@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.jmodelica.generated.scanners;
+package org.jmodelica.ide.scanners.generated;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -97,44 +97,11 @@ Normal = {Operator} | {ID} | {UNSIGNED_NUMBER}
 
 Comment = "//" {InputCharacter}* {LineTerminator}?
 
-
-NONDIGIT = [a-zA-Z_]
-DIGIT = [0-9]
-S_CHAR = [^\"\\]
-Q_CHAR = [^\'\\]
-S_ESCAPE = "\\\'" | "\\\"" | "\\?" | "\\\\" | "\\a" | "\\b" | "\\f" | "\\n" | "\\r" | "\\t" | "\\v"
-
-NL = \r|\n|\r\n
-WS = ({NL} | [ \t\f])+
-QIdentCont = ({Q_CHAR}|{S_ESCAPE})*
-QIdent = "\'" {QIdentCont} "\'"
-NormalID = {NONDIGIT} ({DIGIT}|{NONDIGIT})*
-ID = {NormalID} | {QIdent}
-
-
-%state COMMENTSTATE, COMMENT_ONE_LINE
-
 %%
 
-<YYINITIAL> {
-	{Keyword}     { return KEYWORD; }
-	{WhiteSpace}  { return NORMAL; }
-	{Normal}      { return NORMAL; }
-	"//"		  { yybegin(COMMENT_ONE_LINE); return COMMENT_BOUNDARY; }
-	{ID}	      { return NORMAL; }
-	.             { return NORMAL; }
-}	
-
-<COMMENT_ONE_LINE> {
- 	.*				{ yybegin(YYINITIAL); System.out.println("!@!@!" + yytext()); return COMMENT; }
-}
-
-<COMMENTSTATE> {
-	"\\" . 			{ return COMMENT; }
-	"*/"			{ yybegin(YYINITIAL); return COMMENT_BOUNDARY; }
-	[^*/\\]+		{ System.out.println("HERE!" + yytext()); return COMMENT; }
-}
-
-<<EOF>>      		{ return Token.EOF; }
-
-
+{Keyword}     { return KEYWORD; }
+{WhiteSpace}  { return NORMAL; }
+{Normal}      { return NORMAL; }
+{Comment}     { return COMMENT; }
+.             { return NORMAL; }
+<<EOF>>       { return Token.EOF; }

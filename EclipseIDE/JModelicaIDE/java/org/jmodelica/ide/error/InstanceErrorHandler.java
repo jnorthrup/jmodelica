@@ -28,7 +28,6 @@ public class InstanceErrorHandler implements IErrorHandler {
 	private HashSet<InstanceError> countedErrors = new HashSet<InstanceError>();
 	private boolean lostErrors;
 
-	@SuppressWarnings("unchecked")
 	public void error(String s, ASTNode n) {
 		InstanceError error = new InstanceError(s, n);
 		if (!foundErrors.contains(error)) {
@@ -42,8 +41,7 @@ public class InstanceErrorHandler implements IErrorHandler {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-    public void warning(String s, ASTNode n) {
+	public void warning(String s, ASTNode n) {
 		// Ignore for now - warnings are invoked for things that aren't implemented in compiler
 	}
 	

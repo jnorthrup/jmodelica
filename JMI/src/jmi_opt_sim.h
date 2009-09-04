@@ -101,9 +101,6 @@ typedef int (*jmi_opt_sim_dg_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac);
 typedef int (*jmi_opt_sim_get_bounds_t)(jmi_opt_sim_t *jmi_opt_sim,
 		jmi_real_t *x_lb, jmi_real_t *x_ub);
 
-typedef int (*jmi_opt_sim_set_bounds_t)(jmi_opt_sim_t *jmi_opt_sim,
-		jmi_real_t *x_lb, jmi_real_t *x_ub);
-
 typedef int (*jmi_opt_sim_get_initial_t)(jmi_opt_sim_t *jmi_opt_sim,
 		jmi_real_t *x_init);
 
@@ -113,7 +110,7 @@ typedef int (*jmi_opt_sim_set_initial_t)(jmi_opt_sim_t *jmi_opt_sim,
 typedef int (*jmi_opt_sim_set_initial_from_trajectory_t)(
 		jmi_opt_sim_t *jmi_opt_sim,
 		jmi_real_t *p_opt_init, jmi_real_t *trajectory_data_init,
-		int traj_n_points, jmi_real_t *hs_init, jmi_real_t start_time_init,
+		jmi_real_t *hs_init, jmi_real_t start_time_init,
 		jmi_real_t final_time_init);
 
 typedef int (*jmi_opt_sim_h_nz_indices_t)(jmi_opt_sim_t *jmi_opt_sim,
@@ -210,8 +207,6 @@ int jmi_opt_sim_get_initial(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_init);
  * @param trajectory_data_init A matrix stored in column major format. The
  * first column contains the time vector. The following column contains, in
  * order, the derivative, state, input, and algebraic variable profiles.
- * @param traj_n_points Number of time points contained in the vector
-   trajectory_data_init.
  * @param hs_init A vector of length n_e containing initial guesses of the
  * normalized lengths of the finite elements. This argument is neglected
  * if the problem does not have free element lengths.
@@ -224,7 +219,7 @@ int jmi_opt_sim_get_initial(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_init);
 int jmi_opt_sim_set_initial_from_trajectory(
 		jmi_opt_sim_t *jmi_opt_sim,
 		jmi_real_t *p_opt_init, jmi_real_t *trajectory_data_init,
-		int traj_n_points,jmi_real_t *hs_init, jmi_real_t start_time_init,
+		jmi_real_t *hs_init, jmi_real_t start_time_init,
 		jmi_real_t final_time_init);
 
 /**
@@ -282,16 +277,6 @@ struct jmi_opt_sim_t{
  * @return Error code.
  */
 int jmi_opt_sim_get_bounds(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_lb, jmi_real_t *x_ub);
-
-/**
- * \brief Get the upper and lower bounds of the optimization variables.
- *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
- * @param x_lb (Output) Lower bounds vector.
- * @param x_lb (Output) Upper bounds vector.
- * @return Error code.
- */
-int jmi_opt_sim_set_bounds(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_lb, jmi_real_t *x_ub);
 
 
 /* @} */

@@ -47,7 +47,6 @@ VPATH = @srcdir@
 ##########################################################################
 # C++ Compiler command
 CXX = @CXX@
-CC = @CC@
 
 # C++ Compiler options
 CXXFLAGS = @CXXFLAGS@ -DJMI_AD=JMI_AD_NONE

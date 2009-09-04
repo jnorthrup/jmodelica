@@ -7,7 +7,7 @@ import os.path
 import nose
 
 import jmodelica.jmi as jmi
-from jmodelica.compiler import OptimicaCompiler
+import jmodelica.optimicacompiler as oc
 import jmodelica.xmlparser as xp
 import jmodelica.io
 
@@ -18,9 +18,10 @@ sep = os.path.sep
 jm_home = os.environ.get('JMODELICA_HOME')
 path_to_examples = sep + "Python" + sep + "jmodelica" + sep + "examples"
 
-model = sep + "files" + sep + "VDP.mo"
+model = sep + "vdp_minimum_time" + sep + "VDP.mo"
 fpath = jm_home+path_to_examples+model
-cpath = "VDP_pack.VDP_Opt_Min_Time"
+cpath = "VDP_pack.VDP_Opt"
+
 fname = cpath.replace('.','_',1)
 
 def setup():
@@ -28,14 +29,13 @@ def setup():
     Setup test module. Compile test model (only needs to be done once) and 
     set log level. 
     """
-    oc = OptimicaCompiler()
-    OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
+    oc.set_log_level(oc.LOG_ERROR)
     oc.compile_model(fpath, cpath, target='ipopt')
 
 def test_dymola_export_import():
 
     # Load the dynamic library and XML data
-    vdp = jmi.Model(fname)
+    vdp = jmi.JMIModel(fname)
 
     # Initialize the mesh
     n_e = 50 # Number of elements 
@@ -43,10 +43,10 @@ def test_dymola_export_import():
     n_cp = 3; # Number of collocation points in each element
 
     # Create an NLP object
-    nlp = jmi.SimultaneousOptLagPols(vdp,n_e,hs,n_cp)
+    nlp = jmi.JMISimultaneousOptLagPols(vdp,n_e,hs,n_cp)
 
     # Create an Ipopt NLP object
-    nlp_ipopt = jmi.JMISimultaneousOptIPOPT(nlp.jmi_simoptlagpols)
+    nlp_ipopt = jmi.JMISimultaneousOptIPOPT(nlp)
 
     # Solve the optimization problem
     nlp_ipopt.opt_sim_ipopt_solve()

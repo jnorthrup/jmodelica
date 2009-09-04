@@ -1,18 +1,13 @@
-WARNING: THIS FILE IS OBSOLETE AND NEEDS TO BE UPDATED. DISREGARD THE
-CONTENT UNTIL THIS NOTICE IS REMOVED.
-
 JMODELICA PYTHON INTERFACE
 ===================
-The JModelica Python Interface (JMPI) enables you to work with both Modelica and 
-Optimica models in Python. As Python is an interpreted language you can work 
+The JModelica Python Interface (JMPI) enables you to work with compiled
+models in Python. As Python is an interpreted language you can work both
 interactively or using scripts.
 
 HOW TO USE
 ===================
 1. Add the folder containing the jmodelica package to your PYTHONPATH.
-2. Add the environment variable JMODELICA_HOME which should point at your 
-JModelica installation root folder.
-3. Import the JMPI by adding
+2. Import the JMPI by adding
 
      import jmodelica
     
@@ -27,14 +22,6 @@ downloaded from:
   
 (should also be included in most Linux distros as "python-nose")
 
-Run the tests in the tests package with
-
-	nosetests
-	
-standing somewhere in the jmodelica package. Nose then finds all available 
-tests and runs them. For details on how to run specific tests, and more, 
-have a look at the Nose website.
-
 Some of the tests are run on certain example models that can be found in
 the JMI examples directory that comes bundled with the JModelica source
 distribution. To run the the unit tests those models _needs to be
@@ -44,18 +31,12 @@ compiled_. This is done by invoking
   
 from the source distribution root.
 
-RUNNING EXAMPLES
-===================
-There are a number of example models in the examples package which 
-demonstrate how the JModelica Python Interface can be used. In all 
-examples packages there is one .mo file for the Modelica and Optimica 
-code, describing the model and optimization problem, and one demo.py file 
-which shows the Python code needed to compile, run the model and solve 
-an optimization problem. Take a look at the code or simply run an 
-example with 
+Tests are simply run by invoking
 
-	import demo
-	demo.run_demo()
+  nosetests
+  
+. Nose finds all available tests and runs them. For details on how to
+run specific tests, and more, have a look at the Nose website.
 
 RUNNING TESTS - FAQ
 ===================
@@ -81,8 +62,8 @@ be solved in two ways:
 CODING GUIDELINES
 ===================
 The Python coding standards used are trying to adhere to Python Coding
-Guidelines found in PEP8[1] <http://www.python.org/dev/peps/pep-0008/> 
-with the exception of using UTF-8 encoding and NOT latin-1. Here is a summary:
+Guidelines found in PEP8[1] with the exception of using UTF-8 encoding
+and NOT latin-1. Here is a summary:
 
  * Indent using _spaces_ of width 4.
  * Class names should begin with uppercase and use CamelCase. First
@@ -93,8 +74,8 @@ with the exception of using UTF-8 encoding and NOT latin-1. Here is a summary:
    avoid having an initial underscore.
  * Private methods should have ONE initial underscore, followed by only
    lower case characters. Words should be delimited by underscore.
- * Never use two initial underscores (activates Python's name mangling scheme
-   and makes debugging difficult).
+ * If methods should be hidden when inheritted, use two initial underscores to
+   activate Python's naming mangling scheme.
  * Every module/file must at least contain a docstring describing the
    purpose of the module. All public variables, functions and classes
    should be documentated. Preferably according to PEP 257[2].

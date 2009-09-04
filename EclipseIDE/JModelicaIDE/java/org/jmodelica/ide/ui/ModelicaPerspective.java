@@ -19,26 +19,25 @@ import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.progress.IProgressConstants;
-import org.jmodelica.ide.IDEConstants;
+import org.jmodelica.ide.Constants;
 
 public class ModelicaPerspective implements IPerspectiveFactory {
 
-	@SuppressWarnings("deprecation")
-    public void createInitialLayout(IPageLayout layout) {
+	public void createInitialLayout(IPageLayout layout) {
 		String edit = layout.getEditorArea();
 		layout.setEditorAreaVisible(true);
 		
 		// Shortcuts
-		layout.addPerspectiveShortcut(IDEConstants.PERSPECTIVE_ID);
+		layout.addPerspectiveShortcut(Constants.PERSPECTIVE_ID);
 		
-		layout.addNewWizardShortcut(IDEConstants.WIZARD_FILE_ID);
-		layout.addNewWizardShortcut(IDEConstants.WIZARD_PROJECT_ID);
+		layout.addNewWizardShortcut(Constants.WIZARD_FILE_ID);
+		layout.addNewWizardShortcut(Constants.WIZARD_PROJECT_ID);
 		layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.folder");
 		layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.file");
 		layout.addNewWizardShortcut("org.eclipse.ui.editors.wizards.UntitledTextFileWizard");
 		
 		layout.addShowViewShortcut("org.eclipse.ui.navigator.ProjectExplorer");
-		layout.addShowViewShortcut(IDEConstants.INSTANCE_OUTLINE_VIEW_ID);
+		layout.addShowViewShortcut(Constants.INSTANCE_OUTLINE_VIEW_ID);
 		layout.addShowViewShortcut(IPageLayout.ID_OUTLINE);
 		layout.addShowViewShortcut(IPageLayout.ID_PROBLEM_VIEW);
 		layout.addShowViewShortcut(IPageLayout.ID_RES_NAV);
@@ -62,7 +61,7 @@ public class ModelicaPerspective implements IPerspectiveFactory {
 		// Outline views
 		IFolderLayout outlinefolder = layout.createFolder("right", IPageLayout.RIGHT, (float)0.75, edit);
 		outlinefolder.addView(IPageLayout.ID_OUTLINE);
-		outlinefolder.addView(IDEConstants.INSTANCE_OUTLINE_VIEW_ID);
+		outlinefolder.addView(Constants.INSTANCE_OUTLINE_VIEW_ID);
 		
 		// Actions
 		layout.addActionSet(IPageLayout.ID_NAVIGATE_ACTION_SET);

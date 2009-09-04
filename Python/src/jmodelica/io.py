@@ -23,16 +23,16 @@ import numpy
 import array
 import scipy.io
 
-def export_result_dymola(model, data, file_name='', format='txt'):
+def export_result_dymola(jmi_model, data, file_name='', format='txt'):
     """
     Export an optimization or simulation result to file in Dymolas
     result file format. The parameter values are read from the z
-    vector of the model object and the time series are read from
+    vector of the jmi_model object and the time series are read from
     the data argument.
 
     Parameters:
-        model --
-            A Model object.
+        jmi_model --
+            A JMIModel object.
         data --
             A two dimensional array of variable trajectory data. The
             first column represents the time vector. The following
@@ -56,7 +56,7 @@ def export_result_dymola(model, data, file_name='', format='txt'):
     if (format=='txt'):
 
         if file_name=='':
-            file_name=model.get_name() + '_result.txt'
+            file_name=jmi_model.get_name() + '_result.txt'
 
         # Open file
         f = open(file_name,'w')
@@ -69,7 +69,7 @@ def export_result_dymola(model, data, file_name='', format='txt'):
         f.write('\n')
 
         # Write names
-        names = model.get_variable_names()
+        names = jmi_model.get_variable_names()
         name_value_refs = names.keys()
         name_value_refs.sort(key=int)
 
@@ -88,7 +88,7 @@ def export_result_dymola(model, data, file_name='', format='txt'):
         f.write('\n')
 
         # Write descriptions
-        descriptions = model.get_variable_descriptions()
+        descriptions = jmi_model.get_variable_descriptions()
         desc_value_refs = descriptions.keys()
         desc_value_refs.sort(key=int)
 
@@ -99,7 +99,7 @@ def export_result_dymola(model, data, file_name='', format='txt'):
                 max_desc_length = len(descriptions.get(ref))
 
         f.write('char description(%d,%d)\n' % (len(name_value_refs)+1, max_desc_length))
-        f.write('Time in [s]\n')
+        f.write('Time in [s]')
 
         # Loop over all variables, not only those with a description
         for ref in name_value_refs:
@@ -111,7 +111,7 @@ def export_result_dymola(model, data, file_name='', format='txt'):
         f.write('\n')
 
         # Write data meta information
-        offs = model.get_offsets()
+        offs = jmi_model.get_offsets()
         n_parameters = offs[4] # offs[4] = offs_dx
         f.write('int dataInfo(%d,%d)\n' % (len(name_value_refs)+1, 4))
         f.write('0 1 0 -1 # time\n')
@@ -133,11 +133,11 @@ def export_result_dymola(model, data, file_name='', format='txt'):
         f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
         f.write("%12.12f" % data[0,0])
         for ref in range(n_parameters):
-            f.write(" %12.12f" % model.getZ()[ref])
+            f.write(" %12.12f" % jmi_model.getZ()[ref])
         f.write('\n')
         f.write("%12.12f" % data[-1,0])
         for ref in range(n_parameters):
-            f.write(" %12.12f" % model.getZ()[ref])
+            f.write(" %12.12f" % jmi_model.getZ()[ref])
         f.write('\n\n')
 
         # Write data set 2
@@ -269,12 +269,8 @@ class ResultDymolaTextual:
             nCols = int(nCols[0])
             data = []
             for i in range(0,nLines):
-                info = []
-                while len(info) < nCols:
-                    l = fid.readline()
-                    info.extend(l.split())
+                info = fid.readline().split()
                 data.append(map(float,info[0:nCols]))
-                del(info)
             self.data.append(numpy.array(data))
 
     def get_variable_index(self,name): 
@@ -303,19 +299,13 @@ class ResultDymolaTextual:
             of the variable.
         """
         varInd  = self.get_variable_index(name)
-        dataInd = self.dataInfo[varInd][1]
-        factor = 1
-        if dataInd<0:
-            factor = -1
-            dataInd = -dataInd -1
-        else:
-            dataInd = dataInd - 1
+        dataInd = self.dataInfo[varInd][1]-1
         dataMat = self.dataInfo[varInd][0]-1
         # Take into account that the 'Time' variable has data matrix index 0,
         # which means that it is
         if dataMat<0:
             dataMat = 0
-        return Trajectory(self.data[dataMat][:,0],factor*self.data[dataMat][:,dataInd])
+        return Trajectory(self.data[dataMat][:,0],self.data[dataMat][:,dataInd])
 	
 	
 class ResultDymolaBinary:
@@ -363,17 +353,10 @@ class ResultDymolaBinary:
             of the variable.
         """
         varInd  = self.get_variable_index(name)
-        dataInd = self.raw['dataInfo'][1][varInd]
+        dataInd = self.raw['dataInfo'][1][varInd]-1
         dataMat = self.raw['dataInfo'][0][varInd]
-        factor = 1
-        if dataInd<0:
-            factor = -1
-            dataInd = -dataInd -1
-        else:
-            dataInd = dataInd - 1
-        
         # Take into account that the 'Time' variable has data matrix index 0
             
         if dataMat<1:
             dataMat = 1
-        return Trajectory(self.raw['data_%d'%dataMat][0,:],factor*self.raw['data_%d'%dataMat][dataInd,:])
+        return Trajectory(self.raw['data_%d'%dataMat][0,:],self.raw['data_%d'%dataMat][dataInd,:])

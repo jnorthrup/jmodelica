@@ -16,8 +16,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package org.jmodelica.ide.indent;
 
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
 import org.jmodelica.ide.helpers.Util;
 
 
@@ -29,11 +27,10 @@ import org.jmodelica.ide.helpers.Util;
  */
 public class IndentedSection {
 
+public static String lineSep =
+        System.getProperties().getProperty("line.separator");
 public static int tabWidth = 4;
 public static boolean tabbed = true;
-public static String commentSyntax = "//";
-public static String lineSep =
-        System.getProperties().getProperty("line.separator", "\n");
 
 protected final String[] sec;
 
@@ -44,7 +41,7 @@ protected final String[] sec;
  * @param tabWidth tab width when converting to and from tabbed representation
  */
 public IndentedSection(String s) {
-    sec = s.split("\r\n|\n|\r", -1);
+    sec = s.split("\n|\r|\r\n", -1);
     for (int i = 0; i < sec.length; i++)
         sec[i] = tabbed ? tabify(sec[i]) : spacify(sec[i]);
 }
@@ -56,48 +53,51 @@ public IndentedSection(String s) {
  * @param hints hints to indent by
  * @return indented source code
  */
-public IndentedSection indent(AnchorList<Integer> hints, 
-        int lineStart, int lineEnd) {
+public IndentedSection indent(AnchorList hints, int lineStart, int lineEnd) {
 
-    Document d = new Document(toString());
+    String text = toString();
 
     int[] indents = new int[sec.length];
     int[] adjusts = new int[sec.length];
 
-    try { 
+    int offset = 0;
+    for (int i = 0; i < lineStart; i++)
+        offset += sec[i].length() + lineSep.length();
+
     for (int i = lineStart; i < lineEnd; i++) {
 
-        int offset = d.getLineOffset(i);
-        
-        Anchor<Integer> a = hints.sinkAt(offset + sec[i].length());
-        if (a == null || a.offset < offset)
+        Anchor a = hints.sinkAt(offset + sec[i].length());
+        if (a.offset < offset)
             a = hints.anchorAt(offset);
+        int lineBeg = text.lastIndexOf(lineSep, a.reference);
+        lineBeg = lineBeg <= 0 ? 0 : lineBeg + lineSep.length();
 
-        int indent = a.indent + adjusts[d.getLineOfOffset(a.reference)];  
+        int indent = spacify(text.substring(lineBeg, a.reference)).length();
+        indent = a.indent.modify(indent, tabWidth);
+
+        // find line number of reference offset
+        int refLineNbr = 0, tmp = 0;
+        while ((tmp += (sec[refLineNbr] + lineSep).length()) <= a.reference)
+            ++refLineNbr;
+        indent += adjusts[refLineNbr];
 
         indents[i] = indent;
         adjusts[i] = indents[i] - countIndent(sec[i]);
 
+        offset += sec[i].length() + lineSep.length();
     }
 
-    for (int i = lineStart; i < lineEnd; i++) 
-        if (!sec[i].trim().startsWith(commentSyntax))
-            sec[i] = putIndent(sec[i], indents[i]);
-    
-    } catch (BadLocationException e) {}
-    
+    for (int i = lineStart; i < lineEnd; i++)
+        sec[i] = putIndent(sec[i], indents[i]);
+
     return this;
 }
 
 /**
  * @see IndentedSection#indent(AnchorList)
  */
-public IndentedSection indent(AnchorList<Integer> hints) {
+public IndentedSection indent(AnchorList hints) {
     return indent(hints, 0, sec.length);
-}
-
-public static boolean isIndentChar(char c) {
-    return c == ' ' || c == '\t';
 }
 
 /**
@@ -108,7 +108,7 @@ public static boolean isIndentChar(char c) {
  */
 public static String trimIndent(String s) {
     int i = 0;
-    while (i < s.length() && isIndentChar(s.charAt(i)))
+    while (i < s.length() && (s.charAt(i) == ' ' || s.charAt(i) == '\t'))
         ++i;
     return s.substring(i);
 }
@@ -192,31 +192,25 @@ public static String spacify(String s) {
  * first line in the section. Keep relative indentations for whole section, if
  * possible.
  * 
- * @param indent indent width
+ * @param offset offset
  */
-public IndentedSection offsetIndentTo(int indent) {
+public IndentedSection offsetIndentTo(int offset) {
     int ref = countIndent(sec[0]);
     for (int i = 0; i < sec.length; i++) {
-        sec[i] = putIndent(sec[i], 
-                Math.max(0, indent + countIndent(sec[i]) - ref));
+        sec[i] =
+                putIndent(sec[i], Math.max(0, offset + countIndent(sec[i])
+                        - ref));
     }
     if (sec[sec.length - 1].trim().equals(""))
         sec[sec.length - 1] = "";
     return this;
 }
 
-/**
- * Returns a string repr. of lines <code>start</code> to <code>end</code>.
- * @param startLine line start
- * @param endLine line end
- * @return string repr. of lines <code>start</code> to <code>end</code>
- */
-public String toString(int startLine, int endLine) {
-    String[] tmp = new String[endLine - startLine];
-    for (int i = startLine; i < endLine; i++)
-        tmp[i - startLine] = putIndent(sec[i], countIndent(sec[i]), tabbed);
-    return Util.implode(lineSep, tmp) + 
-        (endLine < sec.length - 1 ? lineSep : "");
+public String toString(int start, int end) {
+    String[] tmp = new String[end - start];
+    for (int i = start; i < end; i++)
+        tmp[i - start] = putIndent(sec[i], countIndent(sec[i]), tabbed);
+    return Util.implode(lineSep, tmp);
 }
 
 public String toString() {

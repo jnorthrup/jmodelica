@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.jmodelica.generated.scanners;
+package org.jmodelica.ide.scanners.generated;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -40,7 +40,6 @@ import org.jmodelica.ide.scanners.HilightScanner;
 
 %{
     private int start;
-    private IToken last_token;
     
     public Modelica22AnnotationScanner() {
         this(new StringReader(""));
@@ -64,21 +63,15 @@ import org.jmodelica.ide.scanners.HilightScanner;
 
     public void setRange(IDocument document, int offset, int length) {
         start = offset;
-        last_token = ANNOTATION_NORMAL;
     	reset(document, offset, length);	
     }
     
     protected void reset(Reader r) {
         yyreset(r);
     }
-    
-    protected IToken rtn(IToken token) {
-    	last_token = token;
-    	return token;
-    }
 %}
-							//note: below ID includes dot
-ID = {NONDIGIT} ({DIGIT}|{NONDIGIT}|".")* | {Q_IDENT}
+
+ID = {NONDIGIT} ({DIGIT}|{NONDIGIT})* | {Q_IDENT}
 NONDIGIT = [a-zA-Z_]
 S_CHAR = [^\"\\]
 Q_IDENT = "\'" ( {Q_CHAR} | {S_ESCAPE} ) ( {Q_CHAR} | {S_ESCAPE} )* "\'"
@@ -92,8 +85,7 @@ UNSIGNED_NUMBER = {DIGIT} {DIGIT}* ( "." ( {UNSIGNED_INTEGER} )? )? ( (e|E) ( "+
 LineTerminator = \r|\n|\r\n
 InputCharacter = [^\r\n]
 
-NNLWhiteSpace = [ \t\f]
-WhiteSpace = ({LineTerminator} | [ \t\f])
+WhiteSpace = ({LineTerminator} | [ \t\f])+
 
 Keyword = "each" | "final" | "replaceable" | "redeclare" | "and" | "or" | "not" | 
           "true" | "false" | "if" | "then" | "else" | "elseif" | "end" | "for" | 
@@ -101,41 +93,18 @@ Keyword = "each" | "final" | "replaceable" | "redeclare" | "and" | "or" | "not" 
           
 Operator = "(" | ")" | "{" | "}" | "[" | "]" | ";" | ":" | "." | "," | "+" | "-" | "*" | 
            "/" | "=" | "^" | "<" | "<=" | ">" | ">=" | "==" | "<>"
-Normal = {ID} | {UNSIGNED_NUMBER}
+Normal = {Operator} | {ID} | {UNSIGNED_NUMBER}
 
 TraditionalComment = "/*" ([^*]* | "*" [^/])* "*/"
 EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
 Comment = {TraditionalComment} | {EndOfLineComment} 
 
-%state COMMENTSTATE, COMMENT_ONE_LINE
-
 %%
 
-<YYINITIAL> {
-	{Keyword}                     { return rtn(ANNOTATION_KEYWORD); }
-	{LineTerminator}{WhiteSpace}* { return rtn(ANNOTATION_NORMAL); }
-	{NNLWhiteSpace}+              { return rtn(last_token); }
-	{ID} {WhiteSpace}* / "="	  { return rtn(ANNOTATION_LHS); }				  
-	{ID} {WhiteSpace}* / "("	  { return rtn(ANNOTATION_RHS); }				  
-	{Operator}+                   { return rtn(ANNOTATION_OPERATOR); }
-	{Normal}                      { return rtn(ANNOTATION_NORMAL); }
-	{STRING}                      { return rtn(ANNOTATION_STRING); }
-	"/*"                          { yybegin(COMMENTSTATE); return rtn(COMMENT_BOUNDARY); }
-	"//"                          { yybegin(COMMENT_ONE_LINE); return rtn(COMMENT_BOUNDARY); }
-	.                             { return rtn(ANNOTATION_NORMAL); }
-}
-
-<COMMENT_ONE_LINE> {
-	[^]*				    	  { yybegin(YYINITIAL); return rtn(COMMENT); }
-}
-
-<COMMENTSTATE> {
-	{LineTerminator}{WhiteSpace}* 
-				      			  { return rtn(ANNOTATION_NORMAL); }
-	"\\" .                        { return rtn(COMMENT); }
-	"*/"                          { yybegin(YYINITIAL); return rtn(COMMENT_BOUNDARY); }
-	[^\\*/\n\r]+                  { return rtn(COMMENT); }
-	[^]							  { return rtn(last_token); }
-}
-
-<<EOF>>                           { return rtn(Token.EOF); }
+{Keyword}     { return ANNOTATION_KEYWORD; }
+{WhiteSpace}  { return ANNOTATION_NORMAL; }
+{Normal}      { return ANNOTATION_NORMAL; }
+{STRING}      { return ANNOTATION_STRING; }
+{Comment}     { return ANNOTATION_COMMENT; }
+.             { return ANNOTATION_NORMAL; }
+<<EOF>>       { return Token.EOF; }

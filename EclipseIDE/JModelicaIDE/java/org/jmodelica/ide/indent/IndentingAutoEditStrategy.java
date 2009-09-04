@@ -1,11 +1,15 @@
 package org.jmodelica.ide.indent;
 
+import java.util.Arrays;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultIndentLineAutoEditStrategy;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
-import org.jmodelica.generated.scanners.IndentationHintScanner;
-
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.TextUtilities;
+import org.jmodelica.ide.scanners.generated.IndentationHintScanner;
+import org.jmodelica.ide.editor.ModelicaAnchorList;
 
 /**
  * Auto editing strategy for indenting source code from indentation hints.
@@ -16,104 +20,88 @@ import org.jmodelica.generated.scanners.IndentationHintScanner;
 public class IndentingAutoEditStrategy extends
         DefaultIndentLineAutoEditStrategy {
 
-public final static IndentingAutoEditStrategy editStrategy = 
-    new IndentingAutoEditStrategy();
-
 final static IndentationHintScanner ihs = new IndentationHintScanner();
 
-/**
- * Count number of tokens in from lineStart of offset up until offset.   
- */
-public static int countTokens(IDocument doc, int offset) {
-    return IndentedSection.spacify(DocUtil.getLinePartial(doc, offset))
-        .length();
+protected int countTokens(IDocument d, int offset) throws BadLocationException {
+    int lineStart = d.getLineInformationOfOffset(offset).getOffset();
+    return IndentedSection.spacify(d.get(lineStart, offset - lineStart))
+            .length();
 }
 
-/**
- * Calculate indent at offset from hints.
- * */
-protected int getIndent(int begin, int end, 
-        AnchorList<Integer> aList) {
-    
-    Anchor<Integer> a = aList.sinkAt(end + 1);
-    
-    if (a == null || a.offset < begin)
-        a = aList.anchorAt(begin + 1);
+/** Calculate indent at offset from hints. */
+protected int getIndent(IDocument d, int begin, int end, boolean countSinks)
+        throws BadLocationException {
+    Anchor a = ihs.ancs.sinkAt(end + 1);
+    if (!countSinks || a == null || a.offset < begin)
+        a = ihs.ancs.anchorAt(begin + 1);
 
-    return a.indent;
+    return a.indent.modify(countTokens(d, a.reference),
+            IndentedSection.tabWidth);
 }
 
-public void customizeDocumentCommand(IDocument doc, DocumentCommand c) {
-
+public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
     try {
-        boolean pastedBlock = c.text.length() > 1 && !c.text.equals("\r\n");
-        boolean isSemicolon = c.text.equals(";");
-        boolean isNewLine = c.text.matches("\r|\n|\r\n");
-        boolean isTab = c.text.equals("\t");
-    
-        // breaking here not necessary for correctness, but we don't
-        // want to analyse source code for every inserted character.
-        if (!(isSemicolon || isNewLine || isTab || pastedBlock))
+        boolean semicolon = c.text.equals(";");
+        boolean hasNewlines = !Arrays.equals(TextUtilities.indexOf(d
+                .getLegalLineDelimiters(), c.text, 0), new int[] { -1, -1 });
+        boolean endsWithNewLine = TextUtilities.endsWith(d
+                .getLegalLineDelimiters(), c.text) != -1;
+        boolean pastedBlock = c.text.length() > 1;
+        /* remove whitespace trailing cursor when breaking */
+        if (!(semicolon || hasNewlines || pastedBlock))
             return;
-    
-        int lineEnd = DocUtil.lineEndOffsetOfOffset(doc, c.offset);
-        int lineBegin = DocUtil.lineStartOffsetOfOffset(doc, c.offset);
-        
-        AnchorList<Integer> anchors = 
-            ihs.analyze(doc.get(0, lineEnd))
-               .bindEnv(doc, IndentedSection.tabWidth);
-        
-        int indent = getIndent(c.offset, lineEnd, anchors);
-    
-        if (pastedBlock) {
-    
-            new PastedBlock(c.text).pasteInto(doc, c, indent);
-    
-        } else if (isNewLine) {
-            /*
-             * if inserting newline, indent new line to 'correct' indentation
-             */
-            c.text += IndentedSection.putIndent("", indent);
-            c.length = findEndOfWhiteSpace(doc, c.offset, lineEnd) - c.offset;
-    
-        } else if (isTab) {
-            /*
-             * if insert tab before beginning of line, indent all the way to
-             * 'correct' indentation
-             */
-            int textStart = DocUtil.textStart(doc, c.offset);
-            
-            if (c.offset < textStart ||
-                c.offset == textStart && countTokens(doc, textStart) < indent)
-            {
+
+        IRegion line = d.getLineInformationOfOffset(c.offset);
+        int lineBegin = line.getOffset();
+        int lineEnd = lineBegin + line.getLength();
+        String text = d.get(0, lineEnd);
+        ihs.analyze(text);
+
+        /*
+         * Check if there are sinks on current line. In that case indent edited
+         * line
+         */
+        Anchor a = ihs.ancs.sinkAt(c.offset);
+        if (a != Anchor.BOTTOM && a.offset >= lineBegin) {
+            int sinkIndent = countTokens(d, a.reference);
+            String tmp = new IndentedSection(d.get(lineBegin, c.offset
+                    - lineBegin)).offsetIndentTo(sinkIndent).toString();
+            c.addCommand(lineBegin, c.offset - lineBegin, tmp, c.owner);
+        }
+
+        if (hasNewlines) {
+            /* remove whitespace trailing cursor when breaking */
+            c.length += findEndOfWhiteSpace(d, c.offset, lineEnd) - c.offset;
+
+            int indent = getIndent(d, c.offset, lineEnd, false);
+
+            if (pastedBlock)
+                c.text = new IndentedSection(c.text).offsetIndentTo(indent)
+                        .toString();
+
+            int begText = findEndOfWhiteSpace(d, lineBegin, lineEnd);
+            if (c.offset <= begText) {
+                /*
+                 * put 'cursor' in very beginning of line if breaking before
+                 * indent ends
+                 */
+                c.length += c.offset - lineBegin;
                 c.offset = lineBegin;
-                c.length = textStart - lineBegin;
-                c.text = IndentedSection.putIndent("", indent);
-            }
-        }
-    
-        if (isSemicolon || isNewLine) {
-    
-            /*
-             * Check if there are sinks on current line. In that case indent edited
-             * line.
-             */
-    
-            Anchor<Integer> a = anchors.sinkAt(c.offset);
+            } else
+                /*
+                 * if breaking in the middle of line, remove indent from the
+                 * first row
+                 */
+                c.text = IndentedSection.trimIndent(c.text);
 
-            if (a == null || a.offset < lineBegin)
-                return;
-
-            int sinkIndent = countTokens(doc, a.reference);
-            String line = 
-                new IndentedSection(DocUtil.getLinePartial(doc, c.offset))
-                    .offsetIndentTo(sinkIndent)
-                    .toString();
-            c.addCommand(lineBegin, c.offset - lineBegin, line, c.owner);
+            if (endsWithNewLine)
+                c.text += IndentedSection.putIndent("", getIndent(d, c.offset,
+                        lineEnd, true));
         }
-    
         c.caretOffset = c.offset + c.length;
-        
-    } catch (BadLocationException e) { e.printStackTrace(); return; }
+    } catch (Exception e) {
+        System.out.println("Exception in indentation code");
+        e.printStackTrace();
+    }
 }
 }

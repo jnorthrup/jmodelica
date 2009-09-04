@@ -29,7 +29,7 @@ import org.eclipse.ui.actions.LabelRetargetAction;
 import org.eclipse.ui.actions.RetargetAction;
 import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.jmodelica.ide.IDEConstants;
+import org.jmodelica.ide.Constants;
 import org.jmodelica.ide.ui.ImageLoader;
 
 
@@ -42,50 +42,41 @@ import org.jmodelica.ide.ui.ImageLoader;
 public class EditorContributor extends BasicTextEditorActionContributor {
 
 private static final String[] ACTIONS = { 
-    IDEConstants.ACTION_ERROR_CHECK_ID,
-    IDEConstants.ACTION_TOGGLE_ANNOTATIONS_ID,
-    IDEConstants.ACTION_FORMAT_REGION_ID, 
-    IDEConstants.ACTION_COMPLETE_ID, 
-    IDEConstants.ACTION_TOGGLE_COMMENT_ID };
-
+    Constants.ACTION_ERROR_CHECK_ID,
+    Constants.ACTION_TOGGLE_ANNOTATIONS_ID,
+    Constants.ACTION_FORMAT_REGION_ID, 
+    Constants.ACTION_TOGGLE_COMMENT_ID };
 private LabelRetargetAction errorCheckAction;
 private RetargetAction toggleAnnotationsAction;
 private LabelRetargetAction formatRegionAction;
-private LabelRetargetAction completeAction;
 private LabelRetargetAction toggleCommentAction;
-
 private RetargetAction[] retargetActions;
 
 public EditorContributor() {
-    errorCheckAction = new LabelRetargetAction(IDEConstants.ACTION_ERROR_CHECK_ID,
-            IDEConstants.ACTION_ERROR_CHECK_TEXT);
+    errorCheckAction = new LabelRetargetAction(Constants.ACTION_ERROR_CHECK_ID,
+            Constants.ACTION_ERROR_CHECK_TEXT);
     errorCheckAction.setImageDescriptor(ImageLoader.ERROR_CHECK_DESC);
     errorCheckAction
             .setDisabledImageDescriptor(ImageLoader.ERROR_CHECK_DIS_DESC);
     toggleAnnotationsAction = new RetargetAction(
-            IDEConstants.ACTION_TOGGLE_ANNOTATIONS_ID,
-            IDEConstants.ACTION_TOGGLE_ANNOTATIONS_TEXT,
+            Constants.ACTION_TOGGLE_ANNOTATIONS_ID,
+            Constants.ACTION_TOGGLE_ANNOTATIONS_TEXT,
             RetargetAction.AS_CHECK_BOX);
     toggleAnnotationsAction.setImageDescriptor(ImageLoader.ANNOTATION_DESC);
     toggleAnnotationsAction
             .setDisabledImageDescriptor(ImageLoader.ANNOTATION_DIS_DESC);
 
     formatRegionAction = new LabelRetargetAction(
-            IDEConstants.ACTION_FORMAT_REGION_ID,
-            IDEConstants.ACTION_FORMAT_REGION_TEXT);
+            Constants.ACTION_FORMAT_REGION_ID,
+            Constants.ACTION_FORMAT_REGION_TEXT);
 
     toggleCommentAction = new LabelRetargetAction(
-            IDEConstants.ACTION_TOGGLE_COMMENT_ID,
-            IDEConstants.ACTION_TOGGLE_COMMENT_TEXT);
+            Constants.ACTION_TOGGLE_COMMENT_ID,
+            Constants.ACTION_TOGGLE_COMMENT_TEXT);
     
-    completeAction = new LabelRetargetAction(
-            IDEConstants.ACTION_FOLLOW_REFERENCE_ID,
-            IDEConstants.ACTION_FOLLOW_REFERENCE_TEXT);
-   
     retargetActions = new RetargetAction[] { 
             errorCheckAction,
             toggleAnnotationsAction, 
-            completeAction,
             formatRegionAction,
             toggleCommentAction };
 }
@@ -120,15 +111,15 @@ private void doSetActiveEditor(IEditorPart part) {
 
 @Override
 public void contributeToMenu(IMenuManager menu) {
+    // TODO Auto-generated method stub
     super.contributeToMenu(menu);
     IMenuManager editMenu = menu
             .findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
-    editMenu.add(new Separator(IDEConstants.GROUP_ERROR_ID));
-    editMenu.appendToGroup(IDEConstants.GROUP_ERROR_ID, errorCheckAction);
-    editMenu.appendToGroup(IDEConstants.GROUP_ERROR_ID, toggleAnnotationsAction);
-    editMenu.appendToGroup(IDEConstants.GROUP_ERROR_ID, formatRegionAction);
-    editMenu.appendToGroup(IDEConstants.GROUP_ERROR_ID, completeAction);
-    editMenu.appendToGroup(IDEConstants.GROUP_ERROR_ID, toggleCommentAction);
+    editMenu.add(new Separator(Constants.GROUP_ERROR_ID));
+    editMenu.appendToGroup(Constants.GROUP_ERROR_ID, errorCheckAction);
+    editMenu.appendToGroup(Constants.GROUP_ERROR_ID, toggleAnnotationsAction);
+    editMenu.appendToGroup(Constants.GROUP_ERROR_ID, formatRegionAction);
+    editMenu.appendToGroup(Constants.GROUP_ERROR_ID, toggleCommentAction);
 }
 
 @Override
@@ -144,9 +135,9 @@ public void contributeToToolBar(IToolBarManager toolBarManager) {
 }
 
 private void contributeToToolOrCoolBar(IContributionManager barManager) {
-    barManager.add(new Separator(IDEConstants.GROUP_MODELICA_ID));
-    barManager.appendToGroup(IDEConstants.GROUP_MODELICA_ID, errorCheckAction);
-    barManager.appendToGroup(IDEConstants.GROUP_MODELICA_ID,
+    barManager.add(new Separator(Constants.GROUP_MODELICA_ID));
+    barManager.appendToGroup(Constants.GROUP_MODELICA_ID, errorCheckAction);
+    barManager.appendToGroup(Constants.GROUP_MODELICA_ID,
             toggleAnnotationsAction);
 }
 

@@ -143,7 +143,7 @@
          </triggerPoints>
          <possibleChildren>
             <instanceof
-                  value="org.jmodelica.modelica.compiler.ASTNode">
+                  value="org.jmodelica.ast.ASTNode">
             </instanceof>
          </possibleChildren>
          <commonSorter
@@ -152,7 +152,7 @@
             <parentExpression>
                <or>
                   <instanceof
-                        value="org.jmodelica.modelica.compiler.ASTNode">
+                        value="org.jmodelica.ast.ASTNode">
                   </instanceof>
                   <and>
                      <adapt
@@ -261,24 +261,6 @@
             id="JModelicaIDE.ModelicaToggleCommentCommand"
             name="Toggle comment on region">
       </command>
-      <command
-            categoryId="JModelicaIDE.ModelicaCommandCategory"
-            description="Toggle annotations on document"
-            id="JModelicaIDE.ModelicaToggleAnnotationCommand"
-            name="Toggle annotations on region">
-      </command>
-      <command
-            categoryId="JModelicaIDE.ModelicaCommandCategory"
-            description="Perform error check"
-            id="JModelicaIDE.ErrorCheckCommand"
-            name="Error check">
-      </command>
-      <command
-            categoryId="JModelicaIDE.ModelicaCommandCategory"
-            description="Go to declaration"
-            id="JModelicaIDE.GoToDeclarationCommand"
-            name="Go to declaration">
-      </command>
       <category
             description="JModelica commands"
             id="JModelicaIDE.ModelicaCommandCategory"
@@ -293,21 +275,6 @@
             commandId="JModelicaIDE.ModelicaToggleCommentCommand"
             keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
             keySequence="Shift+Ctrl+C">
-      </keyBinding>
-      <keyBinding
-            commandId="JModelicaIDE.ModelicaToggleAnnotationCommand"
-            keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            keySequence="Ctrl+T">
-      </keyBinding>
-      <keyBinding
-            commandId="JModelicaIDE.ErrorCheckCommand"
-            keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            keySequence="Ctrl+Alt+E">
-      </keyBinding>
-      <keyBinding
-            commandId="JModelicaIDE.GoToDeclarationCommand"
-            keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            keySequence="F3">
       </keyBinding>
    </extension>
 </plugin>

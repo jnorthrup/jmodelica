@@ -354,9 +354,6 @@ Semantic error at line 297, column 4:
                                                errorMessage=
 "
   1 error(s) found...
-  Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 363, column 18:
-  Could not evaluate binding expression: 'p1'
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 320, column 9:
   Cannot find class or component declaration for p1
@@ -784,7 +781,8 @@ end NameTests.ImportTest5;
     
   end P;
     
-  import NameTests.ImportTest5.P.C.*;
+  extends P;
+  import NameTests.ImportTest5.C.*;
   D d(z=3);
   
 end ImportTest5;
@@ -847,52 +845,6 @@ end NameTests.ImportTest7;
   P.P1.M m;
 
 end ImportTest7;
-
-model ImportTest8
-	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-	   JModelica.UnitTesting.FlatteningTestCase(name="ImportTest8",
-		 description="Test name lookup in a structured library.",
-												flatModel=
- "
- fclass NameTests.ImportTest8
-  parameter Real r.R(start = 1,final quantity = \"Resistance\",final unit = \"Ohm\") \"Resistance\";
-  Real r.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Voltage drop between the two pins (= p.v - n.v)\";
-  Real r.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing from pin p to pin n\";
-  Real r.p.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Potential at the pin\";
-  Real r.p.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
-  Real r.n.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Potential at the pin\";
-  Real r.n.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
- equation 
-  ( r.R ) * ( r.i ) = r.v;
-  r.v = r.p.v - ( r.n.v );
-  0 = r.p.i + r.n.i;
-  r.i = r.p.i; 
- end NameTests.ImportTest8;
- ")})));
-
-  Modelica.Electrical.Analog.Basic.Resistor r;
-	
-end ImportTest8;
-
-model ImportTest9
-	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-	   JModelica.UnitTesting.FlatteningTestCase(name="ImportTest9",
-		 description="Test of import of builtin mathematical functions.",
-												flatModel=
- "
- fclass NameTests.ImportTest9
-  parameter Real p1 = cos(9) /* -0.9111302618846769 */;
-  parameter Real p2 = sin(9) /* 0.4121184852417566 */;
-  parameter Real p3 = sqrt(3) /* 1.7320508075688772 */;
- equation 
- end NameTests.ImportTest9;
- ")})));
-		
-	import Math = Modelica.Math;
-	parameter Real p1 = Math.cos(9);
-	parameter Real p2 = Modelica.Math.sin(9);
-	parameter Real p3 = sqrt(3);
-end ImportTest9;
 
 
 model ShortClassDeclTest1
@@ -1039,7 +991,7 @@ model ShortClassDeclTest6
                                                flatModel=
 "
 fclass NameTests.ShortClassDeclTest6
- parameter Real R = 1;
+ parameter Real R;
  parameter Real a.R = R /*(0.0)*/;
 equation 
 end NameTests.ShortClassDeclTest6;
@@ -1049,7 +1001,7 @@ model Resistor
 	parameter Real R;
 end Resistor;
 
-	parameter Real R=1;
+	parameter Real R;
 	
 	replaceable model Load=Resistor(R=R);
 	// Correct, sets the R in Resistor to R from model A.
@@ -1104,67 +1056,6 @@ model InitialEquationTest1
   der(x)=1;
   
 end InitialEquationTest1;
-
-model EndExpTest1
-
- Real x[1];
-equation
- x[end] = 2;
-
-end EndExpTest1;
-
-model EndExpTest2
-
- Real x;
-equation
- if true then
-   x=3;
- else
-   x=5;
- end if;
-
-end EndExpTest2;
-
-model EndExpTest3
-
- Real x[2];
-equation
- for i in 1:2 loop
-  x[i] = i;
- end for;
-end EndExpTest3;
-
-model EndExpTest4
-
- Real x[2];
-algorithm
- for i in 1:2 loop
-  x[i] := i;
- end for;
-end EndExpTest4;
-
-model EndExpTest5
- Real x;
-algorithm
- if true then
-   x:=3;
- else
-   x:=5;
- end if;
-
-end EndExpTest5;
-
-model EndExpTest6
-
- Real x[2];
- Integer i;
-algorithm
- i:=1;
- while i <=2 loop
-  x[i] := i;
-  i:=i+1;
- end while;
-end EndExpTest6;
 
 
 end NameTests;

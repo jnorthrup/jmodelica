@@ -166,54 +166,37 @@ FProtectedVisibilityType : FVisibilityType ::=;
  */
 abstract FPrimitiveType;
 
-abstract FPrimitiveScalarType : FPrimitiveType;
-abstract FPrimitiveArrayType : FPrimitiveType ::= <Size:int[]>;
-abstract FPrimitiveScalarNumericType : FPrimitiveScalarType;
-abstract FPrimitiveArrayNumericType : FPrimitiveArrayType;
-
 /**
  * \brief Base class for the numeric types Real and Integer.
  */
-//abstract FNumericType : FPrimitiveType;
+abstract FNumericType : FPrimitiveType;
 
 /**
  * \brief Class representing the primitive type Real.
  */
-FRealScalarType : FPrimitiveScalarNumericType ::=;
-
-FRealArrayType : FPrimitiveArrayNumericType;
+FRealType : FNumericType ::=;
 
 /**
  * \brief Class representing the primitive type Integer.
  */
-FIntegerScalarType : FPrimitiveScalarNumericType ::=; 
-
-FIntegerArrayType : FPrimitiveArrayNumericType;
+FIntegerType : FNumericType ::=; 
 
 /**
  * \brief Class representing the primitive type Boolean.
  */
-FBooleanScalarType : FPrimitiveScalarType ::=;
-
-FBooleanArrayType : FPrimitiveArrayType;
+FBooleanType : FPrimitiveType ::=;
 
 /**
  * \brief Class representing the primitive type String.
  */
-FStringScalarType : FPrimitiveScalarType ::=;
-
-FStringArrayType : FPrimitiveArrayType;
+FStringType : FPrimitiveType ::=;
 
 /**
  * \brief Class representing an unknown primitive type.
  *
  * Used to represent type errors. 
  */
-FUnknownScalarType : FPrimitiveScalarType ::=;
-
-FUnknownArrayType : FPrimitiveArrayType ::=;
-
-FUnknownType : FPrimitiveType;
+FUnknownType : FPrimitiveType ::=;
 
 /**
  * \brief A qualified name supporting array subscripts.
@@ -486,12 +469,6 @@ FStringLitExp : FLitExp ::= <String>;
 FFunctionCall : FExp ::= Name:FIdUse Args:FExp*;
 
 /**
- * \brief Function call expression in instance trees.
- */
-InstFunctionCall : FExp ::= Name:InstAccess Args:FExp*;
-
-
-/**
  * \brief Summation reduction expression.
  */
 FSumRedExp : FExp ::= FExp FForIndex;
@@ -556,7 +533,7 @@ FInstAccessExp : FExp ::= InstAccess;
 /**
  * \brief Array constructor expression.
  */
-FArray : FExp ::= FExp*;
+FArrayConstructor : FExp ::= FExp*;
 
 /**
  * \brief A matrix expression.
@@ -582,12 +559,6 @@ FNoExp : FExp::=;
  * \brief Built-in variable time.
  */
 FTimeExp : FExp;
-
-/**
- * \brief 'Built-in expression 'end', used in arrays.
- */
-FEndExp : FExp;
-
 
 // Built in functions
 /**
@@ -661,11 +632,6 @@ FLogExp : FBuiltInExp ::= ;
 FLog10Exp : FBuiltInExp ::= ;
 
 /**
- * \brief Sqrt built-in function.
- */
-FSqrtExp : FBuiltInExp ::= ;
-
-/**
  * \brief Size built-in function.
  */
 FSizeExp : FExp ::= FIdUseExp Dim:FExp;
@@ -683,15 +649,15 @@ FTranspose : FUnaryExp ::=;
 /**
  * \brief Identity built-in function.
  */
-FIdentity : FUnaryExp ::=;
+FIdentity : FFunctionCall;
 
 /**
  * \brief Ones built-in function.
  */
-FOnes : FExp ::= FExp*;
+FOnes : FFunctionCall;
 
 /**
  * \brief Zeros built-in function.
  */
-FZeros : FExp ::= FExp*;
+FZeros : FFunctionCall;
 

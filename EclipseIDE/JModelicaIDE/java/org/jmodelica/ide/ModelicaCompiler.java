@@ -34,17 +34,17 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
 import org.jastadd.plugin.compiler.AbstractCompiler;
 import org.jastadd.plugin.compiler.ast.IASTNode;
-import org.jmodelica.generated.scanners.PackageExaminer;
-import org.jmodelica.ide.error.CompileErrorReport;
-import org.jmodelica.ide.error.InstanceErrorHandler;
-import org.jmodelica.ide.helpers.DocumentReader;
-import org.jmodelica.ide.helpers.Library;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.BadDefinition;
 import org.jmodelica.modelica.compiler.List;
 import org.jmodelica.modelica.compiler.Program;
 import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
+import org.jmodelica.ide.error.CompileErrorReport;
+import org.jmodelica.ide.error.InstanceErrorHandler;
+import org.jmodelica.ide.helpers.DocumentReader;
+import org.jmodelica.ide.helpers.Library;
+import org.jmodelica.ide.scanners.generated.PackageExaminer;
 import org.jmodelica.modelica.parser.ModelicaParser;
 import org.jmodelica.modelica.parser.ModelicaScanner;
 
@@ -59,7 +59,7 @@ public class ModelicaCompiler extends AbstractCompiler {
 		scanner = new ModelicaScanner(System.in);  // Dummy stream
 	}
 
-	public static final String ERROR_MARKER_ID = IDEConstants.ERROR_MARKER_ID;
+	public static final String ERROR_MARKER_ID = Constants.ERROR_MARKER_ID;
 	private ModelicaParser parser;
 	private List<StoredDefinition> list;
 	private ModelicaScanner scanner;
@@ -88,15 +88,15 @@ public class ModelicaCompiler extends AbstractCompiler {
 				if (type == IResource.FOLDER) {
 					// If it is a package, add to library list, otherwise, recurse
 					IFolder folder = (IFolder) resource[i];
-//					try {
-//						Library lib = examiner.examine(folder.getLocation().toOSString());
-//						if (lib.isOK())
-//							root.options.addModelicaLibrary(lib.name, lib.version.toString(), lib.path);
-//					} catch (FileNotFoundException e) {
-//						recursiveCompile((IFolder) resource[i], monitor);
-//					}
+					try {
+						Library lib = examiner.examine(folder.getLocation().toOSString());
+						if (lib.isOK())
+							root.options.addModelicaLibrary(lib.name, lib.version.toString(), lib.path);
+					} catch (FileNotFoundException e) {
+						recursiveCompile((IFolder) resource[i], monitor);
+					}
 				} else if (type == IResource.FILE && extension != null
-						&& extension.equals(IDEConstants.FILE_EXTENSION)) {
+						&& extension.equals(Constants.FILE_EXTENSION)) {
 					// Convert to IFile and get content
 					IFile file = (IFile) resource[i];
 					parseFile(file, null);
@@ -133,15 +133,15 @@ public class ModelicaCompiler extends AbstractCompiler {
 		if (project != null) {
 			String libStr = null, defaultMSL = null;
 			try {
-				libStr = project.getPersistentProperty(IDEConstants.PROPERTY_LIBRARIES_ID);
-				defaultMSL = project.getPersistentProperty(IDEConstants.PROPERTY_DEFAULT_MSL_ID);
+				libStr = project.getPersistentProperty(Constants.PROPERTY_LIBRARIES_ID);
+				defaultMSL = project.getPersistentProperty(Constants.PROPERTY_DEFAULT_MSL_ID);
 			} catch (CoreException e) {
 			}
 			java.util.List<Library> libraries = Library.fromString(libStr);
 
-//			for (Library lib : libraries) 
-//				root.options.addModelicaLibrary(lib.name, lib.version.toString(), lib.path);
-//			root.options.setStringOption("default_msl_version", defaultMSL);
+			for (Library lib : libraries) 
+				root.options.addModelicaLibrary(lib.name, lib.version.toString(), lib.path);
+			root.options.setStringOption("default_msl_version", defaultMSL);
 		}
 	}
 
@@ -185,7 +185,7 @@ public class ModelicaCompiler extends AbstractCompiler {
 		list.add(def);
 	}
 	
-	public ASTNode<?> compileFile(IFile file, String path) {
+	public ASTNode compileFile(IFile file, String path) {
 		newRoot(file != null ? file.getProject() : null);
 		parseFile(file, path);
 		return list.getChild(0);
@@ -193,11 +193,11 @@ public class ModelicaCompiler extends AbstractCompiler {
 
 	@Override
 	protected Collection<String> acceptedFileExtensions() {
-		return Arrays.asList(IDEConstants.All_FILE_EXTENSIONS);
+		return Arrays.asList(Constants.All_FILE_EXTENSIONS);
 	}
 
 	@Override
 	protected String acceptedNatureID() {
-		return IDEConstants.NATURE_ID;
+		return Constants.NATURE_ID;
 	}
 }

@@ -36,9 +36,6 @@ import atexit
 import xmlparser
 import io
 
-int = N.int32
-N.int = N.int32
-
 # ================================================================
 #                         CONSTANTS
 # ================================================================
@@ -474,29 +471,8 @@ def load_DLL(libname, path):
                                     ct.c_int,
                                     ct.POINTER(ct.c_int)]
     
-#    if dF_n_nz is not None:
-#        dll.jmi_dae_dF_nz_indices.argtypes = [ct.c_void_p,
-#                                              ct.c_int,
-#                                              ct.c_int,
-#                                              Nct.ndpointer(
-#                                                dtype=ct.c_int,
-#                                                ndim=1,
-#                                                shape=n_z.value,
-#                                                flags='C'),
-#                                              Nct.ndpointer(
-#                                                dtype=ct.c_int,
-#                                                ndim=1,
-#                                                shape=dF_n_nz.value,
-#                                                flags='C'),
-#                                              Nct.ndpointer(
-#                                                dtype=ct.c_int,
-#                                                ndim=1,
-#                                                shape=dF_n_nz.value,
-#                                                flags='C')]
-#    else:
-#        dll.jmi_dae_dF_nz_indices.errcheck = \
-#                        fail_error_check("Functionality not supported.")      
-    dll.jmi_dae_dF_nz_indices.argtypes = [ct.c_void_p,
+    if dF_n_nz is not None:
+        dll.jmi_dae_dF_nz_indices.argtypes = [ct.c_void_p,
                                               ct.c_int,
                                               ct.c_int,
                                               Nct.ndpointer(
@@ -507,12 +483,16 @@ def load_DLL(libname, path):
                                               Nct.ndpointer(
                                                 dtype=ct.c_int,
                                                 ndim=1,
+                                                shape=dF_n_nz.value,
                                                 flags='C'),
                                               Nct.ndpointer(
                                                 dtype=ct.c_int,
                                                 ndim=1,
+                                                shape=dF_n_nz.value,
                                                 flags='C')]
-                     
+    else:
+        dll.jmi_dae_dF_nz_indices.errcheck = \
+                        fail_error_check("Functionality not supported.")                        
     dll.jmi_dae_dF_dim.argtypes = [ct.c_void_p, ct.c_int, ct.c_int,
                                    ct.c_int,
                                    Nct.ndpointer(dtype=ct.c_int,
@@ -542,9 +522,9 @@ def load_DLL(libname, path):
                                  Nct.ndpointer(dtype=c_jmi_real_t,
                                                ndim=1,
                                                flags='C')]
-    dll.jmi_init_dF0_n_nz.argtypes = [ct.c_void_p,
-                                      ct.c_int,
-                                      ct.POINTER(ct.c_int)]
+    dll.jmi_init_dF0_n_nz = [ct.c_void_p,
+                             ct.c_int,
+                             ct.POINTER(ct.c_int)]
     dll.jmi_init_dF0_nz_indices.argtypes = [ct.c_void_p,
                                           ct.c_int,
                                           ct.c_int,
@@ -584,7 +564,7 @@ def load_DLL(libname, path):
                                  Nct.ndpointer(dtype=c_jmi_real_t,
                                                ndim=1,
                                                flags='C')]
-    dll.jmi_init_dF1_n_nz.argtypes = [ct.c_void_p,
+    dll.jmi_init_dF1_n_nz = [ct.c_void_p,
                              ct.c_int,
                              ct.POINTER(ct.c_int)]
     dll.jmi_init_dF1_nz_indices.argtypes = [ct.c_void_p,
@@ -625,7 +605,7 @@ def load_DLL(libname, path):
                                  Nct.ndpointer(dtype=c_jmi_real_t,
                                                ndim=1,
                                                flags='C')]
-    dll.jmi_init_dFp_n_nz.argtypes = [ct.c_void_p,
+    dll.jmi_init_dFp_n_nz = [ct.c_void_p,
                              ct.c_int,
                              ct.POINTER(ct.c_int)]
     dll.jmi_init_dFp_nz_indices.argtypes = [ct.c_void_p,
@@ -922,7 +902,6 @@ def load_DLL(libname, path):
                                                                 Nct.ndpointer(dtype=c_jmi_real_t,
                                                                               ndim=1,
                                                                               flags='C'),
-                                                                ct.c_int,
                                                                 Nct.ndpointer(dtype=c_jmi_real_t,
                                                                               ndim=1,
                                                                               flags='C'),
@@ -930,13 +909,6 @@ def load_DLL(libname, path):
                                                                 c_jmi_real_t] 
 
         dll.jmi_opt_sim_get_bounds.argtypes = [ct.c_void_p,
-                                                Nct.ndpointer(dtype=c_jmi_real_t,
-                                                              ndim=1,
-                                                              flags='C'),
-                                                Nct.ndpointer(dtype=c_jmi_real_t,
-                                                              ndim=1,
-                                                              flags='C')]
-        dll.jmi_opt_sim_set_bounds.argtypes = [ct.c_void_p,
                                                 Nct.ndpointer(dtype=c_jmi_real_t,
                                                               ndim=1,
                                                               flags='C'),
@@ -1004,10 +976,8 @@ def load_DLL(libname, path):
                                                Nct.ndpointer(dtype=c_jmi_real_t,
                                                              ndim=1,
                                                              flags='C')]
-        # This is not correct, the n_x referes to the wrong x vector
-        # In this case, n_x refers to the size of the optimization vector
-        # not to the number of states.
-        # _returns_ndarray(dll.jmi_opt_sim_get_x, c_jmi_real_t, n_x.value, order='C')
+        #Is this correct????
+        _returns_ndarray(dll.jmi_opt_sim_get_x, c_jmi_real_t, n_x.value, order='C')
     except AttributeError, e:
         pass
 
@@ -1142,7 +1112,7 @@ def load_DLL(libname, path):
     except AttributeError, e:
         pass    
 
-    # IPOPT interface for simulataneous optimization interface
+    # IPOPT
     try:
         dll.jmi_opt_sim_ipopt_new.argtypes = [ct.c_void_p,
                                               ct.c_void_p]
@@ -1195,177 +1165,6 @@ def load_DLL(libname, path):
                                            Nct.ndpointer(dtype=c_jmi_real_t,
                                                          ndim=1,
                                                          flags='C')]
-    except AttributeError, e:
-        pass
-
-    # JMI DAE initialization based on optimization
-    try:
-        dll.jmi_init_opt_new.argtypes = [ct.c_void_p, ct.c_void_p, ct.c_int,Nct.ndpointer(dtype=ct.c_int,
-                                                                              ndim=1,
-                                                                              flags='C'),
-                             Nct.ndpointer(dtype=c_jmi_real_t,
-                                           ndim=1,
-                                           flags='C'),
-                             Nct.ndpointer(dtype=c_jmi_real_t,
-                                           ndim=1,
-                                           flags='C'),
-                             Nct.ndpointer(dtype=c_jmi_real_t,
-                                           ndim=1,
-                                           flags='C'),
-                             Nct.ndpointer(dtype=c_jmi_real_t,
-                                           ndim=1,
-                                           flags='C'),
-                             Nct.ndpointer(dtype=c_jmi_real_t,
-                                           ndim=1,
-                                           flags='C'),
-                             Nct.ndpointer(dtype=c_jmi_real_t,
-                                           ndim=1,
-                                           flags='C'),
-                             Nct.ndpointer(dtype=c_jmi_real_t,
-                                           ndim=1,
-                                           flags='C'),
-                             Nct.ndpointer(dtype=c_jmi_real_t,
-                                           ndim=1,
-                                           flags='C'),
-                             Nct.ndpointer(dtype=c_jmi_real_t,
-                                           ndim=1,
-                                           flags='C'),
-                             Nct.ndpointer(dtype=c_jmi_real_t,
-                                           ndim=1,
-                                           flags='C'),
-                             Nct.ndpointer(dtype=c_jmi_real_t,
-                                           ndim=1,
-                                           flags='C'),
-                             Nct.ndpointer(dtype=c_jmi_real_t,
-                                           ndim=1,
-                                           flags='C'),
-                             ct.c_int,
-                             Nct.ndpointer(dtype=ct.c_int,
-                                           ndim=1,
-                                           flags='C'),
-                             Nct.ndpointer(dtype=ct.c_int,
-                                           ndim=1,
-                                           flags='C'),
-                             Nct.ndpointer(dtype=ct.c_int,
-                                           ndim=1,
-                                           flags='C'),
-                             Nct.ndpointer(dtype=ct.c_int,
-                                           ndim=1,
-                                           flags='C'),
-                             ct.c_int]
-
-        dll.jmi_init_opt_delete.argtypes = [ct.c_void_p]
-        
-        dll.jmi_init_opt_get_dimensions.argtypes = [ct.c_void_p,
-                                                    ct.POINTER(ct.c_int),
-                                                    ct.POINTER(ct.c_int),
-                                                    ct.POINTER(ct.c_int)]    
-        dll.jmi_init_opt_get_x.argtypes =[ct.c_void_p]
-        dll.jmi_init_opt_get_initial.argtypes = [ct.c_void_p,
-                                                Nct.ndpointer(dtype=c_jmi_real_t,
-                                                              ndim=1,
-                                                              flags='C')]
-        
-        dll.jmi_init_opt_set_initial.argtypes =  [ct.c_void_p,
-                                                  Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                ndim=1,
-                                                                flags='C')] 
-
-        dll.jmi_init_opt_get_bounds.argtypes = [ct.c_void_p,
-                                                Nct.ndpointer(dtype=c_jmi_real_t,
-                                                              ndim=1,
-                                                              flags='C'),
-                                                Nct.ndpointer(dtype=c_jmi_real_t,
-                                                              ndim=1,
-                                                              flags='C')]
-        dll.jmi_init_opt_set_bounds.argtypes = [ct.c_void_p,
-                                                Nct.ndpointer(dtype=c_jmi_real_t,
-                                                              ndim=1,
-                                                              flags='C'),
-                                                Nct.ndpointer(dtype=c_jmi_real_t,
-                                                              ndim=1,
-                                                              flags='C')]
-        dll.jmi_init_opt_f.argtypes = [ct.c_void_p,
-                                       Nct.ndpointer(dtype=c_jmi_real_t,
-                                                     ndim=1,
-                                                     flags='C')]
-        dll.jmi_init_opt_df.argtypes = [ct.c_void_p,
-                                        Nct.ndpointer(dtype=c_jmi_real_t,
-                                                      ndim=1,
-                                                      flags='C')]
-        dll.jmi_init_opt_h.argtypes = [ct.c_void_p,
-                                       Nct.ndpointer(dtype=c_jmi_real_t,
-                                                     ndim=1,
-                                                     flags='C')]
-        dll.jmi_init_opt_dh.argtypes = [ct.c_void_p,
-                                        Nct.ndpointer(dtype=c_jmi_real_t,
-                                                      ndim=1,
-                                                      flags='C')]
-        dll.jmi_init_opt_dh_nz_indices.argtypes = [ct.c_void_p,
-                                                   Nct.ndpointer(dtype=ct.c_int,
-                                                                 ndim=1,
-                                                                 flags='C'),
-                                                   Nct.ndpointer(dtype=ct.c_int,
-                                                                 ndim=1,
-                                                                 flags='C')]
-        #dll.jmi_opt_sim_write_file_matlab.argtypes = [ct.c_void_p,
-        #                                              ct.c_char_p]
-        #dll.jmi_opt_sim_get_result.argtypes = [ct.c_void_p,
-        #                                       Nct.ndpointer(dtype=c_jmi_real_t,
-        #                                                     ndim=1,
-        #                                                     flags='C'),
-        #                                       Nct.ndpointer(dtype=c_jmi_real_t,
-        #                                                     ndim=1,
-        #                                                     flags='C'),
-        #                                       Nct.ndpointer(dtype=c_jmi_real_t,
-        #                                                     ndim=1,
-        #                                                     flags='C'),
-        #                                       Nct.ndpointer(dtype=c_jmi_real_t,
-        #                                                     ndim=1,
-        #                                                     flags='C'),
-        #                                       Nct.ndpointer(dtype=c_jmi_real_t,
-        #                                                     ndim=1,
-        #                                                     flags='C'),
-        #                                       Nct.ndpointer(dtype=c_jmi_real_t,
-        #                                                     ndim=1,
-        #                                                     flags='C')]
-        # This is not correct, the n_x referes to the wrong x vector
-        # In this case, n_x refers to the size of the optimization vector
-        # in the initialization problem not to the number of states.
-        # _returns_ndarray(dll.jmi_init_opt_get_x, c_jmi_real_t, n_x.value, order='C')
-    except AttributeError, e:
-        pass
-
-    # IPOPT interface to DAE initialization optimization
-    try:
-        dll.jmi_init_opt_ipopt_new.argtypes = [ct.c_void_p,
-                                              ct.c_void_p]
-    except AttributeError, e:
-        pass
-    
-    try:
-        dll.jmi_init_opt_ipopt_solve.argtypes = [ct.c_void_p]
-    except AttributeError, e:
-        pass
-    
-    try:
-        dll.jmi_init_opt_ipopt_set_string_option.argtypes = [ct.c_void_p,
-                                                            ct.c_char_p,
-                                                            ct.c_char_p]
-    except AttributeError, e:
-        pass
-    
-    try:
-        dll.jmi_init_opt_ipopt_set_int_option.argtypes = [ct.c_void_p,
-                                                         ct.c_char_p,
-                                                         ct.c_int]
-    except AttributeError, e:
-        pass
-
-    try:
-        dll.jmi_init_opt_ipopt_set_double_option.argtypes = [ct.c_void_p,
-                                                            ct.c_char_p,
-                                                            ct.c_double]
     except AttributeError, e:
         pass
    
@@ -1438,55 +1237,57 @@ atexit.register(_cleanup)
 # ================================================================
 #                        HIGH LEVEL INTERFACE
 # ================================================================
-def load_model(libname, path='.', mofile=None, optpackage=None, compiler=None):
-    """Load and return a Model from DLL file residing in path.
+
+class JMIModel(object):
     
-    If the DLL file does not exist this method tries to build it if mofile, and
-    optpackage and compiler all are specified.
-	
-	This function comes very handy when loading test models that needs to be
-	compiled on the fly.
+    """A JMI Model loaded from a DLL."""
     
-    Keyword parameters:
-    mofile -- the Modelica file used to build the DLL file.
-    optpackage -- the Optimica package in the mofile which is to be compiled.
-    compiler -- the compiler to use for compilation. Can be 'optimica' or
-                'modelica'.
-    
-    """
-    try:
-        model = Model(libname, path)
-    except IOError:
-        if mofile is None or optpackage is None:
-            raise
-            
-        print "The model was not found. Trying to compile it..."
-            
-        if compiler=='modelica':
-            from jmodelica.compiler import ModelicaCompiler as __Compiler
-        elif compiler=='optimica':
-            from jmodelica.compiler import OptimicaCompiler as __Compiler
+    def __init__(self, libname, path='.'):
+        """Contructor."""
+		
+        # detect platform specific shared library file extension
+        suffix = ''
+        if sys.platform == 'win32':
+            suffix = '.dll'
+        elif sys.platform == 'darwin':
+            suffix = '.dylib'
         else:
-            raise JMIException('You need to specify a compiler.')
-            
-        # Compilation needs to be done in the path where DLL:s should be placed
-        curdir = os.getcwd()
-        os.chdir(path)
-        oc = __Compiler()
-        oc.compile_model(os.path.join(path, mofile), optpackage)
-        os.chdir(curdir)
-        model = Model(libname, path)
+            suffix = '.so'
+
+        # create temp dll
+        fhandle,self._tempfname = tempfile.mkstemp(suffix=suffix)
+        shutil.copyfile(path+os.sep+libname+suffix,self._tempfname)
+        os.close(fhandle)
+        fname = self._tempfname.split(os.sep)
+        fname = fname[len(fname)-1]
         
-    return model
+        #load temp dll
+        self._dll = load_DLL(fname,tempfile.gettempdir())
 
+        # save dll file name so that it can be deleted when python
+        # exits if not before
+        _temp_dlls.append({'handle':self._dll._handle,'name':self._tempfname})
 
-class Model(object):
-    
-    """ High-level interface to a JMIModel. """
-    
-    def __init__(self, libname, path ='.'):
-        """ Constructor. """
-        self.jmimodel = JMIModel(libname, path)
+        self._jmi = ct.c_voidp()
+        assert self._dll.jmi_new(byref(self._jmi)) == 0, \
+               "jmi_new returned non-zero"
+        assert self._jmi.value is not None, \
+               "jmi struct not returned correctly"
+        
+        # The actual array. These must must not be reset (only changed)
+        # as they are pointing to a shared memory space used by
+        # both the JMI DLL and us. Therefor Python properties are used
+        # to ensure that they aren't reset, only modified.
+        self._x = self._dll.jmi_get_x(self._jmi);
+        self._pi = self._dll.jmi_get_pi(self._jmi);
+        self._cd = self._dll.jmi_get_cd(self._jmi)
+        self._ci = self._dll.jmi_get_ci(self._jmi)
+        self._dx = self._dll.jmi_get_dx(self._jmi)
+        self._pd = self._dll.jmi_get_pd(self._jmi)
+        self._u = self._dll.jmi_get_u(self._jmi)
+        self._w = self._dll.jmi_get_w(self._jmi)
+        self._t = self._dll.jmi_get_t(self._jmi)
+        self._z = self._dll.jmi_get_z(self._jmi)
 
         # sizes of all arrays
         self._n_ci = ct.c_int()
@@ -1522,14 +1323,14 @@ class Model(object):
         self._path = os.path.abspath(path)
         self._libname = libname
         self._setDefaultValuesFromMetadata()
-        self.jmimodel.initAD()
-        self._set_dependent_parameters()
-
+        
+        self.initAD()
+        
     def resetModel(self):
         """Reset the internal states of the DLL.
-        
-        Calling this function is equivalent to reopening the model.
-        
+		
+		Calling this function is equivalent to reopening the model.
+		
         """
         self._setDefaultValuesFromMetadata()
         
@@ -1538,7 +1339,7 @@ class Model(object):
         
         Meta data can be things like time points, initial states, initial cost
         etc.
-        
+		
         """
         if libname is None:
             libname = self._libname
@@ -1567,20 +1368,36 @@ class Model(object):
         except IOError, e:
             # Modelica model - can not load Optimica specific xml
             pass
-
-    def _set_dependent_parameters(self):
+         
+    def initAD(self):
+        """Initializing Algorithmic Differential package.
+        
+        Raises a JMIException on failure.
+		
         """
-        Sets the dependent parameters of the model.
+        if self._dll.jmi_ad_init(self._jmi) is not 0:
+            raise JMIException("Could not initialize AD.")
+               
+    def __del__(self):
+        """DLL load cleanup function.
+        
+        Freeing jmi data structure. Removing handle and deleting temporary DLL
+        file if possible.
+        
         """
-        pd_tmp = N.zeros(self._n_pd.value)
-        pd = N.zeros(self._n_pd.value)
-        print(self.getPI())
-        for i in range(self._n_pd.value):
-            self.setPD(pd)
-            self.jmimodel.init_Fp(pd_tmp)
-            pd[i] = pd_tmp[i]
-            pd_tmp[:] = pd
-        self.setPD(pd)
+        if sys.platform == 'win32':
+            pass
+        else:
+            try:
+                assert self._dll.jmi_delete(self._jmi) == 0, \
+                       "jmi_delete failed"
+                if os.path.exists(self._tempfname) and os.path.isfile(self._tempfname):
+                    if sys.platform == 'win32':
+                        _ctypes.FreeLibrary(self._dll._handle)
+                    os.remove(self._tempfname)
+            except AttributeError:
+                # Error caused if constructor crashes
+                pass
 
     def get_variable_names(self):
         """
@@ -1645,19 +1462,23 @@ class Model(object):
             Dict with ValueReference as key and description as value.
         """
         return self._get_XMLvariables_doc().get_variable_descriptions()
-
+               
     def get_sizes(self):
         """Get and return a list of the sizes of the variable vectors."""
-        self.jmimodel.get_sizes(self._n_ci,
-                                self._n_cd,
-                                self._n_pi,
-                                self._n_pd,
-                                self._n_dx,
-                                self._n_x,
-                                self._n_u,
-                                self._n_w,
-                                self._n_tp,
-                                self._n_z)
+		
+        retval = self._dll.jmi_get_sizes(self._jmi,
+                                 byref(self._n_ci),
+                                 byref(self._n_cd),
+                                 byref(self._n_pi),
+                                 byref(self._n_pd),
+                                 byref(self._n_dx),
+                                 byref(self._n_x),
+                                 byref(self._n_u),
+                                 byref(self._n_w),
+                                 byref(self._n_tp),
+                                 byref(self._n_z))
+        if retval is not 0:
+            raise JMIException("Getting sizes failed.")                     
         
         l = [self._n_ci.value, self._n_cd.value, self._n_pi.value, self._n_pd.value, self._n_dx.value, 
              self._n_x.value, self._n_u.value, self._n_w.value, self._n_tp.value, self._n_z.value]
@@ -1665,543 +1486,35 @@ class Model(object):
     
     def get_offsets(self):
         """Get and return a list of the offsets for the variable types in the z vector."""
-        
-        self.jmimodel.get_offsets(self._offs_ci,
-                                  self._offs_cd,
-                                  self._offs_pi,
-                                  self._offs_pd,
-                                  self._offs_dx,
-                                  self._offs_x,
-                                  self._offs_u,
-                                  self._offs_w,
-                                  self._offs_t,
-                                  self._offs_dx_p,
-                                  self._offs_x_p,
-                                  self._offs_u_p,
-                                  self._offs_w_p)
+		
+        retval = self._dll.jmi_get_offsets(self._jmi,
+                                         byref(self._offs_ci),
+                                         byref(self._offs_cd),
+                                         byref(self._offs_pi),
+                                         byref(self._offs_pd),
+                                         byref(self._offs_dx),
+                                         byref(self._offs_x),
+                                         byref(self._offs_u),
+                                         byref(self._offs_w),
+                                         byref(self._offs_t),
+                                         byref(self._offs_dx_p),
+                                         byref(self._offs_x_p),
+                                         byref(self._offs_u_p),
+                                         byref(self._offs_w_p))
+        if retval is not 0:
+            raise JMIException("Getting offsets failed.")        
         
         l = [self._offs_ci.value, self._offs_cd.value, self._offs_pi.value, self._offs_pd.value, 
              self._offs_dx.value, self._offs_x.value, self._offs_u.value, self._offs_w.value, 
              self._offs_t.value, self._offs_dx_p.value, self._offs_x_p.value, self._offs_u_p.value, 
              self._offs_w_p.value]
         return l
-
+    
     def get_n_tp(self):
-        """Get the number of time points."""
-        
-        self.jmimodel.get_n_tp(self._n_tp)
-        return self._n_tp.value
-
-    def getX(self):
-        """Return a reference to the differentiated variables vector."""
-        return self.jmimodel.get_x()
-        
-    def setX(self, x):
-        """Set the differentiated variables vector."""
-        self.jmimodel._x[:] = x
-        
-    x = property(getX, setX, "The differentiated variables vector.")
-
-    def getX_P(self, i):
-        """Returns a reference to the differentiated variables vector
-        corresponding to the i:th time point.
-        
-        """
-        return self.jmimodel.get_x_p(i)
-        
-    def setX_P(self, new_x_p, i):
-        """Sets the differentiated variables vector corresponding to the i:th 
-        time point. 
-        
-        """
-        x_p = self.jmimodel.get_x_p(i)
-        x_p[:] = new_x_p
-    
-    def getPI(self):
-        """Returns a reference to the independent parameters vector."""
-        return self.jmimodel.get_pi()
-        
-    def setPI(self, pi):
-        """Sets the independent parameters vector."""
-        self.jmimodel._pi[:] = pi
-        
-    pi = property(getPI, setPI, "The independent parameter vector.")
-
-    def getPD(self):
-        """Returns a reference to the dependent parameters vector."""
-        return self.jmimodel._pd
-        
-    def setPD(self, pd):
-        """Sets the dependent parameters vector."""
-        self.jmimodel._pd[:] = pd
-        
-    pd = property(getPD, setPD, "The dependent paramenters vector.")
-
-    def getCD(self):
-        """Returns a reference to the dependent constants vector."""
-        return self.jmimodel.get_cd()
-        
-    def setCD(self, cd):
-        """Sets the dependent constants vector."""
-        self.jmimodel._cd[:] = cd
-        
-    cd = property(getCD, setCD, "The dependent constants vector.")
-
-    def getCI(self):
-        """Returns a reference to the independent constants vector."""
-        return self.jmimodel.get_ci()
-        
-    def setCI(self, ci):
-        """Sets the independent constants vector."""
-        self.jmimodel._ci[:] = ci
-        
-    ci = property(getCI, setCI, "The independent constants vector.")
-
-    def getDX(self):
-        """Returns a reference to the derivatives vector."""
-        return self.jmimodel.get_dx()
-        
-    def setDX(self, dx):
-        """Sets the derivatives vector."""
-        self.jmimodel._dx[:] = dx
-        
-    dx = property(getDX, setDX, "The derivatives vector.")
-
-    def getDX_P(self, i):
-        """Returns a reference to the derivatives variables vector
-        corresponding to the i:th time point.
-        """
-        return self.jmimodel.get_dx_p(i)
-        
-    def setDX_P(self, new_dx_p, i):
-        """Sets the derivatives variables vector corresponding to the i:th
-        time point.
-        """
-        dx_p = self.jmimodel.get_dx_p(i)
-        dx_p[:] = new_dx_p
-
-    def getU(self):
-        """Returns a reference to the inputs vector."""
-        return self.jmimodel.get_u()
-        
-    def setU(self, u):
-        """Sets the inputs vector."""
-        self.jmimodel._u[:] = u
-        
-    u = property(getU, setU, "The inputs vector.")
-
-    def getU_P(self, i):
-        """Returns a reference to the inputs vector corresponding to the i:th time 
-        point.
-        """
-        return self.jmimodel.get_u_p(i)
-        
-    def setU_P(self, new_u_p, i):
-        """Sets the inputs vector corresponding to the i:th time point."""
-        u_p = self.jmimodel.get_u_p(i)
-        u_p[:] = new_u_p
-
-    def getW(self):
-        """Returns a reference to the algebraic variables vector."""
-        return self.jmimodel.get_w()
-        
-    def setW(self, w):
-        """Sets the algebraic variables vector."""
-        self.jmimodel._w[:] = w
-        
-    w = property(getW, setW, "The algebraic variables vector.")
-
-    def getW_P(self, i):
-        """Returns a reference to the algebraic variables vector corresponding to 
-        the i:th time point.
-        """
-        return self.jmimodel.get_w_p(i)
-        
-    def setW_P(self, new_w_p, i):
-        """Sets the algebraic variables vector corresponding to the i:th time 
-        point.
-        """
-        w_p = self.jmimodel.get_w_p(i)
-        w_p[:] = new_w_p
-
-    def getT(self):
-        """Returns a reference to the time value.
-        
-        The return value is a NumPy array of length 1.
-        """
-        return self.jmimodel.get_t()
-        
-    def setT(self, t):
-        """Sets the time value.
-        
-        Parameter t must be a NumPy array of length 1.
-        """
-        self.jmimodel._t[:] = t
-        
-    t = property(getT, setT, "The time value.")
-    
-    def getZ(self):
-        """Returns a reference to the vector containing all parameters,
-        variables and point-wise evalutated variables vector.
-        """
-        return self.jmimodel.get_z()
-        
-    def setZ(self, z):
-        """Sets the vector containing all parameters, variables and point-wise 
-        evalutated variables vector.
-        """
-        self.jmimodel._z[:] = z
-        
-    z = property(getZ, setZ, "All parameters, variables and point-wise evaluated variables vector.")   
-
-    def _get_XMLvariables_doc(self):
-        """ Return a reference to the XMLDoc instance for model variables. """
-        return self._xmlvariables_doc
-    
-    def _set_XMLvariables_doc(self, doc):
-        """ Set the XMLDoc for model variables. """
-        self._xmlvariables_doc = doc
-
-    def _get_XMLvalues_doc(self):
-        """ Return a reference to the XMLDoc instance for independent parameter values. """
-        return self._xmlvalues_doc
-    
-    def _set_XMLvalues_doc(self, doc):
-        """ Set the XMLDoc for independent parameter values. """
-        self._xmlvalues_doc = doc
-
-    def _get_XMLproblvariables_doc(self):
-        """ Return a reference to the XMLDoc instance for optimization problem variables. """
-        return self._xmlproblvariables_doc
-    
-    def _set_XMLproblvariables_doc(self, doc):
-        """ Set the XMLDoc for optimization problem variables. """
-        self._xmlproblvariables_doc = doc
-       
-    def _set_start_attributes(self):
-        
-        """ 
-        Set start attributes for all variables. The start attributes are 
-        fetched together with the corresponding valueReferences from the XMLDoc 
-        instance. The valueReferences are mapped to which primitive type vector 
-        and index in vector each start value belongs to using the protocol 
-        implemented in _translateValueRef.
-            
-        """
-        
-        xmldoc = self._get_XMLvariables_doc()
-        start_attr = xmldoc.get_start_attributes()
-        
-        #Real variables vector
-        z = self.getZ()
-        
-        keys = start_attr.keys()
-        keys.sort(key=int)
-        
-        for key in keys:
-            value = start_attr.get(key)
-            
-            (i, ptype) = _translate_value_ref(key)
-            if(ptype == 0):
-                # Primitive type is Real
-                z[i] = value
-            elif(ptype == 1):
-                # Primitive type is Integer
-                pass
-            elif(ptype == 2):
-                # Primitive type is Boolean
-                pass
-            elif(ptype == 3):
-                # Primitive type is String
-                pass
-            else:
-                "Unknown type"
-    
-    def _set_iparam_values(self, xmldoc=None):
-        """ Set values for the independent parameters. """
-        if not xmldoc:
-            xmldoc = self._get_XMLvalues_doc()
-        values = xmldoc.get_iparam_values()
-       
-        z = self.getZ()
-       
-        keys = values.keys()
-        keys.sort(key=int)
-       
-        for key in keys:
-            value = values.get(key)
-            (i, ptype) = _translate_value_ref(key)
-           
-            if(ptype == 0):
-               # Primitive type is Real
-               z[i] = value
-            elif(ptype == 1):
-                # Primitive type is Integer
-                pass
-            elif(ptype == 2):
-                # Primitive type is Boolean
-                pass
-            elif(ptype == 3):
-                # Primitive type is String
-                pass
-            else:
-                "Unknown type"
-            
-    def _set_opt_interval(self):
-        """ Set the optimization intervals (if Optimica). """
-        xmldoc = self._get_XMLproblvariables_doc()
-        starttime = xmldoc.get_starttime()
-        starttimefree = xmldoc.get_starttime_free()
-        finaltime = xmldoc.get_finaltime()
-        finaltimefree = xmldoc.get_finaltime_free()
-        if starttime and finaltime:
-            self.jmimodel.opt_set_optimization_interval(float(starttime), int(starttimefree),
-                                                        float(finaltime), int(finaltimefree))        
-
-    def _set_timepoints(self):       
-        """ Set the optimization timepoints (if Optimica). """        
-        xmldoc = self._get_XMLproblvariables_doc()
-        start =  float(xmldoc.get_starttime())
-        final = float(xmldoc.get_finaltime())
-        points = []
-        for point in xmldoc.get_timepoints():
-            norm_point = (float(point) - start) / (final-start)
-            points.append(float(norm_point))         
-        self.jmimodel.set_tp(N.array(points))   
-        
-    def _set_p_opt_indices(self):
-        """ Set the optimization parameter indices (if Optimica). """
-        xmldoc = self._get_XMLvariables_doc()
-        refs = xmldoc.get_p_opt_variable_refs()       
-        if len(refs) > 0:
-            n_p_opt = 0
-            p_opt_indices = []
-            refs.sort(key=int)            
-            for ref in refs:
-                (z_i, ptype) = _translate_value_ref(ref)
-                p_opt_indices.append(z_i - self._offs_pi.value)
-                n_p_opt = n_p_opt +1
-            self.jmimodel.opt_set_p_opt_indices(n_p_opt,N.array(p_opt_indices,dtype=int))
-
-    def get_name(self):
-        """ Return the name of the model. """
-        return self._libname
-    
-    def getparameter(self, name):
-        """ Get value of a parameter. """
-        xmldoc = self._get_XMLvariables_doc()
-        valref = xmldoc.get_valueref(name.strip())
-        value = None
-        if valref:
-            (z_i, ptype) = _translate_value_ref(valref)
-            value = self.getPI()[z_i - self._offs_pi.value]
-        else:
-            print "Parameter "+name.strip()+" could not be found in model."
-        return value
-        
-    def setparameter(self, name, value):
-        """ Set value of a parameter. """
-        xmldoc = self._get_XMLvariables_doc()
-        valref = xmldoc.get_valueref(name)
-        if valref:
-            (z_i, ptype) = _translate_value_ref(valref)
-            self.getPI()[z_i - self._offs_pi.value] = value
-        else:
-            print "Parameter "+name+" could not be found in model."
-    
-    def load_parameters_from_XML(self, filename="", path="."):
-        """ 
-        Reset pi vector with values from the XML file created 
-        when model was compiled. If an XML file other than this 
-        should be used instead set the parameters filename and 
-        path (if no path is set file is assumed to be in the 
-        current directory).
-                
-        Parameters:
-            filename -- filename of XML file that should be loaded (optional)
-            path -- directory where XML file is located (optional)
-            
-        Raises IOError if file could not be found.
-        
-        """
-        if filename:
-                xml_values_name = os.path.join(path, filename)
-        else:
-            #load original xml
-            xml_values_name = os.path.join(path, self.get_name()+'_values.xml')
-        
-        if os.path.exists(xml_values_name):
-            self._set_iparam_values(xmlparser.XMLValuesDoc(xml_values_name))
-        else:
-            raise IOError("The file: "+xml_values_name+" could not be found.")
-        
-    def write_parameters_to_XML(self, filename="", path="."):
-        """ 
-        Write parameter values (real) in pi vector to XML. The default 
-        behaviour is to overwrite the XML file created when model was 
-        compiled. To write to a new file, set parameters filename and 
-        path (if no path is set file is assumed to be in the 
-        current directory). 
-        
-        Parameters:
-            filename -- filename of XML file that should be loaded (optional)
-            path -- directory where XML file is located (optional)
-        """
-        pi = self.getPI()
-        parameters = {}
-        # get all indep parameters, translate index in z-vector
-        # to valueref and save in dict with parameter value as value
-        for i in range(len(pi)):
-            zi = i+self._offs_pi.value
-            # parameter type is real (ptype=0) -> z-vector -> index = valueref
-            parameters[zi]=pi[i]
-            
-        # get all parameters in XMLvaluesdoc, go through them all and 
-        # for each, find corresponding parameter in dict created above
-        # and set new value saved in dict (which comes from pi vector)
-        xmldoc = self._get_XMLvalues_doc()
-        elements=xmldoc._doc.findall("/RealParameter")
-        for e in elements:
-            ref = e.getchildren()[0]
-            val = e.getchildren()[1]
-            if parameters.has_key(int(ref.text)):
-                val.text=str(parameters[int(ref.text)])
-        # finally, write to file
-        if filename:
-            if not os.path.exists(path):
-                os.mkdir(path)
-            xmldoc._doc.write(os.path.join(path,filename))
-        else:
-            xmldoc._doc.write(xmldoc._doc.docinfo.URL)
-
-
-class JMIModel(object):
-    
-    """A JMI Model loaded from a DLL."""
-    
-    def __init__(self, libname, path='.'):
-        """Contructor."""
-		        
-        # detect platform specific shared library file extension
-        suffix = ''
-        if sys.platform == 'win32':
-            suffix = '.dll'
-        elif sys.platform == 'darwin':
-            suffix = '.dylib'
-        else:
-            suffix = '.so'
-
-        # create temp dll
-        fhandle,self._tempfname = tempfile.mkstemp(suffix=suffix)
-        shutil.copyfile(path+os.sep+libname+suffix,self._tempfname)
-        os.close(fhandle)
-        fname = self._tempfname.split(os.sep)
-        fname = fname[len(fname)-1]
-        
-        #load temp dll
-        self._dll = load_DLL(fname,tempfile.gettempdir())
-
-        # save dll file name so that it can be deleted when python
-        # exits if not before
-        _temp_dlls.append({'handle':self._dll._handle,'name':self._tempfname})
-
-        self._jmi = ct.c_voidp()
-        assert self._dll.jmi_new(byref(self._jmi)) == 0, \
-               "jmi_new returned non-zero"
-        assert self._jmi.value is not None, \
-               "jmi struct not returned correctly"
-        
-        # The actual array. These must must not be reset (only changed)
-        # as they are pointing to a shared memory space used by
-        # both the JMI DLL and us. Therefor Python properties are used
-        # to ensure that they aren't reset, only modified.
-        self._x = self._dll.jmi_get_x(self._jmi);
-        self._pi = self._dll.jmi_get_pi(self._jmi);
-        self._cd = self._dll.jmi_get_cd(self._jmi)
-        self._ci = self._dll.jmi_get_ci(self._jmi)
-        self._dx = self._dll.jmi_get_dx(self._jmi)
-        self._pd = self._dll.jmi_get_pd(self._jmi)
-        self._u = self._dll.jmi_get_u(self._jmi)
-        self._w = self._dll.jmi_get_w(self._jmi)
-        self._t = self._dll.jmi_get_t(self._jmi)
-        self._z = self._dll.jmi_get_z(self._jmi)
-
-        #self.initAD()
-                 
-    def initAD(self):
-        """Initializing Algorithmic Differential package.
-        
-        Raises a JMIException on failure.
-		
-        """
-        if self._dll.jmi_ad_init(self._jmi) is not 0:
-            raise JMIException("Could not initialize AD.")
-               
-    def __del__(self):
-        """DLL load cleanup function.
-        
-        Freeing jmi data structure. Removing handle and deleting temporary DLL
-        file if possible.
-        
-        """
-        if sys.platform == 'win32':
-            pass
-        else:
-            try:
-                assert self._dll.jmi_delete(self._jmi) == 0, \
-                       "jmi_delete failed"
-                if os.path.exists(self._tempfname) and os.path.isfile(self._tempfname):
-                    if sys.platform == 'win32':
-                        _ctypes.FreeLibrary(self._dll._handle)
-                    os.remove(self._tempfname)
-            except AttributeError:
-                # Error caused if constructor crashes
-                pass
-               
-    def get_sizes(self, n_ci, n_cd, n_pi, n_pd, n_dx, n_x, n_u, n_w, n_tp, n_z):
-        """Get the sizes of the variable vectors."""
-		
-        retval = self._dll.jmi_get_sizes(self._jmi,
-                                 byref(n_ci),
-                                 byref(n_cd),
-                                 byref(n_pi),
-                                 byref(n_pd),
-                                 byref(n_dx),
-                                 byref(n_x),
-                                 byref(n_u),
-                                 byref(n_w),
-                                 byref(n_tp),
-                                 byref(n_z))
-        if retval is not 0:
-            raise JMIException("Getting sizes failed.")                     
-            
-    def get_offsets(self, offs_ci, offs_cd, offs_pi, offs_pd, offs_dx, offs_x, offs_u, offs_w,
-                    offs_t, offs_dx_p, offs_x_p, offs_u_p, offs_w_p):
-        """Get the offsets for the variable types in the z vector."""
-		
-        retval = self._dll.jmi_get_offsets(self._jmi,
-                                         byref(offs_ci),
-                                         byref(offs_cd),
-                                         byref(offs_pi),
-                                         byref(offs_pd),
-                                         byref(offs_dx),
-                                         byref(offs_x),
-                                         byref(offs_u),
-                                         byref(offs_w),
-                                         byref(offs_t),
-                                         byref(offs_dx_p),
-                                         byref(offs_x_p),
-                                         byref(offs_u_p),
-                                         byref(offs_w_p))
-        if retval is not 0:
-            raise JMIException("Getting offsets failed.")        
-            
-    def get_n_tp(self,n_tp):
         """Get and return the number of time points in the model."""
-        
-        retval = self._dll.jmi_get_n_tp(self._jmi, byref(n_tp))
-        if retval is not 0:
+        if self._dll.jmi_get_n_tp(self._jmi, byref(self._n_tp)) is not 0:
             raise JMIException("Getting number of time points in the model failed.")
+        return self._n_tp.value
 
     def set_tp(self, tp):
         """Set the vector of time points. 
@@ -2216,76 +1529,168 @@ class JMIModel(object):
         """Get and return the vector of time points."""
         if self._dll.jmi_get_tp(self._jmi, tp) is not 0:
             raise JMIException("Getting vector of time points failed.")
-    
-    def get_z(self):
-        """Returns a reference to the vector containing all parameters,
-        variables and point-wise evalutated variables vector.
-        """
-        return self._z
-    
-    def get_ci(self):
-        """Returns a reference to the independent constants vector."""
-        return self._ci
-    
-    def get_cd(self):
-        """Returns a reference to the dependent constants vector."""
-        return self._cd
-    
-    def get_pi(self):
-        """Returns a reference to the independent parameters vector."""
-        return self._pi
-        
-    def get_pd(self):
-        """Returns a reference to the dependent parameters vector."""
-        return self._pd
 
-    def get_dx(self):
-        """Returns a reference to the derivatives vector."""
-        return self._dx 
-    
-    def get_x(self):
+    def getX(self):
         """Return a reference to the differentiated variables vector."""
         return self._x
         
-    def get_u(self):
-        """Returns a reference to the inputs vector."""
-        return self._u
+    def setX(self, x):
+        """Set the differentiated variables vector."""
+        self._x[:] = x
         
-    def get_w(self):
-        """Returns a reference to the algebraic variables vector."""
-        return self._w
+    x = property(getX, setX, "The differentiated variables vector.")
 
-    def get_t(self):
-        """Returns a reference to the time value.
-        
-        The return value is a NumPy array of length 1.
-        """
-        return self._t
-
-    def get_dx_p(self, i):
-        """Returns a reference to the derivatives variables vector
-        corresponding to the i:th time point.
-        """
-        return self._dll.jmi_get_dx_p(self._jmi,i)
-
-    def get_x_p(self, i):
+    def getX_P(self, i):
         """Returns a reference to the differentiated variables vector
         corresponding to the i:th time point.
         
         """
         return self._dll.jmi_get_x_p(self._jmi, i)
+        
+    def setX_P(self, new_x_p, i):
+        """Sets the differentiated variables vector corresponding to the i:th 
+        time point. 
+        
+        """
+        x_p = self._dll.jmi_get_x_p(self._jmi, i)
+        x_p[:] = new_x_p
+    
+    def getPI(self):
+        """Returns a reference to the independent parameters vector."""
+        return self._pi
+        
+    def setPI(self, pi):
+        """Sets the independent parameters vector."""
+        self._pi[:] = pi
+        
+    pi = property(getPI, setPI, "The independent parameter vector.")
 
-    def get_u_p(self, i):
+    def getCD(self):
+        """Returns a reference to the dependent constants vector."""
+        return self._cd
+        
+    def setCD(self, cd):
+        """Sets the dependent constants vector."""
+        self._cd[:] = cd
+        
+    cd = property(getCD, setCD, "The dependent constants vector.")
+
+    def getCI(self):
+        """Returns a reference to the independent constants vector."""
+        return self._ci
+        
+    def setCI(self, ci):
+        """Sets the independent constants vector."""
+        self._ci[:] = ci
+        
+    ci = property(getCI, setCI, "The independent constants vector.")
+
+    def getDX(self):
+        """Returns a reference to the derivatives vector."""
+        return self._dx
+        
+    def setDX(self, dx):
+        """Sets the derivatives vector."""
+        self._dx[:] = dx
+        
+    dx = property(getDX, setDX, "The derivatives vector.")
+
+    def getDX_P(self, i):
+        """Returns a reference to the derivatives variables vector
+        corresponding to the i:th time point.
+        """
+        return self._dll.jmi_get_dx_p(self._jmi,i)
+        
+    def setDX_P(self, new_dx_p, i):
+        """Sets the derivatives variables vector corresponding to the i:th
+        time point.
+        """
+        dx_p = self._dll.jmi_get_dx_p(self._jmi,i)
+        dx_p[:] = new_dx_p
+
+    def getPD(self):
+        """Returns a reference to the dependent parameters vector."""
+        return self._pd
+        
+    def setPD(sself, pd):
+        """Sets the dependent parameters vector."""
+        self._pd[:] = pd
+        
+    pd = property(getPD, setPD, "The dependent paramenters vector.")
+
+    def getU(self):
+        """Returns a reference to the inputs vector."""
+        return self._u
+        
+    def setU(self, u):
+        """Sets the inputs vector."""
+        self._u[:] = u
+        
+    u = property(getU, setU, "The inputs vector.")
+
+    def getU_P(self, i):
         """Returns a reference to the inputs vector corresponding to the i:th time 
         point.
         """
         return self._dll.jmi_get_u_p(self._jmi, i)
+        
+    def setU_P(self, new_u_p, i):
+        """Sets the inputs vector corresponding to the i:th time point."""
+        u_p = self._dll.jmi_get_u_p(self._jmi, i)
+        u_p[:] = new_u_p
 
-    def get_w_p(self, i):
+    def getW(self):
+        """Returns a reference to the algebraic variables vector."""
+        return self._w
+        
+    def setW(self, w):
+        """Sets the algebraic variables vector."""
+        self._w[:] = w
+        
+    w = property(getW, setW, "The algebraic variables vector.")
+
+    def getW_P(self, i):
         """Returns a reference to the algebraic variables vector corresponding to 
         the i:th time point.
         """
-        return self._dll.jmi_get_w_p(self._jmi, i) 
+        return self._dll.jmi_get_w_p(self._jmi, i)
+        
+    def setW_P(self, new_w_p, i):
+        """Sets the algebraic variables vector corresponding to the i:th time 
+        point.
+        """
+        w_p = self._dll.jmi_get_w_p(self._jmi, i)
+        w_p[:] = new_w_p
+
+    def getT(self):
+        """Returns a reference to the time value.
+        
+        The return value is a NumPy array of length 1.
+        """
+        return self._t
+        
+    def setT(self, t):
+        """Sets the time value.
+        
+        Parameter t must be a NumPy array of length 1.
+        """
+        self._t[:] = t
+        
+    t = property(getT, setT, "The time value.")
+    
+    def getZ(self):
+        """Returns a reference to the vector containing all parameters,
+        variables and point-wise evalutated variables vector.
+        """
+        return self._z
+        
+    def setZ(self, z):
+        """Sets the vector containing all parameters, variables and point-wise 
+        evalutated variables vector.
+        """
+        self._z[:] = z
+        
+    z = property(getZ, setZ, "All parameters, variables and point-wise evaluated variables vector.")   
     
     def ode_f(self):
         """Evalutates the right hand side of the ODE.
@@ -2416,7 +1821,7 @@ class JMIModel(object):
     
     def dae_get_sizes(self):
         """Returns the number of equations of the DAE."""
-        n_eq_F = ct.c_int()
+        n_eq_F = ct.c_int
         if self._dll.jmi_dae_get_sizes(self._jmi, byref(n_eq_F)) is not 0:
             raise JMIException("Getting number of equations failed.")
         return n_eq_F.value
@@ -2474,7 +1879,7 @@ class JMIModel(object):
             The number of non-zero Jacobian entries.
 			
         """
-        n_nz = ct.c_int()
+        n_nz = ct.c_int
         if self._dll.jmi_dae_dF_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
             raise JMIException("Getting the number of non-zeros failed.")
         return n_nz.value
@@ -2509,7 +1914,7 @@ class JMIModel(object):
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
             pass        
-        if self._dll.jmi_dae_dF_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, col) is not 0:
+        if self._dll.jmi_dae_dF_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, cols) is not 0:
             raise JMIException("Getting the row and column indices failed.")
     
     def dae_dF_dim(self, eval_alg, sparsity, independent_vars, mask):
@@ -2556,9 +1961,9 @@ class JMIModel(object):
             The number of equations in F0, F1 and Fp resp.
 			
         """
-        n_eq_f0 = ct.c_int()
-        n_eq_f1 = ct.c_int()
-        n_eq_fp = ct.c_int()
+        n_eq_f0 = ct.c_int
+        n_eq_f1 = ct.c_int
+        n_eq_fp = ct.c_int
         if self._dll.jmi_init_get_sizes(self._jmi, byref(n_eq_f0), byref(n_eq_f1), byref(n_eq_fp)) is not 0:
             raise JMIException("Getting the number of equations failed.")
         return n_eq_f0.value, n_eq_f1.value, n_eq_fp.value
@@ -2619,7 +2024,7 @@ class JMIModel(object):
             The number of non-zero Jacobian entries in the full Jacobian.
 			
         """
-        n_nz = ct.c_int()
+        n_nz = ct.c_int
         if self._dll.jmi_init_dF0_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
             raise JMIException("Getting the number of non-zeros failed.")
         return n_nz.value
@@ -2652,7 +2057,7 @@ class JMIModel(object):
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
             pass       
-        if self._dll.jmi_init_dF0_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, col) is not 0:
+        if self._dll.jmi_init_dF0_nz_indices(self._jmi, eval_alg, independent_vars, mask, row_i, cols_i) is not 0:
             raise JMIException("Getting the row and column indices failed.")
     
     def init_dF0_dim(self, eval_alg, sparsity, independent_vars, mask):
@@ -2744,7 +2149,7 @@ class JMIModel(object):
             The number of non-zero Jacobian entries in the full Jacobian.
 			
         """
-        n_nz = ct.c_int()
+        n_nz = ct.c_int
         if self._dll.jmi_init_dF1_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
             raise JMIException("Getting the number of non-zeros failed.")
         return n_nz.value
@@ -2778,7 +2183,7 @@ class JMIModel(object):
         except TypeError:
             pass
         
-        if self._dll.jmi_init_dF1_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, col) is not 0:
+        if self._dll.jmi_init_dF1_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, cols) is not 0:
             raise JMIException("Getting the row and column indices failed.")
     
     def init_dF1_dim(self, eval_alg, sparsity, independent_vars, mask):
@@ -2874,7 +2279,7 @@ class JMIModel(object):
             The number of non-zero Jacobian entries in the full Jacobian.
 			
         """
-        n_nz = ct.c_int()
+        n_nz = ct.c_int
         if self._dll.jmi_init_dFp_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
             raise JMIException("Getting the number of non-zeros failed.")
         return n_nz.value
@@ -3141,11 +2546,11 @@ class JMIModel(object):
         except TypeError:
             pass
         
-        dJ_n_cols = ct.c_int()
-        dJ_n_nz = ct.c_int()
-        if self._dll.jmi_opt_dJ_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dJ_n_cols), byref(dJ_n_nz)) is not 0:
+        dF_n_cols = ct.c_int()
+        dF_n_nz = ct.c_int()
+        if self._dll.jmi_opt_dJ_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
             raise JMIException("Computing the number of columns and non-zero elements failed.")
-        return dJ_n_cols.value, dJ_n_nz.value
+        return dF_n_cols.value, dF_n_nz.value
         
     def opt_Ceq(self, res):
         """Evaluate the residual of the equality path constraint Ceq.
@@ -3665,211 +3070,137 @@ class JMIModel(object):
             raise JMIException("Computing the number of columns and non-zero elements failed.")
         return dF_n_cols.value, dF_n_nz.value
     
-class SimultaneousOpt(object):
-    """ High-level interface for JMISimultaneousOpt. """
-
-    def __init__(self):
-        raise JMIException("This class can not be instantiated. ")
+    def _get_XMLvariables_doc(self):
+        """ Return a reference to the XMLDoc instance for model variables. """
+        return self._xmlvariables_doc
     
-    def _initialize(self, model, jmisimopt):
-        self._model = model
-        self.jmisimopt = jmisimopt
-        
-    def get_result(self):
-        """
-        Get the optimization results.
-        
-        Returns:
-        p_opt --
-            A vector containing the values of the optimized parameters.
-        data --
-            A two dimensional array of variable trajectory data. The
-            first column represents the time vector. The following
-            colums contain, in order, the derivatives, the states,
-            the inputs and the algebraic variables. The ordering is
-            according to increasing value references.
-        """
+    def _set_XMLvariables_doc(self, doc):
+        """ Set the XMLDoc for model variables. """
+        self._xmlvariables_doc = doc
 
-        n_points = self.jmisimopt.opt_sim_get_result_variable_vector_length()
-        n_points = n_points.value
-
-        sizes = self._model.get_sizes()
-        n_dx = sizes[4]
-        n_x = sizes[5]
-        n_u = sizes[6]
-        n_w = sizes[7]
-        n_popt = self._model.jmimodel.opt_get_n_p_opt()
-        
-        # Create result data vectors
-        p_opt = N.zeros(n_popt)
-        t_ = N.zeros(n_points)
-        dx_ = N.zeros(n_dx*n_points)
-        x_ = N.zeros(n_x*n_points)
-        u_ = N.zeros(n_u*n_points)
-        w_ = N.zeros(n_w*n_points)
-        
-        # Get the result
-        self.jmisimopt.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
-        
-        data = N.zeros((n_points,1+n_dx+n_x+n_u+n_w))
-        data[:,0] = t_
-        for i in range(n_dx):
-            data[:,i+1] = dx_[i*n_points:(i+1)*n_points]
-        for i in range(n_x):
-            data[:,n_dx+i+1] = x_[i*n_points:(i+1)*n_points]
-        for i in range(n_u):
-            data[:,n_dx+n_x+i+1] = u_[i*n_points:(i+1)*n_points]
-        for i in range(n_w):
-            data[:,n_dx+n_x+n_u+i+1] = w_[i*n_points:(i+1)*n_points]
-
-        return p_opt, data
+    def _get_XMLvalues_doc(self):
+        """ Return a reference to the XMLDoc instance for independent parameter values. """
+        return self._xmlvalues_doc
     
-    def export_result_dymola(self, format='txt'):
-        """
-        Export the opitimization result on Dymola format.
+    def _set_XMLvalues_doc(self, doc):
+        """ Set the XMLDoc for independent parameter values. """
+        self._xmlvalues_doc = doc
 
-        Parameters:
-            format --
-                A string equal either to 'txt' for output to Dymola textual
-                format or 'mat' for output to Dymola binary Matlab format.
-
-        Limitations:
-            Only format='txt' is currently supported.
-        """
-
-        # Get results
-        p_opt, data = self.get_result()
+    def _get_XMLproblvariables_doc(self):
+        """ Return a reference to the XMLDoc instance for optimization problem variables. """
+        return self._xmlproblvariables_doc
+    
+    def _set_XMLproblvariables_doc(self, doc):
+        """ Set the XMLDoc for optimization problem variables. """
+        self._xmlproblvariables_doc = doc
+       
+    def _set_start_attributes(self):
         
-        # Write result
-        io.export_result_dymola(self._model,data)
-
-    def set_initial_from_dymola(self,res, hs_init, start_time_init, final_time_init):
-        """
-        Initialize the optimization vector from an object of either ResultDymolaTextual
-        or ResultDymolaBinary.
-
-        Parameters:
-            res --
-                A reference to an object of type ResultDymolaTextual or
-                ResultDymolaBinary.
-            hs_init -- A vector of length n_e containing initial guesses of the
-                normalized lengths of the finite elements. This argument is
-                neglected if the problem does not have free element lengths.
-            start_time_init --
-                Initial guess of interval start time. This argument is neglected
-                if the start time is fixed.
-            final_time_init --
-                Initial guess of interval final time. This argument is neglected
-                if the final time is fixed.
-        """
-
-        # Obtain the names
-        dx_names = self._model.get_derivative_names()
-        dx_name_value_refs = dx_names.keys()
-        dx_name_value_refs.sort(key=int)
-
-        x_names = self._model.get_differentiated_variable_names()
-        x_name_value_refs = x_names.keys()
-        x_name_value_refs.sort(key=int)
-
-        u_names = self._model.get_input_names()
-        u_name_value_refs = u_names.keys()
-        u_name_value_refs.sort(key=int)
-
-        w_names = self._model.get_algebraic_variable_names()
-        w_name_value_refs = w_names.keys()
-        w_name_value_refs.sort(key=int)
-
-        p_opt_names = self._model.get_p_opt_names()
-        p_opt_name_value_refs = p_opt_names.keys()
-        p_opt_name_value_refs.sort(key=int)
-
-        #print(dx_names)
-        #print(x_names)
-        #print(u_names)
-        #print(w_names)
-        
-        # Obtain vector sizes
-        n_points = 0
-        if len(dx_names) > 0:
-            traj = res.get_variable_data(dx_names.get(dx_name_value_refs[0]))
-        elif len(x_names) > 0:
-            traj = res.get_variable_data(x_names.get(x_name_value_refs[0]))
-        elif len(u_names) > 0:
-            traj = res.get_variable_data(u_names.get(u_name_value_refs[0]))
-        elif len(w_names) > 0:
-            for ref in w_name_value_refs:
-                traj = res.get_variable_data(w_names.get(ref))
-                if N.size(traj.x)>2:
-                    break
-        else:
-            return
-
-        #print(traj.t)
-
-        n_points = N.size(traj.t,0)
-        n_cols = 1+len(dx_names)+len(x_names)+len(u_names)+len(w_names)
-
-        var_data = N.zeros((n_points,n_cols))
-        # Initialize time vector
-        var_data[:,0] = traj.t;
-
-        p_opt_data = N.zeros(len(p_opt_names))
-
-        # Get the parameters
-        n_p_opt = self._model.jmimodel.opt_get_n_p_opt()
-        if n_p_opt > 0:
-            p_opt_indices = N.zeros(n_p_opt, dtype=int)
-        
-            self._model.jmimodel.opt_get_p_opt_indices(p_opt_indices)
-            p_opt_indices = p_opt_indices.tolist()
-
-            for ref in p_opt_name_value_refs:
-                (z_i, ptype) = _translate_value_ref(ref)
-                i_pi = z_i - self._model._offs_pi.value
-                i_pi_opt = p_opt_indices.index(i_pi)
-                traj = res.get_variable_data(p_opt_names.get(ref))
-                p_opt_data[i_pi_opt] = traj.x[0]
-
-        #print(N.size(var_data))
-
-        # Initialize variable names
-        # Loop over all the names
-        col_index = 1;
-        for ref in dx_name_value_refs:
-            #print(dx_names.get(ref))
-            #print(col_index)
-            traj = res.get_variable_data(dx_names.get(ref))
-            var_data[:,col_index] = traj.x
-            col_index = col_index + 1
-        for ref in x_name_value_refs:
-            #print(x_names.get(ref))
-            #print(col_index)
-            traj = res.get_variable_data(x_names.get(ref))
-            var_data[:,col_index] = traj.x
-            col_index = col_index + 1
-        for ref in u_name_value_refs:
-            #print(u_names.get(ref))
-            #print(col_index)
-            traj = res.get_variable_data(u_names.get(ref))
-            var_data[:,col_index] = traj.x
-            col_index = col_index + 1
-        for ref in w_name_value_refs:
-            #print(w_names.get(ref))
-            #print(col_index)
-            traj = res.get_variable_data(w_names.get(ref))
-            if N.size(traj.x)==2:
-                var_data[:,col_index] = N.ones(n_points)*traj.x[0]
-            else:
-                var_data[:,col_index] = traj.x
-            col_index = col_index + 1
-
-        #print(var_data)
-        #print(N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0])
+        """ 
+        Set start attributes for all variables. The start attributes are 
+        fetched together with the corresponding valueReferences from the XMLDoc 
+        instance. The valueReferences are mapped to which primitive type vector 
+        and index in vector each start value belongs to using the protocol 
+        implemented in _translateValueRef.
             
-        self.jmisimopt.opt_sim_set_initial_from_trajectory(p_opt_data,N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0],N.size(var_data,0),
-                                                 hs_init,start_time_init,final_time_init)
+        """
         
+        xmldoc = self._get_XMLvariables_doc()
+        start_attr = xmldoc.get_start_attributes()
+        
+        #Real variables vector
+        z = self.getZ()
+        
+        keys = start_attr.keys()
+        keys.sort(key=int)
+        
+        for key in keys:
+            value = start_attr.get(key)
+            
+            (i, ptype) = _translate_value_ref(key)
+            if(ptype == 0):
+                # Primitive type is Real
+                z[i] = value
+            elif(ptype == 1):
+                # Primitive type is Integer
+                pass
+            elif(ptype == 2):
+                # Primitive type is Boolean
+                pass
+            elif(ptype == 3):
+                # Primitive type is String
+                pass
+            else:
+                "Unknown type"
+    
+    def _set_iparam_values(self):
+        """ Set values for the independent parameters. """
+        xmldoc = self._get_XMLvalues_doc()
+        values = xmldoc.get_iparam_values()
+       
+        z = self.getZ()
+       
+        keys = values.keys()
+        keys.sort(key=int)
+       
+        for key in keys:
+            value = values.get(key)
+            (i, ptype) = _translate_value_ref(key)
+           
+            if(ptype == 0):
+               # Primitive type is Real
+               z[i] = value
+            elif(ptype == 1):
+                # Primitive type is Integer
+                pass
+            elif(ptype == 2):
+                # Primitive type is Boolean
+                pass
+            elif(ptype == 3):
+                # Primitive type is String
+                pass
+            else:
+                "Unknown type"
+            
+    def _set_opt_interval(self):
+        """ Set the optimization intervals (if Optimica). """
+        xmldoc = self._get_XMLproblvariables_doc()
+        starttime = xmldoc.get_starttime()
+        starttimefree = xmldoc.get_starttime_free()
+        finaltime = xmldoc.get_finaltime()
+        finaltimefree = xmldoc.get_finaltime_free()
+        if starttime and finaltime:
+            self.opt_set_optimization_interval(float(starttime), int(starttimefree),
+                                                        float(finaltime), int(finaltimefree))        
+
+    def _set_timepoints(self):       
+        """ Set the optimization timepoints (if Optimica). """        
+        xmldoc = self._get_XMLproblvariables_doc()
+        start =  float(xmldoc.get_starttime())
+        final = float(xmldoc.get_finaltime())
+        points = []
+        for point in xmldoc.get_timepoints():
+            norm_point = (float(point) - start) / (final-start)
+            points.append(float(norm_point))         
+        self.set_tp(N.array(points))   
+        
+    def _set_p_opt_indices(self):
+        """ Set the optimization parameter indices (if Optimica). """
+        xmldoc = self._get_XMLvariables_doc()
+        refs = xmldoc.get_p_opt_variable_refs()       
+        if len(refs) > 0:
+            n_p_opt = 0
+            p_opt_indices = []
+            refs.sort(key=int)            
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                p_opt_indices.append(z_i - self._offs_pi.value)
+                n_p_opt = n_p_opt +1
+            self.opt_set_p_opt_indices(n_p_opt,N.array(p_opt_indices))
+
+    def get_name(self):
+        """ Return the name of the model. """
+        return self._libname
 
 class JMISimultaneousOpt(object):
 
@@ -3908,7 +3239,7 @@ class JMISimultaneousOpt(object):
         if self._jmi_model._dll.jmi_opt_sim_get_dimensions(self._jmi_opt_sim, byref(n_x), byref(n_g), 
                                                         byref(n_h), byref(dg_n_nz), byref(dh_n_nz)) is not 0:
             raise JMIException("Getting the number of variables and constraints failed.")
-        return n_x.value, n_g.value, n_h.value, dg_n_nz.value, dh_n_nz.value
+        return n_x, n_g, n_h, dg_n_nz, dh_n_nz
 
     def opt_sim_get_interval_spec(self, start_time, start_time_free, final_time, final_time_free):
         """ 
@@ -3948,7 +3279,7 @@ class JMISimultaneousOpt(object):
         if self._jmi_model._dll.jmi_opt_sim_set_initial(self._jmi_opt_sim, x_init) is not 0:
             raise JMIException("Setting the initial point failed.")
  
-    def opt_sim_set_initial_from_trajectory(self, p_opt_init, trajectory_data_init, traj_n_points,
+    def opt_sim_set_initial_from_trajectory(self, p_opt_init, trajectory_data_init,
                                             hs_init, start_time_init, final_time_init):
         """
         Set the initial point based on time series trajectories of the
@@ -3966,8 +3297,6 @@ class JMISimultaneousOpt(object):
             first column contains the time vector. The following column
             contains, in order, the derivative, state, input, and algebraic
             variable profiles.
-        traj_n_points --
-            Number of time points in trajectory_data_init.
         hs_init --
             A vector of length n_e containing initial guesses of the
             normalized lengths of the finite elements. This argument is neglected
@@ -3982,7 +3311,6 @@ class JMISimultaneousOpt(object):
         if self._jmi_model._dll.jmi_opt_sim_set_initial_from_trajectory(self._jmi_opt_sim, \
                                                                         p_opt_init, \
                                                                         trajectory_data_init, \
-                                                                        traj_n_points, \
                                                                         hs_init, \
                                                                         start_time_init, \
                                                                         final_time_init) is not 0:
@@ -3998,18 +3326,6 @@ class JMISimultaneousOpt(object):
         
         """
         if self._jmi_model._dll.jmi_opt_sim_get_bounds(self._jmi_opt_sim, x_lb, x_ub) is not 0:
-            raise JMIException("Getting upper and lower bounds of the optimization variables failed.")
-
-    def opt_sim_set_bounds(self, x_lb, x_ub):
-        """ 
-        Set the upper and lower bounds of the optimization variables.
-        
-        Parameters:
-            x_lb -- The lower bounds vector. (Return)
-            x_ub -- The upper bounds vector. (Return)
-        
-        """
-        if self._jmi_model._dll.jmi_opt_sim_set_bounds(self._jmi_opt_sim, x_lb, x_ub) is not 0:
             raise JMIException("Getting upper and lower bounds of the optimization variables failed.")
         
     def opt_sim_f(self, f):
@@ -4145,10 +3461,211 @@ class JMISimultaneousOpt(object):
         if self._jmi_model._dll.jmi_opt_sim_get_result(self._jmi_opt_sim, p_opt, t, dx, x, u, w) is not 0:
             raise JMIException("Getting the results failed.")
 
-class SimultaneousOptLagPols(SimultaneousOpt):
-    """ High-level interface for JMISimultaneousOptLagPols. """
+    def get_result(self):
+        """
+        Get the optimization results.
+        
+        Returns:
+        p_opt --
+            A vector containing the values of the optimized parameters.
+        data --
+            A two dimensional array of variable trajectory data. The
+            first column represents the time vector. The following
+            colums contain, in order, the derivatives, the states,
+            the inputs and the algebraic variables. The ordering is
+            according to increasing value references.
+        """
+
+        n_points = self.opt_sim_get_result_variable_vector_length()
+        n_points = n_points.value
+
+        sizes = self._jmi_model.get_sizes()
+        n_dx = sizes[4]
+        n_x = sizes[5]
+        n_u = sizes[6]
+        n_w = sizes[7]
+        n_popt = self._jmi_model.opt_get_n_p_opt()
+        
+        # Create result data vectors
+        p_opt = N.zeros(n_popt)
+        t_ = N.zeros(n_points)
+        dx_ = N.zeros(n_dx*n_points)
+        x_ = N.zeros(n_x*n_points)
+        u_ = N.zeros(n_u*n_points)
+        w_ = N.zeros(n_w*n_points)
+        
+        # Get the result
+        self.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
+        
+        data = N.zeros((n_points,1+n_dx+n_x+n_u+n_w))
+        data[:,0] = t_
+        for i in range(n_dx):
+            data[:,i+1] = dx_[i*n_points:(i+1)*n_points]
+        for i in range(n_x):
+            data[:,n_dx+i+1] = x_[i*n_points:(i+1)*n_points]
+        for i in range(n_u):
+            data[:,n_dx+n_x+i+1] = u_[i*n_points:(i+1)*n_points]
+        for i in range(n_w):
+            data[:,n_dx+n_x+n_u+i+1] = w_[i*n_points:(i+1)*n_points]
+
+        return p_opt, data
     
-    def __init__(self, model, n_e, hs, n_cp):
+    def export_result_dymola(self, format='txt'):
+        """
+        Export the opitimization result on Dymola format.
+
+        Parameters:
+            format --
+                A string equal either to 'txt' for output to Dymola textual
+                format or 'mat' for output to Dymola binary Matlab format.
+
+        Limitations:
+            Only format='txt' is currently supported.
+        """
+
+        # Get results
+        p_opt, data = self.get_result()
+        
+        # Write result
+        io.export_result_dymola(self._jmi_model,data)
+
+    def set_initial_from_dymola(self,res, hs_init, start_time_init, final_time_init):
+        """
+        Initialize the optimization vector from an object of either ResultDymolaTextual
+        or ResultDymolaBinary.
+
+        Parameters:
+            format --
+                A reference to an object of type ResultDymolaTextual or
+                ResultDymolaBinary.
+            hs_init -- A vector of length n_e containing initial guesses of the
+                normalized lengths of the finite elements. This argument is
+                neglected if the problem does not have free element lengths.
+            start_time_init --
+                Initial guess of interval start time. This argument is neglected
+                if the start time is fixed.
+            final_time_init --
+                Initial guess of interval final time. This argument is neglected
+                if the final time is fixed.
+        """
+
+        # Obtain the names
+        dx_names = self._jmi_model.get_derivative_names()
+        dx_name_value_refs = dx_names.keys()
+        dx_name_value_refs.sort(key=int)
+
+        x_names = self._jmi_model.get_differentiated_variable_names()
+        x_name_value_refs = x_names.keys()
+        x_name_value_refs.sort(key=int)
+
+        u_names = self._jmi_model.get_input_names()
+        u_name_value_refs = u_names.keys()
+        u_name_value_refs.sort(key=int)
+
+        w_names = self._jmi_model.get_algebraic_variable_names()
+        w_name_value_refs = w_names.keys()
+        w_name_value_refs.sort(key=int)
+
+        p_opt_names = self._jmi_model.get_p_opt_names()
+        p_opt_name_value_refs = p_opt_names.keys()
+        p_opt_name_value_refs.sort(key=int)
+
+        #print(dx_names)
+        #print(x_names)
+        #print(u_names)
+        #print(w_names)
+        
+        # Obtain vector sizes
+        n_points = 0
+        if len(dx_names) > 0:
+            traj = res.get_variable_data(dx_names.get(dx_name_value_refs[0]))
+        elif len(x_names) > 0:
+            traj = res.get_variable_data(x_names.get(x_name_value_refs[0]))
+        elif len(u_names) > 0:
+            traj = res.get_variable_data(u_names.get(u_name_value_refs[0]))
+        elif len(w_names) > 0:
+            for ref in w_name_value_refs:
+                traj = res.get_variable_data(w_names.get(ref))
+                if N.size(traj.x)>2:
+                    break
+        else:
+            return
+
+        #print(traj.t)
+
+        n_points = N.size(traj.t,0)
+        n_cols = 1+len(dx_names)+len(x_names)+len(u_names)+len(w_names)
+
+        var_data = N.zeros((n_points,n_cols))
+        # Initialize time vector
+        var_data[:,0] = traj.t;
+
+        p_opt_data = N.zeros(len(p_opt_names))
+
+        # Get the parameters
+        n_p_opt = self._jmi_model.opt_get_n_p_opt()
+        if n_p_opt > 0:
+            p_opt_indices = N.zeros(n_p_opt, dtype=int)
+        
+            self._jmi_model.opt_get_p_opt_indices(p_opt_indices)
+            p_opt_indices = p_opt_indices.tolist()
+
+            for ref in p_opt_name_value_refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_pi = z_i - self._jmi_model._offs_pi.value
+                i_pi_opt = p_opt_indices.index(i_pi)
+                traj = res.get_variable_data(p_opt_names.get(ref))
+                p_opt_data[i_pi_opt] = traj.x[0]
+
+        #print(N.size(var_data))
+
+        # Initialize variable names
+        # Loop over all the names
+        col_index = 1;
+        for ref in dx_name_value_refs:
+            #print(dx_names.get(ref))
+            #print(col_index)
+            traj = res.get_variable_data(dx_names.get(ref))
+            var_data[:,col_index] = traj.x
+            col_index = col_index + 1
+        for ref in x_name_value_refs:
+            #print(x_names.get(ref))
+            #print(col_index)
+            traj = res.get_variable_data(x_names.get(ref))
+            var_data[:,col_index] = traj.x
+            col_index = col_index + 1
+        for ref in u_name_value_refs:
+            #print(u_names.get(ref))
+            #print(col_index)
+            traj = res.get_variable_data(u_names.get(ref))
+            var_data[:,col_index] = traj.x
+            col_index = col_index + 1
+        for ref in w_name_value_refs:
+            #print(w_names.get(ref))
+            #print(col_index)
+            traj = res.get_variable_data(w_names.get(ref))
+            if N.size(traj.x)==2:
+                var_data[:,col_index] = N.ones(n_points)*traj.x[0]
+            else:
+                var_data[:,col_index] = traj.x
+            col_index = col_index + 1
+
+#        print(var_data)
+
+            
+        self.opt_sim_set_initial_from_trajectory(p_opt_data,N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0],
+                                                 hs_init,start_time_init,final_time_init)
+
+
+    
+class JMISimultaneousOptLagPols(JMISimultaneousOpt):
+    
+    """ 
+    An implementation of a transcription method based on Lagrange polynomials 
+    and Radau points. Extends the abstract class JMISimultaneousOpt. 
+    """
+    
+    def __init__(self, jmi_model, n_e, hs, n_cp):
         """
         Constructor where main data structure is created. 
         
@@ -4158,37 +3675,36 @@ class SimultaneousOptLagPols(SimultaneousOpt):
         at compilation.
         
         Parameters:
-            model -- The Model object.
+            jmi_model -- The JMIModel object.
             n_e -- Number of finite elements.
             hs -- Vector containing the normalized element lengths.
             n_cp -- Number of collocation points. 
         
-        """
-        self.jmi_simoptlagpols = JMISimultaneousOptLagPols(model.jmimodel)  
-        SimultaneousOpt._initialize(self, model, self.jmi_simoptlagpols)
+        """    
+        JMISimultaneousOpt._initialize(self, jmi_model)
 
         # Initialization
-        _p_opt_init = N.zeros(model.jmimodel.opt_get_n_p_opt())
-        _dx_init = N.zeros(model._n_dx.value)
-        _x_init = N.zeros(model._n_x.value)
-        _u_init = N.zeros(model._n_u.value)
-        _w_init = N.zeros(model._n_w.value)
+        _p_opt_init = N.zeros(jmi_model.opt_get_n_p_opt())
+        _dx_init = N.zeros(jmi_model._n_dx.value)
+        _x_init = N.zeros(jmi_model._n_x.value)
+        _u_init = N.zeros(jmi_model._n_u.value)
+        _w_init = N.zeros(jmi_model._n_w.value)
     
         # Bounds
-        _p_opt_lb = -1.0e20*N.ones(model.jmimodel.opt_get_n_p_opt())
-        _dx_lb = -1.0e20*N.ones(model._n_dx.value)
-        _x_lb = -1.0e20*N.ones(model._n_x.value)
-        _u_lb = -1.0e20*N.ones(model._n_u.value)
-        _w_lb = -1.0e20*N.ones(model._n_w.value)
+        _p_opt_lb = -1.0e20*N.ones(jmi_model.opt_get_n_p_opt())
+        _dx_lb = -1.0e20*N.ones(jmi_model._n_dx.value)
+        _x_lb = -1.0e20*N.ones(jmi_model._n_x.value)
+        _u_lb = -1.0e20*N.ones(jmi_model._n_u.value)
+        _w_lb = -1.0e20*N.ones(jmi_model._n_w.value)
         _t0_lb = 0.; # not yet supported
         _tf_lb = 0.; # not yet supported
         _hs_lb = N.zeros(n_e); # not yet supported
         
-        _p_opt_ub = 1.0e20*N.ones(model.jmimodel.opt_get_n_p_opt())
-        _dx_ub = 1.0e20*N.ones(model._n_dx.value)
-        _x_ub = 1.0e20*N.ones(model._n_x.value)
-        _u_ub = 1.0e20*N.ones(model._n_u.value)
-        _w_ub = 1.0e20*N.ones(model._n_w.value)
+        _p_opt_ub = 1.0e20*N.ones(jmi_model.opt_get_n_p_opt())
+        _dx_ub = 1.0e20*N.ones(jmi_model._n_dx.value)
+        _x_ub = 1.0e20*N.ones(jmi_model._n_x.value)
+        _u_ub = 1.0e20*N.ones(jmi_model._n_u.value)
+        _w_ub = 1.0e20*N.ones(jmi_model._n_w.value)
         _t0_ub = 0.; # not yet supported
         _tf_ub = 0.; # not yet supported
         _hs_ub = N.zeros(n_e); # not yet supported
@@ -4201,20 +3717,20 @@ class SimultaneousOptLagPols(SimultaneousOpt):
         self._set_ub_values(_p_opt_ub, _dx_ub, _x_ub, _u_ub, _w_ub)
 
         _linearity_information_provided = 1;
-        _p_opt_lin = N.ones(model.jmimodel.opt_get_n_p_opt(),dtype=int)
-        _dx_lin = N.ones(model._n_dx.value,dtype=int)
-        _x_lin = N.ones(model._n_x.value,dtype=int)
-        _u_lin = N.ones(model._n_u.value,dtype=int)        
-        _w_lin = N.ones(model._n_w.value,dtype=int)
-        _dx_tp_lin = N.ones(model._n_dx.value*model._n_tp.value,dtype=int)
-        _x_tp_lin = N.ones(model._n_x.value*model._n_tp.value,dtype=int)
-        _u_tp_lin = N.ones(model._n_u.value*model._n_tp.value,dtype=int)        
-        _w_tp_lin = N.ones(model._n_w.value*model._n_tp.value,dtype=int)
+        _p_opt_lin = N.ones(jmi_model.opt_get_n_p_opt(),dtype=int)
+        _dx_lin = N.ones(jmi_model._n_dx.value,dtype=int)
+        _x_lin = N.ones(jmi_model._n_x.value,dtype=int)
+        _u_lin = N.ones(jmi_model._n_u.value,dtype=int)        
+        _w_lin = N.ones(jmi_model._n_w.value,dtype=int)
+        _dx_tp_lin = N.ones(jmi_model._n_dx.value*jmi_model._n_tp.value,dtype=int)
+        _x_tp_lin = N.ones(jmi_model._n_x.value*jmi_model._n_tp.value,dtype=int)
+        _u_tp_lin = N.ones(jmi_model._n_u.value*jmi_model._n_tp.value,dtype=int)        
+        _w_tp_lin = N.ones(jmi_model._n_w.value*jmi_model._n_tp.value,dtype=int)
         
         self._set_lin_values(_p_opt_lin, _dx_lin, _x_lin, _u_lin, _w_lin, _dx_tp_lin, _x_tp_lin, _u_tp_lin, _w_tp_lin)
 
         try:       
-            assert model.jmimodel._dll.jmi_opt_sim_lp_new(byref(self.jmi_simoptlagpols._jmi_opt_sim), model.jmimodel._jmi, n_e,
+            assert jmi_model._dll.jmi_opt_sim_lp_new(byref(self._jmi_opt_sim), jmi_model._jmi, n_e,
                                       hs, hs_free,
                                      _p_opt_init, _dx_init, _x_init,
                                      _u_init, _w_init,
@@ -4232,405 +3748,9 @@ class SimultaneousOptLagPols(SimultaneousOpt):
         except AttributeError,e:
              raise JMIException("Can not create JMISimultaneousOptLagPols object. Try recompiling model with target='algorithms'")
         
-        assert self.jmi_simoptlagpols._jmi_opt_sim.value is not None, \
+        assert self._jmi_opt_sim.value is not None, \
             "jmi_opt_sim_lp struct has not returned correctly."
 
-    def _set_initial_values(self, p_opt_init, dx_init, x_init, u_init, w_init):
-        
-        """ 
-        Set initial guess values from the XML variables meta data file. 
-        
-        Parameters:
-            p_opt_init -- The optimized parameters initial guess vector.
-            dx_init -- The derivatives initial guess vector.
-            x_init -- The states initial guess vector.
-            u_init -- The input initial guess vector.
-            w_init -- The algebraic variables initial guess vector.
-        
-        """
-        
-        xmldoc = self._model._get_XMLvariables_doc()
-
-        # p_opt: free variables
-        values = xmldoc.get_p_opt_initial_guess_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-
-        n_p_opt = self._model.jmimodel.opt_get_n_p_opt()
-        if n_p_opt > 0:
-            p_opt_indices = N.zeros(n_p_opt, dtype=int)
-        
-            self._model.jmimodel.opt_get_p_opt_indices(p_opt_indices)
-            p_opt_indices = p_opt_indices.tolist()
-            
-            for ref in refs:
-                (z_i, ptype) = _translate_value_ref(ref)
-                i_pi = z_i - self._model._offs_pi.value
-                i_pi_opt = p_opt_indices.index(i_pi)
-                p_opt_init[i_pi_opt] = values.get(ref)
-        
-        # dx: derivative
-        values = xmldoc.get_dx_initial_guess_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_dx = z_i - self._model._offs_dx.value
-            dx_init[i_dx] = values.get(ref)
-        
-        # x: differentiate
-        values = xmldoc.get_x_initial_guess_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_x = z_i - self._model._offs_x.value
-            x_init[i_x] = values.get(ref)
-            
-        # u: input
-        values = xmldoc.get_u_initial_guess_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_u = z_i - self._model._offs_u.value
-            u_init[i_u] = values.get(ref)
-        
-        # w: algebraic
-        values = xmldoc.get_w_initial_guess_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_w = z_i - self._model._offs_w.value
-            w_init[i_w] = values.get(ref) 
-
-    def _set_lb_values(self, p_opt_lb, dx_lb, x_lb, u_lb, w_lb):
-        
-        """ 
-        Set lower bounds from the XML variables meta data file. 
-        
-        Parameters:
-            p_opt_lb -- The optimized parameters lower bounds vector.
-            dx_lb -- The derivatives lower bounds vector.
-            x_lb -- The states lower bounds vector.
-            u_lb -- The input lower bounds vector.
-            w_lb -- The algebraic variables lower bounds vector.        
-        
-        """
-        
-        xmldoc = self._model._get_XMLvariables_doc()
-
-        # p_opt: free variables
-        values = xmldoc.get_p_opt_lb_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-
-        n_p_opt = self._model.jmimodel.opt_get_n_p_opt()
-        if n_p_opt > 0:
-            p_opt_indices = N.zeros(n_p_opt, dtype=int)
-        
-            self._model.jmimodel.opt_get_p_opt_indices(p_opt_indices)
-            p_opt_indices = p_opt_indices.tolist()
-            
-            for ref in refs:
-                (z_i, ptype) = _translate_value_ref(ref)
-                i_pi = z_i - self._model._offs_pi.value
-                i_pi_opt = p_opt_indices.index(i_pi)
-                p_opt_lb[i_pi_opt] = values.get(ref)
-
-        # dx: derivative
-        values = xmldoc.get_dx_lb_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_dx = z_i - self._model._offs_dx.value
-            dx_lb[i_dx] = values.get(ref) 
-        
-        # x: differentiate
-        values = xmldoc.get_x_lb_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_x = z_i - self._model._offs_x.value
-            x_lb[i_x] = values.get(ref)
-            
-        # u: input
-        values = xmldoc.get_u_lb_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_u = z_i - self._model._offs_u.value
-            u_lb[i_u] = values.get(ref)
-        
-        # w: algebraic
-        values = xmldoc.get_w_lb_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_w = z_i - self._model._offs_w.value
-            #print("%d, %d" %(z_i,i_w))
-            w_lb[i_w] = values.get(ref) 
-
-    def _set_ub_values(self, p_opt_ub, dx_ub, x_ub, u_ub, w_ub):
-        
-        """ 
-        Set upper bounds from the XML variables meta data file. 
-        
-        Parameters:
-            p_opt_ub -- The optimized parameters upper bounds vector.
-            dx_ub -- The derivatives upper bounds vector.
-            x_ub -- The states upper bounds vector.
-            u_ub -- The input upper bounds vector.
-            w_ub -- The algebraic variables upper bounds vector.        
-        
-        """
-        
-        xmldoc = self._model._get_XMLvariables_doc()
-
-        # p_opt: free variables
-        values = xmldoc.get_p_opt_ub_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-
-        n_p_opt = self._model.jmimodel.opt_get_n_p_opt()
-        if n_p_opt > 0:
-            p_opt_indices = N.zeros(n_p_opt, dtype=int)
-        
-            self._model.jmimodel.opt_get_p_opt_indices(p_opt_indices)
-            p_opt_indices = p_opt_indices.tolist()
-            
-            for ref in refs:
-                (z_i, ptype) = _translate_value_ref(ref)
-                i_pi = z_i - self._model._offs_pi.value
-                i_pi_opt = p_opt_indices.index(i_pi)
-                p_opt_ub[i_pi_opt] = values.get(ref)
-
-        # dx: derivative
-        values = xmldoc.get_dx_ub_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_dx = z_i - self._model._offs_dx.value
-            dx_ub[i_dx] = values.get(ref) 
-        
-        # x: differentiate
-        values = xmldoc.get_x_ub_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_x = z_i - self._model._offs_x.value
-            x_ub[i_x] = values.get(ref)
-            
-        # u: input
-        values = xmldoc.get_u_ub_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_u = z_i - self._model._offs_u.value
-            u_ub[i_u] = values.get(ref)
-        
-        # w: algebraic
-        values = xmldoc.get_w_ub_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_w = z_i - self._model._offs_w.value
-            w_ub[i_w] = values.get(ref) 
-
-    def _set_lin_values(self, p_opt_lin, dx_lin, x_lin, u_lin, w_lin, dx_tp_lin, x_tp_lin, u_tp_lin, w_tp_lin):
-        
-        """ 
-        Set linearity information from the XML variables meta data file. 
-        
-        For the linearity vectors, a "1" indicates that the variable appears 
-        linearly and a "0" otherwise. The same convention is used for the 
-        linear time point vectors. 
-        
-        For the linear time point vectors, the information about the first 
-        time point is stored in the first n positions in the vector, where 
-        n is equal to the number of parameters/derivatives/states/inputs or 
-        variables, followed by the second time point and so on for all time 
-        points.
-                
-        Parameters:
-            p_opt_lin -- The optimized parameters linear information vector.
-            dx_lin -- The derivatives linear information vector.
-            x_lin -- The states linear information vector.
-            u_lin -- The input linear information vector.
-            w_lin -- The algebraic variables linear information vector.        
-            dx_tp_lin -- The derivatives linear time point vector.
-            x_tp_lin -- The states linear time point vector.
-            u_tp_lin -- The input linear time point vector.
-            w_tp_lin -- The algebraic variables linear time point vector.        
-        
-        """
-        
-        
-        xmldoc = self._model._get_XMLvariables_doc()
-
-        # p_opt: free variables
-        values = xmldoc.get_p_opt_lin_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-
-        n_p_opt = self._model.jmimodel.opt_get_n_p_opt()
-        if n_p_opt > 0:
-            p_opt_indices = N.zeros(n_p_opt, dtype=int)
-        
-            self._model.jmimodel.opt_get_p_opt_indices(p_opt_indices)
-            p_opt_indices = p_opt_indices.tolist()
-
-            for ref in refs:
-                (z_i, ptype) = _translate_value_ref(ref)
-                i_pi = z_i - self._model._offs_pi.value
-                i_pi_opt = p_opt_indices.index(i_pi)
-                p_opt_lin[i_pi_opt] = (values.get(ref) == "true").__int__()
-
-        # dx: derivative
-        values = xmldoc.get_dx_lin_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_dx = z_i - self._model._offs_dx.value
-            dx_lin[i_dx] = (values.get(ref) == "true").__int__()
-        
-        # x: differentiate
-        values = xmldoc.get_x_lin_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_x = z_i - self._model._offs_x.value
-            x_lin[i_x] = (values.get(ref) == "true").__int__()
-            
-        # u: input
-        values = xmldoc.get_u_lin_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_u = z_i - self._model._offs_u.value
-            u_lin[i_u] = (values.get(ref) == "true").__int__()
-        
-        # w: algebraic
-        values = xmldoc.get_w_lin_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_w = z_i - self._model._offs_w.value
-            w_lin[i_w] = (values.get(ref) == "true").__int__()
-
-
-        # number of timepoints
-        no_of_tp = self._model._n_tp.value
-
-        # timepoints dx: derivative
-        values = xmldoc.get_dx_lin_tp_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for no_tp in range(no_of_tp):
-            for ref in refs:
-                (z_i, ptype) = _translate_value_ref(ref)
-                i_dx = z_i - self._model._offs_dx.value
-                dx_tp_lin[i_dx+no_tp*len(refs)] = (values.get(ref)[no_tp] == "true").__int__()
-        
-        # timepoints x: differentiate
-        values = xmldoc.get_x_lin_tp_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)       
-        
-        for no_tp in range(no_of_tp):
-            for ref in refs:
-                (z_i, ptype) = _translate_value_ref(ref)
-                i_x = z_i - self._model._offs_x.value
-                
-                x_tp_lin[i_x+no_tp*len(refs)] = (values.get(ref)[no_tp] == "true").__int__()
-            
-        # timepoints u: input
-        values = xmldoc.get_u_lin_tp_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for no_tp in range(no_of_tp):
-            for ref in refs:
-                (z_i, ptype) = _translate_value_ref(ref)
-                i_u = z_i - self._model._offs_u.value
-                
-                u_tp_lin[i_u+no_tp*len(refs)] = (values.get(ref)[no_tp] == "true").__int__()
-        
-        # timepoints w: algebraic
-        values = xmldoc.get_w_lin_tp_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-
-        for no_tp in range(no_of_tp):
-            for ref in refs:
-                (z_i, ptype) = _translate_value_ref(ref)
-                i_w = z_i - self._model._offs_w.value
-                w_tp_lin[i_w+no_tp*len(refs)] = (values.get(ref)[no_tp] == "true").__int__()
-
-class JMISimultaneousOptLagPols(JMISimultaneousOpt):
-    
-    """ 
-    An implementation of a transcription method based on Lagrange polynomials 
-    and Radau points. Extends the abstract class JMISimultaneousOpt. 
-    """
-    def __init__(self, jmi_model):
-        self._jmi_model = jmi_model
-        JMISimultaneousOpt._initialize(self, jmi_model)
             
     def __del__(self):
         """ Free jmi_opt_sim data structure. """
@@ -4672,6 +3792,393 @@ class JMISimultaneousOptLagPols(JMISimultaneousOpt):
                                                         Lpp_dot_coeffs, Lp_dot_vals, Lpp_dot_vals) is not 0:
             raise JMIException("Getting sim lp pols failed.")
         
+    
+    def _set_initial_values(self, p_opt_init, dx_init, x_init, u_init, w_init):
+        
+        """ 
+        Set initial guess values from the XML variables meta data file. 
+        
+        Parameters:
+            p_opt_init -- The optimized parameters initial guess vector.
+            dx_init -- The derivatives initial guess vector.
+            x_init -- The states initial guess vector.
+            u_init -- The input initial guess vector.
+            w_init -- The algebraic variables initial guess vector.
+        
+        """
+        
+        xmldoc = self._jmi_model._get_XMLvariables_doc()
+
+        # p_opt: free variables
+        values = xmldoc.get_p_opt_initial_guess_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+
+        n_p_opt = self._jmi_model.opt_get_n_p_opt()
+        if n_p_opt > 0:
+            p_opt_indices = N.zeros(n_p_opt, dtype=int)
+        
+            self._jmi_model.opt_get_p_opt_indices(p_opt_indices)
+            p_opt_indices = p_opt_indices.tolist()
+            
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_pi = z_i - self._jmi_model._offs_pi.value
+                i_pi_opt = p_opt_indices.index(i_pi)
+                p_opt_init[i_pi_opt] = values.get(ref)
+        
+        # dx: derivative
+        values = xmldoc.get_dx_initial_guess_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_dx = z_i - self._jmi_model._offs_dx.value
+            dx_init[i_dx] = values.get(ref)
+        
+        # x: differentiate
+        values = xmldoc.get_x_initial_guess_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_x = z_i - self._jmi_model._offs_x.value
+            x_init[i_x] = values.get(ref)
+            
+        # u: input
+        values = xmldoc.get_u_initial_guess_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_u = z_i - self._jmi_model._offs_u.value
+            u_init[i_u] = values.get(ref)
+        
+        # w: algebraic
+        values = xmldoc.get_w_initial_guess_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_w = z_i - self._jmi_model._offs_w.value
+            w_init[i_w] = values.get(ref) 
+
+    def _set_lb_values(self, p_opt_lb, dx_lb, x_lb, u_lb, w_lb):
+        
+        """ 
+        Set lower bounds from the XML variables meta data file. 
+        
+        Parameters:
+            p_opt_lb -- The optimized parameters lower bounds vector.
+            dx_lb -- The derivatives lower bounds vector.
+            x_lb -- The states lower bounds vector.
+            u_lb -- The input lower bounds vector.
+            w_lb -- The algebraic variables lower bounds vector.        
+        
+        """
+        
+        xmldoc = self._jmi_model._get_XMLvariables_doc()
+
+        # p_opt: free variables
+        values = xmldoc.get_p_opt_lb_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+
+        n_p_opt = self._jmi_model.opt_get_n_p_opt()
+        if n_p_opt > 0:
+            p_opt_indices = N.zeros(n_p_opt, dtype=int)
+        
+            self._jmi_model.opt_get_p_opt_indices(p_opt_indices)
+            p_opt_indices = p_opt_indices.tolist()
+            
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_pi = z_i - self._jmi_model._offs_pi.value
+                i_pi_opt = p_opt_indices.index(i_pi)
+                p_opt_lb[i_pi_opt] = values.get(ref)
+
+        # dx: derivative
+        values = xmldoc.get_dx_lb_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_dx = z_i - self._jmi_model._offs_dx.value
+            dx_lb[i_dx] = values.get(ref) 
+        
+        # x: differentiate
+        values = xmldoc.get_x_lb_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_x = z_i - self._jmi_model._offs_x.value
+            x_lb[i_x] = values.get(ref)
+            
+        # u: input
+        values = xmldoc.get_u_lb_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_u = z_i - self._jmi_model._offs_u.value
+            u_lb[i_u] = values.get(ref)
+        
+        # w: algebraic
+        values = xmldoc.get_w_lb_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_w = z_i - self._jmi_model._offs_w.value
+            w_lb[i_w] = values.get(ref) 
+
+    def _set_ub_values(self, p_opt_ub, dx_ub, x_ub, u_ub, w_ub):
+        
+        """ 
+        Set upper bounds from the XML variables meta data file. 
+        
+        Parameters:
+            p_opt_ub -- The optimized parameters upper bounds vector.
+            dx_ub -- The derivatives upper bounds vector.
+            x_ub -- The states upper bounds vector.
+            u_ub -- The input upper bounds vector.
+            w_ub -- The algebraic variables upper bounds vector.        
+        
+        """
+        
+        xmldoc = self._jmi_model._get_XMLvariables_doc()
+
+        # p_opt: free variables
+        values = xmldoc.get_p_opt_ub_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+
+        n_p_opt = self._jmi_model.opt_get_n_p_opt()
+        if n_p_opt > 0:
+            p_opt_indices = N.zeros(n_p_opt, dtype=int)
+        
+            self._jmi_model.opt_get_p_opt_indices(p_opt_indices)
+            p_opt_indices = p_opt_indices.tolist()
+            
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_pi = z_i - self._jmi_model._offs_pi.value
+                i_pi_opt = p_opt_indices.index(i_pi)
+                p_opt_ub[i_pi_opt] = values.get(ref)
+
+        # dx: derivative
+        values = xmldoc.get_dx_ub_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_dx = z_i - self._jmi_model._offs_dx.value
+            dx_ub[i_dx] = values.get(ref) 
+        
+        # x: differentiate
+        values = xmldoc.get_x_ub_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_x = z_i - self._jmi_model._offs_x.value
+            x_ub[i_x] = values.get(ref)
+            
+        # u: input
+        values = xmldoc.get_u_ub_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_u = z_i - self._jmi_model._offs_u.value
+            u_ub[i_u] = values.get(ref)
+        
+        # w: algebraic
+        values = xmldoc.get_w_ub_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_w = z_i - self._jmi_model._offs_w.value
+            w_ub[i_w] = values.get(ref) 
+
+    def _set_lin_values(self, p_opt_lin, dx_lin, x_lin, u_lin, w_lin, dx_tp_lin, x_tp_lin, u_tp_lin, w_tp_lin):
+        
+        """ 
+        Set linearity information from the XML variables meta data file. 
+        
+        For the linearity vectors, a "1" indicates that the variable appears 
+        linearly and a "0" otherwise. The same convention is used for the 
+        linear time point vectors. 
+        
+        For the linear time point vectors, the information about the first 
+        time point is stored in the first n positions in the vector, where 
+        n is equal to the number of parameters/derivatives/states/inputs or 
+        variables, followed by the second time point and so on for all time 
+        points.
+                
+        Parameters:
+            p_opt_lin -- The optimized parameters linear information vector.
+            dx_lin -- The derivatives linear information vector.
+            x_lin -- The states linear information vector.
+            u_lin -- The input linear information vector.
+            w_lin -- The algebraic variables linear information vector.        
+            dx_tp_lin -- The derivatives linear time point vector.
+            x_tp_lin -- The states linear time point vector.
+            u_tp_lin -- The input linear time point vector.
+            w_tp_lin -- The algebraic variables linear time point vector.        
+        
+        """
+        
+        
+        xmldoc = self._jmi_model._get_XMLvariables_doc()
+
+        # p_opt: free variables
+        values = xmldoc.get_p_opt_lin_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+
+        n_p_opt = self._jmi_model.opt_get_n_p_opt()
+        if n_p_opt > 0:
+            p_opt_indices = N.zeros(n_p_opt, dtype=int)
+        
+            self._jmi_model.opt_get_p_opt_indices(p_opt_indices)
+            p_opt_indices = p_opt_indices.tolist()
+
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_pi = z_i - self._jmi_model._offs_pi.value
+                i_pi_opt = p_opt_indices.index(i_pi)
+                p_opt_lin[i_pi_opt] = (values.get(ref) == "true").__int__()
+
+        # dx: derivative
+        values = xmldoc.get_dx_lin_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_dx = z_i - self._jmi_model._offs_dx.value
+            dx_lin[i_dx] = (values.get(ref) == "true").__int__()
+        
+        # x: differentiate
+        values = xmldoc.get_x_lin_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_x = z_i - self._jmi_model._offs_x.value
+            x_lin[i_x] = (values.get(ref) == "true").__int__()
+            
+        # u: input
+        values = xmldoc.get_u_lin_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_u = z_i - self._jmi_model._offs_u.value
+            u_lin[i_u] = (values.get(ref) == "true").__int__()
+        
+        # w: algebraic
+        values = xmldoc.get_w_lin_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_w = z_i - self._jmi_model._offs_w.value
+            w_lin[i_w] = (values.get(ref) == "true").__int__()
+
+
+        # number of timepoints
+        no_of_tp = self._jmi_model._n_tp.value
+
+        # timepoints dx: derivative
+        values = xmldoc.get_dx_lin_tp_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for no_tp in range(no_of_tp):
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_dx = z_i - self._jmi_model._offs_dx.value
+                dx_tp_lin[i_dx+no_tp*len(refs)] = (values.get(ref)[no_tp] == "true").__int__()
+        
+        # timepoints x: differentiate
+        values = xmldoc.get_x_lin_tp_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)       
+        
+        for no_tp in range(no_of_tp):
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_x = z_i - self._jmi_model._offs_x.value
+                
+                x_tp_lin[i_x+no_tp*len(refs)] = (values.get(ref)[no_tp] == "true").__int__()
+            
+        # timepoints u: input
+        values = xmldoc.get_u_lin_tp_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for no_tp in range(no_of_tp):
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_u = z_i - self._jmi_model._offs_u.value
+                
+                u_tp_lin[i_u+no_tp*len(refs)] = (values.get(ref)[no_tp] == "true").__int__()
+        
+        # timepoints w: algebraic
+        values = xmldoc.get_w_lin_tp_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+
+        for no_tp in range(no_of_tp):
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_w = z_i - self._jmi_model._offs_w.value
+                w_tp_lin[i_w+no_tp*len(refs)] = (values.get(ref)[no_tp] == "true").__int__()
+
       
 class JMISimultaneousOptIPOPT(object):
     """ An interface to the NLP solver Ipopt. """
@@ -4743,514 +4250,4 @@ class JMISimultaneousOptIPOPT(object):
         if self._jmi_opt_sim_model._jmi_model._dll.jmi_opt_sim_ipopt_set_num_option(self._jmi_opt_sim_ipopt, key, val) is not 0:
             raise JMIException("Setting num option failed.")
     
-class DAEInitializationOpt(object):
-
-    """
-    NLP interface for a DAE initialization optimization
-    problem.    
-    """
-
-    def __init__(self, model):
-        """
-        Constructor where main data structure is created. 
         
-        Initial guesses, lower and upper bounds and linearity information is 
-        set for optimized parameters, derivatives, states, inputs and 
-        algebraic variables. These values are taken from the XML files created 
-        at compilation.
-        
-        Parameters:
-            model -- The Model object.
-        
-        """
-#        self.jmi_simoptlagpols = JMISimultaneousOptLagPols(model.jmimodel)  
-#        SimultaneousOpt._initialize(self, model, self.jmi_simoptlagpols)
-
-        self._jmi_init_opt = ct.c_voidp() 
-        self._model = model
-        self._jmi_model = model.jmimodel
-
-        _n_p_free = 0
-        _p_free_indices = N.ones(_n_p_free,dtype=int)
-
-        # Initialization
-        _p_free_start = N.zeros(_n_p_free) # Not supported
-        _dx_start = N.zeros(model._n_dx.value)
-        _x_start = N.zeros(model._n_x.value)
-        _w_start = N.zeros(model._n_w.value)
-    
-        # Bounds
-        _p_free_lb = -1.0e20*N.ones(_n_p_free) # Not supported
-        _dx_lb = -1.0e20*N.ones(model._n_dx.value)
-        _x_lb = -1.0e20*N.ones(model._n_x.value)
-        _w_lb = -1.0e20*N.ones(model._n_w.value)
-        
-        _p_free_ub = 1.0e20*N.ones(_n_p_free)
-        _dx_ub = 1.0e20*N.ones(model._n_dx.value)
-        _x_ub = 1.0e20*N.ones(model._n_x.value)
-        _w_ub = 1.0e20*N.ones(model._n_w.value)
-                        
-        self._set_start_values(_p_free_start, _dx_start, _x_start, _w_start)
-        self._set_lb_values(_p_free_lb, _dx_lb, _x_lb, _w_lb)
-        self._set_ub_values(_p_free_ub, _dx_ub, _x_ub, _w_ub)
-
-        _linearity_information_provided = 0; # Not supported
-        _p_free_lin = N.ones(_n_p_free,dtype=int)
-        _dx_lin = N.ones(model._n_dx.value,dtype=int)
-        _x_lin = N.ones(model._n_x.value,dtype=int)
-        _w_lin = N.ones(model._n_w.value,dtype=int)
-        
-#         self._set_lin_values(_p_opt_lin, _dx_lin, _x_lin,_w_lin)
-
-        try:       
-            assert model.jmimodel._dll.jmi_init_opt_new(byref(self._jmi_init_opt), model.jmimodel._jmi,
-                                                        _n_p_free,_p_free_indices,
-                                     _p_free_start, _dx_start, _x_start,
-                                     _w_start,
-                                     _p_free_lb, _dx_lb, _x_lb,
-                                     _w_lb,
-                                     _p_free_ub, _dx_ub, _x_ub,
-                                      _w_ub,
-                                     _linearity_information_provided,                
-                                     _p_free_lin, _dx_lin, _x_lin, _w_lin,
-                                                          JMI_DER_CPPAD) is 0, \
-                                     " jmi_opt_lp_new returned non-zero."
-        except AttributeError,e:
-             raise JMIException("Can not create JMISimultaneousOptLagPols object. Try recompiling model with target='algorithms'")
-        assert self._jmi_init_opt.value is not None, \
-            "jmi_init_opt struct has not returned correctly."
-        
-    def init_opt_get_dimensions(self):
-        """ 
-        Get the number of variables and the number of constraints in the 
-        problem.
-        
-        Returns:
-            Tuple with the number of variables in the NLP problem, equality constraints,
-            and non-zeros in the Jacobian of the equality constraints respectively. 
-            
-        """
-        n_x = ct.c_int()
-        n_h = ct.c_int()
-        dh_n_nz = ct.c_int()
-        if self._jmi_model._dll.jmi_init_opt_get_dimensions(self._jmi_init_opt, byref(n_x), 
-                                                        byref(n_h), byref(dh_n_nz)) is not 0:
-            raise JMIException("Getting the number of variables and constraints failed.")
-        return n_x.value, n_h.value, dh_n_nz.value
-        
-    def init_opt_get_x(self):
-        """ Return the x vector of the NLP. """
-        return self._jmi_model._dll.jmi_init_opt_get_x(self._jmi_init_opt)
-
-    def init_opt_get_initial(self, x_init):
-        """ 
-        Get the initial point of the NLP.
-        
-        Parameters:
-            x_init -- The initial guess vector. (Return)
-        
-        """
-        if self._jmi_model._dll.jmi_init_opt_get_initial(self._jmi_init_opt, x_init) is not 0:
-            raise JMIException("Getting the initial point failed.")
-
-    def init_opt_set_initial(self, x_init):
-        """ Set the initial point of the NLP.
-
-        Parameters:
-            x_init --- The initial guess vector.
-        """
-        if self._jmi_model._dll.jmi_init_opt_set_initial(self._jmi_init_opt, x_init) is not 0:
-            raise JMIException("Setting the initial point failed.")
- 
-    def init_opt_get_bounds(self, x_lb, x_ub):
-        """ 
-        Get the upper and lower bounds of the optimization variables.
-        
-        Parameters:
-            x_lb -- The lower bounds vector. (Return)
-            x_ub -- The upper bounds vector. (Return)
-        
-        """
-        if self._jmi_model._dll.jmi_init_opt_get_bounds(self._jmi_init_opt, x_lb, x_ub) is not 0:
-            raise JMIException("Getting upper and lower bounds of the optimization variables failed.")
-
-    def init_opt_set_bounds(self, x_lb, x_ub):
-        """ 
-        Set the upper and lower bounds of the optimization variables.
-        
-        Parameters:
-            x_lb -- The lower bounds vector. (Return)
-            x_ub -- The upper bounds vector. (Return)
-        
-        """
-        if self._jmi_model._dll.jmi_init_opt_set_bounds(self._jmi_init_opt, x_lb, x_ub) is not 0:
-            raise JMIException("Getting upper and lower bounds of the optimization variables failed.")
-        
-    def init_opt_f(self, f):
-        """ 
-        Get the cost function value at a given point in search space.
-        
-        Parameters:
-            f -- Value of the cost function. (Return)
-        
-        """
-        if self._jmi_model._dll.jmi_init_opt_f(self._jmi_init_opt, f) is not 0:
-            raise JMIException("Getting the cost function failed.")
-        
-    def init_opt_df(self, df):
-        """ 
-        Get the gradient of the cost function value at a given point in search 
-        space.
-        
-        Parameters:
-            df -- Value of the gradient of the cost function. (Return)
-            
-        """
-        if self._jmi_model._dll.jmi_init_opt_df(self._jmi_init_opt, df) is not 0:
-            raise JMIException("Getting the gradient of the cost function value failed.")
-               
-    def init_opt_h(self, res):
-        """ 
-        Get the residual of the equality constraints h.
-        
-        Parameters:
-            res -- The residual of the equality constraints. (Return)
-        
-        """
-        if self._jmi_model._dll.jmi_init_opt_h(self._jmi_init_opt, res) is not 0:
-            raise JMIException("Getting the residual of the equality constraints failed.")
-        
-    def init_opt_dh(self, jac):
-        """ 
-        Get the Jacobian of the residual of the equality constraints.
-        
-        Parameters:
-            jac -- The Jacobian of the residual of the equality constraints. (Return)
-        
-        """
-        if self._jmi_model._dll.jmi_init_opt_dh(self._jmi_init_opt, jac) is not 0:
-            raise JMIException("Getting the Jacobian of the residual of the equality constraints.")
-        
-    def init_opt_dh_nz_indices(self, irow, icol):
-        """ 
-        Get the indices of the non-zeros in the equality constraint Jacobian.
-        
-        Parameters:
-            irow -- 
-                Row indices of the non-zero entries in the Jacobian of the 
-                residual of the equality constraints. (Return)
-            icol -- 
-                Column indices of the non-zero entries in the Jacobian of the 
-                residual of the equality constraints. (Return)
-        
-        """
-        if self._jmi_model._dll.jmi_init_opt_dh_nz_indices(self._jmi_init_opt, irow, icol) is not 0:
-            raise JMIException("Getting the indices of the non-zeros in the equality constraint Jacobian failed.")
-
-    def _set_start_values(self, p_free_start, dx_start, x_start, w_start):
-        
-        """ 
-        Set initial guess values from the XML variables meta data file. 
-        
-        Parameters:
-            p_free_start -- The free parameters start value vector.
-            dx_start -- The derivatives start value vector.
-            x_start -- The states start value vector.
-            w_start -- The algebraic variable start value vector.
-        
-        """
-        
-        xmldoc = self._model._get_XMLvariables_doc()
-
-        # p_free: free variables, not supported
-        #values = xmldoc.get_p_free_startial_guess_values()
-        
-#         refs = values.keys()
-#         refs.sort(key=int)
-
-#         n_p_opt = self._model.jmimodel.opt_get_n_p_opt()
-#         if n_p_opt > 0:
-#             p_opt_indices = N.zeros(n_p_opt, dtype=int)
-        
-#             self._model.jmimodel.opt_get_p_opt_indices(p_opt_indices)
-#             p_opt_indices = p_opt_indices.tolist()
-            
-#             for ref in refs:
-#                 (z_i, ptype) = _translate_value_ref(ref)
-#                 i_pi = z_i - self._model._offs_pi.value
-#                 i_pi_opt = p_opt_indices.index(i_pi)
-#                 p_opt_start[i_pi_opt] = values.get(ref)
-        
-        # dx: derivative
-        values = xmldoc.get_dx_start_attributes()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_dx = z_i - self._model._offs_dx.value
-            dx_start[i_dx] = values.get(ref)
-        
-        # x: differentiate
-        values = xmldoc.get_x_start_attributes()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_x = z_i - self._model._offs_x.value
-            x_start[i_x] = values.get(ref)
-                    
-        # w: algebraic
-        values = xmldoc.get_w_start_attributes()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_w = z_i - self._model._offs_w.value
-            w_start[i_w] = values.get(ref) 
-
-    def _set_lb_values(self, p_free_lb, dx_lb, x_lb, w_lb):
-        
-        """ 
-        Set lower bounds from the XML variables meta data file. 
-        
-        Parameters:
-            p_free_lb -- The free parameters lower bounds vector.
-            dx_lb -- The derivatives lower bounds vector.
-            x_lb -- The states lower bounds vector.
-            w_lb -- The algebraic variables lower bounds vector.        
-        
-        """
-        
-        xmldoc = self._model._get_XMLvariables_doc()
-
-#         # p_free: free parameters
-#         values = xmldoc.get_p_free_lb_values()
-        
-#         refs = values.keys()
-#         refs.sort(key=int)
-
-#         n_p_opt = self._model.jmimodel.opt_get_n_p_opt()
-#         if n_p_opt > 0:
-#             p_opt_indices = N.zeros(n_p_opt, dtype=int)
-        
-#             self._model.jmimodel.opt_get_p_opt_indices(p_opt_indices)
-#             p_opt_indices = p_opt_indices.tolist()
-            
-#             for ref in refs:
-#                 (z_i, ptype) = _translate_value_ref(ref)
-#                 i_pi = z_i - self._model._offs_pi.value
-#                 i_pi_opt = p_opt_indices.index(i_pi)
-#                 p_opt_lb[i_pi_opt] = values.get(ref)
-
-        # dx: derivative
-        values = xmldoc.get_dx_lb_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_dx = z_i - self._model._offs_dx.value
-            dx_lb[i_dx] = values.get(ref) 
-        
-        # x: differentiate
-        values = xmldoc.get_x_lb_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_x = z_i - self._model._offs_x.value
-            x_lb[i_x] = values.get(ref)
-                    
-        # w: algebraic
-        values = xmldoc.get_w_lb_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_w = z_i - self._model._offs_w.value
-            w_lb[i_w] = values.get(ref) 
-
-    def _set_ub_values(self, p_free_ub, dx_ub, x_ub, w_ub):
-        
-        """ 
-        Set upper bounds from the XML variables meta data file. 
-        
-        Parameters:
-            p_free_ub -- The free parameters upper bounds vector.
-            dx_ub -- The derivatives upper bounds vector.
-            x_ub -- The states upper bounds vector.
-            w_ub -- The algebraic variables upper bounds vector.        
-        
-        """
-        
-        xmldoc = self._model._get_XMLvariables_doc()
-
-#         # p_free: free parameters
-#         values = xmldoc.get_p_opt_ub_values()
-        
-#         refs = values.keys()
-#         refs.sort(key=int)
-
-#         n_p_opt = self._model.jmimodel.opt_get_n_p_opt()
-#         if n_p_opt > 0:
-#             p_opt_indices = N.zeros(n_p_opt, dtype=int)
-        
-#             self._model.jmimodel.opt_get_p_opt_indices(p_opt_indices)
-#             p_opt_indices = p_opt_indices.tolist()
-            
-#             for ref in refs:
-#                 (z_i, ptype) = _translate_value_ref(ref)
-#                 i_pi = z_i - self._model._offs_pi.value
-#                 i_pi_opt = p_opt_indices.index(i_pi)
-#                 p_opt_ub[i_pi_opt] = values.get(ref)
-
-        # dx: derivative
-        values = xmldoc.get_dx_ub_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_dx = z_i - self._model._offs_dx.value
-            dx_ub[i_dx] = values.get(ref) 
-        
-        # x: differentiate
-        values = xmldoc.get_x_ub_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_x = z_i - self._model._offs_x.value
-            x_ub[i_x] = values.get(ref)
-            
-        
-        # w: algebraic
-        values = xmldoc.get_w_ub_values()
-        
-        refs = values.keys()
-        refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_w = z_i - self._model._offs_w.value
-            w_ub[i_w] = values.get(ref) 
-
-
-        
-#     def init_opt_write_file_matlab(self, file_name):
-#         """ 
-#         Write the optimization result to file in Matlab format.
-        
-#         Parameters:
-#             file_name -- Name of file to write to.
-        
-#         """
-#         if self._jmi_model._dll.jmi_init_opt_write_file_matlab(self._jmi_init_opt, file_name) is not 0:
-#             raise JMIException("Writing the optimization result to file in Matlab format failed.")
-        
-#     def init_opt_get_result_variable_vector_length(self):
-#         """ Return the length of the result variable vectors. """
-#         n = ct.c_int()
-#         if self._jmi_model._dll.jmi_init_opt_get_result_variable_vector_length(self._jmi_init_opt, byref(n)) is not 0:
-#             raise JMIException("Getting the length of the result variable vectors failed.")
-#         return n
-        
-#     def init_opt_get_result(self, p_opt, t, dx, x, u, w):
-#         """ 
-#         Get the results, stored in column major format.
-        
-#         Parameters:
-#             p_opt -- Vector containing optimal parameter values. (Return)
-#             t -- The time vector. (Return)
-#             dx -- The derivatives. (Return)
-#             x -- The states. (Return)
-#             u -- The inputs. (Return)
-#             w -- The algebraic variables. (Return)
-             
-#         """
-#         if self._jmi_model._dll.jmi_init_opt_get_result(self._jmi_init_opt, p_opt, t, dx, x, u, w) is not 0:
-#             raise JMIException("Getting the results failed.")
-
-class JMIDAEInitializationOptIPOPT(object):
-    """ An interface to the NLP solver Ipopt. """
-    
-    def __init__(self, jmi_init_opt_model):
-        
-        """ 
-        Constructor where main data structure is created. Needs a 
-        JMISimultaneousOpt implementation instance, for example a 
-        JMISimultaneousOptLagPols object. The underlying model must have 
-        been compiled with support for ipopt.
-        
-        Parameters:
-            jmi_opt_sim_model -- JMISimultaneousOpt object.
-        
-        """
-        
-        self._jmi_init_opt_model = jmi_init_opt_model
-        self._jmi_init_opt_ipopt = ct.c_voidp()
-        
-        try:
-            assert self._jmi_init_opt_model._jmi_model._dll.jmi_init_opt_ipopt_new(byref(self._jmi_init_opt_ipopt), 
-                                                                                 self._jmi_init_opt_model._jmi_init_opt) == 0, \
-                   "jmi_init_opt_ipopt_new returned non-zero"
-        except AttributeError, e:
-            raise JMIException("Can not create JMISimultaneousOptIPOPT object. Please recompile model with target='ipopt")
-        
-        assert self._jmi_init_opt_ipopt.value is not None, \
-               "jmi struct not returned correctly"
-               
-    def init_opt_ipopt_solve(self):
-        """ Solve the NLP problem."""
-        if self._jmi_init_opt_model._jmi_model._dll.jmi_init_opt_ipopt_solve(self._jmi_init_opt_ipopt) is not 0:
-            raise JMIException("Solving IPOPT failed.")
-    
-    def init_opt_ipopt_set_string_option(self, key, val):
-        """
-        Set Ipopt string option.
-        
-        Parameters:
-            key -- Name of option.
-            val -- Value of option.
-            
-        """
-        if self._jmi_init_opt_model._jmi_model._dll.jmi_init_opt_ipopt_set_string_option(self._jmi_init_opt_ipopt, key, val) is not 0:
-            raise JMIException("Setting string option failed.")
-        
-    def init_opt_ipopt_set_int_option(self, key, val):
-        """
-        Set Ipopt integer option.
-        
-        Parameters:
-            key -- Name of option.
-            val -- Value of option.
-            
-        """        
-        if self._jmi_init_opt_model._jmi_model._dll.jmi_init_opt_ipopt_set_int_option(self._jmi_init_opt_ipopt, key, val) is not 0:
-            raise JMIException("Setting int option failed.")
-
-    def init_opt_ipopt_set_num_option(self, key, val):
-        """
-        Set Ipopt double option.
-        
-        Parameters:
-            key -- Name of option.
-            val -- Value of option.
-            
-        """
-        if self._jmi_init_opt_model._jmi_model._dll.jmi_init_opt_ipopt_set_num_option(self._jmi_init_opt_ipopt, key, val) is not 0:
-            raise JMIException("Setting num option failed.")

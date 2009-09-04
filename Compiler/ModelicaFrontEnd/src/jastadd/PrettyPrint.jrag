@@ -448,11 +448,7 @@ aspect PrettyPrint {
 	public void TimeExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("time");
 	}
-
-	public void EndExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("end");
-	}
-	
+		
 	public void FunctionCall.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		p.toString(getName(),str,indent,o);
 		str.print("("); 
@@ -588,40 +584,10 @@ aspect PrettyPrint {
 	eq Continuous.toString() = "";
 	
 	syn String FPrimitiveType.toString();
-	eq FRealScalarType.toString() = "Real";
-	eq FIntegerScalarType.toString() = "Integer";
-	eq FStringScalarType.toString() = "String";
-	eq FBooleanScalarType.toString() = "Boolean";	
-	
-	eq FRealArrayType.toString() { 
-		StringBuffer str = new StringBuffer("Real[");
-		int[] size = size();
-		for (int i=0;i<size.length;i++) {
-			str.append(size[i]);
-			if (i<size.length-1) {
-				str.append(",");
-			}
-		}
-		str.append("]");
-		return str.toString();
-	}
-	eq FIntegerArrayType.toString() { 
-		StringBuffer str = new StringBuffer("Integer[");
-		int[] size = size();
-		for (int i=0;i<size.length;i++) {
-			str.append(size[i]);
-			if (i<size.length-1) {
-				str.append(",");
-			}
-		}
-		str.append("]");
-		return str.toString();
-	}
-	eq FStringArrayType.toString() = "String";
-	eq FBooleanArrayType.toString() = "Boolean";	
-	
-	eq FUnknownScalarType.toString() = "FUnknownScalarType";	
-	eq FUnknownArrayType.toString() = "FUnknownArrayType";	
+	eq FRealType.toString() = "Real";
+	eq FIntegerType.toString() = "Integer";
+	eq FStringType.toString() = "String";
+	eq FBooleanType.toString() = "Boolean";	
 	eq FUnknownType.toString() = "FUnknownType";	
 
 }
@@ -675,7 +641,7 @@ aspect FlattPrettyPrint {
 				str.print(" ");
 			}
 			
-			str.print(type().scalarType());
+			str.print(type());
 			str.print(" ");
 			p.toString(getFQName(),str,"",o);
 		
@@ -696,18 +662,14 @@ aspect FlattPrettyPrint {
 
 	    if (isIndependentParameter() && hasBindingExp()) {
 	    	str.print(" /* ");
-	    	try {
-		    	if (isReal()) {
-					str.print(getBindingExp().ceval().realValue());
-				} else if (isInteger()) {
-					str.print(getBindingExp().ceval().intValue());
-				} else if (isBoolean()) {
-					str.print(getBindingExp().ceval().booleanValue());
-				} else if (isString()) {
-					str.print(getBindingExp().ceval().stringValue());
-				}
-			} catch (UnsupportedOperationException e){
-				str.print("evalutation error");
+	    	if (isReal()) {
+				str.print(getBindingExp().ceval().realValue());
+			} else if (isInteger()) {
+				str.print(getBindingExp().ceval().intValue());
+			} else if (isBoolean()) {
+				str.print(getBindingExp().ceval().booleanValue());
+			} else if (isString()) {
+				str.print(getBindingExp().ceval().stringValue());
 			}
 	    	str.print(" */");
 	    }
@@ -939,10 +901,6 @@ aspect FlattPrettyPrint {
 	public void FTimeExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("time");
 	}
-
-	public void FEndExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("end");
-	}
 	
 	public void FStringLitExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("\"" + getString() + "\"");
@@ -959,19 +917,6 @@ aspect FlattPrettyPrint {
 	public void FIdUse.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		debugPrint("FIdUse.prettyPrint(): " + name());
 		str.print(name());
-	}
-
-	public void FIdUseExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		debugPrint("FIdUse.prettyPrint(): " + getFIdUse().name());
-		str.print(getFIdUse().name());
-		if (getFIdUse().hasFArraySubscripts()) {
-			p.toString(getFIdUse().getFArraySubscripts(),str,indent,o);
-		}
-	}
-
-	public void FInstAccessExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		debugPrint("FIdUse.prettyPrint(): " + name());
-		str.print(getInstAccess().name());
 	}
 	
 	public void FDer.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
@@ -1056,13 +1001,7 @@ aspect FlattPrettyPrint {
 		p.toString(getFExp(), str, indent, o);
 		str.print(")");
 	}
-
-	public void FSqrtExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("sqrt(");
-		p.toString(getFExp(), str, indent, o);
-		str.print(")");
-	}
-
+	
 	public void FSumExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("sum(");
 		p.toString(getFExp(),str,indent,o);
@@ -1092,18 +1031,6 @@ aspect FlattPrettyPrint {
 		}
 		str.print(")");
 	}
-
-	public void InstFunctionCall.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print(getName().name());
-		str.print("(");
-		for (int i=0; i<getNumArgs(); i++) {
-				p.toString(getArgs(i),str,"",o);
-				if (i<getNumArgs()-1)
-					str.print(",");
-		}
-		str.print(")");
-	}
-
 	
 	public void FSumRedExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("sum("); 
@@ -1143,7 +1070,7 @@ aspect FlattPrettyPrint {
 		str.print(")");
 	}
 	
-	public void FArray.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+	public void FArrayConstructor.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("{");
 		for (int i=0; i<getNumFExp(); i++) {
 			p.toString(getFExp(i),str,indent,o);

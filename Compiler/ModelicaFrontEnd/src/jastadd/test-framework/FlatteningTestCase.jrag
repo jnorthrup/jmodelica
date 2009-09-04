@@ -15,8 +15,8 @@
 */
 
 
+import org.jmodelica.modelica.parser.FlatModelicaParser;
 import java.util.Collection;
-import org.jmodelica.util.*;
 
 /**
  * @author jakesson
@@ -27,6 +27,8 @@ public class FlatteningTestCase extends TestCase {
     private String flatModelFileName = "";
     private boolean resultOnFile = false;
 	
+    private FlatModelicaParser flatParser = new FlatModelicaParser();
+    
 	public FlatteningTestCase() {}
     
 	/**
@@ -115,38 +117,7 @@ public class FlatteningTestCase extends TestCase {
 		} catch (Exception e) {
 			System.out.println("Error when parsing file: " + getSourceFileName());
 		}
-		String filesep = System.getProperty("file.separator");
-		String optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
-		OptionRegistry or = null;
-		try {
-			or = new OptionRegistry(optionsfile);
-		} catch(XPathExpressionException e) {
-			System.out.println("The options XML file could not be loaded.");
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-			return false;
-		} catch(ParserConfigurationException e) {
-			System.out.println("The options XML file could not be loaded.");
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-			return false;
-		} catch(IOException e) {
-			System.out.println("The options XML file could not be loaded.");
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-			return false;
-		} catch(SAXException e) {
-			System.out.println("The options XML file could not be loaded.");
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-			return false;
-		}
-		
-		String modelica_path = System.getenv("JMODELICA_HOME")+filesep+"ThirdParty/MSL";
-		or.setStringOption("MODELICAPATH",modelica_path);
-		
-		sr.options = or;
-		
+		TestSuite.loadOptions(sr);
 		sr.setFileName(getSourceFileName());
 		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 		Collection<Problem> problems;
@@ -173,11 +144,6 @@ public class FlatteningTestCase extends TestCase {
 	 	TokenTester tt = new TokenTester();
 		String testModel = fc.prettyPrint("");
 		String correctModel = getFlatModel();
-		
-		//System.out.println("Test model:");
-		//System.out.println(testModel);
-		//System.out.println("Correct model:");
-		//System.out.println(correctModel);	
 		
 		boolean result =  tt.test(testModel,correctModel);
 		return result;

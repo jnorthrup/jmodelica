@@ -84,12 +84,6 @@
 				<include name="org/jmodelica/optimica/parser/*.class"/>
 			</fileset>
 		</jar>
-	  	<jar destfile="${jar_output_dir}/util.jar">
-	  		<fileset dir="bin">
-	  			<include name="org/jmodelica/util/*.class"/> 
-	  		</fileset>
-	  	 </jar>
-
 	</target>
 
 	<target name="compile-ast" depends="gen,gen-parser">
@@ -97,7 +91,6 @@
 		<!--<javac classpath="${beaver_dir}/lib/beaver.jar" compiler="javac1.5" debug="true" destdir="bin">-->
 		<javac classpath="${beaver_dir}/lib/beaver.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" compiler="javac1.5" debug="true" destdir="bin"> 
 			<src path="${base_output}"/>
-			<src path="${modelica_front_end_path}/src/java"/>
 			<include name = "**/*.java"/>
 			<exclude name = "**/*junit*/**"/>
 			<exclude name = "**/*.aj"/>

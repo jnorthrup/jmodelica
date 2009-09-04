@@ -26,14 +26,38 @@ aspect Flattening {
 	 * Generic traversal method used to find a particular class instance
 	 * in the instance tree, and if so, flatten it.
 	 */
-    public InstNode InstProgramRoot.findFlattenInst(String className,FClass fc) throws ModelicaClassNotFoundException {
-    	
-    	InstClassDecl icd = simpleLookupInstClassDecl(className);
-    	if (!icd.isUnknown()) {
-       		FQName fqn = new FQName();
+    public InstNode InstNode.findFlattenInst(String className,FClass fc) throws ModelicaClassNotFoundException {
+    	InstNode n = findFlattenInstRecursive(className,fc);
+    	if (n!=null) {
+    		return n;
+    	}
+    	throw new ModelicaClassNotFoundException("Class "+ className + "not found");
+    }
+    
+    public InstNode InstNode.findFlattenInstRecursive(String className,FClass fc) {
+    	for (InstClassDecl icd : getInstClassDecls()) {
+    		InstNode n = icd.findFlattenInstRecursive(className, fc);
+    		if (n!=null) {
+    			return n;
+    		} 
+    	}	
+    	return null;
+    }
+    
+
+	/**
+	 * \ingroup aspect_Flattening
+	 * 
+	 * Check if a class instance matches a particular name, and if so,
+	 * flatten the class. 
+	 */
+    public InstNode InstFullClassDecl.findFlattenInstRecursive(String className, FClass fc) {
+    	if (className.equals(qualifiedName())) {
+    		// Decode qualifiedName() and create an FQName object
+    		FQName fqn = new FQName();
     		int index = 0;
     		int new_index = 0;
-    		String qn = icd.qualifiedName();
+    		String qn = qualifiedName();
     		while (index>=0) {
     			new_index = qn.indexOf('.',index);
      			if (new_index>=0) {
@@ -43,36 +67,41 @@ aspect Flattening {
     				fqn.addFQNamePart(new FQNamePart(qn.substring(index,qn.length()),new Opt()));
         			index = new_index;
     			}
+
     		}
-    		fc.setFQName(fqn); 
-    		fc.addFEquationBlock(new FEquationBlock(new List()));			
-    		for (FAbstractEquation ae : icd.getFAbstractEquations()) {
-    		       ae.flatten(getFQName(),fc);
-    		    }
-    		icd.getInstComponentDeclList().flatten(fc);
-    		icd.getInstExtendsList().flatten(fc);
     		
+  	 		fc.setFQName(fqn); 
+  	 		//InstRoot r = getInstRoot();
+  	 				
+			//r.dumpTree("");
+			//r.printIVarAccesses("");
+			fc.addFEquationBlock(new FEquationBlock(new List()));			
+			for (FAbstractEquation ae : getFAbstractEquations()) {
+		       ae.flatten(getFQName(),fc);
+		    }
+//			for (InstComponentDecl n : getInstComponentDecls())
+//				n.flatten(fc);
+			getInstComponentDeclList().flatten(fc);
+			getInstExtendsList().flatten(fc);
+           
+			//fc.genBindingEquations();
 			fc.genConnectionEquations();
 
 			//System.out.println(fc.prettyPrint(""));
 			//fc.dumpTree("");
-						
+			
+			
 			HashSet<InstAccess> instAccesses = fc.collectInstAccesses();
 			if (instAccesses.size()>0) {
 				System.out.println("Flat model contains InstAccesses!!!");
 				//return null;
 			}
-
-    		
-    	} else {
-        	throw new ModelicaClassNotFoundException("Class "+ className + "not found");
-    	}
-    	
-    	return icd;
-    	
-    }
-    
-    
+			
+			return this;	
+   		} else {
+  			return super.findFlattenInstRecursive(className,fc);
+   		}  	
+	}	
 	
  
 	// Generic method for flattening	
@@ -336,11 +365,11 @@ aspect FlatExpressions {
 	   return new FIdUse(getInstAccess().flatten(prefix));
 	}
 
-	public FExp FArray.flatten(FQName prefix) {
+	public FExp FArrayConstructor.flatten(FQName prefix) {
 	   List l = new List();
 	   for (int i=0;i<getNumFExp();i++)
 	   	 l.add(getFExp(i).flatten(prefix));
-	   return new FArray(l);
+	   return new FArrayConstructor(l);
 	}
 
 	public FIdDecl FIdDecl.flatten(FQName prefix) {
@@ -408,10 +437,8 @@ aspect FlatExpressions {
 	public FExp FExpExp.flatten(FQName prefix) { return new FExpExp(getFExp().flatten(prefix)); }
 	public FExp FLogExp.flatten(FQName prefix) { return new FLogExp(getFExp().flatten(prefix)); }
 	public FExp FLog10Exp.flatten(FQName prefix) { return new FLog10Exp(getFExp().flatten(prefix)); }
-	public FExp FSqrtExp.flatten(FQName prefix) { return new FSqrtExp(getFExp().flatten(prefix)); }
 	
 	public FExp FTimeExp.flatten(FQName prefix) { return new FTimeExp(); }
-	public FExp FEndExp.flatten(FQName prefix) { return new FEndExp(); }
 		
 	public FExp FFunctionCall.flatten(FQName prefix) {
 		List l = new List();
@@ -457,14 +484,9 @@ aspect FlatExpressions {
 				
 		// Is it two "primitives" that are connected?
 		if (c1.extendsPrimitive() || c1.isPrimitive()) {
-/*
 			fc.getConnectionSetManager().addVars(getConnector1().getInstAccess().myInstComponentDecl(),false,((FQName)prefix.fullCopy()).append(getConnector1().getInstAccess().flatten(prefix)),
 		                                         getConnector2().getInstAccess().myInstComponentDecl(),false,((FQName)prefix.fullCopy()).append(getConnector2().getInstAccess().flatten(prefix)));
-*/
-			fc.getConnectionSetManager().addVars(getConnector1().getInstAccess().myInstComponentDecl(),false,getConnector1().getInstAccess().flatten(prefix),
-                    getConnector2().getInstAccess().myInstComponentDecl(),false,getConnector2().getInstAccess().flatten(prefix));
-
-			return;
+		    return;
 		}
 
 		boolean outside1 = enclosingInstClassDecl().memberInstComponent(getConnector1().getInstAccess().name()).size()>0;
@@ -607,7 +629,7 @@ aspect InstantiatedExpressions {
 	   	l.getChild(i).setStart(getStart());
 	   	l.getChild(i).setEnd(getEnd());
 	   }
-	   FArray n = new FArray(l);
+	   FArrayConstructor n = new FArrayConstructor(l);
 	   n.setStart(getStart());
 	   n.setEnd(getEnd());
 	   return n;
@@ -812,16 +834,9 @@ aspect InstantiatedExpressions {
 		n.setEnd(getEnd());
 		return n;
 	}	
-
-	public FExp EndExp.instantiate() { 
-		FExp n = new FEndExp(); 
-		n.setStart(getStart());
-		n.setEnd(getEnd());
-		return n;
-	}	
 	
 	public FExp FunctionCall.instantiate() {
-		List<FExp> l = new List<FExp>();
+		List l = new List();
 		List args = new List();
 		if (hasFunctionArguments())
 			args =  getFunctionArguments().getExpList();
@@ -836,90 +851,40 @@ aspect InstantiatedExpressions {
 		FExp n = null;
 		if (getName().name().equals("der")) {
 			n = new FDer(new FIdUseInstAccess(new FQName(), ((FInstAccessExp)l.getChild(0)).getInstAccessNoTransform())); 
-		} else if (getName().name().equals("sin")) {
+		} else if (getName().name().equals("sin") || getName().name().equals("Modelica.Math.sin")) {
 			n = new FSinExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("cos")) {
+		} else if (getName().name().equals("cos") || getName().name().equals("Modelica.Math.cos")) {
 			n = new FCosExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("tan")) {
+		} else if (getName().name().equals("tan") || getName().name().equals("Modelica.Math.tan")) {
 			n = new FTanExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("asin")) {
+		} else if (getName().name().equals("asin") || getName().name().equals("Modelica.Math.asin")) {
 			n = new FAsinExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("acos")) {
+		} else if (getName().name().equals("acos") || getName().name().equals("Modelica.Math.acos")) {
 			n = new FAcosExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("atan")) {
+		} else if (getName().name().equals("atan") || getName().name().equals("Modelica.Math.atan")) {
 			n = new FAtanExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("atan2")) {
+		} else if (getName().name().equals("atan2") || getName().name().equals("Modelica.Math.atan2")) {
 			n = new FAtan2Exp((FExp)l.getChild(0),(FExp)l.getChild(1)); 
-		} else if (getName().name().equals("sinh")) {
+		} else if (getName().name().equals("sinh") || getName().name().equals("Modelica.Math.sinh")) {
 			n = new FSinhExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("cosh")) {
+		} else if (getName().name().equals("cosh") || getName().name().equals("Modelica.Math.cosh")) {
 			n = new FCoshExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("tanh")) {
+		} else if (getName().name().equals("tanh") || getName().name().equals("Modelica.Math.tanh")) {
 			n = new FTanhExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("exp")) {
+		} else if (getName().name().equals("exp") || getName().name().equals("Modelica.Math.exp")) {
 			n = new FExpExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("log")) {
+		} else if (getName().name().equals("log") || getName().name().equals("Modelica.Math.log")) {
 			n = new FLogExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("log10")) {
+		} else if (getName().name().equals("log10") || getName().name().equals("Modelica.Math.log10")) {
 			n = new FLog10Exp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("sqrt")) {
-			n = new FSqrtExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("identity")) {
-			n = new FIdentity(l.getChild(0));
-		} else if (getName().name().equals("ones")) {
-			n = new FOnes(l);
-		} else if (getName().name().equals("zeros")) {
-			n = new FZeros(l);
 		} else {
-			n = new InstFunctionCall(getName().newInstAccess(),l);	
+			n = new FFunctionCall(new FIdUseInstAccess(new FQName(),getName().newInstAccess()),l);	
 		}
 		n.setStart(getStart());
 		n.setEnd(getEnd());
 		return n;
 	}
 	
-	boolean InstFunctionCall.rewritten = false;
-	rewrite InstFunctionCall {
-    	when (!rewritten)
-    		to FExp {
-    			FExp n = null;
-    			String name = getName().myInstClassDecl().qualifiedName(); 
-    			if (name.equals("Modelica.Math.sin")) {
-    				n = new FSinExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.cos")) {
-    				n = new FCosExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.tan")) {
-    				n = new FTanExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.asin")) {
-    				n = new FAsinExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.acos")) {
-    				n = new FAcosExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.atan")) {
-    				n = new FAtanExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.atan2")) {
-    				n = new FAtan2Exp(getArgs(0),getArgs(1));  
-    			} else if (name.equals("Modelica.Math.sinh")) {
-    				n = new FSinhExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.cosh")) {
-    				n = new FCoshExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.tanh")) {
-    				n = new FTanhExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.exp")) {
-    				n = new FExpExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.log")) {
-    				n = new FLogExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.log10")) {
-    				n = new FLog10Exp(getArgs(0));
-    			} else {
-    				n = this;
-    				rewritten = true;
-    			}
-				n.setStart(getStart());
-				n.setEnd(getEnd());
-				return n;	
-    	}
-  	}
-  
 	public FExp SumRedExp.instantiate() {
 		FSumRedExp n = new FSumRedExp(getExp().instantiate(),
 		                     getForIndex().instantiate());

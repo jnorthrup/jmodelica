@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.jmodelica.generated.scanners;
+package org.jmodelica.ide.scanners.generated;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -23,7 +23,7 @@ import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.Token;
 
-import org.jmodelica.ide.IDEConstants;
+import org.jmodelica.ide.Constants;
 import org.jmodelica.ide.scanners.DocumentScanner;
 
 %%
@@ -41,7 +41,7 @@ import org.jmodelica.ide.scanners.DocumentScanner;
 %table
 
 %{
-    private static final String PARTITION = IDEConstants.PLUGIN_ID + ".partition";
+    private static final String PARTITION = Constants.PLUGIN_ID + ".partition";
     public static final String NORMAL_PARTITION = PARTITION + ".normal";
     public static final String STRING_PARTITION = PARTITION + ".string";
     public static final String QIDENT_PARTITION = PARTITION + ".qident";
@@ -164,7 +164,7 @@ Definition = {Class} {WS} {ID}
 
 Other = .|{NL}
 
-%state ANNOTATION, NORMAL, STRING, QIDENT, COMMENT, LINE_COMMENT
+%state ANNOTATION, NORMAL, STRING, QIDENT, COMMENT
 
 %%
 
@@ -172,10 +172,8 @@ Other = .|{NL}
   "\""				{ /* YYINITIAL: "\"" */ begin(STRING); }
   "\'"				{ /* YYINITIAL: "\'" */ begin(QIDENT); }
   "/*"				{ /* YYINITIAL: "/*" */ begin(COMMENT); }
-  "//" 				{ begin(LINE_COMMENT); }
   "annotation"		{ /* YYINITIAL: "annotation" */ saveOffset = yychar; return beginAnnotation(); }
-  ^{Definition}		{ /* YYINITIAL: Definition */ offset = yychar; return new Token(DEFINITION_PARTITION); }
-  {WS}{Definition}	{ /* YYINITIAL: Definition */ offset = yychar; return new Token(DEFINITION_PARTITION); }
+  {Definition}		{ /* YYINITIAL: Definition */ offset = yychar; return new Token(DEFINITION_PARTITION); }
   {WS}				{ /* YYINITIAL: WS */ }
   {Other}			{ /* YYINITIAL: Other */ begin(NORMAL); }
   <<EOF>>			{ /* YYINITIAL: EOF */ offset = yychar; return Token.EOF; }
@@ -185,8 +183,7 @@ Other = .|{NL}
   "\""				{ /* NORMAL: StringML */ return normalEnd(); }
   "\'"				{ /* NORMAL: QIdentML */ return normalEnd(); }
   "/*"				{ /* NORMAL: CommentML */ return normalEnd(); }
-  "//" 				{ begin(LINE_COMMENT); }
-  {WS}{Definition}	{ /* NORMAL: Definition */ return normalEnd(); }
+  {Definition}		{ /* NORMAL: Definition */ return normalEnd(); }
   "annotation"		{ /* NORMAL: "annotation" */ return beginAnnotation(); }
   {Other}			{ /* NORMAL: Other */ }
   <<EOF>>			{ /* NORMAL: EOF */ return normalEnd(); }
@@ -219,11 +216,3 @@ Other = .|{NL}
   "*/"				{ /* COMMENT: (end of comment) */ return end(COMMENT_PARTITION); }
   <<EOF>>			{ /* COMMENT: EOF */ return end(COMMENT_PARTITION); }
 }
-
-
-<LINE_COMMENT> {
-	.* 				{ return end(COMMENT_PARTITION); }
-	<<EOF>> 		{ return end(COMMENT_PARTITION); } 
-}
-
-[^]					{ return end(IDocument.DEFAULT_CONTENT_TYPE); }

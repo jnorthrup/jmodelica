@@ -55,7 +55,7 @@ SHARED_LDFLAGS = @SHARED_LDFLAGS@
 
 # Directories with header files
 JMIINCDIR = @includedir@
-CPPADINCDIR = @CPPAD_HOME@
+CPPADINCDIR = @CPPAD_INC@
 
 # Directory with jmi.a
 JMILIBDIR = @libdir@

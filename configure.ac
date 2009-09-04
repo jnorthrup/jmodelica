@@ -17,7 +17,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT([JModelica.org], 0.0.0, BUG-REPORT-ADDRESS)
+AC_INIT([JModelica], 0.0.1, BUG-REPORT-ADDRESS)
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([JMI/src/jmi.h])
 AC_CONFIG_HEADER([config.h])
@@ -70,9 +70,7 @@ AC_PROG_LIBTOOL
 
 # By default, we want to install bin, lib, and include
 # in the directory where configure is run.
-AS_IF([test "x$JMODELICA_HOME" = x],
- 	AC_PREFIX_DEFAULT([`pwd`]),
-        AC_PREFIX_DEFAULT(["$JMODELICA_HOME"]))
+AC_PREFIX_DEFAULT([`pwd`])
 
 # Checks for libraries.
 AC_ARG_WITH([ipopt],
@@ -112,32 +110,6 @@ AS_IF([test "x$with_ipopt" != xno],
       [WITH_IPOPT="true"],
       [WITH_IPOPT="false"]) 
 
-# Checks for mingw.
-AC_ARG_WITH([mingw],
-   [AS_HELP_STRING([--with-mingw],
-     [MinGW installation directory. @<:@default=check@:>@])],
-   [mingw=$withval],
-   [with_mingw=no])
-
-AS_IF([test "x$with_mingw" = xno],
-      [mingw=["$MINGW_HOME"]])
-
-AS_IF([test "x$MINGW_HOME" != x],
-      [with_mingw=env])
-
-AS_IF([test "x$with_mingw" = xno],
-      [AC_MSG_RESULT([MinGW installation not specified.])],
-      [AC_CHECK_FILE($mingw/bin/gcc.exe,
-                     [],
-                     [AC_MSG_FAILURE([MinGW installation specifed, but seems to be corrupt!])])])
-
-AM_CONDITIONAL([WITH_MINGW],[test "x$with_mingw" != xno])
-
-# Set output variables to be exported to the Makefiles
-AC_SUBST(MINGW_HOME)
-MINGW_HOME=$mingw
-
-# Detect CppAD
 AC_ARG_WITH([cppad],
    [AS_HELP_STRING([--with-cppad],
      [CppAD installation directory @<:@default=check@:>@])],
@@ -150,7 +122,7 @@ AS_IF([test "x$with_cppad" = xno],
 AS_IF([test "x$with_cppad" = xno],
       [AC_CHECK_FILE($srcdir/$cppad/cppad/cppad.hpp,
                      [],
-                     [AC_MSG_FAILURE([CppAD sources not found - distribution corrupt?])])],
+                     [AC_MSG_FAILURE([--with-cppad option was specified but does not seem to point at a valid CppAD installation])])],
       [AC_CHECK_FILE($cppad/cppad/cppad.hpp,
                      [],
                      [AC_MSG_FAILURE([--with-cppad option was specified but does not seem to point at a valid CppAD installation])])])
@@ -161,11 +133,11 @@ AS_IF([test "x$with_cppad" = xno],
 AM_CONDITIONAL([COMPILE_WITH_CPPAD],[test "x$with_cppad" != xno])
 
 # Set output variables to be exported to the Makefiles
-AC_SUBST(CPPAD_HOME)
+AC_SUBST(CPPAD_INC)
 AC_SUBST(WITH_CPPAD)
 AS_IF([test "x$with_cppad" = xautomatic],
-      [CPPAD_HOME=`cd $srcdir; pwd`/$cppad],
-      [CPPAD_HOME=$cppad])
+      [CPPAD_INC=`cd $srcdir; pwd`/$cppad],
+      [CPPAD_INC=$cppad])
 
 AS_IF([test "x$with_cppad" != xno],
       [WITH_CPPAD="true"],
@@ -177,7 +149,7 @@ case $build in
     ipoptlib="-L$ipopt/lib -lipopt -lg2c -ldl"
     ;;
   *-mingw*)
-    ipoptlib="-L$ipopt/lib -lipopt -lm \
+    ipoptlib="-L$ipopt/lib -lipopt -lm -lfrtbegin \
        -lgfortran -lpthread -lmingw32 -lmoldname -lmingwex -lmsvcrt \
        -luser32 -lkernel32 -ladvapi32 -lshell32 -lstdc++"
     ;;
@@ -207,13 +179,9 @@ AC_SUBST(jmi_cppadlib)
 
 AC_PATH_PROG([ANT], [ant], [])
 AC_SUBST(ANT_OPTS)
-ANT_OPTS="ANT_OPTS=-Xmx512M"
+ANT_OPTS="ANT_OPTS=-Xmx1500M"
 
 AM_CONDITIONAL([HAVE_ANT],[test "x$ANT" != x])
-
-AS_IF([test "x$ANT" = x],
-      [AC_MSG_FAILURE([Cannot find Apache Ant - please install in order to build compiler front-ends.])])
-
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -235,8 +203,6 @@ AC_CONFIG_FILES([
  JMI/examples/CSTR2/Makefile
  Options/options_tpl.xml
  Options/options_tpl.py
- Python/jm_ipython.sh
- Python/jm_python.sh
 ])
 
 

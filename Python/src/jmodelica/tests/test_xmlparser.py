@@ -5,14 +5,14 @@ import os
 
 import nose
 
-from jmodelica.compiler import OptimicaCompiler
+import jmodelica.optimicacompiler as oc
 import jmodelica.xmlparser as xp
 
 
 jm_home = os.environ.get('JMODELICA_HOME')
 path_to_examples = os.sep+'Python'+os.sep+'jmodelica'+os.sep+'examples'
 
-model = os.sep+'files'+os.sep+'Pendulum_pack.mo'
+model = os.sep+'pendulum'+os.sep+'Pendulum_pack.mo'
 fpath = jm_home+path_to_examples+model
 cpath = "Pendulum_pack.Pendulum_Opt"
 
@@ -23,8 +23,7 @@ def setup():
     Setup test module. Compile test model (only needs to be done once) and 
     set log level. 
     """
-    OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
-    oc = OptimicaCompiler()
+    oc.set_log_level(oc.LOG_ERROR)
     oc.compile_model(fpath, cpath)
         
 def test_create_XMLVariablesDoc():

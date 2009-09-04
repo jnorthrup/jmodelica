@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.jmodelica.generated.scanners;
+package org.jmodelica.ide.scanners.generated;
 
 import java.util.*;
 import java.io.StringReader;
@@ -39,13 +39,14 @@ import org.jmodelica.ide.editor.Indent;
 %apiprivate
 %type void
 %char
+%table
 
 %{
     public IndentationHintScanner() {
         this(new StringReader(""));
     }
     
-    public ModelicaAnchorList analyze(String text) {
+    public void analyze(String text) {
 		
 		yyreset(new StringReader(text));
 		
@@ -53,12 +54,10 @@ import org.jmodelica.ide.editor.Indent;
 	
 		annotation_paren_level = 0;
 		last_state = YYINITIAL;
-		
+
 		try {
 			yylex();
 		} catch (IOException e) { }
-		
-		return ancs;
 	}
 	
 	/* scanner state variables */
@@ -83,12 +82,8 @@ NormalId = {IDCHAR} ({DIGIT}|{IDCHAR})*
 Id = {NormalId} | {QIdent}
 QIdent = "\'"  {QIdentCont}*  "\'"
 
-Class = "block" | "when" | "class" | "connector" | "function" | "model" | "package" | "record" | "type" | "for" 
-ClassPrefix = "encapsulated" | "partial" | "replaceable"
-ClassDef = ({ClassPrefix} {WhiteSpace}+)* {Class}
-ClassOneLine = {ClassDef} {WhiteSpace}* {Id} {WhiteSpace}* "="
- 
-Heading = ("initial" {WhiteSpace}+)? ("equation" | "algorithm" | "public" | "protected")
+Class = "block" | "when" | "class" | "connector" | "function" | "model" | "package" | "record" | "type" | "for"
+Separator = "equation" | "algorithm" | "public" | "protected"
 
 End = "end"
 
@@ -97,8 +92,8 @@ QIdentCont = {Q_CHAR} | {S_ESCAPE}
 Other = . | {NewLine}
 
 
-%state LINEBEGIN, END
-%xstate COMMENT, COMMENT_LINEBEGIN, STRING, QIDENT, ANNOTATION, ANNOTATION_LINEBEGIN, CLASS 
+%state LINEBEGIN, CLASS, END
+%xstate COMMENT, COMMENT_LINEBEGIN, STRING, QIDENT, ANNOTATION, ANNOTATION_LINEBEGIN 
 
 %%
 
@@ -107,11 +102,11 @@ Other = . | {NewLine}
   				      last_state = yystate(); 
   				      yybegin(COMMENT_LINEBEGIN); 
   				    }
-  "\""				{ ancs.beginSection(yychar + 1, yychar, Indent.UNCHANGED, "string");     
+  "\""				{ ancs.beginSection(yychar + 1, yychar, Indent.NONE, "string");     
   					  last_state = yystate(); 
   					  yybegin(STRING); 
   					}
-  "\'"				{ ancs.beginSection(yychar + 1, yychar, Indent.UNCHANGED, "qident");
+  "\'"				{ ancs.beginSection(yychar + 1, yychar, Indent.NONE, "qident");
   					  yybegin(QIDENT); 
   					}
   "annotation"		{ ancs.beginSection(yychar + yylength(), yychar, Indent.INDENT, "annotation");
@@ -121,77 +116,50 @@ Other = . | {NewLine}
 
 <YYINITIAL> {
   ^.				{ yypushback(1); yybegin(LINEBEGIN); }
-  {NewLine}			{ yybegin(LINEBEGIN); }
-  {ClassOneLine}	{ ancs.addAnchor(yychar, yychar, Indent.SAME); }
-  {ClassDef}		{ ancs.addAnchor(yychar, yychar, Indent.SAME); 
-  					  ancs.beginSection(yychar + yylength(), yychar, Indent.INDENT, "class");
-  					  yybegin(CLASS);
-  					} 
-  {Heading}			{ ancs.addSink(yychar, "class", Indent.SAME); }
-  "end" {WhiteSpace}* "if" {  }
-  {End}				{ ancs.addSink(yychar, "class", Indent.SAME);
+  {NewLine}			{ yybegin(LINEBEGIN); }   
+  {Class}			{ ancs.addAnchor(yychar, yychar, Indent.SAME); 
+  					  ancs.beginSection(yychar + yylength(), yychar, Indent.INDENT, "class"); } 
+  {Separator}		{ ancs.addSink(yychar); }
+  {End}				{ ancs.addSink(yychar);
   					  ancs.addAnchor(yychar + yylength(), yychar, Indent.INDENT);
   					  yybegin(END); 
   					}
-  {NormalId}    	{  }
   ";"				{ ancs.completeStatement(yychar + 1); }
 } 
 
-<CLASS> {
-	{WhiteSpace}* {NormalId} { yybegin(YYINITIAL);}
-	{Other} 		   { yypushback(1); yybegin(YYINITIAL); }
-}
-
 <LINEBEGIN> {
-  {ClassDef}		|
+  {Class} 			|
   {End}				|
   ";"				|
-  {Heading}		    { yypushback(yylength()); yybegin(YYINITIAL); }
+  {Separator}		{ yypushback(yylength()); yybegin(YYINITIAL); }
   {Id}			    { ancs.beginLine(yychar);
   					  yybegin(YYINITIAL); 
   					}
   {WhiteSpace}*		{ }
-  
 }
 
 <ANNOTATION_LINEBEGIN> {
 	{WhiteSpace}	{ }
-	")"+			{ ancs.addSink(yychar, "paren", 
-						new Indent.AnnotationParen(annotation_paren_level - yylength())); 
-					  yypushback(yylength()	);
-					  yybegin(ANNOTATION); }
-	{Other}			{ yypushback(1); 
+	. 				{ ancs.beginSection(yychar+1, yychar, Indent.SAME, "annotation_newline"); 
+					  yypushback(1); 
 					  yybegin(ANNOTATION); }
 }
 
 <ANNOTATION> {
-  "("				{ 
-  				 	  annotation_paren_level++; 
-  					  
-  					  if(annotation_paren_level==1)
-  				        ancs.beginSection(yychar, yychar, new Indent.AnnotationParen(1), "paren");
-  				      else 
-  				        ancs.annotationParen(yychar, annotation_paren_level); 
-  					}
-  ")" 				{ 
-  					  annotation_paren_level--;
-  					  ancs.annotationParen(yychar+1, annotation_paren_level);
-  					  if (annotation_paren_level == 0) { 
-	  					    ancs.popPast("paren", yychar+1);
-  							ancs.popPast("annotation", yychar+1);
+  "("				{ annotation_paren_level++; }
+  ")" 				{ if (--annotation_paren_level == 0) { 
+  							ancs.popPast("annotation", yychar + yylength());
   							yybegin(YYINITIAL); 
   					  }
 					} 
    "/*"  			{ ancs.beginSection(yychar+2, yychar, Indent.COMMENT, "comment");
 					  last_state = yystate();
 					  yybegin(COMMENT_LINEBEGIN); }
-  "\""				{ ancs.beginSection(yychar+1, yychar, Indent.UNCHANGED, "string");
-					  last_state = yystate();
-					  yybegin(STRING); }
+  "\""				{ ancs.beginSection(yychar+1, -1,Indent.NONE, "string");
+					  last_state = yystate(); yybegin(STRING); }
   {NewLine}			{ yybegin(ANNOTATION_LINEBEGIN); }
   {Other}			{ 	}
 }
-
 
 <END> {
   {WhiteSpace}		{  }
@@ -201,9 +169,8 @@ Other = . | {NewLine}
 }
 
 <STRING> {
-  "\\\\"			{  }
   "\\\""			{  }
-  "\""				{ ancs.popPast("string", yychar + yylength());
+  "\""				{ ancs.popPast("string", yychar + yylength()); 
   					  yybegin(last_state); }
   {Other}			{ }
 }
@@ -217,15 +184,14 @@ Other = . | {NewLine}
 
 <COMMENT_LINEBEGIN> {
   {WhiteSpace} 		{ }
-  "*/"				{ ancs.addSink(yychar, "comment", Indent.SAME); // match comment end delim to start delim if alone on line
-  					  ancs.popPast("comment", yychar); 
+  "*/"				{ ancs.popPast("comment", yychar + yylength()); 
   					  yybegin(last_state); }
   {Other}		    { ancs.addAnchor(yychar+1, yychar, Indent.SAME); 
   					  yybegin(COMMENT); }
 }
 
 <COMMENT> {
-  "*/"				{ ancs.popPast("comment", yychar); 
+  "*/"				{ ancs.popPast("comment", yychar + yylength()); 
   					  yybegin(last_state); }
   {NewLine}	     	{ yybegin(COMMENT_LINEBEGIN); }
   {Other}			{ }

@@ -15,10 +15,13 @@
 */
 package org.jmodelica.ide.scanners;
 
+import org.eclipse.jface.text.rules.IToken;
 
 public class ModelicaCommentScanner extends StupidScanner {
 
-	public ModelicaCommentScanner() {
-	    super(COMMENT_BOUNDARY, COMMENT, COMMENT_BOUNDARY, "/*", "*/");
+	@Override
+	protected IToken getToken() {
+		return COMMENT;
 	}
+
 }

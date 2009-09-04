@@ -223,7 +223,7 @@
        					                                        (Opt)getTypePrefixFlowOpt().fullCopy(),
        					                                        (Opt)getTypePrefixVariabilityOpt().fullCopy(),
        					                                        (Opt)getTypePrefixInputOutputOpt().fullCopy(),
-       					                                        (Access)getClassName().fullCopy(),
+       					                                        (ClassAccess)getClassName().fullCopy(),
        					                                        (Opt)getTypeArraySubscriptsOpt().fullCopy(),
        					                                        (VisibilityType)getVisibilityType().fullCopy(),
        					                                        new List().add(getName(i)),

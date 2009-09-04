@@ -26,10 +26,10 @@ import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 import org.jmodelica.folding.CharacterProjectionViewer;
-import org.jmodelica.generated.scanners.AnnotationNormalStateScanner;
-import org.jmodelica.generated.scanners.BackwardBraceScanner;
-import org.jmodelica.generated.scanners.ForwardBraceScanner;
-import org.jmodelica.generated.scanners.Modelica22PartitionScanner;
+import org.jmodelica.ide.scanners.generated.AnnotationNormalStateScanner;
+import org.jmodelica.ide.scanners.generated.BackwardBraceScanner;
+import org.jmodelica.ide.scanners.generated.ForwardBraceScanner;
+import org.jmodelica.ide.scanners.generated.Modelica22PartitionScanner;
 
 public class ModelicaCharacterPairMatcher implements ICharacterPairMatcher {
 
@@ -58,12 +58,16 @@ public class ModelicaCharacterPairMatcher implements ICharacterPairMatcher {
 			offset--;
 			char ch = document.getChar(offset);
 			switch (ch) {
-			case '(': case '[': case '{':
+			case '(':
+			case '[':
+			case '{':
 				anchor = LEFT;
 				if (isPositionOk(document, offset))
 					return getForwardScanner().match(document, offset);
 				break;
-			case ')': case ']': case '}':
+			case ')':
+			case ']':
+			case '}':
 				anchor = RIGHT;
 				if (isPositionOk(document, offset))
 					return getBackwardScanner().match(document, offset);
@@ -74,17 +78,16 @@ public class ModelicaCharacterPairMatcher implements ICharacterPairMatcher {
 		return null;
 	}
 
-	private boolean isPositionOk(IDocument document, int offset) {
-		return isNormalState(document, offset) && 
-		      !isFolded(offset);
+	private boolean isPositionOk(IDocument document, int offset)
+			throws BadLocationException {
+		return isNormalState(document, offset) && !isFolded(document, offset);
 	}
 
-    private boolean isFolded(int offset) {
+	private boolean isFolded(IDocument document, int offset) {
 		if (projectionViewer != null) {
 			ProjectionAnnotationModel model = projectionViewer.getProjectionAnnotationModel();
 			if (model != null) {
-			    Iterator<?> iter =
-			        model.getAnnotationIterator(offset, 1, true, true);
+				Iterator iter = model.getAnnotationIterator(offset, 1, true, true);
 				while (iter.hasNext()) {
 					Object ann = iter.next();
 					if (ann instanceof ProjectionAnnotation) {
