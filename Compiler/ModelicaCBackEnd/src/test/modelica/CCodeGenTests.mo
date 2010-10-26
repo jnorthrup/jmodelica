@@ -3479,17 +3479,7 @@ model CIntegerExp
 	Real x = 10 ^ 4;
 end CIntegerExp;
 
-model ModelIdentifierTest
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CCodeGenTestCase(
-         name="ModelIdentifierTest",
-         description="",
-         template="$C_model_id$",
-         generatedCode="
-CCodeGenTests_ModelIdentifierTest")})));
 
-	Real r = 1.0;
-end ModelIdentifierTest;
 
 model DependentParametersWithScalingTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
