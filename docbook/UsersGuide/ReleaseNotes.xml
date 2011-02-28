@@ -134,6 +134,7 @@
       improved by adding support for Jacobian regularization in order to
       handle singular Jacobians and by interfacing the sparse linear solver
       SuperLU in order to more efficiently handle large scale systems.</para>
+
     </section>
 
     <section>
@@ -544,41 +545,13 @@ yres = res['y']
           to encode Lagrange cost functions of the type</para>
 
           <informalequation>
-            <m:math display="block">
-              <m:mrow>
-                <m:munderover>
-                  <m:mo>∫</m:mo>
-
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>0</m:mi>
-                  </m:msub>
-
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>f</m:mi>
-                  </m:msub>
-                </m:munderover>
-
-                <m:mrow>
-                  <m:mrow>
-                    <m:mi>L</m:mi>
-
-                    <m:mo>⁡</m:mo>
-
-                    <m:mfenced>
-                      <m:mi>.</m:mi>
-                    </m:mfenced>
-                  </m:mrow>
-
-                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex" />
-
-                  <m:mtext>dt</m:mtext>
-                </m:mrow>
-              </m:mrow>
-            </m:math>
+            <m:math display="block"><m:mrow> <m:munderover> <m:mo>∫</m:mo>
+            <m:msub> <m:mi>t</m:mi> <m:mi>0</m:mi> </m:msub> <m:msub>
+            <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> </m:munderover> <m:mrow>
+            <m:mrow> <m:mi>L</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>.</m:mi>
+            </m:mfenced> </m:mrow> <m:mspace depth="0.5ex" height="0.5ex"
+            width="1ex"></m:mspace> <m:mtext>dt</m:mtext> </m:mrow>
+            </m:mrow></m:math>
           </informalequation>
 
           <para>the Optimica class attribute
