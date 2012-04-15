@@ -74,13 +74,12 @@ Comment = {TraditionalComment} | {EndOfLineComment}
 TraditionalComment = "/*" [^*] ~"*/" | "/*" "*"+ "/"
 EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
 
-Token   = {STRING} | {ID} | {UNSIGNED_INTEGER} | {Operator}
+Token   = {STRING} | {ID} | {UNSIGNED_NUMBER} | {Operator}
 Discard = {Comment} | {WhiteSpace}
 
 %%
 
 {Token}             { return yytext(); }
-{UNSIGNED_NUMBER}   { return Double.toString(Double.parseDouble(yytext())); }
 {Discard}           { }
 .                   { return "$ Bad character '" + yytext() + "' $"; }
 <<EOF>>             { return null; }

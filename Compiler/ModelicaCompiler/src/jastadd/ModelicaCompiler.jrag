@@ -1690,7 +1690,7 @@ public class ModelicaCompiler {
 		try {
 			if (programarguments.containsKey("parse"))
 				parseFiles(name);
-			else if (programarguments.containsKey("fmume") || programarguments.containsKey("fmu"))
+			else if (programarguments.containsKey("fmume"))
 				compileFMUME(cl, name);
 			else if (programarguments.containsKey("fmucs"))
 				compileFMUCS(cl, name);
@@ -2168,25 +2168,28 @@ public abstract class CCompilerDelegator {
 	
 	protected static class SharedLibOperation implements StringOperation {
 		
-		private String format;
+		private String platform;
 		
 		public SharedLibOperation(String platform) {
-			if (platform.startsWith("win")) 
-				format = "%s.dll";
-			else if (platform.startsWith("darwin")) 
-				format = "lib%s.dylib";
-			else
-				format = "lib%s.so";
+			this.platform = platform;
 		}
 		
 		public String op(String library) {
-			return String.format(format, library);
+			if (platform.startsWith("win")) 
+				return library += ".dll";
+			else
+				return library += ".so";
 		}
 
 	}
 	
 	
 	protected static void copyFile(File sourceFile, File destFile) throws IOException {
+		
+		if(!destFile.exists()) {
+			destFile.createNewFile();
+		}
+
 		FileChannel source = null;
 		FileChannel destination = null;
 		try {

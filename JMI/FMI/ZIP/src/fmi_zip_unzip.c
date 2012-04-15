@@ -14,44 +14,19 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifdef __cplusplus 
-extern "C" {
-#endif
 
-#include <stdlib.h>
-#include <jm_types.h>
-#include <jm_callbacks.h>
-#include "miniunz.h"
+#include "fmi_zip_unzip_impl.h"
+#include "jm_types.h"
 
-jm_status_enu_t fmi_zip_unzip(const char* zip_file_path, const char* output_folder, jm_callbacks* callbacks)
+/* Returns 1 if the FMU was successfully unziped. Otherwise 0 is returned */
+jm_status_enu_t fmi_zip_unzip(char* zip_file_path, char* output_folder)
 {
-	/*
-	Usage : miniunz [-e] [-x] [-v] [-l] [-o] [-p password] file.zip [file_to_extr.] [-d extractdir]
-	  -e  Extract without pathname (junk paths)
-	  -x  Extract with pathname
-	  -v  list files
-	  -l  list files
-	  -d  directory to extract into
-	  -o  overwrite files without prompting
-	  -p  extract crypted file using password
-	*/
+    int argc = 5;
+	char *argv[5] = {"miniunz", "-o", zip_file_path, "-d", output_folder};
 
-	int argc = 6;
-	const char *argv[6];
-	argv[0]="miniunz";
-	argv[1]="-x";
-	argv[2]="-o";
-	argv[3]=zip_file_path;
-	argv[4]="-d";
-	argv[5]=output_folder;
-
-	if (miniunz(argc, (char**)argv) == 0) {
+	if (miniunz(argc, argv) == 0) {
 		return jm_status_success;
 	} else {
 		return jm_status_error;	
 	}
 }
-
-#ifdef __cplusplus 
-}
-#endif

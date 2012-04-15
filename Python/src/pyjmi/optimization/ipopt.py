@@ -28,15 +28,7 @@ import numpy.ctypeslib as Nct
 import pyjmi
 from pyjmi import jmi
 from pyjmi.jmi_io import export_result_dymola as jmi_io_export_result_dymola
-from pyjmi.common.io import VariableNotFoundError as jmiVariableNotFoundError
-
-#Check to see if pyfmi is installed so that we also catch the error generated
-#from that package
-try:
-    from pyfmi.common.io import VariableNotFoundError as fmiVariableNotFoundError
-    VariableNotFoundError = (jmiVariableNotFoundError, fmiVariableNotFoundError)
-except ImportError:
-    VariableNotFoundError = jmiVariableNotFoundError
+from pyjmi.common.io import VariableNotFoundError
 
 int = N.int32
 N.int = N.int32
@@ -586,8 +578,8 @@ class NLPCollocation(object):
         if non_fixed_interval:
             # A minimum time problem has been solved,
             # interval is normalized to [0,1]
-            t0 = self._model.get('startTime')
-            tf = self._model.get('finalTime')
+            t0 = self._model.get_value('startTime')
+            tf = self._model.get_value('finalTime')
             for i in range(N.size(data,0)):
                 data[i,0] = t0 + data[i,0]*(tf-t0)
 
@@ -658,8 +650,8 @@ class NLPCollocation(object):
         if non_fixed_interval:
             # A minimum time problem has been solved,
             # interval is normalized to [0,1]
-            t0 = self._model.get('startTime')
-            tf = self._model.get('finalTime')
+            t0 = self._model.get_value('startTime')
+            tf = self._model.get_value('finalTime')
             for i in range(N.size(data,0)):
                 data[i,0] = t0 + data[i,0]*(tf-t0)
 
@@ -841,47 +833,56 @@ class NLPCollocation(object):
         # Obtain vector sizes
         n_points = 0
         num_name_hits = 0
-        for name in dx_names:
-            try:
-                traj = res.get_variable_data(name)
-                num_name_hits = num_name_hits + 1
-                if N.size(traj.x)>2:
-                    break
-            except VariableNotFoundError:
-                pass
-                
-        for name in x_names:
-            try:
-                traj = res.get_variable_data(name)
-                num_name_hits = num_name_hits + 1
-                if N.size(traj.x)>2:
-                    break
-            except VariableNotFoundError:
-                pass
-        
-        for name in u_names:
-            try:
-                traj = res.get_variable_data(name)
-                num_name_hits = num_name_hits + 1
-                if N.size(traj.x)>2:
-                    break
-            except VariableNotFoundError:
-                pass
+        if len(dx_names) > 0:
+            for name in dx_names:
+                try:
+                    traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    pass
 
-        for name in w_names:
-            try:
-                traj = res.get_variable_data(name)
-                num_name_hits = num_name_hits + 1
-                if N.size(traj.x)>2:
-                    break
-            except VariableNotFoundError:
-                pass
+        elif len(x_names) > 0:
+            for name in x_names:
+                try:
+                    traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    pass
+
+        elif len(u_names) > 0:
+            for name in u_names:
+                try:
+                    traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    pass
+
+        elif len(w_names) > 0:
+            for name in w_names:
+                try:
+                    traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    pass
+        else:
+            raise Exception(
+                "None of the model variables not found in result file.")
 
         if num_name_hits==0:
             raise Exception(
                 "None of the model variables not found in result file.")
         
-        n_points = N.size(res.get_variable_data("time").t,0)
+        #print(traj.t)
+        
+        n_points = N.size(traj.t,0)
         n_cols = 1+len(dx_names)+len(x_names)+len(u_names)+len(w_names)
 
         var_data = N.zeros((n_points,n_cols))
@@ -960,7 +961,7 @@ class NLPCollocation(object):
                     var_data[:,col_index] = traj.x*dx_factor
                 dx_index = dx_index + 1
                 col_index = col_index + 1
-            except VariableNotFoundError:
+            except:
                 dx_index = dx_index + 1
                 col_index = col_index + 1
                 print "Warning: Could not find trajectory for derivative variable " + name

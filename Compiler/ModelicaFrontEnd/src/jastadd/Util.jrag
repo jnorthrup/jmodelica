@@ -107,7 +107,6 @@ aspect RootAccess {
         beaver.Parser parser = createModelicaParser(scanner);
         sr = (SourceRoot) parser.parse(scanner);
         sr.setFileName(fileName);
-        sr.setFormatting(scanner.getFormattingInfo());
         reader.close();
         return sr;
     }
@@ -119,7 +118,6 @@ aspect RootAccess {
         beaver.Parser parser = createModelicaParser(scanner);
         sr = (SourceRoot) parser.parse(scanner);
         sr.setFileName(fileName);
-        sr.setFormatting(scanner.getFormattingInfo());
         return sr;
     }
     
@@ -235,21 +233,9 @@ aspect NodeMethods {
      * @param end    the node to copy the <code>end</code> member from.
      */
     public void BaseNode.setLocationNoTree(ASTNode start, ASTNode end) {
-    	setLocationNoTree(start, end, start);
-    }
-    
-    /**
-     * \brief Sets the member variables defining the location of the node within
-     *        the source to values copied from two other nodes, that might not be
-     *        in a proper AST.
-     * @param start      the node to copy the <code>start</code> member from.
-     * @param end        the node to copy the <code>end</code> member from.
-     * @param fNameNode  the node to copy the <code>fName</code> member from.
-     */
-    public void BaseNode.setLocationNoTree(ASTNode start, ASTNode end, ASTNode fNameNode) {
         super.setLocation(start, end);
-        if (fNameNode instanceof BaseNode)
-        	fName = ((BaseNode) fNameNode).fName;
+        if (start instanceof BaseNode)
+        	fName = ((BaseNode) start).fName;
     }
     
     public int ASTNode.beginLine() { return getLine(getStart()); }
@@ -1000,11 +986,7 @@ aspect FlatNames {
     }
     
     public FSubscript FExpSubscript.createEvaluated() {
-    	try {
-    		return new FExpSubscript(getFExp().ceval().buildLiteral());
-    	} catch (ConstantEvaluationException e) {
-    		return fullCopy();
-    	}
+    	return new FExpSubscript(getFExp().ceval().buildLiteral());
     }
 
     syn lazy String FQName.name()            = prefixName(0);
@@ -1399,29 +1381,6 @@ aspect FlatNames {
     		fqn.lastFQNamePart().setFArraySubscripts(fas);
         return new FIdUse(fqn); 
     }
-
-    /**
-     * \brief Create an InstAccess based on an FQName.
-     * 
-     */    
-    public InstAccess FQName.createInstComponentAccess() {
-    	InstAccess ia;
-    	Iterator<FQNamePart> it = getFQNameParts().iterator();
-    	FQNamePart fqnp = it.next();
-    	ia = new InstComponentAccess(fqnp.getName(),(Opt)fqnp.getFArraySubscriptsOpt().fullCopy());
-    	while (it.hasNext()) {
-    		fqnp = it.next();
-    		ia = new InstDot(ia,new InstComponentAccess(fqnp.getName(),(Opt)fqnp.getFArraySubscriptsOpt().fullCopy()));
-    	}	
-    	ia.setParent(this);
-    	return ia;
-    }
-    
-    syn nta InstAccess InstComponentDecl.createNameInstAccess() {
-   		InstAccess ia = getFQName().createInstComponentAccess();
-   		ia = dynamicComponentName(ia);
-   		return ia;
-   	}
     
     syn String FType.name();
     eq FRealType.name()        = "Real";
@@ -1692,16 +1651,12 @@ aspect FlatFunctionUtils {
      eq FFunctionCallEquation.getCall().isFunctionCallClause() = true;
      eq FFunctionCallStmt.getCall().isFunctionCallClause()     = true;
      
-     inh boolean FStatement.insideBlockStmt();
+     inh boolean FWhenStmt.insideBlockStmt();
      eq FAlgorithmBlock.getChild().insideBlockStmt() = false;
      eq FIfWhenStmt.getChild().insideBlockStmt()     = true;
      eq FWhileStmt.getChild().insideBlockStmt()      = true;
      eq FForStmt.getChild().insideBlockStmt()        = true;
      eq InstForStmt.getChild().insideBlockStmt()     = true;
-     
-     inh boolean FStatement.insideBranchedStmt();
-     eq FAlgorithmBlock.getChild().insideBranchedStmt() = false;
-     eq FIfWhenStmt.getChild().insideBranchedStmt()     = true;
      
      /**
       * \brief Return the index of the variable assigned by this FFunctionCallLeft among 
@@ -1843,18 +1798,6 @@ aspect ComponentDeclMethods {
     syn boolean ComponentDecl.isOuter() = hasOuter();
 
     /**
-     * Check if a ClassDecl is declared inner.
-     */
-    syn boolean ClassDecl.isInner() = false;
-    eq BaseClassDecl.isInner() = hasInner();
-    
-    /**
-     * Check if a ClassDecl is declared outer.
-     */
-    syn boolean ClassDecl.isOuter() = false;
-    eq BaseClassDecl.isOuter() = hasOuter();
-
-    /**
      * Check if a ComponentDecl is declared parameter.
      */
     syn boolean ComponentDecl.isParameter() {
@@ -1929,50 +1872,6 @@ aspect ComponentDeclMethods {
     syn boolean InstComponentDecl.isFlow() {
     
         if (getComponentDecl().hasTypePrefixFlow())
-            return true;
-    
-        return false;
-    }
-
-    /**
-     * Check if a InstComponentDecl is declared inner.
-     */
-    syn boolean InstComponentDecl.isInner() {
-    
-        if (getComponentDecl().isInner())
-            return true;
-    
-        return false;
-    }
-
-    /**
-     * Check if a InstComponentDecl is declared inner.
-     */
-    syn boolean InstComponentDecl.isOuter() {
-    
-        if (getComponentDecl().isOuter())
-            return true;
-    
-        return false;
-    }
-    
-        /**
-     * Check if a InstClassDecl is declared inner.
-     */
-    syn boolean InstClassDecl.isInner() {
-    
-        if (getClassDecl().isInner())
-            return true;
-    
-        return false;
-    }
-
-    /**
-     * Check if a InstComponentDecl is declared inner.
-     */
-    syn boolean InstClassDecl.isOuter() {
-    
-        if (getClassDecl().isOuter())
             return true;
     
         return false;
@@ -2227,58 +2126,9 @@ aspect StringComments {
 	
 }
 
-aspect Sorting {
-    
-	public static final Comparator<AbstractFVariable> AbstractFVariable.NAME_COMPARATOR = 
-		new Comparator<AbstractFVariable>() {
-			public int compare(AbstractFVariable fv1, AbstractFVariable fv2) {
-				String n1 = (fv1 == null) ? null : fv1.name();
-				String n2 = (fv2 == null) ? null : fv2.name();
-				if (n1 != null)
-					return n1.compareTo(n2);
-				else
-					return (n2 != null) ? 1 : 0;
-			}
-			
-			public boolean equals(Object obj) { 
-				return obj == this; 
-			}
-		};
-	    
-		public static final Comparator<ASTNode> ASTNode.CHILD_ORDER_COMPARATOR =
-		    new Comparator<ASTNode>() {
-				public int compare(ASTNode n1, ASTNode n2) {
-			    	return childIndex(n1) - childIndex(n2);
-			    }
-				
-				private int childIndex(ASTNode n) {
-					return (n.parent == null) ? 0 : n.parent.getIndexOfChild(n);
-				}
-			    
-				public boolean equals(Object obj) { 
-			    	return obj == this; 
-			    }
-			};
-		    
-		public static final Comparator<ASTNode> ASTNode.TOSTRING_COMPARATOR =
-		    new Comparator<ASTNode>() {
-				public int compare(ASTNode n1, ASTNode n2) {
-			    	return n1.toString().compareTo(n2.toString());
-			    }
-			    
-				public boolean equals(Object obj) { 
-			    	return obj == this; 
-			    }
-			};
-
-}
-
 aspect GeneralHelpers {
 	
 	abstract public FExp FExp.fullCopy();
-	abstract public FAbstractFunctionCall FAbstractFunctionCall.fullCopy();
-	abstract public FStatement FStatement.fullCopy();
-	abstract public FEquationType FEquationType.fullCopy();
 	abstract public FTypePrefixVariability FTypePrefixVariability.fullCopy();
 	
 	abstract public FExp FExp.copy();

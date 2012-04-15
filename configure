@@ -640,18 +640,6 @@ WITH_ECLIPSE_TRUE
 SUPERLU_HOME
 WITH_SUPERLU_FALSE
 WITH_SUPERLU_TRUE
-WITH_MINIZIP_FALSE
-WITH_MINIZIP_TRUE
-WITH_MINIZIP
-MINIZIP_HOME
-WITH_ZLIB_FALSE
-WITH_ZLIB_TRUE
-WITH_ZLIB
-ZLIB_HOME
-WITH_EXPAT_FALSE
-WITH_EXPAT_TRUE
-WITH_EXPAT
-EXPAT_HOME
 WITH_SUNDIALS_FALSE
 WITH_SUNDIALS_TRUE
 WITH_SUNDIALS
@@ -799,9 +787,6 @@ enable_libtool_lock
 with_ipopt
 with_casadi
 with_sundials
-with_expat
-with_zlib
-with_minizip
 with_superlu
 with_eclipse
 with_mingw
@@ -822,9 +807,7 @@ CC
 CFLAGS
 CPP
 CXXCPP'
-ac_subdirs_all='ThirdParty/Sundials/sundials-2.4.0
-ThirdParty/Expat/expat-2.0.1
-ThirdParty/Minizip/minizip'
+ac_subdirs_all='ThirdParty/Sundials/sundials-2.4.0'
 
 # Initialize some variables set by options.
 ac_init_help=
@@ -1464,9 +1447,6 @@ Optional Packages:
   --with-casadi           CasADI Python-interface installation directory
                           [default=check]
   --with-sundials         SUNDIALS installation directory [default=check]
-  --with-expat            Expat installation directory [default=check]
-  --with-zlib             Zlib installation directory [default=check]
-  --with-minizip          Minizip installation directory [default=check]
   --with-superlu          SuperLU installation directory [default=check]
   --with-eclipse          Eclipse installation directory [default=no]
   --with-mingw            MinGW installation directory. [default=no]
@@ -18849,7 +18829,6 @@ fi
 
 
 # Checks for libraries.
-# SUNDIALS
 
 # Check whether --with-sundials was given.
 if test "${with_sundials+set}" = set; then :
@@ -18863,6 +18842,12 @@ if test "x$with_sundials" = xno; then :
   sundials="$CURR_DIR/sundials_install"
 fi
 
+#AS_IF([test "x$with_sundials" = xno],
+#      [AC_MSG_RESULT([SUNDIALS installation not specified.])],
+#      [AC_CHECK_FILE($sundials/lib/libsundials_cvode.a,
+#                     [],
+#                     [AC_MSG_FAILURE([SUNDIALS installation specifed, but seems to be corrupt!])])])
+
 if test "x$with_sundials" = xno; then :
   with_sundials=automatic
 fi
@@ -18870,6 +18855,13 @@ fi
 # Set output variables to be exported to the Makefiles
 
 
+#AS_IF([test "x$with_sundials" = xautomatic],
+#      [SUNDIALS_HOME=`cd $srcdir; pwd`/$sundials],
+#      [SUNDIALS_HOME=$sundials])
+
+#AS_IF([test "x$with_sundials" != xno],
+#      [WITH_SUNDIALS="true"],
+#      [WITH_SUNDIALS="false"])
 
  if test "x$with_sundials" != xno; then
   WITH_SUNDIALS_TRUE=
@@ -18882,108 +18874,6 @@ fi
 
 
 SUNDIALS_HOME=$sundials
-
-# Expat
-
-# Check whether --with-expat was given.
-if test "${with_expat+set}" = set; then :
-  withval=$with_expat; expat=$withval
-else
-  with_expat=no
-fi
-
-
-if test "x$with_expat" = xno; then :
-  expat="$CURR_DIR/expat_install"
-fi
-
-if test "x$with_expat" = xno; then :
-  with_expat=automatic
-fi
-
-# Set output variables to be exported to the Makefiles
-
-
-
- if test "x$with_expat" != xno; then
-  WITH_EXPAT_TRUE=
-  WITH_EXPAT_FALSE='#'
-else
-  WITH_EXPAT_TRUE='#'
-  WITH_EXPAT_FALSE=
-fi
-
-
-
-EXPAT_HOME=$expat
-
-# Zlib
-
-# Check whether --with-zlib was given.
-if test "${with_zlib+set}" = set; then :
-  withval=$with_zlib; zlib=$withval
-else
-  with_zlib=no
-fi
-
-
-if test "x$with_zlib" = xno; then :
-  zlib="$CURR_DIR/zlib_install"
-fi
-
-if test "x$with_zlib" = xno; then :
-  with_zlib=automatic
-fi
-
-# Set output variables to be exported to the Makefiles
-
-
-
- if test "x$with_zlib" != xno; then
-  WITH_ZLIB_TRUE=
-  WITH_ZLIB_FALSE='#'
-else
-  WITH_ZLIB_TRUE='#'
-  WITH_ZLIB_FALSE=
-fi
-
-
-
-ZLIB_HOME=$zlib
-
-# Minizip
-
-# Check whether --with-minizip was given.
-if test "${with_minizip+set}" = set; then :
-  withval=$with_minizip; minizip=$withval
-else
-  with_minizip=no
-fi
-
-
-if test "x$with_minizip" = xno; then :
-  minizip="$CURR_DIR/minizip_install"
-fi
-
-if test "x$with_minizip" = xno; then :
-  with_minizip=automatic
-fi
-
-# Set output variables to be exported to the Makefiles
-
-
-
- if test "x$with_minizip" != xno; then
-  WITH_MINIZIP_TRUE=
-  WITH_MINIZIP_FALSE='#'
-else
-  WITH_MINIZIP_TRUE='#'
-  WITH_MINIZIP_FALSE=
-fi
-
-
-
-MINIZIP_HOME=$minizip
 
 
 # Check whether --with-superlu was given.
@@ -19647,13 +19537,7 @@ fi
 subdirs="$subdirs ThirdParty/Sundials/sundials-2.4.0"
 
 
-subdirs="$subdirs ThirdParty/Expat/expat-2.0.1"
-
-
-subdirs="$subdirs ThirdParty/Minizip/minizip"
-
-
-ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/Expat/Makefile ThirdParty/Zlib/Makefile ThirdParty/Minizip/Makefile ThirdParty/CasADi/Makefile JMI/src/Makefile JMI/Makefile docbook/UsersGuide/Makefile Python/jm_ipython.sh Python/jm_python.sh jm_tests"
+ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/CasADi/Makefile JMI/src/Makefile docbook/UsersGuide/Makefile Python/jm_ipython.sh Python/jm_python.sh jm_tests"
 
 
 cat >confcache <<\_ACEOF
@@ -19791,18 +19675,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${WITH_SUNDIALS_TRUE}" && test -z "${WITH_SUNDIALS_FALSE}"; then
   as_fn_error $? "conditional \"WITH_SUNDIALS\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${WITH_EXPAT_TRUE}" && test -z "${WITH_EXPAT_FALSE}"; then
-  as_fn_error $? "conditional \"WITH_EXPAT\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${WITH_ZLIB_TRUE}" && test -z "${WITH_ZLIB_FALSE}"; then
-  as_fn_error $? "conditional \"WITH_ZLIB\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${WITH_MINIZIP_TRUE}" && test -z "${WITH_MINIZIP_FALSE}"; then
-  as_fn_error $? "conditional \"WITH_MINIZIP\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${WITH_SUPERLU_TRUE}" && test -z "${WITH_SUPERLU_FALSE}"; then
@@ -20903,12 +20775,8 @@ do
     "ThirdParty/Blas/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Blas/Makefile" ;;
     "ThirdParty/Lapack/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Lapack/Makefile" ;;
     "ThirdParty/Sundials/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Sundials/Makefile" ;;
-    "ThirdParty/Expat/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Expat/Makefile" ;;
-    "ThirdParty/Zlib/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Zlib/Makefile" ;;
-    "ThirdParty/Minizip/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Minizip/Makefile" ;;
     "ThirdParty/CasADi/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/CasADi/Makefile" ;;
     "JMI/src/Makefile") CONFIG_FILES="$CONFIG_FILES JMI/src/Makefile" ;;
-    "JMI/Makefile") CONFIG_FILES="$CONFIG_FILES JMI/Makefile" ;;
     "docbook/UsersGuide/Makefile") CONFIG_FILES="$CONFIG_FILES docbook/UsersGuide/Makefile" ;;
     "Python/jm_ipython.sh") CONFIG_FILES="$CONFIG_FILES Python/jm_ipython.sh" ;;
     "Python/jm_python.sh") CONFIG_FILES="$CONFIG_FILES Python/jm_python.sh" ;;

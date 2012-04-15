@@ -65,6 +65,7 @@ def run_demo(with_plots=True):
 		
         plt.subplot(313)
         plt.plot(t,u)
+        plt.title('constraint')
         plt.grid()
         plt.ylabel('u')
 		

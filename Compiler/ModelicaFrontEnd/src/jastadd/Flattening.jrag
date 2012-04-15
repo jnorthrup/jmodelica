@@ -82,11 +82,7 @@ aspect Flattening {
 	}
 	
 	public void InstFunctionCall.flattenUsedFuncsAndEnums(FClass fc) {
-		if (getName().myInstClassDecl().inOrIsOuter()) {
-			getName().myInstClassDecl().myInnerInstClassDecl().flattenFunction(fc);
-		} else {
-			getName().myInstClassDecl().flattenFunction(fc);
-		}
+		getName().myInstClassDecl().flattenFunction(fc);
 		getArgs().flattenUsedFuncsAndEnums(fc);
 	}
 	
@@ -150,28 +146,13 @@ aspect Flattening {
 			fab.ensureReturn();
 			ffd.setFAlgorithmBlock(fab);
 			
-			AnnotationNode functionDer = annotation("derivative");
-			
-			if (functionDer.exists()) {
-				String functionDerName = functionDer.string();
-				if (functionDerName==null) {
-					ValueModification vm = ((CompleteModification)((ClassModification)functionDer.ast()).getParent()).getValueModification();	
-					functionDerName = vm.getExp().prettyPrint("");
-				}
-				List<FIdUse> noDerivatives = new List<FIdUse>();
-				for (AnnotationNode nd : functionDer) {
-					if (nd!=null && "noDerivative".equals(nd.name())) {
-						if (nd.string() != null) {
-							noDerivatives.add(new FIdUse(nd.string()));
-						}
-					}	
-				}				
-
-				InstAccess func_der = dynamicClassName(new InstClassAccess(functionDerName));
+			String functionDerivative = annotation("derivative").string();
+			if (functionDerivative!=null) {
+				InstAccess func_der = dynamicClassName(new InstClassAccess(functionDerivative));
 				InstBaseClassDecl fd_decl = (InstBaseClassDecl)func_der.myInstClassDecl();
 				if (!fd_decl.isUnknown()) {
 					fd_decl.flattenThisFunction(fc);
-					ffd.setFDerivativeFunction(new FDerivativeFunction(new FIdUse(new FQName(fd_decl.qualifiedName())),1,noDerivatives));
+					ffd.setFDerivativeFunction(new FDerivativeFunction(new FIdUse(new FQName(fd_decl.qualifiedName())),1));
 				}
 			}
 			
@@ -501,7 +482,7 @@ aspect Flattening {
 	}
 	
 	public void InstComponentDecl.flatten(FClass fc) {
-		if (!isDisabled()  && !(isOuter() && !isInner())) {
+		if (!isDisabled()) {
 			super.flatten(fc);
 		}
 	}
@@ -520,7 +501,7 @@ aspect Flattening {
 	}
 	
 	public void InstPrimitive.flatten(FClass fc) {
-		if (!isDisabled() && !(isOuter() && !isInner())) {
+		if (!isDisabled()) {
 			fc.addUniqueFVariable(createFVariable());
 			if (isFlow()) {
 				// TODO: Add expanded array subscripts
@@ -1022,7 +1003,6 @@ aspect FlatExpressions {
 	public FIfWhenElseEquation FIfWhenElseEquation.flattenEqn(FQName prefix, FClass fc) {
 		FIfWhenElseEquation res = createEmptyNode();
 		res.setType((FEquationType) getType().fullCopy());
-		res.eliminateOnParamTest = eliminateOnParamTest;
 		for (FAbstractEquation ae : getFAbstractEquations()) {
 			FAbstractEquation feqn = ae.flattenEqn(prefix, fc);
 			if (feqn != null)
@@ -1225,11 +1205,7 @@ aspect FlatExpressions {
 				}
 			}
 		} 
-		if (ia.myInstComponentDecl().inOrIsOuter()) {
-			return new FIdUseExp(ia.myInstComponentDecl().myInnerInstComponentDecl().createNameInstAccess().flatten(new FQName()));
-		} else {
-			return new FIdUseExp(ia.flatten(prefix));
-		}
+		return new FIdUseExp(ia.flatten(prefix));
 	}
 	
 	// TODO: This assumes that no InstDot has an InstDot as left child. 
@@ -1443,17 +1419,13 @@ aspect FlatExpressions {
 		return new FUnknownSizeExp(null, getDim());
 	}
 	
-	public FExp InstDerExp.flatten(FQName prefix) {
-		return getFExp().flattenDer(prefix, order());
-	}
-	
-	public FExp FExp.flattenDer(FQName prefix, int order) {
-		return diff(TIME, order).flatten(prefix);
-	}
-	
-	public FDerExp FInstAccessExp.flattenDer(FQName prefix, int order) {
-		FIdUse use = new FIdUse(getInstAccess().flatten(prefix));
-		return (order == 1) ? new FDerExp(use) : new FHDerExp(use, order);
+	public FDerExp InstDerExp.flatten(FQName prefix) {
+		/* This should only ever be called on InstDerExps that has an FInstAccessExp 
+		 * as its FExp. All more complex "der()" expressions should have been either 
+		 * rewritten in the instance tree or have generated an error during checks. 
+		 */
+		FQName var = ((FInstAccessExp) getFExp()).getInstAccess().flatten(prefix);
+		return new FDerExp(new FIdUse(var));
 	}
 	
 	public FInfArgsFunctionCall FInfArgsFunctionCall.flatten(FQName prefix) {
@@ -1504,14 +1476,7 @@ aspect FlatExpressions {
 		List args = new List();
 		for (InstFunctionArgument e : getArgs()) 
 			args.add(e.flatten(prefix));
-		FIdUse name;	
-		if (getName().myInstClassDecl().inOrIsOuter()) {
-			name = new FIdUse(new FQName(getName().myInstClassDecl().myInnerInstClassDecl().qualifiedName()));
-			//return new FIdUseExp(ia.myInstComponentDecl().myInnerInstComponentDecl().createNameInstAccess().flatten(new FQName()));
-		} else {
-			name = new FIdUse(new FQName(getName().myInstClassDecl().qualifiedName()));	
-		}
-		//FIdUse name = new FIdUse(new FQName(getName().myInstClassDecl().qualifiedName()));
+		FIdUse name = new FIdUse(new FQName(getName().myInstClassDecl().qualifiedName()));
 		Size[] sizes = new Size[myOutputs().size()];
 		FFunctionCall res = createFFunctionCall(name, args, sizes);
 		if (isFunctionCallClause()) 
@@ -1597,7 +1562,7 @@ aspect InstantiatedExpressions {
 		   o = new Opt(new FStringComment(getComment().getStringComment().getComment()));
 	    else
 	    	o = new Opt();
-		FConnectClause c = new FConnectClause(equationType(), o, this,
+		FConnectClause c = new FConnectClause(equationType(), o, 
 				new FIdUseInstAccess(getConnector1().newInstAccess()),
 				new FIdUseInstAccess(getConnector2().newInstAccess()));
 		c.setLocation(this);

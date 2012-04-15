@@ -41,9 +41,9 @@ import org.xml.sax.SAXException;
 public class OptionRegistry {
 	
 		private enum DefOpt {
-			DIVIDE_BY_VARS_IN_TEARING  ("divide_by_vars_in_tearing", false, 
+			DIVIDE_BY_PARS_IN_TEARING  ("divide_by_vars_in_tearing", false, 
 					"If this option is set to true (default is false), a less restrictive strategy is used for solving equations " +
-					"in the tearing algorithm. Specifically, division by parameters and variables is permitted, by default no " +
+					"in the tearing algorithm. Specifically, division by parameters and variables is permitted, by default no" +
 					"such divisions are made during tearing."),
 			ENABLE_TEARING   ("enable_tearing", false, 
 					"If this option is set to true (default is false), tearing of equation systems is enabled."),
@@ -118,9 +118,6 @@ public class OptionRegistry {
 			CHECK_PARAM_EVAL ("check_evaluation_of_parameter_binding_expressions", true, 
 					"Check if parameter an attribute binding expressions should be possible to evaluate during compilation." +
 					"Default is true."),
-			STATE_INIT_EQ ("state_initial_equations", false, 
-							"Neglect initial equations in the model and add initial equations, and parameters, for the states." +
-							"Default is false."),
 			INLINE_FUNCS ("inline_functions", false, 
 					"Perform function inlining on model after flattening (default is false)");
 						
@@ -144,10 +141,6 @@ public class OptionRegistry {
 			
 			private DefOpt(String k, int v, String d) {
 				this(k, new Integer(v), d);
-			}
-			
-			public String toString() {
-				return key;
 			}
 		}
 

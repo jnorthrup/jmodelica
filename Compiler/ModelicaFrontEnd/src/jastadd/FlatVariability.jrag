@@ -188,49 +188,47 @@ aspect FlatVariability {
 	syn lazy Set<InstComponentDecl> FAbstractEquation.assignedSet() = Collections.emptySet();
 	eq InstForClauseE.assignedSet()      = assignedSetFromEqns(getFAbstractEquations());
 	eq FIfWhenElseEquation.assignedSet() = assignedSetFromEqns(getFAbstractEquations());
-	eq FEquation.assignedSet()           = getLeft().accessedVarSet();
+	eq FEquation.assignedSet() {
+		Set<InstComponentDecl> res = new HashSet<InstComponentDecl>();
+		getLeft().addAccessedVar(res);
+		return res;
+	}
 	eq FFunctionCallEquation.assignedSet() {
-		LinkedHashSet<InstComponentDecl> s = new LinkedHashSet<InstComponentDecl>();
-		for (FFunctionCallLeft left : getLefts()) {
-			if (left.hasFExp()) {
-				s.addAll(left.getFExp().accessedVarSet());
-			}
-		}
-		return s;
+		Set<InstComponentDecl> res = new HashSet<InstComponentDecl>();
+		for (FFunctionCallLeft left : getLefts())
+			if (left.hasFExp())
+				left.getFExp().addAccessedVar(res);
+		return res;
 	}
 	
 	/**
-	 * If this is an instance tree access, return set containing accessed var, otherwise empty set.
+	 * If this is an instance tree access, add accessed variable to set.
 	 */
-	syn Set<InstComponentDecl> FExp.accessedVarSet() = Collections.emptySet();
-	eq FInstAccessExp.accessedVarSet()               = getInstAccess().accessedVarSet();
-	eq FIdUseExp.accessedVarSet()                    = getFIdUse().accessedVarSet();
+	public void FExp.addAccessedVar(Set<InstComponentDecl> set) {}
+	
+	public void FInstAccessExp.addAccessedVar(Set<InstComponentDecl> set) {
+		getInstAccess().addAccessedVar(set);
+	}
+	
+	public void FIdUseExp.addAccessedVar(Set<InstComponentDecl> set) {
+		getFIdUse().addAccessedVar(set);
+	}
 	
 	/**
-	 * If this is an instance tree access, return set containing accessed var, otherwise empty set.
+	 * If this is an instance tree access, add accessed variable to set.
 	 */
-	syn Set<InstComponentDecl> FIdUse.accessedVarSet() = Collections.emptySet();
-	eq FIdUseInstAccess.accessedVarSet()               = getInstAccess().accessedVarSet();
+	public void FIdUse.addAccessedVar(Set<InstComponentDecl> set) {}
+	
+	public void FIdUseInstAccess.addAccessedVar(Set<InstComponentDecl> set) {
+		getInstAccess().addAccessedVar(set);
+	}
 	
 	/**
-	 * Get set containing accessed var.
+	 * Add accessed variable to set.
 	 */
-	syn Set<InstComponentDecl> InstAccess.accessedVarSet() = 
-		Collections.singleton(myInstComponentDecl());
-	
-	/**
-	 * If this is an assignment equation, return the variable assigned.
-	 * 
-	 * Only works in flat tree.
-	 */
-	syn AbstractFVariable FAbstractEquation.assignedFV() = null;
-	eq FEquation.assignedFV()                            = getLeft().assignedFV();
-	
-	/**
-	 * If this is an flat tree access, return set containing accessed var, otherwise empty set.
-	 */
-	syn AbstractFVariable FExp.assignedFV() = null;
-	eq FIdUseExp.assignedFV()               = myFV();
+	public void InstAccess.addAccessedVar(Set<InstComponentDecl> set) {
+		set.add(myInstComponentDecl());
+	}
 	
 	
 	syn FTypePrefixVariability FVariable.variability() = getFTypePrefixVariability();

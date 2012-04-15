@@ -34,7 +34,6 @@ from pyjmi.optimization import ipopt
 from pyfmi.fmi import FMUModel
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
-path_to_results = os.path.join(get_files_path(), 'Results')
 
 class TestIO:
     """Tests IO"""
@@ -55,29 +54,8 @@ class TestIO:
         # Load the dynamic library and XML data
         self.fname = "VDP_pack_VDP_Opt_Min_Time.jmu"
         self.vdp = JMUModel(self.fname)
-    
-    @testattr(stddist = True)
-    def test_result_dymola_textual_naming_convention(self):
-        """
-        Assert that we can read both der(PI.x) and PI.der(x) variables. Also tests
-        that we can read u[2, 1] and u[2,1].
-        """
-        res = ResultDymolaTextual(os.path.join(path_to_results, "VDP_pack_VDP_Test_result_correct.txt"))
-        assert res.get_variable_index("vdp.der(x1)") == res.get_variable_index("der(vdp.x1)")
-        assert res.get_variable_index("u[2,1]") == res.get_variable_index("u[2, 1]")
         
-        res = ResultDymolaTextual(os.path.join(path_to_results, "VDP_pack_VDP_Test_result_incorrect.txt"))
-        assert res.get_variable_index("vdp.der(x1)") == res.get_variable_index("der(vdp.x1)")
-        assert res.get_variable_index("u[2, 1]") == res.get_variable_index("u[2, 1]")
-    
-    @testattr(stddist = True)
-    def test_result_dymola_textual_finding_derivative(self):
-        """
-        Test so that the correct alias derivatives are found.
-        """
-        res = ResultDymolaTextual(os.path.join(path_to_results, "VDP_pack_VDP_Test_result_modified_for_alias.txt"))
-        assert res.get_variable_index("vdp.der(x1)") == res.get_variable_index("der(vdp.u)")
-    
+        
     @testattr(ipopt = True)
     def test_dymola_export_import(self):
         """

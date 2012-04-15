@@ -53,12 +53,15 @@ public class EquationBlockFactory {
 		return l;
 	}
 
-	static SimpleEquationBlock createSimpleEquationBlock(ArrayList<FAbstractEquation> eqns, 
-	                                                     ArrayList<FVariable> fvs, boolean solve) {
+	/*
+	 * This method takes a list of Eq objects and reate an equation blocks
+	 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
+	 */
+	static SimpleEquationBlock createSimpleEquationBlock(Stack<Eq> component, boolean solve) {
 				
-		if (eqns.size()==1 ) {
-			FAbstractEquation e = eqns.get(0);
-			FVariable fv = fvs.get(0);
+		if (component.size()==1 ) {
+			FAbstractEquation e = component.get(0).getEquation();
+			FVariable fv = component.get(0).getMatching().getVariable();
 			if (e instanceof FEquation) {
 				FEquation ee = (FEquation)e;
 				if (solve && ee.isSolved(fv.name())) { // Solved scalar equation
@@ -67,65 +70,46 @@ public class EquationBlockFactory {
 					return new UnsolvedScalarEquationBlock(ee,fv);				
 				}
 			}
-
+			// When Equation
+			if (e instanceof FWhenEquation) {
+				FWhenEquation ee = (FWhenEquation)e;
+				if (solve && ee.isSolved(fv.name())) {
+					return new WhenEquationBlock(ee,fv);
+				} 
+			}
+			
 			// If equation TODO
 		}
 		
-		// Check if if the component corresponds to one single function 
-		// call equation or when equation
-		FAbstractEquation e = eqns.get(0);
-		boolean one_equation = true;
-		for (FAbstractEquation eqn : eqns) {
-			if (eqn != e) {
-				one_equation = false;
-				break;
+		// Check if the component contains a single function call equation		
+		FAbstractEquation e = component.get(0).getEquation();
+		if (e instanceof FFunctionCallEquation) {		
+			FFunctionCallEquation fce = (FFunctionCallEquation)e;
+			boolean one_equation = true;
+			for (Eq eqn : component) {
+				if (eqn.getEquation() != e) {
+					one_equation = false;
+					break;
+				}
+			}
+			if (one_equation) {
+				// Loop over all unknowns in the component
+				boolean isSolvable = true;
+				ArrayList<FVariable> l = new ArrayList<FVariable>();
+				for (Eq eqn : component) {
+					l.add(eqn.getMatching().getVariable());
+					if (!eqn.getEquation().isSolved(eqn.getMatching().getVariable().name())) {
+						isSolvable = false;
+					}
+				} // Solved FunctionCallEquation				
+				if (isSolvable && solve) {
+					return new SolvedFunctionCallEquationBlock(fce,l);
+				} else { // Unsolved FunctionCallEquation
+					return new UnsolvedFunctionCallEquationBlock(fce,l);
+				}				
 			}
 		}
-
-		// When Equation
-		if (e instanceof FWhenEquation && one_equation) {
-			FWhenEquation ee = (FWhenEquation)e;
-				return new WhenEquationBlock(ee);
-		}
-
-		
-		// Check if the component contains a single function call equation		
-		if (e instanceof FFunctionCallEquation && one_equation) {		
-			FFunctionCallEquation fce = (FFunctionCallEquation)e;
-			// Loop over all unknowns in the component
-			boolean isSolvable = true;
-			ArrayList<FVariable> l = new ArrayList<FVariable>();
-			for (int i=0;i<eqns.size();i++) {
-				l.add(fvs.get(i));
-				if (!eqns.get(i).isSolved(fvs.get(i).name())) {
-					isSolvable = false;
-				}
-			} // Solved FunctionCallEquation				
-			if (isSolvable && solve) {
-				return new SolvedFunctionCallEquationBlock(fce,l);
-			} else { // Unsolved FunctionCallEquation
-				return new UnsolvedFunctionCallEquationBlock(fce,l);
-			}				
-		}
 		return null;
-	}
-
-
-	/*
-	 * This method takes a list of Eq objects and reate an equation blocks
-	 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
-	 */
-	static SimpleEquationBlock createSimpleEquationBlock(Stack<Eq> component, boolean solve) {
-		ArrayList<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
-		ArrayList<FVariable> fvs = new ArrayList<FVariable>();
-		
-		for (Eq eqn : component) {
-			fvs.add(eqn.getMatching().getVariable());
-			eqns.add(eqn.getEquation());
-		} 
-
-		return createSimpleEquationBlock(eqns,fvs,solve);
-		
 	}
 
 	/*
@@ -208,9 +192,7 @@ public class BiPGraph {
 	
 
 	public ArrayList<Eq> getEquations(FAbstractEquation eqn) {
-		ArrayList<Eq> l = new ArrayList<Eq>();
-		l.addAll(equationIndexMap.get(eqn));
-		return l;
+		return equationIndexMap.get(eqn);
 	}
 
 	public Eq addEquation(String name, String description,
@@ -236,7 +218,6 @@ public class BiPGraph {
 	
 	public Eq replaceEquation(String name, String description, FAbstractEquation eqn) {
 		Eq e = equationMap.get(name);
-		
 		if (e==null) {
 			e = new Eq(name,description,eqn);
 			equations.add(e);
@@ -255,9 +236,8 @@ public class BiPGraph {
 			Eq ee = new Eq(name,description,eqn);
 			equations.set(equations.indexOf(e),ee);
 			equationMap.put(e.getName(),ee);
-			ArrayList<Eq> l = equationIndexMap.get(e.getEquation());
 			removeFromEquationIndexMap(e.getEquation(),e);
-			insertIntoEquationIndexMap(e.getEquation(),ee);
+			insertIntoEquationIndexMap(eqn,ee);
 			e = ee;
 		}
 		return e;
@@ -375,7 +355,7 @@ public class BiPGraph {
 			int n_eq = e.numScalarEquations();
 			LinkedHashSet<Eq> groupMembers = new LinkedHashSet<Eq>();
 			for (int i=0;i<n_eq;i++) {
-				eqn = addEquation(eqNamePrefix+k,e.prettyPrint(""),e);
+				eqn = addEquation("eq_"+k,e.prettyPrint(""),e);
 				groupMembers.add(eqn);
 				k++;
 
@@ -887,9 +867,6 @@ public class BiPGraph {
 			
 			Therefore, all equations in blocks containing differentiated
 			equations are treated in one block.
-			
-			NOTE: This algorithm is still a prototype and it needs to be refactored.
-			This will be done when the final algorithm have been settled.
 		*/
 		
 		BLT blt = computeBLT();
@@ -955,67 +932,43 @@ public class BiPGraph {
 				}
 			}
 									
-			// Step 4: Select independent columns.
-			// In a first attempt we don't add variables with StateSeclect.prefer
-			// If it is possible to find a matching, then we proceed. If not, then
-			// We start over and all all variables, also the ones with StateSelect.prefer
-			// This algorithm is a first approximation of what we need, since we must also
-			// have to support avoid and never.
-			BiPGraph gd = new BiPGraph(getFClass(),"",""); 
-			boolean addSSPrefer = false;
-			boolean done = false;			
-			while (!done) {
-				if (!addSSPrefer) {
-					ASTNode.log.info("First try if it is possible to adhere to StateSelect.prefer");
-				} else {
-					ASTNode.log.info("Not possible to adhere to StateSelect.prefer, neglect");
-				}
-				gd = new BiPGraph(getFClass(),"","");
-						
-				// Add variables to the graph
-				for (FVariable fv : z) {
-					gd.addVariable(fv.name(),"",fv);     
-				}
+			// Step 4: Select independent columns: simple matching will do for 
+			// now
+			BiPGraph gd = new BiPGraph(getFClass(),"","");
 					
-				int k = 1;
-				Eq eqn = null;
-				Var v = null;
-				// Add the equations to the graph
-				for (FAbstractEquation e : h) {
+			// Add variables to the graph
+			for (FVariable fv : z) {
+				gd.addVariable(fv.name(),"",fv);     
+			}
 				
-					int n_eq = e.numScalarEquations();
-					
-					for (int i=0;i<n_eq;i++) {
-						ASTNode.log.info("*** " + e.prettyPrint(""));
-						eqn = gd.addEquation("eq_"+k,e.prettyPrint(""),e);
-						k++;
-					
-						for (FVariable y : e.variables()) { 
-							FRealVariable frv = (FRealVariable)((FRealVariable)y).getMeIntegrated();
-							if (z.contains(y) && (addSSPrefer || frv==null || (frv!=null && frv.stateSelectAttribute()!=FRealVariable.StateSelect.PREFER))) {
-								ASTNode.log.info(" ** " + y.prettyPrint("") + " " + z.contains(y));	
-								v = gd.getVariable(y.name()); 
-								gd.addEdge(eqn,v);
-							} 
-						} 
-					}
-				}
-						
-				ASTNode.log.info(gd.toString());
-				// Run matching
-				gd.maximumMatching(true);	
-				ASTNode.log.info(gd.printMatching());
+			int k = 1;
+			Eq eqn = null;
+			Var v = null;
+			// Add the equations to the graph
+			for (FAbstractEquation e : h) {
 			
-				// Check if we found a matching
-				if (gd.getUnmatchedEquations().size()==0) {
-					done = true;
-				} else if (!addSSPrefer && gd.getUnmatchedEquations().size()!=0) {
-					addSSPrefer = true;
-					done = false;
-				} else {
-					done = true;	
+				int n_eq = e.numScalarEquations();
+				
+				for (int i=0;i<n_eq;i++) {
+					ASTNode.log.info("*** " + e.prettyPrint(""));
+					eqn = gd.addEquation("eq_"+k,e.prettyPrint(""),e);
+					k++;
+				
+					for (FVariable y : e.variables()) { 
+						ASTNode.log.info(" ** " + y.prettyPrint("") + " " + z.contains(y));
+						if (z.contains(y)) {
+							v = gd.getVariable(y.name()); 
+							gd.addEdge(eqn,v);
+						} 
+					} 
 				}
 			}
+					
+			ASTNode.log.info(gd.toString());
+			// Run matching
+			gd.maximumMatching(true);	
+			ASTNode.log.info(gd.printMatching());
+					
 			// The matched variables are selected as dummy derivatives
 			for (Var vv : gd.getMatchedVariables()) {
 				zHat.add(vv.getVariable());
@@ -1359,12 +1312,7 @@ public class BiPGraph {
 	public void removeFromEquationIndexMap(FAbstractEquation eqn, Eq e) {
 		ArrayList<Eq> l = equationIndexMap.get(eqn);
 		if (l!=null) {
-			for (Eq ee : l) {
-				if (e==ee) {
-        			l.remove(e);
-        			return;
-        		}
-        	}
+			l.remove(e);
 		}
 	}
 	

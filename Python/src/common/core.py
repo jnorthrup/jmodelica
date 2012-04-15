@@ -29,15 +29,8 @@ import numpy as N
 import numpy.ctypeslib as Nct
 
 # location for temporary JModelica files
-def get_temp_location():
-    if sys.platform == 'win32':
-        return os.path.join(tempfile._get_default_tempdir(),'JModelica.org')
-    elif sys.platform == 'darwin':
-        return os.path.join(tempfile._get_default_tempdir(),'JModelica.org')
-    else:
-        return os.path.join(tempfile._get_default_tempdir(),os.environ['USER'],'JModelica.org')
+tmp_location = os.path.join(tempfile._get_default_tempdir(),'JModelica.org')
 
-tmp_location = get_temp_location()
 
 class BaseModel(object):
     """ 
@@ -386,26 +379,16 @@ def unzip_unit(archive, path='.'):
         archive = zipfile.ZipFile(os.path.join(path,archive))
     except IOError:
         raise IOError('Could not locate the file: ' + str(archive))
-
-    # create temporary directory
-    tmpdir = create_temp_dir()
     
-    # extract all into temp_dir
-    archive.extractall(path=tmpdir)
-    
-    return tmpdir
-
-
-def create_temp_dir():
-    """
-    Create a temporary directory for extracting an FMU in or similar
-    """
     # create JModelica directory for temporary files (if not already created)
     if not os.path.exists(tmp_location):
-        os.makedirs(tmp_location)
+        os.mkdir(tmp_location)
 
     # create temporary directory
     tmpdir = tempfile.mkdtemp(prefix='jm_tmp', dir=tmp_location)
+    
+    # extract all into temp_dir
+    archive.extractall(path=tmpdir)
     
     return tmpdir
 
@@ -460,6 +443,15 @@ def list_to_string(item_list):
         ret_str =ret_str+str(l)+os.pathsep
     return ret_str
 
+def get_platform_libpath():
+    #Detect libray path depending on platform
+    if sys.platform == 'win32':
+        return 'PATH'
+    elif sys.platform == 'darwin':
+        return 'DYLD_LIBRARY_PATH'
+    else:
+        return 'LD_LIBRARY_PATH'
+
 ## This is an api comment.
 # @param libname Name of library.
 # @param path Path to library.
@@ -488,32 +480,30 @@ def load_DLL(libname, path):
     
     See also http://docs.python.org/library/ct.html
     """
-    if sys.platform == 'win32':
-        # Temporarily add the value of 'path' to system library path in case the dll 
-        # is dependent on other dlls. In that case they should be located in 'path'.
-        libpath = 'PATH'
-        if os.environ.has_key(libpath):
-            oldpath = os.environ[libpath]
-        else:
-            oldpath = None
-        
-        if oldpath is not None:
-            newpath = path + os.pathsep + oldpath
-        else:
-            newpath = path
-        os.environ[libpath] = newpath
+
+    # Temporarily add the value of 'path' to system library path in case the dll 
+    # is dependent on other dlls. In that case they should be located in 'path'. 
+    libpath = get_platform_libpath()
+            
+    if os.environ.has_key(libpath):
+        oldpath = os.environ[libpath]
+    else:
+        oldpath = None
     
+    if oldpath is not None:
+        newpath = path + os.pathsep + oldpath
+    else:
+        newpath = path
+        
+    os.environ[libpath] = newpath
     # Don't catch this exception since it hides the actual source
     # of the error.
     dll = Nct.load_library(libname, path)
-    
-    if sys.platform == 'win32':
-        # Set back to the old path
-        if oldpath is not None:
-            os.environ[libpath] = oldpath
-        else:
-            del os.environ[libpath]
-            
+    # Set back to the old path
+    if oldpath is not None:
+        os.environ[libpath] = oldpath
+    else:
+        del os.environ[libpath]
     return dll
 
 class Trajectory:
@@ -521,7 +511,7 @@ class Trajectory:
     Base class for representation of trajectories.
     """
     
-    def __init__(self, abscissa, ordinate, tol=1e-8):
+    def __init__(self, abscissa, ordinate):
         """
         Default constructor for creating a tracjectory object.
 
@@ -530,33 +520,27 @@ class Trajectory:
             abscissa -- 
                 One dimensional numpy array containing the n abscissa 
                 (independent) values.
-            
+                
             ordinate -- 
                 Two dimensional n x m numpy matrix containing the ordiate 
                 values. The matrix has the same number of rows as the abscissa 
                 has elements. The number of columns is equal to the number of
                 output variables.
-            
-            tol --
-                Minimum distance between abcissae. If two abscissae are closer
-                than the given tolerance, the largest one is moved.
         """
-        self._abscissa = abscissa.astype('float')
+        self._abscissa = abscissa
         self._ordinate = ordinate
         self._n = N.size(abscissa)
         self._x0 = abscissa[0]
         self._xf = abscissa[-1]
-        
-        if not N.all(N.diff(self.abscissa) >= 0):
-            raise Exception("The abscissae must be increasing.")
-        
-        [double_point_indices] = N.nonzero(N.abs(N.diff(self.abscissa)) <= tol)
-        while (len(double_point_indices) > 0):
-            for i in double_point_indices:
-                 self.abscissa[i+1] = self.abscissa[i+1] + tol
-            [double_point_indices] = N.nonzero(
-                    N.abs(N.diff(self.abscissa)) <= tol)
-    
+
+        if not N.all(N.diff(self.abscissa)>=0):
+            raise Exception("The abscissa must be increasing.")
+
+        small = 1e-8
+        double_point_indices = N.nonzero(N.abs(N.diff(self.abscissa))<=small)
+        for i in double_point_indices:
+            self.abscissa[i+1] = self.abscissa[i+1] + small
+
     def eval(self,x):
         """
         Evaluate the trajectory at a specifed abscissa.

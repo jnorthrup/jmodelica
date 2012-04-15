@@ -33,9 +33,10 @@ def run_demo(with_plots=True):
     """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
+    model_name = 'VDP_pack.VDP_Opt_Min_Time'
+    mo_file = curr_dir+'/files/VDP.mop'
 
-    jmu_name = compile_jmu("JMExamples_opt.VDP_Opt_Min_Time", 
-    (curr_dir+"/files/JMExamples_opt.mop",curr_dir+"/files/JMExamples.mo"))
+    jmu_name = compile_jmu(model_name, mo_file)
     vdp = JMUModel(jmu_name)
     res = vdp.optimize()
 
@@ -64,7 +65,7 @@ def run_demo(with_plots=True):
         plt.ylabel('x2')
         
         plt.subplot(313)
-        plt.plot(t,u,'x-')
+        plt.plot(t,u)
         plt.grid()
         plt.ylabel('u')
         plt.xlabel('time')

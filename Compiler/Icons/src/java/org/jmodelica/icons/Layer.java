@@ -6,10 +6,7 @@ import org.jmodelica.icons.primitives.GraphicItem;
 
 
 
-public class Layer extends Observable implements Observer {
-	
-	public static final Object COORDINATE_SYSTEM_UPDATED = new Object();
-	public static final Object GRAPHICS_SWAPPED = new Object();
+public class Layer {
 	
 	private CoordinateSystem coordinateSystem;
 	private ArrayList<GraphicItem> graphics;
@@ -23,15 +20,17 @@ public class Layer extends Observable implements Observer {
 	 */
 	public Layer(CoordinateSystem coordinateSystem, ArrayList<GraphicItem> graphics) {
 		this.coordinateSystem = coordinateSystem;
-		setGraphics(graphics);
+		this.graphics = graphics;
 	}
 	
 	public Layer(CoordinateSystem coordinateSystem) {
-		this(coordinateSystem, new ArrayList<GraphicItem>());
+		this.graphics = new ArrayList<GraphicItem>();
+		this.coordinateSystem = coordinateSystem;
 	}
 	
 	private Layer() {
-		this(CoordinateSystem.DEFAULT_COORDINATE_SYSTEM);
+		this.coordinateSystem = null;
+		this.graphics = null;
 	}
 	
 	public CoordinateSystem getCoordinateSystem() {
@@ -42,21 +41,12 @@ public class Layer extends Observable implements Observer {
 		return graphics;
 	}
 	
-	public void setGraphics(ArrayList<GraphicItem> newGraphics) {
-		if (graphics == newGraphics)
-			return;
-		graphics = newGraphics;
-		notifyObservers(GRAPHICS_SWAPPED);
+	public void setGraphics(ArrayList<GraphicItem> graphics) {
+		this.graphics = graphics;
 	}
 	
 	public String toString() {
 		String s = "coordinateSystem = " + coordinateSystem + "\ngraphics: " + graphics;
 		return s;
-	}
-
-	@Override
-	public void update(Observable o, Object flag, Object additionalInfo) {
-		if (o == coordinateSystem)
-			notifyObservers(COORDINATE_SYSTEM_UPDATED);
 	}
 }

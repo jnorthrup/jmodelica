@@ -189,32 +189,6 @@ end TransformCanonicalTests.TransformCanonicalTest6;
     parameter Real p12 = log(1);
     parameter Real p13 = log10(1);   	
   end TransformCanonicalTest6;
-  
-  
-  model TransformCanonicalTest7
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="TransformCanonicalTest7",
-         description="Provokes a former bug that was due to tree traversals befor the flush after scalarization",
-         flatModel="
-fclass TransformCanonicalTests.TransformCanonicalTest7
- parameter Integer p1 = 2 /* 2 */;
- parameter Integer p2;
- Real x[1];
- Real y;
-parameter equation
- p2 = p1;
-equation
- x[1] = 1;
- y = 2;
-end TransformCanonicalTests.TransformCanonicalTest7;
-")})));
-
-	  parameter Integer p1 = 2;
-	  parameter Integer p2 = p1;
-	  Real x[p2] = 1:p2;
-	  Real y = x[p2]; 
-  end TransformCanonicalTest7;
 
 
   model EvalTest1
@@ -2342,30 +2316,27 @@ equation
   end when;
 end WhenEqu4;
 
-
-model WhenEqu45
+/*
+model WhenEqu5
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="WhenEqu45",
+         name="WhenEqu5",
          description="Basic test of when equations",
          equation_sorting = true,         
          flatModel="
-		 
-fclass TransformCanonicalTests.WhenEqu45
- discrete TransformCanonicalTests.WhenEqu45.E e(start = TransformCanonicalTests.WhenEqu45.E.b);
+fclass TransformCanonicalTests.WhenEqu5
+ discrete TransformCanonicalTests.WhenEqu5.E e(start = TransformCanonicalTests.WhenEqu5.E.b);
  Real t(start = 0);
 initial equation 
  t = 0;
- pre(e) = TransformCanonicalTests.WhenEqu45.E.b;
 equation
  der(t) = 1;
  when time > 1 then
-  e = TransformCanonicalTests.WhenEqu45.E.c;
+  e = TransformCanonicalTests.WhenEqu5.E.c;
  end when;
 
- type TransformCanonicalTests.WhenEqu45.E = enumeration(a, b, c);
-end TransformCanonicalTests.WhenEqu45;
-		 
+ type TransformCanonicalTests.WhenEqu5.E = enumeration(a, b, c);
+end TransformCanonicalTests.WhenEqu5;
 ")})));
   type E = enumeration(a,b,c);
   discrete E e (start=E.b);
@@ -2376,7 +2347,8 @@ equation
     e = E.c;
   end when;
 
-end WhenEqu45;
+end WhenEqu5;
+*/
 
 model WhenEqu5 
 
@@ -2561,7 +2533,7 @@ model WhenEqu10
          flatModel="
 fclass TransformCanonicalTests.WhenEqu10
  discrete Boolean sampleTrigger;
- Real x_p(start = 1, fixed=true);
+ Real x_p(start = 1);
  Real u_p;
  discrete Real x_c;
  discrete Real u_c;
@@ -2591,7 +2563,7 @@ end TransformCanonicalTests.WhenEqu10;
 ")})));
 
  discrete Boolean sampleTrigger;
- Real x_p(start=1, fixed=true);
+ Real x_p(start=1);
  Real u_p;
  discrete Real x_c;
  discrete Real u_c;
@@ -2614,8 +2586,8 @@ equation
  end when;
 end WhenEqu10;
 
-model WhenEqu11	
-		
+model WhenEqu11
+
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="WhenEqu11",
@@ -2680,51 +2652,7 @@ equation
  end when;
 end WhenEqu11;
 
-model WhenEqu12
-	
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="WhenEqu12",
-         description="Basic test of when equations",
-         flatModel="
-fclass TransformCanonicalTests.WhenEqu12
- discrete Real x;
- discrete Real y;
-initial equation 
- pre(x) = 0.0;
- pre(y) = 0.0;
-equation
- when sample(0, 1) then
-  (x, y) = TransformCanonicalTests.WhenEqu12.F(time);
- end when;
-
- function TransformCanonicalTests.WhenEqu12.F
-  input Real x;
-  output Real y1;
-  output Real y2;
- algorithm
-  y1 := 1;
-  y2 := 2;
-  return;
- end TransformCanonicalTests.WhenEqu12.F;
- end TransformCanonicalTests.WhenEqu12;
-")})));		
-		
-	function F
-		input Real x;
-		output Real y1;
-		output Real y2;
-	algorithm
-		y1 := 1;
-		y2 := 2;
-	end F;
-	Real x,y;
-	equation
-	when sample(0,1) then
-		(x,y) = F(time);
-	end when;
-end WhenEqu12;
-
+/* // TODO: add these test when more support is implemented in the middle end
 model IfEqu1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.FlatteningTestCase(
@@ -2880,21 +2808,31 @@ fclass TransformCanonicalTests.IfEqu6
  Real x[1];
  Real x[2];
  Real x[3];
- discrete Boolean y[1];
- discrete Boolean y[2];
-initial equation 
- pre(y[1]) = false;
- pre(y[2]) = false;
+ Boolean y[1];
+ Boolean y[2];
 equation
- x[1] = (if y[1] then 1 elseif y[2] then 4 else 7);
- x[2] = (if y[1] then 2 elseif y[2] then 5 else 8);
- x[3] = (if y[1] then 3 elseif y[2] then 6 else 9);
+ if y[1] then
+  x[1] = 1;
+  x[2] = 2;
+  x[3] = 3;
+ elseif y[2] then
+  x[1] = 4;
+  x[2] = 5;
+  x[3] = 6;
+ else
+  x[1] = 7;
+  x[2] = 8;
+  x[3] = 9;
+ end if;
+ x[1] = 0;
+ x[2] = 0;
+ x[3] = 0;
  y[1] = false;
  y[2] = true;
 end TransformCanonicalTests.IfEqu6;
 ")})));
 
-	Real x[3];
+	Real x[3] = zeros(3);
 	Boolean y[2] = { false, true };
 equation
 	if y[1] then
@@ -2917,29 +2855,33 @@ fclass TransformCanonicalTests.IfEqu7
  Real x[1];
  Real x[2];
  Real x[3];
- discrete Boolean y[1];
- discrete Boolean y[2];
-initial equation 
- pre(y[1]) = false;
- pre(y[2]) = false;
+ Boolean y[1];
+ Boolean y[2];
 equation
- x[1] = (if y[1] then 1 elseif y[2] then 4 else 7);
- x[2] = (if y[1] then 2 elseif y[2] then 5 else 8);
- x[3] = (if y[1] then 3 elseif y[2] then 6 else 9);
+ if y[1] then
+  x[1] = 1;
+  x[2] = 2;
+  x[3] = 3;
+ elseif y[2] then
+  x[1] = 4;
+  x[2] = 5;
+  x[3] = 6;
+ end if;
+ x[1] = 0;
+ x[2] = 0;
+ x[3] = 0;
  y[1] = false;
  y[2] = true;
 end TransformCanonicalTests.IfEqu7;
 ")})));
 
-	Real x[3];
+	Real x[3]= zeros(3);
 	Boolean y[2] = { false, true };
 equation
 	if y[1] then
 		x = 1:3;
 	elseif y[2] then
 		x = 4:6;
-    else
-	   	x = 7:9;
 	end if;
 end IfEqu7;
 
@@ -2954,8 +2896,8 @@ fclass TransformCanonicalTests.IfEqu8
  Real x[1];
  Real x[2];
  Real x[3];
- parameter Boolean y[1] = false;
- parameter Boolean y[2] = true;
+ parameter Boolean y[1] = false ;
+ parameter Boolean y[2] = true ;
 equation
  x[1] = 4;
  x[2] = 5;
@@ -2972,7 +2914,6 @@ equation
 		x = 4:6;
 	else
 		x = 7:9;
-		x[2] = 10;
 	end if;
 end IfEqu8;
 
@@ -2986,17 +2927,22 @@ model IfEqu9
 fclass TransformCanonicalTests.IfEqu9
  Real x[1];
  Real x[2];
- discrete Boolean y;
-initial equation 
- pre(y) = false;
+ Boolean y;
 equation
- x[1] = (if y then 3 else 7);
- x[2] = (if y then 4 else 8);
+ if y then
+  x[1] = 3;
+  x[2] = 4;
+ else
+  x[1] = 7;
+  x[2] = 8;
+ end if;
+ x[1] = 0;
+ x[2] = 0;
  y = true;
 end TransformCanonicalTests.IfEqu9;
 ")})));
 
-	Real x[2];
+	Real x[2] = zeros(2);
 	Boolean y = true;
 equation
 	if false then
@@ -3020,17 +2966,22 @@ model IfEqu10
 fclass TransformCanonicalTests.IfEqu10
  Real x[1];
  Real x[2];
- discrete Boolean y;
-initial equation 
- pre(y) = false;
+ Boolean y;
 equation
- x[1] = (if y then 3 else 5);
- x[2] = (if y then 4 else 6);
+ if y then
+  x[1] = 3;
+  x[2] = 4;
+ else
+  x[1] = 5;
+  x[2] = 6;
+ end if;
+ x[1] = 0;
+ x[2] = 0;
  y = true;
 end TransformCanonicalTests.IfEqu10;
 ")})));
 
-	Real x[2];
+	Real x[2] = zeros(2);
 	Boolean y = true;
 equation
 	if false then
@@ -3054,9 +3005,7 @@ model IfEqu11
 fclass TransformCanonicalTests.IfEqu11
  Real x[1];
  Real x[2];
- discrete Boolean y;
-initial equation 
- pre(y) = false;
+ Boolean y;
 equation
  x[1] = 1;
  x[2] = 2;
@@ -3078,10 +3027,13 @@ equation
 	end if;
 end IfEqu11;
 
+*/
+
   model IfEqu12
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="IfEqu12",
+		 compliance_as_warning=true,
          description="Test of if equations.",
          flatModel="
 fclass TransformCanonicalTests.IfEqu12
@@ -3090,11 +3042,10 @@ fclass TransformCanonicalTests.IfEqu12
 initial equation 
  x = 1;
 equation
- u = (if time >= 1 then  - ( 1 ) else 1);
+ (if time >= 1 then u - (  - ( 1 ) ) else u - ( 1 )) = 0.0;
  der(x) =  - ( x ) + u;
 end TransformCanonicalTests.IfEqu12;
-")})));
-
+		 ")})));
 	Real x(start=1);
     Real u;
   equation
@@ -3107,22 +3058,23 @@ end TransformCanonicalTests.IfEqu12;
   end IfEqu12;
 
   model IfEqu13
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="IfEqu13",
+		 compliance_as_warning=true,
          description="Test of if equations.",
          flatModel="
 fclass TransformCanonicalTests.IfEqu13
  Real x(start = 1);
  Real u;
-initial equation
+initial equation 
  x = 1;
 equation
- der(x) = (if time >= 1 then (  - ( 3 ) ) * ( x ) + u else ( 3 ) * ( x ) + u);
- u = (if time >= 1 then  - ( 1 ) else 1);
+ (if time >= 1 then u - (  - ( 1 ) ) else u - ( 1 )) = 0.0;
+ (if time >= 1 then der(x) - ( (  - ( 3 ) ) * ( x ) + u ) else der(x) - ( ( 3 ) * ( x ) + u )) = 0.0;
 end TransformCanonicalTests.IfEqu13;
-")})));
-
+		 ")})));
+		  
     Real x(start=1);
     Real u;
   equation
@@ -3131,14 +3083,15 @@ end TransformCanonicalTests.IfEqu13;
       der(x) = -3*x + u;
     else
       u = 1;
-      der(x) = 3*x + u;
+    der(x) = 3*x + u;
     end if;
   end IfEqu13;
 
   model IfEqu14
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="IfEqu14",
+		 compliance_as_warning=true,
          description="Test of if equations.",
          flatModel="
 fclass TransformCanonicalTests.IfEqu14
@@ -3147,11 +3100,10 @@ fclass TransformCanonicalTests.IfEqu14
 initial equation 
  x = 1;
 equation
- der(x) = (if time >= 1 then (if time >= 3 then (  - ( 3 ) ) * ( x ) + u else 0) else ( 3 ) * ( x ) + u);
- u = (if time >= 1 then (if time >= 3 then  - ( 1 ) else 4) else 1);
+ (if time >= 1 then (if time >= 3 then u - (  - ( 1 ) ) else u - ( 4 )) - ( 0.0 ) else u - ( 1 )) = 0.0;
+ (if time >= 1 then (if time >= 3 then der(x) - ( (  - ( 3 ) ) * ( x ) + u ) else der(x) - ( 0 )) - ( 0.0 ) else der(x) - ( ( 3 ) * ( x ) + u )) = 0.0;
 end TransformCanonicalTests.IfEqu14;
-")})));
-
+		 ")})));
     Real x(start=1);
     Real u;
   equation
@@ -3165,249 +3117,9 @@ end TransformCanonicalTests.IfEqu14;
       end if;
     else
       u = 1;
-      der(x) = 3*x + u;
+    der(x) = 3*x + u;
     end if;
   end IfEqu14;
-
-
-  model IfEqu15
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu15",
-         description="If equation with mixed assignment equations and non-assignment equations",
-         flatModel="
-fclass TransformCanonicalTests.IfEqu15
- Real x;
- Real y;
- Real z1;
- Real z2;
-equation
- x = (if time < 1 then ( y ) * ( y ) elseif time < 3 then y + 4 else 4);
- y = (if time < 1 then z2 - ( 1 ) elseif time < 3 then 2 else x + 2);
- 0.0 = (if time < 1 then z1 + z2 - ( x + y ) elseif time < 3 then z1 - ( z2 ) - ( x + y ) else z1 + z2 - ( x - ( y ) ));
- 0.0 = (if time < 1 then z1 - ( 2 ) else z2 - ( (if time < 3 then ( y ) * ( x ) else ( 4 ) * ( x )) ));
-end TransformCanonicalTests.IfEqu15;
-")})));
-
-      Real x;
-      Real y;
-      Real z1;
-      Real z2;
-  equation
-      if time < 1 then
-          y = z2 - 1;
-          z1 = 2;
-          x = y * y;
-          z1 + z2 = x + y;
-      elseif time < 3 then
-          x = y + 4;
-          y = 2;
-          z2 = y * x;
-          z1 - z2 = x + y;
-      else
-          z2 = 4 * x;
-          x = 4;
-          y = x + 2;
-          z1 + z2 = x - y;
-      end if;
-  end IfEqu15;
-
-
-  model IfEqu16
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu16",
-         description="Nestled if equations with mixed assignment equations and non-assignment equations",
-         flatModel="
-fclass TransformCanonicalTests.IfEqu16
- Real x;
- Real y;
- Real z1;
- Real z2;
-equation
- x = (if time < 1 then ( y ) * ( y ) else 4);
- y = (if time < 1 then z2 - ( 1 ) elseif time < 3 then 2 else x + 2);
- 0.0 = (if time < 1 then z1 + z2 - ( x + y ) elseif time < 3 then z1 - ( ( y ) * ( x ) ) else z2 - ( ( 4 ) * ( x ) ));
- 0.0 = (if time < 1 then z1 - ( 2 ) else z1 + z2 - ( x - ( y ) ));
-end TransformCanonicalTests.IfEqu16;
-")})));
-
-      Real x;
-      Real y;
-      Real z1;
-      Real z2;
-  equation
-      if time < 1 then
-          y = z2 - 1;
-          z1 = 2;
-          x = y * y;
-          z1 + z2 = x + y;
-      else
-          x = 4;
-          if time < 3 then
-              y = 2;
-              z1 = y * x;
-          else
-              y = x + 2;
-              z2 = 4 * x;
-          end if;
-          z1 + z2 = x - y;
-      end if;
-  end IfEqu16;
-
-
-  model IfEqu17
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu17",
-         description="Check that if equations with function call equations are eliminated",
-         flatModel="
-fclass TransformCanonicalTests.IfEqu17
- Real y1;
- Real y2;
- parameter Boolean p = false /* false */;
-equation
- (y1, y2) = TransformCanonicalTests.IfEqu17.f();
-
- function TransformCanonicalTests.IfEqu17.f
-  output Real x1;
-  output Real x2;
- algorithm
-  x1 := 1;
-  x2 := 2;
-  return;
- end TransformCanonicalTests.IfEqu17.f;
-end TransformCanonicalTests.IfEqu17;
-")})));
-
-      function f
-          output Real x1 = 1;
-          output Real x2 = 2;
-	  algorithm
-      end f;
-      
-      Real y1;
-      Real y2;
-      parameter Boolean p = false; 
-  equation
-      if p then
-          y1 = 3;
-          y2 = 3;
-      else
-          (y1, y2) = f();
-      end if;
-  end IfEqu17;
-
-
-  model IfEqu18
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ComplianceErrorTestCase(
-         name="IfEqu18",
-         description="Check that if equations with function call equations and non-param tests are rejected",
-         errorMessage="
-3 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Compliance error at line 3263, column 15:
-  Boolean variables are supported only when compiling FMUs (constants and parameters are always supported)
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Compliance error at line 3265, column 7:
-  If equations that has non-parameter tests and contains function calls using multiple outputs are not supported
-")})));
-
-      function f
-          output Real x1 = 1;
-          output Real x2 = 2;
-      algorithm
-      end f;
-      
-      Real y1;
-      Real y2;
-  equation
-      if time > 1 then
-          y1 = 3;
-          y2 = 3;
-      else
-          (y1, y2) = f();
-      end if;
-  end IfEqu18;
-
-  model IfEq19
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu19",
-         description="Check that if equations inside when equations are treated correctly.",
-         flatModel="
-fclass TransformCanonicalTests.IfEq19
- discrete Real x;
-initial equation 
- pre(x) = 0.0;
-equation
- when sample(1, 0) then
-  x = (if time >= 3 then pre(x) + 1 else pre(x) + 5);
- end when;
-end TransformCanonicalTests.IfEq19;
-		 
-		 ")})));
-						
-    Real x;
-  equation
-	when sample(1,0) then
-		if time>=3 then
-			x = pre(x) + 1;
-        else
-	        x = pre(x) + 5;
-		end if;
-	end when;
-			
-  end IfEq19;
-
-model IfEq20
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu20",
-         description="Check that parameter if equations are rewritten in initial equation sections.",
-         flatModel="
-		 fclass TransformCanonicalTests.IfEq20
- Real x;
-initial equation 
- x = 3;
-equation
- der(x) =  - ( x );
-end TransformCanonicalTests.IfEq20;
-		 ")})));	
-	Real x;
-initial equation
-    if true then
-		x = 3;
-	end if;
-equation
-	der(x) = -x;
-end IfEq20;
-
-model IfEq21
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IfEqu21",
-         description="Check that variable if equations are rewritten in initial equation sections.",
-         flatModel="
-		 fclass TransformCanonicalTests.IfEq21
- Real x;
-initial equation 
- x = (if time >= 3 then 3 else 4);
-equation
- der(x) =  - ( x );
-end TransformCanonicalTests.IfEq21;
-		 ")})));	
-	Real x;
-initial equation
-    if  time>=3 then
-		x = 3;
-	else
-		x = 4;
-	end if;
-equation
-	der(x) = -x;
-end IfEq21;
 
 model IfExpLeft1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -3691,8 +3403,9 @@ model IndexReduction4_Err
 
 Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc8802960033354722744out/sources/TransformCanonicalTests.IndexReduction4_Err.mof':
 Semantic error at line 0, column 0:
-  Cannot differentiate call to function without derivative annotation 'TransformCanonicalTests.IndexReduction4_Err.F(x2)' in equation:
-   x1 + TransformCanonicalTests.IndexReduction4_Err.F(x2) = 1
+  Cannot differentate the equation 
+   TransformCanonicalTests.IndexReduction4_Err.F(x2)
+  since the function TransformCanonicalTests.IndexReduction4_Err.F does not have a derivative annotation.
 
 Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc8802960033354722744out/sources/TransformCanonicalTests.IndexReduction4_Err.mof':
 Semantic error at line 0, column 0:
@@ -3726,7 +3439,7 @@ model IndexReduction5_Err
 
 Error: in file 'TransformCanonicalTests.IndexReduction5_Err.mof':
 Semantic error at line 0, column 0:
-  Cannot differentiate call to function without derivative annotation 'TransformCanonicalTests.IndexReduction5_Err.F(x2)' in equation:
+  Cannot differentate the equation 
    (x1, x2) = TransformCanonicalTests.IndexReduction5_Err.F(x2)
 
 Error: in file 'TransformCanonicalTests.IndexReduction5_Err.mof':
@@ -4522,420 +4235,6 @@ equation
 end IndexReduction27_DerFunc;
 
 
-model IndexReduction28_Record
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction28_Record",
-         description="Index reduction: function with record input & output",
-         flatModel="
-fclass TransformCanonicalTests.IndexReduction28_Record
- parameter Real A[1,1] = 1 /* 1 */;
- parameter Real A[1,2] = 2 /* 2 */;
- parameter Real A[2,1] = 3 /* 3 */;
- parameter Real A[2,2] = 4 /* 4 */;
- Real x1.a[1];
- Real x1.a[2];
- Real x2.a[1];
- Real x2.a[2];
- Real der_x1_a_1;
- Real der_x1_a_2;
-initial equation 
- x2.a[1] = 0.0;
- x2.a[2] = 0.0;
-equation
- der_x1_a_1 + x2.der(a[1]) = 2;
- der_x1_a_2 + x2.der(a[2]) = 3;
- (TransformCanonicalTests.IndexReduction28_Record.R({ - ( x1.a[1] ), - ( x1.a[2] )})) = TransformCanonicalTests.IndexReduction28_Record.f({x2.a[1],x2.a[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}});
- (TransformCanonicalTests.IndexReduction28_Record.R({ - ( der_x1_a_1 ), - ( der_x1_a_2 )})) = TransformCanonicalTests.IndexReduction28_Record.f_der({x2.a[1],x2.a[2]}, {{A[1,1],A[1,2]},{A[2,1],A[2,2]}}, {x2.der(a[1]),x2.der(a[2])}, {{0.0,0.0},{0.0,0.0}});
-
- function TransformCanonicalTests.IndexReduction28_Record.f_der
-  input Real[2] x;
-  input Real[2, 2] A;
-  input Real[2] der_x;
-  input Real[2, 2] der_A;
-  output TransformCanonicalTests.IndexReduction28_Record.R der_y;
- algorithm
-  der_y.a[1] := ( A[1,1] ) * ( der_x[1] ) + ( A[1,2] ) * ( der_x[2] );
-  der_y.a[2] := ( A[2,1] ) * ( der_x[1] ) + ( A[2,2] ) * ( der_x[2] );
-  return;
- end TransformCanonicalTests.IndexReduction28_Record.f_der;
-
- function TransformCanonicalTests.IndexReduction28_Record.f
-  input Real[2] x;
-  input Real[2, 2] A;
-  output TransformCanonicalTests.IndexReduction28_Record.R y;
- algorithm
-  y.a[1] := ( A[1,1] ) * ( x[1] ) + ( A[1,2] ) * ( x[2] );
-  y.a[2] := ( A[2,1] ) * ( x[1] ) + ( A[2,2] ) * ( x[2] );
-  return;
- end TransformCanonicalTests.IndexReduction28_Record.f;
-
- record TransformCanonicalTests.IndexReduction28_Record.R
-  Real a[2];
- end TransformCanonicalTests.IndexReduction28_Record.R;
-end TransformCanonicalTests.IndexReduction28_Record;
-")})));
-
-record R
-	Real[2] a;
-end R;
-
-function f
-  input Real x[2];
-  input Real A[2,2];
-  output R y;
-algorithm
-  y := R(A*x);
-  annotation(derivative=f_der);
-end f;
-
-function f_der
-  input Real x[2];
-  input Real A[2,2];
-  input Real der_x[2];
-  input Real der_A[2,2];
-  output R der_y;
-algorithm
-  der_y := R(A*der_x);
-end f_der;
-
-  parameter Real A[2,2] = {{1,2},{3,4}};
-  R x1,x2,x3;
-equation
-  der(x1.a) + der(x2.a) = {2,3};
-  x1.a + x3.a = {0,0};
-  x3 = f(x2.a,A);
-end IndexReduction28_Record;
-
-model IndexReduction29_FunctionNoDerivative
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction29_FunctionNoDerivative",
-         description="Index reduction: function with record input & output",
-         flatModel="
-fclass TransformCanonicalTests.IndexReduction29_FunctionNoDerivative
- Real x;
- Real y;
- Real der_x;
-initial equation 
- y = 0.0;
-equation
- der_x + der(y) = 0;
- x + TransformCanonicalTests.IndexReduction29_FunctionNoDerivative.F(y, x, 0, x) = 0;
- der_x + TransformCanonicalTests.IndexReduction29_FunctionNoDerivative.der_F(y, x, 0, x, der(y), der_x) = 0.0;
-
- function TransformCanonicalTests.IndexReduction29_FunctionNoDerivative.der_F
-  input Real p;
-  input Real h;
-  input Integer phase;
-  input Real z;
-  input Real der_p;
-  input Real der_h;
-  output Real der_rho;
- algorithm
-  der_rho := der_p + der_h;
-  return;
- end TransformCanonicalTests.IndexReduction29_FunctionNoDerivative.der_F;
-
- function TransformCanonicalTests.IndexReduction29_FunctionNoDerivative.F
-  input Real p;
-  input Real h;
-  input Integer phase;
-  input Real z;
-  output Real rho;
- algorithm
-  rho := p + h;
-  return;
- end TransformCanonicalTests.IndexReduction29_FunctionNoDerivative.F;
-end TransformCanonicalTests.IndexReduction29_FunctionNoDerivative;
-")})));
-	
-function der_F
-  import SI = Modelica.SIunits;
-
- input SI.Pressure p;
- input SI.SpecificEnthalpy h;
- input Integer phase=0;
- input Real z;
- input Real der_p;
- input Real der_h;
- output Real der_rho;
-
-algorithm
-     der_rho := der_p + der_h;
-end der_F;
-
-function F 
-  import SI = Modelica.SIunits;
-
-  input SI.Pressure p;
-  input SI.SpecificEnthalpy h;
-  input Integer phase=0;
-  input Real z;
-  output SI.Density rho;
-
-algorithm
-	rho := p + h;
-  annotation(derivative(noDerivative=phase, noDerivative=z)=der_F);
-  
-end F;
-
-  Real x,y;
-equation
-  der(x) + der(y) = 0;
-  x + F(y,x,0,x) = 0;
-end IndexReduction29_FunctionNoDerivative;
-
-  model IndexReduction30_PlanarPendulum_StatePrefer
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction30_PlanarPendulum_StatePrefer",
-         description="Test of index reduction",
-         flatModel="
-fclass TransformCanonicalTests.IndexReduction30_PlanarPendulum_StatePrefer
- parameter Real L = 1 \"Pendulum length\" /* 1 */;
- parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
- Real x(stateSelect = StateSelect.prefer) \"Cartesian x coordinate\";
- Real y \"Cartesian x coordinate\";
- Real vx(stateSelect = StateSelect.prefer) \"Velocity in x coordinate\";
- Real lambda \"Lagrange multiplier\";
- Real der_y;
- Real der_2_x;
- Real der_2_y;
-initial equation 
- x = 0.0;
- vx = 0.0;
-equation
- der(x) = vx;
- der(vx) = ( lambda ) * ( x );
- der_2_y = ( lambda ) * ( y ) - ( g );
- x ^ 2 + y ^ 2 = L;
- ( ( 2 ) * ( x ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_y ) = 0.0;
- ( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( der(x) ) + ( 0.0 ) * ( x ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) + ( 0.0 ) * ( y ) ) * ( der_y ) = 0.0;
- der_2_x = der(vx);
-
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
-end TransformCanonicalTests.IndexReduction30_PlanarPendulum_StatePrefer;
-")})));
-
-    parameter Real L = 1 "Pendulum length";
-    parameter Real g =9.81 "Acceleration due to gravity";
-    Real x(stateSelect=StateSelect.prefer) "Cartesian x coordinate";
-    Real y "Cartesian x coordinate";
-    Real vx(stateSelect=StateSelect.prefer) "Velocity in x coordinate";
-    Real vy "Velocity in y coordinate";
-    Real lambda "Lagrange multiplier";
-  equation
-    der(x) = vx;
-    der(y) = vy;
-    der(vx) = lambda*x;
-    der(vy) = lambda*y - g;
-    x^2 + y^2 = L;
-  end IndexReduction30_PlanarPendulum_StatePrefer;
-
-model IndexReduction31_PlanarPendulum_StateAlways
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction31_PlanarPendulum_StateAlways",
-         description="Test of index reduction",
-         flatModel="
-fclass TransformCanonicalTests.IndexReduction31_PlanarPendulum_StateAlways
- parameter Real L = 1 \"Pendulum length\" /* 1 */;
- parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
- Real x(stateSelect = StateSelect.always) \"Cartesian x coordinate\";
- Real y \"Cartesian x coordinate\";
- Real vx(stateSelect = StateSelect.always) \"Velocity in x coordinate\";
- Real lambda \"Lagrange multiplier\";
- Real der_y;
- Real der_2_x;
- Real der_2_y;
-initial equation 
- x = 0.0;
- vx = 0.0;
-equation
- der(x) = vx;
- der(vx) = ( lambda ) * ( x );
- der_2_y = ( lambda ) * ( y ) - ( g );
- x ^ 2 + y ^ 2 = L;
- ( ( 2 ) * ( x ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_y ) = 0.0;
- ( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( der(x) ) + ( 0.0 ) * ( x ) ) * ( der(x) ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der_y ) + ( 0.0 ) * ( y ) ) * ( der_y ) = 0.0;
- der_2_x = der(vx);
-
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
-end TransformCanonicalTests.IndexReduction31_PlanarPendulum_StateAlways;
-")})));
-
-    parameter Real L = 1 "Pendulum length";
-    parameter Real g =9.81 "Acceleration due to gravity";
-    Real x(stateSelect=StateSelect.always) "Cartesian x coordinate";
-    Real y "Cartesian x coordinate";
-    Real vx(stateSelect=StateSelect.always) "Velocity in x coordinate";
-    Real vy "Velocity in y coordinate";
-    Real lambda "Lagrange multiplier";
-  equation
-    der(x) = vx;
-    der(y) = vy;
-    der(vx) = lambda*x;
-    der(vy) = lambda*y - g;
-    x^2 + y^2 = L;
-	
-  end IndexReduction31_PlanarPendulum_StateAlways;
-
-  model IndexReduction32_PlanarPendulum_StatePreferAlways
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="IndexReduction32_PlanarPendulum_StatePreferAlways",
-         description="Test of index reduction",
-         flatModel="
-fclass TransformCanonicalTests.IndexReduction32_PlanarPendulum_StatePreferAlways
- parameter Real L = 1 \"Pendulum length\" /* 1 */;
- parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
- Real x(stateSelect = StateSelect.prefer) \"Cartesian x coordinate\";
- Real y(stateSelect = StateSelect.always) \"Cartesian x coordinate\";
- Real vy(stateSelect = StateSelect.always) \"Velocity in y coordinate\";
- Real lambda \"Lagrange multiplier\";
- Real der_x;
- Real der_2_x;
- Real der_2_y;
-initial equation 
- y = 0.0;
- vy = 0.0;
-equation
- der(y) = vy;
- der_2_x = ( lambda ) * ( x );
- der(vy) = ( lambda ) * ( y ) - ( g );
- x ^ 2 + y ^ 2 = L;
- ( ( 2 ) * ( x ) ) * ( der_x ) + ( ( 2 ) * ( y ) ) * ( der(y) ) = 0.0;
- ( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( der_x ) + ( 0.0 ) * ( x ) ) * ( der_x ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der(y) ) + ( 0.0 ) * ( y ) ) * ( der(y) ) = 0.0;
- der_2_y = der(vy);
-		 
-
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
-end TransformCanonicalTests.IndexReduction32_PlanarPendulum_StatePreferAlways;
-")})));
-
-    parameter Real L = 1 "Pendulum length";
-    parameter Real g =9.81 "Acceleration due to gravity";
-    Real x(stateSelect=StateSelect.prefer) "Cartesian x coordinate";
-    Real y(stateSelect=StateSelect.always) "Cartesian x coordinate";
-    Real vx(stateSelect=StateSelect.prefer) "Velocity in x coordinate";
-    Real vy(stateSelect=StateSelect.always) "Velocity in y coordinate";
-    Real lambda "Lagrange multiplier";
-  equation
-    der(x) = vx;
-    der(y) = vy;
-    der(vx) = lambda*x;
-    der(vy) = lambda*y - g;
-    x^2 + y^2 = L;
-  end IndexReduction32_PlanarPendulum_StatePreferAlways;
-
-model StateInitialPars1
-	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="StateInitialPars1",
-         description="Test the state initial equations option",
-		 state_initial_equations=true,
-         flatModel="
-		 fclass TransformCanonicalTests.StateInitialPars1
- Real x(start = 3);
- parameter Real _start_x = 3 /* 3 */;
-initial equation 
- x = _start_x;
-equation
- der(x) =  - ( x );
-end TransformCanonicalTests.StateInitialPars1; 
-")})));
-	Real x(start=3);
-equation
-	der(x) = -x;
-end StateInitialPars1;
-
-model StateInitialPars2
-	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="StateInitialPars2",
-         description="Test the state initial equations option",
-		 state_initial_equations=true,
-         flatModel="
-		 fclass TransformCanonicalTests.StateInitialPars2
- Real x(start = 3,fixed = true);
- parameter Real _start_x = 3 /* 3 */;
-initial equation 
- x = _start_x;
-equation
- der(x) =  - ( x );
-end TransformCanonicalTests.StateInitialPars2;
-")})));
-	Real x(start=3, fixed = true);
-equation
-	der(x) = -x;
-end StateInitialPars2;
-	
-model StateInitialPars3
-	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="StateInitialPars3",
-         description="Test the state initial equations option",
-		 state_initial_equations=true,
-         flatModel="
-fclass TransformCanonicalTests.StateInitialPars3
- Real x(start = 3,fixed = true);
- Real y(start = 4);
- Real z(start = 6,fixed = true);
- parameter Real _start_x = 3 /* 3 */;
- parameter Real _start_y = 4 /* 4 */;
-initial equation 
- x = _start_x;
- y = _start_y;
-equation
- der(x) =  - ( x );
- der(y) =  - ( y ) + z;
- z + ( 2 ) * ( y ) = 0;
-end TransformCanonicalTests.StateInitialPars3;
-")})));
-	Real x(start=3, fixed = true);
-	Real y(start = 4);
-	Real z(start = 6, fixed = true);
-equation
-	der(x) = -x;
-	der(y) = -y + z;
-	z + 2*y = 0;
-end StateInitialPars3;	
-	
-model StateInitialPars4
-	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="StateInitialPars4",
-         description="Test the state initial equations option",
-		 state_initial_equations=true,
-         flatModel="
-fclass TransformCanonicalTests.StateInitialPars4
- Real x(start = 3);
- Real y(start = 4);
- Real z(start = 6);
- parameter Real _start_x = 3 /* 3 */;
- parameter Real _start_y = 4 /* 4 */;
-initial equation 
- x = _start_x;
- y = _start_y;
-equation
- der(x) =  - ( x );
- der(y) =  - ( y ) + z;
- z + ( 2 ) * ( y ) = 0;
-end TransformCanonicalTests.StateInitialPars4;
-")})));
-	Real x(start=3);
-	Real y(start = 4);
-	Real z(start = 6);
-initial equation
-	x = 3;
-	z = 5;
-equation
-	der(x) = -x;
-	der(y) = -y + z;
-	z + 2*y = 0;
-end StateInitialPars4;		
-	
 model DuplicateVariables1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(

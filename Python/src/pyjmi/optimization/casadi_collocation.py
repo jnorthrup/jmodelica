@@ -286,16 +286,16 @@ class CasadiCollocator(object):
                     
                 if (len(desc)>max_desc_length):
                     max_desc_length = len(desc)
-            
+
             f.write('char name(%d,%d)\n' % (num_vars + 1, max_name_length))
             f.write('time\n')
-            
+        
             # write names
             for name in names:
                 f.write(name[1] +'\n')
-            
+
             f.write('\n')
-            
+
             f.write('char description(%d,%d)\n' % (num_vars + 1, max_desc_length))
             f.write('Time in [s]\n')
 
@@ -747,7 +747,7 @@ class LocalDAECollocator(CasadiCollocator):
         self.__dict__.update(options)
         
         # Define element lengths
-        self.horizon = self.ocp.tf - self.ocp.t0
+        self.horizon = self.ocp.tf() - self.ocp.t0()
         if self.hs != "free":
             self.h = [N.nan] # Element 0
             if self.hs is None:
@@ -776,6 +776,8 @@ class LocalDAECollocator(CasadiCollocator):
         self._create_constraints()
         self._create_constraint_function()
         self._create_cost_function()
+        self._expand_MX()
+        self._calc_Lagrangian_Hessian()
         self._compute_bounds_and_init()
         self._create_solver()
     
@@ -1026,12 +1028,6 @@ class LocalDAECollocator(CasadiCollocator):
                                                '_' +  str(i) + '_' + str(k)))
                         xx[var_indices[i][k]['w']] = w
             
-            if 'p_opt' in var_indices.keys():
-                p_opt = []
-                for j in range(self.model.get_n_p()):
-                    p_opt.append(casadi.SX(str(self.model.get_p()[j])))
-                xx[var_indices['p_opt']] = p_opt
-            
             # Derivative initial values
             if self.eliminate_der_var:
                 dx = []
@@ -1129,9 +1125,9 @@ class LocalDAECollocator(CasadiCollocator):
         h_i = self._collocation['h_i']
         if self.eliminate_der_var:
             coll_der = self._collocation['coll_der']
-            init = casadi.substitute(self.ocp.initial, self.model.dx,
+            init = casadi.substitute(self.ocp.initial(), self.model.dx,
                                      coll_der)
-            dae = casadi.substitute(self.ocp.dae, self.model.dx, coll_der)
+            dae = casadi.substitute(self.ocp.dae(), self.model.dx, coll_der)
             
             sym_z = []
             sym_z += list(self.model.p)
@@ -1155,10 +1151,10 @@ class LocalDAECollocator(CasadiCollocator):
         # Create path constraint functions
         g_e = []
         g_i = []
-        path = self.ocp.path
-        lb = self.ocp.path_min.toArray().reshape(-1)
-        ub = self.ocp.path_max.toArray().reshape(-1)
-        for i in xrange(path.numel()):
+        path = self.ocp.path()
+        lb = self.ocp.path_min()
+        ub = self.ocp.path_max()
+        for i in xrange(len(path)):
             if lb[i] == ub[i]:
                 g_e.append(path[i] - ub[i])
             else:
@@ -1166,7 +1162,6 @@ class LocalDAECollocator(CasadiCollocator):
                     g_i.append(-path[i] + lb[i])
                 if ub[i] != N.inf:
                     g_i.append(path[i] - ub[i])
-        
         if self.eliminate_der_var:
             z = casadi.vertcat([self.model.p,
                                 self.model.x,
@@ -1220,7 +1215,7 @@ class LocalDAECollocator(CasadiCollocator):
         time = []
         i = 1
         self.time_points[i] = {}
-        t = self.ocp.t0
+        t = self.ocp.t0()
         self.time_points[i][0] = t
         time.append(t)
         ti = t # Time at start of element
@@ -1245,7 +1240,7 @@ class LocalDAECollocator(CasadiCollocator):
             time.append(t)
         if self.final_mesh_point or self.discr == "LGR":
             if self.hs != "free":
-                assert(N.allclose(time[-1], self.ocp.tf))
+                assert(N.allclose(time[-1], self.ocp.tf()))
         
         # Create list of state matrices
         x_list = [[]]
@@ -1269,14 +1264,13 @@ class LocalDAECollocator(CasadiCollocator):
         c_e = casadi.vertcat([c_e, initial_F0])
         c_e = casadi.vertcat([c_e, initial_F])
         
-        if self.blocking_factors is None:
-            # Evaluate u_1_0 based on polynomial u_1
-            u_1_0 = 0
-            for k in xrange(1, self.n_cp + 1):
-                u_1_0 += var[1][k]['u'] * self.pol.eval_basis(k, 0, False)
-                
-            # Add residual for u_1_0 as constraint
-            c_e = casadi.vertcat([c_e, var[1][0]['u'] - u_1_0])
+        # Evaluate u_1_0 based on polynomial u_1
+        u_1_0 = 0
+        for k in xrange(1, self.n_cp + 1):
+            u_1_0 += var[1][k]['u'] * self.pol.eval_basis(k, 0, False)
+            
+        # Add residual for u_1_0 as constraint
+        c_e = casadi.vertcat([c_e, var[1][0]['u'] - u_1_0])
         
         # Collocation and DAE constraints
         if self.eliminate_der_var:
@@ -1408,10 +1402,13 @@ class LocalDAECollocator(CasadiCollocator):
                     c_i = casadi.vertcat([c_i, g_i_constr])
         
         # Store constraints and time as data attributes
+        # This code can be simplified once
+        # https://sourceforge.net/apps/trac/casadi/ticket/180
+        # has been fixed.
         self.c_e = c_e
         if self.graph == 'MX' or self.graph == 'expanded_MX':
             if c_i.isNull():
-                self.c_i = casadi.MX(0, 1)
+                self.c_i = casadi.MX(0, 0)
             else:
                 self.c_i = c_i
         else:
@@ -1423,8 +1420,14 @@ class LocalDAECollocator(CasadiCollocator):
         Create constraint function and calculate its Jacobian.
         """
         # Concatenate constraints
-        c = casadi.vertcat([self.get_equality_constraint(),
-                            self.get_inequality_constraint()])
+        c_e = self.get_equality_constraint()
+        if c_e.numel() == 0:
+            c_e = []
+        c_i = self.get_inequality_constraint()
+        if c_i.numel() == 0:
+            c_i = []
+        c = casadi.vertcat([c_e, c_i])
+        self.c = c
         
         # Create constraint function
         if self.graph == 'MX' or self.graph == 'expanded_MX':
@@ -1483,7 +1486,7 @@ class LocalDAECollocator(CasadiCollocator):
             
             # Lagrange cost
             if self.eliminate_der_var:
-                L = self.ocp.lterm
+                L = self.ocp.lterm()
                 sym_z = []
                 sym_z += list(self.model.p)
                 sym_z += list(self.model.x)
@@ -1491,7 +1494,7 @@ class LocalDAECollocator(CasadiCollocator):
                 sym_z += list(self.model.w)
                 sym_z.append(self.model.t)
                 
-                if L.numel() > 0:
+                if len(L) > 0:
                     L = casadi.substitute(L[0], self.model.dx, coll_der)
                     L_fcn = casadi.SXFunction([sym_z, x_i, der_vals_k, h_i],
                                               [L])
@@ -1633,7 +1636,76 @@ class LocalDAECollocator(CasadiCollocator):
         
         # Save cost function as data attribute
         self.cost_fcn = cost_fcn
-    
+        
+    def _expand_MX(self):
+        """
+        Expand the MX graphs to SX graphs.
+        """
+        if self.graph == "expanded_MX":
+            # Replace NLP MX objects with SX objects from expansion
+            self.xx = casadi.ssym("xx", self.n_xx)
+            
+            # Recreate constraints
+            self.c_fcn = self.c_fcn.expand([self.xx])
+            n_c_e = self.c_e.numel()
+            self.c_e = self.c_fcn.outputSX()[:n_c_e]
+            self.c_i = self.c_fcn.outputSX()[n_c_e:]
+            self.c = casadi.vertcat([self.c_e, self.c_i])
+            
+            # Reset user provided options and initialize
+            for (k, v) in self.casadi_options_g.iteritems():
+                self.c_fcn.setOption(k, v)
+            self.c_fcn.init()
+            
+            # Recreate cost
+            self.cost_fcn = self.cost_fcn.expand([self.xx])
+            self.cost = self.cost_fcn.outputSX()
+            
+            # Reset user provided options and initialize
+            for (k, v) in self.casadi_options_f.iteritems():
+                self.cost_fcn.setOption(k, v)
+            self.cost_fcn.init()
+        
+    def _calc_Lagrangian_Hessian(self):
+        """
+        Calculate the exact Hessian of the NLP Lagrangian.
+        """
+        if self.exact_hessian:
+            # Lagrange multipliers and objective function scaling
+            if self.graph == 'MX':
+                lam = casadi.MX("lambda", self.c.numel())
+                sigma = casadi.MX("sigma")
+            elif self.graph == "SX" or self.graph == 'expanded_MX':
+                lam = casadi.ssym("lambda", self.c.numel())
+                sigma = casadi.ssym("sigma")
+            else:
+                raise ValueError('Unknown CasADi graph %s.' % self.graph)
+            
+            # Lagrangian
+            lag_exp = sigma * self.cost + casadi.inner_prod(lam, self.c)
+            if self.graph == 'MX':
+                L = casadi.MXFunction([self.xx, lam, sigma], [lag_exp])
+            elif self.graph == "SX" or self.graph == 'expanded_MX':
+                L = casadi.SXFunction([self.xx, lam, [sigma]], [lag_exp])
+            else:
+                raise ValueError('Unknown CasADi graph %s.' % self.graph)
+                
+            # Set user provided options and initialize
+            for (k, v) in self.casadi_options_l.iteritems():
+                L.setOption(k, v)
+            L.init()
+        
+            # Calculate Hessian
+            self.H_fcn = L.hessian()
+        else:
+            # Set Hessian of the Lagrangian to a null function
+            if self.graph == 'MX':
+                self.H_fcn = casadi.MXFunction()
+            elif self.graph == "SX" or self.graph == 'expanded_MX':
+                self.H_fcn = casadi.SXFunction()
+            else:
+                raise ValueError('Unknown CasADi graph %s.' % self.graph)
+                
     def _compute_bounds_and_init(self):
         """
         Compute bounds and intial guesses for NLP variables.
@@ -1787,8 +1859,12 @@ class LocalDAECollocator(CasadiCollocator):
         return (nlp_lb, nlp_ub, nlp_init)
     
     def _create_solver(self):
-        self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn)
-    
+        if self.get_hessian().isNull():
+            self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn)
+        else:
+            self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn,
+                                             self.get_hessian())
+        
     def get_equality_constraint(self):
         return self.c_e
     
@@ -1797,6 +1873,9 @@ class LocalDAECollocator(CasadiCollocator):
     
     def get_cost(self):
         return self.cost_fcn
+    
+    def get_hessian(self):
+        return self.H_fcn
     
     def get_result(self):
         # Set model info
@@ -2707,8 +2786,8 @@ class PseudoSpectral(CasadiCollocator):
         # Extended vars
         self.ext_vars = {}
         
-        t0 = self.ocp.t0
-        tf = self.ocp.tf
+        t0 = self.ocp.t0()
+        tf = self.ocp.tf()
         
         if self.md.get_opt_finaltime_free():
             tf = casadi.SX("tf")
@@ -2862,15 +2941,15 @@ class PseudoSpectral(CasadiCollocator):
         
         _x_max = md.get_x_max(include_alias = False)
         _u_max = md.get_u_max(include_alias = False)
-        _p_max = [(p.getValueReference(), p.getMax()) for p in ocp.p]
+        _p_max = [(p.getValueReference(), p.getMax()) for p in ocp.p()]
         _x_min = md.get_x_min(include_alias = False)
         _u_min = md.get_u_min(include_alias = False)
-        _p_min = [(p.getValueReference(), p.getMin()) for p in ocp.p]
+        _p_min = [(p.getValueReference(), p.getMin()) for p in ocp.p()]
         _x_start = md.get_x_start(include_alias = False)
         #_u_start = md.get_u_start(include_alias = False)
         _u_start = md.get_u_initial_guess(include_alias = False)
         _p_start = []
-        for p in ocp.p: #NOTE SHOULD BE CHANGED
+        for p in ocp.p(): #NOTE SHOULD BE CHANGED
             for p_ori in md.get_p_opt_initial_guess():
                 if p.getValueReference() == p_ori[0]:
                     _p_start += [p_ori] 

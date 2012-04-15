@@ -51,7 +51,7 @@ FFunctionDecl : BaseNode ::= FQName FFunctionVariable* FAlgorithmBlock [FDerivat
  * The information in this node is extracted from the derivative 
  * annotation in a function declaration.
  */
-FDerivativeFunction : BaseNode ::= Name:FIdUse <Order:int> NoDerivative:FIdUse*;
+FDerivativeFunction : BaseNode ::= Name:FIdUse <Order:int>;
 
 /**
  * \brief A flattenend record declaration.
@@ -456,8 +456,7 @@ FFunctionCallLeft : BaseNode ::= [FExp];
  * connect statements has been transformed into regular equations, but only
  * as an intermediate node type.
  */
-FConnectClause : FAbstractEquation ::= [FStringComment]
-                                       <ConnectClause:ConnectClause>
+FConnectClause : FAbstractEquation ::= [FStringComment] 
                                        Connector1:FIdUseInstAccess 
                                        Connector2:FIdUseInstAccess;
 
@@ -875,11 +874,6 @@ FDerExp : FIdUseExp;
  * \brief The built-in function der converted into a dummy derivative.
  */
 FDummyDerExp : FIdUseExp; 
-
-/**
- * \brief Higher order derivatives occurring as a result of index reduction.
- */
-InstHDerExp : InstDerExp ::= <Order:int>; 
 
 /**
  * \brief Higher order derivatives occurring as a result of index reduction.

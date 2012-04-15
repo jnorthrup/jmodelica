@@ -636,8 +636,6 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 	return fmiOK;
 }
 
-/*Evaluates the A, B, C and D matrices using finite differences, this functions has
-only been used for debugging purposes*/
 fmiStatus fmi_get_jacobian_fd(fmiComponent c, int independents, int dependents, fmiReal jac[], size_t njac){
 	int i;
 	int j;
@@ -744,7 +742,6 @@ fmiStatus fmi_get_jacobian_fd(fmiComponent c, int independents, int dependents, 
  	return fmiOK;
 }
 
-/*Evaluates the A, B, C and D matrices*/
 fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmiReal jac[], size_t njac) {
 	
 	int i;
@@ -756,16 +753,15 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 	int passed = 0;
 	int failed = 0;
 	
+	fmiReal tol = 0.001;
 	fmiReal rel_tol;
 	fmiReal abs_tol;
 	
 	int offs;
 	jmi_real_t** dv;
 	jmi_real_t** dz;
-
-	/*Used for debugging 
-	fmiReal tol = 0.001;	
-	fmiReal* jac2;*/
+	
+	/*fmiReal* jac2;*/
 	
 	size_t nvvr = 0;
 	size_t nzvr = 0;
@@ -778,11 +774,10 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 	n_outputs = jmi->n_outputs;
 	n_outputs2 = n_outputs;
 	
-	/*dv and the dz are stored in the same vector*/
 	dv = jmi->dv;
 	dz = jmi->dv;
 	
-	/* Used for debbugging
+	/*
 	jac2 = (fmiReal*)calloc(njac, sizeof(fmiReal));
 	*/
 	output_vrefs = (int*)calloc(n_outputs, sizeof(int));
@@ -800,9 +795,6 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 	}
 	
 	offs = jmi->n_real_dx;
-	
-	/*nvvr: number of x and/or u variables used
-	  nzvr: number of dx and/or w variables used*/
 	
 	if(independents&FMI_STATES){
 		nvvr += jmi->n_real_x;
@@ -828,21 +820,14 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 		(*(jmi->z))[i+jmi->offs_real_u] = (*(jmi->z_val))[i+jmi->offs_real_u];
 	}
 	
-	/*For every x and/or u variable...*/
 	for(i = 0; i < nvvr; i++){
 		(*dv)[i+offs] = 1;
-		
-		/*Evaluate directional derivative*/
 		jmi->dae->ode_derivatives_dir_der(jmi);
-		
-		/*Jacobian elements ddx/dx and/or ddx/du*/
 		if(dependents&FMI_DERIVATIVES){
 			for(j = 0; j<jmi->n_real_dx;j++){
 				jac[i*nzvr+j] = (*dz)[j];
 			}
 		}
-		
-		/*Jacobian elements dy/dx and/or dy/du*/
 		if(dependents&FMI_OUTPUTS){
 			for(j = 0; j<n_outputs2;j++){
 				index = get_index_from_value_ref(output_vrefs2[j]);
@@ -857,13 +842,11 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 				}
 			}
 		}
-		/*reset dz vector*/
 		for(j = 0; j<jmi->n_real_dx+jmi->n_real_x+jmi->n_real_u+jmi->n_real_w;j++){
 			(*dz)[j] = 0;
 		}
 	}
 	/*
-	---This section has been used for debugging---
 	fmi_get_jacobian_fd(c, independents, dependents, jac2, njac);
 	
 	for(j = 0; j < nvvr; j++){
@@ -898,7 +881,6 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 	return fmiOK;
 }
 
-/*Evaluate the directional derivative dz/dv dv*/
 fmiStatus fmi_get_directional_derivative(fmiComponent c, const fmiValueReference z_vref[], size_t nzvr, const fmiValueReference v_vref[], size_t nvvr, fmiReal dz[], const fmiReal dv[]) {
 	int i = 0;
 	jmi_t* jmi = ((fmi_t *)c)->jmi;
@@ -1181,10 +1163,13 @@ fmiStatus fmi_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[],
 
 fmiStatus fmi_get_state_value_references(fmiComponent c, fmiValueReference vrx[], size_t nx) {
 	fmiInteger offset = ((fmi_t *)c)->jmi->offs_real_x;
+	fmiValueReference* valrefs = ((fmi_t*)c) -> fmi_functions.allocateMemory(nx, sizeof(fmiValueReference));
 	fmiValueReference i;
+    
 	for(i = 0; i<nx; i = i + 1) {
-		vrx[i] = offset + i;
+		valrefs[i] = offset + i;
 	}
+	memcpy (vrx, valrefs, nx*sizeof(fmiReal));
     return fmiOK;
 }
 

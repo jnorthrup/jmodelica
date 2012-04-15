@@ -18,6 +18,40 @@
 package ForbiddenOperationsTests
 
 
+model ComplexExpInDer1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="ComplexExpInDer1",
+        description="Error when using complex expression in der().",
+                                               errorMessage=
+"
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
+Semantic error at line 35, column 2:
+  Expressions within der() not supported
+")})));
+
+ Real x;
+ Real y;
+equation
+ der(x * y) = 0;
+end ComplexExpInDer1;
+
+model ComplexExpInDer2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="ComplexExpInDer2",
+        description="Error when using complex expression in der().",
+                                               errorMessage=
+"
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
+Semantic error at line 50, column 2:
+  Expressions within der() not supported
+")})));
+
+ Real x;
+equation
+ der(der(x)) = 0;
+end ComplexExpInDer2;
+
+
 /* ================ Algorithms =============== */
 
 function WhenInFunction_Func
@@ -190,7 +224,6 @@ equation
 	x = y + 1;
 	when time > 1 then
 		x + y = 3;
-		x = 2;
 	end when;
 end WhenContents1;
 
@@ -204,7 +237,7 @@ model WhenContents2
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
 Semantic error at line 235, column 2:
-  All branches in when equation must assign the same variables
+  Both branches in when equation must assign the same variables
 ")})));
 
 	Real x;
@@ -228,7 +261,7 @@ model WhenContents3
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
 Semantic error at line 262, column 3:
-  All branches in if equation with non-parameter tests within when equation must assign the same variables
+  Both branches in if equation within when equation must assign the same variables
 ")})));
 
 	Real x;

@@ -70,7 +70,6 @@ import org.jmodelica.optimica.parser.OptimicaParser.Terminals;
   }
 
   protected int matchLine()   { return yyline; }
-  protected int matchColumn() { return yycolumn; }
   protected int matchOffset() { return yychar; }
   protected int matchLength() { return yylength(); }
 

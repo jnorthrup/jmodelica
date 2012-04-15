@@ -14,10 +14,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/**
+/*
 * \file jm_vector_template.h
 * \brief Vector template definition.
-*
 * This file is supposed to be included into a C-file that instantiate the template.
 * jm_vector.h must be included before this file.
 * It expects JM_TEMPLATE_INSTANCE_TYPE to be defined to the template type to be instantiated.
@@ -26,10 +25,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "jm_vector.h"
-
-/** \addtogroup jm_vector  A vector of items (dynamic array)*/
-/** @{
-*/
 
 #ifndef JM_TEMPLATE_INSTANCE_TYPE
 #error "JM_TEMPLATE_INSTANCE_TYPE must be defined before including this file"
@@ -101,7 +96,7 @@ size_t jm_vector_reserve(JM_TEMPLATE_INSTANCE_TYPE)(jm_vector(JM_TEMPLATE_INSTAN
         newmem = a->callbacks->malloc(size * sizeof(JM_TEMPLATE_INSTANCE_TYPE));
         if(!newmem) return a->capacity;
         memcpy(newmem, a->items, a->size * sizeof(JM_TEMPLATE_INSTANCE_TYPE));
-        if(a->items !=  a->preallocated) a->callbacks->free((void*)(a->items));
+        if(a->items !=  a->preallocated) a->callbacks->free(a->items);
         a->items = newmem;
         a->capacity = size;
         return a->capacity;
@@ -109,7 +104,7 @@ size_t jm_vector_reserve(JM_TEMPLATE_INSTANCE_TYPE)(jm_vector(JM_TEMPLATE_INSTAN
 
 size_t jm_vector_copy(JM_TEMPLATE_INSTANCE_TYPE)(jm_vector(JM_TEMPLATE_INSTANCE_TYPE)* destination, jm_vector(JM_TEMPLATE_INSTANCE_TYPE)* source) {
         size_t destsize = jm_vector_resize(JM_TEMPLATE_INSTANCE_TYPE)(destination, source->size);
-        memcpy((void*)destination->items, (void*)source->items, sizeof(JM_TEMPLATE_INSTANCE_TYPE)*destsize);
+        memcpy(destination->items, source->items, sizeof(JM_TEMPLATE_INSTANCE_TYPE)*destsize);
         return destination->size;
 }
 
@@ -117,7 +112,7 @@ size_t jm_vector_append(JM_TEMPLATE_INSTANCE_TYPE)(jm_vector(JM_TEMPLATE_INSTANC
         size_t oldsize, newsize;
         oldsize = jm_vector_get_size(JM_TEMPLATE_INSTANCE_TYPE)(destination);
         newsize = jm_vector_resize(JM_TEMPLATE_INSTANCE_TYPE)(destination, source->size + oldsize);
-        memcpy((void*)(destination->items + oldsize), (void*)source->items, sizeof(JM_TEMPLATE_INSTANCE_TYPE)*(newsize - oldsize));
+        memcpy(destination->items + oldsize, source->items, sizeof(JM_TEMPLATE_INSTANCE_TYPE)*(newsize - oldsize));
         return (newsize - oldsize);
 }
 
@@ -133,14 +128,14 @@ JM_TEMPLATE_INSTANCE_TYPE* jm_vector_insert(JM_TEMPLATE_INSTANCE_TYPE)(jm_vector
                 if( jm_vector_reserve(JM_TEMPLATE_INSTANCE_TYPE)(a, reserve) != reserve) return 0;
         }
         assert(a->size < a->capacity);
-        memmove((void*)(a->items+index+1),(void*)(a->items+index), a->size - index);
+        memmove(a->items+index+1,a->items+index, a->size - index);
         a->items[index] = item;
         pitem = &(a->items[index]);
         a->size++;
         return pitem;
 }
 
-JM_TEMPLATE_INSTANCE_TYPE* jm_vector_resize1(JM_TEMPLATE_INSTANCE_TYPE) (jm_vector(JM_TEMPLATE_INSTANCE_TYPE) * a) {
+JM_TEMPLATE_INSTANCE_TYPE* jm_vector_push_back(JM_TEMPLATE_INSTANCE_TYPE) (jm_vector(JM_TEMPLATE_INSTANCE_TYPE) * a, JM_TEMPLATE_INSTANCE_TYPE item) {
         int reserve;
         JM_TEMPLATE_INSTANCE_TYPE* pitem;
         if(a->size == a->capacity) {
@@ -151,15 +146,9 @@ JM_TEMPLATE_INSTANCE_TYPE* jm_vector_resize1(JM_TEMPLATE_INSTANCE_TYPE) (jm_vect
                 if( jm_vector_reserve(JM_TEMPLATE_INSTANCE_TYPE)(a, reserve) != reserve) return 0;
         }
         assert(a->size < a->capacity);
+        a->items[a->size] = item;
         pitem = &(a->items[a->size]);
         a->size++;
-        return pitem;
-}
-
-JM_TEMPLATE_INSTANCE_TYPE* jm_vector_push_back(JM_TEMPLATE_INSTANCE_TYPE) (jm_vector(JM_TEMPLATE_INSTANCE_TYPE) * a, JM_TEMPLATE_INSTANCE_TYPE item) {
-        JM_TEMPLATE_INSTANCE_TYPE* pitem= jm_vector_resize1(JM_TEMPLATE_INSTANCE_TYPE) (a);
-        if(!pitem) return 0;
-        *pitem = item;
         return pitem;
 }
 
@@ -167,14 +156,14 @@ void jm_vector_remove_item(JM_TEMPLATE_INSTANCE_TYPE)(jm_vector(JM_TEMPLATE_INST
     size_t n =v->size - index -1;
     assert(index < v->size);
     if(n) {
-        memmove((void*)&(v->items[index]),(void*) &(v->items[index+1]), n * sizeof(JM_TEMPLATE_INSTANCE_TYPE));
+        memmove(&(v->items[index]), &(v->items[index+1]), n * sizeof(JM_TEMPLATE_INSTANCE_TYPE));
     }
     v->size--;
 }
 
 void jm_vector_zero(JM_TEMPLATE_INSTANCE_TYPE)(jm_vector(JM_TEMPLATE_INSTANCE_TYPE)* a) {
     if(jm_vector_get_size(JM_TEMPLATE_INSTANCE_TYPE)(a) > 0) {
-        memset((void*)a->items,0,a->size * sizeof(JM_TEMPLATE_INSTANCE_TYPE));
+        memset(a->items,0,a->size * sizeof(JM_TEMPLATE_INSTANCE_TYPE));
     }
 }
 
@@ -194,7 +183,7 @@ void jm_vector_foreach(JM_TEMPLATE_INSTANCE_TYPE)(jm_vector(JM_TEMPLATE_INSTANCE
 
 void jm_vector_qsort(JM_TEMPLATE_INSTANCE_TYPE)(jm_vector(JM_TEMPLATE_INSTANCE_TYPE)* v, jm_compare_ft f) {
     if(jm_vector_get_size(JM_TEMPLATE_INSTANCE_TYPE)(v) > 1) {
-        qsort((void*)v->items, jm_vector_get_size(JM_TEMPLATE_INSTANCE_TYPE)(v), sizeof(JM_TEMPLATE_INSTANCE_TYPE),f);
+        qsort(v->items, jm_vector_get_size(JM_TEMPLATE_INSTANCE_TYPE)(v), sizeof(JM_TEMPLATE_INSTANCE_TYPE),f);
     }
 }
 
@@ -232,6 +221,3 @@ JM_TEMPLATE_INSTANCE_TYPE* jm_vector_find(JM_TEMPLATE_INSTANCE_TYPE)(jm_vector(J
 size_t jm_vector_find_index(JM_TEMPLATE_INSTANCE_TYPE)(jm_vector(JM_TEMPLATE_INSTANCE_TYPE)* v, JM_TEMPLATE_INSTANCE_TYPE* itemp, jm_compare_ft f) {
     return jm_vector_ptr2index(JM_TEMPLATE_INSTANCE_TYPE)(v,jm_vector_find(JM_TEMPLATE_INSTANCE_TYPE)(v, itemp, f));
 }
-
-/** @}
-*/

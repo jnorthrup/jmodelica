@@ -26,14 +26,34 @@ settings will be used.
 import os
 import sys
 import platform
+import subprocess
+import string
 
 import jpype
 
 import pymodelica as pym
 from pymodelica.common import xmlparser
 from pymodelica.common.core import list_to_string, get_unit_name
-from compiler_interface import *
 
+#start JVM
+# note that startJVM() fails after shutdownJVM(), hence, only one start
+if not jpype.isJVMStarted():
+    _jvm_args = string.split(pym.environ['JVM_ARGS'],' ')
+    _jvm_class_path = pym.environ['MC_JAR'] + os.pathsep + pym.environ['OC_JAR']+\
+        os.pathsep + pym.environ['UTIL_JAR'] + os.pathsep + \
+        pym.environ['GRAPHS_JAR']
+    _jvm_ext_dirs = pym.environ['BEAVER_PATH']
+    jpype.startJVM(pym.environ['JVM_PATH'], 
+        '-Djava.class.path=%s' % _jvm_class_path, 
+        '-Djava.ext.dirs=%s' % _jvm_ext_dirs,
+        *_jvm_args)
+    org = jpype.JPackage('org')
+    print "JVM started."
+
+OptionRegistry = org.jmodelica.util.OptionRegistry
+
+UnknownOptionException = jpype.JClass(
+    'org.jmodelica.util.OptionRegistry$UnknownOptionException')
 
 def compile_fmu(class_name, file_name=[], compiler='modelica', 
     target='model_fmume', compiler_options={}, compile_to='.', 
@@ -362,10 +382,11 @@ class ModelicaCompiler(object):
     User class for accessing the Java ModelicaCompiler class. 
     """
     
+    ModelicaCompiler = org.jmodelica.modelica.compiler.ModelicaCompiler
     
-    LOG_ERROR = ModelicaCompilerInterface.ERROR
-    LOG_WARNING = ModelicaCompilerInterface.WARNING
-    LOG_INFO = ModelicaCompilerInterface.INFO
+    LOG_ERROR = ModelicaCompiler.ERROR
+    LOG_WARNING = ModelicaCompiler.WARNING
+    LOG_INFO = ModelicaCompiler.INFO
     
     jm_home = pym.environ['JMODELICA_HOME']
 
@@ -396,13 +417,16 @@ class ModelicaCompiler(object):
                 Default: None
         """
         try:
-            options = OptionRegistryInterface(self.options_file_path)
+            options = OptionRegistry(self.options_file_path)
         except jpype.JavaException, ex:
             self._handle_exception(ex)
             
         options.addStringOption('MODELICAPATH',pym.environ['MODELICAPATH'])
         
-        self._compiler = pym._create_compiler(ModelicaCompilerInterface, options)
+        self._compiler = self.ModelicaCompiler(options, 
+                                               xml_template,
+                                               xml_values_template,
+                                               c_template)
             
     @classmethod
     def set_log_level(self,level):
@@ -419,7 +443,7 @@ class ModelicaCompiler(object):
                 ModelicaCompiler.LOG_ERROR, ModelicaCompiler.LOG_WARNING and 
                 ModelicaCompiler.LOG_INFO.
         """
-        ModelicaCompilerInterface.setLogLevel(ModelicaCompilerInterface.log, level)
+        self.ModelicaCompiler.setLogLevel(self.ModelicaCompiler.log, level)
 
     @classmethod
     def get_log_level(self):
@@ -430,7 +454,7 @@ class ModelicaCompiler(object):
         
             The current level of log messages.
         """
-        return ModelicaCompilerInterface.getLogLevel(ModelicaCompilerInterface.log)
+        return self.ModelicaCompiler.getLogLevel(self.ModelicaCompiler.log)
     
     
     def set_options(self, compiler_options):
@@ -956,8 +980,8 @@ class ModelicaCompiler(object):
         underlying Java classes might throw. Raises an appropriate Python error 
         or the default JError.
         """
-        if ex.javaClass() is ModelicaCompilerException \
-            or ex.javaClass() is OptimicaCompilerException:
+        if ex.javaClass() is org.jmodelica.modelica.compiler.CompilerException \
+            or ex.javaClass() is org.jmodelica.optimica.compiler.CompilerException:
             arraylist = ex.__javaobject__.getProblems()
             itr = arraylist.iterator()
 
@@ -975,11 +999,13 @@ class ModelicaCompiler(object):
                     
             raise CompilerError(errors,compliance_errors,warnings)
         
-        if ex.javaClass() is ModelicaClassNotFoundException:
+        if ex.javaClass() is \
+            org.jmodelica.modelica.compiler.ModelicaClassNotFoundException:
             raise ModelicaClassNotFoundError(
                 str(ex.__javaobject__.getClassName()))
         
-        if ex.javaClass() is OptimicaClassNotFoundException:
+        if ex.javaClass() is \
+            org.jmodelica.optimica.compiler.ModelicaClassNotFoundException:
             raise OptimicaClassNotFoundError(
                 str(ex.__javaobject__.getClassName()))
         
@@ -1003,10 +1029,10 @@ class ModelicaCompiler(object):
                 '\nMessage: '+ex.message().encode('utf-8')+\
                 '\nStacktrace: '+ex.stacktrace().encode('utf-8'))
         
-        if ex.javaClass() is SAXException or \
-            ex.javaClass() is SAXNotRecognizedException or \
-            ex.javaClass() is SAXNotSupportedException or \
-            ex.javaClass() is SAXParseException:
+        if ex.javaClass() is org.xml.sax.SAXException or \
+            ex.javaClass() is org.xml.sax.SAXNotRecognizedException or \
+            ex.javaClass() is org.xml.sax.SAXNotSupportedException or \
+            ex.javaClass() is org.xml.sax.SAXParseException:
             raise SAXError(
                 '\nMessage: '+ex.message().encode('utf-8')+\
                 '\nStacktrace: '+ex.stacktrace().encode('utf-8'))
@@ -1024,8 +1050,10 @@ class ModelicaCompiler(object):
         if ex.javaClass() is jpype.java.lang.NullPointerException:
             raise JError(ex.stacktrace().encode('utf-8'))
         
-        if ex.javaClass() is ModelicaCCodeCompilationException or \
-            ex.javaClass() is OptimicaCCodeCompilationException:
+        if ex.javaClass() is \
+            org.jmodelica.modelica.compiler.CcodeCompilationException or \
+            ex.javaClass() is \
+            org.jmodelica.optimica.compiler.CcodeCompilationException:
             raise CcodeCompilationError(
                 '\nMessage: '+ex.message().encode('utf-8')+\
                 '\nStacktrace: '+ex.stacktrace().encode('utf-8'))
@@ -1036,6 +1064,8 @@ class OptimicaCompiler(ModelicaCompiler):
     """ 
     User class for accessing the Java OptimicaCompiler class. 
     """
+
+    OptimicaCompiler = org.jmodelica.optimica.compiler.OptimicaCompiler
 
     jm_home = pym.environ['JMODELICA_HOME']
 
@@ -1069,13 +1099,17 @@ class OptimicaCompiler(ModelicaCompiler):
                 Default: None
         """
         try:
-            options = OptionRegistryInterface(self.options_file_path)
+            options = OptionRegistry(self.options_file_path)
         except jpype.JavaException, ex:
             self._handle_exception(ex)
             
         options.addStringOption('MODELICAPATH',pym.environ['MODELICAPATH'])
         
-        self._compiler = pym._create_compiler(OptimicaCompilerInterface, options)
+        self._compiler = self.OptimicaCompiler(options,
+                                               xml_template,
+                                               xml_values_template,
+                                               c_template,
+                                               optimica_c_template)
 
     @classmethod
     def set_log_level(self,level):
@@ -1092,7 +1126,7 @@ class OptimicaCompiler(ModelicaCompiler):
                 OptimicaCompiler.LOG_ERROR, OptimicaCompiler.LOG_WARNING 
                 and OptimicaCompiler.LOG_INFO.
         """
-        OptimicaCompilerInterface.setLogLevel(OptimicaCompilerInterface.log, level)
+        self.OptimicaCompiler.setLogLevel(self.OptimicaCompiler.log, level)
 
     @classmethod
     def get_log_level(self):
@@ -1103,7 +1137,7 @@ class OptimicaCompiler(ModelicaCompiler):
         
             The current level of log messages.
         """
-        return OptimicaCompilerInterface.getLogLevel(OptimicaCompilerInterface.log)
+        return self.OptimicaCompiler.getLogLevel(self.ModelicaCompiler.log)
 
     def set_boolean_option(self, key, value):
         """ 

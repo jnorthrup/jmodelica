@@ -46,136 +46,7 @@ class Trajectory:
         self.t = t
         self.x = x
 
-class ResultDymola:
-    """
-    Base class for representation of a result file.
-    """
-    def get_variable_index(self,name): 
-        """
-        Retrieve the index in the name vector of a given variable.
-        
-        Parameters::
-        
-            name --
-                Name of variable.
-
-        Returns::
-        
-            In integer index.
-        """
-        #Strip name of spaces, for instace a[2, 1] to a[2,1]
-        name = name.replace(" ", "")
-        
-        try:
-            return self.name.index(name)
-        except ValueError, ex:
-            #Variable was not found so check if it was a derivative variable
-            #and check if there exists a variable with another naming
-            #convention
-            if self._check_if_derivative_variable(name):
-                try:
-                    #First do a simple search for the other naming convention
-                    return self.name.index(self._convert_dx_name(name))
-                except ValueError, ex:
-                    return self._exhaustive_search_for_derivatives(name)
-            else:
-                raise VariableNotFoundError("Cannot find variable " +
-                                        name + " in data file.")
-            
-    
-    def _check_if_derivative_variable(self, name):
-        """
-        Check if a variable is a derivative variable or not.
-        """
-        if name.startswith("der(") or name.split(".")[-1].startswith("der("):
-            return True
-        else:
-            return False
-        
-    
-    def _exhaustive_search_for_derivatives(self, name):
-        """
-        Perform an exhaustive search for a derivative variable by 
-        first retrieving the underlying state and for each its alias
-        check if there exists a derivative variable.
-        """
-        #Find alias for name
-        state = self._find_underlying_state(name)
-        index = self.get_variable_index(state)
-        
-        alias_index = N.where(self.dataInfo[:,1]==self.dataInfo[index,1])[0]
-        
-        #Loop through all alias
-        for ind in alias_index:
-            #Get the trial name
-            trial_name = self.name[ind]
-            
-            #Create the derivative name
-            der_trial_name = self._create_derivative_from_state(trial_name)
-            
-            try:
-                return self.name.index(der_trial_name)
-            except ValueError, ex:
-                try:
-                    return self.name.index(self._convert_dx_name(der_trial_name))
-                except ValueError, ex:
-                    pass
-        else:
-            raise VariableNotFoundError("Cannot find variable " +
-                                        name + " in data file.")
-    
-    def _find_underlying_state(self, name):
-        """
-        Finds the underlying state of a derivative variable. der(PI.x)
-        -> PI.x.
-        """
-        spl = name.split(".")
-        
-        if spl[0].startswith("der("):
-            spl[0] = spl[0][4:] #Remove der(
-            spl[-1] = spl[-1][:-1] #Remove )
-            return ".".join(spl)
-        elif spl[-1].startswith("der("):
-            spl[-1] = spl[-1][4:] #Remove der(
-            spl[-1] = spl[-1][:-1] #Remove )
-            return ".".join(spl)
-        else:
-            return name
-    
-    def _create_derivative_from_state(self, name):
-        """
-        Create a derivative variable from a state by adding for instance
-        to PI.x -> der(PI.x).
-        """
-        return "der("+name+")"
-    
-    def _convert_dx_name(self, name):
-        """
-        Internal method for converting the derivative variable into the 
-        "other" convention. A derivative variable can either be on the 
-        form PI.der(x) and der(PI.x).
-        
-        Returns the original name if the name was not a derivative name.
-        """
-        spl = name.split(".") #Split name
-        
-        if spl[0].startswith("der("): #der(PI.x)
-            spl[0] = spl[0][4:] #Remove der
-            spl[-1] = "der("+spl[-1] #Add der
-            
-            return ".".join(spl) #PI.der(x)
-
-        elif spl[-1].startswith("der("): #PI.der(x)
-            spl[0] = "der("+spl[0] #Add der
-            spl[-1] = spl[-1][4:] #Remove der
-            
-            return ".".join(spl)
-
-        else: #Variable was not a derivative variable
-            return name
-
-
-class ResultDymolaTextual(ResultDymola):
+class ResultDymolaTextual:
     """ 
     Class representing a simulation or optimization result loaded from a Dymola 
     binary file.
@@ -276,6 +147,25 @@ class ResultDymolaTextual(ResultDymola):
             raise JIOError("The result does not seem to be of a supported format.")
         return tmp[2].partition(',')
 
+    def get_variable_index(self,name): 
+        """
+        Retrieve the index in the name vector of a given variable.
+        
+        Parameters::
+        
+            name --
+                Name of variable.
+        
+        Returns::
+        
+            In integer index.
+        """
+        try:
+            return self.name.index(name)
+        except ValueError, ex:
+            raise VariableNotFoundError("Cannot find variable " +
+                                        name + " in data file.")
+            
     def get_variable_data(self,name):
         """
         Retrieve the data sequence for a variable with a given name.
@@ -427,7 +317,7 @@ class ResultDymolaTextual(ResultDymola):
         self.data[1] = N.vstack((self.data[1],res.data[1]))
         self.data[1][n_points:,0] = self.data[1][n_points:,0] + time_shift 
 
-class ResultDymolaBinary(ResultDymola):
+class ResultDymolaBinary:
     """ 
     Class representing a simulation or optimization result loaded from a Dymola 
     binary file.
@@ -455,6 +345,25 @@ class ResultDymolaBinary(ResultDymola):
                 'u',
                 description[:,i].tolist()).tounicode().rstrip() \
                 for i in range(0,description[0,:].size)]
+        
+    def get_variable_index(self,name): 
+        """
+        Retrieve the index in the name vector of a given variable.
+        
+        Parameters::
+        
+            name --
+                Name of variable.
+
+        Returns::
+        
+            In integer index.
+        """
+        try:
+            return self.name.index(name)
+        except ValueError, ex:
+            raise VariableNotFoundError("Cannot find variable " +
+                                        name + " in data file.")
        
     def get_variable_data(self,name):
         """
