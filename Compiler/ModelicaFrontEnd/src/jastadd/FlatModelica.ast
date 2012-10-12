@@ -70,7 +70,7 @@ FEnumDecl : BaseNode ::= Name:FIdDecl FEnumSpecification [FStringComment];
 abstract FEnumSpecification : BaseNode;
 FEnumLiteralList : FEnumSpecification ::= FEnumLiteral*;
 FEnumUnspecified : FEnumSpecification;
-FEnumLiteral : FAbstractVariable ::= Name:FIdUse [FStringComment];
+FEnumLiteral : AbstractFVariable ::= Name:FIdUse [FStringComment];
 
 FAbstractEquationBlock : BaseNode;
 
@@ -84,12 +84,12 @@ FEquationBlock : FAbstractEquationBlock ::= FAbstractEquation*;
 /**
  * \brief Abstract base class for flat variables.
  */
-abstract FAbstractVariable : BaseNode;
+abstract AbstractFVariable : BaseNode;
 
 /**
  * \brief A flat variable in a function.
  */
-FFunctionVariable : FAbstractVariable ::= [FTypePrefixInputOutput]
+FFunctionVariable : AbstractFVariable ::= [FTypePrefixInputOutput]
                                           Type:FType
                                           [BindingExp:FExp]
                                           FQName;
@@ -102,7 +102,7 @@ FFunctionArray : FFunctionVariable;
 /**
  * \brief A flat variable corresponding to an unknown declaration.
  */
-UnknownFVariable : FAbstractVariable;
+UnknownFVariable : AbstractFVariable;
 
 /**
  * \brief A class representing a flattened Modelica variable.
@@ -114,15 +114,14 @@ UnknownFVariable : FAbstractVariable;
  * variables and scalar variables: this information is embedded in the 
  * FQName class.
  */
-abstract FVariable : FAbstractVariable ::= FVisibilityType
+abstract FVariable : AbstractFVariable ::= FVisibilityType
                                            FTypePrefixVariability
                                            [FTypePrefixInputOutput]
                                            FAttribute*
                                            <DerivedType>
                                            [BindingExp:FExp]
                                            [FStringComment]
-                                           FQName
-                                           <ManualTearingVariable:boolean>;
+                                           FQName;
 
 /**
  * Represents a set of attributes that can be used by several variables.
@@ -205,11 +204,6 @@ FStringVariable : FVariable;
 FEnumVariable : FVariable ::= Enum:FQName /Type:FType/;
 
 /**
- * \brief An external object variable.
- */
-FExternalObjectVariable : FVariable ::= DestructorCall:FFunctionCallStmt;
-
-/**
  * \brief Pre FVariable of type Real.
  */
 FPreRealVariable : FRealVariable;
@@ -286,7 +280,7 @@ abstract FType : BaseNode ::= <Size:Size>;
  * In the instance tree, the components are stored alphabetically, 
  * but in the flat tree they are in the order declared. 
  */
-FRecordType : FType ::= <Name> Component:FRecordComponentType* <FClass:FClass>;
+FRecordType : FType ::= <Name> Component:FRecordComponentType*;
 
 /**
  * \brief The type description of a record component.
@@ -340,11 +334,6 @@ FEnumLiteralType : FPrimitiveType ::= <Name>;
  * Used to represent type errors. 
  */
 FUnknownType : FType;
-
-/**
- * \brief Class representing the external object type.
- */
-FExternalObjectType : FPrimitiveType;
 
 /**
  * \brief A qualified name supporting array subscripts.
@@ -445,7 +434,7 @@ FInitialEquation : FEquationType;
  */
 abstract FAbstractEquation : BaseNode ::= Type:FEquationType
                                           /InitialEquation:FEquation*/ 
-                                          /[DynamicFAbstractEquation:FAbstractEquation]/
+                                          /DynamicFAbstractEquation:FAbstractEquation*/
                                           [Residues:FResidues]; 
 
 /**
@@ -663,22 +652,7 @@ ScalarAsArray : Array;
 /**
  * \brief Abstract base class for all flattened expressions.
  */
-abstract FExp : BaseNode ::= /Array/;
-
-/**
- * \brief Abstract base class for all flattened expressions that is not literal or unsupported.
- */
-
-abstract FAbstractExp : FExp;
-/**
- * \brief Abstract base class for all flattened scalar expressions.
- */
-abstract FAbstractScalarExp : FAbstractExp;
-
-/**
- * \brief Abstract base class for all flattened expressions that can be an array.
- */
-abstract FAbstractArrayExp : FAbstractExp;
+abstract FExp : BaseNode ::= /Array/ /DynamicFExp:FExp*/;
 
 /**
  * \brief Unsupported expression.
@@ -690,12 +664,12 @@ FUnsupportedExp : FExp;
 /**
  * \brief Base class for binary expressions.
  */
-abstract FBinExp : FAbstractArrayExp ::= Left:FExp Right:FExp;
+abstract FBinExp : FExp ::= Left:FExp Right:FExp;
 
 /**
  * \brief Base class for unary expressions.
  */
-abstract FUnaryExp : FAbstractArrayExp ::= FExp;
+abstract FUnaryExp : FExp ::= FExp;
 
 /**
  * \brief Base class for arithmetic binary expressions.
@@ -874,7 +848,7 @@ FEnumLitExp : FLitExp ::= <Enum> <Value> <Type:FEnumType>;
 /**
  * Expressions of the form "(exp) for i in (exp)" in instance and flat tree.
  */
-FIterExp : FAbstractArrayExp ::= FExp ForIndex:CommonForIndex*;
+FIterExp : FExp ::= FExp ForIndex:CommonForIndex*;
 
 /**
  * \brief Common subclass for for indices in instance and flat trees.
@@ -889,7 +863,7 @@ FForIndex : CommonForIndex ::= FVariable;
 /**
  * \brief If expression.
  */
-FIfExp : FAbstractArrayExp ::= IfExp:FExp ThenExp:FExp ElseExp:FExp;
+FIfExp : FExp ::= IfExp:FExp ThenExp:FExp ElseExp:FExp;
 
 /**
  * \brief Declaration of a qualified name. 
@@ -904,7 +878,7 @@ FIdUse : BaseNode ::= FQName /ExpandedSubscripts:FArraySubscripts/;
 /**
  * \brief A qualifed identifier in an expression.
  */
-FIdUseExp : FAbstractArrayExp ::= FIdUse;
+FIdUseExp : FExp ::= FIdUse;
 
 /**
  * \brief The built-in function der in the instance tree.
@@ -947,7 +921,7 @@ FIdUseInstAccess : FIdUse ::= InstAccess;
  *
  * Instantiated expressions occurs in the instance tree.
  */
-FInstAccessExp : FAbstractArrayExp ::= InstAccess;
+FInstAccessExp : FExp ::= InstAccess;
 
 /**
  * \brief Record constructor.
@@ -957,7 +931,7 @@ FRecordConstructor : FBuiltInFunctionCall ::= Record:FIdUse Arg:FExp* /Type:FTyp
 /**
  * \brief Array constructor expression.
  */
-FArray : FAbstractArrayExp ::= FExp*;
+FArray : FExp ::= FExp*;
 
 /**
  * \brief Long form of array constructor expression.
@@ -994,41 +968,41 @@ FMatrixRow : FAbstractCat;
 /**
  * \brief Generated expression that applies array subscripts to any expression.
  */
-FSubscriptedExp : FAbstractArrayExp ::= FExp FArraySubscripts;
+FSubscriptedExp : FExp ::= FExp FArraySubscripts;
 
 /**
  * \brief Internal expression that describes an unknown size (for a single dimension).
  * 
  * Only used in Size objects.
  */
-FUnknownSizeExp : FAbstractArrayExp ::= <Variable:CommonVariableDecl> <Dim:int>;
+FUnknownSizeExp : FExp ::= <Variable:CommonVariableDecl> <Dim:int>;
 
 /**
  * \brief Dummy node.
  */
-FNoExp : FAbstractScalarExp;
+FNoExp : FExp;
 
 /**
  * \brief Range expression.
  */
-FRangeExp : FAbstractArrayExp ::= FExp*;
+FRangeExp : FExp ::= FExp*;
 
 /**
  * \brief Built-in variable time.
  */
-FTimeExp : FAbstractScalarExp;
+FTimeExp : FExp;
 
 /**
  * \brief Built-in expression 'end', used in arrays.
  */
-FEndExp : FAbstractScalarExp;
+FEndExp : FExp;
 
 
 // Functions and function-like operators
 /**
  * \brief Base class for all function calls and function call-like operators.
  */
-abstract FAbstractFunctionCall : FAbstractArrayExp;
+abstract FAbstractFunctionCall : FExp;
  
 /**
  * \brief Generic function call expression.
@@ -1253,11 +1227,6 @@ FCross : FBuiltInFunctionCall ::= X:FExp Y:FExp;
 FIdentity : FUnaryBuiltIn;
 
 /**
- * Outer product built-in function.
- */
-FOuterProduct : FBuiltInFunctionCall ::= X:FExp Y:FExp;
-
-/**
  * \brief Identity built-in function.
  */
 FLinspace : FBuiltInFunctionCall ::= StartExp:FExp StopExp:FExp N:FExp;
@@ -1268,24 +1237,19 @@ FLinspace : FBuiltInFunctionCall ::= StartExp:FExp StopExp:FExp N:FExp;
 abstract FInfArgsFunctionCall : FBuiltInFunctionCall ::= FExp*;
 
 /**
- * Base class for operators that creates an array with dimensions given as arguments, e.g. ones().
- */
-abstract FArrayDimAsArgsExp : FInfArgsFunctionCall;
-
-/**
  * \brief Ones built-in function.
  */
-FOnes : FArrayDimAsArgsExp;
+FOnes : FInfArgsFunctionCall;
 
 /**
  * \brief Zeros built-in function.
  */
-FZeros : FArrayDimAsArgsExp;
+FZeros : FInfArgsFunctionCall;
 
 /**
  * \brief Fill built-in function.
  */
-FFillExp : FArrayDimAsArgsExp ::= FillExp:FExp;
+FFillExp : FInfArgsFunctionCall ::= FillExp:FExp;
 
 /**
  * \brief Common base class for FMinExp & FMaxExp.

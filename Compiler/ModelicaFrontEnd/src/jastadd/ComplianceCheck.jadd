@@ -113,9 +113,7 @@ aspect ComplianceCheck {
 	public void InstPrimitive.complianceCheck() {
 		super.complianceCheck();
 		if (isString()) {
-			if (inFunction())
-				warning("String arguments in functions are only partially supported");
-			else if (variability().lessOrEqual(fParameter()))
+			if (variability().lessOrEqual(fParameter()))
 				warning("String parameters are only partially supported");
 			else
 				compliance("String variables are not supported");

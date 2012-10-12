@@ -250,20 +250,6 @@ public class CGenerator extends GenericGenerator {
 			for (FVariable fv : list)
 				generatePreVar(genPrinter, fv, offset, index++);
 		}
-		
-        private void generateExtObject(PrintStream genPrinter, FVariable fv, int index) {
-            genPrinter.print("#define ");
-            genPrinter.print(fv.name_C());
-            genPrinter.print(" ((jmi->ext_objs)[");
-            genPrinter.print(index);
-            genPrinter.print("])\n");
-        }
-        
-        private void generateExtObjectList(PrintStream genPrinter, Iterable<? extends FExternalObjectVariable> list) {
-            int index = 0;
-            for (FExternalObjectVariable fv : list)
-                generateExtObject(genPrinter, fv, index++);
-        }
 	
 		public void generate(PrintStream genPrinter) {
 			generateVarList(genPrinter, fclass.independentRealConstants(),     "real_ci");
@@ -308,7 +294,6 @@ public class CGenerator extends GenericGenerator {
 				generatePreVarList(genPrinter, fclass.discreteBooleanVariables(),     "boolean_d");
 				generatePreVarList(genPrinter, fclass.booleanInputs(),                "boolean_u");
 			}
-			generateExtObjectList(genPrinter, fclass.externalObjectVariables());
 
 		}
 	}
@@ -354,7 +339,7 @@ public class CGenerator extends GenericGenerator {
 
 				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
 					if (!block.isSolvable()) {
-						block.genBlockAddCall_C(block_counter,false, false," ",genPrinter);
+						block.genBlockAddCall_C(block_counter,false," ",genPrinter);
 						block_counter++;
 					}
 				}
@@ -402,7 +387,7 @@ public class CGenerator extends GenericGenerator {
 			if (fclass.root().options.getBooleanOption("generate_ode")) {
 				int block_counter = 0;
 				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
-					block.genBlockResidualFunction_C(block_counter, true,"  ",genPrinter); 
+					block.genBlockResidualFunction_C(block_counter,true,"  ",genPrinter); 
 				  	if (!block.isSolvable()) {
 				  		block_counter++;
 				  	}
@@ -427,7 +412,7 @@ public class CGenerator extends GenericGenerator {
 				int block_counter = 0;
 				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
 				    if (!block.isSolvable()) {
-				    	block.genBlockAddCall_C(block_counter,false, true," ",genPrinter);
+				    	block.genBlockAddCall_C(block_counter,true," ",genPrinter);
 						block_counter++;
 					}
 				}

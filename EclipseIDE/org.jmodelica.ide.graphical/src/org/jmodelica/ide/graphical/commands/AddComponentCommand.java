@@ -1,38 +1,40 @@
 package org.jmodelica.ide.graphical.commands;
 
-import org.eclipse.gef.commands.Command;
-import org.jmodelica.icons.coord.Placement;
-import org.jmodelica.ide.graphical.proxy.AbstractDiagramProxy;
-import org.jmodelica.ide.graphical.proxy.ComponentProxy;
+import org.jmodelica.icons.Component;
+import org.jmodelica.ide.graphical.util.ASTResourceProvider;
 
-public class AddComponentCommand extends Command {
-
-	private AbstractDiagramProxy diagram;
-	private String className;
-	private Placement placement;
-
-	private ComponentProxy component;
-
-	public AddComponentCommand(AbstractDiagramProxy diagram, String className, Placement placement) {
-		this.diagram = diagram;
-		this.className = className;
-		this.placement = placement;
+public abstract class AddComponentCommand extends AbstractCommand {
+	
+	private String componentName;
+	
+	public AddComponentCommand(ASTResourceProvider provider) {
+		super(provider);
 		setLabel("add component");
 	}
-
+	
+	protected abstract Component createComponent();
+	
 	@Override
 	public void execute() {
 		redo();
 	}
-
+	
 	@Override
 	public void redo() {
-		component = diagram.addComponent(className, placement);
+		Component c = createComponent();
+		componentName = c.getComponentName();
+		getASTResourceProvider().getDiagram().addSubcomponent(c);
 	}
-
+	
 	@Override
 	public void undo() {
-		diagram.removeComponent(component);
+		System.out.println(componentName);
+		Component c = getASTResourceProvider().getComponentByName(componentName);
+		System.out.println(c);
+		if (c == null)
+			return;
+		
+		getASTResourceProvider().getDiagram().removeSubComponent(c);
 	}
-
+	
 }

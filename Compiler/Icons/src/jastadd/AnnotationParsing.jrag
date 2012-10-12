@@ -67,15 +67,15 @@ aspect AnnotationParsing {
 				throws FailedConstructionException, NotEnoughParametersException {
 			AnnotationNode placementAnnotation = forPath("Placement");
 			if(placementAnnotation.exists()) {
-				boolean visible = Placement.DEFAULT_VISIBLE;
+				boolean visible = false;
 				Transformation diagramTransformation = null;
 				Transformation iconTransformation = null;
 				for (AnnotationNode a : placementAnnotation) {
-					if ("transformation".equals(a.name())) {
+					if (a.name().equals("transformation")) {
 						diagramTransformation = a.createTransformation();
-					} else if ("iconTransformation".equals(a.name())) {	
+					} else if (a.name().equals("iconTransformation")) {	
 						iconTransformation = a.createTransformation();
-					} else if ("visible".equals(a.name())) {
+					} else if (a.name().equals("visible")) {
 						visible = a.bool();
 					}
 				}
@@ -111,22 +111,6 @@ aspect AnnotationParsing {
 			throw new FailedConstructionException("Connection");
 		}
 		
-		/**
-		 * Creates a connection Line represented by this AnnotationNode
-		 * @return the created connection
-		 * @throws FailedConstructionExceptionException if transformation annotatioNode does not exist. 
-		 */
-		public Line createConnectionLine() throws FailedConstructionException {
-			AnnotationNode lineAnnotation = forPath("Line");
-			if (lineAnnotation.exists()) {
-				//TODO: Once refactor of graphical editor done, remove createConnection() and inline initializeLine()
-				Line con = new Line();
-				lineAnnotation.initializeLine(con);
-				return con;
-			}
-			throw new FailedConstructionException("ConnectionLine");
-		}
-		
 		public boolean hasPlacement() {
 			return forPath("Placement").exists();
 		}
@@ -136,18 +120,18 @@ aspect AnnotationParsing {
 		* @throws NotEnoughParametersException if the extent parameter was not given.
 		* @throws FailedConstructionExceptionException if transformation annotatioNode does not exist. 
 		*/
-		public Transformation createTransformation() 
+		private Transformation createTransformation() 
 			throws FailedConstructionException, NotEnoughParametersException {
 			Transformation transformation = new Transformation();
 			boolean extentSet = false;
 			for (AnnotationNode a : this) {
 				try {
-					if ("extent".equals(a.name())) {
+					if (a.name().equals("extent")) {
 						transformation.setExtent(a.createExtent());
 						extentSet = true;
-					} else if ("origin".equals(a.name())) {
+					} else if (a.name().equals("origin")) {
 						transformation.setOrigin(a.createOrigin());
-					} else if ("rotation".equals(a.name())) {
+					} else if (a.name().equals("rotation")) {
 						transformation.setRotation(a.createRotation());
 					}
 				} catch(FailedConstructionException e) {
@@ -163,20 +147,20 @@ aspect AnnotationParsing {
 		* @return the created CoordinateSystem if the annotationNode exists else a 
 		* deafult Coordinatesystem according to MLS. 
 		*/
-		public CoordinateSystem createCoordinateSystem() {
+		private CoordinateSystem createCoordinateSystem() {
 			if (!exists()) {
 				return CoordinateSystem.DEFAULT_COORDINATE_SYSTEM;
 			}
 			CoordinateSystem co = new CoordinateSystem();
 			for(AnnotationNode c : this) {
 				try {
-					if ("preserveAspectRatio".equals(c.name())) {
+					if (c.name().equals("preserveAspectRatio")) {
 						co.setPreserveAspectRatio(c.bool());
-					} else if ("extent".equals(c.name())) {
+					} else if (c.name().equals("extent")) {
 						co.setExtent(c.createExtent());
-					} else if ("grid".equals(c.name())) {
+					} else if (c.name().equals("grid")) {
 						co.setGrid(c.createGrid());	
-					} else if ("initialScale".equals(c.name())) {
+					} else if (c.name().equals("initialScale")) {
 						//co.setInitialScale(c.real());
 					}
 				} catch (FailedConstructionException e) {
@@ -190,7 +174,7 @@ aspect AnnotationParsing {
 		* @return a grid vector.
 		* @throws FailedConstructionException if grid vector was null.	
 		* */
-		public double[] createGrid() 
+		private double[] createGrid() 
 			throws FailedConstructionException, NotEnoughParametersException, IllegalArgumentException {
 			if(realVector() != null) {
 				double[] grid = realVector();
@@ -203,26 +187,26 @@ aspect AnnotationParsing {
 		* Creates a list with the graphics attribute represented by this AnnotationNode.
 		* @return the created list.		
 		* */
-		public ArrayList<GraphicItem> createGraphics() {
+		private ArrayList<GraphicItem> createGraphics() {
 			ArrayList<GraphicItem> items = new ArrayList<GraphicItem>();
 			for (AnnotationNode a : this) {
 				try {
-					if ("Line".equals(a.name())) {
+					if (a.name().equals("Line")) {
 						items.add(a.createLine());
 					}
-					else if ("Rectangle".equals(a.name())) {
+					else if (a.name().equals("Rectangle")) {
 						items.add(a.createRectangle());
 					}
-					else if ("Polygon".equals(a.name())) {
+					else if (a.name().equals("Polygon")) {
 						items.add(a.createPolygon());
 					}
-					else if ("Ellipse".equals(a.name())) {
+					else if (a.name().equals("Ellipse")) {
 						items.add(a.createEllipse());
 					}
-					else if ("Text".equals(a.name())) {
+					else if (a.name().equals("Text")) {
 						items.add(a.createText());
 					} 
-					else if ("Bitmap".equals(a.name())) {
+					else if (a.name().equals("Bitmap")) {
 						items.add(a.createBitmap());
 					}
 				} catch (FailedConstructionException e) {
@@ -239,19 +223,19 @@ aspect AnnotationParsing {
 		private void initializeFilledShape(FilledShape filledShape) {
 			for (AnnotationNode a : this) {
 				try {
-					if ("lineColor".equals(a.name())) {
+					if (a.name().equals("lineColor")) {
 						filledShape.setLineColor(a.createColor());
 					}
-					else if ("pattern".equals(a.name())) {
+					else if (a.name().equals("pattern")) {
 						filledShape.setLinePattern(a.createLinePattern());
 					}
-					else if ("fillColor".equals(a.name())) {
+					else if (a.name().equals("fillColor")) {
 						filledShape.setFillColor(a.createColor());
 					}
-					else if ("fillPattern".equals(a.name())) {
+					else if (a.name().equals("fillPattern")) {
 						filledShape.setFillPattern(a.createFillPattern());
 					} 
-					else if ("lineThickness".equals(a.name())) {
+					else if (a.name().equals("lineThickness")) {
 						filledShape.setLineThickness(a.createLineThickness());
 					}
 				} catch (FailedConstructionException e){
@@ -267,13 +251,13 @@ aspect AnnotationParsing {
 		*/
 		private void initializeGraphicItem(GraphicItem graphicItem) {
 			for (AnnotationNode a : this) {
-				if ("visible".equals(a.name())) {
+				if (a.name().equals("visible")) {
 					graphicItem.setVisible(a.bool());
-				} else if ("origin".equals(a.name())) {
+				} else if (a.name().equals("origin")) {
 					try {
 						graphicItem.setOrigin(a.createOrigin());
 					} catch (FailedConstructionException e) {}
-				} else if ("rotation".equals(a.name())) {
+				} else if (a.name().equals("rotation")) {
 					graphicItem.setRotation(a.createRotation());
 				}
 			}
@@ -289,7 +273,7 @@ aspect AnnotationParsing {
 				throws FailedConstructionException, NotEnoughParametersException {
 			
 			for (AnnotationNode a : this) {
-				if ("extent".equals(a.name())) {
+				if (a.name().equals("extent")) {
 					filledRectShape.setExtent(a.createExtent());
 					initializeFilledShape(filledRectShape);
 					return;
@@ -308,9 +292,9 @@ aspect AnnotationParsing {
 			Ellipse ellipse = new Ellipse();
 			initializeFilledRectShape(ellipse);
 			for (AnnotationNode a : this) {
-				if ("startAngle".equals(a.name())) {
+				if (a.name().equals("startAngle")) {
 					ellipse.setStartAngle(a.createStartAngle());
-				} else if ("endAngle".equals(a.name())) {
+				} else if (a.name().equals("endAngle")) {
 					ellipse.setEndAngle(a.createEndAngle());
 				}
 			}
@@ -330,13 +314,13 @@ aspect AnnotationParsing {
 			boolean fileNameSet = false;
 			boolean imageSourceSet = false;
 			for (AnnotationNode a : this) {
-				if ("extent".equals(a.name())) {
+				if (a.name().equals("extent")) {
 					bitmap.setExtent(a.createExtent());
 					extentSet = true;
-				} else if ("fileName".equals(a.name())) {
+				} else if (a.name().equals("fileName")) {
 					bitmap.setFileName(a.path());
 					fileNameSet = true;
-				} else if ("imageSource".equals(a.name())) {
+				} else if (a.name().equals("imageSource")) {
 					bitmap.setImageSource(a.string());
 					imageSourceSet = true;
 				}
@@ -369,22 +353,22 @@ aspect AnnotationParsing {
 			initializeGraphicItem(line);
 			boolean pointsSet = false;
 			for (AnnotationNode a : this) {
-				if ("points".equals(a.name())) {
+				if (a.name().equals("points")) {
 					line.setPoints(a.createPoints());
 					pointsSet = true;
 				} else { 
 					try {
-						if ("color".equals(a.name())) {
+						if (a.name().equals("color")) {
 							line.setColor(a.createColor());
-						} else if ("thickness".equals(a.name())) {
+						} else if (a.name().equals("thickness")) {
 							line.setThickness(a.createThickness());
-						} else if ("pattern".equals(a.name())) {
+						} else if (a.name().equals("pattern")) {
 							line.setLinePattern(a.createLinePattern());
-						} else if ("smooth".equals(a.name())) {
+						} else if (a.name().equals("smooth")) {
 							line.setSmooth(a.createSmooth());
-						} else if ("arrow".equals(a.name())) {
+						} else if (a.name().equals("arrow")) {
 							line.setArrow(a.createArrow());
-						} else if ("arrowSize".equals(a.name())) {
+						} else if (a.name().equals("arrowSize")) {
 							line.setArrowSize(a.createArrowSize());
 						}
 					} catch(FailedConstructionException e) {}
@@ -403,7 +387,7 @@ aspect AnnotationParsing {
 		private Point createPoint() 
 				throws FailedConstructionException {
 			for (AnnotationNode a : this) {
-				if ("DynamicSelect".equals(a.name())) {
+				if (a.name().equals("DynamicSelect")) {
 					return a.iterator().next().createPoint();
 				}
 			}
@@ -421,7 +405,7 @@ aspect AnnotationParsing {
 		private Point createOrigin() 
 				throws FailedConstructionException {
 			for (AnnotationNode a : this) {
-				if ("DynamicSelect".equals(a.name())) {
+				if (a.name().equals("DynamicSelect")) {
 					return a.iterator().next().createOrigin();
 				}
 			}
@@ -441,7 +425,7 @@ aspect AnnotationParsing {
 		private Types.Arrow[] createArrow() 
 				throws FailedConstructionException {
 			for (AnnotationNode a : this) {
-				if ("DynamicSelect".equals(a.name())) {
+				if (a.name().equals("DynamicSelect")) {
 					return a.iterator().next().createArrow();
 				}
 			}
@@ -467,7 +451,7 @@ aspect AnnotationParsing {
 		*/
 		private double createRotation() {
 			for (AnnotationNode a : this) {
-				if ("DynamicSelect".equals(a.name())) {
+				if (a.name().equals("DynamicSelect")) {
 					return a.iterator().next().createRotation();
 				}
 			}
@@ -481,7 +465,7 @@ aspect AnnotationParsing {
 		private double createThickness() 
 				throws FailedConstructionException {
 			for (AnnotationNode a : this) {
-				if ("DynamicSelect".equals(a.name())) {
+				if (a.name().equals("DynamicSelect")) {
 					return a.iterator().next().createThickness();
 				}
 			}
@@ -498,7 +482,7 @@ aspect AnnotationParsing {
 		private double createLineThickness() 
 				throws FailedConstructionException {
 			for (AnnotationNode a : this) {
-				if ("DynamicSelect".equals(a.name())) {
+				if (a.name().equals("DynamicSelect")) {
 					return a.iterator().next().createLineThickness();
 				}
 			}
@@ -512,7 +496,7 @@ aspect AnnotationParsing {
 		private double createArrowSize() 
 				throws FailedConstructionException {
 			for (AnnotationNode a : this) {
-				if ("DynamicSelect".equals(a.name())) {
+				if (a.name().equals("DynamicSelect")) {
 					return a.iterator().next().createArrowSize();
 				}
 			}
@@ -529,7 +513,7 @@ aspect AnnotationParsing {
 		private double createRadius() 
 				throws FailedConstructionException {
 			for (AnnotationNode a : this) {
-				if ("DynamicSelect".equals(a.name())) {
+				if (a.name().equals("DynamicSelect")) {
 					return a.iterator().next().createRadius();
 				}
 			}
@@ -545,7 +529,7 @@ aspect AnnotationParsing {
 		*/
 		private double createStartAngle() { 
 			for (AnnotationNode a : this) {
-				if ("DynamicSelect".equals(a.name())) {
+				if (a.name().equals("DynamicSelect")) {
 					return a.iterator().next().createStartAngle();
 				}
 			}
@@ -557,7 +541,7 @@ aspect AnnotationParsing {
 		*/
 		private double createEndAngle() { 
 			for (AnnotationNode a : this) {
-				if ("DynamicSelect".equals(a.name())) {
+				if (a.name().equals("DynamicSelect")) {
 					return a.iterator().next().createEndAngle();
 				}
 			}
@@ -576,9 +560,9 @@ aspect AnnotationParsing {
 			initializeFilledRectShape(rect);
 			for (AnnotationNode a : this) {
 				try {
-					if ("borderPattern".equals(a.name())) {
+					if (a.name().equals("borderPattern")) {
 						rect.setBorderPattern(a.createBorderPattern());
-					} else if ("radius".equals(a.name())) {
+					} else if (a.name().equals("radius")) {
 						rect.setRadius(a.createRadius());
 					}
 				} catch(FailedConstructionException e) {
@@ -604,18 +588,18 @@ aspect AnnotationParsing {
 			boolean textStringSet = false;
 			for (AnnotationNode a : this) {
 				try {
-					if ("textStyle".equals(a.name())) {
+					if (a.name().equals("textStyle")) {
 						text.setTextStyle(a.createTextStyle()); 
-					} else if ("fontSize".equals(a.name())) {
+					} else if (a.name().equals("fontSize")) {
 						text.setFontSize(a.createFontSize());
-					} else if ("fontName".equals(a.name())) {
+					} else if (a.name().equals("fontName")) {
 						text.setFontName(a.createFontName());
-					} else if ("textString".equals(a.name())) {
+					} else if (a.name().equals("textString")) {
 						if(a.string() != null) {	
 							text.setTextString(a.string());
 							textStringSet = true;
 						}
-					} else if ("horizontalAlignment".equals(a.name())) {
+					} else if (a.name().equals("horizontalAlignment")) {
 						text.setHorizontalAlignment(a.createHorizontalAlignment());
 					}
 				}
@@ -637,7 +621,7 @@ aspect AnnotationParsing {
 		private Polygon createPolygon()
 				throws FailedConstructionException, NotEnoughParametersException {
 			for (AnnotationNode a : this) {
-				if ("DynamicSelect".equals(a.name())) {
+				if (a.name().equals("DynamicSelect")) {
 					return a.iterator().next().createPolygon();
 				}
 			}
@@ -645,10 +629,10 @@ aspect AnnotationParsing {
 			initializeFilledShape(polygon);
 			boolean pointsSet = false;
 			for (AnnotationNode a : this) {
-				if ("points".equals(a.name())) {
+				if (a.name().equals("points")) {
 					polygon.setPoints(a.createPoints());
 					pointsSet = true;
-				} else if ("smooth".equals(a.name())) {
+				} else if (a.name().equals("smooth")) {
 					try {
 						polygon.setSmooth(a.createSmooth());
 					} catch (FailedConstructionException e) {}
@@ -720,7 +704,7 @@ aspect AnnotationParsing {
 		private <T extends Enum> T createEnumValue(Class<T> enumClass)
 				throws FailedConstructionException {
 			for (AnnotationNode a : this) 
-				if ("DynamicSelect".equals(a.name())) 
+				if (a.name().equals("DynamicSelect")) 
 					return a.iterator().next().createEnumValue(enumClass);
 			try {
 				String str = string().split("\\.", 2)[1].toUpperCase();
@@ -740,7 +724,7 @@ aspect AnnotationParsing {
 		private ArrayList<Types.TextStyle> createTextStyle()
 				throws FailedConstructionException {
 			for (AnnotationNode a : this) {
-				if ("DynamicSelect".equals(a.name())) {
+				if (a.name().equals("DynamicSelect")) {
 					return a.iterator().next().createTextStyle();
 				}
 			}
@@ -775,7 +759,7 @@ aspect AnnotationParsing {
 		private String createFontName()
 		{	
 			for (AnnotationNode a : this) {
-				if ("DynamicSelect".equals(a.name())) {
+				if (a.name().equals("DynamicSelect")) {
 					return a.iterator().next().createFontName();
 				}
 			}
@@ -790,7 +774,7 @@ aspect AnnotationParsing {
 		private int createFontSize()
 				throws FailedConstructionException {
 			for (AnnotationNode a : this) {
-				if ("DynamicSelect".equals(a.name())) {
+				if (a.name().equals("DynamicSelect")) {
 					return a.iterator().next().createFontSize();
 				}
 			}
@@ -810,7 +794,7 @@ aspect AnnotationParsing {
 		private Color createColor() 
 			throws FailedConstructionException {
 			for (AnnotationNode a : this) {
-				if ("DynamicSelect".equals(a.name())) {
+				if (a.name().equals("DynamicSelect")) {
 					return a.iterator().next().createColor();
 				}
 			}
@@ -839,7 +823,7 @@ aspect AnnotationParsing {
 		private ArrayList<Point> createPoints() 
 			throws FailedConstructionException {
 			for (AnnotationNode a : this) {
-				if ("DynamicSelect".equals(a.name())) {
+				if (a.name().equals("DynamicSelect")) {
 					return a.iterator().next().createPoints();
 				}
 			}
@@ -871,7 +855,7 @@ aspect AnnotationParsing {
 		private Extent createExtent() 
 			throws FailedConstructionException, NotEnoughParametersException {
 			for (AnnotationNode a : this) {
-				if ("DynamicSelect".equals(a.name())) {
+				if (a.name().equals("DynamicSelect")) {
 					return a.iterator().next().createExtent();
 				}
 			}

@@ -3,7 +3,6 @@ import org.jmodelica.util.FormattingItem;
 import org.jmodelica.util.EmptyFormattingItem;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import beaver.Symbol;
 
 aspect FormattedPrint {
 	/**
@@ -72,17 +71,17 @@ aspect FormattedPrint {
 
 	static FormattedPrettyPrinter ASTNode.formattedPrettyPrinter = new FormattedPrettyPrinter();
 	
-	public static final FormattingItem SourceBaseNode.NO_FORMATTING = new EmptyFormattingItem();
-	protected FormattingInfo SourceBaseNode.formatting = new FormattingInfo();
-	protected FormattingItem SourceBaseNode.preFormatting = SourceBaseNode.NO_FORMATTING;
-	protected FormattingItem SourceBaseNode.insideFormatting = SourceBaseNode.NO_FORMATTING;
-	protected FormattingItem SourceBaseNode.postFormatting = SourceBaseNode.NO_FORMATTING;
+	public static final FormattingItem BaseNode.NO_FORMATTING = new EmptyFormattingItem();
+	protected FormattingInfo BaseNode.formatting = new FormattingInfo();
+	protected FormattingItem BaseNode.preFormatting = BaseNode.NO_FORMATTING;
+	protected FormattingItem BaseNode.insideFormatting = BaseNode.NO_FORMATTING;
+	protected FormattingItem BaseNode.postFormatting = BaseNode.NO_FORMATTING;
 	
-	public boolean SourceBaseNode.hasCachedFormatting() {
+	public boolean BaseNode.hasCachedFormatting() {
 		return (formatting == null);
 	}
 	
-	public boolean SourceBaseNode.hasScannedNonCachedFormatting() {
+	public boolean BaseNode.hasScannedNonCachedFormatting() {
 		return (!hasCachedFormatting() && !formatting.isEmpty());
 	}
 	
@@ -92,7 +91,7 @@ aspect FormattedPrint {
 		}
 	}
 	
-	public void SourceBaseNode.setFormatting(FormattingInfo formattingInfo) {
+	public void BaseNode.setFormatting(FormattingInfo formattingInfo) {
 		formatting = formattingInfo;
 		super.setFormatting(formattingInfo);
 	}
@@ -122,7 +121,7 @@ aspect FormattedPrint {
 	}
 	
 	@Override
-	public void SourceBaseNode.propagateFormatting() {
+	public void BaseNode.propagateFormatting() {
 		propagateFormatting(formatting);
 		setDefaultFormatting(new DefaultFormattingIndentation("    "));
 	}
@@ -152,14 +151,14 @@ aspect FormattedPrint {
 		}
 	}
 	
-	protected void SourceBaseNode.addFormattingInformation(FormattingInfo formattingInfo) {
+	protected void BaseNode.addFormattingInformation(FormattingInfo formattingInfo) {
 		if (hasCachedFormatting()) {
 			return;
 		}
 
 		if (hasScannedNonCachedFormatting() && formattingInfo != null) {
-			preFormatting = SourceBaseNode.NO_FORMATTING;
-			postFormatting = SourceBaseNode.NO_FORMATTING;
+			preFormatting = BaseNode.NO_FORMATTING;
+			postFormatting = BaseNode.NO_FORMATTING;
 			Iterator<ScannedFormattingItem> formattingIterator = formattingInfo.iterator();
 			FormattingItem nextItem = addPreFormatting(formattingIterator);
 			addPostFormatting(formattingIterator, nextItem);
@@ -174,8 +173,8 @@ aspect FormattedPrint {
 		if (hasScannedNonCachedFormatting() && formattingInfo != null) {
 			for (Clause clause : originalComposition.getClauses()) {
 				if (clause instanceof EquationClause || clause instanceof Algorithm) {
-					clause.preFormatting = SourceBaseNode.NO_FORMATTING;
-					clause.postFormatting = SourceBaseNode.NO_FORMATTING;
+					clause.preFormatting = BaseNode.NO_FORMATTING;
+					clause.postFormatting = BaseNode.NO_FORMATTING;
 					Iterator<ScannedFormattingItem> formattingIterator = formattingInfo.iterator();
 					FormattingItem nextItem = clause.addPreFormatting(formattingIterator);
 					clause.addPostFormatting(formattingIterator, nextItem);
@@ -186,8 +185,8 @@ aspect FormattedPrint {
 		}
 	}
 	
-	public FormattingItem SourceBaseNode.addPreFormatting(Iterator<ScannedFormattingItem> formattingIterator) {
-		FormattingItem formattingItem = SourceBaseNode.NO_FORMATTING;
+	public FormattingItem BaseNode.addPreFormatting(Iterator<ScannedFormattingItem> formattingIterator) {
+		FormattingItem formattingItem = BaseNode.NO_FORMATTING;
 		FormattingItem.RelativePosition relativePosition = FormattingItem.RelativePosition.BEFORE;
 
 		while (formattingIterator.hasNext() && relativePosition == FormattingItem.RelativePosition.BEFORE) {
@@ -201,14 +200,14 @@ aspect FormattedPrint {
 			if (formattingIterator.hasNext()) {
 				formattingItem = formattingIterator.next();
 			} else {
-				formattingItem = SourceBaseNode.NO_FORMATTING;
+				formattingItem = BaseNode.NO_FORMATTING;
 			}
 		}
 		
 		return formattingItem;
 	}
 	
-	public void SourceBaseNode.addPostFormatting(Iterator<ScannedFormattingItem> formattingIterator, FormattingItem startingFormattingItem) {
+	public void BaseNode.addPostFormatting(Iterator<ScannedFormattingItem> formattingIterator, FormattingItem startingFormattingItem) {
 		FormattingItem formattingItem = startingFormattingItem;
 		FormattingItem.RelativePosition relativePosition = formattingItem.getBackRelativePosition(this);
 
@@ -225,7 +224,7 @@ aspect FormattedPrint {
 	}
 	
 	public FormattingItem Comment.addPreFormatting(Iterator<ScannedFormattingItem> formattingIterator) {
-		return SourceBaseNode.NO_FORMATTING;
+		return BaseNode.NO_FORMATTING;
 	}
 	
 	public void Comment.addPostFormatting(Iterator<ScannedFormattingItem> formattingIterator, FormattingItem startingFormattingItem) {
@@ -237,7 +236,7 @@ aspect FormattedPrint {
 		}
 	}
 	
-	public void SourceBaseNode.addFormattingRest(FormattingInfo formattingInfo) {
+	public void BaseNode.addFormattingRest(FormattingInfo formattingInfo) {
 		Iterator<ScannedFormattingItem> formattingIterator = formattingInfo.iterator();
 		while (formattingIterator.hasNext()) {
 			ScannedFormattingItem formattingItem = formattingIterator.next();
@@ -260,8 +259,8 @@ aspect FormattedPrint {
 		}
 	}
 	
-	public void SourceBaseNode.addInsideFormatting(FormattingInfo formattingInfo) {
-		insideFormatting = SourceBaseNode.NO_FORMATTING;
+	public void BaseNode.addInsideFormatting(FormattingInfo formattingInfo) {
+		insideFormatting = BaseNode.NO_FORMATTING;
 		Iterator<ScannedFormattingItem> formattingIterator = formattingInfo.iterator();
 		while (formattingIterator.hasNext()) {
 			ScannedFormattingItem formattingItem = formattingIterator.next();
@@ -276,7 +275,7 @@ aspect FormattedPrint {
 		}
 	}
 	
-	public boolean SourceBaseNode.matchInsideFormatting(ScannedFormattingItem formattingItem) {
+	public boolean BaseNode.matchInsideFormatting(ScannedFormattingItem formattingItem) {
 		return false;
 	}
 	
@@ -537,7 +536,7 @@ aspect FormattedPrint {
 	}
 
 	@Override
-	protected void SourceBaseNode.setDefaultFormatting(DefaultFormattingIndentation indentation) {
+	protected void BaseNode.setDefaultFormatting(DefaultFormattingIndentation indentation) {
 		if (hasCachedFormatting()) {
 			for (ASTNode node : this) {
 				node.setDefaultFormatting(indentation);
@@ -554,7 +553,7 @@ aspect FormattedPrint {
 		formatting = null;
 	}
 	
-	protected boolean SourceBaseNode.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
+	protected boolean BaseNode.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		return false;
 	}
 	
@@ -803,7 +802,7 @@ aspect FormattedPrint {
 				getAbstractEquation(getNumAbstractEquation() - 1).postFormatting = new DefaultFormattingItem(indentation.toString());
 				indentation.stepIn();
 			}
-			postFormatting = SourceBaseNode.NO_FORMATTING;
+			postFormatting = BaseNode.NO_FORMATTING;
 			return false;
 		}
 
@@ -817,7 +816,7 @@ aspect FormattedPrint {
 		indentation.stepOut();
 		boolean addedIndentation = super.setDefaultFormattingHelper(indentation);
 		indentation.stepIn();
-		postFormatting = SourceBaseNode.NO_FORMATTING;
+		postFormatting = BaseNode.NO_FORMATTING;
 		
 		if (getNumAbstractEquation() > 0) {
 			getAbstractEquation(0).preFormatting = new DefaultFormattingItem("\n");
@@ -838,7 +837,7 @@ aspect FormattedPrint {
 	@Override
 	protected boolean IfExp.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
 		if (getElseExp() instanceof IfExp) {
-			insideFormatting = SourceBaseNode.NO_FORMATTING;
+			insideFormatting = BaseNode.NO_FORMATTING;
 		} else {
 			insideFormatting = new DefaultFormattingItem(" ");
 		}
@@ -1005,7 +1004,7 @@ aspect FormattedPrint {
 		}
 	}
 	
-	void SourceBaseNode.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void BaseNode.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 		prettyPrintFormattedHelper(printer, printStream);
 		printStream.print(postFormatting);
@@ -1042,7 +1041,7 @@ aspect FormattedPrint {
 		printStream.print(postFormatting);
 	}
 
-	void SourceBaseNode.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void BaseNode.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
 		for (ASTNode childNode: this) {
 			childNode.doPrettyPrintFormatted(printer, printStream);
 		}
@@ -1159,7 +1158,9 @@ aspect FormattedPrint {
     }
     
     void Dot.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-    	getAccesss().prettyPrintWithSep(printer, printStream, null, ".");
+    	getLeft().doPrettyPrintFormatted(printer, printStream);
+    	printStream.print(".");
+    	getRight().doPrettyPrintFormatted(printer, printStream);
     }
     
     void ArraySubscripts.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
@@ -1853,10 +1854,10 @@ aspect FormattedPrint {
 			return;
 	}
 	
-	void SourceBaseNode.copyFormattingFrom(ASTNode node) {
+	void BaseNode.copyFormattingFrom(ASTNode node) {
 		if (this.getClass() != node.getClass())
 			return;
-		SourceBaseNode bn = (SourceBaseNode) node;
+		BaseNode bn = (BaseNode) node;
 		node.propagateFormatting();
 		preFormatting = bn.preFormatting;
 		postFormatting = bn.postFormatting;
@@ -1878,7 +1879,7 @@ aspect FormattedPrint {
 		return result;
 	}
 	
-	eq SourceBaseNode.numberOfDefaultFormattingItems() {
+	eq BaseNode.numberOfDefaultFormattingItems() {
 		int result = 0;
 		if (!preFormatting.isScanned() && !preFormatting.isEmptyDefault()) {
 			++result;
@@ -1895,16 +1896,16 @@ aspect FormattedPrint {
 		return result;
 	}
 	
-	syn ArrayList<SourceBaseNode> ASTNode.nonScannedNodes() {
-		ArrayList<SourceBaseNode> result = new ArrayList<SourceBaseNode>();
+	syn ArrayList<BaseNode> ASTNode.nonScannedNodes() {
+		ArrayList<BaseNode> result = new ArrayList<BaseNode>();
 		for (ASTNode node : this) {
 			result.addAll(node.nonScannedNodes());
 		}
 		return result;
 	}
 	
-	eq SourceBaseNode.nonScannedNodes() {
-		ArrayList<SourceBaseNode> result = new ArrayList<SourceBaseNode>();
+	eq BaseNode.nonScannedNodes() {
+		ArrayList<BaseNode> result = new ArrayList<BaseNode>();
 		if (!preFormatting.isScanned() && !preFormatting.isEmptyDefault()) {
 			result.add(this);
 		} else if (!insideFormatting.isScanned() && !insideFormatting.isEmptyDefault()) {
@@ -1918,8 +1919,8 @@ aspect FormattedPrint {
 		return result;
 	}
 	
-	syn SourceBaseNode ASTNode.ownsFormattingItem(int startLine, int startColumn) {
-		SourceBaseNode owner = null;
+	syn BaseNode ASTNode.ownsFormattingItem(int startLine, int startColumn) {
+		BaseNode owner = null;
 		for (ASTNode node : this) {
 			owner = node.ownsFormattingItem(startLine, startColumn);
 			if (owner != null) {
@@ -1930,7 +1931,7 @@ aspect FormattedPrint {
 		return null;
 	}
 	
-	eq SourceBaseNode.ownsFormattingItem(int startLine, int startColumn) {
+	eq BaseNode.ownsFormattingItem(int startLine, int startColumn) {
 		if (preFormatting.isScanned() && ((ScannedFormattingItem) preFormatting).getStartLine() == startLine && ((ScannedFormattingItem) preFormatting).getStartColumn() == startColumn) {
 			return this;
 		}
@@ -1941,7 +1942,7 @@ aspect FormattedPrint {
 			return this;
 		}
 
-		SourceBaseNode owner = null;
+		BaseNode owner = null;
 		for (ASTNode node : this) {
 			owner = node.ownsFormattingItem(startLine, startColumn);
 			if (owner != null) {

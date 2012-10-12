@@ -153,15 +153,14 @@ aspect ContentCheck {
 			boolean inWhen = inWhen();
 			boolean balanced = inWhen ? isBalancedAssignments() : isBalancedEquations();
 			boolean functionCallEqu = hasFunctionCallEquations(); 
-			if (hasOnlyParamTests()) {
-				setEliminateOnParamTest();
-			} else {
-				if (!balanced) {
+			if (!balanced || functionCallEqu) {
+				if (hasOnlyParamTests())
+					setEliminateOnParamTest();
+				else if (!balanced)
 					error(inWhen ? UNBALANCED_ERROR_WHEN : UNBALANCED_ERROR);
-				} else if (functionCallEqu) {
+				else
 					compliance("If equations that has non-parameter tests and contains " + 
-						"function calls using multiple outputs are not supported");
-				}
+							"function calls using multiple outputs are not supported");
 			}
 		}
 	}
@@ -279,8 +278,8 @@ aspect StructuralParams {
 	public void InstAccess.markUsesInSubscriptsAsStructuralParameter() {}
 	
 	public void InstDot.markUsesInSubscriptsAsStructuralParameter() {
-		for (InstAccess ia : getInstAccesss())
-			ia.markUsesInSubscriptsAsStructuralParameter();
+		getLeft().markUsesInSubscriptsAsStructuralParameter();
+		getRight().markUsesInSubscriptsAsStructuralParameter();
 	}
 	
 	public void InstArrayAccess.markUsesInSubscriptsAsStructuralParameter() {

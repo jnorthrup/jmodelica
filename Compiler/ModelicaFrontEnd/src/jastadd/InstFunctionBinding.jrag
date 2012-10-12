@@ -16,7 +16,6 @@
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 
 
 aspect InstFunctionBinding {
@@ -189,7 +188,7 @@ aspect InstFunctionBinding {
 	 * and the expression from the argument as a child.
 	 */
 	public void FRecordConstructor.addArgument(InstFunctionArgument arg) {
-		addArg(arg.getFExpNoTransform().fullCopy());
+		addArg(arg.getFExp().fullCopy());
 		addToOriginalArgs(arg);
 	}
 	
@@ -253,7 +252,6 @@ aspect InstFunctionBinding {
 				map.put("sqrt",         new BuiltInCreator(false, new FSqrtExp(),        1));
 				map.put("transpose",    new BuiltInCreator(false, new FTranspose(),      1));
 				map.put("cross",        new BuiltInCreator(false, new FCross(),          2));
-				map.put("outerProduct", new BuiltInCreator(false, new FOuterProduct(),   2));
 				map.put("sum",          new BuiltInCreator(false, new FSumExp(),         1));
 				map.put("abs",          new BuiltInCreator(false, new FAbsExp(),         1));
 				map.put("ndims",        new BuiltInCreator(false, new FNdimsExp(),       1));
@@ -276,7 +274,7 @@ aspect InstFunctionBinding {
 				
 				String[] unsupported = new String[] { 
 						// Ticket 678: Support for array related functions
-						"scalar", "vector", "matrix", "diagonal", "product", "symmetric", "skew", 
+						"scalar", "vector", "matrix", "diagonal", "product", "outerProduct", "symmetric", "skew", 
 						// Ticket 664: Support all function-like operators
 						"sign", "String", "div", "mod", "rem", "ceil", "floor", "delay", "cardinality", 
 						"semiLinear", "terminal", "smooth", "edge", "reinit", "terminate"
@@ -324,7 +322,7 @@ aspect InstFunctionBinding {
 				}
 				
 				protected static FExp extractFExp(InstFunctionArgument arg) {
-					return arg.getFExpNoTransform().fullCopy();
+					return arg.getFExp().fullCopy();
 				}
 				
 			}
@@ -420,19 +418,13 @@ aspect InstFunctionBinding {
     		bound = true;
 
 		    // Get info
-    		boolean externalObject = false;
 		    InstClassDecl target = getName().myInstClassDecl();
 	    	String name = target.qualifiedName();
 		    if (target.isPrimitive()) {
 		    	// Look for conversion operator with same name as primitive class (if one exists)
-				InstClassDecl icd = getName().lookupInstClass("!" + target.name());
-				if (icd != null)
-					target = icd;
-		    } if (target.isExternalObject()) {
-		    	InstClassDecl icd = target.myConstructor();
-				if (icd != null)
-					target = icd;
-		    	externalObject = true;
+				HashSet set = getName().lookupInstClass("!" + target.name());
+				if (set.size() > 0)
+					target = (InstClassDecl) set.iterator().next();
 		    }
     		ArrayList<InstComponentDecl> inputs = myInputs(target);
 		    
@@ -458,14 +450,12 @@ aspect InstFunctionBinding {
 	    		// Make sure we have any fixed arguments
 	    		for (int i = args.size(); i < inputs.size(); i++) {
 	    			InstMissingArgument arg = new InstMissingArgument();
+	    			arg.setBoundInput(inputs.get(i));
 	    			args.add(arg);
 	    			argsOK = false;
 	    		}
 	    		temp = args.toArray(new InstFunctionArgument[args.size()]);
-
-	    		// Connect fixed arguments to inputs
-	    		for (int i = 0; i < inputs.size(); i++)
-	    			temp[i].setBoundInput(inputs.get(i));
+	    		
 	    	} else {
 		    
 	    		// Bind arguments
@@ -494,10 +484,7 @@ aspect InstFunctionBinding {
 					FIdUse rec = new FIdUseInstAccess(getName());
 					n = new FRecordConstructor(rec, new List());
 				} else {
-					InstAccess accessName = getName();
-					if (externalObject)
-						accessName = accessName.copyAndAppend("constructor");
-					InstFunctionCall ifc = new InstFunctionCall(accessName, new List());
+			    	InstFunctionCall ifc = new InstFunctionCall(getName(), new List());
 					ifc.unbindableArgs = unbindableArgs;
 					ifc.bound = true;
 					n = ifc;
@@ -605,23 +592,4 @@ aspect InstFunctionBinding {
     	}
 	}
 	
-	/**
-	 * Extract constructor function for external object class.
-	 */
-	syn InstClassDecl InstClassDecl.myConstructor() = memberInstClass("constructor");
-	
-	/**
-	 * Extract constructor function for external object class.
-	 */
-	syn InstClassDecl InstExternalObject.myConstructor() = myInstClass().myConstructor();
-	
-	/**
-	 * Extract destructor function for external object class.
-	 */
-	syn InstClassDecl InstClassDecl.myDestructor() = memberInstClass("destructor");
-		
-	/**
-	 * Extract destructor function for external object class.
-	 */
-	syn InstClassDecl InstExternalObject.myDestructor() = myInstClass().myDestructor();
 }

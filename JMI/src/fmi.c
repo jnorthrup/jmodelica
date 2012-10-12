@@ -19,13 +19,11 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
-
 #include "fmi.h"
 #include "fmiModelFunctions.h"
 #include "fmiModelTypes.h"
 #include "jmi.h"
-#include "jmi_block_residual.h"
+#include <time.h>
 
 #ifdef USE_FMI_ALLOC
 #include "fmi_alloc.h"
@@ -65,7 +63,6 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
     char* tmpguid;
     size_t inst_name_len;
     size_t guid_len;
-    char buffer[400];
 
     /* Create jmi struct -> No need  since jmi_init allocates it
      jmi_t* jmi = (jmi_t *)functions.allocateMemory(1, sizeof(jmi_t)); */
@@ -113,35 +110,6 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
     /* set start values*/
     jmi_set_start_values(component -> jmi);
     
-    /* Print some info about Jacobians, if available. */
-    if (jmi->color_info_A != NULL) {
-    	sprintf(buffer,"Number of non-zeros in Jacobian A: %d", jmi->color_info_A->n_nz);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
-    	sprintf(buffer,"Number of colors in Jacobian A: %d", jmi->color_info_A->n_groups);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
-    }
-
-    if (jmi->color_info_B != NULL) {
-    	sprintf(buffer,"Number of non-zeros in Jacobian B: %d", jmi->color_info_B->n_nz);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
-    	sprintf(buffer,"Number of colors in Jacobian B: %d", jmi->color_info_B->n_groups);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
-    }
-
-    if (jmi->color_info_C != NULL) {
-    	sprintf(buffer,"Number of non-zeros in Jacobian C: %d", jmi->color_info_C->n_nz);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
-    	sprintf(buffer,"Number of colors in Jacobian C: %d", jmi->color_info_C->n_groups);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
-    }
-
-    if (jmi->color_info_D != NULL) {
-    	sprintf(buffer,"Number of non-zeros in Jacobian D: %d", jmi->color_info_D->n_nz);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
-    	sprintf(buffer,"Number of colors in Jacobian D: %d", jmi->color_info_D->n_groups);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
-    }
-
     return (fmiComponent)component;
 }
 
@@ -269,13 +237,6 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     jmi_real_t* switchesR0;  /* Initial Switches */
     jmi_real_t* b_mode;
 
-    /* For debugging Jacobians */
-/*
-    int n_states;
-    jmi_real_t* jac;
-    int j;
-*/
-
     /* Update eventInfo */
 
     eventInfo->upcomingTimeEvent = fmiFalse;            /* Next time event is computed after initialization */
@@ -287,6 +248,19 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     /* Evaluate parameters */
     jmi_init_eval_parameters(((fmi_t *)c)->jmi);
 
+    /* Sets the relative tolerance to a default value for use in Kinsol when tolerance controlled is false */
+    if (toleranceControlled == fmiFalse){
+        relativeTolerance = 1e-6;
+    }
+    /* Set tolerance in the BLT blocks */
+    for (i=0; i < ((fmi_t *)c)->jmi->n_dae_init_blocks; i=i+1){
+        ((fmi_t *)c)->jmi->dae_init_block_residuals[i]->kin_ftol = relativeTolerance*safety_factor_newton;
+        ((fmi_t *)c)->jmi->dae_init_block_residuals[i]->kin_stol = relativeTolerance*safety_factor_newton;
+    }
+    for (i=0; i < ((fmi_t *)c)->jmi->n_dae_blocks; i=i+1){
+        ((fmi_t *)c)->jmi->dae_block_residuals[i]->kin_ftol = relativeTolerance*safety_factor_newton;
+        ((fmi_t *)c)->jmi->dae_block_residuals[i]->kin_stol = relativeTolerance*safety_factor_newton;
+    }
     /* Get Sizes */
     retval = jmi_init_get_sizes(((fmi_t *)c)->jmi,&nF0,&nF1,&nFp,&nR0); /* Get the size of R0 and F0, (interested in R0) */
     if(retval != 0) {
@@ -301,10 +275,6 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     }
     /* ---- */
     
-    /* Sets the relative tolerance to a default value for use in Kinsol when tolerance controlled is false */
-    if (toleranceControlled == fmiFalse){
-        relativeTolerance = 1e-6;
-    }
     ((fmi_t *)c) -> fmi_epsilon=safety_factor_events*relativeTolerance; /* Used in the event detection */
     ((fmi_t *)c) -> fmi_newton_tolerance=safety_factor_newton*relativeTolerance; /* Used in the Newton iteration */
     
@@ -492,21 +462,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
         ((fmi_t*)c) -> fmi_functions.freeMemory(a_mode); //Free memory
     }
     */
-    /*
-    n_states = ((fmi_t *)c)->jmi->n_real_x;
-    jac = (jmi_real_t*)calloc(n_states*n_states,sizeof(jmi_real_t));
-    fmi_get_jacobian(c, FMI_STATES, FMI_DERIVATIVES, jac, n_states);
-
-    for (i=0;i<n_states;i++) {
-    	for (j=0;j<n_states;j++) {
-    		printf("%f, ",jac[i + j*n_states]);
-    	}
-    	printf("\n");
-    }
-
-    free(jac);
-*/
-
+    
     return fmiOK;
 }
 
@@ -641,7 +597,7 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 			d0 = clock();
 			fmiFlag = setMatrixElement(A,row+1,col+1,jac[row + col*nx]);
 			d1 = clock();
-			setElementTime += ((realtype)(d1-d0))/(CLOCKS_PER_SEC);
+			setElementTime += ((realtype) ((long)(d1-d0))/(CLOCKS_PER_SEC));
 			if (fmiFlag > fmiWarning) {
 				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix A");
 				fmi -> fmi_functions.freeMemory(jac);
@@ -663,7 +619,7 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 			d0 = clock();
 			fmiFlag = setMatrixElement(B,row+1,col+1,jac[row + col*nx]);
 			d1 = clock();
-			setElementTime += ((realtype)(d1-d0))/(CLOCKS_PER_SEC);
+			setElementTime += ((realtype) ((long)(d1-d0))/(CLOCKS_PER_SEC));
 			if (fmiFlag > fmiWarning) {
 				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix B");
 				fmi -> fmi_functions.freeMemory(jac);
@@ -685,7 +641,7 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 			d0 = clock();
 			fmiFlag = setMatrixElement(C,row + 1, col + 1, jac[row+col*ny]);
 			d1 = clock();
-			setElementTime += ((realtype)(d1-d0))/(CLOCKS_PER_SEC);
+			setElementTime += ((realtype) ((long)(d1-d0))/(CLOCKS_PER_SEC));
 			if (fmiFlag > fmiWarning) {
 				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix C");
 				fmi -> fmi_functions.freeMemory(jac);
@@ -853,6 +809,9 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 	jmi_real_t** dv;
 	jmi_real_t** dz;
 
+	clock_t c0, c1;
+
+	c0 = clock();
 
 	/*Used for debugging 
 	fmiReal tol = 0.001;	
@@ -863,148 +822,95 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 	
 	int n_outputs;
 	int* output_vrefs;
-	int n_outputs_real;
-	int* output_vrefs_real;
+	int n_outputs2;
+	int* output_vrefs2;
 	jmi_t* jmi = ((fmi_t *)c)->jmi;
-    clock_t c0, c1;
-
-	c0 = clock();
 	n_outputs = jmi->n_outputs;
-	n_outputs_real = n_outputs;
+	n_outputs2 = n_outputs;
 	
 	/*dv and the dz are stored in the same vector*/
-	dv = jmi->dz;
-	dz = jmi->dz;
+	dv = jmi->dv;
+	dz = jmi->dv;
 	
 	/* Used for debbugging
 	jac2 = (fmiReal*)calloc(njac, sizeof(fmiReal));
 	*/
+	output_vrefs = (int*)calloc(n_outputs, sizeof(int));
+	output_vrefs2 = (int*)calloc(n_outputs, sizeof(int)); 
+	
+	jmi_get_output_vrefs(jmi, output_vrefs);
+	j = 0;
+	for(i = 0; i < n_outputs; i++){
+		if(get_type_from_value_ref(output_vrefs[i]) == 0){
+			output_vrefs2[j] = output_vrefs[i];	
+			j++;		
+		}else{
+			n_outputs2--;
+		}
+	}
 	
 	offs = jmi->n_real_dx;
 	
+	/*nvvr: number of x and/or u variables used
+	  nzvr: number of dx and/or w variables used*/
+	
+	if(independents&FMI_STATES){
+		nvvr += jmi->n_real_x;
+ 	}else{
+ 		offs += jmi->n_real_x;
+ 	}
+	if(independents&FMI_INPUTS){
+		nvvr += jmi->n_real_u;
+ 	}
+ 	if(dependents&FMI_DERIVATIVES){
+		nzvr += jmi->n_real_dx;
+		output_off = jmi->n_real_dx;
+ 	}
+	if(dependents&FMI_OUTPUTS){
+		nzvr += n_outputs2;
+ 	}
+ 	
  	for(i = 0; i<jmi->n_real_dx+jmi->n_real_x+jmi->n_real_u+jmi->n_real_w;i++){
- 		(*dz)[i] = 0;
+		(*dz)[i] = 0;
 	}
-
+	
 	for(i = 0; i < jmi->n_real_u; i++){
 		(*(jmi->z))[i+jmi->offs_real_u] = (*(jmi->z_val))[i+jmi->offs_real_u];
 	}
-
-	if ((dependents==FMI_DERIVATIVES) && (independents==FMI_STATES) && jmi->color_info_A != NULL) {
-		/* Compute Jacobian A with compression */
-		for (i=0;i<jmi->color_info_A->n_groups;i++) {
-		 	for(k = 0; k<jmi->n_real_dx+jmi->n_real_x+jmi->n_real_u+jmi->n_real_w;k++){
-		 		(*dz)[k] = 0;
-			}
-			/* Set the seed vector */
-			for (j=0;j<jmi->color_info_A->n_cols_in_group[i];j++) {
-				(*dv)[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j] + jmi->n_real_dx] = 1.;
-			}
-			/*
-			for (j=0;j<jmi->n_v;j++) {
-				printf(" * %d %f\n",j,(*(jmi->dz))[j]);
-			}
-			*/
-			/* Evaluate directional derivative */
-			if (i==0) {
-				jmi->cached_block_jacobians = 0;
-			} else {
-				jmi->cached_block_jacobians = 1;
-			}
-			jmi->dae->ode_derivatives_dir_der(jmi);
-			/* Extract Jacobian values */
-			for (j=0;j<jmi->color_info_A->n_cols_in_group[i];j++) {
-				for (k=jmi->color_info_A->col_start_index[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j]];
-					 k<jmi->color_info_A->col_start_index[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j]]+
-					   jmi->color_info_A->col_n_nz[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j]];
-						k++) {
-					jac[(jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j])*(jmi->n_real_x) +
-					    jmi->color_info_A->rows[k]] = (*dz)[jmi->color_info_A->rows[k]];
-				}
-			}
-			/* Reset seed vector */
-			for (j=0;j<jmi->color_info_A->n_cols_in_group[i];j++) {
-				(*dv)[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j] + jmi->n_real_dx] = 0.;
-			}
-		}
-		c1 = clock();
-
-		/*printf("Jac A eval call: %f\n", ((realtype) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
-
-	} else {
-
-		output_vrefs = (int*)calloc(n_outputs, sizeof(int));
-		output_vrefs_real = (int*)calloc(n_outputs, sizeof(int));
-
-		jmi_get_output_vrefs(jmi, output_vrefs);
-		j = 0;
-		for(i = 0; i < n_outputs; i++){
-			if(get_type_from_value_ref(output_vrefs[i]) == 0){
-				output_vrefs_real[j] = output_vrefs[i];
-				j++;
-			}else{
-				n_outputs_real--;
-			}
-		}
-
-		/*nvvr: number of x and/or u variables used
-	  nzvr: number of dx and/or w variables used*/
-
-		if(independents&FMI_STATES){
-			nvvr += jmi->n_real_x;
-		}else{
-			offs += jmi->n_real_x;
-		}
-		if(independents&FMI_INPUTS){
-			nvvr += jmi->n_real_u;
-		}
+	
+	/*For every x and/or u variable...*/
+	for(i = 0; i < nvvr; i++){
+		(*dv)[i+offs] = 1;
+		
+		/*Evaluate directional derivative*/
+		jmi->dae->ode_derivatives_dir_der(jmi);
+		
+		/*Jacobian elements ddx/dx and/or ddx/du*/
 		if(dependents&FMI_DERIVATIVES){
-			nzvr += jmi->n_real_dx;
-			output_off = jmi->n_real_dx;
+			for(j = 0; j<jmi->n_real_dx;j++){
+				jac[i*nzvr+j] = (*dz)[j];
+			}
 		}
+		
+		/*Jacobian elements dy/dx and/or dy/du*/
 		if(dependents&FMI_OUTPUTS){
-			nzvr += n_outputs_real;
-		}
-
-		/*For every x and/or u variable...*/
-		for(i = 0; i < nvvr; i++){
-			(*dv)[i+offs] = 1;
-
-			/*Evaluate directional derivative*/
-			jmi->dae->ode_derivatives_dir_der(jmi);
-
-			/*Jacobian elements ddx/dx and/or ddx/du*/
-			if(dependents&FMI_DERIVATIVES){
-				for(j = 0; j<jmi->n_real_dx;j++){
-					jac[i*nzvr+j] = (*dz)[j];
+			for(j = 0; j<n_outputs2;j++){
+				index = get_index_from_value_ref(output_vrefs2[j]);
+				if(index < jmi->n_real_x + jmi->n_real_u){
+					  if(index == i + offs){
+					  	jac[i*nzvr+output_off+j] = 1;
+					  } else{
+					  	jac[i*nzvr+output_off+j] = 0;
+					  }
+				} else{
+					jac[i*nzvr+j+output_off] = (*dz)[index-jmi->offs_real_dx];	
 				}
 			}
-
-			/*Jacobian elements dy/dx and/or dy/du*/
-			if(dependents&FMI_OUTPUTS){
-				for(j = 0; j<n_outputs_real;j++){
-					index = get_index_from_value_ref(output_vrefs_real[j]);
-					if(index < jmi->n_real_x + jmi->n_real_u){
-						if(index == i + offs){
-							jac[i*nzvr+output_off+j] = 1;
-						} else{
-							jac[i*nzvr+output_off+j] = 0;
-						}
-					} else{
-						jac[i*nzvr+j+output_off] = (*dz)[index-jmi->offs_real_dx];
-					}
-				}
-			}
-			/*reset dz vector*/
-			for(j = 0; j<jmi->n_real_dx+jmi->n_real_x+jmi->n_real_u+jmi->n_real_w;j++){
-				(*dz)[j] = 0;
-			}
-
 		}
-
-		free(output_vrefs);
-		free(output_vrefs_real);
-
+		/*reset dz vector*/
+		for(j = 0; j<jmi->n_real_dx+jmi->n_real_x+jmi->n_real_u+jmi->n_real_w;j++){
+			(*dz)[j] = 0;
+		}
 	}
 	/*
 	---This section has been used for debugging---
@@ -1036,6 +942,8 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 
 	free(jac2);
 	*/
+	free(output_vrefs);
+	free(output_vrefs2);
 	
 	c1 = clock();
 
@@ -1047,11 +955,8 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 fmiStatus fmi_get_directional_derivative(fmiComponent c, const fmiValueReference z_vref[], size_t nzvr, const fmiValueReference v_vref[], size_t nvvr, fmiReal dz[], const fmiReal dv[]) {
 	int i = 0;
 	jmi_t* jmi = ((fmi_t *)c)->jmi;
-	jmi_real_t** dv_ = jmi->dz;
-	jmi_real_t** dz_ = jmi->dz;
-	for (i=0;i<jmi->n_v;i++) {
-		(*dv_)[i] = 0.;
-	}
+	jmi_real_t** dv_ = jmi->dv;
+	jmi_real_t** dz_ = jmi->dv;
 	for (i=0;i<nvvr;i++) {
 		(*dv_)[get_index_from_value_ref(v_vref[i])] = dv[i];
 	}

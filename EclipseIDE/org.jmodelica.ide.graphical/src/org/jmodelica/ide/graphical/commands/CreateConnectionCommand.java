@@ -1,60 +1,65 @@
 package org.jmodelica.ide.graphical.commands;
 
+import java.util.Arrays;
+
 import org.eclipse.gef.commands.Command;
-import org.jmodelica.ide.graphical.proxy.ConnectionProxy;
-import org.jmodelica.ide.graphical.proxy.ConnectorProxy;
+import org.jmodelica.icons.Connection;
+import org.jmodelica.icons.Connector;
+import org.jmodelica.icons.coord.Point;
 
 public abstract class CreateConnectionCommand extends Command {
-
-	private ConnectorProxy source;
-	private ConnectorProxy target;
-	private ConnectionProxy connection;
-
-	public CreateConnectionCommand(ConnectorProxy source) {
+	
+	private Connector source;
+	private Connector target;
+	private Connection connection;
+	
+	public CreateConnectionCommand(Connector source) {
 		this.source = source;
 		setLabel("add connection");
 	}
-
-	public void setTarget(ConnectorProxy model) {
-		target = model;
-	}
-
+	
 	@Override
 	public boolean canExecute() {
-		if (target == null)
-			return true;
 		if (source == target) {
 			return false;
 		}
-		for (ConnectionProxy con : source.getTargetConnections()) {
-			if (con.getSource().equals(target)) {
+		for (Connection con : source.getTargetConnections()) {
+			if (con.getTargetConnector() == target) {
 				return false;
 			}
 		}
-		for (ConnectionProxy con : source.getSourceConnections()) {
-			if (con.getTarget().equals(target)) {
+		for (Connection con : source.getSourceConnections()) {
+			if (con.getSourceConnector() == target) {
 				return false;
 			}
 		}
 		return true;
 	}
-
-	protected abstract void initConnection(ConnectionProxy connection);
-
+	
+	protected abstract void initConnection(Connection c);
+	
 	@Override
 	public void execute() {
-		connection = source.getDiagram().addConnection(source, target);
+		connection = new Connection();
 		initConnection(connection);
+		connection.setSourceConnector(source);
+		connection.setTargetConnector(target);
+		connection.setPoints(Arrays.asList(new Point(), new Point()));
+		redo();
 	}
-
+	
+	@Override
+	public void undo() {
+		connection.disconnect();
+	}
+	
 	@Override
 	public void redo() {
 		connection.connect();
 	}
 
-	@Override
-	public void undo() {
-		connection.disconnect();
+	public void setTarget(Connector model) {
+		target = model;
 	}
 
 }

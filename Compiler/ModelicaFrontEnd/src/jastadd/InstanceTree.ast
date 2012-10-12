@@ -20,10 +20,10 @@ abstract InstNode : BaseNode ::= /InstComponentDecl*/
                                  /InstImport*/ 
                                  /RedeclaredInstClassDecl:InstClassDecl*/
                                  /FAbstractEquation*/ 
-                                 /FQName/;
-
-DynamicOpt : Opt;
-
+                                 /FQName/ 
+                                 /DynamicClassName:InstAccess*/ 
+                                 /DynamicComponentName:InstAccess*/ 
+                                 /DynamicFExp:FExp*/;
 abstract InstRoot : InstNode;
 InstClassRoot : InstRoot ::= <ClassDecl:ClassDecl>;
 //InstFullClassDeclRoot :InstRoot ::= InstFullClassDecl;
@@ -76,7 +76,7 @@ InstImportRename      : InstImport;
 
 abstract InstConstraining : BaseNode         ::=  ClassName:InstAccess [InstClassModification] /InstNode/;
 InstConstrainingClass     : InstConstraining ::= <BaseClassDecl:BaseClassDecl>;
-InstConstrainingComponent : InstConstraining ::= <ComponentDecl:ComponentDecl>;
+InstConstrainingComponent : InstConstraining ::= <ComponentDecl:ComponentDecl> /DynamicClassName:InstAccess*/;
 
 // The class to expand may differ from the declared class of the component due to 
 // redeclaration of classes.
@@ -94,7 +94,6 @@ InstEnum	             : InstPrimitive;
 InstRecord               : InstAssignable;
 InstBuiltIn              : InstPrimitive;
 InstEnumLiteral          : InstBuiltIn;
-InstExternalObject       : InstPrimitive ::= /DestructorCall:FFunctionCallStmt/;
 UnknownInstComponentDecl : InstComponentDecl;
 InstArrayComponentDecl   : InstComponentDecl ::= <Index:int>;
                          
@@ -106,30 +105,23 @@ InstReplacingPrimitive   : InstPrimitive ::= <OriginalDecl:ComponentDecl>
                                              /OriginalInstComponent:InstComponentDecl/ 
                                              <InstComponentRedeclare:InstComponentRedeclare>;
 
-InstCreateComponentDecl : InstComponentDecl ::= <LookupNode:InstLookupRedirectNode>;
-InstCreateForIndexPrimitive : InstPrimitive ::= <LookupNode:InstLookupRedirectNode>;
-InstCreateReplacingComponentDecl : InstCreateComponentDecl ::= <OriginalDecl:ComponentDecl> 
-                                                               <InstComponentRedeclare:InstComponentRedeclare>;
-
-InstExtends : InstNode ::= ClassName:InstAccess <ExtendsClause:ExtendsClause>;
-InstNormalExtends : InstExtends ::= [InstClassModification];
-InstExtendsShortClass : InstNormalExtends;
-InstInlineExtends     : InstNormalExtends;
-InstReplacingExtendsShortClass : InstExtends ::= <InstExtendsShortClass:InstExtendsShortClass>;
+InstExtends : InstNode ::= ClassName:InstAccess <ExtendsClause:ExtendsClause> [InstClassModification];
+InstExtendsShortClass : InstExtends;
+InstInlineExtends     : InstExtends;
+//InstReplacingExtendsShortClass : InstReplacingExtendsShortClass ::= <InstExtendsShortClass:InstExtendsShortClass>
 
 // Accesses in the instance tree
-abstract InstAccess : BaseNode        ::= /ExpandedSubscripts:FArraySubscripts/;
-abstract InstNamedAccess : InstAccess ::= <ID>;
-InstDot : InstAccess ::= InstAccess*;
+abstract InstAccess : BaseNode ::= <ID> /ExpandedSubscripts:FArraySubscripts/;
+InstDot : InstAccess ::= Left:InstAccess Right:InstAccess;
 
-InstArrayAccess     : InstNamedAccess ::= [FArraySubscripts];
+InstArrayAccess     : InstAccess ::= [FArraySubscripts];
 InstParseAccess     : InstArrayAccess;
-InstClassAccess     : InstNamedAccess;
+InstClassAccess     : InstAccess;
 InstGlobalAccess    : InstAccess ::= InstAccess;
 InstAmbiguousAccess : InstArrayAccess;
 InstComponentAccess : InstArrayAccess;
 
-InstForIndex : CommonForIndex ::= InstPrimitive;
+InstForIndex : CommonForIndex ::= InstPrimitive /DynamicClassName:InstAccess*/;
 
 InstForClauseE : FAbstractEquation ::= InstForIndex* FAbstractEquation*;
 InstForStmt    : FStatement        ::= InstForIndex* ForStmt:FStatement*;
@@ -153,4 +145,4 @@ abstract InstElementModification : InstNamedModification ::= [InstModification];
 abstract InstElementRedeclare    : InstNamedModification;
 InstComponentModification : InstElementModification; 
 InstClassRedeclare        : InstElementRedeclare ::= /InstClassDecl/;
-InstComponentRedeclare    : InstElementRedeclare ::= /InstComponentDecl/;
+InstComponentRedeclare    : InstElementRedeclare ::= /InstComponentDecl/ /DynamicClassName:InstAccess*/;

@@ -1,4 +1,3 @@
-import org.eclipse.swt.graphics.Image;
 import org.jmodelica.icons.Icon;
 import org.jmodelica.icons.Component;
 import org.jmodelica.icons.exceptions.FailedConstructionException;
@@ -50,51 +49,18 @@ aspect ModelicaEclipseIcons
 		public void updateCachedIcon() {
 			myCachedIcon();
 			try {
-				myCachedIcon.update(renderIcon(icon()));
+				myCachedIcon.icon = renderIcon(icon());
 			} catch (Exception e) {
 				// Make sure *something* is shown
-				myCachedIcon.update(defaultIcon());
+				myCachedIcon.icon = defaultIcon();
 				e.printStackTrace();
 			}
 			myCachedIcon.iscurrent = true;
 		}
-		
-		protected void disposeCachedIcon() {
-			if (myCachedIcon != null)
-				myCachedIcon.dispose();
-		}
 
 		private static class CachedIcon {
 			public Image icon = null;
-			public Image prev = null;
 			public boolean iscurrent = false;
-			
-			public void update(Image i) {
-				if (i != icon) {
-					if (prev != null)
-						prev = dispose(prev);
-					prev = icon;
-					icon = i;
-				}
-			}
-			
-			public Image transfer() {
-				Image res = icon;
-				icon = null;
-				return res;
-			}
-			
-			public void dispose() {
-				icon = dispose(icon);
-				prev = dispose(prev);
-				iscurrent = false;
-			}
-
-			private Image dispose(Image img) {
-				if (img != null) 
-					img.dispose();
-				return null;
-			}
 		}
 		
 	}

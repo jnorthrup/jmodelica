@@ -23,7 +23,7 @@
  * part of the internal JastAdd run-time system - these methods are not intended
  * to be used by the user.
  * 
- * We are currently working together with the JastAdd team to develop a 
+ * We are currently working togehter with the JastAdd team to develop a 
  * documentation system where internal methods are hidden and where the user
  * API is exposed.
  *
@@ -66,15 +66,13 @@ abstract Root : BaseNode;
 
 ParserHandler : BaseNode;
 
-abstract SourceBaseNode : BaseNode;
-
 /**
  * A class representing the root node of a source AST.
  */
 SourceRoot : Root ::= Program ;
  
 
-Program : SourceBaseNode ::= 
+Program : BaseNode ::= 
 	        UnstructuredEntity:StoredDefinition* 
             /UnknownClassDecl/
             /UnknownComponentDecl/
@@ -85,9 +83,9 @@ Program : SourceBaseNode ::=
             /LibNode*/
             /InstProgramRoot/;
 
-StoredDefinition : SourceBaseNode ::= [Within] Element*;
+StoredDefinition : BaseNode ::= [Within] Element*;
 
-Within : SourceBaseNode ::= [PackageName:Access];
+Within : BaseNode ::= [PackageName:Access];
 
 abstract ClassDecl : Element;
 abstract BaseClassDecl : ClassDecl ::= VisibilityType 
@@ -107,7 +105,6 @@ UnknownClassDecl : FullClassDecl;
 
 PN_FullClassDecl : BaseClassDecl ::= [StringComment] 
                                      Composition 
-                                     [Annotation]
                                      EndDecl;
 	                      
 FullClassDecl : BaseClassDecl ::= [StringComment]  
@@ -122,7 +119,7 @@ FullClassDecl : BaseClassDecl ::= [StringComment]
                                   EndDecl;
 
 LibClassDecl : FullClassDecl ::= LibNode*;
-LibNode : SourceBaseNode ::= <FileName:String> <Name:String> <Structured:boolean> <Version:String> /StoredDefinition/;
+LibNode : BaseNode ::= <FileName:String> <Name:String> <Structured:boolean> <Version:String> /StoredDefinition/;
 
 // TODO: Why does ShortClassDecl have type_prefix:es?
 PN_ShortClassDecl : BaseClassDecl ::= [TypePrefixFlow] 
@@ -153,18 +150,18 @@ StringClassDecl    : PrimitiveClassDecl;
 EnumClassDecl      : PrimitiveClassDecl;
 
 PN_EnumDecl : BaseClassDecl ::= EnumSpecification Comment;
-abstract EnumSpecification : SourceBaseNode;
+abstract EnumSpecification : BaseNode;
 EnumLiteralList : EnumSpecification ::= EnumLiteral*;
 EnumUnspecified : EnumSpecification;
-EnumLiteral : SourceBaseNode ::= IdDecl Comment;
+EnumLiteral : BaseNode ::= IdDecl Comment;
 
 EnumLiteralDecl : ComponentDecl;
 
 BuiltInClassDecl : ClassDecl ::= Name:IdDecl;
 
-ConstrainingClause : SourceBaseNode ::= Access [ClassModification];
+ConstrainingClause : BaseNode ::= Access [ClassModification];
 
-abstract Restriction : SourceBaseNode;
+abstract Restriction : BaseNode;
 Model     : Restriction;
 Block     : Restriction;
 MClass    : Restriction;
@@ -175,30 +172,30 @@ MPackage  : Restriction;
 Function  : Restriction;
 Record    : Restriction;
 
-Replaceable  : SourceBaseNode;
-Redeclare    : SourceBaseNode;
-Encapsulated : SourceBaseNode;
-Partial      : SourceBaseNode;
-Inner        : SourceBaseNode;
-Outer        : SourceBaseNode;
+Replaceable  : BaseNode;
+Redeclare    : BaseNode;
+Encapsulated : BaseNode;
+Partial      : BaseNode;
+Inner        : BaseNode;
+Outer        : BaseNode;
 
-abstract VisibilityType : SourceBaseNode;
+abstract VisibilityType : BaseNode;
 PublicVisibilityType    : VisibilityType;
 ProtectedVisibilityType : VisibilityType;
 UnknownVisibilityType   : VisibilityType;
 
-Composition : SourceBaseNode ::= Clause* [ExternalClause];
+Composition : BaseNode ::= Clause* [ExternalClause];
 
-ExternalClause : SourceBaseNode ::= [ExternalLanguage] 
+ExternalClause : BaseNode ::= [ExternalLanguage] 
                               [ExternalFunctionCall] 
                               [Annotation1:Annotation] 
                               [Annotation2:Annotation];
                    
-ExternalFunctionCall : SourceBaseNode ::= [ReturnVar:Access] FunctionName:IdDecl Arg:Exp*;
+ExternalFunctionCall : BaseNode ::= [ReturnVar:Access] FunctionName:IdDecl Arg:Exp*;
 
-ExternalLanguage : SourceBaseNode ::= <Language>;
+ExternalLanguage : BaseNode ::= <Language>;
 
-abstract Clause : SourceBaseNode;
+abstract Clause : BaseNode;
 
 abstract ElementList : Clause ::= Element*;
 PublicElementList    : ElementList;
@@ -249,13 +246,13 @@ PN_ComponentClause : BaseComponentDecl ::=  Name:PN_ComponentDecl*
                                             [ConstrainingClause] 
                                             Comment;
                                             
-PN_ComponentDecl : SourceBaseNode ::= Name:IdDecl 
+PN_ComponentDecl : BaseNode ::= Name:IdDecl 
                                 [VarArraySubscripts:ArraySubscripts] 
                                 [Modification] 
                                 [ConditionalAttribute]
                                 Comment;
 
-abstract TypePrefix     : SourceBaseNode;
+abstract TypePrefix     : BaseNode;
 abstract TypePrefixFlow : TypePrefix;
 Flow       : TypePrefixFlow;
 Stream     : TypePrefixFlow;
@@ -268,16 +265,16 @@ abstract TypePrefixInputOutput : TypePrefix;
 Input      : TypePrefixInputOutput;
 Output     : TypePrefixInputOutput;
 
-Comment       : SourceBaseNode ::= [StringComment] [Annotation];
-StringComment : SourceBaseNode ::= <Comment:String>;
+Comment       : BaseNode ::= [StringComment] [Annotation];
+StringComment : BaseNode ::= <Comment:String>;
 
 // Annotations and modifications
-Each  : SourceBaseNode;
-Final : SourceBaseNode;
+Each  : BaseNode;
+Final : BaseNode;
 
-ConditionalAttribute : SourceBaseNode ::= Exp;
+ConditionalAttribute : BaseNode ::= Exp;
 
-abstract Modification : SourceBaseNode;
+abstract Modification : BaseNode;
 CompleteModification  : Modification ::= ClassModification [ValueModification];
 ValueModification     : Modification ::= Exp;
 //AssignModification    : Modification ::= Exp;
@@ -294,15 +291,15 @@ ClassRedeclare        : ElementRedeclare ::= BaseClassDecl;
 PN_ComponentRedeclare : ElementRedeclare ::= BaseComponentDecl;
 ComponentRedeclare    : ElementRedeclare ::= ComponentDecl;
 
-abstract Annotation : SourceBaseNode;
+abstract Annotation : BaseNode;
 
 ParseAnnotation : Annotation ::= ClassModification;
 
-abstract AbstractExp : SourceBaseNode;
+abstract AbstractExp : BaseNode;
 abstract Exp : AbstractExp;
 
-abstract AbstractEquationModifier : SourceBaseNode;
-abstract AbstractEquation         : SourceBaseNode ::= [AbstractEquationModifier] Comment;
+abstract AbstractEquationModifier : BaseNode;
+abstract AbstractEquation         : BaseNode ::= [AbstractEquationModifier] Comment;
 Initial              : AbstractEquationModifier;
 Equation             : AbstractEquation ::= Left:Exp Right:Exp;
 EquationAnnotation   : AbstractEquation ::= Annotation;
@@ -315,13 +312,13 @@ ElseEquation         : IfWhenElseEquation;
 ForClauseE           : AbstractEquation ::= ForIndex* AbstractEquation*;
 FunctionCallEquation : AbstractEquation ::= Left:FunctionCallLeft* Call:FunctionCall;
 
-FunctionCallLeft : SourceBaseNode ::= [Access];
-ForIndex : SourceBaseNode ::= ForIndexDecl [Exp];
+FunctionCallLeft : BaseNode ::= [Access];
+ForIndex : BaseNode ::= ForIndexDecl [Exp];
 // ForIndexDecl is introduced basically to make the name-analysis simpler:
 // lookupDecl is supposed to return a ComponentDecls.
 ForIndexDecl : ComponentDecl; // Is this really ok: FIXME! 
          
-abstract Statement    : SourceBaseNode  ::= Comment;
+abstract Statement    : BaseNode  ::= Comment;
 AssignStmt          : Statement ::= Left:Access Right:Exp;
 FunctionCallStmt    : Statement ::= Left:FunctionCallLeft* FunctionCall;
 BreakStmt           : Statement;
@@ -329,7 +326,7 @@ ReturnStmt          : Statement;
 abstract IfWhenStmt   : Statement ::= IfWhenClause*;
 IfStmt              : IfWhenStmt ::= ElseStmt:Statement*;
 WhenStmt            : IfWhenStmt;
-abstract IfWhenClause : SourceBaseNode  ::= Test:Exp Statement*;
+abstract IfWhenClause : BaseNode  ::= Test:Exp Statement*;
 IfClause            : IfWhenClause;
 WhenClause          : IfWhenClause;
 ForStmt             : Statement ::= ForIndex* ForStmt:Statement*;
@@ -362,8 +359,8 @@ BooleanLitExpFalse : BooleanLitExp;
 
 FunctionCall : Exp ::= Name:Access [FunctionArguments];
 
-FunctionArguments : SourceBaseNode::= Exp* NamedArgument*;
-NamedArgument     : SourceBaseNode::= Name:Access Exp;
+FunctionArguments : BaseNode::= Exp* NamedArgument*;
+NamedArgument     : BaseNode::= Name:Access Exp;
 
 IterExp  : Exp ::= Exp ForIndex*;
 RangeExp : Exp ::= Exp*;
@@ -379,20 +376,18 @@ NotExp : Exp ::= Exp;
 OrExp  : LogBinExp;
 AndExp : LogBinExp;
 
-IdDecl : SourceBaseNode ::= <ID>;
+IdDecl : BaseNode ::= <ID>;
 
 DerExp : Exp ::= Exp;
 
 AccessExp : Exp ::= Access;
 
-abstract Access : SourceBaseNode;
-abstract NamedAccess : Access ::= <ID>;
-Dot             : Access      ::= Access*;
-PN_Dot          : Access      ::= Left:Access Right:Access;
-GlobalAccess    : Access      ::= Access;
-ArrayAccess     : NamedAccess ::= [ArraySubscripts];
+abstract Access : BaseNode ::= <ID>;
+Dot             : Access ::= Left:Access Right:Access;
+ArrayAccess     : Access ::= [ArraySubscripts];
 ParseAccess     : ArrayAccess;
-ClassAccess     : NamedAccess;
+ClassAccess     : Access;
+GlobalAccess    : Access ::= Access;
 AmbiguousAccess : ArrayAccess;
 ComponentAccess : ArrayAccess;
 
@@ -400,15 +395,15 @@ ArrayConstructor : Exp ::= FunctionArguments;
 Matrix           : Exp ::= Row:MatrixRow*;
 MatrixRow        : Exp ::= Exp*;
 
-ArraySubscripts : SourceBaseNode ::= Subscript*;
-abstract Subscript : SourceBaseNode;
+ArraySubscripts : BaseNode ::= Subscript*;
+abstract Subscript : BaseNode;
 ColonSubscript : Subscript::=;
 ExpSubscript   : Subscript ::= Exp;
 
 TimeExp : Exp;
 EndExp  : Exp;
 
-EndDecl : SourceBaseNode ::= <EndID:String>;
+EndDecl : BaseNode ::= <EndID:String>;
 
 // Dummy node used in the compilation
 PN_DummyClause : Clause;

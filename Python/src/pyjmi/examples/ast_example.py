@@ -77,7 +77,7 @@ def run_demo(with_plots=True):
     # Don't load the standard library if it is already loaded
     try:
         modelica.getName().getID()
-    except NameError as e:
+    except NameError, e:
         # Load the Modelica standard library and get the class
         # declaration AST node corresponding to the Modelica
         # package.

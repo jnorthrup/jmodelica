@@ -11,33 +11,13 @@ aspect AnnotationEditing {
 	}
 	
 	/**
-	 * Saves the line annotation from <code>connectionLine</code> to this
+	 * Saves the connection annotation from <code>connection</code> to this
 	 * annotation node.
 	 * 
 	 * @param connection Connection to save annotation from
 	 */
-	public void AnnotationNode.saveConnectionLine(Line connectionLine) {
-		forPath("Line").save(connectionLine);
-	}
-	
-	/**
-	 * Saves the icon coordinateSystem annotation from <code>system</code>
-	 * to this annotation node.
-	 * 
-	 * @param system CoordinateSystem to save annotation from
-	 */
-	public void AnnotationNode.saveIconCoordinateSystem(CoordinateSystem system) {
-		forPath("Icon/coordinateSystem").save(system);
-	}
-	
-	/**
-	 * Saves the diagram coordinateSystem annotation from <code>system</code>
-	 * to this annotation node.
-	 * 
-	 * @param system CoordinateSystem to save annotation from
-	 */
-	public void AnnotationNode.saveDiagramCoordinateSystem(CoordinateSystem system) {
-		forPath("Diagram/coordinateSystem").save(system);
+	public void AnnotationNode.saveConnection(Connection connection) {
+		forPath("Line").save((Line)connection);
 	}
 	
 	/*

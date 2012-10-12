@@ -43,7 +43,7 @@ aspect RootAccess {
     eq SourceRoot.getChild().retrieveRoot() = this;
     eq FlatRoot.getChild().retrieveRoot()   = this;
     syn Root ASTNode.root() = retrieveRoot();
-    syn Root BaseNode.root() = retrieveRoot();
+    syn lazy Root BaseNode.root() = retrieveRoot();
     eq Root.root() = this;
     
     // TODO: When uses of HashSet has been generalised to Set, replace with Collections.emptySet()
@@ -252,10 +252,8 @@ aspect NodeMethods {
         	fName = ((BaseNode) fNameNode).fName;
     }
     
-    public int ASTNode.beginLine()   { return getLine(getStart()); }
+    public int ASTNode.beginLine() { return getLine(getStart()); }
     public int ASTNode.beginColumn() { return getColumn(getStart()); }
-    public int ASTNode.endLine()     { return getLine(getEnd()); }
-    public int ASTNode.endColumn()   { return getColumn(getEnd()); }
 
     public String ASTNode.getNodeName() {
         return dump();
@@ -265,7 +263,7 @@ aspect NodeMethods {
         return dump() + ": '" + getID() + "'";
     }
 
-    public String NamedAccess.getNodeName() {
+    public String Access.getNodeName() {
         return dump() + ": '" + getID() + "'";
     }
     
@@ -445,63 +443,38 @@ aspect FileNames {
     
 aspect Names {
   // simple names
-  syn String IdDecl.name()            = getID();
-  syn String Access.name();
-  eq NamedAccess.name()               = getID();
-  eq PN_Dot.name()                    = 
-  	getLeftNoTransform().name() + "." + getRightNoTransform().name();
+  syn String IdDecl.name()  = getID();
+  syn String Access.name()  = getID();
+  eq ParseAccess.name()     = getID();
+  eq ClassAccess.name()     = getID();
+  eq AmbiguousAccess.name() = getID();
+  eq ComponentAccess.name() = getID();
   syn lazy String GlobalAccess.name() = "." + getAccessNoTransform().name();
-  syn lazy String Dot.name() {
-	  StringBuilder buf = new StringBuilder();
-	  List<Access> l = getAccessListNoTransform();
-	  for (int i = 0; i < l.getNumChildNoTransform(); i++) {
-		  buf.append(l.getChildNoTransform(i).name());
-		  buf.append('.');
-	  }
-	  return buf.substring(0, buf.length() - 1);
-  }
+  syn lazy String Dot.name()          = 
+  	getLeftNoTransform().name() + "." + getRightNoTransform().name();
   
    // simple names of InstAccess:es
-  syn String InstAccess.name();
-  eq InstNamedAccess.name()               = getID();
+  syn String InstAccess.name()  = getID();
+  eq InstParseAccess.name()     = getID();
+  eq InstClassAccess.name()     = getID();
+  eq InstAmbiguousAccess.name() = getID();
+  eq InstComponentAccess.name() = getID();
   syn lazy String InstGlobalAccess.name() = "." + getInstAccessNoTransform().name();
-  syn lazy String InstDot.name() {
-	  StringBuilder buf = new StringBuilder();
-	  List<InstAccess> l = getInstAccessListNoTransform();
-	  for (int i = 0; i < l.getNumChildNoTransform(); i++) {
-		  buf.append(l.getChildNoTransform(i).name());
-		  buf.append('.');
-	  }
-	  return buf.substring(0, buf.length() - 1);
-  }
+  syn lazy String InstDot.name()          = 
+  	getLeftNoTransform().name() + "." + getRightNoTransform().name();
   
   syn String InstNamedModification.name() = getNameNoTransform().name();
   
-  syn String Access.qualifiedName();
-  eq NamedAccess.qualifiedName()               = getID();
-  eq PN_Dot.qualifiedName()                    = 
+  syn String Access.qualifiedName()            = getID();
+  syn lazy String Dot.qualifiedName()          = 
   	getLeft().qualifiedName() + "." + getRight().qualifiedName();
-  eq GlobalAccess.qualifiedName() = "." + getAccess().qualifiedName();
-  eq Dot.qualifiedName() {
-	  StringBuilder buf = new StringBuilder();
-	  for (Access a : getAccesss()) {
-		  buf.append(a.qualifiedName());
-		  buf.append('.');
-	  }
-	  return buf.substring(0, buf.length() - 1);
-  }
+  syn lazy String GlobalAccess.qualifiedName() = "." + getAccess().qualifiedName();
   
-  syn String InstAccess.qualifiedName();
-  eq InstNamedAccess.qualifiedName()           = getID();
-  eq InstDot.qualifiedName() {
-	  StringBuilder buf = new StringBuilder();
-	  for (InstAccess ia : getInstAccesss()) {
-		  buf.append(ia.qualifiedName());
-		  buf.append('.');
-	  }
-	  return buf.substring(0, buf.length() - 1);
-  }
-  eq InstGlobalAccess.qualifiedName()         = "." + getInstAccess().qualifiedName();
+  syn String InstAccess.qualifiedName()            = getID();
+  syn lazy String InstDot.qualifiedName()          = 
+  	getLeft().qualifiedName() + "." + getRight().qualifiedName();
+  syn lazy String InstGlobalAccess.qualifiedName() = 
+  	"." + getInstAccess().qualifiedName();
   
   syn String ClassDecl.name();
   eq BaseClassDecl.name()    = getNameNoTransform().getID();
@@ -519,16 +492,12 @@ aspect Names {
   eq InstImportUnqualified.name() = "*";    // To avoid returning null
   
   syn String Access.lastName() = name();
-  eq Dot.lastName()            = getAccessListNoTransform().lastChildNoTransform().lastName();
+  eq Dot.lastName()            = getRightNoTransform().lastName();
   eq GlobalAccess.lastName()   = getAccessNoTransform().lastName();
   
   syn String InstAccess.lastName() = name();
-  eq InstDot.lastName()            = getInstAccessListNoTransform().lastChildNoTransform().lastName();
+  eq InstDot.lastName()            = getRightNoTransform().lastName();
   eq InstGlobalAccess.lastName()   = getInstAccessNoTransform().lastName();
-  
-  public T List.lastChildNoTransform() {
-	  return getChildNoTransform(getNumChildNoTransform() - 1);
-  }
   
   syn String ClassDecl.qualifiedName();
   eq BaseClassDecl.qualifiedName() = combineName(classNamePrefix(), name());
@@ -678,11 +647,11 @@ aspect Names {
      * unqualified name.
      */ 
     syn Access Access.getLastAccess() = this;
-    eq Dot.getLastAccess()            = getAccess(getNumAccess() - 1);
+    eq Dot.getLastAccess()            = getRight().getLastAccess();
     eq GlobalAccess.getLastAccess()   = getAccess().getLastAccess();
     
     syn InstAccess InstAccess.getLastInstAccess() = this;
-    eq InstDot.getLastInstAccess()                = getInstAccess(getNumInstAccess() - 1);
+    eq InstDot.getLastInstAccess()                = getRight().getLastInstAccess();
     eq InstGlobalAccess.getLastInstAccess()       = getInstAccess().getLastInstAccess();
     
     /**
@@ -690,7 +659,7 @@ aspect Names {
      * unqualified name.
      */
     syn Access Access.getFirstAccess() = this;
-    eq Dot.getFirstAccess()            = getAccess(0);
+    eq Dot.getFirstAccess()            = getLeft().getFirstAccess();
     eq GlobalAccess.getFirstAccess()   = getAccess().getFirstAccess();
 
     // For proxy
@@ -699,22 +668,22 @@ aspect Names {
     }
     
     inh Access Access.getNextAccess();
-    eq Dot.getAccess(int i).getNextAccess()    = (i >= getNumAccess() - 1) ? null : getAccess(i + 1);
+    eq Dot.getLeft().getNextAccess() = getRight().getFirstAccess();
     eq SourceRoot.getProgram().getNextAccess() = computeNextAccess();
-    eq Root.getChild().getNextAccess()         = null;
+    eq Root.getChild().getNextAccess() = null;
 
     /**
      * Access method for the first Access of a qualified or
      * unqualified name.
      */
     syn InstAccess InstAccess.getFirstInstAccess() = this;
-    eq InstDot.getFirstInstAccess()                = getInstAccess(0);
+    eq InstDot.getFirstInstAccess()                = getLeft().getFirstInstAccess();
     eq InstGlobalAccess.getFirstInstAccess()       = getInstAccess().getFirstInstAccess();
    
     inh InstAccess InstAccess.getNextInstAccess();
-    eq InstDot.getInstAccess(int i).getNextInstAccess() = 
-    		(i >= getNumInstAccess() - 1) ? null : getInstAccess(i + 1);
-    eq BaseNode.getChild().getNextInstAccess()          = null;
+    eq InstDot.getLeft().getNextInstAccess()  = getRight().getFirstInstAccess();
+    eq InstDot.getRight().getNextInstAccess() = getNextInstAccess();
+    eq ASTNode.getChild().getNextInstAccess() = null;
 
     
     /**
@@ -726,13 +695,9 @@ aspect Names {
     }
     
     public Access Dot.stripFirstAccess() {
-    	int n = getNumAccess();
-    	if (n <= 2)
-    		return getAccess(n - 1);
-    	List<Access> l = new List<Access>();
-    	for (int i = 1; i < n; i++)
-    		l.add(getAccess(i));
-        return new Dot(l);
+        Access right = (Access) getRight().fullCopy();
+        Access left = getLeft().stripFirstAccess();
+        return (left == null) ? right : new Dot(left, right);
     }
     
     public Access GlobalAccess.stripFirstAccess() {
@@ -759,9 +724,9 @@ aspect Names {
     syn InstAccess InstAccess.getTopInstAccess() = retrieveTopInstAccess(this);
     
     inh InstAccess InstAccess.retrieveTopInstAccess(InstAccess pre);
-    eq BaseNode.getChild().retrieveTopInstAccess(InstAccess pre)         = pre;
+    eq ASTNode.getChild().retrieveTopInstAccess(InstAccess pre)          = pre;
     eq InstDot.getChild().retrieveTopInstAccess(InstAccess pre)          = retrieveTopInstAccess(this);
-    eq InstGlobalAccess.getChild().retrieveTopInstAccess(InstAccess pre) = this;
+    eq InstGlobalAccess.getChild().retrieveTopInstAccess(InstAccess pre) = retrieveTopInstAccess(this);
     
     /**
      * \brief Get the array subscripts of the last name part.
@@ -770,10 +735,10 @@ aspect Names {
         getLastInstAccess().getFArraySubscripts();
     
     syn FArraySubscripts InstAccess.getFArraySubscripts() = null;
-    eq InstDot.getFArraySubscripts() = getLastInstAccess().getFArraySubscripts();
+    eq InstDot.getFArraySubscripts() = getRight().getFArraySubscripts();
 
     syn boolean InstAccess.hasFArraySubscripts() = false;
-    eq InstDot.hasFArraySubscripts() = getLastInstAccess().hasFArraySubscripts();
+    eq InstDot.hasFArraySubscripts() = getRight().hasFArraySubscripts();
     
     /**
      * \brief Set the array subscripts of the last name part.
@@ -787,14 +752,15 @@ aspect Names {
      * \brief Copy this access, append a name part to the copy and return the copy.
      */
     public InstDot InstAccess.copyAndAppend(String id) {
-    	InstAccess left = fullCopy();
+    	InstAccess left = (InstAccess) fullCopy();
     	InstAccess right = createPartToAppend(id);
-        return new InstDot(new List<InstAccess>().add(left).add(right));
+        return new InstDot(left, right);
     }
     
     public InstDot InstDot.copyAndAppend(String id) {
-    	InstDot res = fullCopy();
-    	res.addInstAccess(createPartToAppend(id));
+    	InstDot res = (InstDot) copy();
+    	res.setLeft((InstAccess) getLeft().fullCopy());
+    	res.setRight(getRight().copyAndAppend(id));
     	return res;
     }
     
@@ -817,13 +783,7 @@ aspect Slices {
      * \brief Check if this is a slice operation.
      */
     syn boolean InstAccess.isSlice() = hasFArraySubscripts() && isArray();
-    eq InstDot.isSlice() {
-    	int last = getNumInstAccess() - 1;
-    	for (int i = 0; i < last; i++)
-    		if (getInstAccess(i).isArray())
-    			return true;
-    	return getInstAccess(last).isSlice();
-    }
+    eq InstDot.isSlice() = getLeft().isArray() || getRight().isSlice();
     
     /**
      * \brief Check if this is a slice operation.
@@ -891,6 +851,33 @@ aspect FlatNames {
         } else {
             return "unknown";
         }
+    }
+
+    /**
+     * Append a new name part.
+     */
+    public FQName FQName.append(String name) {
+        addFQNamePart(name);
+        return this;
+    }
+
+    /**
+     * Copy and append all name parts from <code>fqn</code>.
+     */
+    public FQName FQName.append(FQName fqn) {
+        for (FQNamePart part : fqn.getFQNameParts())
+            addFQNamePart((FQNamePart) part.fullCopy());
+        return this;
+    }
+
+    /**
+     * Copy and append the last <code>n</code> name parts from <code>fqn</code>.
+     */
+    public FQName FQName.appendSuffix(FQName fqn, int n) {
+    	int num = fqn.getNumFQNamePart();
+        for (int i = num - n; i < num; i++)
+            addFQNamePart((FQNamePart) fqn.getFQNamePart(i).fullCopy());
+        return this;
     }
     
     syn FQNamePart FQName.lastFQNamePart() = getFQNamePart(getNumFQNamePart()-1);
@@ -1077,7 +1064,7 @@ aspect FlatNames {
     eq FFunctionCall.name()        = getNameNoTransform().name();
     eq FBuiltInFunctionCall.name() = builtInName();
     
-    syn String FAbstractVariable.name() = null;
+    syn String AbstractFVariable.name() = null;
     eq FVariable.name()         = getFQNameNoTransform().name();
     eq FFunctionVariable.name() = getFQNameNoTransform().name();
     
@@ -1169,7 +1156,7 @@ aspect FlatNames {
     	return name.replace(".", "_");
     }
     
-    syn String FAbstractVariable.nameUnderscore() = null;
+    syn String AbstractFVariable.nameUnderscore() = null;
     eq FVariable.nameUnderscore()           = getFQName().nameUnderscore();
     eq FDerivativeVariable.nameUnderscore() = "der_" + getFQName().nameUnderscore();
     eq FDummyDerivativeVariable.nameUnderscore() = "der_" + getFQName().nameUnderscore();
@@ -1204,79 +1191,47 @@ aspect FlatNames {
 
     inh int FRecordDecl.recordIndex();
     eq FClass.getFRecordDecl(int i).recordIndex() = i;
-
+    
     /**
-     * Append a new name part.
-     */
-    public FQName FQName.append(String name) {
-        addFQNamePart(name);
-        return this;
-    }
-
-    /**
-     * Copy and append all name parts from <code>fqn</code>.
-     */
-    public FQName FQName.append(FQName fqn) {
-        for (FQNamePart part : fqn.getFQNameParts())
-            addFQNamePart((FQNamePart) part.fullCopy());
-        return this;
-    }
- 
-    /**
-     * Create a copy of the name, with a String appended.
+     * \brief Copy this FQName, append a String to the copy and return the copy.
      */
     public FQName FQName.copyAndAppend(String name) {
         return fullCopy().append(name);
     }
     
     /**
-     * Create a copy of the name, with another FQName appended.
+     * \brief Copy this FQName, append another FQName to the copy and return the copy.
      */
     public FQName FQName.copyAndAppend(FQName name) {
         return fullCopy().append(name);
     }
     
     /**
-     * Create a copy of the name excluding the first part.
+     * \brief Create a copy of all parts but the first of this name.
      */
     public FQName FQName.copySuffix() {
-        return copySuffix(getNumFQNamePart() - 1);
-    }
-    
-    /**
-     * Create a copy of the last part of this name.
-     */
-    public FQName FQName.copyLastSuffix() {
-        return copySuffix(1);
-    }
-    
-    /**
-     * Create a copy of the last <code>n</code> parts of this name.
-     */
-    public FQName FQName.copySuffix(int n) {
         FQName res = new FQName();
-        int m = getNumFQNamePart();
-        for (int i = m - n; i < m; i++)
+        for (int i = 1; i < getNumFQNamePart(); i++)
             res.addFQNamePart(getFQNamePart(i).fullCopy());
         return res;
     }
-
-    /**
-     * Create a copy of the name excluding the last part.
-     */
-    public FQName FQName.copyPrefix() {
-    	return copyPrefix(getNumFQNamePart() - 1);
-    }
     
     /**
-     * Create a copy of the first part of this name.
+     * \brief Create a copy of the first part of this name.
      */
-    public FQName FQName.copyFirstPrefix() {
+    public FQName FQName.copyPrefix() {
     	return copyPrefix(1);
     }
 
     /**
-     * Create a copy of the first <code>n</code> parts of this name.
+     * \brief Create a copy of the name excluding the last part.
+     */
+    public FQName FQName.copyFullPrefix() {
+    	return copyPrefix(getNumFQNamePart() - 1);
+    }
+
+    /**
+     * \brief Create a copy of the first <code>n</code> parts of this name.
      */
     public FQName FQName.copyPrefix(int n) {
         FQName res = new FQName();
@@ -1297,12 +1252,8 @@ aspect FlatNames {
     }
     
     /**
-     * Create a copy of this name with non-literal array subscripts replaced 
-     * with indices from <code>i</code>.
-     * 
-     * The number of dimensions of <code>i</code> must be the same as the number 
-     * of non-literal subscripts. The subscripts to be replaced can be spread out 
-     * over several name parts.
+     * \brief Create a copy of this name with non-literal array subscripts replaced 
+     *        with indices from <code>i</code>.
      */
     public FQName FQName.copyReplacingSubscripts(Index i) {
         FQName res = new FQName();
@@ -1329,44 +1280,44 @@ aspect FlatNames {
     /**
      * Create an access to this variable.
      */
-	public FIdUse FAbstractVariable.createFIdUse() {
+	public FIdUse AbstractFVariable.createFIdUse() {
 		 return null;
 	}
 	// TODO: Add implementation for enum
    
 	public FIdUse FVariable.createFIdUse() {
-		 return getFQName().createUseFQName().createFIdUse();
+		 return getFQName().createFIdUse();
 	}  
    
 	public FIdUse FFunctionVariable.createFIdUse() {
-		 return getFQName().createUseFQName().createFIdUse();
+		 return getFQName().createFIdUse();
 	}  
    
     /**
      * Create an access expression to this variable.
      */
 	public FIdUseExp FVariable.createUseExp() {
-		 return getFQName().createUseFQName().createFIdUseExp();
+		 return getFQName().createFIdUseExp();
 	}
 
 	public FIdUseExp FDerivativeVariable.createUseExp() {
-		 return getFQName().createUseFQName().createFDerExp();
+		 return getFQName().createFDerExp();
 	}
 
 	public FIdUseExp FHDerivativeVariable.createUseExp() {
-		 return getFQName().createUseFQName().createFHDerExp(getOrder());
+		 return getFQName().createFHDerExp(getOrder());
 	}
 
 	public FIdUseExp FDummyDerivativeVariable.createUseExp() {
-		 return getFQName().createUseFQName().createFDummyDerExp();
+		 return getFQName().createFDummyDerExp();
 	}
 
 	public FIdUseExp FHDummyDerivativeVariable.createUseExp() {
-		 return getFQName().createUseFQName().createFHDummyDerExp(getOrder());
+		 return getFQName().createFHDummyDerExp(getOrder());
 	}
     
 	public FIdUseExp FFunctionVariable.createUseExp() {
-		 return getFQName().createUseFQName().createFIdUseExp();
+		 return getFQName().createFIdUseExp();
 	}
     
 	public FExp FEnumLiteral.createUseExp() {
@@ -1388,46 +1339,56 @@ aspect FlatNames {
 	 * Create a pre() expression for this variable.
 	 */
 	public FPreExp FVariable.createFPreExp() {
-		return new FPreExp(getFQName().createUseFQName().createFIdUseExp());
+		return new FPreExp(getFQName().createFIdUseExp());
 	}
 
     /**
-     * Create an FDerExp for this name, using a copy if needed.
+     * \brief Create an FDerExp using a copy of this name.
+     * 
+     * It is assumed that this name is from a variable declaration.
      */
     public FDerExp FQName.createFDerExp() {
         return new FDerExp(createFIdUse()); 
     }
 
     /**
-     * Create an FHDerExp for this name, using a copy if needed.
+     * \brief Create an FHDerExp using a copy of this name.
+     * 
+     * It is assumed that this name is from a variable declaration.
      */
     public FHDerExp FQName.createFHDerExp(int order) {
         return new FHDerExp(createFIdUse(), order); 
     }
 
     /**
-     * Create an FDummyDerExp for this name, using a copy if needed.
+     * \brief Create an FDummyDerExp using a copy of this name.
+     * 
+     * It is assumed that this name is from a variable declaration.
      */
     public FDummyDerExp FQName.createFDummyDerExp() {
         return new FDummyDerExp(createFIdUse()); 
     }
 
     /**
-     * Create an FHDummyDerExp for this name, using a copy if needed.
+     * \brief Create an FHDummyDerExp using a copy of this name.
+     * 
+     * It is assumed that this name is from a variable declaration.
      */
     public FHDummyDerExp FQName.createFHDummyDerExp(int order) {
         return new FHDummyDerExp(createFIdUse(), order); 
     }
     
     /**
-     * Create an FIdUseExp for this name, using a copy if needed.
+     * \brief Create an FIdUseExp using a copy of this name.
+     * 
+     * It is assumed that this name is from a variable declaration.
      */
     public FIdUseExp FQName.createFIdUseExp() {
         return new FIdUseExp(createFIdUse()); 
     }
     
     /**
-     * Create a copy of this name that is suitable for an FIdUse.
+     * \brief Create a copy of this name that is suitable for an FIdUse.
      * 
      * It is assumed that this name is from a variable declaration.
      */
@@ -1439,10 +1400,12 @@ aspect FlatNames {
     }
     
     /**
-     * Create an FIdUse for this name, using a copy if needed.
+     * \brief Create an FIdUse using a copy of this name.
+     * 
+     * It is assumed that this name is from a variable declaration.
      */
     public FIdUse FQName.createFIdUse() {
-        return new FIdUse((FQName) unboundCopy()); 
+        return new FIdUse(createUseFQName()); 
     }
     
     /**
@@ -1465,17 +1428,39 @@ aspect FlatNames {
     		fqn.lastFQNamePart().setFArraySubscripts(fas);
         return new FIdUse(fqn); 
     }
+
+    /**
+     * \brief Create an InstAccess based on an FQName.
+     * 
+     */    
+    public InstAccess FQName.createInstComponentAccess() {
+    	InstAccess ia;
+    	Iterator<FQNamePart> it = getFQNameParts().iterator();
+    	FQNamePart fqnp = it.next();
+    	ia = new InstComponentAccess(fqnp.getName(),(Opt)fqnp.getFArraySubscriptsOpt().fullCopy());
+    	while (it.hasNext()) {
+    		fqnp = it.next();
+    		ia = new InstDot(ia,new InstComponentAccess(fqnp.getName(),(Opt)fqnp.getFArraySubscriptsOpt().fullCopy()));
+    	}	
+    	ia.setParent(this);
+    	return ia;
+    }
+    
+    syn nta InstAccess InstComponentDecl.createNameInstAccess() {
+   		InstAccess ia = getFQName().createInstComponentAccess();
+   		ia = dynamicComponentName(ia);
+   		return ia;
+   	}
     
     syn String FType.name();
-    eq FRealType.name()        		= "Real";
-    eq FIntegerType.name()     		= "Integer";
-    eq FBooleanType.name()     		= "Boolean";
-    eq FStringType.name()      		= "String";
-    eq FEnumType.name()        		= getName();
-    eq FEnumLiteralType.name() 		= getName();
-    eq FRecordType.name()      		= getName();
-    eq FUnknownType.name()     		= "(unknown type)";
-    eq FExternalObjectType.name()	= "ExternalObject"; 
+    eq FRealType.name()        = "Real";
+    eq FIntegerType.name()     = "Integer";
+    eq FBooleanType.name()     = "Boolean";
+    eq FStringType.name()      = "String";
+    eq FEnumType.name()        = getName();
+    eq FEnumLiteralType.name() = getName();
+    eq FRecordType.name()      = getName();
+    eq FUnknownType.name()     = "(unknown type)";
     
     syn boolean FAbstractFunctionCall.isIgnored() = false;
     eq FIgnoredBuiltIn.isIgnored() = true;
@@ -1575,7 +1560,7 @@ aspect FlatFunctionUtils {
      }
      
      /**
-      * \brief Returns a list of all FFunctionVariables not declared as "input" or "output".
+      * \brief Returns a list of all FFunctionVariables declared as "input".
       */
      syn lazy ArrayList<FFunctionVariable> FFunctionDecl.myProtected() {
          ArrayList<FFunctionVariable> l = new ArrayList<FFunctionVariable>();
@@ -2046,12 +2031,7 @@ aspect ComponentDeclMethods {
     syn boolean FIdUseInstAccess.isDisabled() = getInstAccess().isDisabled();
     syn boolean InstAccess.isDisabled() = false;
     eq InstComponentAccess.isDisabled() = myInstComponentDecl().isDisabled();
-    eq InstDot.isDisabled() {
-    	for (InstAccess ia : getInstAccesss())
-    		if (ia.isDisabled())
-    			return true;
-    	return false;
-    }
+    eq InstDot.isDisabled() = getRight().isDisabled() || getLeft().isDisabled();
     
 }
 
@@ -2102,14 +2082,14 @@ aspect ShortClassUtil {
 
 aspect FlatExpressions {
     
-    inh boolean FExp.inEquationSection();
+    inh lazy boolean FExp.inEquationSection();
     eq FClass.getFEquationBlock().inEquationSection() = true;
     eq Root.getChild().inEquationSection() = false;
-    inh boolean FExp.inInitialEquationSection();
+    inh lazy boolean FExp.inInitialEquationSection();
     eq FClass.getFInitialEquation().inInitialEquationSection() = true;
     eq Root.getChild().inInitialEquationSection() = false;
 
-    inh boolean FExp.inEquation();
+    inh lazy boolean FExp.inEquation();
     eq FAbstractEquation.getChild().inEquation() = true;
     eq Root.getChild().inEquation() = false;
     
@@ -2213,9 +2193,6 @@ aspect NodeSearch {
      *             <code>false</code> otherwise
      */
     syn boolean ASTNode.matches(String str) = false;
-    eq Access.matches(String str)           = name().equals(str);
-    eq InstAccess.matches(String str)       = name().equals(str);
-    
     
     public class ASTNode {
         
@@ -2290,9 +2267,9 @@ aspect StringComments {
 
 aspect Sorting {
     
-	public static final Comparator<FAbstractVariable> FAbstractVariable.NAME_COMPARATOR = 
-		new Comparator<FAbstractVariable>() {
-			public int compare(FAbstractVariable fv1, FAbstractVariable fv2) {
+	public static final Comparator<AbstractFVariable> AbstractFVariable.NAME_COMPARATOR = 
+		new Comparator<AbstractFVariable>() {
+			public int compare(AbstractFVariable fv1, AbstractFVariable fv2) {
 				String n1 = (fv1 == null) ? null : fv1.name();
 				String n2 = (fv2 == null) ? null : fv2.name();
 				if (n1 != null)
@@ -2337,7 +2314,6 @@ aspect Sorting {
 aspect GeneralHelpers {
 	
 	abstract public FExp FExp.fullCopy();
-	abstract public InstAccess InstAccess.fullCopy();
 	abstract public FAbstractFunctionCall FAbstractFunctionCall.fullCopy();
 	abstract public FStatement FStatement.fullCopy();
 	abstract public FEquationType FEquationType.fullCopy();
@@ -2347,7 +2323,6 @@ aspect GeneralHelpers {
 	abstract public FTypePrefixVariability FTypePrefixVariability.fullCopy();
 	
 	abstract public FExp FExp.copy();
-	abstract public InstAccess InstAccess.copy();
 	
 	public FExp FExp.unboundCopy() { return (FExp) super.unboundCopy(); }
 	
@@ -2501,7 +2476,7 @@ aspect GeneralHelpers {
 	}
 
 	/**
-	 * Create a human-readable memory size string (e.g. 2.34 kB).
+	 * \brief Creates a human-readable memory size string (e.g. 2.34 kB).
 	 * 
 	 * @param mem  size to format, in bytes. May be negative.
 	 */
@@ -2511,56 +2486,17 @@ aspect GeneralHelpers {
 		for (; i < 4 && scaledMem >= 1000.0; i++)
 			scaledMem /= 1024.0;
 		StringBuilder buf = new StringBuilder();
-		if (i == 0) {
+		if (mem < 0)
+			buf.append('-');
+		if (i == 0)
 			buf.append(mem);
-		} else {
-			if (mem < 0)
-				buf.append('-');
+		else
 			buf.append(roundFriendly(scaledMem));
-		}
 		buf.append(memUnits[i]);
 		return buf.toString();
-	}
-
-	/**
-	 * Parse a human-readable memory size string (e.g. 2.34 kB).
-	 * 
-	 * @param str  string to parse
-	 * @return  the amount of memory described by the string
-	 */
-	public static long ASTNode.parseMem(String str) {
-		Matcher m = memPattern.matcher(str);
-		if (m.matches()) {
-			double val = Double.parseDouble(m.group(1));
-			String suff = m.group(4);
-			if (suff != null && !suff.isEmpty()) {
-				char sc = Character.toLowerCase(suff.charAt(0));
-				for (int i = 0; i < memUnits.length && Character.toLowerCase(memUnits[i].charAt(1)) != sc; i++)
-					val *= 1024.0;
-			}
-			if (val < Long.MAX_VALUE && val > Long.MIN_VALUE)
-				return (long) val;
-		}
-		throw new IllegalArgumentException(str);
 	}
 	
 	private static final String[] ASTNode.memUnits = { 
 		" B", " kB", " MB", " GB", " TB" , " PB" , " EB" };
-	private static final Pattern ASTNode.memPattern = 
-			Pattern.compile("([0-9]+(\\.[0-9]*)?)(([kKmMgGtTpPeE])?[bB]?)?");
 	
-}
-
-aspect DebugHelpers {
-
-	/**
-	 * Check if the list contains an instance of the specified class.
-	 */
-	public boolean List.containsInstance(Class c) {
-		 for (ASTNode n : children)
-			 if (c.isInstance(n))
-				 return true;
-		 return false;
-	}
-
 }

@@ -29,11 +29,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <sundials/sundials_types.h>
-
 #include <fmiModelTypes.h>
 #include <fmiModelFunctions.h>
+#include <math.h>
 
 /**
  * \defgroup Jmi_internal Internal functions of the JMI Model \
@@ -139,6 +137,8 @@
  *  TODO: Error codes...
  *  Introduce #defines to denote different error codes
  */
+#include <nvector/nvector_serial.h>
+#include <kinsol/kinsol.h>
 
 #if JMI_AD == JMI_AD_CPPAD
 /* This must be done outside of 'extern "C"' */
@@ -157,8 +157,7 @@ typedef struct jmi_func_ad_t jmi_func_ad_t;               /**< \brief Forward de
 typedef struct jmi_block_residual_t jmi_block_residual_t; /**< \brief Forward declaration of struct. */
 typedef struct jmi_info_t jmi_info_t;                     /**< \brief Forward declaration of struct. */
 typedef struct jmi_sim_t jmi_sim_t;                       /**< \brief Forward declaration of struct. */
-typedef struct jmi_color_info jmi_color_info;             /**< \brief Forward declaration of struct. */
-typedef struct jmi_simple_color_info_t jmi_simple_color_info_t;      /**< \brief Forward declaration of struct. */
+typedef struct jmi_color_info jmi_color_info;
 
 /* Typedef for the doubles used in the interface. */
 typedef double jmi_real_t; /*< Typedef for the real number
@@ -250,47 +249,15 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 #define SURELY_LT_ZERO(op) (op<=-1e-6? JMI_TRUE: JMI_FALSE)
 #define SURELY_GT_ZERO(op) (op>=1e-6? JMI_TRUE: JMI_FALSE)
 
-/*
-#define check_lbound(x, xmin, message) \
-    if(x < xmin) { jmi_log(jmi, logInfo, message); return 1; }
-
-#define check_ubound(x, xmax, message) \
-    if(x > xmax) { jmi_log(jmi, logInfo, message); return 1; }
-*/
-
-#define check_lbound(x, xmin, message) \
-    if(0) { jmi_log(jmi, logInfo, message); return 1; }
-
-#define check_ubound(x, xmax, message) \
-    if(0) { jmi_log(jmi, logInfo, message); return 1; }
-
-#define check_bounds(x, xmin, xmax, message) \
-    check_lbound(x, xmin, message)\
-    else check_ubound(x, xmax, message)
-
-/*
-#define init_with_lbound(x, xmin, message) \
-    if(x < xmin) { jmi_log(jmi, logInfo, message); x = xmin; }
-
-#define init_with_ubound(x, xmax, message) \
-    if(x > xmax) { jmi_log(jmi, logInfo, message); x = xmax; }
-*/
-
-#define init_with_lbound(x, xmin, message) \
-    if(0) { jmi_log(jmi, logInfo, message); x = xmin; }
-
-#define init_with_ubound(x, xmax, message) \
-    if(0) { jmi_log(jmi, logInfo, message); x = xmax; }
-
-
-#define init_with_bounds(x, xmin, xmax, message) \
-    init_with_lbound(x, xmin, message) \
-    else init_with_ubound(x, xmax, message)
-
 /* Record creation macro */
 #define JMI_RECORD_STATIC(type, name) \
 	type name##_rec;\
 	type* name = &name##_rec;
+
+/* Default Kinsol tolerance when solving BLT blocks */
+/* RCONST from SUNDIALS and defines a compatible type, usally double precision */
+#define JMI_DEFAULT_KINSOL_TOL RCONST(1.0e-8)
+
 
 #ifdef JMI_AD_NONE_AND_CPP
 extern "C" {
@@ -400,6 +367,51 @@ typedef int (*jmi_residual_func_t)(jmi_t* jmi, jmi_ad_var_vec_p res);
 typedef int (*jmi_directional_der_residual_func_t)(jmi_t* jmi, jmi_ad_var_vec_p res,
 		jmi_ad_var_vec_p dF, jmi_ad_var_vec_p dz);
 
+/**
+ * \brief Function signature for evaluation of a equation block residual
+ * function in the generated code.
+ *
+ * @param jmi A jmi_t struct.
+ * @param x (Input/Output) The iteration variable vector. If the init argument is
+ * set to JMI_BLOCK_INITIALIZE then x is an output argument that holds the
+ * initial values. If init is set to JMI_BLOCK_EVALUATE, then x is an input
+ * argument used in the evaluation of the residual.
+ * @param residual (Output) The residual vector if init is set to
+ * JMI_BLOCK_EVALUATE, otherwise this argument is not used.
+ * @param init Set to either JMI_BLOCK_INITIALIZE or JMI_BLOCK_EVALUATE.
+ * @return Error code.
+ */
+typedef int (*jmi_block_residual_func_t)(jmi_t* jmi, jmi_real_t* x,
+		jmi_real_t* residual, int init);
+		
+/**
+ * \brief Function signature for evaluation of a directional derivatives for a
+ * block function in the generated code.
+ *
+ * @param jmi A jmi_t struct.
+ * @param x (Input/Output) The iteration variable vector. If the init argument is
+ * set to JMI_BLOCK_INITIALIZE then x is an output argument that holds the
+ * initial values. If init is set to JMI_BLOCK_EVALUATE, then x is an input
+ * argument used in the evaluation of the residual.
+ * @param dx (input) The seed vector that is used if init is set to JMI_BLOCK_EVALUATE
+ * @param dRes (output) the directional derivative if init is set to JMI_BLOCK_EVALUATE
+ * @param residual (Output) The residual vector if init is set to
+ * JMI_BLOCK_EVALUATE, otherwise this argument is not used.
+ * @param init Set to either JMI_BLOCK_INITIALIZE or JMI_BLOCK_EVALUATE.
+ * @return Error code.
+ */
+typedef int (*jmi_block_dir_der_func_t)(jmi_t* jmi, jmi_real_t* x,
+		 jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int init);
+
+/**
+ * \brief Function signature for evaluation of a directional derivatives for a
+ * block function in the generated code.
+ *
+ * @param jmi A jmi_t struct.
+ * *** DOCUMENT ***
+ * @return Error code.
+ */
+typedef int (*jmi_ode_derivatives_dir_der_func_t)(jmi_t* jmi);
 
 /**
  * \brief Evaluation of symbolic jacobian of a residual function in
@@ -758,21 +770,6 @@ struct jmi_color_info{
 	int* map_off;
 };
 
-struct jmi_simple_color_info_t {
-	int n_nz;                       /**< \brief Number of non-zeros. */
-	int n_cols;                     /**< \brief Number of columns */
-	int* col_n_nz;                   /**< \brief Number of non-zeros in each column */
-	int col_offset;                 /**< \brief Column offset (in some cases, column indexing does not start at zero)*/
-	int* rows;                      /**< \brief Row indices. */
-	int* cols;                      /**< \brief Column indices. */
-	int* col_start_index;           /**< \brief Column start indices (incidence patterns are stored column major)*/
-	int n_groups;                   /**< \brief Number of groups in the CPR seeding. */
-	int n_cols_in_grouping;         /**< \brief Total number of columns used in CPR seeding computation. */
-	int* n_cols_in_group;           /**< \brief The number of column in each CPR group. */
-	int* group_cols;                /**< \brief An ordered array of column indices corresponding to CPR groups. */
-	int* group_start_index;         /**< \brief An array containing the start indices for each group in the array group_cols. */
-};
-
 /**
  * \brief Contains data structures for CppAD.
  *
@@ -792,14 +789,39 @@ struct jmi_func_ad_t{
 	                                            Jacobian. */
 	jmi_real_vec_p z_work;          /**< \brief A work vector for \f$z\f$. */
 	int exec_time;                  /**< \brief A variable that is used for measuring execution time. */
-	jmi_simple_color_info_t* color_info; /**< \brief A struct containing coloring info for the CPR seeding. */
+	int n_groups;                   /**< \brief Number of groups in the CPR seeding. */
+	int n_cols_in_grouping;         /**< \brief Total number of columns used in CPR seeding computation. */
+	int* n_cols_in_group;           /**< \brief The number of column in each CPR group. */
+	int* group_cols;                /**< \brief An ordered array of column indices corresponding to CPR groups. */
+	int* group_start_index;         /**< \brief An array containing the start indices for each group in the array group_cols. */
+};
 
-	/*int n_groups;*/                   /**< \brief Number of groups in the CPR seeding. */
-	/*int n_cols_in_grouping;*/         /**< \brief Total number of columns used in CPR seeding computation. */
-	/*int* n_cols_in_group;    */       /**< \brief The number of column in each CPR group. */
-	/*int* group_cols;          */      /**< \brief An ordered array of column indices corresponding to CPR groups. */
-	/*int* group_start_index;     */    /**< \brief An array containing the start indices for each group in the array group_cols. */
-
+struct jmi_block_residual_t {
+	jmi_t *jmi;                    /**< \brief A pointer to the corresponding jmi_t struct */
+	jmi_block_residual_func_t F;   /**< \brief A function pointer to the block residual function */
+	jmi_block_dir_der_func_t dF;   /**< \brief A function pointer to the block AD-function */
+	int n;                         /**< \brief The number of real unknowns in the equation system */
+	int n_nr;                         /**< \brief The number of non-real unknowns in the equation system */
+	jmi_real_t* x;                 /**< \brief Work vector for the real iteration variables */
+	jmi_real_t* x_nr;                 /**< \brief Work vector for the non-real iteration variables */
+	jmi_real_t* dx;				/**< \brief Work vector for the seed vector */
+	jmi_real_t* dv;					/**< \brief Work vector for (dF/dv)*dv */
+        int index ;
+    jmi_real_t* res;               /**< \brief Work vector for the block residual */
+    jmi_real_t* dres;			   /**< \brief Work vector for the directional derivative that corresponds to dx */
+    jmi_real_t* jac;               /**< \brief Work vector for the block Jacobian */
+    int* ipiv;                     /**< \brief Work vector needed for dgesv */
+    void* kin_mem;                 /**< \brief A pointer to the Kinsol solver */
+    int init;			   /**< \brief A flag for initialization */
+    N_Vector kin_y;                /**< \brief Work vector for Kinsol y */
+    N_Vector kin_y_scale;          /**< \brief Work vector for Kinsol scaling of y */
+    N_Vector kin_f_scale;          /**< \brief Work vector for Kinsol scaling of f */
+    realtype kin_ftol;		   /**< \brief Tolerance for F */
+    realtype kin_stol;		   /**< \brief Tolerance for Step-size */
+  int nb_calls;                    /**< \brief Nb of times the block has been solved */
+  int nb_iters;                     /**< \breif Total nb if iterations of non-linear solver */
+  int nb_jevals ;
+  realtype time_spent;             /**< \brief Total time spent in non-linear solver */
 };
 
 
@@ -877,7 +899,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_sw, int n_sw_init,
 		int n_guards, int n_guards_init,
 		int n_dae_blocks, int n_dae_init_blocks,
-		int scaling_method, int n_ext_objs);
+		int scaling_method);
 
 /**
  * \brief Allocates a jmi_dae_t struct.
@@ -887,31 +909,19 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
  * @param n_eq_F Number of equations in the DAE residual.
  * @param sym_dF Function pointer to the symbolic Jacobian function.
  * @param sym_dF_n_nz Number of non-zeros in the symbolic jacobian.
- * @param sym_dF_row Row indices of the non-zeros in the symbolic Jacobian.
- * @param sym_dF_col Column indices of the non-zeros in the symbolic Jacobian.
+ * @param sym_dF_row Row indices of the non-zeros in the symbolic Jacobain.
+ * @param sym_dF_col Column indices of the non-zeros in the symbolic Jacobain.
  * @param cad_dir_dF A function pointer for evaluation of the AD generated directional
  *               derivative for the DAE residual function.
  * @param cad_dF_n_nz Number of non-zeros in the AD jacobian.
- * @param cad_dF_row Row indices of the non-zeros in the AD Jacobian.
- * @param cad_dF_col Column indices of the non-zeros in the AD Jacobian.
- * @param cad_A_n_nz Number of non-zeros in the ODE AD Jacobian A.
- * @param cad_A_row Row indices of the non-zeros in the ODE AD Jacobian A.
- * @param cad_A_col Column indices of the non-zeros in the ODE AD Jacobian A.
- * @param cad_B_n_nz Number of non-zeros in the ODE AD Jacobian B.
- * @param cad_B_row Row indices of the non-zeros in the ODE AD Jacobian B.
- * @param cad_B_col Column indices of the non-zeros in the ODE AD Jacobian B.
- * @param cad_C_n_nz Number of non-zeros in the ODE AD Jacobian C.
- * @param cad_C_row Row indices of the non-zeros in the ODE AD Jacobian C.
- * @param cad_C_col Column indices of the non-zeros in the ODE AD Jacobian C.
- * @param cad_D_n_nz Number of non-zeros in the ODE AD Jacobian D.
- * @param cad_D_row Row indices of the non-zeros in the ODE AD Jacobian D.
- * @param cad_D_col Column indices of the non-zeros in the ODE AD Jacobian D.
+ * @param cad_dF_row Row indices of the non-zeros in the AD Jacobain.
+ * @param cad_dF_col Column indices of the non-zeros in the AD Jacobain.
  * @param R A function pointer to the DAE event indicator residual function.
  * @param n_eq_R Number of equations in the event indicator function.
  * @param dR Function pointer to the symbolic Jacobian function.
  * @param dR_n_nz Number of non-zeros in the symbolic jacobian.
- * @param dR_row Row indices of the non-zeros in the symbolic Jacobian.
- * @param dR_col Column indices of the non-zeros in the symbolic Jacobian.
+ * @param dR_row Row indices of the non-zeros in the symbolic Jacobain.
+ * @param dR_col Column indices of the non-zeros in the symbolic Jacobain.
  * @param ode_derivatives A function pointer to the ODE RHS function.
  * @param ode_derivatives_dir_der A function pointer to the ODE directional derivative function.
  * @param ode_outputs A function pointer to the ODE output function.
@@ -925,14 +935,10 @@ int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t F, int n_eq_F,
         jmi_jacobian_func_t sym_dF, int sym_dF_n_nz, int* sym_dF_row, int* sym_dF_col,
         jmi_directional_der_residual_func_t cad_dir_dF,
         int cad_dF_n_nz, int* cad_dF_row, int* cad_dF_col,
-        int cad_A_n_nz, int* cad_A_row, int* cad_A_col,
-        int cad_B_n_nz, int* cad_B_row, int* cad_B_col,
-        int cad_C_n_nz, int* cad_C_row, int* cad_C_col,
-        int cad_D_n_nz, int* cad_D_row, int* cad_D_col,
         jmi_residual_func_t R, int n_eq_R,
         jmi_jacobian_func_t dR, int dR_n_nz, int* dR_row, int* dR_col,
         jmi_generic_func_t ode_derivatives,
-        jmi_generic_func_t ode_derivatives_dir_der,
+        jmi_ode_derivatives_dir_der_func_t ode_derivatives_dir_der,
         jmi_generic_func_t ode_outputs,
         jmi_generic_func_t ode_initialize,
         jmi_generic_func_t ode_guards,
@@ -940,29 +946,53 @@ int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t F, int n_eq_F,
         jmi_next_time_event_func_t ode_next_time_event);
 
 /**
- * \brief Allocates memory for the contents of a jmi_simple_color_info struct
+ * \brief Register a block residual function in a jmi_t struct.
  *
- * @param c_info A jmi_simple_color_info struct
- * @param n_cols, Number of columns in Jacobian
- * @param n_cols_in_grouping, Number of columns to include in the coloring
- * @param n_nz, Number of non-zeros
- * @param rows, Row indices of non-zero elements
- * @param cols, Column indices of non-zero elements
- * @param col_offset, Offset of the first column to include in the coloring
- * @param one_indexing If 1, then assume FORTRAN style 1-indexing, if 0 assume C style 0-indexing
- *
- * @return Error code
+ * @param jmi A jmi_t struct.
+ * @param F A jmi_block_residual_func_t function
+ * @param dF A jmi_block_dir_der_func_t function
+ * @param n Integer size of the block of real variables
+ * @param n_nr Integer size of the block of non-real variables
+ * @param index Integer ID nbr of the block
+ * @return Error code.
  */
-int jmi_new_simple_color_info(jmi_simple_color_info_t** c_info, int n_cols, int n_cols_in_grouping, int n_nz,
-		int* rows, int* cols, int col_offset, int one_indexing);
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index);
 
 /**
- * \brief Deletes the contents of a jmi_simple_color_info struct
- *
- * @param c_info A jmi_color_info struct
- * @return Error code
+ * \brief Allocates a jmi_block_residual struct.
+ * 
+ * @param b A jmi_block_residual_t struct (Output)
+ * @param jmi A jmi_t struct.
+ * @param F A jmi_block_residual_func_t function
+ * @param dF A jmi_block_dir_der_func_t function 
+ * @param n Integer size of the block of real variables
+ * @param n_nr Integer size of the block of non-real variables
+ * @param index Integer ID nbr of the block
+ * @return Error code.
  */
-int jmi_delete_simple_color_info(jmi_simple_color_info_t *c_info);
+int jmi_new_block_residual(jmi_block_residual_t** b,jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index);
+
+
+/**
+ * \brief Deletes a jmi_block_residual struct.
+ * 
+ * @param b A jmi_block_residual_t struct.
+ * @return Error code.
+ */
+int jmi_delete_block_residual(jmi_block_residual_t* b);
+
+/**
+ * \brief Register an initialization block residual function in a jmi_t struct.
+ *
+ * @param jmi A jmi_t struct.
+ * @param F A jmi_block_residual_func_t function
+ * @param dF A jmi_block_dir_der_func_t function
+ * @param n Integer size of the block of real variables
+ * @param n_nr Integer size of the block of non-real variables
+ * @param index Integer ID nbr of the block
+ * @return Error code.
+ */
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index);
 
 /**
  * \brief Allocates memory for the contents of a jmi_color_info struct
@@ -993,9 +1023,9 @@ int jmi_delete_color_info(jmi_color_info *c_i);
  *        function \f$F_0\f$.
  * @param dF0 Function pointer to the symbolic Jacobian of \f$F_0\f$.
  * @param dF0_n_nz Number of non-zeros in the symbolic jacobian of \f$F_0\f$.
- * @param dF0_row Row indices of the non-zeros in the symbolic Jacobian
+ * @param dF0_row Row indices of the non-zeros in the symbolic Jacobain
  *        of \f$F_0\f$.
- * @param dF0_col Column indices of the non-zeros in the symbolic Jacobian
+ * @param dF0_col Column indices of the non-zeros in the symbolic Jacobain
  *        of \f$F_0\f$.
  * @param F1 A function pointer to the DAE initialization residual function
  * \f$F_1\f$.
@@ -1003,9 +1033,9 @@ int jmi_delete_color_info(jmi_color_info *c_i);
  *        function \f$F_1\f$.
  * @param dF1 Function pointer to the symbolic Jacobian of \f$F_1\f$.
  * @param dF1_n_nz Number of non-zeros in the symbolic jacobian of \f$F_1\f$.
- * @param dF1_row Row indices of the non-zeros in the symbolic Jacobian
+ * @param dF1_row Row indices of the non-zeros in the symbolic Jacobain
  *        of \f$F_1\f$.
- * @param dF1_col Column indices of the non-zeros in the symbolic Jacobian
+ * @param dF1_col Column indices of the non-zeros in the symbolic Jacobain
  *        of \f$F_1\f$.
  * @param Fp A function pointer to the DAE initialization residual function
  * \f$F_p\f$.
@@ -1013,16 +1043,16 @@ int jmi_delete_color_info(jmi_color_info *c_i);
  *        function \f$F_p\f$.
  * @param dFp Function pointer to the symbolic Jacobian of \f$F_p\f$.
  * @param dFp_n_nz Number of non-zeros in the symbolic jacobian of \f$F_p\f$.
- * @param dFp_row Row indices of the non-zeros in the symbolic Jacobian
+ * @param dFp_row Row indices of the non-zeros in the symbolic Jacobain
  *        of \f$F_p\f$.
- * @param dFp_col Column indices of the non-zeros in the symbolic Jacobian
+ * @param dFp_col Column indices of the non-zeros in the symbolic Jacobain
  *        of \f$F_p\f$.
  * @param R0 A function pointer to the DAE event indicator residual function.
  * @param n_eq_R0 Number of equations in the event indicator function.
  * @param dR0 Function pointer to the symbolic Jacobian function.
  * @param dR0_n_nz Number of non-zeros in the symbolic jacobian.
- * @param dR0_row Row indices of the non-zeros in the symbolic Jacobian.
- * @param dR0_col Column indices of the non-zeros in the symbolic Jacobian.
+ * @param dR0_row Row indices of the non-zeros in the symbolic Jacobain.
+ * @param dR0_col Column indices of the non-zeros in the symbolic Jacobain.
  * @return Error code.
  *
  */
@@ -1058,25 +1088,25 @@ void jmi_delete_init(jmi_init_t** pinit);
  * @param dFfdp Function pointer to the symbolic Jacobian of \f$F_{fdp}\f$.
  * @param dFfdp_n_nz Number of non-zeros in the symbolic jacobian of
  *        \f$F_{fdp}\f$.
- * @param dFfdp_row Row indices of the non-zeros in the symbolic Jacobian
+ * @param dFfdp_row Row indices of the non-zeros in the symbolic Jacobain
  *        of \f$F_{fdp}\f$.
- * @param dFfdp_col Column indices of the non-zeros in the symbolic Jacobian
+ * @param dFfdp_col Column indices of the non-zeros in the symbolic Jacobain
  *        of \f$F_{fdp}\f$.
  * @param J A function pointer to the generalized terminal penalty function \f$J\f$.
  * @param n_eq_J Number of generalized terminal penalty functions.
  * @param dJ Function pointer to the symbolic Jacobian of \f$J\f$.
  * @param dJ_n_nz Number of non-zeros in the symbolic jacobian of \f$J\f$.
- * @param dJ_row Row indices of the non-zeros in the symbolic Jacobian
+ * @param dJ_row Row indices of the non-zeros in the symbolic Jacobain
  *        of \f$J\f$.
- * @param dJ_col Column indices of the non-zeros in the symbolic Jacobian
+ * @param dJ_col Column indices of the non-zeros in the symbolic Jacobain
  *        of \f$J\f$.
  * @param L A function pointer to the Lagrange integrand \f$L\f$.
  * @param n_eq_L Number of Lagrange integrands.
  * @param dL Function pointer to the symbolic Jacobian of \f$L\f$.
  * @param dL_n_nz Number of non-zeros in the symbolic jacobian of \f$L\f$.
- * @param dL_row Row indices of the non-zeros in the symbolic Jacobian
+ * @param dL_row Row indices of the non-zeros in the symbolic Jacobain
  *        of \f$L\f$.
- * @param dL_col Column indices of the non-zeros in the symbolic Jacobian
+ * @param dL_col Column indices of the non-zeros in the symbolic Jacobain
  *        of \f$L\f$.
  * @param Ceq A function pointer to the equality path constraint residual
  * function \f$C_{eq}\f$.
@@ -1085,9 +1115,9 @@ void jmi_delete_init(jmi_init_t** pinit);
  * @param dCeq Function pointer to the symbolic Jacobian of \f$C_{eq}\f$.
  * @param dCeq_n_nz Number of non-zeros in the symbolic jacobian of
  *        \f$C_{eq}\f$.
- * @param dCeq_row Row indices of the non-zeros in the symbolic Jacobian
+ * @param dCeq_row Row indices of the non-zeros in the symbolic Jacobain
  *        of \f$C_{eq}\f$.
- * @param dCeq_col Column indices of the non-zeros in the symbolic Jacobian
+ * @param dCeq_col Column indices of the non-zeros in the symbolic Jacobain
  *        of \f$C_{eq}\f$.
  * @param Cineq A function pointer to the inequality path constraint residual
  * function \f$C_{ineq}\f$.
@@ -1096,9 +1126,9 @@ void jmi_delete_init(jmi_init_t** pinit);
  * @param dCineq Function pointer to the symbolic Jacobian of \f$C_{ineq}\f$.
  * @param dCineq_n_nz Number of non-zeros in the symbolic jacobian of
  *        \f$C_{ineq}\f$.
- * @param dCineq_row Row indices of the non-zeros in the symbolic Jacobian
+ * @param dCineq_row Row indices of the non-zeros in the symbolic Jacobain
  *        of \f$C_{ineq}\f$.
- * @param dCineq_col Column indices of the non-zeros in the symbolic Jacobian
+ * @param dCineq_col Column indices of the non-zeros in the symbolic Jacobain
  *        of \f$C_{ineq}\f$.
  * @param Heq A function pointer to the equality point constraint residual
  * function \f$H_{eq}\f$.
@@ -1107,9 +1137,9 @@ void jmi_delete_init(jmi_init_t** pinit);
  * @param dHeq Function pointer to the symbolic Jacobian of \f$H_{eq}\f$.
  * @param dHeq_n_nz Number of non-zeros in the symbolic jacobian of
  *        \f$H_{eq}\f$.
- * @param dHeq_row Row indices of the non-zeros in the symbolic Jacobian
+ * @param dHeq_row Row indices of the non-zeros in the symbolic Jacobain
  *        of \f$H_{eq}\f$.
- * @param dHeq_col Column indices of the non-zeros in the symbolic Jacobian
+ * @param dHeq_col Column indices of the non-zeros in the symbolic Jacobain
  *        of \f$H_{eq}\f$.
  * @param Hineq A function pointer to the inequality point constraint residual
  * function \f$H_{ineq}\f$.
@@ -1118,9 +1148,9 @@ void jmi_delete_init(jmi_init_t** pinit);
  * @param dHineq Function pointer to the symbolic Jacobian of \f$H_{ineq}\f$.
  * @param dHineq_n_nz Number of non-zeros in the symbolic jacobian of
  *        \f$H_{ineq}\f$.
- * @param dHineq_row Row indices of the non-zeros in the symbolic Jacobian
+ * @param dHineq_row Row indices of the non-zeros in the symbolic Jacobain
  *        of \f$H_{ineq}\f$.
- * @param dHineq_col Column indices of the non-zeros in the symbolic Jacobian
+ * @param dHineq_col Column indices of the non-zeros in the symbolic Jacobain
  *        of \f$H_{ineq}\f$.
  * @return Error code.
  */
@@ -1289,22 +1319,16 @@ struct jmi_t{
 	jmi_ad_var_vec_p z;                  /**< \brief  This vector contains active AD objects in case of AD. */
 	jmi_real_t** z_val;                  /**< \brief  This vector contains the actual values. */
 	jmi_real_t **dz;					 /**< \brief  This vector is used to store calculated directional derivatives */
-	jmi_real_t **dz_active_variables;	 /**< \brief  This vector is used to store seed-values for active variables in block Jacobians */
-	void** ext_objs;                    /**< \brief This vector contains the external object pointers. */
+	jmi_real_t **dz_seed;				 /**< \brief  This vector is used to store seed-values for unknown block jacobians */
+	jmi_real_t **dv;					 /**< \brief  This vector is used to store seed-values for known equations */
 	
 	jmi_real_t *variable_scaling_factors;             /**< \brief Scaling factors. For convenience the vector has the same size as z but only scaling of reals are used. */
 	int scaling_method;                               /**< \brief Scaling method: JMI_SCALING_NONE, JMI_SCALING_VARIABLES */
 	jmi_block_residual_t** dae_block_residuals;       /**< \brief A vector of function pointers to DAE equation blocks */
 	jmi_block_residual_t** dae_init_block_residuals;  /**< \brief A vector of function pointers to DAE initialization equation blocks */
-    int cached_block_jacobians;          /**< \brief This flag indicates weather the Jacobian needs to be refactorized */
 
 	jmi_ad_var_t atEvent;                                      /** \brief A boolean variable indicating if the model equations are evaluated at an event.*/
 	jmi_ad_var_t atInitial;                                    /** \brief A boolean variable indicating if the model equations are evaluated at the initial time */
-
-	jmi_simple_color_info_t* color_info_A; /** \brief CPR coloring info for the ODE Jacobian A */
-	jmi_simple_color_info_t* color_info_B; /** \brief CPR coloring info for the ODE Jacobian B */
-	jmi_simple_color_info_t* color_info_C; /** \brief CPR coloring info for the ODE Jacobian C */
-	jmi_simple_color_info_t* color_info_D; /** \brief CPR coloring info for the ODE Jacobian D */
 
 };
 
@@ -1343,7 +1367,7 @@ struct jmi_dae_t{
 	jmi_func_t* F;                           /**< \brief  A jmi_func_t struct representing the DAE residual \f$F\f$. */
 	jmi_func_t* R;                           /**< \brief  A jmi_func_t struct representing the DAE event indicator function \f$R\f$. */
     jmi_generic_func_t ode_derivatives;      /**< \brief A function pointer to a function for evaluating the ODE derivatives. */
-    jmi_generic_func_t ode_derivatives_dir_der;      /**< \brief A function pointer to a function for evaluating the ODE directional derivative. */
+    jmi_ode_derivatives_dir_der_func_t ode_derivatives_dir_der;      /**< \brief A function pointer to a function for evaluating the ODE directional derivative. */
     jmi_generic_func_t ode_outputs;          /**< \brief A function pointer to a function for evaluating the ODE outputs. */
     jmi_generic_func_t ode_initialize;       /**< \brief A function pointer to a function for initializing the ODE. */
     jmi_generic_func_t ode_guards;           /**< A function pointer for evaluating the guard expressions. */

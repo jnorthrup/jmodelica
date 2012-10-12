@@ -24,7 +24,6 @@
 
 
 #include "jmi.h"
-#include "jmi_block_residual.h"
 
 int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_real_pd, int n_integer_ci, int n_integer_cd,
@@ -40,7 +39,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_sw, int n_sw_init,
 		int n_guards, int n_guards_init,
 		int n_dae_blocks, int n_dae_init_blocks,
-		int scaling_method, int n_ext_objs) {
+		int scaling_method) {
 	jmi_t* jmi_ ;
 	int i;
 	
@@ -192,10 +191,12 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 	jmi_->dz = (jmi_real_vec_p)calloc(1, sizeof(jmi_real_t *));
 	*(jmi_->dz) = (jmi_real_vec_t)calloc(jmi_->n_v, sizeof(jmi_real_t));/*Need number of equations*/
 	
-        jmi_->ext_objs = (void**)calloc(n_ext_objs, sizeof(void*));
-
-	jmi_->dz_active_variables = (jmi_real_vec_p)calloc(1, sizeof(jmi_real_t *));
-	*(jmi_->dz_active_variables) = (jmi_real_vec_t)calloc(jmi_->n_v, sizeof(jmi_real_t));
+	jmi_->dz_seed = (jmi_real_vec_p)calloc(1, sizeof(jmi_real_t *));
+	*(jmi_->dz_seed) = (jmi_real_vec_t)calloc(jmi_->n_v, sizeof(jmi_real_t));
+	
+	jmi_->dv = (jmi_real_vec_p)calloc(1, sizeof(jmi_real_t *));
+	*(jmi_->dv) = (jmi_real_vec_t)calloc(jmi_->n_v, sizeof(jmi_real_t));
+	
 
 	jmi_->variable_scaling_factors = (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t));
 	jmi_->scaling_method = JMI_SCALING_NONE;
@@ -204,11 +205,6 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		jmi_->variable_scaling_factors[i] = 1.0;
 		(*(jmi_->z))[i] = 0;
 		(*(jmi_->z_val))[i] = 0;
-	}
-
-	for (i=0;i<jmi_->n_v;i++) {
-		(*(jmi_->dz))[i] = 0;
-		(*(jmi_->dz_active_variables))[i] = 0;
 	}
 
 	jmi_->tp = (jmi_real_t*)calloc(jmi_->n_tp,sizeof(jmi_real_t));
@@ -279,9 +275,10 @@ int jmi_delete(jmi_t* jmi){
 	free(jmi->z_val);
 	free(*(jmi->dz));
 	free(jmi->dz);
-
-	free(*(jmi->dz_active_variables));
-	free(jmi->dz_active_variables);
+	free(*(jmi->dz_seed));
+	free(jmi->dz_seed);
+	free(*(jmi->dv));
+	free(jmi->dv);
 	free(jmi->variable_scaling_factors);
 	free(jmi->tp);
 	free(jmi);

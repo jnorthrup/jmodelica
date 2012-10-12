@@ -1465,6 +1465,9 @@ class LocalDAECollocationAlg(AlgorithmBase):
             
         # set solver options
         self._set_solver_options()
+
+        if self.init_traj is not None:
+            self.nlp.set_initial_from_file(self.init_traj)
         
     def _set_options(self):
         """ 
@@ -1512,10 +1515,20 @@ class LocalDAECollocationAlg(AlgorithmBase):
             print("Warning: Variable renaming is currently activated.")
         
         # Check validity of quadrature_constraint
+        if self.discr != "LG" and not self.quadrature_constraint:
+            raise ValueError("quadrature_constraint is only compatible " + \
+                             "with Gauss collocation.")
         if (self.discr == "LG" and self.eliminate_der_var and
             self.quadrature_constraint):
             raise NotImplementedError("quadrature_constraint is not " + \
                                       "compatible with eliminate_der_var.")
+        
+        # Check validity of result_mode and n_eval_points
+        if (self.result_mode != "element_interpolation" and
+            self.n_eval_points != defaults['n_eval_points']):
+            raise ValueError("n_eval_points is only used if algorithm " + \
+                             "option result_mode is set to " + \
+                             '"element_interpolation".')
         
         # Check validity of blocking_factors
         if (self.blocking_factors is not None and 
@@ -1523,7 +1536,7 @@ class LocalDAECollocationAlg(AlgorithmBase):
             raise ValueError("The sum of all elements in blocking factors " +
                              "must be the same as the number of elements.")
         
-        # Solver options
+        # solver options
         self.solver_options = self.IPOPT_options
         
     def _set_solver_options(self):
@@ -1657,27 +1670,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Type: bool
             Default: False
         
-        init_traj --
-            Variable trajectory data used for initialization of the NLP
-            variables.
-            
-            Type: None or pyjmi.common.io.ResultDymolaTextual
-            Default: None
-        
-        variable_scaling --
-            Whether to scale the variables according to their nominal values or
-            the trajectories provided with the nominal_traj option.
-            
-            Type: bool
-            Default: True
-        
-        nominal_traj --
-            Variable trajectory data used for scaling of the NLP variables.
-            This option is only applicable if variable scaling is enabled.
-            
-            Type: None or pyjmi.common.io.ResultDymolaTextual
-            Default: None
-        
         write_scaled_result --
             Return the scaled optimization result if set to True, otherwise
             return the unscaled optimization result. This option is 
@@ -1719,11 +1711,10 @@ class LocalDAECollocationAlgOptions(OptionBase):
         
         blocking_factors --
             The iterable of blocking factors, where each element corresponds to
-            the number of collocation elements for which all the control
-            profiles should be constant. For example, if blocking_factors ==
-            [2, 1, 5], then u_0 = u_1 and u_3 = u_4 = u_5 = u_6 = u_7. The sum
-            of all elements in the iterable must be the same as the number of
-            elements.
+            the number of elements for which all the control profiles should be
+            constant. For example, if blocking_factors == [2, 1, 5], then
+            u_0 = u_1 and u_3 = u_4 = u_5 = u_6 = u_7. The sum of all elements
+            in the iterable must be the same as the number of elements.
             
             If blocking_factors is None, then the usual collocation polynomials
             are instead used to represent the controls.
@@ -1776,6 +1767,13 @@ class LocalDAECollocationAlgOptions(OptionBase):
             
             Type: bool
             Default: False
+        
+        init_traj --
+            Variable trajectory data used for initialization of the
+            optimization problem.
+            
+            Type: None or pyjmi.common.io.ResultDymolaTextual
+            Default: None
         
         parameter_estimation_data --
             Parameter estimation data used for solving parameter estimation
@@ -1835,9 +1833,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'discr': "LGR",
                 'graph': 'SX',
                 'rename_vars': False,
-                'init_traj': None,
-                'variable_scaling': True,
-                'nominal_traj': None,
                 'write_scaled_result': False,
                 'result_mode': "collocation_points",
                 'n_eval_points': 20,
@@ -1845,6 +1840,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'quadrature_constraint': True,
                 'eliminate_der_var': False,
                 'eliminate_cont_var': False,
+                'init_traj': None,
                 'parameter_estimation_data': None,
                 'casadi_options_f': {"name": "NLP objective function"},
                 'casadi_options_g': {"name": "NLP constraint function"},

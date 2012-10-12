@@ -405,7 +405,7 @@ aspect Environments {
 	}
 	
 	eq InstComponentModification.matchInstModification(String name) {
-		if (getName().matches(name))
+		if (name.equals(getName().getID()))
 			return hasInstModification()? getInstModification() : null;
 		return null;
 	}
@@ -419,7 +419,7 @@ aspect Environments {
 	
 	// Only add modifiers in constraining clauses
 	eq InstComponentRedeclare.matchInstModification(String name) {
-		if (getName().matches(name) && getInstComponentDecl().hasInstConstraining() &&
+		if (name.equals(getName().getID()) && getInstComponentDecl().hasInstConstraining() &&
 		    getInstComponentDecl().getInstConstraining().hasInstClassModification())
 			return getInstComponentDecl().getInstConstraining().getInstClassModification();
 		return null;
@@ -427,7 +427,7 @@ aspect Environments {
 	
 	// Only add modifiers in constraining clauses
 	eq InstClassRedeclare.matchInstModification(String name) {
-		if (getName().matches(name) && getInstClassDecl().hasInstConstraining() &&
+		if (name.equals(getName().name()) && getInstClassDecl().hasInstConstraining() &&
 		    getInstClassDecl().getInstConstraining().hasInstClassModification())
 			return getInstClassDecl().getInstConstraining().getInstClassModification();
 		return null;
@@ -443,7 +443,8 @@ aspect Environments {
 		Modification mod = org.getModification();
 		for (int i = 0; i < inputs.size(); i++) {
 			String name = inputs.get(i).name();
-			list.add(new InstRecordModification(mod, name, getArg(i)));
+			InstModification im = new InstRecordModification(mod, name, getArg(i));
+			list.add((InstRecordModification) org.dynamicInstMod(im));
 		}
 	}
 	
@@ -473,7 +474,8 @@ aspect Environments {
 			for (FRecordComponentType comp : ((FRecordType) var.type()).getComponents()) {
 				String name = comp.getName();
 				FExp val = exp.dynamicFExp(new FInstAccessExp(copyAndAppend(name)));
-				list.add(new InstRecordModification(mod, name, val));
+				InstModification im = new InstRecordModification(mod, name, val);
+				list.add((InstRecordModification) org.dynamicInstMod(im));
 			}
 		}
 	}
@@ -525,7 +527,6 @@ aspect Environments {
 	}
 	
 	syn InstRedeclareClassNode InstExtendsShortClass.lookupReplacingClass(String name) = null;
-	syn InstRedeclareClassNode InstReplacingExtendsShortClass.lookupReplacingClass(String name) = null;
 	
 	inh InstRedeclareClassNode InstExtends.lookupReplacingClass(String name);
 	eq InstNode.getInstExtends().lookupReplacingClass(String name) {
@@ -533,15 +534,6 @@ aspect Environments {
 			if (icd.name().equals(name))
 				return icd;
 		return retrieveReplacingClass(name);
-	}
-	eq InstExtends.getChild().lookupReplacingClass(String name) {
-		InstRedeclareClassNode res = lookupReplacingClass(name);
-		if (res != null)
-			return res;
-		for (InstClassDecl icd : getRedeclaredInstClassDecls())
-			if (icd.name().equals(name))
-				return icd;
-		return super.retrieveReplacingClass(name);
 	}
 
 	inh lazy InstNode InstModification.myInstNode();
@@ -568,10 +560,36 @@ aspect Environments {
 
 aspect InstanceTreeConstruction {
 	
-	syn nta Opt InstNode.getDynamicFExpOpt() = new DynamicOpt();
-	syn nta Opt FExp.getDynamicFExpOpt()     = new DynamicOpt();
-	syn lazy Opt FAbstractEquation.getDynamicFAbstractEquationOpt() = new DynamicOpt();	
+	syn lazy List InstNode.getDynamicClassNameList() = new List();
+	syn lazy List InstNode.getDynamicComponentNameList() = new List();
+	syn lazy List InstNode.getDynamicFExpList() = new List();
+	syn lazy List InstComponentRedeclare.getDynamicClassNameList() = new List();
+	syn lazy List InstConstrainingComponent.getDynamicClassNameList() = new List();
+	syn lazy List InstForIndex.getDynamicClassNameList() = new List();
+	syn lazy List FExp.getDynamicFExpList() = new List();
+	syn lazy List FAbstractEquation.getDynamicFAbstractEquationList() = new List();	
 	syn lazy List InstValueModification.getDynamicInstModList() = new List();
+	
+	/**
+	 * \brief Dynamically places a class name in the tree under this InstNode.
+	 * 
+	 * @returns  the final version of the dynamically placed node.
+	 */
+	public InstAccess InstNode.dynamicClassName(InstAccess name) {
+		getDynamicClassNameList().add(name);
+		return getDynamicClassName(getNumDynamicClassName() - 1);
+	}
+	
+	
+	/**
+	 * \brief Dynamically places a component name in the tree under this InstNode.
+	 * 
+	 * @returns  the final version of the dynamically placed node.
+	 */
+	public InstAccess InstNode.dynamicComponentName(InstAccess name) {
+		getDynamicComponentNameList().add(name);
+		return getDynamicComponentName(getNumDynamicComponentName() - 1);
+	}
 	
 	
 	/**
@@ -580,29 +598,28 @@ aspect InstanceTreeConstruction {
 	 * @returns  the final version of the dynamically placed node.
 	 */
 	public FExp InstNode.dynamicFExp(FExp exp) {
-		getDynamicFExpOpt().setChild(exp, 0);
-		return (FExp) getDynamicFExpOpt().getChild(0);
+		getDynamicFExpList().add(exp);
+		return getDynamicFExp(getNumDynamicFExp() - 1);
 	}
 	
 	
 	/**
-	 * Dynamically places an FExp in the tree under this FExp.
-	 * 
-	 * If <code>exp</code> is already in tree of if <code>exp == this</code>, 
-	 * then <code>exp</code> is returned.
+	 * \brief Dynamically places an FExp in the tree under this FExp.
 	 * 
 	 * @returns  the final version of the dynamically placed node.
 	 */
 	public FExp FExp.dynamicFExp(FExp exp) {
 		if (exp == this)
 			return exp;
-		if (exp.parent != null) {
-			int i = exp.parent.getIndexOfChild(exp);
-			if (i >= 0)
-				return (FExp) exp.parent.getChild(i);
-		}
-		getDynamicFExpOpt().setChild(exp, 0);
-		return (FExp) getDynamicFExpOpt().getChild(0);
+		// Fool JastAdd into keeping the list
+		boolean finalFlag = is$Final();
+		if (!finalFlag)
+			log.debug("FExp.dynamicFExp(): adding '%s' to dynamic list of non-final exp '%s'.",	exp, this);
+		is$Final(true);
+		getDynamicFExpList().add(exp);
+		exp = getDynamicFExp(getNumDynamicFExp() - 1);
+		is$Final(finalFlag);
+		return exp;
 	}
 
 	/**
@@ -613,8 +630,8 @@ aspect InstanceTreeConstruction {
 	public FAbstractEquation FAbstractEquation.dynamicFAbstractEquation(FAbstractEquation eqn) {
 		if (eqn == this)
 			return eqn;
-		getDynamicFAbstractEquationOpt().setChild(eqn, 0);
-		return (FAbstractEquation) getDynamicFAbstractEquationOpt().getChild(0);
+		getDynamicFAbstractEquationList().add(eqn);
+		return getDynamicFAbstractEquation(getNumDynamicFAbstractEquation() - 1);
 	}
 		
 	/**
@@ -623,18 +640,42 @@ aspect InstanceTreeConstruction {
 	 * @returns  the final version of the dynamically placed node.
 	 */
 	public InstModification InstValueModification.dynamicInstMod(InstModification im) {
-		// TODO: only used for modifications on array components, should probably use an NTA specifically for that instead
 		getDynamicInstModList().add(im);
 		return getDynamicInstMod(getNumDynamicInstMod() - 1);
 	}
 	
 	
-	public interface InstLookupRedirectNode {
-		InstClassDecl lookupInstClassRedirect(String name);
+	/**
+	 * \brief Dynamically places a component name in the tree under this InstComponentRedeclare.
+	 * 
+	 * @returns  the final version of the dynamically placed node.
+	 */
+	public InstAccess InstComponentRedeclare.dynamicClassName(InstAccess name) {
+		addDynamicClassName(name);
+		return getDynamicClassName(getNumDynamicClassName() - 1);
 	}
 	
-	public class InstNode implements InstLookupRedirectNode {}
-	public class InstModification implements InstLookupRedirectNode {}
+	
+	/**
+	 * \brief Dynamically places a component name in the tree under this InstConstrainingComponent.
+	 * 
+	 * @returns  the final version of the dynamically placed node.
+	 */
+	public InstAccess InstConstrainingComponent.dynamicClassName(InstAccess name) {
+		addDynamicClassName(name);
+		return getDynamicClassName(getNumDynamicClassName() - 1);
+	}
+	
+	
+	/**
+	 * \brief Dynamically places a component name in the tree under this InstForIndex.
+	 * 
+	 * @returns  the final version of the dynamically placed node.
+	 */
+	public InstAccess InstForIndex.dynamicClassName(InstAccess name) {
+		addDynamicClassName(name);
+		return getDynamicClassName(getNumDynamicClassName() - 1);
+	}
 	
 	syn lazy List InstNode.getInstComponentDeclList() {
 		
@@ -702,7 +743,7 @@ aspect InstanceTreeConstruction {
 		
 		for (ClassDecl cd : classes()) {
 			if (cd.hasRedeclare()) {
-			    InstNode icd = cd.newInstClassDecl();
+			    InstNode icd = createInstClassDecl(cd);
 			    if (icd != null)
 			    	l.add(icd);
 			}
@@ -753,23 +794,11 @@ aspect InstanceTreeConstruction {
     	InstComponentRedeclare irc = retrieveReplacingComponent(cd.name());
     	if (irc!=null) {
     		ComponentDecl replacingComp = irc.getComponentRedeclare().getComponentDecl();
-    		return new InstCreateReplacingComponentDecl(replacingComp, irc, cd, irc);    	    		
+    		// Add the new access to the InstComponentRedeclare node in order to get lookup in the right scope
+    		return irc.dynamicClassName(replacingComp.getClassName().newInstAccess()).myInstClassDecl().newInstReplacingComponent(replacingComp,cd,irc);    	    		
     	} else { 
-    		return new InstCreateComponentDecl(cd, this);    	
+    		return dynamicClassName(cd.getClassName().newInstAccess()).myInstClassDecl().newInstComponentDecl(cd);    	
     	}
-     }
-     
-     rewrite InstCreateReplacingComponentDecl {
-     	to InstComponentDecl getClassName().myInstClassDecl().newInstReplacingComponent(
-     			getComponentDecl(), getOriginalDecl(), getInstComponentRedeclare());
-     }
-     
-     rewrite InstCreateComponentDecl {
-     	to InstComponentDecl getClassName().myInstClassDecl().newInstComponentDecl(getComponentDecl());
-     }
-     
-     rewrite InstCreateForIndexPrimitive {
-     	to InstPrimitive (InstPrimitive) getClassName().myInstClassDecl().newInstComponentDecl(getComponentDecl());
      }
         
 	public InstNode InstNode.createInstClassDecl(ClassDecl bcd) {
@@ -786,7 +815,7 @@ aspect InstanceTreeConstruction {
 	}    
     
     public interface InstRedeclareClassNode {
-    	public InstClassDecl lookupInstClass(String name);
+    	public HashSet lookupInstClass(String name);
     	public ClassDecl redeclaringClassDecl();
     }
     public class InstClassDecl implements InstRedeclareClassNode {}
@@ -799,70 +828,7 @@ aspect InstanceTreeConstruction {
    		// This cannot be redeclared. Just create and return.
    		return ec.newInstExtends();
 	}
-
-	public InstNode InstReplacingShortClassDecl.createInstExtends(ExtendsClause ec) {
-		if (!isInInstModification() && ec.needsReplacingExtends()) {
-			Environment e = myEnvironment();
-			InstModification im = findMatching(e, name());
-			if (im != null)
-				return im.createInstReplacingExtends(ec);
-		}
-		return ec.newInstExtends();
-	}
-	
-	public InstNode InstExtendsShortClass.createInstExtends(ExtendsClause ec) {
-		return createInstExtendsForShortClass(ec);
-	}
-	
-	public InstNode InstReplacingExtendsShortClass.createInstExtends(ExtendsClause ec) {
-		return createInstExtendsForShortClass(ec);
-	}
-
-	public InstNode InstExtends.createInstExtendsForShortClass(ExtendsClause ec) {
-		if (!isInInstModification() && ec.needsReplacingExtends()) {
-			Environment e = myEnvironment();
-			String name = name();
-			for (InstModification im : e) 
-				if (im.myInstNode().matches(name))
-					return im.myInstNode().createInstReplacingExtends(ec);
-		}
-		return ec.newInstExtends();
-	}
-	
-	public InstExtends InstModification.createInstReplacingExtends(ExtendsClause ec) {
-		return ec.newInstExtends();
-	}
-	
-	public InstExtends InstClassRedeclare.createInstReplacingExtends(ExtendsClause ec) {
-		for (InstExtends ie : getInstClassDecl().getInstExtendss())
-			return ie.createInstReplacingExtends(ec);
-		return ec.newInstExtends();
-	}
-	
-	public InstExtends InstShortClassDecl.createInstReplacingExtends(ExtendsClause ec) {
-		for (InstExtends ie : getInstExtendss())
-			return ie.createInstReplacingExtends(ec);
-		return ec.newInstExtends();
-	}
-	
-	public InstExtends InstNode.createInstReplacingExtends(ExtendsClause ec) {
-		return ec.newInstExtends();
-	}
-	
-	public InstExtends InstExtendsShortClass.createInstReplacingExtends(ExtendsClause ec) {
-		return ec.newInstReplacingExtends(this);
-	}
-	
-	eq InstNamedModification.matches(String str) = name().equals(str);
-	
-	inh boolean InstNode.isInInstModification();
-	eq InstModification.getChild().isInInstModification() = true;
-	eq InstRoot.getChild().isInInstModification()         = false;
-	eq FlatRoot.getChild().isInInstModification()         = false;
-
-	syn boolean ExtendsClause.needsReplacingExtends()  = false;
-	eq ExtendsClauseShortClass.needsReplacingExtends() = true;
-	
+		
 		// Dispatch w.r.t. class type
 	public abstract InstComponentDecl InstClassDecl.newInstComponentDecl(ComponentDecl cd);
 	public InstComponentDecl InstBaseClassDecl.newInstComponentDecl(ComponentDecl cd) {
@@ -897,8 +863,6 @@ aspect InstanceTreeConstruction {
 			return new InstRecord(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
 		else if (extendsEnum()) 
 			return new InstEnum(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
-		else if (isExternalObject())
-			return new InstExternalObject(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
 		else if (extendsPrimitive()) 
 			return new InstPrimitive(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
 		else
@@ -963,11 +927,11 @@ aspect InstanceTreeConstruction {
 	public InstComponentDecl InstBuiltInClassDecl.newInstReplacingComponent(ComponentDecl replacingDecl,
 	                                                                        ComponentDecl originalDecl, 
 	                                                                        InstComponentRedeclare icr) {
-		throw new UnsupportedOperationException();
+		return null;
 	}
 
     public InstClassDecl ClassDecl.newInstClassDecl() {
-    	throw new UnsupportedOperationException();
+    	return null;
     }
     
     public Opt<InstExternal> FullClassDecl.newInstExternalOpt() {
@@ -1069,7 +1033,7 @@ aspect InstanceTreeConstruction {
 
     // Build an InstExtends
 	public InstExtends ExtendsClause.newInstExtends() {
-		InstNormalExtends ie = newEmptyInstExtends();
+		InstExtends ie = newEmptyInstExtends();
 		ie.setClassName(getSuper().newInstAccess());
 		ie.setExtendsClause(this);
 		if (hasClassModification())
@@ -1078,32 +1042,21 @@ aspect InstanceTreeConstruction {
 		return ie;
 	}
 	
-	public InstExtends ExtendsClause.newInstReplacingExtends(InstExtendsShortClass iesc) {
-		InstReplacingExtendsShortClass ie = new InstReplacingExtendsShortClass();
-		ie.setClassName(getSuper().newInstAccess());
-		ie.setExtendsClause(this);
-		ie.setInstExtendsShortClass(iesc);
-		ie.setLocation(this);
-		return ie;
+	public InstExtends ExtendsClause.newEmptyInstExtends() {
+		return new InstExtends();
 	}
 	
-	public InstNormalExtends ExtendsClause.newEmptyInstExtends() {
-		return new InstNormalExtends();
-	}
-	
-	public InstNormalExtends ExtendsClauseShortClass.newEmptyInstExtends() {
+	public InstExtends ExtendsClauseShortClass.newEmptyInstExtends() {
 		return new InstExtendsShortClass();
 	}
 	
-	public InstNormalExtends InlineExtendsClause.newEmptyInstExtends() {
+	public InstExtends InlineExtendsClause.newEmptyInstExtends() {
 		return new InstInlineExtends();
 	}
 
 	public InstAccess ComponentDecl.newInstClassAccess() {
 		return getClassName().newInstAccess();
 	}
-	
-	public abstract InstAccess Access.newInstAccess();
 	
 	public InstAccess ArrayAccess.newInstAccess() {
 		Opt as = null;
@@ -1117,36 +1070,24 @@ aspect InstanceTreeConstruction {
 		return ia;
 	}
 
-	public InstAccess NamedAccess.newInstAccess() {
+	public InstAccess Access.newInstAccess() {
 		InstAccess ia =  new InstParseAccess(getID(),new Opt());
 		ia.setLocation(this);
 		return ia;
 	}
 
 	public InstAccess Dot.newInstAccess() {
-		List<InstAccess> l = new List<InstAccess>();
-		for (Access a : getAccesss())
-			l.add(a.newInstAccess());
-		InstDot ia = new InstDot(l);
+		InstAccess ia = new InstDot(getLeft().newInstAccess(), getRight().newInstAccess());
 		ia.setLocation(this);
 		return ia;
-	}
-
-	public InstAccess PN_Dot.newInstAccess() {
-		throw new UnsupportedOperationException();
-	}
+	}	
 
 	public InstAccess GlobalAccess.newInstAccess() {
 		InstAccess ia = new InstGlobalAccess(getAccess().newInstAccess());
 		ia.setLocation(this);
 		return ia;
-	}
+	}	
 
-	syn boolean InstExtends.hasInstClassModification()           = false;
-	eq InstReplacingExtendsShortClass.hasInstClassModification() = getInstExtendsShortClass().hasInstClassModification();
-	
-	syn InstClassModification InstExtends.getInstClassModification() = null;
-	eq InstReplacingExtendsShortClass.getInstClassModification()     = getInstExtendsShortClass().getInstClassModification();
 
 	syn lazy InstProgramRoot Program.getInstProgramRoot() {
 		return new InstProgramRoot(this);
@@ -1160,14 +1101,16 @@ aspect InstanceTreeConstruction {
 	    // TODO: Check if the component is redeclared. Really...?
     	// -> Yes: Create an InstReplacingComponent component
     	// -> No: Create an InstComponent 
-		return new InstCreateComponentDecl(getComponentRedeclare().getComponentDecl(), this);
+		InstAccess name = dynamicClassName(getComponentRedeclare().getComponentDecl().getClassName().newInstAccess());
+    	return name.myInstClassDecl().newInstComponentDecl(getComponentRedeclare().getComponentDecl());
 	}
 
 	syn lazy InstComponentDecl InstReplacingComposite.getOriginalInstComponent()  {
 		// TODO: Check if the component is redeclared. Really...?
     	// -> Yes: Create an InstReplacingComponent component
     	// -> No: Create an InstComponent 
-    	return new InstCreateComponentDecl(getOriginalDecl(), this);
+		InstAccess name = dynamicClassName(getOriginalDecl().getClassName().newInstAccess());
+    	return name.myInstClassDecl().newInstComponentDecl(getOriginalDecl());
 	}
 
 
@@ -1186,25 +1129,9 @@ aspect InstanceTreeConstruction {
 	}
 
 	/**
-	 * Returns the FExp associated with this argument, if any.
+	 * \brief Returns the FExp associated with this argument, if any.
 	 */
 	public FExp InstFunctionArgument.getFExp() { return null; }
-
-	/**
-	 * Returns the FExp associated with this argument, if any, without triggering rewrites.
-	 */
-	public FExp InstFunctionArgument.getFExpNoTransform() { return null; }
-
-	public FExp InstDefaultArgument.getFExpNoTransform() { return getFExp(); }
-	
-	syn lazy FFunctionCallStmt InstExternalObject.getDestructorCall() {
-		InstAccess name = getClassName().copyAndAppend("destructor");
-		List<InstFunctionArgument> args = new List<InstFunctionArgument>();
-		args.add(new InstPositionalArgument(0, createUseExp()));
-		FFunctionCallStmt stmt = new FFunctionCallStmt(new List(), new InstFunctionCall(name, args));
-		return stmt;
-	}
-
 
 }
 
@@ -1312,7 +1239,6 @@ aspect InstanceAST_API {
     eq InstComponentDecl.name() = getComponentDecl().name();
     eq InstBaseClassDecl.name() = getBaseClassDecl().name();
     eq InstBuiltInClassDecl.name() = getBuiltInClassDecl().name();
-    eq InstExtends.name() = getClassName().name();
 	syn BaseClassDecl InstBaseClassDecl.getBaseClassDecl() = (BaseClassDecl)getClassDecl();
 	syn BuiltInClassDecl InstBuiltInClassDecl.getBuiltInClassDecl() = (BuiltInClassDecl)getClassDecl();
 

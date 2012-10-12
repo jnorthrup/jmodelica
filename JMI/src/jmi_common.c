@@ -125,7 +125,7 @@ int jmi_func_delete(jmi_func_t *func) {
 	free(func->c_info);
 	free(func->coloring_done);
 	free(func);
-	return flag;
+	return 0;
 }
 
 /* Convenience function to evaluate the Jacobian of the function contained in a
@@ -232,7 +232,7 @@ int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 	int j;
 	int k;
 	int l;
-	int flag = 0;
+	int flag;
 	int c_index;
 	
 	int dF_n_cols;
@@ -419,7 +419,7 @@ int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 	free(dF_row);
 	free(dF_col);
 	free(dF_col_independent_ind);
-	return flag;
+	return 0;
 }
 
 
@@ -949,14 +949,10 @@ int jmi_dae_init(jmi_t* jmi,
 		int sym_dF_n_nz, int* sym_dF_row, int* sym_dF_col,
 		jmi_directional_der_residual_func_t cad_dir_dF,
 		int cad_dF_n_nz, int* cad_dF_row, int* cad_dF_col,
-        int cad_A_n_nz, int* cad_A_row, int* cad_A_col,
-        int cad_B_n_nz, int* cad_B_row, int* cad_B_col,
-        int cad_C_n_nz, int* cad_C_row, int* cad_C_col,
-        int cad_D_n_nz, int* cad_D_row, int* cad_D_col,
 		jmi_residual_func_t R, int n_eq_R, jmi_jacobian_func_t dR,
 		int dR_n_nz, int* dR_row, int* dR_col,
         jmi_generic_func_t ode_derivatives,
-        jmi_generic_func_t ode_derivatives_dir_der,
+        jmi_ode_derivatives_dir_der_func_t ode_derivatives_dir_der,
         jmi_generic_func_t ode_outputs,
         jmi_generic_func_t ode_initialize,
         jmi_generic_func_t ode_guards,
@@ -978,6 +974,7 @@ int jmi_dae_init(jmi_t* jmi,
 	jmi_func_new(&jf_R,R,n_eq_R,dR,dR_n_nz,dR_row, dR_col,NULL, 0, NULL, NULL);
 	jmi->dae->R = jf_R;
 	
+
 	jmi->dae->ode_derivatives = ode_derivatives;
 	jmi->dae->ode_derivatives_dir_der = ode_derivatives_dir_der;
 	jmi->dae->ode_outputs = ode_outputs;
@@ -985,43 +982,6 @@ int jmi_dae_init(jmi_t* jmi,
     jmi->dae->ode_guards = ode_guards;
     jmi->dae->ode_guards_init = ode_guards_init;
     jmi->dae->ode_next_time_event = ode_next_time_event;
-
-    if (cad_A_n_nz>0) {
-    	jmi_new_simple_color_info(&(jmi->color_info_A),
-			jmi->n_real_dx, jmi->n_real_dx, cad_A_n_nz,
-			cad_A_row, cad_A_col, 0, 0);
-    	compute_cpr_groups(jmi->color_info_A);
-    } else {
-    	jmi->color_info_A = NULL;
-    }
-
-    if (cad_B_n_nz>0) {
-    	jmi_new_simple_color_info(&(jmi->color_info_B),
-			jmi->n_real_dx, jmi->n_real_dx, cad_B_n_nz,
-			cad_A_row, cad_B_col, 0, 0);
-    	compute_cpr_groups(jmi->color_info_B);
-    } else {
-    	jmi->color_info_B = NULL;
-    }
-
-    if (cad_C_n_nz>0) {
-    	jmi_new_simple_color_info(&(jmi->color_info_C),
-			jmi->n_real_dx, jmi->n_real_dx, cad_A_n_nz,
-			cad_C_row, cad_C_col, 0, 0);
-    	compute_cpr_groups(jmi->color_info_C);
-    } else {
-    	jmi->color_info_C = NULL;
-    }
-
-    if (cad_D_n_nz>0) {
-    	jmi_new_simple_color_info(&(jmi->color_info_D),
-			jmi->n_real_dx, jmi->n_real_dx, cad_D_n_nz,
-			cad_D_row, cad_D_col, 0, 0);
-    	compute_cpr_groups(jmi->color_info_D);
-    } else {
-    	jmi->color_info_D = NULL;
-    }
-
 	return 0;
 }
 
@@ -1068,79 +1028,74 @@ int jmi_sim_init(jmi_t* jmi, fmiReal relative_tolerance){
 	return 0;
 }
 
-int jmi_new_simple_color_info(jmi_simple_color_info_t** c_info, int n_cols, int n_cols_in_grouping, int n_nz,
-		int* rows, int* cols, int col_offset, int one_indexing) {
-	int i,j;
-	int ind;
-	int n_col_el;
-	jmi_simple_color_info_t* c_i_temp = (jmi_simple_color_info_t*)calloc(1,sizeof(jmi_simple_color_info_t));
-	(*c_info) = c_i_temp;
-	c_i_temp->col_offset = col_offset;
-	c_i_temp->n_nz = n_nz;
-	c_i_temp->n_cols = n_cols;
-	c_i_temp->n_cols_in_grouping = n_cols_in_grouping;
-	c_i_temp->col_n_nz = (int*)calloc(n_cols,sizeof(int));
-	c_i_temp->rows = (int*)calloc(n_nz,sizeof(int));
-	c_i_temp->cols = (int*)calloc(n_nz,sizeof(int));
-	c_i_temp->col_start_index = (int*)calloc(n_cols,sizeof(int));
-
-	/* Make sure indices are stored in column major format */
-	ind = 0;
-	c_i_temp->col_start_index[0] = 0;
-	for (i=0;i<n_cols;i++) {
-		n_col_el = 0;
-		for (j=0;j<n_nz;j++) {
-			if (cols[j]-one_indexing == i) {
-				c_i_temp->rows[ind] = rows[j];
-				c_i_temp->cols[ind] = cols[j];
-				ind++;
-				n_col_el++;
-			}
-		}
-		c_i_temp->col_n_nz[i] = n_col_el;
-		if (i<n_cols-1) {
-			c_i_temp->col_start_index[i+1] = ind;
-		}
-	}
-/*
-	printf("**** New color struct ****\n");
-	printf("n_cols: %d\n", n_cols);
-	printf("n_cols_in_grouping: %d\n", n_cols_in_grouping);
-	printf("n_nz: %d\n", n_nz);
-	printf("col_offset: %d\n", col_offset);
-	printf("one_indexing: %d\n", one_indexing);
-	printf("*** Sorted incidence\n");
-
-	for (i=0;i<n_nz;i++) {
-		printf("%d, %d\n", c_i_temp->rows[i], c_i_temp->cols[i]);
-	}
-
-	printf("* Original incidence\n");
-	for (i=0;i<n_nz;i++) {
-		printf("%d, %d\n", rows[i], cols[i]);
-	}
-
-	printf("* Column starts\n");
-	for (i=0;i<n_cols;i++) {
-		printf("%d\n", c_i_temp->col_start_index[i]);
-	}
-*/
-	c_i_temp->group_cols = (int*)calloc(n_cols,sizeof(int));
-	c_i_temp->n_cols_in_group = (int*)calloc(n_cols,sizeof(int));
-	c_i_temp->group_start_index = (int*)calloc(n_nz,sizeof(int));
-	c_i_temp->n_groups = 0;
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index) {
+	jmi_block_residual_t* b;
+	int flag;
+	flag = jmi_new_block_residual(&b,jmi,F,dF,n,n_nr,index);
+	jmi->dae_block_residuals[index] = b;
 	return 0;
 }
 
-int jmi_delete_simple_color_info(jmi_simple_color_info_t *c_info) {
-	free(c_info->cols);
-	free(c_info->rows);
-	free(c_info->col_n_nz);
-	free(c_info->group_cols);
-	free(c_info->col_start_index);
-	free(c_info->n_cols_in_group);
-	free(c_info->group_start_index);
-	free(c_info);
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index) {
+	jmi_block_residual_t* b;
+	int flag;
+	flag = jmi_new_block_residual(&b,jmi,F,dF,n,n_nr,index);
+	jmi->dae_init_block_residuals[index] = b;
+	return 0;
+}
+
+int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index){
+	jmi_block_residual_t* b = (jmi_block_residual_t*)calloc(1,sizeof(jmi_block_residual_t));
+	*block = b;
+	
+	b->jmi = jmi;
+	b->F = F;
+	b->dF = dF;
+	b->n = n;
+	b->n_nr = n_nr;
+	b->index = index ;
+	b->x = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+	if (n_nr>0) {
+		b->x_nr = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+	}
+	b->dx = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+	b->dv = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+	b->res = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+	b->dres = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+	b->jac = (jmi_real_t*)calloc(n*n,sizeof(jmi_real_t));
+	b->ipiv = (int*)calloc(n,sizeof(int));
+	b->init = 1;
+        /*Initialize Kinsol. -> moved to jmi_newton_solvers.c
+        b->kin_mem = KINCreate();  */
+        b->kin_mem = 0;
+	b->kin_y = N_VNew_Serial(n);
+	b->kin_y_scale = N_VNew_Serial(n);
+	b->kin_f_scale = N_VNew_Serial(n);
+	b->kin_ftol = JMI_DEFAULT_KINSOL_TOL;
+	b->kin_stol = JMI_DEFAULT_KINSOL_TOL;
+	return 0;
+}
+
+
+int jmi_delete_block_residual(jmi_block_residual_t* b){
+	free(b->x);
+	if (b->n_nr>0) {
+		free(b->x_nr);
+	}
+	free(b->dx);
+	free(b->dv);
+	free(b->res);
+	free(b->dres);
+	free(b->jac);
+	free(b->ipiv);
+	/*Deallocate Kinsol work vectors.*/
+	N_VDestroy_Serial(b->kin_y);
+	N_VDestroy_Serial(b->kin_y_scale);
+	N_VDestroy_Serial(b->kin_f_scale);
+	/*Deallocate Kinsol */
+        if(b->kin_mem) KINFree(&(b->kin_mem));
+	/*Deallocate struct */
+	free(b);
 	return 0;
 }
 

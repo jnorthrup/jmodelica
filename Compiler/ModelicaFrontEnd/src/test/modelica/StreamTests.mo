@@ -26,16 +26,12 @@ equation
 end LinearResistance;
 
   model StreamTest1
-
-     Reservoir r;
-     Real h = inStream(r.fluidPort.h_outflow);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="StreamTest1",
-			description="Test of inside and outside stream connectors.",
-			eliminate_alias_variables=false,
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="StreamTest1",
+         description="Test of inside and outside stream connectors.",
+         eliminate_alias_variables=false,
+         flatModel="
 fclass StreamTests.StreamTest1
  parameter Real r.p0 = 1 /* 1 */;
  parameter Real r.h0 = 1 /* 1 */;
@@ -51,18 +47,19 @@ equation
 
 end StreamTests.StreamTest1;
 ")})));
+
+
+     Reservoir r;
+     Real h = inStream(r.fluidPort.h_outflow);
   end StreamTest1;
 
   model StreamTest2
-     Reservoir r;
-     Real h = actualStream(r.fluidPort.h_outflow);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="StreamTest2",
-			description="Test of inside and outside stream connectors.",
-			eliminate_alias_variables=false,
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="StreamTest2",
+         description="Test of inside and outside stream connectors.",
+         eliminate_alias_variables=false,
+         flatModel="
 fclass StreamTests.StreamTest2
  parameter Real r.p0 = 1 /* 1 */;
  parameter Real r.h0 = 1 /* 1 */;
@@ -79,22 +76,18 @@ equation
 end StreamTests.StreamTest2;
 
 ")})));
+
+     Reservoir r;
+     Real h = actualStream(r.fluidPort.h_outflow);
   end StreamTest2;
 
   model StreamTest3
-     Reservoir r1;
-     Reservoir r2;
-     LinearResistance res;
-  equation 
-     connect(r1.fluidPort,res.port_a);
-     connect(r2.fluidPort,res.port_b);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="StreamTest3",
-			description="Test of inside and outside stream connectors.",
-			eliminate_alias_variables=false,
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="StreamTest3",
+         description="Test of inside and outside stream connectors.",
+         eliminate_alias_variables=false,
+         flatModel="
 fclass StreamTests.StreamTest3
  parameter Real r1.p0 = 1 /* 1 */;
  parameter Real r1.h0 = 1 /* 1 */;
@@ -129,18 +122,23 @@ equation
 end StreamTests.StreamTest3;
 
 ")})));
+
+
+     Reservoir r1;
+     Reservoir r2;
+     LinearResistance res;
+  equation 
+     connect(r1.fluidPort,res.port_a);
+     connect(r2.fluidPort,res.port_b);
   end StreamTest3;
   
   model StreamTest4
-     Reservoir r[2];
-     Real h[2] = inStream(r.fluidPort.h_outflow);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="StreamTest4",
-			description="Using inStream() on array.",
-			eliminate_alias_variables=false,
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="StreamTest4",
+         description="Using inStream() on array.",
+         eliminate_alias_variables=false,
+         flatModel="
 fclass StreamTests.StreamTest4
  parameter Real r[1].p0 = 1 /* 1 */;
  parameter Real r[1].h0 = 1 /* 1 */;
@@ -166,18 +164,18 @@ equation
 
 end StreamTests.StreamTest4;
 ")})));
+
+     Reservoir r[2];
+     Real h[2] = inStream(r.fluidPort.h_outflow);
   end StreamTest4;
 	
   model StreamTest5
-	 Reservoir r[2];
-	 Real h[2] = actualStream(r.fluidPort.h_outflow);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="StreamTest5",
-			description="Using actualStream() on stream variables from array of connectors.",
-			eliminate_alias_variables=false,
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="StreamTest5",
+         description="Using actualStream() on stream variables from array of connectors.",
+         eliminate_alias_variables=false,
+         flatModel="
 fclass StreamTests.StreamTest5
  parameter Real r[1].p0 = 1 /* 1 */;
  parameter Real r[1].h0 = 1 /* 1 */;
@@ -203,28 +201,18 @@ equation
 
 end StreamTests.StreamTest5;
 ")})));
+
+	 Reservoir r[2];
+	 Real h[2] = actualStream(r.fluidPort.h_outflow);
   end StreamTest5;
   
   model StreamTest6
-	  connector A
-		 flow Real a;
-		 stream Real[2] b;
-		 Real c;
-	  end A;
-	  
-	  A d;
-	  Real f[2];
-  equation
-	  f = actualStream(d.b);
-	  f = {1,2};
-	  d.c = 0;
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="StreamTest6",
-			description="Using actualStream() on array of stream variables.",
-			eliminate_alias_variables=false,
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="StreamTest6",
+         description="Using actualStream() on array of stream variables.",
+         eliminate_alias_variables=false,
+         flatModel="
 fclass StreamTests.StreamTest6
  Real d.a;
  Real d.b[1];
@@ -242,6 +230,19 @@ equation
 
 end StreamTests.StreamTest6;
 ")})));
+
+	  connector A
+		 flow Real a;
+		 stream Real[2] b;
+		 Real c;
+	  end A;
+	  
+	  A d;
+	  Real f[2];
+  equation
+	  f = actualStream(d.b);
+	  f = {1,2};
+	  d.c = 0;
   end StreamTest6;
   
 // TODO: rewrite from actualStream() does not handle this
@@ -261,8 +262,18 @@ end StreamTests.StreamTest6;
   end StreamTest7;
 
 
-// This is actually a compliance error but is kept here in order to avoid copying dependent classes.
 model StreamComplErr
+ // This is actually a compliance error but is kept here in order to avoid copying dependent classes.
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ComplianceErrorTestCase(name="StreamComplErr",
+        description="Compliance error for stream connections with more than two connectors",
+        errorMessage=
+"
+Error: in file 'StreamTests.StreamComplErr.mof':
+Compliance error at line 0, column 0:
+  Stream connections with more than two connectors are not supported: Connection set (stream): {res1.port_b.h_outflow (i), res2.port_a.h_outflow (i), res3.port_a.h_outflow (i)}
+")})));
+
 Reservoir r1;
 Reservoir r2;
 Reservoir r3;
@@ -277,16 +288,6 @@ connect(res1.port_b,res2.port_a);
 connect(res1.port_b,res3.port_a);
 connect(res2.port_b,r2.fluidPort);
 connect(res3.port_b,r3.fluidPort);
-
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="StreamComplErr",
-			description="Compliance error for stream connections with more than two connectors",
-			errorMessage="
-Error: in file 'StreamTests.StreamComplErr.mof':
-Compliance error at line 0, column 0:
-  Stream connections with more than two connectors are not supported: Connection set (stream): {res1.port_b.h_outflow (i), res2.port_a.h_outflow (i), res3.port_a.h_outflow (i)}
-")})));
 end StreamComplErr;
 
 package StreamExample
@@ -404,6 +405,7 @@ package StreamExample
      end FlowSource;
 
      model Reservoir
+     replaceable package Fluid =StreamExample.Fluids.Gases.IdealGasXY;
          parameter SI.Pressure p0;
          parameter SI.Temperature T0;
          parameter SI.SpecificHeatCapacity cp;
@@ -489,72 +491,12 @@ package StreamExample
 
    package Systems
      model HeatedGas
-       parameter SI.SpecificHeatCapacity R_gas=Modelica.Constants.R/0.0289651159;
-       parameter SI.SpecificHeatCapacity cp=1000;
-       StreamExample.Examples.Components.FlowSource flowSource(
-          mflow0=1,
-         cp=cp,
-         T0=303.15) 
-         annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
-       StreamExample.Examples.Components.MultiPortVolume multiPortVolume(
-         V=1,
-         nP=2,
-         cp=cp,
-         R=R_gas,
-          T_start=303.15,
-          p_start=100000) 
-         annotation (Placement(transformation(extent={{0,0},{-20,20}})));
-       Modelica.Thermal.HeatTransfer.Sources.FixedHeatFlow heatSource(Q_flow=
-             100000, T_ref=373.15) 
-         annotation (Placement(transformation(extent={{42,-2},{22,18}})));
-       Components.LinearResistance linearResistance annotation (Placement(
-             transformation(
-             extent={{10,-10},{-10,10}},
-             rotation=-90,
-             origin={-6,36})));
-       Components.Reservoir reservoir(
-         p0=100000,
-         T0=303.15,
-         cp=cp) 
-          annotation (Placement(transformation(extent={{-50,44},{-30,64}})));
-       Modelica.Blocks.Sources.Ramp ramp(
-         offset=1e4,
-         duration=1,
-         startTime=5,
-         height=1e4) 
-         annotation (Placement(transformation(extent={{36,34},{16,54}})));
-
-     equation
-       connect(multiPortVolume.heatPort, heatSource.port) annotation (Line(
-           points={{-1,10},{10,10},{10,8},{22,8}},
-           color={191,0,0},
-           smooth=Smooth.None));
-       connect(flowSource.flowPort, multiPortVolume.flowPort[1]) annotation (
-           Line(
-           points={{-42,10},{-25.9,10},{-25.9,9},{-9.8,9}},
-           color={0,0,255},
-           smooth=Smooth.None));
-       connect(reservoir.flowPort, linearResistance.port_b) annotation (Line(
-           points={{-32,54},{-14,54},{-14,56},{-6,56},{-6,44}},
-           color={0,0,255},
-           smooth=Smooth.None));
-       connect(linearResistance.port_a, multiPortVolume.flowPort[2]) 
-         annotation (Line(
-           points={{-6,28},{-8,28},{-8,11},{-9.8,11}},
-           color={0,0,255},
-           smooth=Smooth.None));
-       connect(linearResistance.u, ramp.y) annotation (Line(
-           points={{-4,36},{6,36},{6,44},{15,44}},
-           color={0,0,127},
-           smooth=Smooth.None));
-       annotation (Diagram(coordinateSystem(preserveAspectRatio=true, extent={{-100,
-                  -100},{100,100}}), graphics),
-				  __JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="StreamExample_Examples_Systems_HeatedGas",
-            description="Test of stream connectors",
-            eliminate_alias_variables=false,
-            flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="StreamExample_Examples_Systems_HeatedGas",
+         description="Test of stream connectors",
+         eliminate_alias_variables=false,
+         flatModel="
 fclass StreamTests.StreamExample.Examples.Systems.HeatedGas
  parameter Modelica.SIunits.SpecificHeatCapacity R_gas = ( 8.314472 ) / ( 0.0289651159 ) /* 287.0512249529787 */;
  parameter Modelica.SIunits.SpecificHeatCapacity cp = 1000 /* 1000 */;
@@ -683,6 +625,67 @@ public
  type Modelica.Blocks.Interfaces.RealOutput = Real;
 end StreamTests.StreamExample.Examples.Systems.HeatedGas;
 ")})));
+
+       parameter SI.SpecificHeatCapacity R_gas=Modelica.Constants.R/0.0289651159;
+       parameter SI.SpecificHeatCapacity cp=1000;
+       StreamExample.Examples.Components.FlowSource flowSource(
+          mflow0=1,
+         cp=cp,
+         T0=303.15) 
+         annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
+       StreamExample.Examples.Components.MultiPortVolume multiPortVolume(
+         V=1,
+         nP=2,
+         cp=cp,
+         R=R_gas,
+          T_start=303.15,
+          p_start=100000) 
+         annotation (Placement(transformation(extent={{0,0},{-20,20}})));
+       Modelica.Thermal.HeatTransfer.Sources.FixedHeatFlow heatSource(Q_flow=
+             100000, T_ref=373.15) 
+         annotation (Placement(transformation(extent={{42,-2},{22,18}})));
+       Components.LinearResistance linearResistance annotation (Placement(
+             transformation(
+             extent={{10,-10},{-10,10}},
+             rotation=-90,
+             origin={-6,36})));
+       Components.Reservoir reservoir(
+         p0=100000,
+         T0=303.15,
+         cp=cp) 
+          annotation (Placement(transformation(extent={{-50,44},{-30,64}})));
+       Modelica.Blocks.Sources.Ramp ramp(
+         offset=1e4,
+         duration=1,
+         startTime=5,
+         height=1e4) 
+         annotation (Placement(transformation(extent={{36,34},{16,54}})));
+
+     equation
+       connect(multiPortVolume.heatPort, heatSource.port) annotation (Line(
+           points={{-1,10},{10,10},{10,8},{22,8}},
+           color={191,0,0},
+           smooth=Smooth.None));
+       connect(flowSource.flowPort, multiPortVolume.flowPort[1]) annotation (
+           Line(
+           points={{-42,10},{-25.9,10},{-25.9,9},{-9.8,9}},
+           color={0,0,255},
+           smooth=Smooth.None));
+       connect(reservoir.flowPort, linearResistance.port_b) annotation (Line(
+           points={{-32,54},{-14,54},{-14,56},{-6,56},{-6,44}},
+           color={0,0,255},
+           smooth=Smooth.None));
+       connect(linearResistance.port_a, multiPortVolume.flowPort[2]) 
+         annotation (Line(
+           points={{-6,28},{-8,28},{-8,11},{-9.8,11}},
+           color={0,0,255},
+           smooth=Smooth.None));
+       connect(linearResistance.u, ramp.y) annotation (Line(
+           points={{-4,36},{6,36},{6,44},{15,44}},
+           color={0,0,127},
+           smooth=Smooth.None));
+       annotation (Diagram(coordinateSystem(preserveAspectRatio=true, extent={{-100,
+                  -100},{100,100}}),     graphics));
      end HeatedGas;
 
      model HeatedGas_Simple
@@ -728,54 +731,12 @@ end StreamTests.StreamExample.Examples.Systems.HeatedGas;
      end HeatedGas_Simple;
 
      model HeatedGas_SimpleWrap
-       parameter SI.SpecificHeatCapacity R_gas=Modelica.Constants.R/0.0289651159;
-       parameter SI.SpecificHeatCapacity cp=1000;
-       StreamExample.Examples.Components.FlowSource flowSource(
-          mflow0=1,
-         cp=cp,
-         T0=303.15) 
-         annotation (Placement(transformation(extent={{-50,0},{-30,20}})));
-       Components.Reservoir reservoir(
-         p0=100000,
-         T0=303.15,
-         cp=cp) 
-          annotation (Placement(transformation(extent={{-50,44},{-30,64}})));
-       Modelica.Blocks.Sources.Ramp ramp(
-         offset=1e4,
-         duration=1,
-         startTime=5,
-         height=1e4) 
-         annotation (Placement(transformation(extent={{36,34},{16,54}})));
-
-       Components.LinearResistanceWrap linearResistanceWrap annotation (
-           Placement(transformation(
-             extent={{10,-10},{-10,10}},
-             rotation=270,
-             origin={-6,32})));
-     equation
-       connect(linearResistanceWrap.u, ramp.y) annotation (Line(
-           points={{-4,32},{6,32},{6,44},{15,44}},
-           color={0,0,127},
-           smooth=Smooth.None));
-        connect(reservoir.flowPort, linearResistanceWrap.port_b) annotation (
-            Line(
-            points={{-32,54},{-6,54},{-6,40}},
-            color={0,0,255},
-            smooth=Smooth.None));
-        connect(flowSource.flowPort, linearResistanceWrap.port_a) annotation (
-            Line(
-            points={{-32,10},{-6,10},{-6,24}},
-            color={0,0,255},
-            smooth=Smooth.None));
-
-       annotation (Diagram(coordinateSystem(preserveAspectRatio=true, extent={{-100,
-                  -100},{100,100}}), graphics),
-				  __JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="StreamExample_Examples_Systems_HeatedGas_SimpleWrap",
-            description="Test of inside and outside stream connectors",
-            eliminate_alias_variables=false,
-            flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="StreamExample_Examples_Systems_HeatedGas_SimpleWrap",
+         description="Test of inside and outside stream connectors",
+         eliminate_alias_variables=false,
+         flatModel="
 fclass StreamTests.StreamExample.Examples.Systems.HeatedGas_SimpleWrap
  parameter Modelica.SIunits.SpecificHeatCapacity R_gas = ( 8.314472 ) / ( 0.0289651159 ) /* 287.0512249529787 */;
  parameter Modelica.SIunits.SpecificHeatCapacity cp = 1000 /* 1000 */;
@@ -851,6 +812,48 @@ public
  type Modelica.Blocks.Interfaces.RealInput = Real;
 end StreamTests.StreamExample.Examples.Systems.HeatedGas_SimpleWrap;
 ")})));
+
+       parameter SI.SpecificHeatCapacity R_gas=Modelica.Constants.R/0.0289651159;
+       parameter SI.SpecificHeatCapacity cp=1000;
+       StreamExample.Examples.Components.FlowSource flowSource(
+          mflow0=1,
+         cp=cp,
+         T0=303.15) 
+         annotation (Placement(transformation(extent={{-50,0},{-30,20}})));
+       Components.Reservoir reservoir(
+         p0=100000,
+         T0=303.15,
+         cp=cp) 
+          annotation (Placement(transformation(extent={{-50,44},{-30,64}})));
+       Modelica.Blocks.Sources.Ramp ramp(
+         offset=1e4,
+         duration=1,
+         startTime=5,
+         height=1e4) 
+         annotation (Placement(transformation(extent={{36,34},{16,54}})));
+
+       Components.LinearResistanceWrap linearResistanceWrap annotation (
+           Placement(transformation(
+             extent={{10,-10},{-10,10}},
+             rotation=270,
+             origin={-6,32})));
+     equation
+       connect(linearResistanceWrap.u, ramp.y) annotation (Line(
+           points={{-4,32},{6,32},{6,44},{15,44}},
+           color={0,0,127},
+           smooth=Smooth.None));
+       annotation (Diagram(coordinateSystem(preserveAspectRatio=true, extent={{-100,
+                  -100},{100,100}}),     graphics));
+        connect(reservoir.flowPort, linearResistanceWrap.port_b) annotation (
+            Line(
+            points={{-32,54},{-6,54},{-6,40}},
+            color={0,0,255},
+            smooth=Smooth.None));
+        connect(flowSource.flowPort, linearResistanceWrap.port_a) annotation (
+            Line(
+            points={{-32,10},{-6,10},{-6,24}},
+            color={0,0,255},
+            smooth=Smooth.None));
      end HeatedGas_SimpleWrap;
    end Systems;
  end Examples;

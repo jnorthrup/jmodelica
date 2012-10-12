@@ -53,8 +53,8 @@ public class EquationBlockFactory {
 		return l;
 	}
 
-	static SimpleEquationBlock createSimpleEquationBlock(java.util.List<FAbstractEquation> eqns, 
-														 java.util.List<FVariable> fvs, boolean solve) {
+	static SimpleEquationBlock createSimpleEquationBlock(ArrayList<FAbstractEquation> eqns, 
+	                                                     ArrayList<FVariable> fvs, boolean solve) {
 				
 		if (eqns.size()==1 ) {
 			FAbstractEquation e = eqns.get(0);
@@ -88,6 +88,7 @@ public class EquationBlockFactory {
 				return new WhenEquationBlock(ee);
 		}
 
+		
 		// Check if the component contains a single function call equation		
 		if (e instanceof FFunctionCallEquation && one_equation) {		
 			FFunctionCallEquation fce = (FFunctionCallEquation)e;
@@ -108,17 +109,10 @@ public class EquationBlockFactory {
 		}
 		return null;
 	}
-	
-	/**
-	 * This method takes an equation and a variable and constructs an equation block.
-	 * If <code>solve</code> is true the equation will be solved for the variable. 
-	 */
-	public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation equation, FVariable variable, boolean solve) {
-		return createSimpleEquationBlock(Arrays.asList(equation), Arrays.asList(variable), solve);
-	}
+
 
 	/*
-	 * This method takes a list of Eq objects and create equation blocks
+	 * This method takes a list of Eq objects and reate an equation blocks
 	 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
 	 */
 	static SimpleEquationBlock createSimpleEquationBlock(Stack<Eq> component, boolean solve) {
@@ -158,9 +152,7 @@ public class EquationBlockFactory {
 		for (Stack<Eq> s : l) {
 			ls.add(createSimpleEquationBlock(s,false));	
 		}	
-
-		// Check if an equation block is mixed, i.e., contains both continous
-		// and discrete variables			
+			
 		EquationBlock b = null;
 		boolean isMixed = false;
 		for (SimpleEquationBlock seb : ls) {
@@ -171,25 +163,8 @@ public class EquationBlockFactory {
 			}
 		}
 		
-		// Check if an equation block is linear in the unknowns
-		boolean isLinear = true;
-		ArrayList<FVariable> activeVariables = new ArrayList<FVariable>();
-		for (SimpleEquationBlock sb : ls) {
-			activeVariables.addAll(sb.activeVariables());
-		}
-		
-		for (SimpleEquationBlock seb : ls) {
-			for (FAbstractEquation e : seb.equations()) {
-				if (!e.checkLinearity(new HashSet(activeVariables))) {
-					isLinear = false;
-				}
-			}
-		}
-		
 		if (isMixed) {
 			b = new MixedEquationBlock(ls);		
-		} else if (isLinear) {
-			b = new LinearEquationBlock(ls);
 		} else {
 			b = new EquationBlock(ls);	
 		}
@@ -804,21 +779,11 @@ public class BiPGraph {
     	int k = startIndex;
     	Eq eqn = null;
     	Var v = null;
-		Map<FVariable, Integer> emptyMap = Collections.emptyMap();
 		for (FAbstractEquation e : eqns) {
 
 			int n_eq = e.numScalarEquations();
 			LinkedHashSet<Eq> groupMembers = new LinkedHashSet<Eq>();
-			Map<FVariable, Integer> ffceLeftVarMap = emptyMap;
-			if (e instanceof FFunctionCallEquation) {
-				int i = 0;
-				ffceLeftVarMap = new HashMap<FVariable, Integer>();
-				for (FVariable fv : e.referencedFVariablesInLHS()) {
-					ffceLeftVarMap.put(fv,i++);
-				}
-			}
-			for (int i = n_eq - 1; 0 <= i; i--) { // During tarjan the order will be reversed,
-												  // need to reverse here to preserve the initial order.
+			for (int i=0;i<n_eq;i++) {
 				eqn = addEquation(eqNamePrefix+k,e.prettyPrint(""),e);
 				groupMembers.add(eqn);
 				k++;
@@ -839,11 +804,8 @@ public class BiPGraph {
 
 				if ((variableMask & ALGEBRAIC_VARIABLES) != 0) {
 					for (FVariable y : e.algebraicVariables()) { 
-						Integer pos = ffceLeftVarMap.get(y);
-						if (pos == null || pos == i) {
-							v = getVariable(y.name()); 
-							addEdge(eqn,v); 
-						}
+						v = getVariable(y.name()); 
+						addEdge(eqn,v); 
 					} 
 				}
 				
@@ -1696,31 +1658,42 @@ public class BiPGraph {
      * it seems to work fine.
      */
 	public BLT computeBLT() {
-		computeRawBLT();
-		BLT blt = new BLT(getFClass());
+		
+		index = 0;
+        S = new Stack<Eq>();
+        components = new LinkedList<Stack<Eq>>();
+        tarjanReset();
+        
+        for (Eq e : getEquations()) {
+        	if (!e.isVisited()) {
+        		tarjan(e);
+        	}
+        }
+				
+        BLT blt = new BLT(getFClass());
+        
+        Var v = null;
 		for (Stack<Eq> bl : components) {
+			
 			blt.add(EquationBlockFactory.createEquationBlock(bl));
+					
 		}
 		return blt;
 	}
 	
 	public LinkedList<Stack<Eq>> computeRawBLT() {
 		index = 0;
-		S = new Stack<Eq>();
-		components = new LinkedList<Stack<Eq>>();
-		tarjanReset();
-		for (Eq e : getEquations()) {
-			if (!e.isVisited()) {
-				tarjan(e);
-			}
-		}
-		
-		java.util.List<Stack<Eq>> oldComponents = components;
-		components = new LinkedList<Stack<Eq>>();
-		for (Stack<Eq> block : oldComponents) {
-			components.add(block);
-		}
-		return components;
+        S = new Stack<Eq>();
+        components = new LinkedList<Stack<Eq>>();
+        tarjanReset();
+        
+        for (Eq e : getEquations()) {
+        	if (!e.isVisited()) {
+        		tarjan(e);
+        	}
+        }
+        
+        return components;	
 	}
 	
 	public void tarjan(Eq e) {
@@ -1742,16 +1715,6 @@ public class BiPGraph {
 				}
 			}
  		}
-		for (Eq eqn : e.getGroupMembers()) {
-			if (!eqn.isVisited()) {
-				tarjan(eqn);
-				e.setTarjanLowLink(Math.min(
-						e.getTarjanLowLink(),eqn.getTarjanLowLink()));
-			} else {
-				e.setTarjanLowLink(Math.min(
-						e.getTarjanLowLink(),eqn.getTarjanNbr()));
-			}
-		}
 		if (e.getTarjanNbr()==e.getTarjanLowLink()) {
 			Stack<Eq> component = new Stack<Eq>();
 			boolean done = false;
@@ -1943,15 +1906,6 @@ public class BiPGraph {
 
 		str.append("----------------------------------------\n");
 		return str.toString();
-	}
-	
-	public Object printMatchingObj() {
-		return new Object() {
-			@Override
-			public String toString() {
-				return printMatching();
-			}
-		};
 	}
 	
 	public String printSolvableMatching() {
@@ -2585,14 +2539,6 @@ public class Eq {
 		return groupMembers;	
 	}
 	
-	public Var getVariable(String name) {
-		for (Var var : variables) {
-			if (var.getName().equals(name)) {
-				return var;
-			}
-		}
-		return null;
-	}
 }
 
 public class Var {

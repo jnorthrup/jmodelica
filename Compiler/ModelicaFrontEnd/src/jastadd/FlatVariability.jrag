@@ -121,10 +121,10 @@ aspect FlatVariability {
 	eq FFunctionCallEquation.isDiscrete() = variability().discreteVariability();
 	eq FFunctionCallEquation.isContinuous() = variability().continuousVariability();
 	
-	syn boolean FAbstractVariable.isConstant()   = false;
-    syn boolean FAbstractVariable.isParameter()  = false;
-    syn boolean FAbstractVariable.isDiscrete()   = false;
-    syn boolean FAbstractVariable.isContinuous() = false;
+	syn boolean AbstractFVariable.isConstant()   = false;
+    syn boolean AbstractFVariable.isParameter()  = false;
+    syn boolean AbstractFVariable.isDiscrete()   = false;
+    syn boolean AbstractFVariable.isContinuous() = false;
 	
 	eq FVariable.isConstant()   = variability().constantVariability();
     eq FVariable.isParameter()  = variability().parameterVariability();
@@ -164,14 +164,7 @@ aspect FlatVariability {
 	eq InstEnumLiteral.variability() = fConstant();
 	
 	syn FTypePrefixVariability InstComponentDecl.defaultVariability() = fConstant();
-	eq InstPrimitive.defaultVariability() {
-		if (isReal())
-			return fContinuous();
-		else if (isExternalObject())
-			return fParameter();
-		else
-			return fDiscrete();
-	}
+	eq InstPrimitive.defaultVariability() = isReal() ? fContinuous() : fDiscrete();
 	eq InstRecord.defaultVariability() {
 		InstComponentDecl rec = isArray() ? getInstComponentDecl(0) : this;
 		FTypePrefixVariability var = fConstant();
@@ -248,13 +241,13 @@ aspect FlatVariability {
 	 * 
 	 * Only works in flat tree.
 	 */
-	syn FAbstractVariable FAbstractEquation.assignedFV() = null;
+	syn AbstractFVariable FAbstractEquation.assignedFV() = null;
 	eq FEquation.assignedFV()                            = getLeft().assignedFV();
 	
 	/**
 	 * If this is an flat tree access, return set containing accessed var, otherwise empty set.
 	 */
-	syn FAbstractVariable FExp.assignedFV() = null;
+	syn AbstractFVariable FExp.assignedFV() = null;
 	eq FIdUseExp.assignedFV()               = myFV();
 	
 	
@@ -276,8 +269,7 @@ aspect FlatVariability {
 	eq FClass.getChild().inDiscreteLocation()                    = false;
 	eq InstNode.getChild().inDiscreteLocation()                  = false;
 	
-	syn FTypePrefixVariability FExp.variability() = expVariability();
-	syn lazy FTypePrefixVariability FAbstractExp.variability() = 
+	syn lazy FTypePrefixVariability FExp.variability() = 
 		inDiscreteLocation() ? expVariability().combineDown(fDiscrete()) : expVariability();
 	
 	syn FTypePrefixVariability FExp.expVariability() = combineFExpListVariability(childFExps());
@@ -330,7 +322,7 @@ aspect FlatVariability {
 	eq FIdUseExp.expVariability() = getFIdUse().variability();
 	
 	syn FTypePrefixVariability FIdUse.variability() {
-		FAbstractVariable variable = myFV();
+		AbstractFVariable variable = myFV();
 		if (variable instanceof FVariable) {
 			FVariable fVariable = (FVariable) variable;
 			return(fVariable.variability());

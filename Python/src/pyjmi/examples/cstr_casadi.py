@@ -157,15 +157,15 @@ def run_demo(with_plots=True):
     ### 3. Solve the optimal control problem
     # Compile model
     fmux = compile_fmux("CSTR.CSTR_Opt2", file_path)
-    
-    # Load model
-    cstr = CasadiModel(fmux)
+
+    # Load model and enable scaling
+    cstr = CasadiModel(fmux, scale_variables=True)
     
     # Set reference values
     cstr.set('Tc_ref', Tc_0_B)
     cstr.set('c_ref', c_0_B)
     cstr.set('T_ref', T_0_B)
-    
+
     # Set initial values
     cstr.set('cstr.c_init', c_0_A)
     cstr.set('cstr.T_init', T_0_A)
@@ -191,11 +191,10 @@ def run_demo(with_plots=True):
     # Verify solution for testing purposes
     try:
         import casadi
-    except:
-        pass
-    else:
         cost = float(res.solver.solver.output(casadi.NLP_COST))
         assert(N.abs(cost/1.e3 - 1.8585429) < 1e-3)
+    except:
+        pass
     
     # Plot the results
     if with_plots:

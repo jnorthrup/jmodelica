@@ -17,103 +17,98 @@
 package TypeTests
 
 	model TypeTest1
-		Integer x = true;
-	
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="TypeTest1",
-			description="Basic expression type test.",
-			errorMessage="
+	   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="TypeTest1",
+                                               description="Basic expression type test.",
+                                               errorMessage=
+"
 1 error(s) found...
 In file 'src/test/modelica/TypeTests.mo':
 Semantic error at line 11, column 11:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
+	
+		Integer x = true;
+	
 	end TypeTest1;
 
 	model TypeTest2
 
-	  Real x;
-	equation
-	  x=true;
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="TypeTest2",
-			description="Basic expression type test.",
-			errorMessage="
+	   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="TypeTest2",
+                                               description="Basic expression type test.",
+                                               errorMessage=
+"
 1 error(s) found...
 In file 'src/test/modelica/TypeTests.mo':
 Semantic error at line 35, column 4:
   The right and left expression types of equation are not compatible
 ")})));
+
+	  Real x;
+	equation
+	  x=true;
 	end TypeTest2;
 
 	model TypeTest3
-	  Real x = 1;
-	  Boolean y = true;
-      Real z = x + y;
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="TypeTest3",
-			description="Basic expression type test.",
-			errorMessage="
+	   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="TypeTest3",
+                                               description="Basic expression type test.",
+                                               errorMessage=
+"
 1 error(s) found...
 In file 'src/test/modelica/TypeTests.mo':
 Semantic error at line 51, column 16:
   Type error in expression: x + y
 ")})));
+	
+	  Real x = 1;
+	  Boolean y = true;
+      Real z = x + y;
 	end TypeTest3;
 
 	model TypeTest4
-	  Real x = 1;
-	  Boolean y = true;
-	equation
-	  x+y=3;  
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="TypeTest4",
-			description="Basic expression type test.",
-			errorMessage="
+	   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="TypeTest4",
+                                               description="Basic expression type test.",
+                                               errorMessage=
+"
 1 error(s) found...
 In file 'src/test/modelica/TypeTests.mo':
 Semantic error at line 66, column 4:
   Type error in expression: x + y
 ")})));
+	
+	  Real x = 1;
+	  Boolean y = true;
+	equation
+	  x+y=3;  
 	end TypeTest4;
 
 	model TypeTest5
+	   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="TypeTest5",
+                                               description="Basic expression type test.",
+                                               errorMessage=
+"
+1 error(s) found...
+In file 'src/test/modelica/TypeTests.mo':
+Semantic error at line 66, column 4:
+  Type error in expression: x + y
+")})));
+	
 	  Real x = 1;
 	  Boolean y = true;
 	initial equation
 	  x+y=3;  
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="TypeTest5",
-			description="Basic expression type test.",
-			errorMessage="
-1 error(s) found...
-In file 'src/test/modelica/TypeTests.mo':
-Semantic error at line 66, column 4:
-  Type error in expression: x + y
-")})));
 	end TypeTest5;
 
 	model TypeTest6
-	  Real x = 1;
-	  Real y(start=true,unit=3,nominal="N",min=true,max="M");
-	equation
-	  x+y=3;  
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="TypeTest6",
-			description="Basic expression type test.",
-			errorMessage="
+	   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="TypeTest6",
+                                               description="Basic expression type test.",
+                                               errorMessage=
+"
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 130, column 10:
   The type of the binding expression of the attribute start does not match the declared type of the variable
@@ -130,22 +125,20 @@ Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src
 Semantic error at line 130, column 49:
   The type of the binding expression of the attribute max does not match the declared type of the variable
 ")})));
+	
+	  Real x = 1;
+	  Real y(start=true,unit=3,nominal="N",min=true,max="M");
+	equation
+	  x+y=3;  
 	end TypeTest6;
 
 
 model TypeRel1
- Boolean eq = 1   == 2;
- Boolean ne = 1   <> 2;
- Boolean gt = 1.0 >  2.0;
- Boolean ge = 1.0 >= 2.0;
- Boolean lt = 1.0 <  2.0;
- Boolean le = 1.0 <= 2.0;
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="TypeRel1",
-			description="Type checks of relational operators: Real/Real (Integer for ==/<>)",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="TypeRel1",
+         description="Type checks of relational operators: Real/Real (Integer for ==/<>)",
+         flatModel="
 fclass TypeTests.TypeRel1
  discrete Boolean eq = 1 == 2;
  discrete Boolean ne = 1 <> 2;
@@ -156,20 +149,22 @@ fclass TypeTests.TypeRel1
 
 end TypeTests.TypeRel1;
 ")})));
+
+ Boolean eq = 1   == 2;
+ Boolean ne = 1   <> 2;
+ Boolean gt = 1.0 >  2.0;
+ Boolean ge = 1.0 >= 2.0;
+ Boolean lt = 1.0 <  2.0;
+ Boolean le = 1.0 <= 2.0;
 end TypeRel1;
 
 
 model TypeRel2
- Boolean gt = 1 >  2.0;
- Boolean ge = 1 >= 2.0;
- Boolean lt = 1 <  2.0;
- Boolean le = 1 <= 2.0;
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="TypeRel2",
-			description="Type checks of relational operators: Real/Integer",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="TypeRel2",
+         description="Type checks of relational operators: Real/Integer",
+         flatModel="
 fclass TypeTests.TypeRel2
  discrete Boolean gt = 1 > 2.0;
  discrete Boolean ge = 1 >= 2.0;
@@ -178,22 +173,20 @@ fclass TypeTests.TypeRel2
 
 end TypeTests.TypeRel2;
 ")})));
+
+ Boolean gt = 1 >  2.0;
+ Boolean ge = 1 >= 2.0;
+ Boolean lt = 1 <  2.0;
+ Boolean le = 1 <= 2.0;
 end TypeRel2;
 
 
 model TypeRel3
- Boolean eq = true == false;
- Boolean ne = true <> false;
- Boolean gt = true >  false;
- Boolean ge = true >= false;
- Boolean lt = true <  false;
- Boolean le = true <= false;
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="TypeRel3",
-			description="Type checks of relational operators: Boolean/Boolean",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="TypeRel3",
+         description="Type checks of relational operators: Boolean/Boolean",
+         flatModel="
 fclass TypeTests.TypeRel3
  discrete Boolean eq = true == false;
  discrete Boolean ne = true <> false;
@@ -204,22 +197,22 @@ fclass TypeTests.TypeRel3
 
 end TypeTests.TypeRel3;
 ")})));
+
+ Boolean eq = true == false;
+ Boolean ne = true <> false;
+ Boolean gt = true >  false;
+ Boolean ge = true >= false;
+ Boolean lt = true <  false;
+ Boolean le = true <= false;
 end TypeRel3;
 
 
 model TypeRel4
- Boolean eq = "1.0" == "2.0";
- Boolean ne = "1.0" <> "2.0";
- Boolean gt = "1.0" >  "2.0";
- Boolean ge = "1.0" >= "2.0";
- Boolean lt = "1.0" <  "2.0";
- Boolean le = "1.0" <= "2.0";
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="TypeRel4",
-			description="Type checks of relational operators: String/String",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="TypeRel4",
+         description="Type checks of relational operators: String/String",
+         flatModel="
 fclass TypeTests.TypeRel4
  discrete Boolean eq = \"1.0\" == \"2.0\";
  discrete Boolean ne = \"1.0\" <> \"2.0\";
@@ -230,22 +223,22 @@ fclass TypeTests.TypeRel4
 
 end TypeTests.TypeRel4;
 ")})));
+
+ Boolean eq = "1.0" == "2.0";
+ Boolean ne = "1.0" <> "2.0";
+ Boolean gt = "1.0" >  "2.0";
+ Boolean ge = "1.0" >= "2.0";
+ Boolean lt = "1.0" <  "2.0";
+ Boolean le = "1.0" <= "2.0";
 end TypeRel4;
 
 
 model TypeRel5
- Boolean eq = {1.0} == {2.0};
- Boolean ne = {1.0} <> {2.0};
- Boolean gt = {1.0} >  {2.0};
- Boolean ge = {1.0} >= {2.0};
- Boolean lt = {1.0} <  {2.0};
- Boolean le = {1.0} <= {2.0};
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="TypeRel5",
-			description="Type checks of relational operators: Real[1]/Real[1]",
-			errorMessage="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="TypeRel5",
+         description="Type checks of relational operators: Real[1]/Real[1]",
+         errorMessage="
 6 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 222, column 15:
@@ -266,22 +259,22 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 227, column 15:
   Type error in expression: {1.0} <= {2.0}
 ")})));
+
+ Boolean eq = {1.0} == {2.0};
+ Boolean ne = {1.0} <> {2.0};
+ Boolean gt = {1.0} >  {2.0};
+ Boolean ge = {1.0} >= {2.0};
+ Boolean lt = {1.0} <  {2.0};
+ Boolean le = {1.0} <= {2.0};
 end TypeRel5;
 
 
 model TypeRel6
- Boolean eq = 1.0 == "2.0";
- Boolean ne = 1.0 <> "2.0";
- Boolean gt = 1.0 >  "2.0";
- Boolean ge = 1.0 >= "2.0";
- Boolean lt = 1.0 <  "2.0";
- Boolean le = 1.0 <= "2.0";
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="TypeRel6",
-			description="Type checks of relational operators: Real/String",
-			errorMessage="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="TypeRel6",
+         description="Type checks of relational operators: Real/String",
+         errorMessage="
 6 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 258, column 15:
@@ -302,39 +295,41 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 263, column 15:
   Type error in expression: 1.0 <= \"2.0\"
 ")})));
+
+ Boolean eq = 1.0 == "2.0";
+ Boolean ne = 1.0 <> "2.0";
+ Boolean gt = 1.0 >  "2.0";
+ Boolean ge = 1.0 >= "2.0";
+ Boolean lt = 1.0 <  "2.0";
+ Boolean le = 1.0 <= "2.0";
 end TypeRel6;
 
 
 
 model AbsType1
- Real x = abs(y);
- Real y = -2.0;
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="AbsType1",
-			description="abs() operator: Real arg & result",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="AbsType1",
+         description="abs() operator: Real arg & result",
+         flatModel="
 fclass TypeTests.AbsType1
  Real x = abs(y);
  Real y =  - ( 2.0 );
 
 end TypeTests.AbsType1;
 ")})));
+
+ Real x = abs(y);
+ Real y = -2.0;
 end AbsType1;
 
 
 model AbsType2
- constant Real x1 = abs(-2.0);
- constant Real x2 = abs(2.0);
- Real y1 = x1;
- Real y2 = x2;
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="AbsType2",
-			description="abs() operator: Real constant",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="AbsType2",
+         description="abs() operator: Real constant",
+         flatModel="
 fclass TypeTests.AbsType2
  constant Real x1 = abs( - ( 2.0 ));
  constant Real x2 = abs(2.0);
@@ -343,38 +338,38 @@ fclass TypeTests.AbsType2
 
 end TypeTests.AbsType2;
 ")})));
+
+ constant Real x1 = abs(-2.0);
+ constant Real x2 = abs(2.0);
+ Real y1 = x1;
+ Real y2 = x2;
 end AbsType2;
 
 
 model AbsType3
- Integer x = abs(y);
- Integer y = -2;
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="AbsType3",
-			description="abs() operator: Integer arg & result",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="AbsType3",
+         description="abs() operator: Integer arg & result",
+         flatModel="
 fclass TypeTests.AbsType3
  discrete Integer x = abs(y);
  discrete Integer y =  - ( 2 );
 
 end TypeTests.AbsType3;
 ")})));
+
+ Integer x = abs(y);
+ Integer y = -2;
 end AbsType3;
 
 
 model AbsType4
- constant Integer x1 = abs(-2);
- constant Integer x2 = abs(2);
- Integer y1 = x1;
- Integer y2 = x2;
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="AbsType4",
-			description="abs() operator: Integer constant",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="AbsType4",
+         description="abs() operator: Integer constant",
+         flatModel="
 fclass TypeTests.AbsType4
  constant Integer x1 = abs( - ( 2 ));
  constant Integer x2 = abs(2);
@@ -383,83 +378,85 @@ fclass TypeTests.AbsType4
 
 end TypeTests.AbsType4;
 ")})));
+
+ constant Integer x1 = abs(-2);
+ constant Integer x2 = abs(2);
+ Integer y1 = x1;
+ Integer y2 = x2;
 end AbsType4;
 
 
 model AbsType5
- parameter String x = abs("-1");
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="AbsType5",
-			description="abs() operator: String arg",
-			errorMessage="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AbsType5",
+         description="abs() operator: String arg",
+         errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 338, column 17:
   Calling function abs(): types of positional argument 1 and input v are not compatible
 ")})));
+
+ parameter String x = abs("-1");
 end AbsType5;
 
 
 model AbsType6
- Real x[2] = abs({1,-1});
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="AbsType6",
-			description="abs() operator: array arg",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="AbsType6",
+         description="abs() operator: array arg",
+         flatModel="
 fclass TypeTests.AbsType6
  Real x[2] = abs({1, - ( 1 )});
 
 end TypeTests.AbsType6;
 ")})));
+
+ Real x[2] = abs({1,-1});
 end AbsType6;
 
 
 model AbsType7
- Real x = abs(1,-1);
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="AbsType7",
-			description="abs() operator: too many args",
-			errorMessage="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AbsType7",
+         description="abs() operator: too many args",
+         errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 348, column 17:
   Calling function abs(): too many positional arguments
 ")})));
+
+ Real x = abs(1,-1);
 end AbsType7;
 
 
 model AbsType8
- Real x = abs();
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="AbsType8",
-			description="abs() operator: no args",
-			errorMessage="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AbsType8",
+         description="abs() operator: no args",
+         errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 364, column 11:
   Calling function abs(): missing argument for required input v
 ")})));
+
+ Real x = abs();
 end AbsType8;
 
 
 
 model IntegerExp1
- constant Integer x = integer(1.8);
- Integer y = x;
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IntegerExp1",
-			description="integer() operator: constant",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IntegerExp1",
+         description="integer() operator: constant",
+         flatModel="
 fclass TypeTests.IntegerExp1
  constant Integer x = integer(1.8);
  discrete Integer y;
@@ -470,18 +467,18 @@ equation
 
 end TypeTests.IntegerExp1;
 ")})));
+
+ constant Integer x = integer(1.8);
+ Integer y = x;
 end IntegerExp1;
 
 
 model IntegerExp2
- Real x = 1.0;
- Integer y = integer(x);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IntegerExp2",
-			description="integer() operator: continous arg",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IntegerExp2",
+         description="integer() operator: continous arg",
+         flatModel="
 fclass TypeTests.IntegerExp2
  Real x;
  discrete Integer y;
@@ -493,37 +490,35 @@ equation
 
 end TypeTests.IntegerExp2;
 ")})));
+
+ Real x = 1.0;
+ Integer y = integer(x);
 end IntegerExp2;
 
 
 model IntegerExp3
- Real y = integer({1.0, 2.0});
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="IntegerExp3",
-			description="integer() operator: array arg",
-			errorMessage="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="IntegerExp3",
+         description="integer() operator: array arg",
+         errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 490, column 19:
   Calling function integer(): types of positional argument 1 and input x are not compatible
 ")})));
+
+ Real y = integer({1.0, 2.0});
 end IntegerExp3;
 
 
 
 model ConstCmpEq
- constant Boolean a = 1 == 2;
- constant Boolean b = 1 == 1;
- Boolean x = a;
- Boolean y = b;
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ConstCmpEq",
-			description="Constant evaluation of comparisons: equals",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ConstCmpEq",
+         description="Constant evaluation of comparisons: equals",
+         flatModel="
 fclass TypeTests.ConstCmpEq
  constant Boolean a = 1 == 2;
  constant Boolean b = 1 == 1;
@@ -538,20 +533,20 @@ equation
 
 end TypeTests.ConstCmpEq;
 ")})));
+
+ constant Boolean a = 1 == 2;
+ constant Boolean b = 1 == 1;
+ Boolean x = a;
+ Boolean y = b;
 end ConstCmpEq;
 
 
 model ConstCmpNeq
- constant Boolean a = 1 <> 2;
- constant Boolean b = 1 <> 1;
- Boolean x = a;
- Boolean y = b;
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ConstCmpNeq",
-			description="Constant evaluation of comparisons: not equal",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ConstCmpNeq",
+         description="Constant evaluation of comparisons: not equal",
+         flatModel="
 fclass TypeTests.ConstCmpNeq
  constant Boolean a = 1 <> 2;
  constant Boolean b = 1 <> 1;
@@ -566,22 +561,20 @@ equation
 
 end TypeTests.ConstCmpNeq;
 ")})));
+
+ constant Boolean a = 1 <> 2;
+ constant Boolean b = 1 <> 1;
+ Boolean x = a;
+ Boolean y = b;
 end ConstCmpNeq;
 
 
 model ConstCmpLeq
- constant Boolean a = 1 <= 2;
- constant Boolean b = 1 <= 1;
- constant Boolean c = 2 <= 1;
- Boolean x = a;
- Boolean y = b;
- Boolean z = c;
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ConstCmpLeq",
-			description="Constant evaluation of comparisons: less or equal",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ConstCmpLeq",
+         description="Constant evaluation of comparisons: less or equal",
+         flatModel="
 fclass TypeTests.ConstCmpLeq
  constant Boolean a = 1 <= 2;
  constant Boolean b = 1 <= 1;
@@ -600,22 +593,22 @@ equation
 
 end TypeTests.ConstCmpLeq;
 ")})));
+
+ constant Boolean a = 1 <= 2;
+ constant Boolean b = 1 <= 1;
+ constant Boolean c = 2 <= 1;
+ Boolean x = a;
+ Boolean y = b;
+ Boolean z = c;
 end ConstCmpLeq;
 
 
 model ConstCmpLt
- constant Boolean a = 1 < 2;
- constant Boolean b = 1 < 1;
- constant Boolean c = 2 < 1;
- Boolean x = a;
- Boolean y = b;
- Boolean z = c;
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ConstCmpLt",
-			description="Constant evaluation of comparisons: less than",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ConstCmpLt",
+         description="Constant evaluation of comparisons: less than",
+         flatModel="
 fclass TypeTests.ConstCmpLt
  constant Boolean a = 1 < 2;
  constant Boolean b = 1 < 1;
@@ -634,22 +627,22 @@ equation
 
 end TypeTests.ConstCmpLt;
 ")})));
+
+ constant Boolean a = 1 < 2;
+ constant Boolean b = 1 < 1;
+ constant Boolean c = 2 < 1;
+ Boolean x = a;
+ Boolean y = b;
+ Boolean z = c;
 end ConstCmpLt;
 
 
 model ConstCmpGeq
- constant Boolean a = 1 >= 2;
- constant Boolean b = 1 >= 1;
- constant Boolean c = 2 >= 1;
- Boolean x = a;
- Boolean y = b;
- Boolean z = c;
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ConstCmpGeq",
-			description="Constant evaluation of comparisons: greater or equal",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ConstCmpGeq",
+         description="Constant evaluation of comparisons: greater or equal",
+         flatModel="
 fclass TypeTests.ConstCmpGeq
  constant Boolean a = 1 >= 2;
  constant Boolean b = 1 >= 1;
@@ -668,22 +661,22 @@ equation
 
 end TypeTests.ConstCmpGeq;
 ")})));
+
+ constant Boolean a = 1 >= 2;
+ constant Boolean b = 1 >= 1;
+ constant Boolean c = 2 >= 1;
+ Boolean x = a;
+ Boolean y = b;
+ Boolean z = c;
 end ConstCmpGeq;
 
 
 model ConstCmpGt
- constant Boolean a = 1 > 2;
- constant Boolean b = 1 > 1;
- constant Boolean c = 2 > 1;
- Boolean x = a;
- Boolean y = b;
- Boolean z = c;
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ConstCmpGt",
-			description="Constant evaluation of comparisons:greater than",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ConstCmpGt",
+         description="Constant evaluation of comparisons:greater than",
+         flatModel="
 fclass TypeTests.ConstCmpGt
  constant Boolean a = 1 > 2;
  constant Boolean b = 1 > 1;
@@ -702,55 +695,55 @@ equation
 
 end TypeTests.ConstCmpGt;
 ")})));
+
+ constant Boolean a = 1 > 2;
+ constant Boolean b = 1 > 1;
+ constant Boolean c = 2 > 1;
+ Boolean x = a;
+ Boolean y = b;
+ Boolean z = c;
 end ConstCmpGt;
 
 
 
 model RealEq1
- Boolean a = 1.0 == 2;
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RealEq1",
-			description="Equality comparisons for reals: == outside function",
-			errorMessage="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="RealEq1",
+         description="Equality comparisons for reals: == outside function",
+         errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 672, column 14:
   Type error in expression: 1.0 == 2
 ")})));
+
+ Boolean a = 1.0 == 2;
 end RealEq1;
 
 
 model RealEq2
- Boolean a = 1.0 <> 2;
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RealEq2",
-			description="Equality comparisons for reals: <> outside function",
-			errorMessage="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="RealEq2",
+         description="Equality comparisons for reals: <> outside function",
+         errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 688, column 14:
   Type error in expression: 1.0 <> 2
 ")})));
+
+ Boolean a = 1.0 <> 2;
 end RealEq2;
 
 
 model RealEq3
- function f
-  output Boolean a = 1.0 == 2;
- algorithm
- end f;
- 
- Boolean b = f();
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="RealEq3",
-			description="Equality comparisons for reals: == in function",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RealEq3",
+         description="Equality comparisons for reals: == in function",
+         flatModel="
 fclass TypeTests.RealEq3
  discrete Boolean b = TypeTests.RealEq3.f();
 
@@ -763,22 +756,22 @@ public
 
 end TypeTests.RealEq3;
 ")})));
-end RealEq3;
 
-
-model RealEq4
  function f
-  output Boolean a = 1.0 <> 2;
+  output Boolean a = 1.0 == 2;
  algorithm
  end f;
  
  Boolean b = f();
+end RealEq3;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="RealEq4",
-			description="Equality comparisons for reals: <> in function",
-			flatModel="
+
+model RealEq4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RealEq4",
+         description="Equality comparisons for reals: <> in function",
+         flatModel="
 fclass TypeTests.RealEq4
  discrete Boolean b = TypeTests.RealEq4.f();
 
@@ -791,19 +784,23 @@ public
 
 end TypeTests.RealEq4;
 ")})));
+
+ function f
+  output Boolean a = 1.0 <> 2;
+ algorithm
+ end f;
+ 
+ Boolean b = f();
 end RealEq4;
 
 
 
 model ParameterStart1
-  constant Real p(start=2);
-  Real y = p;
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ParameterStart1",
-			description="Constant without binding expression: start set",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ParameterStart1",
+         description="Constant without binding expression: start set",
+         flatModel="
 fclass TypeTests.ParameterStart1
  constant Real p(start = 2);
  Real y;
@@ -812,18 +809,18 @@ equation
 
 end TypeTests.ParameterStart1;
 ")})));
+
+  constant Real p(start=2);
+  Real y = p;
 end ParameterStart1;
 
 
 model ParameterStart2
-  constant Real p;
-  Real y = p;
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ParameterStart2",
-			description="Constant without binding expression: start not set",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ParameterStart2",
+         description="Constant without binding expression: start not set",
+         flatModel="
 fclass TypeTests.ParameterStart2
  constant Real p;
  Real y;
@@ -832,17 +829,17 @@ equation
 
 end TypeTests.ParameterStart2;
 ")})));
+
+  constant Real p;
+  Real y = p;
 end ParameterStart2;
 
 model ArrayTypeTest1
-  type T = Real[3](unit="m");
-  T x = {1,2,4};
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ArrayTypeTest1",
-			description="Check that short type declarations with array indices are expanded correctly.",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayTypeTest1",
+         description="Check that short type declarations with array indices are expanded correctly.",
+         flatModel="
 fclass TypeTests.ArrayTypeTest1
  TypeTests.ArrayTypeTest1.T x[1];
  TypeTests.ArrayTypeTest1.T x[2];
@@ -856,19 +853,17 @@ public
  type TypeTests.ArrayTypeTest1.T = Real(unit = \"m\");
 end TypeTests.ArrayTypeTest1;
 ")})));
+
+  type T = Real[3](unit="m");
+  T x = {1,2,4};
 end ArrayTypeTest1;
 
 model ArrayTypeTest2
-  type S = T[4](start=3,unit="m");
-  type T = Real[3](unit="l");
-  T x = {1,2,4};
-  S y = zeros(4,3);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ArrayTypeTest2",
-			description="Check that short type declarations with array indices are expanded correctly.",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayTypeTest2",
+         description="Check that short type declarations with array indices are expanded correctly.",
+         flatModel="
 fclass TypeTests.ArrayTypeTest2
  TypeTests.ArrayTypeTest2.T x[1];
  TypeTests.ArrayTypeTest2.T x[2];
@@ -907,29 +902,19 @@ public
  type TypeTests.ArrayTypeTest2.S = Real(start = 3,unit = \"m\");
 end TypeTests.ArrayTypeTest2;
 ")})));
+
+  type S = T[4](start=3,unit="m");
+  type T = Real[3](unit="l");
+  T x = {1,2,4};
+  S y = zeros(4,3);
 end ArrayTypeTest2;
 
 model ArrayTypeTest3
- model A
-  Real x = 1;
- end A;
-
- model B = A(x(start=1));
-
- model C
- extends A;
- end C; 
-
-  B y[3];
-  C z[3];
-  C w;
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ArrayTypeTest3",
-			description="Check that short type declarations with array indices are expanded correctly.",
-			flatModel="
-fclass TypeTests.ArrayTypeTest3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayTypeTest3",
+         description="Check that short type declarations with array indices are expanded correctly.",
+         flatModel="fclass TypeTests.ArrayTypeTest3
  Real y[1].x(start = 1);
  Real y[2].x(start = 1);
  Real y[3].x(start = 1);
@@ -947,16 +932,12 @@ equation
  w.x = 1;
 end TypeTests.ArrayTypeTest3;
 ")})));
-end ArrayTypeTest3;
-
-model ArrayTypeTest4
 
  model A
   Real x = 1;
-
  end A;
 
- model B = A[2](x(start=1));
+ model B = A(x(start=1));
 
  model C
  extends A;
@@ -965,13 +946,15 @@ model ArrayTypeTest4
   B y[3];
   C z[3];
   C w;
+end ArrayTypeTest3;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ArrayTypeTest4",
-			description="Check that short type declarations with array indices are expanded correctly.",
-			flatModel="
-fclass TypeTests.ArrayTypeTest4
+model ArrayTypeTest4
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayTypeTest4",
+         description="Check that short type declarations with array indices are expanded correctly.",
+         flatModel="fclass TypeTests.ArrayTypeTest4
  Real y[1,1].x(start = 1);
  Real y[1,2].x(start = 1);
  Real y[2,1].x(start = 1);
@@ -995,14 +978,10 @@ equation
  w.x = 1;
 end TypeTests.ArrayTypeTest4;
 ")})));
-end ArrayTypeTest4;
-
-model ArrayTypeTest5
 
  model A
-  Real x;
-  equation
-   x = 3;
+  Real x = 1;
+
  end A;
 
  model B = A[2](x(start=1));
@@ -1014,13 +993,15 @@ model ArrayTypeTest5
   B y[3];
   C z[3];
   C w;
+end ArrayTypeTest4;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ArrayTypeTest5",
-			description="Check that short type declarations with array indices are expanded correctly.",
-			flatModel="
-fclass TypeTests.ArrayTypeTest5
+model ArrayTypeTest5
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayTypeTest5",
+         description="Check that short type declarations with array indices are expanded correctly.",
+         flatModel="fclass TypeTests.ArrayTypeTest5
  Real y[1,1].x(start = 1);
  Real y[1,2].x(start = 1);
  Real y[2,1].x(start = 1);
@@ -1044,33 +1025,63 @@ equation
  w.x = 3;
 end TypeTests.ArrayTypeTest5;
 ")})));
+
+ model A
+  Real x;
+  equation
+   x = 3;
+ end A;
+
+ model B = A[2](x(start=1));
+
+ model C
+ extends A;
+ end C; 
+
+  B y[3];
+  C z[3];
+  C w;
 end ArrayTypeTest5;
 
 
 
 model UnknownTypeAccess1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="UnknownTypeAccess1",
+         description="Using component of model type as expression",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1010, column 8:
+  Accesses to composite components other than records are not allowed: c
+")})));
+
  model C
   Real x=1;
  end C;
  C c;
 equation
  c.x = c;
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="UnknownTypeAccess1",
-			description="Using component of model type as expression",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1010, column 8:
-  Accesses to composite components other than records are not allowed: c
-")})));
 end UnknownTypeAccess1;
 
 
 
 model RecursiveStructure1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="RecursiveStructure1",
+         description="Detect recursive class structures",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1017, column 5:
+  Recursive class structure
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1021, column 5:
+  Recursive class structure
+")})));
+
 	model A
 		B b;
 	end A;
@@ -1080,21 +1091,24 @@ model RecursiveStructure1
 	end B;
 	
 	A a2;
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RecursiveStructure1",
-			description="Detect recursive class structures",
-			errorMessage="
-1 error found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1021, column 5:
-  Recursive class structure
-")})));
 end RecursiveStructure1;
 
 
 model RecursiveStructure2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="RecursiveStructure2",
+         description="Detect recursive class structures",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1058, column 3:
+  Recursive class structure
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1062, column 3:
+  Recursive class structure
+")})));
+
 	model A
 		extends B;
 	end A;
@@ -1104,24 +1118,24 @@ model RecursiveStructure2
 	end B;
 	
 	A a;
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RecursiveStructure2",
-			description="Detect recursive class structures",
-			errorMessage="
-2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1058, column 3:
-  Recursive class structure
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1062, column 3:
-  Recursive class structure
-")})));
 end RecursiveStructure2;
 
 
 model RecursiveStructure3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="RecursiveStructure3",
+         description="Detect recursive class structures",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1071, column 3:
+  Recursive class structure
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1075, column 5:
+  Recursive class structure
+")})));
+
 	model A
 		extends B;
 	end A;
@@ -1131,61 +1145,60 @@ model RecursiveStructure3
 	end B;
 	
 	A a2;
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RecursiveStructure3",
-			description="Detect recursive class structures",
-			errorMessage="
-1 error found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1071, column 3:
-  Recursive class structure
-")})));
 end RecursiveStructure3;
 
 
 
 model WhenType1
-	Real x = 1;
-equation
-	when 1 then
-		x = 2;
-	end when;
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="WhenType1",
-			description="Using test expression of wrong type",
-			errorMessage="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="WhenType1",
+         description="Using test expression of wrong type",
+         errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 1100, column 2:
   Test expression of when equation isn't Boolean scalar or vector expression
 ")})));
+
+	Real x = 1;
+equation
+	when 1 then
+		x = 2;
+	end when;
 end WhenType1;
 
 
 model WhenType2
-	Real x = 1;
-equation
-	when fill(false, 1, 1) then
-		x = 2;
-	end when;
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="WhenType2",
-			description="Using test expression with too many dimensions",
-			errorMessage="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="WhenType2",
+         description="Using test expression with too many dimensions",
+         errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 1120, column 2:
   Test expression of when equation isn't Boolean scalar or vector expression
 ")})));
+
+	Real x = 1;
+equation
+	when fill(false, 1, 1) then
+		x = 2;
+	end when;
 end WhenType2;
 
 model PreTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="PreTest1",
+         description="Testing that continuous variables can be accessed in pre expressions inside when clauses.",
+         errorMessage="
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1148, column 13:
+  Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses
+")})));
+
 	Real x (start=3);
         Real y;
         discrete Real z;
@@ -1196,33 +1209,15 @@ equation
 	elsewhen time>3 then
                 z = 2*pre(x);
         end when;
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="PreTest1",
-			description="Testing that continuous variables can be accessed in pre expressions inside when clauses.",
-			errorMessage="
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1148, column 13:
-  Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses
-")})));
 end PreTest1;
 
 
 model IfExpType1
-    model M
-        parameter Integer n=1;
-        Real y[n];
-    end M;
-
-    parameter Integer n = 3;
-    M m(n=n, y = if n==1 then {2} else 1:n);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IfExpType1",
-			description="If expression with branches with different array sizes",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfExpType1",
+         description="If expression with branches with different array sizes",
+         flatModel="
 fclass TypeTests.IfExpType1
  parameter Integer n = 3 /* 3 */;
  parameter Integer m.n;
@@ -1238,26 +1233,45 @@ equation
 
 end TypeTests.IfExpType1;
 ")})));
+
+    model M
+        parameter Integer n=1;
+        Real y[n];
+    end M;
+
+    parameter Integer n = 3;
+    M m(n=n, y = if n==1 then {2} else 1:n);
 end IfExpType1;
 
 
 model IfExpType2
-    Real x = if 1 then 1 else 2;
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="IfExpType2",
-			description="If expression errors: non-boolean test expression",
-			errorMessage="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="IfExpType2",
+         description="If expression errors: non-boolean test expression",
+         errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 1217, column 17:
   Test expression of if expression must be scalar boolean
 ")})));
+
+    Real x = if 1 then 1 else 2;
 end IfExpType2;
 
 
 model IfExpType3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="IfExpType3",
+         description="If expression errors: incompatible types of branches",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1239, column 18:
+  Branches of if expression has incompatible types
+")})));
+
     model M
         parameter Integer n=1;
         Real y[n];
@@ -1265,21 +1279,21 @@ model IfExpType3
 
     parameter Integer n = 3;
     M m(n=n, y = if n==1 then {true} else 1:n);
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="IfExpType3",
-			description="If expression errors: incompatible types of branches",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1239, column 18:
-  Branches of if expression has incompatible types
-")})));
 end IfExpType3;
 
 
 model IfExpType4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="IfExpType4",
+         description="If expression errors: non-parameter test expression",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1262, column 18:
+  If expression with branches that have different array sizes must have parameter test expression
+")})));
+
     model M
         parameter Integer n=1;
         Real y[n];
@@ -1288,46 +1302,15 @@ model IfExpType4
     parameter Integer n = 3;
     Integer k = n;
     M m(n=n, y = if k==1 then {2} else 1:n);
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="IfExpType4",
-			description="If expression errors: non-parameter test expression",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1262, column 18:
-  If expression with branches that have different array sizes must have parameter test expression
-")})));
 end IfExpType4;
 
 
 model IfExpType5
-  function F
-    input Real x1;
-    input Real x2;
-    input Integer n;
-    output Real y[n];
-  algorithm
-    for i in 1:n loop
-      y[i] := i;
-    end for;
-    y[1] := x1 + x2;
-  end F;
-
-  model M
-    parameter Integer n=1;
-    Real y[n];
-  end M;
-
-  parameter Integer n = 3;
-  M m(n=n, y = if n==1 then {2.} else F(3,5,n));
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IfExpType5",
-			description="If expression with branches with different array sizes, using function call",
-			flatModel="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfExpType5",
+         description="If expression with branches with different array sizes, using function call",
+         flatModel="
 fclass TypeTests.IfExpType5
  parameter Integer n = 3 /* 3 */;
  parameter Integer m.n;
@@ -1355,6 +1338,26 @@ public
 
 end TypeTests.IfExpType5;
 ")})));
+
+  function F
+    input Real x1;
+    input Real x2;
+    input Integer n;
+    output Real y[n];
+  algorithm
+    for i in 1:n loop
+      y[i] := i;
+    end for;
+    y[1] := x1 + x2;
+  end F;
+
+  model M
+    parameter Integer n=1;
+    Real y[n];
+  end M;
+
+  parameter Integer n = 3;
+  M m(n=n, y = if n==1 then {2.} else F(3,5,n));
 end IfExpType5;
 
 end TypeTests;

@@ -18,6 +18,84 @@ package CodeGenTests
 
 
   model CodeGenTest1
+  
+  	  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.GenericCodeGenTestCase(name="CodeGenTest1",
+        description="Test of code generation",
+         automatic_add_initial_equations = false,
+         enable_structural_diagnosis = false,
+		 compliance_as_warning=true,
+        template = 
+        "n_ci: $n_ci$
+n_real_ci: $n_real_ci$
+n_integer_ci: $n_integer_ci$
+n_boolean_ci: $n_boolean_ci$
+n_string_ci $n_string_ci$
+n_cd: $n_cd$
+n_real_cd: $n_real_cd$
+n_integer_cd: $n_integer_cd$
+n_boolean_cd: $n_boolean_cd$
+n_string_cd: $n_string_cd$
+n_pi: $n_pi$
+n_real_pi: $n_real_pi$
+n_integer_pi: $n_integer_pi$
+n_boolean_pi: $n_boolean_pi$
+n_string_pi: $n_string_pi$
+n_pd: $n_pd$
+n_real_pd: $n_real_pd$
+n_integer_pd: $n_integer_pd$
+n_boolean_pd: $n_boolean_pd$
+n_string_pd: $n_string_pd$
+n_real_w: $n_real_w$
+n_d: $n_d$
+n_real_d: $n_real_d$
+n_integer_d: $n_integer_d$
+n_boolean_d: $n_boolean_d$
+n_string_d: $n_string_d$
+n_real_x: $n_real_x$
+n_u: $n_u$
+n_real_u: $n_real_u$
+n_integer_u: $n_integer_u$
+n_boolean_u: $n_boolean_u$
+n_string_u: $n_string_u$
+n_equations: $n_equations$
+n_initial_equations: $n_initial_equations$",
+        generatedCode="n_ci: 0
+n_real_ci: 0
+n_integer_ci: 0
+n_boolean_ci: 0
+n_string_ci 0
+n_cd: 0
+n_real_cd: 0
+n_integer_cd: 0
+n_boolean_cd: 0
+n_string_cd: 0
+n_pi: 16
+n_real_pi: 4
+n_integer_pi: 4
+n_boolean_pi: 4
+n_string_pi: 4
+n_pd: 4
+n_real_pd: 1
+n_integer_pd: 1
+n_boolean_pd: 1
+n_string_pd: 1
+n_real_w: 2
+n_d: 9
+n_real_d: 0
+n_integer_d: 3
+n_boolean_d: 3
+n_string_d: 3
+n_real_x: 1
+n_u: 4
+n_real_u: 1
+n_integer_u: 1
+n_boolean_u: 1
+n_string_u: 1
+n_equations: 12
+n_initial_equations: 0")})));
+  
+  
   	parameter Real rp1=1;
   	parameter Real rp2=rp1;
     parameter Real rp3(start=1);
@@ -64,100 +142,18 @@ package CodeGenTests
      i1 = 1;
      b1 = true;
      s2 = "hello";
-
-    annotation(__JModelica(UnitTesting(tests={
-        GenericCodeGenTestCase(
-            name="CodeGenTest1",
-            description="Test of code generation",
-            automatic_add_initial_equations=false,
-            enable_structural_diagnosis=false,
-            compliance_as_warning=true,
-            template="
-n_ci: $n_ci$
-n_real_ci: $n_real_ci$
-n_integer_ci: $n_integer_ci$
-n_boolean_ci: $n_boolean_ci$
-n_string_ci $n_string_ci$
-n_cd: $n_cd$
-n_real_cd: $n_real_cd$
-n_integer_cd: $n_integer_cd$
-n_boolean_cd: $n_boolean_cd$
-n_string_cd: $n_string_cd$
-n_pi: $n_pi$
-n_real_pi: $n_real_pi$
-n_integer_pi: $n_integer_pi$
-n_boolean_pi: $n_boolean_pi$
-n_string_pi: $n_string_pi$
-n_pd: $n_pd$
-n_real_pd: $n_real_pd$
-n_integer_pd: $n_integer_pd$
-n_boolean_pd: $n_boolean_pd$
-n_string_pd: $n_string_pd$
-n_real_w: $n_real_w$
-n_d: $n_d$
-n_real_d: $n_real_d$
-n_integer_d: $n_integer_d$
-n_boolean_d: $n_boolean_d$
-n_string_d: $n_string_d$
-n_real_x: $n_real_x$
-n_u: $n_u$
-n_real_u: $n_real_u$
-n_integer_u: $n_integer_u$
-n_boolean_u: $n_boolean_u$
-n_string_u: $n_string_u$
-n_equations: $n_equations$
-n_initial_equations: $n_initial_equations$
-",
-        generatedCode="
-n_ci: 0
-n_real_ci: 0
-n_integer_ci: 0
-n_boolean_ci: 0
-n_string_ci 0
-n_cd: 0
-n_real_cd: 0
-n_integer_cd: 0
-n_boolean_cd: 0
-n_string_cd: 0
-n_pi: 16
-n_real_pi: 4
-n_integer_pi: 4
-n_boolean_pi: 4
-n_string_pi: 4
-n_pd: 4
-n_real_pd: 1
-n_integer_pd: 1
-n_boolean_pd: 1
-n_string_pd: 1
-n_real_w: 2
-n_d: 9
-n_real_d: 0
-n_integer_d: 3
-n_boolean_d: 3
-n_string_d: 3
-n_real_x: 1
-n_u: 4
-n_real_u: 1
-n_integer_u: 1
-n_boolean_u: 1
-n_string_u: 1
-n_equations: 12
-n_initial_equations: 0
-")})));
   end CodeGenTest1;
 
 
 	model CodeGenTest2
+	
+	  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.GenericCodeGenTestCase(name="CodeGenTest2",
+        description="Test of code generation",
+        template = "$n_real_x$",generatedCode="1")})));
 		Real x;
     equation
         der(x)=1;
-		
-    annotation(__JModelica(UnitTesting(tests={
-        GenericCodeGenTestCase(
-            name="CodeGenTest2",
-            description="Test of code generation",
-            template="$n_real_x$",
-            generatedCode="1")})));
 	end CodeGenTest2;
 
 	
@@ -188,23 +184,11 @@ n_initial_equations: 0
 	
 	
 	model CodeGenTest5
-		type A = enumeration(a, b, c);
-		type B = enumeration(d, e, f);
-		
-		constant A aic = A.a;
-		constant B bic = B.e;
-		constant A adc = aic;
-		constant B bdc = bic;
-		parameter A aip = A.b;
-		parameter B bip = B.f;
-		parameter A adp = aip;
-		parameter B bdp = bip;
-
-    annotation(__JModelica(UnitTesting(tests={
-        GenericCodeGenTestCase(
-            name="CodeGenTest5",
-            description="Code generation for enumerations: number of enum vars of different types",
-            template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.GenericCodeGenTestCase(
+         name="CodeGenTest5",
+         description="Code generation for enumerations: number of enum vars of different types",
+         template="
 n_enum_ci: $n_enum_ci$
 n_enum_cd: $n_enum_cd$
 n_enum_pi: $n_enum_pi$
@@ -216,20 +200,31 @@ n_enum_cd: 0
 n_enum_pi: 2
 n_enum_pd: 2
 ")})));
+
+		type A = enumeration(a, b, c);
+		type B = enumeration(d, e, f);
+		
+		constant A aic = A.a;
+		constant B bic = B.e;
+		constant A adc = aic;
+		constant B bdc = bic;
+		parameter A aip = A.b;
+		parameter B bip = B.f;
+		parameter A adp = aip;
+		parameter B bdp = bip;
 	end CodeGenTest5;
 	
 	
 	
 	model HookCodeGenTest1
-		Real x = 1;
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.GenericCodeGenTestCase(
+         name="HookCodeGenTest1",
+         description="Test that undefined hook tags don't generate errors",
+         template="$HOOK__not_defined$",
+         generatedCode="")})));
 
-	annotation(__JModelica(UnitTesting(tests={
-		GenericCodeGenTestCase(
-			name="HookCodeGenTest1",
-			description="Test that undefined hook tags don't generate errors",
-			template="$HOOK__not_defined$",
-			generatedCode="
-")})));
+		Real x = 1;
 	end HookCodeGenTest1;
 
 

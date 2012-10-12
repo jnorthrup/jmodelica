@@ -181,7 +181,7 @@ aspect CCodeGen {
 		str.print(toString_C(p));
 	}
 	
-	public String FAbstractVariable.genUse_C(Printer p, FArraySubscripts fas, String type) {
+	public String AbstractFVariable.genUse_C(Printer p, FArraySubscripts fas, String type) {
 		return name_C();
 	}
 	
@@ -207,7 +207,7 @@ aspect CCodeGen {
 		return os.toString();
 	}
 	
-	public String FAbstractVariable.genRecordUse_C(Printer p, FQName name, String type) {
+	public String AbstractFVariable.genRecordUse_C(Printer p, FQName name, String type) {
 		FQNamePart part = name.getFQNamePart(0);
 		FArraySubscripts fas = part.hasFArraySubscripts() ? part.getFArraySubscripts() : null;
 		String res = genUse_C(p, fas, C_ARRAY_RECORD);
@@ -401,14 +401,6 @@ aspect CCodeGen {
 		str.print(";\n");
 	}
 	
-	public void FExternalObjectVariable.printObjectDecl(PrintStream str, String indent) {
-		str.print(indent);
-		str.print(type_C());
-		str.print(" ");
-		str.print(name_C());
-		str.print(";\n");
-	}
-	
 	// Suffixes that are used with variables in JMI: size, var, arr, rec
 	public static final String ASTNode.C_SUFFIX_DEF      = "def";
 	public static final String ASTNode.C_SUFFIX_EXP      = "exp";
@@ -423,10 +415,10 @@ aspect CCodeGen {
 	public static final String ASTNode.C_ARRAY_REFERENCE = "ref";
 	public static final String ASTNode.C_ARRAY_VALUE     = "val";
 	
-	syn String FAbstractVariable.funcArrayType(boolean assign) = 
+	syn String AbstractFVariable.funcArrayType(boolean assign) = 
 		isRecord() ? C_ARRAY_RECORD : (assign ? C_ARRAY_REFERENCE : C_ARRAY_VALUE);
 
-	syn lazy String FAbstractVariable.name_C() = null;
+	syn lazy String AbstractFVariable.name_C() = null;
 	eq FVariable.name_C()           = isForIndex() ? 
 										name_C(null, variableIndex() + C_SUFFIX_INDEX) : 
 										name_C(""); 
@@ -443,7 +435,7 @@ aspect CCodeGen {
 		return name_C(prefix, Integer.toString(variableIndex()));
 	}
 	
-	protected String FAbstractVariable.name_C(String prefix, String suffix) {
+	protected String AbstractFVariable.name_C(String prefix, String suffix) {
 		StringBuilder buf = new StringBuilder();
 		if (prefix != null) {
 			buf.append(prefix);
@@ -459,20 +451,18 @@ aspect CCodeGen {
 		isRecord() ? name_C() : name_C(null, C_SUFFIX_RETURN);
 	syn String FFunctionArray.nameReturn_C()    = name_C();
 	
-	syn String FAbstractVariable.type_C() = type().type_C();
+	syn String AbstractFVariable.type_C() = type().type_C();
 	syn String FFunctionCallLeft.type_C() = type().type_C();
 	
 	syn String FType.type_C() = isArray() ? arrayType_C() : scalarType_C();
 	
-	syn String FType.argType_C()  		= type_C();
-	eq FPrimitiveType.argType_C() 		= "jmi_ad_var_t";
-	eq FIntegerType.argType_C()   		= "jmi_int_t";
-	eq FExternalObjectType.argType_C()	= "void*";
+	syn String FType.argType_C()  = type_C();
+	eq FPrimitiveType.argType_C() = "jmi_ad_var_t";
+	eq FIntegerType.argType_C()   = "jmi_int_t";
 	
-	syn String FType.scalarType_C() 		= "jmi_ad_var_t";
-	eq FRecordType.scalarType_C()   		= name_C() + "*";
-	eq FStringType.scalarType_C()   		= "char*"; // Tentative support.
-	eq FExternalObjectType.scalarType_C()	= "void*";
+	syn String FType.scalarType_C() = "jmi_ad_var_t";
+	eq FRecordType.scalarType_C()   = name_C() + "*";
+	eq FStringType.scalarType_C()   = "char*"; // Tentative support.
 	
 	syn String FType.arrayType_C() = "jmi_array_t*";
 	eq FRecordType.arrayType_C()   = nameArray_C() + "*";
@@ -613,11 +603,7 @@ aspect CCodeGen {
 	}
 	
 	public void FType.printExternInit_C(Printer p, PrintStream str, String indent, String name, FExp src) {
-	    if (isArray() && size().isUnknown())
-	        printInit_C(p, str, indent, name, src, arrayExternMacroType_C());
-	    else
-	        printInit_C(p, str, indent, name, src);
-	    
+		printInit_C(p, str, indent, name, src, arrayExternMacroType_C());
 	}
 	
 	public void FType.printInit_C(Printer p, PrintStream str, String indent, String name, FExp src, String macroType_C) {
@@ -669,7 +655,7 @@ aspect CCodeGen {
 		for (FRecordComponentType comp : getComponents()) {
 			if (comp.getFType().isComposite()) {
 				String compName = name + "->" + comp.getName();
-				String tempName = "tmp_" + src.nextTempNbr_C();
+				String tempName = "tmp_" + nextTempNbr_C();
 				src.recordChildTempNames().put(compName, tempName);
 				comp.getFType().printDecl_C(p, str, indent, tempName, src);
 			}
@@ -982,7 +968,7 @@ aspect CCodeGen {
 	
 	public void FUnknownSizeExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		str.print("jmi_array_size(");
-		FAbstractVariable fv = (FAbstractVariable) getVariable();
+		AbstractFVariable fv = (AbstractFVariable) getVariable();
 		str.print(fv.name_C());
 		str.print(", ");
 		str.print(getDim());
@@ -1115,7 +1101,7 @@ aspect CCodeGen {
 	inh boolean FIntegerLitExp.inFunctionArg();
 	eq FAbstractFunctionCall.getChild().inFunctionArg() = true;
 	eq FArraySubscripts.getChild().inFunctionArg()      = false;
-	eq FAbstractVariable.getChild().inFunctionArg()     = false;
+	eq AbstractFVariable.getChild().inFunctionArg()     = false;
 	eq FAbstractEquation.getChild().inFunctionArg()     = false;
 	eq Root.getChild().inFunctionArg()                  = false;
 	
@@ -1298,7 +1284,7 @@ aspect CCodeGen {
 		String prefix = "";
 		for (FExp arg : stmt.getArgs()) {
 			str.print(prefix);
-			arg.genExternalCFuncArgs(p, str, indent);
+			arg.genExternalCFuncCall(p, str, indent);
 			prefix = ", ";
 		}
 		str.print(");\n");
@@ -1309,13 +1295,13 @@ aspect CCodeGen {
 		String prefix = "";
 		for (FExp arg : stmt.getArgs()) {
 			str.print(prefix);
-			arg.genExternalFortranFuncArgs(p, str, indent);
+			arg.genExternalFortranFuncCall(p, str, indent);
 			prefix = ", ";
 		}
 		str.print(");\n");		
 	}
 	
-	public void FExp.genExternalFortranFuncArgs(Printer p, PrintStream str, String indent) {
+	public void FExp.genExternalFortranFuncCall(Printer p, PrintStream str, String indent) {
 		if (!isArray()) {
 			str.print("&");
 		}
@@ -1328,11 +1314,13 @@ aspect CCodeGen {
 		}
 	}
 	
-	public void FExp.genExternalCFuncArgs(Printer p, PrintStream str, String indent) {
-        p.print(this, str, indent);
+	public void FExp.genExternalCFuncCall(Printer p, PrintStream str, String indent) {}
+	
+	public void FSizeExp.genExternalCFuncCall(Printer p, PrintStream str, String indent) {
+		p.print(this, str, indent);
 	}
 	
-	public void FIdUseExp.genExternalCFuncArgs(Printer p, PrintStream str, String indent) {
+	public void FIdUseExp.genExternalCFuncCall(Printer p, PrintStream str, String indent) {
 		if (myFV() instanceof FFunctionVariable) {
 			FFunctionVariable ffv = (FFunctionVariable)myFV();
 			if (ffv.isOutput() && !isArray()) {
@@ -1405,6 +1393,7 @@ aspect CCodeGen {
 	private int FFunctionDecl.nextTempNbr_C = 1;
 	
 	inh int FExp.nextTempNbr_C();
+	inh int FType.nextTempNbr_C();
 	eq InstNode.getChild().nextTempNbr_C()      = 0;
 	eq FClass.getChild().nextTempNbr_C()        = nextTempNbr_C++;
 	eq FFunctionDecl.getChild().nextTempNbr_C() = nextTempNbr_C++;
@@ -1475,99 +1464,25 @@ aspect CCodeGen {
 
 	
 	public void AbstractEquationBlock.genBlockResidualFunction_C(int block_counter, boolean inInit, String indent, PrintStream str) {
-		str.print("static int dae_" + (inInit? "init_": "") + "block_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {\n");
+		str.print("static int dae_" + (inInit? "init_": "") + "block_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {\n");
 		str.print("  jmi_real_t** res = &residual;\n");	
 		genVarDecls_C(str, indent); // TODO: wrong indent (but so has rest of func...)
+		str.print("  if (init==JMI_BLOCK_INITIALIZE) {\n");
 		int var_counter = 0;
-		// Nominal values
-		str.print("  if (evaluation_mode==JMI_BLOCK_NOMINAL) {\n");
-		for (FVariable fv : blockResidualVariables_C()) {
-			if(((FRealVariable)fv).nominalAttributeSet()) {
-				str.print("    x["+var_counter+"] = ");
-				str.print(((FRealVariable)fv).nominalAttribute());
-				str.append(";\n");
-			} 
-			var_counter++;
-		}
-		
-		// Min values
-		var_counter = 0;
-		str.print("  } else  if (evaluation_mode==JMI_BLOCK_MIN) {\n");
-		for (FVariable fv : blockResidualVariables_C()) {
-			if(((FRealVariable)fv).minAttributeSet()) {
-				str.print("    x["+var_counter+"] = ");
-				str.print(((FRealVariable)fv).minAttribute());
-				str.append(";\n");
-			}
-			var_counter++;
-		}
-		
-		// Max values
-		var_counter = 0;
-		str.print("  } else if (evaluation_mode==JMI_BLOCK_MAX) {\n");
-		for (FVariable fv : blockResidualVariables_C()) {
-			if(((FRealVariable)fv).maxAttributeSet()) {
-				str.print("    x["+var_counter+"] = ");
-				str.print(((FRealVariable)fv).maxAttribute());
-				str.append(";\n");
-			} 
-			var_counter++;
-		}
-
-		str.print("  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {\n");
-		var_counter = 0;
 		// Loop over all active variables and write their value to x	
 		for (FVariable fv : blockResidualVariables_C()) {
-			str.print(indent + indent + "x["+var_counter+"] = " + fv.name_C() + ";\n");
-			if(((FRealVariable)fv).maxAttributeSet() && ((FRealVariable)fv).minAttributeSet()) {
-				str.print(indent + indent + "init_with_bounds(");
-				str.print("x["+var_counter+"],");
-				str.print(((FRealVariable)fv).minAttribute() + ", "+ ((FRealVariable)fv).maxAttribute());
-				str.print(", \"Resetting initial value for " + ((FRealVariable)fv).name() + "\");\n");
-			} else if(((FRealVariable)fv).maxAttributeSet()) {
-				str.print(indent + indent + "init_with_ubound(");
-				str.print("x["+var_counter+"]," + ((FRealVariable)fv).maxAttribute());
-				str.print(", \"Resetting initial value for " + ((FRealVariable)fv).name() + "\");\n");
-			} else if(((FRealVariable)fv).minAttributeSet()) {
-				str.print(indent + indent + "init_with_lbound(");
-				str.print("x["+var_counter+"]," + ((FRealVariable)fv).minAttribute());
-				str.print(", \"Resetting initial value for " + ((FRealVariable)fv).name() + "\");\n");
-			} 
-
+			str.print("    x["+var_counter+"] = " + fv.name_C() + ";\n");
 			var_counter++;
 		}
-		
-		// Generate code for Jacobian
-		genBlockResidualFunctionJacobian_C(indent, str);
-		
-		str.print(indent + "} else if (evaluation_mode==JMI_BLOCK_EVALUATE) {\n");
+		str.print("  } else if (init==JMI_BLOCK_EVALUATE) {\n");
 		// Loop over all active variables and write the values in x to the z vector
 		var_counter = 0;
 		for (FVariable fv : blockResidualVariables_C()) {
-			if(((FRealVariable)fv).maxAttributeSet() && ((FRealVariable)fv).minAttributeSet()) {
-				str.print(indent + indent + "check_bounds(");
-				str.print("x["+var_counter+"],");
-				str.print(((FRealVariable)fv).minAttribute() + ", "+ ((FRealVariable)fv).maxAttribute());
-				str.print(", \"Out of bounds for variable " + ((FRealVariable)fv).name() + "\");\n");
-			} else if(((FRealVariable)fv).maxAttributeSet()) {
-				str.print(indent + indent + "check_ubound(");
-				str.print("x["+var_counter+"]," + ((FRealVariable)fv).maxAttribute());
-				str.print(", \"Out of bounds for variable " + ((FRealVariable)fv).name() + "\");\n");
-			} else if(((FRealVariable)fv).minAttributeSet()) {
-				str.print(indent + indent + "check_lbound(");
-				str.print("x["+var_counter+"]," + ((FRealVariable)fv).minAttribute());
-				str.print(", \"Out of bound for variable " + ((FRealVariable)fv).name() + "\");\n");
-			} 
-			var_counter++;
-		}
-		var_counter = 0;		
-
-		for (FVariable fv : blockResidualVariables_C()) {
-			str.print(indent + indent + fv.name_C() + " = x["+var_counter+"];\n");
+			str.print("    " + fv.name_C() + " = x["+var_counter+"];\n");
 			var_counter++;
 		}
 		
-		genBlockResidualFunctionBeforeEqns_C(indent, str, new HashSet<FAbstractEquation>());
+		genBlockResidualFunctionBeforeEqns_C(indent, str);
 		// Write the residual expressions
 		int equation_counter = 0;
 		for (FAbstractEquation e : blockResidualEquations_C()) {
@@ -1575,17 +1490,8 @@ aspect CCodeGen {
 			equation_counter += e.numScalarEquations();
 		}
 		genBlockResidualFunctionAfterEqns_C(indent, str);
-		// Write back
-		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {\n");
-		var_counter = 0;
-		// Loop over all active variables and write their value to x	
-		for (FVariable fv : blockResidualVariables_C()) {
-			str.print(indent + indent + fv.name_C() + " = x[" + var_counter +"];\n");
-			var_counter++;
-		}
-
-		str.print(indent + "}\n");
-		str.print(indent + "return 0;\n}\n\n");
+		str.print("  }\n");
+		str.print("  return 0;\n}\n\n");
 	}
 	
 	public void SolvedScalarEquationBlock.genBlockResidualFunction_C(int block_counter, boolean inInit, String indent, PrintStream str) {
@@ -1598,20 +1504,12 @@ aspect CCodeGen {
 	}
 	
 	protected void AbstractEquationBlock.genVarDecls_C(PrintStream str, String indent) {
-		for (ASTNode n : new LinkedHashSet<ASTNode>(blockResidualNodes_C()))
+		for (ASTNode n : blockResidualNodes_C())
 			n.genVarDecls_C(ASTNode.printer_C, str, indent);
 	}
 	
 	protected void SolvedScalarEquationBlock.genVarDecls_C(PrintStream str, String indent) {
 		solution().genVarDecls_C(ASTNode.printer_C, str, indent);
-	}
-	
-	@Override
-	protected void TornEquationBlock.genVarDecls_C(PrintStream str, String indent) {
-		for (AbstractEquationBlock aeb : getSolvedBlocks())
-			aeb.genVarDecls_C(str, indent);
-		for (AbstractEquationBlock aeb : getUnsolvedBlocks())
-			aeb.genVarDecls_C(str, indent);
 	}
 	
 	public ArrayList<ASTNode> AbstractEquationBlock.blockResidualNodes_C() {
@@ -1627,7 +1525,7 @@ aspect CCodeGen {
 	}
 	
 	public ArrayList<ASTNode> TornEquationBlock.blockResidualNodes_C() {
-		ArrayList<ASTNode> res = new ArrayList<ASTNode>(activeVariables());
+		ArrayList<ASTNode> res = new ArrayList<ASTNode>(variables());
 		res.addAll(equations());
 		return res;
 	}
@@ -1656,7 +1554,7 @@ aspect CCodeGen {
 	}
 	
 	public void MixedEquationBlock.genBlockResidualFunctionAfterEqns_C(String indent, PrintStream str) {
-		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {\n");
+		str.print("  } else if (init==JMI_BLOCK_EVALUATE_NON_REALS) {\n");
 		// Loop over all active variables and write the values in x to the z vector
 		// Write the residual expressions
 		for (FAbstractEquation ae : discreteEquations()) {
@@ -1669,80 +1567,44 @@ aspect CCodeGen {
 		}
 	}
 	
-	public void AbstractEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
+	public void AbstractEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str) {
 	}
 	
-	public void TornEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
-		// Loop over all solved blocks and write the expressions  
-		for (AbstractEquationBlock aeb : solvedBlocks) {
-			aeb.genBlockResidualFunctionBeforeEqns_C(indent, str, visited);
-		}
+	public void TornEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str) {
+		// Loop over all solved equations and write the expressions  
+		for (MatchingPair mp: getSolvedPairs()){
+			mp.getEquation().genSolvedBlock_C(mp.getFVariable(), indent, str);	
+        }
 	}
 	
-	public void SolvedScalarEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
-		eqn.genSolvedBlock_C(fv, indent, str);
-	}
-	
-	public void SolvedFunctionCallEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
-		if (!visited.contains(functionCallEquation)) {
-			visited.add(functionCallEquation);
-			functionCallEquation.genAssignment_C(indent, str);
-		}
-	}
-	
-	public void AbstractEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {}
+	public void AbstractEquationBlock.genBlockAddCall_C(int block_counter, boolean inInit, String indent, PrintStream str) {
+	} 
 
-	public void LinearEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {
+	public void TornEquationBlock.genBlockAddCall_C(int block_counter, boolean inInit, String indent, PrintStream str) {
+		str.print(indent + "jmi_dae_" + (inInit? "init_": "") + 
+		"add_equation_block(*jmi,dae_" + (inInit? "init_": "") + "block_" + 
+		block_counter + ", NULL," + iterationVariables().size() + ",0," + 
+		block_counter + " );\n");
+	} 
+
+	public void EquationBlock.genBlockAddCall_C(int block_counter, boolean inInit, String indent, PrintStream str) {
+		str.print(indent + "jmi_dae_" + (inInit? "init_": "") + 
+		"add_equation_block(*jmi,dae_" + (inInit? "init_": "") + "block_" + 
+		block_counter + ", NULL," + iterationVariables().size() + ",0," + 
+		block_counter + " );\n");
+	} 
+
+	public void MixedEquationBlock.genBlockAddCall_C(int block_counter, boolean inInit, String indent, PrintStream str) {
+		str.print(indent + "jmi_dae_" + (inInit? "init_": "") + 
+		"add_equation_block(*jmi,dae_" + (inInit? "init_": "") + "block_" + 
+		block_counter + ", NULL," + activeContinuousVariables().size() + "," + 
+		activeDiscreteVariables().size() + "," + 
+		block_counter + " );\n");
+	} 
 		
-		str.print(indent + "} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {\n");
-		// Output Jacobian
-		int var_counter = 0;
-		for (int i=0;i<activeVariables().size();i++) {
-			for (int j=0;j<activeVariables().size();j++) {
-				str.print(indent + indent + "residual[" + var_counter + "] = " + jacobian[j][i].prettyPrint_C("") + ";\n");
-				var_counter++;
-			}
-		}
-						
-	}
-
-	public void AbstractEquationBlock.genBlockAddCall_C(int block_counter, boolean dirDer, boolean inInit, String indent, PrintStream str) {
-	} 
-
-	public void TornEquationBlock.genBlockAddCall_C(int block_counter, boolean dirDer, boolean inInit, String indent, PrintStream str) {
-		str.print(indent + "jmi_dae_" + (inInit? "init_": "") + 
-		"add_equation_block(*jmi,dae_" + (inInit? "init_": "") + "block_" + 
-		block_counter + "," + (dirDer? "dae_" + (inInit? "init_": "") + "block_dir_der_" + block_counter: "NULL") + "," + iterationVariables().size() + ",0,JMI_CONTINUOUS_VARIABILITY,JMI_KINSOL_SOLVER," + 
-		block_counter + " );\n");
-	} 
-
-	public void EquationBlock.genBlockAddCall_C(int block_counter, boolean dirDer, boolean inInit, String indent, PrintStream str) {
-		str.print(indent + "jmi_dae_" + (inInit? "init_": "") + 
-		"add_equation_block(*jmi,dae_" + (inInit? "init_": "") + "block_" + 
-		block_counter + "," + (dirDer? "dae_" + (inInit? "init_": "") + "block_dir_der_" + block_counter: "NULL") + "," + iterationVariables().size() + ",0,JMI_CONTINUOUS_VARIABILITY,JMI_KINSOL_SOLVER," + 
-		block_counter + " );\n");
-	} 
-
-	public void MixedEquationBlock.genBlockAddCall_C(int block_counter, boolean dirDer, boolean inInit, String indent, PrintStream str) {
-		str.print(indent + "jmi_dae_" + (inInit? "init_": "") + 
-		"add_equation_block(*jmi,dae_" + (inInit? "init_": "") + "block_" + 
-		block_counter + "," + (dirDer? "dae_" + (inInit? "init_": "") + "block_dir_der_" + block_counter: "NULL") + "," + activeContinuousVariables().size() + "," + activeDiscreteVariables().size() +",JMI_CONTINUOUS_VARIABILITY,JMI_KINSOL_SOLVER," +  
-		block_counter + " );\n");
-	} 
-
-	public void LinearEquationBlock.genBlockAddCall_C(int block_counter, boolean dirDer, boolean inInit, String indent, PrintStream str) {
-		str.print(indent + "jmi_dae_" + (inInit? "init_": "") + 
-		"add_equation_block(*jmi,dae_" + (inInit? "init_": "") + "block_" + 
-		block_counter + "," + (dirDer? "dae_" + (inInit? "init_": "") + "block_dir_der_" + block_counter: "NULL") + "," + iterationVariables().size() + ",0");
-		str.print(isConstant()? ",JMI_CONSTANT_VARIABILITY,": isParameter()? ",JMI_PARAMETER_VARIABILITY,": 
-			      isDiscrete()? ",JMI_DISCRETE_VARIABILITY,": ",JMI_CONTINUOUS_VARIABILITY,");
-		str.print("JMI_LINEAR_SOLVER,");
-		str.print(block_counter + " );\n");
-	} 
-	
 	public void AbstractEquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {
 		String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
-		str.format("%s ef |= jmi_solve_block_residual(jmi->%s[%d]);\n", indent, var, i);
+		str.format("%s ef |= jmi_kinsol_solve(jmi->%s[%d]);\n", indent, var, i);
 	}
 
 	public void SolvedScalarEquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {	
@@ -1761,7 +1623,7 @@ aspect CCodeGen {
 			functionCallEquation.getCall().prettyPrint_C(str, indent);
 			str.print(";\n");
 			for (FFunctionCallLeft l : functionCallEquation.getLefts()) 
-				l.genWriteBackAssignment_C(str, indent, null);
+				l.genWriteBackAssignment_C(str, indent);
 		}
 	}
 
@@ -1874,7 +1736,7 @@ aspect CCodeGen {
 			getCall().prettyPrint_C(str, indent);
 			str.print(";\n");
 			for (FFunctionCallLeft l : getLefts())
-				l.genWriteBackAssignment_C(str, indent, null);
+				l.genWriteBackAssignment_C(str, indent);
 		}
 	}
 
@@ -1942,54 +1804,48 @@ aspect CCodeGen {
 		str.print(");\n");
 	}
 	
-	public void FFunctionCallLeft.genWriteBackAssignment_C(PrintStream str, String indent, Set<FVariable> vars) {
+	public void FFunctionCallLeft.genWriteBackAssignment_C(PrintStream str, String indent) {
 		if (hasFExp()) 
-			getFExp().type().genWriteBackAssignment_C(str, indent, name_C(), getFExp(), vars);
+			getFExp().type().genWriteBackAssignment_C(str, indent, name_C(), getFExp());
 	}
 	
-	public void FType.genWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp, Set<FVariable> vars) {
+	public void FType.genWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp) {
 		if (isArray()) {
 			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
 			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
 			Array arr = exp.getArray();
 			for (Index i : arr.indices()) {
 				String cellName = pre + i.toUnclosedString() + ")";
-				genCellWriteBackAssignment_C(str, indent, cellName, arr.get(i), vars);
+				genCellWriteBackAssignment_C(str, indent, cellName, arr.get(i));
 			}
 		} else {
-			genCellWriteBackAssignment_C(str, indent, name, exp, vars);
+			genCellWriteBackAssignment_C(str, indent, name, exp);
 		}
 	}
 	
-	public void FType.genCellWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp, Set<FVariable> vars) {
-		exp.genWriteBackAssignment_C(str, indent, name, vars);
+	public void FType.genCellWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp) {
+		exp.genWriteBackAssignment_C(str, indent, name);
 	}
 	
-	public void FRecordType.genCellWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp, Set<FVariable> vars) {
+	public void FRecordType.genCellWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp) {
 		for (FRecordComponentType comp : getComponents()) {
 			String compName = name + "->" + comp.getName();
 			FExp compExp = exp.extractRecordComponentExp(comp.getName());
-			comp.getFType().genWriteBackAssignment_C(str, indent, compName, compExp, vars);
+			comp.getFType().genWriteBackAssignment_C(str, indent, compName, compExp);
 		}
 	}
 
-	public void FExp.genWriteBackAssignment_C(PrintStream str, String indent, String name, Set<FVariable> vars) {
-		throw new UnsupportedOperationException();
-	}
-	
-	public void FIdUseExp.genWriteBackAssignment_C(PrintStream str, String indent, String name, Set<FVariable> vars) {
+	public void FExp.genWriteBackAssignment_C(PrintStream str, String indent, String name) {
 		str.print(indent);
-		if (vars != null && !vars.contains(myFV()))
-			return; // This variable is not in the set of variables to generate code for.
-		
-		getFIdUse().prettyPrint_C(str,"");
+		FIdUseExp e = (FIdUseExp)this;
+		e.getFIdUse().prettyPrint_C(str,"");
 //		prettyPrint_C(str, "");
 		str.print(" = (");
 		str.print(name);
 		str.print(")");
-		if (myFV().isReal() && root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
+		if (e.myFV().isReal() && root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
 			str.print("/sf(");
-			str.print(myFV().valueReference());
+			str.print(e.myFV().valueReference());
 			str.print(")");
 		}
 		str.print(";\n");
@@ -2084,10 +1940,6 @@ aspect CCodeGen {
 		str.print(";\n");
 	}
 	
-	public void FStringVariable.genStartValue_C(String indent, PrintStream str) {
-		// Skip string variables
-	}
-	
 	public void BLT.genOdeDerivativeBlocks(PrintStream str) {
 		int block_counter = 0;
 		for (AbstractEquationBlock block : this) {
@@ -2103,10 +1955,8 @@ aspect CCodeGen {
 	}
 	
 	public void BLT.genVarDecls_C(PrintStream str, String indent) {
-		for (AbstractEquationBlock eb : getAllBlocks()) {
-			if(eb.isSolvable())
-				eb.genVarDecls_C(str, indent);
-		}
+		for (AbstractEquationBlock eb : getAllBlocks())
+			eb.genVarDecls_C(str, indent);
 	}
 
 	public void StructuredBLT.genOdeDerivativeBlocks(PrintStream str) {

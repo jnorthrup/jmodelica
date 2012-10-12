@@ -59,7 +59,7 @@ public class FClassMethodTestCase extends TestCase {
 	    	String correct = filter(getOutput());
 
 	    	if (!removeWhitespace(test).equals(removeWhitespace(correct)))
-	    		assertEquals("Method result does not match expected.", correct, test);
+	    		fail("Method result does not match expected." + compareMsg(test, correct));
 	    } catch (Exception e) {
 	    }
     	return true;

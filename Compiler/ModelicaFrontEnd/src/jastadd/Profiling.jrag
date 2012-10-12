@@ -14,7 +14,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.security.AccessController;
@@ -25,9 +24,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
-import java.util.Map;
 import java.util.Map.Entry;
-import org.jmodelica.util.Criteria;
+import beaver.Symbol;
 
 aspect LightProfiling {
 	
@@ -47,7 +45,7 @@ aspect LightProfiling {
 	
 	public class StepInfo {
 		
-		public static boolean GC_BEFORE_MEM = false;
+		public static final boolean GC_BEFORE_MEM = false;
 		
 		public static final Class<? extends InfoItem> TIME = TimeItem.class;
 		public static final Class<? extends InfoItem> MEMORY_CHANGE = MemoryChangeItem.class;
@@ -135,18 +133,6 @@ aspect LightProfiling {
 				ASTNode.log.debug(String.format(fmt, (Object[]) line));
 		}
 		
-		public String[][] rawLog() {
-			while (top.depth > 0) 
-				end(top.name);
-			top.end();
-			
-			java.util.List<String[]> lines = new ArrayList<String[]>();
-			lines.add(top.toStringsRaw());
-			for (InfoNode n : top)
-				lines.add(n.toStringsRaw());
-			
-			return lines.toArray(new String[lines.size()][]);
-		}
 		
 		private InfoItem[] createItems() {
 			InfoItem[] res = new InfoItem[itemClasses.size()];
@@ -193,29 +179,16 @@ aspect LightProfiling {
 				children.add(n);
 			}
 			
-			private String produceNameHead() {
+			public String[] toStrings() {
+				String[] res = new String[items.length + 1];
 				StringBuilder buf = new StringBuilder();
 				for (int j = 0; j < depth; j++)
 					buf.append(INDENT);
 				buf.append(name);
-				return buf.toString();
-			}
-			
-			public String[] toStrings() {
-				String[] res = new String[items.length + 1];
-				res[0] = produceNameHead();
+				res[0] = buf.toString();
 				int i = 1;
 				for (InfoItem it : items)
 					res[i++] = it.toString();
-				return res;
-			}
-			
-			public String[] toStringsRaw() {
-				String[] res = new String[items.length + 1];
-				res[0] = produceNameHead();
-				int i = 1;
-				for (InfoItem it : items)
-					res[i++] = it.toStringRaw();
 				return res;
 			}
 			
@@ -259,7 +232,6 @@ aspect LightProfiling {
 			public void begin();
 			public void end();
 			public String toString();
-			public String toStringRaw();
 		}
 		
 		public static abstract class StateDifferenceInfoItem implements InfoItem {
@@ -275,39 +247,25 @@ aspect LightProfiling {
 			}
 			
 			public String toString() {
-				return toString(endVal - beginVal, endVal);
-			}
-			
-			public String toStringRaw() {
-				return toStringRaw(endVal - beginVal, endVal);
+				return toString(endVal - beginVal);
 			}
 			
 			public abstract long state();
-			public abstract String toString(long diff, long endVal);
-			public abstract String toStringRaw(long diff, long endVal);
+			public abstract String toString(long diff);
 		}
 		
 		public static class TimeItem extends StateDifferenceInfoItem {
 			public long state() {
-				return System.currentTimeMillis() - MemoryChangeItem.timeSpentInGC;
+				return System.currentTimeMillis();
 			}
 			
-			public String toString(long diff, long endVal) {
+			public String toString(long diff) {
 				return (Math.round(diff / 10.0) / 100.0) + " s";
-			}
-			
-			public String toStringRaw(long diff, long endVal) {
-				return new Long(diff).toString();
 			}
 		}
 		
 		public static class MemoryChangeItem extends StateDifferenceInfoItem {
 			private static final Runtime RUNTIME = Runtime.getRuntime();
-			private static long timeSpentInGC = 0;
-			
-			public static long getTimeSpentInGC() {
-				return timeSpentInGC;
-			}
 
 			public long state() {
 				if (StepInfo.GC_BEFORE_MEM)
@@ -320,7 +278,6 @@ aspect LightProfiling {
 			}
 			
 			private static void runGC() {
-				long start = System.currentTimeMillis();
 				try {
 					long usedMem1 = usedMemory(), usedMem2 = Long.MAX_VALUE;
 					for (int i = 0; (usedMem1 < usedMem2) && (i < 500); ++i) {
@@ -332,15 +289,10 @@ aspect LightProfiling {
 						usedMem1 = usedMemory();
 					}
 				} catch (Exception e) {}
-				timeSpentInGC += System.currentTimeMillis() - start;
 			}
 			
-			public String toString(long diff, long endVal) {
-				return ASTNode.formatMem(diff) + " (" + ASTNode.formatMem(endVal) + " total)";
-			}
-			
-			public String toStringRaw(long diff, long endVal) {
-				return diff + "," + endVal;
+			public String toString(long diff) {
+				return ASTNode.formatMem(diff);
 			}
 		}
 		
@@ -349,77 +301,6 @@ aspect LightProfiling {
 }
 
 aspect MemoryUse {
-	
-	private static Map<Class,Counter> ASTNode.buildNodeCountMap = null;
-	
-	/**
-	 * Output a list of the number of instances of each node class.
-	 */
-	public static void ASTNode.dumpNodeCount(String file) 
-			throws FileNotFoundException {
-		ArrayList<Counter> list = new ArrayList<Counter>();
-		list.addAll(buildNodeCountMap.values());
-		Collections.sort(list);
-		PrintStream out = new PrintStream(file);
-		for (Counter c : list)
-			out.println(c);
-		out.close();
-	}
-	
-	public void ASTNode.buildNodeCount() {
-		if (buildNodeCountMap == null)
-			buildNodeCountMap = new HashMap<Class,Counter>();
-		buildNodeCount(buildNodeCountMap);
-	}
-	
-	private void ASTNode.buildNodeCount(Map<Class,Counter> map) {
-		addToNodeCount(map, getClass());
-		
-		if (children != null)
-			for (int i = children.length - 1; i >= 0; i--) 
-				if (children[i] != null)
-					children[i].buildNodeCount(map);
-	}
-	
-	private void ASTNode.addToNodeCount(Map<Class,Counter> map, Class cls) {
-		if (map.containsKey(cls))
-			map.get(cls).inc();
-		else
-			map.put(cls, new Counter(cls.getSimpleName()));
-		if (cls != ASTNode.class)
-			addToNodeCount(map, cls.getSuperclass());
-	}
-	
-	public class ASTNode {
-		public static class Counter implements Comparable<Counter> {
-			private int n;
-			private String s;
-			
-			private static int l = 0;
-			private static String fmt = null;
-			
-			public Counter(String name) {
-				s = name;
-				n = 1;
-				if (s.length() > l)
-					l = s.length();
-			}
-			
-			public void inc() {
-				n++;
-			}
-			
-			public int compareTo(Counter c) {
-				return c.n - n;
-			}
-			
-			public String toString() {
-				if (fmt == null)
-					fmt = "%-" + l + "s : %d";
-				return String.format(fmt, s, n);
-			}
-		}
-	}
 	
 	/**
 	 * \brief Output a view of an AST, showing the classname and approximate memory footprint 
@@ -459,7 +340,7 @@ aspect MemoryUse {
 	 * @param maxDepth the maximum depth to display nodes from, -1 means infinite depth
 	 * @param minSize  the minimum memory size to display a node
 	 */
-	public void ASTNode.dumpMemoryUse(String file, boolean deep, int maxDepth, long minSize) 
+	public void ASTNode.dumpMemoryUse(String file, boolean deep, int maxDepth, int minSize) 
 			throws FileNotFoundException {
 		dumpMemoryUse(new PrintStream(file), deep, maxDepth, minSize);
 	}
@@ -501,36 +382,10 @@ aspect MemoryUse {
 	 * @param maxDepth the maximum depth to display nodes from, -1 means infinite depth
 	 * @param minSize  the minimum memory size to display a node
 	 */
-	public void ASTNode.dumpMemoryUse(PrintStream out, boolean deep, int maxDepth, long minSize) {
+	public void ASTNode.dumpMemoryUse(PrintStream out, boolean deep, int maxDepth, int minSize) {
 		Profiler.clear();   // Remove any stale data from profiler
 		gatherMemoryUse(out, "", deep, maxDepth, minSize, 0);
 		Profiler.clear();   // Free any memory used by the profiler's cache
-	}
-	
-	/**
-	 * Calculate the memory weight of a subtree.
-	 */
-	public long ASTNode.subTreeSize() {
-		Profiler.clear();   // Remove any stale data from profiler
-		long res = gatherMemoryUse(NullStream.PRINT, "", true, 0, 0, 1);
-		Profiler.clear();   // Free any memory used by the profiler's cache
-		return res;
-	}
-	
-	/**
-	 * Calclulate memory weight of all subtrees fulfilling a specific criteria.
-	 */
-	public long ASTNode.filteredTreeSize(Criteria<ASTNode> filter) {
-		if (filter.test(this)) {
-			return subTreeSize();
-		} else {
-			long res = 0;
-			if (children != null)
-				for (ASTNode ch : children) 
-					if (ch != null)
-						res += ch.filteredTreeSize(filter);
-			return res;
-		}
 	}
 	
 	/**
@@ -538,13 +393,13 @@ aspect MemoryUse {
 	 * 
 	 * @return approximation of the memory footprint for the subtree
 	 */
-	protected long ASTNode.gatherMemoryUse(
-			PrintStream out, String indent, boolean deep, int maxDepth, long minSize, int depth) {
-		long local = Profiler.getNodeSize(this, deep);
-		long mem = local;
+	protected int ASTNode.gatherMemoryUse(
+			PrintStream out, String indent, boolean deep, int maxDepth, int minSize, int depth) {
+		int local = Profiler.getNodeSize(this, deep);
+		int mem = local;
 		String nextInd = indent + " ";
 		if (children != null)
-			for (int i = children.length - 1; i >= 0; i--) 
+			for (int i = children.length -1; i >= 0; i--) 
 				if (children[i] != null)
 					mem += children[i].gatherMemoryUse(out, nextInd, deep, maxDepth, minSize, depth+1);
 		if ((depth == 0 || mem >= minSize) && (maxDepth < 0 || depth < maxDepth))
@@ -552,23 +407,23 @@ aspect MemoryUse {
 		return mem;
 	}
 	
-	protected long Opt.gatherMemoryUse(PrintStream out, String indent, boolean deep, int maxDepth, long minSize, int depth) {
+	protected int Opt.gatherMemoryUse(PrintStream out, String indent, boolean deep, int maxDepth, int minSize, int depth) {
 		return super.gatherMemoryUse(out, indent.substring(1), deep, maxDepth, minSize, depth);
 	}
 	
-	protected long InstExtends.gatherMemoryUse(PrintStream out, String indent, boolean deep, int maxDepth, long minSize, int depth) {
+	protected int InstExtends.gatherMemoryUse(PrintStream out, String indent, boolean deep, int maxDepth, int minSize, int depth) {
 		return super.gatherMemoryUse(out, indent, deep, maxDepth, minSize, depth);
 	}
 
 	/**
 	 * \brief Output method for {@link #dumpMemoryUse(PrintStream, boolean, int, int)}.
 	 */
-	protected void ASTNode.addMemoryUseRow(PrintStream out, String indent, long mem, long local) {
+	protected void ASTNode.addMemoryUseRow(PrintStream out, String indent, int mem, int local) {
 		out.println(indent + getClass().getSimpleName() + extraMemoryUseInfo() + ": " + 
 				formatMem(mem) + " (" + formatMem(local) + ")");
 	}
 	
-	protected void Opt.addMemoryUseRow(PrintStream out, String indent, long mem, long local) {}
+	protected void Opt.addMemoryUseRow(PrintStream out, String indent, int mem, int local) {}
 	
 	/**
 	 * \brief Any extra info to add to the memory use output.
@@ -579,6 +434,137 @@ aspect MemoryUse {
 	eq ClassDecl.extraMemoryUseInfo()         = " \"" + name() + "\"";
 	eq ComponentDecl.extraMemoryUseInfo()     = " \"" + name() + "\"";
 	eq InstExtends.extraMemoryUseInfo()       = " extending \"" + getClassName().name() + "\"";
+
+	/**
+	 * \brief Counts the number of ASTNodes of each type created.
+	 * 
+	 * Activated by changing the superclass of ASTNode to ProfilingNode.
+	 */
+	public class ProfilingNode extends Symbol {
+
+		private static int objects = 0;
+		private static HashMap<String, Counter> names = new HashMap<String, Counter>();
+
+		/**
+		 * \brief If set to <code>true</code>, each instance will be counted as an instance each of 
+		 *        every super class.
+		 */
+		public static boolean COUNT_SUPER = true;
+	    
+		public ProfilingNode() {
+			super();
+			objects++;
+			count(getClass());
+		}
+		
+		private static void count(Class type) {
+			String name = type.getSimpleName();
+			if (names.containsKey(name)) 
+				names.get(name).n++;
+			else
+				names.put(name, new Counter(type));
+			
+			if (COUNT_SUPER && !name.equals("ASTNode"))
+				count(type.getSuperclass());
+		}
+
+		private static class Counter {
+			
+			public static int total;
+			
+			public int n = 1;
+			public Class type;
+			
+			public Counter(Class t) {
+				type = t;
+			}
+			
+			public String toString() {
+				String size = ASTNode.formatMem(Profiler.getTotalShellSize(type) * n);
+				return n + " (" + ASTNode.roundFriendly(n * 100.0 / total) + "%, " + size + ")";
+			}
+			
+		}
+
+		/**
+		 * \brief Resets the counters to 0.
+		 */
+		public static void reset() {
+			objects = 0;
+			names.clear();
+		}
+		
+		/**
+		 * \brief Prints out the collected info.
+		 * 
+		 * @param out     stream to write output to
+		 * @param sorter  comparator for class count entries, use SORT_* constants
+		 */
+		public static void printInfo(PrintStream out, CountSorter sorter) {
+			Counter.total = objects;
+			out.println("Number of AST nodes: " + objects);
+			ArrayList<Map.Entry<String, Counter>> list = new ArrayList<Map.Entry<String, Counter>>();
+			list.addAll(names.entrySet());
+			Collections.sort(list, sorter);
+			for (Map.Entry<String, Counter> e : list) 
+				out.println("  " + e.getKey() + ": " + e.getValue());
+		}
+		
+		/**
+		 * \brief Type for the sorter argument for {@link printInfo(PrintStream, CountSorter)}.
+		 */
+		public static abstract class CountSorter implements Comparator<Entry<String, Counter>> {}
+		
+		/**
+		 * \brief Sort output by count, ascending.
+		 */
+		public static final CountSorter SORT_COUNT_DESC = new CmpCount(true);
+		
+		/**
+		 * \brief Sort output by count, descending.
+		 */
+		public static final CountSorter SORT_COUNT_ASC  = new CmpCount(false);
+		
+		/**
+		 * \brief Sort output by class name, ascending.
+		 */
+		public static final CountSorter SORT_CLASS_DESC = new CmpName(true);
+		
+		/**
+		 * \brief Sort output by class name, descending.
+		 */
+		public static final CountSorter SORT_CLASS_ASC = new CmpName(false);
+		
+		private static class CmpCount extends CountSorter {
+			
+			private int mul;
+			
+			public CmpCount(boolean reverse) {
+				mul = reverse ? -1 : 1;
+			}
+
+			public int compare(Entry<String, Counter> o1, Entry<String, Counter> o2) {
+				int res = mul * (o1.getValue().n - o2.getValue().n);
+				return res == 0 ? o1.getKey().compareTo(o2.getKey()) : res;
+			}
+
+		}
+		
+		private static class CmpName extends CountSorter {
+			
+			private int mul;
+			
+			public CmpName(boolean reverse) {
+				mul = reverse ? -1 : 1;
+			}
+
+			public int compare(Entry<String, Counter> o1, Entry<String, Counter> o2) {
+				return mul * o1.getKey().compareTo(o2.getKey());
+			}
+
+		}
+		
+	}
 
 	/**
 	 * \brief Contains methods for calculating the size of AST nodes.
@@ -593,7 +579,7 @@ aspect MemoryUse {
 		 * 
 		 * @param deep  if the approximation should include the contents of non-ASTNode members
 		 */
-		public static long getNodeSize(ASTNode node, boolean deep) {
+		public static int getNodeSize(ASTNode node, boolean deep) {
 			if (deep)
 				return getObjectSize(node);
 			else 
@@ -607,19 +593,18 @@ aspect MemoryUse {
 			visited.clear();
 		}
 
-	    private static final long OBJECT_PAD_SIZE     = 8;
-	    private static final long OBJECT_SHELL_SIZE   = 12;
-	    private static final long OBJREF_SIZE         = 4;
-	    private static final long LONG_FIELD_SIZE     = 8;
-	    private static final long INT_FIELD_SIZE      = 4;
-	    private static final long SHORT_FIELD_SIZE    = 2;
-	    private static final long CHAR_FIELD_SIZE     = 2;
-	    private static final long BYTE_FIELD_SIZE     = 1;
-	    private static final long BOOLEAN_FIELD_SIZE  = 1;
-	    private static final long DOUBLE_FIELD_SIZE   = 8;
-	    private static final long FLOAT_FIELD_SIZE    = 4;
+	    private static final int OBJECT_SHELL_SIZE   = 8;
+	    private static final int OBJREF_SIZE         = 4;
+	    private static final int LONG_FIELD_SIZE     = 8;
+	    private static final int INT_FIELD_SIZE      = 4;
+	    private static final int SHORT_FIELD_SIZE    = 2;
+	    private static final int CHAR_FIELD_SIZE     = 2;
+	    private static final int BYTE_FIELD_SIZE     = 1;
+	    private static final int BOOLEAN_FIELD_SIZE  = 1;
+	    private static final int DOUBLE_FIELD_SIZE   = 8;
+	    private static final int FLOAT_FIELD_SIZE    = 4;
 
-		private static HashMap<Class, Long> totalFieldSize = new HashMap<Class, Long>();
+		private static HashMap<Class, Integer> totalFieldSize = new HashMap<Class, Integer>();
 		private static IdentityHashMap<Object, Object> visited = new IdentityHashMap<Object, Object>();
 	    
 	    private static class GetFieldsAction implements PrivilegedAction {
@@ -642,10 +627,8 @@ aspect MemoryUse {
 	    	private Field field;
 	    	
 	    	public Object perform(Field f, Object o) throws Exception {
-	    		if (!f.isAccessible()) {
-	    			field = f;
-	    			AccessController.doPrivileged(this);
-	    		}
+	    		field = f;
+	    		AccessController.doPrivileged(this);
 	    		return f.get(o);
 	    	}
 
@@ -659,7 +642,7 @@ aspect MemoryUse {
 		private static GetFieldsAction getFields = new GetFieldsAction();
 		private static GetValueAction  getValue  = new GetValueAction();
 		
-		public static long getObjectSize(Object o) {
+		public static int getObjectSize(Object o) {
 			if (o == null || visited.containsKey(o))
 				return 0;
 			visited.put(o, null);
@@ -670,7 +653,7 @@ aspect MemoryUse {
 			if (o instanceof LinkedList)
 				return getLinkedListSize((LinkedList) o, type);
 			
-			long mem = getTotalShellSize(type);
+			int mem = getTotalShellSize(type);
 			for (; type != null; type = type.getSuperclass())
 				for (Field f : getFields.perform(type)) 
 					if ((f.getModifiers() & Modifier.STATIC) == 0) 
@@ -678,52 +661,40 @@ aspect MemoryUse {
 			return mem;
 		}
 		
-		private static long getObjectFieldSize(Field f, Object o) {
+		private static int getObjectFieldSize(Field f, Object o) {
 			Class type = f.getType();
 			if (type.isPrimitive())
 				return 0;
 			try {
 				Object val = getValue.perform(f, o);
-				return shouldCount(val) ? getObjectSize(val) : 0;
+				return (val instanceof ASTNode) ? 0 : getObjectSize(val);
 			} catch (Exception e) {
 				System.err.println("Could not read member: " + o.getClass().getSimpleName() + "." + f.getName());
 				return OBJECT_SHELL_SIZE;
 			}
 		}
-		
-		private static boolean shouldCount(Object o) {
-			if (o instanceof ASTNode) {
-				ASTNode n = (ASTNode) o;
-				for (; n.parent != null; n = n.parent)
-					if (!n.recognizedByParent())
-						return true;
-				return !(n instanceof Root);
-			} else {
-				return true;
-			}
-		}
 
 		// Special case for linked list to avoid stack overflow
-		private static long getLinkedListSize(LinkedList l, Class type) {
-			long sum = getTotalShellSize(type);
-			long entrySize;
+		private static int getLinkedListSize(LinkedList l, Class type) {
+			int sum = getTotalShellSize(type);
+			int entrySize;
 			try {
 				entrySize = getTotalShellSize(type.getField("header").getType());
 			} catch (Exception e) {
-				entrySize = 3 * OBJREF_SIZE + OBJECT_SHELL_SIZE; // From inspecting source
+				entrySize = 3 * OBJREF_SIZE; // From inspecting source
 			}
 			for (Object o : l)
 				sum += entrySize + getObjectSize(o);
 			return sum;
 		}
 		
-		private static long getTotalFieldSize(Class type) {
+		public static int getTotalShellSize(Class type) {
 			if (totalFieldSize.containsKey(type))
 				return totalFieldSize.get(type);
 			
-			long mem = 0;
+			int mem = OBJECT_SHELL_SIZE;
 			if (type != Object.class)
-				mem = getTotalFieldSize(type.getSuperclass());
+				mem = getTotalShellSize(type.getSuperclass());
 			
 			for (Field f : getFields.perform(type)) 
 				if ((f.getModifiers() & Modifier.STATIC) == 0) 
@@ -733,12 +704,15 @@ aspect MemoryUse {
 			return mem;
 		}
 		
-		public static long getTotalShellSize(Class type) {
-			long mem = OBJECT_SHELL_SIZE + getTotalFieldSize(type);
-			return ((mem - 1) / OBJECT_PAD_SIZE + 1) * OBJECT_PAD_SIZE;
+		private static int getFieldSize(Class type) {
+	        if (type == long.class)
+	        	return LONG_FIELD_SIZE;
+	        else if (type == double.class)
+	        	return DOUBLE_FIELD_SIZE;
+        	return INT_FIELD_SIZE;
 		}
 		
-		private static long getFieldSize(Class type) {
+		private static int getArrayElementSize(Class type) {
 	        if (type == int.class)
 	            return INT_FIELD_SIZE;
 	        else if (type == long.class)
@@ -758,29 +732,21 @@ aspect MemoryUse {
         	return OBJREF_SIZE;
 		}
 		
-		private static long getArraySize(Object o, Class type) {
+		private static int getArraySize(Object o, Class type) {
 			int len = java.lang.reflect.Array.getLength(o);
 			Class comp = type.getComponentType();
-			long size = getFieldSize(comp);
-			long res = OBJECT_SHELL_SIZE + INT_FIELD_SIZE + len * size;
-			res = ((res - 1) / OBJECT_PAD_SIZE + 1) * OBJECT_PAD_SIZE;
+			int size = getArrayElementSize(comp);
+			int res = OBJECT_SHELL_SIZE + INT_FIELD_SIZE + OBJREF_SIZE + len * size;
 			if (!comp.isPrimitive()) { 
 				for (int i = 0; i < len; i++) {
 					Object elem = java.lang.reflect.Array.get(o, i);
-					if (shouldCount(elem))
+					if (!(elem instanceof ASTNode))
 						res += getObjectSize(elem);
 				}
 			}
 			return res;
 		}
 
-	}
-	
-	public boolean ASTNode.recognizedByParent() {
-		return parent != null && 
-				parent.children != null && 
-				childIndex >= 0 && childIndex < parent.children.length &&
-				parent.children[childIndex] == this;
 	}
 
 }

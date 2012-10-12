@@ -18,20 +18,11 @@
 package CCodeGenTests
 
 model CCodeGenTest1
-  Real x1(start=0); 
-  Real x2(start=1); 
-  input Real u; 
-  parameter Real p = 1;
-  Real w = x1+x2;
-equation 
-  der(x1) = (1-x2^2)*x1 - x2 + p*u; 
-  der(x2) = x1; 
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CCodeGenTest1",
-			description="Test of code generation",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenTest1",
+         description="Test of code generation",
+         template="
 $C_variable_aliases$
 $C_DAE_equation_residuals$
 ",
@@ -49,25 +40,25 @@ $C_DAE_equation_residuals$
     (*res)[1] = _x1_0 - (_der_x2_6);
     (*res)[2] = _x1_0 + _x2_1 - (_w_4);
 ")})));
+
+  Real x1(start=0); 
+  Real x2(start=1); 
+  input Real u; 
+  parameter Real p = 1;
+  Real w = x1+x2;
+equation 
+  der(x1) = (1-x2^2)*x1 - x2 + p*u; 
+  der(x2) = x1; 
 end CCodeGenTest1;
 
 
 	model CCodeGenTest2
-		Real x(start=1);
-		Real y(start=3,fixed=true)=3;
-	    Real z = x;
-	    Real w(start=1) = 2;
-	    Real v;
-	equation
-		der(x) = -x;
-		der(v) = 4;
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CCodeGenTest2",
-			description="Test of code generation",
-			automatic_add_initial_equations=false,
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenTest2",
+         description="Test of code generation",
+         automatic_add_initial_equations = false,
+         template="
 $C_variable_aliases$
 $C_DAE_equation_residuals$
 $C_DAE_initial_equation_residuals$
@@ -97,80 +88,77 @@ $C_DAE_initial_guess_equation_residuals$
    (*res)[1] = 1 - _w_2;
    (*res)[2] = 0.0 - _v_3;
 ")})));
+
+		Real x(start=1);
+		Real y(start=3,fixed=true)=3;
+	    Real z = x;
+	    Real w(start=1) = 2;
+	    Real v;
+	equation
+		der(x) = -x;
+		der(v) = 4;
 	end CCodeGenTest2;
 
 	model CCodeGenTest3
-	    parameter Real p3 = p2;
-	    parameter Real p2 = p1*p1;
-		parameter Real p1 = 4;
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CCodeGenTest3",
-			description="Test of code generation",
-			template="$C_DAE_initial_dependent_parameter_residuals$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenTest3",
+         description="Test of code generation",
+         template="$C_DAE_initial_dependent_parameter_residuals$",
+         generatedCode="
     (*res)[0] = ( _p1_2 ) * ( _p1_2 ) - (_p2_0);
     (*res)[1] = _p2_0 - (_p3_1);
 ")})));
+
+	    parameter Real p3 = p2;
+	    parameter Real p2 = p1*p1;
+		parameter Real p1 = 4;
 	end CCodeGenTest3;
 
 
 model CCodeGenTest4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenTest4",
+         description="Test of code generation",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
+    (*res)[0] = _y_1 - (_der_x_2);
+    (*res)[1] = COND_EXP_EQ(COND_EXP_LE(_time,jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: ( 3.141592653589793 ) / ( 2 )\"),JMI_TRUE,JMI_FALSE),JMI_TRUE,sin(_time),_x_0) - (_y_1);
+")})));
+
   Real x(start=0);
   Real y = noEvent(if time <= Modelica.Constants.pi/2 then sin(time) else x);
 equation
   der(x) = y; 
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CCodeGenTest4",
-			description="Test of code generation",
-			template="$C_DAE_equation_residuals$",
-			generatedCode="
-    (*res)[0] = _y_1 - (_der_x_2);
-    (*res)[1] = COND_EXP_EQ(COND_EXP_LE(_time,jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: ( 3.141592653589793 ) / ( 2 )\"),JMI_TRUE,JMI_FALSE),JMI_TRUE,sin(_time),_x_0) - (_y_1);
-")})));
 end CCodeGenTest4;
 
 
 model CCodeGenTest5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenTest5",
+         description="Test of code generation",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
+    (*res)[0] = _y_3 - (_der_x_4);
+    (*res)[1] = COND_EXP_EQ(COND_EXP_LE(_time,_one_0,JMI_TRUE,JMI_FALSE),JMI_TRUE,_x_2,COND_EXP_EQ(COND_EXP_LE(_time,_two_1,JMI_TRUE,JMI_FALSE),JMI_TRUE,(  - ( AD_WRAP_LITERAL(2) ) ) * ( _x_2 ),( AD_WRAP_LITERAL(3) ) * ( _x_2 ))) - (_y_3);
+")})));
+
   parameter Real one = 1;
   parameter Real two = 2;
   Real x(start=0.1,fixed=true);
   Real y = noEvent(if time <= one then x else if time <= two then -2*x else 3*x);
 equation
   der(x) = y; 
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CCodeGenTest5",
-			description="Test of code generation",
-			template="$C_DAE_equation_residuals$",
-			generatedCode="
-    (*res)[0] = _y_3 - (_der_x_4);
-    (*res)[1] = COND_EXP_EQ(COND_EXP_LE(_time,_one_0,JMI_TRUE,JMI_FALSE),JMI_TRUE,_x_2,COND_EXP_EQ(COND_EXP_LE(_time,_two_1,JMI_TRUE,JMI_FALSE),JMI_TRUE,(  - ( AD_WRAP_LITERAL(2) ) ) * ( _x_2 ),( AD_WRAP_LITERAL(3) ) * ( _x_2 ))) - (_y_3);
-")})));
 end CCodeGenTest5;
 
 model CCodeGenTest6
-  parameter Real p=1;
-  parameter Real one = 1;
-  parameter Real two = 2;
-  Real x(start=0.1,fixed=true);
-  Real y = if time <= one then x else if time <= two then -2*x else 3*x;
-  Real z;
-initial equation
-  z = if p>=one then one else two; 
-equation
-  der(x) = y; 
-  der(z) = -z;
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CCodeGenTest6",
-			description="Test of code generation",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenTest6",
+         description="Test of code generation",
+         template="
 $C_DAE_event_indicator_residuals$
 $C_DAE_initial_event_indicator_residuals$
 ",
@@ -182,21 +170,26 @@ $C_DAE_initial_event_indicator_residuals$
     (*res)[1] = _two_2 - (_time);
     (*res)[2] = _p_0 - (_one_1);
 ")})));
+
+  parameter Real p=1;
+  parameter Real one = 1;
+  parameter Real two = 2;
+  Real x(start=0.1,fixed=true);
+  Real y = if time <= one then x else if time <= two then -2*x else 3*x;
+  Real z;
+initial equation
+  z = if p>=one then one else two; 
+equation
+  der(x) = y; 
+  der(z) = -z;
 end CCodeGenTest6;
 
 model CCodeGenTest7
-  Real x(start=0);
-  Real y = noEvent(if 1 <= 2 then 0 else if 3 >= 4 then 1 
-   else if 1 < 2 then 2 else if 3 > 4 then 4 
-   else if 4 == 3 then 4 else 7);
-equation
- der(x) = y; 
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CCodeGenTest7",
-			description="Test of code generation. Verify that no event indicators are generated from relational expressions inside noEvent operators.",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenTest7",
+         description="Test of code generation. Verify that no event indicators are generated from relational expressions inside noEvent operators.",
+         template="
 $C_DAE_equation_residuals$
 $C_DAE_event_indicator_residuals$
 ",
@@ -208,9 +201,27 @@ LT(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(2),JMI_TRUE,JMI_FALSE),JMI_TRUE,AD_WRAP_LI
 3),AD_WRAP_LITERAL(4),JMI_TRUE,JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(4),COND_EXP_EQ(COND_EXP_EQ(AD_WRAP_LITERAL(4),AD_WRAP_LITERAL(
 3),JMI_TRUE,JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(4),AD_WRAP_LITERAL(7)))))) - (_y_1);
 ")})));
+
+  Real x(start=0);
+  Real y = noEvent(if 1 <= 2 then 0 else if 3 >= 4 then 1 
+   else if 1 < 2 then 2 else if 3 > 4 then 4 
+   else if 4 == 3 then 4 else 7);
+equation
+ der(x) = y; 
 end CCodeGenTest7;
 
 model CCodeGenTest8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenTest8",
+         description="Test of code generation",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
+    (*res)[0] = COND_EXP_EQ(_sw(0),JMI_TRUE, - ( AD_WRAP_LITERAL(1) ) + _y_1, - ( _y_1 )) - (_x_0);
+    (*res)[1] = _z_2 + _x_0 + COND_EXP_EQ(_sw(1),JMI_TRUE, - ( AD_WRAP_LITERAL(3) ),AD_WRAP_LITERAL(3)) - (_y_1);
+    (*res)[2] =  - ( _y_1 ) - ( _x_0 ) + COND_EXP_EQ(_sw(2),JMI_TRUE, - ( AD_WRAP_LITERAL(1) ),AD_WRAP_LITERAL(1)) - (_z_2);
+")})));
+
   Real x(start=0);
   Real y(start=1);
   Real z(start=0);
@@ -219,20 +230,25 @@ equation
    y = z + x +(if z>=-1.5 then -3 else 3);
    z = -y  - x + (if y>=0.5 then -1 else 1);
 
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CCodeGenTest8",
-			description="Test of code generation",
-			template="$C_DAE_equation_residuals$",
-			generatedCode="
-    (*res)[0] = COND_EXP_EQ(_sw(0),JMI_TRUE, - ( AD_WRAP_LITERAL(1) ) + _y_1, - ( _y_1 )) - (_x_0);
-    (*res)[1] = _z_2 + _x_0 + COND_EXP_EQ(_sw(1),JMI_TRUE, - ( AD_WRAP_LITERAL(3) ),AD_WRAP_LITERAL(3)) - (_y_1);
-    (*res)[2] =  - ( _y_1 ) - ( _x_0 ) + COND_EXP_EQ(_sw(2),JMI_TRUE, - ( AD_WRAP_LITERAL(1) ),AD_WRAP_LITERAL(1)) - (_z_2);
-")})));
 end CCodeGenTest8;
 
 model CCodeGenTest9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenTest9",
+         description="Test of code generation",
+         template="$C_DAE_initial_equation_residuals$
+$C_DAE_initial_event_indicator_residuals$",
+         generatedCode="
+    (*res)[0] =  - ( _x_0 ) - (_der_x_3);
+    (*res)[1] =  - ( _y_1 ) - (_der_y_4);
+    (*res)[2] =  - ( _z_2 ) - (_der_z_5);
+    (*res)[3] = COND_EXP_EQ(COND_EXP_GE(_time,AD_WRAP_LITERAL(1),JMI_TRUE,JMI_FALSE),JMI_TRUE, - ( AD_WRAP_LITERAL(1) ) + _y_1, - ( _y_1 )) - (_x_0);
+    (*res)[4] = _z_2 + _x_0 + COND_EXP_EQ(COND_EXP_GE(_z_2, - ( AD_WRAP_LITERAL(1.5) ),JMI_TRUE,JMI_FALSE),JMI_TRUE, - ( AD_WRAP_LITERAL(3) ),AD_WRAP_LITERAL(3)) - (_y_1);
+    (*res)[5] =  - ( _y_1 ) - ( _x_0 ) + COND_EXP_EQ(_sw_init(0),JMI_TRUE, - ( AD_WRAP_LITERAL(1) ),AD_WRAP_LITERAL(1)) - (_z_2);
+    (*res)[0] = _y_1 - (AD_WRAP_LITERAL(0.5));
+")})));
+
   Real x(start=0);
   Real y(start=1);
   Real z(start=0);
@@ -244,47 +260,15 @@ equation
    der(x) = -x;
    der(y) = -y;
    der(z) = -z;
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CCodeGenTest9",
-			description="Test of code generation",
-			template="
-$C_DAE_initial_equation_residuals$
-$C_DAE_initial_event_indicator_residuals$
-",
-         generatedCode="
-    (*res)[0] =  - ( _x_0 ) - (_der_x_3);
-    (*res)[1] =  - ( _y_1 ) - (_der_y_4);
-    (*res)[2] =  - ( _z_2 ) - (_der_z_5);
-    (*res)[3] = COND_EXP_EQ(COND_EXP_GE(_time,AD_WRAP_LITERAL(1),JMI_TRUE,JMI_FALSE),JMI_TRUE, - ( AD_WRAP_LITERAL(1) ) + _y_1, - ( _y_1 )) - (_x_0);
-    (*res)[4] = _z_2 + _x_0 + COND_EXP_EQ(COND_EXP_GE(_z_2, - ( AD_WRAP_LITERAL(1.5) ),JMI_TRUE,JMI_FALSE),JMI_TRUE, - ( AD_WRAP_LITERAL(3) ),AD_WRAP_LITERAL(3)) - (_y_1);
-    (*res)[5] =  - ( _y_1 ) - ( _x_0 ) + COND_EXP_EQ(_sw_init(0),JMI_TRUE, - ( AD_WRAP_LITERAL(1) ),AD_WRAP_LITERAL(1)) - (_z_2);
-    (*res)[0] = _y_1 - (AD_WRAP_LITERAL(0.5));
-")})));
 end CCodeGenTest9;
 
 model CCodeGenTest10
-  Real x(start=0);
-  Real y(start=1);
-  Real z(start=0);
-initial equation
-   x = if time>=1 then (-1 + y) else  (- y);
-   y = z + x +(if z>=-1.5 then -3 else 3);
-   z = -y  - x + (if y>=0.5 then -1 else 1);
-equation
-   der(x) = -x;
-   der(y) = -y;
-   der(z) = -z;
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CCodeGenTest10",
-			description="Test of code generation",
-			template="
-$C_DAE_initial_equation_residuals$
-$C_DAE_initial_event_indicator_residuals$
-",
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenTest10",
+         description="Test of code generation",
+         template="$C_DAE_initial_equation_residuals$
+$C_DAE_initial_event_indicator_residuals$",
          generatedCode="
     (*res)[0] =  - ( _x_0 ) - (_der_x_3);
     (*res)[1] =  - ( _y_1 ) - (_der_y_4);
@@ -296,43 +280,76 @@ $C_DAE_initial_event_indicator_residuals$
     (*res)[1] = _z_2 - ( - ( AD_WRAP_LITERAL(1.5) ));
     (*res)[2] = _y_1 - (AD_WRAP_LITERAL(0.5));
 ")})));
+
+  Real x(start=0);
+  Real y(start=1);
+  Real z(start=0);
+initial equation
+   x = if time>=1 then (-1 + y) else  (- y);
+   y = z + x +(if z>=-1.5 then -3 else 3);
+   z = -y  - x + (if y>=0.5 then -1 else 1);
+equation
+   der(x) = -x;
+   der(y) = -y;
+   der(z) = -z;
 end CCodeGenTest10;
 
 model CCodeGenTest11
- Integer x = 1;
- Integer y = 2;
- Real z = noEvent(if x <> y then 1.0 else 2.0);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CCodeGenTest11",
-			description="C code generation: the '<>' operator",
-			template="$C_DAE_equation_residuals$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenTest11",
+         description="C code generation: the '<>' operator",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
     (*res)[0] = 1 - (_x_0);
     (*res)[1] = 2 - (_y_1);
     (*res)[2] = COND_EXP_EQ(COND_EXP_EQ(_x_0, _y_1, JMI_FALSE, JMI_TRUE),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0)) - (_z_2);
 ")})));
+
+ Integer x = 1;
+ Integer y = 2;
+ Real z = noEvent(if x <> y then 1.0 else 2.0);
 end CCodeGenTest11;
 
 
 model CCodeGenTest12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenTest12",
+         description="C code generation: test that x^2 is represented by x*x in the generated code. ",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
+    (*res)[0] = pow(_x_0 - ( 0.3 ),0.3) + (1.0 * (_x_0 - ( 0.3 )) * (_x_0 - ( 0.3 )) * (_x_0 - ( 0.3 ))) - (_der_x_1);
+")})));
+
   Real x(start=1,fixed=true);
 equation
   der(x) = (x-0.3)^0.3 + (x-0.3)^3;
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CCodeGenTest12",
-			description="C code generation: test that x^2 is represented by x*x in the generated code. ",
-			template="$C_DAE_equation_residuals$",
-			generatedCode="
-    (*res)[0] = pow(_x_0 - ( 0.3 ),0.3) + (1.0 * (_x_0 - ( 0.3 )) * (_x_0 - ( 0.3 )) * (_x_0 - ( 0.3 ))) - (_der_x_1);
-")})));
 end CCodeGenTest12;
 
 
 model CCodeGenTest13
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenTest13",
+         description="Code generation for enumerations: variable aliases",
+         template="$C_variable_aliases$",
+         generatedCode="
+#define _ci_0 ((*(jmi->z))[jmi->offs_integer_ci+0])
+#define _cd_1 ((*(jmi->z))[jmi->offs_integer_ci+1])
+#define _aic_4 ((*(jmi->z))[jmi->offs_integer_ci+2])
+#define _bic_5 ((*(jmi->z))[jmi->offs_integer_ci+3])
+#define _adc_6 ((*(jmi->z))[jmi->offs_integer_ci+4])
+#define _bdc_7 ((*(jmi->z))[jmi->offs_integer_ci+5])
+#define _pi_2 ((*(jmi->z))[jmi->offs_integer_pi+0])
+#define _aip_8 ((*(jmi->z))[jmi->offs_integer_pi+1])
+#define _bip_9 ((*(jmi->z))[jmi->offs_integer_pi+2])
+#define _pd_3 ((*(jmi->z))[jmi->offs_integer_pd+0])
+#define _adp_10 ((*(jmi->z))[jmi->offs_integer_pd+1])
+#define _bdp_11 ((*(jmi->z))[jmi->offs_integer_pd+2])
+#define _time ((*(jmi->z))[jmi->offs_t])	 
+")})));
+
 	constant Integer ci = 1;
 	constant Integer cd = ci;
 	parameter Integer pi = 2;
@@ -349,118 +366,70 @@ model CCodeGenTest13
 	parameter B bip = B.f;
 	parameter A adp = aip;
 	parameter B bdp = bip;
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CCodeGenTest13",
-			description="Code generation for enumerations: variable aliases",
-			template="$C_variable_aliases$",
-			generatedCode="
-#define _ci_0 ((*(jmi->z))[jmi->offs_integer_ci+0])
-#define _cd_1 ((*(jmi->z))[jmi->offs_integer_ci+1])
-#define _aic_4 ((*(jmi->z))[jmi->offs_integer_ci+2])
-#define _bic_5 ((*(jmi->z))[jmi->offs_integer_ci+3])
-#define _adc_6 ((*(jmi->z))[jmi->offs_integer_ci+4])
-#define _bdc_7 ((*(jmi->z))[jmi->offs_integer_ci+5])
-#define _pi_2 ((*(jmi->z))[jmi->offs_integer_pi+0])
-#define _aip_8 ((*(jmi->z))[jmi->offs_integer_pi+1])
-#define _bip_9 ((*(jmi->z))[jmi->offs_integer_pi+2])
-#define _pd_3 ((*(jmi->z))[jmi->offs_integer_pd+0])
-#define _adp_10 ((*(jmi->z))[jmi->offs_integer_pd+1])
-#define _bdp_11 ((*(jmi->z))[jmi->offs_integer_pd+2])
-#define _time ((*(jmi->z))[jmi->offs_t])	 
-")})));
 end CCodeGenTest13;
 
 
 
 model CLogExp1
- Boolean x = true;
- Boolean y = false;
- Real z = noEvent(if x and y then 1.0 else 2.0);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CLogExp1",
-			description="C code generation for logical operators: and",
-			template="$C_DAE_equation_residuals$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CLogExp1",
+         description="C code generation for logical operators: and",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
     (*res)[0] = JMI_TRUE - (_x_0);
     (*res)[1] = JMI_FALSE - (_y_1);
     (*res)[2] = COND_EXP_EQ(LOG_EXP_AND(_x_0, _y_1),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0)) - (_z_2);
 ")})));
+
+ Boolean x = true;
+ Boolean y = false;
+ Real z = noEvent(if x and y then 1.0 else 2.0);
 end CLogExp1;
 
 
 model CLogExp2
- Boolean x = true;
- Boolean y = false;
- Real z = noEvent(if x or y then 1.0 else 2.0);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CLogExp2",
-			description="C code generation for logical operators: or",
-			template="$C_DAE_equation_residuals$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CLogExp2",
+         description="C code generation for logical operators: or",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
     (*res)[0] = JMI_TRUE - (_x_0);
     (*res)[1] = JMI_FALSE - (_y_1);
     (*res)[2] = COND_EXP_EQ(LOG_EXP_OR(_x_0, _y_1),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0)) - (_z_2);
 ")})));
+
+ Boolean x = true;
+ Boolean y = false;
+ Real z = noEvent(if x or y then 1.0 else 2.0);
 end CLogExp2;
 
 
 model CLogExp3
- Boolean x = true;
- Real y = noEvent(if not x then 1.0 else 2.0);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CLogExp3",
-			description="C code generation for logical operators: not",
-			template="$C_DAE_equation_residuals$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CLogExp3",
+         description="C code generation for logical operators: not",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
     (*res)[0] = JMI_TRUE - (_x_0);
     (*res)[1] = COND_EXP_EQ(LOG_EXP_NOT(_x_0),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0)) - (_y_1);
 ")})));
+
+ Boolean x = true;
+ Real y = noEvent(if not x then 1.0 else 2.0);
 end CLogExp3;
 
 
 
 
 model CCodeGenDiscreteVariables1
-  constant Real c1 = 1;
-  constant Real c2 = c1;
-  parameter Real p1 = 1;
-  parameter Real p2 = p1;
-  discrete Real rd1 = 4;
-  discrete Real rd2 = rd1;
-  Real x(start=1);
-  Real w = 4;
-
-  constant Integer ci1 = 1;
-  constant Integer ci2 = ci1;
-  parameter Integer pi1 = 1;
-  parameter Integer pi2 = pi1;
-  discrete Integer rid1 = 4;
-  discrete Integer rid2 = rid1;
-
-  constant Boolean cb1 = true;
-  constant Boolean cb2 = cb1;
-  parameter Boolean pb1 = true;
-  parameter Boolean pb2 = pb1;
-  discrete Boolean rbd1 = false;
-  discrete Boolean rbd2 = rbd1;
-
-equation
-  der(x) = -x;
-
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CCodeGenDiscreteVariables1",
-			description="Test C code generation of discrete variables.",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenDiscreteVariables1",
+         description="Test C code generation of discrete variables.",
+         template="
 $C_variable_aliases$
 $C_DAE_equation_residuals$
 ",
@@ -491,28 +460,44 @@ $C_DAE_equation_residuals$
     (*res)[3] = 4 - (_rid2_11);
     (*res)[4] = JMI_FALSE - (_rbd2_16);
 ")})));
+
+  constant Real c1 = 1;
+  constant Real c2 = c1;
+  parameter Real p1 = 1;
+  parameter Real p2 = p1;
+  discrete Real rd1 = 4;
+  discrete Real rd2 = rd1;
+  Real x(start=1);
+  Real w = 4;
+
+  constant Integer ci1 = 1;
+  constant Integer ci2 = ci1;
+  parameter Integer pi1 = 1;
+  parameter Integer pi2 = pi1;
+  discrete Integer rid1 = 4;
+  discrete Integer rid2 = rid1;
+
+  constant Boolean cb1 = true;
+  constant Boolean cb2 = cb1;
+  parameter Boolean pb1 = true;
+  parameter Boolean pb2 = pb1;
+  discrete Boolean rbd1 = false;
+  discrete Boolean rbd2 = rbd1;
+
+equation
+  der(x) = -x;
+
 end CCodeGenDiscreteVariables1;
 
 
 model CCodeGenParameters1
-	function f
-		input Real x;
-		output Real y;
-		external "C";
-	end f;
-	
-	parameter Real x = 1;
-	parameter Real y = x;
-	parameter Real z = f(1);
-	Real dummy = x;
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CCodeGenParameters1",
-			description="Make sure scaling is applied properly when setting to parameter values",
-			generate_dae=true,
-			enable_variable_scaling=true,
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenParameters1",
+         description="Make sure scaling is applied properly when setting to parameter values",
+         generate_dae=true,
+         enable_variable_scaling=true,
+         template="
 $C_DAE_initial_dependent_parameter_assignments$
 $C_set_start_values$
 ",
@@ -523,24 +508,27 @@ $C_set_start_values$
     _z_2 = (func_CCodeGenTests_CCodeGenParameters1_f_exp(AD_WRAP_LITERAL(1)))/sf(1);
    model_init_eval_parameters(jmi);
 ")})));
+
+	function f
+		input Real x;
+		output Real y;
+		external "C";
+	end f;
+	
+	parameter Real x = 1;
+	parameter Real y = x;
+	parameter Real z = f(1);
+	Real dummy = x;
 end CCodeGenParameters1;
 
 model CCodeGenUniqueNames
- model A
-  Real y;
- end A;
- 
- Real x_y = 1;
- A x(y = x_y + 2);
- Real der_x_y = der(x_y) - 1;
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CCodeGenUniqueNames",
-			enable_structural_diagnosis=false,
-			index_reduction=false,
-			description="Test that unique names are generated for each variable",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenUniqueNames",
+         enable_structural_diagnosis=false,
+         index_reduction=false,
+         description="Test that unique names are generated for each variable",
+         template="
 $C_variable_aliases$
 $C_DAE_equation_residuals$
 ",
@@ -555,19 +543,24 @@ $C_DAE_equation_residuals$
     (*res)[1] = _x_y_0 + 2 - (_x_y_1);
     (*res)[2] = _der_x_y_3 - ( 1 ) - (_der_x_y_2);
 ")})));
+
+ model A
+  Real y;
+ end A;
+ 
+ Real x_y = 1;
+ A x(y = x_y + 2);
+ Real der_x_y = der(x_y) - 1;
 end CCodeGenUniqueNames;
 
 
 model CCodeGenDotOp
- Real x[2,2] = y .* y ./ (y .+ y .- 2) .^ y;
- Real y[2,2] = {{1,2},{3,4}};
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CCodeGenDotOp",
-			description="C code generation of dot operators (.+, .*, etc)",
-			template="$C_DAE_equation_residuals$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenDotOp",
+         description="C code generation of dot operators (.+, .*, etc)",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
     (*res)[0] = jmi_divide(( _y_1_1_4 ) * ( _y_1_1_4 ),pow(_y_1_1_4 + _y_1_1_4 - ( 2 ),_y_1_1_4),\"Divide by zero: ( ( y[1,1] ) .* ( y[1,1] ) ) ./ ( ( y[1,1] .+ y[1,1] .- ( 2 ) ) .^ y[1,1] )\") - (_x_1_1_0);
     (*res)[1] = jmi_divide(( _y_1_2_5 ) * ( _y_1_2_5 ),pow(_y_1_2_5 + _y_1_2_5 - ( 2 ),_y_1_2_5),\"Divide by zero: ( ( y[1,2] ) .* ( y[1,2] ) ) ./ ( ( y[1,2] .+ y[1,2] .- ( 2 ) ) .^ y[1,2] )\") - (_x_1_2_1);
     (*res)[2] = jmi_divide(( _y_2_1_6 ) * ( _y_2_1_6 ),pow(_y_2_1_6 + _y_2_1_6 - ( 2 ),_y_2_1_6),\"Divide by zero: ( ( y[2,1] ) .* ( y[2,1] ) ) ./ ( ( y[2,1] .+ y[2,1] .- ( 2 ) ) .^ y[2,1] )\") - (_x_2_1_2);
@@ -577,23 +570,20 @@ model CCodeGenDotOp
     (*res)[6] = 3 - (_y_2_1_6);
     (*res)[7] = 4 - (_y_2_2_7);
 ")})));
+
+ Real x[2,2] = y .* y ./ (y .+ y .- 2) .^ y;
+ Real y[2,2] = {{1,2},{3,4}};
 end CCodeGenDotOp;
 
 
 
 model CCodeGenMinMax
- Real x[2,2] = {{1,2},{3,4}};
- Real y1 = min(x);
- Real y2 = min(1, 2);
- Real y3 = max(x);
- Real y4 = max(1, 2);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CCodeGenMinMax",
-			description="C code generation of min() and max()",
-			template="$C_DAE_equation_residuals$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenMinMax",
+         description="C code generation of min() and max()",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
     (*res)[0] = 1 - (_x_1_1_0);
     (*res)[1] = 2 - (_x_1_2_1);
     (*res)[2] = 3 - (_x_2_1_2);
@@ -603,6 +593,12 @@ model CCodeGenMinMax
     (*res)[6] = jmi_max(jmi_max(jmi_max(_x_1_1_0, _x_1_2_1), _x_2_1_2), _x_2_2_3) - (_y3_6);
     (*res)[7] = jmi_max(AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2)) - (_y4_7);
 ")})));
+
+ Real x[2,2] = {{1,2},{3,4}};
+ Real y1 = min(x);
+ Real y2 = min(1, 2);
+ Real y3 = max(x);
+ Real y4 = max(1, 2);
 end CCodeGenMinMax;
 
 
@@ -666,15 +662,11 @@ end TestFunctionRecursive;
 
 /* Function tests */
 model CFunctionTest1
- Real x;
-equation
- x = TestFunction1(2.0);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CFunctionTest1",
-			description="Test of code generation",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest1",
+         description="Test of code generation",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -701,19 +693,18 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp(jmi_ad_var_t i1_v) {
 
     (*res)[0] = func_CCodeGenTests_TestFunction1_exp(2.0) - (_x_0);
 ")})));
+
+ Real x;
+equation
+ x = TestFunction1(2.0);
 end CFunctionTest1;
 
 model CFunctionTest2
- Real x;
- Real y;
-equation
- (x, y) = TestFunction2(1, 2);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CFunctionTest2",
-			description="C code gen: functions: using multiple outputs",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest2",
+         description="C code gen: functions: using multiple outputs",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -748,19 +739,19 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_
     (*res)[0] = tmp_1 - (_x_0);
     (*res)[1] = tmp_2 - (_y_1);
 ")})));
+
+ Real x;
+ Real y;
+equation
+ (x, y) = TestFunction2(1, 2);
 end CFunctionTest2;
 
 model CFunctionTest3
- Real x;
- Real y = TestFunction2(2, 3);
-equation
- x = TestFunction2(1);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CFunctionTest3",
-			description="C code gen: functions: two calls to same function",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest3",
+         description="C code gen: functions: two calls to same function",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -792,19 +783,19 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_
     (*res)[0] = func_CCodeGenTests_TestFunction2_exp(AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0)) - (_x_0);
     (*res)[1] = func_CCodeGenTests_TestFunction2_exp(AD_WRAP_LITERAL(2), AD_WRAP_LITERAL(3)) - (_y_1);
 ")})));
-end CFunctionTest3;
 
-model CFunctionTest4
  Real x;
  Real y = TestFunction2(2, 3);
 equation
- x = TestFunction1(y * 2);
+ x = TestFunction2(1);
+end CFunctionTest3;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CFunctionTest4",
-			description="C code gen: functions: calls to two functions",
-			template="
+model CFunctionTest4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest4",
+         description="C code gen: functions: calls to two functions",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -853,19 +844,19 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp(jmi_ad_var_t i1_v) {
     (*res)[0] = func_CCodeGenTests_TestFunction1_exp(( _y_1 ) * ( AD_WRAP_LITERAL(2) )) - (_x_0);
     (*res)[1] = func_CCodeGenTests_TestFunction2_exp(AD_WRAP_LITERAL(2), AD_WRAP_LITERAL(3)) - (_y_1);
 ")})));
+
+ Real x;
+ Real y = TestFunction2(2, 3);
+equation
+ x = TestFunction1(y * 2);
 end CFunctionTest4;
 
 model CFunctionTest5
-  Real x;
-  Real y;
-equation
-  (x, y) = TestFunction3(1, 2, 3);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CFunctionTest5",
-			description="C code gen: functions: fewer components assigned than outputs",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest5",
+         description="C code gen: functions: fewer components assigned than outputs",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -902,19 +893,19 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction3_exp(jmi_ad_var_t i1_v, jmi_ad_var_
     (*res)[0] = tmp_1 - (_x_0);
     (*res)[1] = tmp_2 - (_y_1);
 ")})));
+
+  Real x;
+  Real y;
+equation
+  (x, y) = TestFunction3(1, 2, 3);
 end CFunctionTest5;
 
 model CFunctionTest6
-  Real x;
-  Real z;
-equation
-  (x, , z) = TestFunction3(1, 2, 3);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CFunctionTest6",
-			description="C code gen: functions: one output skipped",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest6",
+         description="C code gen: functions: one output skipped",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -951,17 +942,19 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction3_exp(jmi_ad_var_t i1_v, jmi_ad_var_
     (*res)[0] = tmp_1 - (_x_0);
     (*res)[1] = tmp_2 - (_z_1);
 ")})));
+
+  Real x;
+  Real z;
+equation
+  (x, , z) = TestFunction3(1, 2, 3);
 end CFunctionTest6;
 
 model CFunctionTest7
-equation
-  TestFunction2(1, 2);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CFunctionTest7",
-			description="C code gen: functions: no components assigned",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest7",
+         description="C code gen: functions: no components assigned",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -992,16 +985,17 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_
 
     func_CCodeGenTests_TestFunction2_def(AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2), NULL, NULL);
 ")})));
+
+equation
+  TestFunction2(1, 2);
 end CFunctionTest7;
 
 model CFunctionTest8
- Real x = TestFunctionCallingFunction(1);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CFunctionTest8",
-			description="C code gen: functions: function calling other function",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest8",
+         description="C code gen: functions: function calling other function",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -1045,18 +1039,18 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp(jmi_ad_var_t i1_v) {
 
     (*res)[0] = func_CCodeGenTests_TestFunctionCallingFunction_exp(AD_WRAP_LITERAL(1)) - (_x_0);
 ")})));
+
+ Real x = TestFunctionCallingFunction(1);
 end CFunctionTest8;
 
 
 /* TODO: Why is this commented out?
 model CFunctionTest9
- Real x = TestFunctionRecursive(5);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CFunctionTest9",
-			description="C code gen: functions:",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest9",
+         description="C code gen: functions:",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -1087,17 +1081,17 @@ jmi_ad_var_t func_CCodeGenTests_TestFunctionRecursive_exp(jmi_ad_var_t i1_v) {
 
     (*res)[0] = func_CCodeGenTests_TestFunctionRecursive_exp(5) - (_x_0);
 ")})));
+
+ Real x = TestFunctionRecursive(5);
 end CFunctionTest9;
 */
 
 model CFunctionTest10
- Real x = TestFunction0();
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CFunctionTest10",
-			description="C code gen: functions: no inputs",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest10",
+         description="C code gen: functions: no inputs",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -1124,17 +1118,16 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction0_exp() {
 
     (*res)[0] = func_CCodeGenTests_TestFunction0_exp() - (_x_0);
 ")})));
+
+ Real x = TestFunction0();
 end CFunctionTest10;
 
 model CFunctionTest11
-equation
- TestFunctionNoOut(1);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CFunctionTest11",
-			description="C code gen: functions: no outputs",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest11",
+         description="C code gen: functions: no outputs",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -1151,27 +1144,18 @@ void func_CCodeGenTests_TestFunctionNoOut_def(jmi_ad_var_t i1_v) {
 
     func_CCodeGenTests_TestFunctionNoOut_def(AD_WRAP_LITERAL(1));
 ")})));
+
+equation
+ TestFunctionNoOut(1);
 end CFunctionTest11;
 
 model CFunctionTest12
-
-function f
-  input Real x[2];
-  output Real y[2];
-algorithm
-  y:=x;
-end f;
-Real z[2](each nominal=3)={1,1};
-Real w[2];
-equation
-w=f(z);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CFunctionTest12",
-			description="C code gen: function and variable scaling",
-			enable_variable_scaling=true,
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest12",
+         description="C code gen: function and variable scaling",
+         enable_variable_scaling=true,
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -1206,37 +1190,30 @@ void func_CCodeGenTests_CFunctionTest12_f_def(jmi_array_t* x_a, jmi_array_t* y_a
     (*res)[3] = 1 - ((_z_2_1*sf(1)));
 
 ")})));
+
+
+function f
+  input Real x[2];
+  output Real y[2];
+algorithm
+  y:=x;
+end f;
+Real z[2](each nominal=3)={1,1};
+Real w[2];
+equation
+w=f(z);
 end CFunctionTest12;
 
 
 model CFunctionTest13
 
-		
-function F
-  input Real x[2];
-  input Real u;
-  output Real dx[2];
-  output Real y[2];
-algorithm
-  dx := -x + {u,0};
-  y := 2*x;
-end F;
-
-Real x[2](each start = 3);
-Real z[2];
-Real u = 3;
-Real y[2];
-equation
- der(x) = -x;
-(z,y) = F(x,u);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CFunctionTest13",
-			description="C code gen: solved function call equation",
-			generate_ode=true,
-			equation_sorting=true,
-			template="
+	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest13",
+         description="C code gen: solved function call equation",
+		 generate_ode=true,
+         equation_sorting=true,
+         template="
 $C_function_headers$
 $C_functions$
 $C_ode_derivatives$
@@ -1287,9 +1264,8 @@ void func_CCodeGenTests_CFunctionTest13_F_def(jmi_array_t* x_a, jmi_ad_var_t u_v
   _y_2_6 = (jmi_array_val_1(tmp_2, 2));
 	 
 ")})));
-end CFunctionTest13;
-
-model CFunctionTest14
+		
+		
 function F
   input Real x[2];
   input Real u;
@@ -1306,15 +1282,18 @@ Real u = 3;
 Real y[2];
 equation
  der(x) = -x;
-(z,y) = F(z+x,u);
+(z,y) = F(x,u);
+end CFunctionTest13;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CFunctionTest14",
-			description="C code gen: unsolved function call equation",
-			generate_ode=true,
-			equation_sorting=true,
-			template="
+model CFunctionTest14
+
+	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest14",
+         description="C code gen: unsolved function call equation",
+		 generate_ode=true,
+         equation_sorting=true,
+         template="
 $C_function_headers$
 $C_functions$
 $C_ode_derivatives$
@@ -1342,6 +1321,9 @@ void func_CCodeGenTests_CFunctionTest14_F_def(jmi_array_t* x_a, jmi_ad_var_t u_v
     return;
 }
 
+    JMI_ARRAY_STATIC(tmp_1, 2, 1)
+    JMI_ARRAY_STATIC(tmp_2, 2, 1)
+    JMI_ARRAY_STATIC(tmp_3, 2, 1)
     model_ode_guards(jmi);
 /************* ODE section *********/
   _der_x_1_7 =  - ( _x_1_0 );
@@ -1350,29 +1332,37 @@ void func_CCodeGenTests_CFunctionTest14_F_def(jmi_array_t* x_a, jmi_ad_var_t u_v
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
   _u_4 = 3;
-  ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+  ef |= jmi_kinsol_solve(jmi->dae_block_residuals[0]);
 
 ")})));
+		
+		
+function F
+  input Real x[2];
+  input Real u;
+  output Real dx[2];
+  output Real y[2];
+algorithm
+  dx := -x + {u,0};
+  y := 2*x;
+end F;
+
+Real x[2](each start = 3);
+Real z[2];
+Real u = 3;
+Real y[2];
+equation
+ der(x) = -x;
+(z,y) = F(z+x,u);
 end CFunctionTest14;
 
 model CForLoop1
- function f
-  output Real o = 1.0;
-  protected Real x = 0;
-  algorithm
-  for i in 1:3 loop
-   x := x + i;
-  end for;
- end f;
- 
- Real x = f();
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CForLoop1",
-			description="C code generation for for loops: range exp",
-			template="$C_functions$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CForLoop1",
+         description="C code generation for for loops: range exp",
+         template="$C_functions$",
+         generatedCode="
 void func_CCodeGenTests_CForLoop1_f_def(jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t o_v;
@@ -1397,27 +1387,27 @@ jmi_ad_var_t func_CCodeGenTests_CForLoop1_f_exp() {
 }
 
 ")})));
-end CForLoop1;
 
-
-model CForLoop2
  function f
   output Real o = 1.0;
   protected Real x = 0;
   algorithm
-  for i in {2,3,5} loop
+  for i in 1:3 loop
    x := x + i;
   end for;
  end f;
  
  Real x = f();
+end CForLoop1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CForLoop2",
-			description="C code generation for for loops: generic exp",
-			template="$C_functions$",
-			generatedCode="
+
+model CForLoop2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CForLoop2",
+         description="C code generation for for loops: generic exp",
+         template="$C_functions$",
+         generatedCode="
 void func_CCodeGenTests_CForLoop2_f_def(jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t o_v;
@@ -1446,24 +1436,27 @@ jmi_ad_var_t func_CCodeGenTests_CForLoop2_f_exp() {
 }
 
 ")})));
+
+ function f
+  output Real o = 1.0;
+  protected Real x = 0;
+  algorithm
+  for i in {2,3,5} loop
+   x := x + i;
+  end for;
+ end f;
+ 
+ Real x = f();
 end CForLoop2;
 
 
 
 model CArrayInput1
- function f
-  input Real inp[3];
-  output Real out = sum(inp);
- algorithm
- end f;
- 
- Real x = f(1:3);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CArrayInput1",
-			description="C code generation: array inputs to functions: basic test",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayInput1",
+         description="C code generation: array inputs to functions: basic test",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -1495,23 +1488,23 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput1_f_exp(jmi_array_t* inp_a) {
     jmi_array_ref_1(tmp_1, 3) = AD_WRAP_LITERAL(3);
     (*res)[0] = func_CCodeGenTests_CArrayInput1_f_exp(tmp_1) - (_x_0);
 ")})));
-end CArrayInput1;
 
-
-model CArrayInput2
  function f
   input Real inp[3];
   output Real out = sum(inp);
  algorithm
  end f;
  
- Real x = 2 + 5 * f((1:3) + {3, 5, 7});
+ Real x = f(1:3);
+end CArrayInput1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CArrayInput2",
-			description="C code generation: array inputs to functions: expressions around call",
-			template="
+
+model CArrayInput2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayInput2",
+         description="C code generation: array inputs to functions: expressions around call",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -1543,23 +1536,23 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput2_f_exp(jmi_array_t* inp_a) {
     jmi_array_ref_1(tmp_1, 3) = AD_WRAP_LITERAL(3) + AD_WRAP_LITERAL(7);
     (*res)[0] = 2 + ( 5 ) * ( func_CCodeGenTests_CArrayInput2_f_exp(tmp_1) ) - (_x_0);
 ")})));
-end CArrayInput2;
 
-
-model CArrayInput3
  function f
   input Real inp[3];
   output Real out = sum(inp);
  algorithm
  end f;
  
- Real x = f({f(1:3),f(4:6),f(7:9)});
+ Real x = 2 + 5 * f((1:3) + {3, 5, 7});
+end CArrayInput2;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CArrayInput3",
-			description="C code generation: array inputs to functions: nestled calls",
-			template="
+
+model CArrayInput3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayInput3",
+         description="C code generation: array inputs to functions: nestled calls",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -1606,29 +1599,23 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput3_f_exp(jmi_array_t* inp_a) {
     jmi_array_ref_1(tmp_4, 3) = func_CCodeGenTests_CArrayInput3_f_exp(tmp_3);
     (*res)[0] = func_CCodeGenTests_CArrayInput3_f_exp(tmp_4) - (_x_0);
 ")})));
+
+ function f
+  input Real inp[3];
+  output Real out = sum(inp);
+ algorithm
+ end f;
+ 
+ Real x = f({f(1:3),f(4:6),f(7:9)});
 end CArrayInput3;
 
 
 model CArrayInput4
- function f1
-  output Real out = 1.0;
- algorithm
-  out := f2(1:3);
- end f1;
- 
- function f2
-  input Real inp[3];
-  output Real out = sum(inp);
- algorithm
- end f2;
- 
- Real x = f1();
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CArrayInput4",
-			description="C code generation: array inputs to functions: in assign statement",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayInput4",
+         description="C code generation: array inputs to functions: in assign statement",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -1675,31 +1662,29 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput4_f2_exp(jmi_array_t* inp_a) {
 }
 
 ")})));
-end CArrayInput4;
 
-
-model CArrayInput5
  function f1
   output Real out = 1.0;
-  protected Real t;
  algorithm
-  (out, t) := f2(1:3);
+  out := f2(1:3);
  end f1;
  
  function f2
   input Real inp[3];
-  output Real out1 = sum(inp);
-  output Real out2 = max(inp);
+  output Real out = sum(inp);
  algorithm
  end f2;
  
  Real x = f1();
+end CArrayInput4;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CArrayInput5",
-			description="C code generation: array inputs to functions: function call stmt",
-			template="
+
+model CArrayInput5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayInput5",
+         description="C code generation: array inputs to functions: function call stmt",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -1750,35 +1735,31 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput5_f2_exp(jmi_array_t* inp_a) {
 }
 
 ")})));
-end CArrayInput5;
 
-
-model CArrayInput6
  function f1
   output Real out = 1.0;
+  protected Real t;
  algorithm
-  if f2(1:2) < 4 then
-   out := f2(5:6);
-  elseif f2(3:4) > 5 then
-   out := f2(7:8);
-  else
-   out := f2(9:10);
-  end if;
+  (out, t) := f2(1:3);
  end f1;
  
  function f2
-  input Real inp[2];
-  output Real out = sum(inp);
+  input Real inp[3];
+  output Real out1 = sum(inp);
+  output Real out2 = max(inp);
  algorithm
  end f2;
  
  Real x = f1();
+end CArrayInput5;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CArrayInput6",
-			description="C code generation: array inputs to functions: if statement",
-			template="
+
+model CArrayInput6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayInput6",
+         description="C code generation: array inputs to functions: if statement",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -1846,31 +1827,35 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput6_f2_exp(jmi_array_t* inp_a) {
 }
 
 ")})));
-end CArrayInput6;
 
-
-model CArrayInput7
  function f1
   output Real out = 1.0;
  algorithm
-  while f2(1:3) < 2 loop
-   out := f2(4:6);
-  end while;
+  if f2(1:2) < 4 then
+   out := f2(5:6);
+  elseif f2(3:4) > 5 then
+   out := f2(7:8);
+  else
+   out := f2(9:10);
+  end if;
  end f1;
  
  function f2
-  input Real inp[3];
+  input Real inp[2];
   output Real out = sum(inp);
  algorithm
  end f2;
  
  Real x = f1();
+end CArrayInput6;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CArrayInput7",
-			description="C code generation: array inputs to functions: while stmt",
-			template="
+
+model CArrayInput7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayInput7",
+         description="C code generation: array inputs to functions: while stmt",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -1924,16 +1909,13 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput7_f2_exp(jmi_array_t* inp_a) {
 }
 
 ")})));
-end CArrayInput7;
 
-
-model CArrayInput8
  function f1
   output Real out = 1.0;
  algorithm
-  for i in {f2(1:3), f2(4:6)} loop
-   out := f2(7:9);
-  end for;
+  while f2(1:3) < 2 loop
+   out := f2(4:6);
+  end while;
  end f1;
  
  function f2
@@ -1943,12 +1925,15 @@ model CArrayInput8
  end f2;
  
  Real x = f1();
+end CArrayInput7;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CArrayInput8",
-			description="C code generation: array inputs to functions: for stmt",
-			template="
+
+model CArrayInput8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayInput8",
+         description="C code generation: array inputs to functions: for stmt",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -2013,22 +1998,31 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput8_f2_exp(jmi_array_t* inp_a) {
 }
 
 ")})));
+
+ function f1
+  output Real out = 1.0;
+ algorithm
+  for i in {f2(1:3), f2(4:6)} loop
+   out := f2(7:9);
+  end for;
+ end f1;
+ 
+ function f2
+  input Real inp[3];
+  output Real out = sum(inp);
+ algorithm
+ end f2;
+ 
+ Real x = f1();
 end CArrayInput8;
 
 
 model CArrayOutputs1
- function f
-  output Real o[2] = {1,2};
- algorithm
- end f;
- 
- Real x[2] = f();
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CArrayOutputs1",
-			description="C code generation: array outputs from functions: in equation",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayOutputs1",
+         description="C code generation: array outputs from functions: in equation",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -2056,24 +2050,22 @@ void func_CCodeGenTests_CArrayOutputs1_f_def(jmi_array_t* o_a) {
     (*res)[0] = jmi_array_val_1(tmp_1, 1) - (_x_1_0);
     (*res)[1] = jmi_array_val_1(tmp_1, 2) - (_x_2_1);
 ")})));
-end CArrayOutputs1;
 
-
-model CArrayOutputs2
  function f
   output Real o[2] = {1,2};
  algorithm
  end f;
  
- Real x;
-equation
- x = f() * {3,4};
+ Real x[2] = f();
+end CArrayOutputs1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CArrayOutputs2",
-			description="C code generation: array outputs from functions: in expression in equation",
-			template="
+
+model CArrayOutputs2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayOutputs2",
+         description="C code generation: array outputs from functions: in expression in equation",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -2102,29 +2094,24 @@ void func_CCodeGenTests_CArrayOutputs2_f_def(jmi_array_t* o_a) {
     (*res)[1] = jmi_array_val_1(tmp_1, 2) - (_temp_1_2_2);
     (*res)[2] = ( _temp_1_1_1 ) * ( 3 ) + ( _temp_1_2_2 ) * ( 4 ) - (_x_0);
 ")})));
+
+ function f
+  output Real o[2] = {1,2};
+ algorithm
+ end f;
+ 
+ Real x;
+equation
+ x = f() * {3,4};
 end CArrayOutputs2;
 
 
 model CArrayOutputs3
- function f1
-  output Real o = 0;
-  protected Real x;
- algorithm
-  x := f2() * {3,4};
- end f1;
- 
- function f2
-  output Real o[2] = {1,2};
- algorithm
- end f2;
- 
- Real x = f1();
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CArrayOutputs3",
-			description="C code generation: array outputs from functions: in expression in function",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayOutputs3",
+         description="C code generation: array outputs from functions: in expression in function",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -2170,31 +2157,29 @@ void func_CCodeGenTests_CArrayOutputs3_f2_def(jmi_array_t* o_a) {
 
     (*res)[0] = func_CCodeGenTests_CArrayOutputs3_f1_exp() - (_x_0);
 ")})));
-end CArrayOutputs3;
 
-
-model CArrayOutputs4
  function f1
   output Real o = 0;
-  protected Real x[2];
-  protected Real y;
+  protected Real x;
  algorithm
-  (x,y) := f2();
+  x := f2() * {3,4};
  end f1;
  
  function f2
-  output Real o1[2] = {1,2};
-  output Real o2 = 3;
+  output Real o[2] = {1,2};
  algorithm
  end f2;
  
  Real x = f1();
+end CArrayOutputs3;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CArrayOutputs4",
-			description="C code generation: array outputs from functions: function call statement",
-			template="
+
+model CArrayOutputs4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayOutputs4",
+         description="C code generation: array outputs from functions: function call statement",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -2242,33 +2227,31 @@ void func_CCodeGenTests_CArrayOutputs4_f2_def(jmi_array_t* o1_a, jmi_ad_var_t* o
 
     (*res)[0] = func_CCodeGenTests_CArrayOutputs4_f1_exp() - (_x_0);
 ")})));
-end CArrayOutputs4;
 
-
-model CArrayOutputs5
  function f1
-  input Real i[2];
   output Real o = 0;
   protected Real x[2];
   protected Real y;
  algorithm
-  (x, y) := f2(i);
+  (x,y) := f2();
  end f1;
  
  function f2
-  input Real i[2];
-  output Real o1[2] = i;
+  output Real o1[2] = {1,2};
   output Real o2 = 3;
  algorithm
  end f2;
  
- Real x = f1({1,2});
+ Real x = f1();
+end CArrayOutputs4;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CArrayOutputs5",
-			description="C code generation: array outputs from functions: passing input array",
-			template="
+
+model CArrayOutputs5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayOutputs5",
+         description="C code generation: array outputs from functions: passing input array",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -2320,43 +2303,52 @@ void func_CCodeGenTests_CArrayOutputs5_f2_def(jmi_array_t* i_a, jmi_array_t* o1_
     jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
     (*res)[0] = func_CCodeGenTests_CArrayOutputs5_f1_exp(tmp_1) - (_x_0);
 ")})));
+
+ function f1
+  input Real i[2];
+  output Real o = 0;
+  protected Real x[2];
+  protected Real y;
+ algorithm
+  (x, y) := f2(i);
+ end f1;
+ 
+ function f2
+  input Real i[2];
+  output Real o1[2] = i;
+  output Real o2 = 3;
+ algorithm
+ end f2;
+ 
+ Real x = f1({1,2});
 end CArrayOutputs5;
 
 
 
 model CAbsTest1
- Real x = abs(y);
- Real y = -2;
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CAbsTest1",
-			description="C code generation for abs() operator",
-			template="$C_DAE_equation_residuals$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CAbsTest1",
+         description="C code generation for abs() operator",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
     (*res)[0] = jmi_abs(_y_1) - (_x_0);
     (*res)[1] =  - ( 2 ) - (_y_1);
 ")})));
+
+ Real x = abs(y);
+ Real y = -2;
 end CAbsTest1;
 
 
 
 model CUnknownArray1
- function f
-  input Real a[:];
-  input Real b[size(a,1)];
-  output Real o[size(a,1)] = a + b;
- algorithm
- end f;
- 
- Real x[2] = f({1,2}, {3,4});
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CUnknownArray1",
-			description="C code generation for unknown array sizes: basic test",
-			template="$C_functions$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CUnknownArray1",
+         description="C code generation for unknown array sizes: basic test",
+         template="$C_functions$",
+         generatedCode="
 void func_CCodeGenTests_CUnknownArray1_f_def(jmi_array_t* a_a, jmi_array_t* b_a, jmi_array_t* o_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARRAY_DYNAMIC(o_an, 1)
@@ -2375,26 +2367,26 @@ void func_CCodeGenTests_CUnknownArray1_f_def(jmi_array_t* a_a, jmi_array_t* b_a,
 }
 
 ")})));
+
+ function f
+  input Real a[:];
+  input Real b[size(a,1)];
+  output Real o[size(a,1)] = a + b;
+ algorithm
+ end f;
+ 
+ Real x[2] = f({1,2}, {3,4});
 end CUnknownArray1;
 
 
 // TODO: assignment to temp array should be outside loop - see #699
 model CUnknownArray2
-	function f
-		input Real x[:,2];
-		output Real y[size(x, 1), 2];
-	algorithm
-		y := x * {{1, 2}, {3, 4}};
-	end f;
-
-	Real x[3,2] = f({{5,6},{7,8},{9,0}});
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CUnknownArray2",
-			description="C code generation for unknown array sizes: array constructor * array with unknown size",
-			template="$C_functions$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CUnknownArray2",
+         description="C code generation for unknown array sizes: array constructor * array with unknown size",
+         template="$C_functions$",
+         generatedCode="
 void func_CCodeGenTests_CUnknownArray2_f_def(jmi_array_t* x_a, jmi_array_t* y_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARRAY_DYNAMIC(y_an, 2)
@@ -2432,40 +2424,26 @@ void func_CCodeGenTests_CUnknownArray2_f_def(jmi_array_t* x_a, jmi_array_t* y_a)
 }
 
 ")})));
+
+	function f
+		input Real x[:,2];
+		output Real y[size(x, 1), 2];
+	algorithm
+		y := x * {{1, 2}, {3, 4}};
+	end f;
+
+	Real x[3,2] = f({{5,6},{7,8},{9,0}});
 end CUnknownArray2;
 
 
 // This tests for a bug that wasn't exposed until C code generation
 model CUnknownArray3
-    function f1
-        input Real[:] x1;
-        output Real y1;
-    algorithm
-        y1 := f3(f2(x1));
-    end f1;
-    
-    function f2
-        input Real[:] x2;
-        output Real[size(x2,1)] y2;
-    algorithm
-        y2 := x2;
-    end f2;
-    
-    function f3
-        input Real[:] x3;
-        output Real y3;
-    algorithm
-        y3 := sum(x3);
-    end f3;
-    
-    Real x = f1({1,2});
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CUnknownArray3",
-			description="Passing array return value of unknown size directly to other function",
-			template="$C_functions$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CUnknownArray3",
+         description="Passing array return value of unknown size directly to other function",
+         template="$C_functions$",
+         generatedCode="
 void func_CCodeGenTests_CUnknownArray3_f1_def(jmi_array_t* x1_a, jmi_ad_var_t* y1_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t y1_v;
@@ -2525,11 +2503,48 @@ void func_CCodeGenTests_CUnknownArray3_f2_def(jmi_array_t* x2_a, jmi_array_t* y2
 }
 
 ")})));
+
+    function f1
+        input Real[:] x1;
+        output Real y1;
+    algorithm
+        y1 := f3(f2(x1));
+    end f1;
+    
+    function f2
+        input Real[:] x2;
+        output Real[size(x2,1)] y2;
+    algorithm
+        y2 := x2;
+    end f2;
+    
+    function f3
+        input Real[:] x3;
+        output Real y3;
+    algorithm
+        y3 := sum(x3);
+    end f3;
+    
+    Real x = f1({1,2});
 end CUnknownArray3;
 
 
 
 model CRecordDecl1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CRecordDecl1",
+         description="C code generation for records: structs: basic test",
+         template="$C_records$",
+         generatedCode="
+typedef struct _A_0_r {
+    jmi_ad_var_t a;
+    jmi_ad_var_t b;
+} A_0_r;
+JMI_RECORD_ARRAY_TYPE(A_0_r, A_0_ra)
+
+")})));
+
  record A
   Real a;
   Real b;
@@ -2539,24 +2554,29 @@ model CRecordDecl1
 equation
  x.a = 1;
  x.b = 2;
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CRecordDecl1",
-			description="C code generation for records: structs: basic test",
-			template="$C_records$",
-			generatedCode="
-typedef struct _A_0_r {
-    jmi_ad_var_t a;
-    jmi_ad_var_t b;
-} A_0_r;
-JMI_RECORD_ARRAY_TYPE(A_0_r, A_0_ra)
-
-")})));
 end CRecordDecl1;
 
 
 model CRecordDecl2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CRecordDecl2",
+         description="C code generation for records: structs: nested records",
+         template="$C_records$",
+         generatedCode="
+typedef struct _B_0_r {
+    jmi_ad_var_t c;
+} B_0_r;
+JMI_RECORD_ARRAY_TYPE(B_0_r, B_0_ra)
+
+typedef struct _A_1_r {
+    jmi_ad_var_t a;
+    B_0_r* b;
+} A_1_r;
+JMI_RECORD_ARRAY_TYPE(A_1_r, A_1_ra)
+
+")})));
+
  record A
   Real a;
   B b;
@@ -2570,29 +2590,23 @@ model CRecordDecl2
 equation
  x.a = 1;
  x.b.c = 2;
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CRecordDecl2",
-			description="C code generation for records: structs: nested records",
-			template="$C_records$",
-			generatedCode="
-typedef struct _B_0_r {
-    jmi_ad_var_t c;
-} B_0_r;
-JMI_RECORD_ARRAY_TYPE(B_0_r, B_0_ra)
-
-typedef struct _A_1_r {
-    jmi_ad_var_t a;
-    B_0_r* b;
-} A_1_r;
-JMI_RECORD_ARRAY_TYPE(A_1_r, A_1_ra)
-
-")})));
 end CRecordDecl2;
 
 
 model CRecordDecl3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CRecordDecl3",
+         description="C code generation for records: structs: array in record",
+         template="$C_records$",
+         generatedCode="
+typedef struct _A_0_r {
+    jmi_array_t* a;
+} A_0_r;
+JMI_RECORD_ARRAY_TYPE(A_0_r, A_0_ra)
+
+")})));
+
  record A
   Real a[2];
  end A;
@@ -2600,23 +2614,29 @@ model CRecordDecl3
  A x;
 equation
  x.a = {1,2};
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CRecordDecl3",
-			description="C code generation for records: structs: array in record",
-			template="$C_records$",
-			generatedCode="
-typedef struct _A_0_r {
-    jmi_array_t* a;
-} A_0_r;
-JMI_RECORD_ARRAY_TYPE(A_0_r, A_0_ra)
-
-")})));
 end CRecordDecl3;
 
 
 model CRecordDecl4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CRecordDecl4",
+         description="C code generation for records: structs: array of records",
+         template="$C_records$",
+         generatedCode="
+typedef struct _B_0_r {
+    jmi_ad_var_t c;
+} B_0_r;
+JMI_RECORD_ARRAY_TYPE(B_0_r, B_0_ra)
+
+typedef struct _A_1_r {
+    jmi_ad_var_t a;
+    B_0_ra* b;
+} A_1_r;
+JMI_RECORD_ARRAY_TYPE(A_1_r, A_1_ra)
+
+")})));
+
  record A
   Real a;
   B b[2];
@@ -2631,49 +2651,16 @@ equation
  x.a = 1;
  x.b[1].c = 2;
  x.b[2].c = 3;
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CRecordDecl4",
-			description="C code generation for records: structs: array of records",
-			template="$C_records$",
-			generatedCode="
-typedef struct _B_0_r {
-    jmi_ad_var_t c;
-} B_0_r;
-JMI_RECORD_ARRAY_TYPE(B_0_r, B_0_ra)
-
-typedef struct _A_1_r {
-    jmi_ad_var_t a;
-    B_0_ra* b;
-} A_1_r;
-JMI_RECORD_ARRAY_TYPE(A_1_r, A_1_ra)
-
-")})));
 end CRecordDecl4;
 
 
 model CRecordDecl5
-  function f
-  output Real o;
-  protected A x = A(1,2);
- algorithm
-  o := x.a;
- end f;
- 
- record A
-  Real a;
-  Real b;
- end A;
- 
- Real x = f();
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CRecordDecl5",
-			description="C code generation for records: declarations: basic test",
-			template="$C_functions$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CRecordDecl5",
+         description="C code generation for records: declarations: basic test",
+         template="$C_functions$",
+         generatedCode="
 void func_CCodeGenTests_CRecordDecl5_f_def(jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t o_v;
@@ -2693,34 +2680,30 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl5_f_exp() {
 }
 
 ")})));
-end CRecordDecl5;
 
-
-model CRecordDecl6
- function f
+  function f
   output Real o;
-  protected A x = A(1, B(2));
+  protected A x = A(1,2);
  algorithm
-  o := x.b.c;
+  o := x.a;
  end f;
  
  record A
   Real a;
-  B b;
+  Real b;
  end A;
  
- record B
-  Real c;
- end B;
- 
  Real x = f();
+end CRecordDecl5;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CRecordDecl6",
-			description="C code generation for records: declarations: nestled records",
-			template="$C_functions$",
-			generatedCode="
+
+model CRecordDecl6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CRecordDecl6",
+         description="C code generation for records: declarations: nestled records",
+         template="$C_functions$",
+         generatedCode="
 void func_CCodeGenTests_CRecordDecl6_f_def(jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t o_v;
@@ -2742,29 +2725,34 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl6_f_exp() {
 }
 
 ")})));
+
+ function f
+  output Real o;
+  protected A x = A(1, B(2));
+ algorithm
+  o := x.b.c;
+ end f;
+ 
+ record A
+  Real a;
+  B b;
+ end A;
+ 
+ record B
+  Real c;
+ end B;
+ 
+ Real x = f();
 end CRecordDecl6;
 
 
 model CRecordDecl7
- function f
-  output Real o;
-  protected A x = A({1,2});
- algorithm
-  o := x.a[1];
- end f;
- 
- record A
-  Real a[2];
- end A;
- 
- Real x = f();
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CRecordDecl7",
-			description="C code generation for records: declarations: array in record",
-			template="$C_functions$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CRecordDecl7",
+         description="C code generation for records: declarations: array in record",
+         template="$C_functions$",
+         generatedCode="
 void func_CCodeGenTests_CRecordDecl7_f_def(jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t o_v;
@@ -2787,34 +2775,29 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl7_f_exp() {
 }
 
 ")})));
+
+ function f
+  output Real o;
+  protected A x = A({1,2});
+ algorithm
+  o := x.a[1];
+ end f;
+ 
+ record A
+  Real a[2];
+ end A;
+ 
+ Real x = f();
 end CRecordDecl7;
 
 
 model CRecordDecl8
- function f
-  output Real o;
-  protected A x[3] = {A(1,{B(2),B(3)}),A(4,{B(5),B(6)}),A(7,{B(8),B(9)})};
- algorithm
-  o := x[1].b[2].c;
- end f;
- 
- record A
-  Real a;
-  B b[2];
- end A;
- 
- record B
-  Real c;
- end B;
- 
- Real x = f();
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CRecordDecl8",
-			description="C code generation for records: declarations: array of records",
-			template="$C_functions$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CRecordDecl8",
+         description="C code generation for records: declarations: array of records",
+         template="$C_functions$",
+         generatedCode="
 void func_CCodeGenTests_CRecordDecl8_f_def(jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t o_v;
@@ -2851,27 +2834,33 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl8_f_exp() {
 }
 
 ")})));
-end CRecordDecl8;
 
-
-model CRecordDecl9
  function f
-  output A x = A(1,2);
+  output Real o;
+  protected A x[3] = {A(1,{B(2),B(3)}),A(4,{B(5),B(6)}),A(7,{B(8),B(9)})};
  algorithm
+  o := x[1].b[2].c;
  end f;
  
  record A
   Real a;
-  Real b;
+  B b[2];
  end A;
  
- A x = f();
+ record B
+  Real c;
+ end B;
+ 
+ Real x = f();
+end CRecordDecl8;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CRecordDecl9",
-			description="C code generation for records: outputs: basic test",
-			template="
+
+model CRecordDecl9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CRecordDecl9",
+         description="C code generation for records: outputs: basic test",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -2897,31 +2886,27 @@ void func_CCodeGenTests_CRecordDecl9_f_def(A_0_r* x_v) {
     (*res)[0] = tmp_1->a - (_x_a_0);
     (*res)[1] = tmp_1->b - (_x_b_1);
 ")})));
-end CRecordDecl9;
 
-
-model CRecordDecl10
-  function f
-  output A x = A(1, B(2));
+ function f
+  output A x = A(1,2);
  algorithm
  end f;
  
  record A
   Real a;
-  B b;
+  Real b;
  end A;
  
- record B
-  Real c;
- end B;
- 
  A x = f();
+end CRecordDecl9;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CRecordDecl10",
-			description="C code generation for records: outputs: nested arrays",
-			template="
+
+model CRecordDecl10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CRecordDecl10",
+         description="C code generation for records: outputs: nested arrays",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -2951,26 +2936,31 @@ void func_CCodeGenTests_CRecordDecl10_f_def(A_1_r* x_v) {
     (*res)[0] = tmp_1->a - (_x_a_0);
     (*res)[1] = tmp_1->b->c - (_x_b_c_1);
 ")})));
-end CRecordDecl10;
 
-
-model CRecordDecl11
   function f
-  output A x = A({1,2});
+  output A x = A(1, B(2));
  algorithm
  end f;
  
  record A
-  Real a[2];
+  Real a;
+  B b;
  end A;
  
+ record B
+  Real c;
+ end B;
+ 
  A x = f();
+end CRecordDecl10;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CRecordDecl11",
-			description="C code generation for records: outputs: array in record",
-			template="
+
+model CRecordDecl11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CRecordDecl11",
+         description="C code generation for records: outputs: array in record",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -3002,31 +2992,26 @@ void func_CCodeGenTests_CRecordDecl11_f_def(A_0_r* x_v) {
     (*res)[0] = jmi_array_val_1(tmp_1->a, 1) - (_x_a_1_0);
     (*res)[1] = jmi_array_val_1(tmp_1->a, 2) - (_x_a_2_1);
 ")})));
-end CRecordDecl11;
 
-
-model CRecordDecl12
   function f
-  output A x[3] = {A(1,{B(2),B(3)}),A(4,{B(5),B(6)}),A(7,{B(8),B(9)})};
+  output A x = A({1,2});
  algorithm
  end f;
  
  record A
-  Real a;
-  B b[2];
+  Real a[2];
  end A;
  
- record B
-  Real c;
- end B;
- 
- A x[3] = f();
+ A x = f();
+end CRecordDecl11;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CRecordDecl12",
-			description="C code generation for records: outputs: array of records",
-			template="
+
+model CRecordDecl12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CRecordDecl12",
+         description="C code generation for records: outputs: array of records",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -3086,29 +3071,31 @@ void func_CCodeGenTests_CRecordDecl12_f_def(A_1_ra* x_a) {
     (*res)[3] = jmi_array_rec_1(jmi_array_rec_1(tmp_1, 3)->b, 1)->c - (_x_3_b_1_c_7);
     (*res)[4] = jmi_array_rec_1(jmi_array_rec_1(tmp_1, 3)->b, 2)->c - (_x_3_b_2_c_8);
 ")})));
-end CRecordDecl12;
 
-
-model CRecordDecl13
   function f
-  output Real o;
-  input A x;
+  output A x[3] = {A(1,{B(2),B(3)}),A(4,{B(5),B(6)}),A(7,{B(8),B(9)})};
  algorithm
-  o := x.a;
  end f;
  
  record A
   Real a;
-  Real b;
+  B b[2];
  end A;
  
- Real x = f(A(1,2));
+ record B
+  Real c;
+ end B;
+ 
+ A x[3] = f();
+end CRecordDecl12;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CRecordDecl13",
-			description="C code generation for records: inputs: basic test",
-			template="
+
+model CRecordDecl13
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CRecordDecl13",
+         description="C code generation for records: inputs: basic test",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -3138,33 +3125,29 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl13_f_exp(A_0_r* x_v) {
     tmp_1->b = AD_WRAP_LITERAL(2);
     (*res)[0] = func_CCodeGenTests_CRecordDecl13_f_exp(tmp_1) - (_x_0);
 ")})));
-end CRecordDecl13;
 
-
-model CRecordDecl14
- function f
+  function f
   output Real o;
   input A x;
  algorithm
-  o := x.b.c;
+  o := x.a;
  end f;
  
  record A
   Real a;
-  B b;
+  Real b;
  end A;
  
- record B
-  Real c;
- end B;
- 
- Real x = f(A(1, B(2)));
+ Real x = f(A(1,2));
+end CRecordDecl13;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CRecordDecl14",
-			description="C code generation for records: inputs: nested records",
-			template="
+
+model CRecordDecl14
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CRecordDecl14",
+         description="C code generation for records: inputs: nested records",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -3196,28 +3179,33 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl14_f_exp(A_1_r* x_v) {
     tmp_1->b->c = AD_WRAP_LITERAL(2);
     (*res)[0] = func_CCodeGenTests_CRecordDecl14_f_exp(tmp_1) - (_x_0);
 ")})));
-end CRecordDecl14;
 
-
-model CRecordDecl15
  function f
   output Real o;
   input A x;
  algorithm
-  o := x.a[1];
+  o := x.b.c;
  end f;
  
  record A
-  Real a[2];
+  Real a;
+  B b;
  end A;
  
- Real x = f(A({1,2}));
+ record B
+  Real c;
+ end B;
+ 
+ Real x = f(A(1, B(2)));
+end CRecordDecl14;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CRecordDecl15",
-			description="C code generation for records: inputs: array in record",
-			template="
+
+model CRecordDecl15
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CRecordDecl15",
+         description="C code generation for records: inputs: array in record",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -3250,33 +3238,28 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl15_f_exp(A_0_r* x_v) {
     jmi_array_ref_1(tmp_1->a, 2) = AD_WRAP_LITERAL(2);
     (*res)[0] = func_CCodeGenTests_CRecordDecl15_f_exp(tmp_1) - (_x_0);
 ")})));
+
+ function f
+  output Real o;
+  input A x;
+ algorithm
+  o := x.a[1];
+ end f;
+ 
+ record A
+  Real a[2];
+ end A;
+ 
+ Real x = f(A({1,2}));
 end CRecordDecl15;
 
 
 model CRecordDecl16
- function f
-  output Real o;
-  input A x[3];
- algorithm
-  o := x[1].b[2].c;
- end f;
- 
- record A
-  Real a;
-  B b[2];
- end A;
- 
- record B
-  Real c;
- end B;
- 
- Real x = f({A(1,{B(2),B(3)}),A(4,{B(5),B(6)}),A(7,{B(8),B(9)})});
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CRecordDecl16",
-			description="C code generation for records: inputs: array of records",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CRecordDecl16",
+         description="C code generation for records: inputs: array of records",
+         template="
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
@@ -3323,39 +3306,61 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl16_f_exp(A_1_ra* x_a) {
     jmi_array_rec_1(jmi_array_rec_1(tmp_1, 3)->b, 2)->c = null;
     (*res)[0] = func_CCodeGenTests_CRecordDecl16_f_exp(tmp_1) - (_x_0);
 ")})));
+
+ function f
+  output Real o;
+  input A x[3];
+ algorithm
+  o := x[1].b[2].c;
+ end f;
+ 
+ record A
+  Real a;
+  B b[2];
+ end A;
+ 
+ record B
+  Real c;
+ end B;
+ 
+ Real x = f({A(1,{B(2),B(3)}),A(4,{B(5),B(6)}),A(7,{B(8),B(9)})});
 end CRecordDecl16;
 
 
 
 model RemoveCopyright
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="RemoveCopyright",
-			description="Test that licence tag is filtered out",
-			template="/* test copyright blurb */ test",
-			generatedCode="
-test
-")})));
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="RemoveCopyright",
+         description="Test that licence tag is filtered out",
+         template="/* test copyright blurb */ test",
+         generatedCode="test"
+)})));
 end RemoveCopyright;
 
 model ExtStmtInclude1
+	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+		JModelica.UnitTesting.CCodeGenTestCase(
+			name="ExtStmtInclude1",
+			description="Test that include statement is inserted properly.",
+			template="$external_func_includes$",
+			generatedCode="#include \"extFunc.h\"")})));
 	function extFunc
 		 external "C" annotation(Include="#include \"extFunc.h\"");
 	end extFunc;
 	algorithm
 		extFunc();
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ExtStmtInclude1",
-			description="Test that include statement is inserted properly.",
-			template="$external_func_includes$",
-			generatedCode="
-#include \"extFunc.h\"
-")})));
 end ExtStmtInclude1;
 
 model ExtStmtInclude2
+	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+		JModelica.UnitTesting.CCodeGenTestCase(
+			name="ExtStmtInclude2",
+			description="Test that include statements are inserted properly.",
+			template="$external_func_includes$",
+			generatedCode="
+#include \"extFunc2.h\"
+#include \"extFunc1.h\"")})));
 	function extFunc1
 		 external "C" annotation(Include="#include \"extFunc1.h\"");
 	end extFunc1;
@@ -3365,34 +3370,14 @@ model ExtStmtInclude2
 	algorithm
 		extFunc1();
 		extFunc2();
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ExtStmtInclude2",
-			description="Test that include statements are inserted properly.",
-			template="$external_func_includes$",
-			generatedCode="
-#include \"extFunc2.h\"
-#include \"extFunc1.h\"
-")})));
 end ExtStmtInclude2;
 
 model SimpleExternal1
-	Real a_in=1;
-	Real b_out;
-	function f
-		input Real a;
-		output Real b;
-		external;
-	end f;
-	equation
-		b_out = f(a_in);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="SimpleExternal1",
-			description="External C function (undeclared), one scalar input, one scalar output.",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternal1",
+         description="External C function (undeclared), one scalar input, one scalar output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -3416,26 +3401,24 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternal1_f_exp(jmi_ad_var_t a_v) {
 }
 
 ")})));
+
+	Real a_in=1;
+	Real b_out;
+	function f
+		input Real a;
+		output Real b;
+		external;
+	end f;
+	equation
+		b_out = f(a_in);
 end SimpleExternal1;
 
 model SimpleExternal2
-	Real a_in=1;
-	Real b_in=2;
-	Real c_out;
-	function f
-		input Real a;
-		input Real b;
-		output Real c;
-		external "C";
-	end f;
-	equation
-		c_out = f(a_in, b_in);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="SimpleExternal2",
-			description="External C function (undeclared), two scalar inputs, one scalar output.",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternal2",
+         description="External C function (undeclared), two scalar inputs, one scalar output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -3459,24 +3442,26 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternal2_f_exp(jmi_ad_var_t a_v, jmi_ad_v
 }
 
 ")})));
+
+	Real a_in=1;
+	Real b_in=2;
+	Real c_out;
+	function f
+		input Real a;
+		input Real b;
+		output Real c;
+		external "C";
+	end f;
+	equation
+		c_out = f(a_in, b_in);
 end SimpleExternal2;
 
 model SimpleExternal3
-	Real a_in=1;
-	Real b_out;
-	function f
-		input Real a;
-		output Real b;
-		external b = my_f(a);
-	end f;
-	equation
-		b_out = f(a_in);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="SimpleExternal3",
-			description="External C function (declared with return), one scalar input, one scalar output.",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternal3",
+         description="External C function (declared with return), one scalar input, one scalar output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -3500,24 +3485,24 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternal3_f_exp(jmi_ad_var_t a_v) {
 }
 
 ")})));
-end SimpleExternal3;
 
-model SimpleExternal4
 	Real a_in=1;
 	Real b_out;
 	function f
 		input Real a;
 		output Real b;
-		external my_f(a, b);
+		external b = my_f(a);
 	end f;
 	equation
-		b_out = f(a_in);	
+		b_out = f(a_in);
+end SimpleExternal3;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="SimpleExternal4",
-			description="External C function (declared without return), one scalar input, one scalar output.",
-			template="
+model SimpleExternal4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternal4",
+         description="External C function (declared without return), one scalar input, one scalar output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -3541,22 +3526,24 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternal4_f_exp(jmi_ad_var_t a_v) {
 }
 
 ")})));
+
+	Real a_in=1;
+	Real b_out;
+	function f
+		input Real a;
+		output Real b;
+		external my_f(a, b);
+	end f;
+	equation
+		b_out = f(a_in);	
 end SimpleExternal4;
 
 model SimpleExternal5
-	Real a_in=1;
-	function f
-		input Real a;
-		external;
-	end f;
-	equation
-		f(a_in);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="SimpleExternal5",
-			description="External C function (undeclared), scalar input, no output.",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternal5",
+         description="External C function (undeclared), scalar input, no output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -3571,22 +3558,22 @@ void func_CCodeGenTests_SimpleExternal5_f_def(jmi_ad_var_t a_v) {
 }
 
 ")})));
-end SimpleExternal5;
 
-model SimpleExternal6
 	Real a_in=1;
 	function f
 		input Real a;
-		external my_f(a);
+		external;
 	end f;
 	equation
 		f(a_in);
+end SimpleExternal5;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="SimpleExternal6",
-			description="External C function (declared), scalar input, no output.",
-			template="
+model SimpleExternal6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternal6",
+         description="External C function (declared), scalar input, no output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -3601,26 +3588,22 @@ void func_CCodeGenTests_SimpleExternal6_f_def(jmi_ad_var_t a_v) {
 }
 
 ")})));
+
+	Real a_in=1;
+	function f
+		input Real a;
+		external my_f(a);
+	end f;
+	equation
+		f(a_in);
 end SimpleExternal6;
 
 model SimpleExternal7
-	Real a_in = 1;
-	Real b_in = 2;
-	Real c_out;
-	function f
-		input Real a;
-		input Real b;
-		output Real c;
-		external my_f(a,c,b);
-	end f;
-	equation
-		c_out = f(a_in, b_in);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="SimpleExternal7",
-			description="External C function (declared without return), two scalar inputs, one scalar output.",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternal7",
+         description="External C function (declared without return), two scalar inputs, one scalar output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -3644,28 +3627,26 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternal7_f_exp(jmi_ad_var_t a_v, jmi_ad_v
 }
 
 ")})));
-end SimpleExternal7;
 
-model SimpleExternal8
 	Real a_in = 1;
 	Real b_in = 2;
 	Real c_out;
-	Real d_out;
 	function f
 		input Real a;
 		input Real b;
 		output Real c;
-		output Real d;
-		external my_f(a,c,b,d);
+		external my_f(a,c,b);
 	end f;
 	equation
-		(c_out, d_out) = f(a_in, b_in);
+		c_out = f(a_in, b_in);
+end SimpleExternal7;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="SimpleExternal8",
-			description="External C function (declared without return), two scalar inputs, two scalar outputs.",
-			template="
+model SimpleExternal8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternal8",
+         description="External C function (declared without return), two scalar inputs, two scalar outputs.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -3691,9 +3672,7 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternal8_f_exp(jmi_ad_var_t a_v, jmi_ad_v
 }
 
 ")})));
-end SimpleExternal8;
 
-model SimpleExternal9
 	Real a_in = 1;
 	Real b_in = 2;
 	Real c_out;
@@ -3703,16 +3682,18 @@ model SimpleExternal9
 		input Real b;
 		output Real c;
 		output Real d;
-		external d = my_f(a,b,c);
+		external my_f(a,c,b,d);
 	end f;
 	equation
-		(c_out, d_out) = f(a_in, b_in);	
+		(c_out, d_out) = f(a_in, b_in);
+end SimpleExternal8;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="SimpleExternal9",
-			description="External C function (declared with return), two scalar inputs, two scalar outputs (one in return stmt, one in fcn stmt).",
-			template="
+model SimpleExternal9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternal9",
+         description="External C function (declared with return), two scalar inputs, two scalar outputs (one in return stmt, one in fcn stmt).",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -3738,30 +3719,28 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternal9_f_exp(jmi_ad_var_t a_v, jmi_ad_v
 }
 
 ")})));
-end SimpleExternal9;
 
-model SimpleExternal10
 	Real a_in = 1;
 	Real b_in = 2;
 	Real c_out;
 	Real d_out;
-	Real e_out;
 	function f
 		input Real a;
 		input Real b;
 		output Real c;
 		output Real d;
-		output Real e;
-		external d = my_f(a,c,b,e);
+		external d = my_f(a,b,c);
 	end f;
 	equation
-		(c_out, d_out, e_out) = f(a_in, b_in);
+		(c_out, d_out) = f(a_in, b_in);	
+end SimpleExternal9;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="SimpleExternal10",
-			description="External C function (declared with return), two scalar inputs, three scalar outputs (one in return stmt, two in fcn stmt).",
-			template="
+model SimpleExternal10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternal10",
+         description="External C function (declared with return), two scalar inputs, three scalar outputs (one in return stmt, two in fcn stmt).",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -3789,24 +3768,30 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternal10_f_exp(jmi_ad_var_t a_v, jmi_ad_
 }
 
 ")})));
+
+	Real a_in = 1;
+	Real b_in = 2;
+	Real c_out;
+	Real d_out;
+	Real e_out;
+	function f
+		input Real a;
+		input Real b;
+		output Real c;
+		output Real d;
+		output Real e;
+		external d = my_f(a,c,b,e);
+	end f;
+	equation
+		(c_out, d_out, e_out) = f(a_in, b_in);
 end SimpleExternal10;
 
 model IntegerExternal1
-	Integer a_in=1;
-	Real b_out;
-	function f
-		input Integer a;
-		output Real b;
-		external;
-	end f;
-	equation
-		b_out = f(a_in);	
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="IntegerExternal1",
-			description="External C function (undeclared), one scalar Integer input, one scalar Real output.",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="IntegerExternal1",
+         description="External C function (undeclared), one scalar Integer input, one scalar Real output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -3832,24 +3817,24 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternal1_f_exp(jmi_ad_var_t a_v) {
 }
 
 ")})));
-end IntegerExternal1;
 
-model IntegerExternal2
-	Real a_in=1;
-	Integer b_out;
+	Integer a_in=1;
+	Real b_out;
 	function f
-		input Real a;
-		output Integer b;
+		input Integer a;
+		output Real b;
 		external;
 	end f;
 	equation
 		b_out = f(a_in);	
+end IntegerExternal1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="IntegerExternal2",
-			description="External C function (undeclared), one scalar Real input, one scalar Integer output.",
-			template="
+model IntegerExternal2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="IntegerExternal2",
+         description="External C function (undeclared), one scalar Real input, one scalar Integer output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -3873,24 +3858,24 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternal2_f_exp(jmi_ad_var_t a_v) {
 }
 
 ")})));
-end IntegerExternal2;
 
-model IntegerExternal3
 	Real a_in=1;
 	Integer b_out;
 	function f
 		input Real a;
 		output Integer b;
-		external my_f(a, b);
+		external;
 	end f;
 	equation
-		b_out = f(a_in);
+		b_out = f(a_in);	
+end IntegerExternal2;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="IntegerExternal3",
-			description="External C function (declared), one scalar Real input, one scalar Integer output in func stmt.",
-			template="
+model IntegerExternal3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="IntegerExternal3",
+         description="External C function (declared), one scalar Real input, one scalar Integer output in func stmt.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -3917,28 +3902,24 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternal3_f_exp(jmi_ad_var_t a_v) {
 }
 
 ")})));
+
+	Real a_in=1;
+	Integer b_out;
+	function f
+		input Real a;
+		output Integer b;
+		external my_f(a, b);
+	end f;
+	equation
+		b_out = f(a_in);
 end IntegerExternal3;
 
 model IntegerExternal4
-	Integer a_in = 1;
-	Integer b_in = 2;
-	Integer c_out;
-	Integer d_out;
-	function f
-		input Integer a;
-		input Integer b;
-		output Integer c;
-		output Integer d;
-		external d = my_f(a,b,c);
-	end f;
-	equation
-		(c_out, d_out) = f(a_in, b_in);	
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="IntegerExternal4",
-			description="External C function (declared), two scalar Integer inputs, two scalar Integer outputs (one in return, one in func stmt.",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="IntegerExternal4",
+         description="External C function (declared), two scalar Integer inputs, two scalar Integer outputs (one in return, one in func stmt.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -3971,152 +3952,29 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternal4_f_exp(jmi_ad_var_t a_v, jmi_ad_
 }
 
 ")})));
+
+	Integer a_in = 1;
+	Integer b_in = 2;
+	Integer c_out;
+	Integer d_out;
+	function f
+		input Integer a;
+		input Integer b;
+		output Integer c;
+		output Integer d;
+		external d = my_f(a,b,c);
+	end f;
+	equation
+		(c_out, d_out) = f(a_in, b_in);	
 end IntegerExternal4;
 
-model ExternalLiteral1
-	Real a_in = 1;
-    Real b_in = 2;
-    Real c_out;
-    function f
-        input Real a;
-        input Real b;
-        output Real c;
-        external my_f(a,b,10);
-    end f;
-    equation
-        c_out = f(a_in, b_in);
-
-	annotation(__JModelica(UnitTesting(tests={ 
-		CCodeGenTestCase(
-			name="ExternalLiteral1",
-			description="",
-			template="
-$C_function_headers$
-$C_functions$
-",
-			generatedCode="
-void func_CCodeGenTests_ExternalLiteral1_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o);
-jmi_ad_var_t func_CCodeGenTests_ExternalLiteral1_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v);
-
-void func_CCodeGenTests_ExternalLiteral1_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o) {
-    JMI_DYNAMIC_INIT()
-    jmi_ad_var_t c_v;
-    my_f(a_v, b_v, 10);
-    if (c_o != NULL) *c_o = c_v;
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-jmi_ad_var_t func_CCodeGenTests_ExternalLiteral1_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
-    jmi_ad_var_t c_v;
-    func_CCodeGenTests_ExternalLiteral1_f_def(a_v, b_v, &c_v);
-    return c_v;
-}
-
-")})));
-end ExternalLiteral1;
-
-model ExternalLiteral2
-    Real a_in = 1;
-    Real b_in = 2;
-    Real c_out;
-    function f
-        input Real a;
-        input Real b;
-        output Real c;
-        external my_f(a,20,b,10);
-    end f;
-    equation
-        c_out = f(a_in, b_in);
-
-	annotation(__JModelica(UnitTesting(tests={ 
-		CCodeGenTestCase(
-			name="ExternalLiteral2",
-			description="",
-			template="
-$C_function_headers$
-$C_functions$
-",
-			generatedCode="
-void func_CCodeGenTests_ExternalLiteral2_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o);
-jmi_ad_var_t func_CCodeGenTests_ExternalLiteral2_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v);
-
-void func_CCodeGenTests_ExternalLiteral2_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o) {
-    JMI_DYNAMIC_INIT()
-    jmi_ad_var_t c_v;
-    my_f(a_v, 20, b_v, 10);
-    if (c_o != NULL) *c_o = c_v;
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-jmi_ad_var_t func_CCodeGenTests_ExternalLiteral2_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
-    jmi_ad_var_t c_v;
-    func_CCodeGenTests_ExternalLiteral2_f_def(a_v, b_v, &c_v);
-    return c_v;
-}
-
-")})));
-end ExternalLiteral2;
-
-model ExternalLiteral3
-    Real c_out;
-    function f
-        output Real c;
-        external my_f(10,20,30);
-    end f;
-    equation
-        c_out = f();
-
-	annotation(__JModelica(UnitTesting(tests={ 
-		CCodeGenTestCase(
-			name="ExternalLiteral3",
-			description="",
-			template="
-$C_function_headers$
-$C_functions$
-",
-			generatedCode="
-void func_CCodeGenTests_ExternalLiteral3_f_def(jmi_ad_var_t* c_o);
-jmi_ad_var_t func_CCodeGenTests_ExternalLiteral3_f_exp();
-
-void func_CCodeGenTests_ExternalLiteral3_f_def(jmi_ad_var_t* c_o) {
-    JMI_DYNAMIC_INIT()
-    jmi_ad_var_t c_v;
-    my_f(10, 20, 30);
-    if (c_o != NULL) *c_o = c_v;
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-jmi_ad_var_t func_CCodeGenTests_ExternalLiteral3_f_exp() {
-    jmi_ad_var_t c_v;
-    func_CCodeGenTests_ExternalLiteral3_f_def(&c_v);
-    return c_v;
-}
-
-")})));
-end ExternalLiteral3;
-
 model IntegerInFunc1
-	function f
-		input Integer i;
-		input Real a[3];
-		output Real x;
-	algorithm
-		x := a[i];
-	end f;
-	
-	Real x[3] = {2.3, 4.2, 1.5};
-	Real y = f(1, x);
-	Real z = f(2, x);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="IntegerInFunc1",
-			description="Using Integer variable in function",
-			template="$C_functions$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="IntegerInFunc1",
+         description="Using Integer variable in function",
+         template="$C_functions$",
+         generatedCode="
 void func_CCodeGenTests_IntegerInFunc1_f_def(jmi_ad_var_t i_v, jmi_array_t* a_a, jmi_ad_var_t* x_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t x_v;
@@ -4133,137 +3991,164 @@ jmi_ad_var_t func_CCodeGenTests_IntegerInFunc1_f_exp(jmi_ad_var_t i_v, jmi_array
 }
 
 ")})));
+
+	function f
+		input Integer i;
+		input Real a[3];
+		output Real x;
+	algorithm
+		x := a[i];
+	end f;
+	
+	Real x[3] = {2.3, 4.2, 1.5};
+	Real y = f(1, x);
+	Real z = f(2, x);
 end IntegerInFunc1;
 
 model IfExpInParExp
-  parameter Integer N = 2;
-  parameter Real r[3] = array((if i<=N then 1. else 2.) for i in 1:3); 
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="IfExpInParExp",
-			description="Test that relational expressions in parameter expressions are treated correctly",
-			template="$C_DAE_initial_dependent_parameter_residuals$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="IfExpInParExp",
+         description="Test that relational expressions in parameter expressions are treated correctly",
+         template="$C_DAE_initial_dependent_parameter_residuals$",
+         generatedCode="
     (*res)[0] = COND_EXP_EQ(COND_EXP_LE(AD_WRAP_LITERAL(1), _N_0, JMI_TRUE, JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0)) - (_r_1_1);
     (*res)[1] = COND_EXP_EQ(COND_EXP_LE(AD_WRAP_LITERAL(2), _N_0, JMI_TRUE, JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0)) - (_r_2_2);
     (*res)[2] = COND_EXP_EQ(COND_EXP_LE(AD_WRAP_LITERAL(3), _N_0, JMI_TRUE, JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0)) - (_r_3_3);
 ")})));
+
+  parameter Integer N = 2;
+  parameter Real r[3] = array((if i<=N then 1. else 2.) for i in 1:3); 
 end IfExpInParExp;
 
 
 
 model CIntegerExp1
-	Real x = 10 ^ 4;
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CIntegerExp1",
-			description="Test that exponential expressions with integer exponents are properly transformed",
-			template="$C_DAE_equation_residuals$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CIntegerExp1",
+         description="Test that exponential expressions with integer exponents are properly transformed",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
     (*res)[0] = (1.0 * (10) * (10) * (10) * (10)) - (_x_0);
 ")})));
+
+	Real x = 10 ^ 4;
 end CIntegerExp1;
 
 
 model CIntegerExp2
-	Real x = 10 ^ (-4);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CIntegerExp2",
-			description="Test that exponential expressions with integer exponents are properly transformed",
-			template="$C_DAE_equation_residuals$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CIntegerExp2",
+         description="Test that exponential expressions with integer exponents are properly transformed",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
     (*res)[0] = (1.0 / (10) / (10) / (10) / (10)) - (_x_0);
 ")})));
+
+	Real x = 10 ^ (-4);
 end CIntegerExp2;
 
 
 model CIntegerExp3
-	Real x = 10 ^ 0;
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CIntegerExp3",
-			description="Test that exponential expressions with integer exponents are properly transformed",
-			template="$C_DAE_equation_residuals$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CIntegerExp3",
+         description="Test that exponential expressions with integer exponents are properly transformed",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
     (*res)[0] = (1.0) - (_x_0);
 ")})));
+
+	Real x = 10 ^ 0;
 end CIntegerExp3;
 
 
 model CIntegerExp4
-	Real x = 10 ^ 10;
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CIntegerExp4",
-			description="Test that exponential expressions with integer exponents are properly transformed",
-			template="$C_DAE_equation_residuals$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CIntegerExp4",
+         description="Test that exponential expressions with integer exponents are properly transformed",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
     (*res)[0] = pow(10,10) - (_x_0);
 ")})));
+
+	Real x = 10 ^ 10;
 end CIntegerExp4;
 
 
 model CIntegerExp5
-	Real x = 10 ^ (-10);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CIntegerExp5",
-			description="Test that exponential expressions with integer exponents are properly transformed",
-			template="$C_DAE_equation_residuals$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CIntegerExp5",
+         description="Test that exponential expressions with integer exponents are properly transformed",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
     (*res)[0] = pow(10, - ( 10 )) - (_x_0);
 ")})));
+
+	Real x = 10 ^ (-10);
 end CIntegerExp5;
 
 
 
 model ModelIdentifierTest
-	Real r = 1.0;
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="ModelIdentifierTest",
+         description="",
+         template="$C_model_id$",
+         generatedCode="
+CCodeGenTests_ModelIdentifierTest")})));
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ModelIdentifierTest",
-			description="",
-			template="$C_model_id$",
-			generatedCode="
-CCodeGenTests_ModelIdentifierTest
-")})));
+	Real r = 1.0;
 end ModelIdentifierTest;
 
 model GUIDTest1
-	Real r = 1.0;
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="GUIDTest1",
+         description="",
+         template="$C_guid$",
+         generatedCode="
+\"c143b522ea1fdf6db1132a647457c83a\"")})));
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="GUIDTest1",
-			description="",
-			template="$C_guid$",
-			generatedCode="
-\"c143b522ea1fdf6db1132a647457c83a\"
-")})));
+	Real r = 1.0;
 end GUIDTest1;
 
 model GUIDTest2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="GUIDTest2",
+         description="",
+         template="$C_guid$",
+         generatedCode="
+\"ff13c7197701d1a1e9559970770f01f0\"")})));
+	
 	Real r = 2.0;
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="GUIDTest2",
-			description="",
-			template="$C_guid$",
-			generatedCode="
-\"ff13c7197701d1a1e9559970770f01f0\"
-")})));
 end GUIDTest2;
 
 model DependentParametersWithScalingTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="DependentParametersWithScalingTest1",
+         description="",
+         enable_variable_scaling=true,
+         template="$C_DAE_initial_dependent_parameter_assignments$",
+         generatedCode=" 
+JMI_RECORD_STATIC(R_0_r, tmp_1)
+JMI_RECORD_STATIC(R_0_r, tmp_2)
+_p2_1 = (( 3 ) * ( (_p1_0*sf(0)) ))/sf(2);
+_r2_x_2 = ((_r_x_3*sf(1)))/sf(3);
+_p3_4 = (func_CCodeGenTests_DependentParametersWithScalingTest1_F_exp((_p2_1*sf(2))))/sf(4);
+tmp_2->x = (_r2_x_2*sf(3));
+func_CCodeGenTests_DependentParametersWithScalingTest1_FR_def(tmp_2, tmp_1);
+_temp_1_x_5 = (tmp_1->x)/sf(5);
+_r3_x_6 = ((_temp_1_x_5*sf(5)))/sf(6);
+")})));
+
   record R
     Real x = 1;
   end R;
@@ -4288,61 +4173,18 @@ model DependentParametersWithScalingTest1
   parameter R r = R(3);
   parameter R r2 = r;
   parameter R r3 = FR(r2);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="DependentParametersWithScalingTest1",
-			description="",
-			enable_variable_scaling=true,
-			template="$C_DAE_initial_dependent_parameter_assignments$",
-			generatedCode=" 
-JMI_RECORD_STATIC(R_0_r, tmp_1)
-JMI_RECORD_STATIC(R_0_r, tmp_2)
-_p2_1 = (( 3 ) * ( (_p1_0*sf(0)) ))/sf(2);
-_r2_x_2 = ((_r_x_3*sf(1)))/sf(3);
-_p3_4 = (func_CCodeGenTests_DependentParametersWithScalingTest1_F_exp((_p2_1*sf(2))))/sf(4);
-tmp_2->x = (_r2_x_2*sf(3));
-func_CCodeGenTests_DependentParametersWithScalingTest1_FR_def(tmp_2, tmp_1);
-_temp_1_x_5 = (tmp_1->x)/sf(5);
-_r3_x_6 = ((_temp_1_x_5*sf(5)))/sf(6);
-")})));
 end DependentParametersWithScalingTest1;
 
 model WhenTest1
-Real xx(start=2);
-discrete Real x; 
-discrete Real y; 
-discrete Boolean w(start=true); 
-discrete Boolean v(start=true); 
-discrete Boolean z(start=true); 
-equation
-der(xx) = -x; 
-when y > 2 and pre(z) then 
-w = false; 
-end when; 
-when y > 2 and z then 
-v = false; 
-end when; 
-when x > 2 then 
-z = false; 
-end when; 
-when (time>1 and time<1.1) or  (time>2 and time<2.1) or  (time>3 and time<3.1) then 
-x = pre(x) + 1.1; 
-y = pre(y) + 1.1; 
-end when; 
-
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="WhenTest1",
-			description="Test of code generation of when clauses.",
-			generate_ode=true,
-			equation_sorting=true,
-			template="
-$C_ode_guards$
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="WhenTest1",
+         description="Test of code generation of when clauses.",
+         generate_ode=true,
+         equation_sorting=true,
+         template="$C_ode_guards$
                    $C_ode_derivatives$ 
-                   $C_ode_initialization$
-",
+                   $C_ode_initialization$",
          generatedCode=" 
          _guards(0) = LOG_EXP_AND(_sw(0), pre_z_5);
 _guards(1) = LOG_EXP_AND(_sw(1), _z_5);
@@ -4402,34 +4244,40 @@ _y_2 = pre_y_2;
 _xx_0 = 2;
   
 ")})));
+
+Real xx(start=2);
+discrete Real x; 
+discrete Real y; 
+discrete Boolean w(start=true); 
+discrete Boolean v(start=true); 
+discrete Boolean z(start=true); 
+equation
+der(xx) = -x; 
+when y > 2 and pre(z) then 
+w = false; 
+end when; 
+when y > 2 and z then 
+v = false; 
+end when; 
+when x > 2 then 
+z = false; 
+end when; 
+when (time>1 and time<1.1) or  (time>2 and time<2.1) or  (time>3 and time<3.1) then 
+x = pre(x) + 1.1; 
+y = pre(y) + 1.1; 
+end when; 
+
 end WhenTest1;
 
 model WhenTest2 
 
- Real x,ref;
- discrete Real I;
- discrete Real u;
-
- parameter Real K = 1;
- parameter Real Ti = 1;
- parameter Real h = 0.1;
-
-equation
- der(x) = -x + u;
- when sample(0,h) then
-   I = pre(I) + h*(ref-x);
-   u = K*(ref-x) + 1/Ti*I;
- end when;
- ref = if time <1 then 0 else 1;
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="WhenTest2",
-			equation_sorting=true,
-			description="Test that samplers are not duplicated in the function tha computes the next time event.",
-			generate_ode=true,
-			template="
-$C_ode_guards$
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="WhenTest2",
+         equation_sorting=true,
+         description="Test that samplers are not duplicated in the function tha computes the next time event.",
+         generate_ode=true,
+         template="$C_ode_guards$
                    $C_ode_time_events$" ,
          generatedCode="
     _guards(0) = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_6);
@@ -4455,30 +4303,33 @@ $C_ode_guards$
   *nextTime = nextTimeEvent;
 
 ")})));
+
+ Real x,ref;
+ discrete Real I;
+ discrete Real u;
+
+ parameter Real K = 1;
+ parameter Real Ti = 1;
+ parameter Real h = 0.1;
+
+equation
+ der(x) = -x + u;
+ when sample(0,h) then
+   I = pre(I) + h*(ref-x);
+   u = K*(ref-x) + 1/Ti*I;
+ end when;
+ ref = if time <1 then 0 else 1;
 end WhenTest2; 
 
 model WhenTest3 
 
- discrete Real x,y;
- Real dummy;
-equation
- der(dummy) = 0;
- when sample(0,1/3) then
-   x = pre(x) + 1;
- end when;
- when sample(0,2/3) then
-   y = pre(y) + 1;
- end when;
-
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="WhenTest3",
-			description="Test code generation of samplers",
-			generate_ode=true,
-			equation_sorting=true,
-			template="
-$C_ode_time_events$ 
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="WhenTest3",
+         description="Test code generation of samplers",
+         generate_ode=true,
+         equation_sorting=true,
+         template="$C_ode_time_events$ 
                    $C_ode_derivatives$ 
                    $C_ode_initialization$", 
          generatedCode=" 
@@ -4542,71 +4393,46 @@ _y_1 = pre_y_1;
 _dummy_2 = 0.0;
  
 ")})));
+
+ discrete Real x,y;
+ Real dummy;
+equation
+ der(dummy) = 0;
+ when sample(0,1/3) then
+   x = pre(x) + 1;
+ end when;
+ when sample(0,2/3) then
+   y = pre(y) + 1;
+ end when;
+
 end WhenTest3; 
 
 model WhenEqu4
- discrete Boolean sampleTrigger;
- Real x_p(start=1, fixed=true);
- Real u_p;
- discrete Real x_c;
- discrete Real u_c;
- parameter Real a_p = -1;
- parameter Real b_p = 1;
- parameter Real c_p = 1;
- parameter Real a_c = 0.8;
- parameter Real b_c = 1;
- parameter Real c_c = 1;
- parameter Real h = 0.1;
-initial equation
- x_c = pre(x_c); 	
-equation
- der(x_p) = a_p*x_p + b_p*u_p;
- u_p = c_c*x_c;
- sampleTrigger = sample(0,h);
- when {initial(),sampleTrigger} then
-   u_c = c_p*x_p;
-   x_c = a_c*pre(x_c) + b_c*u_c;
- end when;
 
-
-	annotation(__JModelica(UnitTesting(tests={ 
-		CCodeGenTestCase(
-			name="WhenEqu4",
-			description="Test code generation of samplers",
-			generate_ode=true,
-			equation_sorting=true,
-			template="
-$C_dae_init_blocks_residual_functions$
-$C_ode_derivatives$
-$C_ode_initialization$
-",
-			generatedCode="
-static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="WhenTest4",
+         description="Test code generation of samplers",
+         generate_ode=true,
+         equation_sorting=true,
+         template="$C_dae_init_blocks_residual_functions$
+                   $C_ode_derivatives$ 
+                   $C_ode_initialization$", 
+         generatedCode=" 
+static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
+  if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = pre_x_c_3;
     x[1] = _x_c_3;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-    residual[0] = - ( ( _a_c_8 ) * ( 1.0 ) );
-    residual[1] = - ( 1.0 );
-    residual[2] = 1.0;
-    residual[3] = 1.0;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
+  } else if (init==JMI_BLOCK_EVALUATE) {
     pre_x_c_3 = x[0];
     _x_c_3 = x[1];
   (*res)[0] = ( _a_c_8 ) * ( pre_x_c_3 ) + ( _b_c_9 ) * ( _u_c_4 ) - (_x_c_3);
   (*res)[1] = pre_x_c_3 - (_x_c_3);
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    pre_x_c_3 = x[0];
-    _x_c_3 = x[1];
   }
   return 0;
 }
-
-
+		 
     model_ode_guards(jmi);
 /************* ODE section *********/
   _sampleTrigger_0 = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_11);
@@ -4631,20 +4457,20 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
+		 
 
-    model_ode_guards(jmi);
+      model_ode_guards(jmi);
   _x_p_1 = 1;
   _u_c_4 = ( _c_p_7 ) * ( _x_p_1 );
-   ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
+  ef |= jmi_kinsol_solve(jmi->dae_init_block_residuals[0]);
   _u_p_2 = ( _c_c_10 ) * ( _x_c_3 );
   _der_x_p_12 = ( _a_p_5 ) * ( _x_p_1 ) + ( _b_p_6 ) * ( _u_p_2 );
   _sampleTrigger_0 = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_11);
   pre_sampleTrigger_0 = JMI_FALSE;
   pre_u_c_4 = 0.0;
 ")})));
-end WhenEqu4;
 
-model WhenEqu5
+
  discrete Boolean sampleTrigger;
  Real x_p(start=1, fixed=true);
  Real u_p;
@@ -4657,57 +4483,46 @@ model WhenEqu5
  parameter Real b_c = 1;
  parameter Real c_c = 1;
  parameter Real h = 0.1;
- discrete Boolean atInit = true and initial();
 initial equation
  x_c = pre(x_c); 	
 equation
  der(x_p) = a_p*x_p + b_p*u_p;
  u_p = c_c*x_c;
  sampleTrigger = sample(0,h);
- when {atInit,sampleTrigger} then
+ when {initial(),sampleTrigger} then
    u_c = c_p*x_p;
    x_c = a_c*pre(x_c) + b_c*u_c;
  end when;
+end WhenEqu4;
 
-	annotation(__JModelica(UnitTesting(tests={ 
-		CCodeGenTestCase(
-			name="WhenEqu5",
-			description="Test code generation of samplers",
-			generate_ode=true,
-			equation_sorting=true,
-			template="
-$C_dae_init_blocks_residual_functions$
-$C_ode_derivatives$
-$C_ode_initialization$
-",
-			generatedCode="
-static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+model WhenEqu5
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="WhenTest5",
+         description="Test code generation of samplers",
+         generate_ode=true,    
+         equation_sorting=true,
+                  template="$C_dae_init_blocks_residual_functions$
+                   $C_ode_derivatives$ 
+                   $C_ode_initialization$",               
+         generatedCode=" 
+static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
+  if (init==JMI_BLOCK_INITIALIZE) {
     x[0] = pre_x_c_3;
     x[1] = _x_c_3;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-    residual[0] = - ( 1.0 );
-    residual[1] = - ( 1.0 );
-    residual[2] = 1.0;
-    residual[3] = 1.0;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
+  } else if (init==JMI_BLOCK_EVALUATE) {
     pre_x_c_3 = x[0];
     _x_c_3 = x[1];
   (*res)[0] = pre_x_c_3 - (_x_c_3);
   (*res)[1] = pre_x_c_3 - (_x_c_3);
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    pre_x_c_3 = x[0];
-    _x_c_3 = x[1];
   }
   return 0;
 }
-
-
-    model_ode_guards(jmi);
+		 
+		 
+  model_ode_guards(jmi);
 /************* ODE section *********/
   _atInit_12 = LOG_EXP_AND(JMI_TRUE, _atInitial);
   _sampleTrigger_0 = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_11);
@@ -4732,9 +4547,8 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
-
     model_ode_guards(jmi);
-   ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
+  ef |= jmi_kinsol_solve(jmi->dae_init_block_residuals[0]);
   _u_p_2 = ( _c_c_10 ) * ( _x_c_3 );
   _x_p_1 = 1;
   _der_x_p_13 = ( _a_p_5 ) * ( _x_p_1 ) + ( _b_p_6 ) * ( _u_p_2 );
@@ -4745,31 +4559,41 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   pre_sampleTrigger_0 = JMI_FALSE;
   pre_atInit_12 = JMI_FALSE;
 ")})));
+
+
+ discrete Boolean sampleTrigger;
+ Real x_p(start=1, fixed=true);
+ Real u_p;
+ discrete Real x_c;
+ discrete Real u_c;
+ parameter Real a_p = -1;
+ parameter Real b_p = 1;
+ parameter Real c_p = 1;
+ parameter Real a_c = 0.8;
+ parameter Real b_c = 1;
+ parameter Real c_c = 1;
+ parameter Real h = 0.1;
+ discrete Boolean atInit = true and initial();
+initial equation
+ x_c = pre(x_c); 	
+equation
+ der(x_p) = a_p*x_p + b_p*u_p;
+ u_p = c_c*x_c;
+ sampleTrigger = sample(0,h);
+ when {atInit,sampleTrigger} then
+   u_c = c_p*x_p;
+   x_c = a_c*pre(x_c) + b_c*u_c;
+ end when;
 end WhenEqu5;
 
 model WhenEqu6
-	function F
-		input Real x;
-		output Real y1;
-		output Real y2;
-	algorithm
-		y1 := 1;
-		y2 := 2;
-	end F;
-	Real x,y;
-	equation
-	when sample(0,1) then
-		(x,y) = F(time);
-	end when;
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="WhenTest6",
-			description="Test code generation when equations with function calls.",
-			generate_ode=true,
-			equation_sorting=true,
-			template="
-$C_dae_init_blocks_residual_functions$
+			annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="WhenTest6",
+         description="Test code generation when equations with function calls.",
+         generate_ode=true,    
+         equation_sorting=true,
+                  template="$C_dae_init_blocks_residual_functions$
                    $C_ode_derivatives$ 
                    $C_ode_initialization$",               
          generatedCode=" 
@@ -4796,10 +4620,34 @@ $C_dae_init_blocks_residual_functions$
   pre_y_1 = 0.0;
   _y_1 = pre_y_1;		 
 ")})));
+				
+	function F
+		input Real x;
+		output Real y1;
+		output Real y2;
+	algorithm
+		y1 := 1;
+		y2 := 2;
+	end F;
+	Real x,y;
+	equation
+	when sample(0,1) then
+		(x,y) = F(time);
+	end when;
 end WhenEqu6;
 
 
 model NoDAEGenerationTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="NoDAEGenerationTest1",
+         description="Test that no DAE is generated if the corresponding option is set to false.",
+         generate_dae=false,
+         template="$C_DAE_equation_residuals$
+                   $C_DAE_initial_equation_residuals$
+                   $C_DAE_initial_dependent_parameter_residuals$",
+         generatedCode=" 
+")})));
   Real x, y, z;
   parameter Real p = 1;
   parameter Real p2 = p;
@@ -4808,110 +4656,119 @@ equation
   3 = x - y;
   5 = x + 3*y;  
 
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="NoDAEGenerationTest1",
-			description="Test that no DAE is generated if the corresponding option is set to false.",
-			generate_dae=false,
-			template="
-$C_DAE_equation_residuals$
-                   $C_DAE_initial_equation_residuals$
-                   $C_DAE_initial_dependent_parameter_residuals$
-",
-         generatedCode=" 
-")})));
 end NoDAEGenerationTest1;
 
 model BlockTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="BlockTest1",
+         description="Test of code generation of when clauses.",
+         generate_ode=true,
+         equation_sorting=true,
+         template="$C_dae_blocks_residual_functions$
+                   $C_dae_init_blocks_residual_functions$
+                   $C_ode_derivatives$ 
+                   $C_ode_initialization$",
+         generatedCode=" 
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
+jmi_real_t** res = &residual;
+if (init==JMI_BLOCK_INITIALIZE) {
+x[0] = _y_1;
+x[1] = _x_0;
+} else if (init==JMI_BLOCK_EVALUATE) {
+_y_1 = x[0];
+_x_0 = x[1];
+(*res)[0] = _x_0 + ( 3 ) * ( _y_1 ) - (5);
+(*res)[1] = _x_0 - ( _y_1 ) - (3);
+}
+return 0;
+}
+
+
+static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
+jmi_real_t** res = &residual;
+if (init==JMI_BLOCK_INITIALIZE) {
+x[0] = _y_1;
+x[1] = _x_0;
+} else if (init==JMI_BLOCK_EVALUATE) {
+_y_1 = x[0];
+_x_0 = x[1];
+(*res)[0] = _x_0 + ( 3 ) * ( _y_1 ) - (5);
+(*res)[1] = _x_0 - ( _y_1 ) - (3);
+}
+return 0;
+}
+
+model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+ef |= jmi_kinsol_solve(jmi->dae_block_residuals[0]);
+_z_2 = _x_0 + _y_1;
+
+model_ode_guards(jmi);
+ef |= jmi_kinsol_solve(jmi->dae_init_block_residuals[0]);
+_z_2 = _x_0 + _y_1;
+")})));
   Real x, y, z;
 equation
   z = x + y;
   3 = x - y;
   5 = x + 3*y;  
-
-	annotation(__JModelica(UnitTesting(tests={ 
-		CCodeGenTestCase(
-			name="BlockTest1",
-			description="Test code generation of systems of equations.",
-			generate_ode=true,
-			equation_sorting=true,
-			enable_tearing=false,
-			template="
-$C_dae_blocks_residual_functions$
-$C_dae_init_blocks_residual_functions$
-$C_ode_derivatives$
-$C_ode_initialization$
-",
-			generatedCode="
-static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _y_1;
-    x[1] = _x_0;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-    residual[0] = - ( ( 3 ) * ( 1.0 ) );
-    residual[1] = - ( - ( 1.0 ) );
-    residual[2] = - ( 1.0 );
-    residual[3] = - ( 1.0 );
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    _y_1 = x[0];
-    _x_0 = x[1];
-  (*res)[0] = _x_0 + ( 3 ) * ( _y_1 ) - (5);
-  (*res)[1] = _x_0 - ( _y_1 ) - (3);
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _y_1 = x[0];
-    _x_0 = x[1];
-  }
-  return 0;
-}
-
-
-static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _y_1;
-    x[1] = _x_0;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-    residual[0] = - ( ( 3 ) * ( 1.0 ) );
-    residual[1] = - ( - ( 1.0 ) );
-    residual[2] = - ( 1.0 );
-    residual[3] = - ( 1.0 );
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    _y_1 = x[0];
-    _x_0 = x[1];
-  (*res)[0] = _x_0 + ( 3 ) * ( _y_1 ) - (5);
-  (*res)[1] = _x_0 - ( _y_1 ) - (3);
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _y_1 = x[0];
-    _x_0 = x[1];
-  }
-  return 0;
-}
-
-
-    model_ode_guards(jmi);
-/************* ODE section *********/
-/************ Real outputs *********/
-/****Integer and boolean outputs ***/
-/**** Other variables ***/
-   ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
-  _z_2 = _x_0 + _y_1;
-
-    model_ode_guards(jmi);
-   ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
-  _z_2 = _x_0 + _y_1;
-")})));
 end BlockTest1;
 
 
 model BlockTest2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="BlockTest2",
+         description="Test of code generation of when clauses.",
+         generate_ode=true,
+         equation_sorting=true,
+         template="$C_dae_blocks_residual_functions$
+                   $C_ode_derivatives$ 
+                   $C_dae_add_blocks_residual_functions$",
+         generatedCode=" 
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
+  jmi_real_t** res = &residual;
+  if (init==JMI_BLOCK_INITIALIZE) {
+    x[0] = _z2_2_4;
+    x[1] = _z2_1_3;
+  } else if (init==JMI_BLOCK_EVALUATE) {
+    _z2_2_4 = x[0];
+    _z2_1_3 = x[1];
+  (*res)[0] = 5 - (( 3 ) * ( _z2_1_3 ) + ( 4 ) * ( _z2_2_4 ));
+  (*res)[1] = 4 - (( 1 ) * ( _z2_1_3 ) + ( 2 ) * ( _z2_2_4 ));
+  }
+  return 0;
+}
+
+static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
+  jmi_real_t** res = &residual;
+  if (init==JMI_BLOCK_INITIALIZE) {
+    x[0] = _z1_2;
+  } else if (init==JMI_BLOCK_EVALUATE) {
+    _z1_2 = x[0];
+  (*res)[0] = _z1_2 + 2 - (( sin(_z1_2) ) * ( 3 ));
+  }
+  return 0;
+}
+model_ode_guards(jmi);
+  /************* ODE section *********/
+  ef |= jmi_kinsol_solve(jmi->dae_block_residuals[0]);
+  _der_x2_5 =  - ( _x2_1 ) + _z2_1_3 + _z2_2_4;
+  ef |= jmi_kinsol_solve(jmi->dae_block_residuals[1]);
+  _der_x1_6 =  - ( _x1_0 ) + _z1_2;
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+
+jmi_dae_add_equation_block(*jmi,dae_block_0, NULL,2,0,0 );
+jmi_dae_add_equation_block(*jmi,dae_block_1, NULL,1,0,1 );
+
+")})));
+
 Real x1,x2,z1,z2[2];
 
 equation
@@ -4922,124 +4779,41 @@ sin(z1)*3 = z1 + 2;
 der(x2) = -x2 + z2[1] + z2[2];
 der(x1) = -x1 + z1;
 
-	annotation(__JModelica(UnitTesting(tests={ 
-		CCodeGenTestCase(
-			name="BlockTest2",
-			description="Test generation of equation blocks",
-			generate_ode=true,
-			equation_sorting=true,
-			template="
-$C_dae_blocks_residual_functions$
-$C_dae_init_blocks_residual_functions$
-$C_ode_derivatives$
-$C_ode_initialization$
-",
-			generatedCode="
-static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _z2_2_4;
-    x[1] = _z2_1_3;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-     residual[0] = ( 4 ) * ( 1.0 );
-     residual[1] = ( 2 ) * ( 1.0 );
-     residual[2] = ( 3 ) * ( 1.0 );
-     residual[3] = ( 1 ) * ( 1.0 );
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    _z2_2_4 = x[0];
-    _z2_1_3 = x[1];
-  (*res)[0] = 5 - (( 3 ) * ( _z2_1_3 ) + ( 4 ) * ( _z2_2_4 ));
-  (*res)[1] = 4 - (( 1 ) * ( _z2_1_3 ) + ( 2 ) * ( _z2_2_4 ));
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _z2_2_4 = x[0];
-    _z2_1_3 = x[1];
-  }
-  return 0;
-}
-
-static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _z1_2;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    _z1_2 = x[0];
-  (*res)[0] = _z1_2 + 2 - (( sin(_z1_2) ) * ( 3 ));
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _z1_2 = x[0];
-  }
-  return 0;
-}
-
-
-static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _z1_2;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    _z1_2 = x[0];
-  (*res)[0] = _z1_2 + 2 - (( sin(_z1_2) ) * ( 3 ));
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _z1_2 = x[0];
-  }
-  return 0;
-}
-
-static int dae_init_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _z2_2_4;
-    x[1] = _z2_1_3;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-     residual[0] = ( 4 ) * ( 1.0 );
-     residual[1] = ( 2 ) * ( 1.0 );
-     residual[2] = ( 3 ) * ( 1.0 );
-     residual[3] = ( 1 ) * ( 1.0 );
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    _z2_2_4 = x[0];
-    _z2_1_3 = x[1];
-  (*res)[0] = 5 - (( 3 ) * ( _z2_1_3 ) + ( 4 ) * ( _z2_2_4 ));
-  (*res)[1] = 4 - (( 1 ) * ( _z2_1_3 ) + ( 2 ) * ( _z2_2_4 ));
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _z2_2_4 = x[0];
-    _z2_1_3 = x[1];
-  }
-  return 0;
-}
-
-
-    model_ode_guards(jmi);
-/************* ODE section *********/
-   ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
-  _der_x2_5 =  - ( _x2_1 ) + _z2_1_3 + _z2_2_4;
-   ef |= jmi_solve_block_residual(jmi->dae_block_residuals[1]);
-  _der_x1_6 =  - ( _x1_0 ) + _z1_2;
-/************ Real outputs *********/
-/****Integer and boolean outputs ***/
-/**** Other variables ***/
-
-    model_ode_guards(jmi);
-   ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
-   ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[1]);
-  _x2_1 = 0.0;
-  _der_x2_5 =  - ( _x2_1 ) + _z2_1_3 + _z2_2_4;
-  _x1_0 = 0.0;
-  _der_x1_6 =  - ( _x1_0 ) + _z1_2;
-")})));
 end BlockTest2;
 
 model BlockTest3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="BlockTest3",
+         description="Test of code generation of mixed systems of equations.",
+         generate_ode=true,
+         equation_sorting=true,
+         template="$C_dae_blocks_residual_functions$",
+         generatedCode=" 
+		 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
+  jmi_real_t** res = &residual;
+  if (init==JMI_BLOCK_INITIALIZE) {
+    x[0] = _a_4;
+    x[1] = _sa_7;
+    x[2] = _f_5;
+    x[3] = _der_v_13;
+  } else if (init==JMI_BLOCK_EVALUATE) {
+    _a_4 = x[0];
+    _sa_7 = x[1];
+    _f_5 = x[2];
+    _der_v_13 = x[3];
+  (*res)[0] = _a_4 - (_der_v_13);
+  (*res)[1] = COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8),JMI_TRUE,_sa_7 - ( AD_WRAP_LITERAL(1) ),COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9),JMI_TRUE,_sa_7 + AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(0))) - (_a_4);
+  (*res)[2] = COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8),JMI_TRUE,_f0_1 + ( _f1_2 ) * ( _v_3 ),COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9),JMI_TRUE, - ( _f0_1 ) + ( _f1_2 ) * ( _v_3 ),( _f0_1 ) * ( _sa_7 ))) - (_f_5);
+  (*res)[3] = _u_6 - ( _f_5 ) - (( _m_0 ) * ( _der_v_13 ));
+  } else if (init==JMI_BLOCK_EVALUATE_NON_REALS) {
+ _startBack_9 = LOG_EXP_AND(COND_EXP_EQ(pre_mode_10, 2, JMI_TRUE, JMI_FALSE), _sw(1));
+ _startFor_8 = LOG_EXP_AND(COND_EXP_EQ(pre_mode_10, 2, JMI_TRUE, JMI_FALSE), _sw(0));
+  }
+  return 0;
+}
+")})));
+
  parameter Real m = 1;
  parameter Real f0 = 1;
  parameter Real f1 = 1;
@@ -5071,569 +4845,26 @@ equation
       if (pre(mode) == 3 or startBack)
           and v<0 then 3 else 2;
 
-
-	annotation(__JModelica(UnitTesting(tests={ 
-		CCodeGenTestCase(
-			name="BlockTest3",
-			description="Test of code generation of blocks",
-			generate_ode=true,
-			equation_sorting=true,
-			template="
-$C_dae_blocks_residual_functions$
-$C_dae_init_blocks_residual_functions$
-$C_ode_derivatives$
-$C_ode_initialization$
-",
-			generatedCode="
-static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _a_4;
-    x[1] = _sa_7;
-    x[2] = _f_5;
-    x[3] = _der_v_13;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    _a_4 = x[0];
-    _sa_7 = x[1];
-    _f_5 = x[2];
-    _der_v_13 = x[3];
-  (*res)[0] = _a_4 - (_der_v_13);
-  (*res)[1] = COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8), JMI_TRUE, _sa_7 - ( AD_WRAP_LITERAL(1) ), COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9), JMI_TRUE, _sa_7 + AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0))) - (_a_4);
-  (*res)[2] = COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8), JMI_TRUE, _f0_1 + ( _f1_2 ) * ( _v_3 ), COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9), JMI_TRUE,  - ( _f0_1 ) + ( _f1_2 ) * ( _v_3 ), ( _f0_1 ) * ( _sa_7 ))) - (_f_5);
-  (*res)[3] = _u_6 - ( _f_5 ) - (( _m_0 ) * ( _der_v_13 ));
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE_NON_REALS) {
- _startBack_9 = LOG_EXP_AND(COND_EXP_EQ(pre_mode_10, 2, JMI_TRUE, JMI_FALSE), _sw(1));
- _startFor_8 = LOG_EXP_AND(COND_EXP_EQ(pre_mode_10, 2, JMI_TRUE, JMI_FALSE), _sw(0));
-  }  else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _a_4 = x[0];
-    _sa_7 = x[1];
-    _f_5 = x[2];
-    _der_v_13 = x[3];
-  }
-  return 0;
-}
-
-
-static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _a_4;
-    x[1] = _sa_7;
-    x[2] = _f_5;
-    x[3] = _der_v_13;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    _a_4 = x[0];
-    _sa_7 = x[1];
-    _f_5 = x[2];
-    _der_v_13 = x[3];
-  (*res)[0] = _a_4 - (_der_v_13);
-  (*res)[1] = COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8), JMI_TRUE, _sa_7 - ( AD_WRAP_LITERAL(1) ), COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9), JMI_TRUE, _sa_7 + AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0))) - (_a_4);
-  (*res)[2] = COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8), JMI_TRUE, _f0_1 + ( _f1_2 ) * ( _v_3 ), COND_EXP_EQ(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9), JMI_TRUE,  - ( _f0_1 ) + ( _f1_2 ) * ( _v_3 ), ( _f0_1 ) * ( _sa_7 ))) - (_f_5);
-  (*res)[3] = _u_6 - ( _f_5 ) - (( _m_0 ) * ( _der_v_13 ));
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE_NON_REALS) {
- _startBack_9 = LOG_EXP_AND(COND_EXP_EQ(pre_mode_10, 2, JMI_TRUE, JMI_FALSE), _sw(1));
- _startFor_8 = LOG_EXP_AND(COND_EXP_EQ(pre_mode_10, 2, JMI_TRUE, JMI_FALSE), _sw(0));
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _a_4 = x[0];
-    _sa_7 = x[1];
-    _f_5 = x[2];
-    _der_v_13 = x[3];
-  }
-  return 0;
-}
-
-
-    model_ode_guards(jmi);
-/************* ODE section *********/
-  _der_dummy_12 = 1;
-  _u_6 = ( 2 ) * ( sin(_time) );
-   ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
-/************ Real outputs *********/
-/****Integer and boolean outputs ***/
-/**** Other variables ***/
-  _mode_10 = COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8), _sw(2)), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9), _sw(3)), JMI_TRUE, AD_WRAP_LITERAL(3), AD_WRAP_LITERAL(2)));
-
-    model_ode_guards(jmi);
-  _der_dummy_12 = 1;
-  _u_6 = ( 2 ) * ( sin(_time) );
-  pre_mode_10 = 2;
-  _v_3 = 0.0;
-   ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
-  _mode_10 = COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8), _sw(2)), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9), _sw(3)), JMI_TRUE, AD_WRAP_LITERAL(3), AD_WRAP_LITERAL(2)));
-  _dummy_11 = 0.0;
-  pre_startFor_8 = JMI_FALSE;
-  pre_startBack_9 = JMI_FALSE;
-")})));
 end BlockTest3;
 
-model BlockTest4
-  Real x(min=3); 
-  Real y(max=-2, nominal=5);
-  Real z(min=4,max=5,nominal=8);
-equation
-  z = x + y;
-  3 = x - y;
-  5 = x + 3*y + z;  
-
-	annotation(__JModelica(UnitTesting(tests={ 
-		CCodeGenTestCase(
-			name="BlockTest4",
-			description="Test that min, max, and nominal attributes are correctly generated",
-			generate_ode=true,
-			equation_sorting=true,
-			template="$C_dae_blocks_residual_functions$",
-			generatedCode="
-static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-    x[0] = 5.0;
-    x[2] = 8.0;
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-    x[1] = 3.0;
-    x[2] = 4.0;
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-    x[0] = -2.0;
-    x[2] = 5.0;
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _y_1;
-    init_with_ubound(x[0],-2.0, \"Resetting initial value for y\");
-    x[1] = _x_0;
-    init_with_lbound(x[1],3.0, \"Resetting initial value for x\");
-    x[2] = _z_2;
-    init_with_bounds(x[2],4.0, 5.0, \"Resetting initial value for z\");
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-    residual[0] = - ( ( 3 ) * ( 1.0 ) );
-    residual[1] = - ( - ( 1.0 ) );
-    residual[2] = - ( 1.0 );
-    residual[3] = - ( 1.0 );
-    residual[4] = - ( 1.0 );
-    residual[5] = - ( 1.0 );
-    residual[6] = - ( 1.0 );
-    residual[7] = 0.0;
-    residual[8] = 1.0;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    check_ubound(x[0],-2.0, \"Out of bounds for variable y\");
-    check_lbound(x[1],3.0, \"Out of bound for variable x\");
-    check_bounds(x[2],4.0, 5.0, \"Out of bounds for variable z\");
-    _y_1 = x[0];
-    _x_0 = x[1];
-    _z_2 = x[2];
-  (*res)[0] = _x_0 + ( 3 ) * ( _y_1 ) + _z_2 - (5);
-  (*res)[1] = _x_0 - ( _y_1 ) - (3);
-  (*res)[2] = _x_0 + _y_1 - (_z_2);
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _y_1 = x[0];
-    _x_0 = x[1];
-    _z_2 = x[2];
-  }
-  return 0;
-}
-")})));
-end BlockTest4;
-
-model BlockTest5
-  parameter Real p1 = 4;
-  Real x[2](min={1, 4*p1}); 
-  Real y(max=-2, nominal=5);
-  equation
-  3 = x[1] - y + x[2];
-  5 = x[1] + 3*y;
-  3 = x[1] + y + x[2];  
 
 
 
-	annotation(__JModelica(UnitTesting(tests={ 
-		CCodeGenTestCase(
-			name="BlockTest5",
-			description="Test of min and max for iteration varaibles.",
-			generate_ode=true,
-			equation_sorting=true,
-			template="$C_dae_blocks_residual_functions$",
-			generatedCode="
-static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-    x[1] = 5.0;
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-    x[0] = 16.0;
-    x[2] = 1.0;
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-    x[1] = -2.0;
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _x_2_2;
-    init_with_lbound(x[0],16.0, \"Resetting initial value for x[2]\");
-    x[1] = _y_3;
-    init_with_ubound(x[1],-2.0, \"Resetting initial value for y\");
-    x[2] = _x_1_1;
-    init_with_lbound(x[2],1.0, \"Resetting initial value for x[1]\");
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-    residual[0] = - ( 1.0 );
-    residual[1] = 0.0;
-    residual[2] = - ( 1.0 );
-    residual[3] = - ( 1.0 );
-    residual[4] = - ( ( 3 ) * ( 1.0 ) );
-    residual[5] = - ( - ( 1.0 ) );
-    residual[6] = - ( 1.0 );
-    residual[7] = - ( 1.0 );
-    residual[8] = - ( 1.0 );
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    check_lbound(x[0],16.0, \"Out of bound for variable x[2]\");
-    check_ubound(x[1],-2.0, \"Out of bounds for variable y\");
-    check_lbound(x[2],1.0, \"Out of bound for variable x[1]\");
-    _x_2_2 = x[0];
-    _y_3 = x[1];
-    _x_1_1 = x[2];
-  (*res)[0] = _x_1_1 + _y_3 + _x_2_2 - (3);
-  (*res)[1] = _x_1_1 + ( 3 ) * ( _y_3 ) - (5);
-  (*res)[2] = _x_1_1 - ( _y_3 ) + _x_2_2 - (3);
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _x_2_2 = x[0];
-    _y_3 = x[1];
-    _x_1_1 = x[2];
-  }
-  return 0;
-}
-
-")})));
-end BlockTest5;
-
-model BlockTest6
- 
-
-  function f1
-    input Real x;
-	output Real y=0;
-  algorithm
-	  for i in 1:3 loop
-		  y := y + x;
-	  end for;
-  end f1;
-
-  function f2
-	input Real x;
-	input Integer n;
-	output Real y[2]={0,0};
-  algorithm
-	  for i in 1:n loop
-		  y := {y[1] + x, y[2] + 2*x};
-	  end for;
-  end f2;
-  
-  parameter Real p1 = 4;
-  Real x[2](min=f2(3,2)); 
-  Real y(max=-f1(2), nominal=5);
-  equation
-  3 = x[1] - y + x[2];
-  5 = x[1] + 3*y;
-  3 = x[1] + y + x[2];  
-
-	annotation(__JModelica(UnitTesting(tests={ 
-		CCodeGenTestCase(
-			name="BlockTest6",
-			description="Test of min, max and nominal attributes in blocks",
-			generate_ode=true,
-			equation_sorting=true,
-			template="$C_dae_blocks_residual_functions$",
-			generatedCode="
-static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-    x[1] = 5.0;
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-    x[0] = 12.0;
-    x[2] = 6.0;
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-    x[1] = -6.0;
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _x_2_2;
-    init_with_lbound(x[0],12.0, \"Resetting initial value for x[2]\");
-    x[1] = _y_3;
-    init_with_ubound(x[1],-6.0, \"Resetting initial value for y\");
-    x[2] = _x_1_1;
-    init_with_lbound(x[2],6.0, \"Resetting initial value for x[1]\");
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-    residual[0] = - ( 1.0 );
-    residual[1] = 0.0;
-    residual[2] = - ( 1.0 );
-    residual[3] = - ( 1.0 );
-    residual[4] = - ( ( 3 ) * ( 1.0 ) );
-    residual[5] = - ( - ( 1.0 ) );
-    residual[6] = - ( 1.0 );
-    residual[7] = - ( 1.0 );
-    residual[8] = - ( 1.0 );
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    check_lbound(x[0],12.0, \"Out of bound for variable x[2]\");
-    check_ubound(x[1],-6.0, \"Out of bounds for variable y\");
-    check_lbound(x[2],6.0, \"Out of bound for variable x[1]\");
-    _x_2_2 = x[0];
-    _y_3 = x[1];
-    _x_1_1 = x[2];
-  (*res)[0] = _x_1_1 + _y_3 + _x_2_2 - (3);
-  (*res)[1] = _x_1_1 + ( 3 ) * ( _y_3 ) - (5);
-  (*res)[2] = _x_1_1 - ( _y_3 ) + _x_2_2 - (3);
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _x_2_2 = x[0];
-    _y_3 = x[1];
-    _x_1_1 = x[2];
-  }
-  return 0;
-}
-
-")})));
-end BlockTest6;
-
-model BlockTest7
-
-parameter Real A[2,2] = 2*{{1,2},{3,4}};
-Real x[2];
-Real y[2];
-Real z[2];
-Real w[2];
-parameter Real p = 2;
-discrete Real d;
-
-equation
-when time>=1 then
- d = pre(d) + 1;
-end when;
-
-{{1,2},{3,4}}*x = {3,4};
-p*A*y = y;
-(d+1)*A*z = z+{2,2};
-(x[1]+1)*A*w = w+{3,3};
-
-
-	annotation(__JModelica(UnitTesting(tests={ 
-		CCodeGenTestCase(
-			name="BlockTest7",
-			description="Test of min, max and nominal attributes in blocks",
-			generate_ode=true,
-			equation_sorting=true,
-			template="$C_dae_blocks_residual_functions$
-$C_dae_init_blocks_residual_functions$
-$C_dae_add_blocks_residual_functions$
-$C_dae_init_add_blocks_residual_functions$",
-			generatedCode="
-static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-jmi_real_t** res = &residual;
-if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-} else if (evaluation_mode==JMI_BLOCK_MIN) {
-} else if (evaluation_mode==JMI_BLOCK_MAX) {
-} else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-x[0] = _x_2_5;
-x[1] = _x_1_4;
-} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-residual[0] = ( 4 ) * ( 1.0 );
-residual[1] = ( 2 ) * ( 1.0 );
-residual[2] = ( 3 ) * ( 1.0 );
-residual[3] = ( 1 ) * ( 1.0 );
-} else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-_x_2_5 = x[0];
-_x_1_4 = x[1];
-(*res)[0] = 4 - (( 3 ) * ( _x_1_4 ) + ( 4 ) * ( _x_2_5 ));
-(*res)[1] = 3 - (( 1 ) * ( _x_1_4 ) + ( 2 ) * ( _x_2_5 ));
-} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-_x_2_5 = x[0];
-_x_1_4 = x[1];
-}
-return 0;
-}
-
-static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-jmi_real_t** res = &residual;
-if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-} else if (evaluation_mode==JMI_BLOCK_MIN) {
-} else if (evaluation_mode==JMI_BLOCK_MAX) {
-} else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-x[0] = _y_2_7;
-x[1] = _y_1_6;
-} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-residual[0] = ( ( _p_12 ) * ( _A_2_2_3 ) ) * ( 1.0 ) - ( 1.0 );
-residual[1] = ( ( _p_12 ) * ( _A_1_2_1 ) ) * ( 1.0 );
-residual[2] = ( ( _p_12 ) * ( _A_2_1_2 ) ) * ( 1.0 );
-residual[3] = ( ( _p_12 ) * ( _A_1_1_0 ) ) * ( 1.0 ) - ( 1.0 );
-} else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-_y_2_7 = x[0];
-_y_1_6 = x[1];
-(*res)[0] = _y_2_7 - (( ( _p_12 ) * ( _A_2_1_2 ) ) * ( _y_1_6 ) + ( ( _p_12 ) * ( _A_2_2_3 ) ) * ( _y_2_7 ));
-(*res)[1] = _y_1_6 - (( ( _p_12 ) * ( _A_1_1_0 ) ) * ( _y_1_6 ) + ( ( _p_12 ) * ( _A_1_2_1 ) ) * ( _y_2_7 ));
-} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-_y_2_7 = x[0];
-_y_1_6 = x[1];
-}
-return 0;
-}
-
-static int dae_block_2(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-jmi_real_t** res = &residual;
-if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-} else if (evaluation_mode==JMI_BLOCK_MIN) {
-} else if (evaluation_mode==JMI_BLOCK_MAX) {
-} else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-x[0] = _z_2_9;
-x[1] = _z_1_8;
-} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-residual[0] = ( ( _d_13 + 1 ) * ( _A_2_2_3 ) ) * ( 1.0 ) - ( 1.0 );
-residual[1] = ( ( _d_13 + 1 ) * ( _A_1_2_1 ) ) * ( 1.0 );
-residual[2] = ( ( _d_13 + 1 ) * ( _A_2_1_2 ) ) * ( 1.0 );
-residual[3] = ( ( _d_13 + 1 ) * ( _A_1_1_0 ) ) * ( 1.0 ) - ( 1.0 );
-} else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-_z_2_9 = x[0];
-_z_1_8 = x[1];
-(*res)[0] = _z_2_9 + 2 - (( ( _d_13 + 1 ) * ( _A_2_1_2 ) ) * ( _z_1_8 ) + ( ( _d_13 + 1 ) * ( _A_2_2_3 ) ) * ( _z_2_9 ));
-(*res)[1] = _z_1_8 + 2 - (( ( _d_13 + 1 ) * ( _A_1_1_0 ) ) * ( _z_1_8 ) + ( ( _d_13 + 1 ) * ( _A_1_2_1 ) ) * ( _z_2_9 ));
-} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-_z_2_9 = x[0];
-_z_1_8 = x[1];
-}
-return 0;
-}
-
-static int dae_block_3(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-jmi_real_t** res = &residual;
-if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-} else if (evaluation_mode==JMI_BLOCK_MIN) {
-} else if (evaluation_mode==JMI_BLOCK_MAX) {
-} else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-x[0] = _w_2_11;
-x[1] = _w_1_10;
-} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-residual[0] = ( ( _x_1_4 + 1 ) * ( _A_2_2_3 ) ) * ( 1.0 ) - ( 1.0 );
-residual[1] = ( ( _x_1_4 + 1 ) * ( _A_1_2_1 ) ) * ( 1.0 );
-residual[2] = ( ( _x_1_4 + 1 ) * ( _A_2_1_2 ) ) * ( 1.0 );
-residual[3] = ( ( _x_1_4 + 1 ) * ( _A_1_1_0 ) ) * ( 1.0 ) - ( 1.0 );
-} else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-_w_2_11 = x[0];
-_w_1_10 = x[1];
-(*res)[0] = _w_2_11 + 3 - (( ( _x_1_4 + 1 ) * ( _A_2_1_2 ) ) * ( _w_1_10 ) + ( ( _x_1_4 + 1 ) * ( _A_2_2_3 ) ) * ( _w_2_11 ));
-(*res)[1] = _w_1_10 + 3 - (( ( _x_1_4 + 1 ) * ( _A_1_1_0 ) ) * ( _w_1_10 ) + ( ( _x_1_4 + 1 ) * ( _A_1_2_1 ) ) * ( _w_2_11 ));
-} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-_w_2_11 = x[0];
-_w_1_10 = x[1];
-}
-return 0;
-}
-
-
-static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-jmi_real_t** res = &residual;
-if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-} else if (evaluation_mode==JMI_BLOCK_MIN) {
-} else if (evaluation_mode==JMI_BLOCK_MAX) {
-} else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-x[0] = _x_2_5;
-x[1] = _x_1_4;
-} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-residual[0] = ( 4 ) * ( 1.0 );
-residual[1] = ( 2 ) * ( 1.0 );
-residual[2] = ( 3 ) * ( 1.0 );
-residual[3] = ( 1 ) * ( 1.0 );
-} else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-_x_2_5 = x[0];
-_x_1_4 = x[1];
-(*res)[0] = 4 - (( 3 ) * ( _x_1_4 ) + ( 4 ) * ( _x_2_5 ));
-(*res)[1] = 3 - (( 1 ) * ( _x_1_4 ) + ( 2 ) * ( _x_2_5 ));
-} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-_x_2_5 = x[0];
-_x_1_4 = x[1];
-}
-return 0;
-}
-
-static int dae_init_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-jmi_real_t** res = &residual;
-if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-} else if (evaluation_mode==JMI_BLOCK_MIN) {
-} else if (evaluation_mode==JMI_BLOCK_MAX) {
-} else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-x[0] = _y_2_7;
-x[1] = _y_1_6;
-} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-residual[0] = ( ( _p_12 ) * ( _A_2_2_3 ) ) * ( 1.0 ) - ( 1.0 );
-residual[1] = ( ( _p_12 ) * ( _A_1_2_1 ) ) * ( 1.0 );
-residual[2] = ( ( _p_12 ) * ( _A_2_1_2 ) ) * ( 1.0 );
-residual[3] = ( ( _p_12 ) * ( _A_1_1_0 ) ) * ( 1.0 ) - ( 1.0 );
-} else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-_y_2_7 = x[0];
-_y_1_6 = x[1];
-(*res)[0] = _y_2_7 - (( ( _p_12 ) * ( _A_2_1_2 ) ) * ( _y_1_6 ) + ( ( _p_12 ) * ( _A_2_2_3 ) ) * ( _y_2_7 ));
-(*res)[1] = _y_1_6 - (( ( _p_12 ) * ( _A_1_1_0 ) ) * ( _y_1_6 ) + ( ( _p_12 ) * ( _A_1_2_1 ) ) * ( _y_2_7 ));
-} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-_y_2_7 = x[0];
-_y_1_6 = x[1];
-}
-return 0;
-}
-
-static int dae_init_block_2(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-jmi_real_t** res = &residual;
-if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-} else if (evaluation_mode==JMI_BLOCK_MIN) {
-} else if (evaluation_mode==JMI_BLOCK_MAX) {
-} else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-x[0] = _z_2_9;
-x[1] = _z_1_8;
-} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-residual[0] = ( ( _d_13 + 1 ) * ( _A_2_2_3 ) ) * ( 1.0 ) - ( 1.0 );
-residual[1] = ( ( _d_13 + 1 ) * ( _A_1_2_1 ) ) * ( 1.0 );
-residual[2] = ( ( _d_13 + 1 ) * ( _A_2_1_2 ) ) * ( 1.0 );
-residual[3] = ( ( _d_13 + 1 ) * ( _A_1_1_0 ) ) * ( 1.0 ) - ( 1.0 );
-} else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-_z_2_9 = x[0];
-_z_1_8 = x[1];
-(*res)[0] = _z_2_9 + 2 - (( ( _d_13 + 1 ) * ( _A_2_1_2 ) ) * ( _z_1_8 ) + ( ( _d_13 + 1 ) * ( _A_2_2_3 ) ) * ( _z_2_9 ));
-(*res)[1] = _z_1_8 + 2 - (( ( _d_13 + 1 ) * ( _A_1_1_0 ) ) * ( _z_1_8 ) + ( ( _d_13 + 1 ) * ( _A_1_2_1 ) ) * ( _z_2_9 ));
-} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-_z_2_9 = x[0];
-_z_1_8 = x[1];
-}
-return 0;
-}
-
-static int dae_init_block_3(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-jmi_real_t** res = &residual;
-if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-} else if (evaluation_mode==JMI_BLOCK_MIN) {
-} else if (evaluation_mode==JMI_BLOCK_MAX) {
-} else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-x[0] = _w_2_11;
-x[1] = _w_1_10;
-} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-residual[0] = ( ( _x_1_4 + 1 ) * ( _A_2_2_3 ) ) * ( 1.0 ) - ( 1.0 );
-residual[1] = ( ( _x_1_4 + 1 ) * ( _A_1_2_1 ) ) * ( 1.0 );
-residual[2] = ( ( _x_1_4 + 1 ) * ( _A_2_1_2 ) ) * ( 1.0 );
-residual[3] = ( ( _x_1_4 + 1 ) * ( _A_1_1_0 ) ) * ( 1.0 ) - ( 1.0 );
-} else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-_w_2_11 = x[0];
-_w_1_10 = x[1];
-(*res)[0] = _w_2_11 + 3 - (( ( _x_1_4 + 1 ) * ( _A_2_1_2 ) ) * ( _w_1_10 ) + ( ( _x_1_4 + 1 ) * ( _A_2_2_3 ) ) * ( _w_2_11 ));
-(*res)[1] = _w_1_10 + 3 - (( ( _x_1_4 + 1 ) * ( _A_1_1_0 ) ) * ( _w_1_10 ) + ( ( _x_1_4 + 1 ) * ( _A_1_2_1 ) ) * ( _w_2_11 ));
-} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-_w_2_11 = x[0];
-_w_1_10 = x[1];
-}
-return 0;
-}
-
-jmi_dae_add_equation_block(*jmi,dae_block_0,NULL,2,0,JMI_CONSTANT_VARIABILITY,JMI_LINEAR_SOLVER,0 );
-jmi_dae_add_equation_block(*jmi,dae_block_1,NULL,2,0,JMI_PARAMETER_VARIABILITY,JMI_LINEAR_SOLVER,1 );
-jmi_dae_add_equation_block(*jmi,dae_block_2,NULL,2,0,JMI_DISCRETE_VARIABILITY,JMI_LINEAR_SOLVER,2 );
-jmi_dae_add_equation_block(*jmi,dae_block_3,NULL,2,0,JMI_CONTINUOUS_VARIABILITY,JMI_LINEAR_SOLVER,3 );
-
-jmi_dae_init_add_equation_block(*jmi,dae_init_block_0,NULL,2,0,JMI_CONSTANT_VARIABILITY,JMI_LINEAR_SOLVER,0 );
-jmi_dae_init_add_equation_block(*jmi,dae_init_block_1,NULL,2,0,JMI_PARAMETER_VARIABILITY,JMI_LINEAR_SOLVER,1 );
-jmi_dae_init_add_equation_block(*jmi,dae_init_block_2,NULL,2,0,JMI_DISCRETE_VARIABILITY,JMI_LINEAR_SOLVER,2 );
-jmi_dae_init_add_equation_block(*jmi,dae_init_block_3,NULL,2,0,JMI_CONTINUOUS_VARIABILITY,JMI_LINEAR_SOLVER,3 );
-")})));
-end BlockTest7;
 
 model OutputTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="OutputTest1",
+         description="Test of code generation of output value references.",
+         generate_ode=true,
+         equation_sorting=true,
+         template="$n_outputs$
+				   $C_DAE_output_vrefs$",
+         generatedCode=" 
+30
+static const int Output_vrefs[30] = {5,6,7,8,9,14,17,20,23,26,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,268435513,536870970};         
+")})));
+
 
   output Real x_1(start=0.951858508368);
   output Real x_2(start=2.17691690118);
@@ -5755,25 +4986,24 @@ sin(w_other_2_1) + sin(w_other_2_2) - (w_other_2_3) + 4*(x_1)*4*(x_4) - (x_4) + 
 4*(w_other_3_1)*(w_other_3_2) + (w_other_3_3) + cos(x_3) + sin(x_2) + 4*(x_1) + (ur_2) - cos(ur_2) = 0;
 cos(w_other_3_1)*4*(w_other_3_2) + (w_other_3_3) + 4*(x_4) - sin(x_4) + (x_3) + 4*(ur_3) - cos(ur_4) = 0;
 
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="OutputTest1",
-			description="Test of code generation of output value references.",
-			generate_ode=true,
-			equation_sorting=true,
-			template="
-$n_outputs$
-				   $C_DAE_output_vrefs$
-",
-         generatedCode=" 
-30
-static const int Output_vrefs[30] = {5,6,7,8,9,14,17,20,23,26,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,268435513,536870970};         
-")})));
 end OutputTest1;
 
 
 model StartValues1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="StartValues1",
+         description="",
+         template="$C_set_start_values$",
+         generatedCode="
+_y_1 = (2);
+_z_2 = (3);
+model_init_eval_parameters(jmi);
+_x_0 = (1);
+_q_3 = (0.0);
+_der_x_4 = (0.0);		 
+")})));
+
   Real x(start=1);
   parameter Real y = 2;
   parameter Real z(start=3);
@@ -5783,23 +5013,27 @@ equation
   der(x) = x;
   q = x + 1;
 
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="StartValues1",
-			description="",
-			template="$C_set_start_values$",
-			generatedCode="
-_y_1 = (2);
-_z_2 = (3);
-model_init_eval_parameters(jmi);
-_x_0 = (1);
-_q_3 = (0.0);
-_der_x_4 = (0.0);		 
-")})));
 end StartValues1;
 
 model StartValues2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="StartValues2",
+         description="",
+         template="$C_set_start_values$",
+         generatedCode="
+    _pr_0 = (1.5);
+    _pi_1 = (2);
+    _pb_2 = (JMI_TRUE);
+	model_init_eval_parameters(jmi);
+    _r_3 = (5.5);
+    _i_4 = (10);
+    _b_5 = (JMI_FALSE);
+    _der_r_6 = (0.0);
+    pre_i_4 = (10);
+    pre_b_5 = (JMI_FALSE);
+")})));
+
   parameter Real pr = 1.5;
   parameter Integer pi = 2;
   parameter Boolean pb = true;
@@ -5813,43 +5047,14 @@ equation
   i = r + 2;
   b = false;
   
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="StartValues2",
-			description="",
-			template="$C_set_start_values$",
-			generatedCode="
-    _pr_0 = (1.5);
-    _pi_1 = (2);
-    _pb_2 = (JMI_TRUE);
-	model_init_eval_parameters(jmi);
-    _r_3 = (5.5);
-    _i_4 = (10);
-    _b_5 = (JMI_FALSE);
-    _der_r_6 = (0.0);
-    pre_i_4 = (10);
-    pre_b_5 = (JMI_FALSE);
-")})));
 end StartValues2;
 
 model ExternalArray1
-	Real a_in[2]={1,1};
-	Real b_out;
-	function f
-		input Real a[2];
-		output Real b;
-		external;
-	end f;
-	equation
-		b_out = f(a_in);
-
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ExternalArray1",
-			description="External C function (undeclared) with one dim array input, scalar output.",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="ExternalArray1",
+         description="External C function (undeclared) with one dim array input, scalar output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -5873,24 +5078,25 @@ jmi_ad_var_t func_CCodeGenTests_ExternalArray1_f_exp(jmi_array_t* a_a) {
 }
 
 ")})));
-end ExternalArray1;
 
-model ExternalArray2
-	Real a_in[2,2]={{1,1},{1,1}};
+	Real a_in[2]={1,1};
 	Real b_out;
 	function f
-		input Real a[2,2];
+		input Real a[2];
 		output Real b;
 		external;
 	end f;
 	equation
 		b_out = f(a_in);
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ExternalArray2",
-			description="External C function (undeclared) with two dim array input, scalar output.",
-			template="
+end ExternalArray1;
+
+model ExternalArray2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="ExternalArray2",
+         description="External C function (undeclared) with two dim array input, scalar output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -5914,25 +5120,24 @@ jmi_ad_var_t func_CCodeGenTests_ExternalArray2_f_exp(jmi_array_t* a_a) {
 }
 
 ")})));
-end ExternalArray2;
 
-model ExternalArray3
-	Real a_in[2,2];
+	Real a_in[2,2]={{1,1},{1,1}};
 	Real b_out;
 	function f
-		input Real a[:,:];
+		input Real a[2,2];
 		output Real b;
 		external;
 	end f;
 	equation
-		a_in = {{1,1},{2,2}};
 		b_out = f(a_in);
+end ExternalArray2;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ExternalArray3",
-			description="External C function (undeclared) with two dim and unknown no of elements array input, scalar output.",
-			template="
+model ExternalArray3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="ExternalArray3",
+         description="External C function (undeclared) with two dim and unknown no of elements array input, scalar output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -5956,26 +5161,25 @@ jmi_ad_var_t func_CCodeGenTests_ExternalArray3_f_exp(jmi_array_t* a_a) {
 }
 
 ")})));
-end ExternalArray3;
 
-model ExternalArray4
-	Real a_in[2];
-	Real b_out[2];
+	Real a_in[2,2];
+	Real b_out;
 	function f
-		input Real a[2];
-		output Real b[2];
+		input Real a[:,:];
+		output Real b;
 		external;
 	end f;
 	equation
-		a_in[1] = 1;
-		a_in[2] = 2;
+		a_in = {{1,1},{2,2}};
 		b_out = f(a_in);
+end ExternalArray3;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ExternalArray4",
-			description="External C function (undeclared) with one dim array input, one dim array output.",
-			template="
+model ExternalArray4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="ExternalArray4",
+         description="External C function (undeclared) with one dim array input, one dim array output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -5995,25 +5199,26 @@ void func_CCodeGenTests_ExternalArray4_f_def(jmi_array_t* a_a, jmi_array_t* b_a)
 }
 
 ")})));
-end ExternalArray4;
 
-model ExternalArray5
-	Real a_in[2,2];
-	Real b_out[2,2];
+	Real a_in[2];
+	Real b_out[2];
 	function f
-		input Real a[2,2];
-		output Real b[2,2];
+		input Real a[2];
+		output Real b[2];
 		external;
 	end f;
 	equation
-		a_in = {{1,1},{2,2}};
+		a_in[1] = 1;
+		a_in[2] = 2;
 		b_out = f(a_in);
+end ExternalArray4;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ExternalArray5",
-			description="External C function (undeclared) with two dim array input, two dim array output.",
-			template="
+model ExternalArray5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="ExternalArray5",
+         description="External C function (undeclared) with two dim array input, two dim array output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6033,25 +5238,25 @@ void func_CCodeGenTests_ExternalArray5_f_def(jmi_array_t* a_a, jmi_array_t* b_a)
 }
 
 ")})));
-end ExternalArray5;
 
-model ExternalArray6
 	Real a_in[2,2];
 	Real b_out[2,2];
 	function f
-		input Real a[:,:];
-		output Real b[size(a,1),size(a,2)];
+		input Real a[2,2];
+		output Real b[2,2];
 		external;
 	end f;
 	equation
 		a_in = {{1,1},{2,2}};
 		b_out = f(a_in);
+end ExternalArray5;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ExternalArray6",
-			description="External C function (undeclared) with two dim and unknown no of elements array input, two dim array output.",
-			template="
+model ExternalArray6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="ExternalArray6",
+         description="External C function (undeclared) with two dim and unknown no of elements array input, two dim array output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6071,24 +5276,25 @@ void func_CCodeGenTests_ExternalArray6_f_def(jmi_array_t* a_a, jmi_array_t* b_a)
 }
 
 ")})));
-end ExternalArray6;
 
-model IntegerExternalArray1
-	Integer a_in[2]={1,1};
-	Real b_out;
+	Real a_in[2,2];
+	Real b_out[2,2];
 	function f
-		input Integer a[2];
-		output Real b;
+		input Real a[:,:];
+		output Real b[size(a,1),size(a,2)];
 		external;
 	end f;
 	equation
+		a_in = {{1,1},{2,2}};
 		b_out = f(a_in);
+end ExternalArray6;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="IntegerExternalArray1",
-			description="External C function (undeclared) with one dim Integer array input, scalar Real output.",
-			template="
+model IntegerExternalArray1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="IntegerExternalArray1",
+         description="External C function (undeclared) with one dim Integer array input, scalar Real output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6100,7 +5306,7 @@ void func_CCodeGenTests_IntegerExternalArray1_f_def(jmi_array_t* a_a, jmi_ad_var
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t b_v;
     JMI_INT_ARRAY_STATIC(tmp_1, 2, 1)
-    JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
+    JMI_INT_ARRAY_STATIC_INIT_1(tmp_1, 2)
     jmi_copy_matrix_to_int(a_a, a_a->var, tmp_1->var);
     b_v = f(tmp_1->var, jmi_array_size(a_a, 0));
     if (b_o != NULL) *b_o = b_v;
@@ -6115,24 +5321,24 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalArray1_f_exp(jmi_array_t* a_a) {
 }
 
 ")})));
-end IntegerExternalArray1;
 
-model IntegerExternalArray2
-	Integer a_in[2,2]={{1,1},{1,1}};
+	Integer a_in[2]={1,1};
 	Real b_out;
 	function f
-		input Integer a[2,2];
+		input Integer a[2];
 		output Real b;
 		external;
 	end f;
 	equation
-		b_out = f(a_in);	
+		b_out = f(a_in);
+end IntegerExternalArray1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="IntegerExternalArray2",
-			description="External C function (undeclared) with two dim Integer array input, scalar Real output.",
-			template="
+model IntegerExternalArray2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="IntegerExternalArray2",
+         description="External C function (undeclared) with two dim Integer array input, scalar Real output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6144,7 +5350,7 @@ void func_CCodeGenTests_IntegerExternalArray2_f_def(jmi_array_t* a_a, jmi_ad_var
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t b_v;
     JMI_INT_ARRAY_STATIC(tmp_1, 4, 2)
-    JMI_ARRAY_STATIC_INIT_2(tmp_1, 2, 2)
+    JMI_INT_ARRAY_STATIC_INIT_2(tmp_1, 2, 2)
     jmi_copy_matrix_to_int(a_a, a_a->var, tmp_1->var);
     b_v = f(tmp_1->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1));
     if (b_o != NULL) *b_o = b_v;
@@ -6159,24 +5365,24 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalArray2_f_exp(jmi_array_t* a_a) {
 }
 
 ")})));
-end IntegerExternalArray2;
 
-model IntegerExternalArray3
-	Real a_in = 1;
-	Integer b_out[2];
+	Integer a_in[2,2]={{1,1},{1,1}};
+	Real b_out;
 	function f
-		input Real a;
-		output Integer b[2];
+		input Integer a[2,2];
+		output Real b;
 		external;
 	end f;
 	equation
-		b_out = f(a_in);
+		b_out = f(a_in);	
+end IntegerExternalArray2;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="IntegerExternalArray3",
-			description="External C function (undeclared) with one scalar Real input, one dim array Integer output.",
-			template="
+model IntegerExternalArray3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="IntegerExternalArray3",
+         description="External C function (undeclared) with one scalar Real input, one dim array Integer output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6191,7 +5397,7 @@ void func_CCodeGenTests_IntegerExternalArray3_f_def(jmi_ad_var_t a_v, jmi_array_
         JMI_ARRAY_STATIC_INIT_1(b_an, 2)
         b_a = b_an;
     }
-    JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
+    JMI_INT_ARRAY_STATIC_INIT_1(tmp_1, 2)
     jmi_copy_matrix_to_int(b_a, b_a->var, tmp_1->var);
     f(a_v, tmp_1->var, jmi_array_size(b_a, 0));
     jmi_copy_matrix_from_int(b_a, tmp_1->var, b_a->var);
@@ -6200,25 +5406,24 @@ void func_CCodeGenTests_IntegerExternalArray3_f_def(jmi_ad_var_t a_v, jmi_array_
 }
 
 ")})));
-end IntegerExternalArray3;
 
-model IntegerExternalArray4
-	Integer a_in[2,2];
-	Integer b_out[2,2];
+	Real a_in = 1;
+	Integer b_out[2];
 	function f
-		input Integer a[2,2];
-		output Integer b[2,2];
+		input Real a;
+		output Integer b[2];
 		external;
 	end f;
 	equation
-		a_in = {{1,1},{2,2}};
-		b_out = f(a_in);	
+		b_out = f(a_in);
+end IntegerExternalArray3;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="IntegerExternalArray4",
-			description="External C function (undeclared) with one 2-dim Integer array input, one 2-dim Integer array output.",
-			template="
+model IntegerExternalArray4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="IntegerExternalArray4",
+         description="External C function (undeclared) with one 2-dim Integer array input, one 2-dim Integer array output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6234,9 +5439,9 @@ void func_CCodeGenTests_IntegerExternalArray4_f_def(jmi_array_t* a_a, jmi_array_
         JMI_ARRAY_STATIC_INIT_2(b_an, 2, 2)
         b_a = b_an;
     }
-    JMI_ARRAY_STATIC_INIT_2(tmp_1, 2, 2)
+    JMI_INT_ARRAY_STATIC_INIT_2(tmp_1, 2, 2)
     jmi_copy_matrix_to_int(a_a, a_a->var, tmp_1->var);
-    JMI_ARRAY_STATIC_INIT_2(tmp_2, 2, 2)
+    JMI_INT_ARRAY_STATIC_INIT_2(tmp_2, 2, 2)
     jmi_copy_matrix_to_int(b_a, b_a->var, tmp_2->var);
     f(tmp_1->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1), tmp_2->var, jmi_array_size(b_a, 0), jmi_array_size(b_a, 1));
     jmi_copy_matrix_from_int(b_a, tmp_2->var, b_a->var);
@@ -6245,27 +5450,25 @@ void func_CCodeGenTests_IntegerExternalArray4_f_def(jmi_array_t* a_a, jmi_array_
 }
 
 ")})));
+
+	Integer a_in[2,2];
+	Integer b_out[2,2];
+	function f
+		input Integer a[2,2];
+		output Integer b[2,2];
+		external;
+	end f;
+	equation
+		a_in = {{1,1},{2,2}};
+		b_out = f(a_in);	
 end IntegerExternalArray4;
 
 model SimpleExternalFortran1
-
-	Real a_in=1;
-	Real b_out;
-	
-	function f
-		input Real a;
-		output Real b;
-		external "FORTRAN 77";
-	end f;
-	
-	equation
-		b_out = f(a_in);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="SimpleExternalFortran1",
-			description="",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternalFortran1",
+         description="",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6290,26 +5493,27 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran1_f_exp(jmi_ad_var_t a_v) {
 }
 
 ")})));
+
+
+	Real a_in=1;
+	Real b_out;
+	
+	function f
+		input Real a;
+		output Real b;
+		external "FORTRAN 77";
+	end f;
+	
+	equation
+		b_out = f(a_in);
 end SimpleExternalFortran1;
 
 model SimpleExternalFortran2
-	Real a_in=1;
-	Real b_in=2;
-	Real c_out;
-	function f
-		input Real a;
-		input Real b;
-		output Real c;
-		external "FORTRAN 77";
-	end f;
-	equation
-		c_out = f(a_in, b_in);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="SimpleExternalFortran2",
-			description="",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternalFortran2",
+         description="",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6334,24 +5538,26 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran2_f_exp(jmi_ad_var_t a_v, j
 }
 
 ")})));
+
+	Real a_in=1;
+	Real b_in=2;
+	Real c_out;
+	function f
+		input Real a;
+		input Real b;
+		output Real c;
+		external "FORTRAN 77";
+	end f;
+	equation
+		c_out = f(a_in, b_in);
 end SimpleExternalFortran2;
 
 model SimpleExternalFortran3
-	Real a_in=1;
-	Real b_out;
-	function f
-		input Real a;
-		output Real b;
-		external "FORTRAN 77" b = my_f(a);
-	end f;
-	equation
-		b_out = f(a_in);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="SimpleExternalFortran3",
-			description="",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternalFortran3",
+         description="",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6376,24 +5582,24 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran3_f_exp(jmi_ad_var_t a_v) {
 }
 
 ")})));
-end SimpleExternalFortran3;
 
-model SimpleExternalFortran4
 	Real a_in=1;
 	Real b_out;
 	function f
 		input Real a;
 		output Real b;
-		external "FORTRAN 77" my_f(a, b);
+		external "FORTRAN 77" b = my_f(a);
 	end f;
 	equation
-		b_out = f(a_in);	
+		b_out = f(a_in);
+end SimpleExternalFortran3;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="SimpleExternalFortran4",
-			description="",
-			template="
+model SimpleExternalFortran4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternalFortran4",
+         description="",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6418,23 +5624,24 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran4_f_exp(jmi_ad_var_t a_v) {
 }
 
 ")})));
+
+	Real a_in=1;
+	Real b_out;
+	function f
+		input Real a;
+		output Real b;
+		external "FORTRAN 77" my_f(a, b);
+	end f;
+	equation
+		b_out = f(a_in);	
 end SimpleExternalFortran4;
 
 model SimpleExternalFortran5
-	Real a_in=1;
-	function f
-		input Real a;
-		external "FORTRAN 77";
-	end f;
-	equation
-		f(a_in);
-		
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="SimpleExternalFortran5",
-			description="",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternalFortran5",
+         description="",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6450,23 +5657,23 @@ void func_CCodeGenTests_SimpleExternalFortran5_f_def(jmi_ad_var_t a_v) {
 }
 
 ")})));
-end SimpleExternalFortran5;
 
-model SimpleExternalFortran6
 	Real a_in=1;
 	function f
 		input Real a;
-		external "FORTRAN 77" my_f(a);
+		external "FORTRAN 77";
 	end f;
 	equation
 		f(a_in);
 		
+end SimpleExternalFortran5;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="SimpleExternalFortran6",
-			description="",
-			template="
+model SimpleExternalFortran6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternalFortran6",
+         description="",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6482,27 +5689,23 @@ void func_CCodeGenTests_SimpleExternalFortran6_f_def(jmi_ad_var_t a_v) {
 }
 
 ")})));
+
+	Real a_in=1;
+	function f
+		input Real a;
+		external "FORTRAN 77" my_f(a);
+	end f;
+	equation
+		f(a_in);
+		
 end SimpleExternalFortran6;
 
 model SimpleExternalFortran7
-	Real a_in = 1;
-	Real b_in = 2;
-	Real c_out;
-	function f
-		input Real a;
-		input Real b;
-		output Real c;
-		external "FORTRAN 77" my_f(a,c,b);
-	end f;
-	equation
-		c_out = f(a_in, b_in);
-		
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="SimpleExternalFortran7",
-			description="",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternalFortran7",
+         description="",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6527,29 +5730,27 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran7_f_exp(jmi_ad_var_t a_v, j
 }
 
 ")})));
-end SimpleExternalFortran7;
 
-model SimpleExternalFortran8
 	Real a_in = 1;
 	Real b_in = 2;
 	Real c_out;
-	Real d_out;
 	function f
 		input Real a;
 		input Real b;
 		output Real c;
-		output Real d;
-		external "FORTRAN 77" my_f(a,c,b,d);
+		external "FORTRAN 77" my_f(a,c,b);
 	end f;
 	equation
-		(c_out, d_out) = f(a_in, b_in);
+		c_out = f(a_in, b_in);
 		
+end SimpleExternalFortran7;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="SimpleExternalFortran8",
-			description="",
-			template="
+model SimpleExternalFortran8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternalFortran8",
+         description="",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6576,9 +5777,7 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran8_f_exp(jmi_ad_var_t a_v, j
 }
 
 ")})));
-end SimpleExternalFortran8;
 
-model SimpleExternalFortran9
 	Real a_in = 1;
 	Real b_in = 2;
 	Real c_out;
@@ -6588,17 +5787,19 @@ model SimpleExternalFortran9
 		input Real b;
 		output Real c;
 		output Real d;
-		external "FORTRAN 77" d = my_f(a,b,c);
+		external "FORTRAN 77" my_f(a,c,b,d);
 	end f;
 	equation
 		(c_out, d_out) = f(a_in, b_in);
 		
+end SimpleExternalFortran8;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="SimpleExternalFortran9",
-			description="",
-			template="
+model SimpleExternalFortran9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternalFortran9",
+         description="",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6625,31 +5826,29 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran9_f_exp(jmi_ad_var_t a_v, j
 }
 
 ")})));
-end SimpleExternalFortran9;
 
-model SimpleExternalFortran10
 	Real a_in = 1;
 	Real b_in = 2;
 	Real c_out;
 	Real d_out;
-	Real e_out;
 	function f
 		input Real a;
 		input Real b;
 		output Real c;
 		output Real d;
-		output Real e;
-		external "FORTRAN 77" d = my_f(a,c,b,e);
+		external "FORTRAN 77" d = my_f(a,b,c);
 	end f;
 	equation
-		(c_out, d_out, e_out) = f(a_in, b_in);
+		(c_out, d_out) = f(a_in, b_in);
 		
+end SimpleExternalFortran9;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="SimpleExternalFortran10",
-			description="",
-			template="
+model SimpleExternalFortran10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternalFortran10",
+         description="",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6678,24 +5877,31 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran10_f_exp(jmi_ad_var_t a_v, 
 }
 
 ")})));
+
+	Real a_in = 1;
+	Real b_in = 2;
+	Real c_out;
+	Real d_out;
+	Real e_out;
+	function f
+		input Real a;
+		input Real b;
+		output Real c;
+		output Real d;
+		output Real e;
+		external "FORTRAN 77" d = my_f(a,c,b,e);
+	end f;
+	equation
+		(c_out, d_out, e_out) = f(a_in, b_in);
+		
 end SimpleExternalFortran10;
 
 model IntegerExternalFortran1
-	Integer a_in=1;
-	Real b_out;
-	function f
-		input Integer a;
-		output Real b;
-		external "FORTRAN 77";
-	end f;
-	equation
-		b_out = f(a_in);		
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="IntegerExternalFortran1",
-			description="External Fortran function, one scalar Integer input, one scalar Real output.",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="IntegerExternalFortran1",
+         description="External Fortran function, one scalar Integer input, one scalar Real output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6722,24 +5928,24 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalFortran1_f_exp(jmi_ad_var_t a_v) 
 }
 
 ")})));
-end IntegerExternalFortran1;
 
-model IntegerExternalFortran2
-	Real a_in=1;
-	Integer b_out;
+	Integer a_in=1;
+	Real b_out;
 	function f
-		input Real a;
-		output Integer b;
+		input Integer a;
+		output Real b;
 		external "FORTRAN 77";
 	end f;
 	equation
-		b_out = f(a_in);
+		b_out = f(a_in);		
+end IntegerExternalFortran1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="IntegerExternalFortran2",
-			description="",
-			template="
+model IntegerExternalFortran2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="IntegerExternalFortran2",
+         description="",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6764,24 +5970,24 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalFortran2_f_exp(jmi_ad_var_t a_v) 
 }
 
 ")})));
-end IntegerExternalFortran2;
 
-model IntegerExternalFortran3
 	Real a_in=1;
 	Integer b_out;
 	function f
 		input Real a;
 		output Integer b;
-		external "FORTRAN 77" my_f(a, b);
+		external "FORTRAN 77";
 	end f;
 	equation
-		b_out = f(a_in);	
+		b_out = f(a_in);
+end IntegerExternalFortran2;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="IntegerExternalFortran3",
-			description="External Fortran function (declared), one scalar Real input, one scalar Integer output in func stmt.",
-			template="
+model IntegerExternalFortran3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="IntegerExternalFortran3",
+         description="External Fortran function (declared), one scalar Real input, one scalar Integer output in func stmt.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6809,28 +6015,24 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalFortran3_f_exp(jmi_ad_var_t a_v) 
 }
 
 ")})));
+
+	Real a_in=1;
+	Integer b_out;
+	function f
+		input Real a;
+		output Integer b;
+		external "FORTRAN 77" my_f(a, b);
+	end f;
+	equation
+		b_out = f(a_in);	
 end IntegerExternalFortran3;
 
 model IntegerExternalFortran4
-	Integer a_in = 1;
-	Integer b_in = 2;
-	Integer c_out;
-	Integer d_out;
-	function f
-		input Integer a;
-		input Integer b;
-		output Integer c;
-		output Integer d;
-		external "FORTRAN 77" d = my_f(a,b,c);
-	end f;
-	equation
-		(c_out, d_out) = f(a_in, b_in);		
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="IntegerExternalFortran4",
-			description="External Fortran function (declared), two scalar Integer inputs, two scalar Integer outputs (one in return, one in func stmt.",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="IntegerExternalFortran4",
+         description="External Fortran function (declared), two scalar Integer inputs, two scalar Integer outputs (one in return, one in func stmt.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6864,25 +6066,28 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalFortran4_f_exp(jmi_ad_var_t a_v, 
 }
 
 ")})));
+
+	Integer a_in = 1;
+	Integer b_in = 2;
+	Integer c_out;
+	Integer d_out;
+	function f
+		input Integer a;
+		input Integer b;
+		output Integer c;
+		output Integer d;
+		external "FORTRAN 77" d = my_f(a,b,c);
+	end f;
+	equation
+		(c_out, d_out) = f(a_in, b_in);		
 end IntegerExternalFortran4;
 
 model ExternalArrayFortran1
-	Real a_in[2]={1,1};
-	Real b_out;
-	function f
-		input Real a[2];
-		output Real b;
-		external "FORTRAN 77";
-	end f;
-	equation
-		b_out = f(a_in);
-
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ExternalArrayFortran1",
-			description="External Fortan function with one dim array input, scalar output.",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="ExternalArrayFortran1",
+         description="External Fortan function with one dim array input, scalar output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6907,25 +6112,25 @@ jmi_ad_var_t func_CCodeGenTests_ExternalArrayFortran1_f_exp(jmi_array_t* a_a) {
 }
 
 ")})));
-end ExternalArrayFortran1;
 
-model ExternalArrayFortran2
-	Real a_in[2,2]={{1,1},{1,1}};
+	Real a_in[2]={1,1};
 	Real b_out;
 	function f
-		input Real a[2,2];
+		input Real a[2];
 		output Real b;
 		external "FORTRAN 77";
 	end f;
 	equation
 		b_out = f(a_in);
-		
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ExternalArrayFortran2",
-			description="External Fortan function with two dim array input, scalar output.",
-			template="
+end ExternalArrayFortran1;
+
+model ExternalArrayFortran2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="ExternalArrayFortran2",
+         description="External Fortan function with two dim array input, scalar output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -6953,26 +6158,25 @@ jmi_ad_var_t func_CCodeGenTests_ExternalArrayFortran2_f_exp(jmi_array_t* a_a) {
 }
 
 ")})));
-end ExternalArrayFortran2;
 
-model ExternalArrayFortran3
-	Real a_in[2,2];
+	Real a_in[2,2]={{1,1},{1,1}};
 	Real b_out;
 	function f
-		input Real a[:,:];
+		input Real a[2,2];
 		output Real b;
 		external "FORTRAN 77";
 	end f;
 	equation
-		a_in = {{1,1},{2,2}};
 		b_out = f(a_in);
 		
+end ExternalArrayFortran2;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ExternalArrayFortran3",
-			description="External Fortran function with two dim and unknown no of elements array input, scalar output.",
-			template="
+model ExternalArrayFortran3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="ExternalArrayFortran3",
+         description="External Fortran function with two dim and unknown no of elements array input, scalar output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -7000,27 +6204,26 @@ jmi_ad_var_t func_CCodeGenTests_ExternalArrayFortran3_f_exp(jmi_array_t* a_a) {
 }
 
 ")})));
-end ExternalArrayFortran3;
 
-model ExternalArrayFortran4
-	Real a_in[2];
-	Real b_out[2];
+	Real a_in[2,2];
+	Real b_out;
 	function f
-		input Real a[2];
-		output Real b[2];
+		input Real a[:,:];
+		output Real b;
 		external "FORTRAN 77";
 	end f;
 	equation
-		a_in[1] = 1;
-		a_in[2] = 2;
+		a_in = {{1,1},{2,2}};
 		b_out = f(a_in);
 		
+end ExternalArrayFortran3;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ExternalArrayFortran4",
-			description="External Fortran function with one dim array input, one dim array output.",
-			template="
+model ExternalArrayFortran4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="ExternalArrayFortran4",
+         description="External Fortran function with one dim array input, one dim array output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -7041,26 +6244,27 @@ void func_CCodeGenTests_ExternalArrayFortran4_f_def(jmi_array_t* a_a, jmi_array_
 }
 
 ")})));
-end ExternalArrayFortran4;
 
-model ExternalArrayFortran5
-	Real a_in[2,2];
-	Real b_out[2,2];
+	Real a_in[2];
+	Real b_out[2];
 	function f
-		input Real a[2,2];
-		output Real b[2,2];
+		input Real a[2];
+		output Real b[2];
 		external "FORTRAN 77";
 	end f;
 	equation
-		a_in = {{1,1},{2,2}};
+		a_in[1] = 1;
+		a_in[2] = 2;
 		b_out = f(a_in);
 		
+end ExternalArrayFortran4;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ExternalArrayFortran5",
-			description="External Fortran function with two dim array input, two dim array output.",
-			template="
+model ExternalArrayFortran5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="ExternalArrayFortran5",
+         description="External Fortran function with two dim array input, two dim array output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -7088,26 +6292,26 @@ void func_CCodeGenTests_ExternalArrayFortran5_f_def(jmi_array_t* a_a, jmi_array_
 }
 
 ")})));
-end ExternalArrayFortran5;
 
-model ExternalArrayFortran6
 	Real a_in[2,2];
 	Real b_out[2,2];
 	function f
-		input Real a[:,:];
-		output Real b[size(a,1),size(a,2)];
+		input Real a[2,2];
+		output Real b[2,2];
 		external "FORTRAN 77";
 	end f;
 	equation
 		a_in = {{1,1},{2,2}};
 		b_out = f(a_in);
 		
+end ExternalArrayFortran5;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ExternalArrayFortran6",
-			description="External Fortran function with two dim and unknown no of elements array input, two dim array output.",
-			template="
+model ExternalArrayFortran6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="ExternalArrayFortran6",
+         description="External Fortran function with two dim and unknown no of elements array input, two dim array output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -7135,24 +6339,26 @@ void func_CCodeGenTests_ExternalArrayFortran6_f_def(jmi_array_t* a_a, jmi_array_
 }
 
 ")})));
-end ExternalArrayFortran6;
 
-model IntegerExternalArrayFortran1
-	Integer a_in[2]={1,1};
-	Real b_out;
+	Real a_in[2,2];
+	Real b_out[2,2];
 	function f
-		input Integer a[2];
-		output Real b;
+		input Real a[:,:];
+		output Real b[size(a,1),size(a,2)];
 		external "FORTRAN 77";
 	end f;
 	equation
-		b_out = f(a_in);	
+		a_in = {{1,1},{2,2}};
+		b_out = f(a_in);
+		
+end ExternalArrayFortran6;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="IntegerExternalArrayFortran1",
-			description="External Fortran function (undeclared) with one dim Integer array input, scalar Real output.",
-			template="
+model IntegerExternalArrayFortran1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="IntegerExternalArrayFortran1",
+         description="External Fortran function (undeclared) with one dim Integer array input, scalar Real output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -7165,7 +6371,7 @@ void func_CCodeGenTests_IntegerExternalArrayFortran1_f_def(jmi_array_t* a_a, jmi
     jmi_ad_var_t b_v;
     JMI_INT_ARRAY_STATIC(tmp_1, 2, 1)
     extern jmi_ad_var_t f_(jmi_int_t*, jmi_int_t*);
-    JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
+    JMI_INT_ARRAY_STATIC_INIT_1(tmp_1, 2)
     jmi_matrix_to_fortran_int(a_a, a_a->var, tmp_1->var);
     b_v = f_(tmp_1->var, &jmi_array_size(a_a, 0));
     if (b_o != NULL) *b_o = b_v;
@@ -7180,24 +6386,24 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalArrayFortran1_f_exp(jmi_array_t* 
 }
 
 ")})));
-end IntegerExternalArrayFortran1;
 
-model IntegerExternalArrayFortran2
-	Integer a_in[2,2]={{1,1},{1,1}};
+	Integer a_in[2]={1,1};
 	Real b_out;
 	function f
-		input Integer a[2,2];
+		input Integer a[2];
 		output Real b;
 		external "FORTRAN 77";
 	end f;
 	equation
-		b_out = f(a_in);
+		b_out = f(a_in);	
+end IntegerExternalArrayFortran1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="IntegerExternalArrayFortran2",
-			description="External Fortran function (undeclared) with two dim Integer array input, scalar Real output.",
-			template="
+model IntegerExternalArrayFortran2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="IntegerExternalArrayFortran2",
+         description="External Fortran function (undeclared) with two dim Integer array input, scalar Real output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -7210,7 +6416,7 @@ void func_CCodeGenTests_IntegerExternalArrayFortran2_f_def(jmi_array_t* a_a, jmi
     jmi_ad_var_t b_v;
     JMI_INT_ARRAY_STATIC(tmp_1, 4, 2)
     extern jmi_ad_var_t f_(jmi_int_t*, jmi_int_t*, jmi_int_t*);
-    JMI_ARRAY_STATIC_INIT_2(tmp_1, 2, 2)
+    JMI_INT_ARRAY_STATIC_INIT_2(tmp_1, 2, 2)
     jmi_matrix_to_fortran_int(a_a, a_a->var, tmp_1->var);
     b_v = f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1));
     if (b_o != NULL) *b_o = b_v;
@@ -7225,24 +6431,24 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalArrayFortran2_f_exp(jmi_array_t* 
 }
 
 ")})));
-end IntegerExternalArrayFortran2;
 
-model IntegerExternalArrayFortran3
-	Real a_in = 1;
-	Integer b_out[2];
+	Integer a_in[2,2]={{1,1},{1,1}};
+	Real b_out;
 	function f
-		input Real a;
-		output Integer b[2];
+		input Integer a[2,2];
+		output Real b;
 		external "FORTRAN 77";
 	end f;
 	equation
-		b_out = f(a_in);	
+		b_out = f(a_in);
+end IntegerExternalArrayFortran2;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="IntegerExternalArrayFortran3",
-			description="External Fortran function (undeclared) with one scalar Real input, one dim array Integer output.",
-			template="
+model IntegerExternalArrayFortran3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="IntegerExternalArrayFortran3",
+         description="External Fortran function (undeclared) with one scalar Real input, one dim array Integer output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -7258,7 +6464,7 @@ void func_CCodeGenTests_IntegerExternalArrayFortran3_f_def(jmi_ad_var_t a_v, jmi
         JMI_ARRAY_STATIC_INIT_1(b_an, 2)
         b_a = b_an;
     }
-    JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
+    JMI_INT_ARRAY_STATIC_INIT_1(tmp_1, 2)
     jmi_matrix_to_fortran_int(b_a, b_a->var, tmp_1->var);
     f_(&a_v, tmp_1->var, &jmi_array_size(b_a, 0));
     jmi_matrix_from_fortran_int(b_a, tmp_1->var, b_a->var);
@@ -7267,25 +6473,24 @@ void func_CCodeGenTests_IntegerExternalArrayFortran3_f_def(jmi_ad_var_t a_v, jmi
 }
 
 ")})));
-end IntegerExternalArrayFortran3;
 
-model IntegerExternalArrayFortran4
-	Integer a_in[2,2];
-	Integer b_out[2,2];
+	Real a_in = 1;
+	Integer b_out[2];
 	function f
-		input Integer a[2,2];
-		output Integer b[2,2];
+		input Real a;
+		output Integer b[2];
 		external "FORTRAN 77";
 	end f;
 	equation
-		a_in = {{1,1},{2,2}};
-		b_out = f(a_in);		
+		b_out = f(a_in);	
+end IntegerExternalArrayFortran3;
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="IntegerExternalArrayFortran4",
-			description="External Fortran function (undeclared) with one 2-dim Integer array input, one 2-dim Integer array output.",
-			template="
+model IntegerExternalArrayFortran4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="IntegerExternalArrayFortran4",
+         description="External Fortran function (undeclared) with one 2-dim Integer array input, one 2-dim Integer array output.",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -7302,9 +6507,9 @@ void func_CCodeGenTests_IntegerExternalArrayFortran4_f_def(jmi_array_t* a_a, jmi
         JMI_ARRAY_STATIC_INIT_2(b_an, 2, 2)
         b_a = b_an;
     }
-    JMI_ARRAY_STATIC_INIT_2(tmp_1, 2, 2)
+    JMI_INT_ARRAY_STATIC_INIT_2(tmp_1, 2, 2)
     jmi_matrix_to_fortran_int(a_a, a_a->var, tmp_1->var);
-    JMI_ARRAY_STATIC_INIT_2(tmp_2, 2, 2)
+    JMI_INT_ARRAY_STATIC_INIT_2(tmp_2, 2, 2)
     jmi_matrix_to_fortran_int(b_a, b_a->var, tmp_2->var);
     f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1), tmp_2->var, &jmi_array_size(b_a, 0), &jmi_array_size(b_a, 1));
     jmi_matrix_from_fortran_int(b_a, tmp_2->var, b_a->var);
@@ -7313,25 +6518,62 @@ void func_CCodeGenTests_IntegerExternalArrayFortran4_f_def(jmi_array_t* a_a, jmi
 }
 
 ")})));
+
+	Integer a_in[2,2];
+	Integer b_out[2,2];
+	function f
+		input Integer a[2,2];
+		output Integer b[2,2];
+		external "FORTRAN 77";
+	end f;
+	equation
+		a_in = {{1,1},{2,2}};
+		b_out = f(a_in);		
 end IntegerExternalArrayFortran4;
 
 model Smooth1
-  Real y = time - 2;
-  Real x = smooth(2, if y < 0 then 0 else y ^ 3);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="Smooth1",
-			description="",
-			template="$C_DAE_equation_residuals$",
-			generatedCode="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="Smooth1",
+         description="",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
     (*res)[0] = _time - ( 2 ) - (_y_0);
     (*res)[1] = COND_EXP_EQ(_sw(0),JMI_TRUE,AD_WRAP_LITERAL(0),(1.0 * (_y_0) * (_y_0) * (_y_0))) - (_x_1);
 ")})));
+
+  Real y = time - 2;
+  Real x = smooth(2, if y < 0 then 0 else y ^ 3);
 end Smooth1;
 
 model TearingTest1
-	
+	 annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="TearingTest1",
+         description="Test code generation of torn blocks",
+         generate_ode=true,
+         equation_sorting=true,
+		 enable_tearing=true,
+         template="$C_dae_blocks_residual_functions$", 
+         generatedCode=" 
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
+  jmi_real_t** res = &residual;
+  if (init==JMI_BLOCK_INITIALIZE) {
+    x[0] = _i3_7;
+    x[1] = _i2_6;
+  } else if (init==JMI_BLOCK_EVALUATE) {
+    _i3_7 = x[0];
+    _i2_6 = x[1];
+  _u2_2 = ( _R3_11 ) * ( _i3_7 );
+  _i1_5 = _i2_6 + _i3_7;
+  _u1_1 = ( _R1_9 ) * ( _i1_5 );
+  (*res)[0] = _u1_1 + _u2_2 - (_u0_0);
+  (*res)[1] = ( _R2_10 ) * ( _i2_6 ) - (_u2_2);
+  }
+  return 0;
+}
+		 
+")})));
   Real u0,u1,u2,u3,uL;
   Real i0,i1,i2,i3,iL;
   parameter Real R1 = 1;
@@ -7349,103 +6591,14 @@ equation
   u2 = u3;
   i0 = i1 + iL;
   i1 = i2 + i3;
-
-	annotation(__JModelica(UnitTesting(tests={ 
-		CCodeGenTestCase(
-			name="TearingTest1",
-			description="Test code generation of torn blocks",
-			generate_ode=true,
-			equation_sorting=true,
-			enable_tearing=true,
-			template="$C_dae_blocks_residual_functions$",
-			generatedCode="
-static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _i3_7;
-    x[1] = _i2_6;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    _i3_7 = x[0];
-    _i2_6 = x[1];
-  _u2_2 = ( _R3_11 ) * ( _i3_7 );
-  _i1_5 = _i2_6 + _i3_7;
-  _u1_1 = ( _R1_9 ) * ( _i1_5 );
-  (*res)[0] = _u1_1 + _u2_2 - (_u0_0);
-  (*res)[1] = ( _R2_10 ) * ( _i2_6 ) - (_u2_2);
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _i3_7 = x[0];
-    _i2_6 = x[1];
-  }
-  return 0;
-}
-
-")})));
 end TearingTest1;
 
-model MapTearingTest1
-
-  function F
-    input Real x;
-    input Integer[2] map;
-    output Real y;
-  algorithm
-    y := x + 1;
-  end F;
-  Integer[2] map = {1,2};
-  Real x, y;
-equation
-  x = y + 1;
-  y = F(x, map);
-
-	annotation(__JModelica(UnitTesting(tests={ 
-		CCodeGenTestCase(
-			name="MapTearingTest1",
-			description="Test code generation of torn blocks",
-			generate_ode=true,
-			equation_sorting=true,
-			enable_tearing=true,
-			template="$C_dae_blocks_residual_functions$",
-			generatedCode="
-static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  JMI_ARRAY_STATIC(tmp_1, 2, 1)
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _x_2;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    _x_2 = x[0];
-  JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
-  jmi_array_ref_1(tmp_1, 1) = _map_1_0;
-  jmi_array_ref_1(tmp_1, 2) = _map_2_1;
-  _y_3 = func_CCodeGenTests_MapTearingTest1_F_exp(_x_2, tmp_1);
-  (*res)[0] = _y_3 + 1 - (_x_2);
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _x_2 = x[0];
-  }
-  return 0;
-}
-
-")})));
-end MapTearingTest1;
-
-
 model MathSolve
-	Real a[2,2] = [1,2;3,4];
-    Real b[2] = {-2,3};
-	Real x[2];
-equation
-	x = Modelica.Math.Matrices.solve(a, b);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="MathSolve",
-			description="",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="MathSolve",
+         description="",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -7514,22 +6667,20 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def(jmi_array_t* A_a, jmi_arra
 }
 
 ")})));
+
+	Real a[2,2] = [1,2;3,4];
+    Real b[2] = {-2,3};
+	Real x[2];
+equation
+	x = Modelica.Math.Matrices.solve(a, b);
 end MathSolve;
 
 model MathSolve2
-	Real A[2,2] = [1,2;3,4];
-	Real x_r[2] = {-2,3};
-    Real b[2] = A*x_r;
-    Real B[2,3] = [b, 2*b, -3*b];
-    Real X[2,3];
-equation
-	X = Modelica.Math.Matrices.solve2(A, B);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="MathSolve2",
-			description="",
-			template="
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="MathSolve2",
+         description="",
+         template="
 $C_function_headers$
 $C_functions$
 ",
@@ -7605,161 +6756,14 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def(jmi_array_t* A_a, jmi_array_t*
 }
 
 ")})));
+
+	Real A[2,2] = [1,2;3,4];
+	Real x_r[2] = {-2,3};
+    Real b[2] = A*x_r;
+    Real B[2,3] = [b, 2*b, -3*b];
+    Real X[2,3];
+equation
+	X = Modelica.Math.Matrices.solve2(A, B);
 end MathSolve2;
-
-class ExtObject
-	extends ExternalObject;
-	
-	function constructor
-		output ExtObject eo;
-		external "C" eo = init_myEO();
-	end constructor;
-	
-	function destructor
-		input ExtObject eo;
-		external "C" close_myEO(eo);
-	end destructor;
-end ExtObject;
-
-function useMyEO
-	input ExtObject eo;
-	output Real r;
-	external "C" r = useMyEO(eo);
-end useMyEO;
-
-model TestExtObject1
-	ExtObject myEO = ExtObject();
-	Real y;
-equation
-	y = useMyEO(myEO);
-
-
-	annotation(__JModelica(UnitTesting(tests={ 
-		CCodeGenTestCase(
-			name="TestExtObject1",
-			description="",
-			template="
-$C_variable_aliases$
-$C_function_headers$
-$C_functions$
-",
-			generatedCode="
-#define _y_1 ((*(jmi->z))[jmi->offs_real_w+0])
-#define _time ((*(jmi->z))[jmi->offs_t])
-#define _myEO_0 ((jmi->ext_objs)[0])
-
-void func_CCodeGenTests_ExtObject_destructor_def(void* eo_v);
-void func_CCodeGenTests_ExtObject_constructor_def(void** eo_o);
-void* func_CCodeGenTests_ExtObject_constructor_exp();
-void func_CCodeGenTests_useMyEO_def(void* eo_v, jmi_ad_var_t* r_o);
-jmi_ad_var_t func_CCodeGenTests_useMyEO_exp(void* eo_v);
-
-void func_CCodeGenTests_ExtObject_destructor_def(void* eo_v) {
-    JMI_DYNAMIC_INIT()
-    close_myEO(eo_v);
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-void func_CCodeGenTests_ExtObject_constructor_def(void** eo_o) {
-    JMI_DYNAMIC_INIT()
-    void* eo_v;
-    eo_v = init_myEO();
-    if (eo_o != NULL) *eo_o = eo_v;
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-void* func_CCodeGenTests_ExtObject_constructor_exp() {
-    void* eo_v;
-    func_CCodeGenTests_ExtObject_constructor_def(&eo_v);
-    return eo_v;
-}
-
-void func_CCodeGenTests_useMyEO_def(void* eo_v, jmi_ad_var_t* r_o) {
-    JMI_DYNAMIC_INIT()
-    jmi_ad_var_t r_v;
-    r_v = useMyEO(eo_v);
-    if (r_o != NULL) *r_o = r_v;
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-jmi_ad_var_t func_CCodeGenTests_useMyEO_exp(void* eo_v) {
-    jmi_ad_var_t r_v;
-    func_CCodeGenTests_useMyEO_def(eo_v, &r_v);
-    return r_v;
-}
-
-")})));
-end TestExtObject1;
-
-model TestExtObject2
-    ExtObject myEO = ExtObject();
-	ExtObject myEO2 = ExtObject();
-    Real y;
-equation
-    y = useMyEO(myEO) + useMyEO(myEO2);	
-
-	annotation(__JModelica(UnitTesting(tests={ 
-		CCodeGenTestCase(
-			name="TestExtObject2",
-			description="",
-			template="
-$C_variable_aliases$
-$C_function_headers$
-$C_functions$
-",
-			generatedCode="
-#define _y_2 ((*(jmi->z))[jmi->offs_real_w+0])
-#define _time ((*(jmi->z))[jmi->offs_t])
-#define _myEO_0 ((jmi->ext_objs)[0])
-#define _myEO2_1 ((jmi->ext_objs)[1])
-
-void func_CCodeGenTests_ExtObject_destructor_def(void* eo_v);
-void func_CCodeGenTests_ExtObject_constructor_def(void** eo_o);
-void* func_CCodeGenTests_ExtObject_constructor_exp();
-void func_CCodeGenTests_useMyEO_def(void* eo_v, jmi_ad_var_t* r_o);
-jmi_ad_var_t func_CCodeGenTests_useMyEO_exp(void* eo_v);
-
-void func_CCodeGenTests_ExtObject_destructor_def(void* eo_v) {
-    JMI_DYNAMIC_INIT()
-    close_myEO(eo_v);
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-void func_CCodeGenTests_ExtObject_constructor_def(void** eo_o) {
-    JMI_DYNAMIC_INIT()
-    void* eo_v;
-    eo_v = init_myEO();
-    if (eo_o != NULL) *eo_o = eo_v;
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-void* func_CCodeGenTests_ExtObject_constructor_exp() {
-    void* eo_v;
-    func_CCodeGenTests_ExtObject_constructor_def(&eo_v);
-    return eo_v;
-}
-
-void func_CCodeGenTests_useMyEO_def(void* eo_v, jmi_ad_var_t* r_o) {
-    JMI_DYNAMIC_INIT()
-    jmi_ad_var_t r_v;
-    r_v = useMyEO(eo_v);
-    if (r_o != NULL) *r_o = r_v;
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-jmi_ad_var_t func_CCodeGenTests_useMyEO_exp(void* eo_v) {
-    jmi_ad_var_t r_v;
-    func_CCodeGenTests_useMyEO_def(eo_v, &r_v);
-    return r_v;
-}
-
-")})));
-end TestExtObject2;
 
 end CCodeGenTests;

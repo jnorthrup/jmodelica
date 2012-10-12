@@ -49,13 +49,9 @@ public class ModelicaPerspective implements IPerspectiveFactory {
 //		layout.addShowViewShortcut(NewSearchUI.SEARCH_VIEW_ID);     // Later?
 		layout.addShowViewShortcut(IConsoleConstants.ID_CONSOLE_VIEW);
 		
-		// Package Explorer view
-		IFolderLayout packexplorefolder = layout.createFolder("top-left", IPageLayout.LEFT, (float)0.25, edit);
-		packexplorefolder.addView(IDEConstants.CLASS_OUTLINE_VIEW_ID);
-
-		// Project Explorer view
-		IFolderLayout projexplorefolder = layout.createFolder("bottom-left", IPageLayout.BOTTOM, (float)0.5, "top-left");
-		projexplorefolder.addView("org.eclipse.ui.navigator.ProjectExplorer");
+		// Explorer view
+		IFolderLayout explorefolder = layout.createFolder("left", IPageLayout.LEFT, (float)0.25, edit);
+		explorefolder.addView("org.eclipse.ui.navigator.ProjectExplorer");
 		
 		// Problems view, progress view, etc
 		IFolderLayout outputfolder = layout.createFolder("bottom", IPageLayout.BOTTOM, (float)0.75, edit);
@@ -65,11 +61,11 @@ public class ModelicaPerspective implements IPerspectiveFactory {
 		outputfolder.addPlaceholder(IProgressConstants.PROGRESS_VIEW_ID);
 		outputfolder.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		
-		// Outline and property views
+		// Outline views
 		IFolderLayout outlinefolder = layout.createFolder("right", IPageLayout.RIGHT, (float)0.75, edit);
+		outlinefolder.addView(IDEConstants.CLASS_OUTLINE_VIEW_ID);
 		outlinefolder.addPlaceholder(IDEConstants.INSTANCE_OUTLINE_VIEW_ID);
-		outlinefolder.addView(IPageLayout.ID_OUTLINE);
-		outlinefolder.addPlaceholder("org.eclipse.ui.views.PropertySheet");
+		outlinefolder.addPlaceholder(IPageLayout.ID_OUTLINE);
 		
 		// Actions
 		layout.addActionSet(IPageLayout.ID_NAVIGATE_ACTION_SET);

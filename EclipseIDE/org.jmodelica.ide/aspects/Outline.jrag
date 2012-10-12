@@ -265,7 +265,7 @@ aspect Outline {
 		
 		protected void copyCachedOutline(Object[] src, Object[] dst) {
 			if (src != null && dst != null) {
-				for (int s = 0, d = 0; s < src.length; s++) {
+				for (int s = 0, d = 0; s < src.length && d < dst.length; s++) {
 					if (src[s] instanceof BaseNode) {
 						BaseNode dn = null, sn = (BaseNode) src[s];
 						boolean found = false;
@@ -279,8 +279,6 @@ aspect Outline {
 								}
 							}
 						}
-						if (!found || sn != dn)
-							sn.disposeCachedIcon();
 					}
 				}
 			}
@@ -291,7 +289,7 @@ aspect Outline {
 				if (old.myCachedOutlineChildren != null && !myCachedOutlineChildren().iscurrent) 
 					myCachedOutlineChildren.children = old.myCachedOutlineChildren.children;
 				if (old.myCachedIcon != null && !myCachedIcon().iscurrent) 
-					myCachedIcon.update(old.myCachedIcon.transfer());
+					myCachedIcon.icon = old.myCachedIcon.icon;
 			}
 		}
 		

@@ -145,7 +145,7 @@ aspect FlatTypeCheck {
   protected void InstAccess.typeError(InstAccess top) {}
   
   protected void InstDot.typeError(InstAccess top) {
-	  getInstAccess(getNumInstAccess() - 1).typeError(top);
+	  getRight().typeError(top);
   }
   
   protected void InstGlobalAccess.typeError(InstAccess top) {
@@ -181,24 +181,14 @@ aspect FlatTypeCheck {
   }
   
   public void FIdUseExp.typeCheck() {
-	  if (!getFIdUse().isUnknown() && type().isUnknown() && !accessToModelOK())
+	  if (!getFIdUse().isUnknown() && type().isUnknown())
 		  typeError();
   }
-  
   public void FInstAccessExp.typeCheck() {
-	  if (!getInstAccess().isUnknown() && type().isUnknown() && !accessToModelOK())
+	  if (!getInstAccess().isUnknown() && type().isUnknown())
 		  typeError();
   }
 
-  inh boolean FIdUseExp.accessToModelOK();
-  inh boolean FInstAccessExp.accessToModelOK();
-  inh boolean InstFunctionArgument.accessToModelOK();
-  eq BaseNode.getChild().accessToModelOK()             = false;
-  eq InstFunctionArgument.getChild().accessToModelOK() = accessToModelOK();
-  eq FSizeExp.getFExp().accessToModelOK()              = true;
-  eq FSizeExp.getOriginalArg(int i).accessToModelOK()  = i == 0;
-  
-  
   /**
    * \brief Check if the FExp of this FIterExp must be scalar.
    */
@@ -322,7 +312,7 @@ aspect FlatTypeCheck {
   eq FIdUse.getChild().isInstComponentSize()                            = false;
   eq FExp.getChild().isInstComponentSize()                              = false;
   eq FInstAccessExp.getChild().isInstComponentSize()                    = isInstComponentSize();
-  eq FAbstractVariable.getChild().isInstComponentSize()                 = false;
+  eq AbstractFVariable.getChild().isInstComponentSize()                 = false;
   eq FAbstractEquation.getChild().isInstComponentSize()                 = false;
   eq InstNode.getChild().isInstComponentSize()                          = false;
   eq FlatRoot.getChild().isInstComponentSize()                          = false;
@@ -512,11 +502,8 @@ aspect FlatTypeCheck {
 		  }
 	  }
 	  if (!typeOk) {
-		  if (getBoundInput() == null)
-			  error(nonBoundArgumentTypeError());
-		  else
-			  error(functionCallDecription() + ": types of " + argumentDesc() + 
-					  " and input " + getBoundInput().name() + " are not compatible");
+		  error(functionCallDecription() + ": types of " + argumentDesc() + 
+				  " and input " + getBoundInput().name() + " are not compatible");
 	  }
   }
   
@@ -529,11 +516,6 @@ aspect FlatTypeCheck {
   }
   
   public void InstDefaultArgument.typeCheck() {}
-  
-  inh String InstFunctionArgument.nonBoundArgumentTypeError();
-  eq FExp.getChild().nonBoundArgumentTypeError()                          = null;
-  eq FArrayDimAsArgsExp.getOriginalArg(int i).nonBoundArgumentTypeError() = 
-	  functionCallDecription() + ": type of positional argument " + i + " is not compatible with Integer";
   
   protected String InstFunctionArgument.argumentDesc() { return null; }
   
@@ -553,13 +535,15 @@ aspect FlatTypeCheck {
   
   public void InstDot.typeCheck() {
 	  // Check for accesses to non-constant component in class
-	  int n = getNumInstAccess();
-	  for (int i = 0; i < n - 1; i++)
-		  getInstAccess(i).checkAccessCompInClassLeft(getInstAccess(i + 1));
+	  getLeft().checkAccessCompInClassLeft(getRight());
 	  super.typeCheck();
   }
   
   public void InstAccess.checkAccessCompInClassLeft(InstAccess right) {}
+  
+  public void InstDot.checkAccessCompInClassLeft(InstAccess right) {
+	  getRight().checkAccessCompInClassLeft(right);
+  }
   
   public void InstClassAccess.checkAccessCompInClassLeft(InstAccess right) {
 	  right.checkAccessCompInClassRight(myInstClassDecl());
@@ -573,6 +557,10 @@ aspect FlatTypeCheck {
   }
   
   public void InstAccess.checkAccessCompInClassRight(InstClassDecl icd) {}
+  
+  public void InstDot.checkAccessCompInClassRight(InstClassDecl icd) {
+	  getLeft().checkAccessCompInClassRight(icd);
+  }
   
   public void InstComponentAccess.checkAccessCompInClassRight(InstClassDecl icd) {
 	  String type = null;
@@ -618,10 +606,7 @@ aspect FlatTypeCheck {
   eq FSumExp.getChild().argumentTypeValid(FType type)               = type.ndims() > 0 && type.hasAdd();
   eq FEnumIntegerExp.getChild().argumentTypeValid(FType type)       = type.isEnumScalar();
   eq FNoEventExp.getChild().argumentTypeValid(FType type)           = true;
-  eq FSizeExp.getChild().argumentTypeValid(FType type)              = true;
   eq FAbsExp.getChild().argumentTypeValid(FType type)               = type.isNumeric();
-  eq FArrayDimAsArgsExp.getFExp().argumentTypeValid(FType type)     = type.isInteger();
-  eq FFillExp.getOriginalArg(int i).argumentTypeValid(FType type)   = true;
   eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FType type) = 
 	  hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
   eq FSmoothExp.getChild().argumentTypeValid(FType type)            = type.onlyContainsReal();

@@ -59,13 +59,15 @@ public class EvalTestCase extends TestCase {
 
 		for (int i = 0; i < vals.length; i++) {
 			String name = names[i];
-			FAbstractVariable fv = fc.lookupFV(new FQName(name), false);
+			AbstractFVariable fv = fc.lookupFV(new FQName(name), false);
 			if (fv.isUnknown()) {
 				fail("Could not find variable " + name + "."); 
 			} else {
 				String test = fv.ceval().toString();
 				String correct = vals[i].trim();
-				assertEquals("Evaluation result for variable " + name + ": ", correct, test);
+				if (!test.equals(correct))
+					fail("Evaluation result does not match expected for variable " + name + 
+							".\nExpected: " + correct + "\nActual:   " + test);
 			}
 		}		
 

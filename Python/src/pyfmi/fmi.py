@@ -90,6 +90,36 @@ def unzip_fmu(archive, path='.'):
     
     return fmu_files
 
+def unzip_fmux(archive, path='.'):
+    """
+    Unzip an FMUX.
+    
+    Looks for a model description XML file and returns the result in a dict with 
+    the key words: 'model_desc'. If the file is not found an exception will be 
+    raised.
+    
+    Parameters::
+        
+        archive --
+            The archive file name.
+            
+        path --
+            The path to the archive file.
+            Default: Current directory.
+            
+    Raises::
+    
+        IOError the model description XML file is missing in the FMU.
+    """
+    tmpdir = unzip_unit(archive, path)
+    fmux_files = get_files_in_archive(tmpdir)
+    
+    # check if all files have been found during unzip
+    if fmux_files['model_desc'] == None:
+        raise IOError('ModelDescription.xml not found in FMUX archive: '+str(archive))
+    
+    return fmux_files
+
 class FMUException(Exception):
     """
     An FMU exception.
@@ -1987,7 +2017,7 @@ class FMUModel2(FMUModel):
         if status != 0:
             raise FMUException('Failed to evaluate the directional derivative.')
 
-    def check_jacobians(self, delta_abs=1e-2, delta_rel=1e-6, tol=1e-3, spar_tol=1e-9, 
+    def check_jacobians(self, delta_abs=1e-2, delta_rel=1e-6, tol=1e-3, spar_tol=1e-14, 
                         plot_sparsity_check=False,suppress_warnings=False):
         """
         Check if the Jacobians are correct by means of finite differences.
@@ -2056,7 +2086,7 @@ class FMUModel2(FMUModel):
     
         yc_vrefs = self._md.get_continous_outputs_value_references()
         uc_vrefs = self._md.get_continous_inputs_value_references()
-                
+        
         # Compute finite diffrences (fd)
         for i in range(nx):
             if x[i] < 0:
@@ -2104,7 +2134,7 @@ class FMUModel2(FMUModel):
 
             u[i] = u[i] + delta
             self.set_real(uc_vrefs,u)
-        
+            
         # *** Error checking ***
         # Jacobian error (n_err): Compare to fd approx, if relative error > tol then count as error. 
         # Sparsity error (n_spar_err): Compare sparsity ((A/B/C/D)_st) to fd approx, if > spar_tol in fd in some pos. but
@@ -2133,9 +2163,9 @@ class FMUModel2(FMUModel):
             for j in range(nx):
                 if N.abs((A[i,j]-Afd[i,j])/(N.abs(Afd[i,j]) + 1)) > tol:                    
                     print "V_err at: A[" + repr(i).rjust(3) + "," + repr(j).rjust(3) + \
-                    "],jac=" +"{0: e}".format(A[i,j]) + \
-                    ",fd=" + "{0: e}".format(Afd[i,j]) + \
-                    "=> rel_err=" + "{0: e}".format(N.abs((A[i,j]-Afd[i,j])/(N.abs(Afd[i,j]) + 1)))
+                    "], jac=" +"{0: e}".format(A[i,j]) + \
+                    ", fd=" + "{0: e}".format(Afd[i,j]) + \
+                    ", => err=" + "{0: e}".format(A[i,j]-Afd[i,j])
                     n_err = n_err + 1
                 if(N.abs(Afd[i,j]) > spar_tol):
                     if(not A_sp[i,j] == 1 ):
@@ -2154,9 +2184,9 @@ class FMUModel2(FMUModel):
             for j in range(ncu):
                 if N.abs((B[i,j]-Bfd[i,j])/(N.abs(Bfd[i,j]) + 1)) > tol:
                     print "V_err at: B[" + repr(i).rjust(3) + "," + repr(j).rjust(3) + \
-                    "],jac=" +"{0: e}".format(B[i,j]) + \
-                    ",fd=" + "{0: e}".format(Bfd[i,j]) + \
-                    "=> rel_err=" + "{0: e}".format(N.abs((B[i,j]-Bfd[i,j])/(N.abs(Bfd[i,j]) + 1)))
+                    "], jac=" +"{0: e}".format(B[i,j]) + \
+                    ", fd=" + "{0: e}".format(Bfd[i,j]) + \
+                    ", => err=" + "{0: e}".format(B[i,j]-Bfd[i,j])
                     n_err = n_err + 1
                 if(N.abs(Bfd[i,j]) > spar_tol):
                     if(not B_sp[i,j] == 1 ):
@@ -2174,9 +2204,9 @@ class FMUModel2(FMUModel):
             for j in range(nx):
                 if N.abs((C[i,j]-Cfd[i,j])/(N.abs(Cfd[i,j]) + 1)) > tol:
                     print "V_err at: C[" + repr(i).rjust(3) + "," + repr(j).rjust(3) + \
-                    "],jac=" +"{0: e}".format(C[i,j]) + \
-                    ",fd=" + "{0: e}".format(Cfd[i,j]) + \
-                    "=> rel_err=" + "{0: e}".format(N.abs((C[i,j]-Cfd[i,j])/(N.abs(Cfd[i,j]) + 1)))
+                    "], jac=" +"{0: e}".format(C[i,j]) + \
+                    ", fd=" + "{0: e}".format(Cfd[i,j]) + \
+                    ", => err=" + "{0: e}".format(C[i,j]-Cfd[i,j])
                     n_err = n_err + 1
                 if(N.abs(Cfd[i,j]) > spar_tol):
                     if(not C_sp[i,j] == 1 ):
@@ -2195,9 +2225,9 @@ class FMUModel2(FMUModel):
             for j in range(ncu):
                 if N.abs((D[i,j]-Dfd[i,j])/(N.abs(Dfd[i,j]) + 1)) > tol:
                     print "V_err at: D[" + repr(i).rjust(3) + "," + repr(j).rjust(3) + \
-                    "],jac=" +"{0: e}".format(D[i,j]) + \
-                    ",fd=" + "{0: e}".format(Dfd[i,j]) + \
-                    "=> rel_err=" + "{0: e}".format(N.abs((D[i,j]-Dfd[i,j])/(N.abs(Dfd[i,j]) + 1)))
+                    "], jac=" +"{0: e}".format(D[i,j]) + \
+                    ", fd=" + "{0: e}".format(Dfd[i,j]) + \
+                    ", => err=" + "{0: e}".format(D[i,j]-Dfd[i,j])
                     n_err = n_err + 1
                 if(N.abs(Dfd[i,j]) > spar_tol):
                     if(not D_sp[i,j] == 1 ):

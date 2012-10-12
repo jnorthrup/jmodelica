@@ -1,17 +1,18 @@
 package org.jmodelica.ide.graphical.commands;
 
-import org.eclipse.gef.commands.Command;
+import org.jmodelica.icons.Component;
 import org.jmodelica.icons.coord.Point;
-import org.jmodelica.ide.graphical.proxy.ComponentProxy;
+import org.jmodelica.ide.graphical.util.ASTResourceProvider;
 
-public abstract class MoveComponentCommand extends Command {
+public abstract class MoveComponentCommand extends AbstractCommand {
 
 	private Point newOrigin;
 	private Point oldOrigin;
-	private ComponentProxy component;
+	private String componentName;
 
-	public MoveComponentCommand(ComponentProxy component) {
-		this.component = component;
+	public MoveComponentCommand(String componentName, ASTResourceProvider provider) {
+		super(provider);
+		this.componentName = componentName;
 		setLabel("move");
 	}
 
@@ -19,6 +20,10 @@ public abstract class MoveComponentCommand extends Command {
 
 	@Override
 	public void execute() {
+		Component component = getASTResourceProvider().getComponentByName(componentName);
+		if (component == null)
+			return;
+
 		oldOrigin = component.getPlacement().getTransformation().getOrigin();
 		newOrigin = calculateNewOrigin();
 		redo();
@@ -26,11 +31,19 @@ public abstract class MoveComponentCommand extends Command {
 
 	@Override
 	public void redo() {
+		Component component = getASTResourceProvider().getComponentByName(componentName);
+		if (component == null)
+			return;
+
 		component.getPlacement().getTransformation().setOrigin(newOrigin);
 	}
 
 	@Override
 	public void undo() {
+		Component component = getASTResourceProvider().getComponentByName(componentName);
+		if (component == null)
+			return;
+
 		component.getPlacement().getTransformation().setOrigin(oldOrigin);
 	}
 }

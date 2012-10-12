@@ -585,15 +585,11 @@ aspect PrettyPrint {
 		}
 	}
 
-	public void NamedAccess.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void Access.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print(getID());
 	}
 		
 	public void Dot.prettyPrint(Printer p, PrintStream str, String indent) {
-		getAccesss().prettyPrintWithSep(p, str, indent, ".");
-	}
-	
-	public void PN_Dot.prettyPrint(Printer p, PrintStream str, String indent) {
 		p.print(getLeft(),str,indent);
 		str.print(".");
 		p.print(getRight(),str,indent);	
@@ -1444,7 +1440,9 @@ aspect FlatPrettyPrint {
 	}
 	
 	public void InstDot.prettyPrint(Printer p, PrintStream str, String indent) {
-		getInstAccesss().prettyPrintWithSep(p, str, indent, ".");
+		p.print(getLeft(), str, indent);
+		str.print(".");
+		p.print(getRight(), str, indent);
 	}
 	
 	public void InstGlobalAccess.prettyPrint(Printer p, PrintStream str, String indent) {
@@ -1574,7 +1572,6 @@ aspect FlatPrettyPrint {
 	eq FScalar.builtInName()         = "scalar";
 	eq FTranspose.builtInName()      = "transpose";
 	eq FCross.builtInName()          = "cross";
-	eq FOuterProduct.builtInName()   = "outerProduct";
 	eq FNdimsExp.builtInName()       = "ndims";
 	eq FSizeExp.builtInName()        = "size";
 	eq FNoEventExp.builtInName()     = "noEvent";

@@ -261,7 +261,7 @@ abstract public class TestAnnotationizerHelper {
 		BufferedReader in = new BufferedReader(new FileReader(old));
         File altered = File.createTempFile(className, ".mo");
         PrintStream out = new PrintStream(altered);
-        for (int i = 0, n = getLine() - 1; i < n; i++)
+        for (int i = 0, n = getLine(); i < n; i++)
         	out.println(in.readLine());
         try {
         	outputAnnotation(out);
@@ -287,28 +287,28 @@ abstract public class TestAnnotationizerHelper {
 	 * \brief Generates the test annotation and ouputs it on the given stream.
 	 */
 	public void outputAnnotation(PrintStream out) throws Exception {
-		out.println("\n\tannotation(__JModelica(UnitTesting(tests={ ");
-		out.println("\t\t" + getClass().getSimpleName() + "(");
-		out.println("\t\t\tname=\"" + testName + "\",");
-		out.println("\t\t\tdescription=\"" + description + "\",");
+		out.println(" annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={");
+		out.println("     JModelica.UnitTesting." + getClass().getSimpleName() + "(");
+		out.println("         name=\"" + testName + "\",");
+		out.println("         description=\"" + description + "\",");
 		for (String opt : opts) 
-			out.println("\t\t\t" + opt + ",");
-		printSpecific(out, "\t\t\t");
-		out.println(")})));");
+			out.println("         " + opt + ",");
+		printSpecific(out, "         ");
+		out.println(")})));\n");
 	}
 	
 	/**
 	 * \brief Gets the line number of the the start of the test model.
 	 */
 	protected int getLine() throws Exception {
-		return root.getProgram().getInstProgramRoot().simpleLookupInstClassDecl(className).endLine();
+		return root.getProgram().getInstProgramRoot().simpleLookupInstClassDecl(className).beginLine();
 	}
 	
 	/**
 	 * \brief Escapes unallowed characters in the fields of the test annotation.
 	 */
 	protected String prepare(String str) {
-		return str.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"");	
+		return str.replaceAll("\\\\", "\\\\").replaceAll("\"", "\\\\\"");	
 	}
 
 	/**
