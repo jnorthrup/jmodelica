@@ -152,7 +152,6 @@ typedef struct jmi_opt_t jmi_opt_t;                       /**< \brief Forward de
 typedef struct jmi_func_t jmi_func_t;                     /**< \brief Forward declaration of struct. */
 typedef struct jmi_func_ad_t jmi_func_ad_t;               /**< \brief Forward declaration of struct. */
 typedef struct jmi_block_residual_t jmi_block_residual_t; /**< \brief Forward declaration of struct. */
-typedef struct jmi_ode_solver_t jmi_ode_solver_t;         /**< \brief Forward declaration of struct. */
 typedef struct jmi_color_info jmi_color_info;             /**< \brief Forward declaration of struct. */
 typedef struct jmi_simple_color_info_t jmi_simple_color_info_t;      /**< \brief Forward declaration of struct. */
 
@@ -1328,9 +1327,8 @@ struct jmi_t{
 	jmi_simple_color_info_t* color_info_D; /** \brief CPR coloring info for the ODE Jacobian D */
 
     jmi_options_t options; /** \brief Runtime options */
-    jmi_real_t events_epsilon; /** \brief Value used to adjust the event indicator functions */
+
     jmi_int_t recomputeVariables; /** \brief Dirty flag indicating when equations should be resolved. */
-    jmi_ode_solver_t *ode_solver; /** \brief Struct containing the ODE solver. */
 };
 
 /**

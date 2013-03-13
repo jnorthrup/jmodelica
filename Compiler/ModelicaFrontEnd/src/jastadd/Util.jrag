@@ -2038,7 +2038,7 @@ aspect FlatFunctionUtils {
     
      syn lazy FunctionReturnDefinition FFunctionDecl.returnDefinition() = new FunctionReturnDefinition(this);
      inh FunctionReturnDefinition FReturnStmt.returnDefinition();
-     eq FFunctionDecl.getFAlgorithm().returnDefinition() = returnDefinition();
+     eq FFunctionDecl.getFAlgorithmBlock().returnDefinition() = returnDefinition();
      eq InstProgramRoot.getChild().returnDefinition()         = null;
      eq FClass.getChild().returnDefinition()                  = null;
      
@@ -2090,7 +2090,7 @@ aspect FlatFunctionUtils {
 			return true;
 		if (derivativEqualsZero())
 			return true;
-		for (FStatement statement : getFAlgorithm().getFStatements())
+		for (FStatement statement : getFAlgorithmBlock().getFStatements())
 			if (!statement.canDifferentiate())
 				return false;
 		return true;
@@ -2165,7 +2165,7 @@ aspect FlatFunctionUtils {
       * \brief Check is this node is in a non-function algorithm.
       */
      inh boolean FSubscript.inAlgorithm();
-     eq FAlgorithm.getChild().inAlgorithm()   = !inFunction();
+     eq FAlgorithmBlock.getChild().inAlgorithm()   = !inFunction();
      eq InstNode.getChild().inAlgorithm()          = false;
      eq FAbstractEquation.getChild().inAlgorithm() = false;
      eq FClass.getChild().inAlgorithm()            = false;
@@ -2185,14 +2185,14 @@ aspect FlatFunctionUtils {
      eq FFunctionCallStmt.getCall().isFunctionCallClause()     = true;
      
      inh boolean FStatement.insideBlockStmt();
-     eq FAlgorithm.getChild().insideBlockStmt() = false;
+     eq FAlgorithmBlock.getChild().insideBlockStmt() = false;
      eq FIfWhenStmt.getChild().insideBlockStmt()     = true;
      eq FWhileStmt.getChild().insideBlockStmt()      = true;
      eq FForStmt.getChild().insideBlockStmt()        = true;
      eq InstForStmt.getChild().insideBlockStmt()     = true;
      
      inh boolean FStatement.insideBranchedStmt();
-     eq FAlgorithm.getChild().insideBranchedStmt() = false;
+     eq FAlgorithmBlock.getChild().insideBranchedStmt() = false;
      eq FIfWhenStmt.getChild().insideBranchedStmt()     = true;
      
      /**
@@ -2559,22 +2559,18 @@ aspect FlatExpressions {
     
     inh boolean FExp.inNoEventExp();
     eq FNoEventExp.getChild().inNoEventExp() = true;
-    eq FAlgorithm.getChild().inNoEventExp() = true;
+    eq FAlgorithmBlock.getChild().inNoEventExp() = true;
     eq SourceRoot.getChild().inNoEventExp() = false;
     eq FlatRoot.getChild().inNoEventExp() = false;
     eq FClass.getFParameterEquation().inNoEventExp() = true;
-
-    inh boolean FExp.inSmoothExp(int order);
-    eq FSmoothExp.getChild().inSmoothExp(int order) = getOrder().ceval().intValue() >= order;
-    eq SourceRoot.getChild().inSmoothExp(int order) = false;
-    eq FlatRoot.getChild().inSmoothExp(int order) = false;
     
     inh boolean InstAccess.inConnectClause();
     inh boolean FExp.inConnectClause();
-    eq FConnectClause.getChild().inConnectClause()    = true;
+    eq FConnectClause.getChild().inConnectClause() = true;
+    eq FAlgorithmBlock.getChild().inConnectClause() = false;
     eq FAbstractEquation.getChild().inConnectClause() = false;
-    eq SourceRoot.getChild().inConnectClause()        = false;
-    eq FlatRoot.getChild().inConnectClause()          = false;
+    eq SourceRoot.getChild().inConnectClause() = false;
+    eq FlatRoot.getChild().inConnectClause() = false;
 
     inh boolean FExp.inIfCondition();
     eq FIfExp.getChild().inIfCondition() = true;

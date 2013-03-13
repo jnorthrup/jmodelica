@@ -16,7 +16,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "fmiModelFunctions.h"
 #include <jmi.h>
 #include <jmi_block_residual.h>
 #include "fmi.h"
@@ -26,6 +25,7 @@ $external_func_includes$
 
 #define MODEL_IDENTIFIER $C_model_id$
 #define C_GUID $C_guid$
+#include "fmiModelFunctions.h"
 
 static const int N_real_ci = $n_real_ci$;
 static const int N_real_cd = $n_real_cd$;

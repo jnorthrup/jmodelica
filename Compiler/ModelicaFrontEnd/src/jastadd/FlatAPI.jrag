@@ -768,7 +768,7 @@ aspect FlatAPI {
 	syn int FAbstractEquation.numScalarEquations() = 1;
 	eq FEquation.numScalarEquations()           = getLeft().size().numElements();
 	eq FConnectClause.numScalarEquations()      = getConnector1().size().numElements();
-	eq FAlgorithm.numScalarEquations() {
+	eq FAlgorithmBlock.numScalarEquations() {
 		ArrayList<FVariable> assignedVars = new ArrayList<FVariable>();
 		for (FIdUse use : assignedFIdUses()) {
 			if (!use.myFV().isUnknown() && !assignedVars.contains(use.myFV())) {
@@ -848,20 +848,15 @@ aspect FlatAPI {
 			indexOf(this);
 	}
 
-	syn boolean FRelExp.generatesEvent() =
-			!inNoEventExp() &&
-			!inSmoothExp(1) &&
-			isRealComparison() &&
-			!inWhen() &&
-			!variability().lessOrEqual(fParameter());
-	
 	syn int FClass.numEventIndicators() = numRelExpInEquations();
 	
     syn int FClass.numRelExpInEquations() = relExpInEquations().size();
 	coll ArrayList<FRelExp> FClass.relExpInEquations() 
 	  [new ArrayList<FRelExp>()] with add root FlatRoot;
 	FRelExp contributes
- 		this when inEquationSection() && originalFRelExp==null && generatesEvent() 
+    // Only include relational in the equation section which are 
+    // not inside a noEvent operator
+ 		this when inEquationSection() && !inNoEventExp() && originalFRelExp==null && isRealComparison()
 	to FClass.relExpInEquations() for myFClass();	
 		
 	public int FRelExp.relExpInEquationsIndex() {
@@ -900,7 +895,9 @@ aspect FlatAPI {
 	coll ArrayList<FRelExp> FClass.relExpInInitialEquations() 
 	    [new ArrayList<FRelExp>()] with add root FlatRoot;
 	FRelExp contributes
- 		this when inInitialEquationSection() && originalFRelExp==null && generatesEvent()
+	    // Only include relational in the initial equation section which are 
+	    // not inside a noEvent operator
+ 		this when inInitialEquationSection() && !inNoEventExp() && originalFRelExp==null && isRealComparison()
 	    to FClass.relExpInInitialEquations() for myFClass();	
 
 	public int FRelExp.relExpInInitialEquationsIndex() {
@@ -983,7 +980,7 @@ aspect FlatAPI {
 	inh FClass FQName.myFClass();
 	inh FClass FFunctionDecl.myFClass();
 	inh FClass FRecordDecl.myFClass();
-	inh FClass FAlgorithm.myFClass();
+	inh FClass FAlgorithmBlock.myFClass();
 	inh FClass FAbstractEquation.myFClass();	
 	inh lazy FClass FExternalStmt.myFClass();
 	eq FClass.getChild().myFClass() = this;
@@ -1134,12 +1131,11 @@ aspect FlatAPI {
 	syn Set<FVariable> FAbstractEquation.referencedFVariablesInRHS() = Collections.emptySet();
 	eq FEquation.referencedFVariablesInRHS()             = getRight().referencedFVariablesInFExp();
 	eq FFunctionCallEquation.referencedFVariablesInRHS() = getCall().referencedFVariablesInFExp();
-	eq FAlgorithm.referencedFVariablesInRHS() {
+	eq FAlgorithmBlock.referencedFVariablesInRHS() {
 		Set<FVariable> res = new LinkedHashSet<FVariable>();
 		for (FIdUse use : containedFIdUses()) 
 			if (!use.useIsAssignment() && !use.myFV().isForIndex())
 				res.add((FVariable) use.myFV());
-		res.removeAll(referencedFVariablesInLHS());
 		return res;
 	}
 	
@@ -1150,7 +1146,7 @@ aspect FlatAPI {
 		getLefts().findReferencedFVariablesInTree(res);
 		return res;
 	}
-	eq FAlgorithm.referencedFVariablesInLHS() {
+	eq FAlgorithmBlock.referencedFVariablesInLHS() {
 		Set<FVariable> res = new LinkedHashSet<FVariable>();
 		for (FIdUse use : containedFIdUses()) 
 			if (use.useIsAssignment() && !use.myFV().isForIndex())
@@ -1922,14 +1918,12 @@ aspect LinearFVariables {
     	}
     	return true;
     }
-    eq FAlgorithm.checkLinearity(Set<FVariable> vars) = false;
     
     inh boolean FExp.isLinear(Set<FVariable> vars);
-	eq FlatRoot.getChild().isLinear(Set<FVariable> vars)   = true;
+	eq FlatRoot.getChild().isLinear(Set<FVariable> vars) = true;
 	eq SourceRoot.getChild().isLinear(Set<FVariable> vars) = true;
 	
 	eq FAbstractEquation.getChild().isLinear(Set<FVariable> vars) = true;
-	eq FStatement.getChild().isLinear(Set<FVariable> vars)        = false;
 	
 	eq FMulExp.getLeft().isLinear(Set<FVariable> vars)  = getRight().isIndependent(vars) && isLinear(vars);
 	eq FMulExp.getRight().isLinear(Set<FVariable> vars) = getLeft().isIndependent(vars) && isLinear(vars);
@@ -2111,10 +2105,10 @@ aspect FlatDiagnostics {
 		str.append("Number of initial equations:                  " + 
 				numInitialEquations() + "\n");
 
-		str.append("Number of event indicators in equations:      " + 
+		str.append("Number of relational exps in equations:       " + 
 				numRelExpInEquations() + "\n");
 
-		str.append("Number of event indicators in init equations: " + 
+		str.append("Number of relational exps in init equations:  " + 
 				numRelExpInInitialEquations() + "\n");
 
 
@@ -2365,20 +2359,20 @@ aspect FlatAlgorithmAPI {
 	
 	syn boolean FIdUse.inFAlgorithm() = myFAlgorithm() != null;
 	
-	inh lazy FAlgorithm FIdUse.myFAlgorithm();
-	eq FAlgorithm.getChild().myFAlgorithm() = this;
+	inh lazy FAlgorithmBlock FIdUse.myFAlgorithm();
+	eq FAlgorithmBlock.getChild().myFAlgorithm() = this;
 	eq Root.getChild().myFAlgorithm() = null;
 	
-	coll ArrayList<FAlgorithm> FClass.myAlgorithms()
-	    [new ArrayList<FAlgorithm>()] with add root FClass;
-	FAlgorithm contributes this when !inFunction()
+	coll ArrayList<FAlgorithmBlock> FClass.myAlgorithms()
+	    [new ArrayList<FAlgorithmBlock>()] with add root FClass;
+	FAlgorithmBlock contributes this when !inFunction()
 	    to FClass.myAlgorithms() for myFClass();
 
-	coll ArrayList<FIdUse> FAlgorithm.containedFIdUses() 
-    	[new ArrayList<FIdUse>()] with add root FAlgorithm;
-	FIdUse contributes this to FAlgorithm.containedFIdUses() for myFAlgorithm();
+	coll ArrayList<FIdUse> FAlgorithmBlock.containedFIdUses() 
+    	[new ArrayList<FIdUse>()] with add root FAlgorithmBlock;
+	FIdUse contributes this to FAlgorithmBlock.containedFIdUses() for myFAlgorithm();
 	
-	syn lazy ArrayList<FIdUse> FAlgorithm.assignedFIdUses() {
+	syn lazy ArrayList<FIdUse> FAlgorithmBlock.assignedFIdUses() {
 		ArrayList<FIdUse> res = new ArrayList<FIdUse>();
 		for (FIdUse use : containedFIdUses())
 			if (use.useIsAssignment())
@@ -2386,7 +2380,7 @@ aspect FlatAlgorithmAPI {
 		return res;
 	}
 	
-	syn lazy ArrayList<FIdUse> FAlgorithm.usedFIdUses() {
+	syn lazy ArrayList<FIdUse> FAlgorithmBlock.usedFIdUses() {
 		ArrayList<FIdUse> res = new ArrayList<FIdUse>();
 		for (FIdUse use : containedFIdUses())
 			if (!use.useIsAssignment())
@@ -2401,11 +2395,11 @@ aspect FlatAlgorithmAPI {
 	eq FIdUseExp.getFIdUse().useIsAssignment()       = useIsAssignment();
 	eq FExp.getChild().useIsAssignment()             = false;
 	eq FStatement.getChild().useIsAssignment()       = false;
-	eq FAlgorithm.getChild().useIsAssignment()  = false;
+	eq FAlgorithmBlock.getChild().useIsAssignment()  = false;
 	eq Root.getChild().useIsAssignment()             = false;
 	
-	private String FAlgorithm.functionName = null;
-	public String FAlgorithm.generateFunctionName() {
+	private String FAlgorithmBlock.functionName = null;
+	public String FAlgorithmBlock.generateFunctionName() {
 		if (functionName == null)
 			functionName = myFClass().generateFunctionName();
 		return functionName;

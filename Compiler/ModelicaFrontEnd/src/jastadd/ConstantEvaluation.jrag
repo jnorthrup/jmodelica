@@ -1409,8 +1409,6 @@ aspect ConstantEvaluation {
   eq FSqrtExp.cevalCalc()  = new CValueReal(Math.sqrt(getFExp().ceval().realValue()));
   
   eq FAbsExp.cevalCalc() = type().abs(getFExp().ceval());
-  
-  eq FVectorExp.cevalCalc() = getFExp().getArray().getFExp(0).ceval();
 
 	syn CValue FSubscript.ceval() = CValue.UNSUPPORTED;
 	eq FExpSubscript.ceval()      = getFExp().ceval();
@@ -1811,7 +1809,7 @@ aspect ConstantEvaluation {
    *                Should be filled with the values of the inputs.
    */
   public void FFunctionDecl.evaluate(Map<CommonVariableDecl, CValue> values) {
- 	  FAlgorithm fab = getFAlgorithm();
+ 	  FAlgorithmBlock fab = getFAlgorithmBlock();
 	  Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
 	  currentEvaluationValues = values;
 	  for (FFunctionVariable var : getFFunctionVariables())
@@ -1845,7 +1843,7 @@ aspect ConstantEvaluation {
   public void InstFullClassDecl.evaluate(Map<CommonVariableDecl, CValue> values) {
 	  // We assume this class is a function
 	  
- 	  FAlgorithm fab = findFunctionAlgorithm();
+ 	  FAlgorithmBlock fab = findFunctionAlgorithm();
    	  if (fab == null || hasInstExternal()) {
 		  values.clear();
 		  return;

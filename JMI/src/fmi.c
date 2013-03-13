@@ -22,6 +22,8 @@
 #include <time.h>
 
 #include "fmi.h"
+#include "fmiModelFunctions.h"
+#include "fmiModelTypes.h"
 #include "jmi.h"
 #include "jmi_block_residual.h"
 
@@ -322,11 +324,11 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     /* Sets the relative tolerance to a default value for use in Kinsol when tolerance controlled is false */
     if (toleranceControlled == fmiFalse){
         relativeTolerance = jmi->options.nle_solver_default_tol;
-        jmi->events_epsilon = jmi->options.events_default_tol; /* Used in the event detection */
+        ((fmi_t *)c) -> fmi_epsilon= jmi->options.events_default_tol; /* Used in the event detection */
         ((fmi_t *)c) -> fmi_newton_tolerance=jmi->options.nle_solver_default_tol; /* Used in the Newton iteration */
     }
     else {
-        jmi->events_epsilon = jmi->options.events_tol_factor*relativeTolerance; /* Used in the event detection */
+        ((fmi_t *)c) -> fmi_epsilon= jmi->options.events_tol_factor*relativeTolerance; /* Used in the event detection */
         ((fmi_t *)c) -> fmi_newton_tolerance=jmi->options.nle_solver_tol_factor*relativeTolerance; /* Used in the Newton iteration */
     }
     
@@ -544,6 +546,7 @@ fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx)
 }
 
 fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
+	jmi_real_t *switches;
     jmi_t* jmi = ((fmi_t *)c)->jmi;
 	fmiValueReference i;
 	fmiInteger retval;
@@ -555,13 +558,39 @@ fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], si
 		}
 		((fmi_t *)c)->jmi->recomputeVariables = 0;
 	}
-	retval = jmi_dae_R_perturbed(((fmi_t *)c)->jmi,eventIndicators);
+	retval = jmi_dae_R(((fmi_t *)c)->jmi,eventIndicators);
+	switches = jmi_get_sw(((fmi_t *)c)->jmi);
     
 	if(retval != 0) {
 		(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the event indicators failed.");
 		return fmiError;
 	}
 
+    for (i = 0; i < ni; i=i+1){
+        /* x >= 0
+         * x >  0
+         * x <= 0
+         * x <  0
+         * 
+         */
+        if (switches[i] == 1.0){
+            if (jmi->relations[i] == JMI_REL_GEQ){
+                eventIndicators[i] = eventIndicators[i]/1.0+((fmi_t *)c)->fmi_epsilon; /* MISSING DIVIDING WITH NOMINAL */
+            }else if (jmi->relations[i] == JMI_REL_LEQ){
+                eventIndicators[i] = eventIndicators[i]/1.0-((fmi_t *)c)->fmi_epsilon; /* MISSING DIVIDING WITH NOMINAL */
+            }else{
+                eventIndicators[i] = eventIndicators[i]/1.0; /* MISSING DIVIDING WITH NOMINAL */
+            }
+        }else{
+            if (jmi->relations[i] == JMI_REL_GT){
+                eventIndicators[i] = eventIndicators[i]/1.0-((fmi_t *)c)->fmi_epsilon; /* MISSING DIVIDING WITH NOMINAL */
+            }else if (jmi->relations[i] == JMI_REL_LT){
+                eventIndicators[i] = eventIndicators[i]/1.0+((fmi_t *)c)->fmi_epsilon; /* MISSING DIVIDING WITH NOMINAL */
+            }else{
+                eventIndicators[i] = eventIndicators[i]/1.0; /* MISSING DIVIDING WITH NOMINAL */
+            }
+        }
+    }
     return fmiOK;
 }
 

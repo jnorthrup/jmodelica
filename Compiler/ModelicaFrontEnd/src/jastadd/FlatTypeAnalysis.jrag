@@ -175,7 +175,7 @@ aspect FlatTypeAnalysis {
 	syn boolean FAbstractEquation.isReal()    = type().isReal();
 	syn boolean FAbstractEquation.isInteger() = type().isInteger();
 	syn boolean FAbstractEquation.isBoolean() = type().isBoolean();
-	syn boolean FAbstractEquation.isString()  = type().isString();
+	syn boolean FAbstractEquation.isString() = type().isString();
 
 	eq FFunctionCallEquation.isReal() {
 		for (FFunctionCallLeft l : getLefts()) {
@@ -221,38 +221,6 @@ aspect FlatTypeAnalysis {
 		return true;
 	}
 	
-	eq FAlgorithm.isReal() = FStatement.statementsAssignsOnlyReals(getFStatements());
-	// TODO: isInteger(), etc. for algorithm
-	
-	syn boolean FStatement.assignsOnlyReals() = true;
-	eq FAssignStmt.assignsOnlyReals()         = getRight().type().onlyContainsReal();
-	eq FForStmt.assignsOnlyReals()            = statementsAssignsOnlyReals(getForStmts());
-	eq FWhileStmt.assignsOnlyReals()          = statementsAssignsOnlyReals(getWhileStmts());
-	eq FIfStmt.assignsOnlyReals()             = 
-		super.assignsOnlyReals() && statementsAssignsOnlyReals(getElseStmts());
-	eq FIfWhenStmt.assignsOnlyReals() {
-		for (FIfWhenClause s : getFIfWhenClauses())
-			if (!s.assignsOnlyReals())
-				return false;
-		return true;
-	}
-	eq FFunctionCallStmt.assignsOnlyReals() {
-		for (FFunctionCallLeft l : getLefts()) 
-			if (l.hasFExp()) 
-				if (!l.getFExp().type().onlyContainsReal()) 
-					return false;
-		return true;
-	}
-	
-	syn boolean FIfWhenClause.assignsOnlyReals() = FStatement.statementsAssignsOnlyReals(getFStatements());
-	
-	public static boolean FStatement.statementsAssignsOnlyReals(Iterable<? extends FStatement> stmts) {
-		for (FStatement s : stmts)
-			if (!s.assignsOnlyReals())
-				return false;
-		return true;
-	}
-	
 	syn boolean FRelExp.isRealComparison() = getRight().type().numericPromotion(getLeft().type()).isReal();
 	syn boolean FRelExp.isIntegerComparison() = getRight().type().numericPromotion(getLeft().type()).isInteger();
 	syn boolean FRelExp.isBooleanComparison() = getRight().type().numericPromotion(getLeft().type()).isBoolean();
@@ -276,8 +244,6 @@ aspect FlatTypeAnalysis {
 	eq FAddExp.rawType()           = getLeft().type().typePromotion(getRight().type());
 	
 	eq FUnaryBuiltIn.type() = getFExp().type();
-	
-	eq FDimensionConvert.type() = getFExp().type().sizedType(size());
 	
 	eq FDotDivExp.type() {
 		FType t = super.type();
@@ -355,7 +321,6 @@ aspect FlatTypeAnalysis {
 			getFExp().type().arrayType(size());
 	
 	eq FCross.type() = getX().type().numericPromotion(getY().type());
-	eq FSkew.type()  = getFExp().type().arrayType(size());
 
 	eq FOuterProduct.type() { 
 		if (getX().ndims() != 1 || getY().ndims() != 1)
@@ -559,7 +524,6 @@ aspect FlatTypeAnalysis {
 			return fUnknownType();
 		return fIntegerArrayType(size());
 	}
-	eq FDiagonal.type() = getFExp().type().arrayType(size());
 	
 	eq FSubscriptedExp.type() = getFExp().type().sizedType(size());
 

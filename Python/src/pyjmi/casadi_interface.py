@@ -592,9 +592,6 @@ class CasadiModel(BaseModel):
             update_sf --
                 Whether to update the scaling factors using the current nominal
                 values.
-                
-                Type: bool
-                Default: True
         """
         if update_sf:
             self._update_sf()

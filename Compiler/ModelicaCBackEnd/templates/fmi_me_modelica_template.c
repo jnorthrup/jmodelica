@@ -16,7 +16,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "fmiModelFunctions.h"
 #include <jmi.h>
 #include <jmi_block_residual.h>
 #include <fmi.h>
@@ -27,6 +26,7 @@ $external_func_includes$
 
 #define MODEL_IDENTIFIER $C_model_id$
 #define C_GUID $C_guid$
+#include "fmiModelFunctions.h"
 
 static int model_ode_guards_init(jmi_t* jmi);
 static int model_init_R0(jmi_t* jmi, jmi_ad_var_vec_p res);
