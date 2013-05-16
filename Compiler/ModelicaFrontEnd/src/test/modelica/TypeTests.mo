@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009-2013 Modelon AB
+    Copyright (C) 2009 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -457,7 +457,12 @@ model IntegerExp1
 			flatModel="
 fclass TypeTests.IntegerExp1
  constant Integer x = integer(1.8);
- constant Integer y = 1;
+ discrete Integer y;
+initial equation  
+ pre(y) = 0;
+equation
+ y = 1;
+
 end TypeTests.IntegerExp1;
 ")})));
 end IntegerExp1;
@@ -473,8 +478,14 @@ model IntegerExp2
 			description="integer() operator: continous arg",
 			flatModel="
 fclass TypeTests.IntegerExp2
- constant Real x = 1.0;
- constant Integer y = 1;
+ Real x;
+ discrete Integer y;
+initial equation 
+ pre(y) = 0;
+equation
+ x = 1.0;
+ y = integer(x);
+
 end TypeTests.IntegerExp2;
 ")})));
 end IntegerExp2;
@@ -511,8 +522,15 @@ model ConstCmpEq
 fclass TypeTests.ConstCmpEq
  constant Boolean a = 1 == 2;
  constant Boolean b = 1 == 1;
- constant Boolean x = false;
- constant Boolean y = true;
+ discrete Boolean x;
+ discrete Boolean y;
+initial equation 
+ pre(x) = false;
+ pre(y) = false;
+equation
+ x = false;
+ y = true;
+
 end TypeTests.ConstCmpEq;
 ")})));
 end ConstCmpEq;
@@ -532,8 +550,15 @@ model ConstCmpNeq
 fclass TypeTests.ConstCmpNeq
  constant Boolean a = 1 <> 2;
  constant Boolean b = 1 <> 1;
- constant Boolean x = true;
- constant Boolean y = false;
+ discrete Boolean x;
+ discrete Boolean y;
+initial equation  
+ pre(x) = false;
+ pre(y) = false;
+equation
+ x = true;
+ y = false;
+
 end TypeTests.ConstCmpNeq;
 ")})));
 end ConstCmpNeq;
@@ -556,9 +581,18 @@ fclass TypeTests.ConstCmpLeq
  constant Boolean a = 1 <= 2;
  constant Boolean b = 1 <= 1;
  constant Boolean c = 2 <= 1;
- constant Boolean x = true;
- constant Boolean y = true;
- constant Boolean z = false;
+ discrete Boolean x;
+ discrete Boolean y;
+ discrete Boolean z;
+initial equation  
+ pre(x) = false;
+ pre(y) = false;
+ pre(z) = false;
+equation
+ x = true;
+ y = true;
+ z = false;
+
 end TypeTests.ConstCmpLeq;
 ")})));
 end ConstCmpLeq;
@@ -581,9 +615,18 @@ fclass TypeTests.ConstCmpLt
  constant Boolean a = 1 < 2;
  constant Boolean b = 1 < 1;
  constant Boolean c = 2 < 1;
- constant Boolean x = true;
- constant Boolean y = false;
- constant Boolean z = false;
+ discrete Boolean x;
+ discrete Boolean y;
+ discrete Boolean z;
+initial equation 
+ pre(x) = false;
+ pre(y) = false;
+ pre(z) = false;
+equation
+ x = true;
+ y = false;
+ z = false;
+
 end TypeTests.ConstCmpLt;
 ")})));
 end ConstCmpLt;
@@ -606,9 +649,18 @@ fclass TypeTests.ConstCmpGeq
  constant Boolean a = 1 >= 2;
  constant Boolean b = 1 >= 1;
  constant Boolean c = 2 >= 1;
- constant Boolean x = false;
- constant Boolean y = true;
- constant Boolean z = true;
+ discrete Boolean x;
+ discrete Boolean y;
+ discrete Boolean z;
+initial equation 
+ pre(x) = false;
+ pre(y) = false;
+ pre(z) = false;
+equation
+ x = false;
+ y = true;
+ z = true;
+
 end TypeTests.ConstCmpGeq;
 ")})));
 end ConstCmpGeq;
@@ -631,9 +683,18 @@ fclass TypeTests.ConstCmpGt
  constant Boolean a = 1 > 2;
  constant Boolean b = 1 > 1;
  constant Boolean c = 2 > 1;
- constant Boolean x = false;
- constant Boolean y = false;
- constant Boolean z = true;
+ discrete Boolean x;
+ discrete Boolean y;
+ discrete Boolean z;
+initial equation 
+ pre(x) = false;
+ pre(y) = false;
+ pre(z) = false;
+equation
+ x = false;
+ y = false;
+ z = true;
+
 end TypeTests.ConstCmpGt;
 ")})));
 end ConstCmpGt;
@@ -740,7 +801,10 @@ model ParameterStart1
 			flatModel="
 fclass TypeTests.ParameterStart1
  constant Real p(start = 2);
- constant Real y = 2.0;
+ Real y;
+equation
+ y = 2.0;
+
 end TypeTests.ParameterStart1;
 ")})));
 end ParameterStart1;
@@ -757,7 +821,10 @@ model ParameterStart2
 			flatModel="
 fclass TypeTests.ParameterStart2
  constant Real p;
- constant Real y = 0.0;
+ Real y;
+equation
+ y = 0.0;
+
 end TypeTests.ParameterStart2;
 ")})));
 end ParameterStart2;
@@ -772,9 +839,13 @@ model ArrayTypeTest1
 			description="Check that short type declarations with array indices are expanded correctly.",
 			flatModel="
 fclass TypeTests.ArrayTypeTest1
- constant TypeTests.ArrayTypeTest1.T x[1] = 1;
- constant TypeTests.ArrayTypeTest1.T x[2] = 2;
- constant TypeTests.ArrayTypeTest1.T x[3] = 4;
+ TypeTests.ArrayTypeTest1.T x[1];
+ TypeTests.ArrayTypeTest1.T x[2];
+ TypeTests.ArrayTypeTest1.T x[3];
+equation
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 4;
 
 public
  type TypeTests.ArrayTypeTest1.T = Real(unit = \"m\");
@@ -794,21 +865,37 @@ model ArrayTypeTest2
 			description="Check that short type declarations with array indices are expanded correctly.",
 			flatModel="
 fclass TypeTests.ArrayTypeTest2
- constant TypeTests.ArrayTypeTest2.T x[1] = 1;
- constant TypeTests.ArrayTypeTest2.T x[2] = 2;
- constant TypeTests.ArrayTypeTest2.T x[3] = 4;
- constant TypeTests.ArrayTypeTest2.S y[1,1] = 0;
- constant TypeTests.ArrayTypeTest2.S y[1,2] = 0;
- constant TypeTests.ArrayTypeTest2.S y[1,3] = 0;
- constant TypeTests.ArrayTypeTest2.S y[2,1] = 0;
- constant TypeTests.ArrayTypeTest2.S y[2,2] = 0;
- constant TypeTests.ArrayTypeTest2.S y[2,3] = 0;
- constant TypeTests.ArrayTypeTest2.S y[3,1] = 0;
- constant TypeTests.ArrayTypeTest2.S y[3,2] = 0;
- constant TypeTests.ArrayTypeTest2.S y[3,3] = 0;
- constant TypeTests.ArrayTypeTest2.S y[4,1] = 0;
- constant TypeTests.ArrayTypeTest2.S y[4,2] = 0;
- constant TypeTests.ArrayTypeTest2.S y[4,3] = 0;
+ TypeTests.ArrayTypeTest2.T x[1];
+ TypeTests.ArrayTypeTest2.T x[2];
+ TypeTests.ArrayTypeTest2.T x[3];
+ TypeTests.ArrayTypeTest2.S y[1,1];
+ TypeTests.ArrayTypeTest2.S y[1,2];
+ TypeTests.ArrayTypeTest2.S y[1,3];
+ TypeTests.ArrayTypeTest2.S y[2,1];
+ TypeTests.ArrayTypeTest2.S y[2,2];
+ TypeTests.ArrayTypeTest2.S y[2,3];
+ TypeTests.ArrayTypeTest2.S y[3,1];
+ TypeTests.ArrayTypeTest2.S y[3,2];
+ TypeTests.ArrayTypeTest2.S y[3,3];
+ TypeTests.ArrayTypeTest2.S y[4,1];
+ TypeTests.ArrayTypeTest2.S y[4,2];
+ TypeTests.ArrayTypeTest2.S y[4,3];
+equation
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 4;
+ y[1,1] = 0;
+ y[1,2] = 0;
+ y[1,3] = 0;
+ y[2,1] = 0;
+ y[2,2] = 0;
+ y[2,3] = 0;
+ y[3,1] = 0;
+ y[3,2] = 0;
+ y[3,3] = 0;
+ y[4,1] = 0;
+ y[4,2] = 0;
+ y[4,3] = 0;
 
 public
  type TypeTests.ArrayTypeTest2.T = Real(unit = \"l\");
@@ -838,13 +925,21 @@ model ArrayTypeTest3
 			description="Check that short type declarations with array indices are expanded correctly.",
 			flatModel="
 fclass TypeTests.ArrayTypeTest3
- constant Real y[1].x(start = 1) = 1;
- constant Real y[2].x(start = 1) = 1;
- constant Real y[3].x(start = 1) = 1;
- constant Real z[1].x = 1;
- constant Real z[2].x = 1;
- constant Real z[3].x = 1;
- constant Real w.x = 1;
+ Real y[1].x(start = 1);
+ Real y[2].x(start = 1);
+ Real y[3].x(start = 1);
+ Real z[1].x;
+ Real z[2].x;
+ Real z[3].x;
+ Real w.x;
+equation
+ y[1].x = 1;
+ y[2].x = 1;
+ y[3].x = 1;
+ z[1].x = 1;
+ z[2].x = 1;
+ z[3].x = 1;
+ w.x = 1;
 end TypeTests.ArrayTypeTest3;
 ")})));
 end ArrayTypeTest3;
@@ -872,16 +967,27 @@ model ArrayTypeTest4
 			description="Check that short type declarations with array indices are expanded correctly.",
 			flatModel="
 fclass TypeTests.ArrayTypeTest4
- constant Real y[1,1].x(start = 1) = 1;
- constant Real y[1,2].x(start = 1) = 1;
- constant Real y[2,1].x(start = 1) = 1;
- constant Real y[2,2].x(start = 1) = 1;
- constant Real y[3,1].x(start = 1) = 1;
- constant Real y[3,2].x(start = 1) = 1;
- constant Real z[1].x = 1;
- constant Real z[2].x = 1;
- constant Real z[3].x = 1;
- constant Real w.x = 1;
+ Real y[1,1].x(start = 1);
+ Real y[1,2].x(start = 1);
+ Real y[2,1].x(start = 1);
+ Real y[2,2].x(start = 1);
+ Real y[3,1].x(start = 1);
+ Real y[3,2].x(start = 1);
+ Real z[1].x;
+ Real z[2].x;
+ Real z[3].x;
+ Real w.x;
+equation
+ y[1,1].x = 1;
+ y[1,2].x = 1;
+ y[2,1].x = 1;
+ y[2,2].x = 1;
+ y[3,1].x = 1;
+ y[3,2].x = 1;
+ z[1].x = 1;
+ z[2].x = 1;
+ z[3].x = 1;
+ w.x = 1;
 end TypeTests.ArrayTypeTest4;
 ")})));
 end ArrayTypeTest4;
@@ -910,16 +1016,27 @@ model ArrayTypeTest5
 			description="Check that short type declarations with array indices are expanded correctly.",
 			flatModel="
 fclass TypeTests.ArrayTypeTest5
- constant Real y[1,1].x(start = 1) = 3;
- constant Real y[1,2].x(start = 1) = 3;
- constant Real y[2,1].x(start = 1) = 3;
- constant Real y[2,2].x(start = 1) = 3;
- constant Real y[3,1].x(start = 1) = 3;
- constant Real y[3,2].x(start = 1) = 3;
- constant Real z[1].x = 3;
- constant Real z[2].x = 3;
- constant Real z[3].x = 3;
- constant Real w.x = 3;
+ Real y[1,1].x(start = 1);
+ Real y[1,2].x(start = 1);
+ Real y[2,1].x(start = 1);
+ Real y[2,2].x(start = 1);
+ Real y[3,1].x(start = 1);
+ Real y[3,2].x(start = 1);
+ Real z[1].x;
+ Real z[2].x;
+ Real z[3].x;
+ Real w.x;
+equation
+ y[1,1].x = 3;
+ y[1,2].x = 3;
+ y[2,1].x = 3;
+ y[2,2].x = 3;
+ y[3,1].x = 3;
+ y[3,2].x = 3;
+ z[1].x = 3;
+ z[2].x = 3;
+ z[3].x = 3;
+ w.x = 3;
 end TypeTests.ArrayTypeTest5;
 ")})));
 end ArrayTypeTest5;
@@ -1119,11 +1236,16 @@ model IfExpType1
 fclass TypeTests.IfExpType1
  parameter Integer n = 3 /* 3 */;
  parameter Integer m.n;
- constant Real m.y[1] = 1;
- constant Real m.y[2] = 2;
- constant Real m.y[3] = 3;
+ Real m.y[1];
+ Real m.y[2];
+ Real m.y[3];
 parameter equation
  m.n = n;
+equation
+ m.y[1] = 1;
+ m.y[2] = 2;
+ m.y[3] = 3;
+
 end TypeTests.IfExpType1;
 ")})));
 end IfExpType1;
@@ -1219,12 +1341,13 @@ model IfExpType5
 fclass TypeTests.IfExpType5
  parameter Integer n = 3 /* 3 */;
  parameter Integer m.n;
- parameter Real m.y[1];
- parameter Real m.y[2];
- parameter Real m.y[3];
+ Real m.y[1];
+ Real m.y[2];
+ Real m.y[3];
 parameter equation
  m.n = n;
- ({m.y[1], m.y[2], m.y[3]}) = TypeTests.IfExpType5.F(3, 5, n);
+equation
+ ({m.y[1],m.y[2],m.y[3]}) = TypeTests.IfExpType5.F(3, 5, n);
 
 public
  function TypeTests.IfExpType5.F

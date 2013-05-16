@@ -16,18 +16,18 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
-from collections import OrderedDict
 
 from scipy.io.matlab.mio import loadmat
 import matplotlib.pyplot as plt
 import numpy as N
 
-from pymodelica import compile_fmu
+from pymodelica import compile_jmu
 from pymodelica import compile_fmux
-from pyfmi import load_fmu
+from pyjmi import JMUModel
 from pyjmi import CasadiModel
 from pyjmi.common.core import TrajectoryLinearInterpolation
-from pyjmi.optimization.casadi_collocation import MeasurementData
+from pyjmi.optimization.casadi_collocation import ParameterEstimationData
+
 
 def run_demo(with_plots=True):
     """
@@ -91,12 +91,12 @@ def run_demo(with_plots=True):
     # Build input trajectory matrix for use in simulation
     u = N.transpose(N.vstack((t_meas,u1,u2)))
 
-    # compile FMU
-    fmu_name = compile_fmu('QuadTankPack.Sim_QuadTank', 
+    # compile JMU
+    jmu_name = compile_jmu('QuadTankPack.Sim_QuadTank', 
         curr_dir+'/files/QuadTankPack.mop')
 
     # Load model
-    model = load_fmu(fmu_name)
+    model = JMUModel(jmu_name)
     
     # Simulate model response with nominal parameters
     res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60)
@@ -110,13 +110,6 @@ def run_demo(with_plots=True):
     
     u1_sim = res['u1']
     u2_sim = res['u2']
-    
-    assert N.abs(res.final('qt.x1') - 0.05642485) < 1e-3
-    assert N.abs(res.final('qt.x2') - 0.05510478) < 1e-3
-    assert N.abs(res.final('qt.x3') - 0.02736532) < 1e-3
-    assert N.abs(res.final('qt.x4') - 0.02789808) < 1e-3
-    assert N.abs(res.final('u1') - 6.0)           < 1e-3
-    assert N.abs(res.final('u2') - 5.0)           < 1e-3
 
     # Plot simulation result
     if with_plots:
@@ -147,7 +140,7 @@ def run_demo(with_plots=True):
     The collocation algorithm minimizes, if the parameter_estimation_data
     option is set, a quadrature approximation of the integral
 
-    \int_{t_0}^{t_f} (y(t)-y^{meas}(t))^T Q (y(t)-y^{meas}(t)) dt
+    \int_{t_0}^{t_f} (y(t_i)-y_i^{meas})^T Q (y(t_i)-y_i^{meas}) dt
 
     The measurement data is given as a matrix where the first
     column is time and the following column contains data corresponding
@@ -160,29 +153,24 @@ def run_demo(with_plots=True):
     The weighting matrix Q may be used to express that inputs are typically
     more reliable than than measured outputs.
     """
-    
-    # Create measurement data
-    Q = N.diag([1., 1., 10., 10.])
-    data_x1 = N.vstack([t_meas, y1_meas])
-    data_x2 = N.vstack([t_meas, y2_meas])
-    data_u1 = N.vstack([t_meas, u1])
-    data_u2 = N.vstack([t_meas, u2])
-    unconstrained = OrderedDict()
-    unconstrained['qt.x1'] = data_x1
-    unconstrained['qt.x2'] = data_x2
-    unconstrained['u1'] = data_u1
-    unconstrained['u2'] = data_u2
-    measurement_data = MeasurementData(Q=Q, unconstrained=unconstrained)
-    
+
+    Q = N.array([[1.,0,0,0],[0,1,0,0],[0,0,10,0],[0,0,0,10]])
+    measured_variables=['qt.x1','qt.x2','qt.u1','qt.u2']
+    data = N.transpose(N.vstack((t_meas,y1_meas,y2_meas,u1,u2)))
+
+    par_est_data = ParameterEstimationData(Q,measured_variables,data)
+
     opts = model_casadi.optimize_options()
-    
+
     opts['n_e'] = 60
-    
-    opts['measurement_data'] = measurement_data
-    
+
+    opts['parameter_estimation_data'] = par_est_data
+    #opts['IPOPT_options']['derivative_test'] = 'second-order'
+    #opts['IPOPT_options']['max_iter'] = 0
+
     res = model_casadi.optimize(algorithm="LocalDAECollocationAlg",
                                 options=opts)
-    
+
     # Load state profiles
     x1_opt = res["qt.x1"]
     x2_opt = res["qt.x2"]
@@ -193,16 +181,13 @@ def run_demo(with_plots=True):
     t_opt  = res["time"]
 
     # Extract optimal values of parameters
-    a1_opt = res.final("qt.a1")
-    a2_opt = res.final("qt.a2")
+    a1_opt = res["qt.a1"]
+    a2_opt = res["qt.a2"]
 
-    # Print and assert optimal parameter values
+    # Print optimal parameter values
     print('a1: ' + str(a1_opt*1e4) + 'cm^2')
     print('a2: ' + str(a2_opt*1e4) + 'cm^2')
-    a_ref = [0.02656702, 0.02713898]
-    N.testing.assert_allclose(1e4 * N.array([a1_opt, a2_opt]),
-                              [0.02656702, 0.02713898], rtol=1e-4)
-    
+
     # Plot
     if with_plots:
         plt.figure(1)
@@ -221,6 +206,8 @@ def run_demo(with_plots=True):
         plt.subplot(2,1,2)
         plt.plot(t_opt,u2_opt,'k')
         plt.show()
+
+
 
 if __name__=="__main__":
     run_demo()

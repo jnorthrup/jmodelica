@@ -21,9 +21,8 @@ import os.path
 import numpy as N
 import matplotlib.pyplot as plt
 
-from pymodelica import compile_jmu, compile_fmu
+from pymodelica import compile_jmu
 from pyjmi import JMUModel
-from pyfmi import load_fmu
 
 def run_demo(with_plots=True):
     """
@@ -31,13 +30,16 @@ def run_demo(with_plots=True):
     """
     curr_dir = os.path.dirname(os.path.abspath(__file__));
         
-    # Compile and load model
-    fmu_name = compile_fmu("Crystallizer.SimulateCrystallizer", os.path.join(curr_dir, "files", "Crystallizer.mop"), 
+    # Compile model
+
+    jmu_name = compile_jmu("Crystallizer.SimulateCrystallizer", curr_dir+"/files/Crystallizer.mop", 
                            compiler_options={"enable_variable_scaling":True})
-    crys = load_fmu(fmu_name)
-    
-    # Simulate
-    res = crys.simulate(final_time=25)
+
+    crys = JMUModel(jmu_name)
+
+    sim_opts = crys.simulate_options()
+
+    res = crys.simulate(final_time=25,options=sim_opts)
 
     time = res['time']
     Ls = res['c.Ls']
@@ -126,27 +128,26 @@ def run_demo(with_plots=True):
         plt.grid()
         plt.show()
         
-    # Compile and load opt model
     jmu_name = compile_jmu("Crystallizer.OptCrystallizer",
-                           os.path.join(curr_dir, "files", "Crystallizer.mop"),
+                           curr_dir+"/files/Crystallizer.mop",
                            compiler_options={"enable_variable_scaling":True})
+
     crys_opt = JMUModel(jmu_name)
 
-    # Set optimization options
     opt_opts = crys_opt.optimize_options()
 
     n_e = 20
     opt_opts['n_e'] = n_e 
     opt_opts['init_traj'] = res.result_data
     opt_opts['blocking_factors'] = N.ones(n_e,dtype=int)
+    #opt_opts['write_scaled_result'] = True
+    #opt_opts['IPOPT_options']['derivative_test'] = 'first-order'
     opt_opts['IPOPT_options']['max_iter'] = 1000
     opt_opts['IPOPT_options']['tol'] = 1e-3
     opt_opts['IPOPT_options']['dual_inf_tol'] = 1e-3
     
-    # Run optimization
     res_opt = crys_opt.optimize(options=opt_opts)
     
-    # Get result data
     time = res_opt['time']
     Ls = res_opt['c.Ls']
     Nc = res_opt['c.Nc']
@@ -157,13 +158,12 @@ def run_demo(with_plots=True):
     Cc = res_opt['c.Cc']
     Tc = res_opt['c.Tc']
     
+#    Ta = res_opt['Ta']
     Teq = res_opt['c.Teq']
     deltaT = res_opt['c.deltaT']
     Cbar = res_opt['c.Cbar']
     
     Tj = res_opt['c.Tj']
-    
-    assert N.abs(res_opt.final('c.Tj') - 10.0) < 1e-3
 
     if with_plots:
         plt.figure(1)
@@ -224,6 +224,9 @@ def run_demo(with_plots=True):
         plt.hold(True)
         plt.plot(time,Teq-Tc)
         plt.title('Teq-Tc')
+#        plt.subplot(4,1,4)
+#        plt.plot(time,Ta)
+#        plt.title('Ta')
         
         plt.show()
             

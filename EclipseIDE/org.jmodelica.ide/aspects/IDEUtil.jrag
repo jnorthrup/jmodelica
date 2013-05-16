@@ -18,11 +18,10 @@ import org.jmodelica.ide.helpers.Util;
 
 aspect IDEUtil {
 	
-	syn StoredDefinition StoredDefinition.getDefinition()   = this;
-	inh StoredDefinition ASTNode.getDefinition();
+	syn StoredDefinition ASTNode.getDefinition()          = null;
+	syn StoredDefinition StoredDefinition.getDefinition() = this;
 	inh lazy StoredDefinition BaseNode.getDefinition();
-	eq StoredDefinition.getChild().getDefinition()          = this;
-	eq Root.getChild().getDefinition()                      = null;
+	eq StoredDefinition.getChild(int index).getDefinition() = this;
 	eq InstNode.getInstClassDecl(int index).getDefinition() = 
 			getInstClassDecl(index).getClassDecl().getDefinition();
 	eq InstNode.getInstComponentDecl(int index).getDefinition() = 

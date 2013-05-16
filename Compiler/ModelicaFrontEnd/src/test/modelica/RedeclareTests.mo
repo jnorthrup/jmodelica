@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009-2013 Modelon AB
+    Copyright (C) 2009 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -3072,14 +3072,17 @@ model RedeclareTest32
 	
 	D[2] d;
 
-	annotation(__JModelica(UnitTesting(tests={
+	annotation(__JModelica(UnitTesting(tests={ 
 		TransformCanonicalTestCase(
 			name="RedeclareTest32",
 			description="Lookup of extends with redeclare modification in array",
 			flatModel="
 fclass RedeclareTests.RedeclareTest32
- constant Real d[1].y = 3.0;
- constant Real d[2].y = 3.0;
+ Real d[1].y;
+ Real d[2].y;
+equation
+ d[1].y = 3.0;
+ d[2].y = 3.0;
 end RedeclareTests.RedeclareTest32;
 ")})));
 end RedeclareTest32;
@@ -3268,9 +3271,13 @@ equation
 			description="Redeclare class as element, short replacing declaration, with equation and modifications",
 			flatModel="
 fclass RedeclareTests.RedeclareElement5
- constant Real c.b.y(start = 2) = 1;
- constant Real c.b.z(start = 1) = 2;
- constant Real c.b.x(start = 5) = 3;
+ Real c.b.y(start = 2);
+ Real c.b.z(start = 1);
+ Real c.b.x(start = 5);
+equation
+ c.b.y = 1;
+ c.b.x = 3;
+ c.b.z = 2;
 end RedeclareTests.RedeclareElement5;
 ")})));
 end RedeclareElement5;
@@ -3307,9 +3314,13 @@ equation
 			description="Redeclare class as element, long replacing declaration, with equation",
 			flatModel="
 fclass RedeclareTests.RedeclareElement6
- constant Real c.b.y = 1;
- constant Real c.b.z = 2;
- constant Real c.b.x = 3;
+ Real c.b.y;
+ Real c.b.z;
+ Real c.b.x;
+equation
+ c.b.y = 1;
+ c.b.z = 2;
+ c.b.x = 3;
 end RedeclareTests.RedeclareElement6;
 ")})));
 end RedeclareElement6;
@@ -3345,10 +3356,15 @@ model RedeclareElement7
 			description="Redeclare class as element, long extending declaration, with equation and modifications",
 			flatModel="
 fclass RedeclareTests.RedeclareElement7
- constant Real c.b.z = 1;
- constant Real c.b.y(start = 10) = 2;
- constant Real c.b.x(start = 20) = 3;
- constant Real c.b.w = 4;
+ Real c.b.z;
+ Real c.b.y(start = 10);
+ Real c.b.x(start = 20);
+ Real c.b.w;
+equation
+ c.b.z = 1;
+ c.b.w = 4;
+ c.b.y = 2;
+ c.b.x = 3;
 end RedeclareTests.RedeclareElement7;
 ")})));
 end RedeclareElement7;
@@ -3384,10 +3400,15 @@ model RedeclareElement8
 			description="Redeclare class as element, long extending declaration, with equation and modifications",
 			flatModel="
 fclass RedeclareTests.RedeclareElement8
- constant Real c.b.z = 1;
- constant Real c.b.y(start = 10) = 2;
- constant Real c.b.x(start = 20) = 3;
- constant Real c.b.w = 4;
+ Real c.b.z;
+ Real c.b.y(start = 10);
+ Real c.b.x(start = 20);
+ Real c.b.w;
+equation
+ c.b.z = 1;
+ c.b.w = 4;
+ c.b.y = 2;
+ c.b.x = 3;
 end RedeclareTests.RedeclareElement8;
 ")})));
 end RedeclareElement8;
@@ -3599,8 +3620,11 @@ model RedeclareElement14
 			description="Looking up replacing class through extends",
 			flatModel="
 fclass RedeclareTests.RedeclareElement14
- constant Real d.y = 2;
- constant Real d.x = 1;
+ Real d.y;
+ Real d.x;
+equation
+ d.y = 2;
+ d.x = 1;
 end RedeclareTests.RedeclareElement14;
 ")})));
 end RedeclareElement14;
@@ -3636,8 +3660,21 @@ model RedeclareElement15
 			description="Class declared in same scope as replacing class",
 			flatModel="
 fclass RedeclareTests.RedeclareElement15
- constant Real z.y = 2.0;
- constant Real z.x = 1;
+ Real z.y;
+ Real z.x;
+equation
+ z.y = RedeclareTests.RedeclareElement15.C.f(z.x);
+ z.x = 1;
+
+public
+ function RedeclareTests.RedeclareElement15.C.f
+  input Real i;
+  output Real o;
+ algorithm
+  o := i * 2;
+  return;
+ end RedeclareTests.RedeclareElement15.C.f;
+
 end RedeclareTests.RedeclareElement15;
 ")})));
 end RedeclareElement15;
@@ -3678,8 +3715,21 @@ model RedeclareElement16
 			description="Class declared in same scope as replacing class",
 			flatModel="
 fclass RedeclareTests.RedeclareElement16
- constant Real z.x = 1;
- constant Real z.y = 2.0;
+ Real z.x;
+ Real z.y;
+equation
+ z.x = 1;
+ z.y = RedeclareTests.RedeclareElement16.D.f(z.x);
+
+public
+ function RedeclareTests.RedeclareElement16.D.f
+  input Real i;
+  output Real o;
+ algorithm
+  o := i * 2;
+  return;
+ end RedeclareTests.RedeclareElement16.D.f;
+
 end RedeclareTests.RedeclareElement16;
 ")})));
 end RedeclareElement16;
@@ -3718,8 +3768,21 @@ model RedeclareElement17
 			description="Class declared in same scope as replacing class",
 			flatModel="
 fclass RedeclareTests.RedeclareElement17
- constant Real z.x = 1;
- constant Real z.y = 2.0;
+ Real z.x;
+ Real z.y;
+equation
+ z.x = 1;
+ z.y = RedeclareTests.RedeclareElement17.D.f(z.x);
+
+public
+ function RedeclareTests.RedeclareElement17.D.f
+  input Real i;
+  output Real o;
+ algorithm
+  o := i * 2;
+  return;
+ end RedeclareTests.RedeclareElement17.D.f;
+
 end RedeclareTests.RedeclareElement17;
 ")})));
 end RedeclareElement17;
@@ -3946,14 +4009,17 @@ model RedeclareElement22
   
   F f;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="RedeclareElement22",
-			description="Redeclare class extends used directly in redeclare",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={ 
+        TransformCanonicalTestCase(
+            name="RedeclareElement22",
+            description="Redeclare class extends used directly in redeclare",
+            flatModel="
 fclass RedeclareTests.RedeclareElement22
- constant Real f.e.z = 2;
- constant Real f.e.y = 1;
+ Real f.e.z;
+ Real f.e.y;
+equation
+ f.e.z = 2;
+ f.e.y = 1;
 end RedeclareTests.RedeclareElement22;
 ")})));
 end RedeclareElement22;
@@ -3978,16 +4044,21 @@ model RedeclareElement23
   C.B[2] b;
   Real x = b[1].y;
 
-	annotation(__JModelica(UnitTesting(tests={
+	annotation(__JModelica(UnitTesting(tests={ 
 		TransformCanonicalTestCase(
 			name="RedeclareElement23",
 			description="Array of redeclare class extends",
 			flatModel="
 fclass RedeclareTests.RedeclareElement23
- constant Real b[1].z = 2;
- constant Real b[2].z = 2;
- constant Real b[2].y = 1;
- constant Real x = 1;
+ Real b[1].z;
+ Real b[2].z;
+ Real b[2].y;
+ Real x;
+equation
+ b[1].z = 2;
+ x = 1;
+ b[2].z = 2;
+ b[2].y = 1;
 end RedeclareTests.RedeclareElement23;
 ")})));
 end RedeclareElement23;
@@ -4368,8 +4439,21 @@ model RedeclareFunction3
 			description="Functions redeclared in replacing package",
 			flatModel="
 fclass RedeclareTests.RedeclareFunction3
- constant Real z.x = 2.0;
- constant Real z.y = 1;
+ Real z.x;
+ Real z.y;
+equation
+ z.x = RedeclareTests.RedeclareFunction3.E.f(z.y);
+ z.y = 1;
+
+public
+ function RedeclareTests.RedeclareFunction3.E.f
+  input Real i;
+  output Real o;
+ algorithm
+  o := i * 2;
+  return;
+ end RedeclareTests.RedeclareFunction3.E.f;
+
 end RedeclareTests.RedeclareFunction3;
 ")})));
 end RedeclareFunction3;
@@ -4403,8 +4487,29 @@ model RedeclareFunction4
 			description="Redeclared versions of same function",
 			flatModel="
 fclass RedeclareTests.RedeclareFunction4
- constant Real b.x = 5.0;
- constant Real b.y = 14.0;
+ Real b.x;
+ Real b.y;
+equation
+ b.x = RedeclareTests.RedeclareFunction4.A.f({1, 2});
+ b.y = RedeclareTests.RedeclareFunction4.b.A3.f({1, 2, 3});
+
+public
+ function RedeclareTests.RedeclareFunction4.A.f
+  input Real[2] a;
+  output Real b;
+ algorithm
+  b := a[1] * 1 + a[2] * 2;
+  return;
+ end RedeclareTests.RedeclareFunction4.A.f;
+
+ function RedeclareTests.RedeclareFunction4.b.A3.f
+  input Real[3] a;
+  output Real b;
+ algorithm
+  b := a[1] * 1 + a[2] * 2 + a[3] * 3;
+  return;
+ end RedeclareTests.RedeclareFunction4.b.A3.f;
+
 end RedeclareTests.RedeclareFunction4;
 ")})));
 end RedeclareFunction4;
@@ -4433,8 +4538,11 @@ model RedeclareEach1
 			description="Using redeclare on array",
 			flatModel="
 fclass RedeclareTests.RedeclareEach1
- constant Real a[1].a[1] = 0;
- constant Real a[2].a[1] = 0;
+ Real a[1].a[1];
+ Real a[2].a[1];
+equation
+ a[1].a[1] = 0;
+ a[2].a[1] = 0;
 end RedeclareTests.RedeclareEach1;
 ")})));
 end RedeclareEach1;
@@ -4466,8 +4574,11 @@ model RedeclareEach2
 			description="Using redeclare on array",
 			flatModel="
 fclass RedeclareTests.RedeclareEach2
- constant Real a[1].a[1] = 0;
- constant Real a[2].a[1] = 0;
+ Real a[1].a[1];
+ Real a[2].a[1];
+equation
+ a[1].a[1] = 0;
+ a[2].a[1] = 0;
 end RedeclareTests.RedeclareEach2;
 ")})));
 end RedeclareEach2;

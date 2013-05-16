@@ -137,9 +137,12 @@ public class CADGenerator extends CGenerator {
 
 		public void generate(PrintStream genPrinter) {
 			if (shouldGenerateBlockJacobians(fclass)) {
-				fclass.getDAEStructuredBLT().genEnumerateResidualBlocks_C();
+				int block_counter = 0;
 				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
-					block.genBlockResidualFunction_CAD(false, "", genPrinter); 
+				 	block.genBlockResidualFunction_CAD(block_counter,false,"  ",genPrinter); 
+				  	if (!block.isSolvable()) {
+				  		block_counter++;
+				  	}				  
 				}
 			}
 		}
@@ -157,9 +160,12 @@ public class CADGenerator extends CGenerator {
 
 		public void generate(PrintStream genPrinter) {
 			if ( shouldGenerateBlockJacobians(fclass)) {
-				fclass.getDAEInitBLT().genEnumerateResidualBlocks_C();
+				int block_counter = 0;
 				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
-					block.genBlockResidualFunction_CAD(true, "", genPrinter); 
+					block.genBlockResidualFunction_CAD(block_counter,true,"  ",genPrinter); 
+				  	if (!block.isSolvable()) {
+				  		block_counter++;
+				  	}
 				}
 				
 			}

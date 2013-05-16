@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009-2013 Modelon AB
+    Copyright (C) 2009 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1071,9 +1071,14 @@ model ConstantLookup18
 			flatModel="
 fclass NameTests.ConstantLookup18
  parameter Integer b.n = 3 /* 3 */;
- constant Real b.x[1] = 1;
- constant Real b.x[2] = 1;
- constant Real b.x[3] = 1;
+ Real b.x[1];
+ Real b.x[2];
+ Real b.x[3];
+equation
+ b.x[1] = 1;
+ b.x[2] = 1;
+ b.x[3] = 1;
+
 end NameTests.ConstantLookup18;
 ")})));
 end ConstantLookup18;
@@ -1144,7 +1149,10 @@ model ConstantLookup20
 			description="Member of constant record, using record constructor",
 			flatModel="
 fclass NameTests.ConstantLookup20
- constant Real y = 3.0;
+ Real y;
+equation
+ y = 3.0;
+
 end NameTests.ConstantLookup20;
 ")})));
 end ConstantLookup20;
@@ -1474,7 +1482,10 @@ model ConstantLookup29
 			description="Extending class using imported constant",
 			flatModel="
 fclass NameTests.ConstantLookup29
- constant Real a.x(start = 1.0) = 2;
+ Real a.x(start = 1.0);
+equation
+ a.x = 2;
+
 end NameTests.ConstantLookup29;
 ")})));
 end ConstantLookup29;
@@ -1501,7 +1512,9 @@ model ConstantLookup30
 			flatModel="
 fclass NameTests.ConstantLookup30
  parameter Real p = 3.1 /* 3.1 */;
- constant Modelica.SIunits.Force f = 1;
+ Modelica.SIunits.Force f;
+equation
+ f = 1;
 
 public
  type Modelica.SIunits.Force = Real(final quantity = \"Force\",final unit = \"N\");
@@ -1666,8 +1679,8 @@ model ConstantLookup34
 			flatModel="
 fclass NameTests.ConstantLookup34
  parameter Integer j = 1 /* 1 */;
- parameter Real z;
-parameter equation
+ Real z;
+equation
  z = NameTests.ConstantLookup34.f(j);
 
 public
@@ -1750,8 +1763,8 @@ model ConstantLookup35
 			flatModel="
 fclass NameTests.ConstantLookup35
  parameter Integer b.j = 1 /* 1 */;
- parameter Real b.z;
-parameter equation
+ Real b.z;
+equation
  b.z = NameTests.ConstantLookup35.J.f1(b.j);
 
 public
@@ -1797,8 +1810,8 @@ model ConstantLookup36
 			flatModel="
 fclass NameTests.ConstantLookup36
  parameter Integer j = 1 /* 1 */;
- parameter Real z;
-parameter equation
+ Real z;
+equation
  z = NameTests.ConstantLookup36.f(j);
 
 public
@@ -3097,68 +3110,6 @@ public
 end NameTests.ConditionalComponentTest11;
 ")})));
 end ConditionalComponentTest11;
-
-
-model ConditionalComponentTest12
-	model A
-		parameter Boolean flag = true;
-		B b1 if flag;
-		B b2 if not flag;
-		Real z1 if flag;
-		Real z2 if not flag;
-	end A;
-	
-	model B
-		Real x;
-	end B;
-	
-	Real y = 1;
-	A a(b1(x = y), b2(x = y), z1 = y, z2 = y);
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="ConditionalComponentTest12",
-			description="Modifying conditional component",
-			flatModel="
-fclass NameTests.ConditionalComponentTest12
- Real y = 1;
- parameter Boolean a.flag = true /* true */;
- Real a.b1.x = y;
- Real a.z1 = y;
-end NameTests.ConditionalComponentTest12;
-")})));
-end ConditionalComponentTest12;
-
-
-model ConditionalComponentTest13_Err
-	model A
-		Real x;
-	end A;
-	
-	model B
-        parameter Boolean flag = true;
-        A a1 if flag;
-        A a2 if not flag;
-	end B;
-	
-    Real y1 if b.flag;
-    Real y2 if not b.flag;
-	B b(a1(x = y1), a2(x = y2));
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ConditionalComponentTest13_Err",
-			description="Using value of conditional component in modification for other conditional component",
-			errorMessage="
-2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 3159, column 13:
-  The component y1 is conditional: Access of conditional components is only valid in connect statements
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 3159, column 25:
-  The component y2 is conditional: Access of conditional components is only valid in connect statements
-")})));
-end ConditionalComponentTest13_Err;
 
 
 

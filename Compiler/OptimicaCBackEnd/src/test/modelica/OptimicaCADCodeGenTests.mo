@@ -43,7 +43,6 @@ equation
 			name="SparseJacTest1",
 			description="Test that sparsity information is generated correctly",
 			generate_dae_jacobian=true,
-			variability_propagation=false,
 			template="
 $C_DAE_equation_sparsity$
 ",

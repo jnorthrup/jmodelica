@@ -144,7 +144,7 @@ int jmi_dae_cad_get_connections( int n_col, int n_nz, int *row, int *col, int **
  *                         be evaluated. The constants JMI_DER_DX, JMI_DER_X etc are used
  *                         to set this argument.
  * @param screen_use Set the flag to JMI_DER_CHECK_SCREEN_ON to print the result of the comparasion on the screen
- *             or JMI_DER_CHECK_SCREEN_OFF to return -1 if the comparasion failes. 
+ *		       or JMI_DER_CHECK_SCREEN_OFF to return -1 if the comparasion failes. 
  * @param mask This argument is a vector containing ones for the Jacobian columns that
  *             should be included in the Jacobian and zeros for those which should not.
  *             The size of this vector is the same as the z vector.
@@ -155,7 +155,7 @@ int jmi_util_dae_derivative_checker(jmi_t *jmi,jmi_func_t *func, int sparsity, i
 
 /**
  * \brief Help function that is used in jmi_func_cad_dF and jmi_func_fd_dF that determines the mapping between the original col vector
- *              in the sparse triplet representation and the decrease col vector due to independent_vars.
+ *				in the sparse triplet representation and the decrease col vector due to independent_vars.
  *
  * @param jmi A jmi_t struct.
  * @param func The jmi_func_t struct.
@@ -172,6 +172,18 @@ int jmi_func_cad_dF_get_independent_ind(jmi_t *jmi, jmi_func_t *func, int indepe
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * \brief Prints an array to the logger as information
+ * 
+ * @param jmi jmi_t struct
+ * @param x The array to be printed
+ * @param size_x The size of the array
+ * @param category The log category, for example [EVENT_ITERATION]
+ * @param array_info Array information to be printed after category and before x
+ * @return Error code
+ */
+int jmi_print_array(jmi_t* jmi, jmi_real_t* x, jmi_int_t size_x, char* category, char* array_info);
 
 /**
  * \brief Evaluates the switches.
@@ -225,6 +237,38 @@ typedef enum {
     logWarning,
     logInfo
 } jmi_log_category_t;
+
+/**
+ * \brief Log function should be used for all output in the run-time. Forwards the call to FMI logger in case of FMU.
+ *  Use sprintf to form a message first.
+ *
+ * @param jmi       A jmi_t struct.
+ * @param category  Log category. By default logError will go to stderr and other messages to stdout.
+ * @param message   The message. Note that a trailing '\n' is always added to the message when printing.
+ */
+void jmi_log(jmi_t *jmi, jmi_log_category_t category, char* message);
+
+/**
+ * \brief Log error. Forwards the call to FMI logger in case of FMU.
+ *
+ * @param jmi       A jmi_t struct.
+ * @param fmt       Format string used for printf. Note that a trailing '\n' is always added to the message when printing.
+ */
+void jmi_log_error(jmi_t *jmi, char* fmt,...);
+/**
+ * \brief Log warning. Forwards the call to FMI logger in case of FMU.
+ *
+ * @param jmi       A jmi_t struct.
+ * @param fmt       Format string used for printf. Note that a trailing '\n' is always added to the message when printing.
+ */
+void jmi_log_warning(jmi_t *jmi, char* fmt,...);
+/**
+ * \brief Log info. Forwards the call to FMI logger in case of FMU.
+ *
+ * @param jmi       A jmi_t struct.
+ * @param fmt       Format string used for printf. Note that a trailing '\n' is always added to the message when printing.
+ */
+void jmi_log_info(jmi_t *jmi, char* fmt,...);
 
 #ifdef __cplusplus
 }

@@ -24,7 +24,7 @@ import os
 
 from pymodelica.compiler import compile_jmu, compile_fmu
 from pyjmi.jmi import JMUModel
-from pyfmi.fmi import load_fmu, FMUModelCS1, FMUModelME1
+from pyfmi.fmi import load_fmu
 from pyjmi.common.io import ResultDymolaTextual
 from tests_jmodelica import get_files_path
 
@@ -39,7 +39,7 @@ class _BaseSimOptTest:
     """
 
     @classmethod
-    def setup_class_base(cls, mo_file, class_name, options = {}, format='jmu',target="fmume"):
+    def setup_class_base(cls, mo_file, class_name, options = {}, format='jmu'):
         """
         Set up a new test model. Compiles the model. 
         Call this with proper args from setUpClass(). 
@@ -54,7 +54,7 @@ class _BaseSimOptTest:
         if format=='jmu':
             _model_name = compile_jmu(class_name, path, compiler_options=options)
         elif format=='fmu':
-            _model_name = compile_fmu(class_name, path, compiler_options=options,target=target)
+            _model_name = compile_fmu(class_name, path, compiler_options=options)
         else:
             raise Exception("Format must be either 'jmu' or 'fmu'.")
 
@@ -237,7 +237,7 @@ class SimulationTest(_BaseSimOptTest):
     """
 
     @classmethod
-    def setup_class_base(cls, mo_file, class_name, options = {}, format = 'jmu',target="fmume"):
+    def setup_class_base(cls, mo_file, class_name, options = {}, format = 'jmu'):
         """
         Set up a new test model. Compiles the model. 
         Call this with proper args from setUpClass(). 
@@ -246,7 +246,7 @@ class SimulationTest(_BaseSimOptTest):
           options     - a dict of options to set in the compiler, defaults to no options
           format      - either 'jmu' or 'fmu' depending on which format should be tested
         """
-        _BaseSimOptTest.setup_class_base(mo_file, class_name, options, format,target)
+        _BaseSimOptTest.setup_class_base(mo_file, class_name, options, format)
 
     def setup_base(self, rel_tol = 1.0e-4, abs_tol = 1.0e-6, 
         start_time=0.0, final_time=10.0, time_step=0.01, input=(),
@@ -279,17 +279,11 @@ class SimulationTest(_BaseSimOptTest):
                                          'write_scaled_result':self.write_scaled_result,
                                         'IDA_options':{'atol':self.abs_tol,'rtol':self.rel_tol}})
         elif self.format=='fmu':
-            if isinstance(self.model, FMUModelME1):
-                self.model.simulate(start_time=self.start_time,
-                                    final_time=self.final_time,
-                                    input=self.input,
-                                    options={'ncp':self.ncp,
-                                             'CVode_options':{'atol':self.abs_tol,'rtol':self.rel_tol}})
-            else:
-                self.model.simulate(start_time=self.start_time,
-                                    final_time=self.final_time,
-                                    input=self.input,
-                                    options={'ncp':self.ncp})
+            self.model.simulate(start_time=self.start_time,
+                                final_time=self.final_time,
+                                input=self.input,
+                                options={'ncp':self.ncp,
+                                         'CVode_options':{'atol':self.abs_tol,'rtol':self.rel_tol}})
 
 class OptimizationTest(_BaseSimOptTest):
     """

@@ -15,9 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-# Import utility libraries
+# Import library for path manipulations
 import os.path
-from collections import OrderedDict
 
 # Import numerical libraries
 import numpy as N
@@ -29,7 +28,7 @@ from pymodelica import compile_fmux
 from pymodelica import compile_jmu
 from pyjmi import JMUModel
 from pyjmi import CasadiModel
-from pyjmi.optimization.casadi_collocation import MeasurementData
+from pyjmi.optimization.casadi_collocation import ParameterEstimationData
 
 import scipy.integrate as integr
 
@@ -90,6 +89,7 @@ def run_demo(with_plots=True):
     xx_meas = integr.odeint(F,xx0,t_meas)
 
     # Add measurement noice
+    #noice = N.random.random(N_points_meas)*0.2-0.1
     noice = [0.01463904, 0.0139424, 0.09834249, 0.0768069, 0.01971631, 
         -0.03827911, 0.05266659, -0.02608245, 0.05270525, 0.04717024, 0.0779514,]
     xx_meas[:,0] = xx_meas[:,0] + noice
@@ -111,30 +111,28 @@ def run_demo(with_plots=True):
         plt.show()
 
     Q = N.array([[1.]])
-    unconstrained = OrderedDict()
-    unconstrained['sys.y'] = N.vstack([t_meas, xx_meas[:, 0]])
+    measured_variables=['sys.y']
+    data = N.hstack((N.transpose(N.array([t_meas])),N.transpose(N.array([xx_meas[:,0]]))))
 
-    measurement_data = MeasurementData(Q=Q, unconstrained=unconstrained)
+    par_est_data = ParameterEstimationData(Q,measured_variables,data)
 
     opts = model_casadi.optimize_options(algorithm="LocalDAECollocationAlg")
 
     opts['n_e'] = 16
     opts['n_cp'] = 3
 
-    opts['measurement_data'] = measurement_data
+    opts['parameter_estimation_data'] = par_est_data
+    #opts['IPOPT_options']['derivative_test'] = 'second-order'
+    #opts['IPOPT_options']['max_iter'] = 0
 
     res_casadi = model_casadi.optimize(algorithm="LocalDAECollocationAlg", options=opts)
 
     # Extract variable profiles
     x1 = res_casadi['sys.x1']
     u = res_casadi['u']
-    w = res_casadi.final('sys.w')
-    z = res_casadi.final('sys.z')
+    w = res_casadi['sys.w']
+    z = res_casadi['sys.z']
     t = res_casadi['time']
-    
-    assert N.abs(res_casadi.final('sys.x1') - 0.99953927) < 1e-3
-    assert N.abs(w - 1.04972186)  < 1e-3
-    assert N.abs(z - 0.4703822)   < 1e-3
 
     if with_plots:
         # Plot optimization result
@@ -152,8 +150,8 @@ def run_demo(with_plots=True):
         plt.show()
                 
         print("** Optimal parameter values: **")
-        print("w = %f" % w)
-        print("z = %f" % z)
+        print("w = %f"%w)
+        print("z = %f"%z)
 
 if __name__ == "__main__":
     run_demo()

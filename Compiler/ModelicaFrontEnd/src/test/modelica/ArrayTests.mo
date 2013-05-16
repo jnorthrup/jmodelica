@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2009-2013 Modelon AB
+	Copyright (C) 2009 Modelon AB
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -101,14 +101,20 @@ end ArrayTests.General.ArrayTest1c;
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="General_ArrayTest2",
+			name="ArrayTest2",
 			description="Test scalarization of variables",
 			flatModel="
 fclass ArrayTests.General.ArrayTest2
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 2;
- constant Real x[2,1] = 3;
- constant Real x[2,2] = 4;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+equation 
+ x[1,1] = 1;
+ x[1,2] = 2;
+ x[2,1] = 3;
+ x[2,2] = 4;
+
 end ArrayTests.General.ArrayTest2;
 ")})));
   end ArrayTest2;
@@ -138,14 +144,19 @@ end ArrayTests.General.ArrayTest2;
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="General_ArrayTest4",
+			name="ArrayTest4",
 			description="Test scalarization of variables",
 			flatModel="
 fclass ArrayTests.General.ArrayTest4
- constant Real m[1].x[1] = 1;
- constant Real m[1].x[2] = 2;
- constant Real m[2].x[1] = 3;
- constant Real m[2].x[2] = 4;
+ Real m[1].x[1];
+ Real m[1].x[2];
+ Real m[2].x[1];
+ Real m[2].x[2];
+equation 
+ m[1].x[1] = 1;
+ m[1].x[2] = 2;
+ m[2].x[1] = 3;
+ m[2].x[2] = 4;
 end ArrayTests.General.ArrayTest4;
 ")})));
   end ArrayTest4;
@@ -158,16 +169,24 @@ end ArrayTests.General.ArrayTest4;
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="General_ArrayTest5",
+			name="ArrayTest5",
 			description="Test scalarization of variables",
 			flatModel="
 fclass ArrayTests.General.ArrayTest5
- constant Real m[1].x[1] = 1;
- constant Real m[1].x[2] = 2;
- constant Real m[1].x[3] = 3;
- constant Real m[2].x[1] = 4;
- constant Real m[2].x[2] = 5;
- constant Real m[2].x[3] = 6;
+ Real m[1].x[1];
+ Real m[1].x[2];
+ Real m[1].x[3];
+ Real m[2].x[1];
+ Real m[2].x[2];
+ Real m[2].x[3];
+equation
+ m[1].x[1] = 1;
+ m[1].x[2] = 2;
+ m[1].x[3] = 3;
+ m[2].x[1] = 4;
+ m[2].x[2] = 5;
+ m[2].x[3] = 6;
+
 end ArrayTests.General.ArrayTest5;
 ")})));
   end ArrayTest5;
@@ -182,16 +201,24 @@ end ArrayTests.General.ArrayTest5;
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="General_ArrayTest6",
+			name="ArrayTest6",
 			description="Test scalarization of variables",
 			flatModel="
 fclass ArrayTests.General.ArrayTest6
- constant Real m[1].x[1] = 1;
- constant Real m[1].x[2] = 2;
- constant Real m[1].x[3] = 3;
- constant Real m[2].x[1] = 4;
- constant Real m[2].x[2] = 5;
- constant Real m[2].x[3] = 6;
+ Real m[1].x[1];
+ Real m[1].x[2];
+ Real m[1].x[3];
+ Real m[2].x[1];
+ Real m[2].x[2];
+ Real m[2].x[3];
+equation
+ m[1].x[1] = 1;
+ m[1].x[2] = 2;
+ m[1].x[3] = 3;
+ m[2].x[1] = 4;
+ m[2].x[2] = 5;
+ m[2].x[3] = 6;
+
 end ArrayTests.General.ArrayTest6;
 ")})));
   end ArrayTest6;
@@ -204,13 +231,18 @@ end ArrayTests.General.ArrayTest6;
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="General_ArrayTest7",
+			name="ArrayTest7",
 			description="Test scalarization of variables",
 			flatModel="
 fclass ArrayTests.General.ArrayTest7
- constant Real x[1] = 1;
- constant Real x[2] = 2;
- constant Real x[3] = 3;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 3;
+
 end ArrayTests.General.ArrayTest7;
 ")})));
   end ArrayTest7;
@@ -251,29 +283,43 @@ end ArrayTests.General.ArrayTest8;
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="General_ArrayTest9",
+			name="ArrayTest9",
 			description="Test scalarization of variables",
 			flatModel="
 fclass ArrayTests.General.ArrayTest9
  parameter Integer nn.n2 = 2 /* 2 */;
  parameter Integer nn.m[1,1].n1 = 2 /* 2 */;
- constant Real nn.m[1,1].x[1] = 1;
- constant Real nn.m[1,1].x[2] = 1;
+ Real nn.m[1,1].x[1];
+ Real nn.m[1,1].x[2];
  parameter Integer nn.m[1,2].n1 = 2 /* 2 */;
- constant Real nn.m[1,2].x[1] = 1;
- constant Real nn.m[1,2].x[2] = 1;
+ Real nn.m[1,2].x[1];
+ Real nn.m[1,2].x[2];
  parameter Integer nn.m[1,3].n1 = 2 /* 2 */;
- constant Real nn.m[1,3].x[1] = 1;
- constant Real nn.m[1,3].x[2] = 1;
+ Real nn.m[1,3].x[1];
+ Real nn.m[1,3].x[2];
  parameter Integer nn.m[2,1].n1 = 2 /* 2 */;
- constant Real nn.m[2,1].x[1] = 1;
- constant Real nn.m[2,1].x[2] = 1;
+ Real nn.m[2,1].x[1];
+ Real nn.m[2,1].x[2];
  parameter Integer nn.m[2,2].n1 = 2 /* 2 */;
- constant Real nn.m[2,2].x[1] = 1;
- constant Real nn.m[2,2].x[2] = 1;
+ Real nn.m[2,2].x[1];
+ Real nn.m[2,2].x[2];
  parameter Integer nn.m[2,3].n1 = 2 /* 2 */;
- constant Real nn.m[2,3].x[1] = 1;
- constant Real nn.m[2,3].x[2] = 1;
+ Real nn.m[2,3].x[1];
+ Real nn.m[2,3].x[2];
+equation
+ nn.m[1,1].x[1] = 1;
+ nn.m[1,1].x[2] = 1;
+ nn.m[1,2].x[1] = 1;
+ nn.m[1,2].x[2] = 1;
+ nn.m[1,3].x[1] = 1;
+ nn.m[1,3].x[2] = 1;
+ nn.m[2,1].x[1] = 1;
+ nn.m[2,1].x[2] = 1;
+ nn.m[2,2].x[1] = 1;
+ nn.m[2,2].x[2] = 1;
+ nn.m[2,3].x[1] = 1;
+ nn.m[2,3].x[2] = 1;
+
 end ArrayTests.General.ArrayTest9;
 ")})));
       end ArrayTest9;
@@ -335,20 +381,32 @@ end ArrayTests.General.ArrayTest10;
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="General_ArrayTest11",
+			name="ArrayTest11",
 			description="Test scalarization of variables",
 			flatModel="
 fclass ArrayTests.General.ArrayTest11
- constant Real m1[1].x[1] = 1;
- constant Real m1[1].x[2] = 2;
- constant Real m1[2].x[1] = 3;
- constant Real m1[2].x[2] = 4;
- constant Real m2[1].x[1] = 1;
- constant Real m2[1].x[2] = 2;
- constant Real m2[2].x[1] = 3;
- constant Real m2[2].x[2] = 4;
- constant Real m2[3].x[1] = 1;
- constant Real m2[3].x[2] = 2;
+ Real m1[1].x[1];
+ Real m1[1].x[2];
+ Real m1[2].x[1];
+ Real m1[2].x[2];
+ Real m2[1].x[1];
+ Real m2[1].x[2];
+ Real m2[2].x[1];
+ Real m2[2].x[2];
+ Real m2[3].x[1];
+ Real m2[3].x[2];
+equation
+ m1[1].x[1] = 1;
+ m1[1].x[2] = 2;
+ m1[2].x[1] = 3;
+ m1[2].x[2] = 4;
+ m2[1].x[1] = 1;
+ m2[1].x[2] = 2;
+ m2[2].x[1] = 3;
+ m2[2].x[2] = 4;
+ m2[3].x[1] = 1;
+ m2[3].x[2] = 2;
+
 end ArrayTests.General.ArrayTest11;
 ")})));
    end ArrayTest11;
@@ -368,16 +426,24 @@ end ArrayTests.General.ArrayTest11;
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="General_ArrayTest12",
+			name="ArrayTest12",
 			description="Test scalarization of variables",
 			flatModel="
 fclass ArrayTests.General.ArrayTest12
- constant Real n[1].m[1].x[1] = 1;
- constant Real n[1].m[1].x[2] = 2;
- constant Real n[1].m[2].x[1] = 3;
- constant Real n[1].m[2].x[2] = 4;
- constant Real n[1].m[3].x[1] = 5;
- constant Real n[1].m[3].x[2] = 6;
+ Real n[1].m[1].x[1];
+ Real n[1].m[1].x[2];
+ Real n[1].m[2].x[1];
+ Real n[1].m[2].x[2];
+ Real n[1].m[3].x[1];
+ Real n[1].m[3].x[2];
+equation
+ n[1].m[1].x[1] = 1;
+ n[1].m[1].x[2] = 2;
+ n[1].m[2].x[1] = 3;
+ n[1].m[2].x[2] = 4;
+ n[1].m[3].x[1] = 5;
+ n[1].m[3].x[2] = 6;
+
 end ArrayTests.General.ArrayTest12;
 ")})));
       end ArrayTest12;
@@ -417,16 +483,24 @@ end ArrayTests.General.ArrayTest13;
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="General_ArrayTest14",
+			name="ArrayTest14",
 			description="Test scalarization of variables",
 			flatModel="
 fclass ArrayTests.General.ArrayTest14
- constant Real n.m[1,1].x[1] = 1;
- constant Real n.m[1,2].x[1] = 1;
- constant Real n.m[2,1].x[1] = 1;
- constant Real n.m[2,2].x[1] = 1;
- constant Real n.m[3,1].x[1] = 1;
- constant Real n.m[3,2].x[1] = 1;
+ Real n.m[1,1].x[1];
+ Real n.m[1,2].x[1];
+ Real n.m[2,1].x[1];
+ Real n.m[2,2].x[1];
+ Real n.m[3,1].x[1];
+ Real n.m[3,2].x[1];
+equation
+ n.m[1,1].x[1] = 1;
+ n.m[1,2].x[1] = 1;
+ n.m[2,1].x[1] = 1;
+ n.m[2,2].x[1] = 1;
+ n.m[3,1].x[1] = 1;
+ n.m[3,2].x[1] = 1;
+
 end ArrayTests.General.ArrayTest14;
 ")})));
       end ArrayTest14;
@@ -475,19 +549,29 @@ model ArrayTest17
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="General_ArrayTest17",
+			name="ArrayTest17",
 			description="Test scalarization of variables",
 			automatic_add_initial_equations=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest17
- constant Real n[1].m[1,1].x[1] = 1;
- constant Real n[1].m[1,1].x[2] = 1;
- constant Real n[1].m[2,1].x[1] = 2;
- constant Real n[1].m[2,1].x[2] = 1;
- constant Real n[2].m[1,1].x[1] = 3;
- constant Real n[2].m[1,1].x[2] = 1;
- constant Real n[2].m[2,1].x[1] = 4;
- constant Real n[2].m[2,1].x[2] = 1;
+ Real n[1].m[1,1].x[1];
+ Real n[1].m[1,1].x[2];
+ Real n[1].m[2,1].x[1];
+ Real n[1].m[2,1].x[2];
+ Real n[2].m[1,1].x[1];
+ Real n[2].m[1,1].x[2];
+ Real n[2].m[2,1].x[1];
+ Real n[2].m[2,1].x[2];
+equation
+ n[1].m[1,1].x[1] = 1;
+ n[1].m[2,1].x[1] = 2;
+ n[2].m[1,1].x[1] = 3;
+ n[2].m[2,1].x[1] = 4;
+ n[1].m[1,1].x[2] = 1;
+ n[1].m[2,1].x[2] = 1;
+ n[2].m[1,1].x[2] = 1;
+ n[2].m[2,1].x[2] = 1;
+
 end ArrayTests.General.ArrayTest17;
 ")})));
 end ArrayTest17;
@@ -501,13 +585,18 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="General_ArrayTest21",
+			name="ArrayTest21",
 			description="Flattening of arrays.",
 			flatModel="
 fclass ArrayTests.General.ArrayTest21
- constant Real x[1] = 0;
- constant Real x[2] = 0;
+ Real x[1];
+ Real x[2];
+equation 
+ x[1] = 0;
+ x[2] = 0;
+
 end ArrayTests.General.ArrayTest21;
+
 ")})));
 end ArrayTest21;
 
@@ -520,13 +609,18 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="General_ArrayTest22",
+			name="ArrayTest22",
 			description="Flattening of arrays.",
 			flatModel="
 fclass ArrayTests.General.ArrayTest22
- constant Real x[1] = 1;
- constant Real x[2] = 1;
+ Real x[1];
+ Real x[2];
+equation 
+ x[1] = 1;
+ x[2] = 1;
+
 end ArrayTests.General.ArrayTest22;
+
 ")})));
 end ArrayTest22;
 
@@ -539,14 +633,20 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="General_ArrayTest23",
+			name="ArrayTest23",
 			description="Flattening of arrays.",
 			flatModel="
 fclass ArrayTests.General.ArrayTest23
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 1;
- constant Real x[2,1] = 1;
- constant Real x[2,2] = 1;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+equation 
+ x[1,1] = 1;
+ x[1,2] = 1;
+ x[2,1] = 1;
+ x[2,2] = 1;
+
 end ArrayTests.General.ArrayTest23;
 ")})));
 end ArrayTest23;
@@ -563,18 +663,28 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="General_ArrayTest24",
+			name="ArrayTest24",
 			description="Flattening of arrays.",
 			flatModel="
 fclass ArrayTests.General.ArrayTest24
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 1;
- constant Real x[2,1] = 2;
- constant Real x[2,2] = 2;
- constant Real y[1,1] = 2.0;
- constant Real y[1,2] = 3.0;
- constant Real y[2,1] = 3.0;
- constant Real y[2,2] = 4.0;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = 1;
+ y[1,1] = x[1,1] + 1;
+ x[1,2] = 1;
+ y[1,2] = x[1,2] + 2;
+ x[2,1] = 2;
+ y[2,1] = x[2,1] + 1;
+ x[2,2] = 2;
+ y[2,2] = x[2,2] + 2;
+
 end ArrayTests.General.ArrayTest24;
 ")})));
 end ArrayTest24;
@@ -593,22 +703,36 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="General_ArrayTest25",
+			name="ArrayTest25",
 			description="Flattening of arrays.",
 			flatModel="
 fclass ArrayTests.General.ArrayTest25
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 1;
- constant Real x[1,3] = 1;
- constant Real x[2,1] = 2;
- constant Real x[2,2] = 2;
- constant Real x[2,3] = 2;
- constant Real y[1,1] = 2.0;
- constant Real y[1,2] = 3.0;
- constant Real y[1,3] = 4.0;
- constant Real y[2,1] = 3.0;
- constant Real y[2,2] = 4.0;
- constant Real y[2,3] = 5.0;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[1,3];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[2,3];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[1,3];
+ Real y[2,1];
+ Real y[2,2];
+ Real y[2,3];
+equation
+ x[1,1] = 1;
+ y[1,1] = x[1,1] + 1;
+ x[1,2] = 1;
+ y[1,2] = x[1,2] + 2;
+ x[1,3] = 1;
+ y[1,3] = x[1,3] + 3;
+ x[2,1] = 2;
+ y[2,1] = x[2,1] + 1;
+ x[2,2] = 2;
+ y[2,2] = x[2,2] + 2;
+ x[2,3] = 2;
+ y[2,3] = x[2,3] + 3;
+
 end ArrayTests.General.ArrayTest25;
 ")})));
 end ArrayTest25;
@@ -647,53 +771,76 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="General_ArrayTest26",
+			name="ArrayTest26",
 			description="Flattening of arrays.",
 			automatic_add_initial_equations=false,
 			enable_structural_diagnosis=false,
-			flatModel="
-fclass ArrayTests.General.ArrayTest26
- constant Real x[1,1] = 3;
+			flatModel="fclass ArrayTests.General.ArrayTest26
+ Real x[1,1];
  Real x[1,2];
- constant Real x[1,3] = 3;
+ Real x[1,3];
  Real x[1,4];
- constant Real x[2,1] = 4;
- constant Real x[2,2] = 2;
- constant Real x[2,3] = 4;
- constant Real x[2,4] = 2;
- constant Real x[3,1] = 5;
+ Real x[2,1];
+ Real x[2,2];
+ Real x[2,3];
+ Real x[2,4];
+ Real x[3,1];
  Real x[3,2];
- constant Real x[3,3] = 5;
+ Real x[3,3];
  Real x[3,4];
- constant Real x[4,1] = 6;
- constant Real x[4,2] = 4;
- constant Real x[4,3] = 6;
- constant Real x[4,4] = 4;
- constant Real y[1,1] = 6.0;
+ Real x[4,1];
+ Real x[4,2];
+ Real x[4,3];
+ Real x[4,4];
+ Real y[1,1];
  Real y[1,2];
- constant Real y[1,3] = 8.0;
+ Real y[1,3];
  Real y[1,4];
- constant Real y[2,1] = 7.0;
- constant Real y[2,2] = 4.0;
- constant Real y[2,3] = 9.0;
- constant Real y[2,4] = 6.0;
- constant Real y[3,1] = 8.0;
+ Real y[2,1];
+ Real y[2,2];
+ Real y[2,3];
+ Real y[2,4];
+ Real y[3,1];
  Real y[3,2];
- constant Real y[3,3] = 10.0;
+ Real y[3,3];
  Real y[3,4];
- constant Real y[4,1] = 9.0;
- constant Real y[4,2] = 6.0;
- constant Real y[4,3] = 11.0;
- constant Real y[4,4] = 8.0;
+ Real y[4,1];
+ Real y[4,2];
+ Real y[4,3];
+ Real y[4,4];
 equation
- 5.0 = 5;
- 8.0 = 8.0;
- 5.0 = 5;
- 10.0 = 10.0;
- 3.0 = 3;
- 6.0 = 6.0;
- 3.0 = 3;
- 8.0 = 8.0;
+ x[2,2] = 2;
+ y[2,2] = x[2,2] + 2;
+ x[2,4] = 2;
+ y[2,4] = x[2,4] + 4;
+ x[4,2] = 4;
+ y[4,2] = x[4,2] + 2;
+ x[4,4] = 4;
+ y[4,4] = x[4,4] + 4;
+ x[1,1] = 1 + 2;
+ y[1,1] = x[1,1] + 1 + 2;
+ x[1,3] = 1 + 2;
+ y[1,3] = x[1,3] + 3 + 2;
+ x[3,1] = 3 + 2;
+ y[3,1] = x[3,1] + 1 + 2;
+ x[3,3] = 3 + 2;
+ y[3,3] = x[3,3] + 3 + 2;
+ x[3,1] = 3 + 2;
+ y[3,1] = x[3,1] + 1 + 2;
+ x[3,3] = 3 + 2;
+ y[3,3] = x[3,3] + 3 + 2;
+ x[1,1] = 1 + 2;
+ y[1,1] = x[1,1] + 1 + 2;
+ x[1,3] = 1 + 2;
+ y[1,3] = x[1,3] + 3 + 2;
+ x[2,3] = 2 + 2;
+ y[2,3] = x[2,3] + 3 + 2;
+ x[2,1] = 2 + 2;
+ y[2,1] = x[2,1] + 1 + 2;
+ x[4,3] = 4 + 2;
+ y[4,3] = x[4,3] + 3 + 2;
+ x[4,1] = 4 + 2;
+ y[4,1] = x[4,1] + 1 + 2;
 end ArrayTests.General.ArrayTest26;
 ")})));
 end ArrayTest26;
@@ -915,15 +1062,29 @@ model ArrayTest35
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="General_ArrayTest35",
+			name="ArrayTest35",
 			description="Test adding array sizes that are present as expressions in tree",
 			flatModel="
 fclass ArrayTests.General.ArrayTest35
- constant Real z[1] = {1, 2, 0, 0, 0};
- constant Real z[2] = {1, 2, 0, 0, 0};
- constant Real z[3] = {1, 2, 0, 0, 0};
- constant Real z[4] = {1, 2, 0, 0, 0};
- constant Real z[5] = {1, 2, 0, 0, 0};
+ Real z[1];
+ Real z[2];
+ Real z[3];
+ Real z[4];
+ Real z[5];
+equation
+ ({z[1], z[2], z[3], z[4], z[5]}) = ArrayTests.General.ArrayTest35.f({1, 2});
+
+public
+ function ArrayTests.General.ArrayTest35.f
+  input Real[:] x;
+  output Real[2 * size(x, 1) + 1] y;
+ algorithm
+  for i1 in 1:size(y, 1) loop
+   y[i1] := cat(1, x, zeros(size(x, 1) + 1));
+  end for;
+  return;
+ end ArrayTests.General.ArrayTest35.f;
+
 end ArrayTests.General.ArrayTest35;
 ")})));
 end ArrayTest35;
@@ -960,14 +1121,20 @@ model UnknownSize1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="UnknownSize_UnknownSize1",
+			name="UnknownSize1",
 			description="Using unknown array sizes: deciding with binding exp",
 			flatModel="
 fclass ArrayTests.UnknownSize.UnknownSize1
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 2;
- constant Real x[2,1] = 3;
- constant Real x[2,2] = 4;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+equation
+ x[1,1] = 1;
+ x[1,2] = 2;
+ x[2,1] = 3;
+ x[2,2] = 4;
+
 end ArrayTests.UnknownSize.UnknownSize1;
 ")})));
 end UnknownSize1;
@@ -986,18 +1153,28 @@ model UnknownSize2
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="UnknownSize_UnknownSize2",
+			name="UnknownSize2",
 			description="Using unknown array sizes: binding exp through modification on array",
 			flatModel="
 fclass ArrayTests.UnknownSize.UnknownSize2
- constant Real x[1].y[1].z[1] = 1;
- constant Real x[1].y[1].z[2] = 2;
- constant Real x[1].y[2].z[1] = 3;
- constant Real x[1].y[2].z[2] = 4;
- constant Real x[2].y[1].z[1] = 1;
- constant Real x[2].y[1].z[2] = 2;
- constant Real x[2].y[2].z[1] = 3;
- constant Real x[2].y[2].z[2] = 4;
+ Real x[1].y[1].z[1];
+ Real x[1].y[1].z[2];
+ Real x[1].y[2].z[1];
+ Real x[1].y[2].z[2];
+ Real x[2].y[1].z[1];
+ Real x[2].y[1].z[2];
+ Real x[2].y[2].z[1];
+ Real x[2].y[2].z[2];
+equation
+ x[1].y[1].z[1] = 1;
+ x[1].y[1].z[2] = 2;
+ x[1].y[2].z[1] = 3;
+ x[1].y[2].z[2] = 4;
+ x[2].y[1].z[1] = 1;
+ x[2].y[1].z[2] = 2;
+ x[2].y[2].z[1] = 3;
+ x[2].y[2].z[2] = 4;
+
 end ArrayTests.UnknownSize.UnknownSize2;
 ")})));
 end UnknownSize2;
@@ -1008,12 +1185,16 @@ model UnknownSize3
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="UnknownSize_UnknownSize3",
+			name="UnknownSize3",
 			description="Using unknown array sizes: one dim known, one unknown",
 			flatModel="
 fclass ArrayTests.UnknownSize.UnknownSize3
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 2;
+ Real x[1,1];
+ Real x[1,2];
+equation
+ x[1,1] = 1;
+ x[1,2] = 2;
+
 end ArrayTests.UnknownSize.UnknownSize3;
 ")})));
 end UnknownSize3;
@@ -1087,14 +1268,19 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Subscripts_SubscriptExpression1",
+			name="SubscriptExpression1",
 			description="Replacing expressions in array subscripts with literals: basic test",
 			flatModel="
 fclass ArrayTests.Subscripts.SubscriptExpression1
- constant Real x[1] = 1;
- constant Real x[2] = 2.0;
- constant Real x[3] = 4.0;
- constant Real x[4] = 8.0;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real x[4];
+equation
+ x[1] = 1;
+ x[2] = x[1] * 2;
+ x[3] = x[2] * 2;
+ x[4] = x[3] * 2;
 end ArrayTests.Subscripts.SubscriptExpression1;
 ")})));
 end SubscriptExpression1;
@@ -1185,26 +1371,43 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Subscripts_SubscriptExpression6",
+			name="SubscriptExpression6",
 			description="Type checking array subscripts: simulating [4,4] with [16]",
 			flatModel="
 fclass ArrayTests.Subscripts.SubscriptExpression6
- constant Real x[1] = 3;
- constant Real x[2] = 5;
- constant Real x[3] = 7;
- constant Real x[4] = 9;
- constant Real x[5] = 4;
- constant Real x[6] = 6;
- constant Real x[7] = 8;
- constant Real x[8] = 10;
- constant Real x[9] = 5;
- constant Real x[10] = 7;
- constant Real x[11] = 9;
- constant Real x[12] = 11;
- constant Real x[13] = 6;
- constant Real x[14] = 8;
- constant Real x[15] = 10;
- constant Real x[16] = 12;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real x[4];
+ Real x[5];
+ Real x[6];
+ Real x[7];
+ Real x[8];
+ Real x[9];
+ Real x[10];
+ Real x[11];
+ Real x[12];
+ Real x[13];
+ Real x[14];
+ Real x[15];
+ Real x[16];
+equation
+ x[1] = 1 + 1 * 2;
+ x[2] = 1 + 2 * 2;
+ x[3] = 1 + 3 * 2;
+ x[4] = 1 + 4 * 2;
+ x[5] = 2 + 1 * 2;
+ x[6] = 2 + 2 * 2;
+ x[7] = 2 + 3 * 2;
+ x[8] = 2 + 4 * 2;
+ x[9] = 3 + 1 * 2;
+ x[10] = 3 + 2 * 2;
+ x[11] = 3 + 3 * 2;
+ x[12] = 3 + 4 * 2;
+ x[13] = 4 + 1 * 2;
+ x[14] = 4 + 2 * 2;
+ x[15] = 4 + 3 * 2;
+ x[16] = 4 + 4 * 2;
 end ArrayTests.Subscripts.SubscriptExpression6;
 ")})));
 end SubscriptExpression6;
@@ -1219,35 +1422,45 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Subscripts_SubscriptExpression7",
+			name="SubscriptExpression7",
 			description="Type checking array subscripts: using min in subscripts",
 			automatic_add_initial_equations=false,
 			enable_structural_diagnosis=false,
 			flatModel="
 fclass ArrayTests.Subscripts.SubscriptExpression7
- constant Real x[1,1] = 3;
- constant Real x[1,2] = 5;
- constant Real x[1,3] = 7;
- constant Real x[1,4] = 9;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[1,3];
+ Real x[1,4];
  Real x[2,1];
- constant Real x[2,2] = 4;
- constant Real x[2,3] = 8;
- constant Real x[2,4] = 10;
+ Real x[2,2];
+ Real x[2,3];
+ Real x[2,4];
  Real x[3,1];
  Real x[3,2];
- constant Real x[3,3] = 5;
- constant Real x[3,4] = 11;
+ Real x[3,3];
+ Real x[3,4];
  Real x[4,1];
  Real x[4,2];
  Real x[4,3];
- constant Real x[4,4] = 6;
+ Real x[4,4];
 equation
- 4.0 = 6;
- 5.0 = 7;
- 5.0 = 9;
- 6.0 = 8;
- 6.0 = 10;
- 6.0 = 12;
+ x[1,1] = 1 + 1 * 2;
+ x[1,2] = 1 + 2 * 2;
+ x[1,3] = 1 + 3 * 2;
+ x[1,4] = 1 + 4 * 2;
+ x[2,2] = 2 + 1 * 2;
+ x[2,2] = 2 + 2 * 2;
+ x[2,3] = 2 + 3 * 2;
+ x[2,4] = 2 + 4 * 2;
+ x[3,3] = 3 + 1 * 2;
+ x[3,3] = 3 + 2 * 2;
+ x[3,3] = 3 + 3 * 2;
+ x[3,4] = 3 + 4 * 2;
+ x[4,4] = 4 + 1 * 2;
+ x[4,4] = 4 + 2 * 2;
+ x[4,4] = 4 + 3 * 2;
+ x[4,4] = 4 + 4 * 2;
 end ArrayTests.Subscripts.SubscriptExpression7;
 ")})));
 end SubscriptExpression7;
@@ -1324,14 +1537,20 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Add_ArrayAdd1",
+			name="ArrayAdd1",
 			description="Scalarization of addition: Real[2] + Integer[2]",
 			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayAdd1
- constant Real x[1] = 11.0;
- constant Real x[2] = 22.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = y[1] + 10;
+ x[2] = y[2] + 20;
+ y[1] = 1;
+ y[2] = 2;
+
 end ArrayTests.Algebra.Add.ArrayAdd1;
 ")})));
 end ArrayAdd1;
@@ -1345,18 +1564,28 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Add_ArrayAdd2",
+			name="ArrayAdd2",
 			description="Scalarization of addition: Real[2,2] + Integer[2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayAdd2
- constant Real x[1,1] = 11.0;
- constant Real x[1,2] = 22.0;
- constant Real x[2,1] = 33.0;
- constant Real x[2,2] = 44.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] + 10;
+ x[1,2] = y[1,2] + 20;
+ x[2,1] = y[2,1] + 30;
+ x[2,2] = y[2,2] + 40;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+
 end ArrayTests.Algebra.Add.ArrayAdd2;
 ")})));
 end ArrayAdd2;
@@ -1370,26 +1599,44 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Add_ArrayAdd3",
+			name="ArrayAdd3",
 			description="Scalarization of addition: Real[2,2,2] + Integer[2,2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayAdd3
- constant Real x[1,1,1] = 11.0;
- constant Real x[1,1,2] = 22.0;
- constant Real x[1,2,1] = 33.0;
- constant Real x[1,2,2] = 44.0;
- constant Real x[2,1,1] = 55.0;
- constant Real x[2,1,2] = 66.0;
- constant Real x[2,2,1] = 77.0;
- constant Real x[2,2,2] = 88.0;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = y[1,1,1] + 10;
+ x[1,1,2] = y[1,1,2] + 20;
+ x[1,2,1] = y[1,2,1] + 30;
+ x[1,2,2] = y[1,2,2] + 40;
+ x[2,1,1] = y[2,1,1] + 50;
+ x[2,1,2] = y[2,1,2] + 60;
+ x[2,2,1] = y[2,2,1] + 70;
+ x[2,2,2] = y[2,2,2] + 80;
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Add.ArrayAdd3;
 ")})));
 end ArrayAdd3;
@@ -1575,14 +1822,20 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Add_ArrayDotAdd1",
+			name="ArrayDotAdd1",
 			description="Scalarization of element-wise addition: Real[2] .+ Integer[2]",
 			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayDotAdd1
- constant Real x[1] = 11.0;
- constant Real x[2] = 22.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = y[1] .+ 10;
+ x[2] = y[2] .+ 20;
+ y[1] = 1;
+ y[2] = 2;
+
 end ArrayTests.Algebra.Add.ArrayDotAdd1;
 ")})));
 end ArrayDotAdd1;
@@ -1596,18 +1849,28 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Add_ArrayDotAdd2",
+			name="ArrayDotAdd2",
 			description="Scalarization of element-wise addition: Real[2,2] .+ Integer[2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayDotAdd2
- constant Real x[1,1] = 11.0;
- constant Real x[1,2] = 22.0;
- constant Real x[2,1] = 33.0;
- constant Real x[2,2] = 44.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] .+ 10;
+ x[1,2] = y[1,2] .+ 20;
+ x[2,1] = y[2,1] .+ 30;
+ x[2,2] = y[2,2] .+ 40;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+
 end ArrayTests.Algebra.Add.ArrayDotAdd2;
 ")})));
 end ArrayDotAdd2;
@@ -1621,26 +1884,44 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Add_ArrayDotAdd3",
+			name="ArrayDotAdd3",
 			description="Scalarization of element-wise addition: Real[2,2,2] .+ Integer[2,2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayDotAdd3
- constant Real x[1,1,1] = 11.0;
- constant Real x[1,1,2] = 22.0;
- constant Real x[1,2,1] = 33.0;
- constant Real x[1,2,2] = 44.0;
- constant Real x[2,1,1] = 55.0;
- constant Real x[2,1,2] = 66.0;
- constant Real x[2,2,1] = 77.0;
- constant Real x[2,2,2] = 88.0;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = y[1,1,1] .+ 10;
+ x[1,1,2] = y[1,1,2] .+ 20;
+ x[1,2,1] = y[1,2,1] .+ 30;
+ x[1,2,2] = y[1,2,2] .+ 40;
+ x[2,1,1] = y[2,1,1] .+ 50;
+ x[2,1,2] = y[2,1,2] .+ 60;
+ x[2,2,1] = y[2,2,1] .+ 70;
+ x[2,2,2] = y[2,2,2] .+ 80;
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Add.ArrayDotAdd3;
 ")})));
 end ArrayDotAdd3;
@@ -1654,14 +1935,20 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Add_ArrayDotAdd4",
+			name="ArrayDotAdd4",
 			description="Scalarization of element-wise addition: Real[2] .+ Integer",
 			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayDotAdd4
- constant Real x[1] = 11.0;
- constant Real x[2] = 12.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = y[1] .+ 10;
+ x[2] = y[2] .+ 10;
+ y[1] = 1;
+ y[2] = 2;
+
 end ArrayTests.Algebra.Add.ArrayDotAdd4;
 ")})));
 end ArrayDotAdd4;
@@ -1675,18 +1962,28 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Add_ArrayDotAdd5",
+			name="ArrayDotAdd5",
 			description="Scalarization of element-wise addition: Real[2,2] .+ Integer",
 			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayDotAdd5
- constant Real x[1,1] = 11.0;
- constant Real x[1,2] = 12.0;
- constant Real x[2,1] = 13.0;
- constant Real x[2,2] = 14.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] .+ 10;
+ x[1,2] = y[1,2] .+ 10;
+ x[2,1] = y[2,1] .+ 10;
+ x[2,2] = y[2,2] .+ 10;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+
 end ArrayTests.Algebra.Add.ArrayDotAdd5;
 ")})));
 end ArrayDotAdd5;
@@ -1700,26 +1997,44 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Add_ArrayDotAdd6",
+			name="ArrayDotAdd6",
 			description="Scalarization of element-wise addition: Real[2,2,2] .+ Integer",
 			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayDotAdd6
- constant Real x[1,1,1] = 11.0;
- constant Real x[1,1,2] = 12.0;
- constant Real x[1,2,1] = 13.0;
- constant Real x[1,2,2] = 14.0;
- constant Real x[2,1,1] = 15.0;
- constant Real x[2,1,2] = 16.0;
- constant Real x[2,2,1] = 17.0;
- constant Real x[2,2,2] = 18.0;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = y[1,1,1] .+ 10;
+ x[1,1,2] = y[1,1,2] .+ 10;
+ x[1,2,1] = y[1,2,1] .+ 10;
+ x[1,2,2] = y[1,2,2] .+ 10;
+ x[2,1,1] = y[2,1,1] .+ 10;
+ x[2,1,2] = y[2,1,2] .+ 10;
+ x[2,2,1] = y[2,2,1] .+ 10;
+ x[2,2,2] = y[2,2,2] .+ 10;
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Add.ArrayDotAdd6;
 ")})));
 end ArrayDotAdd6;
@@ -1733,13 +2048,18 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Add_ArrayDotAdd7",
+			name="ArrayDotAdd7",
 			description="Scalarization of element-wise addition: Real .+ Integer[2]",
 			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayDotAdd7
- constant Real x[1] = 11.0;
- constant Real x[2] = 21.0;
- constant Real y = 1;
+ Real x[1];
+ Real x[2];
+ Real y;
+equation
+ x[1] = y .+ 10;
+ x[2] = y .+ 20;
+ y = 1;
+
 end ArrayTests.Algebra.Add.ArrayDotAdd7;
 ")})));
 end ArrayDotAdd7;
@@ -1753,15 +2073,22 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Add_ArrayDotAdd8",
+			name="ArrayDotAdd8",
 			description="Scalarization of element-wise addition: Real .+ Integer[2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayDotAdd8
- constant Real x[1,1] = 11.0;
- constant Real x[1,2] = 21.0;
- constant Real x[2,1] = 31.0;
- constant Real x[2,2] = 41.0;
- constant Real y = 1;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y;
+equation
+ x[1,1] = y .+ 10;
+ x[1,2] = y .+ 20;
+ x[2,1] = y .+ 30;
+ x[2,2] = y .+ 40;
+ y = 1;
+
 end ArrayTests.Algebra.Add.ArrayDotAdd8;
 ")})));
 end ArrayDotAdd8;
@@ -1775,19 +2102,30 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Add_ArrayDotAdd9",
+			name="ArrayDotAdd9",
 			description="Scalarization of element-wise addition: Real .+ Integer[2,2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Add.ArrayDotAdd9
- constant Real x[1,1,1] = 11.0;
- constant Real x[1,1,2] = 21.0;
- constant Real x[1,2,1] = 31.0;
- constant Real x[1,2,2] = 41.0;
- constant Real x[2,1,1] = 51.0;
- constant Real x[2,1,2] = 61.0;
- constant Real x[2,2,1] = 71.0;
- constant Real x[2,2,2] = 81.0;
- constant Real y = 1;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y;
+equation
+ x[1,1,1] = y .+ 10;
+ x[1,1,2] = y .+ 20;
+ x[1,2,1] = y .+ 30;
+ x[1,2,2] = y .+ 40;
+ x[2,1,1] = y .+ 50;
+ x[2,1,2] = y .+ 60;
+ x[2,2,1] = y .+ 70;
+ x[2,2,2] = y .+ 80;
+ y = 1;
+
 end ArrayTests.Algebra.Add.ArrayDotAdd9;
 ")})));
 end ArrayDotAdd9;
@@ -1862,14 +2200,19 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Sub_ArraySub1",
+			name="ArraySub1",
 			description="Scalarization of subtraction: Real[2] - Integer[2]",
 			flatModel="
 fclass ArrayTests.Algebra.Sub.ArraySub1
- constant Real x[1] = -9.0;
- constant Real x[2] = -18.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = y[1] - 10;
+ x[2] = y[2] - 20;
+ y[1] = 1;
+ y[2] = 2;
 end ArrayTests.Algebra.Sub.ArraySub1;
 ")})));
 end ArraySub1;
@@ -1883,18 +2226,27 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Sub_ArraySub2",
+			name="ArraySub2",
 			description="Scalarization of subtraction: Real[2,2] - Integer[2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Sub.ArraySub2
- constant Real x[1,1] = -9.0;
- constant Real x[1,2] = -18.0;
- constant Real x[2,1] = -27.0;
- constant Real x[2,2] = -36.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] - 10;
+ x[1,2] = y[1,2] - 20;
+ x[2,1] = y[2,1] - 30;
+ x[2,2] = y[2,2] - 40;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
 end ArrayTests.Algebra.Sub.ArraySub2;
 ")})));
 end ArraySub2;
@@ -1908,26 +2260,43 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Sub_ArraySub3",
+			name="ArraySub3",
 			description="Scalarization of subtraction: Real[2,2,2] - Integer[2,2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Sub.ArraySub3
- constant Real x[1,1,1] = -9.0;
- constant Real x[1,1,2] = -18.0;
- constant Real x[1,2,1] = -27.0;
- constant Real x[1,2,2] = -36.0;
- constant Real x[2,1,1] = -45.0;
- constant Real x[2,1,2] = -54.0;
- constant Real x[2,2,1] = -63.0;
- constant Real x[2,2,2] = -72.0;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = y[1,1,1] - 10;
+ x[1,1,2] = y[1,1,2] - 20;
+ x[1,2,1] = y[1,2,1] - 30;
+ x[1,2,2] = y[1,2,2] - 40;
+ x[2,1,1] = y[2,1,1] - 50;
+ x[2,1,2] = y[2,1,2] - 60;
+ x[2,2,1] = y[2,2,1] - 70;
+ x[2,2,2] = y[2,2,2] - 80;
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
 end ArrayTests.Algebra.Sub.ArraySub3;
 ")})));
 end ArraySub3;
@@ -2113,14 +2482,19 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Sub_ArrayDotSub1",
+			name="ArrayDotSub1",
 			description="Scalarization of element-wise subtraction: Real[2] .- Integer[2]",
 			flatModel="
 fclass ArrayTests.Algebra.Sub.ArrayDotSub1
- constant Real x[1] = -9.0;
- constant Real x[2] = -18.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = y[1] .- 10;
+ x[2] = y[2] .- 20;
+ y[1] = 1;
+ y[2] = 2;
 end ArrayTests.Algebra.Sub.ArrayDotSub1;
 ")})));
 end ArrayDotSub1;
@@ -2134,18 +2508,27 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Sub_ArrayDotSub2",
+			name="ArrayDotSub2",
 			description="Scalarization of element-wise subtraction: Real[2,2] .- Integer[2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Sub.ArrayDotSub2
- constant Real x[1,1] = -9.0;
- constant Real x[1,2] = -18.0;
- constant Real x[2,1] = -27.0;
- constant Real x[2,2] = -36.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] .- 10;
+ x[1,2] = y[1,2] .- 20;
+ x[2,1] = y[2,1] .- 30;
+ x[2,2] = y[2,2] .- 40;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
 end ArrayTests.Algebra.Sub.ArrayDotSub2;
 ")})));
 end ArrayDotSub2;
@@ -2159,26 +2542,43 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Sub_ArrayDotSub3",
+			name="ArrayDotSub3",
 			description="Scalarization of element-wise subtraction: Real[2,2,2] .- Integer[2,2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Sub.ArrayDotSub3
- constant Real x[1,1,1] = -9.0;
- constant Real x[1,1,2] = -18.0;
- constant Real x[1,2,1] = -27.0;
- constant Real x[1,2,2] = -36.0;
- constant Real x[2,1,1] = -45.0;
- constant Real x[2,1,2] = -54.0;
- constant Real x[2,2,1] = -63.0;
- constant Real x[2,2,2] = -72.0;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = y[1,1,1] .- 10;
+ x[1,1,2] = y[1,1,2] .- 20;
+ x[1,2,1] = y[1,2,1] .- 30;
+ x[1,2,2] = y[1,2,2] .- 40;
+ x[2,1,1] = y[2,1,1] .- 50;
+ x[2,1,2] = y[2,1,2] .- 60;
+ x[2,2,1] = y[2,2,1] .- 70;
+ x[2,2,2] = y[2,2,2] .- 80;
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
 end ArrayTests.Algebra.Sub.ArrayDotSub3;
 ")})));
 end ArrayDotSub3;
@@ -2192,14 +2592,19 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Sub_ArrayDotSub4",
+			name="ArrayDotSub4",
 			description="Scalarization of element-wise subtraction: Real[2] .- Integer",
 			flatModel="
 fclass ArrayTests.Algebra.Sub.ArrayDotSub4
- constant Real x[1] = -9.0;
- constant Real x[2] = -8.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = y[1] .- 10;
+ x[2] = y[2] .- 10;
+ y[1] = 1;
+ y[2] = 2;
 end ArrayTests.Algebra.Sub.ArrayDotSub4;
 ")})));
 end ArrayDotSub4;
@@ -2213,18 +2618,27 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Sub_ArrayDotSub5",
+			name="ArrayDotSub5",
 			description="Scalarization of element-wise subtraction: Real[2,2] .- Integer",
 			flatModel="
 fclass ArrayTests.Algebra.Sub.ArrayDotSub5
- constant Real x[1,1] = -9.0;
- constant Real x[1,2] = -8.0;
- constant Real x[2,1] = -7.0;
- constant Real x[2,2] = -6.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] .- 10;
+ x[1,2] = y[1,2] .- 10;
+ x[2,1] = y[2,1] .- 10;
+ x[2,2] = y[2,2] .- 10;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
 end ArrayTests.Algebra.Sub.ArrayDotSub5;
 ")})));
 end ArrayDotSub5;
@@ -2238,26 +2652,43 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Sub_ArrayDotSub6",
+			name="ArrayDotSub6",
 			description="Scalarization of element-wise subtraction: Real[2,2,2] .- Integer",
 			flatModel="
 fclass ArrayTests.Algebra.Sub.ArrayDotSub6
- constant Real x[1,1,1] = -9.0;
- constant Real x[1,1,2] = -8.0;
- constant Real x[1,2,1] = -7.0;
- constant Real x[1,2,2] = -6.0;
- constant Real x[2,1,1] = -5.0;
- constant Real x[2,1,2] = -4.0;
- constant Real x[2,2,1] = -3.0;
- constant Real x[2,2,2] = -2.0;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = y[1,1,1] .- 10;
+ x[1,1,2] = y[1,1,2] .- 10;
+ x[1,2,1] = y[1,2,1] .- 10;
+ x[1,2,2] = y[1,2,2] .- 10;
+ x[2,1,1] = y[2,1,1] .- 10;
+ x[2,1,2] = y[2,1,2] .- 10;
+ x[2,2,1] = y[2,2,1] .- 10;
+ x[2,2,2] = y[2,2,2] .- 10;
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
 end ArrayTests.Algebra.Sub.ArrayDotSub6;
 ")})));
 end ArrayDotSub6;
@@ -2271,13 +2702,17 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Sub_ArrayDotSub7",
+			name="ArrayDotSub7",
 			description="Scalarization of element-wise subtraction: Real .- Integer[2]",
 			flatModel="
 fclass ArrayTests.Algebra.Sub.ArrayDotSub7
- constant Real x[1] = -9.0;
- constant Real x[2] = -19.0;
- constant Real y = 1;
+ Real x[1];
+ Real x[2];
+ Real y;
+equation
+ x[1] = y .- 10;
+ x[2] = y .- 20;
+ y = 1;
 end ArrayTests.Algebra.Sub.ArrayDotSub7;
 ")})));
 end ArrayDotSub7;
@@ -2291,15 +2726,21 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Sub_ArrayDotSub8",
+			name="ArrayDotSub8",
 			description="Scalarization of element-wise subtraction: Real .- Integer[2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Sub.ArrayDotSub8
- constant Real x[1,1] = -9.0;
- constant Real x[1,2] = -19.0;
- constant Real x[2,1] = -29.0;
- constant Real x[2,2] = -39.0;
- constant Real y = 1;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y;
+equation
+ x[1,1] = y .- 10;
+ x[1,2] = y .- 20;
+ x[2,1] = y .- 30;
+ x[2,2] = y .- 40;
+ y = 1;
 end ArrayTests.Algebra.Sub.ArrayDotSub8;
 ")})));
 end ArrayDotSub8;
@@ -2313,19 +2754,29 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Sub_ArrayDotSub9",
+			name="ArrayDotSub9",
 			description="Scalarization of element-wise subtraction: Real .- Integer[2,2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Sub.ArrayDotSub9
- constant Real x[1,1,1] = -9.0;
- constant Real x[1,1,2] = -19.0;
- constant Real x[1,2,1] = -29.0;
- constant Real x[1,2,2] = -39.0;
- constant Real x[2,1,1] = -49.0;
- constant Real x[2,1,2] = -59.0;
- constant Real x[2,2,1] = -69.0;
- constant Real x[2,2,2] = -79.0;
- constant Real y = 1;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y;
+equation
+ x[1,1,1] = y .- 10;
+ x[1,1,2] = y .- 20;
+ x[1,2,1] = y .- 30;
+ x[1,2,2] = y .- 40;
+ x[2,1,1] = y .- 50;
+ x[2,1,2] = y .- 60;
+ x[2,2,1] = y .- 70;
+ x[2,2,2] = y .- 80;
+ y = 1;
 end ArrayTests.Algebra.Sub.ArrayDotSub9;
 ")})));
 end ArrayDotSub9;
@@ -2400,14 +2851,19 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayMulOK1",
+			name="ArrayMulOK1",
 			description="Scalarization of multiplication: Real[3] * Integer[3]",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK1
- constant Real x = 140.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
- constant Real y[3] = 3;
+ Real x;
+ Real y[1];
+ Real y[2];
+ Real y[3];
+equation
+ x = y[1] * 10 + y[2] * 20 + y[3] * 30;
+ y[1] = 1;
+ y[2] = 2;
+ y[3] = 3;
 end ArrayTests.Algebra.Mul.ArrayMulOK1;
 ")})));
 end ArrayMulOK1;
@@ -2421,18 +2877,27 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayMulOK2",
+			name="ArrayMulOK2",
 			description="Scalarization of multiplication: Real[2,2] * Integer[2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK2
- constant Real x[1,1] = 70.0;
- constant Real x[1,2] = 100.0;
- constant Real x[2,1] = 150.0;
- constant Real x[2,2] = 220.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] * 10 + y[1,2] * 30;
+ x[1,2] = y[1,1] * 20 + y[1,2] * 40;
+ x[2,1] = y[2,1] * 10 + y[2,2] * 30;
+ x[2,2] = y[2,1] * 20 + y[2,2] * 40;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
 end ArrayTests.Algebra.Mul.ArrayMulOK2;
 ")})));
 end ArrayMulOK2;
@@ -2446,30 +2911,51 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayMulOK3",
+			name="ArrayMulOK3",
 			description="Scalarization of multiplication: Integer[3,2] * Real[2,4]",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK3
- constant Real x[1,1] = 110.0;
- constant Real x[1,2] = 140.0;
- constant Real x[1,3] = 170.0;
- constant Real x[1,4] = 200.0;
- constant Real x[2,1] = 230.0;
- constant Real x[2,2] = 300.0;
- constant Real x[2,3] = 370.0;
- constant Real x[2,4] = 440.0;
- constant Real x[3,1] = 350.0;
- constant Real x[3,2] = 460.0;
- constant Real x[3,3] = 570.0;
- constant Real x[3,4] = 680.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[1,3] = 3;
- constant Real y[1,4] = 4;
- constant Real y[2,1] = 5;
- constant Real y[2,2] = 6;
- constant Real y[2,3] = 7;
- constant Real y[2,4] = 8;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[1,3];
+ Real x[1,4];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[2,3];
+ Real x[2,4];
+ Real x[3,1];
+ Real x[3,2];
+ Real x[3,3];
+ Real x[3,4];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[1,3];
+ Real y[1,4];
+ Real y[2,1];
+ Real y[2,2];
+ Real y[2,3];
+ Real y[2,4];
+equation
+ x[1,1] = 10 * y[1,1] + 20 * y[2,1];
+ x[1,2] = 10 * y[1,2] + 20 * y[2,2];
+ x[1,3] = 10 * y[1,3] + 20 * y[2,3];
+ x[1,4] = 10 * y[1,4] + 20 * y[2,4];
+ x[2,1] = 30 * y[1,1] + 40 * y[2,1];
+ x[2,2] = 30 * y[1,2] + 40 * y[2,2];
+ x[2,3] = 30 * y[1,3] + 40 * y[2,3];
+ x[2,4] = 30 * y[1,4] + 40 * y[2,4];
+ x[3,1] = 50 * y[1,1] + 60 * y[2,1];
+ x[3,2] = 50 * y[1,2] + 60 * y[2,2];
+ x[3,3] = 50 * y[1,3] + 60 * y[2,3];
+ x[3,4] = 50 * y[1,4] + 60 * y[2,4];
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[1,3] = 3;
+ y[1,4] = 4;
+ y[2,1] = 5;
+ y[2,2] = 6;
+ y[2,3] = 7;
+ y[2,4] = 8;
 end ArrayTests.Algebra.Mul.ArrayMulOK3;
 ")})));
 end ArrayMulOK3;
@@ -2483,14 +2969,19 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayMulOK4",
+			name="ArrayMulOK4",
 			description="Scalarization of multiplication: Real[2] * Integer[2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK4
- constant Real x[1] = 70.0;
- constant Real x[2] = 100.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = y[1] * 10 + y[2] * 30;
+ x[2] = y[1] * 20 + y[2] * 40;
+ y[1] = 1;
+ y[2] = 2;
 end ArrayTests.Algebra.Mul.ArrayMulOK4;
 ")})));
 end ArrayMulOK4;
@@ -2504,16 +2995,23 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayMulOK5",
+			name="ArrayMulOK5",
 			description="Scalarization of multiplication: Real[2,2] * Integer[2]",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK5
- constant Real x[1] = 50.0;
- constant Real x[2] = 110.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ Real x[1];
+ Real x[2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1] = y[1,1] * 10 + y[1,2] * 20;
+ x[2] = y[2,1] * 10 + y[2,2] * 20;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
 end ArrayTests.Algebra.Mul.ArrayMulOK5;
 ")})));
 end ArrayMulOK5;
@@ -2527,14 +3025,19 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayMulOK6",
+			name="ArrayMulOK6",
 			description="Scalarization of multiplication: Real[2] * Integer",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK6
- constant Real x[1] = 10.0;
- constant Real x[2] = 20.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = y[1] * 10;
+ x[2] = y[2] * 10;
+ y[1] = 1;
+ y[2] = 2;
 end ArrayTests.Algebra.Mul.ArrayMulOK6;
 ")})));
 end ArrayMulOK6;
@@ -2548,18 +3051,27 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayMulOK7",
+			name="ArrayMulOK7",
 			description="Scalarization of multiplication: Real[2,2] * Integer",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK7
- constant Real x[1,1] = 10.0;
- constant Real x[1,2] = 20.0;
- constant Real x[2,1] = 30.0;
- constant Real x[2,2] = 40.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] * 10;
+ x[1,2] = y[1,2] * 10;
+ x[2,1] = y[2,1] * 10;
+ x[2,2] = y[2,2] * 10;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
 end ArrayTests.Algebra.Mul.ArrayMulOK7;
 ")})));
 end ArrayMulOK7;
@@ -2573,26 +3085,43 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayMulOK8",
+			name="ArrayMulOK8",
 			description="Scalarization of multiplication: Real[2,2,2] * Integer",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK8
- constant Real x[1,1,1] = 10.0;
- constant Real x[1,1,2] = 20.0;
- constant Real x[1,2,1] = 30.0;
- constant Real x[1,2,2] = 40.0;
- constant Real x[2,1,1] = 50.0;
- constant Real x[2,1,2] = 60.0;
- constant Real x[2,2,1] = 70.0;
- constant Real x[2,2,2] = 80.0;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = y[1,1,1] * 10;
+ x[1,1,2] = y[1,1,2] * 10;
+ x[1,2,1] = y[1,2,1] * 10;
+ x[1,2,2] = y[1,2,2] * 10;
+ x[2,1,1] = y[2,1,1] * 10;
+ x[2,1,2] = y[2,1,2] * 10;
+ x[2,2,1] = y[2,2,1] * 10;
+ x[2,2,2] = y[2,2,2] * 10;
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
 end ArrayTests.Algebra.Mul.ArrayMulOK8;
 ")})));
 end ArrayMulOK8;
@@ -2606,13 +3135,17 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayMulOK9",
+			name="ArrayMulOK9",
 			description="Scalarization of multiplication: Real * Integer[2]",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK9
- constant Real x[1] = 10.0;
- constant Real x[2] = 20.0;
- constant Real y = 1;
+ Real x[1];
+ Real x[2];
+ Real y;
+equation
+ x[1] = y * 10;
+ x[2] = y * 20;
+ y = 1;
 end ArrayTests.Algebra.Mul.ArrayMulOK9;
 ")})));
 end ArrayMulOK9;
@@ -2626,15 +3159,21 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayMulOK10",
+			name="ArrayMulOK10",
 			description="Scalarization of multiplication: Real * Integer[2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK10
- constant Real x[1,1] = 10.0;
- constant Real x[1,2] = 20.0;
- constant Real x[2,1] = 30.0;
- constant Real x[2,2] = 40.0;
- constant Real y = 1;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y;
+equation
+ x[1,1] = y * 10;
+ x[1,2] = y * 20;
+ x[2,1] = y * 30;
+ x[2,2] = y * 40;
+ y = 1;
 end ArrayTests.Algebra.Mul.ArrayMulOK10;
 ")})));
 end ArrayMulOK10;
@@ -2648,19 +3187,29 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayMulOK11",
+			name="ArrayMulOK11",
 			description="Scalarization of multiplication: Real * Integer[2,2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK11
- constant Real x[1,1,1] = 10.0;
- constant Real x[1,1,2] = 20.0;
- constant Real x[1,2,1] = 30.0;
- constant Real x[1,2,2] = 40.0;
- constant Real x[2,1,1] = 50.0;
- constant Real x[2,1,2] = 60.0;
- constant Real x[2,2,1] = 70.0;
- constant Real x[2,2,2] = 80.0;
- constant Real y = 1;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y;
+equation
+ x[1,1,1] = y * 10;
+ x[1,1,2] = y * 20;
+ x[1,2,1] = y * 30;
+ x[1,2,2] = y * 40;
+ x[2,1,1] = y * 50;
+ x[2,1,2] = y * 60;
+ x[2,2,1] = y * 70;
+ x[2,2,2] = y * 80;
+ y = 1;
 end ArrayTests.Algebra.Mul.ArrayMulOK11;
 ")})));
 end ArrayMulOK11;
@@ -2674,16 +3223,23 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayMulOK12",
+			name="ArrayMulOK12",
 			description="Scalarization of multiplication: Real[2,2] * Integer[2,1]",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK12
- constant Real x[1,1] = 50.0;
- constant Real x[2,1] = 110.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ Real x[1,1];
+ Real x[2,1];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] * 10 + y[1,2] * 20;
+ x[2,1] = y[2,1] * 10 + y[2,2] * 20;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
 end ArrayTests.Algebra.Mul.ArrayMulOK12;
 ")})));
 end ArrayMulOK12;
@@ -2695,16 +3251,23 @@ model ArrayMulOK13
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayMulOK13",
+			name="ArrayMulOK13",
 			description="Scalarization of multiplication: check that type() of Real[3] * Real[3] is correct",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK13
- constant Real x[1] = 1;
- constant Real x[2] = 2;
- constant Real x[3] = 3;
- constant Real y[1] = 14.0;
- constant Real y[2] = 28.0;
- constant Real y[3] = 42.0;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real y[1];
+ Real y[2];
+ Real y[3];
+equation
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 3;
+ y[1] = (x[1] * x[1] + x[2] * x[2] + x[3] * x[3]) * x[1];
+ y[2] = (x[1] * x[1] + x[2] * x[2] + x[3] * x[3]) * x[2];
+ y[3] = (x[1] * x[1] + x[2] * x[2] + x[3] * x[3]) * x[3];
 end ArrayTests.Algebra.Mul.ArrayMulOK13;
 ")})));
 end ArrayMulOK13;
@@ -2890,14 +3453,19 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayDotMul1",
+			name="ArrayDotMul1",
 			description="Scalarization of element-wise multiplication: Real[2] .* Integer[2]",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayDotMul1
- constant Real x[1] = 10.0;
- constant Real x[2] = 40.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = y[1] .* 10;
+ x[2] = y[2] .* 20;
+ y[1] = 1;
+ y[2] = 2;
 end ArrayTests.Algebra.Mul.ArrayDotMul1;
 ")})));
 end ArrayDotMul1;
@@ -2911,18 +3479,27 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayDotMul2",
+			name="ArrayDotMul2",
 			description="Scalarization of element-wise multiplication: Real[2,2] .* Integer[2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayDotMul2
- constant Real x[1,1] = 10.0;
- constant Real x[1,2] = 40.0;
- constant Real x[2,1] = 90.0;
- constant Real x[2,2] = 160.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] .* 10;
+ x[1,2] = y[1,2] .* 20;
+ x[2,1] = y[2,1] .* 30;
+ x[2,2] = y[2,2] .* 40;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
 end ArrayTests.Algebra.Mul.ArrayDotMul2;
 ")})));
 end ArrayDotMul2;
@@ -2936,26 +3513,43 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayDotMul3",
+			name="ArrayDotMul3",
 			description="Scalarization of element-wise multiplication: Real[2,2,2] .* Integer[2,2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayDotMul3
- constant Real x[1,1,1] = 10.0;
- constant Real x[1,1,2] = 40.0;
- constant Real x[1,2,1] = 90.0;
- constant Real x[1,2,2] = 160.0;
- constant Real x[2,1,1] = 250.0;
- constant Real x[2,1,2] = 360.0;
- constant Real x[2,2,1] = 490.0;
- constant Real x[2,2,2] = 640.0;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = y[1,1,1] .* 10;
+ x[1,1,2] = y[1,1,2] .* 20;
+ x[1,2,1] = y[1,2,1] .* 30;
+ x[1,2,2] = y[1,2,2] .* 40;
+ x[2,1,1] = y[2,1,1] .* 50;
+ x[2,1,2] = y[2,1,2] .* 60;
+ x[2,2,1] = y[2,2,1] .* 70;
+ x[2,2,2] = y[2,2,2] .* 80;
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
 end ArrayTests.Algebra.Mul.ArrayDotMul3;
 ")})));
 end ArrayDotMul3;
@@ -2969,14 +3563,19 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayDotMul4",
+			name="ArrayDotMul4",
 			description="Scalarization of element-wise multiplication: Real[2] .* Integer",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayDotMul4
- constant Real x[1] = 10.0;
- constant Real x[2] = 20.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = y[1] .* 10;
+ x[2] = y[2] .* 10;
+ y[1] = 1;
+ y[2] = 2;
 end ArrayTests.Algebra.Mul.ArrayDotMul4;
 ")})));
 end ArrayDotMul4;
@@ -2990,18 +3589,27 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayDotMul5",
+			name="ArrayDotMul5",
 			description="Scalarization of element-wise multiplication: Real[2,2] .* Integer",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayDotMul5
- constant Real x[1,1] = 10.0;
- constant Real x[1,2] = 20.0;
- constant Real x[2,1] = 30.0;
- constant Real x[2,2] = 40.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] .* 10;
+ x[1,2] = y[1,2] .* 10;
+ x[2,1] = y[2,1] .* 10;
+ x[2,2] = y[2,2] .* 10;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
 end ArrayTests.Algebra.Mul.ArrayDotMul5;
 ")})));
 end ArrayDotMul5;
@@ -3015,26 +3623,43 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayDotMul6",
+			name="ArrayDotMul6",
 			description="Scalarization of element-wise multiplication: Real[2,2,2] .* Integer",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayDotMul6
- constant Real x[1,1,1] = 10.0;
- constant Real x[1,1,2] = 20.0;
- constant Real x[1,2,1] = 30.0;
- constant Real x[1,2,2] = 40.0;
- constant Real x[2,1,1] = 50.0;
- constant Real x[2,1,2] = 60.0;
- constant Real x[2,2,1] = 70.0;
- constant Real x[2,2,2] = 80.0;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = y[1,1,1] .* 10;
+ x[1,1,2] = y[1,1,2] .* 10;
+ x[1,2,1] = y[1,2,1] .* 10;
+ x[1,2,2] = y[1,2,2] .* 10;
+ x[2,1,1] = y[2,1,1] .* 10;
+ x[2,1,2] = y[2,1,2] .* 10;
+ x[2,2,1] = y[2,2,1] .* 10;
+ x[2,2,2] = y[2,2,2] .* 10;
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
 end ArrayTests.Algebra.Mul.ArrayDotMul6;
 ")})));
 end ArrayDotMul6;
@@ -3048,13 +3673,17 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayDotMul7",
+			name="ArrayDotMul7",
 			description="Scalarization of element-wise multiplication: Real .* Integer[2]",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayDotMul7
- constant Real x[1] = 10.0;
- constant Real x[2] = 20.0;
- constant Real y = 1;
+ Real x[1];
+ Real x[2];
+ Real y;
+equation
+ x[1] = y .* 10;
+ x[2] = y .* 20;
+ y = 1;
 end ArrayTests.Algebra.Mul.ArrayDotMul7;
 ")})));
 end ArrayDotMul7;
@@ -3068,15 +3697,21 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayDotMul8",
+			name="ArrayDotMul8",
 			description="Scalarization of element-wise multiplication: Real .* Integer[2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayDotMul8
- constant Real x[1,1] = 10.0;
- constant Real x[1,2] = 20.0;
- constant Real x[2,1] = 30.0;
- constant Real x[2,2] = 40.0;
- constant Real y = 1;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y;
+equation
+ x[1,1] = y .* 10;
+ x[1,2] = y .* 20;
+ x[2,1] = y .* 30;
+ x[2,2] = y .* 40;
+ y = 1;
 end ArrayTests.Algebra.Mul.ArrayDotMul8;
 ")})));
 end ArrayDotMul8;
@@ -3090,19 +3725,29 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Mul_ArrayDotMul9",
+			name="ArrayDotMul9",
 			description="Scalarization of element-wise multiplication: Real .* Integer[2,2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayDotMul9
- constant Real x[1,1,1] = 10.0;
- constant Real x[1,1,2] = 20.0;
- constant Real x[1,2,1] = 30.0;
- constant Real x[1,2,2] = 40.0;
- constant Real x[2,1,1] = 50.0;
- constant Real x[2,1,2] = 60.0;
- constant Real x[2,2,1] = 70.0;
- constant Real x[2,2,2] = 80.0;
- constant Real y = 1;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y;
+equation
+ x[1,1,1] = y .* 10;
+ x[1,1,2] = y .* 20;
+ x[1,2,1] = y .* 30;
+ x[1,2,2] = y .* 40;
+ x[2,1,1] = y .* 50;
+ x[2,1,2] = y .* 60;
+ x[2,2,1] = y .* 70;
+ x[2,2,2] = y .* 80;
+ y = 1;
 end ArrayTests.Algebra.Mul.ArrayDotMul9;
 ")})));
 end ArrayDotMul9;
@@ -3215,14 +3860,19 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Div_ArrayDiv3",
+			name="ArrayDiv3",
 			description="Scalarization of division: Real[2] / Integer",
 			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDiv3
- constant Real x[1] = 0.1;
- constant Real x[2] = 0.2;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = y[1] / 10;
+ x[2] = y[2] / 10;
+ y[1] = 1;
+ y[2] = 2;
 end ArrayTests.Algebra.Div.ArrayDiv3;
 ")})));
 end ArrayDiv3;
@@ -3236,18 +3886,27 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Div_ArrayDiv4",
+			name="ArrayDiv4",
 			description="Scalarization of division: Real[2,2] / Integer",
 			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDiv4
- constant Real x[1,1] = 0.1;
- constant Real x[1,2] = 0.2;
- constant Real x[2,1] = 0.3;
- constant Real x[2,2] = 0.4;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] / 10;
+ x[1,2] = y[1,2] / 10;
+ x[2,1] = y[2,1] / 10;
+ x[2,2] = y[2,2] / 10;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
 end ArrayTests.Algebra.Div.ArrayDiv4;
 ")})));
 end ArrayDiv4;
@@ -3261,26 +3920,43 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Div_ArrayDiv5",
+			name="ArrayDiv5",
 			description="Scalarization of division: Real[2,2,2] / Integer",
 			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDiv5
- constant Real x[1,1,1] = 0.1;
- constant Real x[1,1,2] = 0.2;
- constant Real x[1,2,1] = 0.3;
- constant Real x[1,2,2] = 0.4;
- constant Real x[2,1,1] = 0.5;
- constant Real x[2,1,2] = 0.6;
- constant Real x[2,2,1] = 0.7;
- constant Real x[2,2,2] = 0.8;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = y[1,1,1] / 10;
+ x[1,1,2] = y[1,1,2] / 10;
+ x[1,2,1] = y[1,2,1] / 10;
+ x[1,2,2] = y[1,2,2] / 10;
+ x[2,1,1] = y[2,1,1] / 10;
+ x[2,1,2] = y[2,1,2] / 10;
+ x[2,2,1] = y[2,2,1] / 10;
+ x[2,2,2] = y[2,2,2] / 10;
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
 end ArrayTests.Algebra.Div.ArrayDiv5;
 ")})));
 end ArrayDiv5;
@@ -3352,14 +4028,19 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Div_ArrayDotDiv1",
+			name="ArrayDotDiv1",
 			description="Scalarization of element-wise division: Real[2] ./ Integer[2]",
 			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv1
- constant Real x[1] = 0.1;
- constant Real x[2] = 0.1;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = y[1] ./ 10;
+ x[2] = y[2] ./ 20;
+ y[1] = 1;
+ y[2] = 2;
 end ArrayTests.Algebra.Div.ArrayDotDiv1;
 ")})));
 end ArrayDotDiv1;
@@ -3373,18 +4054,27 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Div_ArrayDotDiv2",
+			name="ArrayDotDiv2",
 			description="Scalarization of element-wise division: Real[2,2] ./ Integer[2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv2
- constant Real x[1,1] = 0.1;
- constant Real x[1,2] = 0.1;
- constant Real x[2,1] = 0.1;
- constant Real x[2,2] = 0.1;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] ./ 10;
+ x[1,2] = y[1,2] ./ 20;
+ x[2,1] = y[2,1] ./ 30;
+ x[2,2] = y[2,2] ./ 40;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
 end ArrayTests.Algebra.Div.ArrayDotDiv2;
 ")})));
 end ArrayDotDiv2;
@@ -3398,26 +4088,43 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Div_ArrayDotDiv3",
+			name="ArrayDotDiv3",
 			description="Scalarization of element-wise division: Real[2,2,2] ./ Integer[2,2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv3
- constant Real x[1,1,1] = 0.1;
- constant Real x[1,1,2] = 0.1;
- constant Real x[1,2,1] = 0.1;
- constant Real x[1,2,2] = 0.1;
- constant Real x[2,1,1] = 0.1;
- constant Real x[2,1,2] = 0.1;
- constant Real x[2,2,1] = 0.1;
- constant Real x[2,2,2] = 0.1;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = y[1,1,1] ./ 10;
+ x[1,1,2] = y[1,1,2] ./ 20;
+ x[1,2,1] = y[1,2,1] ./ 30;
+ x[1,2,2] = y[1,2,2] ./ 40;
+ x[2,1,1] = y[2,1,1] ./ 50;
+ x[2,1,2] = y[2,1,2] ./ 60;
+ x[2,2,1] = y[2,2,1] ./ 70;
+ x[2,2,2] = y[2,2,2] ./ 80;
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
 end ArrayTests.Algebra.Div.ArrayDotDiv3;
 ")})));
 end ArrayDotDiv3;
@@ -3431,14 +4138,19 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Div_ArrayDotDiv4",
+			name="ArrayDotDiv4",
 			description="Scalarization of element-wise division: Real[2] ./ Integer",
 			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv4
- constant Real x[1] = 0.1;
- constant Real x[2] = 0.2;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = y[1] ./ 10;
+ x[2] = y[2] ./ 10;
+ y[1] = 1;
+ y[2] = 2;
 end ArrayTests.Algebra.Div.ArrayDotDiv4;
 ")})));
 end ArrayDotDiv4;
@@ -3452,18 +4164,27 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Div_ArrayDotDiv5",
+			name="ArrayDotDiv5",
 			description="Scalarization of element-wise division: Real[2,2] ./ Integer",
 			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv5
- constant Real x[1,1] = 0.1;
- constant Real x[1,2] = 0.2;
- constant Real x[2,1] = 0.3;
- constant Real x[2,2] = 0.4;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] ./ 10;
+ x[1,2] = y[1,2] ./ 10;
+ x[2,1] = y[2,1] ./ 10;
+ x[2,2] = y[2,2] ./ 10;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
 end ArrayTests.Algebra.Div.ArrayDotDiv5;
 ")})));
 end ArrayDotDiv5;
@@ -3477,26 +4198,43 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Div_ArrayDotDiv6",
+			name="ArrayDotDiv6",
 			description="Scalarization of element-wise division: Real[2,2,2] ./ Integer",
 			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv6
- constant Real x[1,1,1] = 0.1;
- constant Real x[1,1,2] = 0.2;
- constant Real x[1,2,1] = 0.3;
- constant Real x[1,2,2] = 0.4;
- constant Real x[2,1,1] = 0.5;
- constant Real x[2,1,2] = 0.6;
- constant Real x[2,2,1] = 0.7;
- constant Real x[2,2,2] = 0.8;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = y[1,1,1] ./ 10;
+ x[1,1,2] = y[1,1,2] ./ 10;
+ x[1,2,1] = y[1,2,1] ./ 10;
+ x[1,2,2] = y[1,2,2] ./ 10;
+ x[2,1,1] = y[2,1,1] ./ 10;
+ x[2,1,2] = y[2,1,2] ./ 10;
+ x[2,2,1] = y[2,2,1] ./ 10;
+ x[2,2,2] = y[2,2,2] ./ 10;
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
 end ArrayTests.Algebra.Div.ArrayDotDiv6;
 ")})));
 end ArrayDotDiv6;
@@ -3510,13 +4248,17 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Div_ArrayDotDiv7",
+			name="ArrayDotDiv7",
 			description="Scalarization of element-wise division: Real ./ Integer[2]",
 			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv7
- constant Real x[1] = 0.1;
- constant Real x[2] = 0.05;
- constant Real y = 1;
+ Real x[1];
+ Real x[2];
+ Real y;
+equation
+ x[1] = y ./ 10;
+ x[2] = y ./ 20;
+ y = 1;
 end ArrayTests.Algebra.Div.ArrayDotDiv7;
 ")})));
 end ArrayDotDiv7;
@@ -3530,15 +4272,21 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Div_ArrayDotDiv8",
+			name="ArrayDotDiv8",
 			description="Scalarization of element-wise division: Real ./ Integer[2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv8
- constant Real x[1,1] = 0.1;
- constant Real x[1,2] = 0.05;
- constant Real x[2,1] = 0.03333333333333333;
- constant Real x[2,2] = 0.025;
- constant Real y = 1;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y;
+equation
+ x[1,1] = y ./ 10;
+ x[1,2] = y ./ 20;
+ x[2,1] = y ./ 30;
+ x[2,2] = y ./ 40;
+ y = 1;
 end ArrayTests.Algebra.Div.ArrayDotDiv8;
 ")})));
 end ArrayDotDiv8;
@@ -3552,19 +4300,29 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Div_ArrayDotDiv9",
+			name="ArrayDotDiv9",
 			description="Scalarization of element-wise division: Real ./ Integer[2,2,2]",
 			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv9
- constant Real x[1,1,1] = 0.1;
- constant Real x[1,1,2] = 0.05;
- constant Real x[1,2,1] = 0.03333333333333333;
- constant Real x[1,2,2] = 0.025;
- constant Real x[2,1,1] = 0.02;
- constant Real x[2,1,2] = 0.016666666666666666;
- constant Real x[2,2,1] = 0.014285714285714285;
- constant Real x[2,2,2] = 0.0125;
- constant Real y = 1;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y;
+equation
+ x[1,1,1] = y ./ 10;
+ x[1,1,2] = y ./ 20;
+ x[1,2,1] = y ./ 30;
+ x[1,2,2] = y ./ 40;
+ x[2,1,1] = y ./ 50;
+ x[2,1,2] = y ./ 60;
+ x[2,2,1] = y ./ 70;
+ x[2,2,2] = y ./ 80;
+ y = 1;
 end ArrayTests.Algebra.Div.ArrayDotDiv9;
 ")})));
 end ArrayDotDiv9;
@@ -3639,14 +4397,20 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Pow_ArrayDotPow1",
+			name="ArrayDotPow1",
 			description="Scalarization of element-wise exponentiation:",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow1
- constant Real x[1] = 1.0;
- constant Real x[2] = 1048576.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = y[1] .^ 10;
+ x[2] = y[2] .^ 20;
+ y[1] = 1;
+ y[2] = 2;
+
 end ArrayTests.Algebra.Pow.ArrayDotPow1;
 ")})));
 end ArrayDotPow1;
@@ -3660,18 +4424,28 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Pow_ArrayDotPow2",
+			name="ArrayDotPow2",
 			description="Scalarization of element-wise exponentiation:",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow2
- constant Real x[1,1] = 1.0;
- constant Real x[1,2] = 1048576.0;
- constant Real x[2,1] = 2.05891132094649E14;
- constant Real x[2,2] = 1.2089258196146292E24;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] .^ 10;
+ x[1,2] = y[1,2] .^ 20;
+ x[2,1] = y[2,1] .^ 30;
+ x[2,2] = y[2,2] .^ 40;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+
 end ArrayTests.Algebra.Pow.ArrayDotPow2;
 ")})));
 end ArrayDotPow2;
@@ -3685,26 +4459,44 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Pow_ArrayDotPow3",
+			name="ArrayDotPow3",
 			description="Scalarization of element-wise exponentiation:",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow3
- constant Real x[1,1,1] = 1.0;
- constant Real x[1,1,2] = 1048576.0;
- constant Real x[1,2,1] = 2.05891132094649E14;
- constant Real x[1,2,2] = 1.2089258196146292E24;
- constant Real x[2,1,1] = 8.881784197001253E34;
- constant Real x[2,1,2] = 4.887367798068926E46;
- constant Real x[2,2,1] = 1.4350360160986845E59;
- constant Real x[2,2,2] = 1.7668470647783843E72;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = y[1,1,1] .^ 10;
+ x[1,1,2] = y[1,1,2] .^ 20;
+ x[1,2,1] = y[1,2,1] .^ 30;
+ x[1,2,2] = y[1,2,2] .^ 40;
+ x[2,1,1] = y[2,1,1] .^ 50;
+ x[2,1,2] = y[2,1,2] .^ 60;
+ x[2,2,1] = y[2,2,1] .^ 70;
+ x[2,2,2] = y[2,2,2] .^ 80;
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Pow.ArrayDotPow3;
 ")})));
 end ArrayDotPow3;
@@ -3718,14 +4510,20 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Pow_ArrayDotPow4",
+			name="ArrayDotPow4",
 			description="Scalarization of element-wise exponentiation:",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow4
- constant Real x[1] = 1.0;
- constant Real x[2] = 1024.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = y[1] .^ 10;
+ x[2] = y[2] .^ 10;
+ y[1] = 1;
+ y[2] = 2;
+
 end ArrayTests.Algebra.Pow.ArrayDotPow4;
 ")})));
 end ArrayDotPow4;
@@ -3739,18 +4537,28 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Pow_ArrayDotPow5",
+			name="ArrayDotPow5",
 			description="Scalarization of element-wise exponentiation:",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow5
- constant Real x[1,1] = 1.0;
- constant Real x[1,2] = 1024.0;
- constant Real x[2,1] = 59049.0;
- constant Real x[2,2] = 1048576.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] .^ 10;
+ x[1,2] = y[1,2] .^ 10;
+ x[2,1] = y[2,1] .^ 10;
+ x[2,2] = y[2,2] .^ 10;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+
 end ArrayTests.Algebra.Pow.ArrayDotPow5;
 ")})));
 end ArrayDotPow5;
@@ -3764,26 +4572,44 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Pow_ArrayDotPow6",
+			name="ArrayDotPow6",
 			description="Scalarization of element-wise exponentiation:",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow6
- constant Real x[1,1,1] = 1.0;
- constant Real x[1,1,2] = 1024.0;
- constant Real x[1,2,1] = 59049.0;
- constant Real x[1,2,2] = 1048576.0;
- constant Real x[2,1,1] = 9765625.0;
- constant Real x[2,1,2] = 6.0466176E7;
- constant Real x[2,2,1] = 2.82475249E8;
- constant Real x[2,2,2] = 1.073741824E9;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = y[1,1,1] .^ 10;
+ x[1,1,2] = y[1,1,2] .^ 10;
+ x[1,2,1] = y[1,2,1] .^ 10;
+ x[1,2,2] = y[1,2,2] .^ 10;
+ x[2,1,1] = y[2,1,1] .^ 10;
+ x[2,1,2] = y[2,1,2] .^ 10;
+ x[2,2,1] = y[2,2,1] .^ 10;
+ x[2,2,2] = y[2,2,2] .^ 10;
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
+
 end ArrayTests.Algebra.Pow.ArrayDotPow6;
 ")})));
 end ArrayDotPow6;
@@ -3797,13 +4623,18 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Pow_ArrayDotPow7",
+			name="ArrayDotPow7",
 			description="Scalarization of element-wise exponentiation:",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow7
- constant Real x[1] = 1.0;
- constant Real x[2] = 1.0;
- constant Real y = 1;
+ Real x[1];
+ Real x[2];
+ Real y;
+equation
+ x[1] = y .^ 10;
+ x[2] = y .^ 20;
+ y = 1;
+
 end ArrayTests.Algebra.Pow.ArrayDotPow7;
 ")})));
 end ArrayDotPow7;
@@ -3817,15 +4648,22 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Pow_ArrayDotPow8",
+			name="ArrayDotPow8",
 			description="Scalarization of element-wise exponentiation:",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow8
- constant Real x[1,1] = 1.0;
- constant Real x[1,2] = 1.0;
- constant Real x[2,1] = 1.0;
- constant Real x[2,2] = 1.0;
- constant Real y = 1;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y;
+equation
+ x[1,1] = y .^ 10;
+ x[1,2] = y .^ 20;
+ x[2,1] = y .^ 30;
+ x[2,2] = y .^ 40;
+ y = 1;
+
 end ArrayTests.Algebra.Pow.ArrayDotPow8;
 ")})));
 end ArrayDotPow8;
@@ -3839,19 +4677,30 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Pow_ArrayDotPow9",
+			name="ArrayDotPow9",
 			description="Scalarization of element-wise exponentiation:",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow9
- constant Real x[1,1,1] = 1.0;
- constant Real x[1,1,2] = 1.0;
- constant Real x[1,2,1] = 1.0;
- constant Real x[1,2,2] = 1.0;
- constant Real x[2,1,1] = 1.0;
- constant Real x[2,1,2] = 1.0;
- constant Real x[2,2,1] = 1.0;
- constant Real x[2,2,2] = 1.0;
- constant Real y = 1;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y;
+equation
+ x[1,1,1] = y .^ 10;
+ x[1,1,2] = y .^ 20;
+ x[1,2,1] = y .^ 30;
+ x[1,2,2] = y .^ 40;
+ x[2,1,1] = y .^ 50;
+ x[2,1,2] = y .^ 60;
+ x[2,2,1] = y .^ 70;
+ x[2,2,2] = y .^ 80;
+ y = 1;
+
 end ArrayTests.Algebra.Pow.ArrayDotPow9;
 ")})));
 end ArrayDotPow9;
@@ -3920,14 +4769,20 @@ model ArrayPow1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Pow_ArrayPow1",
+			name="ArrayPow1",
 			description="Scalarization of element-wise exponentiation: Integer[2,2] ^ 0",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow1
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 0;
- constant Real x[2,1] = 0;
- constant Real x[2,2] = 1;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+equation
+ x[1,1] = 1;
+ x[1,2] = 0;
+ x[2,1] = 0;
+ x[2,2] = 1;
+
 end ArrayTests.Algebra.Pow.ArrayPow1;
 ")})));
 end ArrayPow1;
@@ -3938,14 +4793,20 @@ model ArrayPow2
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Pow_ArrayPow2",
+			name="ArrayPow2",
 			description="Scalarization of element-wise exponentiation: Integer[2,2] ^ 1",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow2
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 2;
- constant Real x[2,1] = 3;
- constant Real x[2,2] = 4;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+equation
+ x[1,1] = 1;
+ x[1,2] = 2;
+ x[2,1] = 3;
+ x[2,2] = 4;
+
 end ArrayTests.Algebra.Pow.ArrayPow2;
 ")})));
 end ArrayPow2;
@@ -3956,14 +4817,19 @@ model ArrayPow3
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Pow_ArrayPow3",
+			name="ArrayPow3",
 			description="Scalarization of element-wise exponentiation: Integer[2,2] ^ 2",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow3
- constant Real x[1,1] = 7;
- constant Real x[1,2] = 10;
- constant Real x[2,1] = 15;
- constant Real x[2,2] = 22;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+equation
+ x[1,1] = 1 * 1 + 2 * 3;
+ x[1,2] = 1 * 2 + 2 * 4;
+ x[2,1] = 3 * 1 + 4 * 3;
+ x[2,2] = 3 * 2 + 4 * 4;
 end ArrayTests.Algebra.Pow.ArrayPow3;
 ")})));
 end ArrayPow3;
@@ -3974,14 +4840,19 @@ model ArrayPow4
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Pow_ArrayPow4",
+			name="ArrayPow4",
 			description="Scalarization of element-wise exponentiation: Integer[2,2] ^ 3",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow4
- constant Real x[1,1] = 37;
- constant Real x[1,2] = 54;
- constant Real x[2,1] = 81;
- constant Real x[2,2] = 118;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+equation
+ x[1,1] = (1 * 1 + 2 * 3) * 1 + (1 * 2 + 2 * 4) * 3;
+ x[1,2] = (1 * 1 + 2 * 3) * 2 + (1 * 2 + 2 * 4) * 4;
+ x[2,1] = (3 * 1 + 4 * 3) * 1 + (3 * 2 + 4 * 4) * 3;
+ x[2,2] = (3 * 1 + 4 * 3) * 2 + (3 * 2 + 4 * 4) * 4;
 end ArrayTests.Algebra.Pow.ArrayPow4;
 ")})));
 end ArrayPow4;
@@ -3992,19 +4863,29 @@ model ArrayPow5
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Pow_ArrayPow5",
+			name="ArrayPow5",
 			description="Scalarization of element-wise exponentiation: Integer[3,3] ^ 2",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow5
- constant Real x[1,1] = 30;
- constant Real x[1,2] = 36;
- constant Real x[1,3] = 42;
- constant Real x[2,1] = 66;
- constant Real x[2,2] = 81;
- constant Real x[2,3] = 96;
- constant Real x[3,1] = 102;
- constant Real x[3,2] = 126;
- constant Real x[3,3] = 150;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[1,3];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[2,3];
+ Real x[3,1];
+ Real x[3,2];
+ Real x[3,3];
+equation
+ x[1,1] = 1 * 1 + 2 * 4 + 3 * 7;
+ x[1,2] = 1 * 2 + 2 * 5 + 3 * 8;
+ x[1,3] = 1 * 3 + 2 * 6 + 3 * 9;
+ x[2,1] = 4 * 1 + 5 * 4 + 6 * 7;
+ x[2,2] = 4 * 2 + 5 * 5 + 6 * 8;
+ x[2,3] = 4 * 3 + 5 * 6 + 6 * 9;
+ x[3,1] = 7 * 1 + 8 * 4 + 9 * 7;
+ x[3,2] = 7 * 2 + 8 * 5 + 9 * 8;
+ x[3,3] = 7 * 3 + 8 * 6 + 9 * 9;
 end ArrayTests.Algebra.Pow.ArrayPow5;
 ")})));
 end ArrayPow5;
@@ -4018,18 +4899,27 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Pow_ArrayPow6",
+			name="ArrayPow6",
 			description="Scalarization of element-wise exponentiation: component Real[2,2] ^ 2",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow6
- constant Real x[1,1] = 7.0;
- constant Real x[1,2] = 10.0;
- constant Real x[2,1] = 15.0;
- constant Real x[2,2] = 22.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] * y[1,1] + y[1,2] * y[2,1];
+ x[1,2] = y[1,1] * y[1,2] + y[1,2] * y[2,2];
+ x[2,1] = y[2,1] * y[1,1] + y[2,2] * y[2,1];
+ x[2,2] = y[2,1] * y[1,2] + y[2,2] * y[2,2];
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
 end ArrayTests.Algebra.Pow.ArrayPow6;
 ")})));
 end ArrayPow6;
@@ -4043,18 +4933,28 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Pow_ArrayPow7",
+			name="ArrayPow7",
 			description="Scalarization of element-wise exponentiation:component Real[2,2] ^ 0",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow7
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 0;
- constant Real x[2,1] = 0;
- constant Real x[2,2] = 1;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = 1;
+ x[1,2] = 0;
+ x[2,1] = 0;
+ x[2,2] = 1;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+
 end ArrayTests.Algebra.Pow.ArrayPow7;
 ")})));
 end ArrayPow7;
@@ -4147,15 +5047,20 @@ model ArrayPow13
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Pow_ArrayPow13",
+			name="ArrayPow13",
 			description="Scalarization of element-wise exponentiation: Real[2,2] ^ constant Integer component",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow13
- constant Real x[1,1] = 7;
- constant Real x[1,2] = 10;
- constant Real x[2,1] = 15;
- constant Real x[2,2] = 22;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
  constant Integer y = 2;
+equation
+ x[1,1] = 1 * 1 + 2 * 3;
+ x[1,2] = 1 * 2 + 2 * 4;
+ x[2,1] = 3 * 1 + 4 * 3;
+ x[2,2] = 3 * 2 + 4 * 4;
 end ArrayTests.Algebra.Pow.ArrayPow13;
 ")})));
 end ArrayPow13;
@@ -4183,11 +5088,13 @@ model ArrayPow15
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Pow_ArrayPow15",
+			name="ArrayPow15",
 			description="Scalarization of element-wise exponentiation: Integer[1,1] ^ 2",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow15
- constant Real x[1,1] = 1;
+ Real x[1,1];
+equation
+ x[1,1] = 1 * 1;
 end ArrayTests.Algebra.Pow.ArrayPow15;
 ")})));
 end ArrayPow15;
@@ -4214,11 +5121,14 @@ model ArrayPow17
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Pow_ArrayPow17",
+			name="ArrayPow17",
 			description="Scalarization of element-wise exponentiation: Integer ^ 2",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow17
- constant Real x = 1.0;
+ Real x;
+equation
+ x = 1 ^ 2;
+
 end ArrayTests.Algebra.Pow.ArrayPow17;
 ")})));
 end ArrayPow17;
@@ -4233,13 +5143,21 @@ model ArrayNeg1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Neg_ArrayNeg1",
+			name="ArrayNeg1",
 			description="Scalarization of negation: array of Integer (literal)",
 			flatModel="
 fclass ArrayTests.Algebra.Neg.ArrayNeg1
- constant Integer x[1] = -1;
- constant Integer x[2] = 0;
- constant Integer x[3] = 1;
+ discrete Integer x[1];
+ discrete Integer x[2];
+ discrete Integer x[3];
+initial equation 
+ pre(x[1]) = 0;
+ pre(x[2]) = 0;
+ pre(x[3]) = 0;
+equation
+ x[1] = - 1;
+ x[2] = - 0;
+ x[3] = - (- 1);
 end ArrayTests.Algebra.Neg.ArrayNeg1;
 ")})));
 end ArrayNeg1;
@@ -4251,17 +5169,31 @@ model ArrayNeg2
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Neg_ArrayNeg2",
+			name="ArrayNeg2",
 			description="Scalarization of negation: array of Integer (variable)",
 			eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Algebra.Neg.ArrayNeg2
- constant Integer x[1] = -1;
- constant Integer x[2] = 0;
- constant Integer x[3] = 1;
- constant Integer y[1] = 1;
- constant Integer y[2] = 0;
- constant Integer y[3] = -1;
+ discrete Integer x[1];
+ discrete Integer x[2];
+ discrete Integer x[3];
+ discrete Integer y[1];
+ discrete Integer y[2];
+ discrete Integer y[3];
+initial equation 
+ pre(x[1]) = 0;
+ pre(x[2]) = 0;
+ pre(x[3]) = 0;
+ pre(y[1]) = 0;
+ pre(y[2]) = 0;
+ pre(y[3]) = 0;
+equation
+ x[1] = - y[1];
+ x[2] = - y[2];
+ x[3] = - y[3];
+ y[1] = 1;
+ y[2] = 0;
+ y[3] = - 1;
 end ArrayTests.Algebra.Neg.ArrayNeg2;
 ")})));
 end ArrayNeg2;
@@ -4273,16 +5205,24 @@ model ArrayNeg3
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Algebra_Neg_ArrayNeg3",
+			name="ArrayNeg3",
 			description="Scalarization of negation: constant evaluation",
 			flatModel="
 fclass ArrayTests.Algebra.Neg.ArrayNeg3
- constant Integer x[1] = -1;
- constant Integer x[2] = 0;
- constant Integer x[3] = 1;
+ discrete Integer x[1];
+ discrete Integer x[2];
+ discrete Integer x[3];
  constant Integer y[1] = - 1;
  constant Integer y[2] = - 0;
  constant Integer y[3] = - (- 1);
+initial equation 
+ pre(x[1]) = 0;
+ pre(x[2]) = 0;
+ pre(x[3]) = 0;
+equation
+ x[1] = -1;
+ x[2] = 0;
+ x[3] = 1;
 end ArrayTests.Algebra.Neg.ArrayNeg3;
 ")})));
 end ArrayNeg3;
@@ -4335,12 +5275,19 @@ model ArrayAnd1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Logical_And_ArrayAnd1",
+			name="ArrayAnd1",
 			description="Scalarization of logical and: arrays of Booleans (literal)",
 			flatModel="
 fclass ArrayTests.Logical.And.ArrayAnd1
- constant Boolean x[1] = true;
- constant Boolean x[2] = false;
+ discrete Boolean x[1];
+ discrete Boolean x[2];
+initial equation 
+ pre(x[1]) = false;
+ pre(x[2]) = false;
+equation
+ x[1] = true and true;
+ x[2] = true and false;
+
 end ArrayTests.Logical.And.ArrayAnd1;
 ")})));
 end ArrayAnd1;
@@ -4351,14 +5298,25 @@ model ArrayAnd2
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Logical_And_ArrayAnd2",
+			name="ArrayAnd2",
 			description="Scalarization of logical and: arrays of Booleans (component)",
 			flatModel="
 fclass ArrayTests.Logical.And.ArrayAnd2
- constant Boolean y[1] = true;
- constant Boolean y[2] = false;
- constant Boolean x[1] = true;
- constant Boolean x[2] = false;
+ discrete Boolean y[1];
+ discrete Boolean y[2];
+ discrete Boolean x[1];
+ discrete Boolean x[2];
+initial equation 
+ pre(y[1]) = false;
+ pre(y[2]) = false;
+ pre(x[1]) = false;
+ pre(x[2]) = false;
+equation
+ y[1] = true;
+ y[2] = false;
+ x[1] = true and y[1];
+ x[2] = true and y[2];
+
 end ArrayTests.Logical.And.ArrayAnd2;
 ")})));
 end ArrayAnd2;
@@ -4469,16 +5427,25 @@ model ArrayAnd9
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Logical_And_ArrayAnd9",
+			name="ArrayAnd9",
 			description="Scalarization of logical and: constant evaluation",
 			flatModel="
 fclass ArrayTests.Logical.And.ArrayAnd9
  constant Boolean y[1] = true and true;
  constant Boolean y[2] = false and true;
  constant Boolean y[3] = false and false;
- constant Boolean x[1] = true;
- constant Boolean x[2] = false;
- constant Boolean x[3] = false;
+ discrete Boolean x[1];
+ discrete Boolean x[2];
+ discrete Boolean x[3];
+initial equation 
+ pre(x[1]) = false;
+ pre(x[2]) = false;
+ pre(x[3]) = false;
+equation
+ x[1] = true;
+ x[2] = false;
+ x[3] = false;
+
 end ArrayTests.Logical.And.ArrayAnd9;
 ")})));
 end ArrayAnd9;
@@ -4493,12 +5460,19 @@ model ArrayOr1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Logical_Or_ArrayOr1",
+			name="ArrayOr1",
 			description="Scalarization of logical or: arrays of Booleans (literal)",
 			flatModel="
 fclass ArrayTests.Logical.Or.ArrayOr1
- constant Boolean x[1] = true;
- constant Boolean x[2] = true;
+ discrete Boolean x[1];
+ discrete Boolean x[2];
+initial equation 
+ pre(x[1]) = false;
+ pre(x[2]) = false;
+equation
+ x[1] = true or true;
+ x[2] = true or false;
+
 end ArrayTests.Logical.Or.ArrayOr1;
 ")})));
 end ArrayOr1;
@@ -4510,14 +5484,25 @@ model ArrayOr2
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Logical_Or_ArrayOr2",
+			name="ArrayOr2",
 			description="Scalarization of logical or: arrays of Booleans (component)",
 			flatModel="
 fclass ArrayTests.Logical.Or.ArrayOr2
- constant Boolean y[1] = true;
- constant Boolean y[2] = false;
- constant Boolean x[1] = true;
- constant Boolean x[2] = true;
+ discrete Boolean y[1];
+ discrete Boolean y[2];
+ discrete Boolean x[1];
+ discrete Boolean x[2];
+initial equation 
+ pre(y[1]) = false;
+ pre(y[2]) = false;
+ pre(x[1]) = false;
+ pre(x[2]) = false;
+equation
+ y[1] = true;
+ y[2] = false;
+ x[1] = true or y[1];
+ x[2] = true or y[2];
+
 end ArrayTests.Logical.Or.ArrayOr2;
 ")})));
 end ArrayOr2;
@@ -4628,16 +5613,25 @@ model ArrayOr9
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Logical_Or_ArrayOr9",
+			name="ArrayOr9",
 			description="Scalarization of logical or: constant evaluation",
 			flatModel="
 fclass ArrayTests.Logical.Or.ArrayOr9
  constant Boolean y[1] = true or true;
  constant Boolean y[2] = true or false;
  constant Boolean y[3] = false or false;
- constant Boolean x[1] = true;
- constant Boolean x[2] = true;
- constant Boolean x[3] = false;
+ discrete Boolean x[1];
+ discrete Boolean x[2];
+ discrete Boolean x[3];
+initial equation 
+ pre(x[1]) = false;
+ pre(x[2]) = false;
+ pre(x[3]) = false;
+equation
+ x[1] = true;
+ x[2] = true;
+ x[3] = false;
+
 end ArrayTests.Logical.Or.ArrayOr9;
 ")})));
 end ArrayOr9;
@@ -4653,12 +5647,19 @@ model ArrayNot1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Logical_Not_ArrayNot1",
+			name="ArrayNot1",
 			description="Scalarization of logical not: array of Boolean (literal)",
 			flatModel="
 fclass ArrayTests.Logical.Not.ArrayNot1
- constant Boolean x[1] = false;
- constant Boolean x[2] = true;
+ discrete Boolean x[1];
+ discrete Boolean x[2];
+initial equation 
+ pre(x[1]) = false;
+ pre(x[2]) = false;
+equation
+ x[1] = not true;
+ x[2] = not false;
+
 end ArrayTests.Logical.Not.ArrayNot1;
 ")})));
 end ArrayNot1;
@@ -4670,14 +5671,25 @@ model ArrayNot2
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Logical_Not_ArrayNot2",
+			name="ArrayNot2",
 			description="Scalarization of logical not: array of Boolean (component)",
 			flatModel="
 fclass ArrayTests.Logical.Not.ArrayNot2
- constant Boolean x[1] = false;
- constant Boolean x[2] = true;
- constant Boolean y[1] = true;
- constant Boolean y[2] = false;
+ discrete Boolean x[1];
+ discrete Boolean x[2];
+ discrete Boolean y[1];
+ discrete Boolean y[2];
+initial equation 
+ pre(x[1]) = false;
+ pre(x[2]) = false;
+ pre(y[1]) = false;
+ pre(y[2]) = false;
+equation
+ x[1] = not y[1];
+ x[2] = not y[2];
+ y[1] = true;
+ y[2] = false;
+
 end ArrayTests.Logical.Not.ArrayNot2;
 ")})));
 end ArrayNot2;
@@ -4689,14 +5701,21 @@ model ArrayNot3
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Logical_Not_ArrayNot3",
+			name="ArrayNot3",
 			description="Scalarization of logical not: constant evaluation",
 			flatModel="
 fclass ArrayTests.Logical.Not.ArrayNot3
- constant Boolean x[1] = false;
- constant Boolean x[2] = true;
+ discrete Boolean x[1];
+ discrete Boolean x[2];
  constant Boolean y[1] = not true;
  constant Boolean y[2] = not false;
+initial equation 
+ pre(x[1]) = false;
+ pre(x[2]) = false;
+equation
+ x[1] = false;
+ x[2] = true;
+
 end ArrayTests.Logical.Not.ArrayNot3;
 ")})));
 end ArrayNot3;
@@ -4749,11 +5768,12 @@ model LongArrayForm1
 
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
-			name="Constructors_LongForm_LongArrayForm1",
+			name="LongArrayForm1",
 			description="Long form of array constructor",
 			flatModel="
 fclass ArrayTests.Constructors.LongForm.LongArrayForm1
- Real x[3] = array(1, 2, 3);
+ Real x[3] = array(1,2,3);
+
 end ArrayTests.Constructors.LongForm.LongArrayForm1;
 ")})));
 end LongArrayForm1;
@@ -4764,13 +5784,18 @@ model LongArrayForm2
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Constructors_LongForm_LongArrayForm2",
+			name="LongArrayForm2",
 			description="Long form of array constructor",
 			flatModel="
 fclass ArrayTests.Constructors.LongForm.LongArrayForm2
- constant Real x[1] = 1;
- constant Real x[2] = 2;
- constant Real x[3] = 3;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 3;
+
 end ArrayTests.Constructors.LongForm.LongArrayForm2;
 ")})));
 end LongArrayForm2;
@@ -4803,19 +5828,30 @@ model LongArrayForm4
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Constructors_LongForm_LongArrayForm4",
+			name="LongArrayForm4",
 			description="Long form of array constructor, array component parts",
 			flatModel="
 fclass ArrayTests.Constructors.LongForm.LongArrayForm4
- constant Real x3[1,1] = 1;
- constant Real x3[1,2] = 2;
- constant Real x3[1,3] = 3;
- constant Real x3[2,1] = 4;
- constant Real x3[2,2] = 5;
- constant Real x3[2,3] = 6;
- constant Real x3[3,1] = 7;
- constant Real x3[3,2] = 8;
- constant Real x3[3,3] = 9;
+ Real x3[1,1];
+ Real x3[1,2];
+ Real x3[1,3];
+ Real x3[2,1];
+ Real x3[2,2];
+ Real x3[2,3];
+ Real x3[3,1];
+ Real x3[3,2];
+ Real x3[3,3];
+equation
+ x3[1,1] = 1;
+ x3[1,2] = 2;
+ x3[1,3] = 3;
+ x3[2,1] = 4;
+ x3[2,2] = 5;
+ x3[2,3] = 6;
+ x3[3,1] = 7;
+ x3[3,2] = 8;
+ x3[3,3] = 9;
+
 end ArrayTests.Constructors.LongForm.LongArrayForm4;
 ")})));
 end LongArrayForm4;
@@ -4866,14 +5902,20 @@ model EmptyArray3
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Constructors_EmptyArray_EmptyArray3",
+			name="EmptyArray3",
 			description="Empty arrays, concatenation",
 			flatModel="
 fclass ArrayTests.Constructors.EmptyArray.EmptyArray3
- constant Real xx[1,1] = 1;
- constant Real xx[1,2] = 2;
- constant Real xx[2,1] = 3;
- constant Real xx[2,2] = 4;
+ Real xx[1,1];
+ Real xx[1,2];
+ Real xx[2,1];
+ Real xx[2,2];
+equation
+ xx[1,1] = 1;
+ xx[1,2] = 2;
+ xx[2,1] = 3;
+ xx[2,2] = 4;
+
 end ArrayTests.Constructors.EmptyArray.EmptyArray3;
 ")})));
 end EmptyArray3;
@@ -4886,14 +5928,20 @@ model EmptyArray4
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Constructors_EmptyArray_EmptyArray4",
+			name="EmptyArray4",
 			description="Empty arrays, multiplication",
 			flatModel="
 fclass ArrayTests.Constructors.EmptyArray.EmptyArray4
- constant Real y[1,1] = 0;
- constant Real y[1,2] = 0;
- constant Real y[2,1] = 0;
- constant Real y[2,2] = 0;
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ y[1,1] = 0;
+ y[1,2] = 0;
+ y[2,1] = 0;
+ y[2,2] = 0;
+
 end ArrayTests.Constructors.EmptyArray.EmptyArray4;
 ")})));
 end EmptyArray4;
@@ -4916,7 +5964,7 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Constructors_EmptyArray_EmptyArray5",
+			name="EmptyArray5",
 			description="Empty arrays, simple equation system",
 			flatModel="
 fclass ArrayTests.Constructors.EmptyArray.EmptyArray5
@@ -4927,10 +5975,10 @@ fclass ArrayTests.Constructors.EmptyArray.EmptyArray5
  input Real u[2];
  Real y[1];
  Real y[2];
- parameter Real D[1,1] = 1 /* 1 */;
- parameter Real D[1,2] = 2 /* 2 */;
- parameter Real D[2,1] = 2 /* 2 */;
- parameter Real D[2,2] = 4 /* 4 */;
+ parameter Real D[1,1] = 1 * 1 /* 1 */;
+ parameter Real D[1,2] = 2 * 1 /* 2 */;
+ parameter Real D[2,1] = 1 * 2 /* 2 */;
+ parameter Real D[2,2] = 2 * 2 /* 4 */;
 equation
  y[1] = 0.0 + (D[1,1] * u[1] + D[1,2] * u[2]);
  y[2] = 0.0 + (D[2,1] * u[1] + D[2,2] * u[2]);
@@ -4948,19 +5996,29 @@ model ArrayIterTest1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Constructors_Iterators_ArrayIterTest1",
+			name="ArrayIterTest1",
 			description="Array constructor with iterators: over scalar exp",
 			flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest1
- constant Real x[1,1] = 2;
- constant Real x[1,2] = 4;
- constant Real x[1,3] = 6;
- constant Real x[2,1] = 3;
- constant Real x[2,2] = 6;
- constant Real x[2,3] = 9;
- constant Real x[3,1] = 5;
- constant Real x[3,2] = 10;
- constant Real x[3,3] = 15;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[1,3];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[2,3];
+ Real x[3,1];
+ Real x[3,2];
+ Real x[3,3];
+equation
+ x[1,1] = 1 * 2;
+ x[1,2] = 2 * 2;
+ x[1,3] = 3 * 2;
+ x[2,1] = 1 * 3;
+ x[2,2] = 2 * 3;
+ x[2,3] = 3 * 3;
+ x[3,1] = 1 * 5;
+ x[3,2] = 2 * 5;
+ x[3,3] = 3 * 5;
 end ArrayTests.Constructors.Iterators.ArrayIterTest1;
 ")})));
 end ArrayIterTest1;
@@ -4971,18 +6029,27 @@ model ArrayIterTest2
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Constructors_Iterators_ArrayIterTest2",
+			name="ArrayIterTest2",
 			description="Array constructor with iterators: over array exp",
 			flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest2
- constant Real x[1,1,1] = 1;
- constant Real x[1,1,2] = 2;
- constant Real x[1,2,1] = 4;
- constant Real x[1,2,2] = 2;
- constant Real x[2,1,1] = 1;
- constant Real x[2,1,2] = 5;
- constant Real x[2,2,1] = 4;
- constant Real x[2,2,2] = 5;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+equation
+ x[1,1,1] = 1 * 1;
+ x[1,1,2] = 2;
+ x[1,2,1] = 2 * 2;
+ x[1,2,2] = 2;
+ x[2,1,1] = 1 * 1;
+ x[2,1,2] = 5;
+ x[2,2,1] = 2 * 2;
+ x[2,2,2] = 5;
 end ArrayTests.Constructors.Iterators.ArrayIterTest2;
 ")})));
 end ArrayIterTest2;
@@ -5016,27 +6083,46 @@ model ArrayIterTest4
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Constructors_Iterators_ArrayIterTest4",
+			name="ArrayIterTest4",
 			description="Array constructor with iterators: nestled constructors, masking index",
 			flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest4
- constant Real i = 1;
- constant Real x[1,1,1,1] = 3;
- constant Real x[1,1,1,2] = 1;
- constant Real x[1,1,2,1] = 3;
- constant Real x[1,1,2,2] = 2;
- constant Real x[1,2,1,1] = 4;
- constant Real x[1,2,1,2] = 1;
- constant Real x[1,2,2,1] = 4;
- constant Real x[1,2,2,2] = 2;
- constant Real x[2,1,1,1] = 3;
- constant Real x[2,1,1,2] = 1;
- constant Real x[2,1,2,1] = 3;
- constant Real x[2,1,2,2] = 2;
- constant Real x[2,2,1,1] = 4;
- constant Real x[2,2,1,2] = 1;
- constant Real x[2,2,2,1] = 4;
- constant Real x[2,2,2,2] = 2;
+ Real i;
+ Real x[1,1,1,1];
+ Real x[1,1,1,2];
+ Real x[1,1,2,1];
+ Real x[1,1,2,2];
+ Real x[1,2,1,1];
+ Real x[1,2,1,2];
+ Real x[1,2,2,1];
+ Real x[1,2,2,2];
+ Real x[2,1,1,1];
+ Real x[2,1,1,2];
+ Real x[2,1,2,1];
+ Real x[2,1,2,2];
+ Real x[2,2,1,1];
+ Real x[2,2,1,2];
+ Real x[2,2,2,1];
+ Real x[2,2,2,2];
+equation
+ i = 1;
+ x[1,1,1,1] = 3;
+ x[1,1,1,2] = 1;
+ x[1,1,2,1] = 3;
+ x[1,1,2,2] = 2;
+ x[1,2,1,1] = 4;
+ x[1,2,1,2] = 1;
+ x[1,2,2,1] = 4;
+ x[1,2,2,2] = 2;
+ x[2,1,1,1] = 3;
+ x[2,1,1,2] = 1;
+ x[2,1,2,1] = 3;
+ x[2,1,2,2] = 2;
+ x[2,2,1,1] = 4;
+ x[2,2,1,2] = 1;
+ x[2,2,2,1] = 4;
+ x[2,2,2,2] = 2;
+
 end ArrayTests.Constructors.Iterators.ArrayIterTest4;
 ")})));
 end ArrayIterTest4;
@@ -5047,11 +6133,14 @@ model ArrayIterTest5
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Constructors_Iterators_ArrayIterTest5",
+			name="ArrayIterTest5",
 			description="Array constructor with iterators: vectors of length 1",
 			flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest5
- constant Real x[1,1,1] = 1;
+ Real x[1,1,1];
+equation
+ x[1,1,1] = 1;
+
 end ArrayTests.Constructors.Iterators.ArrayIterTest5;
 ")})));
 end ArrayIterTest5;
@@ -5127,7 +6216,7 @@ model ForEquation2
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="For_ForEquation2",
+			name="ForEquation2",
 			description="",
 			flatModel="
 fclass ArrayTests.For.ForEquation2
@@ -5135,9 +6224,14 @@ fclass ArrayTests.For.ForEquation2
  parameter Integer a.rev[1] = 3 /* 3 */;
  parameter Integer a.rev[2] = 2 /* 2 */;
  parameter Integer a.rev[3] = 1 /* 1 */;
- constant Real a.x[1] = 1;
- constant Real a.x[2] = 2;
- constant Real a.x[3] = 3;
+ Real a.x[1];
+ Real a.x[2];
+ Real a.x[3];
+equation
+ a.x[1] = 1;
+ a.x[2] = 2;
+ a.x[3] = 3;
+
 end ArrayTests.For.ForEquation2;
 ")})));
 end ForEquation2;
@@ -5159,14 +6253,28 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="For_ForEquation3",
+			name="ForEquation3",
 			description="Array expressions depending on for loop index",
 			flatModel="
 fclass ArrayTests.For.ForEquation3
  parameter Integer n = 3 /* 3 */;
- constant Real x[1] = 2.0;
- constant Real x[2] = 4.0;
- constant Real x[3] = 7.0;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ x[1] = ArrayTests.For.ForEquation3.f(1);
+ x[2] = ArrayTests.For.ForEquation3.f(1 + 2);
+ x[3] = ArrayTests.For.ForEquation3.f(1 + 2 + 3);
+
+public
+ function ArrayTests.For.ForEquation3.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x + 1;
+  return;
+ end ArrayTests.For.ForEquation3.f;
+
 end ArrayTests.For.ForEquation3;
 ")})));
 end ForEquation3;
@@ -5244,18 +6352,28 @@ model SliceTest2
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Slices_SliceTest2",
+			name="SliceTest2",
 			description="Slice operations: basic test",
 			flatModel="
 fclass ArrayTests.Slices.SliceTest2
- constant Real x[1].a[1] = 1;
- constant Real x[1].a[2] = 2;
- constant Real x[2].a[1] = 3;
- constant Real x[2].a[2] = 4;
- constant Real y[1,1] = 2.0;
- constant Real y[1,2] = 3.0;
- constant Real y[2,1] = 4.0;
- constant Real y[2,2] = 5.0;
+ Real x[1].a[1];
+ Real x[1].a[2];
+ Real x[2].a[1];
+ Real x[2].a[2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1].a[1] = 1;
+ x[1].a[2] = 2;
+ x[2].a[1] = 3;
+ x[2].a[2] = 4;
+ y[1,1] = x[1].a[1] .+ 1;
+ y[1,2] = x[1].a[2] .+ 1;
+ y[2,1] = x[2].a[1] .+ 1;
+ y[2,2] = x[2].a[2] .+ 1;
+
 end ArrayTests.Slices.SliceTest2;
 ")})));
 end SliceTest2;
@@ -5271,30 +6389,52 @@ model SliceTest3
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Slices_SliceTest3",
+			name="SliceTest3",
 			description="Slice operations: test with vector indices",
 			flatModel="
 fclass ArrayTests.Slices.SliceTest3
- constant Real x[1].a[1] = 1;
- constant Real x[1].a[2] = 2;
- constant Real x[1].a[3] = 3;
- constant Real x[1].a[4] = 4;
- constant Real x[2].a[1] = 1;
- constant Real x[2].a[2] = 2;
- constant Real x[2].a[3] = 3;
- constant Real x[2].a[4] = 4;
- constant Real x[3].a[1] = 1;
- constant Real x[3].a[2] = 2;
- constant Real x[3].a[3] = 3;
- constant Real x[3].a[4] = 4;
- constant Real x[4].a[1] = 1;
- constant Real x[4].a[2] = 2;
- constant Real x[4].a[3] = 3;
- constant Real x[4].a[4] = 4;
- constant Real y[1,1] = 3.0;
- constant Real y[1,2] = 5.0;
- constant Real y[2,1] = 3.0;
- constant Real y[2,2] = 5.0;
+ Real x[1].a[1];
+ Real x[1].a[2];
+ Real x[1].a[3];
+ Real x[1].a[4];
+ Real x[2].a[1];
+ Real x[2].a[2];
+ Real x[2].a[3];
+ Real x[2].a[4];
+ Real x[3].a[1];
+ Real x[3].a[2];
+ Real x[3].a[3];
+ Real x[3].a[4];
+ Real x[4].a[1];
+ Real x[4].a[2];
+ Real x[4].a[3];
+ Real x[4].a[4];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1].a[1] = 1;
+ x[1].a[2] = 2;
+ x[1].a[3] = 3;
+ x[1].a[4] = 4;
+ x[2].a[1] = 1;
+ x[2].a[2] = 2;
+ x[2].a[3] = 3;
+ x[2].a[4] = 4;
+ x[3].a[1] = 1;
+ x[3].a[2] = 2;
+ x[3].a[3] = 3;
+ x[3].a[4] = 4;
+ x[4].a[1] = 1;
+ x[4].a[2] = 2;
+ x[4].a[3] = 3;
+ x[4].a[4] = 4;
+ y[1,1] = x[2].a[2] .+ 1;
+ y[1,2] = x[2].a[4] .+ 1;
+ y[2,1] = x[3].a[2] .+ 1;
+ y[2,2] = x[3].a[4] .+ 1;
+
 end ArrayTests.Slices.SliceTest3;
 ")})));
 end SliceTest3;
@@ -5317,7 +6457,7 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Slices_MixedIndices1",
+			name="MixedIndices1",
 			description="Mixing for index subscripts with colon subscripts",
 			automatic_add_initial_equations=false,
 			flatModel="
@@ -5330,23 +6470,32 @@ fclass ArrayTests.Slices.MixedIndices1
  Real y[2,1,2];
  Real y[2,2,1];
  Real y[2,2,2];
- constant Real z[1,1,1] = 1;
- constant Real z[1,1,2] = 0;
- constant Real z[1,2,1] = 0;
- constant Real z[1,2,2] = 1;
- constant Real z[2,1,1] = 1;
- constant Real z[2,1,2] = 0;
- constant Real z[2,2,1] = 0;
- constant Real z[2,2,2] = 1;
+ Real z[1,1,1];
+ Real z[1,1,2];
+ Real z[1,2,1];
+ Real z[1,2,2];
+ Real z[2,1,1];
+ Real z[2,1,2];
+ Real z[2,2,1];
+ Real z[2,2,2];
 equation
- der(y[1,1,1]) = 1.0;
- der(y[1,1,2]) = 0.0;
- der(y[1,2,1]) = 0.0;
- der(y[1,2,2]) = 1.0;
- der(y[2,1,1]) = 1.0;
- der(y[2,1,2]) = 0.0;
- der(y[2,2,1]) = 0.0;
- der(y[2,2,2]) = 1.0;
+ der(y[1,1,1]) = z[1,1,1];
+ der(y[1,1,2]) = z[1,1,2];
+ der(y[1,2,1]) = z[1,2,1];
+ der(y[1,2,2]) = z[1,2,2];
+ der(y[2,1,1]) = z[2,1,1];
+ der(y[2,1,2]) = z[2,1,2];
+ der(y[2,2,1]) = z[2,2,1];
+ der(y[2,2,2]) = z[2,2,2];
+ z[1,1,1] = 1;
+ z[1,1,2] = 0;
+ z[1,2,1] = 0;
+ z[1,2,2] = 1;
+ z[2,1,1] = 1;
+ z[2,1,2] = 0;
+ z[2,2,1] = 0;
+ z[2,2,2] = 1;
+
 end ArrayTests.Slices.MixedIndices1;
 ")})));
 end MixedIndices1;
@@ -5362,22 +6511,35 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Slices_MixedIndices2",
+			name="MixedIndices2",
 			description="Mixing expression subscripts containing for indices with colon subscripts",
 			flatModel="
 fclass ArrayTests.Slices.MixedIndices2
- constant Real y[1,1] = 2.0;
- constant Real y[1,2] = 0.0;
- constant Real y[2,1] = 0.0;
- constant Real y[2,2] = 2.0;
- constant Real y[3,1] = 2.0;
- constant Real y[3,2] = 0.0;
- constant Real y[4,1] = 0.0;
- constant Real y[4,2] = 2.0;
- constant Real z[1,1] = 1;
- constant Real z[1,2] = 0;
- constant Real z[2,1] = 0;
- constant Real z[2,2] = 1;
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+ Real y[3,1];
+ Real y[3,2];
+ Real y[4,1];
+ Real y[4,2];
+ Real z[1,1];
+ Real z[1,2];
+ Real z[2,1];
+ Real z[2,2];
+equation
+ y[1,1] = z[1,1] * 2;
+ y[1,2] = z[1,2] * 2;
+ y[2,1] = z[2,1] * 2;
+ y[2,2] = z[2,2] * 2;
+ y[3,1] = z[1,1] * 2;
+ y[3,2] = z[1,2] * 2;
+ y[4,1] = z[2,1] * 2;
+ y[4,2] = z[2,2] * 2;
+ z[1,1] = 1;
+ z[1,2] = 0;
+ z[2,1] = 0;
+ z[2,2] = 1;
 end ArrayTests.Slices.MixedIndices2;
 ")})));
 end MixedIndices2;
@@ -5423,12 +6585,15 @@ model ArrayConst1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Other_ArrayConst1",
+			name="ArrayConst1",
 			description="Array constants used with parameter index",
 			flatModel="
 fclass ArrayTests.Other.ArrayConst1
- constant Real x[1] = 1.0;
- constant Real x[2] = 0.5;
+ Real x[1];
+ Real x[2];
+equation
+ x[1] = 1 / 1.0;
+ x[2] = 1 / 2.0;
 end ArrayTests.Other.ArrayConst1;
 ")})));
 end ArrayConst1;
@@ -5443,12 +6608,16 @@ equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Other_ArrayConst2",
+			name="ArrayConst2",
 			description="Array constants used with parameter index",
 			flatModel="
 fclass ArrayTests.Other.ArrayConst2
- constant Real x[1] = 1.0;
- constant Real x[2] = 2.0;
+ Real x[1];
+ Real x[2];
+equation
+ x[1] = 1.0;
+ x[2] = 2.0;
+
 end ArrayTests.Other.ArrayConst2;
 ")})));
 end ArrayConst2;
@@ -5466,11 +6635,26 @@ model ArrayConst3
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Other_ArrayConst3",
+			name="ArrayConst3",
 			description="Array constants used with index of discrete variability",
 			flatModel="
 fclass ArrayTests.Other.ArrayConst3
- constant Real x = 1;
+ Real x;
+equation
+ x = ArrayTests.Other.ArrayConst3.f(1);
+
+public
+ function ArrayTests.Other.ArrayConst3.f
+  Real[2] testConst;
+  input Real i;
+  output Real o;
+ algorithm
+  testConst[1] := 1;
+  testConst[2] := 2;
+  o := testConst[integer(i)];
+  return;
+ end ArrayTests.Other.ArrayConst3.f;
+
 end ArrayTests.Other.ArrayConst3;
 ")})));
 end ArrayConst3;
@@ -5482,12 +6666,15 @@ model ArrayConst4
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Other_ArrayConst4",
+			name="ArrayConst4",
 			description="Array constants used with parameter index",
 			flatModel="
 fclass ArrayTests.Other.ArrayConst4
  parameter Integer i = 1 /* 1 */;
- constant Real x = 1.0;
+ Real x;
+equation
+ x = 1.0;
+
 end ArrayTests.Other.ArrayConst4;
 ")})));
 end ArrayConst4;
@@ -5525,19 +6712,26 @@ equation
 		c[i] = b[i].x[1] + b[i].x[end];
 	end for;
 
-	annotation(__JModelica(UnitTesting(tests={
+	annotation(__JModelica(UnitTesting(tests={ 
 		TransformCanonicalTestCase(
 			name="Other_ArraySize3",
 			description="Handle end in for loop",
 			flatModel="
 fclass ArrayTests.Other.ArraySize3
  parameter Integer n = 2 /* 2 */;
- constant Real b[1].x[1] = 1;
- constant Real b[1].x[2] = 2;
- constant Real b[2].x[1] = 1;
- constant Real b[2].x[2] = 2;
- constant Real c[1] = 3.0;
- constant Real c[2] = 3.0;
+ Real b[1].x[1];
+ Real b[1].x[2];
+ Real b[2].x[1];
+ Real b[2].x[2];
+ Real c[1];
+ Real c[2];
+equation
+ c[1] = b[1].x[1] + b[1].x[2];
+ c[2] = b[2].x[1] + b[2].x[2];
+ b[1].x[1] = 1;
+ b[1].x[2] = 2;
+ b[2].x[1] = 1;
+ b[2].x[2] = 2;
 end ArrayTests.Other.ArraySize3;
 ")})));
 end ArraySize3;

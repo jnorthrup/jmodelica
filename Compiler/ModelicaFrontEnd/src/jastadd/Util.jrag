@@ -1116,7 +1116,6 @@ aspect FlatNames {
     syn String FClass.name()        = getFQNameNoTransform().name();
     syn String FFunctionDecl.name() = getFQNameNoTransform().name();
     syn String FRecordDecl.name()   = getFQNameNoTransform().name();
-    syn String FAttribute.name()    = getName().name();
     
     syn String FAbstractFunctionCall.name();
     eq InstFunctionCall.name()     = getNameNoTransform().name();
@@ -1133,10 +1132,10 @@ aspect FlatNames {
     
     syn String FDerivativeFunction.name() = getNameNoTransform().name();
       
-    eq FDerivativeVariable.name()       = getFQNameNoTransform().derName();
-    eq FHDerivativeVariable.name()      = getFQNameNoTransform().hDerName(getOrder());
-    eq FDummyDerivativeVariable.name()  = getFQNameNoTransform().derName();
-    eq FHDummyDerivativeVariable.name() = getFQNameNoTransform().hDerName(getOrder());
+    eq FDerivativeVariable.name()  = getFQNameNoTransform().derName();
+    eq FHDerivativeVariable.name()  = getFQNameNoTransform().hDerName(getOrder());
+    eq FDummyDerivativeVariable.name()  =getFQNameNoTransform().derName();
+    eq FHDummyDerivativeVariable.name()  =getFQNameNoTransform().hDerName(getOrder());
 
     syn String FIdUse.derName()    = getFQNameNoTransform().derName();
     syn String FIdUseExp.derName() = getFIdUseNoTransform().derName();
@@ -1230,7 +1229,6 @@ aspect FlatNames {
     eq FForIndex.getFVariable().findVariableIndex()       = forIndexIndex();
     eq FRecordDecl.getFVariable().findVariableIndex()     = -1;
     eq FEnumDecl.getChild().findVariableIndex()           = -1;
-    eq FClass.getDummyVariable().findVariableIndex()      = -1;
     
     inh lazy int FForIndex.forIndexIndex();
     eq FClass.getChild().forIndexIndex() = nextForIndexIndex++;
@@ -1870,21 +1868,13 @@ aspect FlatNames {
     eq FEnumLiteralType.name() 		= getName();
     eq FRecordType.name()      		= getName();
     eq FUnknownType.name()     		= "(unknown type)";
-    eq FExternalObjectType.name()	= "ExternalObject";
-    
-    
-    syn boolean FAbstractFunctionCall.ignoreInFlattening() = false;
-    eq FIgnoredBuiltIn.ignoreInFlattening()                = true;
-    eq FConnectionsOp.ignoreInFlattening()                 = true;
-    
-    syn boolean FAbstractEquation.ignoreInFlattening() = false;
-    eq FFunctionCallEquation.ignoreInFlattening()      = getCall().ignoreInFlattening();
+    eq FExternalObjectType.name()	= "ExternalObject"; 
     
     syn boolean FAbstractFunctionCall.isIgnored() = false;
-    eq FIgnoredBuiltIn.isIgnored()                = true;
+    eq FIgnoredBuiltIn.isIgnored() = true;
     
     syn boolean FAbstractEquation.isIgnored() = false;
-    eq FFunctionCallEquation.isIgnored()      = getCall().isIgnored();
+    eq FFunctionCallEquation.isIgnored() = getCall().isIgnored();
     
     /**
      * \brief Add an equation to the first equation block.
@@ -2048,7 +2038,7 @@ aspect FlatFunctionUtils {
     
      syn lazy FunctionReturnDefinition FFunctionDecl.returnDefinition() = new FunctionReturnDefinition(this);
      inh FunctionReturnDefinition FReturnStmt.returnDefinition();
-     eq FFunctionDecl.getFAlgorithm().returnDefinition() = returnDefinition();
+     eq FFunctionDecl.getFAlgorithmBlock().returnDefinition() = returnDefinition();
      eq InstProgramRoot.getChild().returnDefinition()         = null;
      eq FClass.getChild().returnDefinition()                  = null;
      
@@ -2100,7 +2090,7 @@ aspect FlatFunctionUtils {
 			return true;
 		if (derivativEqualsZero())
 			return true;
-		for (FStatement statement : getFAlgorithm().getFStatements())
+		for (FStatement statement : getFAlgorithmBlock().getFStatements())
 			if (!statement.canDifferentiate())
 				return false;
 		return true;
@@ -2175,7 +2165,7 @@ aspect FlatFunctionUtils {
       * \brief Check is this node is in a non-function algorithm.
       */
      inh boolean FSubscript.inAlgorithm();
-     eq FAlgorithm.getChild().inAlgorithm()   = !inFunction();
+     eq FAlgorithmBlock.getChild().inAlgorithm()   = !inFunction();
      eq InstNode.getChild().inAlgorithm()          = false;
      eq FAbstractEquation.getChild().inAlgorithm() = false;
      eq FClass.getChild().inAlgorithm()            = false;
@@ -2195,14 +2185,14 @@ aspect FlatFunctionUtils {
      eq FFunctionCallStmt.getCall().isFunctionCallClause()     = true;
      
      inh boolean FStatement.insideBlockStmt();
-     eq FAlgorithm.getChild().insideBlockStmt() = false;
+     eq FAlgorithmBlock.getChild().insideBlockStmt() = false;
      eq FIfWhenStmt.getChild().insideBlockStmt()     = true;
      eq FWhileStmt.getChild().insideBlockStmt()      = true;
      eq FForStmt.getChild().insideBlockStmt()        = true;
      eq InstForStmt.getChild().insideBlockStmt()     = true;
      
      inh boolean FStatement.insideBranchedStmt();
-     eq FAlgorithm.getChild().insideBranchedStmt() = false;
+     eq FAlgorithmBlock.getChild().insideBranchedStmt() = false;
      eq FIfWhenStmt.getChild().insideBranchedStmt()     = true;
      
      /**
@@ -2459,23 +2449,47 @@ aspect ComponentDeclMethods {
     /**
      * Check if a InstComponentDecl is declared inner.
      */
-    syn boolean InstComponentDecl.isOuter() = getComponentDecl().isOuter();
+    syn boolean InstComponentDecl.isOuter() {
+    
+        if (getComponentDecl().isOuter())
+            return true;
+    
+        return false;
+    }
     
         /**
      * Check if a InstClassDecl is declared inner.
      */
-    syn boolean InstClassDecl.isInner() = getClassDecl().isInner();
+    syn boolean InstClassDecl.isInner() {
+    
+        if (getClassDecl().isInner())
+            return true;
+    
+        return false;
+    }
 
     /**
      * Check if a InstComponentDecl is declared inner.
      */
-    syn boolean InstClassDecl.isOuter() = getClassDecl().isOuter();
+    syn boolean InstClassDecl.isOuter() {
+    
+        if (getClassDecl().isOuter())
+            return true;
+    
+        return false;
+    }
     
     /**
      * Check if a component is disabled by a conditional clause
      */
-    syn boolean InstComponentDecl.isDisabled() = 
-    	hasConditionalAttribute() && !getConditionalAttribute().ceval().booleanValue();
+    syn boolean InstComponentDecl.isDisabled() {
+    	if (!hasConditionalAttribute() || 
+    			(hasConditionalAttribute() && getConditionalAttribute().ceval().booleanValue())) {
+    		return false;
+    	} else {
+    		return true;
+    	}
+    }
     
     syn boolean FIdUseInstAccess.isDisabled() = getInstAccess().isDisabled();
     syn boolean InstAccess.isDisabled() = false;
@@ -2545,22 +2559,18 @@ aspect FlatExpressions {
     
     inh boolean FExp.inNoEventExp();
     eq FNoEventExp.getChild().inNoEventExp() = true;
-    eq FAlgorithm.getChild().inNoEventExp() = true;
+    eq FAlgorithmBlock.getChild().inNoEventExp() = true;
     eq SourceRoot.getChild().inNoEventExp() = false;
     eq FlatRoot.getChild().inNoEventExp() = false;
     eq FClass.getFParameterEquation().inNoEventExp() = true;
-
-    inh boolean FExp.inSmoothExp(int order);
-    eq FSmoothExp.getChild().inSmoothExp(int order) = getOrder().ceval().intValue() >= order;
-    eq SourceRoot.getChild().inSmoothExp(int order) = false;
-    eq FlatRoot.getChild().inSmoothExp(int order) = false;
     
     inh boolean InstAccess.inConnectClause();
     inh boolean FExp.inConnectClause();
-    eq FConnectClause.getChild().inConnectClause()    = true;
+    eq FConnectClause.getChild().inConnectClause() = true;
+    eq FAlgorithmBlock.getChild().inConnectClause() = false;
     eq FAbstractEquation.getChild().inConnectClause() = false;
-    eq SourceRoot.getChild().inConnectClause()        = false;
-    eq FlatRoot.getChild().inConnectClause()          = false;
+    eq SourceRoot.getChild().inConnectClause() = false;
+    eq FlatRoot.getChild().inConnectClause() = false;
 
     inh boolean FExp.inIfCondition();
     eq FIfExp.getChild().inIfCondition() = true;

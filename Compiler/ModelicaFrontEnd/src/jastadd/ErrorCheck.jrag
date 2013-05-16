@@ -761,8 +761,6 @@ aspect InstanceErrorCheck {
 					}
 				}
 			}
-		} catch (ConstantEvaluationNotReadyException e) {
-			// Will be evaluatable later, ignore for now
 		} catch (ConstantEvaluationException e) {
 			failed = true;
 		}
@@ -967,7 +965,7 @@ aspect InstanceErrorCheck {
 	 * \brief Check if class has exactly one algorithm section or external function declaration.
 	 */
 	public boolean InstClassDecl.isCompleteFunction() {
-		return (numFAlgorithm() == 1) != (numInstExternal() == 1);
+		return (numFAlgorithmBlock() == 1) != (numInstExternal() == 1);
 	}
 	
 	syn boolean InstClassDecl.hasInstExternal() = false;
@@ -980,16 +978,16 @@ aspect InstanceErrorCheck {
 	}
 	eq InstSimpleShortClassDecl.numInstExternal() = actualInstClass().numInstExternal();
 	
-	syn int InstClassDecl.numFAlgorithm() {
+	syn int InstClassDecl.numFAlgorithmBlock() {
 		int n = 0;
 		for (FAbstractEquation e : getFAbstractEquations())
-			if (e instanceof FAlgorithm)
+			if (e instanceof FAlgorithmBlock)
 				n++;
 		for (InstExtends ie : getInstExtendss())
-			n += ie.myInstClass().numFAlgorithm();
+			n += ie.myInstClass().numFAlgorithmBlock();
 		return n;
 	}
-	eq InstSimpleShortClassDecl.numFAlgorithm() = actualInstClass().numFAlgorithm();
+	eq InstSimpleShortClassDecl.numFAlgorithmBlock() = actualInstClass().numFAlgorithmBlock();
 	
 	public void InstExternalObject.collectErrors() {
 	    if (!errorChecked) {

@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 from pymodelica import compile_jmu
 from pyjmi import JMUModel
 
-def run_demo(with_plots=True):
+def run_demo(with_plots=True,with_blocking_factors = False):
     """ 
     Load change of a distillation column. The distillation column model is 
     documented in the paper:
@@ -41,8 +41,6 @@ def run_demo(with_plots=True):
     pages={1379-1397},
     year={2002}
     }
-    
-    Note: This example requires Ipopt with MA27.
     """
     
     curr_dir = os.path.dirname(os.path.abspath(__file__));
@@ -62,7 +60,7 @@ def run_demo(with_plots=True):
     # Store stationary point A
     y_A = N.zeros(32)
     x_A = N.zeros(32)
-    print(' *** Stationary point A ***')
+    # print(' *** Stationary point A ***')
     print '(Tray index, x_i_A, y_i_A)'
     for i in range(32):
         y_A[i] = init_result['y['+ str(i+1) +']'][0]
@@ -77,7 +75,7 @@ def run_demo(with_plots=True):
     # Store stationary point B
     y_B = N.zeros(32)
     x_B = N.zeros(32)
-    print(' *** Stationary point B ***')
+    # print(' *** Stationary point B ***')
     print '(Tray index, x_i_B, y_i_B)'
     for i in range(32):
         y_B[i] = init_result['y[' + str(i+1) + ']'][0]
@@ -106,27 +104,26 @@ def run_demo(with_plots=True):
 
     # Solve the optimization problem
     opts = model.optimize_options()
-    opts['hs'] = N.ones(100)*1./100  # Equidistant points
-    opts['n_e'] = 100                # Number of elements
-    opts['n_cp'] = 3                 # Number of collocation points in each element
+    opts['hs'] = N.ones(100)*1./100 # Equidistant points
+    opts['n_e'] = 100 # Number of elements
+    opts['n_cp'] = 3  # Number of collocation points in each element
     opt_res = model.optimize()
 
     # Extract variable profiles
     x1  = opt_res['x[1]']
     x8  = opt_res['x[8]']
-    x16 = opt_res['x[16]']
-    x24 = opt_res['x[24]']
-    x32 = opt_res['x[32]']
+    x16	= opt_res['x[16]']
+    x24	= opt_res['x[24]']
+    x32	= opt_res['x[32]']
     y1  = opt_res['y[1]']
     y8  = opt_res['y[8]']
-    y16 = opt_res['y[16]']
-    y24 = opt_res['y[24]']
-    y32 = opt_res['y[32]']
-    t   = opt_res['time']
-    rr  = opt_res['rr']
-    
-    assert N.abs(opt_res.final('rr') - 2.0) < 1e-3
-    
+    y16	= opt_res['y[16]']
+    y24	= opt_res['y[24]']
+    y32	= opt_res['y[32]']
+    t	= opt_res['time']
+    rr	= opt_res['rr']
+	
+	
     # Plot the results
     if with_plots:
         plt.figure()

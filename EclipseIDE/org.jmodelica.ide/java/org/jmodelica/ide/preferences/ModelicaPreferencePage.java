@@ -1,11 +1,19 @@
 package org.jmodelica.ide.preferences;
 
+import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.runtime.QualifiedName;
+import org.eclipse.core.runtime.preferences.ConfigurationScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.jmodelica.ide.Activator;
 import org.jmodelica.ide.IDEConstants;
+import org.jmodelica.ide.helpers.Util;
 
 public class ModelicaPreferencePage extends PreferencePage  implements IWorkbenchPreferencePage {
 	
@@ -16,13 +24,13 @@ public class ModelicaPreferencePage extends PreferencePage  implements IWorkbenc
 	@Override
 	protected Control createContents(Composite parent) {
 		settings = new ModelicaSettingsControl();
-		settings.setLibraryPaths(ModelicaPreferences.INSTANCE.get(LIBRARIES_ID));
+		settings.setLibraryPaths(Preferences.get(LIBRARIES_ID));
 		return settings.createControl(parent);
 	}
 
 	private String defaults(String key) {
-		ModelicaPreferences.INSTANCE.clear(key);
-		return ModelicaPreferences.INSTANCE.get(key);
+		Preferences.clear(key);
+		return Preferences.get(key);
 	}
 
 	public void init(IWorkbench workbench) {}
@@ -37,7 +45,7 @@ public class ModelicaPreferencePage extends PreferencePage  implements IWorkbenc
 	@Override
 	public boolean performOk() {
 		// TODO: for a value that is still default, do Preferences.clear() instead
-		ModelicaPreferences.INSTANCE.set(LIBRARIES_ID, settings.getLibraryPaths());
+		Preferences.set(LIBRARIES_ID, settings.getLibraryPaths());
 		// TODO Trigger rebuild of all Modelica projects
 		return super.performOk();
 	}

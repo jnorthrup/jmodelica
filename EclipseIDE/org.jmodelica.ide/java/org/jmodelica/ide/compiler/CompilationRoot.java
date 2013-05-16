@@ -14,22 +14,26 @@ import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.modelica.compiler.BadDefinition;
 import org.jmodelica.modelica.compiler.List;
 import org.jmodelica.modelica.compiler.ParserException;
-import org.jmodelica.modelica.compiler.ParserHandler;
 import org.jmodelica.modelica.compiler.Program;
 import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 import org.jmodelica.modelica.parser.ModelicaParser;
 import org.jmodelica.modelica.parser.ModelicaScanner;
-import org.jmodelica.util.AbstractModelicaScanner;
 
+import beaver.Parser;
 
 /**
  * 
  * Represents a SourceRoot capable of compiling and adding more
  * StoredDefinitions.
+ * 
+ * @author philip
+ * 
  */
 public class CompilationRoot {
 
+	private final ModelicaParser parser = new ModelicaParser();
+	private final ModelicaScanner scanner = new ModelicaScanner(System.in); // Dummy stream
 	private final CompileErrorReport errorReport = new CompileErrorReport();
 
 	private final SourceRoot root;
@@ -44,6 +48,8 @@ public class CompilationRoot {
 		list = new List<StoredDefinition>();
 		Program prog = new Program(list);
 		root = new SourceRoot(prog);
+
+		parser.setReport(errorReport);
 
 		root.options = new IDEOptions(project);
 		root.setProject(project);
@@ -80,6 +86,8 @@ public class CompilationRoot {
 	protected StoredDefinition annotatedDefinition(StoredDefinition def, IFile file) {
 		def.setFile(file);
 		def.setFileName(file.getRawLocation().toOSString());
+		def.setLineBreakMap(scanner.getLineBreakMap());
+
 		return def;
 	}
 
@@ -123,15 +131,16 @@ public class CompilationRoot {
 		return this;
 	}
 
-	public void parseFile(Reader reader, IFile file, boolean clearSemantic) {		
+	public void parseFile(Reader reader, IFile file, boolean clearSemantic) {
+
 		errorReport.setFile(file, clearSemantic);
+		scanner.reset(reader);
 
 		try {
-			AbstractModelicaScanner scanner = getScanner(reader);
-			SourceRoot localRoot = (SourceRoot) getParser(scanner).parse(scanner);
+			SourceRoot localRoot = (SourceRoot) parser.parse(scanner);
 			for (StoredDefinition def : localRoot.getProgram().getUnstructuredEntitys()) 
 				list.add(annotatedDefinition(def, file));
-		} catch (ModelicaParser.Exception e) {
+		} catch (Parser.Exception e) {
 			addBadDef(file);
 		} catch (ParserException e) {
 			addBadDef(file);
@@ -147,18 +156,7 @@ public class CompilationRoot {
 			}
 		}
 	}
-	
-	private ModelicaParser getParser(AbstractModelicaScanner scanner) {
-		ModelicaParser parser = (ModelicaParser)ParserHandler.createModelicaParser(scanner);
-		parser.setReport(errorReport);
-		return parser;
-	}
 
-	private AbstractModelicaScanner getScanner(Reader reader) {
-		AbstractModelicaScanner scanner = ParserHandler.createModelicaScanner(reader);
-		return scanner;
-	}	
-	
 	public void addPackageDirectory(File dir) {
 		try {
 			String path = root.options.getStringOption(IDEConstants.PACKAGES_IN_WORKSPACE_OPTION);

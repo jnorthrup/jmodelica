@@ -164,13 +164,10 @@ aspect InstFunctionBinding {
 	 * if the input has a default value and an InstMissingArgument otherwise.
 	 */
 	public InstFunctionArgument InstComponentDecl.createInstDefaultArgument() {
-		throw new UnsupportedOperationException();
-	}
-	
-	public InstFunctionArgument InstAssignable.createInstDefaultArgument() {
 		InstFunctionArgument arg = null;
-		if (hasBindingFExp()) {
-			FExp exp = myBindingInstExp();
+		if (hasInstModification() && getInstModification() instanceof InstValueModification) {
+			InstValueModification mod = (InstValueModification) getInstModification();
+			FExp exp = mod.getFExp();
 			arg = new InstDefaultArgument(exp);
 		} else {
 			arg = new InstMissingArgument();
@@ -264,14 +261,9 @@ aspect InstFunctionBinding {
 				map.put("initial",      new BuiltInCreator(false, new FInitialExp(),     0));
 				map.put("terminal",     new BuiltInCreator(false, new FTerminalExp(),    0));
 				map.put("identity",     new BuiltInCreator(false, new FIdentity(),       1));
-				map.put("diagonal",     new BuiltInCreator(false, new FDiagonal(),       1));
-				map.put("scalar",       new BuiltInCreator(false, new FScalarExp(),      1));
-				map.put("vector",       new BuiltInCreator(false, new FVectorExp(),      1));
-				map.put("matrix",       new BuiltInCreator(false, new FMatrixExp(),      1));
 				map.put("sqrt",         new BuiltInCreator(false, new FSqrtExp(),        1));
 				map.put("transpose",    new BuiltInCreator(false, new FTranspose(),      1));
 				map.put("cross",        new BuiltInCreator(false, new FCross(),          2));
-				map.put("skew",         new BuiltInCreator(false, new FSkew(),           1));
 				map.put("outerProduct", new BuiltInCreator(false, new FOuterProduct(),   2));
 				map.put("sum",          new BuiltInCreator(false, new FSumExp(),         1));
 				map.put("abs",          new BuiltInCreator(false, new FAbsExp(),         1));
@@ -293,18 +285,10 @@ aspect InstFunctionBinding {
 				map.put("size",         new VarArgsBuiltInCreator(new FSizeExp(), 1, 2));
 				map.put("min",          new VarArgsBuiltInCreator(new FMinExp(),  1, 2));
 				map.put("max",          new VarArgsBuiltInCreator(new FMaxExp(),  1, 2));
-				//       name                                    math       node              # args
-				map.put("Connections.branch", new BuiltInCreator(false, new FConnBranch(),    2));
-				map.put("Connections.root",   new BuiltInCreator(false, new FConnRoot(),      1));
-				map.put("Connections.isRoot", new BuiltInCreator(false, new FConnIsRoot(),    1));
-				map.put("Connections.rooted", new BuiltInCreator(false, new FConnRooted(),    1));
-				map.put("rooted",             new BuiltInCreator(false, new FConnRootedDep(), 1));
-				//       name                                                      node                  min/max # args
-				map.put("Connections.potentialRoot", new VarArgsBuiltInCreator(new FConnPotentialRoot(), 1, 2));
 				
 				String[] unsupported = new String[] { 
 						// Ticket 678: Support for array related functions
-						"product", "symmetric", "skew", 
+						"scalar", "vector", "matrix", "diagonal", "product", "symmetric", "skew", 
 						// Ticket 664: Support all function-like operators
 						"sign", "String", "div", "mod", "rem", "ceil", "delay", "cardinality", 
 						"semiLinear", "terminal", "smooth", "edge", "change", "reinit", "terminate"

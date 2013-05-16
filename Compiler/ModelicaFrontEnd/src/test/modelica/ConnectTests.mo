@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009-2013 Modelon AB
+    Copyright (C) 2009 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -350,6 +350,8 @@ fclass ConnectTests.ConnectTest8
  Real a[4].x;
  Real a[4].y;
 equation
+ for i in 1:3 loop
+ end for;
  a[1].x = a[2].x;
  a[2].x = a[3].x;
  a[3].x = a[4].x;
@@ -545,6 +547,8 @@ fclass ConnectTests.ConnectTest12
  Real b[3,4].a[2].x;
  Real b[3,4].a[2].y;
 equation
+ for i in 1:2, j in 1:3 loop
+ end for;
  b[1,1].a[1].x = b[1,1].a[2].x;
  b[1,1].a[2].x = b[1,2].a[1].x;
  b[1,2].a[1].x = b[1,2].a[2].x;
@@ -626,6 +630,8 @@ fclass ConnectTests.ConnectTest13
  Real b[3].a[2].x;
  Real b[3].a[2].y;
 equation
+ for i in 1:2 loop
+ end for;
  b[1].a[1].x = b[2].a[1].x;
  b[2].a[1].x = b[3].a[1].x;
  - b[1].a[1].y - b[2].a[1].y - b[3].a[1].y = 0;

@@ -19,6 +19,7 @@ Test module for testing the CASADI examples.
 """
 
 from tests_jmodelica import testattr
+from pyfmi.examples import *
 from pyjmi.examples import *
 
 @testattr(casadi = True)

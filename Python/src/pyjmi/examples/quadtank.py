@@ -31,6 +31,7 @@ def run_demo(with_plots=True):
     """
     Optimal control of the quadruple tank process.
     """
+
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     
     # Compile the Optimica model to JMU
@@ -38,7 +39,7 @@ def run_demo(with_plots=True):
         curr_dir+"/files/QuadTank.mop")
 
     # Load the dynamic library and XML data
-    qt = JMUModel(jmu_name)
+    qt=JMUModel(jmu_name)
 
     # Define inputs for operating point A
     u_A = N.array([2.,2])
@@ -56,6 +57,8 @@ def run_demo(with_plots=True):
 
     # Compute stationary state values for operating point A
     qt.real_u = u_A
+    #qt.getPI()[21] = u_A[0]
+    #qt.getPI()[22] = u_A[1]
     
     t_sim = N.linspace(0.,2000.,500)
     y_sim = integr.odeint(res,x_0,t_sim)
@@ -111,7 +114,9 @@ def run_demo(with_plots=True):
     u2=res['u2']
     t =res['time']
 
-    assert N.abs(res.final('cost') - 5.0333257e+02) < 1e-3
+    cost=res['cost']
+
+    assert N.abs(cost[-1] - 5.0333257e+02) < 1e-3
     
     if with_plots:
         # Plot

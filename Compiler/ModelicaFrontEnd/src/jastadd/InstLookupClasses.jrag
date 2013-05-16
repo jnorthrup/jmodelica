@@ -289,7 +289,6 @@ aspect InstLookupClasses {
 	
 	syn InstClassDecl InstAccess.qualifiedLookupInstClass(String name) = null;	
 	eq InstClassAccess.qualifiedLookupInstClass(String name)           = myInstClassDecl().memberInstClass(name);
-	eq InstComponentAccess.qualifiedLookupInstClass(String name)       = myInstComponentDecl().memberInstClass(name);
 	
 	syn InstClassDecl InstNode.lookupInstClassInSurrounding(String name)     = lookupInstClass(name);
 	eq InstReplacingFullClassDecl.lookupInstClassInSurrounding(String name)  = 
@@ -463,7 +462,7 @@ aspect InstLookupClasses {
 	}
 	
 	eq InstComponentDecl.memberInstClass(String name) {
-		if (isArray() && !isPrimitive()) {
+		if (isArray()) {
 			return arrayCellInstComponent(ndims()).memberInstClass(name);
 		} else {
 			if (!constrainMemberInstClass(name))

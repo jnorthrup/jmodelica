@@ -52,7 +52,7 @@ aspect ConstantEvaluation {
 		}
 		
 		public ConstantEvaluationException() {
-			super("Unspecified constant evaluation failure");
+			super();
 			this.val = null;
 		}
 		
@@ -67,17 +67,10 @@ aspect ConstantEvaluation {
 		 * \brief Gets the error message.
 		 */
 		public String getMessage() {
-			return (val == null) ? super.getMessage() :
+			return (val == null) ? 
+				"Unspecified constant evaluation failure" :
 				"Cannot " + super.getMessage() + val.errorDesc();
 		}
-	}
-	
-	public class ConstantEvaluationNotReadyException extends ConstantEvaluationException {
-		
-		public ConstantEvaluationNotReadyException() {
-			super(null, "Cannot evaluate expression yet");
-		}
-		
 	}
   
 	/**
@@ -1078,15 +1071,10 @@ aspect ConstantEvaluation {
    * Check if this expression can be constant evaluated.
    * 
    * Calls ceval and checks that no exception is thrown, and that the result isn't unknown.
-   * Use only for error checking, since it does not guarantee that the expression can be 
-   * evaluated at the moment - only after calculating overconstrained connection graph.
    */
   syn boolean FExp.canCeval() {
   	  try {
-  	  	  return !ceval().isUnknown();
-	  } catch (ConstantEvaluationNotReadyException e) {
-		  // Will be evaluatable later, ignore for now
-		  return true;
+  	  	   return !ceval().isUnknown();
   	  } catch (Exception e) {
   	  	  return false;
   	  }
@@ -1184,26 +1172,7 @@ aspect ConstantEvaluation {
   eq FFloorExp.cevalCalc()       = getFExp().ceval().convertInteger();
   
   eq FNdimsExp.cevalCalc() = new CValueInteger(getFExp().ndims());
-  
-  eq FConnectionsOp.cevalCalc() {
-	  throw new ConstantEvaluationException();
-  }
-  eq FConnBoolOp.cevalCalc() {
-	  if (connectionGraph != null && connectionGraph.builtTreesDone()) 
-		  return new CValueBoolean(cevalFromGraph());
-	  else
-		  throw new ConstantEvaluationNotReadyException();
-  }
-  
-  syn boolean FConnBoolOp.cevalFromGraph();
-  eq FConnIsRoot.cevalFromGraph() = connectionGraph.ops(getA()).isRoot;
-  eq FConnRooted.cevalFromGraph() = connectionGraph.ops(getA()).rooted;
-
-  /**
-   * The connections graph to use when constat evaluating a Connections.x() operator with boolean result.
-   */
-  protected OverconstrainedConnectionGraph FConnBoolOp.connectionGraph = null;
-  
+ 
   eq FSizeExp.cevalCalc() {
 	  if (!hasDim())
 		  return CValue.UNKNOWN;
@@ -1246,7 +1215,7 @@ aspect ConstantEvaluation {
   eq FNoEventExp.cevalCalc() = getFExp().ceval();
   eq FSmoothExp.cevalCalc()  = getFExp().ceval();
   
-  eq FPreExp.cevalCalc()     = variability().constantVariability() ? getFExp().ceval() : CValue.UNKNOWN;
+  eq FPreExp.cevalCalc()     = CValue.UNKNOWN;
   eq FSampleExp.cevalCalc()  = CValue.UNKNOWN;
   
   /** Decides what initial() is currently evaluated to. */
@@ -1365,8 +1334,6 @@ aspect ConstantEvaluation {
   }
  
   eq FIdUseExp.cevalCalc()      = getFIdUse().ceval();
-  eq FDerExp.cevalCalc() = 
-			getFIdUse().variability().discreteOrLess() ? new CValueInteger(0) : CValue.UNKNOWN;
   eq FInstAccessExp.cevalCalc() = getInstAccess().ceval();
   
   syn CValue InstAccess.ceval()        = ceval(Index.NULL);
@@ -1442,8 +1409,6 @@ aspect ConstantEvaluation {
   eq FSqrtExp.cevalCalc()  = new CValueReal(Math.sqrt(getFExp().ceval().realValue()));
   
   eq FAbsExp.cevalCalc() = type().abs(getFExp().ceval());
-  
-  eq FVectorExp.cevalCalc() = getFExp().getArray().getFExp(0).ceval();
 
 	syn CValue FSubscript.ceval() = CValue.UNSUPPORTED;
 	eq FExpSubscript.ceval()      = getFExp().ceval();
@@ -1549,7 +1514,7 @@ aspect ConstantEvaluation {
 	eq InstRecord.startAttributeCValueDefault() {
 		CValueRecord res = new CValueRecord((FRecordType) type());
 		int i = 0;
-		for (InstComponentDecl var : myInstClass().actualInstClass().getInstComponentDecls())
+		for (InstComponentDecl var : myInstClass().getInstComponentDecls())
 			res.setMember(i++, var.startAttributeCValue());
 		return res;
 	}
@@ -1738,8 +1703,8 @@ aspect ConstantEvaluation {
 	  public String name();
   }
   
-  FAbstractVariable implements CommonVariableDecl;
-  InstComponentDecl implements CommonVariableDecl;
+  public class FAbstractVariable implements CommonVariableDecl {}
+  public class InstComponentDecl implements CommonVariableDecl {}
   
   syn ArrayList<? extends CommonVariableDecl> FAbstractFunctionCall.myFuncInputs() = 
 	  new ArrayList<CommonVariableDecl>(0);
@@ -1844,7 +1809,7 @@ aspect ConstantEvaluation {
    *                Should be filled with the values of the inputs.
    */
   public void FFunctionDecl.evaluate(Map<CommonVariableDecl, CValue> values) {
- 	  FAlgorithm fab = getFAlgorithm();
+ 	  FAlgorithmBlock fab = getFAlgorithmBlock();
 	  Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
 	  currentEvaluationValues = values;
 	  for (FFunctionVariable var : getFFunctionVariables())
@@ -1856,16 +1821,12 @@ aspect ConstantEvaluation {
 	  for (FFunctionVariable var : myNonInputs())
 		  var.readEvaluationValue(values);
 	  
-	  try {
-		  fab.getFStatements().evaluateList(values);
-	  } finally {
-		  for (FFunctionVariable var : getFFunctionVariables())
-			  var.setEvaluationValue(null);
-		  if (oldVal != null)
-			  for (CommonVariableDecl var : oldVal.keySet())
-				  var.readEvaluationValue(oldVal);
-		  currentEvaluationValues = oldVal;
-	  }
+	  fab.getFStatements().evaluateList(values);
+	  
+	  if (oldVal != null)
+		  for (CommonVariableDecl var : oldVal.keySet())
+			  var.readEvaluationValue(oldVal);
+	  currentEvaluationValues = oldVal;
   }
   private Map<CommonVariableDecl, CValue> FFunctionDecl.currentEvaluationValues = null;
   
@@ -1882,7 +1843,7 @@ aspect ConstantEvaluation {
   public void InstFullClassDecl.evaluate(Map<CommonVariableDecl, CValue> values) {
 	  // We assume this class is a function
 	  
- 	  FAlgorithm fab = findFunctionAlgorithm();
+ 	  FAlgorithmBlock fab = findFunctionAlgorithm();
    	  if (fab == null || hasInstExternal()) {
 		  values.clear();
 		  return;
@@ -1890,8 +1851,6 @@ aspect ConstantEvaluation {
 	  
 	  Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
 	  currentEvaluationValues = values;
-	  for (InstComponentDecl var : getInstComponentDecls())
-		  var.setEvaluationValue(null);
 	  fab.prepareForFunctionEval();
 	  
 	  for (InstComponentDecl var : myInputs())
@@ -1899,16 +1858,12 @@ aspect ConstantEvaluation {
 	  for (InstComponentDecl var : myNonInputs())
 		  var.readEvaluationValue(values);
 	  
-	  try {
-		  fab.getFStatements().evaluateList(values);
-	  } finally {
-		  for (InstComponentDecl var : getInstComponentDecls())
-			  var.setEvaluationValue(null);
-		  if (oldVal != null)
-			  for (CommonVariableDecl var : oldVal.keySet())
-				  var.readEvaluationValue(oldVal);
-		  currentEvaluationValues = oldVal;
-	  }
+	  fab.getFStatements().evaluateList(values);
+	  
+	  if (oldVal != null)
+		  for (CommonVariableDecl var : oldVal.keySet())
+			  var.readEvaluationValue(oldVal);
+	  currentEvaluationValues = oldVal;
   }
   private Map<CommonVariableDecl, CValue> InstFullClassDecl.currentEvaluationValues = null;
   
@@ -2103,8 +2058,8 @@ aspect ConstantEvaluation {
   public interface FunctionEvalNode {
 	  public int evaluate(Map<CommonVariableDecl, CValue> values);
   }
-  FStatement implements FunctionEvalNode;
-  FIfWhenClause implements FunctionEvalNode;
+  public class FStatement implements FunctionEvalNode {}
+  public class FIfWhenClause implements FunctionEvalNode {}
   
   /**
    * \brief Evaluate statement during function evaluation.
@@ -2182,8 +2137,8 @@ aspect ConstantEvaluation {
 	  public boolean isArray();
 	  public CommonNamePart nextNamePart();
   }
-  InstAccess implements CommonNamePart;
-  FQNamePart implements CommonNamePart;
+  public class InstAccess implements CommonNamePart {}
+  public class FQNamePart implements CommonNamePart {}
   
   public Indices FQNamePart.indices() {
 	  return Indices.createFromFas(getFArraySubscripts());
@@ -2315,7 +2270,7 @@ aspect ConstantEvaluation {
 
   public int FFunctionCallStmt.evaluate(Map<CommonVariableDecl, CValue> values) {
 	  CValue[] vals = getCall().evaluate();
-	  for (int i = 0, n = getNumLeft(); i < n; i++)
+	  for (int i = 0; i < vals.length; i++)
 		  getLeft(i).setEvaluationValue(vals[i], values);
 	  return EVAL_CONT;
   }
@@ -2804,19 +2759,4 @@ aspect CircularExpressions {
 	syn boolean FSubscript.isCircular() = false;
 	eq FExpSubscript.isCircular() = getFExp().isCircular();
 
-}
-
-aspect AritmeticTransformations {
-	
-	/**
-	 * Create a negated copy of this expression.
-	 */
-	public FExp FExp.createNegated() {
-		return new FNegExp(fullCopy());
-	}
-	
-	public FExp FNegExp.createNegated() {
-		return getFExp().fullCopy();
-	}
-	
 }

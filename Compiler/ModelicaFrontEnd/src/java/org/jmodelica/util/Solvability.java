@@ -15,9 +15,6 @@ public enum Solvability {
 		}
 	};
 	
-	public static Solvability least(Solvability a, Solvability b) {
-		return a.compareTo(b) > 0 ? a : b;
-	}
 	
 	public boolean isSolvable() {
 		return true;

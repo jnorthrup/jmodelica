@@ -222,7 +222,7 @@ model IntegerArg1
 		x := a[i];
 	end f;
 	
-	Real x = f(2, {3, 4, 5 + time});
+	Real x = f(2, {3, 4, 5});
 end IntegerArg1;
 
 model FuncTest1

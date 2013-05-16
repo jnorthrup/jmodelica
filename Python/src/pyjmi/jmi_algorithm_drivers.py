@@ -70,7 +70,6 @@ except:
 if casadi_present:
     from pyjmi.optimization.casadi_collocation import *
     from pyjmi.optimization.polynomial import *
-    from pyjmi.common.xmlparser import XMLException
 
 default_int = int
 int = N.int32
@@ -232,31 +231,23 @@ class IpoptInitializationAlg(AlgorithmBase):
         """ 
         Solve the initialization problem using ipopt solver. 
         """
-        try:
-            self.nlp_ipopt.init_opt_ipopt_solve()
-        finally:
-            self._write_result()
-        
-    def _write_result(self):
-        """
-        Helper method. Write result to file.
-        """
-        self.nlp.export_result_dymola(**self.result_args)
-        
-        # Set result file name
-        if not self.result_args['file_name']:
-            self.result_args['file_name'] = self.model.get_identifier()+'_result.txt'
+        self.nlp_ipopt.init_opt_ipopt_solve()
         
     def get_result(self):
         """ 
-        Load result data and create an IpoptInitResult object.
+        Write result to file, load result data and create an IpoptInitResult 
+        object.
         
         Returns::
         
             The IpoptInitResult object.
         """
-        # load result file
+        self.nlp.export_result_dymola(**self.result_args)
+        # result file name
         resultfile = self.result_args['file_name']
+        if not resultfile:
+            resultfile=self.model.get_identifier()+'_result.txt'
+        # load result file
         res = ResultDymolaTextual(resultfile)
         
         # create and return result object
@@ -891,10 +882,7 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         """
         times = {}
         solve_t0 = time.clock() - self._t0
-        try:
-            self.nlp_ipopt.opt_coll_ipopt_solve()
-        finally:
-            self._write_result()
+        self.nlp_ipopt.opt_coll_ipopt_solve()
         times['sol'] = time.clock() - self._t0 - solve_t0
         
         # Calculate times
@@ -904,9 +892,14 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         # Store times as data attribute
         self.times = times
         
-    def _write_result(self):
-        """
-        Helper method. Write result to file.
+    def get_result(self):
+        """ 
+        Write result to file, load result data and create an 
+        CollocationLagrangePolynomialsResult object.
+        
+        Returns::
+        
+            The CollocationLagrangePolynomialsResult object.
         """
         if self.result_mode=='element_interpolation':
             self.nlp.export_result_dymola_element_interpolation(
@@ -916,23 +909,14 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         elif self.result_mode=='default':
             self.nlp.export_result_dymola(**self.result_args)
         else:
-             raise InvalidAlgorithmArgumentException(self.result_mode)
+             raise InvalidAlgorithmArgumentException(self.resul_mode)
             
-        # Set result file name
-        if not self.result_args['file_name']:
-            self.result_args['file_name'] = self.model.get_identifier()+'_result.txt'
-        
-    def get_result(self):
-        """ 
-        Load result data and create a CollocationLagrangePolynomialsResult 
-        object.
-        
-        Returns::
-        
-            The CollocationLagrangePolynomialsResult object.
-        """
-        # load result file
+        # result file name
         resultfile = self.result_args['file_name']
+        if not resultfile:
+            resultfile=self.model.get_identifier()+'_result.txt'
+        
+        # load result file
         res = ResultDymolaTextual(resultfile)
         
         # Calculate post-processing and total time
@@ -1124,10 +1108,7 @@ class KInitSolveAlg(AlgorithmBase):
         """
         Functions calling the solver to solve the problem
         """
-        try:
-            res = self.solver.solve()
-        finally:
-            self._write_result()
+        res = self.solver.solve()
         
         dx = res[0:self.problem._dx_size]
         x = res[self.problem._dx_size:self.problem._mark]
@@ -1136,27 +1117,23 @@ class KInitSolveAlg(AlgorithmBase):
         self.model.real_dx = dx
         self.model.real_x = x
         self.model.real_w = w
-        
-    def _write_result(self):
-        """
-        Helper method. Write result to file.
-        """
-        write_resdata(self.problem)
-        
-        # Set result file name
-        if not self.result_args['file_name']:
-            self.result_args['file_name'] = self.model.get_identifier()+'_result.txt'
 
     def get_result(self):
         """ 
-        Load result data and create an NLSInitResult object.
+        Write result to file, load result data and create an NLSInitResult 
+        object.
         
         Returns::
         
             The NLSInitResult object.
         """
-        # load result file
+        #self.solver.export_result_dymola(**self.result_args)
+        write_resdata(self.problem)
+        # result file name
         resultfile = self.result_args['file_name']
+        if not resultfile:
+            resultfile=self.model.get_identifier()+'_result.txt'
+        # load result file
         res = ResultDymolaTextual(resultfile)
         
         # create and return result object
@@ -1264,34 +1241,28 @@ class CasadiPseudoSpectralAlg(AlgorithmBase):
         """ 
         Solve the optimization problem using ipopt solver. 
         """
-        try:
-            self.nlp.ipopt_solve()
-        finally:
-            self._write_result()
+        self.nlp.ipopt_solve()
         
-    def _write_result(self):
-        """
-        Helper method. Write result data to file.
-        """
-        if self.result_mode=='default':
-            self.nlp.export_result_dymola(**self.result_args)
-        else:
-             raise InvalidAlgorithmArgumentException(self.result_mode)
-
-        # Set result file name
-        if not self.result_args['file_name']:
-            self.result_args['file_name'] = self.model.get_identifier()+'_result.txt'
-                    
     def get_result(self):
         """ 
-        Load result data and create a CasadiPseudoSpectralAlgResult object.
+        Write result to file, load result data and create an 
+        CasadiPseudoSpectralAlgResult object.
         
         Returns::
         
             The CasadiPseudoSpectralAlgResult object.
         """
-        # load result file
+        if self.result_mode=='default':
+            self.nlp.export_result_dymola(**self.result_args)
+        else:
+             raise InvalidAlgorithmArgumentException(self.resul_mode)
+            
+        # result file name
         resultfile = self.result_args['file_name']
+        if not resultfile:
+            resultfile=self.model.get_identifier()+'_result.txt'
+        
+        # load result file
         res = ResultDymolaTextual(resultfile)
         
         # create and return result object
@@ -1552,29 +1523,6 @@ class LocalDAECollocationAlg(AlgorithmBase):
             raise ValueError("The sum of all elements in blocking factors " +
                              "must be the same as the number of elements.")
         
-        # Check validity of nominal_traj_mode
-        var_vectors = self.model._var_vectors
-        ocp_names = [[var.getName() for var in var_vectors[vt]] for vt in ['x', 'u', 'w']]
-        ocp_names = reduce(list.__add__, ocp_names)
-        ocp_names += [convert_casadi_der_name(str(var.der())) for var in var_vectors['x']]
-        for name in self.nominal_traj_mode.keys():
-            if name not in ocp_names:
-                if name != "_default_mode":
-                    aliases = self.model.xmldoc.get_aliases_for_variable(name)
-                    found_alias = False
-                    if aliases is not None:
-                        for alias in aliases[0]:
-                            if alias in ocp_names:
-                                self.nominal_traj_mode[alias] = \
-                                        self.nominal_traj_mode[name]
-                                del self.nominal_traj_mode[name]
-                                found_alias = True
-                                break
-                    if not found_alias:
-                        raise XMLException("Could not find variable " + name +
-                                           ", as referenced by " +
-                                           "nominal_traj_mode.")
-        
         # Solver options
         self.solver_options = self.IPOPT_options
         
@@ -1591,7 +1539,6 @@ class LocalDAECollocationAlg(AlgorithmBase):
         """
         times = {}
         times['sol'] = self.nlp.ipopt_solve()
-        self._write_result()
         
         # Calculate times
         times['tot'] = time.clock() - self._t0
@@ -1600,25 +1547,19 @@ class LocalDAECollocationAlg(AlgorithmBase):
         # Store times as data attribute
         self.times = times
         
-    def _write_result(self):
-        """
-        Helper method. Write result to file.
-        """
-        self.nlp.export_result_dymola(self.result_file_name)
-        
-        # Set result file name
-        if not self.result_file_name:
-            self.result_file_name = self.model.get_identifier()+'_result.txt'
-        
     def get_result(self):
         """ 
-        Load result data and create a LocalDAECollocationAlgResult object.
+        Write result to file, load result data and create a 
+        LocalDAECollocationAlgResult object.
         
         Returns::
         
             The LocalDAECollocationAlgResult object.
         """
-        resultfile = self.result_file_name
+        self.nlp.export_result_dymola()
+        
+        # Load result file
+        resultfile = self.model.get_identifier() + '_result.txt'
         res = ResultDymolaTextual(resultfile)
         
         # Get optimized element lengths
@@ -1633,7 +1574,7 @@ class LocalDAECollocationAlg(AlgorithmBase):
         return LocalDAECollocationAlgResult(self.model, resultfile, self.nlp,
                                             res, self.options, self.times,
                                             h_opt)
-    
+        
     @classmethod
     def get_default_options(cls):
         """ 
@@ -1737,34 +1678,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Type: None or pyjmi.common.io.ResultDymolaTextual
             Default: None
         
-        nominal_traj_mode --
-            Mode for computing scaling factors for each variable based on
-            nominal trajectories. Four possible modes:
-            
-            "attribute": Time-invariant, linear scaling based on Nominal
-            attribute
-            
-            "linear": Time-invariant, linear scaling
-            
-            "affine": Time-invariant, affine scaling
-            
-            "time-variant": Time-variant, linear scaling
-            
-            Option is a dictionary with variable names as keys and
-            corresponding scaling modes as values. For all variables
-            not occuring in the keys of the dictionary, the mode specified by
-            the "_default_mode" entry will be used, which by default is
-            "linear".
-            
-            Type: {str: str}
-            Default: {"_default_mode": "linear"}
-        
-        result_file_name --
-            Specifies the name of the file where the result is written. Setting
-            this option to an empty string results in a default file name that
-            is based on the name of the model class.
-            Default: ""
-        
         write_scaled_result --
             Return the scaled optimization result if set to True, otherwise
             return the unscaled optimization result. This option is 
@@ -1864,11 +1777,12 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Type: bool
             Default: False
         
-        measurement_data --
-            Data used to penalize, constraint or eliminate certain variables.
+        parameter_estimation_data --
+            Parameter estimation data used for solving parameter estimation
+            problems.
             
             Type: None or
-            pyjmi.optimization.casadi_collocation.MeasurementData
+            pyjmi.optimization.casadi_collocation.ParameterEstimationData
             Default: None
     
     Options are set by using the syntax for dictionaries::
@@ -1924,8 +1838,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'init_traj': None,
                 'variable_scaling': True,
                 'nominal_traj': None,
-                'nominal_traj_mode': {"_default_mode": "linear"},
-                'result_file_name': "",
                 'write_scaled_result': False,
                 'result_mode': "collocation_points",
                 'n_eval_points': 20,
@@ -1933,7 +1845,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'quadrature_constraint': True,
                 'eliminate_der_var': False,
                 'eliminate_cont_var': False,
-                'measurement_data': None,
+                'parameter_estimation_data': None,
                 'casadi_options_f': {"name": "NLP objective function"},
                 'casadi_options_g': {"name": "NLP constraint function"},
                 'IPOPT_options': {'generate_hessian': True}}

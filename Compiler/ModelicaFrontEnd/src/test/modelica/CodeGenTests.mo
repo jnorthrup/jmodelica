@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009-2013 Modelon AB
+    Copyright (C) 2009 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -69,7 +69,6 @@ package CodeGenTests
         GenericCodeGenTestCase(
             name="CodeGenTest1",
             description="Test of code generation",
-            variability_propagation=false,
             automatic_add_initial_equations=false,
             enable_structural_diagnosis=false,
             compliance_as_warning=true,
@@ -157,7 +156,6 @@ n_initial_equations: 0
         GenericCodeGenTestCase(
             name="CodeGenTest2",
             description="Test of code generation",
-            variability_propagation=false,
             template="$n_real_x$",
             generatedCode="1")})));
 	end CodeGenTest2;
@@ -206,7 +204,6 @@ n_initial_equations: 0
         GenericCodeGenTestCase(
             name="CodeGenTest5",
             description="Code generation for enumerations: number of enum vars of different types",
-            variability_propagation=false,
             template="
 n_enum_ci: $n_enum_ci$
 n_enum_cd: $n_enum_cd$
