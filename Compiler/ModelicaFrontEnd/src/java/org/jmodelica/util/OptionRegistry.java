@@ -331,34 +331,12 @@ public class OptionRegistry {
             ("use_jacobian_scaling",
             runtime,
             false,
-            "To be deprecated utilize use_jacobian_equilibration. If jacobian rows/columns should be automatically scaled in equation block solvers."),
-        USE_JACOBIAN_EQUILIBRATION
-            ("use_jacobian_equilibration",
-             runtime,
-             false,
-             "If jacobian equilibration should be utilized in equation block solvers to improve linear solver accuracy."),
-        ITERATION_VARIABLE_SCALING
-            ("iteration_variable_scaling",
-            runtime,
-            1,
-            "Iteration variables scaling mode in equation block solvers:"+
-            "0 - no scaling, 1 - scaling based on nominals only (default), 2 - utilize heuristict to guess nominal based on min,max,start, etc.",
-            0,2),
+            "If jacobian rows/columns should be automatically scaled in equation block solvers."),
         USE_AUTOMATIC_SCALING
             ("use_automatic_scaling",
             runtime,
             true,
-            "To be deprecated: Enable equations and variables automatic scaling in equation block solvers."),
-        USE_MANUAL_EQUATION_SCALING
-             ("use_manual_equation_scaling",
-              runtime,
-              false,
-              "To be deprecated: Enable equations scaling using manual values from annotations in equation block solvers."),
-        RESIDUAL_EQUATION_SCALING
-            ("residual_equation_scaling",
-             runtime,
-             1,
-             "Equations scaling mode in equation block solvers:0-no scaling,1-automatic scaling,2-manual scaling"),
+            "Enable equations and variables automatic scaling in equation block solvers."),
         RESCALE_EACH_STEP
             ("rescale_each_step",
                runtime,
@@ -374,12 +352,6 @@ public class OptionRegistry {
                 runtime,
                 false,
                 "Use Brent search to improve accuracy in solution of 1D non-linear equations."),
-        BLOCK_SOLVER_EXPERIMENTAL_MODE
-            ("block_solver_experimental_mode",
-                runtime,
-                0,
-                "Activate experimental features of equation block solvers",
-                0,255),
         NLE_SOLVER_DEFAULT_TOL
             ("nle_solver_default_tol",
                 runtime,
@@ -403,12 +375,6 @@ public class OptionRegistry {
                 0.0001,
                 "Tolerance safety factor for the non-linear equation block solver. Used when external solver specifies relative tolerance.",
                 1e-6,1.0),
-        NLE_SOLVER_MAX_ITER
-            ("nle_solver_max_iter",
-            runtime,
-            100,
-            "Maximum number of iterations for the equation block solver before failure",
-            2,500),
         EVENTS_DEFAULT_TOL
             ("events_default_tol",
               runtime,
@@ -421,6 +387,11 @@ public class OptionRegistry {
               0.0001,
               "Tolerance safety factor for the event iterations. Used when external solver specifies relative tolerance.",
               1e-6,1.0),
+        USE_MANUAL_EQUATION_SCALING
+              ("use_manual_equation_scaling",
+                runtime,
+                false,
+                "Enable equations scaling using manula values from annotations in equation block solvers."),
 		BLOCK_JACOBIAN_CHECK
 			("block_jacobian_check",
 			 runtime,

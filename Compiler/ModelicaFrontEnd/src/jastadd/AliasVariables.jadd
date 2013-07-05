@@ -509,13 +509,7 @@ aspect AliasVariables {
 				buf.append(fv.name());
 				if (withStart && fv.startAttributeSet()) {
 					buf.append("(start=");
-					CValue start;
-					try {
-						start = fv.startAttributeCValue();
-					} catch (ConstantEvaluationException e) {
-						start = CValue.UNKNOWN;
-					}
-					buf.append(start);
+					buf.append(fv.startAttributeCValue());
 					buf.append(")");
 				}
 				return buf.toString();

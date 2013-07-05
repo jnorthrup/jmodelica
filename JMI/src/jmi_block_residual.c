@@ -145,18 +145,11 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         jmi_real_t* real_vrs = (jmi_real_t*)calloc(block->n,sizeof(jmi_real_t));
         /* Initialize the work vectors */
         for(i=0; i < block->n; ++i) {
-            if(jmi->options.iteration_variable_scaling_mode == jmi_iter_var_scaling_heuristics) {
-                block->nominal[i] = BIG_REAL;
-            }
-            else {
-                block->nominal[i] = 1.0;
-            }
+            block->nominal[i] = BIG_REAL;
             block->max[i] = BIG_REAL;
             block->min[i] = -block->max[i];
         }
-        if(jmi->options.iteration_variable_scaling_mode != jmi_iter_var_scaling_none) {
-            block->F(jmi,block->nominal,block->res,JMI_BLOCK_NOMINAL);
-        }
+        block->F(jmi,block->nominal,block->res,JMI_BLOCK_NOMINAL);
         block->F(jmi,block->min,block->res,JMI_BLOCK_MIN);
         block->F(jmi,block->max,block->res,JMI_BLOCK_MAX);
         block->F(jmi,block->initial,block->res,JMI_BLOCK_INITIALIZE);
@@ -259,74 +252,61 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         iter = 0;
         converged = 0;
         ef = 0;
-        if(jmi->options.block_solver_experimental_mode & jmi_block_solver_experimental_converge_switches_first) {
-            while(1) {
-                jmi_log_node_t iter_node;
-                iter += 1;
-    
-                iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "SwitchIteration", "Local iteration <iter:%d> at <t:%E>",
-                                              iter, jmi_get_t(jmi)[0]);
-                
-                /* Evaluate the block to update dependent variables if any */
-                ef = block->F(jmi,block->x,block->res,JMI_BLOCK_EVALUATE);
-                if(ef != 0) {
-                    jmi_log_fmt(jmi->log, iter_node, logError, "Problem calling residual function <block:%d, iter:%d> at <t:%E>",
-                                block->index, iter, jmi_get_t(jmi)[0]);
-                    jmi_log_leave(jmi->log, iter_node);
-                    break;
-                }
-                
-                jmi_write_back_to_z_val(jmi); 
-                
-                retval = jmi_evaluate_switches(jmi,switches,mode_sw);
-                jmi_write_back_to_z(jmi);
-                
-                ef = block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
-                if(ef != 0) { jmi_log_leave(jmi->log, iter_node); break; }
-                jmi_write_back_to_z_val(jmi);
-                
-                jmi_log_reals(jmi->log, iter_node, logInfo, "ivs", block->x, block->n);
-                jmi_log_reals(jmi->log, iter_node, logInfo, "switches", switches, nbr_sw);
-                jmi_log_reals(jmi->log, iter_node, logInfo, "booleans", booleans, jmi->n_boolean_d);
-                
-                /* Check for consistency */
-                if (jmi_compare_switches(&sw_old[(iter-1)*nbr_sw],switches,nbr_sw) && jmi_compare_switches(&bool_old[(iter-1)*nbr_bool],booleans,nbr_bool)){
-                    jmi_log_fmt(jmi->log, iter_node, logInfo, "Found consistent switched state before solving at <t:%g>",
-                                jmi_get_t(jmi)[0]);
-                    break;
-                }
-                else {
-                    /* Check for infinite loop */
-                    if((iter >= nbr_allocated_iterations/2) &&  jmi_check_infinite_loop(sw_old,switches,nbr_sw,iter)){
-                        jmi_log_fmt(jmi->log, iter_node, logError, "Detected infinite loop in fixed point iteration at "
-                                    "<t:%g>", jmi_get_t(jmi)[0]);
-                        jmi_log_leave(jmi->log, iter_node);
-                        break;
-                    }
-                    if(iter >= nbr_allocated_iterations){
-                        jmi_log_fmt(jmi->log, iter_node, logError, "Failed to converge during switches iteration due to too many iterations at <t:%E>", jmi_get_t(jmi)[0]);
-                        jmi_log_leave(jmi->log, iter_node);
-                        break;
-                    }
-                    
-                    /* Store the new switches */
-                    memcpy(&sw_old[iter*nbr_sw],switches,nbr_sw*sizeof(jmi_real_t));
-                    memcpy(&bool_old[iter*nbr_bool],booleans,nbr_bool*sizeof(jmi_real_t));
-                }
-                jmi_log_leave(jmi->log, iter_node);
-            }
-        }
-        
-        iter = 0;
         while (1){
             jmi_log_node_t iter_node;
             iter += 1;
 
+#if 0
+            iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "BlockIteration", "Initial iteration <block:%d iter:%d> at <t:%E>",
+                                          block->index, iter, jmi_get_t(jmi)[0]);
+            
+
+            /* Evaluate the block to update dependent variables if any */
+            block->F(jmi,block->x,block->res,JMI_BLOCK_EVALUATE);
+
+            jmi_write_back_to_z_val(jmi); 
+            
+            retval = jmi_evaluate_switches(jmi,switches,mode_sw);
+            jmi_write_back_to_z(jmi);
+        
+            block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
+            jmi_write_back_to_z_val(jmi);
+            
+            jmi_log_reals(jmi->log, logInfo, "ivs", block->x, block->n);
+            jmi_log_reals(jmi->log, logInfo, "switches", switches, nbr_sw);
+            jmi_log_reals(jmi->log, logInfo, "booleans", booleans, jmi->n_boolean_d);
+            
+            /* Check for consistency */
+            if (jmi_compare_switches(&sw_old[(iter-1)*nbr_sw],switches,nbr_sw) && jmi_compare_switches(&bool_old[(iter-1)*nbr_bool],booleans,nbr_bool)){
+                jmi_log_fmt(jmi->log, logInfo, "Found consistent switched state before solving at <t:%g>",
+                            jmi_get_t(jmi)[0]);
+            }
+            else {
+                /* Check for infinite loop */
+                if((iter >= nbr_allocated_iterations/2) &&  jmi_check_infinite_loop(sw_old,switches,nbr_sw,iter)){
+                    jmi_log_fmt(jmi->log, logError, "Detected infinite loop in fixed point iteration at "
+                                "<t:%g>", jmi_get_t(jmi)[0]);
+                    jmi_log_leave(jmi->log, iter_node);
+                    break;
+                }
+                if(iter >= nbr_allocated_iterations){
+                    jmi_log_fmt(jmi->log, logError, "Failed to converge during initial fixed point iteration due to too many iterations at <t:%E>", jmi_get_t(jmi)[0]);
+                    jmi_log_leave(jmi->log, iter_node);
+                    break;
+                }
+
+                /* Store the new switches */
+                memcpy(&sw_old[iter*nbr_sw],switches,nbr_sw*sizeof(jmi_real_t));
+                memcpy(&bool_old[iter*nbr_bool],booleans,nbr_bool*sizeof(jmi_real_t));        
+                continue;
+            }
+            jmi_log_leave(jmi->log, iter_node);
+#endif            
+
             iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "BlockIteration", "Local iteration <iter:%d> at <t:%E>",
                                           iter, jmi_get_t(jmi)[0]);
             /* Solve block */
-            ef = block->solve(block); 
-            if (ef!=0){ jmi_log_leave(jmi->log, iter_node); break; }
+            ef = block->solve(block); if (ef!=0){ break; }
             jmi_write_back_to_z_val(jmi);
             
             retval = jmi_evaluate_switches(jmi,switches,mode_sw);
@@ -422,7 +402,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
                 block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
                 jmi_write_back_to_z_val(jmi);
                 
-                ef = block->solve(block); if (ef!=0){ jmi_log_leave(jmi->log, iter_node); break; }
+                ef = block->solve(block); if (ef!=0){ break; }
                 jmi_write_back_to_z_val(jmi);
                 
                 memcpy(x_new, block->x, block->n*sizeof(jmi_real_t));
@@ -696,7 +676,26 @@ int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_blo
     dgetrs_(&trans, &n_x, &i, current_block->jac, &n_x, current_block->ipiv, current_block->dv, &n_x, &INFO);
 
     /* Write back results into the global dz vector. */
+/*    ef |= current_block->dF(jmi, current_block->x, current_block->dx, current_block->res, current_block->dv, JMI_BLOCK_EVALUATE_INACTIVE);
+*/
     ef |= current_block->dF(jmi, current_block->x, current_block->dx, current_block->res, current_block->dv, JMI_BLOCK_WRITE_BACK);
+  /*   ef |= current_block->dF(jmi, current_block->x, current_block->dx,current_block->res, current_block->dx, JMI_BLOCK_EVALUATE_INACTIVE);
+   dgetrs_(&trans, &n_x, &i, current_block->jac, &n_x, current_block->ipiv, current_block->dv, &n_x, &INFO);
+    ef |= current_block->dF(jmi, current_block->x, current_block->dx, current_block->res, current_block->dv, JMI_BLOCK_WRITE_BACK);
+ */
+#if 0
+    if(jmi->dz_active_index) {
+        jmi_real_t* active_dz = jmi->dz_active_variables_buf[jmi->dz_active_index-1];
+        jmi_real_t* store_dz = jmi->dz[0]; 
+        jmi->dz[0] = active_dz;
+        ef |= current_block->dF(jmi, current_block->x, current_block->dx,current_block->res, current_block->dv, JMI_BLOCK_EVALUATE_INACTIVE);
+        /* Perform a back-solve */
+        dgetrs_(&trans, &n_x, &i, current_block->jac, &n_x, current_block->ipiv, current_block->dv, &n_x, &INFO);
+        /* Write back results into the global dz vector. */
+        ef |= current_block->dF(jmi, current_block->x, current_block->dx, current_block->res, current_block->dv, JMI_BLOCK_WRITE_BACK);
+        jmi->dz[0] = store_dz; 
+    }
+#endif
     
     return ef;
 }

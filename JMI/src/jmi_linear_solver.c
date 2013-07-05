@@ -58,10 +58,6 @@ int jmi_linear_solver_solve(jmi_block_residual_t * block){
     if (solver->cached_jacobian != 1) {
 
         /*printf("** Computing factorization in jmi_linear_solver_solve for block %d\n",block->index);*/
-          /*
-             TODO: this code should be merged with the code used in kinsol interface module.
-             A regularization strategy for simple cases singular jac should be introduced.
-          */
         info = block->F(jmi,NULL,solver->factorization,JMI_BLOCK_EVALUATE_JACOBIAN);
         if(info) {
             if(block->init) {
@@ -74,7 +70,7 @@ int jmi_linear_solver_solve(jmi_block_residual_t * block){
             }
             return -1;
         }
-        if((n_x>1)  && block->jmi->options.use_jacobian_equilibration_flag) {
+        if((n_x>1)  && block->jmi->options.use_jacobian_scaling_flag) {
             double rowcnd, colcnd, amax;
             dgeequ_(&n_x, &n_x, solver->factorization, &n_x, solver->rScale, solver->cScale, 
                     &rowcnd, &colcnd, &amax, &info);
@@ -174,7 +170,6 @@ int jmi_linear_solver_evaluate_jacobian(jmi_block_residual_t* block, jmi_real_t*
     /* jmi_linear_solver_t* solver = block->solver; */
     jmi_t * jmi = block->jmi;
     int i;
-    /* TODO: This code does not propagate errors. Besides it should also be merged with jmi_linear_solver_solve() */
     block->F(jmi,NULL,jacobian,JMI_BLOCK_EVALUATE_JACOBIAN);
     for (i=0;i<block->n*block->n;i++) {
         jacobian[i] = -jacobian[i];
