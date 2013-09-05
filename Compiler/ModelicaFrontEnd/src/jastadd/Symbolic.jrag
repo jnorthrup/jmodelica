@@ -428,39 +428,33 @@ aspect Derivatives {
     
     }
 
-	syn Collection<FAbstractEquation> FAbstractEquation.diff(String name) {
-		throw new EquationDifferentiationException(this, "Cannot differentate the equation:\n   " + prettyPrint(""));
+	public FAbstractEquation FAbstractEquation.diff(String name) {
+		throw new EquationDifferentiationException(this, 
+				"Cannot differentate the equation:\n   " + prettyPrint(""));
 	}
 	
-	eq FEquation.diff(String name) {
+	public FAbstractEquation FEquation.diff(String name) {
 		try {
-			return Arrays.asList(dynamicFAbstractEquation(new FEquation(getLeft().diff(name), getRight().diff(name))));
+			return dynamicFAbstractEquation(
+					new FEquation(getLeft().diff(name), getRight().diff(name)));
 		} catch (ExpressionDifferentiationException e) {
-			throw new EquationDifferentiationException(this, e.toQuotedString() + " in equation:\n   " + this);
+			throw new EquationDifferentiationException(this,
+			    e.toQuotedString() + " in equation:\n   " + this);
 		}
 	}
 	
-	eq FFunctionCallEquation.diff(String name) {
+	public FAbstractEquation FFunctionCallEquation.diff(String name) {
 		List lefts = new List();
 		for (FFunctionCallLeft l : getLefts()) {
 			Opt lopt = l.hasFExp() ? new Opt(l.getFExp().diff(name)) : new Opt();
 			lefts.add(new FFunctionCallLeft(lopt));
 		}
 		try {
-			FExp diffedCall = getCall().diff(name);
-			if (diffedCall.isLiteralZero()) {
-				Collection<FAbstractEquation> res = new ArrayList<FAbstractEquation>();
-				for (FFunctionCallLeft left : getLefts())
-					for (FIdUse fIdUse : left.assignedFIdUses())
-						res.add(dynamicFAbstractEquation(
-								new FEquation(new FIdUseExp(fIdUse.fullCopy()), fIdUse.type().zeroLiteral())));
-				return res;
-			} else {
-				return Arrays.asList(dynamicFAbstractEquation(
-						new FFunctionCallEquation(lefts, (FAbstractFunctionCall)diffedCall)));
-			}
+			return dynamicFAbstractEquation(new FFunctionCallEquation(lefts, 
+					(FAbstractFunctionCall) getCall().diff(name)));
 		} catch (ExpressionDifferentiationException e) {
-			throw new EquationDifferentiationException(this, e.toQuotedString() + " in equation:\n   " + this);
+			throw new EquationDifferentiationException(this,
+				    e.toQuotedString() + " in equation:\n   " + this);
 		}
 	}
 	
@@ -674,10 +668,6 @@ aspect Derivatives {
 			throw new ExpressionDifferentiationException(this);
 	}
 
-	public FExp FHomotopyExp.diff(String name) {
-		return dynamicFExp(getActual().diff(name));
-	}
-	
 	public FExp FNoEventExp.diff(String name) {
 		return new FNoEventExp(getFExp().diff(name));
 	}
@@ -692,12 +682,6 @@ aspect Derivatives {
 		} 
 		FExp e = getIfExp().copySymbolic();
 		return dynamicFExp(new FIfExp(e, td, ed));
-	}
-	
-	public FExp FMinMaxExp.diff(String name) {
-		return dynamicFExp(createNode(
-				dynamicFExp((getX().diff(name))), 
-				dynamicFExp((getY().diff(name)))));
 	}
 	
 	public FExp FIdUseExp.diff(String name) {

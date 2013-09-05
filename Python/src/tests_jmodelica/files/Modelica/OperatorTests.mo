@@ -1,9 +1,5 @@
 package OperatorTests "Some tests for operators" 
 
-model HomotopyTest
-  Real x = homotopy(time,time*2);
-end HomotopyTest;
-
 model SemiLinearTest
   Real x,y;
 equation

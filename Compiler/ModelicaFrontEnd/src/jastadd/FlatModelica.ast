@@ -603,11 +603,6 @@ FConnRooted : FConnBoolOp;
 FConnRootedDep : FConnRooted;
 
 /**
- * The cardinality() function-like operator.
- */
-FCardinality : FUnaryBuiltIn;
-
-/**
  * \brief For equation clause.
  */
 FForClauseE : FAbstractEquation ::= FForIndex* FAbstractEquation*;
@@ -1464,11 +1459,6 @@ FMatrixExp : FDimensionConvert;
 FTranspose : FUnaryBuiltIn;
 
 /**
- * \brief Symmetric built-in function.
- */
-FSymmetric : FUnaryBuiltIn;
-
-/**
  * \brief Cross built-in function.
  */
 FCross : FBuiltInFunctionCall ::= X:FExp Y:FExp;
@@ -1561,11 +1551,6 @@ FProductExp : FReductionExp;
 /**
  * \brief SemiLinear built-in function.
  */
-FHomotopyExp : FBuiltInFunctionCall ::= Actual:FExp Simplified:FExp;
-
-/**
- * \brief SemiLinear built-in function.
- */
 FSemiLinearExp : FBuiltInFunctionCall ::= X:FExp PosSlope:FExp NegSlope:FExp;
 
 /**
@@ -1582,12 +1567,6 @@ FInStream : FStreamBuiltIn;
  * \brief ActualStream built-in function.
  */
 FActualStream : FStreamBuiltIn;
-
-/**
- * \brief getInstanceName built-in function.
- */
-FGetInstanceName : FNoArgBuiltIn;
-
 
 /**
  * \brief Dummy node for unsupported built-in functions.

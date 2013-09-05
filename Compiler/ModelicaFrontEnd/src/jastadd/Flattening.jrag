@@ -83,7 +83,6 @@ aspect Flattening {
 		flattenInstClassDeclExtra(fc);
 		fc.genConnectionEquations();
 		fc.createExperiment(annotation("experiment"));
-		root().breakOnErrors();
     	endStep("flattenInstClassDecl()");
     }
     
@@ -1905,30 +1904,24 @@ aspect FlatExpressions {
 	public FExp FUnaryExp.flatten(FQName prefix)   { return createNode(getFExp().flatten(prefix)); }
 	public FExp FLitExp.flatten(FQName prefix)     { return fullCopy(); }
 	public FExp FEnumLitExp.flatten(FQName prefix) { return new FEnumLitExp(getEnum(), getValue(), null); }
-	
-	public FExp FModFuncExp.flatten(FQName prefix) {
-		FExp toRound = new FDivExp(getX().flatten(prefix), getY().flatten(prefix));
-		FExp rounded = type().isInteger() ? new FIntegerFuncExp(toRound) : new FFloorFuncExp(toRound);
-		return new FSubExp(getX().flatten(prefix), new FMulExp(rounded, getY().flatten(prefix)));
-	}
 		
-	public FExp FEventGenExp.flatten(FQName prefix)    { return createNode(getX().flatten(prefix)); }
-	public FExp FBinEventGenExp.flatten(FQName prefix) { return createNode(getX().flatten(prefix), getY().flatten(prefix)); }
-	public FExp FRemFuncExp.flatten(FQName prefix)     { return new FSubExp(getX().flatten(prefix), new FMulExp(new FDivFuncExp(getX().flatten(prefix), getY().flatten(prefix)), getY().flatten(prefix)));}
-	public FExp FUnaryBuiltIn.flatten(FQName prefix)   { return createNode(getFExp().flatten(prefix)); }
-	public FExp FEdgeExp.flatten(FQName prefix)        { return new FAndExp(getFExp().flatten(prefix), new FNotExp(new FPreExp(getFExp().flatten(prefix)))); }
-	public FExp FChangeExp.flatten(FQName prefix)      { return new FNeqExp(getFExp().flatten(prefix), new FPreExp(getFExp().flatten(prefix))); }
-
-	public FExp                 FNoArgBuiltIn.flatten(FQName prefix)             { return createEmptyNode(); }
+	public FExp                 FEventGenExp.flatten(FQName prefix)              { return createNode(getX().flatten(prefix)); }
+	public FExp                 FBinEventGenExp.flatten(FQName prefix)           { return createNode(getX().flatten(prefix),getY().flatten(prefix)); }
+	public FExp                 FModFuncExp.flatten(FQName prefix)               {
+		if (type().isInteger()) {
+			return new FSubExp(getX().flatten(prefix), new FMulExp(new FIntegerFuncExp(new FDivExp(getX().flatten(prefix),getY().flatten(prefix))),getY().flatten(prefix)));
+		} else {	
+			return new FSubExp(getX().flatten(prefix), new FMulExp(new FFloorFuncExp(new FDivExp(getX().flatten(prefix),getY().flatten(prefix))),getY().flatten(prefix)));
+		}
+	}
+	public FExp                 FRemFuncExp.flatten(FQName prefix)               { return new FSubExp(getX().flatten(prefix), new FMulExp(new FDivFuncExp(getX().flatten(prefix),getY().flatten(prefix)),getY().flatten(prefix)));}
+	public FExp                 FUnaryBuiltIn.flatten(FQName prefix)             { return createNode(getFExp().flatten(prefix)); }
+	public FExp                 FEdgeExp.flatten(FQName prefix)                  { return new FAndExp(getFExp().flatten(prefix),new FNotExp(new FPreExp(getFExp().flatten(prefix)))); }
+	public FExp                 FChangeExp.flatten(FQName prefix)                { return new FNeqExp(getFExp().flatten(prefix),new FPreExp(getFExp().flatten(prefix))); }
+	public FBuiltInFunctionCall FNoArgBuiltIn.flatten(FQName prefix)             { return createEmptyNode(); }
 	public FBuiltInFunctionCall FMathematicalFunctionCall.flatten(FQName prefix) { return createNode(getFExp().flatten(prefix)); }
 	public FAtan2Exp            FAtan2Exp.flatten(FQName prefix)                 { return new FAtan2Exp(getFExp().flatten(prefix), getY().flatten(prefix)); }
-	public FHomotopyExp         FHomotopyExp.flatten(FQName prefix)              { return new FHomotopyExp(getActual().flatten(prefix), getSimplified().flatten(prefix)); }
 	public FSemiLinearExp       FSemiLinearExp.flatten(FQName prefix)            { return new FSemiLinearExp(getX().flatten(prefix), getPosSlope().flatten(prefix), getNegSlope().flatten(prefix)); }
-	public FExp                 FGetInstanceName.flatten(FQName prefix)          { return new FStringLitExp(myInstFullClassDecl().name() + "." + prefix.name()); }
-	
-	inh InstFullClassDecl ASTNode.myInstFullClassDecl();
-	eq Root.getChild().myInstFullClassDecl() = null;
-	eq InstFullClassDecl.getChild().myInstFullClassDecl() = this;
 	
 	public FUnsupportedBuiltIn FUnsupportedBuiltIn.flatten(FQName prefix) { throw new UnsupportedOperationException(); }
 	
@@ -1937,18 +1930,11 @@ aspect FlatExpressions {
 	public FSampleExp    FSampleExp.flatten(FQName prefix)    { return new FSampleExp(getOffset().flatten(prefix), getInterval().flatten(prefix)); }
 	public FSmoothExp    FSmoothExp.flatten(FQName prefix)    { return new FSmoothExp(getOrder().flatten(prefix), getFExp().flatten(prefix)); }
 	
-	
 	public FAssert FAssert.flatten(FQName prefix) {
 		Opt level = hasLevel() ? new Opt(getLevel().flatten(prefix)) : new Opt();
 		return new FAssert(getTest().flatten(prefix), getMsg().flatten(prefix), level); 
 	}
 	                     
-	public FCardinality FCardinality.flatten(FQName prefix) { 
-	    FCardinality res = new FCardinality(getFExp().flatten(prefix));
-	    res.rewriteCardinality = true;
-	    return res;
-	}
-	
 	public FConnectionsOp FConnectionsOp.flatten(FQName prefix) { throw new UnsupportedOperationException(); }
 	public FConnectionsOp FConnBoolOp.flatten(FQName prefix) {
 		FConnBoolOp res = createNode(getA().flatten(prefix));

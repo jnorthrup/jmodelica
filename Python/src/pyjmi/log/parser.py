@@ -47,13 +47,11 @@ def parse_value(text):
         return int(text)
     elif floatingpoint_pattern.match(text):
         return float(text)
+    elif quoted_string_pattern.match(text):
+        return text[1:-1].replace('""','"')
     else:
-        if quoted_string_pattern.match(text):
-            text = text[1:-1].replace('""','"')
-        else:
-            assert '"' not in text            
-#        return text
-        return text.encode('ascii', 'xmlcharrefreplace') # avoid printing all strings as u'...'
+        assert '"' not in text
+        return text
 
 def parse_vector(text):
     text = text.strip()
@@ -95,7 +93,7 @@ class ContentHandler(sax.ContentHandler):
 
     def create_comment(self):
         if len(self.chars) > 0:
-            comment = self.take_chars()
+            comment = self.take_chars().strip()  # want to remove at least a final newline
             if comment != '':
                 self.nodes[-1].add(Comment(comment))
 

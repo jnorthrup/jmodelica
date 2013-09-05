@@ -45,13 +45,12 @@ class Node(object):
         assert isinstance(type, basestring)
         self.type  = type
         self.nodes = []
-        self.keys  = []
         self.dict  = {}
 
     def add(self, node, key=None):
-        self.keys.append(key)
-        self.nodes.append(node)
-        if key is not None:
+        if key is None:
+            self.nodes.append(node)
+        else:
             if key in self.dict:
                 # Duplicate attribute value ==> record no value. (should not happen)
                 # consider: Is None the best to use for this?

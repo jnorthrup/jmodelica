@@ -247,26 +247,51 @@ end ElseWhenEq_ComplErr;
 
 model UnsupportedBuiltins1_ComplErr
  equation
-  delay(1);
-  reinit(1);
+  symmetric(1 + "2");
 
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="UnsupportedBuiltins1_ComplErr",
 			description="Compliance error for unsupported builtins",
 			errorMessage="
-2 errors found:
+1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 214, column 3:
-  The delay() function-like operator is not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 216, column 3:
-  The reinit() function-like operator is not supported
+Compliance error at line 171, column 3:
+  The symmetric() function-like operator is not supported
 ")})));
 end UnsupportedBuiltins1_ComplErr;
 
 
 model UnsupportedBuiltins2_ComplErr
+ equation
+  String();
+  delay(1);
+  cardinality();
+  reinit(1);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="UnsupportedBuiltins2_ComplErr",
+			description="Compliance error for unsupported builtins",
+			errorMessage="
+8 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Semantic error at line 212, column 3:
+  The class String is not a function
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 218, column 3:
+  The delay() function-like operator is not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 219, column 3:
+  The cardinality() function-like operator is not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 287, column 3:
+  The reinit() function-like operator is not supported
+")})));
+end UnsupportedBuiltins2_ComplErr;
+
+
+model UnsupportedBuiltins3_ComplErr
   parameter Boolean x;
  equation
   sign(1);
@@ -286,7 +311,7 @@ model UnsupportedBuiltins2_ComplErr
 
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
-			name="UnsupportedBuiltins2_ComplErr",
+			name="UnsupportedBuiltins3_ComplErr",
 			description="Compliance error for unsupported builtins",
 			generate_ode=false,
 			generate_dae=true,
@@ -335,24 +360,8 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 288, column 3:
   The terminate() function-like operator is currently only supported when compiling FMUs
 ")})));
-end UnsupportedBuiltins2_ComplErr;
+end UnsupportedBuiltins3_ComplErr;
 
-model UnsupportedBuiltins_WarnErr
- equation
-  homotopy(1,1);
-
-	annotation(__JModelica(UnitTesting(tests={
-		WarningTestCase(
-			name="UnsupportedBuiltins_WarnErr",
-			description="Compliance error for unsupported builtins",
-			errorMessage="
-1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-At line 306, column 3:
-  The homotopy() function like operator is not fully supported. It is replaced with its first argument.
-
-")})));
-end UnsupportedBuiltins_WarnErr;
 
 model ArrayCellMod_ComplErr
  model A
@@ -711,7 +720,6 @@ model Error2
     output Real y[size(x,2),size(x,1)];
   algorithm
 	y := transpose(x);
-	y := symmetric(x);
 	b := identity(n);
 	c := linspace(1,5,n);
 	a := min(c);
@@ -733,9 +741,6 @@ model Error2
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 736, column 7:
   Unknown sizes in operator transpose() is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 736, column 7:
-  Unknown sizes in operator symmetric() is not supported in functions
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 737, column 7:
   Unknown size arg in operator identity() is not supported in functions

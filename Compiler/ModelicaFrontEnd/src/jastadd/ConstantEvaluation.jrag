@@ -1263,7 +1263,6 @@ aspect ConstantEvaluation {
   eq FLeqExp.cevalCalc() = cevalType().leq(getLeft().ceval(), getRight().ceval());
   
   eq FIfExp.cevalCalc() = cevalSelectExp().ceval();
-  eq FHomotopyExp.cevalCalc()   = getActual().ceval();
   eq FSemiLinearExp.cevalCalc() = type().mul(getX().ceval(),cevalSelectExp().ceval());
   
   syn FExp FIfExp.cevalSelectExp() =
@@ -1285,9 +1284,6 @@ aspect ConstantEvaluation {
   }
   
   eq FNdimsExp.cevalCalc() = new CValueInteger(getFExp().ndims());
-  
-  // Rewritten after flattening - give dummy value here to prevent error messages about structural parameters
-  eq FCardinality.cevalCalc() = new CValueInteger(1);
   
   eq FConnectionsOp.cevalCalc() {
 	  throw new ConstantEvaluationException();

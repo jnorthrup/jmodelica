@@ -120,7 +120,6 @@ aspect TransformCanonical {
 		if (root().options.getBooleanOption("automatic_add_initial_equations")) {
 			// Equations are added as part of this this method
 			computeMatchingsAndBLT();
-			computeInteractiveFMUIfSet();
 			daeBLT.complianceCheck();
 		}
 	
@@ -467,7 +466,6 @@ aspect TransformCanonical {
 	 */
 	public abstract class AbstractEquationBlock {
 	
-		private Set<AbstractEquationBlock> allPredecessors = null;
 		private Set<AbstractEquationBlock> predecessors = new LinkedHashSet<AbstractEquationBlock>();
 		private Set<AbstractEquationBlock> successors = new LinkedHashSet<AbstractEquationBlock>();
 		private Set<FVariable> dependsOnVariables = null; 
@@ -579,10 +577,14 @@ aspect TransformCanonical {
 		}
 
 		public Collection<AbstractEquationBlock> getAllPredecessors() {
-			if (allPredecessors == null) {
-				allPredecessors = new LinkedHashSet<AbstractEquationBlock>(); 
-				for (AbstractEquationBlock eb : getPredecessors()) {
-					allPredecessors.addAll(eb.getAllPredecessors());
+			java.util.List<AbstractEquationBlock> allPredecessors = new ArrayList<AbstractEquationBlock>(); 
+			for (AbstractEquationBlock eb : getPredecessors()) {
+				for (AbstractEquationBlock ebb : eb.getAllPredecessors()) {
+					if (!allPredecessors.contains(ebb)) {
+						allPredecessors.add(ebb);
+					}
+				}
+				if (!allPredecessors.contains(eb)) {
 					allPredecessors.add(eb);
 				}
 			}
