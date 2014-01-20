@@ -38,9 +38,7 @@ typedef enum {
     initializationMode,
     eventMode,
     continuousTimeMode,
-    instantiatedMode,
-	slaveInitialized,
-	terminated
+    instantiatedMode
 } fmi_mode_t;
 
 typedef struct fmi2_me_t fmi2_me_t;  /**< \brief Forward declaration of struct. */

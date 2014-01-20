@@ -15,12 +15,12 @@
 */
 
 /**
- * Root node for flat Modelica models.
+ * \brief Root node for flat Modelica models.
  */
 FlatRoot : Root ::= FClass;
 
 /**
- * A flat Modelica model containing variables, initial equations,
+ * \brief A flat Modelica model containing variables, initial equations,
  * DAE equations and functions.
  *
  * FClass corresponds to a flattened Modelica model and contains essentially
@@ -42,7 +42,7 @@ FClass : BaseNode ::= FQName
                       DummyVariable:FVariable*;
 
 /**
- * A flattened user-defined function.
+ * \brief A flattened user-defined function.
  *
  * Results from a class with the restriction "function" and an algorithm block.
  */
@@ -63,7 +63,7 @@ FConstructorDecl : FFunctionDecl;
 FDestructorDecl : FFunctionDecl;
 
 /**
- * A derivative function reference.
+ * \brief A derivative function reference.
  * 
  * The information in this node is extracted from the derivative 
  * annotation in a function declaration.
@@ -71,12 +71,12 @@ FDestructorDecl : FFunctionDecl;
 FDerivativeFunction : BaseNode ::= Name:FIdUse <Order:int> NoDerivative:FIdUse* ZeroDerivative:FIdUse*;
 
 /**
- * A flattenend record declaration.
+ * \brief A flattenend record declaration.
  */
 FRecordDecl : BaseNode ::= FQName FVariable*;
 
 /**
- * A flattenend enumeration declaration.
+ * \brief A flattenend enumeration declaration.
  */
 FEnumDecl : BaseNode ::= Name:FIdDecl FEnumSpecification [FStringComment];
 abstract FEnumSpecification : BaseNode;
@@ -85,12 +85,12 @@ FEnumUnspecified : FEnumSpecification;
 FEnumLiteral : FAbstractVariable ::= Name:FIdUse [FStringComment];
 
 /**
- * Abstract base class for flat variables.
+ * \brief Abstract base class for flat variables.
  */
 abstract FAbstractVariable : BaseNode;
 
 /**
- * A flat variable in a function.
+ * \brief A flat variable in a function.
  */
 FFunctionVariable : FAbstractVariable ::= [FTypePrefixInputOutput]
                                           Type:FType
@@ -99,17 +99,17 @@ FFunctionVariable : FAbstractVariable ::= [FTypePrefixInputOutput]
                                           <Order:int>;
 
 /**
- * An array variable in a function. 
+ * \brief An array variable in a function. 
  */
 FFunctionArray : FFunctionVariable;
 
 /**
- * A flat variable corresponding to an unknown declaration.
+ * \brief A flat variable corresponding to an unknown declaration.
  */
 UnknownFVariable : FAbstractVariable;
 
 /**
- * A class representing a flattened Modelica variable.
+ * \brief A class representing a flattened Modelica variable.
  *
  * FVariable contains information about the variable's visibility (public
  * or protected), variability (parameter, discrete or continuous) and causality
@@ -135,17 +135,17 @@ abstract FVariable : FAbstractVariable ::= FVisibilityType
 FDerivedType : BaseNode ::= <Name> BaseType:FType FAttribute*;
  
 /**
- * Base class for variable type prefixes.
+ * \brief Base class for variable type prefixes.
  */
 abstract FTypePrefix : BaseNode;
 
 /**
- * Base class for variability type prefixes.
+ * \brief Base class for variability type prefixes.
  */
 abstract FTypePrefixVariability : FTypePrefix;
 
 /**
- * Continuous (default) variability.
+ * \brief Continuous (default) variability.
  *
  * Continuous is not a valid prefix but is used to identify expressions that 
  * are not declared as parameters, constants, or discrete.
@@ -153,12 +153,12 @@ abstract FTypePrefixVariability : FTypePrefix;
 FContinuous : FTypePrefixVariability;
 
 /**
- * Discrete variability.
+ * \brief Discrete variability.
  */
 FDiscrete : FTypePrefixVariability;
 
 /**
- * Parameter variability.
+ * \brief Parameter variability.
  */
 FParameter : FTypePrefixVariability;
 
@@ -168,87 +168,87 @@ FParameter : FTypePrefixVariability;
 FStructParameter : FParameter;
 
 /**
- * Constant variability.
+ * \brief Constant variability.
  */
 FConstant : FTypePrefixVariability;
 
 /**
- * Base class for causality type prefixes.
+ * \brief Base class for causality type prefixes.
  */
 abstract FTypePrefixInputOutput : FTypePrefix;
 
 /**
- * Input causality.
+ * \brief Input causality.
  */ 
 FInput : FTypePrefixInputOutput;
 
 /**
- * Output causality.
+ * \brief Output causality.
  */
 FOutput : FTypePrefixInputOutput;
 
 /**
- * FVariable of type Real.
+ * \brief FVariable of type Real.
  */
 FRealVariable : FVariable;
 
 /**
- * FVariable of type Integer.
+ * \brief FVariable of type Integer.
  */
 FIntegerVariable : FVariable;
 
 /**
- * FVariable of type Boolean.
+ * \brief FVariable of type Boolean.
  */
 FBooleanVariable : FVariable;
 
 /**
- * FVariable of type String.
+ * \brief FVariable of type String.
  */
 FStringVariable : FVariable;
 
 /**
- * FVariable of type Enumeration.
+ * \brief FVariable of type Enumeration.
  */
 FEnumVariable : FVariable ::= Enum:FQName /Type:FType/;
 
 /**
- * An external object variable.
+ * \brief An external object variable.
  */
 FExternalObjectVariable : FVariable ::= [DestructorCall:FFunctionCallStmt];
 
 /**
- * Pre FVariable of type Real.
+ * \brief Pre FVariable of type Real.
  */
 FPreRealVariable : FRealVariable;
 
 /**
- * FVariable of type Integer.
+ * \brief FVariable of type Integer.
  */
 FPreIntegerVariable : FIntegerVariable;
 
 /**
- * FVariable of type Boolean.
+ * \brief FVariable of type Boolean.
  */
 FPreBooleanVariable : FBooleanVariable;
 
 /**
- * FVariable of type String.
+ * \brief FVariable of type String.
  */
 FPreStringVariable : FStringVariable;
 
 /**
- * FVariable of type Enumeration.
+ * \brief FVariable of type Enumeration.
  */
 FPreEnumVariable : FEnumVariable;
 
 /**
- * FVariable of a record type.
+ * \brief FVariable of a record type.
  */
 FRecordVariable : FVariable ::= Record:FQName /Type:FType/;
 
 /**
- * FVariable corresponding to a derivative variable.
+ * \brief FVariable corresponding to a derivative variable.
  *
  * Notice that this kind of variables does not result from flattening, but are
  * introduced when a flattened model is transformed into a canonical form.
@@ -262,22 +262,22 @@ FHDerivativeVariable : FDerivativeVariable ::= <Order:int>;
 FHDummyDerivativeVariable : FDummyDerivativeVariable ::= <Order:int>;
 
 /**
- * Node representing the visibility of an FVariable object.
+ * \brief Node representing the visibility of an FVariable object.
  */
 abstract FVisibilityType : BaseNode;
 
 /**
- * Public visibility.
+ * \brief Public visibility.
  */
 FPublicVisibilityType : FVisibilityType;
 
 /**
- * Protected visibility.
+ * \brief Protected visibility.
  */
 FProtectedVisibilityType : FVisibilityType;
 
 /**
- * Visibility for temporary variable. 
+ * \brief Visibility for temporary variable. 
  *
  * Used to mark temporary variables added during elaboration, e.g. to handle function calls returning array.
  */
@@ -289,12 +289,12 @@ FTemporaryVisibilityType : FPublicVisibilityType;
 FRuntimeOptionVisibilityType : FPublicVisibilityType;
 
 /**
- * Base class for all type nodes.
+ * \brief Base class for all type nodes.
  */
 abstract FType : BaseNode ::= <Size:Size>;
 
 /**
- * A record type.
+ * \brief A record type.
  * 
  * In the instance tree, the components are stored alphabetically, 
  * but in the flat tree they are in the order declared. 
@@ -302,12 +302,12 @@ abstract FType : BaseNode ::= <Size:Size>;
 FRecordType : FType ::= <Name> Component:FRecordComponentType* <FClass:FClass>;
 
 /**
- * The type description of a record component.
+ * \brief The type description of a record component.
  */
 FRecordComponentType : BaseNode ::= <Name> FType;
 
 /**
- * Base class for primitive type nodes.
+ * \brief Base class for primitive type nodes.
  *
  * The flat type system is based on explicit representations of the primitive
  * types Real, Integer, Boolean and String, where each type corresponds to
@@ -321,51 +321,51 @@ abstract FPrimitiveType : FType;
 FNoType : FType;
 
 /**
- * Base class for the numeric types Real and Integer.
+ * \brief Base class for the numeric types Real and Integer.
  */
 abstract FPrimitiveNumericType : FPrimitiveType;
 
 /**
- * Class representing the primitive type Real.
+ * \brief Class representing the primitive type Real.
  */
 FRealType : FPrimitiveNumericType;
 
 /**
- * Class representing the primitive type Integer.
+ * \brief Class representing the primitive type Integer.
  */
 FIntegerType : FPrimitiveNumericType;
 
 /**
- * Class representing the primitive type Boolean.
+ * \brief Class representing the primitive type Boolean.
  */
 FBooleanType : FPrimitiveType;
 
 /**
- * Class representing the primitive type String.
+ * \brief Class representing the primitive type String.
  */
 FStringType : FPrimitiveType;
 
 /**
- * Class representing an enumeration type.
+ * \brief Class representing an enumeration type.
  */
 FEnumType : FPrimitiveType ::= <Name> FEnumLiteralType*;
 
 FEnumLiteralType : FPrimitiveType ::= <Name>;
 
 /**
- * Class representing an unknown type.
+ * \brief Class representing an unknown type.
  *
  * Used to represent type errors. 
  */
 FUnknownType : FType;
 
 /**
- * Class representing the external object type.
+ * \brief Class representing the external object type.
  */
 FExternalObjectType : FPrimitiveType;
 
 /**
- * A qualified name supporting array subscripts.
+ * \brief A qualified name supporting array subscripts.
  *
  * Flattened variables and identifiers typically have qualified names, which
  * are represented by FQName. FQName contains a list of FQNamePart objects
@@ -411,7 +411,7 @@ FQNamePart : BaseNode ::= <Name:String>;
 FQNamePartArray : FQNamePart ::= FArraySubscripts;
 
 /**
- * Representation of an attribute for a built-in types.
+ * \brief Representation of an attribute for a built-in types.
  *
  * The attributes (start, unit etc.) of the built-in types are represented by
  * objects of the FAttribute class, which in turned are stored in the 
@@ -429,32 +429,32 @@ FAttribute : BaseNode ::= Type:FIdUse
                           FAttribute*;
 
 /**
- * An internal generated attribute that is removed during the scalarization step.
+ * \brief An internal generated attribute that is removed during the scalarization step.
  */
 FInternalAttribute : FAttribute;
 
 /**
- * Node representing the each prefix for attributes.
+ * \brief Node representing the each prefix for attributes.
  */
 FEach : BaseNode;
 
 /**
- * Node representing the final prefix for attributes.
+ * \brief Node representing the final prefix for attributes.
  */
 FFinal : BaseNode;
 
 /**
- * A string comment node.
+ * \brief A string comment node.
  */
 FStringComment : BaseNode ::= <Comment:String>;
 
 /**
- * Array subscripts used in FQNames.
+ * \brief Array subscripts used in FQNames.
  */
 FArraySubscripts : BaseNode ::= FSubscript*;
 
 /**
- * Base class for array subscripts.
+ * \brief Base class for array subscripts.
  */ 
 abstract FSubscript : BaseNode;
 
@@ -474,22 +474,22 @@ FExpSubscript : FSubscript ::= FExp /Expanded:Array/;
 FIntegerSubscript : FSubscript ::= <Value:int>;
 
 /**
- * Classifies a flattened equation as initial or normal.
+ * \brief Classifies a flattened equation as initial or normal.
  */
 abstract FEquationType : BaseNode;
 
 /**
- * Classifies a flattened equation as normal.
+ * \brief Classifies a flattened equation as normal.
  */
 FNormalEquation : FEquationType;
 
 /**
- * Classifies a flattened equation as initial.
+ * \brief Classifies a flattened equation as initial.
  */
 FInitialEquation : FEquationType;
 
 /**
- * Base class for flattened equations.
+ * \brief Base class for flattened equations.
  *
  * The NTA InitialEquation is used to represent default initial equations for
  * when equations that are not active during initialization.
@@ -502,17 +502,17 @@ abstract FAbstractEquation : BaseNode ::= Type:FEquationType
                                           [Nominal:FNominal];
 
 /**
- * Unsupported equation.
+ * \brief Unsupported equation.
  */
 FUnsupportedEquation : FAbstractEquation;
 
 /**
- * An equation consisting of a right and a left hand side expression.
+ * \brief An equation consisting of a right and a left hand side expression.
  */
 FEquation : FAbstractEquation ::= Left:FExp Right:FExp;
 
 /**
- * An equation consisting of a left hand side that is a list of component 
+ * \brief An equation consisting of a left hand side that is a list of component 
  *        references and a right hand side that is a function call.
  *
  * Example: (x, y, z) = func(a, b);
@@ -537,7 +537,7 @@ FNominal : BaseNode ::= Value:FExp;
 InstNominal : FNominal ::= [Enabled:FExp];
 
 /**
- * One of the left hand side variables in a function call equation. 
+ * \brief One of the left hand side variables in a function call equation. 
  *
  * Needed because it is allowed to leave places in the variable list empty.
  * Example: (x, , z) = func(a, b);
@@ -545,7 +545,7 @@ InstNominal : FNominal ::= [Enabled:FExp];
 FFunctionCallLeft : BaseNode ::= [FExp];
 
 /**
- * A flattened connect statement.
+ * \brief A flattened connect statement.
  *
  * Notice that FConnectClauses are not present in flattened models, where
  * connect statements has been transformed into regular equations, but only
@@ -604,7 +604,7 @@ FConnRootedDep : FConnRooted;
 FCardinality : FUnaryBuiltIn;
 
 /**
- * For equation clause.
+ * \brief For equation clause.
  */
 FForClauseE : FAbstractEquation ::= FForIndex* FAbstractEquation*;
 
@@ -634,7 +634,7 @@ FIfEquation : FIfWhenEquation;
 FElseEquation : FIfWhenElseEquation;
 
 /**
- * A flattened algorithm clause.
+ * \brief A flattened algorithm clause.
  */
 FAlgorithm : FAbstractEquation ::= FStatement*;
 
@@ -645,17 +645,17 @@ FAlgorithm : FAbstractEquation ::= FStatement*;
 FDerivativeAlgorithm : FAlgorithm ::=  <Order:int>;
 
 /**
- * Base class for statements in flattened algorithms.
+ * \brief Base class for statements in flattened algorithms.
  */
 abstract FStatement : BaseNode;
 
 /**
- * An assignment statement in the instance tree.
+ * \brief An assignment statement in the instance tree.
  */
 InstAssignStmt : FStatement ::= Left:FIdUseInstAccess Right:FExp;
 
 /**
- * A flattened assignment statement.
+ * \brief A flattened assignment statement.
  */
 FAssignStmt : FStatement ::= Left:FIdUseExp Right:FExp;
 
@@ -666,7 +666,7 @@ FAssignStmt : FStatement ::= Left:FIdUseExp Right:FExp;
 FDerivativeAssignStmt : FAssignStmt ::= <Order:int>;
 
 /**
- * A flattened function call statement.
+ * \brief A flattened function call statement.
  * 
  * This covers function calls with no used return value or when using 
  * the syntax <code>(vars) := function(args);</code>. Function calls using 
@@ -682,12 +682,12 @@ FFunctionCallStmt : FStatement ::= Left:FFunctionCallLeft* Call:FAbstractFunctio
 FDerivativeFunctionCallStmt : FFunctionCallStmt ::= <Order:int>;
 
 /**
- * Flattened break statement.
+ * \brief Flattened break statement.
  */
 FBreakStmt : FStatement;
 
 /**
- * Flattened return statement.
+ * \brief Flattened return statement.
  */
 FReturnStmt : FStatement;
 
@@ -702,84 +702,84 @@ FInitArrayStmt : FStatement ::= FIdUseExp;
 FDerivatedInitArrayStmt : FInitArrayStmt ::= <Order:int>;
 
 /**
- * Base class for flattened if and when statements.
+ * \brief Base class for flattened if and when statements.
  */
 abstract FIfWhenStmt : FStatement ::= FIfWhenClause*;
 
 /**
- * Flattened if statement.
+ * \brief Flattened if statement.
  */
 FIfStmt : FIfWhenStmt ::= ElseStmt:FStatement*;
 
 /**
- * Flattened when statement.
+ * \brief Flattened when statement.
  */
 FWhenStmt : FIfWhenStmt;
 
 /**
- * Base class for flattened [else]if and [else]when clauses in if/when statements.
+ * \brief Base class for flattened [else]if and [else]when clauses in if/when statements.
 
  */
 abstract FIfWhenClause : BaseNode ::= Test:FExp FStatement*;
 
 /**
- * Flattened [else]if clause in if statement.
+ * \brief Flattened [else]if clause in if statement.
  */
 FIfClause : FIfWhenClause;
 
 /**
- * Flattened [else]when clause in when statement.
+ * \brief Flattened [else]when clause in when statement.
  */
 FWhenClause : FIfWhenClause;
 
 /**
- * Flattened for statement.
+ * \brief Flattened for statement.
  */
 FForStmt : FStatement ::= Index:FForIndex ForStmt:FStatement*;
 
 /**
- * Flattened while statement.
+ * \brief Flattened while statement.
  */
 FWhileStmt : FStatement ::= Test:FExp WhileStmt:FStatement*;
 
 /**
- * An external function interface in the flat tree. Implemented as a statement.
+ * \brief An external function interface in the flat tree. Implemented as a statement.
  */
 FExternalStmt : FStatement ::= FExternalLanguage [ReturnVar:FIdUse] <Name> Arg:FExp*;
 
 /**
- * A language specification for an external function.
+ * \brief A language specification for an external function.
  */
 abstract FExternalLanguage : BaseNode;
 
 /**
- * Language specification for "C".
+ * \brief Language specification for "C".
  */
 FCExternalLanguage : FExternalLanguage;
 
 /**
- * Language specification for "FORTRAN 77"
+ * \brief Language specification for "FORTRAN 77"
  */
 FFortran77ExternalLanguage : FExternalLanguage;
 
 /**
- * Language specification for "builtin"
+ * \brief Language specification for "builtin"
  */
 FBuiltinExternalLanguage : FExternalLanguage;
 
 /**
- * Unknown language specification
+ * \brief Unknown language specification
  */
 FUnknownExternalLanguage : FExternalLanguage ::= <Language>;
 
 
 /**
- * Describes the set of scalarized FExp nodes corresponding to an array expression.
+ * \brief Describes the set of scalarized FExp nodes corresponding to an array expression.
  */
 Array : BaseNode ::= FExp*;
 
 /**
- * Dummy array for representing a scalar expression in algorithms handling Arrays. 
+ * \brief Dummy array for representing a scalar expression in algorithms handling Arrays. 
  * 
  * Iterator acts as if on a vector of length 1.
  * 
@@ -795,54 +795,54 @@ Array : BaseNode ::= FExp*;
 ScalarAsArray : Array;
 
 /**
- * Abstract base class for all flattened expressions.
+ * \brief Abstract base class for all flattened expressions.
  */
 abstract FExp : BaseNode ::= /Array/;
 
 /**
- * Abstract base class for all flattened expressions that is not literal or unsupported.
+ * \brief Abstract base class for all flattened expressions that is not literal or unsupported.
  */
 abstract FAbstractExp : FExp;
 
 /**
- * Abstract base class for all flattened scalar expressions.
+ * \brief Abstract base class for all flattened scalar expressions.
  */
 abstract FAbstractScalarExp : FAbstractExp;
 
 /**
- * Abstract base class for all flattened expressions that can be an array.
+ * \brief Abstract base class for all flattened expressions that can be an array.
  */
 abstract FAbstractArrayExp : FAbstractExp;
 
 /**
- * Unsupported expression.
+ * \brief Unsupported expression.
  *
  * Used for reporting errors.
  */
 FUnsupportedExp : FExp;
 
 /**
- * Base class for binary expressions.
+ * \brief Base class for binary expressions.
  */
 abstract FBinExp : FAbstractArrayExp ::= Left:FExp Right:FExp;
 
 /**
- * Base class for unary expressions.
+ * \brief Base class for unary expressions.
  */
 abstract FUnaryExp : FAbstractArrayExp ::= FExp;
 
 /**
- * Base class for arithmetic binary expressions.
+ * \brief Base class for arithmetic binary expressions.
  */
 abstract FArtmBinExp : FBinExp;
 
 /**
- * Element-wise addition expression.
+ * \brief Element-wise addition expression.
  */
 FDotAddExp : FArtmBinExp;
 
 /**
- * Addition expression.
+ * \brief Addition expression.
  */
 FAddExp : FDotAddExp;
 
@@ -852,127 +852,127 @@ FAddExp : FDotAddExp;
 FStringAddExp : FDotAddExp;
 
 /**
- * Element-wise subtraction expression.
+ * \brief Element-wise subtraction expression.
  */
 FDotSubExp : FArtmBinExp;
 
 /**
- * Subtraction expression.
+ * \brief Subtraction expression.
  */
 FSubExp : FDotSubExp;
 
 /**
- * Element-wise multiplicative expression.
+ * \brief Element-wise multiplicative expression.
  */
 FDotMulExp : FArtmBinExp;
 
 /**
- * Multiplicative expression.
+ * \brief Multiplicative expression.
  */
 FMulExp : FDotMulExp;
 
 /**
- * Element-wise division expression.
+ * \brief Element-wise division expression.
  */
 FDotDivExp : FArtmBinExp;
 
 /**
- * Division expression.
+ * \brief Division expression.
  */
 FDivExp : FDotDivExp;
 
 /**
- * Element-wise power expression.
+ * \brief Element-wise power expression.
  */
 FDotPowExp : FArtmBinExp;
 
 /**
- * Power expression.
+ * \brief Power expression.
  */
 FPowExp : FDotPowExp;
 
 /**
- * Unary negation expression.
+ * \brief Unary negation expression.
  */
 FNegExp : FUnaryExp;
 
 /**
- * Base class for logical binary expressions.
+ * \brief Base class for logical binary expressions.
  */
 abstract FBoolBinExp : FBinExp;
 
 /**
- * Base class for relational expressions.
+ * \brief Base class for relational expressions.
  */
 abstract FRelExp : FBoolBinExp ::= /[Indicator:FIdUseExp]/;
 
 /**
- * Less than expression.
+ * \brief Less than expression.
  */
 FLtExp : FRelExp;
 
 /**
- * Less than or equal expression.
+ * \brief Less than or equal expression.
  */
 FLeqExp : FRelExp;
 
 /**
- * Greater than expression.
+ * \brief Greater than expression.
  */
 FGtExp : FRelExp;
 
 /**
- * Greater than or equal expression.
+ * \brief Greater than or equal expression.
  */
 FGeqExp : FRelExp;
 
 /**
- * Base class for equality expressions (== and <>).
+ * \brief Base class for equality expressions (== and <>).
  */
 abstract FEqRelExp : FRelExp;
 
 /**
- * Equality expression.
+ * \brief Equality expression.
  */
 FEqExp : FEqRelExp;
 
 /**
- * Inequality expression.
+ * \brief Inequality expression.
  */
 FNeqExp : FEqRelExp;
 
 /**
- * Not expression.
+ * \brief Not expression.
  */
 FNotExp : FUnaryExp;
 
 /**
- * Base class for binary boolean operators.
+ * \brief Base class for binary boolean operators.
  */
 abstract FLogBinExp : FBoolBinExp;
 
 /**
- * Or expression.
+ * \brief Or expression.
  */
 FOrExp : FLogBinExp;
 
 /**
- * And expression.
+ * \brief And expression.
  */
 FAndExp : FLogBinExp;
 
 /**
- * Base class for literal expressions.
+ * \brief Base class for literal expressions.
  */
 abstract FLitExp : FExp;
 
 /**
- * Real literal expression.
+ * \brief Real literal expression.
  */
 FRealLitExp : FLitExp ::= <Value:double>;
 
 /**
- * Integer literal expression.
+ * \brief Integer literal expression.
  */
 FIntegerLitExp : FLitExp ::= <Value:int>;
 
@@ -982,27 +982,27 @@ FIntegerLitExp : FLitExp ::= <Value:int>;
 FOverflowIntLitExp : FRealLitExp ::= <String>;
 
 /**
- * Boolean literal expression.
+ * \brief Boolean literal expression.
  */
 abstract FBooleanLitExp : FLitExp ::=;
 
 /**
- * True boolean literal expression.
+ * \brief True boolean literal expression.
  */
 FBooleanLitExpTrue : FBooleanLitExp;
 
 /**
- * False boolean literal expression.
+ * \brief False boolean literal expression.
  */
 FBooleanLitExpFalse : FBooleanLitExp;
 
 /**
- * String literal expression.
+ * \brief String literal expression.
  */
 FStringLitExp : FLitExp ::= <String>;
 
 /**
- * Enumeration literal expression.
+ * \brief Enumeration literal expression.
  * 
  * All accesses to enumeration literals should be replaced by FEnumLitExps in flat tree.
  * Note that Type may be <code>null</code> in the flat tree - use type().
@@ -1016,47 +1016,47 @@ FEnumLitExp : FLitExp ::= <Enum> <Value> [Type:FEnumType];
 FIterExp : FAbstractArrayExp ::= FExp ForIndex:CommonForIndex*;
 
 /**
- * Common subclass for for indices in instance and flat trees.
+ * \brief Common subclass for for indices in instance and flat trees.
  */
 abstract CommonForIndex : BaseNode ::= [FExp];
 
 /**
- * For indices expression.
+ * \brief For indices expression.
  */
 FForIndex : CommonForIndex ::= FVariable;
 
 /**
- * If expression.
+ * \brief If expression.
  */
 FIfExp : FAbstractArrayExp ::= IfExp:FExp ThenExp:FExp ElseExp:FExp;
 
 /**
- * Declaration of a qualified name. 
+ * \brief Declaration of a qualified name. 
  */
 FIdDecl : BaseNode ::= FQName;
 
 /**
- * A qualified identifier.
+ * \brief A qualified identifier.
  */
 FIdUse : BaseNode ::= FQName /ExpandedSubscripts:FArraySubscripts/;
 
 /**
- * A qualifed identifier in an expression.
+ * \brief A qualifed identifier in an expression.
  */
 FIdUseExp : FAbstractArrayExp ::= FIdUse;
 
 /**
- * Identifier of temporary variable, used during scalarization
+ * \brief Identifier of temporary variable, used during scalarization
  */
 FIdTempExp : FIdUseExp;
 
 /**
- * The built-in function der in the instance tree.
+ * \brief The built-in function der in the instance tree.
  */
 InstDerExp : FUnaryExp; 
 
 /**
- * The built-in function der.
+ * \brief The built-in function der.
  */
 
 FDerExp : FIdUseExp; 
@@ -1072,87 +1072,82 @@ InstPreExp : FUnaryBuiltIn;
 FPreExp : FIdUseExp;
 
 /**
- * The built-in function der converted into a dummy derivative.
+ * \brief The built-in function der converted into a dummy derivative.
  */
 FDummyDerExp : FIdUseExp; 
 
 /**
- * Higher order derivatives occurring as a result of index reduction.
+ * \brief Higher order derivatives occurring as a result of index reduction.
  */
 InstHDerExp : InstDerExp ::= <Order:int>; 
 
 /**
- * Higher order derivatives occurring as a result of index reduction.
+ * \brief Higher order derivatives occurring as a result of index reduction.
  */
 FHDerExp : FDerExp ::= <Order:int>; 
 
 /**
- * Higher order derivatives occurring as a result of index reduction, 
+ * \brief Higher order derivatives occurring as a result of index reduction, 
  * converted into a dummy derivative.
  */
 FHDummyDerExp : FDummyDerExp ::= <Order:int>; 
 
 /**
- * Identifier in the instance tree.
+ * \brief Identifier in the instance tree.
  */
 FIdUseInstAccess : FIdUse ::= InstAccess;
 
 /**
- * Identifiers in instantiated expressions.
+ * \brief Identifiers in instantiated expressions.
  *
  * Instantiated expressions occurs in the instance tree.
  */
 FInstAccessExp : FAbstractArrayExp ::= InstAccess;
 
 /**
- * Record constructor.
+ * \brief Record constructor.
  */
 FRecordConstructor : FBuiltInFunctionCall ::= Record:FIdUse Arg:FExp* /Type:FType/;
 
 /**
- * Record constructor in instance trees.
- */
-InstRecordConstructor : FAbstractFunctionCall ::= Record:InstAccess Arg:InstFunctionArgument*;
-
-/**
- * Array constructor expression.
+ * \brief Array constructor expression.
  */
 FArray : FAbstractArrayExp ::= FExp*;
 
 /**
- * Long form of array constructor expression.
+ * \brief Long form of array constructor expression.
  */
 FLongArray : FArray;
 
 /**
- * Initial node for long form of array constructor expression.
+ * \brief Initial node for long form of array constructor expression.
  *
  * Rewritten to FLongArray immediately.
  */
 FParseArray : FInfArgsFunctionCall;
 
 /**
- * Abstract super class for all forms of array concatenation expression.
+ * \brief Abstract super class for all forms of array concatenation expression.
  */
 abstract FAbstractCat : FInfArgsFunctionCall;
  
 /**
- * Array concatenation expression.
+ * \brief Array concatenation expression.
  */
 FCatExp : FAbstractCat ::= Dim:FExp;
 
 /**
- * Short form for array concatenation expression.
+ * \brief Short form for array concatenation expression.
  */
 FMatrix : FAbstractCat;
 
 /**
- * Row in short form for array concatenation expression.
+ * \brief Row in short form for array concatenation expression.
  */
 FMatrixRow : FAbstractCat;
 
 /**
- * Generated expression that applies array subscripts to any expression.
+ * \brief Generated expression that applies array subscripts to any expression.
  */
 FSubscriptedExp : FAbstractArrayExp ::= FExp FArraySubscripts;
 
@@ -1162,41 +1157,41 @@ FSubscriptedExp : FAbstractArrayExp ::= FExp FArraySubscripts;
 FArgumentExp : FAbstractArrayExp ::= <Index:int> <Depth:int>;
 
 /**
- * Internal expression that describes an unknown size (for a single dimension).
+ * \brief Internal expression that describes an unknown size (for a single dimension).
  * 
  * Only used in Size objects.
  */
 FUnknownSizeExp : FAbstractArrayExp ::= <Variable:CommonVariableDecl> <Dim:int>;
 
 /**
- * Dummy node.
+ * \brief Dummy node.
  */
 FNoExp : FAbstractScalarExp;
 
 /**
- * Range expression.
+ * \brief Range expression.
  */
 FRangeExp : FAbstractArrayExp ::= FExp*;
 
 /**
- * Built-in variable time.
+ * \brief Built-in variable time.
  */
 FTimeExp : FAbstractScalarExp;
 
 /**
- * Built-in expression 'end', used in arrays.
+ * \brief Built-in expression 'end', used in arrays.
  */
 FEndExp : FAbstractScalarExp;
 
 
 // Functions and function-like operators
 /**
- * Base class for all function calls and function call-like operators.
+ * \brief Base class for all function calls and function call-like operators.
  */
 abstract FAbstractFunctionCall : FAbstractArrayExp;
  
 /**
- * Generic function call expression.
+ * \brief Generic function call expression.
  */
 FFunctionCall : FAbstractFunctionCall ::= Name:FIdUse Arg:FExp* <Sizes:Size[]>;
  
@@ -1206,12 +1201,12 @@ FFunctionCall : FAbstractFunctionCall ::= Name:FIdUse Arg:FExp* <Sizes:Size[]>;
 FVectorFunctionCall : FFunctionCall ::= <VectorSize:Size> <Vectorized:boolean[]>;
 
 /**
- * Generic function call expression in instance trees.
+ * \brief Generic function call expression in instance trees.
  */
 InstFunctionCall : FAbstractFunctionCall ::= Name:InstAccess Arg:InstFunctionArgument*;
 
 /**
- * Partial function call expression in instance trees.
+ * \brief Partial function call expression in instance trees.
  */
 InstPartialFunctionCall : InstFunctionCall;
 
@@ -1221,29 +1216,29 @@ InstPartialFunctionCall : InstFunctionCall;
 InstVectorFunctionCall : InstFunctionCall ::= <Dims:int>;
 
 /**
- * Base class for function call arguments in the instance tree.
+ * \brief Base class for function call arguments in the instance tree.
  */
 abstract InstFunctionArgument : BaseNode;
 
 /**
- * Positional function call argument in the instance tree.
+ * \brief Positional function call argument in the instance tree.
  */
 InstPositionalArgument : InstFunctionArgument ::= <Pos:int> FExp;
 
 /**
- * Named function call argument in the instance tree.
+ * \brief Named function call argument in the instance tree.
  */
 InstNamedArgument : InstFunctionArgument ::= Name:InstAccess FExp;
 
 /**
- * Missing function call argument in the instance tree.
+ * \brief Missing function call argument in the instance tree.
  *  
  * This node indicates a semantic error.
  */
 InstMissingArgument : InstFunctionArgument;
 
 /**
- * Function call argument in the instance tree for when several 
+ * \brief Function call argument in the instance tree for when several 
  * arguments are bound to the same input parameter.
  *  
  * This node indicates a semantic error.
@@ -1251,20 +1246,20 @@ InstMissingArgument : InstFunctionArgument;
 InstMultipleBoundArgument : InstFunctionArgument ::= Arg:InstFunctionArgument*;
 
 /**
- * Function call argument using default value in the instance tree.
+ * \brief Function call argument using default value in the instance tree.
  */
 InstDefaultArgument : InstFunctionArgument ::= <FExp:FExp>;
 
 // Built in functions
 /**
- * Base class for calls to all built-in functions. 
+ * \brief Base class for calls to all built-in functions. 
  *
  * OriginalArg list is only used for error checking and is empty in the flattened tree.
  */
 abstract FBuiltInFunctionCall : FAbstractFunctionCall ::= /OriginalArg:InstFunctionArgument*/;
 
 /**
- * Base class for calls to built-in unary functions.
+ * \brief Base class for calls to built-in unary functions.
  */
 abstract FUnaryBuiltIn : FBuiltInFunctionCall ::= FExp;
 
@@ -1276,17 +1271,17 @@ abstract FUnaryBuiltIn : FBuiltInFunctionCall ::= FExp;
 abstract FVectUnaryBuiltIn : FUnaryBuiltIn;
 
 /**
- * Base class for calls to built-in functions with no arguments.
+ * \brief Base class for calls to built-in functions with no arguments.
  */
 abstract FNoArgBuiltIn : FBuiltInFunctionCall;
 
 /**
- * noEvent built-in function.
+ * \brief noEvent built-in function.
  */
 FNoEventExp : FVectUnaryBuiltIn;
 
 /**
- * smooth built-in function.
+ * \brief smooth built-in function.
  * 
  * Handled like noEvent(), but with a warning. To be implemented properly later.
  */
@@ -1338,142 +1333,142 @@ FTerminate : FUnaryBuiltIn;
 FAssert : FBuiltInFunctionCall ::= Test:FExp Msg:FExp [Level:FExp];
 
 /**
- * Abs built-in function.
+ * \brief Abs built-in function.
  */
 FAbsExp : FVectUnaryBuiltIn;
 
 /**
- * Sign built-in function.
+ * \brief Sign built-in function.
  */
 FSignExp : FVectUnaryBuiltIn;
 
 /**
- * Sqrt built-in function.
+ * \brief Sqrt built-in function.
  */
 FSqrtExp : FMathematicalFunctionCall;
 
 /**
- * The Integer() built-in function (convert enumeration value to Integer).
+ * \brief The Integer() built-in function (convert enumeration value to Integer).
  */
 FEnumIntegerExp : FVectUnaryBuiltIn;
 
 /**
- * Abstract base class for event generating expressions.
+ * \brief Abstract base class for event generating expressions.
  */
 abstract FEventGenExp : FBuiltInFunctionCall ::= X:FExp;
 
 /**
- * Abstract base class for binary event generating expressions.
+ * \brief Abstract base class for binary event generating expressions.
  */
 abstract FBinEventGenExp : FEventGenExp ::= Y:FExp;
 
 /**
- * The div() built-in function.
+ * \brief The div() built-in function.
  */
 FDivFuncExp : FBinEventGenExp;
 
 /**
- * The mod() built-in function.
+ * \brief The mod() built-in function.
  */
 FModFuncExp : FBinEventGenExp;
 
 /**
- * The rem() built-in function.
+ * \brief The rem() built-in function.
  */
 FRemFuncExp : FBinEventGenExp;
 
 /**
- * The floor() built-in function.
+ * \brief The floor() built-in function.
  */
 FFloorFuncExp : FEventGenExp;
 
 /**
- * The ceil() built-in function.
+ * \brief The ceil() built-in function.
  */
 FCeilFuncExp : FEventGenExp;
 
 /**
- * The integer() built-in function (convert Real to Integer).
+ * \brief The integer() built-in function (convert Real to Integer).
  */
 FIntegerFuncExp : FFloorFuncExp;
 
 /**
- * Base class for calls to built-in mathematical functions.
+ * \brief Base class for calls to built-in mathematical functions.
  */
 abstract FMathematicalFunctionCall : FBuiltInFunctionCall ::= FExp;
 
 /**
- * Sin built-in function.
+ * \brief Sin built-in function.
  */
 FSinExp : FMathematicalFunctionCall;
 
 /**
- * Cos built-in function.
+ * \brief Cos built-in function.
  */
 FCosExp : FMathematicalFunctionCall;
 
 /**
- * Tan built-in function.
+ * \brief Tan built-in function.
  */
 FTanExp : FMathematicalFunctionCall;
 
 /**
- * Asin built-in function.
+ * \brief Asin built-in function.
  */
 FAsinExp : FMathematicalFunctionCall;
 
 /**
- * ACos built-in function.
+ * \brief ACos built-in function.
  */
 FAcosExp : FMathematicalFunctionCall;
 
 /**
- * ATan built-in function.
+ * \brief ATan built-in function.
  */
 FAtanExp : FMathematicalFunctionCall;
 
 /**
- * Atan2 built-in function.
+ * \brief Atan2 built-in function.
  */
 FAtan2Exp : FMathematicalFunctionCall ::= Y:FExp;
 
 /**
- * Sinh built-in function.
+ * \brief Sinh built-in function.
  */
 FSinhExp : FMathematicalFunctionCall;
 
 /**
- * Cosh built-in function.
+ * \brief Cosh built-in function.
  */
 FCoshExp : FMathematicalFunctionCall;
 
 /**
- * Tanh built-in function.
+ * \brief Tanh built-in function.
  */
 FTanhExp : FMathematicalFunctionCall;
 
 /**
- * Exp built-in function.
+ * \brief Exp built-in function.
  */
 FExpExp : FMathematicalFunctionCall;
 
 /**
- * Log built-in function.
+ * \brief Log built-in function.
  */
 FLogExp : FMathematicalFunctionCall;
 
 /**
- * Log10 built-in function.
+ * \brief Log10 built-in function.
  */
 FLog10Exp : FMathematicalFunctionCall;
 
 /**
- * Ndims built-in function.
+ * \brief Ndims built-in function.
  */
 FNdimsExp : FUnaryBuiltIn;
 
 /**
- * Size built-in function.
+ * \brief Size built-in function.
  */
 FSizeExp : FBuiltInFunctionCall ::= FExp [Dim:FExp];
 
@@ -1498,27 +1493,27 @@ FVectorExp : FDimensionConvert;
 FMatrixExp : FDimensionConvert;
 
 /**
- * Transpose built-in function.
+ * \brief Transpose built-in function.
  */
 FTranspose : FUnaryBuiltIn;
 
 /**
- * Symmetric built-in function.
+ * \brief Symmetric built-in function.
  */
 FSymmetric : FUnaryBuiltIn;
 
 /**
- * Cross built-in function.
+ * \brief Cross built-in function.
  */
 FCross : FBuiltInFunctionCall ::= X:FExp Y:FExp;
 
 /**
- * Skew built-in function.
+ * \brief Skew built-in function.
  */
 FSkew : FUnaryBuiltIn;
 
 /**
- * Identity built-in function.
+ * \brief Identity built-in function.
  */
 FIdentity : FUnaryBuiltIn;
 
@@ -1533,12 +1528,12 @@ FDiagonal : FUnaryBuiltIn;
 FOuterProduct : FBuiltInFunctionCall ::= X:FExp Y:FExp;
 
 /**
- * Identity built-in function.
+ * \brief Identity built-in function.
  */
 FLinspace : FBuiltInFunctionCall ::= StartExp:FExp StopExp:FExp N:FExp;
 
 /**
- * Base class for function call-like operators with no maximum number of arguments.
+ * \brief Base class for function call-like operators with no maximum number of arguments.
  */
 abstract FInfArgsFunctionCall : FBuiltInFunctionCall ::= FExp*;
 
@@ -1548,22 +1543,22 @@ abstract FInfArgsFunctionCall : FBuiltInFunctionCall ::= FExp*;
 abstract FArrayDimAsArgsExp : FInfArgsFunctionCall;
 
 /**
- * Ones built-in function.
+ * \brief Ones built-in function.
  */
 FOnes : FArrayDimAsArgsExp;
 
 /**
- * Zeros built-in function.
+ * \brief Zeros built-in function.
  */
 FZeros : FArrayDimAsArgsExp;
 
 /**
- * Fill built-in function.
+ * \brief Fill built-in function.
  */
 FFillExp : FArrayDimAsArgsExp ::= FillExp:FExp;
 
 /**
- * Common base class for FMinExp & FMaxExp.
+ * \brief Common base class for FMinExp & FMaxExp.
  */
 abstract FMinMaxExp : FBuiltInFunctionCall ::= X:FExp [Y:FExp];
 
@@ -1573,67 +1568,67 @@ abstract FMinMaxExp : FBuiltInFunctionCall ::= X:FExp [Y:FExp];
 FStringExp : FBuiltInFunctionCall ::= Value:FExp [MinimumLength:FExp] [LeftJustified:FExp] [SignificantDigits:FExp] [Format:FExp];
 
 /**
- * Min built-in function.
+ * \brief Min built-in function.
  */
 FMinExp : FMinMaxExp;
 
 /**
- * Max built-in function.
+ * \brief Max built-in function.
  */
 FMaxExp : FMinMaxExp;
 
 /**
- * Abstract base class for reduction expressions (sum(), product())
+ * \brief Abstract base class for reduction expressions (sum(), product())
  */
 abstract FReductionExp : FUnaryBuiltIn;
 
 /**
- * Sum built-in function.
+ * \brief Sum built-in function.
  */
 FSumExp : FReductionExp;
 
 /**
- * Product built-in function.
+ * \brief Product built-in function.
  */
 FProductExp : FReductionExp;
 
 /**
- * SemiLinear built-in function.
+ * \brief SemiLinear built-in function.
  */
 FHomotopyExp : FBuiltInFunctionCall ::= Actual:FExp Simplified:FExp;
 
 /**
- * SemiLinear built-in function.
+ * \brief SemiLinear built-in function.
  */
 FSemiLinearExp : FBuiltInFunctionCall ::= X:FExp PosSlope:FExp NegSlope:FExp;
 
 /**
- * Common base class for FInStream & FActualStream
+ * \brief Common base class for FInStream & FActualStream
  */
 abstract FStreamBuiltIn : FVectUnaryBuiltIn;
 
 /**
- * InStream built-in function.
+ * \brief InStream built-in function.
  */
 FInStream : FStreamBuiltIn;
 
 /**
- * ActualStream built-in function.
+ * \brief ActualStream built-in function.
  */
 FActualStream : FStreamBuiltIn;
 
 /**
- * getInstanceName built-in function.
+ * \brief getInstanceName built-in function.
  */
 FGetInstanceName : FNoArgBuiltIn;
 
 
 /**
- * Dummy node for unsupported built-in functions.
+ * \brief Dummy node for unsupported built-in functions.
  */
 FUnsupportedBuiltIn : FBuiltInFunctionCall ::= <Name>;
 
 /**
- * Dummy node for built-in functions that are ignored with a warning.
+ * \brief Dummy node for built-in functions that are ignored with a warning.
  */
 FIgnoredBuiltIn : FUnsupportedBuiltIn;
