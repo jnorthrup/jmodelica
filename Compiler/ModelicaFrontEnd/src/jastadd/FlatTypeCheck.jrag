@@ -20,24 +20,9 @@ import org.jmodelica.util.Criteria;
 import org.jmodelica.util.ErrorCheckType;
 
 aspect FlatTypeCheck {
-
+	
     public void ASTNode.typeCheck(ErrorCheckType checkType) {}
-
-    public abstract class ErrorChecker {
-        public static class TypeChecker extends ErrorChecker {
-            public TypeChecker() {
-                super("TypeCheck");
-            }
-
-            @Override
-            public void check(ASTNode node, ErrorCheckType checkType) {
-                node.typeCheck(checkType);
-            }
-        }
-    }
-
-    private static ErrorChecker ASTNode.TYPE_CHECKER = addErrorChecker(new ErrorChecker.TypeChecker());
-
+    
     public void InstNode.typeCheck(ErrorCheckType checkType) {
         typeCheckSystemResiduals(checkType);
     }
@@ -612,7 +597,7 @@ aspect FlatTypeCheck {
 	  if (!getDim().type().isUnknown() && !fIntegerScalarType().typeCompatible(getDim().type()))
 		  error("Dimension argument of cat() is not compatible with Integer: " + getDim());
 	  else if (!getDim().type().isUnknown() && !getDim().variability().lessOrEqual(fParameter()))
-		  error("Dimension argument of cat() does not have constant variability: " + getDim());
+		  error("Dimension argument of cat() does not have constant or parameter variability: " + getDim());
   }
   
   public void FAbstractCat.typeCheckFExps() {}
@@ -717,7 +702,7 @@ aspect FlatTypeCheck {
   eq FAbstractCat.checkTypeAsExpression() = dimensionIsOk();
   
   syn boolean FAbstractCat.dimensionIsOk(); 
-  eq FCatExp.dimensionIsOk()    = getDim().isConstantExp() && 
+  eq FCatExp.dimensionIsOk()    = getDim().variability().lessOrEqual(fParameter()) && 
   								  getDim().type().isInteger() && getDim().type().isScalar();
   eq FMatrix.dimensionIsOk()    = true;
   eq FMatrixRow.dimensionIsOk() = true;

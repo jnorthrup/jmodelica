@@ -15,10 +15,6 @@
 from tests_jmodelica import testattr
 from modelicacasadi_transfer import *
 
-def MX_equal(x, y):
-    eq = (x == y)
-    return eq.isConstant() and eq.getValue() == 1
-
 @testattr(casadi = True)    
 def test_SharedNode_eq():
     m = Model()
@@ -878,8 +874,8 @@ def test_OptimizationProblemTime():
     final = MX(1)
     opt = OptimizationProblem()
     
-    assert( MX_equal(opt.getStartTime(), MX(0)) )
-    assert( MX_equal(opt.getFinalTime(), MX(0)) )
+    assert( opt.getStartTime().isNull() )
+    assert( opt.getFinalTime().isNull() )
     opt.setStartTime(start)
     opt.setFinalTime(final)
     assert( isEqual(start, opt.getStartTime()) )
@@ -891,14 +887,14 @@ def test_OptimizationProblemLagrangeMayer():
     mayer = MX("mayer")
     opt = OptimizationProblem()
 
-    assert( MX_equal(opt.getObjectiveIntegrand(), MX(0)) )
-    assert( MX_equal(opt.getObjective(), MX(0)) )
+    assert( opt.getLagrangeTerm().isNull() )
+    assert( opt.getMayerTerm().isNull() )
     
-    opt.setObjective(mayer)
-    opt.setObjectiveIntegrand(lagrange)
+    opt.setMayerTerm(mayer)
+    opt.setLagrangeTerm(lagrange)
     
-    assert( isEqual(lagrange, opt.getObjectiveIntegrand()) )
-    assert( isEqual(mayer, opt.getObjective()) )
+    assert( isEqual(lagrange, opt.getLagrangeTerm()) )
+    assert( isEqual(mayer, opt.getMayerTerm()) )
 
 @testattr(casadi = True)    
 def test_OptimizationProblemPathConstraints():
@@ -968,14 +964,13 @@ def test_OptimizationProblemTimedVariables():
 def test_OptimizationProblemPrinting():
     simpleOptProblem = OptimizationProblem()
     expectedPrint = ("Model contained in OptimizationProblem:\n\n" +
-                     "------------------------------- Variables -------------------------------\n\n" +
-                     "Time variable: 0\n\n" +
+                     "------------------------------- Variables -------------------------------\n\n\n" +
                      "---------------------------- Variable types  ----------------------------\n\n\n" +
                      "------------------------------- Functions -------------------------------\n\n\n" +
                      "------------------------------- Equations -------------------------------\n\n\n" +
                      "----------------------- Optimization information ------------------------\n\n" +
-                     "Start time = 0\nFinal time = 0\n\n\n" +
-                     "-- Objective integrand term --\n0\n-- Objective term --\n0")
+                     "Start time = not set\nFinal time = not set\n\n\n" +
+                     "-- Lagrange term --\nnot set\n-- Mayer term --\nnot set")
     print simpleOptProblem
     assert( str(simpleOptProblem) == expectedPrint )
 
@@ -1349,7 +1344,6 @@ def test_ModelPrinting():
     model.addDaeEquation(eq1)
     model.addInitialEquation(eq2)
     expectedPrint = ("------------------------------- Variables -------------------------------\n\n" +
-                    "Time variable: 0\n" +
                     "Real node;\n\n" +
                     "---------------------------- Variable types  ----------------------------\n\n" +
                     "Real type (displayUnit = , fixed = 0, max = inf, min = -inf, nominal = 1, quantity = , start = 0, unit = );\n\n" +

@@ -31,15 +31,15 @@ namespace ModelicaCasADi
 class OptimizationProblem : public Model {
     public:
         /** Create a blank, uninitialized OptimizationProblem */
-        OptimizationProblem() { normalizedTime = false; startTime = finalTime = objective = objectiveIntegrand = CasADi::MX(0); }
+        OptimizationProblem() {}
         virtual ~OptimizationProblem();
         /**
          * Initialize the OptimizationProblem, before populating it.
          * @param An optional string identifier, default is empty string. 
          * @param An option flag telling whether minumum time normalisation
-         * has been performed (by the compiler). Default is false.
+         * has been performed (by the compiler). Default is true.
          */ 
-        void initializeProblem(std::string identifier = "", bool normalizedTime = false);
+        void initializeProblem(std::string identifier = "", bool normalizedTime = true);
         /** @return An MX */
         CasADi::MX getStartTime() const;
         /** @return An MX */
@@ -62,9 +62,9 @@ class OptimizationProblem : public Model {
          */ 
         std::vector< Ref<TimedVariable> >  getTimedVariables() const;
         /** @return An MX  */
-        CasADi::MX getObjectiveIntegrand() const;
+        CasADi::MX getLagrangeTerm() const;
         /** @return An MX  */
-        CasADi::MX getObjective() const;
+        CasADi::MX getMayerTerm() const;
         /** @param An MX  */
         void setStartTime(CasADi::MX startTime);
         /** @param An MX  */
@@ -80,9 +80,9 @@ class OptimizationProblem : public Model {
          */ 
         void setPointConstraints(const std::vector< Ref<Constraint> > &pointConstraints);
         /** @param An MX */
-        void setObjectiveIntegrand(CasADi::MX objectiveIntegrand);
+        void setLagrangeTerm(CasADi::MX lagrangeTerm);
         /** @param An MX */
-        void setObjective(CasADi::MX objective);
+        void setMayerTerm(CasADi::MX mayerTerm);
         /** @param A Ref<TimedVariable> to be added to the optimization problem during transfer*/
         void addTimedVariable(Ref<TimedVariable> timedVariable);
         
@@ -93,8 +93,8 @@ class OptimizationProblem : public Model {
     private:
         CasADi::MX startTime; /// Start time can be an expression
         CasADi::MX finalTime; /// Final time can be an expression
-        CasADi::MX objectiveIntegrand;
-        CasADi::MX objective;
+        CasADi::MX lagrangeTerm;
+        CasADi::MX mayerTerm;
         bool normalizedTime;
         std::vector< TimedVariable * > timedVariables;
         std::vector< Ref<Constraint> >  pathConstraints;
@@ -103,8 +103,8 @@ class OptimizationProblem : public Model {
 inline CasADi::MX OptimizationProblem::getStartTime() const { return startTime; }
 inline CasADi::MX OptimizationProblem::getFinalTime() const { return finalTime; }
 inline bool OptimizationProblem::getNormalizedTimeFlag() const { return normalizedTime; }
-inline CasADi::MX OptimizationProblem::getObjectiveIntegrand() const { return objectiveIntegrand; }
-inline CasADi::MX OptimizationProblem::getObjective() const { return objective; }
+inline CasADi::MX OptimizationProblem::getLagrangeTerm() const { return lagrangeTerm; }
+inline CasADi::MX OptimizationProblem::getMayerTerm() const { return mayerTerm; }
 inline std::vector< Ref<Constraint> >  OptimizationProblem::getPathConstraints() const { return pathConstraints; }
 inline std::vector< Ref<Constraint> >  OptimizationProblem::getPointConstraints() const { return pointConstraints; }
 
@@ -112,8 +112,8 @@ inline void OptimizationProblem::setStartTime(CasADi::MX startTime) { this->star
 inline void OptimizationProblem::setFinalTime(CasADi::MX finalTime) { this->finalTime = finalTime; }
 inline void OptimizationProblem::setPathConstraints(const std::vector< Ref<Constraint> > &pathConstraints) { this->pathConstraints = pathConstraints; }
 inline void OptimizationProblem::setPointConstraints(const std::vector< Ref<Constraint> > &pointConstraints) { this->pointConstraints = pointConstraints; }
-inline void OptimizationProblem::setObjectiveIntegrand(CasADi::MX objectiveIntegrand) { this->objectiveIntegrand = objectiveIntegrand; } 
-inline void OptimizationProblem::setObjective(CasADi::MX objective) { this->objective = objective; } 
+inline void OptimizationProblem::setLagrangeTerm(CasADi::MX lagrangeTerm) { this->lagrangeTerm = lagrangeTerm; } 
+inline void OptimizationProblem::setMayerTerm(CasADi::MX mayerTerm) { this->mayerTerm = mayerTerm; } 
 inline void OptimizationProblem::addTimedVariable(Ref<TimedVariable> var) { assert(var->isOwnedBy(this)); timedVariables.push_back(var.getNode()); }
 }; // End namespace
 #endif

@@ -1,10 +1,6 @@
 package org.jmodelica.util;
 
-import java.io.Serializable;
-
-public class Problem implements Comparable<Problem>, Serializable {
-    private static final long serialVersionUID = 1;
-    
+public class Problem implements Comparable<Problem> {
     public int compareTo(Problem o) {
         Problem other = (Problem)o;
         if(!fileName.equals(other.fileName))

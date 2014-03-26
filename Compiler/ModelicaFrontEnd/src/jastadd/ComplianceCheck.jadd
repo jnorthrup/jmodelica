@@ -18,28 +18,13 @@ import org.jmodelica.util.ErrorCheckType;
 
 aspect ComplianceCheck {
 
-    /**
-     * \brief Check for code that is not allowed in its current context.
-     * 
-     * Examples would be checking that classes follow the requirements of 
-     * their restriction. 
-     */
-    public void ASTNode.complianceCheck(ErrorCheckType checkType) {}
-
-    public abstract class ErrorChecker {
-        public static class ComplianceChecker extends ErrorChecker {
-            public ComplianceChecker() {
-                super("ComplianceCheck");
-            }
-
-            @Override
-            public void check(ASTNode node, ErrorCheckType checkType) {
-                node.complianceCheck(checkType);
-            }
-        }
-    }
-
-    private static ErrorChecker ASTNode.COMPLIANCE_CHECKER = addErrorChecker(new ErrorChecker.ComplianceChecker());
+	/**
+	 * \brief Check for code that is not allowed in its current context.
+	 * 
+	 * Examples would be checking that classes follow the requirements of 
+	 * their restriction. 
+	 */
+	public void ASTNode.complianceCheck(ErrorCheckType checkType) {}
 	
 	public void FIfWhenClause.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
@@ -79,10 +64,6 @@ aspect ComplianceCheck {
 			complianceOnlyFMU("Using arrays of records with indices of higher than parameter variability is");
 		}
 	}
-
-    public void InstOperatorRecord.collectErrors(ErrorCheckType checkType) {
-        compliance("Operator records are not supported");
-    }
 
 	public void FWhenEquation.complianceCheck(ErrorCheckType checkType) {
 		complianceOnlyFMU("When equations are");
@@ -193,6 +174,24 @@ aspect ComplianceCheck {
 	eq FScalarExp.unknownSizeSupported()             = false;
 	eq FVectorExp.unknownSizeSupported()             = false;
 	eq FMatrixExp.unknownSizeSupported()             = false;
+		
+	public void FMinMaxExp.complianceCheck(ErrorCheckType checkType) {
+		super.complianceCheck(checkType);
+		if (inFunction() && (getX().size().isUnknown() || (hasY() && getY().size().isUnknown()))) {
+			compliance("Unknown sizes in operator " + name() + "() is not supported in functions");
+		}
+	}
+	
+	public void FCatExp.complianceCheck(ErrorCheckType checkType) {
+		super.complianceCheck(checkType);
+		if (inFunction()) {
+			for (FExp exp: getFExpList()) {
+				if (exp.size().isUnknown()) {
+					compliance("Unknown size arg in operator " + name() + "() is not supported in functions");
+				}
+			}
+		}
+	}
 	
 	public void InstForIndex.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);

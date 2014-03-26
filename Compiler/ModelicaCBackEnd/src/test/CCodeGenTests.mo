@@ -3235,49 +3235,42 @@ void func_CCodeGenTests_CUnknownArray5_f_def(jmi_array_t* i1_a, jmi_array_t* i2_
     JMI_DYNAMIC_INIT()
     JMI_ARRAY_DYNAMIC(y_an, 2)
     JMI_ARRAY_DYNAMIC(temp_1_a, 2)
-    JMI_ARRAY_DYNAMIC(temp_2_a, 2)
-    jmi_ad_var_t i7_0i;
-    jmi_ad_var_t i7_0ie;
-    jmi_ad_var_t i8_1i;
-    jmi_ad_var_t i8_1ie;
-    jmi_ad_var_t i5_2i;
-    jmi_ad_var_t i5_2ie;
-    jmi_ad_var_t i6_3i;
-    jmi_ad_var_t i6_3ie;
-    jmi_ad_var_t i3_4i;
-    jmi_ad_var_t i3_4ie;
-    jmi_ad_var_t i4_5i;
-    jmi_ad_var_t i4_5ie;
+    jmi_ad_var_t temp_2_v;
+    jmi_ad_var_t temp_3_v;
+    jmi_ad_var_t i5_0i;
+    jmi_ad_var_t i5_0ie;
+    jmi_ad_var_t i6_1i;
+    jmi_ad_var_t i6_1ie;
+    jmi_ad_var_t i3_2i;
+    jmi_ad_var_t i3_2ie;
+    jmi_ad_var_t i4_3i;
+    jmi_ad_var_t i4_3ie;
     if (y_a == NULL) {
         JMI_ARRAY_DYNAMIC_INIT_2(y_an, jmi_array_size(i1_a, 0) * jmi_array_size(i1_a, 0), jmi_array_size(i1_a, 0), jmi_array_size(i1_a, 0))
         y_a = y_an;
     }
     JMI_ARRAY_DYNAMIC_INIT_2(temp_1_a, jmi_array_size(i1_a, 0) * jmi_array_size(i1_a, 0), jmi_array_size(i1_a, 0), jmi_array_size(i1_a, 0))
-    JMI_ARRAY_DYNAMIC_INIT_2(temp_2_a, jmi_array_size(i1_a, 0) * jmi_array_size(i1_a, 0), jmi_array_size(i1_a, 0), jmi_array_size(i1_a, 0))
-    i7_0ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
-    for (i7_0i = 1; i7_0i < i7_0ie; i7_0i += 1) {
-        i8_1ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
-        for (i8_1i = 1; i8_1i < i8_1ie; i8_1i += 1) {
-            jmi_array_ref_2(temp_2_a, i7_0i, i8_1i) = jmi_array_val_2(x_a, jmi_array_val_1(i1_a, i7_0i), jmi_array_val_1(i2_a, i8_1i));
+    temp_2_v = 0;
+    temp_3_v = 0;
+    i5_0ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
+    for (i5_0i = 1; i5_0i < i5_0ie; i5_0i += 1) {
+        i6_1ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
+        for (i6_1i = 1; i6_1i < i6_1ie; i6_1i += 1) {
+            jmi_array_ref_2(temp_1_a, temp_2_v + i5_0i, temp_3_v + i6_1i) = jmi_array_val_2(x_a, jmi_array_val_1(i1_a, i5_0i), jmi_array_val_1(i2_a, i6_1i));
         }
     }
-    i5_2ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
-    for (i5_2i = 1; i5_2i < i5_2ie; i5_2i += 1) {
-        i6_3ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
-        for (i6_3i = 1; i6_3i < i6_3ie; i6_3i += 1) {
-            jmi_array_ref_2(temp_1_a, i5_2i, i6_3i) = jmi_array_val_2(temp_2_a, i5_2i, i6_3i);
-        }
-    }
-    i3_4ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
-    for (i3_4i = 1; i3_4i < i3_4ie; i3_4i += 1) {
-        i4_5ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
-        for (i4_5i = 1; i4_5i < i4_5ie; i4_5i += 1) {
-            jmi_array_ref_2(y_a, i3_4i, i4_5i) = jmi_array_val_2(temp_1_a, i4_5i, i3_4i);
+    i3_2ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
+    for (i3_2i = 1; i3_2i < i3_2ie; i3_2i += 1) {
+        i4_3ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
+        for (i4_3i = 1; i4_3i < i4_3ie; i4_3i += 1) {
+            jmi_array_ref_2(y_a, i3_2i, i4_3i) = jmi_array_val_2(temp_1_a, i4_3i, i3_2i);
         }
     }
     JMI_DYNAMIC_FREE()
     return;
 }
+
+			
 ")})));
 end CUnknownArray5;
 
@@ -3305,49 +3298,41 @@ void func_CCodeGenTests_CUnknownArray6_f_def(jmi_array_t* i1_a, jmi_array_t* i2_
     JMI_DYNAMIC_INIT()
     JMI_ARRAY_DYNAMIC(y_an, 2)
     JMI_ARRAY_DYNAMIC(temp_1_a, 2)
-    JMI_ARRAY_DYNAMIC(temp_2_a, 2)
-    jmi_ad_var_t i7_0i;
-    jmi_ad_var_t i7_0ie;
-    jmi_ad_var_t i8_1i;
-    jmi_ad_var_t i8_1ie;
-    jmi_ad_var_t i5_2i;
-    jmi_ad_var_t i5_2ie;
-    jmi_ad_var_t i6_3i;
-    jmi_ad_var_t i6_3ie;
-    jmi_ad_var_t i3_4i;
-    jmi_ad_var_t i3_4ie;
-    jmi_ad_var_t i4_5i;
-    jmi_ad_var_t i4_5ie;
+    jmi_ad_var_t temp_2_v;
+    jmi_ad_var_t temp_3_v;
+    jmi_ad_var_t i5_0i;
+    jmi_ad_var_t i5_0ie;
+    jmi_ad_var_t i6_1i;
+    jmi_ad_var_t i6_1ie;
+    jmi_ad_var_t i3_2i;
+    jmi_ad_var_t i3_2ie;
+    jmi_ad_var_t i4_3i;
+    jmi_ad_var_t i4_3ie;
     if (y_a == NULL) {
         JMI_ARRAY_DYNAMIC_INIT_2(y_an, (jmi_array_size(i1_a, 0) * 2 - 2) * jmi_array_size(i1_a, 0), jmi_array_size(i1_a, 0) * 2 - 2, jmi_array_size(i1_a, 0))
         y_a = y_an;
     }
     JMI_ARRAY_DYNAMIC_INIT_2(temp_1_a, jmi_array_size(i1_a, 0) * jmi_array_size(i1_a, 0), jmi_array_size(i1_a, 0), jmi_array_size(i1_a, 0))
-    JMI_ARRAY_DYNAMIC_INIT_2(temp_2_a, jmi_array_size(i1_a, 0) * jmi_array_size(i1_a, 0), jmi_array_size(i1_a, 0), jmi_array_size(i1_a, 0))
-    i7_0ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
-    for (i7_0i = 1; i7_0i < i7_0ie; i7_0i += 1) {
-        i8_1ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
-        for (i8_1i = 1; i8_1i < i8_1ie; i8_1i += 1) {
-            jmi_array_ref_2(temp_2_a, i7_0i, i8_1i) = jmi_array_val_2(x_a, jmi_array_val_1(i1_a, i7_0i), jmi_array_val_1(i2_a, i8_1i));
+    temp_2_v = 0;
+    temp_3_v = 0;
+    i5_0ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
+    for (i5_0i = 1; i5_0i < i5_0ie; i5_0i += 1) {
+        i6_1ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
+        for (i6_1i = 1; i6_1i < i6_1ie; i6_1i += 1) {
+            jmi_array_ref_2(temp_1_a, temp_2_v + i5_0i, temp_3_v + i6_1i) = jmi_array_val_2(x_a, jmi_array_val_1(i1_a, i5_0i), jmi_array_val_1(i2_a, i6_1i));
         }
     }
-    i5_2ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
-    for (i5_2i = 1; i5_2i < i5_2ie; i5_2i += 1) {
-        i6_3ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
-        for (i6_3i = 1; i6_3i < i6_3ie; i6_3i += 1) {
-            jmi_array_ref_2(temp_1_a, i5_2i, i6_3i) = jmi_array_val_2(temp_2_a, i5_2i, i6_3i);
-        }
-    }
-    i3_4ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
-    for (i3_4i = 1; i3_4i < i3_4ie; i3_4i += 1) {
-        i4_5ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
-        for (i4_5i = 1; i4_5i < i4_5ie; i4_5i += 1) {
-            jmi_array_ref_2(y_a, i3_4i, i4_5i) = jmi_array_val_2(temp_1_a, i4_5i, i3_4i);
+    i3_2ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
+    for (i3_2i = 1; i3_2i < i3_2ie; i3_2i += 1) {
+        i4_3ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
+        for (i4_3i = 1; i4_3i < i4_3ie; i4_3i += 1) {
+            jmi_array_ref_2(y_a, i3_2i, i4_3i) = jmi_array_val_2(temp_1_a, i4_3i, i3_2i);
         }
     }
     JMI_DYNAMIC_FREE()
     return;
 }
+
 ")})));
 end CUnknownArray6;
 
@@ -11079,7 +11064,7 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalFortran2_f_exp(jmi_ad_var_t a_v);
 void func_CCodeGenTests_IntegerExternalFortran2_f_def(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t b_v;
-    extern jmi_int_t f_(jmi_ad_var_t*);
+    extern jmi_ad_var_t f_(jmi_ad_var_t*);
     b_v = f_(&a_v);
     if (b_o != NULL) *b_o = b_v;
     JMI_DYNAMIC_FREE()
@@ -11176,7 +11161,7 @@ void func_CCodeGenTests_IntegerExternalFortran4_f_def(jmi_ad_var_t a_v, jmi_ad_v
     jmi_int_t tmp_1;
     jmi_int_t tmp_2;
     jmi_int_t tmp_3;
-    extern jmi_int_t my_f_(jmi_int_t*, jmi_int_t*, jmi_int_t*);
+    extern jmi_ad_var_t my_f_(jmi_int_t*, jmi_int_t*, jmi_int_t*);
     tmp_1 = (int)a_v;
     tmp_2 = (int)b_v;
     tmp_3 = (int)c_v;
@@ -11463,13 +11448,14 @@ void func_CCodeGenTests_ExternalArrayFortran6_f_def(jmi_array_t* a_a, jmi_array_
     }
     JMI_ARRAY_DYNAMIC_INIT_2(tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
     jmi_matrix_to_fortran_real(a_a, a_a->var, tmp_1->var);
-    JMI_ARRAY_DYNAMIC_INIT_2(tmp_2, jmi_array_size(b_a, 0) * jmi_array_size(b_a, 1), jmi_array_size(b_a, 0), jmi_array_size(b_a, 1))
+    JMI_ARRAY_DYNAMIC_INIT_2(tmp_2, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
     jmi_matrix_to_fortran_real(b_a, b_a->var, tmp_2->var);
     f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1), tmp_2->var, &jmi_array_size(b_a, 0), &jmi_array_size(b_a, 1));
     jmi_matrix_from_fortran_real(b_a, tmp_2->var, b_a->var);
     JMI_DYNAMIC_FREE()
     return;
 }
+
 ")})));
 end ExternalArrayFortran6;
 
@@ -12403,11 +12389,11 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def(jmi_array_t* A_a, jmi_arra
     }
     lda_v = jmi_max(AD_WRAP_LITERAL(1), jmi_array_size(A_a, 0));
     ldb_v = jmi_max(AD_WRAP_LITERAL(1), jmi_array_size(b_a, 0));
-    tmp_1 = (int)1;
-    JMI_ARRAY_DYNAMIC_INIT_2(tmp_2, jmi_array_size(Awork_a, 0) * jmi_array_size(Awork_a, 1), jmi_array_size(Awork_a, 0), jmi_array_size(Awork_a, 1))
+    tmp_1 = 1;
+    JMI_ARRAY_DYNAMIC_INIT_2(tmp_2, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_2->var);
     tmp_3 = (int)lda_v;
-    JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_4, jmi_array_size(ipiv_a, 0), jmi_array_size(ipiv_a, 0))
+    JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_4, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     jmi_matrix_to_fortran_int(ipiv_a, ipiv_a->var, tmp_4->var);
     tmp_5 = (int)ldb_v;
     tmp_6 = (int)info_v;
@@ -12504,12 +12490,12 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def(jmi_array_t* A_a, jmi_array_t*
     }
     lda_v = jmi_max(AD_WRAP_LITERAL(1), jmi_array_size(A_a, 0));
     ldb_v = jmi_max(AD_WRAP_LITERAL(1), jmi_array_size(B_a, 0));
-    JMI_ARRAY_DYNAMIC_INIT_2(tmp_1, jmi_array_size(Awork_a, 0) * jmi_array_size(Awork_a, 1), jmi_array_size(Awork_a, 0), jmi_array_size(Awork_a, 1))
+    JMI_ARRAY_DYNAMIC_INIT_2(tmp_1, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_1->var);
     tmp_2 = (int)lda_v;
-    JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_3, jmi_array_size(ipiv_a, 0), jmi_array_size(ipiv_a, 0))
+    JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_3, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     jmi_matrix_to_fortran_int(ipiv_a, ipiv_a->var, tmp_3->var);
-    JMI_ARRAY_DYNAMIC_INIT_2(tmp_4, jmi_array_size(X_a, 0) * jmi_array_size(X_a, 1), jmi_array_size(X_a, 0), jmi_array_size(X_a, 1))
+    JMI_ARRAY_DYNAMIC_INIT_2(tmp_4, jmi_array_size(A_a, 0) * jmi_array_size(B_a, 1), jmi_array_size(A_a, 0), jmi_array_size(B_a, 1))
     jmi_matrix_to_fortran_real(X_a, X_a->var, tmp_4->var);
     tmp_5 = (int)ldb_v;
     tmp_6 = (int)info_v;
@@ -14106,364 +14092,5 @@ $C_ode_derivatives$
 /********* Write back reinits *******/
 ")})));
 end TruncDivString1;
-
-package ExternalFunction
-package CEval
-model Scalar
-    type E = enumeration(A,B);
-    function f
-        input Real a1;
-        input Integer a2;
-        input Boolean a3;
-        input String a4;
-        input E a5;
-        output Real b1;
-        output Integer b2;
-        output Boolean b3;
-        output String b4;
-        output E b5;
-        external;
-    end f;
-    
-    Real x1;
-    Integer x2;
-    Boolean x3;
-    String x4;
-    E x5;
-equation
-    (x1,x2,x3,x4,x5) = f(1,2,true,"s",E.A);
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ExternalFunction_CEval_Scalar",
-			description="Test code gen for external C functions evaluation. Scalars.",
-			variability_propagation=false,
-			inline_functions="none",
-			template="
-$ECE_external_includes$
-$ECE_record_definitions$
-$ECE_main$
-",
-			generatedCode="
-/* Declarations */
-jmi_ad_var_t a1_v;
-jmi_ad_var_t a2_v;
-jmi_ad_var_t a3_v;
-char* a4_v;
-jmi_ad_var_t a5_v;
-jmi_ad_var_t b1_v;
-jmi_ad_var_t b2_v;
-jmi_ad_var_t b3_v;
-char* b4_v;
-jmi_ad_var_t b5_v;
-jmi_int_t tmp_1;
-jmi_int_t tmp_2;
-jmi_int_t tmp_3;
-jmi_int_t tmp_4;
-jmi_int_t tmp_5;
-jmi_int_t tmp_6;
-
-printf(\"START\\n\"); fflush(stdout);
-/* Parse */
-JMCEVAL_parse(Real, a1_v);
-JMCEVAL_parse(Integer, a2_v);
-JMCEVAL_parse(Boolean, a3_v);
-JMCEVAL_parse(String, a4_v);
-JMCEVAL_parse(Enum, a5_v);
-JMCEVAL_parse(Real, b1_v);
-JMCEVAL_parse(Integer, b2_v);
-JMCEVAL_parse(Boolean, b3_v);
-JMCEVAL_parse(String, b4_v);
-JMCEVAL_parse(Enum, b5_v);
-
-/* Call the function */
-printf(\"CALC\\n\"); fflush(stdout);
-tmp_1 = (int)a2_v;
-tmp_2 = (int)a3_v;
-tmp_3 = (int)a5_v;
-tmp_4 = (int)b2_v;
-tmp_5 = (int)b3_v;
-tmp_6 = (int)b5_v;
-f(a1_v, tmp_1, tmp_2, a4_v, tmp_3, &b1_v, &tmp_4, &tmp_5, &b4_v, &tmp_6);
-b2_v = tmp_4;
-b3_v = tmp_5;
-b5_v = tmp_6;
-printf(\"DONE\\n\"); fflush(stdout);
-
-/* Print */
-JMCEVAL_print(Real, b1_v);
-JMCEVAL_print(Integer, b2_v);
-JMCEVAL_print(Boolean, b3_v);
-JMCEVAL_print(String, b4_v);
-JMCEVAL_print(Enum, b5_v);
-
-/* Free strings */
-JMCEVAL_free(a4_v);
-JMCEVAL_free(b4_v);
-
-printf(\"END\\n\"); fflush(stdout);
-")})));
-end Scalar;
-
-model Array
-type E = enumeration(A,B);
-function f
-    input Real[:] a1;
-    input Integer[:] a2;
-    input Boolean[:] a3;
-    input String[:] a4;
-    input E[:] a5;
-    output Real[size(a1,1)] b1;
-    output Integer[size(a2,1)] b2;
-    output Boolean[size(a3,1)] b3;
-    output String[size(a4,1)] b4;
-    output E[size(a5,1)] b5;
-    external;
-end f;
-    Real[1] x1;
-    Integer[1] x2;
-    Boolean[1] x3;
-    String[1] x4;
-    E[1] x5;
-equation
-	(x1,x2,x3,x4,x5) = f({1},{2},{true},{"s"},{E.A});
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-            name="ExternalFunction_CEval_Array",
-			description="Test code gen for external C functions evaluation. Arrays.",
-			variability_propagation=false,
-			inline_functions="none",
-			template="
-$ECE_external_includes$
-$ECE_record_definitions$
-$ECE_main$
-",
-			generatedCode="
-/* Declarations */
-JMI_ARRAY_DYNAMIC(a1_a, 1)
-JMI_ARRAY_DYNAMIC(a2_a, 1)
-JMI_ARRAY_DYNAMIC(a3_a, 1)
-JMI_STRING_ARRAY_DYNAMIC(a4_a, 1)
-JMI_ARRAY_DYNAMIC(a5_a, 1)
-JMI_ARRAY_DYNAMIC(b1_a, 1)
-JMI_ARRAY_DYNAMIC(b2_a, 1)
-JMI_ARRAY_DYNAMIC(b3_a, 1)
-JMI_STRING_ARRAY_DYNAMIC(b4_a, 1)
-JMI_ARRAY_DYNAMIC(b5_a, 1)
-JMI_INT_ARRAY_DYNAMIC(tmp_1, 1)
-JMI_INT_ARRAY_DYNAMIC(tmp_2, 1)
-JMI_INT_ARRAY_DYNAMIC(tmp_3, 1)
-JMI_INT_ARRAY_DYNAMIC(tmp_4, 1)
-JMI_INT_ARRAY_DYNAMIC(tmp_5, 1)
-JMI_INT_ARRAY_DYNAMIC(tmp_6, 1)
-
-printf(\"START\\n\"); fflush(stdout);
-/* Parse */
-JMCEVAL_parseArrayDims(1);
-JMI_ARRAY_DYNAMIC_INIT_1(a1_a, d[0], d[0]);
-JMCEVAL_parseArray(Real, a1_a);
-JMCEVAL_parseArrayDims(1);
-JMI_ARRAY_DYNAMIC_INIT_1(a2_a, d[0], d[0]);
-JMCEVAL_parseArray(Integer, a2_a);
-JMCEVAL_parseArrayDims(1);
-JMI_ARRAY_DYNAMIC_INIT_1(a3_a, d[0], d[0]);
-JMCEVAL_parseArray(Boolean, a3_a);
-JMCEVAL_parseArrayDims(1);
-JMI_STRING_ARRAY_DYNAMIC_INIT_1(a4_a, d[0], d[0]);
-JMCEVAL_parseArray(String, a4_a);
-JMCEVAL_parseArrayDims(1);
-JMI_ARRAY_DYNAMIC_INIT_1(a5_a, d[0], d[0]);
-JMCEVAL_parseArray(Enum, a5_a);
-JMCEVAL_parseArrayDims(1);
-JMI_ARRAY_DYNAMIC_INIT_1(b1_a, d[0], d[0]);
-JMCEVAL_parseArray(Real, b1_a);
-JMCEVAL_parseArrayDims(1);
-JMI_ARRAY_DYNAMIC_INIT_1(b2_a, d[0], d[0]);
-JMCEVAL_parseArray(Integer, b2_a);
-JMCEVAL_parseArrayDims(1);
-JMI_ARRAY_DYNAMIC_INIT_1(b3_a, d[0], d[0]);
-JMCEVAL_parseArray(Boolean, b3_a);
-JMCEVAL_parseArrayDims(1);
-JMI_STRING_ARRAY_DYNAMIC_INIT_1(b4_a, d[0], d[0]);
-JMCEVAL_parseArray(String, b4_a);
-JMCEVAL_parseArrayDims(1);
-JMI_ARRAY_DYNAMIC_INIT_1(b5_a, d[0], d[0]);
-JMCEVAL_parseArray(Enum, b5_a);
-
-/* Call the function */
-printf(\"CALC\\n\"); fflush(stdout);
-JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_1, jmi_array_size(a2_a, 0), jmi_array_size(a2_a, 0))
-jmi_copy_matrix_to_int(a2_a, a2_a->var, tmp_1->var);
-JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_2, jmi_array_size(a3_a, 0), jmi_array_size(a3_a, 0))
-jmi_copy_matrix_to_int(a3_a, a3_a->var, tmp_2->var);
-JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_3, jmi_array_size(a5_a, 0), jmi_array_size(a5_a, 0))
-jmi_copy_matrix_to_int(a5_a, a5_a->var, tmp_3->var);
-JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_4, jmi_array_size(b2_a, 0), jmi_array_size(b2_a, 0))
-jmi_copy_matrix_to_int(b2_a, b2_a->var, tmp_4->var);
-JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_5, jmi_array_size(b3_a, 0), jmi_array_size(b3_a, 0))
-jmi_copy_matrix_to_int(b3_a, b3_a->var, tmp_5->var);
-JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_6, jmi_array_size(b5_a, 0), jmi_array_size(b5_a, 0))
-jmi_copy_matrix_to_int(b5_a, b5_a->var, tmp_6->var);
-f(a1_a->var, jmi_array_size(a1_a, 0), tmp_1->var, jmi_array_size(a2_a, 0), tmp_2->var, jmi_array_size(a3_a, 0), a4_a->var, jmi_array_size(a4_a, 0), tmp_3->var, jmi_array_size(a5_a, 0), b1_a->var, jmi_array_size(b1_a, 0), tmp_4->var, jmi_array_size(b2_a, 0), tmp_5->var, jmi_array_size(b3_a, 0), b4_a->var, jmi_array_size(b4_a, 0), tmp_6->var, jmi_array_size(b5_a, 0));
-jmi_copy_matrix_from_int(b2_a, tmp_4->var, b2_a->var);
-jmi_copy_matrix_from_int(b3_a, tmp_5->var, b3_a->var);
-jmi_copy_matrix_from_int(b5_a, tmp_6->var, b5_a->var);
-printf(\"DONE\\n\"); fflush(stdout);
-
-/* Print */
-JMCEVAL_printArray(Real, b1_a);
-JMCEVAL_printArray(Integer, b2_a);
-JMCEVAL_printArray(Boolean, b3_a);
-JMCEVAL_printArray(String, b4_a);
-JMCEVAL_printArray(Enum, b5_a);
-
-/* Free strings */
-JMCEVAL_freeArray(a4_a);
-JMCEVAL_freeArray(b4_a);
-
-printf(\"END\\n\"); fflush(stdout);
-")})));
-end Array;
-
-model Dgelsx
-    function dgelsx
-      "Computes the minimum-norm solution to a real linear least squares problem with rank deficient A"
-      input Real A[:, :];
-      input Real B[size(A, 1), :];
-      input Real rcond=0.0 "Reciprocal condition number to estimate rank";
-      output Real X[max(size(A, 1), size(A, 2)), size(B, 2)]=cat(
-                1,
-                B,
-                zeros(max(nrow, ncol) - nrow, nrhs))
-        "Solution is in first size(A,2) rows";
-      output Integer info;
-      output Integer rank "Effective rank of A";
-    protected
-      Integer nrow=size(A, 1);
-      Integer ncol=size(A, 2);
-      Integer nx=max(nrow, ncol);
-      Integer nrhs=size(B, 2);
-      Integer lwork=max(min(nrow, ncol) + 3*ncol, 2*min(nrow, ncol) + nrhs);
-      Real work[max(min(size(A, 1), size(A, 2)) + 3*size(A, 2), 2*min(size(A, 1),
-        size(A, 2)) + size(B, 2))];
-      Real Awork[size(A, 1), size(A, 2)]=A;
-      Integer jpvt[size(A, 2)]=zeros(ncol);
-    external"FORTRAN 77" dgelsx(
-              nrow,
-              ncol,
-              nrhs,
-              Awork,
-              nrow,
-              X,
-              nx,
-              jpvt,
-              rcond,
-              rank,
-              work,
-              lwork,
-              info);
-    end dgelsx;
-    
-    Real[2,1] out;
-    Real a;
-    Real b;
-  equation
-    (out,a,b) = dgelsx({{1},{2}},{{1},{2}},1);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ExternalFunction_CEval_Dgelsx",
-			description="Test code gen ceval of external functions.",
-			variability_propagation=false,
-			inline_functions="none",
-			template="
-$ECE_external_includes$
-$ECE_record_definitions$
-$ECE_main$
-",
-			generatedCode="
-/* Declarations */
-jmi_ad_var_t nrow_v;
-jmi_ad_var_t ncol_v;
-jmi_ad_var_t nrhs_v;
-JMI_ARRAY_DYNAMIC(Awork_a, 2)
-JMI_ARRAY_DYNAMIC(X_a, 2)
-jmi_ad_var_t nx_v;
-JMI_ARRAY_DYNAMIC(jpvt_a, 1)
-jmi_ad_var_t rcond_v;
-jmi_ad_var_t rank_v;
-JMI_ARRAY_DYNAMIC(work_a, 1)
-jmi_ad_var_t lwork_v;
-jmi_ad_var_t info_v;
-jmi_int_t tmp_1;
-jmi_int_t tmp_2;
-jmi_int_t tmp_3;
-JMI_ARRAY_DYNAMIC(tmp_4, 2)
-jmi_int_t tmp_5;
-JMI_ARRAY_DYNAMIC(tmp_6, 2)
-jmi_int_t tmp_7;
-JMI_INT_ARRAY_DYNAMIC(tmp_8, 1)
-jmi_int_t tmp_9;
-jmi_int_t tmp_10;
-jmi_int_t tmp_11;
-extern void dgelsx_(jmi_int_t*, jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*);
-
-printf(\"START\\n\"); fflush(stdout);
-/* Parse */
-JMCEVAL_parse(Integer, nrow_v);
-JMCEVAL_parse(Integer, ncol_v);
-JMCEVAL_parse(Integer, nrhs_v);
-JMCEVAL_parseArrayDims(2);
-JMI_ARRAY_DYNAMIC_INIT_2(Awork_a, d[0]*d[1], d[0], d[1]);
-JMCEVAL_parseArray(Real, Awork_a);
-JMCEVAL_parseArrayDims(2);
-JMI_ARRAY_DYNAMIC_INIT_2(X_a, d[0]*d[1], d[0], d[1]);
-JMCEVAL_parseArray(Real, X_a);
-JMCEVAL_parse(Integer, nx_v);
-JMCEVAL_parseArrayDims(1);
-JMI_ARRAY_DYNAMIC_INIT_1(jpvt_a, d[0], d[0]);
-JMCEVAL_parseArray(Integer, jpvt_a);
-JMCEVAL_parse(Real, rcond_v);
-JMCEVAL_parse(Integer, rank_v);
-JMCEVAL_parseArrayDims(1);
-JMI_ARRAY_DYNAMIC_INIT_1(work_a, d[0], d[0]);
-JMCEVAL_parseArray(Real, work_a);
-JMCEVAL_parse(Integer, lwork_v);
-JMCEVAL_parse(Integer, info_v);
-
-/* Call the function */
-printf(\"CALC\\n\"); fflush(stdout);
-tmp_1 = (int)nrow_v;
-tmp_2 = (int)ncol_v;
-tmp_3 = (int)nrhs_v;
-JMI_ARRAY_DYNAMIC_INIT_2(tmp_4, jmi_array_size(Awork_a, 0) * jmi_array_size(Awork_a, 1), jmi_array_size(Awork_a, 0), jmi_array_size(Awork_a, 1))
-jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_4->var);
-tmp_5 = (int)nrow_v;
-JMI_ARRAY_DYNAMIC_INIT_2(tmp_6, jmi_array_size(X_a, 0) * jmi_array_size(X_a, 1), jmi_array_size(X_a, 0), jmi_array_size(X_a, 1))
-jmi_matrix_to_fortran_real(X_a, X_a->var, tmp_6->var);
-tmp_7 = (int)nx_v;
-JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_8, jmi_array_size(jpvt_a, 0), jmi_array_size(jpvt_a, 0))
-jmi_matrix_to_fortran_int(jpvt_a, jpvt_a->var, tmp_8->var);
-tmp_9 = (int)rank_v;
-tmp_10 = (int)lwork_v;
-tmp_11 = (int)info_v;
-dgelsx_(&tmp_1, &tmp_2, &tmp_3, tmp_4->var, &tmp_5, tmp_6->var, &tmp_7, tmp_8->var, &rcond_v, &tmp_9, work_a->var, &tmp_10, &tmp_11);
-jmi_matrix_from_fortran_real(X_a, tmp_6->var, X_a->var);
-rank_v = tmp_9;
-info_v = tmp_11;
-printf(\"DONE\\n\"); fflush(stdout);
-
-/* Print */
-JMCEVAL_printArray(Real, X_a);
-JMCEVAL_print(Integer, rank_v);
-JMCEVAL_print(Integer, info_v);
-
-/* Free strings */
-
-printf(\"END\\n\"); fflush(stdout);
-")})));
-end Dgelsx;
-end CEval;
-end ExternalFunction;
 
 end CCodeGenTests;

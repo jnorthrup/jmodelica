@@ -94,8 +94,7 @@ def transfer_model(class_name, file_name=[],
     return model
 
 def transfer_optimization_problem(class_name, file_name=[],
-                                  compiler_options={}, compiler_log_level='warning',
-                                  accept_model=False):
+                                  compiler_options={}, compiler_log_level='warning'):
     """ 
     Compiles and transfers an optimization problem to the ModelicaCasADi interface. 
     
@@ -140,11 +139,6 @@ def transfer_optimization_problem(class_name, file_name=[],
             'warning'/'w', 'error'/'e', 'info'/'i' or 'debug'/'d'. 
             Default: 'warning'
 
-        accept_model --
-            If true, allows to transfer a model. Only the model parts of the
-            OptimizationProblem will be initialized.
-
-
     Returns::
     
         An OptimizationProblem representing the class given by class_name.
@@ -153,8 +147,7 @@ def transfer_optimization_problem(class_name, file_name=[],
     model = OptimizationProblem()
     _transfer_optimization_problem(model, class_name=class_name, file_name=file_name,
                                    compiler_options=compiler_options,
-                                   compiler_log_level=compiler_log_level,
-                                   accept_model=accept_model)
+                                   compiler_log_level=compiler_log_level)
     return model
 
 def transfer_to_casadi_interface(*args, **kwargs):

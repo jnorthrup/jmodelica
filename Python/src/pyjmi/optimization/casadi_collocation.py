@@ -3379,8 +3379,8 @@ class LocalDAECollocator(CasadiCollocator):
                                path_c in op.getPathConstraints()])
         point = casadi.vertcat([point_c.getResidual() for
                                 point_c in op.getPointConstraints()])
-        mterm = op.getObjective()
-        lterm = op.getObjectiveIntegrand()
+        mterm = op.getMayerTerm()
+        lterm = op.getLagrangeTerm()
 
         # Substitute named variables with vector variables in expressions
         if self.named_vars:

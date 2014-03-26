@@ -50,8 +50,7 @@ FFunctionDecl : BaseNode ::= FQName
                              FFunctionVariable* 
                              FAlgorithm 
                              [FDerivativeFunction] 
-                             /DummyExp:FExp/
-                             <SmoothOrder:int>;
+                             /DummyExp:FExp/;
 
 /**
  * A function that is the constructor of an external object.
@@ -301,13 +300,6 @@ abstract FType : BaseNode ::= <Size:Size>;
  * but in the flat tree they are in the order declared. 
  */
 FRecordType : FType ::= <Name> Component:FRecordComponentType* <FClass:FClass>;
-
-/**
- * An operator record type. 
- *
- * Only used in instance tree.
- */
-FOperatorRecordType : FRecordType ::= <Operators:Map<String,InstClassDecl>>;
 
 /**
  * The type description of a record component.

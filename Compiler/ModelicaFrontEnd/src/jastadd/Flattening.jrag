@@ -29,10 +29,9 @@ aspect FlatTree {
 	 * @param icd   the class being flattened
 	 * @param file  the path to the file to report errors on
 	 */
-	public static FClass FClass.create(InstClassDecl icl, String file, ModelicaCompiler mc) {
+	public static FClass FClass.create(InstClassDecl icl, String file) {
 		FlatRoot flatRoot = new FlatRoot(icl.createFClass());
 		flatRoot.setFileName(file);
-		flatRoot.setCompiler(mc);
 		FClass fc = flatRoot.getFClass(); // make FClass final
 		flatRoot.options = icl.root().options.copy();
 		// TODO: We should change how the checkErrors() method works, 
@@ -189,32 +188,43 @@ aspect Flattening {
 		icd.flattenThisFunction(fc);
 	}
 	
-    public void InstBaseClassDecl.flattenThisFunction(FClass fc) {
-        if (fc.lookupFunc(qualifiedName()) == null) {
-            InstExternal ie = findFunctionExternal();
-
-            FDerivativeFunction der = createFDerivativeFunction(fc, ie);
-            FFunctionDecl ffd = createFFunction(fc, ie);
-            if (der != null)
-                ffd.setFDerivativeFunction(der);
-            // TODO: should we look in extends as well?
-            ffd.readInlineAnnotation(annotation());
-            ffd.setSmoothOrder(smoothOrder());
-
-            ffd.ensureFQNamesFull();
-            addLocalFunctionConstants(ffd, fc);
-            flattenUsedFuncsAndEnums(fc);
-            ffd.updateRecordArraySizes();
-        }
-    }
-
-    private FFunctionDecl InstBaseClassDecl.createFFunctionDecl() {
+	public void InstBaseClassDecl.flattenThisFunction(FClass fc) {
+		if (fc.lookupFunc(qualifiedName()) == null) {	
+	   		FFunctionDecl ffd = createFFunctionDecl();
+	   		ffd.setFQName(new FQNameString(qualifiedName()));
+	   		
+	   		flattenComponentsInFunction(ffd, fc, new HashSet<String>());
+			
+	   		FAlgorithm fab = findFunctionAlgorithm();
+	   		fab = (fab == null) ? new FAlgorithm(new List()) : fab.flattenEqn(new FQNameEmpty(), fc);
+			InstExternal ie = findFunctionExternal();
+			if (ie != null)
+				fab.addFStatement(ie.flatten(this, new FQNameEmpty()));
+			fab.ensureReturn();
+			ffd.setFAlgorithm(fab);
+			
+			FDerivativeFunction der = createFDerivativeFunction(fc, ie);
+			if (der != null)
+				ffd.setFDerivativeFunction(der);
+			// TODO: should we look in extends as well?
+			ffd.readInlineAnnotation(annotation());
+			ffd.readSmoothOrderAnnotation(annotation());
+			
+			fc.addFFunctionDecl(ffd);
+			ffd.ensureFQNamesFull();
+			addLocalFunctionConstants(ffd, fc);
+			flattenUsedFuncsAndEnums(fc);
+			ffd.updateRecordArraySizes();
+		}
+	}
+	
+	private FFunctionDecl InstBaseClassDecl.createFFunctionDecl() {
         if (isConstructor())
             return new FConstructorDecl();
         if (isDestructor())
             return new FDestructorDecl();
-        return new FFunctionDecl();
-    }
+	    return new FFunctionDecl();
+	}
 	
 	public AnnotationNode InstClassDecl.derivativeAnnotation(InstExternal ie) {
 		AnnotationNode functionDer = annotation("derivative");
@@ -223,26 +233,6 @@ aspect Flattening {
 		return functionDer;
 	}
 	
-    protected FFunctionDecl InstBaseClassDecl.createFFunction(FClass fc, InstExternal ie) {
-        FFunctionDecl ffd = createFFunctionDecl();
-        ffd.setFQName(new FQNameString(qualifiedName()));
-        
-        flattenComponentsInFunction(ffd, fc, new HashSet<String>());
-        
-        FAlgorithm fab = findFunctionAlgorithm();
-        fab = (fab == null) ? new FAlgorithm(new List()) : fab.flattenEqn(new FQNameEmpty(), fc);
-        if (ie != null)
-            flattenExternal(fab, ie);
-        fab.ensureReturn();
-        ffd.setFAlgorithm(fab);
-        fc.addFFunctionDecl(ffd);
-        return ffd;
-    }
-    
-    protected void InstBaseClassDecl.flattenExternal(FAlgorithm fab, InstExternal ie) {
-        fab.addFStatement(ie.flatten(this, new FQNameEmpty()));
-    }
-    
 	private FDerivativeFunction InstBaseClassDecl.createFDerivativeFunction(FClass fc, InstExternal ie) {
 		AnnotationNode functionDer = derivativeAnnotation(ie);
 		
@@ -400,60 +390,36 @@ aspect Flattening {
             icd.flattenInRecord(frd, fc, names);
 	}
 	
-    public FExternalStmt InstExternal.flatten(InstClassDecl func, FQName prefix) {
-        return createStmt(func, prefix, true);
-    }
-    
-    public FExternalStmt InstExternal.createStmt(InstClassDecl func, FQName prefix, boolean flat) {
-        FExternalStmt stmt = new FExternalStmt();
-        stmt.setFExternalLanguage(hasFExternalLanguage() ? 
-                (FExternalLanguage) getFExternalLanguage().fullCopy() : 
-                new FCExternalLanguage());
-        stmt.extractLibrary(this);
-        if (hasInstExternalCall()) {
-            InstExternalCall call = getInstExternalCall();
-            if (call.hasReturnVar()) {
-                if (flat)
-                    stmt.setReturnVar(new FIdUse(call.getReturnVar().flatten(prefix)));
-                else
-                    stmt.setReturnVar(new FIdUseInstAccess(call.getReturnVar().fullCopy()));
-            }
-            stmt.setName(call.getName());
-            for (FExp arg : call.getArgs()) {
-                if (flat)
-                    stmt.addArg(arg.flatten(prefix));
-                else
-                    stmt.addArg(arg.externalArgCopy());
-            }
-        } else {
-            boolean hasReturn = func.myOutputs().size() == 1 && 
-                    func.myOutputs().get(0).canBeExternalReturn(stmt.getFExternalLanguage());
-            if (hasReturn) {
-                if (flat)
-                    stmt.setReturnVar(new FIdUse(func.myOutputs().get(0).name()));
-                else
-                    stmt.setReturnVar(new FIdUseInstAccess(new InstComponentAccess(func.myOutputs().get(0).name())));
-            }
-            stmt.setName(func.name());
-            for (InstComponentDecl arg : func.getInstComponentDecls()) {
-                if (!hasReturn || !arg.isOutput()) {
-                        arg.addExternalArg(stmt.getArgs(), flat);
-                }
-            }
-        }
-        return stmt;
-    }
-    public FExp FExp.externalArgCopy() {
-        return fullCopy();
-    }
-    public FExp FInstAccessExp.externalArgCopy() {
-        return new FIdUseExp(new FIdUseInstAccess(new InstComponentAccess(name())));
-    }
-    
-    public void InstComponentDecl.addExternalArg(List<FExp> args, boolean flat) {}
-    
-    public void InstAssignable.addExternalArg(List<FExp> args, boolean flat) {
-        FIdUseExp use = flat ? new FIdUseExp(name()) : new FIdUseExp(new FIdUseInstAccess(new InstComponentAccess(name())));
+	public FExternalStmt InstExternal.flatten(InstClassDecl func, FQName prefix) {
+		FExternalStmt stmt = new FExternalStmt();
+		stmt.setFExternalLanguage(hasFExternalLanguage() ? 
+				(FExternalLanguage) getFExternalLanguage().fullCopy() : 
+				new FCExternalLanguage());
+		stmt.extractLibrary(this);
+		if (hasInstExternalCall()) {
+			InstExternalCall call = getInstExternalCall();
+			if (call.hasReturnVar())
+				stmt.setReturnVar(new FIdUse(call.getReturnVar().flatten(prefix)));
+			stmt.setName(call.getName());
+			for (FExp arg : call.getArgs())
+				stmt.addArg(arg.flatten(prefix));
+		} else {
+			boolean hasReturn = func.myOutputs().size() == 1 && 
+					func.myOutputs().get(0).canBeExternalReturn(stmt.getFExternalLanguage());
+			if (hasReturn)
+				stmt.setReturnVar(new FIdUse(func.myOutputs().get(0).name()));
+			stmt.setName(func.name());
+			for (InstComponentDecl arg : func.getInstComponentDecls())
+				if (!hasReturn || !arg.isOutput())
+					arg.flattenExternalArg(stmt.getArgs());
+		}
+		return stmt;
+	}
+	
+	public void InstComponentDecl.flattenExternalArg(List<FExp> args) {}
+	
+	public void InstAssignable.flattenExternalArg(List<FExp> args) {
+		FIdUseExp use = new FIdUseExp(name());
 		args.add(use);
 		for (int i = 0; i < ndims(); i++)
 			args.add(new FSizeExp(use.fullCopy(), new Opt(new FIntegerLitExp(i + 1))));
@@ -882,13 +848,10 @@ aspect Flattening {
 	 */
 	syn FExp InstAssignable.myBindingInstExp() = hasInstValueMod() ? myInstValueMod().getFExp() : null;
 
-    /**
-     * Check if this component has a binding expression.
-     * 
-     * Always false for components that are not assignable.
-     */
-    syn boolean InstComponentDecl.hasBindingFExp() = false;
-    eq InstAssignable.hasBindingFExp()             = myBindingInstExp() != null;
+	/**
+	 * \brief Check if this primitive or record has a binding expression.
+	 */
+	syn boolean InstAssignable.hasBindingFExp() = myBindingInstExp() != null;
 
 	/**
 	 * \brief Retrieve the part of the binding expression that applies to this InstAssignable.
