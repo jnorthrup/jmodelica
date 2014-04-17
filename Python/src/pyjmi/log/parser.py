@@ -142,48 +142,35 @@ def create_parser():
     parser.setContentHandler(handler)
     return parser, handler
 
-def parse_xml_log(filename, accept_errors=False):
+def parse_xml_log(filename):
     """
     Parse a pure XML JMI log as created by extract_jmi_log, return the root node.
-
-    If accept_errors is True and a parse error occurs, the results of parsing
-    up to that point will be returned.
     """
     parser, handler = create_parser()
     try:
         parser.parse(filename)
     except sax.SAXException as e:
-        if accept_errors:
-            print 'Warning: Failure during parsing of XML JMI log:\n', e
-            print 'Parsed log will be incomplete.'
-        else:
-            raise Exception('Failed to parse XML JMI log:\n' + repr(e))
+        raise Exception('Failed to parse XML JMI log:\n' + e.getMessage())
         
     return handler.get_root()
 
 # Support routines to parse JMI logs
 
-def parse_jmi_log(filename, modulename = 'Model', accept_errors=False):
+def parse_jmi_log(filename, modulename = 'Model'):
     """
     Parse the XML contents of a JMI log and return the root node.
 
     modulename selects the module as recorded in the beginning of each line by
-    FMI Library. If accept_errors is True and a parse error occurs, the
-    results of parsing up to that point will be returned.
+    FMI Library.
     """
     parser, handler = create_parser()
     try:
         with open(filename, 'r') as f:
             filter_jmi_log(parser.feed, f, modulename)
-
-        parser.close()
     except sax.SAXException as e:
-        if accept_errors:
-            print 'Warning: Failure during parsing of XML JMI log:\n', e
-            print 'Parsed log will be incomplete'
-        else:
-            raise Exception('Failed to parse XML JMI log:\n' + repr(e))
+        raise Exception('Failed to parse XML JMI log:\n' + e.getMessage())
     
+    parser.close()
     return handler.get_root()
 
 def extract_jmi_log(destfilename, filename, modulename = 'Model'):
@@ -198,9 +185,9 @@ def extract_jmi_log(destfilename, filename, modulename = 'Model'):
             filter_jmi_log(destfile.write, sourcefile, modulename)
 
 def filter_jmi_log(write, sourcefile, modulename = 'Model'):
-    write('<?xml version="1.0" encoding="UTF-8"?>\n<JMILog>\n')
+    write('<Log>\n')
 
-    pre_re = r'FMIL: module = ' + modulename + r', log level = ([0-9]+): \[([^]]+)\]\[FMU status:([^]]+)\] '
+    pre_re = r'FMIL: module = ' + modulename + r', log level = ([0-9]+): \[([^]]+)\]\[FMU status:([^]]+)\]'
     pre_pattern = re.compile(pre_re)
 
     for line in sourcefile:
@@ -209,4 +196,4 @@ def filter_jmi_log(write, sourcefile, modulename = 'Model'):
             # log_level, category, fmu_status = m.groups()
             write(line[m.end():])
 
-    write('</JMILog>\n')
+    write('</Log>\n')

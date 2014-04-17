@@ -10,7 +10,8 @@ public class IntegerCost implements MunkresCost<IntegerCost> {
     
     @Override
     public int compareTo(IntegerCost other) {
-        return new Integer(value).compareTo(other.value);
+        // TODO Auto-generated method stub
+        return Long.compare(value, other.value);
     }
 
     @Override

@@ -13,7 +13,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.jmodelica.util.Criteria;
 import org.jmodelica.util.FilteredIterator;
 import org.jmodelica.util.Problem;
-import org.jmodelica.util.StreamGobbler;
 import org.jmodelica.util.logging.ObjectStreamLogger;
 
 public final class Compilation {
@@ -26,11 +25,9 @@ public final class Compilation {
     protected Compilation(List<String> args, String jmodelicaHome) throws IOException {
         ProcessBuilder builder = new ProcessBuilder(args);
         builder.environment().put("JMODELICA_HOME", jmodelicaHome);
+        builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
         
         process = builder.start();
-        
-        StreamGobbler sg = new StreamGobbler(process.getInputStream(), System.out);
-        sg.start();
         
         receiver = new LogReceiver();
         receiver.start();

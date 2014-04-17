@@ -1,7 +1,7 @@
 #!/usr/bin/env python 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2014 Modelon AB
+# Copyright (C) 2010 Modelon AB
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -102,6 +102,7 @@ def run_demo():
     for node in log.nodes:
         print '   ', node, ','
     print ']'
+    print 'Time of first solve: log.nodes[0].t =', log.nodes[0].t
 
     # Gather information pertaining to equation solves
     solves = gather_solves(log)
@@ -118,7 +119,7 @@ def run_demo():
     print
     print 'First iteration in first block solve: '
     print '  Iteration variables:',              solves[0].block_solves[0].iterations[0].ivs
-    print '  Scaled residuals:',                 solves[0].block_solves[0].iterations[0].scaled_residuals
+    print '  Scaled residuals:',                 solves[0].block_solves[0].iterations[0].residuals
     print '  Jacobian:\n',                       solves[0].block_solves[0].iterations[0].jacobian
     print '  Jacobian updated in iteration:',    solves[0].block_solves[0].iterations[0].jacobian_updated
     print '  Residual scaling factors:',         solves[0].block_solves[0].iterations[0].residual_scaling

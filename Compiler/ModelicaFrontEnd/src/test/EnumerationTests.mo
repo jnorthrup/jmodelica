@@ -147,23 +147,24 @@ end EnumerationTests.EnumerationTest6;
 ")})));
   end EnumerationTest6;
   
+  
+  // Keeping this here for now, despite it being a compliance test
   model EnumerationTest7
     type A = enumeration(a, b, c);
-    Real x[A] = {3,2,1};
+    Real x[A];
 
 	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
+		ComplianceErrorTestCase(
 			name="EnumerationTest7",
 			description="Compliance error for using enumeration as array size",
-            flatModel="
-fclass EnumerationTests.EnumerationTest7
- Real x[3] = {3, 2, 1};
-
-public
- type EnumerationTests.EnumerationTest7.A = enumeration(a, b, c);
-
-end EnumerationTests.EnumerationTest7;
-
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo':
+Compliance error at line 117, column 12:
+  Array sizes of Boolean or enumeration type are not supported: A
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo':
+Compliance error at line 154, column 12:
+  Could not evaluate expression used as structural parameter: A
 ")})));
   end EnumerationTest7;
   

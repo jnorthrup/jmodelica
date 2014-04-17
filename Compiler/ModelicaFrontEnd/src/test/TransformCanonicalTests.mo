@@ -2505,7 +2505,9 @@ model UnbalancedTest1_Err
 			name="UnbalancedTest1_Err",
 			description="Test error messages for unbalanced systems.",
 			errorMessage="
-1 errors found:
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Index reduction failed: No continuous equations was given
 
 Error: in file '...':
 Semantic error at line 0, column 0:
@@ -2528,7 +2530,9 @@ equation
 			description="Test error messages for unbalanced systems.",
 			variability_propagation=false,
 			errorMessage="
-1 errors found:
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Index reduction failed: Maximum number of differentiations reached
 
 Error: in file '...':
 Semantic error at line 0, column 0:
@@ -2551,7 +2555,9 @@ equation
 			name="UnbalancedTest3_Err",
 			description="Test error messages for unbalanced systems.",
 			errorMessage="
-1 errors found:
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Index reduction failed: No continuous equations was given
 
 Error: in file '...':
 Semantic error at line 0, column 0:
@@ -2569,7 +2575,9 @@ equation
 			name="UnbalancedTest4_Err",
 			description="Test error messages for unbalanced systems.",
 			errorMessage="
-1 errors found:
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Index reduction failed: No continuous equations was given
 
 Error: in file '...':
 Semantic error at line 0, column 0:
@@ -2590,7 +2598,9 @@ equation
 			description="Test error messages for unbalanced systems.",
 			variability_propagation=false,
 			errorMessage="
-1 errors found:
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Index reduction failed: Maximum number of differentiations reached
 
 Error: in file '...':
 Semantic error at line 0, column 0:
@@ -6539,7 +6549,11 @@ model IllegalWhen3_Err
 			name="IllegalWhen3_Err",
 			description="Test illegal when-matching",
 			errorMessage="
-1 errors found:
+2 errors found:
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Index reduction failed: Maximum number of differentiations reached
 
 Error: in file '...':
 Semantic error at line 0, column 0:
@@ -6548,6 +6562,8 @@ Semantic error at line 0, column 0:
 
   The following equation(s) could not be matched to any variable:
     y + 3 = time
+	
+			
 ")})));
 end IllegalWhen3_Err;
 

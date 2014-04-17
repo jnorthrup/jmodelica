@@ -19,35 +19,29 @@ Test module for testing the CASADI examples.
 """
 
 from tests_jmodelica import testattr
-from pyjmi.examples import (ccpp, vdp_casadi, vdp_minimum_time_casadi,
-                            cstr_casadi, qt_par_est_casadi, vehicle_turn)
+from pyjmi.examples import ccpp, vdp_casadi, vdp_minimum_time_casadi, cstr_casadi, qt_par_est_casadi
 
 @testattr(casadi = True)
 def test_ccpp():
-    """Run the Combined Cycle Power Plant example."""
+    """Run the new Combined Cycle Power Plant example."""
     ccpp.run_demo(False)
 
 @testattr(casadi = True)
 def test_vdp_casadi():
-    """Run the VDP CasADi example."""
+    """Run the new VDP CasADi example."""
     vdp_casadi.run_demo(False)
 
 @testattr(casadi = True)
 def test_vdp_minimum_time_casadi():
-    """Run the VDP CasADi minimum time example."""
+    """Run the new VDP CasADi minimum time example."""
     vdp_minimum_time_casadi.run_demo(False)
 
 @testattr(casadi = True)
 def test_cstr_casadi():
-    """Run the CSTR CasADi example."""
+    """Run the new CSTR CasADi example."""
     cstr_casadi.run_demo(False)
 
 @testattr(casadi = True)
 def test_qt_par_casadi():
-    """Run the QT CasADi example."""
+    """Run the new QT CasADi example."""
     qt_par_est_casadi.run_demo(False)
-
-@testattr(ma27 = True)
-def test_vehicle_turn():
-    """Run the vehicle turn example."""
-    vehicle_turn.run_demo(False)
