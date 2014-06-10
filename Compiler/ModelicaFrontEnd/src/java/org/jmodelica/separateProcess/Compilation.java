@@ -10,7 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.jmodelica.util.CompiledUnit;
 import org.jmodelica.util.Criteria;
 import org.jmodelica.util.FilteredIterator;
 import org.jmodelica.util.Problem;
@@ -23,7 +22,6 @@ public final class Compilation {
     private final LogReceiver receiver;
     private final Collection<Problem> problems = new ConcurrentLinkedQueue<Problem>();
     private Throwable exception = null;
-    private CompiledUnit compiledUnit = null;
     
     protected Compilation(List<String> args, String jmodelicaHome) throws IOException {
         ProcessBuilder builder = new ProcessBuilder(args);
@@ -57,15 +55,11 @@ public final class Compilation {
     public Throwable getException() {
         return exception;
     }
-
+    
     public Iterator<Problem> getProblems() {
         return problems.iterator();
     }
-
-    public CompiledUnit getCompiledUnit() {
-        return compiledUnit;
-    }
-
+    
     public Iterator<Problem> getErrors() {
         return new FilteredIterator<Problem>(getProblems(), new Criteria<Problem>() {
             @Override
@@ -95,8 +89,6 @@ public final class Compilation {
                         // Ignore
                     } else if (o instanceof Problem) {
                         problems.add((Problem) o);
-                    } else if (o instanceof CompiledUnit) {
-                        compiledUnit = (CompiledUnit) o;
                     } else if (o instanceof Throwable) {
                         if (exception == null)
                             exception = (Throwable) o;

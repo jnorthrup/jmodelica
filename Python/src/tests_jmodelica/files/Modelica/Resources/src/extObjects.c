@@ -1,7 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
-#include "ModelicaUtilities.h"
 
 void* constructor_string(const char* str) {
     void* res = malloc(strlen(str) + 1);
@@ -18,7 +16,7 @@ void destructor_string_create_file(void* o) {
     FILE* f = fopen((char*) o, "w");
     fprintf(f, "Test file.");
     fclose(f);
-    fprintf(stderr, "Destructing external object for file '%s'.\n", (char*)o);
+    fprintf(stderr, "Destructing external object for file '%s'.\n", o);
 
     free(o);
 }

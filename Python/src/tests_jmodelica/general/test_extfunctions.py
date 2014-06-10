@@ -29,8 +29,6 @@ from tests_jmodelica import testattr, get_files_path
 from tests_jmodelica.general.base_simul import *
 from assimulo.solvers.sundials import CVodeError
 
-path_to_mofiles = os.path.join(get_files_path(), 'Modelica')
-
 class TestExternalStatic:
 
     @classmethod
@@ -38,7 +36,21 @@ class TestExternalStatic:
         """
         Sets up the test class.
         """
-        cls.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
+        cls.dir = build_ext('add_static', 'ExtFunctionTests.mo')
+        cls.fpath = path(cls.dir, "ExtFunctionTests.mo")
+        
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        pass
+    
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Cleans up after test class.
+        """
+        shutil.rmtree(TestExternalStatic.dir, True)
     
     @testattr(stddist = True)
     def test_ExtFuncStatic(self):
@@ -64,6 +76,18 @@ class TestExternalStatic:
         nose.tools.assert_equals(res.final('myResult[3]'), 6)
         
 class TestUtilities:
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        pass
+        
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        pass
     
     @testattr(stddist = True)
     def test_ModelicaUtilities(self):
@@ -83,7 +107,21 @@ class TestExternalShared:
         """
         Sets up the test class.
         """
-        cls.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
+        cls.dir = build_ext('add_shared', 'ExtFunctionTests.mo')
+        cls.fpath = path(cls.dir, "ExtFunctionTests.mo")
+        
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        pass
+    
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Cleans up after test class.
+        """
+        shutil.rmtree(TestExternalShared.dir, True)
         
     @testattr(stddist = True)
     def test_ExtFuncShared(self):
@@ -114,7 +152,15 @@ class TestExternalBool:
         Sets up the test class.
         """
         self.cpath = "ExtFunctionTests.ExtFunctionBool"
-        self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
+        self.dir = build_ext('array_shared', 'ExtFunctionTests.mo')
+        self.fpath = path(self.dir, "ExtFunctionTests.mo")
+    
+    @classmethod
+    def tearDownClass(self):
+        """
+        Cleans up after test class.
+        """
+        shutil.rmtree(self.dir, True)
         
     @testattr(stddist = True)
     def test_ExtFuncBool(self):
@@ -139,7 +185,15 @@ class TestExternalShared2:
         Sets up the test class.
         """
         self.cpath = "ExtFunctionTests.ExtFunctionTest2"
-        self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
+        self.dir = build_ext('array_shared', 'ExtFunctionTests.mo')
+        self.fpath = path(self.dir, "ExtFunctionTests.mo")
+    
+    @classmethod
+    def tearDownClass(self):
+        """
+        Cleans up after test class.
+        """
+        shutil.rmtree(self.dir, True)
         
     @testattr(stddist = True)
     def test_ExtFuncShared(self):
@@ -167,7 +221,15 @@ class TestExternalInf:
         Sets up the test class. Check timeout of infinite loop during constant evaluation.
         """
         self.cpath = "ExtFunctionTests.ExternalInfinityTest"
-        self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
+        self.dir = build_ext('array_shared', 'ExtFunctionTests.mo')
+        self.fpath = path(self.dir, "ExtFunctionTests.mo")
+    
+    @classmethod
+    def tearDownClass(self):
+        """
+        Cleans up after test class.
+        """
+        shutil.rmtree(self.dir, True)
         
     @testattr(stddist = True)
     def test_ExtFuncShared(self):
@@ -184,7 +246,15 @@ class TestExternalObject:
         """
         Sets up the test class.
         """
-        cls.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
+        cls.dir = build_ext('ext_objects', 'ExtFunctionTests.mo')
+        cls.fpath = path(cls.dir, "ExtFunctionTests.mo")
+    
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Cleans up after test class.
+        """
+        shutil.rmtree(TestExternalObject.dir, True)
         
     @testattr(stddist = True)
     def test_ExtObjectDestructor(self):
@@ -208,7 +278,15 @@ class TestExternalObject2:
         """
         Sets up the test class.
         """
-        cls.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
+        cls.dir = build_ext('ext_objects', 'ExtFunctionTests.mo')
+        cls.fpath = path(cls.dir, "ExtFunctionTests.mo")
+    
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Cleans up after test class.
+        """
+        shutil.rmtree(TestExternalObject2.dir, True)
         
     @testattr(stddist = True)
     def test_ExtObjectDestructor(self):
@@ -294,7 +372,15 @@ class TestModelicaError:
         """
         Sets up the test class.
         """
-        cls.fpath = path(path_to_mofiles, 'Asserts.mo')
+        cls.dir = build_ext('use_modelica_error', 'Asserts.mo')
+        cls.fpath = path(cls.dir, 'Asserts.mo')
+    
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Cleans up after test class.
+        """
+        shutil.rmtree(TestModelicaError.dir, True)
         
     @testattr(stddist = True)
     def test_simulate(self):
@@ -314,7 +400,12 @@ class TestCBasic:
     '''
     @classmethod
     def setUpClass(self):
-        self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
+        self.dir = build_ext('basic_static_c', 'ExtFunctionTests.mo')
+        self.fpath = path(self.dir, "ExtFunctionTests.mo")
+    
+    @classmethod
+    def tearDownClass(self):
+        shutil.rmtree(self.dir, True)
     
     @testattr(stddist = True)
     def testCEvalReal(self):
@@ -396,7 +487,12 @@ class TestFortranBasic:
     '''
     @classmethod
     def setUpClass(self):
-        self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
+        self.dir = build_ext('basic_static_f', 'ExtFunctionTests.mo')
+        self.fpath = path(self.dir, "ExtFunctionTests.mo")
+    
+    @classmethod
+    def tearDownClass(self):
+        shutil.rmtree(self.dir, True)
     
     @testattr(stddist = True)
     def testCEvalReal(self):
@@ -456,7 +552,8 @@ class TestAdvanced:
     '''
     @classmethod
     def setUpClass(self):
-        self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
+        self.dir   = build_ext('ext_objects', 'ExtFunctionTests.mo')
+        self.fpath = path(self.dir, "ExtFunctionTests.mo")
     
     @testattr(stddist = True)
     def testDGELSX(self):
@@ -518,7 +615,12 @@ class TestUtilities:
     '''
     @classmethod
     def setUpClass(self):
-        self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
+        self.dir = build_ext('use_modelica_error', 'ExtFunctionTests.mo')
+        self.fpath = path(self.dir, "ExtFunctionTests.mo")
+    
+    @classmethod
+    def tearDownClass(self):
+        shutil.rmtree(self.dir, True)
     
     @testattr(stddist = True)
     def testCEvalLog(self):
@@ -535,3 +637,27 @@ class TestUtilities:
         logfile.close()
         os.remove(logfile.name);
         assert(count >= 2)
+        
+def build_ext(target, mofile):
+    """
+    Build a library for an external function.
+    """
+    platform = get_platform_dir()
+    if platform[:-2] == 'win':
+        bin = path(os.environ['MINGW_HOME'],'bin')
+        make = '%s CC=%s AR=%s' % (path(bin,'mingw32-make'), path(bin,'gcc'), path(bin,'ar'))
+        cmd = "gnumake Makefile "+target
+    else:
+        make = 'make'
+        cmd = '%s PLATFORM=%s clean %s' % (make, platform, target)
+    
+    src = path(get_files_path(), 'Modelica')
+    dst = create_temp_dir()
+    shutil.copytree(path(src, 'Resources'), path(dst, 'Resources'))
+    shutil.copy(path(src, mofile), dst)
+    old = os.getcwd()
+    os.chdir(path(dst, 'Resources', 'src'))
+    subprocess.call(cmd, shell=True)
+    os.chdir(old)
+    
+    return dst

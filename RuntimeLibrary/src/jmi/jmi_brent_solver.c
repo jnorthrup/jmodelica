@@ -137,43 +137,62 @@ static int jmi_brent_init(jmi_block_solver_t * block) {
 }
 
 
-static int jmi_brent_try_bracket(jmi_block_solver_t * block, 
-                                     double x_cur, double f_cur,
-                                     double x_bracket, double* f_bracket)
+static int jmi_brent_improve_bracket(jmi_block_solver_t * block, 
+                                     double* x_cur, double* f_cur,
+                                     double* x_bracket, double* f_bracket)
 {
     int flag;
     jmi_brent_solver_t* solver = (jmi_brent_solver_t*)block->solver;
     jmi_log_t *log = block->log;
 
     if (block->callbacks->log_options.log_level > 4) {
-         jmi_log_node(log, logInfo, "Info", "Trying to bracket the root with <iv: %g>", x_bracket);
+         jmi_log_node(log, logInfo, "Info", "Trying to bracket the root with <iv: %g>", x_bracket[0]);
     }
 
-    flag =  brentf(x_bracket, f_bracket, block); /* evaluate residual */
+    flag =  brentf(*x_bracket, f_bracket, block); /* evaluate residual */
     if (flag) {
         /* report error */
         return -1;
     }
     if (f_bracket[0] > DBL_MIN) { 
-        if (f_cur <= 0) { /* sign change - bracketing done */
+        if (f_cur[0] > 0) {  
+            /* check if improve the bracketing (no sign change) */
+            if (f_bracket[0] < f_cur[0]) {
+                if (block->callbacks->log_options.log_level > 4) {
+                    jmi_log_node(log, logInfo, "Info", "improving backeting in <block: %d> with <iv: %g> <residual: %g>", 
+                        x_bracket[0], f_bracket[0]);
+                }
+                f_cur[0] = f_bracket[0];
+                x_cur[0] = x_bracket[0];
+            }
+        }
+        else  { /* sign change - bracketing done */
             solver->f_pos_min = f_bracket[0];
-            solver->y_pos_min = x_bracket;
-            solver->f_neg_max = f_cur;
-            solver->y_neg_max = x_cur;
+            solver->y_pos_min = x_bracket[0];
+            solver->f_neg_max = f_cur[0];
+            solver->y_neg_max = x_cur[0];
             return 1;
         }
     }
     else if (f_bracket[0] < -DBL_MIN) { 
-        if (f_cur >= 0) { /* sign change - bracketing done */
+        if (f_cur[0] < 0) {  
+            /* check if improve the bracketing (no sign change) */
+            if (f_bracket[0] > f_cur[0]) {
+                f_cur[0] = f_bracket[0];
+                x_cur[0] = x_bracket[0];
+            }
+        }
+        else  { /* sign change - bracketing done */
             solver->f_neg_max = f_bracket[0];
-            solver->y_neg_max = x_bracket;
-            solver->f_pos_min = f_cur;
-            solver->y_pos_min = x_cur;
+            solver->y_neg_max = x_bracket[0];
+            solver->f_pos_min = f_cur[0];
+            solver->y_pos_min = x_cur[0];
             return 1;
         }
     }
     else {
-        block->x[0] = x_bracket;
+        f_cur[0] = f_bracket[0];
+        x_cur[0] = x_bracket[0];
         jmi_log_node(log, logInfo, "Info", "Got zero residual while bracketing in <block: %d>", block->id);
         return 2;
     }
@@ -239,12 +258,10 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                 tmp = lower - lstep;  
                 if ((tmp < block->min[0]) || (tmp != tmp)) { /* make sure we're inside bounds and not NAN*/
                     tmp = block->min[0];
-                    /* This update can increase roundoff that prevents lstep from decreasing.
-                       Ok if we hit the bound anyway. */
-                    lstep = lower - tmp;
                 }
+                lstep = lower - tmp;
 
-                flag = jmi_brent_try_bracket(block, lower, f_lower, tmp, &f_tmp);
+                flag = jmi_brent_improve_bracket(block, &x, &f, &tmp, &f_tmp);
 
                  /* modify the step for the next time */
                 if (flag < 0) { 
@@ -252,7 +269,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                     lstep *= 0.5;
                     jmi_log_node(log, logInfo, "Info", 
                         "Reducing bracketing step in negative direction to <lstep: %g> in <block: %d>", lstep, block->id);
-                    if ((lstep <= UNIT_ROUNDOFF * block->nominal[0]) || (lower - lstep == lower)) {
+                    if (lstep <= UNIT_ROUNDOFF * block->nominal[0]) {
                         jmi_log_node(log, logInfo, "Info", 
                             "Too small bracketing step - modifying lower <bound: %g> on the iteration variable in <block: %d>", lower, block->id);
                         block->min[0] = lower; /* we cannot step further without breaking the function -> update the bound */
@@ -271,12 +288,10 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                 tmp = upper + ustep;
                 if ((tmp > block->max[0]) || (tmp != tmp)) {
                     tmp = block->max[0];
-                    /* This update can increase roundoff that prevents lstep from decreasing.
-                       Ok if we hit the bound anyway. */
-                    ustep = tmp - upper;
                 }
+                ustep = tmp - upper;
 
-                flag = jmi_brent_try_bracket(block, upper, f_upper, tmp, &f_tmp);
+                flag = jmi_brent_improve_bracket(block, &x, &f, &tmp, &f_tmp);
 
                  /* modify the step for the next time */
                 if (flag < 0) { 
@@ -285,7 +300,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                     jmi_log_node(log, logInfo, "Info", 
                         "Reducing bracketing step in positive direction to <ustep: %g> in <block: %d>", ustep, block->id);
 
-                    if ((ustep <= UNIT_ROUNDOFF * block->nominal[0]) ||  (upper + ustep == upper)) {
+                    if (ustep <= UNIT_ROUNDOFF * block->nominal[0]) {
                         jmi_log_node(log, logInfo, "Info", 
                             "Too small bracketing step - modifying upper <bound: %g> on the iteration variable in <block: %d>", upper, block->id);
                         block->max[0] = upper; /* we cannot step further without breaking the function -> update the bound */
@@ -310,6 +325,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         }
         if (flag == 2) {
             /* root found while in bracketing */
+            block->x[0] = x;
             return JMI_BRENT_SUCCESS;
         }
     }

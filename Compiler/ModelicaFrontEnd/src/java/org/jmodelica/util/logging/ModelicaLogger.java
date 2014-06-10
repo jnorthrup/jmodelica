@@ -1,6 +1,5 @@
 package org.jmodelica.util.logging;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -11,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.jmodelica.util.streams.NullStream;
-import org.jmodelica.util.CompiledUnit;
 import org.jmodelica.util.Problem;
 import org.jmodelica.util.exceptions.CompilerException;
 
@@ -45,8 +43,6 @@ public abstract class ModelicaLogger {
     protected abstract void write(Level level, Throwable throwable);
 
     protected abstract void write(Level level, Problem problem);
-
-    protected abstract void write(Level level, CompiledUnit unit);
 
     /**
      * Log <code>message</code> on log level <code>level</code>.
@@ -144,20 +140,6 @@ public abstract class ModelicaLogger {
      */
     public void logProblem(Problem problem) {
         write(Level.fromKind(problem.severity()), problem);
-    }
-
-    /**
-     * Log the compiled unit (e.g. FMU file).
-     */
-    public void logCompiledUnit(CompiledUnit unit) {
-        write(Level.ERROR, unit);
-    }
-
-    /**
-     * Log the compiled unit, it will be written on level info.
-     */
-    public void logCompiledUnit(File unitFile) {
-        logCompiledUnit(new CompiledUnit(unitFile));
     }
 
     /**

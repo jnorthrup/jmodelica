@@ -331,11 +331,16 @@ def _compile_unit(class_name, file_name, compiler, target, version,
         comp.set_compiler_logger(compiler_log_level)
         
         # compile unit in java
-        return comp.compile_Unit(class_name, file_name, target, version, compile_to)
+        warnings = comp.compile_Unit(class_name, file_name, target, version, compile_to)
 
     else:
-        return compile_separate_process(class_name, file_name, compiler, target, version, compiler_options, 
+        warnings = compile_separate_process(class_name, file_name, compiler, target, version, compiler_options, 
                                  compile_to, compiler_log_level, jvm_args)
+        
+    if os.path.isdir(compile_to):
+        return CompilerResult(os.path.join(compile_to, _get_unit_name_from_target(class_name, target)), warnings)
+    else:
+        return CompilerResult(compile_to, warnings)
 
 def compile_separate_process(class_name, file_name=[], compiler='auto', target='me', version='1.0', compiler_options={}, 
                              compile_to='.', compiler_log_level='warning', jvm_args=''):
@@ -515,6 +520,65 @@ def _ensure_path(start, end):
             
     return start
 
+
+def _get_unit_name_from_target(class_name, target):
+   """
+   Helper method to get unit file ending from compiler target.
+   """
+   # compile unit in java
+   if (target == 'me' or target == 'cs' or target == 'me+cs'): 
+       return get_fmu_name(class_name)
+   elif (target == 'jmu'):
+       return get_jmu_name(class_name)
+   elif (target == 'fmux'):
+       return get_fmux_name(class_name)
+   else:
+       raise Exception("Could not extract unit type from target %s" %(target))
+    
+def get_jmu_name(class_name):
+    """
+    Computes the JMU name from a class name.
+    
+    Parameters::
+        
+        class_name -- 
+            The name of the model.
+        
+    Returns::
+    
+        The JMU name (replaced dots with underscores).
+    """
+    return get_unit_name(class_name, unit_type='JMU')
+
+def get_fmu_name(class_name):
+    """
+    Computes the FMU name from a class name.
+    
+    Parameters::
+        
+        class_name -- 
+            The name of the model.
+        
+    Returns::
+    
+        The FMU name (replaced dots with underscores).
+    """
+    return get_unit_name(class_name, unit_type='FMU')
+
+def get_fmux_name(class_name):
+    """
+    Computes the FMUX name from a class name.
+    
+    Parameters::
+        
+        class_name -- 
+            The name of the model.
+        
+    Returns::
+    
+        The FMUX name (replaced dots with underscores).
+    """
+    return get_unit_name(class_name, unit_type='FMUX')
 
 def _get_compiler(files, selected_compiler='auto'):
     from compiler_wrappers import ModelicaCompiler, OptimicaCompiler

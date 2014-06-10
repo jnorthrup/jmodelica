@@ -31,7 +31,6 @@ abstract InstRoot : InstBaseNode;
 InstProgramRoot : InstRoot ::= <Program:Program>
                                /UnknownInstClassDecl/
                                /UnknownInstComponentDecl/
-                               /InstAnonymousClass:InstClassDecl*/ 
                                /InstPredefinedType:InstClassDecl*/ 
                                /InstBuiltInType:InstClassDecl*/   
                                /InstBuiltInFunction:InstClassDecl*/

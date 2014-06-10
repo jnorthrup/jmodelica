@@ -988,27 +988,25 @@ aspect FlatAPI {
     eq FRelExp.hasEventGeneratingType() = isRealComparison();
     eq FEventGenExp.hasEventGeneratingType() = argType().isReal();
 
-    syn boolean FRelExp.generatesEventInDAE() = inEquationSection() && originalFRelExp==null && generatesEvent(false);
-    syn boolean FRelExp.generatesEventInInitDAE() =
-            (inInitialEquationSection() || inEquationSection() && containsNonFixedParameter())
-            && originalFRelExp==null && generatesEvent(true);
-    
 	syn int FClass.numEventIndicators() = numRelExpInEquations();
 	
     syn int FClass.numRelExpInEquations() = relExpInEquations().size();
 	coll ArrayList<FRelExp> FClass.relExpInEquations() 
 	  [new ArrayList<FRelExp>()] with add root FlatRoot;
-	FRelExp contributes this when generatesEventInDAE() 
+	FRelExp contributes
+ 		this when inEquationSection() && originalFRelExp==null && generatesEvent() 
 	to FClass.relExpInEquations() for myFClass();
 	
 	coll ArrayList<FRelExp> FAbstractEquation.relExpInEquation() 
 		[new ArrayList<FRelExp>()] with add root FAbstractEquation;
-	FRelExp contributes this when generatesEventInDAE() 
+	FRelExp contributes
+		this when inEquationSection() && originalFRelExp==null && generatesEvent() 
 	to FAbstractEquation.relExpInEquation() for myFEquation();
 	
 	coll ArrayList<FRelExp> FStatement.relExpInStmt() 
 		[new ArrayList<FRelExp>()] with add root FStatement;
-	FRelExp contributes this when generatesEventInDAE() 
+	FRelExp contributes
+		this when inEquationSection() && originalFRelExp==null && generatesEvent() 
 	to FStatement.relExpInStmt() for myFStatement();
 			
 	inh FStatement FExp.myFStatement();
@@ -1053,12 +1051,14 @@ aspect FlatAPI {
         relExpInInitialEquations().size();
     coll ArrayList<FRelExp> FClass.relExpInInitialEquations()
         [new ArrayList<FRelExp>()] with add root FlatRoot;
-    FRelExp contributes this when generatesEventInInitDAE()
+    FRelExp contributes
+        this when inInitialEquationSection() && originalFRelExp==null && generatesEvent()
     to FClass.relExpInInitialEquations() for myFClass();
 
     coll ArrayList<FRelExp> FAbstractEquation.relExpInInitialEquation() 
         [new ArrayList<FRelExp>()] with add root FAbstractEquation;
-    FRelExp contributes this when generatesEventInInitDAE() 
+    FRelExp contributes
+        this when inInitialEquationSection() && originalFRelExp==null && generatesEvent() 
     to FAbstractEquation.relExpInInitialEquation() for myFEquation();
 
 	public int FRelExp.relExpInInitialEquationsIndex() {
@@ -1898,7 +1898,6 @@ aspect Attributes {
     eq FDerivedType.getChild().isInFV()      = false;
     eq FAbstractEquation.getChild().isInFV() = false;
     eq FFunctionDecl.getChild().isInFV()     = false;
-    eq FClass.getChild().isInFV()            = false;
 
     /**
      * Check if this attribute is in a specific FVariable.
@@ -1908,7 +1907,6 @@ aspect Attributes {
     eq FDerivedType.getChild().isInFV(FVariable fv)      = false;
     eq FAbstractEquation.getChild().isInFV(FVariable fv) = false;
     eq FFunctionDecl.getChild().isInFV(FVariable fv)     = false;
-    eq FClass.getChild().isInFV(FVariable fv)            = false;
 
     /**
      * Check if this attribute is in an FDerivedType.
@@ -1918,7 +1916,6 @@ aspect Attributes {
     eq FDerivedType.getChild().isInDerivedType()      = true;
     eq FAbstractEquation.getChild().isInDerivedType() = false;
     eq FFunctionDecl.getChild().isInDerivedType()     = false;
-    eq FClass.getChild().isInDerivedType()            = false;
 
     /**
      * Check if this attribute is in a specific FDerivedType.
@@ -1928,7 +1925,6 @@ aspect Attributes {
     eq FDerivedType.getChild().isInDerivedType(FDerivedType t)      = t == this;
     eq FAbstractEquation.getChild().isInDerivedType(FDerivedType t) = false;
     eq FFunctionDecl.getChild().isInDerivedType(FDerivedType t)     = false;
-    eq FClass.getChild().isInDerivedType(FDerivedType t)            = false;
 
     syn boolean FAttribute.isDecl() = false;
     eq FIdDeclAttribute.isDecl()    = true;

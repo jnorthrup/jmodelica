@@ -7,7 +7,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import org.jmodelica.util.CompiledUnit;
 import org.jmodelica.util.Problem;
 import org.jmodelica.util.exceptions.ModelicaException;
 
@@ -81,7 +80,5 @@ public class StreamingLogger extends PipeLogger {
     protected void do_write(Problem problem) throws IOException {
         do_write(problem.toString());
     }
-
-    protected void do_write(CompiledUnit unit) throws IOException {}
 
 }

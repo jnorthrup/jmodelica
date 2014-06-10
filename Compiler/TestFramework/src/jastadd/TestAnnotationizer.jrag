@@ -302,8 +302,9 @@ abstract public class TestAnnotationizerHelper {
 		opts.addStringOption("MODELICAPATH", modelicapath);
 		SourceRoot root;
 		
+		ParserHandler ph = new ParserHandler();
 		try {
-			root = ParserHandler.parseFile(filePath);
+			root = ph.parseFile(filePath);
 			root.options = opts;
 		} catch (ParserException e) {
 			e.getProblem().setFileName(filePath);

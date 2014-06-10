@@ -25,9 +25,6 @@ aspect LocalIteration{
 
             @Override
             protected void contribute(InstBaseClassDecl src, FFunctionDecl dest) {}
-
-            @Override
-            protected void contribute(InstNode src, FClass dest) {}
         }
     }
     

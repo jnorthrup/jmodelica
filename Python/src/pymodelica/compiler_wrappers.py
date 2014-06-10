@@ -353,14 +353,12 @@ class ModelicaCompiler(object):
             A list of warnings given by the compiler
         """
         self._compiler.retreiveAndClearWarnings() # Remove old warnings
-        unit = None
         try:
-            unit = self._compiler.compileUnit(class_name, file_name, target, version, compile_to)
+            self._compiler.compileUnit(class_name, file_name, target, version, compile_to)
             self._compiler.closeLogger()
         except jpype.JavaException as ex:
             self._handle_exception(ex)
-        from compiler import CompilerResult
-        return CompilerResult(unit, self.get_warnings())
+        return self.get_warnings()
 
     def parse_model(self,model_file_name):
         """ 

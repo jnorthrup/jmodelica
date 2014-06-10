@@ -220,9 +220,8 @@ public class CompilerInstance {
 
     public static void main(String[] args) throws Throwable {
         CompilerInstance ci = new CompilerInstance();
-        Compilation c = ci.compile("Modelica.Mechanics.Rotational.Examples.First");
+        Compilation c = ci.compile("Modelica.Mechanics.MultiBody.Examples.Elementary.FreeBody");
         c.join();
-        System.out.println(c.getCompiledUnit());
     }
 
     private static String join(String delimiter, String... args) {

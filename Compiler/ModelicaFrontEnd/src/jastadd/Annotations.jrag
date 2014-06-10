@@ -68,7 +68,6 @@ aspect AnnotationAPI {
     eq FFunctionDecl.annotation()     = new FAttributeListAnnotationNode(getFAttributes());
     eq FVariable.annotation()         = new FAttributeListAnnotationNode(getFAttributes());
     eq FAbstractEquation.annotation() = new FAttributeListAnnotationNode(getFAttributes());
-    eq FClass.annotation()            = new FAttributeListAnnotationNode(getFAttributes());
 
     syn AnnotationNode InstNode.classAnnotation() = myInstClass().annotation();
 
@@ -628,7 +627,7 @@ aspect AnnotationAPI {
         
         @Override
         protected AnnotationNode lookup(String path) {
-            return realNode == null ? null : realNode.lookup(path);
+            return realNode == null ? super.lookup(path) : realNode.lookup(path);
         }
 
         @Override
