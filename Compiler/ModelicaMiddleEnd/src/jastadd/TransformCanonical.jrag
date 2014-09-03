@@ -239,8 +239,9 @@ aspect TransformCanonical {
              * Call this method at the end of perform() if it changed the tree.
              */
             void change() {
-                setDAEBLT(BLT.EMPTY_BLT);
-                setDAEInitBLT(BLT.EMPTY_BLT);
+                daeBLT = BLT.EMPTY_BLT;
+                daeStructuredBLT = BLT.EMPTY_BLT;
+                daeInitBLT = BLT.EMPTY_BLT;
                 DAEBiPGraph = null;
                 root().flushAllRecursiveClearFinal();
             }
@@ -371,48 +372,23 @@ aspect TransformCanonical {
     }
 
     private BLT FClass.daeBLT = BLT.EMPTY_BLT;
-    public BLT FClass.getDAEBLT() {
+    syn BLT FClass.getDAEBLT() {
         transformCanonical();
         return daeBLT;
     }
-    
-    public void FClass.setDAEBLT(BLT newBLT) {
-        daeBLT = newBLT;
-        daeFVariableEquationBlockMap = new HashMap<FVariable, AbstractEquationBlock>();
-        for (AbstractEquationBlock eb : daeBLT)
-            for (FVariable fv : eb.allVariables())
-                daeFVariableEquationBlockMap.put(fv,eb);
-        if (newBLT == BLT.EMPTY_BLT)
-            daeStructuredBLT = BLT.EMPTY_BLT;
-        else
-            daeStructuredBLT = new StructuredBLT(this, daeBLT);
-    }
 
     private StructuredBLT FClass.daeStructuredBLT = BLT.EMPTY_BLT;
-
-    public StructuredBLT FClass.getDAEStructuredBLT() {
+    syn StructuredBLT FClass.getDAEStructuredBLT() {
         transformCanonical();
         return daeStructuredBLT;
     }
 
     private BLT FClass.daeInitBLT = BLT.EMPTY_BLT;
-
-    public BLT FClass.getDAEInitBLT() {
+    syn BLT FClass.getDAEInitBLT() {
         transformCanonical();
         return daeInitBLT;
     }
-
-    public void FClass.setDAEInitBLT(BLT newBLT) {
-        daeInitBLT = newBLT;
-        daeInitFVariableEquationBlockMap = new HashMap<FVariable, AbstractEquationBlock>();
-        for (AbstractEquationBlock eb : daeInitBLT) {
-            for (FVariable fv : eb.allVariables()) {
-                daeInitFVariableEquationBlockMap.put(fv,eb);
-            }
-        }
-        daeInitBLT.computeDependencies();
-    }
-
+    
     syn boolean FClass.onlyInitBLT() = getDAEBLT() == BLT.EMPTY_BLT && getDAEInitBLT() != BLT.EMPTY_BLT;
 
     syn boolean FClass.shouldPerformMatchingsAndBLT() = true;
@@ -549,31 +525,38 @@ aspect TransformCanonical {
             breakOnErrors();
         } 
 
-        // Perform BLT
-        if (root().options.getBooleanOption("equation_sorting") &&
-                !root().options.getBooleanOption("generate_only_initial_system") &&
-                g.isComplete()) {
-            BLT daeBLT;
-            try {
-                daeBLT = g.computeBLT(root().options);
-                if (blockFunctionExtraction(daeBLT, g)) {
-                    daeBLT = g.computeBLT(root().options);
-                }
-            } catch (BLTException e) {
-                error(e.getMessage());
-                return;
-            }
-            for (FAbstractEquation e : equations())
-                if (e.numScalarEquations() == 0)
-                    daeBLT.add(EquationBlockFactory.createMetaBlock(e));
-            setDAEBLT(daeBLT);
-            getDAEStructuredBLT().errorCheck();
-            log.info(getDAEStructuredBLT());
-            log.info(getDAEBLT());
-        } else {
-            setDAEBLT(BLT.EMPTY_BLT);
-        }
-
+		// Perform BLT
+		if (root().options.getBooleanOption("equation_sorting") &&
+		        !root().options.getBooleanOption("generate_only_initial_system") &&
+		        g.isComplete()) {
+			try {
+				daeBLT = g.computeBLT(root().options);
+				if (blockFunctionExtraction(daeBLT, g)) {
+				    daeBLT = g.computeBLT(root().options);
+				}
+			} catch (BLTException e) {
+				error(e.getMessage());
+				return;
+			}
+			daeFVariableEquationBlockMap = new HashMap<FVariable, AbstractEquationBlock>();
+			for (AbstractEquationBlock eb : daeBLT) {
+				for (FVariable fv : eb.allVariables()) {
+					daeFVariableEquationBlockMap.put(fv,eb);
+				}
+			}
+			for (FAbstractEquation e : equations())
+				if (e.numScalarEquations() == 0)
+					daeBLT.add(EquationBlockFactory.createMetaBlock(e));
+			daeStructuredBLT = new StructuredBLT(this, daeBLT);
+			daeStructuredBLT.errorCheck();
+			log.info(daeStructuredBLT);
+			
+			log.info(daeBLT);
+		} else {
+		    daeBLT = BLT.EMPTY_BLT;
+		    daeStructuredBLT = BLT.EMPTY_BLT;
+		}
+		
 		Enumerator enumerator = new Enumerator(1);
 		// Find matching for the initialization system
 		g.addVariables(this, VAR_TYPES_INIT);
@@ -660,18 +643,23 @@ aspect TransformCanonical {
 		collectErrors(ErrorCheckType.COMPILE);
 		breakOnErrors();
 		
-        if (root().options.getBooleanOption("equation_sorting") && g.isComplete()) {
-            g.tarjanReset();
-            BLT daeInitBLT;
-            try {
-                daeInitBLT = g.computeBLT(root().options);
+		if (root().options.getBooleanOption("equation_sorting") && g.isComplete()) {
+			g.tarjanReset();
+			try {
+				daeInitBLT = g.computeBLT(root().options);
                 if (blockFunctionExtraction(daeInitBLT, g)) {
                     daeInitBLT = g.computeBLT(root().options);
                 }
-            } catch (BLTException e) {
-                error(e.getMessage());
-                return;
-            }
+			} catch (BLTException e) {
+				error(e.getMessage());
+				return;
+			}
+			daeInitFVariableEquationBlockMap = new HashMap<FVariable, AbstractEquationBlock>();
+			for (AbstractEquationBlock eb : daeInitBLT) {
+				for (FVariable fv : eb.allVariables()) {
+					daeInitFVariableEquationBlockMap.put(fv,eb);
+				}
+			}	
             for (FAbstractEquation e : equations()) {
                 if (e.numScalarEquations() == 0) {
                     if (e.replacedAtInitialization()) {
@@ -683,13 +671,12 @@ aspect TransformCanonical {
                     }
                 }
             }
-            setDAEInitBLT(daeInitBLT);
-            daeInitBLT.errorCheck();
-            log.info(daeInitBLT);
-        } else {
-            setDAEInitBLT(BLT.EMPTY_BLT);
-        }
-    }
+			daeInitBLT.errorCheck();
+			log.info(daeInitBLT);
+		} else {
+		    daeInitBLT = BLT.EMPTY_BLT;
+		}
+	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////			
 	
