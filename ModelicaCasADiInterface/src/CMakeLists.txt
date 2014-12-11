@@ -52,10 +52,6 @@ set(MC_CPP
   transferModelica.cpp
   transferOptimica.cpp
   Variable.cpp
-  Block.cpp
-  Equations.cpp
-  FlatEquations.cpp
-  BLT.cpp
   ${TYPES_CPP}
   jcc/initjcc.cpp
   jcc/jccutils.cpp
@@ -85,11 +81,27 @@ set(MC_HPP
   transferModelica.hpp
   transferOptimica.hpp
   Variable.hpp
-  Block.hpp
-  Equations.hpp
-  FlatEquations.hpp
-  BLT.hpp
   ${TYPES_HPP}
+  jcc/initjcc.h
+  jcc/jccutils.h
+  jcc/mxwrap.hpp
+  jcc/mxvectorwrap.hpp
+  jcc/mxfunctionwrap.hpp
+  ${JCC_SRC_DIR}/JCCEnv.h
+  ${JCC_SRC_DIR}/JObject.h
+  ${JCC_SRC_DIR}/JArray.h
+)
+
+set(DE_CPP 
+  ${TYPES_CPP}
+  jcc/initjcc.cpp
+  jcc/jccutils.cpp
+  ${JCC_SRC_DIR}/JCCEnv.cpp
+  ${JCC_SRC_DIR}/JObject.cpp
+  ${JCC_GEN_DIR}/__wrap__.cpp
+)
+
+set(DE_HPP
   jcc/initjcc.h
   jcc/jccutils.h
   jcc/mxwrap.hpp
@@ -117,8 +129,16 @@ set_target_properties(ModelicaCasADi PROPERTIES COMPILE_FLAGS ${CXX_FLAGS})
 set_target_properties(ModelicaCasADi PROPERTIES COMPILE_DEFINITIONS MODELICACASADI_WITH_SWIG)
 add_dependencies(ModelicaCasADi jcc_gen)
 
-add_executable(develope_interface ${MC_CPP} ${MC_HPP} develope_interface.cpp)
-set_target_properties(develope_interface PROPERTIES COMPILE_FLAGS ${CXX_FLAGS})
-add_dependencies(develope_interface jcc_gen)
-target_link_libraries(develope_interface ${CASADI_DLL})
-target_link_libraries(develope_interface pthread)
+
+add_executable(cInterface ${MC_CPP} ${MC_HPP} cInterface.cpp)
+set_target_properties(cInterface PROPERTIES COMPILE_FLAGS ${CXX_FLAGS})
+add_dependencies(cInterface jcc_gen)
+target_link_libraries(cInterface ModelicaCasADi ${PYTHON_LIBRARIES})
+target_link_libraries(cInterface ${CASADI_DLL})
+target_link_libraries(cInterface pthread)
+
+add_executable(debug_ifcasadi ${DE_CPP} ${DE_HPP} debug_interface.cpp)
+set_target_properties(debug_ifcasadi PROPERTIES COMPILE_FLAGS ${CXX_FLAGS})
+add_dependencies(debug_ifcasadi jcc_gen)
+target_link_libraries(debug_ifcasadi ${CASADI_DLL})
+target_link_libraries(debug_ifcasadi pthread)

@@ -1157,11 +1157,12 @@ equation
 fclass TransformCanonicalTests.AliasTest30
  parameter Boolean f = true /* true */;
  parameter Real x(start = 3,fixed = true);
- constant Real y = 0.0;
+ constant Real y = -0.0;
  parameter Real p = 5 /* 5 */;
 parameter equation
  x = p;
 end TransformCanonicalTests.AliasTest30;
+			
 ")})));
 end AliasTest30;
 
@@ -4785,34 +4786,6 @@ Semantic error at line 4684, column 21:
 end StateInitialPars7;
 
 
-model StateInitialPars8
-    Real x(start = 1);
-	Real y(stateSelect = StateSelect.always) = x;
-equation 
-    der(x) = -x;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="StateInitialPars8",
-            description="Alias eliminating differentiated variable with state_initial_equations active",
-            state_initial_equations=true,
-            flatModel="
-fclass TransformCanonicalTests.StateInitialPars8
- Real y(stateSelect = StateSelect.always,start = 1);
- parameter Real _start_y = 1 /* 1 */;
-initial equation 
- y = _start_y;
-equation
- der(y) = - y;
-
-public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
-
-end TransformCanonicalTests.StateInitialPars8;
-")})));
-end StateInitialPars8;
-
-
   model SolveEqTest1
     Real x, y, z;
   equation
@@ -5461,15 +5434,15 @@ equation
 w[1] := time
 
 --- Solved function call equation ---
-({temp_6, temp_7}) = TransformCanonicalTests.BlockTest10.F({w[1], 2.0})
-  Assigned variables: temp_6
-                      temp_7
+({temp_4, temp_5}) = TransformCanonicalTests.BlockTest10.F({w[1], 2.0})
+  Assigned variables: temp_4
+                      temp_5
 
 --- Solved equation ---
-z[1] := - temp_6
+z[1] := - temp_4
 
 --- Solved equation ---
-z[2] := - temp_7
+z[2] := - temp_5
 -------------------------------
 ")})));
 end BlockTest10;
@@ -5491,284 +5464,6 @@ equation
 -------------------------------
 ")})));
 end BlockTest11;
-
-model IncidenceComputation1
-    function func
-        input Real x1;
-        input Real x2;
-        input Real x3;
-        output Real y1;
-        output Real y2;
-        output Real y3;
-      algorithm
-        y1 := x1;
-        y1 := x2;
-        y2 := y1;
-        y3 := y2;
-        y3 := x1;
-        y1 := x3;
-    end func;
-    Real a,b,c,d,e,f;
-equation
-    der(d) = time;
-    der(e) = time;
-    der(f) = time;
-    (d,b,f) = func(a,e,c);
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="IncidenceComputation1",
-            description="Incidence computation in function call equation",
-            equation_sorting=true,
-            inline_functions="none",
-            function_incidence_computation="all",
-            methodName="printMatchedDAE",
-            methodResult="
-BiPGraph (6 equations, 6 variables)
-Variables: {der(d) der(e) der(f) a b c }
-eq_1 : der(d)@ // der(d) = time
-eq_2 : der(e)@ // der(e) = time
-eq_3 : der(f)@ // der(f) = time
-eq_4 : a@ // (d, b, f) = TransformCanonicalTests.IncidenceComputation1.func(a, e, c)
-eq_5 : b@ // (d, b, f) = TransformCanonicalTests.IncidenceComputation1.func(a, e, c)
-eq_6 : c@ // (d, b, f) = TransformCanonicalTests.IncidenceComputation1.func(a, e, c)
-")})));
-end IncidenceComputation1;
-
-model IncidenceComputation2
-    function func
-        input Real x1;
-        input Real x2;
-        input Real x3;
-        input Real n;
-        output Real y1;
-        output Real y2;
-        output Real y3;
-      algorithm
-        y1 := n*x1 + x2 + x3;
-        y2 := x1 + n*x2 + x3;
-        y3 := x1 + x2 - n/x3;
-    end func;
-    Real a,b,c,d,e,f;
-equation
-    der(d) = time;
-    der(e) = time;
-    der(f) = time;
-    (d,b,f) = func(a,e,c,0);
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="IncidenceComputation2",
-            description="Incidence computation in function call equation",
-            equation_sorting=true,
-            inline_functions="none",
-            function_incidence_computation="all",
-            methodName="printMatchedDAE",
-            methodResult="
-BiPGraph (6 equations, 6 variables)
-Variables: {der(d) der(e) der(f) a b c }
-eq_1 : der(d)@ // der(d) = time
-eq_2 : der(e)@ // der(e) = time
-eq_3 : der(f)@ // der(f) = time
-eq_4 : a@ // (d, b, f) = TransformCanonicalTests.IncidenceComputation2.func(a, e, c, 0)
-eq_5 : b@ a@ c@ // (d, b, f) = TransformCanonicalTests.IncidenceComputation2.func(a, e, c, 0)
-eq_6 : c@ // (d, b, f) = TransformCanonicalTests.IncidenceComputation2.func(a, e, c, 0)
-")})));
-end IncidenceComputation2;
-
-model IncidenceComputation3
-    function func
-        input Real[3] x;
-        input Real n;
-        output Real[3] y;
-      algorithm
-        y[1] := n*x[1] + x[2] + x[3];
-        y[2] := x[1] + n*x[2] + x[3];
-        y[3] := x[1] + x[2] - n/x[3];
-    end func;
-    Real a,b,c,d,e,f;
-equation
-    der(d) = time;
-    der(e) = time;
-    der(f) = time;
-    ({d,b,f}) = func({a,e,c},0);
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="IncidenceComputation3",
-            description="Incidence computation in function call equation",
-            equation_sorting=true,
-            inline_functions="none",
-            function_incidence_computation="all",
-            methodName="printMatchedDAE",
-            methodResult="
-BiPGraph (6 equations, 6 variables)
-Variables: {der(d) der(e) der(f) a b c }
-eq_1 : der(d)@ // der(d) = time
-eq_2 : der(e)@ // der(e) = time
-eq_3 : der(f)@ // der(f) = time
-eq_4 : a@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation3.func({a, e, c}, 0)
-eq_5 : b@ a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation3.func({a, e, c}, 0)
-eq_6 : c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation3.func({a, e, c}, 0)
-")})));
-end IncidenceComputation3;
-
-model IncidenceComputation4
-    record R
-        Real a;
-        Real b;
-        Real c;
-    end R;
-    
-    function func
-        input R x;
-        input Real n;
-        output R y;
-      algorithm
-        y.a := n*x.a + x.b + x.c;
-        y.b := x.a + n*x.b + x.c;
-        y.c := x.a + x.b - n/x.c;
-    end func;
-    Real a,b,c,d,e,f;
-equation
-    der(d) = time;
-    der(e) = time;
-    der(f) = time;
-    (R(d,b,f)) = func(R(a,e,c),0);
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="IncidenceComputation4",
-            description="Incidence computation in function call equation",
-            equation_sorting=true,
-            inline_functions="none",
-            function_incidence_computation="all",
-            methodName="printMatchedDAE",
-            methodResult="
-BiPGraph (6 equations, 6 variables)
-Variables: {der(d) der(e) der(f) a b c }
-eq_1 : der(d)@ // der(d) = time
-eq_2 : der(e)@ // der(e) = time
-eq_3 : der(f)@ // der(f) = time
-eq_4 : a@ // (TransformCanonicalTests.IncidenceComputation4.R(d, b, f)) = TransformCanonicalTests.IncidenceComputation4.func(TransformCanonicalTests.IncidenceComputation4.R(a, e, c), 0)
-eq_5 : b@ a@ c@ // (TransformCanonicalTests.IncidenceComputation4.R(d, b, f)) = TransformCanonicalTests.IncidenceComputation4.func(TransformCanonicalTests.IncidenceComputation4.R(a, e, c), 0)
-eq_6 : c@ // (TransformCanonicalTests.IncidenceComputation4.R(d, b, f)) = TransformCanonicalTests.IncidenceComputation4.func(TransformCanonicalTests.IncidenceComputation4.R(a, e, c), 0)
-")})));
-end IncidenceComputation4;
-
-model IncidenceComputation5
-    function func2
-        input Real[2] x;
-        input Real n;
-        output Real[2] y;
-      algorithm
-        y[1] := n*x[1] + x[2];
-        y[2] := x[1] + n*x[2];
-    end func2;
-    
-    function func
-        input Real[3] x;
-        input Real n;
-        output Real[3] y;
-      algorithm
-        y[1:2] := func2(x[1:2], n);
-        y[1] := y[1] + x[3];
-        y[2] := y[2] + x[3];
-        y[3] := x[1] + x[2] - n/x[3];
-    end func;
-    Real a,b,c,d,e,f;
-equation
-    der(d) = time;
-    der(e) = time;
-    der(f) = time;
-    ({d,b,f}) = func({a,e,c},0);
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="IncidenceComputation5",
-            description="Incidence computation in function call equation",
-            equation_sorting=true,
-            inline_functions="none",
-            function_incidence_computation="all",
-            methodName="printMatchedDAE",
-            methodResult="
-BiPGraph (6 equations, 6 variables)
-Variables: {der(d) der(e) der(f) a b c }
-eq_1 : der(d)@ // der(d) = time
-eq_2 : der(e)@ // der(e) = time
-eq_3 : der(f)@ // der(f) = time
-eq_4 : a@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation5.func({a, e, c}, 0)
-eq_5 : b@ a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation5.func({a, e, c}, 0)
-eq_6 : c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation5.func({a, e, c}, 0)
-")})));
-end IncidenceComputation5;
-
-model IncidenceComputation6
-    function func
-        input Real[3] x;
-        input Real n;
-        output Real[3] y;
-      algorithm
-        y := func(x,n);
-    end func;
-    Real a,b,c,d,e,f;
-equation
-    der(d) = time;
-    der(e) = time;
-    der(f) = time;
-    ({d,b,f}) = func({a,e,c},0);
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="IncidenceComputation6",
-            description="Incidence computation in function call equation. Test recursive function.",
-            equation_sorting=true,
-            inline_functions="none",
-            function_incidence_computation="all",
-            methodName="printMatchedDAE",
-            methodResult="
-BiPGraph (6 equations, 6 variables)
-Variables: {der(d) der(e) der(f) a b c }
-eq_1 : der(d)@ // der(d) = time
-eq_2 : der(e)@ // der(e) = time
-eq_3 : der(f)@ // der(f) = time
-eq_4 : a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation6.func({a, e, c}, 0)
-eq_5 : b@ a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation6.func({a, e, c}, 0)
-eq_6 : a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation6.func({a, e, c}, 0)
-")})));
-end IncidenceComputation6;
-
-model IncidenceComputation7
-    function func
-        input Real[3] x;
-        input Real n;
-        output Real[3] y;
-      algorithm
-        if x[1] > x[2] then
-            y := x;
-        else
-            y := x;
-        end if;
-    end func;
-    Real a,b,c,d,e,f;
-equation
-    der(d) = time;
-    der(e) = time;
-    der(f) = time;
-    ({d,b,f}) = func({a,e,c},0);
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="IncidenceComputation7",
-            description="Incidence computation in function call equation. Test if stmt.",
-            equation_sorting=true,
-            inline_functions="none",
-            function_incidence_computation="all",
-            methodName="printMatchedDAE",
-            methodResult="
-BiPGraph (6 equations, 6 variables)
-Variables: {der(d) der(e) der(f) a b c }
-eq_1 : der(d)@ // der(d) = time
-eq_2 : der(e)@ // der(e) = time
-eq_3 : der(f)@ // der(f) = time
-eq_4 : a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation7.func({a, e, c}, 0)
-eq_5 : b@ a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation7.func({a, e, c}, 0)
-eq_6 : a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation7.func({a, e, c}, 0)
-")})));
-end IncidenceComputation7;
 
 model VarDependencyTest1
   Real x[15];

@@ -6291,12 +6291,11 @@ equation
 public
  function temp_1
   input Integer i_0;
-  input Real[2] x;
+  input Real[:] x;
   output Real y;
  algorithm
   y := x[i_0];
   return;
- annotation(Inline = false);
  end temp_1;
 
 end ArrayTests.VariableIndex.Equation;
@@ -6329,12 +6328,11 @@ equation
 public
  function temp_1
   input Integer i_0;
-  input Real[2] x;
+  input Real[:] x;
   output Real y;
  algorithm
   y := x[i_0];
   return;
- annotation(Inline = false);
  end temp_1;
 
 end ArrayTests.VariableIndex.TwoDim1;
@@ -6367,12 +6365,11 @@ equation
 public
  function temp_1
   input Integer i_0;
-  input Real[2] x;
+  input Real[:] x;
   output Real y;
  algorithm
   y := x[i_0];
   return;
- annotation(Inline = false);
  end temp_1;
 
 end ArrayTests.VariableIndex.TwoDim2;
@@ -6410,12 +6407,11 @@ public
  function temp_1
   input Integer i_0;
   input Integer i_1;
-  input Real[2, 2] x;
+  input Real[:, :] x;
   output Real y;
  algorithm
   y := x[i_0,i_1];
   return;
- annotation(Inline = false);
  end temp_1;
 
 end ArrayTests.VariableIndex.TwoDim3;
@@ -6449,13 +6445,12 @@ equation
 public
  function temp_1
   input Integer i_0;
-  input Real[2, 2] x;
+  input Real[:, 2] x;
   output Real[2] y;
  algorithm
   y[1] := x[i_0,1];
   y[2] := x[i_0,2];
   return;
- annotation(Inline = false);
  end temp_1;
 
 end ArrayTests.VariableIndex.TwoDim4;
@@ -6489,13 +6484,12 @@ equation
 public
  function temp_1
   input Integer i_0;
-  input Real[2, 2] x;
+  input Real[2, :] x;
   output Real[2] y;
  algorithm
   y[1] := x[1,i_0];
   y[2] := x[2,i_0];
   return;
- annotation(Inline = false);
  end temp_1;
 
 end ArrayTests.VariableIndex.TwoDim5;
@@ -6533,13 +6527,12 @@ equation
 public
  function temp_1
   input Integer i_0;
-  input Real[2, 2] x;
+  input Real[2, :] x;
   output Real[2] y;
  algorithm
   y[1] := x[1,i_0];
   y[2] := x[2,i_0];
   return;
- annotation(Inline = false);
  end temp_1;
 
 end ArrayTests.VariableIndex.TwoDim6;
@@ -6577,13 +6570,12 @@ equation
 public
  function temp_1
   input Integer i_0;
-  input Real[2, 2] x;
+  input Real[:, 2] x;
   output Real[2] y;
  algorithm
   y[1] := x[i_0,1];
   y[2] := x[i_0,2];
   return;
- annotation(Inline = false);
  end temp_1;
 
 end ArrayTests.VariableIndex.TwoDim7;
@@ -6617,12 +6609,11 @@ equation
 public
  function temp_1
   input Integer i_0;
-  input Real[2] x;
+  input Real[:] x;
   output Real y;
  algorithm
   y := x[i_0];
   return;
- annotation(Inline = false);
  end temp_1;
 
 end ArrayTests.VariableIndex.Algorithm;
@@ -6656,12 +6647,11 @@ equation
 public
  function temp_1
   input ArrayTests.VariableIndex.Enum.ABC i_0;
-  input ArrayTests.VariableIndex.Enum.ABC[3] x;
+  input ArrayTests.VariableIndex.Enum.ABC[:] x;
   output ArrayTests.VariableIndex.Enum.ABC y;
  algorithm
   y := x[i_0];
   return;
- annotation(Inline = false);
  end temp_1;
 
  type ArrayTests.VariableIndex.Enum.ABC = enumeration(A, B, C);
@@ -6696,12 +6686,11 @@ equation
 public
  function temp_1
   input Boolean i_0;
-  input Boolean[2] x;
+  input Boolean[:] x;
   output Boolean y;
  algorithm
   y := x[i_0];
   return;
- annotation(Inline = false);
  end temp_1;
 
 end ArrayTests.VariableIndex.Bool;
@@ -6734,7 +6723,6 @@ public
  algorithm
   y := x[i_0];
   return;
- annotation(Inline = false);
  end temp_1;
 
 end ArrayTests.VariableIndex.ExpEquation;
@@ -6757,8 +6745,15 @@ fclass ArrayTests.VariableIndex.ExpEquationArray
  discrete input Integer i;
  Real y[1];
  Real y[2];
+ discrete Real temp_1[1];
+ discrete Real temp_1[2];
+initial equation 
+ pre(temp_1[1]) = 0.0;
+ pre(temp_1[2]) = 0.0;
 equation
- ({y[1], y[2]}) = temp_1({i, i + 1}, {1.0, 2.0, 3.0});
+ ({temp_1[1], temp_1[2]}) = temp_1({i, i + 1}, {1.0, 2.0, 3.0});
+ y[1] = temp_1[1];
+ y[2] = temp_1[2];
 
 public
  function temp_1
@@ -6769,279 +6764,11 @@ public
   y[1] := x[i_0[1]];
   y[2] := x[i_0[2]];
   return;
- annotation(Inline = false);
  end temp_1;
 
 end ArrayTests.VariableIndex.ExpEquationArray;
 ")})));
 end ExpEquationArray;
-
-
-model Slice1
-    record R
-        Real p;
-    end R;
-    
-    Real y;
-    R[2] x = { R(time), R(2 * time) };
-    input Integer i;
-equation
-    y = if i == 0 then 1 else x[i].p;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="VariableIndex_Slice1",
-            description="Using variable index in slice",
-            flatModel="
-fclass ArrayTests.VariableIndex.Slice1
- Real y;
- Real x[1].p;
- Real x[2].p;
- discrete input Integer i;
-equation
- y = if i == 0 then 1 else temp_1(i, {x[1].p, x[2].p});
- x[1].p = time;
- x[2].p = 2 * time;
-
-public
- function temp_1
-  input Integer i_0;
-  input Real[2] x;
-  output Real y;
- algorithm
-  y := x[i_0];
-  return;
- annotation(Inline = false);
- end temp_1;
-
-end ArrayTests.VariableIndex.Slice1;
-")})));
-end Slice1;
-
-
-model Slice2
-    Real x[2, 2, 2] = { { {1, 2}, {3, 4} }, { {5, 6}, {7, 8} } } * time;
-    Real y[2, 3] = x[i, {2, 1}, {1, 2, 2}];
-    input Integer i;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="VariableIndex_Slice2",
-            description="Using variable index in slice with matrix result",
-            flatModel="
-fclass ArrayTests.VariableIndex.Slice2
- Real x[1,1,1];
- Real x[1,1,2];
- Real x[1,2,1];
- Real x[1,2,2];
- Real x[2,1,1];
- Real x[2,1,2];
- Real x[2,2,1];
- Real x[2,2,2];
- Real y[1,1];
- Real y[1,2];
- Real y[1,3];
- Real y[2,1];
- Real y[2,2];
- Real y[2,3];
- discrete input Integer i;
-equation
- x[1,1,1] = time;
- x[1,1,2] = 2 * time;
- x[1,2,1] = 3 * time;
- x[1,2,2] = 4 * time;
- x[2,1,1] = 5 * time;
- x[2,1,2] = 6 * time;
- x[2,2,1] = 7 * time;
- x[2,2,2] = 8 * time;
- ({{y[1,1], y[1,2], y[1,3]}, {y[2,1], y[2,2], y[2,3]}}) = temp_1(i, {{{x[1,2,1], x[1,2,2], x[1,2,2]}, {x[1,1,1], x[1,1,2], x[1,1,2]}}, {{x[2,2,1], x[2,2,2], x[2,2,2]}, {x[2,1,1], x[2,1,2], x[2,1,2]}}});
-
-public
- function temp_1
-  input Integer i_0;
-  input Real[2, 2, 3] x;
-  output Real[2, 3] y;
- algorithm
-  y[1,1] := x[i_0,1,1];
-  y[1,2] := x[i_0,1,2];
-  y[1,3] := x[i_0,1,3];
-  y[2,1] := x[i_0,2,1];
-  y[2,2] := x[i_0,2,2];
-  y[2,3] := x[i_0,2,3];
-  return;
- annotation(Inline = false);
- end temp_1;
-
-end ArrayTests.VariableIndex.Slice2;
-")})));
-end Slice2;
-
-
-model Slice3
-    record R
-        Real x[2];
-    end R;
-    
-    R r[2] =  {R({1, 2} * time), R({3, 4} * time)};
-    Real x[2] = r.x[i];
-    input Integer i;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="VariableIndex_Slice3",
-            description="Using variable index in slice with no index on record",
-            flatModel="
-fclass ArrayTests.VariableIndex.Slice3
- Real r[1].x[1];
- Real r[1].x[2];
- Real r[2].x[1];
- Real r[2].x[2];
- Real x[1];
- Real x[2];
- discrete input Integer i;
-equation
- r[1].x[1] = time;
- r[1].x[2] = 2 * time;
- r[2].x[1] = 3 * time;
- r[2].x[2] = 4 * time;
- ({x[1], x[2]}) = temp_1(i, {{r[1].x[1], r[1].x[2]}, {r[2].x[1], r[2].x[2]}});
-
-public
- function temp_1
-  input Integer i_0;
-  input Real[2, 2] x;
-  output Real[2] y;
- algorithm
-  y[1] := x[1,i_0];
-  y[2] := x[2,i_0];
-  return;
- annotation(Inline = false);
- end temp_1;
-
-end ArrayTests.VariableIndex.Slice3;
-")})));
-end Slice3;
-
-
-model Slice4
-    model A
-        Real z;
-    end A;
-
-    Real y;
-    A[2] x(z = {1, 2} * time);
-    input Integer i;
-equation
-    y = x[i].z;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="VariableIndex_Slice4",
-            description="Using variable index in slice over models",
-            flatModel="
-fclass ArrayTests.VariableIndex.Slice4
- Real y;
- Real x[1].z;
- Real x[2].z;
- discrete input Integer i;
-equation
- y = temp_1(i, {x[1].z, x[2].z});
- x[1].z = time;
- x[2].z = 2 * time;
-
-public
- function temp_1
-  input Integer i_0;
-  input Real[2] x;
-  output Real y;
- algorithm
-  y := x[i_0];
-  return;
- annotation(Inline = false);
- end temp_1;
-
-end ArrayTests.VariableIndex.Slice4;
-")})));
-end Slice4;
-
-
-model Slice5
-    model A
-        Real z;
-    end A;
-
-    model B
-        A a[2,2];
-    end B;
-
-    Real y[2];
-    B b[2,2](a(z = fill(time, 2, 2, 2, 2)));
-    input Integer i;
-    input Integer j;
-equation
-    y = b[:, i].a[j, 1].z;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="VariableIndex_Slice5",
-            description="Using variable index in slice over models, complex example",
-            flatModel="
-fclass ArrayTests.VariableIndex.Slice5
- Real y[1];
- Real y[2];
- Real b[1,1].a[1,1].z;
- Real b[1,1].a[1,2].z;
- Real b[1,1].a[2,1].z;
- Real b[1,1].a[2,2].z;
- Real b[1,2].a[1,1].z;
- Real b[1,2].a[1,2].z;
- Real b[1,2].a[2,1].z;
- Real b[1,2].a[2,2].z;
- Real b[2,1].a[1,1].z;
- Real b[2,1].a[1,2].z;
- Real b[2,1].a[2,1].z;
- Real b[2,1].a[2,2].z;
- Real b[2,2].a[1,1].z;
- Real b[2,2].a[1,2].z;
- Real b[2,2].a[2,1].z;
- Real b[2,2].a[2,2].z;
- discrete input Integer i;
- discrete input Integer j;
-equation
- ({y[1], y[2]}) = temp_1(i, j, {{{b[1,1].a[1,1].z, b[1,1].a[2,1].z}, {b[1,2].a[1,1].z, b[1,2].a[2,1].z}}, {{b[2,1].a[1,1].z, b[2,1].a[2,1].z}, {b[2,2].a[1,1].z, b[2,2].a[2,1].z}}});
- b[1,1].a[1,1].z = time;
- b[1,1].a[1,2].z = time;
- b[1,1].a[2,1].z = time;
- b[1,1].a[2,2].z = time;
- b[1,2].a[1,1].z = time;
- b[1,2].a[1,2].z = time;
- b[1,2].a[2,1].z = time;
- b[1,2].a[2,2].z = time;
- b[2,1].a[1,1].z = time;
- b[2,1].a[1,2].z = time;
- b[2,1].a[2,1].z = time;
- b[2,1].a[2,2].z = time;
- b[2,2].a[1,1].z = time;
- b[2,2].a[1,2].z = time;
- b[2,2].a[2,1].z = time;
- b[2,2].a[2,2].z = time;
-
-public
- function temp_1
-  input Integer i_0;
-  input Integer i_1;
-  input Real[2, 2, 2] x;
-  output Real[2] y;
- algorithm
-  y[1] := x[1,i_0,i_1];
-  y[2] := x[2,i_0,i_1];
-  return;
- annotation(Inline = false);
- end temp_1;
-
-end ArrayTests.VariableIndex.Slice5;
-")})));
-end Slice5;
 
 end VariableIndex;
 
@@ -7422,62 +7149,5 @@ end ScalarizingPre;
 
 
 end Other;
-
-
-model Delay1
-    Real[2] y1;
-    Real[2] y2;
-    Real[2] x;
-  equation
-    y1 = delay(x,{1,2},2);
-    y2 = delay(x,{1,2});
-    x = {time,time};
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Delay1",
-            description="Test scalarizing of vectorized delay",
-            flatModel="
-fclass ArrayTests.Delay1
- Real y1[1];
- Real y1[2];
- Real y2[1];
- Real y2[2];
- Real x[1];
- Real x[2];
-equation
- y1[1] = delay(x[1], 1, 2);
- y1[2] = delay(x[2], 2, 2);
- y2[1] = delay(x[1], 1);
- y2[2] = delay(x[2], 2);
- x[1] = time;
- x[2] = time;
-end ArrayTests.Delay1;
-")})));
-end Delay1;
-
-model SpatialDistribution1
-    Real[2] y;
-    Real[2] x;
-  equation
-    y = spatialDistribution(x,{1,2},1,true,{{0,0.5,1.0}, {0,0.6,1.0}}, {1,2,3});
-    x = {time,time};
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="SpatialDistribution1",
-            description="Test scalarizing of vectorized delay",
-            flatModel="
-fclass ArrayTests.SpatialDistribution1
- Real y[1];
- Real y[2];
- Real x[1];
- Real x[2];
-equation
- y[1] = spatialDistribution(x[1], 1, 1, true, {0, 0.5, 1.0}, {1, 2, 3});
- y[2] = spatialDistribution(x[2], 2, 1, true, {0, 0.6, 1.0}, {1, 2, 3});
- x[1] = time;
- x[2] = time;
-end ArrayTests.SpatialDistribution1;
-")})));
-end SpatialDistribution1;
 
 end ArrayTests;

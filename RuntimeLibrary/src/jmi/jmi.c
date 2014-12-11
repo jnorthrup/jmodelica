@@ -42,7 +42,7 @@ int jmi_init(jmi_t** jmi,
         int n_boolean_d, int n_boolean_u,
         int n_string_d, int n_string_u,
         int n_outputs, int* output_vrefs,
-        int n_sw, int n_sw_init, int n_time_sw, int n_state_sw,
+        int n_sw, int n_sw_init,
         int n_guards, int n_guards_init,
         int n_dae_blocks, int n_dae_init_blocks,
         int n_initial_relations, int* initial_relations,
@@ -104,8 +104,6 @@ int jmi_init(jmi_t** jmi,
 
     jmi_->n_sw = n_sw;
     jmi_->n_sw_init = n_sw_init;
-    jmi_->n_time_sw = n_time_sw;
-    jmi_->n_state_sw = n_state_sw;
 
     jmi_->n_guards = n_guards;
     jmi_->n_guards_init = n_guards_init;
@@ -156,8 +154,6 @@ int jmi_init(jmi_t** jmi,
 
     jmi_->offs_sw = jmi_->offs_boolean_u + n_boolean_u;
     jmi_->offs_sw_init = jmi_->offs_sw + n_sw;
-    jmi_->offs_state_sw = jmi_->offs_sw;
-    jmi_->offs_time_sw = jmi_->offs_sw+n_state_sw;
 
     jmi_->offs_guards = jmi_->offs_sw_init + n_sw_init;
     jmi_->offs_guards_init = jmi_->offs_guards + n_guards;
@@ -193,6 +189,8 @@ int jmi_init(jmi_t** jmi,
     *(jmi_->dz) = (jmi_real_t*)calloc(jmi_->n_v, sizeof(jmi_real_t));/*Need number of equations*/
     
     jmi_->ext_objs = (void**)calloc(n_ext_objs, sizeof(void*));
+    jmi_->indep_extobjs_initialized = 0;
+    jmi_->dep_extobjs_initialized = 0;
     jmi_->block_level = 0;
     jmi_->dz_active_index = 0;
     for (i=0;i<JMI_ACTIVE_VAR_BUFS_NUM;i++) {
@@ -245,8 +243,6 @@ int jmi_init(jmi_t** jmi,
 
     jmi_->atEvent = JMI_FALSE;
     jmi_->atInitial = JMI_FALSE;
-    jmi_->eventPhase = JMI_TIME_EXACT;
-    jmi_->nextTimeEvent.defined = 0;
     
     jmi_init_runtime_options(jmi_, &jmi_->options);
 
@@ -306,59 +302,40 @@ int jmi_delete(jmi_t* jmi){
         free(jmi->dz_active_variables_buf[i]);
     }
     free(jmi->variable_scaling_factors);
-    jmi_destruct_external_objs(jmi);
     free(jmi->ext_objs);
     jmi_log_delete(jmi->log);
-
-    jmi_destroy_delay_if(jmi);
-
-    return 0;
-}
-
-int jmi_init_delay_if(jmi_t* jmi, int n_delays, int n_spatialdists, jmi_generic_func_t init, jmi_generic_func_t sample, int n_delay_switches) {
-
-    int i;
-    jmi_real_t* switches;
-    
-    jmi->init_delay = init;
-    jmi->sample_delay = sample;
-    jmi->delay_event_mode = 0;
-
-    jmi->n_delays = n_delays;
-    jmi->delays = (jmi_delay_t *)calloc(n_delays, sizeof(jmi_delay_t));
-    for (i=0; i < n_delays; i++) {
-        jmi_delay_new(jmi, i);
-    }
-
-    jmi->n_spatialdists = n_spatialdists;
-    jmi->spatialdists = (jmi_spatialdist_t *)calloc(n_spatialdists, sizeof(jmi_spatialdist_t));
-    for (i=0; i < n_spatialdists; i++) {
-        jmi_spatialdist_new(jmi, i);
-    }
-
-    switches = jmi_get_sw(jmi);
-    for (i = jmi->n_state_sw - n_spatialdists - n_delay_switches; i < jmi->n_state_sw; i++) {
-        switches[i] = JMI_DELAY_INITIAL_EVENT_SW;
-    }
-
-    return 0;
-}
-
-int jmi_destroy_delay_if(jmi_t* jmi) {
-    int i;
 
     for (i=0; i < jmi->n_delays; i++) {
         jmi_delay_delete(jmi, i);
     }
     free(jmi->delays);
 
-    for (i=0; i < jmi->n_spatialdists; i++) {
-        jmi_spatialdist_delete(jmi, i);
-    }
-    free(jmi->spatialdists);
-
     return 0;
 }
+
+int jmi_init_delay_if(jmi_t* jmi, int n_delays, jmi_generic_func_t init, jmi_generic_func_t sample, int n_delay_switches) {
+    
+    int i;
+    jmi_real_t* switches;
+    
+    jmi->init_delay = init;
+    jmi->sample_delay = sample;
+    
+    jmi->delay_event_mode = 0;
+    jmi->n_delays = n_delays;
+    jmi->delays = (jmi_delay_t *)calloc(n_delays, sizeof(jmi_delay_t));
+    for (i=0; i < n_delays; i++) {
+        jmi_delay_new(jmi, i);
+    }
+    
+    switches = jmi_get_sw(jmi);
+    for (i = jmi->n_sw - n_delay_switches; i < jmi->n_sw; i++) {
+        switches[i] = JMI_DELAY_INITIAL_EVENT_SW;
+    }
+    
+    return 0;
+}
+
 
 int jmi_func_F(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res) {
     int return_status;
@@ -575,7 +552,7 @@ int jmi_ode_guards_init(jmi_t* jmi) {
     return return_status;
 }
 
-int jmi_ode_next_time_event(jmi_t* jmi, jmi_time_event_t* event) {
+int jmi_ode_next_time_event(jmi_t* jmi, jmi_real_t* nextTime) {
 
     int return_status;
 
@@ -584,7 +561,7 @@ int jmi_ode_next_time_event(jmi_t* jmi, jmi_time_event_t* event) {
 		return_status = -1;
     }
 	else {
-        return_status = jmi->dae->ode_next_time_event(jmi, event);
+        return_status = jmi->dae->ode_next_time_event(jmi, nextTime);
     }
     jmi_set_current(NULL);
 
@@ -699,7 +676,7 @@ int jmi_dae_R_perturbed(jmi_t* jmi, jmi_real_t* res){
     
     switches = jmi_get_sw(jmi);
     
-    for (i = 0; i < jmi->n_relations; i=i+1){
+    for (i = 0; i < jmi->n_sw; i=i+1){
         if (switches[i] == 1.0){
             if (jmi->relations[i] == JMI_REL_GEQ){
                 res[i] = res[i]+jmi->events_epsilon;

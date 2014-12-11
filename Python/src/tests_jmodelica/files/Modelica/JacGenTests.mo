@@ -74,9 +74,9 @@ package JacGenTests
   
   
   model JacTestPow
-    Real x1(start=1);
+    Real x1(start=0);
     Real x2(start=5);
-	Real x3(start=2);
+	Real x3(start=-5);
     input Real u;
     output Real y;
   equation
@@ -127,7 +127,7 @@ package JacGenTests
   end JacTestMax;  
   
   model JacTestSqrt
-    Real x1(start=0.5);
+    Real x1(start=0);
     Real x2(start=5);
 	Real x3(start=1);
     input Real u;
@@ -192,9 +192,9 @@ package JacGenTests
   end JacTestCoTan;
   
   model JacTestAsin
-	Real x1(start=-0.9);
+	Real x1(start=-1);
     Real x2(start=0);
-	Real x3(start=0.9);
+	Real x3(start=1);
     input Real u;
     output Real y;
   equation
@@ -205,9 +205,9 @@ package JacGenTests
   end JacTestAsin;
   
   model JacTestAcos
-    Real x1(start=-0.9);
+    Real x1(start=-1);
     Real x2(start=0);
-	Real x3(start=0.9);
+	Real x3(start=1);
     input Real u;
     output Real y;
   equation
@@ -744,7 +744,7 @@ model JacTestDiscreteFunction1
 	algorithm
 		a := x ^ f;
 	end F;
-	Real x(start=5,min=0);
+	Real x(start=5);
 	Real y(start=10);
 	Real a(start=15);
 equation
@@ -787,7 +787,7 @@ equation
 	algorithm
 		a := x^2;
 	end F;
-	Real x(start=5,min=0);
+	Real x(start=5);
 	Real y(start=10);
 	Real a(start=15);
 	equation
@@ -807,7 +807,7 @@ equation
 		a := x*2*x;
 		b := y*4*x;
 	end F;
-	Real x(start=5,min=0);
+	Real x(start=5);
 	Real y(start=10);
 	Real a(start=15);
 	equation
@@ -828,7 +828,7 @@ equation
 		b := y*4*x;
 		c := y*4*x;
 	end F;
-	Real x(start=5,min=0);
+	Real x(start=5);
 	Real y(start=10);
 	Real a(start=15);
 	equation

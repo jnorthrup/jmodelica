@@ -651,9 +651,9 @@ aspect InstanceTreeConstruction {
         int p = className.indexOf('(');
         if (p >= 0) {
             String targetName = className.substring(0, p);
-            InstLookupResult<InstClassDecl> icd = lookupInstClassQualified(targetName);
-            if (icd.successful()) {
-                Restriction restriction = ((BaseClassDecl) icd.target().getClassDecl()).getRestriction();
+            InstClassDecl icd = lookupInstClassQualified(targetName);
+            if (!icd.isUnknown()) {
+                Restriction restriction = ((BaseClassDecl) icd.getClassDecl()).getRestriction();
                 ClassDecl cl = sourceRoot().getProgram().anonymousClass(className, restriction, targetName);
                 if (cl != null) {
                     addInstAnonymousClass(createInstClassDecl(cl));
@@ -662,8 +662,7 @@ aspect InstanceTreeConstruction {
             }
             return unknownInstClassDecl();
         } else {
-            InstLookupResult<InstClassDecl> icd = lookupInstClassQualified(className);
-            return icd.successful() ? icd.target() : unknownInstClassDecl();
+            return lookupInstClassQualified(className);
         }
     }
 
@@ -894,7 +893,6 @@ aspect InstanceTreeConstruction {
 
      public interface InstRedeclareClassNode {
          public InstLookupResult<InstClassDecl> lookupInstClass(String name);
-         public InstLookupResult<InstClassDecl> lookupInstClassQualified(String name);
          public ClassDecl redeclaringClassDecl();
      }
     InstClassDecl implements InstRedeclareClassNode;

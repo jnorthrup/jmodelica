@@ -101,6 +101,11 @@ aspect ComplianceCheck {
         compliance("The " + getName() + "() function-like operator is not supported");
     }
 
+    public void FDelayExp.complianceCheck(ErrorCheckType checkType) {
+        if (!lockBranch(checkType))
+            compliance("The delay() function-like operator is not supported");
+    }
+
 	public void FSampleExp.complianceCheck(ErrorCheckType checkType) {
 	    complianceOnlyFMU("The sample() function-like operator is");
 	}
@@ -143,18 +148,6 @@ aspect ComplianceCheck {
 			compliance("The cardinality() function-like operator is only supported in asserts and in the tests of if clauses that do not contain connect()");
     }
 	
-    public void FDelayExp.complianceCheck(ErrorCheckType checkType) {
-        complianceOnlyFMU("The delay() function-like operator is");
-    }
-    
-    public void FSpatialDistExp.complianceCheck(ErrorCheckType checkType) {
-        complianceOnlyFMU("The spatialDistribution() function-like operator is");
-        FAbstractEquation equation = myFEquation();
-        if (isArray() && equation != null && equation instanceof FFunctionCallEquation) {
-            compliance("The spatialDistribution() function-like operator is not supported vectorized in function call equations");
-        }
-    }
-    
 	syn boolean FExp.isAccessToInnerOrOuter()  = false;
 	eq FInstAccessExp.isAccessToInnerOrOuter() = 
         getInstAccess().myInstComponentDecl().isInner() || getInstAccess().myInstComponentDecl().isOuter();

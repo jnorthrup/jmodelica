@@ -233,21 +233,14 @@ aspect FlatNames {
             res.addFSubscript(fs.createEvaluated());
         return res;
     }
-
+    
     public FSubscript FSubscript.createEvaluated() {
         return (FSubscript) fullCopy();
     }
-
-    public FSubscript FColonSubscript.createEvaluated() {
-        return new FIntegerSubscript(1);
-    }
-
+    
     public FSubscript FExpSubscript.createEvaluated() {
         try {
-            CValue val = getFExp().ceval();
-            if (val.isArray())
-                val = val.array().getCell(0);
-            return val.createFSubscript();
+            return getFExp().ceval().createFSubscript();
         } catch (ConstantEvaluationException e) {
             return fullCopy();
         }
@@ -816,22 +809,14 @@ aspect FlatNames {
     public FQName FQName.removeFArraySubscripts() {
         return this;
     }
-
+   
     public FQNameFull FQNameFull.removeFArraySubscripts() {
         int i = getNumFQNamePart() - 1;
         if (getFQNamePart(i).hasFArraySubscripts())
             setFQNamePart(new FQNamePart(getFQNamePart(i).getName()), i);
         return this;
     }
-
-    /**
-     * Return the prefix name of the name this part belongs to, up to and including this part.
-     * 
-     * Creates a copy only if needed.
-     */
-    inh FQName FQNamePart.partialName();
-    eq FQNameFull.getFQNamePart(int i).partialName() = (i == getNumFQNamePart() - 1) ? this : copyPrefix();
-
+   
     /**
      * Create a copy of the name excluding the first part.
      */
@@ -1817,8 +1802,6 @@ aspect FlatExpressions {
     
     inh boolean FAbstractEquation.isInitial();
     inh boolean FIfExp.isInitial();
-    inh boolean FDelayExp.isInitial();
-    inh boolean FSpatialDistExp.isInitial();
     eq FClass.getChild().isInitial()                      = false;
     eq FClass.getFInitialEquation().isInitial()           = true;
     eq InstNode.getChild().isInitial()                    = false;

@@ -239,8 +239,8 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 #define ALMOST_ZERO(op) LOG_EXP_AND(ALMOST_LT_ZERO(op),ALMOST_GT_ZERO(op))
 #define ALMOST_LT_ZERO(op) (op<=1e-6? JMI_TRUE: JMI_FALSE)
 #define ALMOST_GT_ZERO(op) (op>=-1e-6? JMI_TRUE: JMI_FALSE)
-#define SURELY_LT_ZERO(op) (op<-1e-6? JMI_TRUE: JMI_FALSE)
-#define SURELY_GT_ZERO(op) (op>1e-6? JMI_TRUE: JMI_FALSE)
+#define SURELY_LT_ZERO(op) (op<=-1e-6? JMI_TRUE: JMI_FALSE)
+#define SURELY_GT_ZERO(op) (op>=1e-6? JMI_TRUE: JMI_FALSE)
 
 
 /* Record creation macro */
@@ -274,21 +274,6 @@ jmi_ad_var_t jmi_divide_function(const char* name, jmi_ad_var_t num, jmi_ad_var_
  * Function to wrap division and report errors to the log, for use in equations.
  */
 jmi_ad_var_t jmi_divide_equation(jmi_t *jmi, jmi_ad_var_t num, jmi_ad_var_t den, const char* msg);
-
-#define jmi_pow_function(DUMMY1, X, Y, DUMMY2) pow(X,Y)
-#define jmi_pow_equation(DUMMY1, X, Y, DUMMY2) pow(X,Y)
-#define jmi_exp_function(DUMMY1, X, DUMMY2) exp(X)
-#define jmi_exp_equation(DUMMY1, X, DUMMY2) exp(X)
-#define jmi_log_function(DUMMY1, X, DUMMY2) log(X)
-#define jmi_log_equation(DUMMY1, X, DUMMY2) log(X)
-#define jmi_log10_function(DUMMY1, X, DUMMY2) log10(X)
-#define jmi_log10_equation(DUMMY1, X, DUMMY2) log10(X)
-#define jmi_sinh_function(DUMMY1, X, DUMMY2) sinh(X)
-#define jmi_sinh_equation(DUMMY1, X, DUMMY2) sinh(X)
-#define jmi_cosh_function(DUMMY1, X, DUMMY2) cosh(X)
-#define jmi_cosh_equation(DUMMY1, X, DUMMY2) cosh(X)
-#define jmi_tan_function(DUMMY1, X, DUMMY2) tan(X)
-#define jmi_tan_equation(DUMMY1, X, DUMMY2) tan(X)
 
 /**
  * Set the terminate flag and log message.
@@ -356,26 +341,14 @@ jmi_real_t jmi_dremainder(jmi_real_t x, jmi_real_t y);
  */
 typedef int (*jmi_generic_func_t)(jmi_t* jmi);
 
-typedef struct _jmi_time_event_t {
-    int defined;
-    int phase;
-    jmi_ad_var_t time;
-} jmi_time_event_t;
-
-/**
- * If the time event T2 defined by <code>def</code>, <code>phase</code>, and <code>time</code>
- * is before the time event T1 defined by <code>event</code> then T1 is updated to T2.
- */
-void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, jmi_ad_var_t time);
-
 /**
  * \brief A function signature for computation of the next time event.
  *
  * @param jmi A jmi_t struct.
- * @param event (Output) Information of the next time event.
+ * @param nextTime (Output) The time instant of the next time event.
  * @return Error code.
  */
-typedef int (*jmi_next_time_event_func_t)(jmi_t* jmi, jmi_time_event_t* event);
+typedef int (*jmi_next_time_event_func_t)(jmi_t* jmi, jmi_real_t* nextTime);
 
 /**
  * \brief Function signature for evaluation of a residual function in
@@ -975,7 +948,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
         int n_boolean_d, int n_boolean_u,
         int n_string_d, int n_string_u,
         int n_outputs, int* output_vrefs,
-        int n_sw, int n_sw_init, int n_time_sw, int n_state_sw,
+        int n_sw, int n_sw_init,
         int n_guards, int n_guards_init,
         int n_dae_blocks, int n_dae_init_blocks,
         int n_initial_relations, int* initial_relations,

@@ -21,23 +21,12 @@
 set(CLASSES_common
   java.lang.System
   java.lang.Object
-  java.util.Iterator
   java.util.ArrayList
-  java.util.Collection
-  java.util.Arrays
-  java.util.Collections
-  java.util.Map
-  java.util.HashMap
-  java.util.LinkedHashMap
-  java.util.Set
-  java.util.HashSet
-  java.util.LinkedHashSet
   ifcasadi.MX
   ifcasadi.MXFunction
   ifcasadi.MXVector
   ifcasadi.ifcasadi
   org.jmodelica.util.OptionRegistry
-  org.jmodelica.util.streams.CodeStream;
 )
 
 set(CLASSES_modelica
@@ -66,15 +55,7 @@ set(CLASSES_modelica
   org.jmodelica.modelica.compiler.FAssignStmt
   org.jmodelica.modelica.compiler.FFunctionCallStmt
   org.jmodelica.modelica.compiler.FFunctionVariable
-  org.jmodelica.modelica.compiler.FAlgorithm
-  org.jmodelica.modelica.compiler.BLT
-  org.jmodelica.modelica.compiler.StructuredBLT
-  org.jmodelica.modelica.compiler.AbstractEquationBlock
-  org.jmodelica.modelica.compiler.SimpleEquationBlock
-  org.jmodelica.modelica.compiler.EquationBlock
-  org.jmodelica.modelica.compiler.TornEquationBlock
-  org.jmodelica.modelica.compiler.ScalarEquationBlock
-  org.jmodelica.modelica.compiler.SolvedScalarEquationBlock
+  org.jmodelica.modelica.compiler.FAlgorithm 
 )
 
 # todo: consolidate with CLASSES_modelica
@@ -117,14 +98,6 @@ set(CLASSES_optimica
   org.jmodelica.optimica.compiler.FAlgorithm 
   org.jmodelica.optimica.compiler.BaseNode
   org.jmodelica.optimica.compiler.Root
-  org.jmodelica.optimica.compiler.BLT
-  org.jmodelica.optimica.compiler.StructuredBLT
-  org.jmodelica.optimica.compiler.AbstractEquationBlock
-  org.jmodelica.optimica.compiler.SimpleEquationBlock
-  org.jmodelica.optimica.compiler.EquationBlock
-  org.jmodelica.optimica.compiler.TornEquationBlock
-  org.jmodelica.optimica.compiler.ScalarEquationBlock
-  org.jmodelica.optimica.compiler.SolvedScalarEquationBlock
 )
 
 

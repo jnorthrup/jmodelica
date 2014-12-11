@@ -115,19 +115,7 @@ typedef struct jmi_ode_problem_t jmi_ode_problem_t;       /**< \brief Forward de
 typedef struct jmi_color_info jmi_color_info;             /**< \brief Forward declaration of struct. */
 typedef struct jmi_simple_color_info_t jmi_simple_color_info_t;      /**< \brief Forward declaration of struct. */
 typedef struct jmi_delay_t jmi_delay_t;                   /**< \brief Forward declaration of struct. */
-typedef struct jmi_spatialdist_t jmi_spatialdist_t;       /**< \brief Forward declaration of struct. */
 
-typedef struct _jmi_time_event_t {
-    int defined;
-    int phase;
-    jmi_ad_var_t time;
-} jmi_time_event_t;
-
-/**
- * If the time event T2 defined by <code>def</code>, <code>phase</code>, and <code>time</code>
- * is before the time event T1 defined by <code>event</code> then T1 is updated to T2.
- */
-void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, double time);
 
 /* Masks for maping vref to indices. */               
 #define VREF_INDEX_MASK  0x0FFFFFFF
@@ -161,8 +149,8 @@ void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, double time
 #define ALMOST_ZERO(op) LOG_EXP_AND(ALMOST_LT_ZERO(op),ALMOST_GT_ZERO(op))
 #define ALMOST_LT_ZERO(op) (op<=JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
 #define ALMOST_GT_ZERO(op) (op>=-JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
-#define SURELY_LT_ZERO(op) (op<-JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
-#define SURELY_GT_ZERO(op) (op>JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
+#define SURELY_LT_ZERO(op) (op<=-JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
+#define SURELY_GT_ZERO(op) (op>=JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
 
 
 /* Record creation macro */
@@ -175,17 +163,8 @@ void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, double time
 #define snprintf sprintf_s
 #endif
 
-
-/** Use for internal hard errors. Does not return. */
-void jmi_internal_error(jmi_t *jmi, const char msg[]);
-
 /*Some of these functions return types are a temporary remnants of CppAD*/
 
-/**
- * Function for checking if a vector contains NAN values. Returns the
- * index of the NAN (if found) in the parameter index_of_nan
- */
-int jmi_check_nan(jmi_t *jmi, jmi_real_t* val, size_t n_val, jmi_int_t* index_of_nan);
 /**
  * Function to wrap division and report errors to the log, for use in functions.
  */
@@ -336,10 +315,10 @@ typedef int (*jmi_generic_func_t)(jmi_t* jmi);
  * \brief A function signature for computation of the next time event.
  *
  * @param jmi A jmi_t struct.
- * @param event (Output) Information about the next time event.
+ * @param nextTime (Output) The time instant of the next time event.
  * @return Error code.
  */
-typedef int (*jmi_next_time_event_func_t)(jmi_t* jmi, jmi_time_event_t* event);
+typedef int (*jmi_next_time_event_func_t)(jmi_t* jmi, jmi_real_t* nextTime);
 
 /**
  * \brief Function signature for evaluation of a residual function in
@@ -866,7 +845,7 @@ int jmi_init(jmi_t** jmi,
         int n_boolean_d, int n_boolean_u,
         int n_string_d, int n_string_u,
         int n_outputs, int* output_vrefs,
-        int n_sw, int n_sw_init, int n_time_sw, int n_state_sw,
+        int n_sw, int n_sw_init,
         int n_guards, int n_guards_init,
         int n_dae_blocks, int n_dae_init_blocks,
         int n_initial_relations, int* initial_relations,
@@ -1101,8 +1080,6 @@ struct jmi_t {
 
     int n_sw;                            /**< \brief Number of switching functions in the DAE \f$F\f$. */
     int n_sw_init;                       /**< \brief Number of switching functions in the DAE initialization system\f$F_0\f$. */
-    int n_time_sw;                       /**< \brief Number of switches related to time events in the DAE \f$F\f$. */
-    int n_state_sw;                      /**< \brief Number of switches related to state events in the DAE \f$F\f$. */
 
     int n_guards;                        /**< \brief Number of guards in the DAE \f$F\f$. */
     int n_guards_init;                   /**< \brief Number of guards in the DAE initialization system\f$F_0\f$. */
@@ -1115,7 +1092,6 @@ struct jmi_t {
     int n_dae_init_blocks;               /**< \brief Number of initial BLT blocks. */
 
     int n_delays;                        /**< \brief Number of (fixed and variable time) delay blocks. */
-    int n_spatialdists;                  /**< \brief Number of spatialDistribution blocks. */
 
     /* Offset variables in the z vector, for convenience. */
     /* Structural, final, and evaluated parameters "_pi_s", "_ip_f", and
@@ -1161,8 +1137,6 @@ struct jmi_t {
 
     int offs_sw;                         /**< \brief  Offset of the first switching function in the DAE \f$F\f$ */
     int offs_sw_init;                    /**< \brief  Offset of the first switching function in the DAE initialization system \f$F_0\f$ */
-    int offs_state_sw;                   /**< \brief  Offset of the first switching function (state) in the DAE \f$F\f$ */
-    int offs_time_sw;                    /**< \brief  Offset of the first switching function (time) in the DAE \f$F\f$ */
 
     int offs_guards;                     /**< \brief  Offset of the first guard \f$F\f$ */
     int offs_guards_init;                /**< \brief  Offset of the first guard in the DAE initialization system \f$F_0\f$ */
@@ -1195,6 +1169,8 @@ struct jmi_t {
 #define JMI_ACTIVE_VAR_BUFS_NUM 3
     jmi_real_t *dz_active_variables_buf[JMI_ACTIVE_VAR_BUFS_NUM];  /**< \brief  This vector is the buffer used by dz_active_variables */
     void** ext_objs;                     /**< \brief This vector contains the external object pointers. */
+    int indep_extobjs_initialized;       /** <\brief Flag indicating if initialization of independent external objects have been done. */
+    int dep_extobjs_initialized;         /** <\brief Flag indicating if initialization of dependent external objects have been done. */
     
     jmi_real_t* nominals;                             /**< \brief Nominal values of differentiated states. */
     jmi_real_t *variable_scaling_factors;             /**< \brief Scaling factors. For convenience the vector has the same size as z but only scaling of reals are used. */
@@ -1204,8 +1180,7 @@ struct jmi_t {
     int cached_block_jacobians;                       /**< \brief This flag indicates weather the Jacobian needs to be refactorized */
 
     jmi_delay_t *delays;                 /**< \brief Delay blocks (fixed and variable time) */
-    jmi_spatialdist_t *spatialdists;     /**< \brief spatialDistribution blocks */
-    jmi_boolean delay_event_mode;        /**< \brief Controls operation of `jmi_delay_record_sample` and `jmi_spatialdist_record_sample` */
+    jmi_boolean delay_event_mode;        /**< \brief Controls operation of `jmi_delay_record_sample` */
 
     jmi_int_t n_initial_relations;       /**< \brief Number of relational operators used in the event indicators for the initialization system. There should be the same number of initial relations as there are event indicators */
     jmi_int_t* initial_relations;        /**< \brief Kind of relational operators used in the event indicators for the initialization system: JMI_REL_GT, JMI_REL_GEQ, JMI_REL_LT, JMI_REL_LEQ */
@@ -1214,10 +1189,6 @@ struct jmi_t {
 
     jmi_real_t atEvent;                  /**< \brief A boolean variable indicating if the model equations are evaluated at an event.*/
     jmi_real_t atInitial;                /**< \brief A boolean variable indicating if the model equations are evaluated at the initial time */
-    jmi_real_t atTimeEvent;              /**< \brief A boolean variable indicating if the model equations are evaluated at an time event time */
-    int eventPhase;                      /**< \brief Zero if in first phase of event iteration, non zero if in second phase */
-    
-    jmi_time_event_t nextTimeEvent;
 
     jmi_int_t is_initialized;            /**< Flag to keep track of if the initial equations have been solved. */
 	
@@ -1529,8 +1500,6 @@ int jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size
  * @return The new switch value
  */
 jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel);
-
-jmi_real_t jmi_turn_switch_time(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel);
 
 /**
  * \brief Check if file exists.

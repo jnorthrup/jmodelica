@@ -939,17 +939,9 @@ aspect BLT{
                 if (!first)
                     sb.append(separator);
                 first = false;
-                sb.append(var.displayName());
+                sb.append(var.name());
             }
             return sb.toString();
-        }
-        
-        public boolean isMeta() {
-            return false;
-        }
-        
-        public boolean isScalar() {
-            return false;
         }
         
     }
@@ -1438,11 +1430,6 @@ aspect BLT{
         public boolean isSolvable() {
             return true;
         }
-        
-        @Override
-        public boolean isMeta() {
-            return true;
-        }
 
     }
 
@@ -1466,11 +1453,6 @@ aspect BLT{
         @Override
         public Collection<FVariable> allLocalVariables() {
             return Arrays.asList(fv);
-        }
-        
-        @Override
-        public boolean isScalar() {
-            return true;
         }
 
     }
@@ -2149,7 +2131,7 @@ aspect BLTPrettyPrinting {
 
     @Override
     public void SolvedScalarEquationBlock.prettyPrintSub(Printer p, CodeStream str, String indent) {
-        str.format("%s%s := ", indent, fv.displayName());
+        str.format("%s%s := ", indent, fv.name());
         p.print(solution(), str, indent);
         equation().getFAttributeList().prettyPrintFAnnotationAttributeList(str, p);
         str.println();
@@ -2255,7 +2237,7 @@ aspect BLTPrettyPrinting {
             str.print(first ? firstIndent : otherIndent);
             if (label != null)
                 str.format("(%s) ", label);
-            str.print(fv.displayName());
+            str.print(fv.name());
             first = false;
             if (printAttributes) {
                 str.print(" (");
@@ -2282,7 +2264,7 @@ aspect IVPrettyPrinting{
     @Override
     protected void TornEquationBlock.printIterationVariables(CodeStream str) {
         for (FVariable var : localUnsolvedVariables())
-            str.println(var.displayName());
+            str.println(var.name());
     }
 
 }
@@ -2538,7 +2520,7 @@ aspect AutomaticTearing {
                 SolvingEq res = bestIter.getMatching();
                 bestIter.isIter(true);
                 res.isRes(true);
-                ASTNode.log.info("Automatic tearing pair, equation: %s, tearing with variable: %s", res.getEquation(), bestIter.getVariable().displayName());
+                ASTNode.log.info("Automatic tearing pair, equation: %s, tearing with variable: %s", res.getEquation(), bestIter.getVariable().name());
                 eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(res, bestIter, AUTOMATIC_TEARING_BLOCK_PRODUCER));
                 Collection<SCCBlock<SolvingEq, SolvingVar>> blt = g.tarjan();
                 for (SCCBlock<SolvingEq, SolvingVar> block : blt) {
@@ -2572,7 +2554,7 @@ aspect TearingPrinting {
             for (FVariable var : block.allLocalVariables()) {
                 str.print(" (");
                 str.print(block.producer().symbol());
-                str.print(") " + (counter++) + " " + var.displayName() + " (");
+                str.print(") " + (counter++) + " " + var.name() + " (");
                 var.printFAttributes(str, FAttribute.MIN, FAttribute.MAX, FAttribute.START, FAttribute.NOMINAL);
                 str.println(")");
                 str.print("   (");

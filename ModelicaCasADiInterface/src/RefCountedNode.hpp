@@ -34,7 +34,6 @@ class RefCountedNode: public SharedNode {
     public:
         RefCountedNode() { refCount=0; }
         virtual ~RefCountedNode() { assert(refCount==0); }
-        int getCount(){return refCount;}
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
    private:

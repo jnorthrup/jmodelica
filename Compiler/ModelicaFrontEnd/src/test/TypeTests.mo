@@ -1416,53 +1416,6 @@ end TypeTests.PreTest4;
 ")})));
 end PreTest4;
 
-model DerTest1
-    Integer i;
-    Boolean b;
-equation
-    der(i) = time;
-    der(b) = if time > 0 then true else false;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="DerTest1",
-            description="Test that der give errors for non-real references",
-            errorMessage="
-2 errors found:
-
-Error: in file '...':
-Semantic error at line 1, column 1:
-  Only real typed expressions are allowed in der() operator
-
-Error: in file '...':
-Semantic error at line 1, column 1:
-  Only real typed expressions are allowed in der() operator
-")})));
-end DerTest1;
-
-model DerTest2
-    Real r1;
-    Real r2;
-equation
-    der({r1, r2}) = {time, time};
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="DerTest2",
-            description="Test that der give errors for non-real references",
-            flatModel="
-fclass TypeTests.DerTest2
- Real r1;
- Real r2;
-initial equation 
- r1 = 0.0;
- r2 = 0.0;
-equation
- der(r1) = time;
- der(r2) = time;
-end TypeTests.DerTest2;
-")})));
-end DerTest2;
 
 model EdgeTest1
   Real x (start=3);
@@ -2354,69 +2307,5 @@ Semantic error at line 2274, column 71:
   Creating functional input argument mf(): no input matching named argument x4 found
 ")})));
 end Functional7;
-
-model Delay1
-    Real x1 = sin(time);
-    Real d;
-  equation
-    {x1} = delay({x1}, {d,d}, 2);
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="Delay1",
-            description="Check type error for delay().",
-            errorMessage="
-1 errors found:
-
-Error: in file '...':
-Semantic error at line 2362, column 24:
-  Calling function delay(): types of positional argument 2 and input delayTime are not compatible
-    type of '{d, d}' is Real[2]
-")})));
-end Delay1;
-
-model SpatialDist1
-    Real x = sin(time);
-    Real d;
-  equation
-    {x} = spatialDistribution({x}, d, {2}, {true}, {{0,0},{0,0}});
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="SpatialDist1",
-            description="Check type error for spatialDistribution().",
-            errorMessage="
-2 errors found:
-Error: in file '...':
-Semantic error at line 2381, column 11:
-  Calling function spatialDistribution(): first and second arguments 'in0' and 'in1' needs equivalent sizes
-Error: in file '...':
-Semantic error at line 2381, column 11:
-  Calling function spatialDistribution(): fourth argument 'positiveVelocity' cannot be vectorized
-Error: in file '...':
-Semantic error at line 2381, column 11:
-  Calling function spatialDistribution(): third argument 'x' cannot be vectorized
-Error: in file '...':
-Semantic error at line 2381, column 50:
-  Calling function spatialDistribution(): types of positional argument 5 and input initialPoints are not compatible
-    type of '{{0, 0}, {0, 0}}' is Integer[2, 2]
-")})));
-end SpatialDist1;
-
-model SpatialDist2
-    Real[2] y1;
-    Real[2] y2;
-  equation
-    (y1,y2) = spatialDistribution({1,2}, {3,4}, 2, true);
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="SpatialDist2",
-            description="Check type error for spatialDistribution().",
-            errorMessage="
-1 errors found:
-Error: in file '...':
-Compliance error at line 2408, column 15:
-  The spatialDistribution() function-like operator is not supported vectorized in function call equations
-
-")})));
-end SpatialDist2;
 
 end TypeTests;

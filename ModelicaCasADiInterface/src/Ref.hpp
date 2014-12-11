@@ -61,9 +61,6 @@ template <class T> class Ref {
         bool operator==(void *p) const { return node == p; }
         bool operator!=(void *p) const { return node != p; }
         
-        template <class S>
-        friend bool operator < (const Ref<S>& a, const Ref<S>& b);
-        
         void setNode(T *node) {
             if (this->node == node) return;
             
@@ -87,9 +84,6 @@ template <class T>
 bool operator==(void *p, const Ref<T> &ref) { return ref.node == p; }
 template <class T>
 bool operator!=(void *p, const Ref<T> &ref) { return ref.node != p; }
-
-template<class S>
-bool operator < (const Ref<S>& a, const Ref<S>& b){return a.node<b.node;}
 
 }; // End namespace
 #endif

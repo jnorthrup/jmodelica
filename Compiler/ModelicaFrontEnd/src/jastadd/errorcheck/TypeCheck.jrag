@@ -718,7 +718,7 @@ aspect FlatTypeCheck {
   public void FBuiltInFunctionCall.typeCheck(ErrorCheckType checkType) {
 	  if (checkTypeAsExpression())
 		  super.typeCheck(checkType);
-	  int n = builtInNumOutput();
+	  int n = builtInHasOutput() ? 1 : 0;
 	  if (myLefts().size() > n)
 		  error("Too many components assigned from function call: " + builtInName() + 
 				  "() has " + n + " output(s)");
@@ -784,21 +784,6 @@ aspect FlatTypeCheck {
         if (!(hasMax() ? getMax() : getDelay()).variability().parameterOrLess())
             error("Calling function delay(): last argument supplied must be of parameter variability");
     }
-    
-    public void FSpatialDistExp.typeCheck(ErrorCheckType checkType) {
-        super.typeCheck(checkType);
-        if (!getIn0().size().equivalent(getIn1().size(), true)) {
-            error("Calling function spatialDistribution(): first and second arguments 'in0' and 'in1' needs equivalent sizes");
-        }
-        if (isArray()) {
-            if (getX().isArray()) {
-                error("Calling function spatialDistribution(): third argument 'x' cannot be vectorized");
-            }
-            if (getPositiveVelocity().isArray()) {
-                error("Calling function spatialDistribution(): fourth argument 'positiveVelocity' cannot be vectorized");
-            }
-        }
-    }
 
 	public void FStringExp.typeCheck(ErrorCheckType checkType) {
 		FType valueType = getValue().type();
@@ -814,17 +799,10 @@ aspect FlatTypeCheck {
     }
   }
   
-    public void InstDerExp.typeCheck(ErrorCheckType checkType) {
-        FType type = getFExp().type();
-        if (!(type.isReal() && (type.isScalar() || type.isArray())))
-            error("Only real typed expressions are allowed in der() operator");
-    }
-  
-  syn int FBuiltInFunctionCall.builtInNumOutput() = 1;
-  eq FIgnoredBuiltIn.builtInNumOutput() = 0;
-  eq FConnectionsOp.builtInNumOutput()  = 0;
-  eq FConnBoolOp.builtInNumOutput()     = 1;
-  eq FSpatialDistExp.builtInNumOutput() = 2;
+  syn boolean FBuiltInFunctionCall.builtInHasOutput() = true;
+  eq FIgnoredBuiltIn.builtInHasOutput() = false;
+  eq FConnectionsOp.builtInHasOutput()  = false;
+  eq FConnBoolOp.builtInHasOutput()     = true;
   
   syn boolean FBuiltInFunctionCall.checkTypeAsExpression() = false;
   eq FSizeExp.checkTypeAsExpression()     = true;
@@ -1042,6 +1020,7 @@ aspect FlatTypeCheck {
     eq FConnPotentialRoot.getOriginalArg(int i).argumentDefinedTypeValid()   = i == 1;
     eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()             = i != 0;
     eq FSmoothExp.getOriginalArg(int i).argumentDefinedTypeValid()           = i == 0;
+    eq FDelayExp.getOriginalArg(int i).argumentDefinedTypeValid()            = i > 0;
     eq InstPreExp.getOriginalArg().argumentDefinedTypeValid()                = false;
     eq FEdgeExp.getOriginalArg().argumentDefinedTypeValid()                  = false;
     eq FChangeExp.getOriginalArg().argumentDefinedTypeValid()                = false;
@@ -1070,6 +1049,7 @@ aspect FlatTypeCheck {
     eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FType type)     = 
         hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
     eq FSmoothExp.getChild().argumentTypeValid(FType type)                = type.onlyContainsReal();
+    eq FDelayExp.getChild().argumentTypeValid(FType type)                 = type.isNumeric();
     eq FDimensionConvert.getChild().argumentTypeValid(FType type)         = argumentSizeValid(type.size());
     eq FCardinality.getChild().argumentTypeValid(FType type)              = type.isScalar() && getFExp().isComponentReference(ALLOWED_COMPONENTS);
     eq FConnectionsOp.getOriginalArg(int i).argumentTypeValid(FType type) = 

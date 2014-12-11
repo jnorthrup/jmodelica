@@ -247,12 +247,6 @@
 #define JMI_INF   1e20                    /**< \brief A Very Large Number denoting infinity.*/
 #define JMI_PI    3.14159265358979323846  /**< \brief The constant pi. */
 
-#define JMI_OK     0                 /**< \brief Everything is OK. */
-#define JMI_ERROR -1                 /**< \brief An ERROR occurred. */
-
-#define JMI_TIME_EXACT 0            /**< \brief Time events that are exact shall be handled. */
-#define JMI_TIME_GREATER 1          /**< \brief Time events should be handled as time has passed the exact. */
-
 /*The option JMI_DER_CPPAD is no longer used and should be removed.*/
 #define JMI_DER_SYMBOLIC 1          /**< \brief Use symbolic evaluation of derivatives (if available). */
 #define JMI_DER_CPPAD 2             /**< \brief Use automatic differentiation (CppAD) to evaluate derivatives. */
@@ -354,7 +348,7 @@ int jmi_new(jmi_t** jmi, jmi_callbacks_t* jmi_callbacks);
  * @param jmi A pointer to the jmi_t struct to clean up.
  * @return Error code.
  */
-int jmi_destruct_external_objs(jmi_t* jmi);
+int jmi_terminate(jmi_t* jmi);
 
 /**
  * Deallocates memory and deletes a jmi_t struct.
@@ -786,26 +780,6 @@ int jmi_get_output_vrefs(jmi_t *jmi, int *output_vrefs);
 jmi_real_t* jmi_get_sw(jmi_t* jmi);
 
 /**
- * \brief Get a pointer to the first switching function (state) in the DAE \$fF\$f.
- * A switch value of 1 corresponds to true and 0 corresponds to false.
- *
- * @param jmi The jmi_t struct.
- * @return A pointer to the vector of switching functions.
- *
- */
-jmi_real_t* jmi_get_state_sw(jmi_t* jmi);
-
-/**
- * \brief Get a pointer to the first switching function (time) in the DAE \$fF\$f.
- * A switch value of 1 corresponds to true and 0 corresponds to false.
- *
- * @param jmi The jmi_t struct.
- * @return A pointer to the vector of switching functions.
- *
- */
-jmi_real_t* jmi_get_time_sw(jmi_t* jmi);
-
-/**
  * \brief Get a pointer to the first switching function in the initialization system \$fF_0\$f.
  * A switch value of 1 corresponds to true and 0 corresponds to false.
  * @param jmi The jmi_t struct.
@@ -995,10 +969,10 @@ int jmi_ode_guards_init(jmi_t* jmi);
  * \brief Computes the next time event.
  *
  * @param jmi A jmi_t struct.
- * @param event (Output) Information of the next time event.
+ * @param nextTime (Output) The time instant of the next time event.
  * @return Error code.
  */
-int jmi_ode_next_time_event(jmi_t* jmi, jmi_time_event_t* event);
+int jmi_ode_next_time_event(jmi_t* jmi, jmi_real_t* nextTime);
 
 
 /* @} */
@@ -1500,12 +1474,7 @@ int jmi_set_start_values(jmi_t *jmi);
 
 /* Initialize delay interface 
  * Called when initializing jmi struct */
-int jmi_init_delay_if(jmi_t* jmi, int n_delays, int n_spatialdists, jmi_generic_func_t init, jmi_generic_func_t sample, int n_delay_switches);
-
-/* Tear down delay interface
- * Called when destroying jmi struct */
-int jmi_destroy_delay_if(jmi_t* jmi);
-
+int jmi_init_delay_if(jmi_t* jmi, int n_delays, jmi_generic_func_t init, jmi_generic_func_t sample, int n_delay_switches);
 
 /* Initialize delay blocks 
  * Called after model initalization */

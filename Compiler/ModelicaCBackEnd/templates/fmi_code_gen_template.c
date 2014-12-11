@@ -74,9 +74,7 @@ static const int N_string_u = $n_string_u$;
 
 static const int N_ext_objs = $n_ext_objs$;
 
-static const int N_time_sw = $n_time_switches$;
-static const int N_state_sw = $n_state_switches$;
-static const int N_sw = $n_time_switches$ + $n_state_switches$;
+static const int N_sw = $n_switches$;
 static const int N_delay_sw = $n_delay_switches$;
 static const int N_eq_F = $n_equations$;
 static const int N_eq_R = $n_event_indicators$;
@@ -93,7 +91,6 @@ static const int N_sw_init = $n_initial_switches$;
 static const int N_guards_init = $n_guards_init$;
 
 static const int N_delays = $n_delays$;
-static const int N_spatialdists = $n_spatialdists$;
 
 static const int Scaling_method = $C_DAE_scaling_method$;
 
@@ -182,7 +179,7 @@ $C_ode_guards$
     return 0;
 }
 
-static int model_ode_next_time_event(jmi_t* jmi, jmi_time_event_t* event) {
+static int model_ode_next_time_event(jmi_t* jmi, jmi_real_t* nextTime) {
 $C_ode_time_events$
     return 0;
 }
@@ -282,7 +279,7 @@ int jmi_new(jmi_t** jmi, jmi_callbacks_t* jmi_callbacks) {
              N_real_dx, N_real_x, N_real_u, N_real_w,
              N_real_d, N_integer_d, N_integer_u, N_boolean_d, N_boolean_u,
              N_string_d, N_string_u, N_outputs, (int (*))Output_vrefs,
-             N_sw, N_sw_init, N_time_sw,N_state_sw, N_guards, N_guards_init,
+             N_sw, N_sw_init, N_guards, N_guards_init,
              N_dae_blocks, N_dae_init_blocks,
              N_initial_relations, (int (*))DAE_initial_relations,
              N_relations, (int (*))DAE_relations,
@@ -322,12 +319,12 @@ $CAD_dae_init_add_blocks_residual_functions$
                   0, NULL, NULL);
     
     /* Initialize the delay interface */
-    jmi_init_delay_if(*jmi, N_delays, N_spatialdists, *model_init_delay, *model_sample_delay, N_delay_sw);
+    jmi_init_delay_if(*jmi, N_delays, *model_init_delay, *model_sample_delay, N_delay_sw);
 
     return 0;
 }
 
-int jmi_destruct_external_objs(jmi_t* jmi) {
+int jmi_terminate(jmi_t* jmi) {
 $C_destruct_external_object$
     return 0;
 }

@@ -239,73 +239,13 @@ aspect CCodeGen {
 			}
 			str.print(")");
 		} else {
-            prettyPrintGuarded_C(p, str, indent, getLeft(), getRight());
+			str.print("pow(");
+			p.print(getLeft(),str,indent); 
+			str.print(",");
+			p.print(getRight(),str,indent);
+			str.print(")");
 		}
 	}
-	
-    public void FExp.prettyPrintGuarded_C(CodePrinter p, CodeStream str, String indent, FExp left, FExp right) {
-        boolean func = inFunction();
-        str.print("jmi_");
-        str.print(guardedFunctionName_C());
-        str.print(func ? "_function(" : "_equation(");
-        str.print(func ? "\"" + containingFFunctionDecl().name() + "\", ": "jmi, ");
-        p.print(left,str,indent);
-        str.print(","); 
-        p.print(right,str,indent);
-        str.print(",\""); 
-        CStringCodeStream tstr = new CStringCodeStream(str);
-        prettyPrint(tstr, "");
-        tstr.close();
-        str.print("\")");
-    }
-    
-    public void FExp.prettyPrintGuarded_C(CodePrinter p, CodeStream str, String indent, FExp exp) {
-        boolean func = inFunction();
-        str.print("jmi_");
-        str.print(guardedFunctionName_C());
-        str.print(func ? "_function(" : "_equation(");
-        str.print(func ? "\"" + containingFFunctionDecl().name() + "\", ": "jmi, ");
-        p.print(exp,str,indent);
-        str.print(",\""); 
-        CStringCodeStream tstr = new CStringCodeStream(str);
-        prettyPrint(tstr, "");
-        tstr.close();
-        str.print("\")");
-    }
-    
-    syn String FExp.guardedFunctionName_C() { throw new UnsupportedOperationException(); }
-    eq FDotDivExp.guardedFunctionName_C() = "divide";
-    eq FDotPowExp.guardedFunctionName_C() = "pow";
-    eq FExpExp.guardedFunctionName_C()    = "exp";
-    eq FLogExp.guardedFunctionName_C()    = "log";
-    eq FLog10Exp.guardedFunctionName_C()  = "log10";
-    eq FSinhExp.guardedFunctionName_C()   = "sinh";
-    eq FCoshExp.guardedFunctionName_C()   = "cosh";
-    eq FTanExp.guardedFunctionName_C()    = "tan";
-    
-    public void FExpExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getFExp());
-    }
-    
-    public void  FLogExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getFExp());
-    }
-    
-    public void  FLog10Exp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getFExp());
-    }
-    
-    public void  FSinhExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getFExp());
-    }
-    
-    public void  FCoshExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getFExp());
-    }
-    
-    public void  FTanExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getFExp());
-    }
 	
 	public void FMinMaxExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		str.print("jmi_" + builtInName() + "(");
@@ -479,23 +419,20 @@ aspect CCodeGen {
             sep = ", ";
         }
         if (!exp) {
-            call.prettyPrintCallOutputs_C(p, str, indent, myOutputs().size(), sep);
+            int tot = myOutputs().size();
+            int lefts = call.myLefts().size();
+            for (int i = 0; i < tot; i++) {
+                str.print(sep);
+                if (i < lefts)
+                    call.myLefts().get(i).genArgument_C(str);
+                else
+                    str.print("NULL");
+                sep = ", ";
+            }
         }
         str.print(")");
         if (!exp)
             str.print(";\n");
-    }
-    
-    public void FAbstractFunctionCall.prettyPrintCallOutputs_C(CodePrinter p, CodeStream str, String indent, int outputs, String sep) {
-        int lefts = myLefts().size();
-        for (int i = 0; i < outputs; i++) {
-            str.print(sep);
-            if (i < lefts)
-                myLefts().get(i).genArgument_C(str);
-            else
-                str.print("NULL");
-            sep = ", ";
-        }
     }
     
     @Override
@@ -2070,7 +2007,19 @@ aspect CCodeGen {
 	eq FDotDivExp.op_C() = " / ";
 
 	public void FDotDivExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getLeft(), getRight());
+		if (inFunction()) {
+			str.format("jmi_divide_function(\"%s\", ", containingFFunctionDecl().name());
+		} else {
+			str.print("jmi_divide_equation(jmi, ");
+		}
+        p.print(getLeft(),str,indent);
+        str.print(","); 
+        p.print(getRight(),str,indent);
+        str.print(",\""); 
+        CStringCodeStream tstr = new CStringCodeStream(str);
+        prettyPrint(tstr, "");
+        tstr.close();
+        str.print("\")");
 	}
 	
     public void FStringLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
@@ -2494,11 +2443,17 @@ aspect CCodeGen {
 	}
 	
     private void FRelExp.printSwitchMacro_C(CodePrinter p, CodeStream str, String indent) {
-        if (originalFExp().generatesEventInDAE()) {
-            str.format("_sw(%d)", mySwitchIndex());
-        } else {
-            str.format("_sw_init(%d)", relExpInInitialEquationsIndex());
+        int index = myEventIndicatorIndex();
+        if (index >= 0) {
+            str.format("_sw(%d)", index);
+            return;
         }
+        index = relExpInInitialEquationsIndex();
+        if (index >= 0) {
+            str.format("_sw_init(%d)", index);
+            return;
+        }
+        throw new UnsupportedOperationException("Unable to generate switch macro for relational operator, not in list of switches!");
     }
 
     syn String FRelExp.op_C() = op();
@@ -2510,54 +2465,23 @@ aspect CCodeGen {
         if (root().options.getBooleanOption("generate_dae"))
             return;
         if (generatesEvent(p.inInitialSystem())) {
-            str.format("%sif (", outerIndent);
             if (p.insideBlock())
-                str.print("evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS");
+                str.formatln("%sif (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {", outerIndent);
             else
-                str.print("jmi->atInitial || jmi->atEvent");
-            str.println(") {");
-            
+                str.formatln("%sif (jmi->atInitial || jmi->atEvent) {", outerIndent);
             String indent = p.indent(outerIndent);
             str.print(indent);
             printSwitchMacro_C(p, str, indent);
-            boolean time = isTimeEventGenerating();
-            if (time) {
-                str.print(" = jmi_turn_switch_time(");
-            } else {
-                str.print(" = jmi_turn_switch(");
-            }
+            str.print(" = jmi_turn_switch(");
             printIndicator_C(p, str, indent);
             str.print(", ");
             printSwitchMacro_C(p, str, indent);
-            if (time) {
-                str.format(", JMI_ALMOST_EPS, ");
-            } else {
-                str.format(", jmi->events_epsilon, ");
-            }
-            boolean phased = isPhased();
-            if (phased) {
-                str.print("jmi->eventPhase ? (");
-                genRelExpKindPhased(str);
-                str.print(") : (");
-            }
+            str.format(", jmi->events_epsilon, ");
             genRelExpKind(str);
-            if (phased) {
-                str.print(")");
-            }
-            
             str.formatln(");");
             str.formatln("%s}", outerIndent);
         }
     }
-    
-    syn boolean FRelExp.isPhased() = isTimeEventGenerating() && isPhased_sub();
-    
-    syn boolean FRelExp.isPhased_sub() { throw new UnsupportedOperationException(); }
-    eq FGtExp.isPhased_sub()  = getLeft() instanceof FTimeExp;
-    eq FGeqExp.isPhased_sub() = getRight() instanceof FTimeExp;
-    eq FLtExp.isPhased_sub()  = getRight() instanceof FTimeExp;
-    eq FLeqExp.isPhased_sub() = getLeft() instanceof FTimeExp;
-      
 
 
 	public void FLogBinExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
@@ -2625,7 +2549,7 @@ aspect CCodeGen {
         p.printPreSteps(maxDelayExp, str, indent);
         
         str.format("%sjmi_delay_init(jmi, %d, ", indent, myDelayIndex());
-        str.print(!isTimeEventGenerating() ? "JMI_FALSE" : "JMI_TRUE"); // jmi_boolean fixed
+        str.print(generatesStateEvents() ? "JMI_FALSE" : "JMI_TRUE"); // jmi_boolean fixed
         str.print(", "); 
         str.print(generatesEventInDAE() ? "JMI_FALSE" : "JMI_TRUE"); // jmi_boolean no_event
         str.print(", "); 
@@ -2657,143 +2581,40 @@ aspect CCodeGen {
         p.printPostSteps(getFExp(), str, indent);
     }
     
-    public void FDelayExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        str.format("jmi_delay_evaluate(jmi, %d, ", myDelayIndex());
-        p.print(getFExp(), str, indent);
-        str.print(", ");
-        p.print(getDelay(), str, indent);
-        str.print(")");
-    }
     
-    /**
-     * Generate temp declarations for the initialization of spatialDistribution blocks.
-     */
-    public void FSpatialDistExp.genInitVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        p.printVarDecls(getX(), str, indent);
-        getX().genTempInputDecl_C(p, str, indent);
-        p.printVarDecls(getInitialPoints(), str, indent);
-        getInitialPoints().genTempInputDecl_C(p, str, indent);
-        p.printVarDecls(getInitialValues(), str, indent);
-        getInitialValues().genTempInputDecl_C(p, str, indent);
-    }
-    
-    /**
-     * Generate the initialization of spatialDistribution blocks.
-     */
-    public void FSpatialDistExp.genInit_C(CodePrinter p, CodeStream str, String indent) {
-        
-        //int jmi_spatialdist_init(jmi_t *jmi, int index, jmi_boolean no_event,
-        // jmi_real_t x0, jmi_real_t *x_init, jmi_real_t *y_init, int n_init);
-        
-        p.printPreSteps(getX(), str, indent);
-        getX().genTempInput_C(p, str, indent);
-        p.printPreSteps(getInitialPoints(), str, indent);
-        getInitialPoints().genTempInput_C(p, str, indent);
-        p.printPreSteps(getInitialValues(), str, indent);
-        getInitialValues().genTempInput_C(p, str, indent);
-        
-        str.format("%sjmi_spatialdist_init(jmi, %d, ", indent, mySpatialDistIndex());
-        str.print(generatesEventInDAE() ? "JMI_FALSE" : "JMI_TRUE"); // jmi_boolean no_event
-        str.print(", "); 
-        p.print(getX(), str, indent); // jmi_real_t x0,
-        str.print(", "); 
-        getInitialPoints().genArgument_C(p, str, indent); // jmi_real_t *x_init
-        str.print(", ");
-        getInitialValues().genArgument_C(p, str, indent); // jmi_real_t *y_init
-        str.println(");");
-        
-        p.printPostSteps(getX(), str, indent);
-        p.printPostSteps(getInitialPoints(), str, indent);
-        p.printPostSteps(getInitialValues(), str, indent);
-    }
-    
-    /**
-     * Generate temp declarations for the sampling of spatialDistribution blocks.
-     */
-    public void FSpatialDistExp.genSampleVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        p.printVarDecls(getIn0(), str, indent);
-        p.printVarDecls(getIn1(), str, indent);
-        p.printVarDecls(getX(), str, indent);
-        p.printVarDecls(getPositiveVelocity(), str, indent);
-    }
-    
-    /**
-     * Generate the sampling of spatialDistribution blocks.
-     */
-    public void FSpatialDistExp.genSample_C(CodePrinter p, CodeStream str, String indent) {
-//        int jmi_spatialdist_record_sample(jmi_t *jmi, int index, jmi_real_t in0,
-//              jmi_real_t in1, jmi_real_t x, jmi_boolean positiveVelocity);
-        
-        p.printPreSteps(getIn0(), str, indent);
-        p.printPreSteps(getIn1(), str, indent);
-        p.printPreSteps(getX(), str, indent);
-        p.printPreSteps(getPositiveVelocity(), str, indent);
-            
-        str.format("%sjmi_spatialdist_record_sample(jmi, %d, ", indent, mySpatialDistIndex());
-        p.print(getIn0(), str, indent);
-        str.print(", ");
-        p.print(getIn1(), str, indent);
-        str.print(", ");
-        p.print(getX(), str, indent);
-        str.print(", ");
-        p.print(getPositiveVelocity(), str, indent);
-        str.println(");");
-        
-        p.printPostSteps(getIn0(), str, indent);
-        p.printPostSteps(getIn1(), str, indent);
-        p.printPostSteps(getX(), str, indent);
-        p.printPostSteps(getPositiveVelocity(), str, indent);
-    }
-    
-    
-    public void FSpatialDistExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        p.printVarDecls(getIn0(), str, indent);
-        p.printVarDecls(getIn1(), str, indent);
-        p.printVarDecls(getX(), str, indent);
-        p.printVarDecls(getPositiveVelocity(), str, indent);
-    }
-    
-    public void FSpatialDistExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
-        p.printPreSteps(getIn0(), str, indent);
-        p.printPreSteps(getIn1(), str, indent);
-        p.printPreSteps(getX(), str, indent);
-        p.printPreSteps(getPositiveVelocity(), str, indent);
-    }
-    
-    public void FSpatialDistExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
-        p.printPostSteps(getIn0(), str, indent);
-        p.printPostSteps(getIn1(), str, indent);
-        p.printPostSteps(getX(), str, indent);
-        p.printPostSteps(getPositiveVelocity(), str, indent);
-    }
-    
-    public void FSpatialDistExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-//        int jmi_spatialdist_evaluate(jmi_t *jmi, int index, jmi_real_t *out0,
-//            jmi_real_t *out1, jmi_real_t in0, jmi_real_t in1, jmi_real_t x, 
-//            jmi_boolean positiveVelocity);
-        
-        boolean exp = functionCallIsExp();
-        if (!exp) {
-            str.print(indent);
-        }
-        str.format("jmi_spatialdist_evaluate(jmi, %d, ", mySpatialDistIndex());
-        if (exp) {
-            str.print("NULL, NULL");
+    public void FDelayExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        if (p.inInitialSystem()) {
+            p.printVarDecls(getFExp(), str, indent);
         } else {
-            prettyPrintCallOutputs_C(p, str, indent, 2, "");
+            super.genVarDecls_C(p, str, indent);
         }
-        str.print(", ");
-        p.print(getIn0(), str, indent);
-        str.print(", ");
-        p.print(getIn1(), str, indent);
-        str.print(", ");
-        p.print(getX(), str, indent);
-        str.print(", ");
-        p.print(getPositiveVelocity(), str, indent);
-        str.print(")");
-        
-        if (!exp) {
-            str.println(";");
+    }
+    
+    public void FDelayExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        if (p.inInitialSystem()) {
+            p.printPreSteps(getFExp(), str, indent);
+        } else {
+            super.genTempVars_C(p, str, indent);
+        }
+    }
+    
+    public void FDelayExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
+        if (p.inInitialSystem()) {
+            p.printPostSteps(getFExp(), str, indent);
+        } else {
+            super.genTempFree_C(p, str, indent);
+        }
+    }
+    
+    public void FDelayExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        if (p.inInitialSystem()) {
+            p.print(getFExp(), str, indent);
+        } else {
+            str.format("jmi_delay_evaluate(jmi, %d, ", myDelayIndex());
+            p.print(getFExp(), str, indent);
+            str.print(", ");
+            p.print(getDelay(), str, indent);
+            str.print(")");
         }
     }
 	
@@ -3184,12 +3005,6 @@ aspect CCodeGen {
         for (FVariable fv : localNonRealVariables())
             str.format("%sx[%d] = %d;\n", nextIndent, nonRealEnumerator.next(), fv.valueReference());
         
-        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {\n");
-        // Loop over all non-real variables and write their position in the z-vector
-        Enumerator directImpactNonRealEnumerator = new Enumerator();
-        for (FVariable fv : directlyImpactingNonReals_C())
-            str.format("%sx[%d] = %d;\n", nextIndent, directImpactNonRealEnumerator.next(), fv.valueReference());
-        
         str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {\n");
         // Loop over all non-real variables and write their position in the z-vector
         Enumerator relExpEnumerator = new Enumerator();
@@ -3197,12 +3012,6 @@ aspect CCodeGen {
             relExp.genBlockResidualFunction_printSwitchIndex_C(p, str, nextIndent, relExpEnumerator);
         for (FRelExp relExp : activeInitialSwitches_C())
             relExp.genBlockResidualFunction_printSwitchIndex_C(p, str, nextIndent, relExpEnumerator);
-        
-        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_DIRECTLY_ACTIVE_SWITCH_INDEX) {\n");
-        // Loop over all non-real variables and write their position in the z-vector
-        Enumerator directlyActiveSwitchEnumerator = new Enumerator();
-        for (FRelExp relExp : directlyActiveSwitches_C())
-            relExp.genBlockResidualFunction_printSwitchIndex_C(p, str, nextIndent, directlyActiveSwitchEnumerator);
         
         // Equation nominal values
         str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {\n");
@@ -3254,11 +3063,17 @@ aspect CCodeGen {
      * Prints the position for the switch in the z-vector
      */
     public void FRelExp.genBlockResidualFunction_printSwitchIndex_C(CodePrinter p, CodeStream str, String nextIndent, Enumerator enumerator) {
-        if (originalFExp().generatesEventInDAE()) {
-            str.format("%sx[%d] = jmi->offs_sw + %d;\n", nextIndent, enumerator.next(), mySwitchIndex());
-        } else {
-            str.format("%sx[%d] = jmi->offs_sw_init + %d;\n", nextIndent, enumerator.next(), relExpInInitialEquationsIndex());
+        int index = myEventIndicatorIndex();
+        if (index >= 0) {
+            str.format("%sx[%d] = jmi->offs_sw + %d;\n", nextIndent, enumerator.next(), index);
+            return;
         }
+        index = relExpInInitialEquationsIndex();
+        if (index >= 0) {
+            str.format("%sx[%d] = jmi->offs_sw_init + %d;\n", nextIndent, enumerator.next(), index);
+            return;
+        }
+        throw new UnsupportedOperationException("Unable to generate switch index for relational operator, not in list of switches!");
     }
 
     /**
@@ -3594,9 +3409,7 @@ aspect CCodeGen {
 			str.print("NULL, ");
 		str.print(localUnsolvedVariables().size() + ", "); // Rename to realIterationVariables() and nonRealIterationVariables()?
 		str.print(localNonRealVariables().size() + ", ");
-		str.print(directlyImpactingNonReals_C().size() + ", ");
 		str.print((activeSwitches_C().size() + activeInitialSwitches_C().size()) + ", ");
-		str.print(directlyActiveSwitches_C().size() + ", ");
 		str.print(variability().genJMIVariabilityConstant_C() + ", ");
 		p.C_blockResidualAttributePrinter.printVariability(p, str, indent, this.localUnsolvedVariables());
 		str.print(genJMISolverConstant_C(nleSolver) + ", ");
@@ -3628,8 +3441,6 @@ aspect CCodeGen {
     private Collection<FRelExp> AbstractEquationBlock.inactiveSwitches_C = null;
     private Collection<FRelExp> AbstractEquationBlock.activeInitialSwitches_C = null;
     private Collection<FRelExp> AbstractEquationBlock.inactiveInitialSwitches_C = null;
-    private Collection<FRelExp> AbstractEquationBlock.directlyActiveSwitches_C = null;
-    private Collection<FVariable> AbstractEquationBlock.directlyImpactingNonReals_C = null;
     
     /**
      * Returns all active switches in the block. A switch is considered active
@@ -3666,73 +3477,33 @@ aspect CCodeGen {
     /**
      * Returns all inactive initial switches in the block. A switch is considered
      * active in a block if is located in the block and depends on active
-     * variables in the block.
+     * aariables in the block.
      */
     public Collection<FRelExp> AbstractEquationBlock.inactiveInitialSwitches_C() {
         cacheSwitches_C();
         return inactiveInitialSwitches_C;
     }
     
-    /**
-     * Returns all directly active switches in the block. A switch is
-     * considered active in a block if is located in the block and depends on
-     * active variables in the block. A switch is considered direct if it
-     * diretly affects an continuous equation.
-     */
-    public Collection<FRelExp> AbstractEquationBlock.directlyActiveSwitches_C() {
-        cacheSwitches_C();
-        return directlyActiveSwitches_C;
-    }
-    
-    /**
-     * Returns all directly affecting non reals in the block. A non real is
-     * considered directly affecting in a block if is solved in the block and 
-     * is used in a continuous equation.
-     */
-    public Collection<FVariable> AbstractEquationBlock.directlyImpactingNonReals_C() {
-        cacheSwitches_C();
-        return directlyImpactingNonReals_C;
-    }
-    
     private void AbstractEquationBlock.cacheSwitches_C() {
-        if (activeSwitches_C != null && activeInitialSwitches_C != null && inactiveSwitches_C != null &&
-                inactiveInitialSwitches_C != null && directlyActiveSwitches_C != null && directlyImpactingNonReals_C != null)
+        if (activeSwitches_C != null && activeInitialSwitches_C != null && inactiveSwitches_C != null && inactiveInitialSwitches_C != null)
             return;
-        activeSwitches_C = new LinkedHashSet<FRelExp>();
-        activeInitialSwitches_C = new LinkedHashSet<FRelExp>();
-        inactiveSwitches_C = new LinkedHashSet<FRelExp>();
-        inactiveInitialSwitches_C = new LinkedHashSet<FRelExp>();
-        directlyActiveSwitches_C = new LinkedHashSet<FRelExp>();
-        directlyImpactingNonReals_C = new LinkedHashSet<FVariable>();
-        
-        Set<FAbstractEquation> realEqns = new HashSet<FAbstractEquation>(localRealEquations());
-        Set<FVariable> nonRealVars = new HashSet<FVariable>(localNonRealVariables());
-        Set<FVariable> allVariables = new HashSet<FVariable>(allLocalVariables());
+        activeSwitches_C = new ArrayList<FRelExp>();
+        activeInitialSwitches_C = new ArrayList<FRelExp>();
+        inactiveSwitches_C = new ArrayList<FRelExp>();
+        inactiveInitialSwitches_C = new ArrayList<FRelExp>();
+        Collection<FVariable> allVariables = allLocalVariables();
         for (FAbstractEquation equation : allLocalEquations()) {
-            boolean realEqn = realEqns.contains(equation);
             for (FRelExp relExp : equation.relExpInInitialEquation()) {
-                if (relExp.dependsOn(allVariables)) {
+                if (relExp.dependsOn(allVariables))
                     activeInitialSwitches_C.add(relExp);
-                    if (realEqn)
-                        directlyActiveSwitches_C.add(relExp);
-                } else {
+                else
                     inactiveInitialSwitches_C.add(relExp);
-                }
             }
             for (FRelExp relExp : equation.relExpInEquation()) {
-                if (relExp.dependsOn(allVariables)) {
+                if (relExp.dependsOn(allVariables))
                     activeSwitches_C.add(relExp);
-                    if (realEqn)
-                        directlyActiveSwitches_C.add(relExp);
-                } else {
+                else
                     inactiveSwitches_C.add(relExp);
-                }
-            }
-            if (realEqn) {
-                for (FVariable var : equation.referencedFVariables()) {
-                    if (nonRealVars.contains(var))
-                        directlyImpactingNonReals_C.add(var);
-                }
             }
         }
     }
@@ -4114,10 +3885,10 @@ aspect CCodeGen {
 	public void FEquation.genAssignment_C(CodePrinter p, CodeStream str, String indent) {
 		p.printPreSteps(this, str, indent);
 		FIdUseExp left = (FIdUseExp)getLeft();
-        FAbstractVariable fv = left.myFV();
+		String oldindent = indent; // needed if left is EO
         if (left.myFV().isExternalObject()) {
-            FExternalObjectVariable eo = (FExternalObjectVariable) fv;
-            eo.genDestructorCall_C(p, str, indent);
+            str.print(indent + "if (!jmi->dep_extobjs_initialized) { \n");
+            indent = p.indent(indent);
         }
         str.print(indent);
 		p.print(left.getFIdUse(), str, "");
@@ -4131,20 +3902,12 @@ aspect CCodeGen {
 		}
 		str.print(";\n");
 		
+		if (left.myFV().isExternalObject()) {
+		    str.print(oldindent + "}\n");
+		}
 		p.printPostSteps(this, str, indent);
 	}
-    
-    public void FExternalObjectVariable.genDestructorCall_C(CodePrinter p, CodeStream str, String indent) {
-        if (hasDestructorCall()) {
-            str.formatln("%sif (%s != NULL) {", indent, name_C());
-            p.print(getDestructorCall(), str, p.indent(indent));
-            str.formatln("%s%s = NULL;", p.indent(indent), name_C());
-            str.formatln("%s}", indent);
-        } else {
-            /* Alias external objects does not call constructors so no destructor call is needed. */
-        }
-    }
-    
+
     @Override
     public void FFunctionCallEquation.genAssignment_C(CodePrinter p, CodeStream str, String indent) {
         genBlock_C(p, str, indent, null, null, null);
@@ -4326,13 +4089,6 @@ aspect CCodeGen {
         }
     }
     
-    public void FSpatialDistExp.genEventResidualVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        if (!p.inInitialSystem()) {
-            p.printVarDecls(getX(), str, indent);
-            p.printVarDecls(getPositiveVelocity(), str, indent);
-        }
-    }
-    
     public void FExp.genEventResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
         throw new UnsupportedOperationException();
     }
@@ -4363,25 +4119,6 @@ aspect CCodeGen {
             p.printPostSteps(getDelay(), str, indent);
         }
     }
-    
-    public void FSpatialDistExp.genEventResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
-//        int jmi_spatialdist_event_indicator(jmi_t *jmi, int index, jmi_real_t x, 
-//              jmi_boolean positiveVelocity, jmi_real_t *event_indicator);
-        if (p.inInitialSystem()) {
-            str.formatln("%s(*res)[%d] = JMI_DELAY_INITIAL_EVENT_RES;", indent, enumerator.next());
-        } else {
-            p.printPreSteps(getX(), str, indent);
-            p.printPreSteps(getPositiveVelocity(), str, indent);
-            int index = mySpatialDistIndex();
-            str.format("%sjmi_spatialdist_event_indicator(jmi, %d, ", indent, index);
-            p.print(getX(), str, indent);
-            str.print(", ");
-            p.print(getPositiveVelocity(), str, indent);
-            str.print(", &(*res)[" + enumerator.next() + "]);\n");
-            p.printPostSteps(getX(), str, indent);
-            p.printPostSteps(getPositiveVelocity(), str, indent);
-        }
-    }
 	
     private void FRelExp.printIndicator_C(CodePrinter p, CodeStream str, String indent) {
         if (hasIndicator()) {
@@ -4392,116 +4129,6 @@ aspect CCodeGen {
             p.print(getRight(), str, indent);
             str.print(")");
         }
-    }
-    
-    public void FExp.genTimeEventCalc_C(CodePrinter p, CodeStream str, String indent, String res) {
-        throw new UnsupportedOperationException();
-    }
-    
-    @Override
-    public void FRelExp.genTimeEventCalc_C(CodePrinter p, CodeStream str, String indent, String res) {
-        super.genTempVars_C(p, str, indent);
-        boolean phased = isPhased();
-        str.format("%sif (SURELY_LT_ZERO(", indent);
-        printIndicator_C(p, str, indent);
-        str.print(")");
-        if (phased) {
-            str.print(" || (!jmi->eventPhase && ALMOST_ZERO(");
-            printIndicator_C(p, str, indent);
-            str.print("))");
-        }
-        str.println(") {");
-        
-        str.format("%sjmi_min_time_event(&%s, 1, %s, ", p.indent(indent), res, phased ? "1" : "0");
-        p.print(solutionForTime(), str, indent);
-        str.formatln(");\n%s}", indent);
-        super.genTempFree_C(p, str, indent);
-    }
-    
-    @Override
-    public void FSampleExp.genTimeEventCalc_C(CodePrinter p, CodeStream str, String indent, String res) {
-        /*
-            There are three cases to consider for each sampler:
-             1) The current time is (surely) before the offset of 
-                the sampler. In this case, the next time event occurs
-                at time offset.
-             2) The current time is a sample instant of the sampler
-                in which case next time event is the next sample
-                instant.
-             3) If neither of the above holds true, then the current
-                time is in between two sample instants of the sampler.
-                In this case, the next time event is the next sample
-                instant.
-        */
-        super.genTempVars_C(p, str, indent);
-        // Case 1: time is before offset 
-        str.print("  if (SURELY_LT_ZERO(_t - (");
-        getOffset().prettyPrint_C(str,"");
-        str.print("))) {\n");
-        str.format("%sjmi_min_time_event(&%s, 1, 0, ", indent, res);
-        getOffset().prettyPrint_C(str,"");
-        str.println(");");
-        //str.print("printf(\"Hepp: %f %f\\n\",_t,nextTimeEventTmp);\n");
-        str.print("  } ");   
-        // Case 2: we are at a sample                                   
-        str.print(" else if (ALMOST_ZERO(jmi_dremainder(_t - (");
-        getOffset().prettyPrint_C(str,"");
-        str.print("), ");
-        getInterval().prettyPrint_C(str,"");
-        str.print("))) {\n");
-        // nSamp should be almost an integer - round to get it exact
-        str.print("    nSamp = jmi_dround((_t - (");
-        getOffset().prettyPrint_C(str,"");
-        str.print(")) / (");
-        getInterval().prettyPrint_C(str,"");
-        str.print("));\n");
-        str.format("%sjmi_min_time_event(&%s, 1, 0, ", indent, res);
-        str.print("(nSamp + 1.0) * (");
-        getInterval().prettyPrint_C(str,"");
-        str.print(") + (");
-        getOffset().prettyPrint_C(str,"");
-        str.println("));");
-/*----*//*
-        str.print("printf(\"Hopp: %12.12f %12.12f %12.12f %12.12f\\n\",_t,nextTimeEventTmp,nSamp,");
-        str.print("(_t-");
-        getOffset().prettyPrint_C(str,"");
-        str.print(")/(");
-        getInterval().prettyPrint_C(str,"");
-        str.print("));\n");
-
-*//*---*/
-        str.print("  } ");
-
-        // Case 3: Neither of the above: in between samples
-        str.print(" else if (SURELY_GT_ZERO(jmi_dremainder(_t - (");
-        getOffset().prettyPrint_C(str,"");
-        str.print("), ");
-        getInterval().prettyPrint_C(str,"");
-        str.print("))) {\n");
-        // User the floor function to get the number of previous
-        // samples
-        str.print("    nSamp = floor((_t - (");
-        getOffset().prettyPrint_C(str,"");
-        str.print(")) / (");
-        getInterval().prettyPrint_C(str,"");
-        str.print("));\n");
-        str.format("%sjmi_min_time_event(&%s, 1, 0, ", indent, res);
-        str.print("(nSamp + 1.0) * (");
-        getInterval().prettyPrint_C(str,"");
-        str.print(") + (");
-        getOffset().prettyPrint_C(str,"");
-        str.println("));");
-/*----*//*
-        str.print("printf(\"Hopp2: %12.12f %12.12f %12.12f %12.12f\\n\",_t,nextTimeEventTmp,nSamp,");
-        str.print("(_t-");
-        getOffset().prettyPrint_C(str,"");
-        str.print(")/(");
-        getInterval().prettyPrint_C(str,"");
-        str.print("));\n");
-
-*//*---*/
-        str.print("  }\n");
-        super.genTempFree_C(p, str, indent);
     }
 
 	public void FRealVariable.genStartAttributeResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
@@ -4529,45 +4156,34 @@ aspect CCodeGen {
 		p.printPostSteps(this, str, indent);
 	}
 	
-    public void FExp.genRelExpKind(CodeStream str) {
+    public void FExp.genRelExpKind(CodeStream genPrinter) {
         throw new UnsupportedOperationException();
     }
     
-    public void FDelayExp.genRelExpKind(CodeStream str) {
-        str.print(FRelExp.GEQ_C);
-        str.print(", ");
-        str.print(FRelExp.GEQ_C);
+    public void FDelayExp.genRelExpKind(CodeStream genPrinter) {
+        genPrinter.print("JMI_REL_GEQ, JMI_REL_GEQ");
     }
     
-    public void FSpatialDistExp.genRelExpKind(CodeStream str) {
-        str.print(FRelExp.GEQ_C);
+    public void FRelExp.genRelExpKind(CodeStream genPrinter) {
+    	genPrinter.print("-1");
     }
     
-    public void FRelExp.genRelExpKind(CodeStream str) {
-    	str.print(kindString());
+    public void FLtExp.genRelExpKind(CodeStream genPrinter) {
+    	genPrinter.print("JMI_REL_LT");
+    }
+
+    public void FLeqExp.genRelExpKind(CodeStream genPrinter) {
+    	genPrinter.print("JMI_REL_LEQ");
+    }
+
+    public void FGtExp.genRelExpKind(CodeStream genPrinter) {
+    	genPrinter.print("JMI_REL_GT");
     }
     
-    public void FRelExp.genRelExpKindPhased(CodeStream str) {
-        str.print(kindStringPhased());
+    public void FGeqExp.genRelExpKind(CodeStream genPrinter) {
+    	genPrinter.print("JMI_REL_GEQ");
     }
-    
-    public static String FRelExp.LT_C  = "JMI_REL_LT";
-    public static String FRelExp.LEQ_C = "JMI_REL_LEQ";
-    public static String FRelExp.GT_C  = "JMI_REL_GT";
-    public static String FRelExp.GEQ_C = "JMI_REL_GEQ";
-    
-    syn String FRelExp.kindString() = "-1";
-    eq FLtExp.kindString()  = FRelExp.LT_C;
-    eq FLeqExp.kindString() = FRelExp.LEQ_C;
-    eq FGtExp.kindString()  = FRelExp.GT_C;
-    eq FGeqExp.kindString() = FRelExp.GEQ_C;
-    
-    syn String FRelExp.kindStringPhased() = kindString();
-    eq FLtExp.kindStringPhased()  = FRelExp.LEQ_C;
-    eq FLeqExp.kindStringPhased() = FRelExp.LT_C;
-    eq FGtExp.kindStringPhased()  = FRelExp.GEQ_C;
-    eq FGeqExp.kindStringPhased() = FRelExp.GT_C;
-    
+    	
     /**
      * Convert to a string represenation to use in C source files.
      * 
@@ -4585,8 +4201,8 @@ aspect CCodeGen {
 		return Integer.toString(intValue());
 	}
 	
-    public void FVariable.genStartValue_C(CodePrinter p, CodeStream str, String indent) {
-        p.printPreSteps(this, str, indent);
+	public void FVariable.genStartValue_C(String indent, CodeStream str) {
+		printer_C.printPreSteps(this, str, indent);
 		str.print(indent + name_C() + " = ");
 		FExp exp = useBindingExpAsStart() ? getBindingExp() : startAttributeExp();
 		boolean noExp = exp == null;
@@ -4594,18 +4210,27 @@ aspect CCodeGen {
 			setBindingExp(exp = type().zeroLiteral());
 		OptionRegistry opt = root().options;
 		str.print("(");
-        p.print(exp, str, indent);
+		exp.prettyPrint_C(str,"");
 		str.print(")");
 		if (isReal() && opt.getBooleanOption("enable_variable_scaling"))
 			str.format("/sf(%d)", valueReference());
 		if (noExp)
 			setBindingExpOpt(new Opt());
 		str.print(";\n");
-        p.printPostSteps(this, str, indent);
+        printer_C.printPostSteps(this, str, indent);
 	}
 	
-    public void FStringVariable.genStartValue_C(CodePrinter p, CodeStream str, String indent) {
+	public void FStringVariable.genStartValue_C(String indent, CodeStream str) {
 		// Skip string variables
+	}
+	
+	public void FExternalObjectVariable.genStartValue_C(String indent, CodeStream str) {
+		str.print(indent + "if (!jmi->indep_extobjs_initialized) { \n");
+		printer_C.printVarDecls(this, str, printer_C.indent(indent));
+		printer_C.printPreSteps(this, str, printer_C.indent(indent));
+		super.genStartValue_C(printer_C.indent(indent), str);
+		str.print(indent + "}\n");
+		printer_C.printPostSteps(this, str, printer_C.indent(indent));
 	}
 	
 	public void BLT.genOdeDerivativeBlocks(CodeStream str) {

@@ -29,19 +29,6 @@
 #include <stdio.h>
 #include <assert.h>
 
-void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, jmi_ad_var_t time) {
-    if (JMI_TRUE == LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_NOT(AD_WRAP_LITERAL(event->defined)), SURELY_GT_ZERO(event->time - time)), LOG_EXP_AND(ALMOST_ZERO(event->time - time), SURELY_GT_ZERO(event->phase - phase)))) {
-        event->defined = def;
-        event->phase = phase;
-        event->time = time;
-    }
-}
-
-void jmi_internal_error(jmi_t *jmi, const char msg[]) {
-    jmi_log_node(jmi->log, logError, "Error", "Internal error <msg:%s>", msg);
-    jmi_throw();
-}
-
 /* Helper function for logging warnings from the "_equation"- and "_function"-functions below */
 void static jmi_log_func_or_eq(jmi_t *jmi, const char cathegory_name[], const char func_name[], const char msg[]) {
     if (func_name != NULL) {
@@ -53,36 +40,14 @@ void static jmi_log_func_or_eq(jmi_t *jmi, const char cathegory_name[], const ch
     }
 }
 
-int jmi_check_nan(jmi_t *jmi, jmi_real_t* val, size_t n_val, jmi_int_t* index_of_nan) {
-    int i = 0;
-    for (i = 0; i < n_val; i++) {
-        if ( val[i] - val[i] != 0) {
-            *index_of_nan = i;
-            return JMI_ERROR;
-        }
-    }
-    return JMI_OK;
-}
-
-void jmi_inf_log(jmi_t *jmi, const char func_name[], const char msg[], jmi_real_t res) {
-    if (((res - res) != 0)) {
-        if (res > 0) {
-            /* res is +inf */
-            jmi_log_func_or_eq(jmi, "RangeError", func_name, msg);
-        } else if (res < 0){
-            /* res is -inf */
-            jmi_log_func_or_eq(jmi, "RangeError", func_name, msg);
-        }
-    }
-}
-
 /*Some of these functions return types are a temporary remnant of CppAD*/
 jmi_ad_var_t static jmi_divide(jmi_t *jmi, const char func_name[], jmi_ad_var_t num, jmi_ad_var_t den, const char msg[]) {
-    if (den == 0) {
+    if (den==0) {
         jmi_log_func_or_eq(jmi, "DivideByZero", func_name, msg);
+        return (num==0)? 0: ( (num>0)? JMI_INF: -JMI_INF );
+    } else {
+        return num/den;
     }
-    
-    return num/den;
 }
 
 jmi_ad_var_t jmi_divide_function(const char func_name[], jmi_ad_var_t num, jmi_ad_var_t den, const char msg[]) {
@@ -97,19 +62,27 @@ jmi_ad_var_t static jmi_pow(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, 
 
     jmi_ad_var_t to_return = pow(x, y);
     
-    if ((to_return - to_return) != 0) {
+    if (to_return != to_return) {
         /* The returned value is not a number */
     
         /* Check that the inputs are in the domain of the function*/
         if (x > 0 || (x == 0 && y > 0) || (x < 0 && (int)y == y)) {
             /* Range problem, will return JMI_INF or -JMI_INF */
             jmi_log_func_or_eq(jmi, "RangeError", func_name, msg);
-        } else if (x == 0 && y < 0) {
-            /* Pole error */
-            jmi_log_func_or_eq(jmi, "DivideByZero", func_name, msg);
+            if (x > 0 || ((int)y == y && ((int)y % 2) == 0)) {
+                return JMI_INF;
+            } else {
+                return -JMI_INF;
+            }
         }
+    } else if (x == 0 && y < 0) {
+        /* Pole error */
+        jmi_log_func_or_eq(jmi, "DivideByZero", func_name, msg);
+        return JMI_INF;
+    } else {
+        /* Domain problem, will return 'not a number' */
+        return to_return;
     }
-    jmi_inf_log(jmi, func_name, msg, to_return);
     return to_return;
 }
 
@@ -124,7 +97,15 @@ jmi_ad_var_t jmi_pow_equation(jmi_t *jmi, jmi_ad_var_t x, jmi_ad_var_t y, const 
 jmi_ad_var_t static jmi_exp(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, const char msg[]) {
 
     jmi_ad_var_t to_return = exp(x);
-    jmi_inf_log(jmi, func_name, msg, to_return);
+    
+    if (to_return != to_return) {
+        /* The returned value is not a number */
+
+        /* Will always be a Range problem, will return JMI_INF */
+        jmi_log_func_or_eq(jmi, "RangeError", func_name, msg);
+        return JMI_INF;
+    
+    }
     return to_return;
 }
 
@@ -140,15 +121,17 @@ jmi_ad_var_t static jmi_log(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, 
 
     jmi_ad_var_t to_return = log(x);
     
-    if ((to_return - to_return) != 0) {
+    if (to_return != to_return) {
         /* The returned value is not a number */
         
         if (x == 0) {
             /* Pole problem, will return -JMI_INF */
             jmi_log_func_or_eq(jmi, "LogarithmOfZero", func_name, msg);
-        } else if (x > 0) {
-            /* Range problem, will return JMI_INF */
-            jmi_log_func_or_eq(jmi, "LogarithmOfInf", func_name, msg);
+            return -JMI_INF;
+        } else {
+            /* Domain problem, will return 'not a number' */
+            assert(x < 0);
+            return to_return;
         }
     }
     return to_return;
@@ -166,15 +149,17 @@ jmi_ad_var_t static jmi_log10(jmi_t *jmi, const char func_name[], jmi_ad_var_t x
 
     jmi_ad_var_t to_return = log10(x);
     
-    if ((to_return - to_return) != 0) {
+    if (to_return != to_return) {
         /* The returned value is not a number */
         
         if (x == 0) {
             /* Pole problem, will return -JMI_INF */
             jmi_log_func_or_eq(jmi, "LogarithmOfZero", func_name, msg);
-        } else if (x > 0) {
-            /* Infinity problem, will return JMI_INF */
-            jmi_log_func_or_eq(jmi, "LogarithmOfInf", func_name, msg);
+            return -JMI_INF;
+        } else {
+            /* Domain problem, will return 'not a number' */
+            assert(x < 0);
+            return to_return;
         }
     }
     return to_return;
@@ -191,7 +176,14 @@ jmi_ad_var_t jmi_log10_equation(jmi_t *jmi, jmi_ad_var_t x, const char msg[]) {
 jmi_ad_var_t static jmi_sinh(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, const char msg[]) {
 
     jmi_ad_var_t to_return = sinh(x);
-    jmi_inf_log(jmi, func_name, msg, to_return);
+    
+    if (to_return != to_return) {
+        /* The returned value is not a number */
+
+        /* Will always be a Range problem, will return JMI_INF or -JMI_INF */
+        jmi_log_func_or_eq(jmi, "RangeError", func_name, msg);
+        return (x > 0)? JMI_INF: -JMI_INF;
+    }
     return to_return;
 }
 
@@ -206,7 +198,14 @@ jmi_ad_var_t jmi_sinh_equation(jmi_t *jmi, jmi_ad_var_t x, const char msg[]) {
 jmi_ad_var_t static jmi_cosh(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, const char msg[]) {
 
     jmi_ad_var_t to_return = cosh(x);
-    jmi_inf_log(jmi, func_name, msg, to_return);
+    
+    if (to_return != to_return) {
+        /* The returned value is not a number */
+
+        /* Will always be a Range problem, will return JMI_INF */
+        jmi_log_func_or_eq(jmi, "RangeError", func_name, msg);
+        return JMI_INF;
+    }
     return to_return;
 }
 
@@ -221,7 +220,23 @@ jmi_ad_var_t jmi_cosh_equation(jmi_t *jmi, jmi_ad_var_t x, const char msg[]) {
 jmi_ad_var_t static jmi_tan(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, const char msg[]) {
 
     jmi_ad_var_t to_return = tan(x);
-    jmi_inf_log(jmi, func_name, msg, to_return);
+    
+    if (to_return != to_return) {
+        /* The returned value is not a number */
+
+        /* Map the value of x to the interval [-pi/2, pi/2] */
+        if (x > 0) {
+            x = fmod(x + JMI_PI / 2.0, JMI_PI) - JMI_PI / 2.0;
+        } else {
+            x = fmod(x - JMI_PI / 2.0, JMI_PI) + JMI_PI / 2.0;
+        }
+
+        /* Will always be a Range/Pole problem, will return JMI_INF or -JMI_INF
+         * Note: the pole case is mean because small pertubations give very different
+         * results, this is probably a modeling error if it occurs */
+        jmi_log_func_or_eq(jmi, "RangeError", func_name, msg);
+        return (x > 0)? JMI_INF: -JMI_INF;
+    }
     return to_return;
 }
 
@@ -1565,14 +1580,6 @@ jmi_real_t* jmi_get_sw(jmi_t* jmi) {
     return *(jmi->z) + jmi->offs_sw;
 }
 
-jmi_real_t* jmi_get_state_sw(jmi_t* jmi) {
-    return *(jmi->z) + jmi->offs_state_sw;
-}
-
-jmi_real_t* jmi_get_time_sw(jmi_t* jmi) {
-    return *(jmi->z) + jmi->offs_time_sw;
-}
-
 jmi_real_t* jmi_get_sw_init(jmi_t* jmi) {
     return *(jmi->z) + jmi->offs_sw_init;
 }
@@ -2395,26 +2402,6 @@ jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int
             if ((ev_ind >= 0.0 && rel == JMI_REL_GEQ) || (ev_ind >= eps && rel == JMI_REL_GT) || (ev_ind <= 0.0 && rel == JMI_REL_LEQ) || (ev_ind <= -1*eps && rel == JMI_REL_LT)){
                 sw = 1.0;
             }
-        }
-    }
-    return sw;
-}
-
-jmi_real_t jmi_turn_switch_time(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel) {
-    /* x >= 0
-     * x >  0
-     * x <= 0
-     * x <  0
-     */
-    if (sw == 1.0){
-        if ((ev_ind < -eps && rel == JMI_REL_GEQ) || (ev_ind <= eps && rel == JMI_REL_GT)
-                || (ev_ind > eps && rel == JMI_REL_LEQ) || (ev_ind >= -eps && rel == JMI_REL_LT)) {
-            sw = 0.0;
-        }
-    } else {
-        if ((ev_ind >= -eps && rel == JMI_REL_GEQ) || (ev_ind > eps && rel == JMI_REL_GT)
-                || (ev_ind <= eps && rel == JMI_REL_LEQ) || (ev_ind < -eps && rel == JMI_REL_LT)) {
-            sw = 1.0;
         }
     }
     return sw;

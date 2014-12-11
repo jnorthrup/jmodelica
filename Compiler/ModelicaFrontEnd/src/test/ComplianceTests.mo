@@ -148,6 +148,27 @@ end ArrayOfRecords_Warn;
 // Real x = f();
 //end ExternalFunction_ComplErr;
 
+model UnsupportedBuiltins1_ComplErr
+ equation
+  delay(1, 2);
+  spatialDistribution();
+
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="UnsupportedBuiltins1_ComplErr",
+			description="Compliance error for unsupported builtins",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 214, column 3:
+  The delay() function-like operator is not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 216, column 3:
+  The spatialDistribution() function-like operator is not supported
+")})));
+end UnsupportedBuiltins1_ComplErr;
+
+
 model UnsupportedBuiltins2_ComplErr
   parameter Boolean x;
   parameter Real y;
@@ -169,9 +190,7 @@ model UnsupportedBuiltins2_ComplErr
   der(y) = time;
   when y > time then
     reinit(y, 2);
-  end when;
-  delay(3,3);
-  spatialDistribution(1,1,1,true);
+end when;
 
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
@@ -229,12 +248,6 @@ Compliance error at line 208, column 3:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 209, column 5:
   The reinit() function-like operator is currently only supported when compiling FMUs
-Error: in file '...':
-Compliance error at line 190, column 3:
-  The delay() function-like operator is currently only supported when compiling FMUs
-Error: in file '...':
-Compliance error at line 190, column 3:
-  The spatialDistribution() function-like operator is currently only supported when compiling FMUs
 ")})));
 end UnsupportedBuiltins2_ComplErr;
 

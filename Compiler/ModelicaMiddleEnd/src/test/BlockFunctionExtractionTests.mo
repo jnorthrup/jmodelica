@@ -44,7 +44,6 @@ public
  algorithm
   o1 := i1 + 1;
   return;
- annotation(Inline = false);
  end BlockFunctionExtractionTests.f;
 
 end BlockFunctionExtractionTests.ExtractFunctionCall;
@@ -81,7 +80,6 @@ public
  algorithm
   o1 := i1 + 1;
   return;
- annotation(Inline = false);
  end BlockFunctionExtractionTests.f;
 
 end BlockFunctionExtractionTests.ExtractFunctionCallLexicalDiff;

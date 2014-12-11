@@ -968,10 +968,15 @@ public class ModelicaCompiler {
             removeCompiledExternals();
             
         } finally {
+//          logCompilationInfo();
+            // The node count requires changing ASTNode.java by hand - see dumpNodeCountFile()
+//          dumpNodeCountFile("node_count.txt");
         }
 
-        if (options.getBooleanOption("generate_html_diagnostics"))
+        if (options.getBooleanOption("generate_html_diagnostics")) {
+            getDiagnosticsGenerator().finalize();
             setDiagnosticsGenerator(null);
+        }
 
         log.info("====== Model compiled successfully =======");
         
@@ -1288,15 +1293,15 @@ public class ModelicaCompiler {
             ASTNode.endStep("writeIterationVariables()");
         }
         
-        fc.errorCheck(target.getCheckType());
-        handleCompilerWarnings(fc.collectWarnings());
-        
         if (fc.root().options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
             ASTNode.beginStep("htmlDiagnostics()");
             getDiagnosticsGenerator().writeTransformedFlattenedModel(fc);
             getDiagnosticsGenerator().writeDiagnostics(fc);
             ASTNode.endStep("htmlDiagnostics()");
         }
+        
+        fc.errorCheck(target.getCheckType());
+        handleCompilerWarnings(fc.collectWarnings());
 
         hookFlatModelChecked(fc);
         ASTNode.endStep("flattenModel()");
@@ -1972,7 +1977,6 @@ public class ModelicaCompiler {
                     options.setBooleanOption("generate_fmi_me_xml", false);
                     options.setBooleanOption("generate_fmi_cs_xml", false);
                     options.setBooleanOption("generate_xml_equations", false);
-                    options.setBooleanOption("relational_time_events", false);
                     options.setStringOption(CCompilerDelegator.OPTION, GccCompilerDelegator.NAME);
                     break;
                 case FMUX:

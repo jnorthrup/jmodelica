@@ -645,7 +645,6 @@ public
  algorithm
   r.x := a;
   return;
- annotation(Inline = false);
  end FunctionTests.FunctionFlatten13.f;
 
  record FunctionTests.FunctionFlatten13.R
@@ -695,7 +694,6 @@ public
   r.r2.x := a + a;
   r.y := 3;
   return;
- annotation(Inline = false);
  end FunctionTests.FunctionFlatten14.f;
 
  record FunctionTests.FunctionFlatten14.R2
@@ -745,7 +743,6 @@ public
  algorithm
   r.r2.x := 3;
   return;
- annotation(Inline = false);
  end FunctionTests.FunctionFlatten15.f;
 
  record FunctionTests.FunctionFlatten15.R2
@@ -795,7 +792,6 @@ public
   r[1].r2.x := a + a;
   r[2].r2.x := a + a;
   return;
- annotation(Inline = false);
  end FunctionTests.FunctionFlatten16.f;
 
  record FunctionTests.FunctionFlatten16.R2
@@ -846,7 +842,6 @@ public
   r[1].r2.x := a;
   r[2].r2.x := a + a;
   return;
- annotation(Inline = false);
  end FunctionTests.FunctionFlatten17.f;
 
  record FunctionTests.FunctionFlatten17.R2
@@ -2626,7 +2621,7 @@ function f
 	input Real[2] i;
 	output Real[2] o;
 algorithm
-    o := if i * i > 1.0E-6 then i else i .+ 1;
+	o := if i * i > 1.0E-6 then i else i;
 end f;
 
 Real[2] x = f({time,time*2});
@@ -2649,8 +2644,8 @@ public
   input Real[2] i;
   output Real[2] o;
 algorithm
-  o[1] := if i[1] * i[1] + i[2] * i[2] > 1.0E-6 then i[1] else i[1] .+ 1;
-  o[2] := if i[1] * i[1] + i[2] * i[2] > 1.0E-6 then i[2] else i[2] .+ 1;
+  o[1] := if i[1] * i[1] + i[2] * i[2] > 1.0E-6 then i[1] else i[1];
+  o[2] := if i[1] * i[1] + i[2] * i[2] > 1.0E-6 then i[2] else i[2];
   return;
  end FunctionTests.AlgorithmFlatten7.f;
 end FunctionTests.AlgorithmFlatten7;
@@ -10042,7 +10037,7 @@ model UnknownArray46
         input Real[:] x;
         output Real[size(x,1)] y;
       algorithm
-        y := f2(if size(x,1) > 1 then x else x .+ 1);
+        y := f2(if size(x,1) > 1 then x else x);
     end f1;
     Real[1] y = f1({1});
     
@@ -10067,7 +10062,7 @@ public
   size(y) := {size(x, 1)};
   size(temp_1) := {size(x, 1)};
   for i1 in 1:size(x, 1) loop
-   temp_1[i1] := if size(x, 1) > 1 then x[i1] else x[i1] .+ 1;
+   temp_1[i1] := if size(x, 1) > 1 then x[i1] else x[i1];
   end for;
   (y) := FunctionTests.UnknownArray46.f2(temp_1);
   return;
@@ -10132,7 +10127,6 @@ public
    y[i1] := temp_1[i1] + x[i1];
   end for;
   return;
- annotation(Inline = false);
  end FunctionTests.UnknownArray47.f1;
 
  function FunctionTests.UnknownArray47.f2
@@ -10189,7 +10183,6 @@ public
   end for;
   y[1,1] := temp_1[1,1];
   return;
- annotation(Inline = false);
  end FunctionTests.UnknownArray48.f;
 
 end FunctionTests.UnknownArray48;
@@ -14087,6 +14080,7 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear3
  constant Real x = 0;
  constant Real y = 0;
  Real sa;
+ Real sb;
  parameter Real p1(fixed = false);
  parameter Real p2 = 2 /* 2 */;
  discrete Real r1;
@@ -14099,10 +14093,12 @@ initial equation
  pre(temp_1) = false;
 equation
  sa = time;
+ sa = sb;
  temp_1 = time > 1;
  r1 = if temp_1 and not pre(temp_1) then 2 else pre(r1);
  r2 = if temp_1 and not pre(temp_1) then 2 else pre(r2);
 end FunctionTests.FunctionLike.Special.SemiLinear3;
+			
 ")})));
 end SemiLinear3;
 
@@ -14131,14 +14127,23 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear4
  Real y;
  Real sa;
  Real sb;
+ Real s[1];
  Real s[2];
+ Real s[3];
+ Real s[4];
+ Real s[5];
 equation
  sa = time;
  sb = time;
  x = time;
- s[2] = if x >= 0 then sa else sb;
+ s[1] = if x >= 0 then sa else sb;
+ s[2] = s[1];
+ s[3] = s[2];
+ s[4] = s[3];
+ s[5] = s[4];
  y = if x >= 0.0 then x * sa else x * sb;
 end FunctionTests.FunctionLike.Special.SemiLinear4;
+			
 ")})));
 end SemiLinear4;
 
@@ -14167,16 +14172,20 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear5
  Real y;
  Real sa;
  Real sb;
+ Real s[1];
  Real s[2];
  Real s[3];
+ Real s[4];
  Real s[5];
 equation
  sa = time;
  sb = time;
  x = time;
- s[5] = if x >= 0 then s[3] else sb;
+ s[4] = if x >= 0 then s[3] else sb;
+ s[5] = s[4];
  y = - (if x >= 0.0 then x * s[3] else x * sb);
- s[2] = if x >= 0 then sa else s[3];
+ s[1] = if x >= 0 then sa else s[3];
+ s[2] = s[1];
  y = if x >= 0.0 then x * sa else x * s[3];
 end FunctionTests.FunctionLike.Special.SemiLinear5;
 ")})));
@@ -14605,519 +14614,6 @@ end EventRel;
 
 end FunctionLike;
 
-package DerivativeAnnotation
-    model MissingReference1
-        function F
-            input Real x;
-            output Real y;
-        algorithm
-            y := x + 1;
-            annotation(Inline=false, derivative);
-        end F;
-        Real x = F(time);
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="DerivativeAnnotation_MissingReference1",
-            description="Test error message given when there is no derivative function reference",
-            errorMessage="
-1 errors found:
 
-Error: in file '...':
-Semantic error at line 1, column 1:
-  Function name is missing in derivative annotation declaration
-")})));
-    end MissingReference1;
-
-    model MissingDecl1
-        function F
-            input Real x;
-            output Real y;
-        algorithm
-            y := x + 1;
-            annotation(Inline=false, derivative=notAFunction);
-        end F;
-        Real x = F(time);
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="DerivativeAnnotation_MissingDecl1",
-            description="Test error message given when referencing missing derivative function",
-            errorMessage="
-1 errors found:
-
-Error: in file '...':
-Semantic error at line 1, column 1:
-  Cannot find function declaration for notAFunction
-")})));
-    end MissingDecl1;
-
-    model InvalidDecl1
-        function F
-            input Real x;
-            output Real y;
-        algorithm
-            y := x + 1;
-            annotation(Inline=false, derivative=1+2);
-        end F;
-        Real x = F(time);
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="DerivativeAnnotation_InvalidDecl1",
-            description="Test error message given for invalid derivative function reference",
-            errorMessage="
-1 errors found:
-
-Error: in file '...':
-Semantic error at line 1, column 1:
-  Invalid derivative function reference
-")})));
-    end InvalidDecl1;
-
-    model InvalidDecl2
-        function F
-            input Real x;
-            output Real y;
-        algorithm
-            y := x + 1;
-            annotation(Inline=false, derivative=B);
-        end F;
-        model B
-            Real y;
-        end B;
-        Real x = F(time);
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="DerivativeAnnotation_InvalidDecl2",
-            description="Test error message given when giving derivative function reference to non-function class",
-            errorMessage="
-1 errors found:
-
-Error: in file '...':
-Semantic error at line 1, column 1:
-  The class B is not a function
-")})));
-    end InvalidDecl2;
-
-    model MultipleOrder1
-        function F
-            input Real x;
-            output Real y;
-        algorithm
-            y := x + 1;
-            annotation(Inline=false, derivative(order=1, order=1)=F_der);
-        end F;
-        function F_der
-            input Real x;
-            input Real x_der;
-            output Real y_der;
-        algorithm
-            y_der := x_der;
-        end F_der;
-        model B
-            Real y;
-        end B;
-        Real x = F(time);
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="DerivativeAnnotation_MultipleOrder1",
-            description="Test error message given when there are multiple order attributes supplied",
-            errorMessage="
-1 errors found:
-
-Error: in file '...':
-Semantic error at line 1, column 1:
-  Multiple declarations of the order attribute
-")})));
-    end MultipleOrder1;
-
-    model InvalidOrder1
-        function F
-            input Real x;
-            output Real y;
-        algorithm
-            y := x + 1;
-            annotation(Inline=false, derivative(order=1.1)=F_der);
-        end F;
-        function F_der
-            input Real x;
-            input Real x_der;
-            output Real y_der;
-        algorithm
-            y_der := x_der;
-        end F_der;
-        model B
-            Real y;
-        end B;
-        Real x = F(time);
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="DerivativeAnnotation_InvalidOrder1",
-            description="Test error message given when order argument is of non-integer type",
-            errorMessage="
-1 errors found:
-
-Error: in file '...':
-Semantic error at line 1, column 1:
-  Expecting integer typed expression for order attribute
-")})));
-    end InvalidOrder1;
-
-    model InvalidOrder2
-        function F
-            input Real x;
-            output Real y;
-        algorithm
-            y := x + 1;
-            annotation(Inline=false, derivative(order=0)=F_der);
-        end F;
-        function F_der
-            input Real x;
-            input Real x_der;
-            output Real y_der;
-        algorithm
-            y_der := x_der;
-        end F_der;
-        model B
-            Real y;
-        end B;
-        Real x = F(time);
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="DerivativeAnnotation_InvalidOrder2",
-            description="Test error message given when order argument is invalid number (0 or less)",
-            errorMessage="
-1 errors found:
-
-Error: in file '...':
-Semantic error at line 1, column 1:
-  Order attribute must be greater or equal to one
-")})));
-    end InvalidOrder2;
-
-    model MultipleVariableRestrictions1
-        function F
-            input Real x;
-            input Real x2;
-            output Real y;
-        algorithm
-            y := x + 1;
-            annotation(Inline=false, derivative(noDerivative=x2, noDerivative=x2)=F_der);
-        end F;
-        function F_der
-            input Real x;
-            input Real x_der;
-            output Real y_der;
-        algorithm
-            y_der := x_der;
-        end F_der;
-        model B
-            Real y;
-        end B;
-        Real x = F(time, 2);
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="DerivativeAnnotation_MultipleVariableRestrictions1",
-            description="Test error message given when there are multiple noDerivative attributes for the same variable",
-            errorMessage="
-1 errors found:
-
-Error: in file '...':
-Semantic error at line 1, column 1:
-  Multiple noDerivative or zeroDerivative declarations for x2
-")})));
-    end MultipleVariableRestrictions1;
-
-    model MultipleVariableRestrictions2
-        function F
-            input Real x;
-            input Real x2;
-            output Real y;
-        algorithm
-            y := x + 1;
-            annotation(Inline=false, derivative(zeroDerivative=x2, zeroDerivative=x2)=F_der);
-        end F;
-        function F_der
-            input Real x;
-            input Real x_der;
-            output Real y_der;
-        algorithm
-            y_der := x_der;
-        end F_der;
-        model B
-            Real y;
-        end B;
-        Real x = F(time, 2);
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="DerivativeAnnotation_MultipleVariableRestrictions2",
-            description="Test error message given when there are multiple zeroDerivative attributes for the same variable",
-            errorMessage="
-1 errors found:
-
-Error: in file '...':
-Semantic error at line 1, column 1:
-  Multiple noDerivative or zeroDerivative declarations for x2
-")})));
-    end MultipleVariableRestrictions2;
-
-    model MultipleVariableRestrictions3
-        function F
-            input Real x;
-            input Real x2;
-            output Real y;
-        algorithm
-            y := x + 1;
-            annotation(Inline=false, derivative(noDerivative=x2, zeroDerivative=x2)=F_der);
-        end F;
-        function F_der
-            input Real x;
-            input Real x_der;
-            output Real y_der;
-        algorithm
-            y_der := x_der;
-        end F_der;
-        model B
-            Real y;
-        end B;
-        Real x = F(time, 2);
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="DerivativeAnnotation_MultipleVariableRestrictions3",
-            description="Test error message given when there are one noDerivative and one zeroDerivative attribute for the same variable",
-            errorMessage="
-1 errors found:
-
-Error: in file '...':
-Semantic error at line 1, column 1:
-  Multiple noDerivative or zeroDerivative declarations for x2
-")})));
-    end MultipleVariableRestrictions3;
-
-    model InvalidVariable1
-        function F
-            input Real x;
-            output Real y;
-        algorithm
-            y := x + 1;
-            annotation(Inline=false, derivative(noDerivative=1 + 1)=F_der);
-        end F;
-        function F_der
-            input Real x;
-            input Real x_der;
-            output Real y_der;
-        algorithm
-            y_der := x_der;
-        end F_der;
-        model B
-            Real y;
-        end B;
-        Real x = F(time);
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="DerivativeAnnotation_InvalidVariable1",
-            description="Test error message given when noDerivative attribute isn't a variable reference",
-            errorMessage="
-1 errors found:
-
-Error: in file '...':
-Semantic error at line 1, column 1:
-  Expecting variable reference for noDerivative annotation
-")})));
-    end InvalidVariable1;
-
-    model InvalidVariable2
-        function F
-            input Real x;
-            output Real y;
-        algorithm
-            y := x + 1;
-            annotation(Inline=false, derivative(zeroDerivative=1 + 1)=F_der);
-        end F;
-        function F_der
-            input Real x;
-            input Real x_der;
-            output Real y_der;
-        algorithm
-            y_der := x_der;
-        end F_der;
-        model B
-            Real y;
-        end B;
-        Real x = F(time);
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="DerivativeAnnotation_InvalidVariable2",
-            description="Test error message given when zeroDerivative attribute isn't a variable reference",
-            errorMessage="
-1 errors found:
-
-Error: in file '...':
-Semantic error at line 1, column 1:
-  Expecting variable reference for zeroDerivative annotation
-")})));
-    end InvalidVariable2;
-
-    model InvalidVariable3
-        function F
-            input Real x;
-            output Real y;
-        algorithm
-            y := x + 1;
-            annotation(Inline=false, derivative(noDerivative=notAVar)=F_der);
-        end F;
-        function F_der
-            input Real x;
-            input Real x_der;
-            output Real y_der;
-        algorithm
-            y_der := x_der;
-        end F_der;
-        model B
-            Real y;
-        end B;
-        Real x = F(time);
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="DerivativeAnnotation_InvalidVariable3",
-            description="Test error message given when noDerivative attribute point to missing variable",
-            errorMessage="
-1 errors found:
-
-Error: in file '...':
-Semantic error at line 1, column 1:
-  Unable to find notAVar
-")})));
-    end InvalidVariable3;
-
-    model InvalidVariable4
-        function F
-            input Real x;
-            output Real y;
-        algorithm
-            y := x + 1;
-            annotation(Inline=false, derivative(zeroDerivative=notAVar)=F_der);
-        end F;
-        function F_der
-            input Real x;
-            input Real x_der;
-            output Real y_der;
-        algorithm
-            y_der := x_der;
-        end F_der;
-        model B
-            Real y;
-        end B;
-        Real x = F(time);
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="DerivativeAnnotation_InvalidVariable4",
-            description="Test error message given when zeroDerivative attribute point to missing variable",
-            errorMessage="
-1 errors found:
-
-Error: in file '...':
-Semantic error at line 1, column 1:
-  Unable to find notAVar
-")})));
-    end InvalidVariable4;
-
-    model NonInputVariable1
-        function F
-            input Real x;
-            output Real y;
-        algorithm
-            y := x + 1;
-            annotation(Inline=false, derivative(noDerivative=y)=F_der);
-        end F;
-        function F_der
-            input Real x;
-            input Real x_der;
-            output Real y_der;
-        algorithm
-            y_der := x_der;
-        end F_der;
-        model B
-            Real y;
-        end B;
-        Real x = F(time);
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="DerivativeAnnotation_NonInputVariable1",
-            description="Test error message given when a noDerivative attribute references a non-input variable",
-            errorMessage="
-1 errors found:
-
-Error: in file '...':
-Semantic error at line 1, column 1:
-  noDerivative annotation may only reference input variables
-")})));
-    end NonInputVariable1;
-
-    model ExtendsTest1
-        package P1
-            replaceable partial function F
-                input Real x;
-                output Real y;
-            end F;
-        end P1;
-        
-        package P2
-            extends P1;
-            redeclare function extends F
-            algorithm
-                y := x;
-                annotation(Inline=false, derivative=F_der);
-            end F;
-            
-            function F_der
-                input Real x;
-                input Real x_der;
-                output Real y_der;
-            algorithm
-                y_der := x_der;
-                annotation(Inline=false);
-            end F_der;
-        end P2;
-        P2 p2;
-        Real x, y;
-    equation
-        x = p2.F(time);
-        der(x) * der(y) = 1;
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="DerivativeAnnotation_ExtendsTest1",
-            description="Ensure that derivative function is found when using derivative equations in redeclaring packages/functions",
-            flatModel="
-fclass FunctionTests.DerivativeAnnotation.ExtendsTest1
- Real x;
- Real y;
-equation
- x = FunctionTests.DerivativeAnnotation.ExtendsTest1.p2.F(time);
- der(x) * der(y) = 1;
-
-public
- function FunctionTests.DerivativeAnnotation.ExtendsTest1.p2.F
-  input Real x;
-  output Real y;
- algorithm
-  y := x;
-  return;
- annotation(derivative = FunctionTests.DerivativeAnnotation.ExtendsTest1.p2.F_der,Inline = false);
- end FunctionTests.DerivativeAnnotation.ExtendsTest1.p2.F;
-
- function FunctionTests.DerivativeAnnotation.ExtendsTest1.p2.F_der
-  input Real x;
-  input Real x_der;
-  output Real y_der;
- algorithm
-  y_der := x_der;
-  return;
- annotation(Inline = false);
- end FunctionTests.DerivativeAnnotation.ExtendsTest1.p2.F_der;
-
-end FunctionTests.DerivativeAnnotation.ExtendsTest1;
-")})));
-    end ExtendsTest1;
-
-end DerivativeAnnotation;
 
 end FunctionTests;

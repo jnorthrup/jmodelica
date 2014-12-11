@@ -38,7 +38,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
         int n_boolean_d, int n_boolean_u,
         int n_string_d, int n_string_u,
         int n_outputs, int* output_vrefs,
-        int n_sw, int n_sw_init, int n_time_sw, int n_state_sw,
+        int n_sw, int n_sw_init,
         int n_guards, int n_guards_init,
         int n_dae_blocks, int n_dae_init_blocks,
         int n_initial_relations, int* initial_relations,
@@ -609,18 +609,15 @@ int jmi_ode_guards_init(jmi_t* jmi) {
 int jmi_ode_next_time_event(jmi_t* jmi, jmi_real_t* nextTime) {
 
     int i, return_status;
-    jmi_time_event_t event;
     for (i=0;i<jmi->n_z;i++) {
         (*(jmi->z))[i] = (*(jmi->z_val))[i];
     }
 
     jmi_set_current(jmi);
-    if (jmi_try(jmi)) {
+    if (jmi_try(jmi))
 		return_status = -1;
-    } else {
-        return_status = jmi->dae->ode_next_time_event(jmi, &event);
-        *nextTime = event.defined ? event.time : JMI_INF;
-    }
+	else
+		return_status = jmi->dae->ode_next_time_event(jmi, nextTime);
     jmi_set_current(NULL);
 
     return return_status;

@@ -18,27 +18,20 @@
 */
 
 /** \file jmi_delay.h
-    \brief Interface to simulation of delay and spatialDistribution blocks.
+    \brief Interface to simulation of delay blocks.
 
-    Delay blocks are kept in the `jmi_t` struct and are indexed from 0 to `n_delays - 1`;
-    spatialDistribution blocks are indexed from 0 to `n_spatialdists - 1`.
-    Each block represents a use of the `delay` operator with fixed or variable time delay,
-    or the `spatialDistribution` operator, respectively.
-    The functions below that take an index operate on a single delay or spatialDistribution block,
-    those that don't operate on all relevant blocks at once.
-
-    The total number of delay and spatialDistribution blocks is specified upon model initialization,
-    aftern which `jmi_delay_new` and `jmi_spatialdist_new` respectively is called on each block.
-    Correspondingly, `jmi_delete` deallocates the blocks with the aid of `jmi_delay_delete` and
-    `jmi_spatialdist_delete`.
-
-
-    Delay blocks
-    ------------
+    Delay blocks are kept in the `jmi_t` struct and are indexed from 0 to `n_delays - 1`.
+    Each delay block represents a use of the `delay` operator with fixed or variable time delay.
+    The functions below that take an index operate on a single delay block,
+    those that don't operate on all delay blocks at once.
     Most functions need the current time value, which they take implicitly from the `jmi_t` struct.
     
+    The total number of delay blocks `n_delays` is specified in the call to `jmi_init`,
+    which allocates space for the blocks and calls `jmi_delay_new` on them.
+    Correspondingly, `jmi_delete` deallocates the blocks with the aid of `jmi_delay_delete`.
+
     Before using a delay block in simulation, it must be initialized with `jmi_delay_init`.
-    This will specify the properties of the delay block and provide an initial value for its output,
+    This will specify the properties of the delay block and provide an initial value for it's output,
     to be used until the elapsed simulation time exceeds the delay time.
 
     Delay blocks are evaluated using the `jmi_delay_evaluate`, which uses the current time and input
@@ -66,16 +59,6 @@
 
     Delay blocks with state events have two event indicators (forward and backward), both with a >= 0 relation,
     queried with `jmi_delay_first_event_indicator` and `jmi_delay_second_event_indicator`.
-
-
-    spatialDistribution blocks
-    --------------------------
-    spatialDistribution blocks are quite similar to delay blocks, but there are some differences:
-      * They cannot be fixed-delay, and can only trigger time events, not state events.
-      * They are initialized with full contents for 0 <= x <= 1 using `jmi_spatialdist_init`.
-      * The position `x` must be explicitly supplied to most functions.
-      * They only use one event indicator, for the next event in the direction indicated by `positiveVelocity`.
-
  */
 
 #ifndef _JMI_DELAY_H
@@ -102,35 +85,16 @@ jmi_real_t jmi_delay_evaluate(jmi_t *jmi, int index, jmi_real_t y_in, jmi_real_t
 /** \brief Record a sample for the delay with given index. Call at each completed integrator step. Time is taken from the `jmi` struct. */
 int jmi_delay_record_sample(jmi_t *jmi, int index, jmi_real_t y_in);
 
-/** \brief Call with `event_mode` set to true before recording samples that follow an event, then with `event_mode` set to false before recording regular samples.
-           Use also for recording into spatialDistributions. */
+/** \brief Call with `event_mode` set to true before recording samples that follow an event, then with `event_mode` set to false before recording regular samples */
 int jmi_delay_set_event_mode(jmi_t *jmi, jmi_boolean in_event);
 
 /** \brief Return the next time event caused by any delay block, or JMI_INF if there is no next time event */
 jmi_real_t jmi_delay_next_time_event(jmi_t *jmi);
 
-/** \brief Compute the first (of two) event indicators >= 0 for a variable delay block in *event_indicator. Return -1 on failure, 0 otherwise. */
+/** \brief Return the first (of two) event indicators >= 0 for a variable delay block in *event_indicator. Return -1 on failure, 0 otherwise. */
 int jmi_delay_first_event_indicator(jmi_t *jmi, int index, jmi_real_t delay_time, jmi_real_t *event_indicator);
-/** \brief Compute the second (of two) event indicators >= 0 for a variable delay block in *event_indicator. Return -1 on failure, 0 otherwise. */
+/** \brief Return the second (of two) event indicators >= 0 for a variable delay block in *event_indicator. Return -1 on failure, 0 otherwise. */
 int jmi_delay_second_event_indicator(jmi_t *jmi, int index, jmi_real_t delay_time, jmi_real_t *event_indicator);
-
-
-/** \brief Allocate buffers for the spatialdist block with the given index. Do this before `jmi_spatialdist_init`. */
-int jmi_spatialdist_new(jmi_t *jmi, int index);
-/** \brief Free the memory for the buffers of the spatialdist block with the given index. It may then be reallocated with `jmi_spatialdist_new`. */
-int jmi_spatialdist_delete(jmi_t *jmi, int index);
-
-/** \brief Initialize the spatialdist block with given index and provide initial contents (linearly interpolated, 0 <= x_init <= 1). */
-int jmi_spatialdist_init(jmi_t *jmi, int index, jmi_boolean no_event, jmi_real_t x0, jmi_array_t *x_init, jmi_array_t *y_init);
-
-/** \brief Evaluate the output of the spatialdist block with given index, current input values, and position `x`. */
-jmi_real_t jmi_spatialdist_evaluate(jmi_t *jmi, int index, jmi_real_t *out0, jmi_real_t *out1, jmi_real_t in0, jmi_real_t in1, jmi_real_t x, jmi_boolean positiveVelocity);
-
-/** \brief Record a sample for the spatialdist with given index. Call at each completed integrator step. */
-int jmi_spatialdist_record_sample(jmi_t *jmi, int index, jmi_real_t in0, jmi_real_t in1, jmi_real_t x, jmi_boolean positiveVelocity);
-
-/** \brief Return the event indicator >= 0 for a spatialdist block in *event_indicator. Return -1 on failure, 0 otherwise. */
-int jmi_spatialdist_event_indicator(jmi_t *jmi, int index, jmi_real_t x, jmi_boolean positiveVelocity, jmi_real_t *event_indicator);
 
 
 #endif 

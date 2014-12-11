@@ -31,8 +31,8 @@
 
 typedef struct {
     jmi_real_t t; /**< \brief Increases between points, except at events, where it remains the same. There may never be two events in a row without an event-free interval in between. */
-    int left;     /**< \brief Index of a point in the same segment, before this one. Iff it points to the same point, there is an event to the left. Must point inside the buffer. */
-    int right;    /**< \brief Index of a point in the same segment, after this one. Iff it points to the same point, there is an event to the right. Must point inside the buffer. */
+    int left;     /**< \brief Index of a point in the same segment, before this one. Iff it points to the same points, there is an event to the left. Must point inside the buffer. */
+    int right;    /**< \brief Index of a point in the same segment, after this one. Iff it points to the same points, there is an event to the right. Must point inside the buffer. */
     jmi_real_t y;
 } jmi_delay_point_t;
 
@@ -43,7 +43,7 @@ typedef struct {
     int head;        /**< \brief Position of the first used point in buf. */
     int head_index;  /**< \brief Logical index associated with the head position. */
     jmi_delay_point_t *buf; /**< \brief Buffer of history points. */
-    jmi_real_t max_delay;   /**< \brief Maximum delay relative to the last recorded sample that the buffer will be queried for. */
+    jmi_real_t max_delay;   /**< \brief Maximum delay that the buffer will be queried for. */
 } jmi_delaybuffer_t;
 
 /** \brief Represents the current position in a `jmi_delaybuffer_t`, including state needed to trigger events. */
@@ -57,15 +57,6 @@ struct jmi_delay_t {
     jmi_boolean fixed;              /**< \brief True if this is a fixed delay. */
     jmi_boolean no_event;           /**< \brief True if this delay should not generate any events - it will cross events in the history anyway. */
     jmi_delay_position_t position;  /**< \brief Current buffer position, including state needed to trigger events. */
-};
-
-/** \brief Represents a single spatialDistribution block. Wraps a delaybuffer_t with the contents and adds additional state. */
-struct jmi_spatialdist_t {
-    jmi_delaybuffer_t buffer;        /**< \brief The actual history. */
-    jmi_boolean no_event;            /**< \brief True if this spatialDistribution should not generate any events - it will cross events in the history anyway. */
-    jmi_delay_position_t lposition;  /**< \brief Current buffer position for the left endpoint, including state needed to trigger events. */
-    jmi_delay_position_t rposition;  /**< \brief Current buffer position for the right endpoint, including state needed to trigger events. */
-    jmi_real_t last_x;               /**< \brief Last recorded x position. */
 };
 
 

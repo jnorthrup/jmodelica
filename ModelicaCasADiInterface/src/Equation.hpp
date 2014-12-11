@@ -31,18 +31,14 @@ class Equation: public RefCountedNode {
          */
         Equation(casadi::MX lhs, casadi::MX rhs); 
         /** @return A MX */
-        casadi::MX getLhs() const;
+        const casadi::MX getLhs() const;
         /** @return A MX */
-        casadi::MX getRhs() const;
-        
-        void setLhs(casadi::MX nlhs);
-        void setRhs(casadi::MX nrhs);
-        
+        const casadi::MX getRhs() const;
         /** 
          * Returns the residual on the form: left-hand-side - right-hand-side
          * @return A MX 
          */
-        casadi::MX getResidual() const; 
+        const casadi::MX getResidual() const; 
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;
 
@@ -52,17 +48,14 @@ class Equation: public RefCountedNode {
         casadi::MX rhs;
 };
 
-inline casadi::MX Equation::getLhs() const { return lhs; }
-inline casadi::MX Equation::getRhs() const { return rhs; }
-inline casadi::MX Equation::getResidual() const { return lhs - rhs; }
+inline const casadi::MX Equation::getLhs() const { return lhs; }
+inline const casadi::MX Equation::getRhs() const { return rhs; }
+inline const casadi::MX Equation::getResidual() const { return lhs - rhs; }
 inline void Equation::print(std::ostream& os) const { 
     lhs.print(os);
     os << " = ";
     rhs.print(os); 
 }
-
-inline void Equation::setLhs(casadi::MX nlhs) { lhs = nlhs; }
-inline void Equation::setRhs(casadi::MX nrhs) { rhs = nrhs; }
 
 }; // End namespace
 #endif

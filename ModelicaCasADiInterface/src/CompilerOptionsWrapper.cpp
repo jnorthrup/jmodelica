@@ -18,15 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "jni.h"
 #include "jccutils.h"
 
-#include "java/util/Collection.h"
-#include "java/util/Iterator.h"
-#include "java/lang/String.h"
-#include <string>
-#include "JCCEnv.h"
-
 #include "CompilerOptionsWrapper.hpp"
-
-
 namespace ModelicaCasADi 
 {
 void CompilerOptionsWrapper::setStringOption(std::string opt, std::string val) {
@@ -70,19 +62,6 @@ void CompilerOptionsWrapper::setRealOption(std::string opt, double val) {
     }
 }
 
-bool CompilerOptionsWrapper::getBooleanOption(std::string opt) {
-    bool roption;    
-    try 
-    {
-        roption = optr.getBooleanOption(StringFromUTF(opt.c_str()));
-    }
-    catch (JavaError e) 
-    {
-        rethrowJavaException(e);
-    }
-    return roption;
-}
-
 void CompilerOptionsWrapper::addStringOption(std::string opt, std::string val) {
     try 
     {
@@ -122,26 +101,6 @@ void CompilerOptionsWrapper::addRealOption(std::string opt, double val) {
     {
         rethrowJavaException(e);
     }
-}
-
-void CompilerOptionsWrapper::printCompilerOptions(std::ostream& out){
-    try 
-    {
-        java::util::Collection opts(optr.getOptionKeys().this$);
-        
-        java::util::Iterator iter(opts.iterator().this$);
-        while(iter.hasNext()){
-            java::lang::String key(iter.next().this$);
-            out <<"\033[31m"<<env->toString(key.this$) <<"\033[0m"<< ": ";            
-            out << env->toString(optr.getDescription(key).this$);
-            out << "\n";
-        }
-        
-    }
-    catch (JavaError e) 
-    {
-        rethrowJavaException(e);
-    }       
 }
 
 
