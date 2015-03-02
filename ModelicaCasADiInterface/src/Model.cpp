@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "DerivativeVariable.hpp"
 #include "Model.hpp"
 #include <algorithm>
-#include <fstream>
 
 using casadi::MX; using casadi::MXFunction;
 using std::vector; using std::ostream;
@@ -679,7 +678,5 @@ namespace ModelicaCasADi
             return casadi::MX();  
         }
     }
-
-    
 
 };   // End namespace
