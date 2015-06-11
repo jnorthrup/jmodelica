@@ -235,7 +235,7 @@ int jmi_set_real(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
     jmi_value_reference i;
     jmi_value_reference index;
     jmi_real_t* z;
-    int needParameterUpdate = 0, needRecomputeVars = 0;
+    int needParameterUpdate = 0;
 
     if (jmi->user_terminate == 1) {
         jmi_log_node(jmi->log, logError, "CannotSetVariable",
@@ -257,28 +257,23 @@ int jmi_set_real(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         return -1;
     }
     
+    jmi->recomputeVariables = 1;
     z = jmi_get_z(jmi);
     
     for (i = 0; i < nvr; i = i + 1) {
         /* Get index in z vector from value reference. */ 
         index = get_index_from_value_ref(vr[i]);
 
-        if(z[index] != value[i]) {
-            /* Set value from the value array to z vector. */
-            z[index] = value[i];
-            needRecomputeVars = 1;
-            if (index < jmi->offs_real_dx) {
-                needParameterUpdate = 1;
-            }
+        /* Set value from the value array to z vector. */
+        z[index] = value[i];
+
+        if (index < jmi->offs_real_dx) {
+            needParameterUpdate = 1;
         }
 
     }
-    if(needRecomputeVars) {
-        jmi->recomputeVariables = 1;    
-
-        if( needParameterUpdate ) {
+    if( needParameterUpdate ) {
           jmi_init_eval_parameters(jmi);
-        }
     }
     return 0;
 }
@@ -291,7 +286,6 @@ int jmi_set_integer(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
     jmi_value_reference index;
     jmi_real_t* z;
     int needParameterUpdate = 0;
-    int needRecomputeVars = 0;
 
     if (jmi->user_terminate == 1) {
         jmi_log_node(jmi->log, logError, "CannotSetVariable",
@@ -313,28 +307,23 @@ int jmi_set_integer(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         return -1;
     }
 
+    jmi->recomputeVariables = 1;
     z = jmi_get_z(jmi);
 
     for (i = 0; i < nvr; i = i + 1) {
         /* Get index in z vector from value reference. */ 
         index = get_index_from_value_ref(vr[i]);
         
-        if(z[index] != value[i]) {
-            /* Set value from the value array to z vector. */
-            z[index] = value[i];
-            needRecomputeVars = 1;
-            if (index < jmi->offs_real_dx) {
-                needParameterUpdate = 1;
-            }
-        }
-    }
+        /* Set value from the value array to z vector. */
+        z[index] = value[i];
 
-    if(needRecomputeVars) {
-        jmi->recomputeVariables = needRecomputeVars;
-    
-        if( needParameterUpdate ) {
-              jmi_init_eval_parameters(jmi);
+        if (index < jmi->offs_real_dx) {
+             needParameterUpdate = 1;
         }
+
+    }
+    if( needParameterUpdate ) {
+          jmi_init_eval_parameters(jmi);
     }
     return 0;
 }
@@ -346,7 +335,7 @@ int jmi_set_boolean(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
     jmi_value_reference i;
     jmi_value_reference index;
     jmi_real_t* z;
-    int needParameterUpdate = 0, needRecomputeVars = 0;
+    int needParameterUpdate = 0;
 
     if (jmi->user_terminate == 1) {
         jmi_log_node(jmi->log, logError, "CannotSetVariable",
@@ -368,28 +357,23 @@ int jmi_set_boolean(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         return -1;
     }
 
+    jmi->recomputeVariables = 1;
     z = jmi_get_z(jmi);
 
     for (i = 0; i < nvr; i = i + 1) {
         /* Get index in z vector from value reference. */ 
         index = get_index_from_value_ref(vr[i]);
         
-        if(z[index] != value[i]) {
-            /* Set value from the value array to z vector. */
-            z[index] = value[i];
-            needRecomputeVars = 1;
-            if (index < jmi->offs_real_dx) {
-                needParameterUpdate = 1;
-            }
-        }
-    }
+        /* Set value from the value array to z vector. */
+        z[index] = value[i];
 
-    if(needRecomputeVars) {
-        jmi->recomputeVariables = needRecomputeVars;
-    
-        if( needParameterUpdate ) {
-              jmi_init_eval_parameters(jmi);
+        if (index < jmi->offs_real_dx) {
+            needParameterUpdate = 1;
         }
+
+    }
+    if( needParameterUpdate ) {
+          jmi_init_eval_parameters(jmi);
     }
     return 0;
 }
@@ -1234,13 +1218,13 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         op->events_tol_factor = z[index];
     index = get_option_index("_block_jacobian_check");
     if(index)
-         bsop->block_jacobian_check = (int)z[index]; 
+         bsop->block_jacobian_check = z[index]; 
     index = get_option_index("_block_jacobian_check_tol");
     if(index)
          bsop->block_jacobian_check_tol = z[index];
     index = get_option_index("_cs_solver");
     if(index)
-        op->cs_solver = (int)z[index];
+        op->cs_solver = z[index];
     index = get_option_index("_cs_rel_tol");
     if(index)
         op->cs_rel_tol = z[index];

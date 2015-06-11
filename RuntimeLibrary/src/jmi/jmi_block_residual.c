@@ -65,17 +65,7 @@ int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi
 
 int jmi_block_residual(void* b, double* x, double* residual, int mode) {
     jmi_block_residual_t* block = (jmi_block_residual_t*)b;
-    jmi_t* jmi = block->jmi;
-    int ret;
-    int depth = jmi_prepare_try(jmi);
-    if(jmi_try(jmi, depth)) {
-        ret = -1;
-    }
-    else {
-        ret = block->F(block->jmi, x, residual, mode);
-    }
-    jmi_finalize_try(jmi,depth);
-    return ret;     
+    return block->F(block->jmi, x, residual, mode);
 }
 
 int jmi_block_dir_der(void* b, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int mode) {
@@ -83,20 +73,14 @@ int jmi_block_dir_der(void* b, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residua
     jmi_t* jmi = block->jmi;
     jmi_real_t* store_dz = jmi->dz[0]; 
     int i, ef;
-    int depth = jmi_prepare_try(jmi);
     jmi->dz[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
     jmi->dz_active_variables[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
 
     for (i=0;i<jmi->n_v;i++) {
         jmi->dz_active_variables[0][i] = 0;
     }
-    if(jmi_try(jmi, depth)) {
-        ef = -1;
-    }
-    else {
-        ef = block->dF(block->jmi,x,dx,residual,dRes,mode);
-    }
-    jmi_finalize_try(jmi,depth);
+
+    ef = block->dF(block->jmi,x,dx,residual,dRes,mode);
     jmi->dz_active_variables[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
     jmi->dz[0] = store_dz;
     return ef;
@@ -658,7 +642,6 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
     free(b->nr_pre_index);
     free(b->nr_direct_index);
     free(b->nr_vref);
-    free(b->sr_vref);
     free(b->jac);
     free(b->ipiv);
     free(b->min);

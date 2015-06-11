@@ -728,7 +728,7 @@ equation
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 592, column 13:
-  Array size mismatch in modification of the attribute start for the variable x, expected size is [3] and size of start expression is [2]
+  Array size mismatch for the attribute start, size of declaration is [3] and size of start expression is [2]
 ")})));
 end ArrayTest27_Err;
 
@@ -1575,97 +1575,6 @@ equation
 end ArrayTests.Subscripts.SubscriptExpression9;
 ")})));
 end SubscriptExpression9;
-
-model SubscriptExpression10
-    record R
-        Real a;
-    end R;
-    
-    function f1
-        input R x;
-        output Real y;
-    algorithm
-        y := x.a;
-        y := y + 1;
-    end f1;
-    
-    function f2
-        input Real x;
-        output R y;
-    algorithm
-        x := x - 1;
-        y.a := x;
-    end f2;
-    
-    model M
-        parameter Real b = 1;
-    end M;
-    
-    parameter Real c[3] = { 1, 2, 3 };
-    M m[3](b = f1(f2(c)));
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Subscripts_SubscriptExpression10",
-            description="",
-            inline_functions="none",
-            flatModel="
-fclass ArrayTests.Subscripts.SubscriptExpression10
- parameter Real c[1] = 1 /* 1 */;
- parameter Real c[2] = 2 /* 2 */;
- parameter Real c[3] = 3 /* 3 */;
- parameter Real temp_1.a;
- parameter Real temp_2.a;
- parameter Real temp_3.a;
- parameter Real temp_4.a;
- parameter Real temp_5.a;
- parameter Real temp_6.a;
- parameter Real temp_7.a;
- parameter Real temp_8.a;
- parameter Real temp_9.a;
- parameter Real m[1].b;
- parameter Real m[2].b;
- parameter Real m[3].b;
-parameter equation
- (ArrayTests.Subscripts.SubscriptExpression10.R(temp_1.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[1]);
- (ArrayTests.Subscripts.SubscriptExpression10.R(temp_2.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[2]);
- (ArrayTests.Subscripts.SubscriptExpression10.R(temp_3.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[3]);
- (ArrayTests.Subscripts.SubscriptExpression10.R(temp_4.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[1]);
- (ArrayTests.Subscripts.SubscriptExpression10.R(temp_5.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[2]);
- (ArrayTests.Subscripts.SubscriptExpression10.R(temp_6.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[3]);
- (ArrayTests.Subscripts.SubscriptExpression10.R(temp_7.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[1]);
- (ArrayTests.Subscripts.SubscriptExpression10.R(temp_8.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[2]);
- (ArrayTests.Subscripts.SubscriptExpression10.R(temp_9.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[3]);
- m[1].b = ArrayTests.Subscripts.SubscriptExpression10.f1(ArrayTests.Subscripts.SubscriptExpression10.R(temp_1.a));
- m[2].b = ArrayTests.Subscripts.SubscriptExpression10.f1(ArrayTests.Subscripts.SubscriptExpression10.R(temp_5.a));
- m[3].b = ArrayTests.Subscripts.SubscriptExpression10.f1(ArrayTests.Subscripts.SubscriptExpression10.R(temp_9.a));
-
-public
- function ArrayTests.Subscripts.SubscriptExpression10.f1
-  input ArrayTests.Subscripts.SubscriptExpression10.R x;
-  output Real y;
- algorithm
-  y := x.a;
-  y := y + 1;
-  return;
- end ArrayTests.Subscripts.SubscriptExpression10.f1;
-
- function ArrayTests.Subscripts.SubscriptExpression10.f2
-  input Real x;
-  output ArrayTests.Subscripts.SubscriptExpression10.R y;
- algorithm
-  x := x - 1;
-  y.a := x;
-  return;
- end ArrayTests.Subscripts.SubscriptExpression10.f2;
-
- record ArrayTests.Subscripts.SubscriptExpression10.R
-  Real a;
- end ArrayTests.Subscripts.SubscriptExpression10.R;
-
-end ArrayTests.Subscripts.SubscriptExpression10;
-")})));
-end SubscriptExpression10;
 
 
 
@@ -6001,72 +5910,6 @@ end ArrayTests.Constructors.Iterators.ArrayIterTest9;
 ")})));
 end ArrayIterTest9;
 
-model ArrayIterTest10
-    constant Real[1,2] c = {{1,2}};
-    parameter Real[:,:] x = {{c[i,j] for i in 1:1} for j in 1:2};
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Constructors_Iterators_ArrayIterTest10",
-            description="Nested iteration expressions",
-            inline_functions="none",
-            flatModel="
-fclass ArrayTests.Constructors.Iterators.ArrayIterTest10
- constant Real c[1,1] = 1;
- constant Real c[1,2] = 2;
- parameter Real x[1,1] = 1.0 /* 1.0 */;
- parameter Real x[2,1] = 2.0 /* 2.0 */;
-end ArrayTests.Constructors.Iterators.ArrayIterTest10;
-")})));
-end ArrayIterTest10;
-
-model ArrayIterTest11
-    record R
-        parameter Real[:,:] x = {{i + j for i in 1:1} for j in 1:2};
-    end R;
-    
-    R r;
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Constructors_Iterators_ArrayIterTest11",
-            description="Nested iteration expressions",
-            inline_functions="none",
-            flatModel="
-fclass ArrayTests.Constructors.Iterators.ArrayIterTest11
- parameter Real r.x[1,1] = 2 /* 2 */;
- parameter Real r.x[2,1] = 3 /* 3 */;
-end ArrayTests.Constructors.Iterators.ArrayIterTest11;
-")})));
-end ArrayIterTest11;
-
-model ArrayIterTest12
-    record R
-        Real t[:] = {time,time};
-        Real[:,:] x = {{t[i] + t[j] for i in 1:1} for j in 1:2};
-    end R;
-    
-    R r;
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Constructors_Iterators_ArrayIterTest12",
-            description="Nested iteration expressions",
-            inline_functions="none",
-            flatModel="
-fclass ArrayTests.Constructors.Iterators.ArrayIterTest12
- Real r.t[1];
- Real r.t[2];
- Real r.x[1,1];
- Real r.x[2,1];
-equation
- r.t[1] = time;
- r.t[2] = time;
- r.x[1,1] = r.t[1] + r.t[1];
- r.x[2,1] = r.t[1] + r.t[1];
-end ArrayTests.Constructors.Iterators.ArrayIterTest12;
-")})));
-end ArrayIterTest12;
 
 model ArrayIterTestUnknown1
     function f
@@ -6325,7 +6168,7 @@ fclass ArrayTests.For.ForStructural1
  Real x[2];
 equation
  for i in 1:2 loop
-if ({true, false})[i] then
+  if p[i] then
    x[i] = time;
   else
    x[i] = 1;
@@ -7536,60 +7379,6 @@ fclass ArrayTests.Other.ArraySize3
 end ArrayTests.Other.ArraySize3;
 ")})));
 end ArraySize3;
-
-
-model ArraySize4
-    function f
-        input Real[:] x1;
-        input Real[:] x2;
-        output Boolean[size(x1,1)-1, size(x2,1)-1] y;
-    protected
-        final parameter Integer n1 = size(x1,1)-1;
-        parameter Integer n2 = size(x1,1)-1;
-    algorithm
-        for i in 1:n1 loop
-        end for;
-    end f;
-    
-    Boolean[3,3] y = f({1,2,3,4},{1,2,3,4});
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Other_ArraySize4",
-            description="",
-            flatModel="
-fclass ArrayTests.Other.ArraySize4
- parameter Boolean y[1,1];
- parameter Boolean y[1,2];
- parameter Boolean y[1,3];
- parameter Boolean y[2,1];
- parameter Boolean y[2,2];
- parameter Boolean y[2,3];
- parameter Boolean y[3,1];
- parameter Boolean y[3,2];
- parameter Boolean y[3,3];
-parameter equation
- ({{y[1,1], y[1,2], y[1,3]}, {y[2,1], y[2,2], y[2,3]}, {y[3,1], y[3,2], y[3,3]}}) = ArrayTests.Other.ArraySize4.f({1, 2, 3, 4}, {1, 2, 3, 4});
-
-public
- function ArrayTests.Other.ArraySize4.f
-  input Real[:] x1;
-  input Real[:] x2;
-  output Boolean[:,:] y;
-  Integer n1;
-  Integer n2;
- algorithm
-  size(y) := {size(x1, 1) - 1, size(x2, 1) - 1};
-  n1 := size(x1, 1) - 1;
-  n2 := size(x1, 1) - 1;
-  for i in 1:n1 loop
-  end for;
-  return;
- end ArrayTests.Other.ArraySize4.f;
-
-end ArrayTests.Other.ArraySize4;
-
-")})));
-end ArraySize4;
 
 
 model ArraySizeInIf1

@@ -359,24 +359,13 @@ aspect ErrorCheck {
    * @param then       if true, we are trying to remove the then-branch, otherwise the else-branch
    */
   public boolean FIfExp.lockMyBranch(ErrorCheckType checkType, boolean then) {
-        if (getIfExp().lockable(then)) {
+	  if (getIfExp().variability().parameterOrLess() && getIfExp().ceval().booleanValue() != then) {
 		  getIfExp().markAsStructuralParameter(checkType);
 		  return true;
 	  } else {
 		  return lockBranch(checkType);
 	  }
   }
-  
-    syn boolean FExp.lockable(boolean then) {
-        if (variability().parameterOrLess() && valueIsFixed()) {
-            try {
-                return ceval().booleanValue() != then;
-            } catch (ConstantEvaluationException e) {
-                
-            }
-        }
-        return false;
-    }
   
   /**
    * Lock this if-expression and return true if it only has only parameter-expression 
@@ -389,7 +378,7 @@ aspect ErrorCheck {
    * @param then       if true, we are trying to remove the then-branch, otherwise the else-branch
    */
   public boolean FIfEquation.lockMyBranch(ErrorCheckType checkType, boolean then) {
-        if (getTest().lockable(then)) {
+	  if (getTest().variability().parameterOrLess() && getTest().ceval().booleanValue() != then) {
 		  getTest().markAsStructuralParameter(checkType);
 		  return true;
 	  } else {
@@ -1116,25 +1105,19 @@ aspect InstanceErrorCheck {
             errorChecked = true;
             // Check that the function exists
             InstCallable func = getName().myInstCallable();
-            String name = getName().name();
-            if (getName().hasLookupError() || func.isUnknown()) {
-                // Function does not exist or can't be used due to constraining classes, or name refers to component
-                getName().classLookupError("function", name + "()");
-            } else if (!func.isCallable()) {
+            if (!func.isCallable()) {
+                // Report that function does not exist
+                String name = getName().name();
                 if (func.isExternalObject()) {
-                    // Something is be wrong with constructor
                     name += ".constructor";
                     func = func.asInstClassDecl().myConstructor();
-                    if (func.isUnknown()) {
-                        // The constructor does not exist
+                    if (func.isUnknown()) 
                         error("Cannot find function declaration for " + name + "()");
-                    }
-                    // Constructor exists, but is not a function - delegate to default case
-                }
-                if (!func.isUnknown()) {
-                    // Not a function
+                } else if (func.isUnknown()) {
+                    getName().classLookupError("function", name + "()");
+                } 
+                if (!func.isUnknown())
                     error("The class " + name + " is not a function");
-                }
             } else if (!func.isRecord() && !func.isCompleteFunction()) {
                 // TODO: add check if function is partial?
                 if (!checkType.allowIncompleteReplaceableFunc() || !canBeReplacedForMe(func.asInstNode()))
@@ -1163,20 +1146,16 @@ aspect InstanceErrorCheck {
     inh boolean ASTNode.canBeReplacedForMe(InstNode node);
     eq InstNode.getChild().canBeReplacedForMe(InstNode node) = node.canBeReplacedFor(this);
     eq Root.getChild().canBeReplacedForMe(InstNode node)     = false;
-
-    /**
-     * Is this node or any node before the closest common ancestor with <code>source</code> replaceable?
-     */
-    syn boolean InstNode.canBeReplacedFor(InstNode source)        = canBeReplacedIn(commonAncestor(source));
-    eq InstSimpleShortClassDecl.canBeReplacedFor(InstNode source) = 
-        super.canBeReplacedFor(source) || myTargetInstClassDecl().canBeReplacedFor(source);
-    eq InstShortClassDecl.canBeReplacedFor(InstNode source)       = 
-        super.canBeReplacedFor(source) || myTargetInstClassDecl().canBeReplacedFor(source);
-
+	
+	/**
+	 * Is this node or any node before the closest common ancestor with <code>source</code> replaceable?
+	 */
+	syn boolean InstNode.canBeReplacedFor(InstNode source) = canBeReplacedIn(commonAncestor(source));
+	
     /**
      * Is this class or any class before <code>ancestor</code> replaceable?
      */
-    syn boolean InstNode.canBeReplacedIn(InstNode ancestor) = isReplaceable() || canBeReplacedInHelper(ancestor);
+	syn boolean InstNode.canBeReplacedIn(InstNode ancestor) = isReplaceable() || canBeReplacedInHelper(ancestor);
 
     /**
      * Helper method for {@link #canBeReplacedIn(InstNode)} - use it instead.
@@ -1282,14 +1261,14 @@ aspect InstanceErrorCheck {
 		for (InstExtends ie : getInstExtendss())
 			ie.calcIsRecursive(visited);
 	}
-
-    public void InstSimpleShortClassDecl.calcIsRecursive(HashSet<InstNode> visited) {
-        recursiveCache = visited.contains(this) ? RECURSIVE_YES : RECURSIVE_NO;
-        visited.add(this);
-        if (recursiveCache == RECURSIVE_NO) 
-            myTargetInstClassDecl().calcIsRecursive(visited);
-    }
-
+	
+	public void InstSimpleShortClassDecl.calcIsRecursive(HashSet<InstNode> visited) {
+		recursiveCache = visited.contains(this) ? RECURSIVE_YES : RECURSIVE_NO;
+		visited.add(this);
+		if (recursiveCache == RECURSIVE_NO) 
+			getTarget().myInstClassDecl().calcIsRecursive(visited);
+	}
+	
 	private byte InstExtends.recursiveCache              = RECURSIVE_UNKNOWN;
 	private byte InstSimpleShortClassDecl.recursiveCache = RECURSIVE_UNKNOWN;
 	protected static final byte InstNode.RECURSIVE_UNKNOWN = 0;

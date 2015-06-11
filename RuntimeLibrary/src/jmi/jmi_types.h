@@ -40,35 +40,6 @@ typedef void* jmi_extobj_t; /*< Typedef for the external object
 #define JMI_MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 #define JMI_ABS(X)   ((X) < (0) ? (-1*X) : (X))
 
-
-#define JMI_DEF(TYPE, NAME) \
-    JMI_DEF_##TYPE(NAME)
-#define JMI_DEF_REA(NAME) \
-    jmi_real_t NAME = 0;
-#define JMI_DEF_INT(NAME) \
-    JMI_DEF_REA(NAME)
-#define JMI_DEF_BOO(NAME) \
-    JMI_DEF_REA(NAME)
-#define JMI_DEF_ENU(NAME) \
-    JMI_DEF_REA(NAME)
-#define JMI_DEF_STR(NAME) \
-    jmi_string_t NAME = "";
-#define JMI_DEF_EXO(NAME) \
-    jmi_extobj_t NAME = NULL;
-
-#define JMI_DEF_REA_EXT(NAME) \
-    JMI_DEF_REA(NAME)
-#define JMI_DEF_INT_EXT(NAME) \
-    jmi_int_t NAME = 0;
-#define JMI_DEF_BOO_EXT(NAME) \
-    JMI_DEF_INT_EXT(NAME)
-#define JMI_DEF_ENU_EXT(NAME) \
-    JMI_DEF_INT_EXT(NAME)
-#define JMI_DEF_STR_EXT(NAME) \
-    JMI_DEF_STR(NAME)
-#define JMI_DEF_EXO_EXT(NAME) \
-    JMI_DEF_EXO(NAME)
-
 /* Max allowed length of strings */
 #define JMI_STR_MAX 16 * 1024 - 1
 
@@ -78,18 +49,12 @@ typedef void* jmi_extobj_t; /*< Typedef for the external object
 #define JMI_DEF_STR_DYNA(NAME) \
     jmi_string_t NAME;
 
-/* Initialization of strings from expressions */
+/* Initialization of string */
 #define JMI_INI_STR_STAT(NAME) \
     NAME[0] = '\0';
 #define JMI_INI_STR_DYNA(NAME, LEN) \
     NAME = calloc(JMI_MIN(LEN, JMI_STR_MAX) + 1, 1); \
     JMI_INI_STR_STAT(NAME)
-
-/* Initialization of function variables */
-#define JMI_INI(TYPE, NAME) \
-    JMI_INI_##TYPE(NAME)
-#define JMI_INI_STR(NAME) \
-    NAME = "";
 
 /* Assign (copy) SRC to DEST */
 #define JMI_ASG(TYPE, DEST, SRC) \

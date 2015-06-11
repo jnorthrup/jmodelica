@@ -136,9 +136,12 @@ public class ModelicaCompiler {
 	
 	// If true, assume that JMODELICA_HOME points to the source folder - for easier debugging while developing
 	protected boolean debugSrcIsHome = false;
-    public void setDebugSrcIsHome(boolean b) {
-        debugSrcIsHome = b;
-    }
+	protected static final String[] DEBUG_TEMPLATE_IN_SRC = new String[] {
+	    "Compiler/ModelicaCBackEnd/templates",
+        "Compiler/ModelicaFMUXBackEnd/templates",
+        "Compiler/OptimicaCBackEnd/templates",
+        "Compiler/OptimicaFMUXBackEnd/templates",
+	};
 	
 	protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<CompilationHooks>();
 	protected LinkedList<CompilationHooks> hooksList = new LinkedList<CompilationHooks>(globalHooksList);
@@ -761,7 +764,9 @@ public class ModelicaCompiler {
                 ASTNode.beginStep("compileCCode()");
                 String cFileName = (flatName != null) ? flatName : FClass.convertClassNameToUnderscore(className);
                 CCompilerDelegator ccompiler = getCCompiler();
-                ccompiler.compileCCode(cFileName, target, outDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories(), options.getIntegerOption("max_n_proc"));
+                Set<String> extLibs = new HashSet<String>(fc.externalLibraries());
+                extLibs.add(options.getStringOption("lapack_lib"));
+                ccompiler.compileCCode(cFileName, target, outDir, extLibs, fc.externalLibraryDirectories(), fc.externalIncludeDirectories(), options.getIntegerOption("max_n_proc"));
                 ccompiler.copySharedLibs(outDir, fc.externalLibraries(), fc.externalLibraryDirectories());
                 ASTNode.endStep("compileCCode()");
             }
@@ -1176,7 +1181,6 @@ public class ModelicaCompiler {
         fc.transformCanonical();
         
         /* Temporary fix to problems with long compilation times due to later evaluations */
-        getExternalFunctionCache().tearDown(getOptions());
         fc.myOptions().setIntegerOption("external_constant_evaluation", 0);
         
         hookModelTransformed(fc);
@@ -1247,9 +1251,7 @@ public class ModelicaCompiler {
     }
     
     protected ExternCEvalGenerator createCGenerator(FExternalStmt ext) {
-        CodeGenContext cgc = new CodeGenContext();
-        Map<String,String> tempMap = new HashMap<String,String>();
-        return new ExternCEvalGenerator(new PrettyPrinter(), '$', null, ext, cgc, tempMap);
+        return new ExternCEvalGenerator(new PrettyPrinter(), '$', null, ext);
     }
 
     /**
@@ -1266,6 +1268,8 @@ public class ModelicaCompiler {
         if (tmpl != null || gen instanceof GenericXMLGenerator) {
             hookCheckAbort();
             hookCodeGeneratorCreated(gen);
+            if (tmpl != null && debugSrcIsHome) 
+                tmpl = debugFindTemplateInSrcDir(tmpl);
             File outFile = new File(dir, name);
             OutputStream output = new FileOutputStream(outFile);
             boolean debugGen = options.getBooleanOption("debug_duplicate_generated");
@@ -1275,6 +1279,17 @@ public class ModelicaCompiler {
             log.debug("Generated file '" + outFile + "'.");
         }
     }
+
+	private static String debugFindTemplateInSrcDir(String tmpl) {
+	    String name = new File(tmpl).getName();
+	    String src = getJModelicaHome();
+	    for (String dir : DEBUG_TEMPLATE_IN_SRC) {
+	        File f = new File(new File(src, dir), name);
+	        if (f.exists())
+	            return f.getPath();
+	    }
+	    return tmpl;
+	}
 	
 	/**
 	 * 
@@ -1430,7 +1445,7 @@ public class ModelicaCompiler {
         setFindFlatToInstanceLinks(programarguments.containsKey("findflatinst"));
         
         if (programarguments.containsKey("debugSrcIsHome")) 
-            setDebugSrcIsHome(true);
+            debugSrcIsHome = true;
         
         // platform argument
         String platforms = programarguments.get("platform");
@@ -1582,6 +1597,117 @@ public class ModelicaCompiler {
             platform = platform.substring(0, platform.length() - 2) + "32";
         }
         return platform;
+    }
+    
+    
+    /**
+     * Maps external functions names to compiled executables.
+     * A null/nonexistent entry means it has not been compiled yet.
+     * An empty string means compilation was not succesful.
+     */
+    private Map<String, String> compiledExternals = new HashMap<String, String>();
+    
+    /**
+     * If there is no executable corresponding to <code>ext</code>, create one.
+     */
+    private String getCompiledExternal(FExternalStmt ext) {
+        String executable = compiledExternals.get(ext.getName());
+        if (executable == null) {
+            if (outDir == null)
+                setRandomOutDir();
+            String source = ext.getName().replace(".", "_");
+            TargetObject target = createTargetObject("ceval", "0.1");
+            Set<String> libs = new HashSet<String>();
+            Set<String> libDirs = new HashSet<String>();
+            Set<String> incDirs = new HashSet<String>();
+            if (ext.library() != null)
+                for (String lib : ext.library())
+                    libs.add(lib);
+            libs.add(options.getStringOption("lapack_lib"));
+            if (ext.libraryDirectory() != null)
+                libDirs.add(ext.libraryDirectory());
+            if (ext.includeDirectory() != null)
+                incDirs.add(ext.includeDirectory());
+            try {
+                target.getTemplates().generateCFiles(this, null, createCGenerator(ext), sourceDir, source);
+                executable = getCCompiler().compileCCodeLocal(source, target, outDir, libs, libDirs, incDirs, 1);
+                new File(sourceDir, source + ".c").delete();
+                log.debug(String.format("Compiled external function \"%s\" to executable \"%s\" for constant evaluation.", ext.getName(), executable));
+            } catch (FileNotFoundException e) {
+                executable = "";
+                log.debug(String.format("Could not generate code for constant evaluation of external function \"%s\".", ext.getName()));
+            } catch (CcodeCompilationException e) {
+                executable = "";
+                log.debug(String.format("Could not compile external function \"%s\" for constant evaluation.", ext.getName()));
+                e.printStackTrace(new PrintStream(log.debugStream()));
+            }
+            compiledExternals.put(ext.getName(), executable);
+        }
+        return executable;
+    }
+    
+    /**
+     * Remove executables compiled by the constant evaluation framework.
+     */
+    private void removeCompiledExternals() {
+        for (String key : compiledExternals.keySet()) {
+            String executable = compiledExternals.get(key);
+            if (executable.length() > 0) {
+                new File(executable).delete();
+            }
+        }
+        compiledExternals = new HashMap<String,String>();
+    }
+    
+    /**
+     * Make sure <code>ext</code> executable is not used.
+     */
+    public void invalidateExternal(FExternalStmt ext) {
+        String key = ext.getName();
+        String executable = compiledExternals.get(key);
+        if (executable != null && executable.length() > 0) {
+            new File(executable).delete();
+        }
+        compiledExternals.put(key, "");
+    }
+    
+    /**
+     * Start a process for constant evaluation of <code>ext</code>.
+     */
+    public Process createExternCEvalProc(FExternalStmt ext) {
+        Process proc = null;
+        String executable = getCompiledExternal(ext);
+        if (executable.length() > 0) {
+            try {
+                ProcessBuilder pb = new ProcessBuilder(executable);
+                pb.redirectErrorStream(true);
+                if (ext.libraryDirectory() != null) {
+                    // Update environment in case of shared library
+                    String platform = reduceBits(getPlatform(), getCCompiler().getTargetPlatforms());
+                    File f = new File(ext.libraryDirectory(), platform);
+                    String libLoc = f.isDirectory() ? f.getPath() : ext.libraryDirectory();
+                    appendPath(pb, libLoc, platform);
+                }
+                proc = pb.start();
+            } catch (IOException e) {
+                log.debug("Could not execute external function process for constant evaluation. Executable: " + executable);
+            }
+        }
+        return proc;
+    }
+    
+    /**
+     * Append a library location <code>libLoc</code> to the path variable in environment of <code>pb</code>.
+     */
+    private void appendPath(ProcessBuilder pb, String libLoc, String platform) {
+        String sep = platform.startsWith("win") ? ";" : ":";
+        String var = platform.startsWith("win") ? "PATH" : "LD_LIBRARY_PATH";
+        String res = pb.environment().get(var);
+        if (res == null)
+            res = libLoc;
+        else
+            res = res + sep + libLoc;
+        pb.environment().put(var, res);
     }
     
     /**
@@ -1889,6 +2015,7 @@ public class ModelicaCompiler {
             }
             
             fc.loadResources(new File(outDir, "resources"));
+            removeCompiledExternals();
             
         } finally {
         }
@@ -1957,7 +2084,6 @@ public class ModelicaCompiler {
      * Tear down the compiler. Undo the work done in {@link #setUp(IErrorHandler)}.
      */
     protected void ModelicaCompiler.tearDown() {
-        getExternalFunctionCache().tearDown(getOptions());
         setErrorHandler(null);
         isSetUp = false;
     }
@@ -2032,14 +2158,6 @@ public class Templates {
     
     private String[] templates;
     
-    protected static final String[] DEBUG_TEMPLATE_IN_SRC = new String[] {
-        "Compiler/ModelicaCBackEnd/templates",
-        "Compiler/ModelicaFMUXBackEnd/templates",
-        "Compiler/OptimicaCBackEnd/templates",
-        "Compiler/OptimicaFMUXBackEnd/templates",
-    };
-    
-    
     private Templates(String... templates) {
         this.templates = templates;
     }
@@ -2048,18 +2166,10 @@ public class Templates {
         return (i < templates.length) ? templates[i] : null;
     }
     
-    private static String templatePath(String fileName, boolean debugSrcIsHome) {
+    private static String templatePath(String fileName) {
         if (fileName == null)
             return null;
-        String home = ModelicaCompiler.getJModelicaHome();
-        if (debugSrcIsHome) {
-            for (String dir : DEBUG_TEMPLATE_IN_SRC) {
-                File f = new File(new File(home, dir), fileName);
-                if (f.exists())
-                    return f.getAbsolutePath();
-            }
-        }
-        return new File(templateDir(), fileName).getAbsolutePath();
+        return new File(templateDir(), fileName).getPath();
     }
     
     protected static File templateDir() {
@@ -2068,7 +2178,7 @@ public class Templates {
     
     public void generateXMLFiles(ModelicaCompiler mc, FClass fc, AbstractGenerator gen, File sourceDir, String name)
             throws FileNotFoundException {
-        mc.generateFile(templatePath(getXMLTemplateName(fc), mc.debugSrcIsHome), gen, sourceDir, name + ".xml", "");
+        mc.generateFile(templatePath(getXMLTemplateName(fc)), gen, sourceDir, name + ".xml", "");
     }
     
     public void generateCFiles(ModelicaCompiler mc, FClass fc, AbstractGenerator gen, File sourceDir, String name)
@@ -2078,7 +2188,7 @@ public class Templates {
     
     protected void generateCFiles(ModelicaCompiler mc, FClass fc, AbstractGenerator gen, File sourceDir, String name, String header)
             throws FileNotFoundException {
-        mc.generateFile(templatePath(getCTemplateName(fc), mc.debugSrcIsHome), gen, sourceDir, name + ".c", header);
+        mc.generateFile(templatePath(getCTemplateName(fc)), gen, sourceDir, name + ".c", header);
     }
     
     private static class FMUTemplates extends Templates {
@@ -2090,8 +2200,9 @@ public class Templates {
             super(templates);
         }
         
-        private String subTemplatePath(String file, boolean debugSrcIsHome) {
-            return templatePath(new File(subDir, file).getPath(), debugSrcIsHome);
+        private String subTemplatePath(String file) {
+            File dir = new File(templateDir(), subDir);
+            return new File(dir, file).getPath();
         }
         
         protected void generateCFiles(ModelicaCompiler mc, FClass fc, AbstractGenerator gen, File sourceDir, String name, String header)
@@ -2104,10 +2215,10 @@ public class Templates {
             super.generateCFiles(mc, fc, gen, sourceDir, name, header);
             
             for (String tpl : heads) {
-                mc.generateFile(subTemplatePath(tpl + ".h", mc.debugSrcIsHome), gen, sourceDir, name + "_" + tpl + ".h", "");
+                mc.generateFile(subTemplatePath(tpl) + ".h", gen, sourceDir, name + "_" + tpl + ".h", "");
             }
             for (String tpl : tpls) {
-                mc.generateFile(subTemplatePath(tpl + ".c", mc.debugSrcIsHome), gen, sourceDir, name + "_" + tpl + ".c", header);
+                mc.generateFile(subTemplatePath(tpl) + ".c", gen, sourceDir, name + "_" + tpl + ".c", header);
             }
         }
     }

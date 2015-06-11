@@ -78,9 +78,6 @@ aspect Arrays {
 	 *                                      constant Integer values.
 	 */
 	public Index FArraySubscripts.createIndex() {
-        if (getNumFSubscript() == 0) {
-            return Index.NULL;
-        }
 		int[] i = new int[getNumFSubscript()];
 		int j = 0;
 		for (FSubscript s : getFSubscripts()) 
@@ -702,16 +699,7 @@ aspect Arrays {
     inh Size FEndExp.mySize();
     inh Size FSubscript.mySize();
     inh Size FArraySubscripts.mySize();
-    eq FIdUse.getChild().mySize() {
-        if (inFunction()) {
-            FQNameFull fqn = getFQName().asFQNameFull();
-            if (fqn.numParts() > 1) {
-                FType type = lookupFV(fqn.copyPrefix(1)).type();
-                return type.lookupHierarchical(fqn, 1).size();
-            }
-        }
-        return myFV().size();
-    }
+    eq FIdUse.getChild().mySize()                        = myFV().size();
     eq FIdUseInstAccess.getChild().mySize()              = getInstAccess().size();
     eq InstScalarAccess.getExpandedSubscripts().mySize() = myInstComponentDecl().size();
     eq InstArrayAccess.getFArraySubscripts().mySize()    = myInstComponentDecl().size();
@@ -1184,31 +1172,15 @@ aspect Arrays {
 			s = s.createKnown(getBindingFExp());
 		return s;
 	}
-
-    /**
-     * Get the array sizes as declared. May be unknown. 
-     */
-    syn Size InstComponentDecl.declaredSize() = 
-        hasFArraySubscripts() ? getFArraySubscripts().declarationSize() : defaultSize();
+	
+	/**
+	 * Get the array sizes as declared. May be unknown. 
+	 */
+	syn Size InstComponentDecl.declaredSize() = 
+		hasFArraySubscripts() ? getFArraySubscripts().declarationSize() : Size.SCALAR;
     syn Size InstComponentDecl.declaredSizeCalc() =
-        hasFArraySubscripts() ? getFArraySubscripts().declarationSize(getFArraySubscripts().getFSubscripts()) : defaultSizeCalc();
-
-    /**
-     * Find the declared size for a component that does not have any array subscripts in the declaration. 
-     * For all components except the NTA of InstComponentRedeclare, this is simply scalar.
-     */
-    inh Size InstComponentDecl.defaultSize();
-    eq InstComponentRedeclare.getInstComponentDecl().defaultSize() = myInstReplacingComponent().declaredSize();
-    eq ASTNode.getChild().defaultSize()                            = Size.SCALAR;
-
-    /**
-     * Find the declared calculated size for a component that does not have any array subscripts in the declaration. 
-     * For all components except the NTA of InstComponentRedeclare, this is simply scalar.
-     */
-    inh Size InstComponentDecl.defaultSizeCalc();
-    eq InstComponentRedeclare.getInstComponentDecl().defaultSizeCalc() = myInstReplacingComponent().declaredSizeCalc();
-    eq ASTNode.getChild().defaultSizeCalc()                            = Size.SCALAR;
-
+        hasFArraySubscripts() ? getFArraySubscripts().declarationSize(getFArraySubscripts().getFSubscripts()) : Size.SCALAR;
+	
 	/**
 	 * Get the array sizes. 
 	 */
@@ -1941,15 +1913,8 @@ aspect Arrays {
 	eq FIterExp.getArray() = copyArray();
 	
 	eq FSubscriptedExp.getArray() {
-        if (!isArray()) {
-            try {
-                Index i = getFArraySubscripts().createIndex();
-                return new ScalarAsArray(getFExp().getArray().get(i));
-            } catch (ConstantEvaluationException e) {
-                
-            }
-            return new ScalarAsArray(this);
-        }
+		if (!isArray()) 
+			return new ScalarAsArray(this);
 		Array arr = new Array(indices());
 		Array old = getFExp().getArray();
 		Indices ind = arr.indices();
@@ -3179,40 +3144,29 @@ aspect ArrayHelpers {
             ns[size.length] = s;
             return new Size(ns);
         }
-
-        /**
-         * Creates a new Size that is a concatenation of <code>s</code> and this size.
-         * 
-         * <code>s</code> is added on the left side.
-         */
-        public Size expand(Size s) {
-            return s.createExpanded(s, this);
-        }
-
-        /**
-         * Creates a new Size that is a concatenation of this size and <code>s</code>.
-         * 
-         * <code>s</code> is added on the right side.
-         */
-        public Size expandRight(Size s) {
-            return s.createExpanded(this, s);
-        }
-
-        /**
-         * Delegate method for expand(Size) and expandRight(Size).
-         * 
-         * Creates a new size that is the concatenation of a and b.
-         */
-        protected Size createExpanded(Size a, Size b) {
-            int ndims = a.size.length + b.size.length;
+        
+		/**
+		 * Creates a new Size that is a concatenation of <code>s</code> and this size.
+		 * 
+		 * <code>s</code> is added on the left side.
+		 */
+		public Size expand(Size s) {
+			return s.expandFrom(this);
+		}
+		
+		/**
+		 * Delegate method for expand(Size). Double dispatch is needed there.
+		 */
+		protected Size expandFrom(Size s) {
+            int ndims = size.length + s.size.length;
             if (ndims == 0)
                 return Size.SCALAR;
             int[] ns = new int[ndims];
-            System.arraycopy(a.size, 0, ns, 0, a.size.length);
-            System.arraycopy(b.size, 0, ns, a.size.length, b.size.length);
+            System.arraycopy(size, 0, ns, 0, size.length);
+            System.arraycopy(s.size, 0, ns, size.length, s.size.length);
             return new Size(ns);
-        }
-
+		}
+		
 		/**
 		 * Create an FExp that describes the length of dimension <code>d</code>, 
 		 *        given the supplied variable values.
@@ -3292,10 +3246,6 @@ aspect ArrayHelpers {
 		public FExp createFExp(int d) {
 			return new FIntegerLitExp(size[d]);
 		}
-		
-        public FExp createFExpForced(int d) {
-            return createFExp(d);
-        }
 		
 		/**
 		 * Create an FExp that describes the number of elements of this size.
@@ -3416,6 +3366,7 @@ aspect ArrayHelpers {
 				}
 			} else {
 				for (int si : s.size) {
+					exps[i] = null;
 					size[i++] = si;
 				}
 			}
@@ -3426,6 +3377,7 @@ aspect ArrayHelpers {
 		 */
 		public void set(int i, int s) {
 			size[i] = s;
+			exps[i] = null;
 		}
 		
 		/**
@@ -3463,6 +3415,7 @@ aspect ArrayHelpers {
 				if (exps[i] != null) {
 					try {
 						size[i] = exps[i].ceval().intValue();
+						exps[i] = null;
 					} catch (ConstantEvaluationException e) {
 					}
 				}
@@ -3493,11 +3446,15 @@ aspect ArrayHelpers {
 		 * Adds <code>s</code> to length <code>d</code>.
 		 */
 		public void add(int d, int s) {
-            if (size[d] == Size.UNKNOWN || s == Size.UNKNOWN) {
-                size[d] = Size.UNKNOWN;
-            } else {
-                size[d] = size[d] + s;
-            }
+			if (s == UNKNOWN) {
+				size[d] = UNKNOWN;
+				exps[d] = null;
+			} else if (size[d] != UNKNOWN) {
+				size[d] += s;
+			} else if (exps[d] != null) {
+				FExp e = new FAddExp(exps[d].createSizeFExp(), new FIntegerLitExp(s));
+				exps[d] = exps[d].dynamicFExp(e);
+			}
 		}
 		
 		/**
@@ -3516,76 +3473,36 @@ aspect ArrayHelpers {
 		/**
 		 * Adds the length of dimension <code>d2</code> of <code>s</code> 
 		 *        to length <code>d1</code> of this size.
-         *
-         * Adds both expressions and evaluated sizes.
 		 */
 		public void add(int d1, Size s, int d2) {
-            addFExp(d1, s, d2);
-            add(d1, s.size[d2]);
+			FExp e = (s instanceof MutableSize) ? ((MutableSize) s).exps[d2] : null;
+			if (e != null)
+				add(d1, e);
+			else
+				add(d1, s.size[d2]);
 		}
 		
-        /**
-         * If there is an expression in dimension <code>d1</code> of <code>this</code> or 
-         * dimension <code>d2</code> of size <code>s</code>, add the two size representations 
-         * into a new <code>FExp</code> in <code>this</code>.
-         */
-        protected void addFExp(int d1, Size s, int d2) {
-            FExp n = null;
-            if (hasFExp(d1)) {
-                n = getFExp(d1);
-            } else if (s instanceof MutableSize) {
-                MutableSize ms = (MutableSize) s;
-                if (ms.hasFExp(d2)) {
-                    n = ms.getFExp(d2);
-                }
-            }
-            
-            if (n == null) {
-                return;
-            }
-            
-            FExp e = new FAddExp(createFExpForced(d1), s.createFExpForced(d2));
-            exps[d1] = n.dynamicFExp(e);
-        }
-        
-        /**
-         * Returns true if there is an FExp representing size in 
-         * dimension <code>d</code>, else false.
-         */
-        protected boolean hasFExp(int d) {
-            return exps[d] != null;
-        }
-        
-        /**
-         * Get the FExp representing size in dimension <code>d</code>.
-         * It might be null.
-         */
-        protected FExp getFExp(int d) {
-            return exps[d];
-        }
-
-        /**
-         * Get length in the <code>i</code>th dimension.
-         */
-        public int get(int i) {
-            evaluate(i);
-            if (i < 0 || i >= size.length)
-                return UNKNOWN;
-            if (size[i] != Size.UNKNOWN) // We want to evaluate FUnknownSizeExps as well
-                return size[i];
-            try {
-                if (exps[i] != null)
-                    return exps[i].ceval().intValue();
-            } catch (ConstantEvaluationException e) {
-            }
-            return UNKNOWN;
-        }
-
+		/**
+		 * Get length in the <code>i</code>th dimension.
+		 */
+		public int get(int i) {
+			evaluate(i);
+			if (i < 0 || i >= size.length)
+				return UNKNOWN;
+			if (exps[i] == null) // We want to evaluate FUnknownSizeExps as well
+				return size[i];
+			try {
+				return exps[i].ceval().intValue();
+			} catch (ConstantEvaluationException e) {
+				return UNKNOWN;
+			}
+		}
+		
 		/**
 		 * Check if the lengths in the given dimension has a value (fix length or integer).
 		 */
 		protected boolean hasValue(int dim) {
-            return size[dim] != UNKNOWN || okExp(dim);
+			return size[dim] != UNKNOWN || okExp(exps[dim]);
 		}
 		
         /**
@@ -3595,16 +3512,8 @@ aspect ArrayHelpers {
             return okExp(e, false);
         }
         
-        protected boolean okExp(int i) {
-            return okExp(i, false);
-        }
-        
         protected static boolean okExp(FExp e, boolean allowUnknownSize) {
             return e != null && e.isValidExp(allowUnknownSize);
-        }
-        
-        protected boolean okExp(int i, boolean allowUnknownSize) {
-            return size[i] == Size.UNKNOWN && okExp(exps[i], allowUnknownSize);
         }
 		
 		/**
@@ -3655,48 +3564,43 @@ aspect ArrayHelpers {
 			System.arraycopy(exps, 0, ns.exps, 1, size.length);
 			return ns;
 		}
-
-        /**
-         * Creates a new Size that is a concatenation of <code>s</code> and this size.
-         * 
-         * <code>s</code> is added on the left side.
-         */
-        public Size expand(Size s) {
+		
+		/**
+		 * Creates a new Size that is a concatenation of <code>s</code> and this size.
+		 * 
+		 * <code>s</code> is added on the left side.
+		 */
+		public Size expand(Size s) {
             return createExpanded(s, this);
         }
-
+        
         /**
-         * Creates a new Size that is a concatenation of this size and <code>s</code>.
-         * 
-         * <code>s</code> is added on the right side.
+         * Delegate method for expand(Size). Double dispatch is needed there.
          */
-        public Size expandRight(Size s) {
+        protected Size expandFrom(Size s) {
             return createExpanded(this, s);
         }
-
-        /**
-         * Delegate method for expand(Size) and expandRight(Size). Creates a new size tyhat is the concatenation of a and b.
-         */
-        protected Size createExpanded(Size a, Size b) {
-            int ndims = a.size.length + b.size.length;
-            if (ndims == 0)
-                return Size.SCALAR;
-            MutableSize ns = new MutableSize(ndims);
-            if (a instanceof MutableSize) {
-                MutableSize m = (MutableSize) a;
-                m.evaluate();
-                System.arraycopy(m.exps, 0, ns.exps, 0, m.size.length);
-            }
+        
+        private static Size createExpanded(Size a, Size b) {
+			int ndims = a.size.length + b.size.length;
+			if (ndims == 0)
+				return Size.SCALAR;
+			MutableSize ns = new MutableSize(ndims);
+			if (a instanceof MutableSize) {
+			    MutableSize m = (MutableSize) a;
+			    m.evaluate();
+				System.arraycopy(m.exps, 0, ns.exps, 0, m.size.length);
+			}
             if (b instanceof MutableSize) {
                 MutableSize m = (MutableSize) b;
                 m.evaluate();
                 System.arraycopy(m.exps, 0, ns.exps, a.size.length, m.size.length);
             }
-            System.arraycopy(a.size, 0, ns.size, 0, a.size.length);
-            System.arraycopy(b.size, 0, ns.size, a.size.length, b.size.length);
-            return ns;
-        }
-
+			System.arraycopy(a.size, 0, ns.size, 0, a.size.length);
+			System.arraycopy(b.size, 0, ns.size, a.size.length, b.size.length);
+			return ns;
+		}
+		
         /**
          * Create an FExp that describes the length of dimension <code>d</code>, 
          *        given the supplied variable values.
@@ -3705,7 +3609,7 @@ aspect ArrayHelpers {
          */
         public FExp createSizeFExp(int d, Map<ASTNode, FExp> varMap) {
             evaluate(d);
-            return (okExp(d, true)) ?
+            return (okExp(exps[d], true)) ?
                     exps[d].createSizeFExp(varMap) :
                     super.createSizeFExp(d, varMap);
         }
@@ -3717,22 +3621,11 @@ aspect ArrayHelpers {
 		 */
 		public FExp createFExp(int d) {
 			evaluate(d);
-            return (okExp(d, true)) ?
+            return (okExp(exps[d], true)) ?
 					exps[d].createSizeFExp() : 
 					super.createFExp(d);
 		}
-        
-        /**
-         * Create an FExp that describes the length of dimension <code>d</code>.
-         * 
-         * Uses the FExp even if there is an evaluated size.
-         */
-        public FExp createFExpForced(int d) {
-            return (hasFExp(d)) ?
-                    getFExp(d).createSizeFExp() : 
-                    super.createFExpForced(d);
-        }
-        
+		
 		/**
 		 * Create an FExp that describes the number of elements of this size.
 		 */
@@ -3790,7 +3683,7 @@ aspect ArrayHelpers {
 		 */
 		protected FSubscript flattenFSubscript(int i, FQName prefix) {
 			evaluate(i);
-            return !okExp(i) ? super.flattenFSubscript(i, prefix) : 
+			return exps[i] == null ? super.flattenFSubscript(i, prefix) : 
 				new FExpSubscript(exps[i].flatten(prefix));
 		}
 
@@ -3799,7 +3692,7 @@ aspect ArrayHelpers {
          */
         public FSubscript rangeFSubscript(int i) {
             evaluate(i);
-            return !okExp(i) ? super.rangeFSubscript(i) : 
+            return !okExp(exps[i]) ? super.rangeFSubscript(i) : 
                 new FExpSubscript(new FRangeExp(new FIntegerLitExp(1), exps[i].fullCopy()));
         }
 
@@ -3808,7 +3701,8 @@ aspect ArrayHelpers {
 		 */
 		protected String toString(int i) {
 			evaluate(i);
-            return !okExp(i) ? super.toString(i) : exps[i].prettyPrint("");
+			// TODO: use okExp() instead of "== null"?
+			return exps[i] == null ? super.toString(i) : exps[i].prettyPrint("");
 		}
 		
 		/**
@@ -4568,7 +4462,7 @@ aspect ArrayHelpers {
 		 */
 		protected Indices(Size size) {
 			ndims = size.ndims();
-            this.size = size.evaluated();
+			this.size = size;
 			hash = -1;
 			if (ndims < 4) {
 				int h = 0;

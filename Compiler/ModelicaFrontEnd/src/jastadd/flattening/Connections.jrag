@@ -72,18 +72,10 @@ aspect Connections {
     rewrite FInStream {
         when (rewriteStreams) to FExp {
             // Always create expression from the connection set where the variable is an inside connector. 
-            return expandInStreamExp();
+            String name = ((FIdUseExp) getFExp()).getFIdUse().getFQName().fullCopy().name();
+            ConnectionSet cs = myFClass().getConnectionSetManager().getStreamConnectionSet(name, false);
+            return cs.createInStreamExp(name);
         }
-    }
-    
-    protected FExp FInStream.expandInStreamExp() {
-        String name = ((FIdUseExp) getFExp()).getFIdUse().getFQName().fullCopy().name();
-        ConnectionSet cs = myFClass().getConnectionSetManager().getStreamConnectionSet(name, false);
-        return cs.createInStreamExp(name);
-    }
-    
-    protected FExp FDerInStream.expandInStreamExp() {
-        return getFExp().diff(FExp.TIME);
     }
 
 	/**
@@ -940,8 +932,8 @@ aspect Connections {
                     leftComp.connectTo(leftEntry, rightEntry, prefix, csm, source, buildGraph);
                 }
             }
-            csm.countCardinality(left.getFQName().scalarName());
-            csm.countCardinality(right.getFQName().scalarName());
+            csm.countCardinality(left.name());
+            csm.countCardinality(right.name());
         }
     }
 
@@ -967,8 +959,8 @@ aspect Connections {
                 else
                     csm.addVars(left, right);
             }
-            csm.countCardinality(left.getFQName().scalarName());
-            csm.countCardinality(right.getFQName().scalarName());
+            csm.countCardinality(left.name());
+            csm.countCardinality(right.name());
         }
     }
 
@@ -1087,16 +1079,14 @@ aspect Connections {
 			fi.buildConnectionSets(prefix, csm, connect);
 		}
 	}
-
-    public void FConnectClause.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
-        if (!isDisabled() && connect) {
-            InstAccess left  = getConnector1().getInstAccess();
-            InstAccess right = getConnector2().getInstAccess();
-            left.connectTo(right, prefix, csm, this);
-        }
-    }
-
-    syn boolean FConnectClause.isDisabled() = getConnector1().isDisabled() || getConnector2().isDisabled();
+	
+	public void FConnectClause.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
+		if (!getConnector1().isDisabled() && !getConnector2().isDisabled() && connect) {
+			InstAccess left  = getConnector1().getInstAccess();
+			InstAccess right = getConnector2().getInstAccess();
+			left.connectTo(right, prefix, csm, this);
+		}
+	}
 
 }
 
@@ -2565,14 +2555,12 @@ aspect Cardinality {
         return (e == null) ? 0 : e.peek();
     }
 
-    // Can only be calculated after flattening - give dummy value before that to prevent error messages about structural parameters for cardinality()
-    syn int FExp.cardinalityValue() {
-        throw new UnsupportedOperationException();
+
+    private boolean FCardinality.rewriteCardinality = false;
+    
+    rewrite FCardinality {
+        when (rewriteCardinality) to FIntegerLitExp 
+            new FIntegerLitExp(myFClass().getConnectionSetManager().getCardinality(((FIdUseExp) getFExp()).name()));
     }
-    eq FIdUseExp.cardinalityValue()      = getFIdUse().cardinalityValue();
-    eq FInstAccessExp.cardinalityValue() = 1;
-
-    syn int FIdUse.cardinalityValue()      = myFClass().getConnectionSetManager().getCardinality(scalarName());
-    eq FIdUseInstAccess.cardinalityValue() = 1;
-
+    
 }

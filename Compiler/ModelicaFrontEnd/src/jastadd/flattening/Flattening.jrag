@@ -668,7 +668,7 @@ aspect Flattening {
 		MutableSize res = new MutableSize(size.length);
 		System.arraycopy(size, 0, res.size, 0, size.length);
 		for (int i = 0; i < exps.length; i++) {
-			if (size[i] == Size.UNKNOWN && exps[i] != null) {
+			if (exps[i] != null) {
 				res.exps[i] = exps[i].flatten(prefix);
 				if (context != null)
 					res.exps[i] = context.affixExpression(res.exps[i]);
@@ -808,7 +808,8 @@ aspect Flattening {
     public void InstAssignable.flattenInRecord(FRecordDecl frd, FClass fc, Set<String> names) {
         if (names.add(name())) {
             FVariable fv = createFVariable();
-            fv.modifiableInRecord = isModifiable();
+            if (isConstant() || (isParameter() && getComponentDecl().hasFinal()))
+                fv.modifiableInRecord = false;
             frd.addFVariableNoTransform(fv);
             flattenMyType(fc);
         }
@@ -935,30 +936,27 @@ aspect Flattening {
 	
 	public void InstRecord.addAttributesToFV(List<FAttribute> attr) {
 		super.addAttributesToFV(attr);
-        generateAdditionalAttributes(attr, hasBindingFExp() || variability().knownParameterOrLess());
-    }
-    
-    public void InstComponentDecl.generateAdditionalAttributes(List<FAttribute> attr, boolean isBound) {}
-    
-    public void InstRecord.generateAdditionalAttributes(List<FAttribute> attr, boolean isBound) {
+		generateSizeAttributes(attr);
+//		if (hasBindingFExp())
+//			generateSizeAttributesFromBExp(attr, getBindingFExp());
+	}
+	
+	public void InstComponentDecl.generateSizeAttributes(List<FAttribute> attr) {}
+	
+	public void InstRecord.generateSizeAttributes(List<FAttribute> attr) {
 		for (InstComponentDecl icd : allInstComponentDecls()) {
 			FAttribute a = findMatching(attr, icd.name());
 			boolean create = (a == null);
-            boolean canBind = icd.hasBindingFExp() || icd.variability().knownParameterOrLess();
 			List<FAttribute> list = create ? new List<FAttribute>() : a.getFAttributes();
             if (icd.declaredSizeCalc().isUnknownNoEval())
 				list.add(new FInternalAttribute("size()", icd.size().createFExp()));
-            icd.generateAdditionalAttributes(list, isBound || canBind);
-            if (create && (list.getNumChild() > 0 || (!isBound && canBind))) {
+			icd.generateSizeAttributes(list);
+			if (create && list.getNumChild() > 0) {
 				a = new FAttribute(new FIdUse(icd.getClassName().flatten(new FQNameEmpty())), 
 						new FIdDecl(new FQNameString(icd.name())), 
 						new Opt(), true, 0, new Opt(), new Opt(), list);
 				attr.add(a);
 			}
-            
-            if (!isBound && canBind) {
-                a.setValue(((InstAssignable)icd).flattenBindingFExp());
-            }
 		}
 	}
 	
@@ -1229,6 +1227,14 @@ aspect Flattening {
 	eq FColonSubscript.specify(int index)   = new FIntegerSubscript(index);
 
 	// TODO: The names here needs to be clearer. (Down to and including getInstValueMod().)
+	/**
+	 * Check if the binding expression of an InstAssignable node is set 
+	 *        through a modification that is declared "each".
+	 */
+	syn lazy boolean InstAssignable.myBindingExpHasEach() {
+		return hasInstValueMod() ? myInstValueMod().hasEach() : false;
+	}
+	
 	/**
 	 * Check if this InstAssignable node has an InstModification setting 
 	 *        its binding expression.
@@ -1646,10 +1652,10 @@ aspect FlatExpressions {
             int i = parent.myCallInputs().indexOf(var);
             int d = findDepthOfNestledFunctionCalls();
             return new FArgumentExp(i, d);
-        } else if (!inFunction() && variability().extractNonParameterIndices(getInstAccess().indexVariability())) {
+        } else if (!inFunction() && !getInstAccess().indexVariability().parameterOrLess()) {
             FInstAccessExp copy = (FInstAccessExp) dynamicFExp(fullCopy());
             List<FSubscript> sub = new List<FSubscript>();
-            copy.getInstAccess().extractNonParameterIndices(sub, variability());
+            copy.getInstAccess().extractNonParameterIndexes(sub);
             FExp res = dynamicFExp(new FSubscriptedExp(copy, new FArraySubscripts(sub)));
             return res.flatten(prefix);
         } else {
@@ -1728,16 +1734,16 @@ aspect FlatExpressions {
 
 
     /**
-     * Move any non-parameter indices to given list and replace with colon.
+     * Move any non-parameter indexes to given list and replace with colon.
      * Copy any parameter non-scalar indices to given list.
      */
-    public void InstAccess.extractNonParameterIndices(List<FSubscript> sub, FTypePrefixVariability v) {}
+    public void InstAccess.extractNonParameterIndexes(List<FSubscript> sub) {}
 
-    public void InstArrayAccess.extractNonParameterIndices(List<FSubscript> sub, FTypePrefixVariability v) {
+    public void InstArrayAccess.extractNonParameterIndexes(List<FSubscript> sub) {
         FArraySubscripts fas = getFArraySubscripts();
         for (int i = 0, n = fas.getNumFSubscript(); i < n; i++) {
             FSubscript fs = fas.getFSubscript(i);
-            if (v.extractNonParameterIndices(fs.variability())) {
+            if (!fs.variability().parameterOrLess()) {
                 sub.add(fs);
                 fas.setFSubscript(new FColonSubscript(), i);
             } else if (fs.ndims() == 1) {
@@ -1746,23 +1752,16 @@ aspect FlatExpressions {
         }
     }
 
-    public void InstComponentAccess.extractNonParameterIndices(List<FSubscript> sub, FTypePrefixVariability v) {
-        if (isArray()) {
-            for (int i = 0, n = ndims(); i < n; i++) {
+    public void InstComponentAccess.extractNonParameterIndexes(List<FSubscript> sub) {
+        if (isArray())
+            for (int i = 0, n = ndims(); i < n; i++)
                 sub.add(size().rangeFSubscript(i));
-            }
-        }
     }
 
-    public void InstDot.extractNonParameterIndices(List<FSubscript> sub, FTypePrefixVariability v) {
-        for (InstAccess ia : getInstAccesss()) {
-            ia.extractNonParameterIndices(sub, v);
-        }
+    public void InstDot.extractNonParameterIndexes(List<FSubscript> sub) {
+        for (InstAccess ia : getInstAccesss())
+            ia.extractNonParameterIndexes(sub);
     }
-    
-    syn boolean FTypePrefixVariability.extractNonParameterIndices(FTypePrefixVariability other) = !other.parameterOrLess();
-    eq FConstant.extractNonParameterIndices(FTypePrefixVariability other) = !other.knownParameterOrLess();
-    eq FKnownParameter.extractNonParameterIndices(FTypePrefixVariability other) = !other.knownParameterOrLess();
 
 	/**
 	 * Check if this access is in the binding expression of an input to a function 
@@ -2236,12 +2235,13 @@ aspect FlatExpressions {
 		Opt level = hasLevel() ? new Opt(getLevel().flatten(prefix)) : new Opt();
 		return new FAssert(getTest().flatten(prefix), getMsg().flatten(prefix), level); 
 	}
-
-    public FCardinality FCardinality.flatten(FQName prefix) { 
-        FCardinality res = new FCardinality(getFExp().flatten(prefix));
-        return res;
-    }
-
+	                     
+	public FCardinality FCardinality.flatten(FQName prefix) { 
+	    FCardinality res = new FCardinality(getFExp().flatten(prefix));
+	    res.rewriteCardinality = true;
+	    return res;
+	}
+	
 	public FConnectionsOp FConnectionsOp.flatten(FQName prefix) { throw new UnsupportedOperationException(); }
 	public FConnectionsOp FConnBoolOp.flatten(FQName prefix) {
 		FConnBoolOp res = createNode(getA().flatten(prefix));
@@ -2294,7 +2294,7 @@ aspect FlatExpressions {
 	}
 	
 	public FExp FExp.flattenDer(FQName prefix, int order) {
-		return dynamicFExp(diff(TIME, order)).flatten(prefix);
+		return diff(TIME, order).flatten(prefix);
 	}
 
     public FDerExp FInstAccessExp.flattenDer(FQName prefix, int order) {
@@ -2321,32 +2321,14 @@ aspect FlatExpressions {
 	}
 	
 	public FTimeExp FTimeExp.flatten(FQName prefix) { return new FTimeExp(); }
-    public FExp  FEndExp.flatten(FQName prefix)  { return dynamicFExp(mySize().createFExp(0)).flatten(prefix); }
+	public FEndExp  FEndExp.flatten(FQName prefix)  { return new FEndExp(); }
 	
 	public FRecordConstructor InstRecordConstructor.flatten(FQName prefix) {
 		List args = new List();
-        int i = 0;
-        for (InstComponentDecl icd : getRecord().myInstClassDecl().allInstComponentDecls()) {
-            if (icd.isModifiable()) {
-                args.add(getArg(i++).flatten(prefix));
-            } else {
-                args.add(icd.flattenInRecordConstructor(prefix));
-            }
-        }
+		for (InstFunctionArgument a : getArgs()) 
+			args.add(a.flatten(prefix));
 		return new FRecordConstructor(getRecord().flattenRecordName(), args);		
 	}
-	
-    public FExp InstComponentDecl.flattenInRecordConstructor(FQName prefix) {
-        return null;
-    }
-    
-    public FExp InstAssignable.flattenInRecordConstructor(FQName prefix) {
-        if (hasBindingFExp()) {
-            return flattenBindingFExp();
-        } else {
-            return cevalNoBExp(defaultVariableEvaluator(), Index.NULL).buildLiteral();
-        }
-    }
 	
 	public FIdUse InstAccess.flattenRecordName() {
 		return new FIdUse(myInstClassDecl().qualifiedName());

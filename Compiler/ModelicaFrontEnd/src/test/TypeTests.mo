@@ -122,19 +122,19 @@ Semantic error at line 96, column 4:
 			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 130, column 10:
-  The type of the binding expression of the attribute start for the variable y does not match the declared type of the variable
+  The type of the binding expression of the attribute start does not match the declared type of the variable
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 130, column 21:
-  The type of the binding expression of the attribute unit for the variable y does not match the declared type of the variable
+  The type of the binding expression of the attribute unit does not match the declared type of the variable
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 130, column 28:
-  The type of the binding expression of the attribute nominal for the variable y does not match the declared type of the variable
+  The type of the binding expression of the attribute nominal does not match the declared type of the variable
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 130, column 40:
-  The type of the binding expression of the attribute min for the variable y does not match the declared type of the variable
+  The type of the binding expression of the attribute min does not match the declared type of the variable
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 130, column 49:
-  The type of the binding expression of the attribute max for the variable y does not match the declared type of the variable
+  The type of the binding expression of the attribute max does not match the declared type of the variable
 ")})));
 	end TypeTest6;
 
@@ -420,10 +420,7 @@ model AbsType5
             name="AbsType5",
             description="abs() operator: String arg",
             errorMessage="
-2 errors found:
-Error: in file '...':
-Semantic error at line 415, column 14:
-  Could not evaluate binding expression of structural parameter x
+1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
 Semantic error at line 416, column 27:
   Calling function abs(): types of positional argument 1 and input v are not compatible
@@ -1895,19 +1892,13 @@ model StringExpType1
             name="StringExpType1",
             description="",
             errorMessage="
-4 errors found:
-Error: in file '...':
-Semantic error at line 1886, column 20:
-  Could not evaluate binding expression of structural parameter a
-Error: in file '...':
-Semantic error at line 1887, column 30:
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 1802, column 30:
   Calling function String(): types of positional argument 1 and input x are not compatible
     type of '{1, 2}' is Integer[2]
-Error: in file '...':
-Semantic error at line 1887, column 36:
-  Could not evaluate binding expression of structural parameter b
-Error: in file '...':
-Semantic error at line 1888, column 30:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 1803, column 30:
   Calling function String(): types of positional argument 1 and input x are not compatible
     type of '\"a\"' is String
 ")})));
@@ -2588,49 +2579,5 @@ Semantic error at line 2539, column 21:
   Circularity in binding expression of parameter: a = if a < 2 then 3 else 1
 ")})));
 end CircularIfExp6;
-
-model DivType1
-    function f
-        input Integer n;
-        output Real[n] x;
-        Real[:] t = 1:5;
-    algorithm
-        x := t[div(2:n+1,n)];
-    end f;
-    
-    Real[3] x = f(3);
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="DivType1",
-            description="Type calculation for div() operator",
-            flatModel="
-fclass TypeTests.DivType1
- parameter Real x[1];
- constant Real x[2] = 1;
- constant Real x[3] = 1;
-parameter equation
- ({x[1], , }) = TypeTests.DivType1.f(3);
-
-public
- function TypeTests.DivType1.f
-  input Integer n;
-  output Real[:] x;
-  Real[5] t;
- algorithm
-  size(x) := {n};
-  t[1] := 1;
-  t[2] := 2;
-  t[3] := 3;
-  t[4] := 4;
-  t[5] := 5;
-  for i1 in 1:max(integer(n + 1 - 2) + 1, 0) loop
-   x[i1] := t[div(2 + (i1 - 1), n)];
-  end for;
-  return;
- end TypeTests.DivType1.f;
-
-end TypeTests.DivType1;
-")})));
-end DivType1;
 
 end TypeTests;

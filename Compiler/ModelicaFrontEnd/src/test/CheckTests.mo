@@ -300,65 +300,6 @@ Semantic error at line 261, column 14:
 ")})));
 end FunctionNoAlgorithm3;
 
-
-model FunctionNoAlgorithm4
-    function f
-        input Real x;
-        output Real y;
-    end f;
-    
-    function f2 = f3;
-    
-    replaceable function f3 = f;
-
-    Real z = f2(time);
-    Integer y = 1.2; // Generate an error to be able to use error test case
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="FunctionNoAlgorithm4",
-            description="",
-            checkType=check,
-            errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
-Semantic error at line 315, column 17:
-  The binding expression of the variable y does not match the declared type of the variable
-")})));
-end FunctionNoAlgorithm4;
-
-
-model FunctionNoAlgorithm5
-    function f
-        input Real x;
-        output Real y;
-    end f;
-    
-    model A
-        replaceable function f2 = f;
-        Real z = f2(time);
-    end A;
-    
-    replaceable function f3 = f;
-
-    A a(redeclare function f2 = f3);
-    Integer y = 1.2; // Generate an error to be able to use error test case
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="FunctionNoAlgorithm5",
-            description="",
-            checkType=check,
-            errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
-Semantic error at line 345, column 17:
-  The binding expression of the variable y does not match the declared type of the variable
-")})));
-end FunctionNoAlgorithm5;
-
-
-
 model IfEquationElse1
   Real x;
 equation
@@ -1005,34 +946,5 @@ Semantic error at line 936, column 10:
   Calling function spatialDistribution(): missing argument for required input positiveVelocity
 ")})));
 end SpatialDist1;
-
-model FixedFalseIfEquTest1
-    Real x;
-    parameter Boolean b(fixed=false);
-  initial equation
-    b = true;
-  equation
-    if b then
-        x = time;
-    else
-        x = 0;
-    end if;
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="FixedFalseIfEquTest1",
-            description="Test that fixed false parameter if test in if equation is not marked as structural.",
-            flatModel="
-fclass CheckTests.FixedFalseIfEquTest1
- Real x;
- parameter Boolean b(fixed = false);
-initial equation 
- b = true;
-equation
- x = if b then time else 0;
-end CheckTests.FixedFalseIfEquTest1;
-
-")})));
-end FixedFalseIfEquTest1;
 
 end CheckTests;

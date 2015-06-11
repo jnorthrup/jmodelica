@@ -27,8 +27,8 @@
 
 #include "jmi_brent_search.h"
 
-#define BRENT_BASE_LOG_LEVEL 7     /* Minimal Brent printouts log level */
-#define BRENT_EXTENDED_LOG_LEVEL 8 /* Extended Brent printouts log level */
+#define BRENT_BASE_LOG_LEVEL 6     /* Minimal Brent printouts log level */
+#define BRENT_EXTENDED_LOG_LEVEL 7 /* Extended Brent printouts log level */
 
 #define BRENT_INITIAL_STEP_FACTOR 0.001 /* Initial bracketing step as a fraction of nominal */
 #define BRENT_MAX_NEWTON 10 /* Max number of Newton iteration */
@@ -247,7 +247,7 @@ static int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, d
         delta = f/df;
         
         if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
-            jmi_log_fmt(block->log, node, logInfo, "Iteration variable <ivs: %f>, Function value <f: %f>, Derivative value <df: %f>, Delta <delta:%f>",
+            jmi_log_fmt(block->log, node, logInfo, "Iteration variable <ivs: %f>, Function value <f: %f>, Dervative value <df: %f>, Delta <delta:%f>",
             x,f,df,delta);
         }
         

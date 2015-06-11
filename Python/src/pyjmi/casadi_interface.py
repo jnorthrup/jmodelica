@@ -26,8 +26,6 @@ import sys
 import casadi
 from collections import OrderedDict, Iterable
 from pyjmi.common.core import TrajectoryLinearInterpolation
-import pyjmi.common.io
-import pyfmi.common.io
 
 try:
     import modelicacasadi_wrapper
@@ -224,7 +222,6 @@ def linearize_dae_with_point(optProblem,t0,z0):
             
         
     """
-    optProblem.calculateValuesForDependentParameters()
     
     # Get model variable vectors
     var_kinds = {'dx': optProblem.DERIVATIVE,
@@ -473,7 +470,6 @@ def linearize_dae_with_simresult(optProblem, t0, sim_result):
             dictionary with the values for the reference point 
             around which the linearization is done
     """
-    optProblem.calculateValuesForDependentParameters()
     
     # Get model variable vectors
     var_kinds = {'dx': optProblem.DERIVATIVE,
@@ -597,7 +593,7 @@ def linearize_dae_with_simresult(optProblem, t0, sim_result):
             name = var.getName()
             try:
                 data = sim_result.result_data.get_variable_data(name)
-            except (pyfmi.common.io.VariableNotFoundError, pyjmi.common.io.VariableNotFoundError):
+            except VariableNotFoundError:
                 print("Warning: Could not find initial " +
                       "trajectory for variable " + name +
                       ". Using initialGuess attribute value " +

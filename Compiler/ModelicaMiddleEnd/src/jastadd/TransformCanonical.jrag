@@ -343,14 +343,6 @@ aspect TransformCanonical {
         return daeFVariableEquationBlockMap;
     }
 
-    private HashMap<FAbstractEquation, AbstractEquationBlock> FClass.daeEquationEquationBlockMap =
-            new HashMap<FAbstractEquation, AbstractEquationBlock>();
-
-    syn HashMap<FAbstractEquation,AbstractEquationBlock> FClass.getDAEFEquationEquationBlockMap() {
-        transformCanonical();
-        return daeEquationEquationBlockMap;
-    }
-
     syn lazy AbstractEquationBlock FVariable.myDAEInitEquationBlock() = 
             myFClass().getDAEInitFVariableEquationBlockMap().get(this);
 
@@ -358,12 +350,6 @@ aspect TransformCanonical {
     syn HashMap<FVariable,AbstractEquationBlock> FClass.getDAEInitFVariableEquationBlockMap() {
         transformCanonical();
         return daeInitFVariableEquationBlockMap;
-    }
-
-    private HashMap<FAbstractEquation,AbstractEquationBlock> FClass.daeInitEquationEquationBlockMap = new HashMap<FAbstractEquation,AbstractEquationBlock>();
-    syn HashMap<FAbstractEquation,AbstractEquationBlock> FClass.getDAEInitEquationEquationBlockMap() {
-        transformCanonical();
-        return daeInitEquationEquationBlockMap;
     }
 
     private ArrayList<FAbstractEquation> FClass.daeUnmatchedEquations = new ArrayList<FAbstractEquation>();
@@ -399,18 +385,9 @@ aspect TransformCanonical {
     public void FClass.setDAEBLT(BLT newBLT) {
         daeBLT = newBLT;
         daeFVariableEquationBlockMap = new HashMap<FVariable, AbstractEquationBlock>();
-        daeEquationEquationBlockMap = new HashMap<FAbstractEquation, AbstractEquationBlock>();
-
-        for (AbstractEquationBlock eb : daeBLT) {
-            for (FVariable fv : eb.allVariables()) {
+        for (AbstractEquationBlock eb : daeBLT)
+            for (FVariable fv : eb.allVariables())
                 daeFVariableEquationBlockMap.put(fv,eb);
-            }
-
-            for (FAbstractEquation equation : eb.allEquations()) {
-            	daeEquationEquationBlockMap.put(equation, eb);
-            }
-        }
-
         if (newBLT == BLT.EMPTY_BLT)
             daeStructuredBLT = BLT.EMPTY_BLT;
         else
@@ -434,15 +411,9 @@ aspect TransformCanonical {
     public void FClass.setDAEInitBLT(BLT newBLT) {
         daeInitBLT = newBLT;
         daeInitFVariableEquationBlockMap = new HashMap<FVariable, AbstractEquationBlock>();
-        daeInitEquationEquationBlockMap = new HashMap<FAbstractEquation, AbstractEquationBlock>();
-
         for (AbstractEquationBlock eb : daeInitBLT) {
             for (FVariable fv : eb.allVariables()) {
                 daeInitFVariableEquationBlockMap.put(fv,eb);
-            }
-
-            for (FAbstractEquation equation : eb.allEquations()) {
-                daeInitEquationEquationBlockMap.put(equation, eb);
             }
         }
         daeInitBLT.computeDependencies();
@@ -1857,12 +1828,8 @@ aspect TransformCanonical {
 			if (!equation.isAliasEquation()) 
 				eqns.add(equation);
 
-        // Collect derivative binding equations, however only if we are going
-        // to perform index reduction!
-        if (myOptions().getBooleanOption("propagate_derivatives")) {
-            for (FAbstractEquation eqn : eqns) {
-                eqn.propagateDerivativeBindings();
-            }
+        for (FAbstractEquation eqn : eqns) {
+            eqn.propagateDerivativeBindings();
         }
 
 		setFVariableList(new List(nonAliasVars));
@@ -1941,7 +1908,7 @@ aspect TransformCanonical {
 	
 	boolean FIdUseExp.rewriteAlias = false;
 	boolean FAssignStmt.rewriteAlias = false;
-
+	
     /**
      * FIdUses referring to alias variables need to be changed to 
      * FIdUses referring to their alias targets. 
@@ -1978,37 +1945,27 @@ aspect TransformCanonical {
             }
         }
     }
-
-    rewrite FPreExp {
-        when (rewriteAlias) to FExp {
-            if (myNonPreFV().isFVariable() && myNonPreFV().isAlias()) {
-                FVariable fv = (FVariable) myNonPreFV();
-                FExp new_exp = fv.alias().createFPreExp();
-                if (fv.isNegated()) 
-                    new_exp = new FNegExp(new_exp);
-                return new_exp;
-            } else {
-                rewriteAlias = false;
-                return this;
-            }
-        }
-    }
-
-    rewrite FAssignStmt {
-        when (rewriteAlias) to FAssignStmt {
-            if (getLeft().myFV().isFVariable() && getLeft().myFV().isAlias()) {
-                FVariable fv = (FVariable) getLeft().myFV();
-                setLeft(fv.alias().createUseExp());
-                if (fv.isNegated()) 
-                    setRight(new FNegExp(getRight()));
-                return this;
-            } else {
-                rewriteAlias = false;
-                return this;
-            }
-        }
-    }
-
+	
+	rewrite FPreExp {
+		when (rewriteAlias && myNonPreFV().isFVariable() && myNonPreFV().isAlias()) to FExp {
+			FVariable fv = (FVariable) myNonPreFV();
+			FExp new_exp = fv.alias().createFPreExp();
+			if (fv.isNegated()) 
+				new_exp = new FNegExp(new_exp);
+			return new_exp;
+		}
+	}
+	
+	rewrite FAssignStmt {
+		when (rewriteAlias && getLeft().myFV().isFVariable() && getLeft().myFV().isAlias()) to FAssignStmt {
+			FVariable fv = (FVariable) getLeft().myFV();
+			setLeft(fv.alias().createUseExp());
+			if (fv.isNegated()) 
+				setRight(new FNegExp(getRight()));
+			return this;
+		}
+	}
+	
     /**
      * FDerExps referring to alias variables need to be changed to 
      * FDerExps referring to their alias targets. 
@@ -2316,30 +2273,9 @@ aspect TransformCanonical {
 	}
 
 	public FType FClass.createEquivalentRecordType(FType old) {
-        FRecordDecl rec = equivalentRecordMap.get(old.name());
-        if (rec == null) {
-            return old;
-        }
-        FType t = rec.type().fullCopy();
-        t.transferSizes(old);
-        return t;
-    }
-    
-    public void FType.transferSizes(FType t) {
-        if (!t.isUnknown()) {
-            setSize(t.getSize());
-        }
-    }
-    
-    public void FRecordType.transferSizes(FType t) {
-        super.transferSizes(t);
-        if (!t.isUnknown()) {
-            FRecordType rt = (FRecordType) t;
-            for (int i = 0; i < getNumComponent(); i++) {
-                getComponent(i).getFType().transferSizes(rt.getComponent(i).getFType());
-            }
-        }
-    }
+		FRecordDecl rec = equivalentRecordMap.get(old.name());
+		return (rec != null) ? rec.type().sizedType(old.size()).fullCopy() : old;
+	}
 	
 	public void FClass.insertTempsInLHS() {
 		for (FAbstractEquation equation : getFAbstractEquations()) {

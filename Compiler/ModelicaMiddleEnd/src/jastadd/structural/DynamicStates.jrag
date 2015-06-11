@@ -508,8 +508,8 @@ aspect DynamicStateSelect{
                                 break;
                             default:
                                 sb.append('*');
-                            }
                         }
+                    }
                     }
                     sb.append('\n');
                 }

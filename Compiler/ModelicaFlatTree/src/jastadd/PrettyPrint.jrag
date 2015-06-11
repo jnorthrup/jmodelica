@@ -1019,8 +1019,7 @@ aspect FlatPrettyPrint {
 
 	syn String FVariable.prettyPrintType() = 
 		getDerivedType().isEmpty() ? type().scalarType().toString() : getDerivedType();
-	syn String FAbstractVariable.displayName()  = name();
-	eq FVariable.displayName()                  = getFQName().toString();
+	syn String FVariable.displayName()          = getFQName().toString();
 	eq FDerivativeVariable.displayName()        = name();
 	eq FPreBooleanVariable.displayName()        = name();
 	eq FPreEnumVariable.displayName()           = name();
@@ -1915,7 +1914,6 @@ aspect FlatPrettyPrint {
     eq FCardinality.builtInName()        = "cardinality";
 	eq FSemiLinearExp.builtInName()      = "semiLinear";
 	eq FInStream.builtInName()           = "inStream";
-	eq FDerInStream.builtInName()        = "derInStream";
 	eq FActualStream.builtInName()       = "actualStream";
 	eq FGetInstanceName.builtInName()    = "getInstanceName";
 	eq FConnBranch.builtInName()         = "Connections.branch";
@@ -2021,20 +2019,6 @@ aspect FlatPrettyPrint {
     eq Operator.toString()            = "operator";
     eq OperatorRecord.toString()      = "operator record";
     eq OperatorFunction.toString()    = "operator function";
-
-    syn String InstRestriction.toString();
-    eq InstModel.toString()               = "model";
-    eq InstBlock.toString()               = "block";
-    eq InstMClass.toString()              = "class";
-    eq InstConnector.toString()           = "connector";
-    eq InstExpandableConnector.toString() = "expandable connector";
-    eq InstMType.toString()               = "type";
-    eq InstMPackage.toString()            = "package";
-    eq InstFunction.toString()            = "function";
-    eq InstMRecord.toString()             = "record";
-    eq InstOperator.toString()            = "operator";
-    eq InstOperatorRecord.toString()      = "operator record";
-    eq InstOperatorFunction.toString()    = "operator function";
 
     syn String ComponentDecl.toString() = prettyPrint("");
     syn String Access.toString()        = prettyPrint("");
