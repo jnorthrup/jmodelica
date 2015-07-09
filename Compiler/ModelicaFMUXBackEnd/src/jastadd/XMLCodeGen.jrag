@@ -533,9 +533,6 @@ aspect XMLCodeGen {
 			
 	}
 
-    syn String FVariable.quantityXML(GenericXMLGenerator gen)    =  gen.replaceIllegalChars(quantityAttribute());
-    syn String FVariable.unitXML(GenericXMLGenerator gen)        =  gen.replaceIllegalChars(unitAttribute());
-    syn String FVariable.displayUnitXML(GenericXMLGenerator gen) =  gen.replaceIllegalChars(displayUnitAttribute());
 	
 }//aspect end
 
@@ -631,6 +628,7 @@ aspect XMLTagBinding{
         eq FIntegerSubscript.xmlTag() = "IndexExpression";
         
         eq InstForStmt.xmlTag() = "For";
+        eq InstAssignStmt.xmlTag() = "Assign";
         eq FExternalStmt.xmlTag() = "External";
         eq FWhenStmt.xmlTag() = "When";
     	

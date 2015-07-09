@@ -102,7 +102,7 @@ aspect FlatNames {
                 prefix.copyAndAppend(name(), size().flattenFArraySubscripts(prefix)) :
                 prefix.copyAndAppend(name());
     eq InstArrayComponentDecl.appendMyName(FQName prefix)    = 
-        (getIndex() > 0) ? prefix.copyAndAddSubscript(new FIntegerSubscript(getIndex())) : prefix;
+        prefix.copyAndAddSubscript(new FIntegerSubscript(getIndex()));
     eq InstEnumLiteral.appendMyName(FQName prefix)           = prefix.copyAndAppend(name());
     
     inh lazy FQName InstNode.retrieveFQName();
@@ -112,8 +112,7 @@ aspect FlatNames {
     eq InstReplacingRecord.getOriginalInstComponent().retrieveFQName()    = retrieveFQName();
     eq InstReplacingComposite.getOriginalInstComponent().retrieveFQName() = retrieveFQName();
     eq InstReplacingPrimitive.getOriginalInstComponent().retrieveFQName() = retrieveFQName();
-    eq InstReplacingShortClassDecl.getChild().retrieveFQName()            = (isFunction() || isRecord()) ? new FQNameEmpty() : retrieveFQName();
-    eq InstReplacingSimpleShortClassDecl.getChild().retrieveFQName()      = (isFunction() || isRecord()) ? new FQNameEmpty() : retrieveFQName();
+    eq InstReplacingShortClassDecl.getChild().retrieveFQName()            = isFunction() || isRecord() ? new FQNameEmpty() : retrieveFQName();
     eq InstClassDecl.getChild().retrieveFQName()                          = new FQNameEmpty();
     eq InstValueModification.getChild().retrieveFQName()                  = retrieveFQNameFromModification();
     eq InstForIndex.getChild().retrieveFQName()                           = new FQNameEmpty();
@@ -189,9 +188,6 @@ aspect FlatNames {
     syn String FQName.lastActualPartName() = lastPartName();
     eq FQNameString.lastActualPartName()   = getName().substring(getName().lastIndexOf('.') + 1);
 
-    syn String FQName.lastActualTypePartName() = lastPartName();
-    eq FQNameString.lastActualTypePartName()   = getName().substring(Math.max(getName().lastIndexOf('.'), getName().lastIndexOf(':')) + 1);
-    
     /**
      * Gets the prefix name parts. Considers FQNameString as having one part for each '.'-separated substring.
      */
@@ -345,6 +341,7 @@ aspect FlatNames {
     syn String FIdUseExp.name()        = getFIdUse().name();
     eq FAbstractDerExp.name()          = derName(order());
     eq FPreExp.name()                  = preName();
+    syn String FInstAccessExp.name()   = getInstAccessNoTransform().name();
     syn String FIdUseInstAccess.name() = getInstAccessNoTransform().name();
     
     syn String FIdDecl.name() = getFQNameNoTransform().name();
@@ -1062,8 +1059,8 @@ aspect FlatNames {
     /**
      * Create an access to this variable, from a scope where it can be accessed unqualified.
      */
-    public FIdUseExp InstComponentDecl.createUseExp() {
-        return new FIdUseExp(new FIdUseInstAccess(new InstComponentAccess(name())));
+    public FInstAccessExp InstComponentDecl.createUseExp() {
+        return new FInstAccessExp(new InstComponentAccess(name()));
     }
 
     /**
@@ -1071,8 +1068,8 @@ aspect FlatNames {
      */
     abstract public FExp CommonAccess.createFExp();
 
-    public FIdUseExp InstAccess.createFExp() {
-        return new FIdUseExp(new FIdUseInstAccess(this));
+    public FInstAccessExp InstAccess.createFExp() {
+        return new FInstAccessExp(this);
     }
 
     public FIdUseExp FIdUse.createFExp() {
@@ -1297,7 +1294,8 @@ aspect FlatFunctionUtils {
      /**
       * May this component be altered by a modification?
       */
-     syn boolean InstComponentDecl.isModifiable() = !(isConstant()&& hasBindingExp()) && !(isParameter() && getComponentDecl().hasFinal());
+     syn boolean InstComponentDecl.isModifiable() = !isConstant() && !getComponentDecl().hasFinal();
+     // TODO: Are there other reasons a component might not be modifiable?
      
      /**
       * Returns a list of all FFunctionVariables declared as "input".

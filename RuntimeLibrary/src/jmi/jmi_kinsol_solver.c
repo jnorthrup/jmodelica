@@ -243,6 +243,8 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
         for (j = 0; j < N; j++) {
           realtype sqrt_relfunc = kin_mem->kin_sqrt_relfunc;
             
+          /* Generate the jth col of Jac(u) */      
+          N_VSetArrayPointer(DENSE_COL(J,j), jthCol);
       
           ujsaved = u_data[j];
           ujscale = ONE/uscale_data[j];
@@ -269,18 +271,15 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
           u_data[j] = ujsaved;
       
           inc_inv = ONE/inc;
-          /* Generate the jth col of Jac(u) */
-          N_VSetArrayPointer(DENSE_COL(J, j), jthCol);
-          N_VLinearSum(inc_inv, ftemp, -inc_inv, fu, jthCol);
-          /* Restore original array pointer in tmp2 */
-          N_VSetArrayPointer(tmp2_data, tmp2);
+          N_VLinearSum(inc_inv, ftemp, -inc_inv, fu, jthCol);      
         }
       
         /* Evaluate the residual with the original u vector to avoid that the initial guess 
            for the final IV is pertubated when the iterations start*/
         /*ret = kin_f(u, ftemp, block);*/
 
-       
+        /* Restore original array pointer in tmp2 */
+        N_VSetArrayPointer(tmp2_data, tmp2);
         if (block->options->block_jacobian_check) {
             jac_fd = (realtype*) calloc(N * N, sizeof(realtype));
             for (i = 0; i < N * N; i++) {
@@ -950,6 +949,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
 /* Form regualrized matrix Transpose(J).J */
 static void jmi_kinsol_reg_matrix(jmi_block_solver_t * block) {
     jmi_kinsol_solver_t* solver = block->solver;
+    /*    jmi_t * jmi = block->jmi; */
     int i,j,k;
     realtype **JTJ_c =  solver->JTJ->cols;
     realtype **jac = solver->J->cols;

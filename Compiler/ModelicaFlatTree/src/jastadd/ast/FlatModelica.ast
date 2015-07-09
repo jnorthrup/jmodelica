@@ -40,6 +40,7 @@ FClass : BaseNode ::= FQName
                       /UnknownFVariable/
                       FResidualPair*
                       FAttribute*
+                      DummyVariable:FVariable*
                       /[FDynamicResolver]/
                       DynamicStateManager;
 
@@ -155,13 +156,7 @@ FDiscrete : FTypePrefixVariability;
 /**
  * Parameter variability.
  */
-abstract FParameter : FTypePrefixVariability;
-
-FNonFixedParameter : FParameter;
-
-FFixedParameter : FParameter;
-
-FIndexParameter : FParameter;
+FParameter : FTypePrefixVariability;
 
 /**
  * Parameter with known value variability
@@ -704,6 +699,11 @@ FDerivativeAlgorithm : FAlgorithm ::=  <Order:int>;
 abstract FStatement : BaseNode;
 
 /**
+ * An assignment statement in the instance tree.
+ */
+InstAssignStmt : FStatement ::= Left:FIdUseInstAccess Right:FExp;
+
+/**
  * A flattened assignment statement.
  */
 FAssignStmt : FStatement ::= Left:FIdUseExp Right:FExp;
@@ -1161,6 +1161,13 @@ InstHDerExp : InstDerExp ::= <Order:int>;
  * Identifier in the instance tree.
  */
 FIdUseInstAccess : FIdUse ::= InstAccess;
+
+/**
+ * Identifiers in instantiated expressions.
+ *
+ * Instantiated expressions occurs in the instance tree.
+ */
+FInstAccessExp : FAbstractArrayExp ::= InstAccess;
 
 /**
  * Record constructor.
@@ -1694,12 +1701,6 @@ abstract FStreamBuiltIn : FVectUnaryBuiltIn;
  * InStream built-in function.
  */
 FInStream : FStreamBuiltIn;
-
-/**
- * Derivative of instream. Temporary expression created by der(inStream()) rewrites
- * and removed after connection sets are built.
- */
-FDerInStream : FInStream;
 
 /**
  * ActualStream built-in function.

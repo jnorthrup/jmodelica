@@ -228,11 +228,9 @@ static int model_init_Fp(jmi_t* jmi, jmi_real_t** res) {
 	return -1;
 }
 
-$C_DAE_initial_dependent_parameter_assignments$
-
 static int model_init_eval_parameters(jmi_t* jmi) {
-    model_init_eval_parameters_base(jmi);
-    return 0;
+$C_DAE_initial_dependent_parameter_assignments$
+        return 0;
 }
 
 static int model_init_R0(jmi_t* jmi, jmi_real_t** res) {
@@ -286,10 +284,8 @@ int jmi_destruct_external_objs(jmi_t* jmi) {
 	return 0;
 }
 
-$C_set_start_values$
-
 int jmi_set_start_values(jmi_t* jmi) {
-    jmi_set_start_values_base(jmi);
+$C_set_start_values$
     return 0;
 }
 

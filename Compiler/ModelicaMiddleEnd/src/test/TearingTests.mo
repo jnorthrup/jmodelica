@@ -281,7 +281,7 @@ model BLTError1
     Real r,s;
 equation
     i = j + integer(time) + integer(s);
-    j = 1/i;
+    i * j = 0;
     r = i * time;
     s = r * 3.14;
 
@@ -295,7 +295,7 @@ equation
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/TearingTests.mo':
 Semantic error at line 0, column 0:
   Non-real equation used as residual:
-i = j + temp_2 + temp_1
+i * j = 0
 ")})));
 end BLTError1;
 

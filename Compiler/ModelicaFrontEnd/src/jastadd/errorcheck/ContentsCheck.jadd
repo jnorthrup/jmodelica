@@ -193,17 +193,17 @@ aspect ContentCheck {
 
     inh boolean InstModification.isForAttributeOnOperatorRecordDeclarationMember();
     eq InstNode.getChild().isForAttributeOnOperatorRecordDeclarationMember()                                 = false;
-    eq InstCompleteModification.getInstValueModification().isForAttributeOnOperatorRecordDeclarationMember() = // TODO: not needed?
+    eq InstCompleteModification.getInstValueModification().isForAttributeOnOperatorRecordDeclarationMember() = 
         isForAttributeOnOperatorRecordDeclarationMember();
-    eq InstElementModification.getInstModification().isForAttributeOnOperatorRecordDeclarationMember()       =
-        getName().myInstComponentDecl().isPrimitive() && isForOperatorRecordDeclarationMember();
+    eq InstComponentModification.getInstModification().isForAttributeOnOperatorRecordDeclarationMember()     =
+        isForOperatorRecordDeclarationMember();
 
-    inh boolean InstNamedModification.isForOperatorRecordDeclarationMember();
-    eq InstElementModification.getChild().isForOperatorRecordDeclarationMember() = 
-        getName().isComponentAccess() && isForOperatorRecordDeclarationMember();
-    eq InstClassDecl.getChild().isForOperatorRecordDeclarationMember()           = isOperatorRecord();
-    eq InstExtends.getChild().isForOperatorRecordDeclarationMember()             = myInstClass().isOperatorRecord();
-    eq InstNode.getChild().isForOperatorRecordDeclarationMember()                = false;
+    syn boolean InstNamedModification.isForOperatorRecordDeclarationMember() = 
+        getName().myInstComponentDecl().isOperatorRecordDeclarationMember();
+
+    inh boolean InstComponentDecl.isOperatorRecordDeclarationMember();
+    eq InstClassDecl.getChild().isOperatorRecordDeclarationMember() = isOperatorRecord();
+    eq Root.getChild().isOperatorRecordDeclarationMember()          = false;
 
 	public void InstFunctionCall.contentCheck(ErrorCheckType checkType) {
        if (generated) {
@@ -224,8 +224,8 @@ aspect ContentCheck {
 	}
 
     public void InstComponentDecl.contentCheck(ErrorCheckType checkType) {
-        if (!inFunction()) // Array sizes outside functions should be structural parameters
-            size().forceVariability(checkType, fStructParameter());
+        if (!inFunction() && hasFArraySubscripts()) // Array sizes outside functions should be structural parameters
+            getFArraySubscripts().forceVariability(checkType, fStructParameter());
         checkQuotedIdentifier(getComponentDecl(), getComponentDecl().getName().getID());
     }
 
@@ -338,46 +338,28 @@ aspect ContentCheck {
         super.contentCheck(checkType);
         checkQuotedIdentifier(this, getID());
     }
-    
+
 	/**
-	 * Check if this equation may legally contain a connect clause.
+     * Check if this equation is in a place that allows connect clauses.
 	 */
-    public void FAbstractEquation.checkMayContainConnect(ErrorCheckType checkType, FConnectClause connect) {
-        FAbstractEquation context = surroundingFAbstractEquation();
-        if (context != null) {
-            context.checkMayContainConnect(checkType, connect);
-        }
-    }
-    
-    public void FWhenEquation.checkMayContainConnect(ErrorCheckType checkType, FConnectClause connect) {
-        super.checkMayContainConnect(checkType, connect);
-        connect.error("Connect clauses are not allowed in when equations");
-    }
-    
-    public void FIfEquation.checkMayContainConnect(ErrorCheckType checkType, FConnectClause connect) {
-        super.checkMayContainConnect(checkType, connect);
-        FTypePrefixVariability v = getTest().variability();
-        if (!v.fixedParameterOrLess()) {
-            connect.error("Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions");
-        } else {
-            if (!getTest().canCeval()) {
-                getTest().error("Could not evaluate test expression for if equation containing connect clause");
-            }
-            getTest().markAsStructuralParameter(checkType);
-        }
-    }
-    
-    inh FAbstractEquation FConnectClause.surroundingFAbstractEquation();
-    inh FAbstractEquation FAbstractEquation.surroundingFAbstractEquation();
-    eq FAbstractEquation.getChild().surroundingFAbstractEquation() = this;
-    eq FClass.getChild().surroundingFAbstractEquation()            = null;
-    eq InstNode.getChild().surroundingFAbstractEquation()          = null;
-    
+	inh boolean FAbstractEquation.connectAllowed();
+	eq FAbstractEquation.getChild().connectAllowed() = mayContainConnect() && connectAllowed();
+	eq FClass.getChild().connectAllowed()            = true;
+	eq InstNode.getChild().connectAllowed()          = true;
+	
+	/**
+	 * Check if this equation may legally contain a conncect clause.
+	 */
+	syn boolean FAbstractEquation.mayContainConnect() = false;
+	eq InstForClauseE.mayContainConnect()             = true;
+	eq FElseEquation.mayContainConnect()              = true;
+	eq FIfEquation.mayContainConnect()                = 
+		getTest().variability().parameterOrLess() && getTest().canCeval();
+	
 	public void FConnectClause.contentCheck(ErrorCheckType checkType) {
 		super.contentCheck(checkType);
-        if (!lockBranch(checkType)) {
-            checkMayContainConnect(checkType, this);
-        }
+		if (!connectAllowed())
+			error("Connect clauses are not allowed in if equations with non-parameter conditions, or in when equations"); 
 	}
 	
 	public void FWhenEquation.contentCheck(ErrorCheckType checkType) {
@@ -411,7 +393,7 @@ aspect ContentCheck {
 			boolean inWhen = inWhen();
 			boolean balanced = inWhen ? isBalancedAssignments() : isBalancedEquations();
 			boolean functionCallEqu = hasFunctionCallEquations(); 
-            if (hasOnlyFixedParamTests()) {
+			if (hasOnlyParamTests()) {
 				setEliminateOnParamTest(checkType);
 			} else {
 				if (!balanced) {
@@ -445,9 +427,9 @@ aspect ContentCheck {
 	eq ASTNode.getChild().isTopWhenIfEquation()        = true;
 	eq FIfWhenEquation.getElse().isTopWhenIfEquation() = false;
 	
-    syn boolean FIfWhenElseEquation.hasOnlyFixedParamTests() = true;
-    eq FIfWhenEquation.hasOnlyFixedParamTests()              = getTest().isFixedParamOrLessExp() 
-            && (!hasElse() || getElse().hasOnlyFixedParamTests());
+	syn boolean FIfWhenElseEquation.hasOnlyParamTests() = true;
+	eq FIfWhenEquation.hasOnlyParamTests()              = 
+		getTest().variability().parameterOrLess() && (!hasElse() || getElse().hasOnlyParamTests());
 	
 	syn boolean FAbstractEquation.isAssignmentEqn() = false;
 	eq FEquation.isAssignmentEqn()                  = getLeft().isAccess();
@@ -683,6 +665,8 @@ aspect ForceVariability {
     public void FExp.forceVariability(ErrorCheckType checkType,  FTypePrefixVariability v) {
         if (inFunction())
             return;
+        if (!checkType.allowConstantNoValue() && !canCeval())
+            compliance("Could not evaluate expression used as structural parameter: " + this);
         forceUsesVariability(checkType, v);
     }
     
@@ -747,7 +731,7 @@ aspect ForceVariability {
         if (hasBindingFExp()) {
             FExp e = getBindingFExp();
             if (!checkType.allowConstantNoValue() && !e.canCeval())
-                error("Could not evaluate binding expression of structural parameter " + qualifiedName());
+                compliance("Could not evaluate binding expression of structural parameter " + qualifiedName());
             e.forceUsesVariability(checkType, v);
         }
     }
@@ -771,18 +755,6 @@ aspect ForceVariability {
             icd.setVariabilityNotCalculated();
         }
         variability_computed = false;
-    }
-    
-    public void Size.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
-        
-    }
-    
-    public void MutableSize.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
-        for (FExp e : exps) {
-            if (e != null) {
-                e.forceVariability(checkType, v);
-            }
-        }
     }
     
 }

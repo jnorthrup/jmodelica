@@ -1649,38 +1649,6 @@ end TransformCanonicalTests.AliasStateSelect5;
 end AliasStateSelect5;
 
 
-model AliasPropNegSecondRound1
-    Real x(stateSelect=StateSelect.always);
-    Real y(min=ymin);
-    Real z;
-    parameter Real ymin = 2;
-equation
-    x = -y * z;
-    z = 1;
-    der(x) = time - 3;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AliasPropNegSecondRound1",
-            description="Test against crash when propagating negated attribute during second round of alias elimination",
-            flatModel="
-fclass TransformCanonicalTests.AliasPropNegSecondRound1
- Real x(stateSelect = StateSelect.always,max = - ymin);
- constant Real z = 1;
- parameter Real ymin = 2 /* 2 */;
-initial equation 
- x = 0.0;
-equation
- der(x) = time - 3;
-
-public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
-
-end TransformCanonicalTests.AliasPropNegSecondRound1;
-")})));
-end AliasPropNegSecondRound1;
-
-
 model ParameterBindingExpTest3_Warn
 
   parameter Real p;
@@ -2573,43 +2541,6 @@ initial equation
 end TransformCanonicalTests.InitialEqTest19;
 ")})));
 end InitialEqTest19;
-
-model InitialEqTest20
-    discrete Integer i(start=0, fixed=true);
-    discrete Real t;
-algorithm
-    when {initial(), time > 1+t} then
-        t := time + 1;
-    end when;
-    i := integer(time);
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="InitialEqTest20",
-            description="Test BiPGraph matching prioritazion for discrete variables (pre variables should be unmatched)",
-            flatModel="
-fclass TransformCanonicalTests.InitialEqTest20
- discrete Integer i(start = 0,fixed = true);
- discrete Real t;
- discrete Integer temp_1;
- Real temp_2;
- discrete Boolean temp_3;
-initial equation 
- pre(temp_1) = 0;
- pre(i) = 0;
- pre(t) = 0.0;
- pre(temp_3) = false;
-algorithm
- temp_2 := time - (1 + t);
- temp_3 := time > 1 + t;
- if initial() or temp_3 and not pre(temp_3) then
-  t := time + 1;
- end if;
- temp_1 := if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
- i := temp_1;
-end TransformCanonicalTests.InitialEqTest20;
-")})));
-end InitialEqTest20;
 
 model ParameterDerivativeTest
  Real x(start=1);
@@ -6888,12 +6819,11 @@ equation
             description="Test error message given by BLT when non-real equations are unsolved",
             errorMessage="
 1 errors found:
-Error: in file '...':
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TransformCanonicalTests.mo':
 Semantic error at line 0, column 0:
-  The system is structurally singular. The following varible(s) could not be matched to any equation:
-     i
-  The following equation(s) could not be matched to any variable:
-    42 * (i + 1) = temp_1
+  Unable to solve variable 'i' from equation:
+42 * (i + 1) = temp_1
 ")})));
 end BLTError1;
 
@@ -6901,7 +6831,7 @@ model BLTError2
     Integer i, j;
 equation
     i = j + integer(time);
-    j = 1/i;
+    i * j = 0;
 
     annotation(__JModelica(UnitTesting(tests={
         ComplianceErrorTestCase(
@@ -6914,33 +6844,9 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/TransformCanonicalTests.mo':
 Semantic error at line 0, column 0:
   Non-real equations contains an algebraic loop:
 i = j + temp_1
-j = 1 / i
+i * j = 0
 ")})));
 end BLTError2;
-
-model BLTError3
-    Real x;
-    Integer i;
-algorithm
-    x := i;
-equation
-    x = integer(time);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="BLTError3",
-            description="Test error message given by BLT when non-real equations are unsolved",
-            errorMessage="
-1 errors found:
-Error: in file '...':
-Semantic error at line 0, column 0:
-  The system is structurally singular. The following varible(s) could not be matched to any equation:
-     i
-  The following equation(s) could not be matched to any variable:
-    algorithm
-     x := i;
-")})));
-end BLTError3;
 
 model LinearBlockTest1
     Real x,y,z,a;

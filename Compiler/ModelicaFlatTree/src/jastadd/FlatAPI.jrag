@@ -829,10 +829,8 @@ aspect FlatAPI {
                 return true;
         return false;
     }
-    eq FIdUseExp.containsNonFixedParameter() = getFIdUse().containsNonFixedParameter();
-    
-    syn boolean FIdUse.containsNonFixedParameter() = myFV().isNonFixedParameter();
-    eq FIdUseInstAccess.containsNonFixedParameter() = !isCircular() && myInstComponentDecl().isNonFixedParameter();
+    eq FIdUseExp.containsNonFixedParameter()      = myFV().isNonFixedParameter();
+    eq FInstAccessExp.containsNonFixedParameter() = !isCircular() && myInstComponentDecl().isNonFixedParameter();
     
     syn boolean InstComponentDecl.isNonFixedParameter() = false;
     eq InstAssignable.isNonFixedParameter() {
@@ -851,15 +849,6 @@ aspect FlatAPI {
     }
     
 
-    syn boolean ASTNode.containsFTimeExp() {
-        for (ASTNode child : this)
-            if (child.containsFTimeExp())
-                return true;
-        return false;
-    }
-    eq FTimeExp.containsFTimeExp() = true;
-    syn lazy boolean FAbstractEquation.containsFTimeExp() = super.containsFTimeExp();
-    
     syn int FClass.numDiscretePreVariables() = discretePreVariables().size();
     syn lazy ArrayList<FVariable> FClass.discretePreVariables() {
         ArrayList<FVariable> l = new ArrayList<FVariable>();
@@ -1375,7 +1364,7 @@ aspect FlatAPI {
      * Does not check context further than expressions.
      */
     syn boolean FExp.hasEventGeneratingVariability(boolean checkNonFixedParameters) =
-            !variability().parameterOrLess() || (checkNonFixedParameters && containsNonFixedParameter());
+            !variability().lessOrEqual(fParameter()) || (checkNonFixedParameters && containsNonFixedParameter());
 
     syn boolean FExp.inEventGeneratingLocation() = !inFunction() && !inNoEventExp() && !inSmoothExp(1);
 
@@ -2242,7 +2231,11 @@ aspect FlatTypes {
     }
     
     syn FExp FRecordDecl.extractArg(FRecordConstructor frc, String name) {
-        return frc.getArg(indexOf(name));
+        FVariable fv = getFVariable(indexOf(name));
+        if (fv.modifiableInRecord)
+            return frc.getArg(indexOfArg(name));
+        else
+            return fv.getBindingExp();
     }
     
     syn FExp FRecordConstructor.myArgFExp(String name) {
@@ -2554,12 +2547,6 @@ aspect FVariableUses {
     eq FClass.getChild().inFunctionCallLeft()            = false;
     eq InstRoot.getChild().inFunctionCallLeft()          = false;
     
-    inh boolean FExp.inFunctionCallLeftTop();
-    eq FFunctionCallLeft.getChild().inFunctionCallLeftTop() = true;
-    eq FExp.getChild().inFunctionCallLeftTop()              = false;
-    eq FClass.getChild().inFunctionCallLeftTop()            = false;
-    eq InstRoot.getChild().inFunctionCallLeftTop()          = false;
-    
     /**
      * Checks if this expression is used in a function call
      */
@@ -2639,12 +2626,7 @@ aspect FVariableUses {
     
     inh FTypePrefixVariability FExp.bindingExpVariability();
     eq Root.getChild().bindingExpVariability() = fContinuous();
-    eq FVariable.getChild().bindingExpVariability() = variability();
-    eq FVariable.getFAttribute().bindingExpVariability() = fParameter();
-    eq FRecordVariable.getFAttribute(int i).bindingExpVariability() {
-        int partIndex = myFRecordDecl().indexOf(getFAttribute(i).name());
-        return variability().getPart(partIndex);
-    }
+    eq FVariable.getBindingExp().bindingExpVariability() = variability();
     
     /**
      * Collection attribute returning all dependent parameters which
@@ -3469,9 +3451,9 @@ aspect FlatAlgorithmAPI {
     inh boolean FArray.useIsAssignment();
     inh boolean FRecordConstructor.useIsAssignment();
     eq FAssignStmt.getLeft().useIsAssignment()       = true;
+    eq InstAssignStmt.getLeft().useIsAssignment()    = true;
     eq FFunctionCallLeft.getFExp().useIsAssignment() = true;
     eq FIdUseExp.getFIdUse().useIsAssignment()       = useIsAssignment();
-    eq FArraySubscripts.getChild().useIsAssignment() = false;
     eq FArray.getFExp().useIsAssignment()            = useIsAssignment();
     eq FRecordConstructor.getArg().useIsAssignment() = useIsAssignment();
     eq FExp.getChild().useIsAssignment()             = false;
@@ -3592,6 +3574,20 @@ aspect FlatExternalFunctionAPI {
     
     public void FExternalStmt.extractLibrary(InstExternal n) {
         library = n.annotation("Library").asStringVector();
+        if (library != null) {
+            ArrayList<String> libs = new ArrayList<String>();
+            String lapackLib = n.myOptions().getStringOption("lapack_lib");
+            for (int i = 0; i < library.length; i++) {
+                if (library[i].equals("lapack") && !lapackLib.equals("lapack")) {
+                    n.warning("Removing use of external library 'lapack'. Will use '"
+                            + lapackLib + "' specified by option 'lapack_lib'");
+                } else {
+                    libs.add(library[i]);
+                }
+            }
+            library = new String[libs.size()];
+            library = libs.toArray(library);
+        }
         include = n.annotation("Include").string();
         libraryDir = n.annotation("LibraryDirectory").string();
         includeDir = n.annotation("IncludeDirectory").string();

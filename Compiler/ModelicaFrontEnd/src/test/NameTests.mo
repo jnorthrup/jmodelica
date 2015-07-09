@@ -421,11 +421,7 @@ Semantic error at line 386, column 37:
 Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 386, column 39:
   Cannot find component declaration for y
-
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 389, column 39:
-  Cannot find component declaration for y
-  ")})));
+")})));
 end NameTest13_Err;
   
  model NameTest14_Err
@@ -798,7 +794,7 @@ model NameTest25_Err
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
 Semantic error at line 787, column 18:
-  Cannot use component y, because it is not present in constraining type of declaration 'replaceable B b constrainedby B'
+  Cannot use component y, because it is not present in constraining type of declaration 'redeclare replaceable C b'
 ")})));
 end NameTest25_Err;
 
@@ -2735,7 +2731,7 @@ equation
 fclass NameTests.EndExpTest1
  Real x[1];
 equation 
- x[1] = 2;
+ x[end] = 2;
 
 end NameTests.EndExpTest1;
 ")})));
@@ -2840,8 +2836,8 @@ model IndexLookup1
 			flatModel="
 fclass NameTests.IndexLookup1
  parameter Integer i = 2 /* 2 */;
- Real y.z[2] = {1, 2};
- Real x = (y.z[1:2])[i];
+ Real y.z[2] = {1,2};
+ Real x = y.z[i];
 
 end NameTests.IndexLookup1;
 ")})));
@@ -2866,8 +2862,8 @@ model IndexLookup2
 fclass NameTests.IndexLookup2
  parameter Integer i = 2 /* 2 */;
  parameter Integer y.i = 1 /* 1 */;
- Real y.z[2] = {1, 2};
- Real x = (y.z[1:2])[i];
+ Real y.z[2] = {1,2};
+ Real x = y.z[i];
 
 end NameTests.IndexLookup2;
 ")})));
@@ -3219,22 +3215,7 @@ Semantic error at line 3159, column 25:
 ")})));
 end ConditionalComponentTest13_Err;
 
-model ConditionalComponentTest14
-    record R
-        parameter Real x;
-    end R;
-    
-    parameter R r if false;
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConditionalComponentTest14",
-            description="Flattening type of conditional component",
-            flatModel="
-fclass NameTests.ConditionalComponentTest14
-end NameTests.ConditionalComponentTest14;
-")})));
-end ConditionalComponentTest14;
 
 model AttributeDot1
   Real x=1;

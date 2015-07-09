@@ -1183,7 +1183,7 @@ class LocalDAECollocationPrepareAlg(AlgorithmBase):
         Arguments are the same as for LocalDAECollocationAlg.
         """
         self.alg = LocalDAECollocationAlg(op, options)
-        self.solver = self.alg.nlp.wrapper
+        self.solver = casadi_collocation.OptimizationSolver(self.alg.nlp)
 
     def solve(self):
         pass
@@ -1301,7 +1301,6 @@ class LocalDAECollocationAlg(AlgorithmBase):
             
         # set solver options
         self._set_solver_options()
-        self.nlp.solver_object.init()
 
         # record the initialization time including initialization within the algorithm object
         self.nlp.times['init'] = time.clock() - t0_init
@@ -1594,14 +1593,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
             
             Type: bool
             Default: True
-
-        equation_scaling --
-            Whether to scale the equations in collocated NLP.
-            Many NLP solvers default to scaling the equations, but if it is
-            done through this option the resulting scaling can be inspected.
-            
-            Type: bool
-            Default: False
         
         nominal_traj --
             Variable trajectory data used for scaling of the NLP variables.
@@ -1787,13 +1778,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
             pyjmi.optimization.casadi_collocation.ExternalData
             Default: None
 
-        mutable_external_data --
-            True: If the external_data option is used, the external data
-            can be changed after discretization, e.g. during warm starting.
-
-            Type: bool
-            Default: True
-
         delayed_feedback --
             Experimental feature used to add delay constraints to the
             optimization problem.
@@ -1819,15 +1803,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Type: String
             Default: 'IPOPT'
 
-        explicit_hessian --
-            Explicitly construct the Lagrangian Hessian, rather than rely on
-            CasADi to automatically generate it. This is only done to
-            circumvent a bug in CasADi, see #4313, which rarely causes the
-            automatic Hessian to be incorrect.
-
-            Type: bool
-            Default: False
-
     Options are set by using the syntax for dictionaries::
 
         >>> opts = my_model.optimize_options()
@@ -1852,7 +1827,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'init_traj': None,
                 'init_dual': None,
                 'variable_scaling': True,
-                'equation_scaling': False,
                 'nominal_traj': None,
                 'nominal_traj_mode': {"_default_mode": "linear"},
                 'result_file_name': "",
@@ -1865,11 +1839,9 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'eliminate_der_var': False,
                 'eliminate_cont_var': False,
                 'external_data': None,
-                'mutable_external_data': True,
                 'checkpoint': False,
                 'delayed_feedback': None,
                 'solver': 'IPOPT',
-                'explicit_hessian': False,
                 'IPOPT_options': {},
                 'WORHP_options': {}}
         

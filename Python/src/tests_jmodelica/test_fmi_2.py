@@ -426,7 +426,6 @@ class Test_FMUModelME2:
         cls.coupled_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="me", version="2.0")
         cls.bouncing_name = compile_fmu("BouncingBall",os.path.join(path_to_mofiles,"BouncingBall.mo"), target="me", version="2.0")
         cls.jacobian_name = compile_fmu("JacFuncTests.BasicJacobianTest",os.path.join(path_to_mofiles,"JacTest.mo"), target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
-        cls.output2_name = compile_fmu("OutputTest2",os.path.join(path_to_mofiles,"OutputTest.mo"), target="me", version="2.0")
     
     @testattr(fmi = True)
     def test_version(self):
@@ -632,20 +631,6 @@ class Test_FMUModelME2:
         nose.tools.assert_almost_equal(n_states[0], 0.0001)
 
     @testattr(fmi = True)
-    def test_output_dependencies(self):
-        model = load_fmu(self.output2_name)
-        
-        [state_dep, input_dep] = model.get_output_dependencies()
-        
-        assert state_dep["y1"][0] == "x1"
-        assert state_dep["y1"][1] == "x2"
-        assert state_dep["y2"][0] == "x2"
-        assert state_dep["y3"][0] == "x1"
-        assert input_dep["y1"][0] == "u1"
-        assert input_dep["y3"][0] == "u1"
-        assert len(input_dep["y2"]) == 0
-
-    @testattr(fmi = True)
     def test_get_derivatives(self):
         """
         Test the method get_derivatives in FMUModelME2
@@ -754,18 +739,7 @@ class Test_FMUModelME2:
         coupled.enter_continuous_time_mode()
         res=coupled.simulate(options=opts)
         assert len(res['time']) > 250
-    
-    @testattr(fmi = True)
-    def test_simulate_no_state(self):
-        
-        name = compile_fmu("Modelica.Blocks.Examples.IntegerNetwork1", version = 2.0, compiler_options={"generate_ode_jacobian":True})
 
-        model = load_fmu(name)
-
-        res = model.simulate(final_time=3)
-
-        assert res.final("integerStep.y") == 3.0
-    
     @testattr(fmi = True)
     def test_simulate(self):
         """
