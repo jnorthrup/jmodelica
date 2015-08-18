@@ -27,8 +27,8 @@
 
 #include "jmi_brent_search.h"
 
-#define BRENT_BASE_LOG_LEVEL 7     /* Minimal Brent printouts log level */
-#define BRENT_EXTENDED_LOG_LEVEL 8 /* Extended Brent printouts log level */
+#define BRENT_BASE_LOG_LEVEL 6     /* Minimal Brent printouts log level */
+#define BRENT_EXTENDED_LOG_LEVEL 7 /* Extended Brent printouts log level */
 
 #define BRENT_INITIAL_STEP_FACTOR 0.001 /* Initial bracketing step as a fraction of nominal */
 #define BRENT_MAX_NEWTON 10 /* Max number of Newton iteration */
@@ -99,14 +99,7 @@ int brentdf(realtype y, realtype f, realtype* df, void* problem_data) {
         inc = -inc;
         y = y0 + inc;
     }
-    /* If function evaluation failed, try finite difference in other direction. */
-    if (ret) {
-        inc = -inc;
-        y = y0 + inc;
-        if ((y <= block->max[0]) && (y >= block->min[0])) {
-            ret = brentf(y, &ftemp, block);
-        }
-    }
+          
     ret = brentf(y, &ftemp, block);
     if (ret) {
         jmi_log_t* log = block->log;
@@ -199,7 +192,6 @@ void jmi_brent_solver_print_solve_end(jmi_block_solver_t *block, const jmi_log_n
 
 static int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, double *d) {
     double x = *x0;
-    double x_tmp = x;
     double f = 0.0;
     double df = 0.0;
     double delta = 1e20;
@@ -214,7 +206,6 @@ static int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, d
     
     
     for (i = 0; i < BRENT_MAX_NEWTON; i++) {
-        x = x_tmp;
         flag = brentf(x, &f, block);
         if (flag) {
             if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) { jmi_log_leave(block->log, node); }
@@ -256,25 +247,25 @@ static int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, d
         delta = f/df;
         
         if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
-            jmi_log_fmt(block->log, node, logInfo, "Iteration variable <ivs: %f>, Function value <f: %f>, Derivative value <df: %f>, Delta <delta:%f>",
+            jmi_log_fmt(block->log, node, logInfo, "Iteration variable <ivs: %f>, Function value <f: %f>, Dervative value <df: %f>, Delta <delta:%f>",
             x,f,df,delta);
         }
         
-        x_tmp = x - delta;
+        x = x - delta;
         
         /* Clamping */
-        if (x_tmp < block->min[0]) {
+        if (x < block->min[0]) {
             if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
                 jmi_log_fmt(block->log, node, logInfo, "Clamping iteration variable <ivs: %f> to minimum, <min: %f>",
-                    x_tmp,block->min[0]);
+                    x,block->min[0]);
             }
-            x_tmp = block->min[0];
-        } else if (x_tmp > block->max[0]) {
+            x = block->min[0];
+        } else if (x > block->max[0]) {
             if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
                 jmi_log_fmt(block->log, node, logInfo, "Clamping iteration variable <ivs: %f> to maximum, <max: %f>",
-                    x_tmp,block->max[0]);
+                    x,block->max[0]);
             }
-            x_tmp = block->max[0];
+            x = block->max[0];
         }
         
     }
@@ -507,7 +498,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
             block->parent_block->time_in_brent += ((double)clock() - t) / CLOCKS_PER_SEC;
         }
 #endif
-        if(block->options->brent_ignore_error_flag)
+        if(block->options->experimental_mode & jmi_block_solver_experimental_Brent_ignore_error)
             return JMI_BRENT_SUCCESS;
         else
             return JMI_BRENT_FIRST_SYSFUNC_ERR;
@@ -628,17 +619,14 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
             else {
                 jmi_log_node(log, logError, "BrentBracketFailed", "Could not bracket the root in <block: %s>. Both lower and upper are at bounds.", block->label);
                 jmi_brent_solver_print_solve_end(block, &topnode, JMI_BRENT_ROOT_BRACKETING_FAILED);
-                /* Write initial guess back to model. */ 
-                block->x[0] = init;
-                block->F(block->problem_data,block->x, NULL, JMI_BLOCK_WRITE_BACK);
 #ifdef JMI_PROFILE_RUNTIME
                 if (block->parent_block) {
                     block->parent_block->time_in_brent += ((double)clock() - t) / CLOCKS_PER_SEC;
                 }
 #endif
-                if(block->options->brent_ignore_error_flag) {
-                    /*block->x[0] = init;
-                    block->F(block->problem_data,block->x, NULL, JMI_BLOCK_WRITE_BACK); */
+                if(block->options->experimental_mode & jmi_block_solver_experimental_Brent_ignore_error) {
+                    block->x[0] = init;
+                    block->F(block->problem_data,block->x, NULL, JMI_BLOCK_WRITE_BACK);
                     return JMI_BRENT_SUCCESS;
                 }
                 else
@@ -682,8 +670,6 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         if (flag) {
             jmi_log_node(log, logError, "Error", "Function evaluation failed while iterating in <block: %s>", block->label);
             jmi_brent_solver_print_solve_end(block, &topnode, JMI_BRENT_SYSFUNC_FAIL);
-             block->x[0] = init;
-             block->F(block->problem_data,block->x, NULL, JMI_BLOCK_WRITE_BACK);
 #ifdef JMI_PROFILE_RUNTIME
             if (block->parent_block) {
                 block->parent_block->time_in_brent += ((double)clock() - t) / CLOCKS_PER_SEC;

@@ -437,17 +437,13 @@ opts? # View the help text</programlisting>
 
       <programlisting language="python">res = op.optimize(options=opts)</programlisting>
 
-      <para>The standard options for the algorithm are shown in <xref
+      <para>The options for the algorithm are shown in <xref
       linkend="opt-tab-casadi-dae-opts"/>. Additional documentation is
-      available in the Python class documentation. The algorithm also has a
-      lot of experimental options, which are not as well tested and some are
-      intended for debugging purposes. These are shown in <xref
-      linkend="opt-tab-casadi-dae-experimental-opts"/>, and caution is advised
-      when changing their default values.</para>
+      available in the Python class documentation.</para>
 
       <table xml:id="opt-tab-casadi-dae-opts">
-        <title>Standard options for the CasADi- and collocation-based
-        optimization algorithm</title>
+        <title>Options for the CasADi- and collocation-based optimization
+        algorithm</title>
 
         <tgroup cols="3">
           <colspec align="left" colname="col–opt" colwidth="1*"/>
@@ -492,11 +488,31 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
+              <entry><literal>free_element_lengths_data</literal></entry>
+
+              <entry>None</entry>
+
+              <entry>Data used for optimizing the element lengths if they are
+              free. Should be None when hs != "free".</entry>
+            </row>
+
+            <row>
               <entry><literal>n_cp</literal></entry>
 
               <entry>3</entry>
 
               <entry>Number of collocation points in each element.</entry>
+            </row>
+
+            <row>
+              <entry><literal>discr</literal></entry>
+
+              <entry>'LGR'</entry>
+
+              <entry>Determines the collocation scheme used to discretize the
+              problem. Possible values: "LG" and "LGR". "LG": Gauss
+              collocation (Legendre-Gauss) "LGR": Radau collocation
+              (Legendre-Gauss-Radau).</entry>
             </row>
 
             <row>
@@ -517,151 +533,6 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
-              <entry><literal>init_traj</literal></entry>
-
-              <entry>None</entry>
-
-              <entry>Variable trajectory data used for initialization of the
-              NLP variables.</entry>
-            </row>
-
-            <row>
-              <entry><literal>nominal_traj</literal></entry>
-
-              <entry>None</entry>
-
-              <entry>Variable trajectory data used for scaling of the NLP
-              variables. This option is only applicable if variable scaling is
-              enabled.</entry>
-            </row>
-
-            <row>
-              <entry><literal>blocking_factors</literal></entry>
-
-              <entry>None (not used)</entry>
-
-              <entry>Blocking factors are used to enforce piecewise constant
-              inputs. The inputs may only change values at some of the element
-              boundaries. The option is either None (disabled), given as an
-              instance of
-              pyjmi.optimization.casadi_collocation.BlockingFactors or as a
-              list of blocking factors. If the options is a list of blocking
-              factors, then each element in the list specifies the number of
-              collocation elements for which all of the inputs must be
-              constant. For example, if blocking_factors == [2, 2, 1], then
-              the inputs will attain 3 different values (number of elements in
-              the list), and it will change values between collocation element
-              number 2 and 3 as well as number 4 and 5. The sum of all
-              elements in the list must be the same as the number of
-              collocation elements and the length of the list determines the
-              number of separate values that the inputs may attain. See the
-              documentation of the BlockingFactors class for how to use it. If
-              blocking_factors is None, then the usual collocation polynomials
-              are instead used to represent the controls.</entry>
-            </row>
-
-            <row>
-              <entry><literal>external_data</literal></entry>
-
-              <entry>None</entry>
-
-              <entry>Data used to penalize, constrain or eliminate certain
-              variables.</entry>
-            </row>
-
-            <row>
-              <entry><literal>delayed_feedback</literal></entry>
-
-              <entry>None</entry>
-
-              <entry>If not <literal>None</literal>, should be a
-              <literal>dict</literal> with mappings <literal>'delayed_var':
-              ('undelayed_var', delay_ne)</literal>. For each key-value pair,
-              adds the the constraint that the variable
-              <literal>'delayed_var'</literal> equals the value of the
-              variable <literal>'undelayed_var'</literal> delayed by
-              <literal>delay_ne</literal> elements. The initial part of the
-              trajectory for <literal>'delayed_var'</literal> is fixed to its
-              initial guess given by the <literal>init_traj</literal> option
-              or the <literal>initialGuess</literal> attribute.
-              <literal>'delayed_var'</literal> will typically be an input.
-              This is an experimental feature and is subject to
-              change.</entry>
-            </row>
-
-            <row>
-              <entry><literal>solver</literal></entry>
-
-              <entry>'IPOPT'</entry>
-
-              <entry>Specifies the nonlinear programming solver to be used.
-              Possible choices are 'IPOPT' and 'WORHP'.</entry>
-            </row>
-
-            <row>
-              <entry><literal>IPOPT_options</literal></entry>
-
-              <entry>IPOPT defaults</entry>
-
-              <entry>IPOPT options for solution of NLP. See IPOPT's
-              documentation for available options.</entry>
-            </row>
-
-            <row>
-              <entry><literal>WORHP_options</literal></entry>
-
-              <entry>WORHP defaults</entry>
-
-              <entry>WORHP options for solution of NLP. See WORHP's
-              documentation for available options.</entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </table>
-
-      <table xml:id="opt-tab-casadi-dae-experimental-opts">
-        <title>Experimental and debugging options for the CasADi- and
-        collocation-based optimization algorithm</title>
-
-        <tgroup cols="3">
-          <colspec align="left" colname="col–opt" colwidth="1*"/>
-
-          <colspec align="left" colname="col–desc" colwidth="1*"/>
-
-          <colspec align="left" colname="col–def" colwidth="2*"/>
-
-          <thead>
-            <row>
-              <entry align="center">Option</entry>
-
-              <entry align="center">Default</entry>
-
-              <entry align="center">Description</entry>
-            </row>
-          </thead>
-
-          <tbody>
-            <row>
-              <entry><literal>free_element_lengths_data</literal></entry>
-
-              <entry>None</entry>
-
-              <entry>Data used for optimizing the element lengths if they are
-              free. Should be None when hs != "free".</entry>
-            </row>
-
-            <row>
-              <entry><literal>discr</literal></entry>
-
-              <entry>'LGR'</entry>
-
-              <entry>Determines the collocation scheme used to discretize the
-              problem. Possible values: "LG" and "LGR". "LG": Gauss
-              collocation (Legendre-Gauss) "LGR": Radau collocation
-              (Legendre-Gauss-Radau).</entry>
-            </row>
-
-            <row>
               <entry><literal>named_vars</literal></entry>
 
               <entry>False</entry>
@@ -672,6 +543,15 @@ opts? # View the help text</programlisting>
               NLP consisting of the named variables can then be obtained using
               the get_named_var_expr method of the collocator class. This
               option is only intended for investigative purposes.</entry>
+            </row>
+
+            <row>
+              <entry><literal>init_traj</literal></entry>
+
+              <entry>None</entry>
+
+              <entry>Variable trajectory data used for initialization of the
+              NLP variables.</entry>
             </row>
 
             <row>
@@ -700,14 +580,13 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
-              <entry><literal>equation_scaling</literal></entry>
+              <entry><literal>nominal_traj</literal></entry>
 
-              <entry>False</entry>
+              <entry>None</entry>
 
-              <entry>Whether to scale the equations in collocated NLP. Many
-              NLP solvers default to scaling the equations, but if it is done
-              through this option the resulting scaling can be
-              inspected.</entry>
+              <entry>Variable trajectory data used for scaling of the NLP
+              variables. This option is only applicable if variable scaling is
+              enabled.</entry>
             </row>
 
             <row>
@@ -789,7 +668,32 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
-              <entry><literal>checkpoint</literal></entry>
+              <entry><literal>blocking_factors</literal></entry>
+
+              <entry>None (not used)</entry>
+
+              <entry>Blocking factors are used to enforce piecewise constant
+              inputs. The inputs may only change values at some of the element
+              boundaries. The option is either None (disabled), given as an
+              instance of
+              pyjmi.optimization.casadi_collocation.BlockingFactors or as a
+              list of blocking factors. If the options is a list of blocking
+              factors, then each element in the list specifies the number of
+              collocation elements for which all of the inputs must be
+              constant. For example, if blocking_factors == [2, 2, 1], then
+              the inputs will attain 3 different values (number of elements in
+              the list), and it will change values between collocation element
+              number 2 and 3 as well as number 4 and 5. The sum of all
+              elements in the list must be the same as the number of
+              collocation elements and the length of the list determines the
+              number of separate values that the inputs may attain. See the
+              documentation of the BlockingFactors class for how to use it. If
+              blocking_factors is None, then the usual collocation polynomials
+              are instead used to represent the controls.</entry>
+            </row>
+
+            <row>
+              <entry>checkpoint</entry>
 
               <entry>False</entry>
 
@@ -821,23 +725,72 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
-              <entry><literal>mutable_external_data</literal></entry>
+              <entry><literal>measurement_data</literal></entry>
 
-              <entry>True</entry>
+              <entry>None</entry>
 
-              <entry>If true and the <literal>external_data</literal> option
-              is used, the external data can be changed after discretization,
-              e.g. during warm starting.</entry>
+              <entry>Data used to penalize, constraint or eliminate certain
+              variables.</entry>
+            </row>
+
+            <row>
+              <entry>delayed_feedback</entry>
+
+              <entry>None</entry>
+
+              <entry>If not <literal>None</literal>, should be a
+              <literal>dict</literal> with mappings <literal>'delayed_var':
+              ('undelayed_var', delay_ne)</literal>. For each key-value pair,
+              adds the the constraint that the variable
+              <literal>'delayed_var'</literal> equals the value of the
+              variable <literal>'undelayed_var'</literal> delayed by
+              <literal>delay_ne</literal> elements. The initial part of the
+              trajectory for <literal>'delayed_var'</literal> is fixed to its
+              initial guess given by the <literal>init_traj</literal> option
+              or the <literal>initialGuess</literal> attribute.
+              <literal>'delayed_var'</literal> will typically be an input.
+              This is an experimental feature and is subject to
+              change.</entry>
+            </row>
+
+            <row>
+              <entry><literal>solver</literal></entry>
+
+              <entry>'IPOPT'</entry>
+
+              <entry>Specifies the nonlinear programming solver to be used.
+              Possible choices are 'IPOPT' and 'WORHP'.</entry>
+            </row>
+
+            <row>
+              <entry><literal>IPOPT_options</literal></entry>
+
+              <entry>IPOPT defaults</entry>
+
+              <entry>IPOPT options for solution of NLP. See IPOPT's
+              documentation for available options.</entry>
+            </row>
+
+            <row>
+              <entry><literal>WORHP_options</literal></entry>
+
+              <entry>WORHP defaults</entry>
+
+              <entry>WORHP options for solution of NLP. See WORHP's
+              documentation for available options.</entry>
             </row>
           </tbody>
         </tgroup>
       </table>
 
-      <para>The last standard options, <literal>IPOPT_options</literal> and
-      <literal>WORHP_options</literal>, serve as interfaces for setting
-      options in IPOPT and WORHP. To exemplify the usage of these algorithm
-      options, the maximum number of iterations in IPOPT can be set using the
-      following syntax:</para>
+      <para>A few of the options are experimental, so changing default values
+      should be done with some care.</para>
+
+      <para>The last options, <literal>IPOPT_options</literal> and
+      <literal>WORHP_options</literal>, serve as interface for setting options
+      in IPOPT and WORHP. To exemplify the usage of these algorithm options,
+      the maximum number of iterations in IPOPT can be set using the following
+      syntax:</para>
 
       <programlisting>opts = model.optimize_options()
 opts["IPOPT_options"]["max_iter"] = 10000</programlisting>
@@ -913,47 +866,21 @@ Returns::
 
         <programlisting>solver = model.prepare_optimization(options=opts)</programlisting>
 
-        <para>Alternatively, the solver can be retrieved from an existing
-        optimization result, as <literal>solver = res.get_solver()</literal>.
-        Manipulating the solver (e.g. setting parameters) may affect the
-        original optimization problem object and vice versa.</para>
-
         <para>The obtained solver object represents the discretized problem,
         and can be used to solve it using its own <literal>optimize</literal>
         method:</para>
 
         <programlisting>res = solver.optimize()</programlisting>
 
-        <para>While options cannot be changed in general, parameter values,
-        initial trajectories, external data, and NLP solver options can be
-        changed on the solver object. Parameter values can be updated
-        with</para>
+        <para>While options cannot be changed in general, parameter values and
+        NLP solver options can be changed on the solver object. Parameter
+        values can be updated with</para>
 
         <programlisting>solver.set(parameter_name, value)</programlisting>
 
         <para>and current values retrieved with</para>
 
         <programlisting>solver.get(parameter_name)</programlisting>
-
-        <para>New initial trajectories can be set with</para>
-
-        <programlisting>solver.set_init_traj(init_traj)</programlisting>
-
-        <para>where <literal>init_traj</literal> has the same format as used
-        with the <literal>init_traj</literal> option.</para>
-
-        <para>External data can be updated with</para>
-
-        <programlisting>solver.set_external_variable_data(variable_name, data)</programlisting>
-
-        <para>(unless the <literal>mutable_external_data</literal> option is
-        turned off). <literal>variable_name</literal> should correspond to one
-        of the variables used in the <literal>external_data</literal> option
-        passed to <literal>prepare_optimization</literal>.
-        <literal>data</literal> should be the new data, in the same format as
-        variable data used in the <literal>external_data</literal> option. The
-        kind of external data used for the variable
-        (eliminated/constrained/quadratic penalty) is not changed.</para>
 
         <para>Settings to the nonlinear solver can be changed with</para>
 
@@ -977,11 +904,7 @@ Returns::
 
         <programlisting>solver.set_warm_start(True)</programlisting>
 
-        <para>before calling <literal>solver.optimize()</literal>. This will
-        reuse the last solution for the primal variables (unless
-        <literal>solver.set_init_traj</literal> was called since the last
-        <literal>solver.optimize</literal>) as well as the last solution for
-        the dual variables.</para>
+        <para>before calling <literal>solver.optimize()</literal>.</para>
 
         <para>When using the IPOPT solver with warm starting, several solver
         options typically also need to be set to see the benefits, e g:</para>
@@ -1022,41 +945,243 @@ set_warm_start_options(solver)
         by:</para>
 
         <informalequation>
-          <m:math display="block" overflow="scroll"><m:mtable> <m:mtr> <m:mtd
-          columnalign="right"> <m:mover> <m:mi>c</m:mi> <m:mo>.</m:mo>
-          </m:mover> <m:mfenced> <m:mi>t</m:mi> </m:mfenced> </m:mtd> <m:mtd
-          columnalign="left"> <m:mo>=</m:mo> <m:mfrac> <m:mrow> <m:msub>
-          <m:mi>F</m:mi> <m:mn>0</m:mn> </m:msub> <m:mfenced separators="">
-          <m:msub> <m:mi>c</m:mi> <m:mn>0</m:mn> </m:msub> <m:mo>-</m:mo>
-          <m:mi>c</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>t</m:mi>
-          </m:mfenced> </m:mfenced> </m:mrow> <m:mi>V</m:mi> </m:mfrac>
-          <m:mo>-</m:mo> <m:msub> <m:mi>k</m:mi> <m:mn>0</m:mn> </m:msub>
-          <m:mi>c</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>t</m:mi>
-          </m:mfenced> <m:msup> <m:mi>e</m:mi> <m:mrow> <m:mo>-</m:mo>
-          <m:mi>EdivR</m:mi> <m:mo>/</m:mo> <m:mi>T</m:mi> <m:mo>⁡</m:mo>
-          <m:mfenced> <m:mi>t</m:mi> </m:mfenced> </m:mrow> </m:msup> </m:mtd>
-          </m:mtr> <m:mtr> <m:mtd columnalign="right"> <m:mover>
-          <m:mi>T</m:mi> <m:mo>.</m:mo> </m:mover> <m:mfenced> <m:mi>t</m:mi>
-          </m:mfenced> </m:mtd> <m:mtd columnalign="left"> <m:mo>=</m:mo>
-          <m:mfrac> <m:mrow> <m:msub> <m:mi>F</m:mi> <m:mn>0</m:mn> </m:msub>
-          <m:mfenced separators=""> <m:msub> <m:mi>T</m:mi> <m:mn>0</m:mn>
-          </m:msub> <m:mo>-</m:mo> <m:mi>T</m:mi> <m:mo>⁡</m:mo> <m:mfenced>
-          <m:mi>t</m:mi> </m:mfenced> </m:mfenced> </m:mrow> <m:mi>V</m:mi>
-          </m:mfrac> <m:mo>-</m:mo> <m:mfrac> <m:mrow> <m:mrow> <m:mi>d</m:mi>
-          <m:mi>H</m:mi> </m:mrow> <m:msub> <m:mi>k</m:mi> <m:mn>0</m:mn>
-          </m:msub> <m:mi>c</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>t</m:mi>
-          </m:mfenced> </m:mrow> <m:mrow> <m:mi>ρ</m:mi> <m:msub>
-          <m:mi>C</m:mi> <m:mi>p</m:mi> </m:msub> </m:mrow> </m:mfrac>
-          <m:msup> <m:mi>e</m:mi> <m:mrow> <m:mo>-</m:mo> <m:mi>EdivR</m:mi>
-          <m:mo>/</m:mo> <m:mi>T</m:mi> <m:mo>⁡</m:mo> <m:mfenced>
-          <m:mi>t</m:mi> </m:mfenced> </m:mrow> </m:msup> <m:mo>+</m:mo>
-          <m:mfrac> <m:mrow> <m:mn>2</m:mn> <m:mi>U</m:mi> </m:mrow> <m:mrow>
-          <m:mi>r</m:mi> <m:mi>ρ</m:mi> <m:msub> <m:mi>C</m:mi> <m:mi>p</m:mi>
-          </m:msub> </m:mrow> </m:mfrac> <m:mfenced separators=""> <m:mrow>
-          <m:mi>T</m:mi> <m:mi>c</m:mi> </m:mrow> <m:mfenced> <m:mi>t</m:mi>
-          </m:mfenced> <m:mo>-</m:mo> <m:mi>T</m:mi> <m:mo>⁡</m:mo>
-          <m:mfenced> <m:mi>t</m:mi> </m:mfenced> </m:mfenced> </m:mtd>
-          </m:mtr> </m:mtable> <m:mspace linebreak="newline"/></m:math>
+          <m:math display="block" overflow="scroll">
+            <m:mtable>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mover>
+                    <m:mi>c</m:mi>
+
+                    <m:mo>.</m:mo>
+                  </m:mover>
+
+                  <m:mfenced>
+                    <m:mi>t</m:mi>
+                  </m:mfenced>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>F</m:mi>
+
+                        <m:mn>0</m:mn>
+                      </m:msub>
+
+                      <m:mfenced separators="">
+                        <m:msub>
+                          <m:mi>c</m:mi>
+
+                          <m:mn>0</m:mn>
+                        </m:msub>
+
+                        <m:mo>-</m:mo>
+
+                        <m:mi>c</m:mi>
+
+                        <m:mo>⁡</m:mo>
+
+                        <m:mfenced>
+                          <m:mi>t</m:mi>
+                        </m:mfenced>
+                      </m:mfenced>
+                    </m:mrow>
+
+                    <m:mi>V</m:mi>
+                  </m:mfrac>
+
+                  <m:mo>-</m:mo>
+
+                  <m:msub>
+                    <m:mi>k</m:mi>
+
+                    <m:mn>0</m:mn>
+                  </m:msub>
+
+                  <m:mi>c</m:mi>
+
+                  <m:mo>⁡</m:mo>
+
+                  <m:mfenced>
+                    <m:mi>t</m:mi>
+                  </m:mfenced>
+
+                  <m:msup>
+                    <m:mi>e</m:mi>
+
+                    <m:mrow>
+                      <m:mo>-</m:mo>
+
+                      <m:mi>EdivR</m:mi>
+
+                      <m:mo>/</m:mo>
+
+                      <m:mi>T</m:mi>
+
+                      <m:mo>⁡</m:mo>
+
+                      <m:mfenced>
+                        <m:mi>t</m:mi>
+                      </m:mfenced>
+                    </m:mrow>
+                  </m:msup>
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mover>
+                    <m:mi>T</m:mi>
+
+                    <m:mo>.</m:mo>
+                  </m:mover>
+
+                  <m:mfenced>
+                    <m:mi>t</m:mi>
+                  </m:mfenced>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>F</m:mi>
+
+                        <m:mn>0</m:mn>
+                      </m:msub>
+
+                      <m:mfenced separators="">
+                        <m:msub>
+                          <m:mi>T</m:mi>
+
+                          <m:mn>0</m:mn>
+                        </m:msub>
+
+                        <m:mo>-</m:mo>
+
+                        <m:mi>T</m:mi>
+
+                        <m:mo>⁡</m:mo>
+
+                        <m:mfenced>
+                          <m:mi>t</m:mi>
+                        </m:mfenced>
+                      </m:mfenced>
+                    </m:mrow>
+
+                    <m:mi>V</m:mi>
+                  </m:mfrac>
+
+                  <m:mo>-</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:mrow>
+                        <m:mi>d</m:mi>
+
+                        <m:mi>H</m:mi>
+                      </m:mrow>
+
+                      <m:msub>
+                        <m:mi>k</m:mi>
+
+                        <m:mn>0</m:mn>
+                      </m:msub>
+
+                      <m:mi>c</m:mi>
+
+                      <m:mo>⁡</m:mo>
+
+                      <m:mfenced>
+                        <m:mi>t</m:mi>
+                      </m:mfenced>
+                    </m:mrow>
+
+                    <m:mrow>
+                      <m:mi>ρ</m:mi>
+
+                      <m:msub>
+                        <m:mi>C</m:mi>
+
+                        <m:mi>p</m:mi>
+                      </m:msub>
+                    </m:mrow>
+                  </m:mfrac>
+
+                  <m:msup>
+                    <m:mi>e</m:mi>
+
+                    <m:mrow>
+                      <m:mo>-</m:mo>
+
+                      <m:mi>EdivR</m:mi>
+
+                      <m:mo>/</m:mo>
+
+                      <m:mi>T</m:mi>
+
+                      <m:mo>⁡</m:mo>
+
+                      <m:mfenced>
+                        <m:mi>t</m:mi>
+                      </m:mfenced>
+                    </m:mrow>
+                  </m:msup>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:mn>2</m:mn>
+
+                      <m:mi>U</m:mi>
+                    </m:mrow>
+
+                    <m:mrow>
+                      <m:mi>r</m:mi>
+
+                      <m:mi>ρ</m:mi>
+
+                      <m:msub>
+                        <m:mi>C</m:mi>
+
+                        <m:mi>p</m:mi>
+                      </m:msub>
+                    </m:mrow>
+                  </m:mfrac>
+
+                  <m:mfenced separators="">
+                    <m:mrow>
+                      <m:mi>T</m:mi>
+
+                      <m:mi>c</m:mi>
+                    </m:mrow>
+
+                    <m:mfenced>
+                      <m:mi>t</m:mi>
+                    </m:mfenced>
+
+                    <m:mo>-</m:mo>
+
+                    <m:mi>T</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>t</m:mi>
+                    </m:mfenced>
+                  </m:mfenced>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+
+            <m:mspace linebreak="newline"/>
+          </m:math>
         </informalequation>
 
         <para>This tutorial will cover the following topics:</para>
@@ -1209,40 +1334,203 @@ print('T = %f' % T_0_B)
             by:</para>
 
             <informalequation>
-              <m:math display="block" overflow="scroll"><m:mtable> <m:mtr>
-              <m:mtd columnalign="right"/> <m:mtd columnalign="left"> <m:msub>
-              <m:mi mathvariant="normal">min</m:mi> <m:mrow> <m:mi>u</m:mi>
-              <m:mo>⁡</m:mo> <m:mfenced> <m:mi>t</m:mi> </m:mfenced> </m:mrow>
-              </m:msub> <m:munderover> <m:mo>∫</m:mo> <m:mn>0</m:mn>
-              <m:mn>150</m:mn> </m:munderover> <m:msup> <m:mfenced close=")"
-              open="(" separators=""> <m:msup> <m:mi>c</m:mi> <m:mrow>
-              <m:mi>r</m:mi> <m:mi>e</m:mi> <m:mi>f</m:mi> </m:mrow> </m:msup>
-              <m:mo>-</m:mo> <m:mi>c</m:mi> <m:mo>⁡</m:mo> <m:mfenced>
-              <m:mi>t</m:mi> </m:mfenced> </m:mfenced> <m:mn>2</m:mn>
-              </m:msup> <m:mo>+</m:mo> <m:msup> <m:mfenced close=")" open="("
-              separators=""> <m:msup> <m:mi>T</m:mi> <m:mrow> <m:mi>r</m:mi>
-              <m:mi>e</m:mi> <m:mi>f</m:mi> </m:mrow> </m:msup> <m:mo>-</m:mo>
-              <m:mi>T</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>t</m:mi>
-              </m:mfenced> </m:mfenced> <m:mn>2</m:mn> </m:msup>
-              <m:mo>+</m:mo> <m:msup> <m:mfenced close=")" open="("
-              separators=""> <m:msubsup> <m:mi>T</m:mi> <m:mi>c</m:mi>
-              <m:mrow> <m:mi>r</m:mi> <m:mi>e</m:mi> <m:mi>f</m:mi> </m:mrow>
-              </m:msubsup> <m:mo>-</m:mo> <m:msub> <m:mi>T</m:mi>
-              <m:mi>c</m:mi> </m:msub> <m:mfenced> <m:mi>t</m:mi> </m:mfenced>
-              </m:mfenced> <m:mn>2</m:mn> </m:msup> <m:mrow> <m:mi>d</m:mi>
-              <m:mi>t</m:mi> </m:mrow> </m:mtd> </m:mtr> <m:mtr> <m:mtd
-              columnalign="right"/> <m:mtd columnalign="left"> <m:mstyle
-              mathvariant="normal"> <m:mi>subject</m:mi> <m:mo> </m:mo>
-              <m:mo> </m:mo> <m:mi>to</m:mi> </m:mstyle> </m:mtd> </m:mtr>
-              <m:mtr> <m:mtd columnalign="right"/> <m:mtd columnalign="left">
-              <m:mn>230</m:mn> <m:mo>≤</m:mo> <m:mi>u</m:mi> <m:mo>⁡</m:mo>
-              <m:mfenced> <m:mi>t</m:mi> </m:mfenced> <m:mo>=</m:mo> <m:msub>
-              <m:mi>T</m:mi> <m:mi>c</m:mi> </m:msub> <m:mfenced>
-              <m:mi>t</m:mi> </m:mfenced> <m:mn>≤ 370</m:mn> </m:mtd> </m:mtr>
-              <m:mtr> <m:mtd columnalign="right"/> <m:mtd columnalign="left">
-              <m:mi>T</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>t</m:mi>
-              </m:mfenced> <m:mo>≤</m:mo> <m:mn>350</m:mn> </m:mtd> </m:mtr>
-              </m:mtable> <m:mspace linebreak="newline"/></m:math>
+              <m:math display="block" overflow="scroll">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd columnalign="right"/>
+
+                    <m:mtd columnalign="left">
+                      <m:msub>
+                        <m:mi mathvariant="normal">min</m:mi>
+
+                        <m:mrow>
+                          <m:mi>u</m:mi>
+
+                          <m:mo>⁡</m:mo>
+
+                          <m:mfenced>
+                            <m:mi>t</m:mi>
+                          </m:mfenced>
+                        </m:mrow>
+                      </m:msub>
+
+                      <m:munderover>
+                        <m:mo>∫</m:mo>
+
+                        <m:mn>0</m:mn>
+
+                        <m:mn>150</m:mn>
+                      </m:munderover>
+
+                      <m:msup>
+                        <m:mfenced close=")" open="(" separators="">
+                          <m:msup>
+                            <m:mi>c</m:mi>
+
+                            <m:mrow>
+                              <m:mi>r</m:mi>
+
+                              <m:mi>e</m:mi>
+
+                              <m:mi>f</m:mi>
+                            </m:mrow>
+                          </m:msup>
+
+                          <m:mo>-</m:mo>
+
+                          <m:mi>c</m:mi>
+
+                          <m:mo>⁡</m:mo>
+
+                          <m:mfenced>
+                            <m:mi>t</m:mi>
+                          </m:mfenced>
+                        </m:mfenced>
+
+                        <m:mn>2</m:mn>
+                      </m:msup>
+
+                      <m:mo>+</m:mo>
+
+                      <m:msup>
+                        <m:mfenced close=")" open="(" separators="">
+                          <m:msup>
+                            <m:mi>T</m:mi>
+
+                            <m:mrow>
+                              <m:mi>r</m:mi>
+
+                              <m:mi>e</m:mi>
+
+                              <m:mi>f</m:mi>
+                            </m:mrow>
+                          </m:msup>
+
+                          <m:mo>-</m:mo>
+
+                          <m:mi>T</m:mi>
+
+                          <m:mo>⁡</m:mo>
+
+                          <m:mfenced>
+                            <m:mi>t</m:mi>
+                          </m:mfenced>
+                        </m:mfenced>
+
+                        <m:mn>2</m:mn>
+                      </m:msup>
+
+                      <m:mo>+</m:mo>
+
+                      <m:msup>
+                        <m:mfenced close=")" open="(" separators="">
+                          <m:msubsup>
+                            <m:mi>T</m:mi>
+
+                            <m:mi>c</m:mi>
+
+                            <m:mrow>
+                              <m:mi>r</m:mi>
+
+                              <m:mi>e</m:mi>
+
+                              <m:mi>f</m:mi>
+                            </m:mrow>
+                          </m:msubsup>
+
+                          <m:mo>-</m:mo>
+
+                          <m:msub>
+                            <m:mi>T</m:mi>
+
+                            <m:mi>c</m:mi>
+                          </m:msub>
+
+                          <m:mfenced>
+                            <m:mi>t</m:mi>
+                          </m:mfenced>
+                        </m:mfenced>
+
+                        <m:mn>2</m:mn>
+                      </m:msup>
+
+                      <m:mrow>
+                        <m:mi>d</m:mi>
+
+                        <m:mi>t</m:mi>
+                      </m:mrow>
+                    </m:mtd>
+                  </m:mtr>
+
+                  <m:mtr>
+                    <m:mtd columnalign="right"/>
+
+                    <m:mtd columnalign="left">
+                      <m:mstyle mathvariant="normal">
+                        <m:mi>subject</m:mi>
+
+                        <m:mo> </m:mo>
+
+                        <m:mo> </m:mo>
+
+                        <m:mi>to</m:mi>
+                      </m:mstyle>
+                    </m:mtd>
+                  </m:mtr>
+
+                  <m:mtr>
+                    <m:mtd columnalign="right"/>
+
+                    <m:mtd columnalign="left">
+                      <m:mn>230</m:mn>
+
+                      <m:mo>≤</m:mo>
+
+                      <m:mi>u</m:mi>
+
+                      <m:mo>⁡</m:mo>
+
+                      <m:mfenced>
+                        <m:mi>t</m:mi>
+                      </m:mfenced>
+
+                      <m:mo>=</m:mo>
+
+                      <m:msub>
+                        <m:mi>T</m:mi>
+
+                        <m:mi>c</m:mi>
+                      </m:msub>
+
+                      <m:mfenced>
+                        <m:mi>t</m:mi>
+                      </m:mfenced>
+
+                      <m:mn>≤ 370</m:mn>
+                    </m:mtd>
+                  </m:mtr>
+
+                  <m:mtr>
+                    <m:mtd columnalign="right"/>
+
+                    <m:mtd columnalign="left">
+                      <m:mi>T</m:mi>
+
+                      <m:mo>⁡</m:mo>
+
+                      <m:mfenced>
+                        <m:mi>t</m:mi>
+                      </m:mfenced>
+
+                      <m:mo>≤</m:mo>
+
+                      <m:mn>350</m:mn>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+
+                <m:mspace linebreak="newline"/>
+              </m:math>
             </informalequation>
 
             <para>and is expressed in Optimica format in the class
@@ -1637,53 +1925,215 @@ plt.show()
         optimization problem:</para>
 
         <informalequation>
-          <m:math display="block" overflow="scroll"><m:munder>
-          <m:mi>min</m:mi> <m:mrow> <m:mi>u</m:mi> <m:mo>⁡</m:mo> <m:mfenced>
-          <m:mi>t</m:mi> </m:mfenced> </m:mrow> </m:munder> <m:msub>
-          <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> <m:mspace
-          linebreak="newline"/></m:math>
+          <m:math display="block" overflow="scroll">
+            <m:munder>
+              <m:mi>min</m:mi>
+
+              <m:mrow>
+                <m:mi>u</m:mi>
+
+                <m:mo>⁡</m:mo>
+
+                <m:mfenced>
+                  <m:mi>t</m:mi>
+                </m:mfenced>
+              </m:mrow>
+            </m:munder>
+
+            <m:msub>
+              <m:mi>t</m:mi>
+
+              <m:mi>f</m:mi>
+            </m:msub>
+
+            <m:mspace linebreak="newline"/>
+          </m:math>
         </informalequation>
 
         <para>subject to the Van der Pol dynamics:</para>
 
         <informalequation>
-          <m:math display="block" overflow="scroll"><m:mtable> <m:mtr> <m:mtd
-          columnalign="right"> <m:msub> <m:mover> <m:mi>x</m:mi>
-          <m:mo>.</m:mo> </m:mover> <m:mn>1</m:mn> </m:msub> </m:mtd> <m:mtd
-          columnalign="left"> <m:mo>=</m:mo> <m:mfenced separators="">
-          <m:mn>1</m:mn> <m:mo>-</m:mo> <m:msubsup> <m:mi>x</m:mi>
-          <m:mn>2</m:mn> <m:mn>2</m:mn> </m:msubsup> </m:mfenced> <m:msub>
-          <m:mi>x</m:mi> <m:mn>1</m:mn> </m:msub> <m:mo>-</m:mo> <m:msub>
-          <m:mi>x</m:mi> <m:mn>2</m:mn> </m:msub> <m:mo>+</m:mo>
-          <m:mi>u</m:mi> <m:mi>,</m:mi> <m:mspace width="1em"/> <m:msub>
-          <m:mi>x</m:mi> <m:mn>1</m:mn> </m:msub> <m:mfenced> <m:mn>0</m:mn>
-          </m:mfenced> <m:mo>=</m:mo> <m:mn>0</m:mn> </m:mtd> </m:mtr> <m:mtr>
-          <m:mtd columnalign="right"> <m:msub> <m:mover> <m:mi>x</m:mi>
-          <m:mo>.</m:mo> </m:mover> <m:mn>2</m:mn> </m:msub> </m:mtd> <m:mtd
-          columnalign="left"> <m:mo>=</m:mo> <m:msub> <m:mi>x</m:mi>
-          <m:mn>1</m:mn> </m:msub> <m:mi>,</m:mi> <m:mspace width="1em"/>
-          <m:msub> <m:mi>x</m:mi> <m:mn>2</m:mn> </m:msub> <m:mfenced>
-          <m:mn>0</m:mn> </m:mfenced> <m:mo>=</m:mo> <m:mn>1</m:mn> </m:mtd>
-          </m:mtr> </m:mtable> <m:mspace linebreak="newline"/></m:math>
+          <m:math display="block" overflow="scroll">
+            <m:mtable>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mover>
+                      <m:mi>x</m:mi>
+
+                      <m:mo>.</m:mo>
+                    </m:mover>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mfenced separators="">
+                    <m:mn>1</m:mn>
+
+                    <m:mo>-</m:mo>
+
+                    <m:msubsup>
+                      <m:mi>x</m:mi>
+
+                      <m:mn>2</m:mn>
+
+                      <m:mn>2</m:mn>
+                    </m:msubsup>
+                  </m:mfenced>
+
+                  <m:msub>
+                    <m:mi>x</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+
+                  <m:mo>-</m:mo>
+
+                  <m:msub>
+                    <m:mi>x</m:mi>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mi>u</m:mi>
+
+                  <m:mi>,</m:mi>
+
+                  <m:mspace width="1em"/>
+
+                  <m:msub>
+                    <m:mi>x</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+
+                  <m:mfenced>
+                    <m:mn>0</m:mn>
+                  </m:mfenced>
+
+                  <m:mo>=</m:mo>
+
+                  <m:mn>0</m:mn>
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mover>
+                      <m:mi>x</m:mi>
+
+                      <m:mo>.</m:mo>
+                    </m:mover>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:msub>
+                    <m:mi>x</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+
+                  <m:mi>,</m:mi>
+
+                  <m:mspace width="1em"/>
+
+                  <m:msub>
+                    <m:mi>x</m:mi>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
+
+                  <m:mfenced>
+                    <m:mn>0</m:mn>
+                  </m:mfenced>
+
+                  <m:mo>=</m:mo>
+
+                  <m:mn>1</m:mn>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+
+            <m:mspace linebreak="newline"/>
+          </m:math>
         </informalequation>
 
         <para>and the constraints:</para>
 
         <informalequation>
-          <m:math display="block" overflow="scroll"><m:mtable> <m:mtr> <m:mtd
-          columnalign="right"> <m:msub> <m:mi>x</m:mi> <m:mn>1</m:mn>
-          </m:msub> <m:mo>⁡</m:mo> <m:mfenced> <m:msub> <m:mi>t</m:mi>
-          <m:mi>f</m:mi> </m:msub> </m:mfenced> </m:mtd> <m:mtd
-          columnalign="left"> <m:mo>=</m:mo> <m:mn>0</m:mn> <m:mi>,</m:mi>
-          <m:mspace width="1em"/> <m:msub> <m:mi>x</m:mi> <m:mn>2</m:mn>
-          </m:msub> <m:mo>⁡</m:mo> <m:mfenced> <m:msub> <m:mi>t</m:mi>
-          <m:mi>f</m:mi> </m:msub> </m:mfenced> <m:mo>=</m:mo> <m:mn>0</m:mn>
-          </m:mtd> </m:mtr> </m:mtable> <m:mspace
-          linebreak="newline"/></m:math>
+          <m:math display="block" overflow="scroll">
+            <m:mtable>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mi>x</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+
+                  <m:mo>⁡</m:mo>
+
+                  <m:mfenced>
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mi>f</m:mi>
+                    </m:msub>
+                  </m:mfenced>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mn>0</m:mn>
+
+                  <m:mi>,</m:mi>
+
+                  <m:mspace width="1em"/>
+
+                  <m:msub>
+                    <m:mi>x</m:mi>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
+
+                  <m:mo>⁡</m:mo>
+
+                  <m:mfenced>
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mi>f</m:mi>
+                    </m:msub>
+                  </m:mfenced>
+
+                  <m:mo>=</m:mo>
+
+                  <m:mn>0</m:mn>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+
+            <m:mspace linebreak="newline"/>
+          </m:math>
         </informalequation>
 
         <para><informalequation>
-            <m:math display="block"><m:mi>-1 ≤ u(t) ≤ 1</m:mi></m:math>
+            <m:math display="block">
+              <m:mi>-1 ≤ u(t) ≤ 1</m:mi>
+            </m:math>
           </informalequation></para>
 
         <para>This problem is encoded in the following Optimica
@@ -1788,55 +2238,210 @@ plt.show()
         <para>We consider the optimization problem</para>
 
         <informalequation>
-          <m:math display="block"><m:mrow> <m:munder> <m:mi>min</m:mi>
-          <m:mi>u(t)</m:mi> </m:munder> <m:mrow> <m:munderover> <m:mo>∫</m:mo>
-          <m:mi>0</m:mi> <m:mi>1</m:mi> </m:munderover> <m:msup>
-          <m:mi>(4x(t)</m:mi> <m:mi>2</m:mi> </m:msup> <m:msubsup> <m:mi>+
-          u(t)</m:mi> <m:mi>1</m:mi> <m:mi>2</m:mi> </m:msubsup> <m:msubsup>
-          <m:mi>+ u(t)</m:mi> <m:mi>2</m:mi> <m:mi>2</m:mi> </m:msubsup>
-          <m:mi>) dt</m:mi> </m:mrow> </m:mrow></m:math>
+          <m:math display="block">
+            <m:mrow>
+              <m:munder>
+                <m:mi>min</m:mi>
+
+                <m:mi>u(t)</m:mi>
+              </m:munder>
+
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>∫</m:mo>
+
+                  <m:mi>0</m:mi>
+
+                  <m:mi>1</m:mi>
+                </m:munderover>
+
+                <m:msup>
+                  <m:mi>(4x(t)</m:mi>
+
+                  <m:mi>2</m:mi>
+                </m:msup>
+
+                <m:msubsup>
+                  <m:mi>+ u(t)</m:mi>
+
+                  <m:mi>1</m:mi>
+
+                  <m:mi>2</m:mi>
+                </m:msubsup>
+
+                <m:msubsup>
+                  <m:mi>+ u(t)</m:mi>
+
+                  <m:mi>2</m:mi>
+
+                  <m:mi>2</m:mi>
+                </m:msubsup>
+
+                <m:mi>) dt</m:mi>
+              </m:mrow>
+            </m:mrow>
+          </m:math>
         </informalequation>
 
         <para>subject to the dynamics</para>
 
         <informalequation>
-          <m:math display="block"><m:mtable> <m:mtr> <m:mtd> <m:mrow>
-          <m:mover> <m:mi>x</m:mi> <m:mi>.</m:mi> </m:mover> <m:mi>(t)</m:mi>
-          <m:mo>=</m:mo> <m:msub> <m:mi>u</m:mi> <m:mi>1</m:mi> </m:msub>
-          <m:mi>(t) -</m:mi> <m:mi>2</m:mi> <m:msub> <m:mi>u</m:mi>
-          <m:mi>2</m:mi> </m:msub> <m:mi>(t)</m:mi> </m:mrow> </m:mtd>
-          </m:mtr> <m:mtr> <m:mtd> <m:mrow> <m:msub> <m:mi>u</m:mi>
-          <m:mi>2</m:mi> </m:msub> <m:mi>(t)</m:mi> <m:mo>=</m:mo> <m:msub>
-          <m:mi>u</m:mi> <m:mi>1</m:mi> </m:msub> <m:mi>(t -</m:mi> <m:msub>
-          <m:mi>t</m:mi> <m:mi>delay</m:mi> </m:msub> <m:mi>)</m:mi> </m:mrow>
-          </m:mtd> </m:mtr> </m:mtable></m:math>
+          <m:math display="block">
+            <m:mtable>
+              <m:mtr>
+                <m:mtd>
+                  <m:mrow>
+                    <m:mover>
+                      <m:mi>x</m:mi>
+
+                      <m:mi>.</m:mi>
+                    </m:mover>
+
+                    <m:mi>(t)</m:mi>
+
+                    <m:mo>=</m:mo>
+
+                    <m:msub>
+                      <m:mi>u</m:mi>
+
+                      <m:mi>1</m:mi>
+                    </m:msub>
+
+                    <m:mi>(t) -</m:mi>
+
+                    <m:mi>2</m:mi>
+
+                    <m:msub>
+                      <m:mi>u</m:mi>
+
+                      <m:mi>2</m:mi>
+                    </m:msub>
+
+                    <m:mi>(t)</m:mi>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd>
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>u</m:mi>
+
+                      <m:mi>2</m:mi>
+                    </m:msub>
+
+                    <m:mi>(t)</m:mi>
+
+                    <m:mo>=</m:mo>
+
+                    <m:msub>
+                      <m:mi>u</m:mi>
+
+                      <m:mi>1</m:mi>
+                    </m:msub>
+
+                    <m:mi>(t -</m:mi>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mi>delay</m:mi>
+                    </m:msub>
+
+                    <m:mi>)</m:mi>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+          </m:math>
         </informalequation>
 
         <para>and the boundary conditions</para>
 
         <informalequation>
-          <m:math display="block"><m:mtable> <m:mtr> <m:mtd> <m:mrow>
-          <m:mi>x(0)</m:mi> <m:mo>=</m:mo> <m:mi>1</m:mi> </m:mrow> </m:mtd>
-          </m:mtr> <m:mtr> <m:mtd> <m:mrow> <m:mi>x(1)</m:mi> <m:mo>=</m:mo>
-          <m:mi>0</m:mi> </m:mrow> </m:mtd> </m:mtr> <m:mtr> <m:mtd> <m:mrow>
-          <m:msub> <m:mi>u</m:mi> <m:mi>2</m:mi> </m:msub> <m:mi>(t)</m:mi>
-          <m:mo>=</m:mo> <m:mi>0.25, t &lt;</m:mi> <m:msub> <m:mi>t</m:mi>
-          <m:mi>delay</m:mi> </m:msub> </m:mrow> </m:mtd> </m:mtr>
-          </m:mtable></m:math>
+          <m:math display="block">
+            <m:mtable>
+              <m:mtr>
+                <m:mtd>
+                  <m:mrow>
+                    <m:mi>x(0)</m:mi>
+
+                    <m:mo>=</m:mo>
+
+                    <m:mi>1</m:mi>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd>
+                  <m:mrow>
+                    <m:mi>x(1)</m:mi>
+
+                    <m:mo>=</m:mo>
+
+                    <m:mi>0</m:mi>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd>
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>u</m:mi>
+
+                      <m:mi>2</m:mi>
+                    </m:msub>
+
+                    <m:mi>(t)</m:mi>
+
+                    <m:mo>=</m:mo>
+
+                    <m:mi>0.25, t &lt;</m:mi>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mi>delay</m:mi>
+                    </m:msub>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+          </m:math>
         </informalequation>
 
         <para>The effect of positive <inlineequation>
-            <m:math display="inline"><m:msub> <m:mi>u</m:mi> <m:mi>1</m:mi>
-            </m:msub></m:math>
+            <m:math display="inline">
+              <m:msub>
+                <m:mi>u</m:mi>
+
+                <m:mi>1</m:mi>
+              </m:msub>
+            </m:math>
           </inlineequation> is initially to increase <inlineequation>
-            <m:math display="inline"><m:mi>x</m:mi></m:math>
+            <m:math display="inline">
+              <m:mi>x</m:mi>
+            </m:math>
           </inlineequation>, but after a time delay of time <inlineequation>
-            <m:math display="inline"><m:msub> <m:mi>t</m:mi>
-            <m:mi>delay</m:mi> </m:msub></m:math>
+            <m:math display="inline">
+              <m:msub>
+                <m:mi>t</m:mi>
+
+                <m:mi>delay</m:mi>
+              </m:msub>
+            </m:math>
           </inlineequation>, it comes back with twice the effect in the
         negative direction through <inlineequation>
-            <m:math display="inline"><m:msub> <m:mi>u</m:mi> <m:mi>2</m:mi>
-            </m:msub></m:math>
+            <m:math display="inline">
+              <m:msub>
+                <m:mi>u</m:mi>
+
+                <m:mi>2</m:mi>
+              </m:msub>
+            </m:math>
           </inlineequation>.</para>
 
         <para>We model everything except the delay constraint in the Optimica
@@ -1857,8 +2462,13 @@ end DelayTest;
         Notice how delay constraint is added using the
         <literal>delayed_feedback</literal> option, and the initial part of
         <inlineequation>
-            <m:math display="inline"><m:msub> <m:mi>u</m:mi> <m:mi>2</m:mi>
-            </m:msub></m:math>
+            <m:math display="inline">
+              <m:msub>
+                <m:mi>u</m:mi>
+
+                <m:mi>2</m:mi>
+              </m:msub>
+            </m:math>
           </inlineequation> is set using the <literal>initialGuess</literal>
         attribute:</para>
 
@@ -1906,30 +2516,65 @@ plt.show()
 
         <para>The resulting control and state profiles are shown in <xref
         linkend="opt-fig-delayed-feedback"/>. Notice that <inlineequation>
-            <m:math display="inline"><m:mi>x</m:mi></m:math>
+            <m:math display="inline">
+              <m:mi>x</m:mi>
+            </m:math>
           </inlineequation> grows initially since <inlineequation>
-            <m:math display="inline"><m:msub> <m:mi>u</m:mi> <m:mi>1</m:mi>
-            </m:msub></m:math>
+            <m:math display="inline">
+              <m:msub>
+                <m:mi>u</m:mi>
+
+                <m:mi>1</m:mi>
+              </m:msub>
+            </m:math>
           </inlineequation> is set positive to exploit the greater control
         gain that appears delayed through <inlineequation>
-            <m:math display="inline"><m:msub> <m:mi>u</m:mi> <m:mi>2</m:mi>
-            </m:msub></m:math>
+            <m:math display="inline">
+              <m:msub>
+                <m:mi>u</m:mi>
+
+                <m:mi>2</m:mi>
+              </m:msub>
+            </m:math>
           </inlineequation>. At time <inlineequation>
-            <m:math display="inline"><m:mi>1 -</m:mi> <m:msub> <m:mi>t</m:mi>
-            <m:mi>delay</m:mi> </m:msub></m:math>
+            <m:math display="inline">
+              <m:mi>1 -</m:mi>
+
+              <m:msub>
+                <m:mi>t</m:mi>
+
+                <m:mi>delay</m:mi>
+              </m:msub>
+            </m:math>
           </inlineequation>, the delayed value of <inlineequation>
-            <m:math display="inline"><m:msub> <m:mi>u</m:mi> <m:mi>1</m:mi>
-            </m:msub></m:math>
+            <m:math display="inline">
+              <m:msub>
+                <m:mi>u</m:mi>
+
+                <m:mi>1</m:mi>
+              </m:msub>
+            </m:math>
           </inlineequation> ceases to influence <inlineequation>
-            <m:math display="inline"><m:mi>x</m:mi></m:math>
+            <m:math display="inline">
+              <m:mi>x</m:mi>
+            </m:math>
           </inlineequation> within the horizon, and <inlineequation>
-            <m:math display="inline"><m:msub> <m:mi>u</m:mi> <m:mi>1</m:mi>
-            </m:msub></m:math>
+            <m:math display="inline">
+              <m:msub>
+                <m:mi>u</m:mi>
+
+                <m:mi>1</m:mi>
+              </m:msub>
+            </m:math>
           </inlineequation> immediately switches sign to drive down
         <inlineequation>
-            <m:math display="inline"><m:mi>x</m:mi></m:math>
+            <m:math display="inline">
+              <m:mi>x</m:mi>
+            </m:math>
           </inlineequation> to its final value <inlineequation>
-            <m:math display="inline"><m:mi>x(1) = 0</m:mi></m:math>
+            <m:math display="inline">
+              <m:mi>x(1) = 0</m:mi>
+            </m:math>
           </inlineequation>.</para>
 
         <figure xml:id="opt-fig-delayed-feedback">
@@ -1966,62 +2611,395 @@ plt.show()
         equations:</para>
 
         <informalequation>
-          <m:math display="block" overflow="scroll"><m:mtable> <m:mtr> <m:mtd
-          columnalign="right"> <m:msub> <m:mover> <m:mi>x</m:mi>
-          <m:mo>.</m:mo> </m:mover> <m:mn>1</m:mn> </m:msub> </m:mtd> <m:mtd
-          columnalign="left"> <m:mo>=</m:mo> <m:mo>-</m:mo> <m:mfrac> <m:msub>
-          <m:mi>a</m:mi> <m:mn>1</m:mn> </m:msub> <m:msub> <m:mi>A</m:mi>
-          <m:mn>2</m:mn> </m:msub> </m:mfrac> <m:msqrt> <m:mrow>
-          <m:mn>2</m:mn> <m:mi>g</m:mi> </m:mrow> <m:msub> <m:mi>x</m:mi>
-          <m:mn>1</m:mn> </m:msub> </m:msqrt> <m:mo>+</m:mo> <m:mfrac>
-          <m:msub> <m:mi>a</m:mi> <m:mn>3</m:mn> </m:msub> <m:msub>
-          <m:mi>A</m:mi> <m:mn>1</m:mn> </m:msub> </m:mfrac> <m:msqrt>
-          <m:mrow> <m:mn>2</m:mn> <m:mi>g</m:mi> </m:mrow> <m:msub>
-          <m:mi>x</m:mi> <m:mn>3</m:mn> </m:msub> </m:msqrt> <m:mo>+</m:mo>
-          <m:mfrac> <m:mrow> <m:msub> <m:mi>γ</m:mi> <m:mn>1</m:mn> </m:msub>
-          <m:msub> <m:mi>k</m:mi> <m:mn>1</m:mn> </m:msub> </m:mrow> <m:msub>
-          <m:mi>A</m:mi> <m:mn>1</m:mn> </m:msub> </m:mfrac> <m:msub>
-          <m:mi>u</m:mi> <m:mn>1</m:mn> </m:msub> </m:mtd> </m:mtr> <m:mtr>
-          <m:mtd columnalign="right"> <m:msub> <m:mover> <m:mi>x</m:mi>
-          <m:mo>.</m:mo> </m:mover> <m:mn>2</m:mn> </m:msub> </m:mtd> <m:mtd
-          columnalign="left"> <m:mo>=</m:mo> <m:mo>-</m:mo> <m:mfrac> <m:msub>
-          <m:mi>a</m:mi> <m:mn>2</m:mn> </m:msub> <m:msub> <m:mi>A</m:mi>
-          <m:mn>2</m:mn> </m:msub> </m:mfrac> <m:msqrt> <m:mrow>
-          <m:mn>2</m:mn> <m:mi>g</m:mi> </m:mrow> <m:msub> <m:mi>x</m:mi>
-          <m:mn>2</m:mn> </m:msub> </m:msqrt> <m:mo>+</m:mo> <m:mfrac>
-          <m:msub> <m:mi>a</m:mi> <m:mn>4</m:mn> </m:msub> <m:msub>
-          <m:mi>A</m:mi> <m:mn>2</m:mn> </m:msub> </m:mfrac> <m:msqrt>
-          <m:mrow> <m:mn>2</m:mn> <m:mi>g</m:mi> </m:mrow> <m:msub>
-          <m:mi>x</m:mi> <m:mn>4</m:mn> </m:msub> </m:msqrt> <m:mo>+</m:mo>
-          <m:mfrac> <m:mrow> <m:msub> <m:mi>γ</m:mi> <m:mn>2</m:mn> </m:msub>
-          <m:msub> <m:mi>k</m:mi> <m:mn>2</m:mn> </m:msub> </m:mrow> <m:msub>
-          <m:mi>A</m:mi> <m:mn>2</m:mn> </m:msub> </m:mfrac> <m:msub>
-          <m:mi>u</m:mi> <m:mn>2</m:mn> </m:msub> </m:mtd> </m:mtr> <m:mtr>
-          <m:mtd columnalign="right"> <m:msub> <m:mover> <m:mi>x</m:mi>
-          <m:mo>.</m:mo> </m:mover> <m:mn>3</m:mn> </m:msub> </m:mtd> <m:mtd
-          columnalign="left"> <m:mo>=</m:mo> <m:mo>-</m:mo> <m:mfrac> <m:msub>
-          <m:mi>a</m:mi> <m:mn>3</m:mn> </m:msub> <m:msub> <m:mi>A</m:mi>
-          <m:mn>3</m:mn> </m:msub> </m:mfrac> <m:msqrt> <m:mrow>
-          <m:mn>2</m:mn> <m:mi>g</m:mi> </m:mrow> <m:msub> <m:mi>x</m:mi>
-          <m:mn>3</m:mn> </m:msub> </m:msqrt> <m:mo>+</m:mo> <m:mfrac>
-          <m:mrow> <m:mfenced separators=""> <m:mn>1</m:mn> <m:mo>-</m:mo>
-          <m:msub> <m:mi>γ</m:mi> <m:mn>2</m:mn> </m:msub> </m:mfenced>
-          <m:msub> <m:mi>k</m:mi> <m:mn>2</m:mn> </m:msub> </m:mrow> <m:msub>
-          <m:mi>A</m:mi> <m:mn>3</m:mn> </m:msub> </m:mfrac> <m:msub>
-          <m:mi>u</m:mi> <m:mn>2</m:mn> </m:msub> </m:mtd> </m:mtr> <m:mtr>
-          <m:mtd columnalign="right"> <m:msub> <m:mover> <m:mi>x</m:mi>
-          <m:mo>.</m:mo> </m:mover> <m:mn>4</m:mn> </m:msub> </m:mtd> <m:mtd
-          columnalign="left"> <m:mo>=</m:mo> <m:mo>-</m:mo> <m:mfrac> <m:msub>
-          <m:mi>a</m:mi> <m:mn>4</m:mn> </m:msub> <m:msub> <m:mi>A</m:mi>
-          <m:mn>4</m:mn> </m:msub> </m:mfrac> <m:msqrt> <m:mrow>
-          <m:mn>2</m:mn> <m:mi>g</m:mi> </m:mrow> <m:msub> <m:mi>x</m:mi>
-          <m:mn>4</m:mn> </m:msub> </m:msqrt> <m:mo>+</m:mo> <m:mfrac>
-          <m:mrow> <m:mfenced separators=""> <m:mn>1</m:mn> <m:mo>-</m:mo>
-          <m:msub> <m:mi>γ</m:mi> <m:mn>1</m:mn> </m:msub> </m:mfenced>
-          <m:msub> <m:mi>k</m:mi> <m:mn>1</m:mn> </m:msub> </m:mrow> <m:msub>
-          <m:mi>A</m:mi> <m:mn>4</m:mn> </m:msub> </m:mfrac> <m:msub>
-          <m:mi>u</m:mi> <m:mn>1</m:mn> </m:msub> </m:mtd> </m:mtr>
-          </m:mtable> <m:mspace linebreak="newline"/></m:math>
+          <m:math display="block" overflow="scroll">
+            <m:mtable>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mover>
+                      <m:mi>x</m:mi>
+
+                      <m:mo>.</m:mo>
+                    </m:mover>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mo>-</m:mo>
+
+                  <m:mfrac>
+                    <m:msub>
+                      <m:mi>a</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>2</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msqrt>
+                    <m:mrow>
+                      <m:mn>2</m:mn>
+
+                      <m:mi>g</m:mi>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>x</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+                  </m:msqrt>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mfrac>
+                    <m:msub>
+                      <m:mi>a</m:mi>
+
+                      <m:mn>3</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msqrt>
+                    <m:mrow>
+                      <m:mn>2</m:mn>
+
+                      <m:mi>g</m:mi>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>x</m:mi>
+
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:msqrt>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>γ</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+
+                      <m:msub>
+                        <m:mi>k</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msub>
+                    <m:mi>u</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mover>
+                      <m:mi>x</m:mi>
+
+                      <m:mo>.</m:mo>
+                    </m:mover>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mo>-</m:mo>
+
+                  <m:mfrac>
+                    <m:msub>
+                      <m:mi>a</m:mi>
+
+                      <m:mn>2</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>2</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msqrt>
+                    <m:mrow>
+                      <m:mn>2</m:mn>
+
+                      <m:mi>g</m:mi>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>x</m:mi>
+
+                      <m:mn>2</m:mn>
+                    </m:msub>
+                  </m:msqrt>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mfrac>
+                    <m:msub>
+                      <m:mi>a</m:mi>
+
+                      <m:mn>4</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>2</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msqrt>
+                    <m:mrow>
+                      <m:mn>2</m:mn>
+
+                      <m:mi>g</m:mi>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>x</m:mi>
+
+                      <m:mn>4</m:mn>
+                    </m:msub>
+                  </m:msqrt>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>γ</m:mi>
+
+                        <m:mn>2</m:mn>
+                      </m:msub>
+
+                      <m:msub>
+                        <m:mi>k</m:mi>
+
+                        <m:mn>2</m:mn>
+                      </m:msub>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>2</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msub>
+                    <m:mi>u</m:mi>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mover>
+                      <m:mi>x</m:mi>
+
+                      <m:mo>.</m:mo>
+                    </m:mover>
+
+                    <m:mn>3</m:mn>
+                  </m:msub>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mo>-</m:mo>
+
+                  <m:mfrac>
+                    <m:msub>
+                      <m:mi>a</m:mi>
+
+                      <m:mn>3</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msqrt>
+                    <m:mrow>
+                      <m:mn>2</m:mn>
+
+                      <m:mi>g</m:mi>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>x</m:mi>
+
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:msqrt>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:mfenced separators="">
+                        <m:mn>1</m:mn>
+
+                        <m:mo>-</m:mo>
+
+                        <m:msub>
+                          <m:mi>γ</m:mi>
+
+                          <m:mn>2</m:mn>
+                        </m:msub>
+                      </m:mfenced>
+
+                      <m:msub>
+                        <m:mi>k</m:mi>
+
+                        <m:mn>2</m:mn>
+                      </m:msub>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msub>
+                    <m:mi>u</m:mi>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mover>
+                      <m:mi>x</m:mi>
+
+                      <m:mo>.</m:mo>
+                    </m:mover>
+
+                    <m:mn>4</m:mn>
+                  </m:msub>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mo>-</m:mo>
+
+                  <m:mfrac>
+                    <m:msub>
+                      <m:mi>a</m:mi>
+
+                      <m:mn>4</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>4</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msqrt>
+                    <m:mrow>
+                      <m:mn>2</m:mn>
+
+                      <m:mi>g</m:mi>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>x</m:mi>
+
+                      <m:mn>4</m:mn>
+                    </m:msub>
+                  </m:msqrt>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:mfenced separators="">
+                        <m:mn>1</m:mn>
+
+                        <m:mo>-</m:mo>
+
+                        <m:msub>
+                          <m:mi>γ</m:mi>
+
+                          <m:mn>1</m:mn>
+                        </m:msub>
+                      </m:mfenced>
+
+                      <m:msub>
+                        <m:mi>k</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>4</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msub>
+                    <m:mi>u</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+
+            <m:mspace linebreak="newline"/>
+          </m:math>
         </informalequation>
 
         <para>Where the nominal parameter values are given in <xref
@@ -2436,305 +3414,6 @@ plt.show()
         all four tank levels are penalized. Do this as an exercise!</para>
       </section>
     </section>
-
-    <section>
-      <title>Investigating optimization progress</title>
-
-      <para>This section describes some tools that can be used to investigate
-      the progress of the nonlinear programming solver on an optimization
-      problem. This information can be useful when debugging convergence
-      problems; some of it (e.g. dual variables) may also be useful to gain a
-      better understanding of the properties of an optimization problem. To
-      make sense of the information that can be retrieved, we first give an
-      overview of the collocation procedure that transcribes the optimization
-      problem into a Nonlinear Program (NLP).</para>
-
-      <para>Methods for inspecting progress are divided into low level and
-      high level methods, where the low level methods provide details of the
-      underlying NLP while the high level methods are oriented towards the
-      optimization problem as seen in the model formulation.</para>
-
-      <para>All functionality related to inspection of solver progress is
-      exposed through the solver object as returned through the
-      <literal>prepare_optimization</literal> method. If the optimization has
-      been done through the <literal>optimize</literal> method instead, the
-      solver can be obtained as in</para>
-
-      <programlisting>res = model.optimize(options=opts)
-solver = res.get_solver()
-</programlisting>
-
-      <section>
-        <title>Collocation</title>
-
-        <para>To be able to solve a dynamic optimization problem, it is first
-        discretized through collocation. Time is divided into
-        <emphasis>elements</emphasis> (time intervals), and time varying
-        variables are approximated by a low order polynomial over each
-        element. Each polynomial piece is described by sample values at a
-        number of <emphasis>collocation points</emphasis> (default 3) within
-        the element. The result is that each time varying variable in the
-        model is <emphasis>instantiated</emphasis> into one NLP variable for
-        each collocation point within each element. Some variables may also
-        need to be instantiated at additional points, such as the initial
-        point which is typically not a collocation point.</para>
-
-        <para>The equations in a model are divided into initial equations, dae
-        equations, path constraints and point constraints. These equations are
-        also instantiated at different time points to become constraints in
-        the NLP. Initial equations and point constraints are instantiated only
-        once. Dae equations and path constraints are instantiated at
-        collocation point of each element and possibly some additional
-        points.</para>
-
-        <para>When using the methods described below, each model equation is
-        referred to as a pair <literal>(eqtype, eqind)</literal>. The string
-        <literal>eqtype</literal> may be either <literal>'initial'</literal>,
-        <literal>'dae'</literal>, <literal>'path_eq'</literal>,
-        <literal>'path_ineq'</literal>, <literal>'point_eq'</literal>, or
-        <literal>'point_ineq'</literal>. The equation index
-        <literal>eqind</literal> gives the index within the given equation
-        type, and is a nonnegative integer less than the number of equations
-        within the type. The symbolic model equations corresponding to given
-        pairs <literal>(eqtype, eqind)</literal> can be retrieved through the
-        <literal>get_equations</literal> method:</para>
-
-        <programlisting>eq      = solver.get_equations(eqtype, 0)     # first equation of type eqtype
-eqs     = solver.get_equations(eqtype, [1,3]) # second and fourth equation
-all_eqs = solver.get_equations(eqtype)        # all equations of the given type
-</programlisting>
-
-        <para>Apart from the model equations, collocation may also instantiate
-        additional kinds of constraints, such as <emphasis>continuity
-        constraints</emphasis> to enforce continuity of states between
-        elements and <emphasis>collocation constraints</emphasis> to prescribe
-        the coupling between states and their derivatives. These constraints
-        have their own <literal>eqtype</literal> strings. A list of all
-        equation types that are used in a given model can be retrieved
-        using</para>
-
-        <programlisting>eqtypes = solver.get_constraint_types()</programlisting>
-      </section>
-
-      <section>
-        <title>Inspecting residuals</title>
-
-        <para>Given a potential solution to the NLP, the
-        <emphasis>residual</emphasis> of a constraint is a number that
-        specifies how close it is to being satisfied. For equalities, the
-        residual must be (close to) zero for the solution to be feasible. For
-        inequalities, the residual must be in a specified range, typically
-        nonpositive. The constraint <emphasis>violation</emphasis> is zero if
-        the residual is within bounds, and gives the signed distance to the
-        closest bound otherwise; for equality constraints, this is the same as
-        the residual. Methods for returning residuals actually return the
-        violation by default, but have an option to get the raw
-        residual.</para>
-
-        <para>For a feasible solution, all violations are (almost) zero. If an
-        optimization converges to an infeasible point or does not have time to
-        converge to a feasible one then the residuals show which constraints
-        the NLP solver was unable to satisfy. If one problematic constraint
-        comes into conflict with a number of constraints, all of them will
-        likely have nonzero violations.</para>
-
-        <para>Residual values for a given equation type can be retrieved as a
-        function of time through</para>
-
-        <programlisting>r, t, i, k = solver.get_residuals(eqtype)</programlisting>
-
-        <para>where <literal>r</literal> is an array of residuals of shape
-        <literal>(n_timepoints, n_equations)</literal>, and
-        <literal>t</literal>, <literal>i</literal>, and <literal>k</literal>
-        are vectors that give the time, element index, and collocation point
-        index for each instantiation. The are also optional arguments:
-        <literal>inds</literal> gives a subset of equation indices (e.g.
-        <literal>inds=[0, 1]</literal>), <literal>point</literal> specifies
-        whether to evaluate residuals at the optimization solution
-        (<literal>point='opt'</literal>, default) or the initial point
-        (<literal>point='init'</literal>), and <literal>raw</literal>
-        specifies whether to return constraint violations
-        (<literal>raw=False</literal>, default) or raw residuals
-        (<literal>raw=True</literal>).</para>
-
-        <para>The above can also be done with</para>
-
-        <programlisting>r = solver.get_residuals(eqtype, tik=False)
-t, i, k = solver.get_constraint_points(eqtype)
-</programlisting>
-
-        <para>To get an overview of which residuals are the biggest,</para>
-
-        <programlisting>solver.get_residual_norms()</programlisting>
-
-        <para>returns a list of equation types sorted by descending residual
-        norm, and</para>
-
-        <programlisting>solver.get_residual_norms(eqtype)</programlisting>
-
-        <para>returns a list of equation indices of the given type sorted by
-        residual norm.</para>
-
-        <para>By default, the methods above work with the unscaled residuals
-        that result directly from collocation. If the
-        <literal>equation_scaling</literal> option is turned on, the
-        constraints will be rescaled before they are sent to the NLP solver.
-        It might be of more interest to look at the size of the scaled
-        residuals, since these are what the NLP solver will try to make small.
-        The above methods can then be made to work with the scaled residuals
-        instead of the unscaled by use of the <literal>scaled=True</literal>
-        keyword argument. The residual scale factors can also be retrieved in
-        analogy to <literal>solver.get_residuals</literal> through</para>
-
-        <programlisting>scales = solver.get_residual_scales(eqtype)</programlisting>
-
-        <para>and an overview of the residual scale factors (or inverse scale
-        factors with <literal>inv=True</literal>) can be gained from</para>
-
-        <programlisting>solver.get_residual_scale_norms()</programlisting>
-      </section>
-
-      <section>
-        <title>Inspecting the constraint Jacobian</title>
-
-        <para>When solving the collocated NLP, the NLP solver typically has to
-        evaluate the Jacobian of the constraint residual functions.
-        Convergence problems can sometimes be related to numerical problems
-        with the constraint Jacobian. In particular, Ipopt will never consider
-        potential solution if there are nonfinite (infinity or not-a-number)
-        entries in the Jacobian. If the Jacobian has such entries at the
-        initial guess, the optimizer will give up completely.</para>
-
-        <para>The constraint Jacobian comes from the NLP. As seen from the
-        original model, it contains the derivatives of the model equations
-        (and also e.g. the collocation equations) with respect to the model
-        variables at different time points. If one or several problematic
-        entries are found in the Jacobian, it is often helpful to know the
-        model equation and variable that they correspond to.</para>
-
-        <para>The set of (model equation, model variable) pairs that
-        correspond to nonfinite entries in the constraint Jacobian can be
-        printed with</para>
-
-        <programlisting>solver.print_nonfinite_jacobian_entries()</programlisting>
-
-        <para>or returned with</para>
-
-        <programlisting>entries = solver.find_nonfinite_jacobian_entries()</programlisting>
-
-        <para>There are also methods to allow to make more custom analyses of
-        this kind. To instead list all Jacobian entries with an absolute value
-        greater than 10, one can use</para>
-
-        <programlisting>J = solver.get_nlp_jacobian() # Get the raw NLP constraint Jacobian as a (sparse) scipy.csc_matrix
-
-# Find the indices of all entries with absolute value &gt; 10
-J.data = abs(J.data) &gt; 10
-c_inds, xx_inds = N.nonzero(J)
-
-entries = solver.get_model_jacobian_entries(c_inds, xx_inds) # Map the indices to equations and variables in the model
-solver.print_jacobian_entries(entries) # Print them
-</programlisting>
-
-        <para>To get the Jacobian with residual scaling applied, use the
-        <literal>scaled_residuals=True</literal> option.</para>
-      </section>
-
-      <section>
-        <title>Inspecting dual variables</title>
-
-        <para>Many NLP solvers (including Ipopt) produce a solution that
-        consists of not only the primal variables (the actual NLP variables),
-        but also one <emphasis>dual variable</emphasis> for each constraint in
-        the NLP. Upon convergence, the value of each dual variable gives the
-        change in the optimal objective per unit change in the residual. Thus,
-        the dual variables can give an idea of which constraints are most
-        hindering when it comes to achieving a lower objective value, however,
-        they must be interpreted in relation to how much it might be possible
-        to change any given constraint.</para>
-
-        <para>Dual variable values for a given equation type can be retrieved
-        as a function of time through</para>
-
-        <programlisting>d, t, i, k = solver.get_constraint_duals(eqtype)</programlisting>
-
-        <para>in analogy to <literal>solver.get_residuals</literal>. To get
-        constraint duals for the equation scaled problem, use the
-        <literal>scaled=True</literal> keyword argument.</para>
-
-        <para>Besides regular constraints, the NLP can also contain upper and
-        lower bounds on variables. These will correspond to the Modelica
-        <literal>min</literal> and <literal>max</literal> attributes for
-        instantiated model variables. The dual variables for the bounds on a
-        given model variable <literal>var</literal> can be retrieved as a
-        function of time through</para>
-
-        <programlisting>d, t, i, k = solver.get_bound_duals(var)</programlisting>
-
-        <para>The above can also be done with</para>
-
-        <programlisting>d = solver.get_bound_duals(var, tik=False)
-t, i, k = solver.get_variable_points(var)
-</programlisting>
-      </section>
-
-      <section>
-        <title>Inspecting low level information about NLP solver
-        progress</title>
-
-        <para>The methods described above generally hide the actual collocated
-        NLP and only require to work with model variables and equations,
-        instantiated at different points. There also exist lower level methods
-        that expose the NLP level information and its mapping to the original
-        model more directly, and may be useful for more custom applications.
-        These include</para>
-
-        <itemizedlist>
-          <listitem>
-            <para><literal>get_nlp_variables</literal>,
-            <literal>get_nlp_residuals</literal>,
-            <literal>get_nlp_bound_duals</literal>, and
-            <literal>get_nlp_constraint_duals</literal> to get raw vectors
-            from the NLP solution.</para>
-          </listitem>
-
-          <listitem>
-            <para><literal>get_nlp_variable_bounds</literal> and
-            <literal>get_nlp_residual_bounds</literal> to get the
-            corresponding bounds used in the NLP.</para>
-          </listitem>
-
-          <listitem>
-            <para><literal>get_nlp_residual_scales</literal> to get the raw
-            residual scale factors.</para>
-          </listitem>
-
-          <listitem>
-            <para><literal>get_nlp_variable_indices</literal> and
-            <literal>get_nlp_constraint_indices</literal> to get mappings from
-            model variables and equations to their NLP counterparts.</para>
-          </listitem>
-
-          <listitem>
-            <para><literal>get_point_time</literal> to get the times of
-            collocation points <literal>(i, k)</literal>.</para>
-          </listitem>
-
-          <listitem>
-            <para><literal>get_model_variables</literal> and
-            <literal>get_model_constraints</literal> to map from NLP variables
-            and constraints to the corresponding model variables and
-            equations.</para>
-          </listitem>
-        </itemizedlist>
-
-        <para>The low level constraint Jacobian methods
-        <literal>get_nlp_jacobian</literal>,
-        <literal>get_model_jacobian_entries</literal>, and the
-        <literal>print_jacobian_entries</literal> method have already been
-        covered in the section about jacobians above.</para>
-      </section>
-    </section>
   </section>
 
   <section>
@@ -2755,17 +3434,25 @@ t, i, k = solver.get_variable_points(var)
     rotating in the horizontal plane and a pendulum which is free to rotate in
     the vertical plane. The construction has two degrees of freedom, the angle
     of the arm, <inlineequation>
-        <m:math display="inline"><m:mi>φ</m:mi></m:math>
+        <m:math display="inline">
+          <m:mi>φ</m:mi>
+        </m:math>
       </inlineequation>, and the angle of the pendulum, <inlineequation>
-        <m:math display="inline"><m:mi>θ</m:mi></m:math>
+        <m:math display="inline">
+          <m:mi>θ</m:mi>
+        </m:math>
       </inlineequation>. Copy the file
     <filename>$JMODELICA_HOME/Python/pyjmi/examples/files/FMUs/Furuta.fmu</filename>
     to your working directory. <emphasis role="bold">Note that this the
     Furuta.fmu file is currently only supported on Windows.</emphasis>
     Measurement data for <inlineequation>
-        <m:math display="inline"><m:mi>φ</m:mi></m:math>
+        <m:math display="inline">
+          <m:mi>φ</m:mi>
+        </m:math>
       </inlineequation> and <inlineequation>
-        <m:math display="inline"><m:mi>θ</m:mi></m:math>
+        <m:math display="inline">
+          <m:mi>θ</m:mi>
+        </m:math>
       </inlineequation> is available in the file
     <filename>$JMODELICA_HOME/Python/pyjmi/examples/files/FurutaData.mat</filename>.
     Copy this file to your working directory as well. These measurements will
@@ -2811,16 +3498,24 @@ plt.show ()
 
     <para>This code should generate <xref linkend="opt-fig-furuta-meas"/>
     showing the measurements of <inlineequation>
-        <m:math display="inline"><m:mi>θ</m:mi></m:math>
+        <m:math display="inline">
+          <m:mi>θ</m:mi>
+        </m:math>
       </inlineequation> and <inlineequation>
-        <m:math display="inline"><m:mi>φ</m:mi></m:math>
+        <m:math display="inline">
+          <m:mi>φ</m:mi>
+        </m:math>
       </inlineequation>.</para>
 
     <figure xml:id="opt-fig-furuta-meas">
       <title>Measurements of <inlineequation>
-          <m:math display="inline"><m:mi>θ</m:mi></m:math>
+          <m:math display="inline">
+            <m:mi>θ</m:mi>
+          </m:math>
         </inlineequation> and <inlineequation>
-          <m:math display="inline"><m:mi>φ</m:mi></m:math>
+          <m:math display="inline">
+            <m:mi>φ</m:mi>
+          </m:math>
         </inlineequation> for the Furuta pendulum.</title>
 
       <mediaobject>
@@ -2862,9 +3557,13 @@ plt.show ()
 
     <figure xml:id="opt-fig-furuta-meas-nomsim">
       <title>Measurements and model simulation result for <inlineequation>
-          <m:math display="inline"><m:mi>φ</m:mi></m:math>
+          <m:math display="inline">
+            <m:mi>φ</m:mi>
+          </m:math>
         </inlineequation> and <inlineequation>
-          <m:math display="inline"><m:mi>θ</m:mi></m:math>
+          <m:math display="inline">
+            <m:mi>θ</m:mi>
+          </m:math>
         </inlineequation> when using nominal parameter values in the Furuta
       pendulum model.</title>
 
@@ -2883,16 +3582,26 @@ plt.show ()
     <itemizedlist>
       <listitem>
         <para><inlineequation>
-            <m:math display="inline"><m:msub> <m:mi>c</m:mi> <m:mi>arm</m:mi>
-            </m:msub></m:math>
+            <m:math display="inline">
+              <m:msub>
+                <m:mi>c</m:mi>
+
+                <m:mi>arm</m:mi>
+              </m:msub>
+            </m:math>
           </inlineequation>: arm friction coefficient (nominal value
         0.012)</para>
       </listitem>
 
       <listitem>
         <para><inlineequation>
-            <m:math display="inline"><m:msub> <m:mi>c</m:mi> <m:mi>pend</m:mi>
-            </m:msub></m:math>
+            <m:math display="inline">
+              <m:msub>
+                <m:mi>c</m:mi>
+
+                <m:mi>pend</m:mi>
+              </m:msub>
+            </m:math>
           </inlineequation>: pendulum friction coefficient (nominal value
         0.002)</para>
       </listitem>
@@ -2909,31 +3618,86 @@ plt.show ()
       </inlinemediaobject></para>
 
     <para>where <inlineequation>
-        <m:math display="inline"><m:msub> <m:mi>t</m:mi> <m:mi>i</m:mi>
-        </m:msub></m:math>
+        <m:math display="inline">
+          <m:msub>
+            <m:mi>t</m:mi>
+
+            <m:mi>i</m:mi>
+          </m:msub>
+        </m:math>
       </inlineequation>, i = 1,2,...,M, are the measurement time points and
     <inlineequation>
-        <m:math display="inline"><m:msup> <m:mrow> <m:mo>[</m:mo> <m:mtable>
-        <m:mtr> <m:mtd> <m:msub> <m:mi>c</m:mi> <m:mi>arm</m:mi> </m:msub>
-        </m:mtd> <m:mtd> <m:msub> <m:mi>c</m:mi> <m:mi>pend</m:mi> </m:msub>
-        </m:mtd> </m:mtr> </m:mtable> <m:mo>]</m:mo> </m:mrow> <m:mi>T</m:mi>
-        </m:msup></m:math>
+        <m:math display="inline">
+          <m:msup>
+            <m:mrow>
+              <m:mo>[</m:mo>
+
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>c</m:mi>
+
+                      <m:mi>arm</m:mi>
+                    </m:msub>
+                  </m:mtd>
+
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>c</m:mi>
+
+                      <m:mi>pend</m:mi>
+                    </m:msub>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+
+              <m:mo>]</m:mo>
+            </m:mrow>
+
+            <m:mi>T</m:mi>
+          </m:msup>
+        </m:math>
       </inlineequation> is the parameter vector. <inlineequation>
-        <m:math display="inline"><m:msup> <m:mi>φ</m:mi> <m:mi>meas</m:mi>
-        </m:msup></m:math>
+        <m:math display="inline">
+          <m:msup>
+            <m:mi>φ</m:mi>
+
+            <m:mi>meas</m:mi>
+          </m:msup>
+        </m:math>
       </inlineequation> and <inlineequation>
-        <m:math display="inline"><m:msup> <m:mi>θ</m:mi> <m:mi>meas</m:mi>
-        </m:msup></m:math>
+        <m:math display="inline">
+          <m:msup>
+            <m:mi>θ</m:mi>
+
+            <m:mi>meas</m:mi>
+          </m:msup>
+        </m:math>
       </inlineequation> are the measurements of <inlineequation>
-        <m:math display="inline"><m:mi>φ</m:mi></m:math>
+        <m:math display="inline">
+          <m:mi>φ</m:mi>
+        </m:math>
       </inlineequation> and <inlineequation>
-        <m:math display="inline"><m:mi>θ</m:mi></m:math>
+        <m:math display="inline">
+          <m:mi>θ</m:mi>
+        </m:math>
       </inlineequation>, respectively, and <inlineequation>
-        <m:math display="inline"><m:msup> <m:mi>φ</m:mi> <m:mi>sim</m:mi>
-        </m:msup></m:math>
+        <m:math display="inline">
+          <m:msup>
+            <m:mi>φ</m:mi>
+
+            <m:mi>sim</m:mi>
+          </m:msup>
+        </m:math>
       </inlineequation> and <inlineequation>
-        <m:math display="inline"><m:msup> <m:mi>θ</m:mi> <m:mi>sim</m:mi>
-        </m:msup></m:math>
+        <m:math display="inline">
+          <m:msup>
+            <m:mi>θ</m:mi>
+
+            <m:mi>sim</m:mi>
+          </m:msup>
+        </m:math>
       </inlineequation> are the corresponding simulation results. Now, add
     code defining a starting point for the algorithm (use the nominal
     parameter values) as well as lower and upper bounds for the
@@ -2943,8 +3707,13 @@ x0 = N.array([0.012,0.002])*1e3
 lb = N.zeros (2)
 ub = (x0 + 1e-2)*1e3
 </programlisting>Note that the values are scaled with a factor <inlineequation>
-        <m:math display="inline"><m:msup> <m:mi>10</m:mi> <m:mi>3</m:mi>
-        </m:msup></m:math>
+        <m:math display="inline">
+          <m:msup>
+            <m:mi>10</m:mi>
+
+            <m:mi>3</m:mi>
+          </m:msup>
+        </m:math>
       </inlineequation>. This is done to get a more appropriate variable size
     for the algorithm to work with. After the optimization is done, the
     obtained result is scaled back again. In this calibration problem, we
@@ -3077,9 +3846,13 @@ plt.show ()
 
     <figure xml:id="opt-fig-furuta-opt">
       <title>Measurements and model simulation results for <inlineequation>
-          <m:math display="inline"><m:mi>φ</m:mi></m:math>
+          <m:math display="inline">
+            <m:mi>φ</m:mi>
+          </m:math>
         </inlineequation> and <inlineequation>
-          <m:math display="inline"><m:mi>θ</m:mi></m:math>
+          <m:math display="inline">
+            <m:mi>θ</m:mi>
+          </m:math>
         </inlineequation> with nominal and optimal parameters in the model of
       the Furuta pendulum.</title>
 

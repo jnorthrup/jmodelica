@@ -19,8 +19,7 @@
 The pyjmi example package.
 """
 __all__ = ['ast_example', 'bang_control', 'blood_glucose', 'blood_glucose_opt', 
-           'blood_glucose_opt_scaled',
-           'cart_pendulum', 'catalyst_mixing', 'catalytic_cracking', 
+           'blood_glucose_opt_scaled', 'catalyst_mixing', 'catalytic_cracking', 
            'ccpp', 'ccpp_elimination', 'coloumb_friction', 'cont_state', 'crane',
            'crystallizer', 
            'cstr', 'cstr_casadi', 'cstr_mpc', 'cstr_mpc_casadi', 'cstr2',
@@ -28,7 +27,7 @@ __all__ = ['ast_example', 'bang_control', 'blood_glucose', 'blood_glucose_opt',
            'distillation_fmu', 'distillation1_fmu',  'distillation2_fmu', 
            'distillation4_fmu', 'distillation4_opt',
            'dist1_init_sim', 'distillation1_opt',
-           'extfunctions', 'extFunctions_arrays', 'extFunctions_matrix', 'fed_batch_oed',
+           'extfunctions', 'extFunctions_arrays', 'extFunctions_matrix', 
            'furuta_dfo', 'furuta_dfo_cost', 'furuta_modified', 
            'if_example_1', 'if_example_2', 
            'lagrange_cost', 'leadtransport',
@@ -44,5 +43,4 @@ __all__ = ['ast_example', 'bang_control', 'blood_glucose', 'blood_glucose_opt',
            'vehicle_turn', 'vdp', 'vdp_casadi',
            'vdp_minimum_time', 'vdp_minimum_time_casadi',
            'vdp_pp', 'VDP_sim', 
-           'vdp_minimum_time_interpolation', 'bounds_kinsol',
-           'furuta_dfo_using_algorithm_drivers']
+           'vdp_minimum_time_interpolation', 'bounds_kinsol']

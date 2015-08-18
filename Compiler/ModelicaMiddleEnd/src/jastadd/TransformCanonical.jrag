@@ -32,10 +32,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Collections;
 import java.util.Iterator;
-
-import org.jmodelica.util.collections.ListMap;
-import org.jmodelica.util.collections.LinkedHashListMap;
-import org.jmodelica.util.collections.ParallelIterable;
+import org.jmodelica.util.ParallelIterable;
 import org.jmodelica.util.ErrorCheckType;
 import org.jmodelica.util.munkres.MunkresProblem;
 import org.jmodelica.util.munkres.IntegerCost;
@@ -111,12 +108,12 @@ aspect TransformCanonical {
                 return;
             transformations = new ArrayList<Transformation>();
             transformations.add(new enableIfEquationElimination());
+            transformations.add(new enableArrayAccessRewrite());
             transformations.add(new genAlgorithmFunctionsIfSet());
             transformations.add(new genBindingAssignments());
             transformations.add(new scalarize());
             transformations.add(new MakeReinitedVarsStates());
             transformations.add(new enableIfEquationElimination());
-            transformations.add(new enableStreamsRewrite());
             transformations.add(new extractEventGeneratingExps());
             transformations.add(new transformAlgorithms());
             transformations.add(new enableWhenClauseRewrite());
@@ -346,14 +343,6 @@ aspect TransformCanonical {
         return daeFVariableEquationBlockMap;
     }
 
-    private HashMap<FAbstractEquation, AbstractEquationBlock> FClass.daeEquationEquationBlockMap =
-            new HashMap<FAbstractEquation, AbstractEquationBlock>();
-
-    syn HashMap<FAbstractEquation,AbstractEquationBlock> FClass.getDAEFEquationEquationBlockMap() {
-        transformCanonical();
-        return daeEquationEquationBlockMap;
-    }
-
     syn lazy AbstractEquationBlock FVariable.myDAEInitEquationBlock() = 
             myFClass().getDAEInitFVariableEquationBlockMap().get(this);
 
@@ -361,12 +350,6 @@ aspect TransformCanonical {
     syn HashMap<FVariable,AbstractEquationBlock> FClass.getDAEInitFVariableEquationBlockMap() {
         transformCanonical();
         return daeInitFVariableEquationBlockMap;
-    }
-
-    private HashMap<FAbstractEquation,AbstractEquationBlock> FClass.daeInitEquationEquationBlockMap = new HashMap<FAbstractEquation,AbstractEquationBlock>();
-    syn HashMap<FAbstractEquation,AbstractEquationBlock> FClass.getDAEInitEquationEquationBlockMap() {
-        transformCanonical();
-        return daeInitEquationEquationBlockMap;
     }
 
     private ArrayList<FAbstractEquation> FClass.daeUnmatchedEquations = new ArrayList<FAbstractEquation>();
@@ -402,18 +385,9 @@ aspect TransformCanonical {
     public void FClass.setDAEBLT(BLT newBLT) {
         daeBLT = newBLT;
         daeFVariableEquationBlockMap = new HashMap<FVariable, AbstractEquationBlock>();
-        daeEquationEquationBlockMap = new HashMap<FAbstractEquation, AbstractEquationBlock>();
-
-        for (AbstractEquationBlock eb : daeBLT) {
-            for (FVariable fv : eb.allVariables()) {
+        for (AbstractEquationBlock eb : daeBLT)
+            for (FVariable fv : eb.allVariables())
                 daeFVariableEquationBlockMap.put(fv,eb);
-            }
-
-            for (FAbstractEquation equation : eb.allEquations()) {
-            	daeEquationEquationBlockMap.put(equation, eb);
-            }
-        }
-
         if (newBLT == BLT.EMPTY_BLT)
             daeStructuredBLT = BLT.EMPTY_BLT;
         else
@@ -437,15 +411,9 @@ aspect TransformCanonical {
     public void FClass.setDAEInitBLT(BLT newBLT) {
         daeInitBLT = newBLT;
         daeInitFVariableEquationBlockMap = new HashMap<FVariable, AbstractEquationBlock>();
-        daeInitEquationEquationBlockMap = new HashMap<FAbstractEquation, AbstractEquationBlock>();
-
         for (AbstractEquationBlock eb : daeInitBLT) {
             for (FVariable fv : eb.allVariables()) {
                 daeInitFVariableEquationBlockMap.put(fv,eb);
-            }
-
-            for (FAbstractEquation equation : eb.allEquations()) {
-                daeInitEquationEquationBlockMap.put(equation, eb);
             }
         }
         daeInitBLT.computeDependencies();
@@ -886,7 +854,7 @@ aspect TransformCanonical {
 	
 	
 	syn lazy Set<String> FStatement.sortingAssignedNames() = Collections.<String>emptySet();
-    eq FAssignStmt.sortingAssignedNames()      = getLeft().sortingAssignedNames();
+	eq FAssignStmt.sortingAssignedNames()      = Collections.singleton(getLeft().name());
 	eq FInitArrayStmt.sortingAssignedNames()   = 
 		Collections.singleton("size(" + getFIdUseExp().name() + ")");
 	eq FForStmt.sortingAssignedNames()         = sortingAssignedNames(getForStmts());
@@ -916,16 +884,6 @@ aspect TransformCanonical {
 		return res;
 	}
 	
-    syn Set<String> FAssignableExp.sortingAssignedNames();
-    eq FIdUseExp.sortingAssignedNames() = Collections.singleton(name());
-    eq FSubscriptedExp.sortingAssignedNames() {
-        Set<String> res = new LinkedHashSet<String>();
-        for (FIdUseExp use : findFIdUseExpsInTree()) {
-            res.add(use.name());
-        }
-        return res;
-    }
-    
 	
 	syn lazy Set<String> FStatement.sortingDependencies() = Collections.<String>emptySet();
 	eq FAssignStmt.sortingDependencies()       = 
@@ -1119,17 +1077,10 @@ aspect TransformCanonical {
 		throw new UnsupportedOperationException("Can't extract record component of " + getClass().getSimpleName());
 	}
 	
-    public FExp FIdUseExp.extractRecordFExp(String suffix) {
-        return new FIdUseExp(getFIdUse().extractRecordFExp(suffix));
-    }
-    
-    public FIdUse FIdUse.extractRecordFExp(String suffix) {
-        return new FIdUse(getFQName().copyAsFQNameFull().append(suffix));
-    }
-    
-    public FIdUse FIdUseInstAccess.extractRecordFExp(String suffix) {
-        return new FIdUseInstAccess(getInstAccess().copyAndAppend(suffix));
-    }
+	public FExp FIdUseExp.extractRecordFExp(String suffix) {
+		FQName name = getFIdUse().getFQName().copyAsFQNameFull().append(suffix);
+		return new FIdUseExp(name);
+	}
 	
     public FExp FRecordConstructor.extractRecordFExp(String suffix) {
         return myArgFExp(suffix).fullCopy();
@@ -1877,12 +1828,8 @@ aspect TransformCanonical {
 			if (!equation.isAliasEquation()) 
 				eqns.add(equation);
 
-        // Collect derivative binding equations, however only if we are going
-        // to perform index reduction!
-        if (myOptions().getBooleanOption("propagate_derivatives")) {
-            for (FAbstractEquation eqn : eqns) {
-                eqn.propagateDerivativeBindings();
-            }
+        for (FAbstractEquation eqn : eqns) {
+            eqn.propagateDerivativeBindings();
         }
 
 		setFVariableList(new List(nonAliasVars));
@@ -1961,7 +1908,7 @@ aspect TransformCanonical {
 	
 	boolean FIdUseExp.rewriteAlias = false;
 	boolean FAssignStmt.rewriteAlias = false;
-
+	
     /**
      * FIdUses referring to alias variables need to be changed to 
      * FIdUses referring to their alias targets. 
@@ -1998,38 +1945,27 @@ aspect TransformCanonical {
             }
         }
     }
-
-    rewrite FPreExp {
-        when (rewriteAlias) to FExp {
-            if (myNonPreFV().isFVariable() && myNonPreFV().isAlias()) {
-                FVariable fv = (FVariable) myNonPreFV();
-                FExp new_exp = fv.alias().createFPreExp();
-                if (fv.isNegated()) 
-                    new_exp = new FNegExp(new_exp);
-                return new_exp;
-            } else {
-                rewriteAlias = false;
-                return this;
-            }
-        }
-    }
-
-    rewrite FAssignStmt {
-        when (rewriteAlias && getLeft() instanceof FIdUseExp) to FAssignStmt {
-            FIdUseExp left = (FIdUseExp) getLeft();
-            if (left.myFV().isFVariable() && left.myFV().isAlias()) {
-                FVariable fv = (FVariable) left.myFV();
-                setLeft(fv.alias().createUseExp());
-                if (fv.isNegated()) 
-                    setRight(new FNegExp(getRight()));
-                return this;
-            } else {
-                rewriteAlias = false;
-                return this;
-            }
-        }
-    }
-
+	
+	rewrite FPreExp {
+		when (rewriteAlias && myNonPreFV().isFVariable() && myNonPreFV().isAlias()) to FExp {
+			FVariable fv = (FVariable) myNonPreFV();
+			FExp new_exp = fv.alias().createFPreExp();
+			if (fv.isNegated()) 
+				new_exp = new FNegExp(new_exp);
+			return new_exp;
+		}
+	}
+	
+	rewrite FAssignStmt {
+		when (rewriteAlias && getLeft().myFV().isFVariable() && getLeft().myFV().isAlias()) to FAssignStmt {
+			FVariable fv = (FVariable) getLeft().myFV();
+			setLeft(fv.alias().createUseExp());
+			if (fv.isNegated()) 
+				setRight(new FNegExp(getRight()));
+			return this;
+		}
+	}
+	
     /**
      * FDerExps referring to alias variables need to be changed to 
      * FDerExps referring to their alias targets. 
@@ -2064,7 +2000,7 @@ aspect TransformCanonical {
      * Rewrite derivatives of parameters to zeros.
      */
     rewrite FAbstractDerExp {
-        when (getFIdUse().myFV().isFVariable() && getFIdUse().myFV().variability().parameterOrLess()) to FExp {
+        when (getFIdUse().myFV().isFVariable() && getFIdUse().myFV().variability().lessOrEqual(fParameter())) to FExp {
             return new FRealLitExp(0.0);
         }
     }
@@ -2098,18 +2034,17 @@ aspect TransformCanonical {
 		setFVariableList(new List(vars));
 	}
 
-    /**
-     * Check if this is a temporary variable that should be eliminated.
-     */
-    syn boolean FVariable.shouldEliminateTemporary() = 
-        isTemporary() && 
-        nonDefiningUses().size() <= 1 && 
-        definingUses().size() <= 1 && 
-        !usedAsFunctionCallLeft() && 
+	/**
+	 * Check if this is a temporary variable that should be eliminated.
+	 */
+	syn boolean FVariable.shouldEliminateTemporary() = 
+		isTemporary() && 
+		nonDefiningUses().size() <= 1 && 
+		definingUses().size() <= 1 && 
+		!usedAsFunctionCallLeft() && 
         !isPreVariable() && myPreVariable().isUnknown() && 
-        (definingUses().isEmpty() || !definingUses().iterator().next().myFEquation().generatesEvents()) && 
-        !isDifferentiatedVariable() && !isDerivativeVariable();
-
+		(definingUses().isEmpty() || !definingUses().iterator().next().myFEquation().generatesEvents());
+	
 	/**
 	 * Inline all non-defining uses of variable, and remove equation defining it.
 	 * 
@@ -2338,30 +2273,9 @@ aspect TransformCanonical {
 	}
 
 	public FType FClass.createEquivalentRecordType(FType old) {
-        FRecordDecl rec = equivalentRecordMap.get(old.name());
-        if (rec == null) {
-            return old;
-        }
-        FType t = rec.type().fullCopy();
-        t.transferSizes(old);
-        return t;
-    }
-    
-    public void FType.transferSizes(FType t) {
-        if (!t.isUnknown()) {
-            setSize(t.getSize());
-        }
-    }
-    
-    public void FRecordType.transferSizes(FType t) {
-        super.transferSizes(t);
-        if (!t.isUnknown()) {
-            FRecordType rt = (FRecordType) t;
-            for (int i = 0; i < getNumComponent(); i++) {
-                getComponent(i).getFType().transferSizes(rt.getComponent(i).getFType());
-            }
-        }
-    }
+		FRecordDecl rec = equivalentRecordMap.get(old.name());
+		return (rec != null) ? rec.type().sizedType(old.size()).fullCopy() : old;
+	}
 	
 	public void FClass.insertTempsInLHS() {
 		for (FAbstractEquation equation : getFAbstractEquations()) {
@@ -2663,8 +2577,6 @@ aspect IfEquations {
     
     public class FClass {
         public class enableIfEquationElimination extends Transformation {
-            // Depends on MakeReinitedVarsStates when invoked after scalarize
-            
             public void perform() {
                 enableIfEquationElimination();
                 
@@ -3473,7 +3385,7 @@ aspect StateInitialEquations {
         
         for (FRealVariable fv : differentiatedRealVariables()) {
             FQName nameToAdd = fv.getFQName().copyAndAddPrefix("_start_");
-            FRealVariable fvToAdd = new FRealVariable(new FPublicVisibilityType(), fNonFixedParameter(), nameToAdd);
+            FRealVariable fvToAdd = new FRealVariable(new FPublicVisibilityType(), new FParameter(), nameToAdd);
             if (fv.startAttributeSet())
                 fvToAdd.setBindingExp(fv.startAttributeExp().ceval().buildLiteral());
             else
@@ -3557,7 +3469,7 @@ aspect RuntimeOptions {
 	 */
 	public FVariable FClass.commonCreateRuntimeOptionParameter(FVariable v, String name, FExp bExp) {
 		v.setFVisibilityType(new FRuntimeOptionVisibilityType());
-		v.setFTypePrefixVariability(fFixedParameter());
+		v.setFTypePrefixVariability(new FParameter());
 		v.setBindingExp(bExp);
 		v.setFQName(new FQNameString(name));
 		return v;
@@ -3717,7 +3629,7 @@ aspect SemiLinear {
              * Applies zero flow transformations to a list of equations.
              */
             private List<FAbstractEquation> transform(List<FAbstractEquation> equations) {
-                ListMap<String, FEquation> rule1 = new LinkedHashListMap<String, FEquation>();
+                Map<String,ArrayList<FEquation>> rule1 = new HashMap<String,ArrayList<FEquation>>();
                 ArrayList<FEquation> rule2 = new ArrayList<FEquation>();
                 List<FAbstractEquation> newEquations = new List<FAbstractEquation>();
                 
@@ -3727,12 +3639,15 @@ aspect SemiLinear {
                         rule2.add((FEquation) equation);
                     } else if (equation.isZeroFlowForm()) {
                         FEquation e = (FEquation) equation;
-                        rule1.add(e.zeroFlowGetKey(), e);
+                        String key = e.zeroFlowGetKey();
+                        if (rule1.get(key) == null)
+                            rule1.put(key, new ArrayList<FEquation>());
+                        rule1.get(key).add(e);
                     }
                 }
                 
                 // Chained zero flow transformations (Rule 1)
-                for (java.util.List<FEquation> l : rule1.values()) {
+                for (ArrayList<FEquation> l : rule1.values()) {
                     if (l.size() > 1)
                         transformChain(newEquations, buildChain(l));
                 }
@@ -3753,7 +3668,7 @@ aspect SemiLinear {
              * the semiLinear expressions. If any equation cannot be ordered an
              * error is given.
              */
-            private ArrayList<FEquation> buildChain(java.util.List<FEquation> l) {
+            private ArrayList<FEquation> buildChain(ArrayList<FEquation> l) {
                 ArrayList<FEquation> chain = new ArrayList<FEquation>();
                 FEquation eq1 = l.remove(0);
                 chain.add(eq1);
@@ -3919,6 +3834,96 @@ aspect SemiLinear {
 	FSemiLinearExp contributes this
 		to FClass.collectSemiLinearExps()
 		for myFClass();
+}
+
+aspect ArrayAccessRewrite {
+    public class FClass {
+        public class enableArrayAccessRewrite extends Transformation {
+            public void perform() {
+                enableArrayAccessRewrite();
+            }
+        }
+    }
+
+    public void ASTNode.enableArrayAccessRewrite() {
+        for (ASTNode n : this)
+            n.enableArrayAccessRewrite();
+    }
+    
+    public void FIdUseExp.enableArrayAccessRewrite() {
+        super.enableArrayAccessRewrite();
+        rewriteContinuousArrayAccess = true;
+        is$Final = false;
+    }
+    
+    public void FSubscriptedExp.enableArrayAccessRewrite() {
+        super.enableArrayAccessRewrite();
+        rewriteContinuousArrayAccess = true;
+        is$Final = false;
+    }
+    
+    private boolean FIdUseExp.rewriteContinuousArrayAccess       = false;
+    private boolean FSubscriptedExp.rewriteContinuousArrayAccess = false;
+
+    rewrite FSubscriptedExp {
+        when (rewriteContinuousArrayAccess) to FExp {
+            rewriteContinuousArrayAccess = false;
+            return createSubscriptFunc();
+        }
+    }
+
+    /**
+     * Create delegate function for array access involving index that can not be calculated at compile time.
+     */
+    public FExp FSubscriptedExp.createSubscriptFunc() {
+        if (indexVariability().parameterOrLess() || inFunction())
+            return this;
+        List<FExp> args = new List<FExp>();
+        List<FFunctionVariable> funcVars = new List<FFunctionVariable>();
+        FQNameFull arrayUse = new FQNameFull("x");
+        Enumerator enumerator = new Enumerator();
+        for (FSubscript sub : getFArraySubscripts().getFSubscripts()) {
+            sub.populateSubscriptFunc(args, funcVars, arrayUse, enumerator);
+        }
+        args.add(getFExp().fullCopy());
+        Size inputSize = getFExp().size();
+        String funcName = myFClass().nextTempFuncName();
+        FFunctionCall call = new FFunctionCall(new FIdUse(funcName), args, new Size[]{ size() });
+        funcVars.add(inputSize.createFunctionVariable("x", type(), new FInput()));
+        funcVars.add(size().createFunctionVariable("y", type(), new FOutput()));
+        FFunctionDecl funcDecl = new FFunctionDecl(funcName, funcVars, new FAssignStmt(new FIdUseExp("y"), new FIdUseExp(arrayUse)), new FReturnStmt());
+        funcDecl.annotation().forPath("Inline").setValue(new FBooleanLitExpFalse());
+        myFClass().addFFunctionDecl(funcDecl);
+        return call;
+    }
+
+    /**
+     * Calculate arguments needed due to this subscript for delegate function for array access involving index that can not be calculated at compile time.
+     * 
+     * @param args        list of arguments to add index argument expressions to
+     * @param funcVars    list of variables in the new function to add input parameters for index arguments to
+     * @param arrayUse    access to the array input in the new function to add index expressions to
+     * @param enumerator  used to number the names for input parameters for index arguments
+     */
+    public void FSubscript.populateSubscriptFunc(List<FExp> args, List<FFunctionVariable> funcVars, FQNameFull arrayUse, Enumerator enumerator) {
+        arrayUse.addSubscript(fullCopy());
+    }
+
+    public void FExpSubscript.populateSubscriptFunc(List<FExp> args, List<FFunctionVariable> funcVars, FQNameFull arrayUse, Enumerator enumerator) {
+        if (!variability().parameterOrLess()) {
+            args.add(getFExp().fullCopy());
+            String varName = "i_" + enumerator.next();
+            funcVars.add(new FFunctionVariable(type(), varName, new FInput()));
+            FArraySubscripts fas = new FArraySubscripts();
+            for (int i = 0; i < ndims(); i++) {
+                fas.addFSubscript(size().rangeFSubscript(i));
+            }
+            arrayUse.addSubscript(new FExpSubscript(new FIdUseExp(varName, fas)));
+        } else {
+            arrayUse.addSubscript(fullCopy());
+        }
+    }
+
 }
 
 
@@ -4117,7 +4122,6 @@ aspect FunctionAndRecordCleanup {
         getFInitialEquations().markUsedFunctionsAndRecords();
         getFParameterEquations().markUsedFunctionsAndRecords();
         getFAbstractEquations().markUsedFunctionsAndRecords();
-        getDynamicStateManager().markUsedFunctionsAndRecords();
         List<FFunctionDecl> funcs = new List<FFunctionDecl>();
         for (FFunctionDecl func : getFFunctionDecls())
             if (func.functionIsUsed())

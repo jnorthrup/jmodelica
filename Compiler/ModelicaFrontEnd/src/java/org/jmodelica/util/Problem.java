@@ -1,37 +1,15 @@
-/*
-    Copyright (C) 2015 Modelon AB
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, version 3 of the License.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 package org.jmodelica.util;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.jmodelica.util.logging.Level;
-import org.jmodelica.util.logging.XMLLogger;
-import org.jmodelica.util.logging.units.LoggingUnit;
-
-public class Problem implements Comparable<Problem>, LoggingUnit {
+public class Problem implements Comparable<Problem>, Serializable {
     private static final long serialVersionUID = 1;
     
     public int compareTo(Problem other) {
-        if (kind.order != other.kind.order)
-            return kind.order - other.kind.order;
-        if (fileName == null || other.fileName == null) {
-            if (fileName != null)
-                return -1;
+        if (fileName == null) {
             if (other.fileName != null)
                 return 1;
         } else {
@@ -48,18 +26,14 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
     public enum Severity { ERROR, WARNING }
 
     public enum Kind { 
-        OTHER(2), LEXICAL("Syntax", 1), SYNTACTIC("Syntax", 1), SEMANTIC(2), COMPLIANCE("Compliance", 2);
+        OTHER, LEXICAL("Syntax"), SYNTACTIC("Syntax"), SEMANTIC, COMPLIANCE("Compliance");
 
         private String desc = null;
-        public final int order;
 
-        private Kind(int order) {
-            this.order = order;
-        }
+        private Kind() {}
 
-        private Kind(String desc, int order) {
+        private Kind(String desc) {
             this.desc = desc;
-            this.order = order;
         }
 
         public void writeKindAndSeverity(StringBuilder sb, Severity sev) {
@@ -192,23 +166,5 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
         return sb.toString();
     }
 
-    @Override
-    public String print(Level level) {
-        return toString();
-}
-
-    @Override
-    public String printXML(Level level) {
-        return XMLLogger.write_node(Problem.capitalize(severity()), 
-                "kind",    kind().toString().toLowerCase(),
-                "file",    fileName(),
-                "line",    beginLine(),
-                "column",  beginColumn(),
-                "message", message());
-    }
-
-    @Override
-    public void prepareForSerialization() {
-    }
 }
 

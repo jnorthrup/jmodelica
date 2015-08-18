@@ -968,75 +968,6 @@ end FunctionTests.FunctionFlatten20;
 ")})));
 end FunctionFlatten20;
 
-model FunctionFlatten21
-    function f
-        constant Real x;
-        output Real y = x;
-        algorithm
-    end f;
-    
-    Real x = f();
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="FunctionFlatten21",
-            description="Flattening of constant in function",
-            flatModel="
-fclass FunctionTests.FunctionFlatten21
- Real x = FunctionTests.FunctionFlatten21.f();
-
-public
- function FunctionTests.FunctionFlatten21.f
-  Real x;
-  output Real y := x;
- algorithm
-  return;
- end FunctionTests.FunctionFlatten21.f;
-
-end FunctionTests.FunctionFlatten21;
-
-")})));
-end FunctionFlatten21;
-
-model FunctionFlatten22
-    record R
-        constant Real x;
-    end R;
-    
-    function f
-        input R y;
-        output R z;
-    algorithm
-        z := y;
-    end f;
-    
-    R y = f(R(1));
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="FunctionFlatten22",
-            description="Flattening of constant in function",
-            flatModel="
-fclass FunctionTests.FunctionFlatten22
- constant FunctionTests.FunctionFlatten22.R y = FunctionTests.FunctionFlatten22.R(1);
-
-public
- function FunctionTests.FunctionFlatten22.f
-  input FunctionTests.FunctionFlatten22.R y;
-  output FunctionTests.FunctionFlatten22.R z;
- algorithm
-  z := y;
-  return;
- end FunctionTests.FunctionFlatten22.f;
-
- record FunctionTests.FunctionFlatten22.R
-  constant Real x;
- end FunctionTests.FunctionFlatten22.R;
-
-end FunctionTests.FunctionFlatten22;
-")})));
-end FunctionFlatten22;
-
 /* ====================== Function calls ====================== */
 
 model FunctionBinding1
@@ -5694,9 +5625,8 @@ public
   Real[:,:,:] temp_2;
  algorithm
   size(o) := {size(a, 1), size(a, 2) + size(b, 2), size(a, 3)};
-  assert(max(size(b, 3) + size(c, 3), 0) == size(b, 3) + size(c, 3), \"Mismatching size in dimension 3 of expression cat(2, a, cat(3, b, c)) in function FunctionTests.ArrayExpInFunc30.f\");
   assert(size(a, 1) == size(b, 1), \"Mismatching size in dimension 1 of expression cat(3, b, c) in function FunctionTests.ArrayExpInFunc30.f\");
-  size(temp_1) := {size(a, 1), size(a, 2) + size(b, 2), max(size(b, 3) + size(c, 3), 0)};
+  size(temp_1) := {size(a, 1), size(a, 2) + size(b, 2), size(b, 3) + size(c, 3)};
   size(temp_2) := {size(a, 1), size(b, 2), size(b, 3) + size(c, 3)};
   for i7 in 1:size(a, 1) loop
    for i8 in 1:size(b, 2) loop
@@ -5714,7 +5644,7 @@ public
   end for;
   for i4 in 1:size(a, 1) loop
    for i5 in 1:size(a, 2) loop
-    for i6 in 1:max(size(b, 3) + size(c, 3), 0) loop
+    for i6 in 1:size(b, 3) + size(c, 3) loop
      temp_1[i4,i5,i6] := a[i4,i5,i6];
     end for;
    end for;
@@ -5728,7 +5658,7 @@ public
   end for;
   for i1 in 1:size(a, 1) loop
    for i2 in 1:size(a, 2) + size(b, 2) loop
-    for i3 in 1:max(size(b, 3) + size(c, 3), 0) loop
+    for i3 in 1:size(b, 3) + size(c, 3) loop
      o[i1,i2,i3] := temp_1[i1,i2,i3];
     end for;
    end for;
@@ -5954,7 +5884,7 @@ public
   Integer temp_1;
  algorithm
   temp_1 := -2147483648;
-  for i1 in 1:max(k, 0) loop
+  for i1 in 1:k loop
    temp_1 := if temp_1 > i1 then temp_1 else i1;
   end for;
   ao := temp_1;
@@ -7263,9 +7193,11 @@ public
  function FunctionTests.ArrayOutputScalarization17.f1
   output Real o;
   Real[2] y;
+  Real[2] temp_1;
  algorithm
   o := 2;
-  (y) := FunctionTests.ArrayOutputScalarization17.f2(FunctionTests.ArrayOutputScalarization17.f2({1, 2}));
+  (temp_1) := FunctionTests.ArrayOutputScalarization17.f2({1, 2});
+  (y) := FunctionTests.ArrayOutputScalarization17.f2(temp_1);
   return;
  end FunctionTests.ArrayOutputScalarization17.f1;
 
@@ -9275,8 +9207,14 @@ fclass FunctionTests.UnknownArray33
  Real x;
  Real y.x[1];
  Real y.x[2];
+ Real temp_1[1];
+ Real temp_1[2];
+ Real temp_2[1];
+ Real temp_2[2];
 equation
- (x, FunctionTests.UnknownArray33.R({y.x[1], y.x[2]})) = FunctionTests.UnknownArray33.f(FunctionTests.UnknownArray33.f2(FunctionTests.UnknownArray33.f2({time, time * 2})));
+ ({temp_1[1], temp_1[2]}) = FunctionTests.UnknownArray33.f2({time, time * 2});
+ ({temp_2[1], temp_2[2]}) = FunctionTests.UnknownArray33.f2({temp_1[1], temp_1[2]});
+ (x, FunctionTests.UnknownArray33.R({y.x[1], y.x[2]})) = FunctionTests.UnknownArray33.f({temp_2[1], temp_2[2]});
 
 public
  function FunctionTests.UnknownArray33.f
@@ -9284,11 +9222,13 @@ public
   output Real b;
   output FunctionTests.UnknownArray33.R c;
   Real[2] temp_1;
+  Real[2] temp_2;
  algorithm
   b := a[1];
-  (temp_1) := FunctionTests.UnknownArray33.f2(FunctionTests.UnknownArray33.f2(a));
-  c.x[1] := temp_1[1];
-  c.x[2] := temp_1[2];
+  (temp_1) := FunctionTests.UnknownArray33.f2(a);
+  (temp_2) := FunctionTests.UnknownArray33.f2(temp_1);
+  c.x[1] := temp_2[1];
+  c.x[2] := temp_2[2];
   return;
  end FunctionTests.UnknownArray33.f;
 
@@ -9326,13 +9266,13 @@ model UnknownArray34
 
     Real x = f(3);
 	
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="UnknownArray34",
-            description="Known to unknown size assignment",
-            variability_propagation=false,
-            inline_functions="none",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+				TransformCanonicalTestCase(
+			name="UnknownArray34",
+			description="Known to unknown size assignment",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
 fclass FunctionTests.UnknownArray34
  Real x;
 equation
@@ -9347,15 +9287,15 @@ public
   Integer[3] temp_1;
  algorithm
   size(d) := {n};
-  assert(max(n, 0) == 3, \"Mismatching sizes in FunctionTests.UnknownArray34.f\");
+  assert(n == 3, \"Mismatching sizes in FunctionTests.UnknownArray34.f\");
   temp_1[1] := 1;
   temp_1[2] := 2;
   temp_1[3] := 3;
   for i1 in 1:3 loop
    d[i1] := temp_1[i1];
   end for;
-  assert(max(n, 0) == 3, \"Mismatching sizes in FunctionTests.UnknownArray34.f\");
-  for i1 in 1:max(n, 0) loop
+  assert(n == 3, \"Mismatching sizes in FunctionTests.UnknownArray34.f\");
+  for i1 in 1:n loop
    c[i1] := d[i1];
   end for;
   b := 1;
@@ -9363,6 +9303,7 @@ public
  end FunctionTests.UnknownArray34.f;
 
 end FunctionTests.UnknownArray34;
+			
 ")})));
 end UnknownArray34;
 
@@ -9380,13 +9321,13 @@ model UnknownArray35
 
     Real x = f(3, {1,2,3});
 	
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="UnknownArray35",
-            description="Known to unknown size assignment",
-            variability_propagation=false,
-            inline_functions="none",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+				TransformCanonicalTestCase(
+			name="UnknownArray35",
+			description="Known to unknown size assignment",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
 fclass FunctionTests.UnknownArray35
  Real x;
 equation
@@ -9402,7 +9343,7 @@ public
  algorithm
   size(e) := {n, 3};
   assert(size(d, 1) == 3, \"Mismatching sizes in FunctionTests.UnknownArray35.f\");
-  assert(max(n, 0) == 3, \"Mismatching sizes in FunctionTests.UnknownArray35.f\");
+  assert(n == 3, \"Mismatching sizes in FunctionTests.UnknownArray35.f\");
   size(temp_1) := {3, size(d, 1)};
   for i4 in 1:size(d, 1) loop
    temp_1[1,i4] := d[i4];
@@ -9423,6 +9364,7 @@ public
  end FunctionTests.UnknownArray35.f;
 
 end FunctionTests.UnknownArray35;
+			
 ")})));
 end UnknownArray35;
 
@@ -9472,11 +9414,11 @@ public
   size(d) := {n};
   d[1] := 1;
   d[2] := 2;
-  assert(max(n, 0) == 2, \"Mismatching sizes in FunctionTests.UnknownArray36.f1\");
-  for i1 in 1:max(n, 0) loop
+  assert(n == 2, \"Mismatching sizes in FunctionTests.UnknownArray36.f1\");
+  for i1 in 1:n loop
    c[i1] := d[i1];
   end for;
-  assert(max(n, 0) == 2, \"Mismatching sizes in FunctionTests.UnknownArray36.f1\");
+  assert(n == 2, \"Mismatching sizes in FunctionTests.UnknownArray36.f1\");
   (c, d) := FunctionTests.UnknownArray36.f2(c, d);
   b := 1;
   return;
@@ -9603,13 +9545,13 @@ model UnknownArray38
 
     Real x = f(3, {1,2,3});
 	
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="UnknownArray38",
-            description="Checks a more complex combination of known/unknown sizes",
-            variability_propagation=false,
-            inline_functions="none",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+				TransformCanonicalTestCase(
+			name="UnknownArray38",
+			description="Checks a more complex combination of known/unknown sizes",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
 fclass FunctionTests.UnknownArray38
  Real x;
 equation
@@ -9632,7 +9574,7 @@ public
  algorithm
   size(e) := {n, 3};
   assert(size(d, 1) == 3, \"Mismatching sizes in FunctionTests.UnknownArray38.f\");
-  assert(max(n, 0) == 3, \"Mismatching sizes in FunctionTests.UnknownArray38.f\");
+  assert(n == 3, \"Mismatching sizes in FunctionTests.UnknownArray38.f\");
   size(temp_1) := {3, size(d, 1)};
   for i4 in 1:size(d, 1) loop
    temp_1[1,i4] := d[i4];
@@ -9652,14 +9594,14 @@ public
   size(temp_2) := {n, 1};
   size(temp_3) := {n, 1};
   size(temp_4) := {n};
-  size(temp_5) := {max(n, 0), 2};
+  size(temp_5) := {n, 2};
   temp_7[1,1] := 1;
   temp_7[1,2] := 2;
   temp_7[2,1] := 3;
   temp_7[2,2] := 4;
   temp_7[3,1] := 5;
   temp_7[3,2] := 6;
-  for i1 in 1:max(n, 0) loop
+  for i1 in 1:n loop
    for i2 in 1:2 loop
     temp_6 := 0.0;
     for i3 in 1:3 loop
@@ -9725,11 +9667,11 @@ public
  algorithm
   size(o) := {m, m};
   for i in 1:m loop
-   size(temp_1) := {max(m, 0)};
-   for i2 in 1:max(m, 0) loop
+   size(temp_1) := {m};
+   for i2 in 1:m loop
     temp_1[i2].x := i * i2;
    end for;
-   for i1 in 1:max(m, 0) loop
+   for i1 in 1:m loop
     o[i,i1].x := temp_1[i1].x;
    end for;
   end for;
@@ -9844,13 +9786,13 @@ public
  algorithm
   size(o) := {m, m};
   for i in 1:m loop
-   size(temp_1) := {max(m, 0)};
-   for i2 in 1:max(m, 0) loop
+   size(temp_1) := {m};
+   for i2 in 1:m loop
     temp_1[i2].x := i * i2;
     temp_1[i2].y[1] := i;
     temp_1[i2].y[2] := i2;
    end for;
-   for i1 in 1:max(m, 0) loop
+   for i1 in 1:m loop
     o[i,i1].x := temp_1[i1].x;
     o[i,i1].y[1] := temp_1[i1].y[1];
     o[i,i1].y[2] := temp_1[i1].y[2];
@@ -9915,8 +9857,8 @@ public
   FunctionTests.UnknownArray42.R2 temp_3;
  algorithm
   size(o) := {m};
-  size(temp_1) := {max(m, 0)};
-  for i2 in 1:max(m, 0) loop
+  size(temp_1) := {m};
+  for i2 in 1:m loop
    (temp_2) := FunctionTests.UnknownArray42.f2(i2);
    (temp_3) := FunctionTests.UnknownArray42.f2(i2);
    temp_1[i2].y[1].p1[1] := temp_2.p1[1];
@@ -9924,7 +9866,7 @@ public
    temp_1[i2].z.p1[1] := temp_3.p1[1];
    temp_1[i2].z.p2 := temp_3.p2;
   end for;
-  for i1 in 1:max(m, 0) loop
+  for i1 in 1:m loop
    o[i1].y[1].p1[1] := temp_1[i1].y[1].p1[1];
    o[i1].y[1].p2 := temp_1[i1].y[1].p2;
    o[i1].z.p1[1] := temp_1[i1].z.p1[1];
@@ -11316,16 +11258,16 @@ model InputAsArraySize7
 	
 	Real x = f(3, {1, 2, 3});
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="InputAsArraySize7",
-            description="Input as array size of other input in function: basic test",
-            variability_propagation=false,
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InputAsArraySize7",
+			description="Input as array size of other input in function: basic test",
+			variability_propagation=false,
+			flatModel="
 fclass FunctionTests.InputAsArraySize7
  Real x;
 equation
- x = FunctionTests.InputAsArraySize7.f(3, {1, 2, 3});
+ x = FunctionTests.InputAsArraySize7.f(3, {1,2,3});
 
 public
  function FunctionTests.InputAsArraySize7.f
@@ -11335,7 +11277,7 @@ public
   Real temp_1;
  algorithm
   temp_1 := 0.0;
-  for i1 in 1:max(n, 0) loop
+  for i1 in 1:n loop
    temp_1 := temp_1 + y[i1];
   end for;
   x := temp_1;
@@ -11371,16 +11313,16 @@ model InputAsArraySize9
 	
 	Real x = f(3, {1, 2, 3});
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="InputAsArraySize9",
-            description="Input as array size of other input in function: basic test",
-            variability_propagation=false,
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InputAsArraySize9",
+			description="Input as array size of other input in function: basic test",
+			variability_propagation=false,
+			flatModel="
 fclass FunctionTests.InputAsArraySize9
  Real x;
 equation
- x = FunctionTests.InputAsArraySize9.f(3, {1, 2, 3});
+ x = FunctionTests.InputAsArraySize9.f(3, {1,2,3});
 
 public
  function FunctionTests.InputAsArraySize9.f
@@ -11390,7 +11332,7 @@ public
   Real temp_1;
  algorithm
   temp_1 := 0.0;
-  for i1 in 1:max(n, 0) loop
+  for i1 in 1:n loop
    temp_1 := temp_1 + y[i1];
   end for;
   x := temp_1;
@@ -12100,7 +12042,7 @@ This is not allowed when calling Modelica.Matrices.QR(A).\");
    (Q, tau, p) := Modelica.Math.Matrices.LAPACK.dgeqpf(A);
   else
    (Q, tau) := Modelica.Math.Matrices.LAPACK.dgeqrf(A);
-   for i1 in 1:max(ncol, 0) loop
+   for i1 in 1:ncol loop
     p[i1] := i1;
    end for;
   end if;
@@ -12588,7 +12530,7 @@ package FuncCallInSize
         constant Integer m = 2;
         Real[:] y2 = P.f(m);
         
-    annotation(__JModelica(UnitTesting(tests={
+        annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="UnknownSize_FuncCallInSize_FromOtherPackage",
             description="Scalarization of functions: Function call from other package in declaration size",
@@ -12611,7 +12553,7 @@ public
   output Real[:] y;
  algorithm
   size(y) := {FunctionTests.UnknownSize.FuncCallInSize.P.f2(n)};
-  for i1 in 1:max(n, 0) loop
+  for i1 in 1:n loop
    y[i1] := i1;
   end for;
   return;
@@ -15220,36 +15162,5 @@ end FunctionTests.DerivativeAnnotation.ExtendsTest1;
     end ExtendsTest1;
 
 end DerivativeAnnotation;
-
-
-model UnusedFunction1
-    function f
-        input Real x;
-        output Real y = x;
-        algorithm
-    end f;
-    
-    record R
-        Real x = f(time);
-    end R;
-    
-    R r(x=time+1);
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="UnusedFunction1",
-            description="",
-            flatModel="
-fclass FunctionTests.UnusedFunction1
- FunctionTests.UnusedFunction1.R r(x = time + 1);
-
-public
- record FunctionTests.UnusedFunction1.R
-  Real x;
- end FunctionTests.UnusedFunction1.R;
-
-end FunctionTests.UnusedFunction1;
-
-")})));
-end UnusedFunction1;
 
 end FunctionTests;

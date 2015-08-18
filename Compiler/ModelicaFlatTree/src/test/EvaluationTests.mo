@@ -1672,14 +1672,14 @@ fclass EvaluationTests.EvaluateAnnotation6
 
 public
  function EvaluationTests.EvaluateAnnotation6.f
-  input EvaluationTests.EvaluateAnnotation6.R x(n = 1);
+  input EvaluationTests.EvaluateAnnotation6.R x;
   output EvaluationTests.EvaluateAnnotation6.R y := x;
  algorithm
   return;
  end EvaluationTests.EvaluateAnnotation6.f;
 
  record EvaluationTests.EvaluateAnnotation6.R
-  Real n;
+  Real n = 1;
  end EvaluationTests.EvaluateAnnotation6.R;
 
 end EvaluationTests.EvaluateAnnotation6;
@@ -1717,14 +1717,14 @@ fclass EvaluationTests.EvaluateAnnotation7
 
 public
  function EvaluationTests.EvaluateAnnotation7.f
-  input EvaluationTests.EvaluateAnnotation7.P x(n = 1);
+  input EvaluationTests.EvaluateAnnotation7.P x;
   output EvaluationTests.EvaluateAnnotation7.P y := x;
  algorithm
   return;
  end EvaluationTests.EvaluateAnnotation7.f;
 
  record EvaluationTests.EvaluateAnnotation7.P
-  Real n;
+  Real n = 1;
  end EvaluationTests.EvaluateAnnotation7.P;
 
 end EvaluationTests.EvaluateAnnotation7;
@@ -1752,7 +1752,7 @@ fclass EvaluationTests.EvaluateAnnotation8
 public
  record EvaluationTests.EvaluateAnnotation8.R
   Real y;
-  Real x;
+  Real x = y;
  end EvaluationTests.EvaluateAnnotation8.R;
 
 end EvaluationTests.EvaluateAnnotation8;
@@ -1787,15 +1787,15 @@ fclass EvaluationTests.EvaluateAnnotation9
 
 public
  function EvaluationTests.EvaluateAnnotation9.F
-  input EvaluationTests.EvaluateAnnotation9.R i(p = -41);
-  output EvaluationTests.EvaluateAnnotation9.R o(p = -41);
+  input EvaluationTests.EvaluateAnnotation9.R i;
+  output EvaluationTests.EvaluateAnnotation9.R o;
  algorithm
   o.p := i.p + 42;
   return;
  end EvaluationTests.EvaluateAnnotation9.F;
 
  record EvaluationTests.EvaluateAnnotation9.R
-  parameter Real p;
+  parameter Real p = -41 /* -41 */;
  end EvaluationTests.EvaluateAnnotation9.R;
 
 end EvaluationTests.EvaluateAnnotation9;
@@ -1828,9 +1828,9 @@ fclass EvaluationTests.EvaluateAnnotation10
 
 public
  record EvaluationTests.EvaluateAnnotation10.R
-  parameter Real a;
-  parameter Real b;
-  constant Real p;
+  parameter Real a = 1 /* 1 */;
+  parameter Real b = a;
+  constant Real p = 3;
  end EvaluationTests.EvaluateAnnotation10.R;
 
 end EvaluationTests.EvaluateAnnotation10;
@@ -1848,7 +1848,7 @@ model EvaluateAnnotation11
     
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="EvaluateAnnotation11",
+            name="EvaluateAnnotation10",
             description="Evaluate annotation on record with mixed variabilities",
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation11
@@ -2012,14 +2012,14 @@ fclass EvaluationTests.FinalParameterEval6
 
 public
  function EvaluationTests.FinalParameterEval6.f
-  input EvaluationTests.FinalParameterEval6.R x(n = 1);
+  input EvaluationTests.FinalParameterEval6.R x;
   output EvaluationTests.FinalParameterEval6.R y := x;
  algorithm
   return;
  end EvaluationTests.FinalParameterEval6.f;
 
  record EvaluationTests.FinalParameterEval6.R
-  Real n;
+  Real n = 1;
  end EvaluationTests.FinalParameterEval6.R;
 
 end EvaluationTests.FinalParameterEval6;
@@ -3732,8 +3732,6 @@ end EvaluationTests.Partial.IfStmt15;
     
 end Partial;
 
-
-
 model AssigningCached1
     record R
         Real a;
@@ -3775,7 +3773,6 @@ end EvaluationTests.AssigningCached1;
 ")})));
 end AssigningCached1;
 
-
 model AssigningCached2
     function f
         input Real[:] x;
@@ -3807,7 +3804,6 @@ public
 end EvaluationTests.AssigningCached2;
 ")})));
 end AssigningCached2;
-
 
 model AssigningCached3
     record R
@@ -3847,7 +3843,6 @@ public
 end EvaluationTests.AssigningCached3;
 ")})));
 end AssigningCached3;
-
 
 model AssigningCached4
     record R
@@ -3893,215 +3888,5 @@ public
 end EvaluationTests.AssigningCached4;
 ")})));
 end AssigningCached4;
-
-
-
-model ParameterMinMax1
-    parameter Integer n(min=1);
-    Real[n] x = if n < 2 then {2} else 1:n;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ParameterMinMax1",
-            description="Constricting evaluation of parameters without binding expression to min-max range",
-            flatModel="
-fclass EvaluationTests.ParameterMinMax1
- structural parameter Integer n(min = 1) = 1 /* 1 */;
- Real x[1] = {2};
-end EvaluationTests.ParameterMinMax1;
-")})));
-end ParameterMinMax1;
-
-
-model ParameterMinMax2
-    parameter Integer n(min=1, start=2);
-    Real[n] x = if n < 2 then {2} else 1:n;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ParameterMinMax2",
-            description="Constricting evaluation of parameters without binding expression to min-max range",
-            flatModel="
-fclass EvaluationTests.ParameterMinMax2
- structural parameter Integer n(min = 1,start = 2) = 2 /* 2 */;
- Real x[2] = 1:2;
-end EvaluationTests.ParameterMinMax2;
-")})));
-end ParameterMinMax2;
-
-
-model ParameterMinMax3
-    parameter Integer n(max=-1);
-    Real[-n] x = if n > -2 then {2} else 1:(-n);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ParameterMinMax3",
-            description="Constricting evaluation of parameters without binding expression to min-max range",
-            flatModel="
-fclass EvaluationTests.ParameterMinMax3
- structural parameter Integer n(max = -1) = -1 /* -1 */;
- Real x[1] = {2};
-end EvaluationTests.ParameterMinMax3;
-")})));
-end ParameterMinMax3;
-
-
-model ParameterMinMax4
-    parameter Integer n(max=-1, start=-2);
-    Real[-n] x = if n > -2 then {2} else 1:(-n);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ParameterMinMax4",
-            description="Constricting evaluation of parameters without binding expression to min-max range",
-            flatModel="
-fclass EvaluationTests.ParameterMinMax4
- structural parameter Integer n(max = -1,start = -2) = -2 /* -2 */;
- Real x[2] = 1:2;
-end EvaluationTests.ParameterMinMax4;
-")})));
-end ParameterMinMax4;
-
-
-model ParameterMinMax5
-    parameter Real n(min=1.2);
-    Real[integer(n)] x = 1:size(x,1);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ParameterMinMax5",
-            description="Constricting evaluation of parameters without binding expression to min-max range",
-            flatModel="
-fclass EvaluationTests.ParameterMinMax5
- structural parameter Real n(min = 1.2) = 1.2 /* 1.2 */;
- Real x[1] = 1:1;
-end EvaluationTests.ParameterMinMax5;
-")})));
-end ParameterMinMax5;
-
-
-model ParameterMinMax6
-    parameter Real n(max=-1.2);
-    Real[integer(-n)] x = 1:size(x,1);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ParameterMinMax6",
-            description="Constricting evaluation of parameters without binding expression to min-max range",
-            flatModel="
-fclass EvaluationTests.ParameterMinMax6
- structural parameter Real n(max = -1.2) = -1.2 /* -1.2 */;
- Real x[1] = 1:1;
-end EvaluationTests.ParameterMinMax6;
-")})));
-end ParameterMinMax6;
-
-
-model ParameterMinMax7
-    type A = enumeration(a, b, c, d, e);
-    type B = A(start = B.c);
-    parameter B n(min=B.d);
-    Real[Integer(n)] x = 1:size(x,1);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ParameterMinMax7",
-            description="Constricting evaluation of parameters without binding expression to min-max range",
-            flatModel="
-fclass EvaluationTests.ParameterMinMax7
- structural parameter EvaluationTests.ParameterMinMax7.B n(min = EvaluationTests.ParameterMinMax7.A.d) = EvaluationTests.ParameterMinMax7.A.d /* EvaluationTests.ParameterMinMax7.A.d */;
- Real x[4] = 1:4;
-
-public
- type EvaluationTests.ParameterMinMax7.B = enumeration(a, b, c, d, e)(start = EvaluationTests.ParameterMinMax7.A.c);
-
- type EvaluationTests.ParameterMinMax7.A = enumeration(a, b, c, d, e);
-
-end EvaluationTests.ParameterMinMax7;
-")})));
-end ParameterMinMax7;
-
-
-model ParameterMinMax8
-    type A = enumeration(a, b, c, d, e);
-    type B = A(start = B.c);
-    parameter B n(max=B.b);
-    Real[Integer(n)] x = 1:size(x,1);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ParameterMinMax8",
-            description="Constricting evaluation of parameters without binding expression to min-max range",
-            flatModel="
-fclass EvaluationTests.ParameterMinMax8
- structural parameter EvaluationTests.ParameterMinMax8.B n(max = EvaluationTests.ParameterMinMax8.A.b) = EvaluationTests.ParameterMinMax8.A.b /* EvaluationTests.ParameterMinMax8.A.b */;
- Real x[2] = 1:2;
-
-public
- type EvaluationTests.ParameterMinMax8.B = enumeration(a, b, c, d, e)(start = EvaluationTests.ParameterMinMax8.A.c);
-
- type EvaluationTests.ParameterMinMax8.A = enumeration(a, b, c, d, e);
-
-end EvaluationTests.ParameterMinMax8;
-")})));
-end ParameterMinMax8;
-
-
-model ForLoopSizeVary1
-    function f
-        input Real x;
-        output Real y = 0;
-      algorithm
-        for i in 1:3 loop
-            for j in 1:i-1 loop
-                y := y + j;
-            end for;
-        end for;
-    end f;
-    
-    constant Real y1 = f(1);
-    Real y2 = f(1);
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="ForLoopSizeVary1",
-            description="Varying sizes in for loops",
-            inline_functions="none",
-            flatModel="
-fclass EvaluationTests.ForLoopSizeVary1
- constant Real y1 = 4.0;
- constant Real y2 = 4.0;
-end EvaluationTests.ForLoopSizeVary1;
-")})));
-end ForLoopSizeVary1;
-
-model ForLoopSizeVary2
-    function f
-        input Real x;
-        output Real y = 0;
-      algorithm
-        for i in 1:3 loop
-            for j in 1:3-i loop
-                y := y + j;
-            end for;
-        end for;
-    end f;
-    
-    constant Real y1 = f(1);
-    Real y2 = f(1);
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="ForLoopSizeVary2",
-            description="Varying sizes in for loops",
-            inline_functions="none",
-            flatModel="
-fclass EvaluationTests.ForLoopSizeVary2
- constant Real y1 = 4.0;
- constant Real y2 = 4.0;
-end EvaluationTests.ForLoopSizeVary2;
-")})));
-end ForLoopSizeVary2;
 
 end EvaluationTests;

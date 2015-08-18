@@ -1350,21 +1350,17 @@ class TestLocalDAECollocator(object):
         assert_results(res_renaming, cost_ref, u_norm_ref)
 
         # Compare tenth and twentieth equality constraints
-        c_e_10 = res_renaming.solver.get_equality_constraint()[self.test_named_vars_c_e_10_id()]
+        c_e_10 = res_renaming.solver.get_equality_constraint()[10]
         c_e_20 = res_renaming.solver.get_equality_constraint()[20]
-        
         N.testing.assert_string_equal(
             repr(res_renaming.solver.get_named_var_expr(c_e_10)),
-                 "SX((der(x1)_1_1-((((1-sq(x2_1_1))*der(x2)_1_1)" +
+                 "SX((der(x1)_1_1-((((1-sq(x2_1_1))*x1_1_1)" +
                  "-x2_1_1)+u_1_1)))")
         N.testing.assert_string_equal(
             repr(res_renaming.solver.get_named_var_expr(c_e_20)),
             "SX((((((-3*x2_1_0)+(5.53197*x2_1_1))+" +
             "(-7.53197*x2_1_2))+(5*x2_1_3))-(10*der(x2)_1_3)))")
 
-    def test_named_vars_c_e_10_id(self):
-        return 10;
-    
     @testattr(casadi = True)
     def test_scaling(self):
         """
@@ -2025,6 +2021,3 @@ class TestLocalDAECollocator_BLT_transfer(TestLocalDAECollocator):
     @nose.tools.nottest    
     def test_nominal_traj_vdp(self):
         assert False 
-
-    def test_named_vars_c_e_10_id(self):
-        return 11;

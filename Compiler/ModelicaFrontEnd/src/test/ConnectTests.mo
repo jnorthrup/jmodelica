@@ -79,11 +79,11 @@ end ConnectTests.ConnectTest1;
     C2 c2;  
       
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConnectTest2_Err",
-            description="Basic test of name lookup in connect clauses",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectTest2_Err",
+			description="Basic test of name lookup in connect clauses",
+			errorMessage="
 1 errors found:
 
 Error at line 76, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
@@ -1156,11 +1156,11 @@ model ConnectTest25
 equation
     connect(a, a);
 
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="ConnectTest25",
-            description="Check that self-connections are allowed with a warning",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		WarningTestCase(
+			name="ConnectTest25",
+			description="Check that self-connections are allowed with a warning",
+			errorMessage="
 1 errors found:
 
 Warning at line 1157, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
@@ -1209,63 +1209,6 @@ equation
 end ConnectTests.ConnectTest26;
 ")})));
 end ConnectTest26;
-
-
-model ConnectTest27
-    connector T = Real;
-    T[2] x1 if false;
-    T[3] x2 = (1:3) * time;
-equation
-    connect(x1, x2);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConnectTest27",
-            description="Allow connect clauses with mismatch in sizes if one side refers to a disabled conditional",
-            flatModel="
-fclass ConnectTests.ConnectTest27
- Real x2[3] = (1:3) * time;
-end ConnectTests.ConnectTest27;
-")})));
-end ConnectTest27;
-
-
-model ConnectTest28
-    connector C = input Real;
-    model A
-        C x;
-    equation
-        x = time;
-    end A;
-    
-    model B
-        extends A;
-        C x;
-        C y;
-    equation
-        connect(x, y);
-    end B;
-    
-    B b;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConnectTest28",
-            description="Check that connections to duplicate components work",
-            flatModel="
-fclass ConnectTests.ConnectTest28
- ConnectTests.ConnectTest28.C b.y;
- ConnectTests.ConnectTest28.C b.x;
-equation
- b.x = time;
- b.x = b.y;
-
-public
- type ConnectTests.ConnectTest28.C = Real;
-end ConnectTests.ConnectTest28;
-")})));
-end ConnectTest28;
-
 
 
 model ConnectOuterTest1
@@ -1454,10 +1397,12 @@ end ConnectOuterTest6;
 
 
 model ConnectOuterTest7
+    /* This verifies #3452, but the result is wrong, and should be updated 
+	   when #3451 is fixed. */
     connector C
-        Real x;
-        flow Real y;
-    end C;
+		Real x;
+		flow Real y;
+	end C;
     
     model A
         C c;
@@ -1470,15 +1415,15 @@ model ConnectOuterTest7
 	model D
         inner A a;
         B b;
-    end D;
-    
-    D d;
+	end D;
+	
+	D d;
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConnectOuterTest7",
-            description="Non-connected connector in component declared inner outer",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectOuterTest7",
+			description="Non-connected connector in component declared inner outer",
+			flatModel="
 fclass ConnectTests.ConnectOuterTest7
  Real d.a.c.x;
  Real d.a.c.y;
@@ -1486,116 +1431,9 @@ fclass ConnectTests.ConnectOuterTest7
  Real d.b.a.c.y;
 equation
  d.a.c.y = 0;
- d.b.a.c.y = 0;
- end ConnectTests.ConnectOuterTest7;
+end ConnectTests.ConnectOuterTest7;
 ")})));
 end ConnectOuterTest7;
-
-
-model ConnectOuterTest8
-    connector C
-        Real x;
-        flow Real y;
-    end C;
-    
-    model A
-        C c;
-    end A;
-    
-    model B
-        inner outer A a;
-        C c;
-        D d;
-    equation
-        connect(c, a.c);
-    end B;
-    
-    model D
-        outer A a;
-        C c;
-    equation
-        connect(c, a.c);
-    end D;
-    
-    inner A a;
-    B b;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConnectOuterTest8",
-            description="Connected connector in component declared inner outer",
-            flatModel="
-fclass ConnectTests.ConnectOuterTest8
- Real a.c.x;
- Real a.c.y;
- Real b.a.c.x;
- Real b.a.c.y;
- Real b.c.x;
- Real b.c.y;
- Real b.d.c.x;
- Real b.d.c.y;
-equation
- a.c.y - b.c.y = 0;
- a.c.x = b.c.x;
- b.a.c.y - b.d.c.y = 0;
- b.c.y = 0;
- b.a.c.x = b.d.c.x;
- b.d.c.y = 0;
-end ConnectTests.ConnectOuterTest8;
-")})));
-end ConnectOuterTest8;
-
-
-model ConnectOuterTest9
-    connector C
-        Real x;
-        flow Real y;
-    end C;
-    
-    model B
-        inner outer C c1;
-        C c2;
-        D d;
-    equation
-        connect(c1, c2);
-    end B;
-    
-    model D
-        outer C c1;
-        C c2;
-    equation
-        connect(c1, c2);
-    end D;
-    
-    inner C c1;
-    B b;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConnectOuterTest9",
-            description="Connected connector declared inner outer",
-            flatModel="
-fclass ConnectTests.ConnectOuterTest9
- Real c1.x;
- Real c1.y;
- Real b.c1.x;
- Real b.c1.y;
- Real b.c2.x;
- Real b.c2.y;
- Real b.d.c2.x;
- Real b.d.c2.y;
-equation
- c1.y = 0;
- b.c2.x = c1.x;
- - b.c2.y - c1.y = 0;
- b.c1.y = 0;
- b.c2.y = 0;
- b.c1.x = b.d.c2.x;
- - b.c1.y - b.d.c2.y = 0;
- b.d.c2.y = 0;
-end ConnectTests.ConnectOuterTest9;
-")})));
-end ConnectOuterTest9;
 
 
 
@@ -1613,11 +1451,11 @@ model ConnectErrTest1
 equation
     connect(a, b);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConnectErrTest1",
-            description="",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectErrTest1",
+			description="",
+			errorMessage="
 1 errors found:
 
 Error at line 1576, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
@@ -1632,11 +1470,11 @@ model ConnectErrTest2
 equation
     connect(a, b);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConnectErrTest2",
-            description="",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectErrTest2",
+			description="",
+			errorMessage="
 2 errors found:
 
 Error at line 1595, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
@@ -1663,11 +1501,11 @@ model ConnectErrTest3
 equation
     connect(a, b);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConnectErrTest3",
-            description="",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectErrTest3",
+			description="",
+			errorMessage="
 1 errors found:
 
 Error at line 1626, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
@@ -1701,11 +1539,11 @@ model ConnectErrTest4
 equation
     connect(a, b);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConnectErrTest4",
-            description="",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectErrTest4",
+			description="",
+			errorMessage="
 1 errors found:
 
 Error at line 1664, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
@@ -1728,11 +1566,11 @@ model ConnectErrTest5
 equation
     connect(a, b);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConnectErrTest5",
-            description="",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectErrTest5",
+			description="",
+			errorMessage="
 1 errors found:
 
 Error at line 1691, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
@@ -1750,11 +1588,11 @@ model ConnectErrTest6
 equation
     connect(a1, a2[1:2]);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConnectErrTest6",
-            description="",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectErrTest6",
+			description="",
+			errorMessage="
 1 errors found:
 
 Error at line 1713, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
@@ -1777,11 +1615,11 @@ model ConnectErrTest7
 equation
     connect(a, b);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConnectErrTest7",
-            description="",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectErrTest7",
+			description="",
+			errorMessage="
 1 errors found:
 
 Error at line 1740, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
@@ -1804,11 +1642,11 @@ model ConnectErrTest8
 equation
     connect(a, b);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConnectErrTest8",
-            description="",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectErrTest8",
+			description="",
+			errorMessage="
 1 errors found:
 
 Error at line 1767, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
@@ -1831,11 +1669,11 @@ model ConnectErrTest9
 equation
     connect(a, b);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConnectErrTest9",
-            description="",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectErrTest9",
+			description="",
+			errorMessage="
 1 errors found:
 
 Error at line 1794, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
@@ -1864,7 +1702,7 @@ equation
 1 errors found:
 
 Error at line 1818, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
-  Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions
+  Connect clauses are not allowed in if equations with non-parameter conditions, or in when equations
 ")})));
 end ConnectErrTest10;
 
@@ -1898,152 +1736,6 @@ Error at line 1850, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/Connec
   Types of connected components do not match
 ")})));
 end ConnectErrTest11;
-
-model ConnectErrTest12
-    connector A = Real;
-    
-    A x;
-    A y = time;
-    
-    parameter Real p(start=3,fixed=false);
-equation
-    if p < 2 then
-        x = y + 2;
-    else
-        connect(x,y);
-    end if;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConnectErrTest12",
-            description="Connect clause in else branch of if with non-fixed parameter test",
-            errorMessage="
-1 errors found:
-
-Error at line 1875, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
-  Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions
-")})));
-end ConnectErrTest12;
-
-model ConnectErrTest13
-    connector A = Real;
-    
-    A x;
-    A y = time;
-    
-    parameter Real p(start=3,fixed=false);
-equation
-    if time < 2 then
-        if p < 2 then
-            connect(x,y);
-        else
-            connect(x,y);
-        end if;
-    else
-        if p < 2 then
-            connect(x,y);
-        else
-            connect(x,y);
-        end if;
-    end if;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConnectErrTest13",
-            description="Connect clause in nested branch of if with non-fixed parameter test",
-            errorMessage="
-4 errors found:
-
-Error at line 1900, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
-  Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions
-
-Error at line 1902, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
-  Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions
-
-Error at line 1906, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
-  Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions
-
-Error at line 1908, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
-  Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions
-")})));
-end ConnectErrTest13;
-
-model ConnectErrTest14
-
-    function f
-        input Integer i;
-        output Integer o;
-        external;
-    end f;
-
-    connector A = Real;
-    
-    A x;
-    A y = time;
-    
-    parameter Integer p = 3;
-    parameter Real[2] pa = 1:2;
-equation
-    if pa[f(p)] < 2 then
-        x = y + 2;
-    else
-        connect(x,y);
-    end if;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConnectErrTest14",
-            description="Connect clause in nested branch of if with non-evaluable test",
-            errorMessage="
-1 errors found:
-
-Error at line 1949, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
-  Could not evaluate test expression for if equation containing connect clause
-")})));
-end ConnectErrTest14;
-
-model ConnectInIfNoErr1
-    connector A = Real;
-    A[3] a = (1:3) * time;
-    A[3] b;
-    
-    parameter Boolean[2] p1 = { true , false };
-    parameter Boolean[1] p2 = { true };
-    
-equation
-    for i in 1:3 loop
-        if rem(i, 2) == 1 then
-            if p1[integer((i + 1) / 2)] then
-                connect(a[i], b[i]);
-            else
-                connect(a[i], b[i]);
-            end if;
-        else
-            if p2[integer((i + 1) / 2)] then
-                connect(a[i], b[i]);
-            else
-                connect(a[i], b[i]);
-            end if;
-        end if;
-    end for;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConnectInIfNoErr1",
-            description="Check that connect statements are not error checked in inactive if branches",
-            flatModel="
-fclass ConnectTests.ConnectInIfNoErr1
- Real a[3] = (1:3) * time;
- Real b[3];
- structural parameter Boolean p1[2] = {true, false} /* { true, false } */;
- structural parameter Boolean p2[1] = {true} /* { true } */;
-equation
- a[1] = b[1];
- a[2] = b[2];
- a[3] = b[3];
-end ConnectTests.ConnectInIfNoErr1;
-")})));
-end ConnectInIfNoErr1;
 
 
 
@@ -2538,11 +2230,11 @@ equation
 	x = inStream(d.a);
 	y = actualStream(d.a);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="StreamTest3",
-            description="Using inStream() and actualStream() on normal var in connector",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="StreamTest3",
+			description="Using inStream() and actualStream() on normal var in connector",
+			errorMessage="
 2 errors found:
 
 Error at line 2500, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
@@ -2568,11 +2260,11 @@ equation
 	x = inStream(d.b);
 	y = actualStream(d.b);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="StreamTest4",
-            description="Using inStream() and actualStream() on flow var",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="StreamTest4",
+			description="Using inStream() and actualStream() on flow var",
+			errorMessage="
 2 errors found:
 
 Error at line 2530, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
@@ -2592,11 +2284,11 @@ equation
 	x = inStream(a);
 	y = actualStream(a);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="StreamTest5",
-            description="Using inStream() and actualStream() on normal var not in connector",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="StreamTest5",
+			description="Using inStream() and actualStream() on normal var not in connector",
+			errorMessage="
 2 errors found:
 
 Error at line 2554, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
@@ -2608,64 +2300,8 @@ Error at line 2555, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/Connec
 end StreamTest5;
 
 
-model StreamTest6
-    connector A
-        Real a;
-        flow Real b;
-        stream Real c;
-    end A;
-
-    model B
-        A a;
-    end B;
-
-    parameter Integer n = 2;
-    Real x[n];
-    A a[n];
-    B b[n];
-equation
-    connect(a, b.a);
-    a.a = (1:2) * time;
-    a.c = a.a * 2;
-    for i in 1:n loop
-        if i < n then
-            x[i] = inStream(a[i + 1].c) * time;
-        else
-            x[i] = inStream(a[i].c) + time;
-        end if;
-    end for;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="StreamTest6",
-            description="Check that inStream() using out-of-bounds array access does not cause crash when used in inactive if branch",
-            flatModel="
-fclass ConnectTests.StreamTest6
- structural parameter Integer n = 2 /* 2 */;
- Real x[1];
- Real x[2];
- Real a[1].a;
- constant Real a[1].b = 0;
- Real a[1].c;
- Real a[2].a;
- constant Real a[2].b = 0;
- Real a[2].c;
- constant Real b[1].a.b = 0;
- constant Real b[2].a.b = 0;
-equation
- a[1].a = time;
- a[2].a = 2 * time;
- a[1].c = a[1].a * 2;
- a[2].c = a[2].a * 2;
- x[1] = a[2].c * time;
- x[2] = a[2].c + time;
-end ConnectTests.StreamTest6;
-")})));
-end StreamTest6;
-
-
 model Cardinality1
-    connector A = Real;
+	connector A = Real;
 
     A x;
     A y;
@@ -2676,20 +2312,30 @@ equation
     if cardinality(x) == 2 then
         x = time;
     elseif cardinality(y) == 2 then
-        y = 2 * time;
+        y = time;
     else
-        z = 3 * time;
+        z = time;
     end if;
 
     annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
+        FlatteningTestCase(
             name="Cardinality1",
             description="cardinality(): basic test",
             flatModel="
 fclass ConnectTests.Cardinality1
  Real x;
+ Real y;
+ Real z;
 equation
- x = 2 * time;
+ if 1 == 2 then
+  x = time;
+ elseif 2 == 2 then
+  y = time;
+ else
+  z = time;
+ end if;
+ x = y;
+ y = z;
 end ConnectTests.Cardinality1;
 ")})));
 end Cardinality1;
@@ -2697,8 +2343,8 @@ end Cardinality1;
 
 model Cardinality2
     connector A
-        Real a;
-        Real b;
+        Real x;
+        flow Real y;
     end A;
 	
     A x;
@@ -2708,26 +2354,39 @@ equation
     connect(x, y);
     connect(y, z);
     if cardinality(x) == 2 then
-        x.a = time;
+        x.x = time;
     elseif cardinality(y) == 2 then
-        y.a = 2 * time;
+        y.x = time;
     else
-        z.a = 3 * time;
+        z.x = time;
     end if;
-	x.b = 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Cardinality2",
-            description="cardinality(): basic test",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="Cardinality2",
+			description="cardinality(): basic test",
+			flatModel="
 fclass ConnectTests.Cardinality2
- Real x.a;
- constant Real x.b = 1;
- constant Real y.b = 1;
- constant Real z.b = 1;
+ Real x.x;
+ Real x.y;
+ Real y.x;
+ Real y.y;
+ Real z.x;
+ Real z.y;
 equation
- x.a = 2 * time;
+ if 1 == 2 then
+  x.x = time;
+ elseif 2 == 2 then
+  y.x = time;
+ else
+  z.x = time;
+ end if;
+ x.x = y.x;
+ y.x = z.x;
+ - x.y - y.y - z.y = 0;
+ x.y = 0;
+ y.y = 0;
+ z.y = 0;
 end ConnectTests.Cardinality2;
 ")})));
 end Cardinality2;
@@ -2749,11 +2408,11 @@ model Cardinality3
 		connect(a, a2);
 	end B;
 
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="Cardinality3",
-            description="cardinality(): deprecation warning and limitation on where it can be used",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		WarningTestCase(
+			name="Cardinality3",
+			description="cardinality(): deprecation warning and limitation on where it can be used",
+			errorMessage="
 2 errors found:
 
 Compliance error at line 2644, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
@@ -2764,8 +2423,9 @@ Warning at line 2644, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Conn
 ")})));
 end Cardinality3;
 
+//TODO: Wrong, #3374
 model Cardinality4
-    connector A = Real;
+	connector A = Real;
 
     A x[2];
     A y;
@@ -2774,22 +2434,32 @@ equation
     connect(x[2], y);
     if cardinality(x[1]) == 2 then
         x[1] = time;
-    elseif cardinality(x[2]) == 2 then
-        x[2] = 2 * time;
+    elseif cardinality(y) == 2 then
+        y = time;
     else
-        y = 3 * time;
+        x[2] = time;
     end if;
 
     annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
+        FlatteningTestCase(
             name="Cardinality4",
-            description="",
+            description="cardinality(): array test",
             flatModel="
 fclass ConnectTests.Cardinality4
- Real x[1];
+ Real x[2];
+ Real y;
 equation
- x[1] = 2 * time;
+ if 3 == 2 then
+  x[1] = time;
+ elseif 1 == 2 then
+  y = time;
+ else
+  x[2] = time;
+ end if;
+ x[1] = x[2];
+ x[2] = y;
 end ConnectTests.Cardinality4;
+			
 ")})));
 end Cardinality4;
 
@@ -2810,17 +2480,19 @@ equation
     end if;
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="Cardinality5",
-            description="cardinality(): non scalar",
-            errorMessage="
+		ErrorTestCase(
+			name="Cardinality5",
+			description="cardinality(): non scalar",
+			errorMessage="
 1 errors found:
 
 Error at line 2710, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   The argument of cardinality() must be a scalar reference to a connector
+			
 ")})));
 end Cardinality5;
 
+//TODO: Wrong, #3374
 model Cardinality6
 	connector A = Real;
 
@@ -2828,52 +2500,26 @@ model Cardinality6
 equation
     connect(x[1:2], x[2:3]);
     for i in 1:3 loop
-        assert(cardinality(x[i]) == 1, "Failed for index: " + String(i));
-    end for;
+		assert(cardinality(x[i]) == 1, "Message");
+	end for;
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        FlatteningTestCase(
             name="Cardinality6",
             description="cardinality(): array test",
-            errorMessage="
-1 errors found:
-
-Error in flattened model:
-  Assertion failed: Failed for index: 2
+            flatModel="
+fclass ConnectTests.Cardinality6
+ Real x[3];
+equation
+ for i in 1:3 loop
+  assert(4 == 1, \"Message\");
+ end for;
+ x[1] = x[2];
+ x[2] = x[3];
+end ConnectTests.Cardinality6;
+			
 ")})));
 end Cardinality6;
-
-
-model Cardinality7
-    connector A = Real;
-
-    parameter Integer n = 2;
-    A x[n];
-    A y[n] = (1:n) * time;
-equation
-    connect(x[1], y[1]);
-    for i in 1:n loop
-        if cardinality(x[i]) == 0 then
-            x[n] = 0;
-        end if;
-    end for;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Cardinality7",
-            description="cardinality(): array test as test of if expression",
-            flatModel="
-fclass ConnectTests.Cardinality7
- structural parameter Integer n = 2 /* 2 */;
- Real x[1];
- constant Real x[2] = 0;
- Real y[2];
-equation
- x[1] = time;
- y[2] = 2 * time;
-end ConnectTests.Cardinality7;
-")})));
-end Cardinality7;
 
 
 model ConditionalNoErrTest1

@@ -30,8 +30,6 @@ aspect Variability {
     eq FFinalParameter.finalParameterVariability() = true;
     syn boolean FTypePrefixVariability.knownParameterVariability() = false;
     eq FKnownParameter.knownParameterVariability() = true;
-    syn boolean FTypePrefixVariability.indexParameterVariability() = false;
-    eq FIndexParameter.indexParameterVariability() = true;
     syn boolean FTypePrefixVariability.parameterVariability() = false;
     eq FParameter.parameterVariability() = true;	
     syn boolean FTypePrefixVariability.discreteVariability() = false;
@@ -55,13 +53,11 @@ aspect Variability {
     syn boolean FTypePrefixVariability.lessOrEqual(FTypePrefixVariability other) = 
             compareTo(other) <= 0;
 	
-    syn boolean FTypePrefixVariability.evalOrLess()           = lessOrEqual(fEvalParameter());
+    syn boolean FTypePrefixVariability.evalOrLess()       = lessOrEqual(fEvalParameter());
     syn boolean FTypePrefixVariability.knownParameterOrLess() = lessOrEqual(fFinalParameter());
-    syn boolean FTypePrefixVariability.parameterOrLess()      = lessOrEqual(fNonFixedParameter());
-    syn boolean FTypePrefixVariability.indexParameterOrLess() = lessOrEqual(fIndexParameter());
-    syn boolean FTypePrefixVariability.fixedParameterOrLess() = lessOrEqual(fFixedParameter());
-    syn boolean FTypePrefixVariability.discreteOrLess()       = lessOrEqual(fDiscrete());
-    syn boolean FTypePrefixVariability.continuousOrLess()     = lessOrEqual(fContinuous());
+    syn boolean FTypePrefixVariability.parameterOrLess()  = lessOrEqual(fParameter());
+    syn boolean FTypePrefixVariability.discreteOrLess()   = lessOrEqual(fDiscrete());
+    syn boolean FTypePrefixVariability.continuousOrLess() = lessOrEqual(fContinuous());
 
     /**
      * An ordering of the variability types.
@@ -77,24 +73,20 @@ aspect Variability {
     protected int FStructParameter.variabilityLevel() { return VARIABILITY_LEVEL; }
     protected int FEvalParameter.variabilityLevel()   { return VARIABILITY_LEVEL; }
     protected int FFinalParameter.variabilityLevel()  { return VARIABILITY_LEVEL; }
-    protected int FIndexParameter.variabilityLevel()  { return VARIABILITY_LEVEL; }
-    protected int FFixedParameter.variabilityLevel()  { return VARIABILITY_LEVEL; }
-    protected int FNonFixedParameter.variabilityLevel() { return VARIABILITY_LEVEL; }
+    protected int FParameter.variabilityLevel()       { return VARIABILITY_LEVEL; }
     protected int FDiscrete.variabilityLevel()        { return VARIABILITY_LEVEL; }
     protected int FContinuous.variabilityLevel()      { return VARIABILITY_LEVEL; }
     protected int FCompositeVariability.variabilityLevel() { return combine().variabilityLevel(); }
-    protected static final int FConstant.VARIABILITY_LEVEL          = 0;
-    protected static final int FEvalParameter.VARIABILITY_LEVEL     = 3;
-    protected static final int FStructParameter.VARIABILITY_LEVEL   = 4;
-    protected static final int FFinalParameter.VARIABILITY_LEVEL    = 5;
-    protected static final int FIndexParameter.VARIABILITY_LEVEL    = 8;
-    protected static final int FFixedParameter.VARIABILITY_LEVEL    = 10;
-    protected static final int FNonFixedParameter.VARIABILITY_LEVEL = 11;
-    protected static final int FDiscrete.VARIABILITY_LEVEL          = 20;
-    protected static final int FContinuous.VARIABILITY_LEVEL        = 30;
+    protected static final int FConstant.VARIABILITY_LEVEL        = 0;
+    protected static final int FEvalParameter.VARIABILITY_LEVEL   = 3;
+    protected static final int FStructParameter.VARIABILITY_LEVEL = 4;
+    protected static final int FFinalParameter.VARIABILITY_LEVEL  = 5;
+    protected static final int FParameter.VARIABILITY_LEVEL       = 10;
+    protected static final int FDiscrete.VARIABILITY_LEVEL        = 20;
+    protected static final int FContinuous.VARIABILITY_LEVEL      = 30;
     
     /**
-     * Combines (up) component variabilities to a single primitive variability.
+     * Combines component variabilities to a single primitive variability.
      */
     syn FTypePrefixVariability FTypePrefixVariability.combine() {
         return this;
@@ -104,21 +96,6 @@ aspect Variability {
         FTypePrefixVariability high = fConstant();
         for (FComponentVariability v : getComponents()) {
             high = high.combine(v.getVariability().combine());
-        }
-        return high;
-    }
-    
-    /**
-     * Combines (down) component variabilities to a single primitive variability.
-     */
-    syn FTypePrefixVariability FTypePrefixVariability.combineDown() {
-        return this;
-    }
-    
-    eq FCompositeVariability.combineDown() {
-        FTypePrefixVariability high = fConstant();
-        for (FComponentVariability v : getComponents()) {
-            high = high.combineDown(v.getVariability().combineDown());
         }
         return high;
     }
@@ -332,10 +309,6 @@ aspect Variability {
             e.makeContinuousVariablesDiscrete();
     }
     
-    public void FSubscriptedExp.makeContinuousVariablesDiscrete() {
-        getFExp().makeContinuousVariablesDiscrete();
-    }
-    
     /**
      * If this is a normal continous variable, convert it to a discrete variable.
      */
@@ -381,7 +354,15 @@ aspect Variability {
     syn boolean FIdUse.valueIsFixed() = myFV().valueIsFixed();
 
     syn boolean FAbstractVariable.valueIsFixed() = true;
-    eq FVariable.valueIsFixed() = fixedAttribute();
+    eq FVariable.valueIsFixed() {
+        if (!fixedAttribute() || !isParameter() || myFClass().nonFixedParametersPropagated())
+            return fixedAttribute();
+        if (hasBindingExp())
+            return getBindingExp().valueIsFixed();
+        if (hasParameterEquation()) 
+            return parameterEquation().rhsIsFixed();
+        return true;
+    }
 
     syn boolean FAbstractEquation.rhsIsFixed() = true;
     eq FEquation.rhsIsFixed()                  = getRight().valueIsFixed();
@@ -391,14 +372,7 @@ aspect Variability {
     syn boolean FExp.isParameterExp()  = variability().parameterVariability();
     syn boolean FExp.isDiscreteExp()   = variability().discreteVariability();
     syn boolean FExp.isContinuousExp() = variability().continuousVariability();
-    
-    syn boolean FExp.isFixedParamOrLessExp() {
-        if (variability().parameterVariability()) {
-            return !containsNonFixedParameter();
-        }
-        return variability().parameterOrLess();
-    }
-    
+
     syn boolean FSubscript.isConstant() = true;
     eq FExpSubscript.isConstant() = getFExp().isConstantExp();
 
@@ -415,10 +389,9 @@ aspect Variability {
     syn FTypePrefixVariability FExp.variabilityInNoEventExp(FTypePrefixVariability var) =
         inNoEventExp() ? var : var.combineDown(fDiscrete());
 
+    eq FInstAccessExp.variability() = getInstAccess().myInstComponentDecl().variability();
+
     eq FUnsupportedExp.expVariability() = fContinuous(); // Only here to avoid null pointer 
-    
-    eq FSubscriptedExp.expVariability() = super.expVariability().combine(indexVariability());
-    
 
     public static FTypePrefixVariability FExp.combineFExpListVariability(Iterable<? extends FExp> exps) {
         Iterator<? extends FExp> it = exps.iterator();
@@ -435,47 +408,7 @@ aspect Variability {
     eq FTimeExp.expVariability()  = fContinuous();
     eq FRelExp.expVariability()   = super.expVariability().combineDown(fDiscrete());
 
-    eq FSizeExp.expVariability() {
-        FTypePrefixVariability res = ASTNode.fConstant();
-        if (hasDim()) {
-            if (getDim().variability().knownParameterOrLess()) {
-                try {
-                    CValue v = getDim().ceval();
-                    return getFExp().size().variability(v.intValue() - 1);
-                } catch (ConstantEvaluationException e) {
-                    
-                }
-            }
-            res = res.combine(getDim().variability());
-        }
-        res = res.combine(getFExp().size().variability());
-        return res;
-    }
-    
-    public FTypePrefixVariability Size.variability() {
-        return ASTNode.fConstant();
-    }
-    public FTypePrefixVariability MutableSize.variability() {
-        FTypePrefixVariability res = super.variability();
-        for (int i = 0; i < exps.length; i++) {
-            res = res.combine(variability(i));
-        }
-        return res;
-    }
-    
-    public FTypePrefixVariability Size.variability(int d) {
-        return ASTNode.fConstant();
-    }
-    public FTypePrefixVariability MutableSize.variability(int d) {
-        FTypePrefixVariability res = super.variability(d);
-        if (hasFExp(d)) {
-            res = res.combine(getFExp(d).variability());
-        }
-        return res;
-    }
-    
-    eq FUnknownSizeExp.expVariability() = fParameter();
-    
+    eq FSizeExp.expVariability() = hasDim() ? getDim().variability() : fParameter();
     eq FSignExp.expVariability() = getFExp().variability().combineDown(fDiscrete());
 
     eq FEventGenExp.expVariability()    = getX().variability().combineDown(fDiscrete());
@@ -508,16 +441,6 @@ aspect Variability {
                 total = total.combine(arg.getFExp().variability().combine());
         return total;
     }
-    
-    eq FMulExp.expVariability() {
-        // Refined by variability propagation
-        return super.expVariability();
-    }
-    
-    eq FDivExp.expVariability() {
-        // Refined by variability propagation
-        return super.expVariability();
-    }
 
 
     // TODO: Maybe there should be a special variability for "no return value"
@@ -548,7 +471,7 @@ aspect Variability {
 
 	syn FTypePrefixVariability FForIndex.variability() = hasFExp() ? getFExp().variability() : fParameter();
 
-    syn FTypePrefixVariability FSubscript.variability() = fConstant();
+	syn FTypePrefixVariability FSubscript.variability() = fParameter();
 	eq FExpSubscript.variability() = getFExp().variability();
 	
 	syn FTypePrefixVariability FArraySubscripts.variability() {
@@ -632,8 +555,8 @@ aspect Variability {
             FTypePrefixVariability nv = other.getPart(name);
             nv = v.combine(nv, combiner);
             l.add(new FComponentVariability(fcv.getName(), nv));
-            low = low.combineDown(nv.combineDown());
-            high = high.combine(nv.combine());
+            low = low.combineDown(nv);
+            high = high.combine(nv);
             containsComposite = containsComposite || nv.compositeVariability();
         }
         if (!containsComposite && low.equals(high))
@@ -664,9 +587,7 @@ aspect VariabilitySingletons {
 
     public static final FContinuous      FContinuous.instance      = new FContinuous();
     public static final FDiscrete        FDiscrete.instance        = new FDiscrete();
-    public static final FNonFixedParameter FNonFixedParameter.instance = new FNonFixedParameter();
-    public static final FFixedParameter  FFixedParameter.instance  = new FFixedParameter();
-    public static final FIndexParameter  FIndexParameter.instance  = new FIndexParameter();
+    public static final FParameter       FParameter.instance       = new FParameter();
     public static final FFinalParameter  FFinalParameter.instance  = new FFinalParameter();
     public static final FEvalParameter   FEvalParameter.instance   = new FEvalParameter();
     public static final FStructParameter FStructParameter.instance = new FStructParameter();
@@ -680,23 +601,8 @@ aspect VariabilitySingletons {
         return FDiscrete.instance;
     }
 
-    /**
-     * @deprecated Delegates to fFixedParameter(). Use correct specific parameter sub-variability.
-     */
     public static FParameter ASTNode.fParameter() {
-        return fFixedParameter();
-    }
-    
-    public static FParameter ASTNode.fNonFixedParameter() {
-        return FNonFixedParameter.instance;
-    }
-    
-    public static FParameter ASTNode.fFixedParameter() {
-        return FFixedParameter.instance;
-    }
-    
-    public static FParameter ASTNode.fIndexParameter() {
-        return FIndexParameter.instance;
+        return FParameter.instance;
     }
     
     public static FFinalParameter ASTNode.fFinalParameter() {

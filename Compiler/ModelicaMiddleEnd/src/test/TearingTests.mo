@@ -225,13 +225,13 @@ equation
 	i0 = i1 + iL;
 	i1 = i2 + i3;
 
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="WarningTest1",
-            description="Test missing start value warning",
-            equation_sorting=true,
-            automatic_tearing=true,
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={ 
+		WarningTestCase(
+			name="WarningTest1",
+			description="Test missing start value warning",
+			equation_sorting=true,
+			automatic_tearing=true,
+			errorMessage="
 2 errors found:
 
 Warning in flattened model:
@@ -261,13 +261,13 @@ equation
 	i0 = i1 + iL;
 	i1 = i2 + i3;
 	
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="WarningTest2",
-            description="Test missing start value warning",
-            equation_sorting=true,
-            automatic_tearing=true,
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={ 
+		WarningTestCase(
+			name="WarningTest2",
+			description="Test missing start value warning",
+			equation_sorting=true,
+			automatic_tearing=true,
+			errorMessage="
 1 errors found:
 
 Warning in flattened model:
@@ -281,7 +281,7 @@ model BLTError1
     Real r,s;
 equation
     i = j + integer(time) + integer(s);
-    j = 1/i;
+    i * j = 0;
     r = i * time;
     s = r * 3.14;
 
@@ -294,7 +294,7 @@ equation
 
 Error in flattened model:
   Non-real equation used as residual:
-i = j + temp_2 + temp_1
+i * j = 0
 ")})));
 end BLTError1;
 

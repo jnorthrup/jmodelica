@@ -204,6 +204,13 @@ abstract public class OptionRegistry {
              "", 
              "The value of this option is appended to the value of the MODELICAPATH environment " +
              "variable for determining in what directories to search for libraries."),
+        LAPACK_LIB
+            ("lapack_lib", 
+             compiler, 
+             "lapack",
+             "Specifies what lapack library to use. The compiler will remove annotations including the"
+             + "'lapack' library and instead include the library specified by this option. If the specified"
+             + "library is 'lapack', which is default, nothing will happen."),
         START_FIX
             ("state_start_values_fixed", 
              compiler, 
@@ -230,14 +237,6 @@ abstract public class OptionRegistry {
              5000,
              "Time limit (ms) when evaluating constant calls to external functions during compilation. "
              + "0 indicates no evaluation. -1 indicates no time limit. Default is 5000."),
-        EXT_CEVAL_MAX_PROC
-            ("external_constant_evaluation_max_proc",
-              compiler,
-              10,
-              "The maximum number of processes kept alive for evaluation of external functions during compilation, the"
-              + " default value is 10. If the value of this option is less than 1, no processes will be kept alive,"
-              + " i.e. this feature is turned off. Using this feature may reduce compilation time if external functions"
-              + " use external objects."),
         HALT_WARN
             ("halt_on_warning", 
              compiler, 
@@ -256,14 +255,6 @@ abstract public class OptionRegistry {
              true, 
              // NB: this description used in a Python test 
              "If this option is true (default is true), index reduction is performed."),
-        PROPAGATE_DERIVATIVES
-            ("propagate_derivatives", 
-             compiler, 
-             true, 
-             "If this option is true (default is true), the compiler will try " +
-             "to replace ordinary variable references with derivative " +
-             "references. This is done by first finding equations on the form " +
-             "x = der(y). If possible, uses of x will the be replaced with der(x)."),
         EQU_SORT
             ("equation_sorting", 
              compiler, 
