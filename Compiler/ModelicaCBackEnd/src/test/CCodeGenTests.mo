@@ -17420,7 +17420,6 @@ model TestRelationalOp9
             description="Test correct event generation. Temp in time event calculation.",
             variability_propagation=false,
             inline_functions="none",
-            common_subexp_elim=false,
             template="
 $C_DAE_relations$
 static const int N_sw = $n_state_switches$ + $n_time_switches$;
@@ -19612,7 +19611,6 @@ model LoadResource1
             name="LoadResource1",
             description="",
             variability_propagation=false,
-            common_subexp_elim=false,
             template="
 $C_ode_derivatives$
 $C_DAE_initial_dependent_parameter_assignments$
@@ -21007,7 +21005,6 @@ model Delay4
             description="Delay operator code gen: Array temp generation",
             generate_ode=true,
             equation_sorting=true,
-            common_subexp_elim=false,
             template="
 N_delays = $n_delays$;
 $C_DAE_relations$

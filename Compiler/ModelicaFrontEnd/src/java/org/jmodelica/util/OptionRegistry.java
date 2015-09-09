@@ -245,13 +245,6 @@ abstract public class OptionRegistry {
              true,
              "If enabled, the compiler performs a global analysis on the equation system and reduces variables to " +
              "constants and parameters where applicable."),
-        COMMON_SUBEXP_ELIM
-            ("common_subexp_elim", 
-             OptionType.compiler, 
-             Category.uncommon,
-             true,
-             "If enabled, the compiler performs a global analysis on the equation system and extract identical " +
-             "function calls into common equations."),
         EXT_CEVAL
             ("external_constant_evaluation", 
              OptionType.compiler, 
