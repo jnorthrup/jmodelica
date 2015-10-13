@@ -1019,8 +1019,7 @@ aspect FlatPrettyPrint {
 
 	syn String FVariable.prettyPrintType() = 
 		getDerivedType().isEmpty() ? type().scalarType().toString() : getDerivedType();
-	syn String FAbstractVariable.displayName()  = name();
-	eq FVariable.displayName()                  = getFQName().toString();
+	syn String FVariable.displayName()          = getFQName().toString();
 	eq FDerivativeVariable.displayName()        = name();
 	eq FPreBooleanVariable.displayName()        = name();
 	eq FPreEnumVariable.displayName()           = name();
@@ -1062,7 +1061,7 @@ aspect FlatPrettyPrint {
 			try {
 				str.print(getBindingExp().ceval());
 			} catch (ConstantEvaluationException e){
-                str.print("evaluation error");
+				str.print("evalutation error");
 			}
 			str.print(" */");
 		}
@@ -1353,6 +1352,12 @@ aspect FlatPrettyPrint {
 	}
 	
 	public void FAssignStmt.prettyPrint(Printer p, CodeStream str, String indent) {
+		p.print(getLeft(), str, indent);
+		str.print(" := ");
+		p.print(getRight(), str, indent);
+	}
+	
+	public void InstAssignStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		p.print(getLeft(), str, indent);
 		str.print(" := ");
 		p.print(getRight(), str, indent);
@@ -1681,6 +1686,10 @@ aspect FlatPrettyPrint {
 	protected void FIdUseExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		p.print(getFIdUse(), str, indent);
 	}
+
+	protected void FInstAccessExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
+		p.print(getInstAccess(), str, indent);
+	}
 	
 	public void InstAccess.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(name());
@@ -1905,7 +1914,6 @@ aspect FlatPrettyPrint {
     eq FCardinality.builtInName()        = "cardinality";
 	eq FSemiLinearExp.builtInName()      = "semiLinear";
 	eq FInStream.builtInName()           = "inStream";
-	eq FDerInStream.builtInName()        = "derInStream";
 	eq FActualStream.builtInName()       = "actualStream";
 	eq FGetInstanceName.builtInName()    = "getInstanceName";
 	eq FConnBranch.builtInName()         = "Connections.branch";
@@ -2012,20 +2020,6 @@ aspect FlatPrettyPrint {
     eq OperatorRecord.toString()      = "operator record";
     eq OperatorFunction.toString()    = "operator function";
 
-    syn String InstRestriction.toString();
-    eq InstModel.toString()               = "model";
-    eq InstBlock.toString()               = "block";
-    eq InstMClass.toString()              = "class";
-    eq InstConnector.toString()           = "connector";
-    eq InstExpandableConnector.toString() = "expandable connector";
-    eq InstMType.toString()               = "type";
-    eq InstMPackage.toString()            = "package";
-    eq InstFunction.toString()            = "function";
-    eq InstMRecord.toString()             = "record";
-    eq InstOperator.toString()            = "operator";
-    eq InstOperatorRecord.toString()      = "operator record";
-    eq InstOperatorFunction.toString()    = "operator function";
-
     syn String ComponentDecl.toString() = prettyPrint("");
     syn String Access.toString()        = prettyPrint("");
     syn String Modification.toString()  = prettyPrint("");
@@ -2117,7 +2111,7 @@ aspect PrettyPrint_MC {
 	    	try {
 				str.print(getBindingExp().ceval());
 			} catch (ConstantEvaluationException e){
-                str.print("evaluation error");
+				str.print("evalutation error");
 			}
 	    	str.print(" */");
 	    }

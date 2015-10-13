@@ -44,13 +44,13 @@ model IntegerVariable_ComplErr
 Integer i=1;
 
 
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="IntegerVariable_ComplErr",
-            description="Compliance error for integer variables",
-            generate_ode=false,
-            generate_dae=true,
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="IntegerVariable_ComplErr",
+			description="Compliance error for integer variables",
+			generate_ode=false,
+			generate_dae=true,
+			errorMessage="
 1 errors found:
 
 Compliance error at line 42, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
@@ -62,13 +62,13 @@ model BooleanVariable_ComplErr
  Boolean b=true;
 
 
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="BooleanVariable_ComplErr",
-            description="Compliance error for boolean variables",
-            generate_ode=false,
-            generate_dae=true,
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="BooleanVariable_ComplErr",
+			description="Compliance error for boolean variables",
+			generate_ode=false,
+			generate_dae=true,
+			errorMessage="
 1 errors found:
 
 Compliance error at line 61, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
@@ -81,13 +81,13 @@ model EnumVariable_ComplErr
  A x = A.b;
 
 
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="EnumVariable_ComplErr",
-            description="Compliance error for enumeration variables",
-            generate_ode=false,
-            generate_dae=true,
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="EnumVariable_ComplErr",
+			description="Compliance error for enumeration variables",
+			generate_ode=false,
+			generate_dae=true,
+			errorMessage="
 1 errors found:
 
 Compliance error at line 80, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
@@ -111,13 +111,13 @@ model ArrayOfRecords_Warn
  
  R x[2] = f(1);
 
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="ArrayOfRecords_Warn",
-            description="Compliance warning for arrays of records with index variability > parameter",
-            generate_ode=false,
-            generate_dae=true,
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		WarningTestCase(
+			name="ArrayOfRecords_Warn",
+			description="Compliance warning for arrays of records with index variability > parameter",
+			generate_ode=false,
+			generate_dae=true,
+			errorMessage="
 2 errors found:
 
 Compliance error at line 104, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
@@ -174,13 +174,13 @@ model UnsupportedBuiltins2_ComplErr
   delay(3,3);
   spatialDistribution(1,1,1,true);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="UnsupportedBuiltins2_ComplErr",
-            description="Compliance error for builtins that are only supported for FMUs",
-            generate_ode=false,
-            generate_dae=true,
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="UnsupportedBuiltins2_ComplErr",
+			description="Compliance error for builtins that are only supported for FMUs",
+			generate_ode=false,
+			generate_dae=true,
+			errorMessage="
 18 errors found:
 
 Compliance error at line 156, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
@@ -239,6 +239,23 @@ Compliance error at line 175, column 3, in file 'Compiler/ModelicaFrontEnd/src/t
 ")})));
 end UnsupportedBuiltins2_ComplErr;
 
+model UnsupportedBuiltins_WarnErr
+ equation
+  homotopy(1,1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="UnsupportedBuiltins_WarnErr",
+            description="Compliance error for unsupported builtins",
+            homotopy_type="homotopy",
+            errorMessage="
+1 errors found:
+
+Warning at line 244, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
+  The 'homotopy' setting of the homotopy_type option is not supported. Setting to 'actual'.
+")})));
+end UnsupportedBuiltins_WarnErr;
+
 model ArrayCellMod_ComplErr
  model A
   Real b[2];
@@ -247,17 +264,18 @@ model ArrayCellMod_ComplErr
  A a(b[1] = 1, b[1](start=2));
  A a2(b[:] = {1,2}, b[:](start={2,3}));
 
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="ArrayCellMod_ComplErr",
-            description="Compliance error for modifiers of specific array elements",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="ArrayCellMod_ComplErr",
+			description="Compliance error for modifiers of specific array elements",
+			errorMessage="
 2 errors found:
 
 Error at line 264, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   Modifiers of specific array elements are not allowed
-
-Error at line 264, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
+Error at line 364, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+  Array size mismatch in declaration of b, size of declaration is [2] and size of binding expression is scalar
+Error at line 364, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
   Modifiers of specific array elements are not allowed
 ")})));
 end ArrayCellMod_ComplErr;
@@ -311,13 +329,13 @@ x = pre(x) + 1.1;
 y = pre(y) + 1.1; 
 end when; 
 
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="HybridNonFMU1",
-            description="Test that compliance warnings for hybrid elements are issued when not compiling FMU",
-            generate_ode=false,
-            generate_dae=true,
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="HybridNonFMU1",
+			description="Test that compliance warnings for hybrid elements are issued when not compiling FMU",
+			generate_ode=false,
+			generate_dae=true,
+			errorMessage="
 11 errors found:
 
 Compliance error at line 311, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
@@ -443,13 +461,13 @@ equation
  end when;
  z = floor(dummy);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="HybridNonFMU2",
-            description="",
-            generate_ode=false,
-            generate_dae=true,
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={ 
+		ComplianceErrorTestCase(
+			name="HybridNonFMU2",
+			description="",
+			generate_ode=false,
+			generate_dae=true,
+			errorMessage="
 7 errors found:
 
 Compliance error at line 454, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
@@ -572,11 +590,11 @@ end R;
   
   Real x[4,2] = f({{1,2,3,4},{5,6,7,8}}, {R({1,1})});
 
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="UnknownArraySizes_Error1",
-            description="Test that compliance errors are given.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="UnknownArraySizes_Error1",
+			description="Test that compliance errors are given.",
+			errorMessage="
 1 errors found:
 
 Compliance error at line 577, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
@@ -626,11 +644,11 @@ end Error2;
 model ArrayIterTest
  Real x[1,1] = { i * j for i, j };
 
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
             name="UnknownArraySizes_ArrayIterTest",
-            description="Array constructor with iterators: without in",
-            errorMessage="
+			description="Array constructor with iterators: without in",
+			errorMessage="
 3 errors found:
 
 Error at line 643, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
@@ -657,11 +675,11 @@ algorithm
 		x2[i] := i;
 	end for;
 	
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="UnknownArrayIndex",
-            description="Test errors for unknown array for indices in algorithms and equations.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="UnknownArrayIndex",
+			description="Test errors for unknown array for indices in algorithms and equations.",
+			errorMessage="
 2 errors found:
 
 Compliance error at line 668, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
@@ -679,12 +697,12 @@ algorithm
 		x := x - 1;
 	end while;
 	
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="WhileStmt",
-            description="Test while statement in algorithm",
-            algorithms_as_functions=false,
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="WhileStmt",
+			description="Test while statement in algorithm",
+			algorithms_as_functions=false,
+			errorMessage="
 1 errors found:
 
 Compliance error at line 694, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':

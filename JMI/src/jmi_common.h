@@ -248,27 +248,6 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
     type name##_rec;\
     type* name = &name##_rec;
 
-#define JMI_DEF(TYPE, NAME) \
-    JMI_DEF_##TYPE(NAME)
-#define JMI_DEF_REA(NAME) \
-    jmi_ad_var_t NAME;
-#define JMI_DEF_INT(NAME) \
-    JMI_DEF_REA(NAME)
-#define JMI_DEF_BOO(NAME) \
-    JMI_DEF_REA(NAME)
-#define JMI_DEF_ENU(NAME) \
-    JMI_DEF_REA(NAME)
-
-#define JMI_DEF_REA_EXT(NAME) \
-    JMI_DEF_REAL(NAME)
-#define JMI_DEF_INT_EXT(NAME) \
-    jmi_int_t NAME;
-#define JMI_DEF_BOO_EXT(NAME) \
-    JMI_DEF_INT_EXT(NAME)
-#define JMI_DEF_ENU_EXT(NAME) \
-    JMI_DEF_INT_EXT(NAME)
-
-
 /* Handle return value */
 #define JMI_RET(TYPE, DEST, SRC) \
     if (DEST != NULL) { JMI_RET_##TYPE(DEST, SRC) }
@@ -276,12 +255,6 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 /* Put return value in return variable in function */
 #define JMI_RET_GEN(DEST, SRC) \
     *DEST = SRC;
-
-/* Initialization of function variables */
-#define JMI_INI(TYPE, NAME) \
-    JMI_INI_##TYPE(NAME)
-#define JMI_INI_STR(NAME) \
-    NAME = "";
 
 #ifdef _MSC_VER
 /* Note: the return value isn't the same as for snprintf(). */

@@ -1413,11 +1413,11 @@ Error at line 1390, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Expand
     equation
         connect(c, ec1.a[:]);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr3",
-            description="Exandable connectors: local size error in connection, number of dimensions differ",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr3",
+			description="Exandable connectors: local size error in connection, number of dimensions differ",
+			errorMessage="
 1 errors found:
 
 Error at line 1414, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
@@ -1437,11 +1437,11 @@ Error at line 1414, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Expand
     equation
         connect(c, ec1.a[:,1]);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr3b",
-            description="Exandable connectors: local size error in connection, number of dimensions differ",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr3b",
+			description="Exandable connectors: local size error in connection, number of dimensions differ",
+			errorMessage="
 1 errors found:
 
 Error at line 1438, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
@@ -1462,11 +1462,11 @@ Error at line 1438, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Expand
         connect(c1, ec1.a);
         connect(c2, ec1.a[4]);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr4",
-            description="Exandable connectors: size mismatch between connections, access to specific element > fixed size",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr4",
+			description="Exandable connectors: size mismatch between connections, access to specific element > fixed size",
+			errorMessage="
 1 errors found:
 
 Error at line 1463, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
@@ -1487,11 +1487,11 @@ Error at line 1463, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Expand
         connect(c2, ec1.a[4]);
         connect(c1, ec1.a);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr5",
-            description="Exandable connectors: size mismatch between connections, access to specific element > fixed size",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr5",
+			description="Exandable connectors: size mismatch between connections, access to specific element > fixed size",
+			errorMessage="
 1 errors found:
 
 Error at line 1488, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
@@ -1512,11 +1512,11 @@ Error at line 1488, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Expand
         connect(c1, ec1.a);
         connect(c2, ec1.a[3,1]);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr6",
-            description="Exandable connectors: size mismatch between connections, number of dimensions differ",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr6",
+			description="Exandable connectors: size mismatch between connections, number of dimensions differ",
+			errorMessage="
 1 errors found:
 
 Error at line 1513, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
@@ -1537,11 +1537,11 @@ Error at line 1513, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Expand
         connect(c2, ec1.a[3,1]);
         connect(c1, ec1.a);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr7",
-            description="Exandable connectors: size mismatch between connections, number of dimensions differ",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr7",
+			description="Exandable connectors: size mismatch between connections, number of dimensions differ",
+			errorMessage="
 1 errors found:
 
 Error at line 1538, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
@@ -1562,11 +1562,11 @@ Error at line 1538, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Expand
         connect(c1, ec1.a);
         connect(c2, ec1.a);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr8",
-            description="Exandable connectors: size mismatch between connections, different fixed sizes",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr8",
+			description="Exandable connectors: size mismatch between connections, different fixed sizes",
+			errorMessage="
 1 errors found:
 
 Error at line 1563, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
@@ -1594,11 +1594,11 @@ Error at line 1563, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Expand
         connect(c1, ec.a);
         connect(c2, ec.a);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr9",
-            description="",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr9",
+			description="",
+			errorMessage="
 1 errors found:
 
 Error at line 1595, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
@@ -1622,11 +1622,11 @@ Error at line 1595, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Expand
         connect(c1, ec.a[1]);
         connect(c2, ec.a[2]);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr10",
-            description="",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr10",
+			description="",
+			errorMessage="
 1 errors found:
 
 Error at line 1623, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
@@ -1647,11 +1647,11 @@ Error at line 1623, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Expand
     equation
         connect(c, ec.a);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr11",
-            description="",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr11",
+			description="",
+			errorMessage="
 1 errors found:
 
 Error at line 1648, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
@@ -1672,11 +1672,11 @@ Error at line 1648, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Expand
     equation
         connect(c[1:2], ec.a);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr12",
-            description="",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr12",
+			description="",
+			errorMessage="
 1 errors found:
 
 Error at line 1673, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
@@ -1702,11 +1702,11 @@ Error at line 1673, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Expand
         connect(ec1, ec2);
         connect(c, ec2.a);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr13",
-            description="",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr13",
+			description="",
+			errorMessage="
 1 errors found:
 
 Error at line 1703, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
@@ -1729,11 +1729,11 @@ Error at line 1703, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Expand
     equation
         connect(ec1, ec2);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr14",
-            description="",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr14",
+			description="",
+			errorMessage="
 1 errors found:
 
 Error at line 1730, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
@@ -1756,11 +1756,11 @@ Error at line 1730, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Expand
     equation
         connect(ec1, ec2);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr15",
-            description="",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr15",
+			description="",
+			errorMessage="
 1 errors found:
 
 Error at line 1757, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
@@ -1792,11 +1792,11 @@ Error at line 1757, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Expand
         connect(ec2, ec3);
 		connect(c, ec1.a);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr16",
-            description="",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr16",
+			description="",
+			errorMessage="
 1 errors found:
 
 Error at line 1780, column 32, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
@@ -1828,11 +1828,11 @@ Error at line 1780, column 32, in file 'Compiler/ModelicaFrontEnd/src/test/Expan
         connect(ec2, ec3);
         connect(c, ec1.a);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr17",
-            description="",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr17",
+			description="",
+			errorMessage="
 1 errors found:
 
 Error at line 1816, column 32, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
@@ -1855,11 +1855,11 @@ Error at line 1816, column 32, in file 'Compiler/ModelicaFrontEnd/src/test/Expan
 	equation
 		connect(ec, c);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr18",
-            description="",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr18",
+			description="",
+			errorMessage="
 1 errors found:
 
 Error at line 1856, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
@@ -1878,11 +1878,11 @@ Error at line 1856, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/Expand
     equation
         y = ec.x;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr19",
-            description="Using member of expandable connector that is not connected to",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr19",
+			description="Using member of expandable connector that is not connected to",
+			errorMessage="
 1 errors found:
 
 Error at line 1879, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
@@ -1899,11 +1899,11 @@ Error at line 1879, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/Expan
         EC ec;
         Real y = ec.x;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr20",
-            description="Using member of expandable connector that is not connected to",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr20",
+			description="Using member of expandable connector that is not connected to",
+			errorMessage="
 1 errors found:
 
 Error at line 1900, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
@@ -1924,11 +1924,11 @@ Error at line 1900, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/Expan
         EC ec;
         A a(y = ec.x);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr21",
-            description="Using member of expandable connector that is not connected to",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr21",
+			description="Using member of expandable connector that is not connected to",
+			errorMessage="
 1 errors found:
 
 Error at line 1925, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
@@ -1936,38 +1936,6 @@ Error at line 1925, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/Expan
 ")})));
     end ExpandableErr21;
 
-model ExpandableErr22
-    connector A
-        Real x;
-    end A;
-    
-    connector B
-        Real x;
-        Real y;
-    end B;
-    
-    expandable connector C
-    end C;
-    
-    C c1, c2;
-    A a;
-    B b;
-equation
-    connect(a, c1.d);
-    connect(b, c2.d);
-    connect(c1, c2);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr22",
-            description="",
-            errorMessage="
-1 errors found:
-
-Error at line 1957, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
-  Type of component introduced to external connector does not match other connections to same name in connection set or component declared in connector
-")})));
-end ExpandableErr22;
 
 
     model ExpandableCompliance3

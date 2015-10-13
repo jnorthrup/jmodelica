@@ -40,6 +40,7 @@ FClass : BaseNode ::= FQName
                       /UnknownFVariable/
                       FResidualPair*
                       FAttribute*
+                      DummyVariable:FVariable*
                       /[FDynamicResolver]/
                       DynamicStateManager;
 
@@ -155,13 +156,7 @@ FDiscrete : FTypePrefixVariability;
 /**
  * Parameter variability.
  */
-abstract FParameter : FTypePrefixVariability;
-
-FNonFixedParameter : FParameter;
-
-FFixedParameter : FParameter;
-
-FIndexParameter : FParameter;
+FParameter : FTypePrefixVariability;
 
 /**
  * Parameter with known value variability
@@ -704,9 +699,14 @@ FDerivativeAlgorithm : FAlgorithm ::=  <Order:int>;
 abstract FStatement : BaseNode;
 
 /**
+ * An assignment statement in the instance tree.
+ */
+InstAssignStmt : FStatement ::= Left:FIdUseInstAccess Right:FExp;
+
+/**
  * A flattened assignment statement.
  */
-FAssignStmt : FStatement ::= Left:FAssignableExp Right:FExp;
+FAssignStmt : FStatement ::= Left:FIdUseExp Right:FExp;
 
 /**
  * A flattened derivative assignment statement.
@@ -1016,19 +1016,14 @@ FAndExp : FLogBinExp;
 abstract FLitExp : FExp;
 
 /**
- * Base class for all numeric literal expressions
- */
-abstract FNumericLitExp : FLitExp;
-
-/**
  * Real literal expression.
  */
-FRealLitExp : FNumericLitExp ::= <Value:double>;
+FRealLitExp : FLitExp ::= <Value:double>;
 
 /**
  * Integer literal expression.
  */
-FIntegerLitExp : FNumericLitExp ::= <Value:int>;
+FIntegerLitExp : FLitExp ::= <Value:int>;
 
 /**
  * Integer literal expression that is too large to actually fit in an int.
@@ -1100,24 +1095,15 @@ abstract CommonAccess : BaseNode;
 FIdUse : CommonAccess ::= FQName /ExpandedSubscripts:FArraySubscripts/;
 
 
-
 /**
  * Abstract FExp type for all FExps that describes a variable references.
  */
 abstract FVarRefExp : FAbstractArrayExp;
 
-
-abstract FAssignableExp : FVarRefExp;
-
-/**
- * Generated expression that applies array subscripts to any expression.
- */
-FSubscriptedExp : FAssignableExp ::= FExp FArraySubscripts;
-
 /**
  * A qualifed identifier in an expression.
  */
-FIdUseExp : FAssignableExp ::= FIdUse;
+FIdUseExp : FVarRefExp ::= FIdUse;
 
 /**
  * A reference to a dynamic state
@@ -1177,6 +1163,13 @@ InstHDerExp : InstDerExp ::= <Order:int>;
 FIdUseInstAccess : FIdUse ::= InstAccess;
 
 /**
+ * Identifiers in instantiated expressions.
+ *
+ * Instantiated expressions occurs in the instance tree.
+ */
+FInstAccessExp : FAbstractArrayExp ::= InstAccess;
+
+/**
  * Record constructor.
  */
 FRecordConstructor : FBuiltInFunctionCall ::= Record:FIdUse Arg:FExp* /Type:FType/;
@@ -1222,6 +1215,11 @@ FMatrix : FAbstractCat;
  * Row in short form for array concatenation expression.
  */
 FMatrixRow : FAbstractCat;
+
+/**
+ * Generated expression that applies array subscripts to any expression.
+ */
+FSubscriptedExp : FAbstractArrayExp ::= FExp FArraySubscripts;
 
 /**
  * Generated expression referring to the value of another argument to the same function call.
@@ -1703,12 +1701,6 @@ abstract FStreamBuiltIn : FVectUnaryBuiltIn;
  * InStream built-in function.
  */
 FInStream : FStreamBuiltIn;
-
-/**
- * Derivative of instream. Temporary expression created by der(inStream()) rewrites
- * and removed after connection sets are built.
- */
-FDerInStream : FInStream;
 
 /**
  * ActualStream built-in function.

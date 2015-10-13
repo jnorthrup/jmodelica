@@ -42,8 +42,6 @@ set(JMISources
     jmi_global.c
     jmi.c
     jmi_array_none.c
-    jmi_dyn_mem.c
-    jmi_dyn_mem_.c
     jmi_block_residual.c
     jmi_cs.c
     jmi_me.c
@@ -115,9 +113,6 @@ set(STANDARDTABLESSources
     ${MSLCSOURCES}/zlib/uncompr.c
     ${MSLCSOURCES}/zlib/zutil.c
 )
-
-include_directories(module_include)
-
 #Build jmi library
 add_library(jmi STATIC ${JMISources})
 if(NOT MSVC)

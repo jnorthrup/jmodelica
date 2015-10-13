@@ -46,21 +46,11 @@ jmi_t* jmi_get_current();
  */
 int jmi_current_is_set();
 
-/**
- * \brief Prepare try buffer for calling jmi_try()
- * \returns Try depth to be submitted to jmi_try and jmi_finalize_try
- */
-int jmi_prepare_try(jmi_t* jmi);
-
-/**
-*    \brief Cleans up try buffer after jmi_try returnes.
-*/
-void jmi_finalize_try(jmi_t* jmi, int depth);
 
 /**
  * \brief Set up for exception handling.
  */
-#define jmi_try(jmi,depth) setjmp((jmi)->try_location[(depth)])
+#define jmi_try(jmi) setjmp((jmi)->try_location)
 
 /**
  * \brief Throw exception.

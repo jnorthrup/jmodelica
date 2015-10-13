@@ -728,7 +728,7 @@ equation
 1 errors found:
 
 Error at line 719, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-  Array size mismatch in modification of the attribute start for the variable x, expected size is [3] and size of start expression is [2]
+  Array size mismatch for the attribute start, size of declaration is [3] and size of start expression is [2]
 ")})));
 end ArrayTest27_Err;
 
@@ -1216,25 +1216,11 @@ fclass ArrayTests.General.ArrayTest45
  Real b.x[2];
  parameter Integer b.j = 1 /* 1 */;
 equation
- b.x[1] = ({{1.0, 2.0}, {3.0, 4.0}})[b.j,1] + time;
- b.x[2] = ({{1.0, 2.0}, {3.0, 4.0}})[b.j,2] + 2 * time;
+ b.x[1] = 1.0 + time;
+ b.x[2] = 2.0 + 2 * time;
 end ArrayTests.General.ArrayTest45;
 ")})));
 end ArrayTest45;
-
-
-model ArrayTest46
-    Real x[0] = 1:-1;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="General_ArrayTest46",
-            description="Check that range exp with negative end is handled properly",
-            flatModel="
-fclass ArrayTests.General.ArrayTest46
-end ArrayTests.General.ArrayTest46;
-")})));
-end ArrayTest46;
 
 
 end General;
@@ -1590,79 +1576,6 @@ end ArrayTests.Subscripts.SubscriptExpression9;
 ")})));
 end SubscriptExpression9;
 
-model SubscriptExpression10
-    record R
-        Real a;
-    end R;
-    
-    function f1
-        input R x;
-        output Real y;
-    algorithm
-        y := x.a;
-        y := y + 1;
-    end f1;
-    
-    function f2
-        input Real x;
-        output R y;
-    algorithm
-        x := x - 1;
-        y.a := x;
-    end f2;
-    
-    model M
-        parameter Real b = 1;
-    end M;
-    
-    parameter Real c[3] = { 1, 2, 3 };
-    M m[3](b = f1(f2(c)));
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Subscripts_SubscriptExpression10",
-            description="",
-            inline_functions="none",
-            flatModel="
-fclass ArrayTests.Subscripts.SubscriptExpression10
- parameter Real c[1] = 1 /* 1 */;
- parameter Real c[2] = 2 /* 2 */;
- parameter Real c[3] = 3 /* 3 */;
- parameter Real m[1].b;
- parameter Real m[2].b;
- parameter Real m[3].b;
-parameter equation
- m[1].b = ArrayTests.Subscripts.SubscriptExpression10.f1(ArrayTests.Subscripts.SubscriptExpression10.f2(c[1]));
- m[2].b = ArrayTests.Subscripts.SubscriptExpression10.f1(ArrayTests.Subscripts.SubscriptExpression10.f2(c[2]));
- m[3].b = ArrayTests.Subscripts.SubscriptExpression10.f1(ArrayTests.Subscripts.SubscriptExpression10.f2(c[3]));
-
-public
- function ArrayTests.Subscripts.SubscriptExpression10.f1
-  input ArrayTests.Subscripts.SubscriptExpression10.R x;
-  output Real y;
- algorithm
-  y := x.a;
-  y := y + 1;
-  return;
- end ArrayTests.Subscripts.SubscriptExpression10.f1;
-
- function ArrayTests.Subscripts.SubscriptExpression10.f2
-  input Real x;
-  output ArrayTests.Subscripts.SubscriptExpression10.R y;
- algorithm
-  x := x - 1;
-  y.a := x;
-  return;
- end ArrayTests.Subscripts.SubscriptExpression10.f2;
-
- record ArrayTests.Subscripts.SubscriptExpression10.R
-  Real a;
- end ArrayTests.Subscripts.SubscriptExpression10.R;
-
-end ArrayTests.Subscripts.SubscriptExpression10;
-")})));
-end SubscriptExpression10;
-
 
 
 model NumSubscripts1
@@ -1855,45 +1768,6 @@ equation
 end ArrayTests.Subscripts.EndSubscript1;
 ")})));
 end EndSubscript1;
-
-model EndSubscript2
-    record R
-        parameter Integer n;
-        Real[n] x;
-    end R;
-    
-    function f
-        input R r;
-        output Real x = r.x[end];
-        algorithm
-    end f;
-    
-    Real x = f(R(2,1:2));
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="Subscripts_EndSubscript2",
-            description="Using end in record with parameter size in function",
-            flatModel="
-fclass ArrayTests.Subscripts.EndSubscript2
- Real x = ArrayTests.Subscripts.EndSubscript2.f(ArrayTests.Subscripts.EndSubscript2.R(2, 1:2));
-
-public
- function ArrayTests.Subscripts.EndSubscript2.f
-  input ArrayTests.Subscripts.EndSubscript2.R r(x(size() = {n}));
-  output Real x := r.x[r.n];
- algorithm
-  return;
- end ArrayTests.Subscripts.EndSubscript2.f;
-
- record ArrayTests.Subscripts.EndSubscript2.R
-  parameter Integer n;
-  Real x[n];
- end ArrayTests.Subscripts.EndSubscript2.R;
-
-end ArrayTests.Subscripts.EndSubscript2;
-")})));
-end EndSubscript2;
 
 
 end Subscripts;
@@ -5924,12 +5798,18 @@ fclass ArrayTests.Constructors.Iterators.ArrayIterTest8
  Real z[2];
  Real w[1];
  Real w[2];
+ Real temp_1[1].a;
+ Real temp_1[1].b;
+ Real temp_1[2].a;
+ Real temp_1[2].b;
 equation
  z[1] = time;
  z[2] = time * 2;
- w[1] = ArrayTests.Constructors.Iterators.ArrayIterTest8.f2(ArrayTests.Constructors.Iterators.ArrayIterTest8.f1(z[1]));
- w[2] = ArrayTests.Constructors.Iterators.ArrayIterTest8.f2(ArrayTests.Constructors.Iterators.ArrayIterTest8.f1(z[2]));
- 
+ (ArrayTests.Constructors.Iterators.ArrayIterTest8.R(temp_1[1].a, temp_1[1].b)) = ArrayTests.Constructors.Iterators.ArrayIterTest8.f1(z[1]);
+ (ArrayTests.Constructors.Iterators.ArrayIterTest8.R(temp_1[2].a, temp_1[2].b)) = ArrayTests.Constructors.Iterators.ArrayIterTest8.f1(z[2]);
+ w[1] = ArrayTests.Constructors.Iterators.ArrayIterTest8.f2(ArrayTests.Constructors.Iterators.ArrayIterTest8.R(temp_1[1].a, temp_1[1].b));
+ w[2] = ArrayTests.Constructors.Iterators.ArrayIterTest8.f2(ArrayTests.Constructors.Iterators.ArrayIterTest8.R(temp_1[2].a, temp_1[2].b));
+
 public
  function ArrayTests.Constructors.Iterators.ArrayIterTest8.f2
   input ArrayTests.Constructors.Iterators.ArrayIterTest8.R x;
@@ -6030,175 +5910,6 @@ end ArrayTests.Constructors.Iterators.ArrayIterTest9;
 ")})));
 end ArrayIterTest9;
 
-model ArrayIterTest10
-    constant Real[1,2] c = {{1,2}};
-    parameter Real[:,:] x = {{c[i,j] for i in 1:1} for j in 1:2};
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Constructors_Iterators_ArrayIterTest10",
-            description="Nested iteration expressions",
-            inline_functions="none",
-            flatModel="
-fclass ArrayTests.Constructors.Iterators.ArrayIterTest10
- constant Real c[1,1] = 1;
- constant Real c[1,2] = 2;
- parameter Real x[1,1] = 1.0 /* 1.0 */;
- parameter Real x[2,1] = 2.0 /* 2.0 */;
-end ArrayTests.Constructors.Iterators.ArrayIterTest10;
-")})));
-end ArrayIterTest10;
-
-model ArrayIterTest11
-    record R
-        parameter Real[:,:] x = {{i + j for i in 1:1} for j in 1:2};
-    end R;
-    
-    R r;
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Constructors_Iterators_ArrayIterTest11",
-            description="Nested iteration expressions",
-            inline_functions="none",
-            flatModel="
-fclass ArrayTests.Constructors.Iterators.ArrayIterTest11
- parameter Real r.x[1,1] = 2 /* 2 */;
- parameter Real r.x[2,1] = 3 /* 3 */;
-end ArrayTests.Constructors.Iterators.ArrayIterTest11;
-")})));
-end ArrayIterTest11;
-
-model ArrayIterTest12
-    record R
-        Real t[:] = {time,time};
-        Real[:,:] x = {{t[i] + t[j] for i in 1:1} for j in 1:2};
-    end R;
-    
-    R r;
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Constructors_Iterators_ArrayIterTest12",
-            description="Nested iteration expressions",
-            inline_functions="none",
-            flatModel="
-fclass ArrayTests.Constructors.Iterators.ArrayIterTest12
- Real r.t[1];
- Real r.t[2];
- Real r.x[1,1];
- Real r.x[2,1];
-equation
- r.t[1] = time;
- r.t[2] = time;
- r.x[1,1] = r.t[1] + r.t[1];
- r.x[2,1] = r.t[1] + r.t[2];
-end ArrayTests.Constructors.Iterators.ArrayIterTest12;
-")})));
-end ArrayIterTest12;
-
-model ArrayIterTest13
-    Integer[:] x0 = 1:8;
-    constant Integer[:,:,:] x1 = {{{1,2},{3,4}},{{5,6},{7,8}}};
-    Integer[:,:,:] x2 = {{{x0[x1[i,j,k]] for i in 1:2} for j in 1:2} for k in 1:2};
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Constructors_Iterators_ArrayIterTest13",
-            description="Nested iteration expressions",
-            flatModel="
-fclass ArrayTests.Constructors.Iterators.ArrayIterTest13
- constant Integer x1[1,1,1] = 1;
- constant Integer x1[1,1,2] = 2;
- constant Integer x1[1,2,1] = 3;
- constant Integer x1[1,2,2] = 4;
- constant Integer x1[2,1,1] = 5;
- constant Integer x1[2,1,2] = 6;
- constant Integer x1[2,2,1] = 7;
- constant Integer x1[2,2,2] = 8;
- constant Integer x2[1,1,1] = 1;
- constant Integer x2[1,1,2] = 5;
- constant Integer x2[1,2,1] = 3;
- constant Integer x2[1,2,2] = 7;
- constant Integer x2[2,1,1] = 2;
- constant Integer x2[2,1,2] = 6;
- constant Integer x2[2,2,1] = 4;
- constant Integer x2[2,2,2] = 8;
- constant Integer x0[1] = 1;
- constant Integer x0[2] = 2;
- constant Integer x0[3] = 3;
- constant Integer x0[4] = 4;
- constant Integer x0[5] = 5;
- constant Integer x0[6] = 6;
- constant Integer x0[7] = 7;
- constant Integer x0[8] = 8;
-end ArrayTests.Constructors.Iterators.ArrayIterTest13;
-")})));
-end ArrayIterTest13;
-
-model ArrayIterTest14
-    Real[n] L = (1:n) .+ time;
-    parameter Integer n = 2;
-    Real[n] z=1/sum(L)*{sum(L[1:i]) + 0.5*L[i + 1] for i in 0:n - 1};
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Constructors_Iterators_ArrayIterTest14",
-            description="Varying size in iteration expression",
-            flatModel="
-fclass ArrayTests.Constructors.Iterators.ArrayIterTest14
- Real L[1];
- Real L[2];
- structural parameter Integer n = 2 /* 2 */;
- Real z[1];
- Real z[2];
-equation
- L[1] = 1 .+ time;
- L[2] = 2 .+ time;
- z[1] = 1 / (L[1] + L[2]) * (0.5 * L[1]);
- z[2] = 1 / (L[1] + L[2]) * (L[1] + 0.5 * L[2]);
-end ArrayTests.Constructors.Iterators.ArrayIterTest14;
-")})));
-end ArrayIterTest14;
-
-model ArrayIterTest15
-    record R
-        Real x;
-    end R;
-    
-    function f1
-        input Real x;
-        output R y = R(x);
-        algorithm
-    end f1;
-    
-    function f2
-        input R x;
-        output Real y = x.x;
-        algorithm
-    end f2;
-    
-    parameter Integer n = 3;
-    Real[n] x = (1:n) .* time;
-    Real[n] z = {f2(f1(x[i])) for i in 1:n};
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Constructors_Iterators_ArrayIterTest15",
-            description="Varying size in iteration expression",
-            flatModel="
-fclass ArrayTests.Constructors.Iterators.ArrayIterTest15
- structural parameter Integer n = 3 /* 3 */;
- Real z[1];
- Real z[2];
- Real z[3];
-equation
- z[1] = time;
- z[2] = 2 .* time;
- z[3] = 3 .* time;
-end ArrayTests.Constructors.Iterators.ArrayIterTest15;
-")})));
-end ArrayIterTest15;
 
 model ArrayIterTestUnknown1
     function f
@@ -6209,12 +5920,12 @@ model ArrayIterTestUnknown1
     
 	Real x[3] = f(6);
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Constructors_Iterators_ArrayIterTestUnknown1",
-            description="Array constructor with iterators: vectors of length 1",
-            variability_propagation=false,
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Constructors_Iterators_ArrayIterTestUnknown1",
+			description="Array constructor with iterators: vectors of length 1",
+			variability_propagation=false,
+			flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1
  Real x[1];
  Real x[2];
@@ -6228,18 +5939,19 @@ public
   output Real[:] x;
   Real[:] temp_1;
  algorithm
-  size(x) := {max(a / 2, 0)};
-  size(temp_1) := {max(a / 2, 0)};
-  for i2 in 1:max(a / 2, 0) loop
+  size(x) := {max(integer(a / 2 - 1) + 1, 0)};
+  size(temp_1) := {max(integer(a / 2 - 1) + 1, 0)};
+  for i2 in 1:max(integer(a / 2 - 1) + 1, 0) loop
    temp_1[i2] := i2 ^ 2;
   end for;
-  for i1 in 1:max(a / 2, 0) loop
+  for i1 in 1:max(integer(a / 2 - 1) + 1, 0) loop
    x[i1] := temp_1[i1];
   end for;
   return;
  end ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1.f;
 
 end ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1;
+			
 ")})));
 end ArrayIterTestUnknown1;
 
@@ -6456,7 +6168,7 @@ fclass ArrayTests.For.ForStructural1
  Real x[2];
 equation
  for i in 1:2 loop
-  if ({true, false})[i] then
+  if p[i] then
    x[i] = time;
   else
    x[i] = 1;
@@ -6752,7 +6464,19 @@ initial equation
  pre(i) = 0;
 equation
  i = if time > 1 then 1 else 2;
- x = ({42.0, 3.14})[i];
+ x = temp_1(i, {42.0, 3.14});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[2] x;
+  output Real y;
+ algorithm
+  y := x[i_0];
+  return;
+ annotation(Inline = false);
+ end temp_1;
+
 end ArrayTests.VariableIndex.Equation;
 ")})));
 end Equation;
@@ -6778,7 +6502,19 @@ initial equation
  pre(i) = 0;
 equation
  i = if time > 1 then 1 else 2;
- x = ({2.0, 4.0})[i];
+ x = temp_1(i, {2.0, 4.0});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[2] x;
+  output Real y;
+ algorithm
+  y := x[i_0];
+  return;
+ annotation(Inline = false);
+ end temp_1;
+
 end ArrayTests.VariableIndex.TwoDim1;
 ")})));
 end TwoDim1;
@@ -6804,7 +6540,19 @@ initial equation
  pre(i) = 0;
 equation
  i = if time > 1 then 1 else 2;
- x = ({1.0, 2.0})[i];
+ x = temp_1(i, {1.0, 2.0});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[2] x;
+  output Real y;
+ algorithm
+  y := x[i_0];
+  return;
+ annotation(Inline = false);
+ end temp_1;
+
 end ArrayTests.VariableIndex.TwoDim2;
 ")})));
 end TwoDim2;
@@ -6834,7 +6582,20 @@ initial equation
 equation
  i1 = if time > 1 then 1 else 2;
  i2 = if time > 0.5 then 1 else 2;
- x = ({{1.0, 2.0}, {3.0, 4.0}})[i1,i2];
+ x = temp_1(i1, i2, {{1.0, 2.0}, {3.0, 4.0}});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Integer i_1;
+  input Real[2, 2] x;
+  output Real y;
+ algorithm
+  y := x[i_0,i_1];
+  return;
+ annotation(Inline = false);
+ end temp_1;
+
 end ArrayTests.VariableIndex.TwoDim3;
 ")})));
 end TwoDim3;
@@ -6861,8 +6622,20 @@ initial equation
  pre(i) = 0;
 equation
  i = if time > 1 then 1 else 2;
- x[1] = ({1.0, 3.0})[i];
- x[2] = ({2.0, 4.0})[i];
+ ({x[1], x[2]}) = temp_1(i, {{1.0, 2.0}, {3.0, 4.0}});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[2, 2] x;
+  output Real[2] y;
+ algorithm
+  y[1] := x[i_0,1];
+  y[2] := x[i_0,2];
+  return;
+ annotation(Inline = false);
+ end temp_1;
+
 end ArrayTests.VariableIndex.TwoDim4;
 ")})));
 end TwoDim4;
@@ -6889,8 +6662,20 @@ initial equation
  pre(i) = 0;
 equation
  i = if time > 1 then 1 else 2;
- x[1] = ({1.0, 2.0})[i];
- x[2] = ({3.0, 4.0})[i];
+ ({x[1], x[2]}) = temp_1(i, {{1.0, 2.0}, {3.0, 4.0}});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[2, 2] x;
+  output Real[2] y;
+ algorithm
+  y[1] := x[1,i_0];
+  y[2] := x[2,i_0];
+  return;
+ annotation(Inline = false);
+ end temp_1;
+
 end ArrayTests.VariableIndex.TwoDim5;
 ")})));
 end TwoDim5;
@@ -6921,8 +6706,20 @@ initial equation
  pre(i) = 0;
 equation
  i = if time > 1 then 1 else 2;
- x[1] = ({3.0, 4.0})[i];
- x[2] = ({5.0, 6.0})[i];
+ ({x[1], x[2]}) = temp_1(i, {{3.0, 4.0}, {5.0, 6.0}});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[2, 2] x;
+  output Real[2] y;
+ algorithm
+  y[1] := x[1,i_0];
+  y[2] := x[2,i_0];
+  return;
+ annotation(Inline = false);
+ end temp_1;
+
 end ArrayTests.VariableIndex.TwoDim6;
 ")})));
 end TwoDim6;
@@ -6953,8 +6750,20 @@ initial equation
  pre(i) = 0;
 equation
  i = if time > 1 then 1 else 2;
- x[1] = ({2.0, 6.0})[i];
- x[2] = ({3.0, 7.0})[i];
+ ({x[1], x[2]}) = temp_1(i, {{2.0, 3.0}, {6.0, 7.0}});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[2, 2] x;
+  output Real[2] y;
+ algorithm
+  y[1] := x[i_0,1];
+  y[2] := x[i_0,2];
+  return;
+ annotation(Inline = false);
+ end temp_1;
+
 end ArrayTests.VariableIndex.TwoDim7;
 ")})));
 end TwoDim7;
@@ -6979,9 +6788,21 @@ fclass ArrayTests.VariableIndex.Algorithm
 initial equation 
  pre(i) = 0;
 algorithm
- x := ({table[1], table[2]})[i];
+ x := temp_1(i, {table[1], table[2]});
 equation
  i = if time > 1 then 1 else 2;
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[2] x;
+  output Real y;
+ algorithm
+  y := x[i_0];
+  return;
+ annotation(Inline = false);
+ end temp_1;
+
 end ArrayTests.VariableIndex.Algorithm;
 ")})));
 end Algorithm;
@@ -7008,9 +6829,19 @@ initial equation
  pre(x) = ArrayTests.VariableIndex.Enum.ABC.A;
 equation
  i = if time > 1 then ArrayTests.VariableIndex.Enum.ABC.A else ArrayTests.VariableIndex.Enum.ABC.B;
- x = ({ArrayTests.VariableIndex.Enum.ABC.A, ArrayTests.VariableIndex.Enum.ABC.B, ArrayTests.VariableIndex.Enum.ABC.C})[i];
- 
+ x = temp_1(i, {ArrayTests.VariableIndex.Enum.ABC.A, ArrayTests.VariableIndex.Enum.ABC.B, ArrayTests.VariableIndex.Enum.ABC.C});
+
 public
+ function temp_1
+  input ArrayTests.VariableIndex.Enum.ABC i_0;
+  input ArrayTests.VariableIndex.Enum.ABC[3] x;
+  output ArrayTests.VariableIndex.Enum.ABC y;
+ algorithm
+  y := x[i_0];
+  return;
+ annotation(Inline = false);
+ end temp_1;
+
  type ArrayTests.VariableIndex.Enum.ABC = enumeration(A, B, C);
 
 end ArrayTests.VariableIndex.Enum;
@@ -7038,7 +6869,19 @@ initial equation
  pre(x) = false;
 equation
  i = if time > 1 then false else true;
- x = ({true, false})[i];
+ x = temp_1(i, {true, false});
+
+public
+ function temp_1
+  input Boolean i_0;
+  input Boolean[2] x;
+  output Boolean y;
+ algorithm
+  y := x[i_0];
+  return;
+ annotation(Inline = false);
+ end temp_1;
+
 end ArrayTests.VariableIndex.Bool;
 ")})));
 end Bool;
@@ -7059,7 +6902,19 @@ fclass ArrayTests.VariableIndex.ExpEquation
  discrete input Integer i;
  Real y;
 equation
- y = ({1.0, 2.0, 3.0})[i];
+ y = temp_1(i, {1.0, 2.0, 3.0});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[3] x;
+  output Real y;
+ algorithm
+  y := x[i_0];
+  return;
+ annotation(Inline = false);
+ end temp_1;
+
 end ArrayTests.VariableIndex.ExpEquation;
 ")})));
 end ExpEquation;
@@ -7081,388 +6936,24 @@ fclass ArrayTests.VariableIndex.ExpEquationArray
  Real y[1];
  Real y[2];
 equation
- y[1] = ({1.0, 2.0, 3.0})[i];
- y[2] = ({1.0, 2.0, 3.0})[i + 1];
+ ({y[1], y[2]}) = temp_1({i, i + 1}, {1.0, 2.0, 3.0});
+
+public
+ function temp_1
+  input Integer[2] i_0;
+  input Real[3] x;
+  output Real[2] y;
+ algorithm
+  y[1] := x[i_0[1]];
+  y[2] := x[i_0[2]];
+  return;
+ annotation(Inline = false);
+ end temp_1;
+
 end ArrayTests.VariableIndex.ExpEquationArray;
 ")})));
 end ExpEquationArray;
 
-model RecordArrayEquation1
-    record R
-        Real y = i + 1/2;
-        Integer i;
-    end R;
-    R[3] x = {R(i=i+1),R(i=i+2),R(i=i+3)};
-    Integer i = integer(time);
-    R r = x[i];
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="VariableIndex_RecordArrayEquation1",
-            description="Test of variable array index access",
-            flatModel="
-fclass ArrayTests.VariableIndex.RecordArrayEquation1
- Real x[1].y;
- discrete Integer x[1].i;
- Real x[2].y;
- discrete Integer x[2].i;
- Real x[3].y;
- discrete Integer x[3].i;
- discrete Integer i;
- Real r.y;
- discrete Integer r.i;
-initial equation 
- pre(i) = 0;
- pre(x[1].i) = 0;
- pre(x[2].i) = 0;
- pre(x[3].i) = 0;
- pre(r.i) = 0;
-equation
- x[1].y = i + 1 + 0.5;
- x[1].i = i + 1;
- x[2].y = i + 2 + 0.5;
- x[2].i = i + 2;
- x[3].y = i + 3 + 0.5;
- x[3].i = i + 3;
- r.y = ({x[1].y, x[2].y, x[3].y})[i];
- r.i = ({x[1].i, x[2].i, x[3].i})[i];
- i = if time < pre(i) or time >= pre(i) + 1 or initial() then integer(time) else pre(i);
-end ArrayTests.VariableIndex.RecordArrayEquation1;
-")})));
-end RecordArrayEquation1;
-
-model RecordArrayEquation2
-    record R
-        Real x;
-    end R;
-    R[:,:] x = {{R(time) for i in 1:3}};
-    Integer i = integer(time);
-    R[1,2] y;
-    parameter Integer p = 1;
-equation
-    for k in 1:1 loop
-        for j in 1:2 loop
-            y[k,j+i] = x[k,j+p+i];
-        end for;
-    end for;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="VariableIndex_RecordArrayEquation2",
-            description="Test of variable array index access",
-            flatModel="
-fclass ArrayTests.VariableIndex.RecordArrayEquation2
- Real x[1,1].x;
- Real x[1,2].x;
- Real x[1,3].x;
- discrete Integer i;
- Real y[1,1].x;
- Real y[1,2].x;
- parameter Integer p = 1 /* 1 */;
-initial equation 
- pre(i) = 0;
-equation
- ({y[1,1].x, y[1,2].x})[1 + i] = ({x[1,1].x, x[1,2].x, x[1,3].x})[1 + p + i];
- ({y[1,1].x, y[1,2].x})[2 + i] = ({x[1,1].x, x[1,2].x, x[1,3].x})[2 + p + i];
- x[1,1].x = time;
- x[1,2].x = time;
- x[1,3].x = time;
- i = if time < pre(i) or time >= pre(i) + 1 or initial() then integer(time) else pre(i);
-end ArrayTests.VariableIndex.RecordArrayEquation2;
-")})));
-end RecordArrayEquation2;
-
-model ExpEquationCombination
-    Real[:,:,:,:] x = fill(time,2,3,4,5);
-    Real[:,:] y = x[2,{i,j},2:4,k];
-    discrete Integer i,j,k;
-initial equation
-    i = 1;
-    j = 2;
-    k = 3;
-equation
-    when time > 1 then
-        i = 2;
-        j = 1;
-        k = 4;
-    end when;
-    
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="VariableIndex_ExpEquationCombination",
-            description="Test of variable array index access",
-            flatModel="
-fclass ArrayTests.VariableIndex.ExpEquationCombination
- Real x[1,1,1,1];
- Real x[1,1,1,2];
- Real x[1,1,1,3];
- Real x[1,1,1,4];
- Real x[1,1,1,5];
- Real x[1,1,2,1];
- Real x[1,1,2,2];
- Real x[1,1,2,3];
- Real x[1,1,2,4];
- Real x[1,1,2,5];
- Real x[1,1,3,1];
- Real x[1,1,3,2];
- Real x[1,1,3,3];
- Real x[1,1,3,4];
- Real x[1,1,3,5];
- Real x[1,1,4,1];
- Real x[1,1,4,2];
- Real x[1,1,4,3];
- Real x[1,1,4,4];
- Real x[1,1,4,5];
- Real x[1,2,1,1];
- Real x[1,2,1,2];
- Real x[1,2,1,3];
- Real x[1,2,1,4];
- Real x[1,2,1,5];
- Real x[1,2,2,1];
- Real x[1,2,2,2];
- Real x[1,2,2,3];
- Real x[1,2,2,4];
- Real x[1,2,2,5];
- Real x[1,2,3,1];
- Real x[1,2,3,2];
- Real x[1,2,3,3];
- Real x[1,2,3,4];
- Real x[1,2,3,5];
- Real x[1,2,4,1];
- Real x[1,2,4,2];
- Real x[1,2,4,3];
- Real x[1,2,4,4];
- Real x[1,2,4,5];
- Real x[1,3,1,1];
- Real x[1,3,1,2];
- Real x[1,3,1,3];
- Real x[1,3,1,4];
- Real x[1,3,1,5];
- Real x[1,3,2,1];
- Real x[1,3,2,2];
- Real x[1,3,2,3];
- Real x[1,3,2,4];
- Real x[1,3,2,5];
- Real x[1,3,3,1];
- Real x[1,3,3,2];
- Real x[1,3,3,3];
- Real x[1,3,3,4];
- Real x[1,3,3,5];
- Real x[1,3,4,1];
- Real x[1,3,4,2];
- Real x[1,3,4,3];
- Real x[1,3,4,4];
- Real x[1,3,4,5];
- Real x[2,1,1,1];
- Real x[2,1,1,2];
- Real x[2,1,1,3];
- Real x[2,1,1,4];
- Real x[2,1,1,5];
- Real x[2,1,2,1];
- Real x[2,1,2,2];
- Real x[2,1,2,3];
- Real x[2,1,2,4];
- Real x[2,1,2,5];
- Real x[2,1,3,1];
- Real x[2,1,3,2];
- Real x[2,1,3,3];
- Real x[2,1,3,4];
- Real x[2,1,3,5];
- Real x[2,1,4,1];
- Real x[2,1,4,2];
- Real x[2,1,4,3];
- Real x[2,1,4,4];
- Real x[2,1,4,5];
- Real x[2,2,1,1];
- Real x[2,2,1,2];
- Real x[2,2,1,3];
- Real x[2,2,1,4];
- Real x[2,2,1,5];
- Real x[2,2,2,1];
- Real x[2,2,2,2];
- Real x[2,2,2,3];
- Real x[2,2,2,4];
- Real x[2,2,2,5];
- Real x[2,2,3,1];
- Real x[2,2,3,2];
- Real x[2,2,3,3];
- Real x[2,2,3,4];
- Real x[2,2,3,5];
- Real x[2,2,4,1];
- Real x[2,2,4,2];
- Real x[2,2,4,3];
- Real x[2,2,4,4];
- Real x[2,2,4,5];
- Real x[2,3,1,1];
- Real x[2,3,1,2];
- Real x[2,3,1,3];
- Real x[2,3,1,4];
- Real x[2,3,1,5];
- Real x[2,3,2,1];
- Real x[2,3,2,2];
- Real x[2,3,2,3];
- Real x[2,3,2,4];
- Real x[2,3,2,5];
- Real x[2,3,3,1];
- Real x[2,3,3,2];
- Real x[2,3,3,3];
- Real x[2,3,3,4];
- Real x[2,3,3,5];
- Real x[2,3,4,1];
- Real x[2,3,4,2];
- Real x[2,3,4,3];
- Real x[2,3,4,4];
- Real x[2,3,4,5];
- Real y[1,1];
- Real y[1,2];
- Real y[1,3];
- Real y[2,1];
- Real y[2,2];
- Real y[2,3];
- discrete Integer i;
- discrete Integer j;
- discrete Integer k;
- discrete Boolean temp_1;
-initial equation 
- i = 1;
- j = 2;
- k = 3;
- pre(temp_1) = false;
-equation
- temp_1 = time > 1;
- i = if temp_1 and not pre(temp_1) then 2 else pre(i);
- j = if temp_1 and not pre(temp_1) then 1 else pre(j);
- k = if temp_1 and not pre(temp_1) then 4 else pre(k);
- x[1,1,1,1] = time;
- x[1,1,1,2] = time;
- x[1,1,1,3] = time;
- x[1,1,1,4] = time;
- x[1,1,1,5] = time;
- x[1,1,2,1] = time;
- x[1,1,2,2] = time;
- x[1,1,2,3] = time;
- x[1,1,2,4] = time;
- x[1,1,2,5] = time;
- x[1,1,3,1] = time;
- x[1,1,3,2] = time;
- x[1,1,3,3] = time;
- x[1,1,3,4] = time;
- x[1,1,3,5] = time;
- x[1,1,4,1] = time;
- x[1,1,4,2] = time;
- x[1,1,4,3] = time;
- x[1,1,4,4] = time;
- x[1,1,4,5] = time;
- x[1,2,1,1] = time;
- x[1,2,1,2] = time;
- x[1,2,1,3] = time;
- x[1,2,1,4] = time;
- x[1,2,1,5] = time;
- x[1,2,2,1] = time;
- x[1,2,2,2] = time;
- x[1,2,2,3] = time;
- x[1,2,2,4] = time;
- x[1,2,2,5] = time;
- x[1,2,3,1] = time;
- x[1,2,3,2] = time;
- x[1,2,3,3] = time;
- x[1,2,3,4] = time;
- x[1,2,3,5] = time;
- x[1,2,4,1] = time;
- x[1,2,4,2] = time;
- x[1,2,4,3] = time;
- x[1,2,4,4] = time;
- x[1,2,4,5] = time;
- x[1,3,1,1] = time;
- x[1,3,1,2] = time;
- x[1,3,1,3] = time;
- x[1,3,1,4] = time;
- x[1,3,1,5] = time;
- x[1,3,2,1] = time;
- x[1,3,2,2] = time;
- x[1,3,2,3] = time;
- x[1,3,2,4] = time;
- x[1,3,2,5] = time;
- x[1,3,3,1] = time;
- x[1,3,3,2] = time;
- x[1,3,3,3] = time;
- x[1,3,3,4] = time;
- x[1,3,3,5] = time;
- x[1,3,4,1] = time;
- x[1,3,4,2] = time;
- x[1,3,4,3] = time;
- x[1,3,4,4] = time;
- x[1,3,4,5] = time;
- x[2,1,1,1] = time;
- x[2,1,1,2] = time;
- x[2,1,1,3] = time;
- x[2,1,1,4] = time;
- x[2,1,1,5] = time;
- x[2,1,2,1] = time;
- x[2,1,2,2] = time;
- x[2,1,2,3] = time;
- x[2,1,2,4] = time;
- x[2,1,2,5] = time;
- x[2,1,3,1] = time;
- x[2,1,3,2] = time;
- x[2,1,3,3] = time;
- x[2,1,3,4] = time;
- x[2,1,3,5] = time;
- x[2,1,4,1] = time;
- x[2,1,4,2] = time;
- x[2,1,4,3] = time;
- x[2,1,4,4] = time;
- x[2,1,4,5] = time;
- x[2,2,1,1] = time;
- x[2,2,1,2] = time;
- x[2,2,1,3] = time;
- x[2,2,1,4] = time;
- x[2,2,1,5] = time;
- x[2,2,2,1] = time;
- x[2,2,2,2] = time;
- x[2,2,2,3] = time;
- x[2,2,2,4] = time;
- x[2,2,2,5] = time;
- x[2,2,3,1] = time;
- x[2,2,3,2] = time;
- x[2,2,3,3] = time;
- x[2,2,3,4] = time;
- x[2,2,3,5] = time;
- x[2,2,4,1] = time;
- x[2,2,4,2] = time;
- x[2,2,4,3] = time;
- x[2,2,4,4] = time;
- x[2,2,4,5] = time;
- x[2,3,1,1] = time;
- x[2,3,1,2] = time;
- x[2,3,1,3] = time;
- x[2,3,1,4] = time;
- x[2,3,1,5] = time;
- x[2,3,2,1] = time;
- x[2,3,2,2] = time;
- x[2,3,2,3] = time;
- x[2,3,2,4] = time;
- x[2,3,2,5] = time;
- x[2,3,3,1] = time;
- x[2,3,3,2] = time;
- x[2,3,3,3] = time;
- x[2,3,3,4] = time;
- x[2,3,3,5] = time;
- x[2,3,4,1] = time;
- x[2,3,4,2] = time;
- x[2,3,4,3] = time;
- x[2,3,4,4] = time;
- x[2,3,4,5] = time;
- y[1,1] = ({{x[2,1,2,1], x[2,1,2,2], x[2,1,2,3], x[2,1,2,4], x[2,1,2,5]}, {x[2,2,2,1], x[2,2,2,2], x[2,2,2,3], x[2,2,2,4], x[2,2,2,5]}, {x[2,3,2,1], x[2,3,2,2], x[2,3,2,3], x[2,3,2,4], x[2,3,2,5]}})[i,k];
- y[1,2] = ({{x[2,1,2,1], x[2,1,2,2], x[2,1,2,3], x[2,1,2,4], x[2,1,2,5]}, {x[2,2,2,1], x[2,2,2,2], x[2,2,2,3], x[2,2,2,4], x[2,2,2,5]}, {x[2,3,2,1], x[2,3,2,2], x[2,3,2,3], x[2,3,2,4], x[2,3,2,5]}})[j,k];
- y[1,3] = ({{x[2,1,3,1], x[2,1,3,2], x[2,1,3,3], x[2,1,3,4], x[2,1,3,5]}, {x[2,2,3,1], x[2,2,3,2], x[2,2,3,3], x[2,2,3,4], x[2,2,3,5]}, {x[2,3,3,1], x[2,3,3,2], x[2,3,3,3], x[2,3,3,4], x[2,3,3,5]}})[i,k];
- y[2,1] = ({{x[2,1,3,1], x[2,1,3,2], x[2,1,3,3], x[2,1,3,4], x[2,1,3,5]}, {x[2,2,3,1], x[2,2,3,2], x[2,2,3,3], x[2,2,3,4], x[2,2,3,5]}, {x[2,3,3,1], x[2,3,3,2], x[2,3,3,3], x[2,3,3,4], x[2,3,3,5]}})[j,k];
- y[2,2] = ({{x[2,1,4,1], x[2,1,4,2], x[2,1,4,3], x[2,1,4,4], x[2,1,4,5]}, {x[2,2,4,1], x[2,2,4,2], x[2,2,4,3], x[2,2,4,4], x[2,2,4,5]}, {x[2,3,4,1], x[2,3,4,2], x[2,3,4,3], x[2,3,4,4], x[2,3,4,5]}})[i,k];
- y[2,3] = ({{x[2,1,4,1], x[2,1,4,2], x[2,1,4,3], x[2,1,4,4], x[2,1,4,5]}, {x[2,2,4,1], x[2,2,4,2], x[2,2,4,3], x[2,2,4,4], x[2,2,4,5]}, {x[2,3,4,1], x[2,3,4,2], x[2,3,4,3], x[2,3,4,4], x[2,3,4,5]}})[j,k];
-end ArrayTests.VariableIndex.ExpEquationCombination;
-")})));
-end ExpEquationCombination;
 
 model Slice1
     record R
@@ -7486,9 +6977,21 @@ fclass ArrayTests.VariableIndex.Slice1
  Real x[2].p;
  discrete input Integer i;
 equation
- y = if i == 0 then 1 else ({x[1].p, x[2].p})[i];
+ y = if i == 0 then 1 else temp_1(i, {x[1].p, x[2].p});
  x[1].p = time;
  x[2].p = 2 * time;
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[2] x;
+  output Real y;
+ algorithm
+  y := x[i_0];
+  return;
+ annotation(Inline = false);
+ end temp_1;
+
 end ArrayTests.VariableIndex.Slice1;
 ")})));
 end Slice1;
@@ -7529,12 +7032,24 @@ equation
  x[2,1,2] = 6 * time;
  x[2,2,1] = 7 * time;
  x[2,2,2] = 8 * time;
- y[1,1] = ({x[1,2,1], x[2,2,1]})[i];
- y[1,2] = ({x[1,2,2], x[2,2,2]})[i];
- y[1,3] = ({x[1,2,2], x[2,2,2]})[i];
- y[2,1] = ({x[1,1,1], x[2,1,1]})[i];
- y[2,2] = ({x[1,1,2], x[2,1,2]})[i];
- y[2,3] = ({x[1,1,2], x[2,1,2]})[i];
+ ({{y[1,1], y[1,2], y[1,3]}, {y[2,1], y[2,2], y[2,3]}}) = temp_1(i, {{{x[1,2,1], x[1,2,2], x[1,2,2]}, {x[1,1,1], x[1,1,2], x[1,1,2]}}, {{x[2,2,1], x[2,2,2], x[2,2,2]}, {x[2,1,1], x[2,1,2], x[2,1,2]}}});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[2, 2, 3] x;
+  output Real[2, 3] y;
+ algorithm
+  y[1,1] := x[i_0,1,1];
+  y[1,2] := x[i_0,1,2];
+  y[1,3] := x[i_0,1,3];
+  y[2,1] := x[i_0,2,1];
+  y[2,2] := x[i_0,2,2];
+  y[2,3] := x[i_0,2,3];
+  return;
+ annotation(Inline = false);
+ end temp_1;
+
 end ArrayTests.VariableIndex.Slice2;
 ")})));
 end Slice2;
@@ -7567,8 +7082,20 @@ equation
  r[1].x[2] = 2 * time;
  r[2].x[1] = 3 * time;
  r[2].x[2] = 4 * time;
- x[1] = ({r[1].x[1], r[1].x[2]})[i];
- x[2] = ({r[2].x[1], r[2].x[2]})[i];
+ ({x[1], x[2]}) = temp_1(i, {{r[1].x[1], r[1].x[2]}, {r[2].x[1], r[2].x[2]}});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[2, 2] x;
+  output Real[2] y;
+ algorithm
+  y[1] := x[1,i_0];
+  y[2] := x[2,i_0];
+  return;
+ annotation(Inline = false);
+ end temp_1;
+
 end ArrayTests.VariableIndex.Slice3;
 ")})));
 end Slice3;
@@ -7596,9 +7123,21 @@ fclass ArrayTests.VariableIndex.Slice4
  Real x[2].z;
  discrete input Integer i;
 equation
- y = ({x[1].z, x[2].z})[i];
+ y = temp_1(i, {x[1].z, x[2].z});
  x[1].z = time;
  x[2].z = 2 * time;
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[2] x;
+  output Real y;
+ algorithm
+  y := x[i_0];
+  return;
+ annotation(Inline = false);
+ end temp_1;
+
 end ArrayTests.VariableIndex.Slice4;
 ")})));
 end Slice4;
@@ -7647,8 +7186,7 @@ fclass ArrayTests.VariableIndex.Slice5
  discrete input Integer i;
  discrete input Integer j;
 equation
- y[1] = ({{b[1,1].a[1,1].z, b[1,1].a[2,1].z}, {b[1,2].a[1,1].z, b[1,2].a[2,1].z}})[i,j];
- y[2] = ({{b[2,1].a[1,1].z, b[2,1].a[2,1].z}, {b[2,2].a[1,1].z, b[2,2].a[2,1].z}})[i,j];
+ ({y[1], y[2]}) = temp_1(i, j, {{{b[1,1].a[1,1].z, b[1,1].a[2,1].z}, {b[1,2].a[1,1].z, b[1,2].a[2,1].z}}, {{b[2,1].a[1,1].z, b[2,1].a[2,1].z}, {b[2,2].a[1,1].z, b[2,2].a[2,1].z}}});
  b[1,1].a[1,1].z = time;
  b[1,1].a[1,2].z = time;
  b[1,1].a[2,1].z = time;
@@ -7665,6 +7203,20 @@ equation
  b[2,2].a[1,2].z = time;
  b[2,2].a[2,1].z = time;
  b[2,2].a[2,2].z = time;
+
+public
+ function temp_1
+  input Integer i_0;
+  input Integer i_1;
+  input Real[2, 2, 2] x;
+  output Real[2] y;
+ algorithm
+  y[1] := x[1,i_0,i_1];
+  y[2] := x[2,i_0,i_1];
+  return;
+ annotation(Inline = false);
+ end temp_1;
+
 end ArrayTests.VariableIndex.Slice5;
 ")})));
 end Slice5;
@@ -7689,18 +7241,12 @@ model CircularFunctionArg1
             name="Other_CircularFunctionArg1",
             description="Circular dependency when calculating size of function output",
             errorMessage="
-4 errors found:
+2 errors found:
 
-Error at line 7682, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-  Can not infer array size of the variable c
-
-Error at line 7684, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 7546, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Could not evaluate array size of output b
 
-Error at line 7684, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-  Can not infer array size of the variable d
-
-Error at line 7685, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 7547, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Could not evaluate array size of output b
 ")})));
 end CircularFunctionArg1;
@@ -7724,8 +7270,8 @@ fclass ArrayTests.Other.ArrayConst1
 end ArrayTests.Other.ArrayConst1;
 ")})));
 end ArrayConst1;
-
-
+								   
+   
 model ArrayConst2
 	Real x[2];
 equation
@@ -7779,9 +7325,7 @@ model ArrayConst4
 			flatModel="
 fclass ArrayTests.Other.ArrayConst4
  parameter Integer i = 1 /* 1 */;
- parameter Real x;
-parameter equation
- x = ({1.0, 2.0})[i];
+ constant Real x = 1.0;
 end ArrayTests.Other.ArrayConst4;
 ")})));
 end ArrayConst4;
@@ -7835,60 +7379,6 @@ fclass ArrayTests.Other.ArraySize3
 end ArrayTests.Other.ArraySize3;
 ")})));
 end ArraySize3;
-
-
-model ArraySize4
-    function f
-        input Real[:] x1;
-        input Real[:] x2;
-        output Boolean[size(x1,1)-1, size(x2,1)-1] y;
-    protected
-        final parameter Integer n1 = size(x1,1)-1;
-        parameter Integer n2 = size(x1,1)-1;
-    algorithm
-        for i in 1:n1 loop
-        end for;
-    end f;
-    
-    Boolean[3,3] y = f({1,2,3,4},{1,2,3,4});
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Other_ArraySize4",
-            description="",
-            flatModel="
-fclass ArrayTests.Other.ArraySize4
- parameter Boolean y[1,1];
- parameter Boolean y[1,2];
- parameter Boolean y[1,3];
- parameter Boolean y[2,1];
- parameter Boolean y[2,2];
- parameter Boolean y[2,3];
- parameter Boolean y[3,1];
- parameter Boolean y[3,2];
- parameter Boolean y[3,3];
-parameter equation
- ({{y[1,1], y[1,2], y[1,3]}, {y[2,1], y[2,2], y[2,3]}, {y[3,1], y[3,2], y[3,3]}}) = ArrayTests.Other.ArraySize4.f({1, 2, 3, 4}, {1, 2, 3, 4});
-
-public
- function ArrayTests.Other.ArraySize4.f
-  input Real[:] x1;
-  input Real[:] x2;
-  output Boolean[:,:] y;
-  Integer n1;
-  Integer n2;
- algorithm
-  size(y) := {size(x1, 1) - 1, size(x2, 1) - 1};
-  n1 := size(x1, 1) - 1;
-  n2 := size(x1, 1) - 1;
-  for i in 1:n1 loop
-  end for;
-  return;
- end ArrayTests.Other.ArraySize4.f;
-
-end ArrayTests.Other.ArraySize4;
-
-")})));
-end ArraySize4;
 
 
 model ArraySizeInIf1
@@ -8034,69 +7524,6 @@ end ArrayTests.Other.ArraySizeInIf3;
 ")})));
 end ArraySizeInIf3;
 
-model ArraySizeInComp1
-    record R
-        Real[:] x = 1:n;
-        parameter Integer n;
-    end R;
-    
-    function f
-        input R r;
-        output Real[r.n] x = r.x;
-        algorithm
-    end f;
-    
-    R r1(n=2);
-    Real[:] x = f(r1);
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Other_ArraySizeInComp1",
-            description="",
-            flatModel="
-fclass ArrayTests.Other.ArraySizeInComp1
- constant Real r1.x[1] = 1;
- constant Real r1.x[2] = 2;
- structural parameter Integer r1.n = 2 /* 2 */;
- constant Real x[1] = 0.0;
- constant Real x[2] = 0.0;
-end ArrayTests.Other.ArraySizeInComp1;
-")})));
-end ArraySizeInComp1;
-
-model ArraySizeInComp2
-    record R
-        Real[:] x = 1:n;
-        parameter Integer n;
-    end R;
-    
-    function f
-        input R[:] r;
-        output Real[r[2].n] x = r[2].x;
-        algorithm
-    end f;
-    
-    R r1(n=2);
-    R r2(n=3);
-    Real[:] x = f({r1,r2});
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Other_ArraySizeInComp2",
-            description="",
-            flatModel="
-fclass ArrayTests.Other.ArraySizeInComp2
- constant Real r1.x[1] = 1;
- constant Real r1.x[2] = 2;
- structural parameter Integer r1.n = 2 /* 2 */;
- constant Real r2.x[1] = 1;
- constant Real r2.x[2] = 2;
- constant Real r2.x[3] = 3;
- structural parameter Integer r2.n = 3 /* 3 */;
- constant Real x[1] = 0.0;
- constant Real x[2] = 0.0;
- constant Real x[3] = 0.0;
-end ArrayTests.Other.ArraySizeInComp2;
-")})));
-end ArraySizeInComp2;
 
 model ArraySimplify1
     Real x[2], y[2], z[2];

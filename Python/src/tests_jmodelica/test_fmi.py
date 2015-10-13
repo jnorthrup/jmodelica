@@ -1002,7 +1002,7 @@ class Test_Logger:
         """
         self.m = load_fmu(Test_Logger.fmu)
         self.m.set_debug_logging(True)
-        self.m.set('_log_level',7)
+        self.m.set('_log_level',6)
         self.m.set_log_level(5)
 
     @testattr(fmi = True)
@@ -1108,34 +1108,6 @@ class Test_SetDependentParameterError:
         self.m.set('pbi',True)
         nose.tools.assert_raises(FMUException,self.m.set, 'pbd', True)
         nose.tools.assert_raises(FMUException,self.m.set, 'cb', True)
-
-class Test_DependentParameterEvaluationError:
-    """
-    Test that errors in evaluating dependent parameters results in exceptions
-    """
-
-    @classmethod
-    def setUpClass(self):
-        """
-        Sets up the test class.
-        """
-        self.fmu =  compile_fmu('Parameter.Error.DependentCheck',os.path.join(path_to_mofiles,'ParameterTests.mo'))
-
-    def setUp(self):
-        """
-        Sets up the test case.
-        """
-        self.m = load_fmu(self.fmu)
-
-    @testattr(fmi = True)
-    def test_dependent_parameter_eval(self):
-        """
-        Test that expeptions are thrown when dependent parameters evaluation fails.
-        """
-        nose.tools.assert_almost_equal( self.m.get('pd'),0.5) # test value after instantiate
-        self.m.set('p',0.6)
-        nose.tools.assert_almost_equal( self.m.get('pd'),0.6) # test value propagation
-        nose.tools.assert_raises(FMUException,self.m.set, 'p', 5) # test that assert triggers
 
 class Test_StructuralParameterError:
     """

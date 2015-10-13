@@ -61,7 +61,7 @@ abstract public class TestCase implements GenericTestCase {
 		OptionRegistry or = ModelicaCompiler.createOptions();
 		String modelica_path = System.getenv("JMODELICA_HOME") + File.separator + 
 				"ThirdParty" + File.separator + "MSL";
-		or.setStringOption("MODELICAPATH", modelica_path);
+		or.addStringOption("MODELICAPATH", modelica_path);
 		or.setBooleanOption("generate_runtime_option_parameters", false);
 		return or;
 	}
@@ -338,11 +338,10 @@ abstract public class TestCase implements GenericTestCase {
         Collection<Problem> problems = null;
         try {
             ipr.checkErrorsInInstClass(className, checkType);
-            problems = sr.collectWarnings();
         } catch (CompilerException e) {
             problems = e.getProblems();
+            if (testSemanticProblems(problems)) return;
         }
-        if (testSemanticProblems(problems)) return;
         
         
         // Flatten class and check errors reported during flattening

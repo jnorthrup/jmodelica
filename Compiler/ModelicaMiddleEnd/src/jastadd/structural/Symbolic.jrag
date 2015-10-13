@@ -631,7 +631,7 @@ aspect Derivatives {
 	}
 
 	public FExp FDotDivExp.diff(String name) {
-		if (getRight().variability().parameterOrLess()) {
+		if (getRight().variability().lessOrEqual(fParameter())) {
 			return dynamicFExp(newFDivExp(
 			    getLeft().diff(name),
 				getRight().copySymbolic()));
@@ -778,14 +778,14 @@ aspect Derivatives {
         if (order <= 1)
             diffExp.resetOriginalReferences();
         if (order > 0)
-            return new FSmoothExp(order - 1, diffExp);
+            return new FSmoothExp(new FIntegerLitExp(order - 1), diffExp);
         else
             return diffExp;
     }
 
-    public FExp FHomotopyExp.diff(String name) {
-        return dynamicFExp(new FHomotopyExp(getActual().diff(name), getSimplified().diff(name)));
-    }
+	public FExp FHomotopyExp.diff(String name) {
+		return dynamicFExp(getActual().diff(name));
+	}
 	
 	public FExp FNoEventExp.diff(String name) {
 		return new FNoEventExp(getFExp().diff(name));
@@ -808,6 +808,10 @@ aspect Derivatives {
 	}
 
     public FExp FIdUseExp.diff(String name) {
+        return dynamicFExp(diffUseOrDerExp(name, name()));
+    }
+
+    public FExp FInstAccessExp.diff(String name) {
         return dynamicFExp(diffUseOrDerExp(name, name()));
     }
 
@@ -855,18 +859,6 @@ aspect Derivatives {
     public FExp FSpatialDistExp.diff(String name) {
         throw new FunctionDifferentiationException(this);
     }
-    
-    public FExp FInStream.diff(String name) {
-        if (name.equals(FExp.TIME)) {
-            return new FDerInStream(this.treeCopy());
-        }
-        return super.diff(name);
-    }
-    
-    public FExp FSubscriptedExp.diff(String name) {
-        return new FSubscriptedExp(getFExp().diff(name), getFArraySubscripts().treeCopy());
-    }
-
 
     public FExp FExp.diffUseOrDerExp(String name, String myName) {
         if (type().containsReal()) {
@@ -893,6 +885,7 @@ aspect Derivatives {
 
     syn FExp FExp.createDerExp(int order) = diff(TIME, order);
     eq FIdUseExp.createDerExp(int order) = getFIdUse().createDerExp(order() + order);
+    eq FInstAccessExp.createDerExp(int order) = getInstAccess().createDerExp(order);
     eq InstDerExp.createDerExp(int order) = getFExp().createDerExp(order() + order);
 
     syn FExp FIdUse.createDerExp(int order) = new FDerExp(fullCopy(), order);
@@ -900,7 +893,7 @@ aspect Derivatives {
 	syn FExp FIdUseInstAccess.createDerExp(int order) = getInstAccess().createDerExp(order);
 	
 	syn InstDerExp InstAccess.createDerExp(int order) {
-        FExp use = new FIdUseExp(new FIdUseInstAccess(fullCopy()));
+		FExp use = new FInstAccessExp(fullCopy());
 		return (order == 1) ? new InstDerExp(use) : new InstHDerExp(use, order);
 	}
 	
@@ -1183,7 +1176,7 @@ aspect ExpressionSimplification {
      * Is this expression a literal zero?
      */
     syn boolean FExp.isLiteralZero() = false;
-    eq FNumericLitExp.isLiteralZero()= type().isScalar() && ceval().realValue() == 0.0;
+    eq FLitExp.isLiteralZero()       = type().isNumericScalar() && ceval().realValue() == 0.0;
     eq FDotAddExp.isLiteralZero()    = getLeftNoTransform().isLiteralZero() && getRightNoTransform().isLiteralZero();
     eq FDotSubExp.isLiteralZero()    = getLeftNoTransform().isLiteralZero() && getRightNoTransform().isLiteralZero();
     eq FDotMulExp.isLiteralZero()    = getLeftNoTransform().isLiteralZero() || getRightNoTransform().isLiteralZero();
@@ -1194,7 +1187,7 @@ aspect ExpressionSimplification {
      * Is this expression a literal one?
      */
     syn boolean FExp.isLiteralOne() = false;
-    eq FNumericLitExp.isLiteralOne()= type().isScalar() && ceval().realValue() == 1.0;
+    eq FLitExp.isLiteralOne()       = type().isNumericScalar() && ceval().realValue() == 1.0;
     eq FDotMulExp.isLiteralOne()    = getLeftNoTransform().isLiteralOne() && getRightNoTransform().isLiteralOne();
     eq FDotDivExp.isLiteralOne()    = getLeftNoTransform().isLiteralOne() && getRightNoTransform().isLiteralOne();
     eq FNegExp.isLiteralOne()       = getFExpNoTransform().isLiteralMinusOne();
@@ -1203,7 +1196,7 @@ aspect ExpressionSimplification {
      * Is this expression a literal minus one?
      */
     syn boolean FExp.isLiteralMinusOne() = false;
-    eq FNumericLitExp.isLiteralMinusOne()= type().isScalar() && ceval().realValue() == -1.0;
+    eq FLitExp.isLiteralMinusOne()       = type().isNumericScalar() && ceval().realValue() == -1.0;
     eq FNegExp.isLiteralMinusOne()       = getFExpNoTransform().isLiteralOne();
 
     /**
@@ -1261,10 +1254,18 @@ aspect ExpressionSimplification {
         return toString().equals(o.toString());
     }
 
-    eq FNumericLitExp.equalsSymbolic(FExp other) {
-        if (!(other instanceof FNumericLitExp) || !type().isScalar() || !other.type().isScalar())
+    eq FRealLitExp.equalsSymbolic(FExp other) {
+        if (!(other instanceof FRealLitExp))
             return false;
-        return ceval().equals(other.ceval());
+        FRealLitExp o = (FRealLitExp) other;
+        return getValue() == o.getValue(); 
+    }
+
+    eq FIntegerLitExp.equalsSymbolic(FExp other) {
+        if (!(other instanceof FIntegerLitExp))
+            return false;
+        FIntegerLitExp o = (FIntegerLitExp) other;
+        return getValue() == o.getValue(); 
     }
 
     eq FBooleanLitExpTrue.equalsSymbolic(FExp other)  = other instanceof FBooleanLitExpTrue;

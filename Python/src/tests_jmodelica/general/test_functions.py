@@ -201,28 +201,4 @@ class TestStringArray(SimulationTest):
         Test that string arrays in function compiles and simulates
         """
         self.assert_end_value('n', 12)
-
-class TestFuncCallInputOutputArray1(SimulationTest):
-    """
-    Test of function call with same input and output array
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        SimulationTest.setup_class_base('FunctionTests.mo', 
-            'FunctionTests.FuncCallInputOutputArray1')
-
-    @testattr(stddist = True)
-    def setUp(self):
-        self.setup_base(start_time=0.0, final_time=1.0, time_step=0.01)
-        self.run()
         
-    @testattr(stddist = True)
-    def test_stringArrayInFunction(self):
-        """
-        Test that string arrays in function compiles and simulates
-        """
-        self.assert_end_value('p1[1]', 3)
-        self.assert_end_value('p1[2]', 3)
-        self.assert_end_value('p2[1]', 3)
-        self.assert_end_value('p2[2]', 3)

@@ -262,7 +262,6 @@ abstract TypePrefixVariability : TypePrefix;
 Continuous : TypePrefixVariability;
 Discrete   : TypePrefixVariability;
 Parameter  : TypePrefixVariability;
-IndexParameter : Parameter;
 Constant   : TypePrefixVariability;
 abstract TypePrefixInputOutput : TypePrefix;
 Input      : TypePrefixInputOutput;
@@ -286,7 +285,7 @@ ClassModification : Modification ::= Argument*;
 abstract Argument : Modification ::= [Each] [Final];
 
 abstract NamedModification   : Argument ::= Name:Access;
-abstract ElementModification : NamedModification ::= [Modification] Comment;
+abstract ElementModification : NamedModification ::= [Modification] [StringComment];
 // ClassModification : ElementModification; // is a(M.x=3) valid if M is a class?
 ComponentModification : ElementModification; 
 abstract ElementRedeclare    : NamedModification;

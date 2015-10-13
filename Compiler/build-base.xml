@@ -307,9 +307,11 @@
                     <arg value="--beaver" />
                     <arg value="--rewrite" />
                     <arg value="--cacheCycle" />
-                    <arg value="--visitCheck=false" />
+                    <arg value="--noComponentCheck" />
+                    <arg value="--noVisitCheck" />
                     <arg value="--lazyMaps" />
                     <arg value="--indent=4space" />
+                    <arg value="--deterministic" />
                     <arg line="${jastadd_files}" />
                 </java>
             	<!-- delete stale java files created in earlier runs -->
@@ -485,7 +487,7 @@
 
 import org.junit.runner.RunWith;
 
-@RunWith(org.jmodelica.junit.TreeJModelicaRunner.class)
+@RunWith(${jm_package}.junit.JModelicaRunner.class)
 public class ${test_class_name} extends ${ast_package}.TestSpecification {
 
     public ${test_class_name}() { 

@@ -57,17 +57,17 @@ aspect AliasVariables {
 		if (aliasSet == null || inRecord()) {
 			return null;
 		}
-        AliasManager.AliasVariable av = aliasSet.getModelVariable();
+		AliasManager.AliasVariable av = aliasSet.getIterationVariable();
 		return av.getFVariable()==this? null : av;
 	}
 	
 	/**
-     * Get the model variable corresponding to the alias.
+	 * Get the iteration variable corresponding to the alias.
 	 * 
-     * If the FVariable is an alias, the alias() return corresponding model
+	 * If the FVariable is an alias, the alias() return corresponding iteration
 	 * FVariable, else null.
 	 * 
-     * @return The corresponding model variable if alias, otherwise null.
+	 * @return The corresponding iteration variable if alias, otherwise null.
 	 */
 	syn FVariable FAbstractVariable.alias() = null;
 	
@@ -93,7 +93,7 @@ aspect AliasVariables {
 		if (alias == null) {
 			return false;
 		} else {
-            AliasManager.AliasVariable iav = aliasSet.getModelVariable();
+			AliasManager.AliasVariable iav = aliasSet.getIterationVariable();
 			return (alias.isNegated() != iav.isNegated());
 		}
 	}
@@ -108,7 +108,7 @@ aspect AliasVariables {
     public void FVariable.propagateAttributesFromAlias() {
         AliasManager.AliasSet aliasSet = aliasSet();
         if (aliasSet != null) {
-            AliasManager.AliasVariable myAv = aliasSet.getModelVariable();
+            AliasManager.AliasVariable myAv = aliasSet.getIterationVariable();
             if (myAv.getFVariable() == this && shouldPropagateAttributesForAlias()) {
                 AliasManager.AttributePropagatorMap map = new AliasManager.AttributePropagatorMap(myAv);
                 for (AliasManager.AliasVariable av : aliasSet) 
@@ -284,7 +284,11 @@ aspect AliasVariables {
 				return;
 			}
 			boolean shouldNegate = aliasA.isNegated() == aliasB.isNegated() ? neg : !neg;
-            resultSet.merge(mergeSet, shouldNegate);
+			for (AliasVariable a : mergeSet) {
+				if (shouldNegate)
+					a.negated = !a.negated;
+				resultSet.add(a);
+			}
 			aliasSets.remove(mergeSet);
 		}
 		
@@ -334,7 +338,6 @@ aspect AliasVariables {
 			
 			// List of aliases
 			private java.util.List<AliasVariable> aliases = new ArrayList<AliasVariable>();
-            private AliasVariable model = null;
 			
 			/**
 			 * Private constructor
@@ -358,59 +361,27 @@ aspect AliasVariables {
 			 * @param newAlias Alias variable to add
 			 */
 			private void add(AliasVariable newAlias) {
-                _add(newAlias);
-                model(newAlias);
+				newAlias.setSet(this);
+				aliases.add(newAlias);
 			}
 			
-            /**
-             * Adds a new alias variable to this set
-             * without updating model variable.
-             * 
-             * @param newAlias Alias variable to add
-             */
-            private void _add(AliasVariable newAlias) {
-                newAlias.setSet(this);
-                aliases.add(newAlias);
-            }
-            
-            /**
-             * Update model variable if <code>newAlias</code>
-             * has a better alias heuristic score.
-             * 
-             * @param newAlias Alias variable to check
-             */
-            private void model(AliasVariable newAlias) {
-                if (model == null || (newAlias != null && 
-                        newAlias.getFVariable().aliasHeuristicScore() 
-                        > model.getFVariable().aliasHeuristicScore())) {
-                    model = newAlias;
-                }
-            }
-            
-            /**
-             * Add all AliasVariables from <code>mergeSet</code> into
-             * <code>this</code>. Does not modify or remove <code>mergeSet</code>.
-             * 
-             * @param mergeSet Alias set absorb
-             * @param negate True if set should be negated
-             */
-            private void merge(AliasSet mergeSet, boolean negate) {
-                for (AliasVariable a : mergeSet) {
-                    if (negate)
-                        a.negated = !a.negated;
-                    _add(a);
-                }
-                model(mergeSet.model);
-            }
-            
-			
 			/**
-             * Get the model variable of this alias set.
+			 * Get the iteration variable of this alias set.
 			 * 
-             * @return The model variable of this alias set.
+			 * @return The iteration variable of this alias set.
 			 */
-            public AliasVariable getModelVariable() {
-                return model;
+			public AliasVariable getIterationVariable() {
+				// Find the variable with highest heuristic score
+				AliasVariable best = null;
+				int max = 0;
+				for (AliasVariable av : aliases) {
+					int score = av.getFVariable().aliasHeuristicScore();
+					if (score > max) {
+						max = score;
+						best = av;
+					}
+				}
+				return best;
 			}
 			
 			/**
@@ -436,11 +407,11 @@ aspect AliasVariables {
 				StringBuilder str = new StringBuilder();
 				str.append("{");
 				
-                AliasVariable model = getModelVariable();
-                str.append(model.toString(withStart));
+				AliasVariable iteration = getIterationVariable();
+				str.append(iteration.toString(withStart));
 				
 				for (AliasVariable alias : aliases) {
-                    if (alias == model)
+					if (alias == iteration)
 						continue;
 					str.append(sep);
 					str.append(alias.toString(withStart));
@@ -456,7 +427,7 @@ aspect AliasVariables {
 			 */
 			public String toStringVerbose() {
 				StringBuilder str = new StringBuilder();
-                str.append("Alias set: (" + getModelVariable().getFVariable().name() + ")\n");
+				str.append("Alias set: (" + getIterationVariable().getFVariable().name() + ")\n");
 				for (AliasVariable alias : aliases) {
 					if (alias.isNegated()) {
 						str.append("-");
@@ -647,10 +618,10 @@ aspect AliasVariables {
 				public void addToMap(Map<String, AttributePropagator> map) {
                     map.put(name, this);
 				}
-
-                protected void select(int i, List<FAttribute> l) {
-                    if (i < 0)
-                        return;
+				
+				protected void select(int i, List<FAttribute> l) {
+				    if (i < 0)
+				        return;
                     FAttribute sel = list.get(i);
                     
                     // Don't add attributes from own type
@@ -660,18 +631,16 @@ aspect AliasVariables {
                         return;
                     
                     // If it is taken from elsewhere, we need a copy
-                    if (!inTarget) {
+                    if (!inTarget)
                         sel = sel.fullCopy();
-                        sel.parent = list.get(i).parent;
-                    }
                     
                     // Value may need to be negated
                     if (neg.get(i) != target.isNegated() && sel.hasValue())
                         negate(sel);
                     
                     l.add(sel);
-                }
-
+				}
+				
 				protected void negate(FAttribute sel) {
 				    sel.setValue(sel.getValue().createNegated());
 				}
@@ -933,8 +902,6 @@ aspect DerivativeRewriting {
         if (!left.isFVariable() || !right.isFVariable())
             return;
         if (left.isTemporary() || right.isTemporary())
-            return;
-        if (left.isInput() || right.isInput())
             return;
         if (left.variability().discreteOrLess() || right.variability().discreteOrLess())
             return;

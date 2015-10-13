@@ -81,7 +81,6 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
     block_solver->max = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     block_solver->nominal = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     block_solver->initial = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
-    block_solver->start_set = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     block_solver->value_references = (jmi_int_t*)calloc(n,sizeof(jmi_int_t));
 #if 0
     block_solver->message_buffer = (char*)calloc(n*500+2000,sizeof(char));
@@ -198,7 +197,6 @@ void jmi_delete_block_solver(jmi_block_solver_t** block_solver_ptr) {
     free(block_solver->nominal);
     free(block_solver->initial);
     free(block_solver->value_references);
-    free(block_solver->start_set);
     free(block_solver->message_buffer);
     free(block_solver);
 
@@ -282,7 +280,6 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
         block_solver->F(block_solver->problem_data,block_solver->max,block_solver->res,JMI_BLOCK_MAX);
         block_solver->F(block_solver->problem_data,block_solver->initial,block_solver->res,JMI_BLOCK_INITIALIZE);
         block_solver->F(block_solver->problem_data,real_vrs,block_solver->res,JMI_BLOCK_VALUE_REFERENCE);
-        block_solver->F(block_solver->problem_data,block_solver->start_set,block_solver->res,JMI_BLOCK_START_SET);
 
         for (i=0;i<block_solver->n;i++) {
             block_solver->value_references[i] = (int)real_vrs[i];
@@ -398,7 +395,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
     }
     
     if (handle_discrete_changes) {
-        int iter, non_reals_changed_flag = 0;
+        int iter, non_reals_changed_flag;
         jmi_log_node_t top_node = jmi_log_enter_fmt(log, logInfo, "BlockEventIterations",
                                       "Starting block (local) event iteration at <t:%E> in <block:%s>",
                                       cur_time, block_solver->label);
@@ -439,11 +436,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                 block_solver->init = 0;
             }
 
-            if (ef!=0){ 
-                jmi_log_leave(log, iter_node); 
-                if(ef > 0) ef = -1;
-                break; 
-            }
+            if (ef!=0){ jmi_log_leave(log, iter_node); break; }
             
             ef = block_solver->update_discrete_variables(block_solver->problem_data, &non_reals_changed_flag);
             
@@ -465,10 +458,6 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                 converged = 1;
                 jmi_log_leave(log, iter_node);
                 break;
-            }
-            else {
-                jmi_log_fmt(log, iter_node, logInfo, "Detected discrete variables change in <block:%s, iter:%I> at <t:%E>",
-                            block_solver->label, iter, cur_time);
             }
 
             jmi_log_leave(log, iter_node);
@@ -629,8 +618,6 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->regularization_tolerance = -1;
     bsop->use_newton_for_brent = 0; 
 
-    bsop->active_bounds_threshold = 0; /** < \brief Threshold for when at active bound. */
-
     bsop->enforce_bounds_flag = 1;  /**< \brief Enforce min-max bounds on variables in the equation blocks*/
     bsop->use_jacobian_equilibration_flag = 0; 
     bsop->use_Brent_in_1d_flag = 0;            /**< \brief If Brent search should be used to improve accuracy in solution of 1D non-linear equations */
@@ -647,9 +634,7 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->rescale_each_step_flag = 0;
     bsop->rescale_after_singular_jac_flag = 0;
     bsop->check_jac_cond_flag = 0;  /**< \brief NLE solver should check Jacobian condition number and log it. */
-    bsop->brent_ignore_error_flag = 0;
     bsop->experimental_mode = 0;
-    bsop->use_nominals_as_fallback_in_init = 0;
     bsop->solver = JMI_KINSOL_SOLVER;
     bsop->jacobian_variability = JMI_CONTINUOUS_VARIABILITY;
     bsop->label = "";

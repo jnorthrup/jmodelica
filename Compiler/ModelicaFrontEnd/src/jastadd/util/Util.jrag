@@ -930,16 +930,7 @@ aspect Names {
     eq BaseNode.getChild().retrieveTopInstAccess(InstAccess pre)         = pre;
     eq InstDot.getChild().retrieveTopInstAccess(InstAccess pre)          = retrieveTopInstAccess(this);
     eq InstGlobalAccess.getChild().retrieveTopInstAccess(InstAccess pre) = this;
-
-    /**
-     * Check if this access is a name part of a qualified access.
-     */
-    inh boolean Access.inQualified();
-    inh boolean InstAccess.inQualified();
-    eq Dot.getAccess().inQualified()         = true;
-    eq InstDot.getInstAccess().inQualified() = true;
-    eq BaseNode.getChild().inQualified()     = false;
-
+    
     /**
      * Get the array subscripts of the last name part.
      */
@@ -952,19 +943,7 @@ aspect Names {
     syn boolean InstAccess.hasFArraySubscripts() = false;
     eq InstArrayAccess.hasFArraySubscripts() = true;
     eq InstDot.hasFArraySubscripts() = getLastInstAccess().hasFArraySubscripts();
-
-    /**
-     * Is this an access to a component?
-     */
-    syn boolean InstAccess.isComponentAccess() = false;
-    eq InstComponentAccess.isComponentAccess() = true;
-
-    /**
-     * Is this an access to a class?
-     */
-    syn boolean InstAccess.isClassAccess() = false;
-    eq InstClassAccess.isClassAccess()     = true;
-
+    
     /**
      * Copy this access, append a name part to the copy and return the copy.
      */
@@ -1033,20 +1012,23 @@ aspect Slices {
 		}
 		return array && exp;
     }
-    
-    
-    /**
-     * Check if this is a slice operation.
-     */
-    syn boolean FAssignableExp.isSlice();
-    eq FIdUseExp.isSlice() = isArray() && getFIdUse().isSlice();
-    eq FSubscriptedExp.isSlice() = isArray();
-    
+	
     /**
      * Check if this is a slice operation.
      */
     syn boolean FIdUse.isSlice()  = getFQName().isSlice();
     eq FIdUseInstAccess.isSlice() = getInstAccess().isSlice();
+	
+    /**
+     * Check if this is a slice operation.
+     */
+    syn boolean FInstAccessExp.isSlice() = getInstAccess().isSlice();
+	
+    /**
+     * Check if this is a slice operation.
+     */
+    // TODO: change order
+    syn boolean FIdUseExp.isSlice() = getFIdUse().isSlice() && isArray();
     
 }
 
@@ -1330,7 +1312,7 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component is declared inner.
      */
-    syn boolean InstComponentDecl.isInner() = getComponentDecl().isInner() || isGeneratedInner();
+    syn boolean InstComponentDecl.isInner() = getComponentDecl().isInner();
     eq InstReplacingComposite.isInner()     = 
         getComponentDecl().hasInnerOrOuter() ? getComponentDecl().isInner() : getOriginalDecl().isInner();
     eq InstReplacingRecord.isInner()        = 
@@ -1341,7 +1323,7 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component is declared outer.
      */
-    syn boolean InstComponentDecl.isOuter() = getComponentDecl().isOuter() && !isGeneratedInner();
+    syn boolean InstComponentDecl.isOuter() = getComponentDecl().isOuter();
     eq InstReplacingComposite.isOuter()     = 
         getComponentDecl().hasInnerOrOuter() ? getComponentDecl().isOuter() : getOriginalDecl().isOuter();
     eq InstReplacingRecord.isOuter()        = 
@@ -1462,7 +1444,7 @@ aspect MultiDeclMethods {
 aspect ShortClassUtil {
 
     syn InstClassDecl InstClassDecl.finalClass() = this;
-    eq InstShortClassDecl.finalClass()           = myTargetInstClassDecl().finalClass();
+    eq InstShortClassDecl.finalClass()           = getInstExtends(0).myInstClass().finalClass();
     eq InstSimpleShortClassDecl.finalClass()     = actualInstClass().finalClass();
 
 
@@ -1479,7 +1461,7 @@ aspect ShortClassUtil {
 
     syn boolean InstClassDecl.isInput()            = false;
     eq InstShortClassDecl.isInput()                = 
-        getClassDecl().isInput() || myTargetInstClassDecl().isInput();
+        getClassDecl().isInput() || getInstExtends(0).myInstClass().isInput();
     eq InstSimpleShortClassDecl.isInput()          = actualInstClass().isInput();
     eq InstReplacingShortClassDecl.isInput()       = 
         (super.isInput() || super.isOutput()) ? super.isInput() : getOriginalInstClass().isInput();
@@ -1488,7 +1470,7 @@ aspect ShortClassUtil {
 
     syn boolean InstClassDecl.isOutput()            = false;
     eq InstShortClassDecl.isOutput()                =
-        getClassDecl().isOutput() || myTargetInstClassDecl().isOutput();
+        getClassDecl().isOutput() || getInstExtends(0).myInstClass().isOutput();
     eq InstSimpleShortClassDecl.isOutput()          = actualInstClass().isOutput();
     eq InstReplacingShortClassDecl.isOutput()       = 
         (super.isInput() || super.isOutput()) ? super.isOutput() : getOriginalInstClass().isOutput();
@@ -1868,18 +1850,16 @@ aspect UtilInterface {
     /**
      * Provides easy access to non-ast utils via the AST root.
      */
-    public class UtilInterface {
+    class UtilInterface {
         
         private ModelicaCompiler mc;
         private OptionRegistry options;
         private IErrorHandler eh;
-        private ExternalFunctionCache efc;
         
-        protected UtilInterface(ModelicaCompiler mc, OptionRegistry options, IErrorHandler eh, ExternalFunctionCache efc) {
+        protected UtilInterface(ModelicaCompiler mc, OptionRegistry options, IErrorHandler eh) {
             this.mc = mc;
             this.options = options;
             this.eh = eh;
-            this.efc = efc;
         }
         
         public ModelicaCompiler getModelicaCompiler() {
@@ -1893,10 +1873,6 @@ aspect UtilInterface {
         public IErrorHandler getErrorHandler() {
             return eh;
         }
-        
-        public ExternalFunctionCache getExternalFunctionCache() {
-            return efc;
-        }
     }
     
     UtilInterface ModelicaCompiler.createUtilInterface() {
@@ -1904,25 +1880,20 @@ aspect UtilInterface {
     }
     
     public static UtilInterface UtilInterface.create(ModelicaCompiler mc) {
-        return create(mc, mc.getOptions(), mc.getErrorHandler(), mc.getExternalFunctionCache());
+        return create(mc, mc.getOptions(), mc.getErrorHandler());
     }
     
     public static UtilInterface UtilInterface.create(UtilInterface other) {
-        return create(other.getModelicaCompiler(), other.getOptionRegistry().copy(), 
-                other.getErrorHandler(), other.getExternalFunctionCache());
+        return create(other.getModelicaCompiler(), other.getOptionRegistry().copy(), other.getErrorHandler());
     }
     
     public static UtilInterface UtilInterface.create(OptionRegistry options) {
-        return create(null, options, new DefaultErrorHandler(), null);
-    }
-    
-    public static UtilInterface UtilInterface.create(OptionRegistry options, IErrorHandler eh) {
-        return create(null, options, eh, null);
+        return create(null, options, new DefaultErrorHandler());
     }
     
     private static UtilInterface UtilInterface.create(ModelicaCompiler mc, OptionRegistry options, 
-            IErrorHandler eh, ExternalFunctionCache efc) {
-        return new UtilInterface(mc, options, eh, efc);
+            IErrorHandler eh) {
+        return new UtilInterface(mc, options, eh);
     }
     
     public void Root.transferRoot(Root other) {
@@ -1939,10 +1910,7 @@ aspect UtilInterface {
     }
     
     public void UtilInterface.clean() {
-        ExternalFunctionCache efc = getExternalFunctionCache();
-        if (efc != null) {
-            efc.destroyProcesses(getOptionRegistry());
-        }
+        
     }
     
 }

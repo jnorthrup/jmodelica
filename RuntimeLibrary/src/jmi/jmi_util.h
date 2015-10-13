@@ -35,8 +35,6 @@
 #include "jmi_log.h"
 #include "jmi_block_solver.h"
 
-#include "jmi_dyn_mem.h"
-
 /**
  * \defgroup Jmi_internal Internal functions of the JMI Model \
  * interface.
@@ -119,8 +117,6 @@ typedef struct jmi_simple_color_info_t jmi_simple_color_info_t;      /**< \brief
 typedef struct jmi_delay_t jmi_delay_t;                   /**< \brief Forward declaration of struct. */
 typedef struct jmi_spatialdist_t jmi_spatialdist_t;       /**< \brief Forward declaration of struct. */
 typedef struct jmi_dynamic_state_set_t jmi_dynamic_state_set_t;       /**< \brief Forward declaration of struct. */
-typedef struct jmi_modules_t jmi_modules_t;               /**< \brief Forward declaration of struct. */
-typedef struct jmi_module_t jmi_module_t;                 /**< \brief Forward declaration of struct. */
 
 typedef struct _jmi_time_event_t {
     int defined;
@@ -172,7 +168,7 @@ void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, double time
 
 /* Record creation macro */
 #define JMI_RECORD_STATIC(type, name) \
-    type name##_rec = {0};\
+    type name##_rec;\
     type* name = &name##_rec;
 
 #ifdef _MSC_VER
@@ -180,11 +176,6 @@ void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, double time
 #define snprintf sprintf_s
 #endif
 
-
-/**
- * \brief Maximum depth for nested try blocks.
- */
-#define JMI_MAX_EXCEPTION_DEPTH 10
 
 /** Use for internal hard errors. Does not return. */
 void jmi_internal_error(jmi_t *jmi, const char msg[]);
@@ -859,7 +850,6 @@ struct jmi_simple_color_info_t {
  * @param n_relations Number of relational operators in the DAE equations.
  * @param relations Kind of relational operators in the DAE equations. One of: JMI_REL_GT, JMI_REL_GEQ, JMI_REL_LT, JMI_REL_LEQ.
  * @param scaling_method Scaling method. Options are JMI_SCALING_NONE or JMI_SCALING_VARIABLES.
- * @param homotopy_block Block number of the block which contains homotopy operators, -1 if none.
  * @param jmi_callbacks A jmi_callback_t struct.
  * @return Error code.
  */
@@ -883,8 +873,7 @@ int jmi_init(jmi_t** jmi,
         int n_initial_relations, int* initial_relations,
         int n_relations, int* relations, int n_dynamic_state_sets,
         jmi_real_t* nominals,
-        int scaling_method, int n_ext_objs, int homotopy_block,
-        jmi_callbacks_t* jmi_callbacks);
+        int scaling_method, int n_ext_objs, jmi_callbacks_t* jmi_callbacks);
 
 /**
  * \brief Allocates a jmi_dae_t struct.
@@ -1055,15 +1044,6 @@ int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
 void jmi_delete_init(jmi_init_t** pinit);
 
 /**
- * \brief Contains a pointers to the runtime modules.
- */
-struct jmi_modules_t {
-    jmi_module_t *mod_get_set;
-
-    /* Add future modules here */
-};
-
-/**
  * \brief The main struct of the JMI Model interface containing
  * dimension information and pointers to jmi_dae_t and jmi_init_t.
  *
@@ -1171,7 +1151,6 @@ struct jmi_t {
     int offs_real_u;                     /**< \brief  Offset of the input real vector in \f$z\f$. */
     int offs_real_w;                     /**< \brief  Offset of the algebraic real variables vector in \f$z\f$. */
     int offs_t;                          /**< \brief  Offset of the time entry in \f$z\f$. */
-    int offs_homotopy_lambda;            /**< \brief  Offset of the homotopy lambda entry in \f$z\f$. */
 
     int offs_real_d;                     /**< \brief  Offset of the discrete real variable vector in \f$z\f$. */
 
@@ -1265,21 +1244,13 @@ struct jmi_t {
     jmi_real_t* real_x_work;             /**< \brief Work array for the real x variables */
     jmi_real_t* real_u_work;             /**< \brief Work array for the real u variables */
     
-    jmp_buf try_location[JMI_MAX_EXCEPTION_DEPTH+1];                /**< \brief Buffer for setjmp/longjmp, for exception handling. */
-    jmi_int_t current_try_depth;
-
+    jmp_buf try_location;                /**< \brief Buffer for setjmp/longjmp, for exception handling. */
     jmi_int_t model_terminate;           /**< \brief Flag to trigger termination of the simulation. */
     jmi_int_t user_terminate;            /**< \brief Flag that the user has terminated the model. */
 
     jmi_int_t reinit_triggered;          /**< \brief Flag to signal that a reinit triggered in the current event iteration. */
     
     jmi_string_t resource_location;      /**< \brief Absolute file path to resource directory. No trailing separator. May be null. */
-
-    jmi_modules_t modules;               /**< \brief Interchangable modules struct */
-
-    jmi_dynamic_list dyn_mem_head;   /**< \brief List of pointers to memory allocated during function evaluations. */
-    jmi_dynamic_list* dyn_mem_last;  /**< \brief List of pointers to memory allocated during function evaluations. */
-    jmi_dyn_mem_t dyn_mem;
 };
 
 /**

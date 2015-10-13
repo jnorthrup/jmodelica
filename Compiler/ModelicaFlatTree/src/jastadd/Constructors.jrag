@@ -463,13 +463,6 @@ aspect Constructors {
 	public FRangeExp.FRangeExp(FExp start, FExp step, FExp stop) {
 		this(new List().add(start).add(step).add(stop));
 	}
-    public FSmoothExp.FSmoothExp(int order, FExp exp) {
-        this(new FIntegerLitExp(order), exp);
-    }
-
-    /**
-     * Constructs an FSmoothExp with a literal Integer order.
-     */
 
     /**
      * Add this expression to another.
@@ -840,7 +833,7 @@ aspect Constructors {
 	 *        Extracts array subscripts from type.
 	 */
 	public FFunctionArray.FFunctionArray(FType type, String name) {
-        this(new Opt(), type, new Opt(), new FQNameFull(name));
+        this(new Opt(), type, new Opt(), new FQNameFull(name, type.size().createFArraySubscripts()));
 	}
 	
 	/**
@@ -1049,6 +1042,7 @@ aspect InheritedFactoryMethods {
     public FDummyDerExp   FDummyDerExp.createEmptyNode()   { return new FDummyDerExp();   }
     public FDynamicDerExp FDynamicDerExp.createEmptyNode() { return new FDynamicDerExp(); }
     public InstHDerExp    InstHDerExp.createEmptyNode()    { return new InstHDerExp();    }
+    public FInstAccessExp FInstAccessExp.createEmptyNode() { return new FInstAccessExp(); }
     public FPreExp        FPreExp.createEmptyNode()        { return new FPreExp();        }
     public InstPreExp     InstPreExp.createEmptyNode()     { return new InstPreExp();     }
     public FIdTempExp     FIdTempExp.createEmptyNode()     { return new FIdTempExp();     }
@@ -1126,7 +1120,6 @@ aspect InheritedFactoryMethods {
 	public FHomotopyExp    FHomotopyExp.createEmptyNode()    { return new FHomotopyExp();    }
 	public FSemiLinearExp  FSemiLinearExp.createEmptyNode()  { return new FSemiLinearExp();  }
 	public FInStream       FInStream.createEmptyNode()       { return new FInStream();       }
-	public FDerInStream    FDerInStream.createEmptyNode()    { return new FDerInStream();    }
 	public FActualStream   FActualStream.createEmptyNode()   { return new FActualStream();   }
 	public FGetInstanceName FGetInstanceName.createEmptyNode() { return new FGetInstanceName(); }
 	

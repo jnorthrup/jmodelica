@@ -105,8 +105,8 @@ aspect OptimicaErrorCheck {
             error("Timed variables are not allowed in equations");
     }
 
-    public void InstTimedVariable.typeError(ErrorCheckType checkType) {
-        boolean badVar  = !getArg().variability().parameterOrLess();
+    public void InstTimedVariable.typeError() {
+        boolean badVar  = !getArg().variability().lessOrEqual(fParameter());
         boolean badType = !getArg().type().isRealScalar();
         if (badVar || badType) {
             String msg = "The argument of a timed variable must be a scalar parameter Real expression";
@@ -115,7 +115,7 @@ aspect OptimicaErrorCheck {
             else
                 error("%s\n    type of '%s' is %s", msg, getArg(), getArg().type());
         } else {
-            super.typeError(checkType);
+            super.typeError();
         }
     }
 

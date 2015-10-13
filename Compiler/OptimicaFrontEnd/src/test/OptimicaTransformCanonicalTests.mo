@@ -1,18 +1,3 @@
-/*
-    Copyright (C) 2015 Modelon AB
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, version 3 of the License.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 package OptimicaTransformCanonicalTests
 
   optimization LinearityTest1 (objective = cost(finalTime)^2, startTime=0, finalTime=1)
@@ -311,15 +296,15 @@ end OptimicaTransformCanonicalTests.ArrayTest2;
   equation
     der(x) = -x;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ArrayTest3_Err",
-            description="Test type checking of class attributes in Optimica.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayTest3_Err",
+			description="Test type checking of class attributes in Optimica.",
+			errorMessage="
 1 errors found:
-
-Error at line 293, column 31, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTransformCanonicalTests.mo':
-  Array size mismatch in modification of the attribute objective for the optimization ArrayTest3_Err, expected size is scalar and size of objective expression is [2]
+Error at line 271, column 27, in file '/Users/jakesson/projects/JModelica/Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTransformCanonicalTests.mo':
+  Array size mismatch for the attribute objective, size of declaration is scalar and size of objective expression is [2]
+  
 ")})));
   end ArrayTest3_Err;
 

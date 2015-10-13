@@ -1,3 +1,5 @@
+import java.util.Collections;
+
 /*
     Copyright (C) 2009-2014 Modelon AB
 
@@ -13,8 +15,6 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-import java.util.Collections;
 
 aspect OverdeterminedInitialSystem {
     
@@ -58,28 +58,28 @@ aspect OverdeterminedInitialSystem {
          * returned if all unmatched equations are found to be redundent.
          */
         public OISResult overdeterminedInitialSystem() {
-            ASTNode.log.verbose("Analysing initial system for redundant equations to remove.");
+            ASTNode.log.info("Analysing initial system for redundant equations to remove.");
             OISVariableEvaluator evaluator = new OISVariableEvaluator();
             boolean allIsGood = true;
             for (E eqn : unmatchedEquationsIterable()) {
-                ASTNode.log.verbose("Checking unmatched equation %s", eqn);
+                ASTNode.log.info("Checking unmatched equation %s", eqn);
                 FAbstractEquation equation = eqn.getEquation();
                 if (!equation.isInitial()) {
-                    ASTNode.log.verbose("  Not an initial equation");
+                    ASTNode.log.info("  Not an initial equation");
                     allIsGood = false;
                 } else if (equation.OIS_consistencyCheck(evaluator)) {
-                    ASTNode.log.verbose("  Consistent");
+                    ASTNode.log.info("  Consistent");
                 } else {
                     allIsGood = false;
-                    ASTNode.log.verbose("  Unable to verify or different values were calculated");
+                    ASTNode.log.info("  Unable to verify or different values were calculated");
                 }
             }
             if (!allIsGood) {
-                ASTNode.log.verbose("Unable to verify all unmatched initial equations");
+                ASTNode.log.info("Unable to verify all unmatched initial equations");
                 return null;
             }
             Collection<E> results = new ArrayList<E>();
-            ASTNode.log.verbose("All seems to be ok!");
+            ASTNode.log.info("All seems to be ok!");
             return new OISResult(getUnmatchedEquations(), evaluator.visitedParameters);
         }
         
@@ -105,7 +105,7 @@ aspect OverdeterminedInitialSystem {
             
             @Override
             public CValue ceval(CommonVariableDecl variable) {
-                ASTNode.log.verbose(variable.name());
+                ASTNode.log.info(variable.name());
                 CValue val = evaluationCache.get(variable);
                 if (val != null)
                     return val;

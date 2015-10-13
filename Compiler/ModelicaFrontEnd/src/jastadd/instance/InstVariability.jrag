@@ -60,12 +60,12 @@ aspect InstVariability {
         FTypePrefixVariability v =  super.calcVariability();
         if (v.parameterVariability()) {
             
-            if (isSetAsNonFixed()) {
-                return fNonFixedParameter();
-            } else if (isEvalFixed()) {
-                v = fEvalParameter();
+            v = v.combineDown(forcedVariability);
+            
+            if (isEvalFixed()) {
+                v = v.combineDown(fEvalParameter());
             } else if (isFinalIndependent()) {
-                v = fFinalParameter();
+                v = v.combineDown(fFinalParameter());
             }
             
             v = v.combineDown(forcedVariability);
@@ -97,17 +97,14 @@ aspect InstVariability {
     syn boolean InstComponentDecl.valueIsFixed() = true;
     eq InstAssignable.valueIsFixed() {
         // TODO: hierarchical check for records?
-        if (isSetAsNonFixed())
+        if (isPrimitive() && attributeCValueSet(defaultVariableEvaluator(), FAttribute.FIXED) != null && !fixedAttributeCValue().reduceBooleanAnd())
             return false;
         if (hasBindingFExp() && !getBindingFExp().valueIsFixed())
             return false;
         return true;
     }
+    eq FInstAccessExp.valueIsFixed()   = getInstAccess().myInstComponentDecl().valueIsFixed();
     eq FIdUseInstAccess.valueIsFixed() = getInstAccess().myInstComponentDecl().valueIsFixed();
-    
-    syn boolean InstAssignable.isSetAsNonFixed() = isPrimitive() && 
-            attributeCValueSet(defaultVariableEvaluator(), FAttribute.FIXED) != null && 
-            !fixedAttributeCValue().reduceBooleanAnd();
 
     syn FTypePrefixVariability InstComponentDecl.defaultVariability() = fContinuous();
     eq InstArrayComponentDecl.defaultVariability()                    = parentDefaultVariability();
@@ -148,7 +145,6 @@ aspect InstVariability {
     
     inh FTypePrefixVariability InstComponentDecl.parentBExpVariability();
     inh FTypePrefixVariability InstExtends.parentBExpVariability();
-    eq Root.getChild().parentBExpVariability()  = fContinuous();
     eq InstBaseNode.getChild().parentBExpVariability()  = fContinuous();
     eq InstComponentDecl.getInstComponentDecl().parentBExpVariability() = bExpVariability();
     eq InstComponentDecl.getInstExtends().parentBExpVariability() = bExpVariability();
@@ -163,18 +159,17 @@ aspect InstVariability {
     public FTypePrefixVariability FParameter.combinePropagate(FTypePrefixVariability other) {
         // TODO: look over this after we have added "dependent parameter that is evaluated" variability
         if (other.parameterVariability()) {
-            if (fixedParameterOrLess() && other.fixedParameterOrLess()) {
-                return other.combineDown(this);
-            } else {
-                return fNonFixedParameter();
-            }
+            return other.combineDown(this);
         }
         return super.combinePropagate(other);
     }
     
     public FTypePrefixVariability FEvalParameter.combinePropagate(FTypePrefixVariability other) {
         // TODO: look over this after we have added "dependent parameter that is evaluated" variability
-        return fStructParameter().combinePropagate(other);
+        if (other.parameterVariability()) {
+            return other.combineDown(fStructParameter());
+        }
+        return super.combinePropagate(other);
     }
     
     public FTypePrefixVariability FCompositeVariability.combinePropagate(FTypePrefixVariability other) {
@@ -230,6 +225,7 @@ aspect InstVariability {
      * If this is an instance tree access, return set containing accessed var, otherwise empty set.
      */
     syn Set<InstComponentDecl> FExp.accessedVarSet() = Collections.emptySet();
+    eq FInstAccessExp.accessedVarSet()               = getInstAccess().accessedVarSet();
     eq FIdUseExp.accessedVarSet()                    = getFIdUse().accessedVarSet();
 
     /**

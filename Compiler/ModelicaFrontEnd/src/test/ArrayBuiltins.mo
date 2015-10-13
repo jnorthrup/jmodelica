@@ -2753,22 +2753,6 @@ Error at line 2741, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/Array
 ")})));
 end Linspace8;
 
-model Linspace9
-    parameter Integer n = 1;
-    Real x[n] = if n >= 2 then linspace(1, 2, n) else (1:n);
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Linspace9",
-            description="Linspace operator: to low value for n in inactive branch",
-            flatModel="
-fclass ArrayBuiltins.Linspace9
- structural parameter Integer n = 1 /* 1 */;
- constant Real x[1] = 1;
-end ArrayBuiltins.Linspace9;
-")})));
-end Linspace9;
-
 
 model NdimsExp1
  constant Integer n = ndims({{1,2},{3,4}});

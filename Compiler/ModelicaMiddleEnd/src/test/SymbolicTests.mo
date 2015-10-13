@@ -72,7 +72,7 @@ model EquivalentIfBranch3
             flatModel="
 fclass SymbolicTests.EquivalentIfBranch3
  Real x = time;
- Real y = x;
+ Real y = if x > 1 then x else x;
 end SymbolicTests.EquivalentIfBranch3;
 ")})));
 end EquivalentIfBranch3;
@@ -92,20 +92,6 @@ fclass SymbolicTests.EquivalentIfBranch4
 end SymbolicTests.EquivalentIfBranch4;
 ")})));
 end EquivalentIfBranch4;
-
-model EquivalentIfBranch5
-    Real x = if time > 1 then 0.0 else 0;
-    
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="EquivalentIfBranch5",
-            description="Symbolic simplification of equivalent if branches",
-            flatModel="
-fclass SymbolicTests.EquivalentIfBranch5
- Real x = 0.0;
-end SymbolicTests.EquivalentIfBranch5;
-")})));
-end EquivalentIfBranch5;
 
 
 model SimplifyNegations1

@@ -47,8 +47,7 @@ from pyjmi.examples import (ast_example,
                             vdp,
                             vdp_minimum_time,
                             vdp_minimum_time_interpolation,
-                            bounds_kinsol,
-                            furuta_dfo_using_algorithm_drivers)
+                            bounds_kinsol)
 
 @testattr(stddist = True)
 def test_ast_example():
@@ -194,9 +193,3 @@ def test_vdp_minimum_time_interpolation():
 def bounds_kinsol_example():
     """ Test the bounds_kinsol example."""
     bounds_kinsol.run_demo(False)
-
-@testattr(stddist = True)
-def furuta_dfo_using_algorithm_drivers_example():
-    """ Test the Furuta DFO example."""
-    furuta_dfo_using_algorithm_drivers.run_demo(False)
-

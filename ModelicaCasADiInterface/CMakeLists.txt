@@ -69,8 +69,7 @@ link_directories(${IPOPT_HOME}/lib)
 
 get_filename_component(ABS_MC_BUILD "${MC_BUILD}" REALPATH)
 
-# Jar file location provided from environment
-set(COMPILERS_DIR "$ENV{IFCASADI_JAR_BASE}")
+set(COMPILERS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../Compiler")
 set(THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty")
 
 set(MC_JAR "${COMPILERS_DIR}/ModelicaCompilerCasADi/bin/ModelicaCompiler.jar")

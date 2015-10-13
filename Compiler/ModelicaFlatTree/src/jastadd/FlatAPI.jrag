@@ -125,10 +125,6 @@ aspect FlatAPI {
         // 'time' variable is stored in this position
         map.incIndex();
         
-        // Need to increase the index counter by one since the
-        // '_homotopy_lambda' variable is stored in this position
-        map.incIndex();
-        
         map.add(discreteRealVariables());
         
         map.setType(1);
@@ -259,12 +255,9 @@ aspect FlatAPI {
         algebraicContinousRealVariablesOffset() + 
         numAlgebraicContinousRealVariables();
 
-    syn int FClass.homotopyLambdaOffset() =
-        timeOffset() + 1;
-
     syn int FClass.discreteRealVariablesOffset() = 
-        homotopyLambdaOffset() + 1;
-
+        timeOffset() + 1;
+        
     syn int FClass.discreteIntegerVariablesOffset() = 
         discreteRealVariablesOffset() + 
         numDiscreteRealVariables();
@@ -356,39 +349,39 @@ aspect FlatAPI {
 
     syn int FClass.numReals() = reals().size();
     coll ArrayList<FRealVariable> FClass.reals() 
-      [new ArrayList<FRealVariable>()] with add root FClass;
+      [new ArrayList<FRealVariable>()] with add root FlatRoot;
     FRealVariable contributes this when shouldContribute() to FClass.reals() for myFClass();
 
     syn int FClass.numIntegers() = integers().size();
     coll ArrayList<FIntegerVariable> FClass.integers() 
-      [new ArrayList<FIntegerVariable>()] with add root FClass;
+      [new ArrayList<FIntegerVariable>()] with add root FlatRoot;
     FIntegerVariable contributes this when shouldContribute() to FClass.integers() for myFClass();
 
     syn int FClass.numEnums() = enums().size();
     coll ArrayList<FEnumVariable> FClass.enums() 
-      [new ArrayList<FEnumVariable>()] with add root FClass;
+      [new ArrayList<FEnumVariable>()] with add root FlatRoot;
     FEnumVariable contributes this when shouldContribute() to FClass.enums() for myFClass();
 
     syn int FClass.numBooleans() = booleans().size();
     coll ArrayList<FBooleanVariable> FClass.booleans() 
-      [new ArrayList<FBooleanVariable>()] with add root FClass;
+      [new ArrayList<FBooleanVariable>()] with add root FlatRoot;
     FBooleanVariable contributes this when shouldContribute() to FClass.booleans() for myFClass();
 
     syn int FClass.numStrings() = strings().size();
     coll ArrayList<FStringVariable> FClass.strings() 
-      [new ArrayList<FStringVariable>()] with add root FClass;
+      [new ArrayList<FStringVariable>()] with add root FlatRoot;
     FStringVariable contributes this when shouldContribute() to FClass.strings() for myFClass();
 
     syn int FClass.numIndependentConstants() = independentConstants().size();
     coll ArrayList<FVariable> FClass.independentConstants() 
-      [new ArrayList<FVariable>()] with add root FClass;
+      [new ArrayList<FVariable>()] with add root FlatRoot;
     FVariable contributes this 
       when isIndependentConstant() && shouldContribute() 
       to FClass.independentConstants() for myFClass();
 
     syn int FClass.numExternalObjectVariables() = externalObjectVariables().size();
     coll ArrayList<FExternalObjectVariable> FClass.externalObjectVariables()
-      [new ArrayList<FExternalObjectVariable>()] with add root FClass;
+      [new ArrayList<FExternalObjectVariable>()] with add root FlatRoot;
     FExternalObjectVariable contributes this when shouldContribute() to FClass.externalObjectVariables() for myFClass();
 
     syn int FClass.numIndependentRealConstants() = independentRealConstants().size();
@@ -416,7 +409,7 @@ aspect FlatAPI {
     syn ArrayList<FVariable> FClass.dependentConstants() = new ArrayList<FVariable>(0);
 // This collection would never contain anything, replacing with just an empty list.
 //  coll ArrayList<FVariable> FClass.dependentConstants() 
-//    [new ArrayList<FVariable>()] with add root FClass;
+//    [new ArrayList<FVariable>()] with add root FlatRoot;
 //  FVariable contributes
 //      this when false
 //  to FClass.dependentConstants() for myFClass();
@@ -517,7 +510,7 @@ aspect FlatAPI {
     
     syn int FClass.numRegularIndependentParameters() = regularIndependentParameters().size();
     coll ArrayList<FVariable> FClass.regularIndependentParameters() 
-      [new ArrayList<FVariable>()] with add root FClass;
+      [new ArrayList<FVariable>()] with add root FlatRoot;
     FVariable contributes
         this when isRegularIndependentParameter() && shouldContribute()
     to FClass.regularIndependentParameters() for myFClass();
@@ -544,7 +537,7 @@ aspect FlatAPI {
     
     syn int FClass.numStructuralIndependentParameters() = structuralIndependentParameters().size();
     coll ArrayList<FVariable> FClass.structuralIndependentParameters() 
-      [new ArrayList<FVariable>()] with add root FClass;
+      [new ArrayList<FVariable>()] with add root FlatRoot;
     FVariable contributes
         this when isStructuralIndependentParameter() && shouldContribute()
     to FClass.structuralIndependentParameters() for myFClass();
@@ -571,7 +564,7 @@ aspect FlatAPI {
     
     syn int FClass.numFinalIndependentParameters() = finalIndependentParameters().size();
     coll ArrayList<FVariable> FClass.finalIndependentParameters()
-      [new ArrayList<FVariable>()] with add root FClass;
+      [new ArrayList<FVariable>()] with add root FlatRoot;
     FVariable contributes
         this when isFinalIndependentParameter() && shouldContribute()
     to FClass.finalIndependentParameters() for myFClass();
@@ -598,7 +591,7 @@ aspect FlatAPI {
     
     syn int FClass.numEvalIndependentParameters() = evalIndependentParameters().size();
     coll ArrayList<FVariable> FClass.evalIndependentParameters()
-      [new ArrayList<FVariable>()] with add root FClass;
+      [new ArrayList<FVariable>()] with add root FlatRoot;
     FVariable contributes
         this when isEvalIndependentParameter() && shouldContribute()
     to FClass.evalIndependentParameters() for myFClass();
@@ -625,7 +618,7 @@ aspect FlatAPI {
     
     syn int FClass.numDependentParameters() = dependentParameters().size();
     coll ArrayList<FVariable> FClass.dependentParameters() 
-      [new ArrayList<FVariable>()] with add root FClass;
+      [new ArrayList<FVariable>()] with add root FlatRoot;
     FVariable contributes
         this when isDependentParameter() && shouldContribute()
     to FClass.dependentParameters() for myFClass();
@@ -673,7 +666,7 @@ aspect FlatAPI {
     syn int FClass.numDifferentiatedRealVariables() = differentiatedRealVariables().size();
     // The LinkedHashSet is used here to avoid duplicates.
     coll LinkedHashSet<FRealVariable> FClass.allDifferentiatedRealVariables() 
-      [new LinkedHashSet<FRealVariable>()] with add root FClass;
+      [new LinkedHashSet<FRealVariable>()] with add root FlatRoot;
     FDerExp contributes (FRealVariable) getFIdUse().myFV() when getFIdUse().myFV().isFVariable() && !inDeadIfBranch()
     to FClass.allDifferentiatedRealVariables() for myFClass();
     FDerivativeVariable contributes
@@ -706,7 +699,7 @@ aspect FlatAPI {
      * the original model.
      */
     coll LinkedHashSet<FRealVariable> FClass.dynamicStates()
-      [new LinkedHashSet<FRealVariable>()] with add root FClass;
+      [new LinkedHashSet<FRealVariable>()] with add root FlatRoot;
     FRealVariable contributes this when (isDynamicState())
       to FClass.dynamicStates() for myFClass();
     syn int FClass.numDynamicStates() = dynamicStates().size();
@@ -717,7 +710,7 @@ aspect FlatAPI {
      * contains all the actual states.
      */
     coll LinkedHashSet<FDynamicStateVariable> FClass.dynamicStateVariables()
-      [new LinkedHashSet<FDynamicStateVariable>()] with add root FClass;
+      [new LinkedHashSet<FDynamicStateVariable>()] with add root FlatRoot;
     FDynamicStateVariable contributes this 
       to FClass.dynamicStateVariables() for myFClass();
     syn int FClass.numDynamicStateVariables() = dynamicStateVariables().size();
@@ -727,7 +720,7 @@ aspect FlatAPI {
      * compiler.
      */
     coll LinkedHashSet<FDynamicAlgebraicVariable> FClass.dynamicAlgebraicVariables()
-    [new LinkedHashSet<FDynamicAlgebraicVariable>()] with add root FClass;
+    [new LinkedHashSet<FDynamicAlgebraicVariable>()] with add root FlatRoot;
       FDynamicAlgebraicVariable contributes this 
     to FClass.dynamicAlgebraicVariables() for myFClass();
     syn int FClass.numDynamicAlgebraicVariables() = dynamicAlgebraicVariables().size();
@@ -737,7 +730,7 @@ aspect FlatAPI {
      * uses that were not introduced because of stateselect.
      */
     coll LinkedHashSet<FRealVariable> FClass.differentiatedRealVariablesFilteredSet() 
-      [new LinkedHashSet<FRealVariable>()] with add root FClass;
+      [new LinkedHashSet<FRealVariable>()] with add root FlatRoot;
     FDerExp contributes (FRealVariable) getFIdUse().myFV() when getFIdUse().myFV().isFVariable() && !inDeadIfBranch()
     to FClass.differentiatedRealVariablesFilteredSet() for myFClass();
     FDerivativeVariable contributes
@@ -751,7 +744,7 @@ aspect FlatAPI {
      * or kept as a component.
      */
     coll LinkedHashSet<FFunctionDecl> FClass.myFFunctionDeclsPartial() 
-        [new LinkedHashSet<FFunctionDecl>()] with add root FClass;
+        [new LinkedHashSet<FFunctionDecl>()] with add root FlatRoot;
     FPartialFunctionCall contributes myFCallable().actualFFunctionDecl() to FClass.myFFunctionDeclsPartial() for myFClass();
     FFunctionVariable contributes myFCallable().actualFFunctionDecl() when type().isFunction()
         to FClass.myFFunctionDeclsPartial() for myFClass();
@@ -760,17 +753,17 @@ aspect FlatAPI {
      * \brief Collection of all FFunctionDecls called by a partial function call.
      */
     coll LinkedHashSet<FFunctionDecl> FClass.myFFunctionDeclsPartialCalled() 
-        [new LinkedHashSet<FFunctionDecl>()] with add root FClass;
+        [new LinkedHashSet<FFunctionDecl>()] with add root FlatRoot;
     FPartialFunctionCall contributes myFCallable().actualFFunctionDecl() to FClass.myFFunctionDeclsPartialCalled() for myFClass();
 
     coll ArrayList<FDelayExp> FClass.myDelayExps()
-        [new ArrayList<FDelayExp>()] with add root FClass;
+        [new ArrayList<FDelayExp>()] with add root FlatRoot;
     FDelayExp contributes this to FClass.myDelayExps() for myFClass();
     
     syn lazy int FDelayExp.myDelayIndex() = myFClass().myDelayExps().indexOf(originalFExp());
     
     coll ArrayList<FSpatialDistExp> FClass.mySpatialDistExps()
-        [new ArrayList<FSpatialDistExp>()] with add root FClass;
+        [new ArrayList<FSpatialDistExp>()] with add root FlatRoot;
     FSpatialDistExp contributes this to FClass.mySpatialDistExps() for myFClass();
     
     syn lazy int FSpatialDistExp.mySpatialDistIndex() = myFClass().mySpatialDistExps().indexOf(originalFExp());
@@ -789,21 +782,21 @@ aspect FlatAPI {
 
     syn int FClass.numDerivativeVariables() = derivativeVariables().size();
     coll ArrayList<FDerivativeVariable> FClass.derivativeVariables() 
-      [new ArrayList<FDerivativeVariable>()] with add root FClass;
+      [new ArrayList<FDerivativeVariable>()] with add root FlatRoot;
     FDerivativeVariable contributes
         this when (shouldContribute())
     to FClass.derivativeVariables() for myFClass();
     
     syn int FClass.numVariables() = variables().size();
     coll ArrayList<FVariable> FClass.variables() 
-      [new ArrayList<FVariable>()] with add root FClass;
+      [new ArrayList<FVariable>()] with add root FlatRoot;
     FVariable contributes
         this when !isParameter() && !isConstant() && !isPreVariable() && shouldContribute()
     to FClass.variables() for myFClass();
 
     syn int FClass.numDiscreteVariables() = discreteVariables().size();
     coll ArrayList<FVariable> FClass.discreteVariables() 
-      [new ArrayList<FVariable>()] with add root FClass;
+      [new ArrayList<FVariable>()] with add root FlatRoot;
     FRealVariable contributes
         this when isDiscrete() && !isInput() && !isPreVariable() && shouldContribute()
     to FClass.discreteVariables() for myFClass();   
@@ -822,7 +815,7 @@ aspect FlatAPI {
 
     syn int FClass.numNonFixedParameters() = nonFixedParameters().size();
     coll ArrayList<FVariable> FClass.nonFixedParameters()
-        [new ArrayList<FVariable>()] with add root FClass;
+        [new ArrayList<FVariable>()] with add root FlatRoot;
     FVariable contributes this when isNonFixedParameter() && shouldContribute()
     to FClass.nonFixedParameters() for myFClass();
 
@@ -836,10 +829,8 @@ aspect FlatAPI {
                 return true;
         return false;
     }
-    eq FIdUseExp.containsNonFixedParameter() = getFIdUse().containsNonFixedParameter();
-    
-    syn boolean FIdUse.containsNonFixedParameter() = myFV().isNonFixedParameter();
-    eq FIdUseInstAccess.containsNonFixedParameter() = !isCircular() && myInstComponentDecl().isNonFixedParameter();
+    eq FIdUseExp.containsNonFixedParameter()      = myFV().isNonFixedParameter();
+    eq FInstAccessExp.containsNonFixedParameter() = !isCircular() && myInstComponentDecl().isNonFixedParameter();
     
     syn boolean InstComponentDecl.isNonFixedParameter() = false;
     eq InstAssignable.isNonFixedParameter() {
@@ -858,32 +849,6 @@ aspect FlatAPI {
     }
     
 
-    syn boolean ASTNode.containsFTimeExp() {
-        for (ASTNode child : this)
-            if (child.containsFTimeExp())
-                return true;
-        return false;
-    }
-    eq FTimeExp.containsFTimeExp() = true;
-    syn lazy boolean FAbstractEquation.containsFTimeExp() = super.containsFTimeExp();
-    
-    syn boolean ASTNode.containsFHomotopyExp() {
-        for (ASTNode child : this)
-            if (child.containsFHomotopyExp())
-                return true;
-        return false;
-    }
-    eq FHomotopyExp.containsFHomotopyExp() = true;
-    syn lazy boolean FAbstractEquation.containsFHomotopyExp() = super.containsFHomotopyExp();
-    public boolean AbstractEquationBlock.containsFHomotopyExp() {
-        for (FAbstractEquation eqn : allEquations()) {
-            if (eqn.containsFHomotopyExp()) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
     syn int FClass.numDiscretePreVariables() = discretePreVariables().size();
     syn lazy ArrayList<FVariable> FClass.discretePreVariables() {
         ArrayList<FVariable> l = new ArrayList<FVariable>();
@@ -898,7 +863,7 @@ aspect FlatAPI {
     
     syn int FClass.numAliasVariables() = aliasVariables().size();
     coll ArrayList<FVariable> FClass.aliasVariables() 
-      [new ArrayList<FVariable>()] with add root FClass;
+      [new ArrayList<FVariable>()] with add root FlatRoot;
     FVariable contributes
         this when  !isParameter() && !isConstant() && isAlias()
     to FClass.aliasVariables() for myFClass();
@@ -917,7 +882,7 @@ aspect FlatAPI {
 
     syn int FClass.numTempVariables() = tempVariables().size();
     coll ArrayList<FVariable> FClass.tempVariables() 
-        [new ArrayList<FVariable>()] with add root FClass;
+        [new ArrayList<FVariable>()] with add root FlatRoot;
     FVariable contributes
         this when isTemporary() && shouldContribute()
     to FClass.tempVariables() for myFClass();
@@ -1010,7 +975,7 @@ aspect FlatAPI {
     
     syn int FClass.numVariablesWithBindingExp() = variablesWithBindingExp().size();
     coll ArrayList<FVariable> FClass.variablesWithBindingExp() 
-        [new ArrayList<FVariable>()] with add root FClass;
+        [new ArrayList<FVariable>()] with add root FlatRoot;
     FVariable contributes this when 
         !isParameter() && !isConstant() && hasBindingExp() && shouldContribute()
         to FClass.variablesWithBindingExp() for myFClass();
@@ -1037,7 +1002,7 @@ aspect FlatAPI {
      
     syn int FClass.numInputs() = inputs().size();
     coll ArrayList<FVariable> FClass.inputs() 
-        [new ArrayList<FVariable>()] with add root FClass;
+        [new ArrayList<FVariable>()] with add root FlatRoot;
     FVariable contributes
         this when isInput() && shouldContribute()
     to FClass.inputs() for myFClass();
@@ -1067,7 +1032,7 @@ aspect FlatAPI {
 
     syn int FClass.numOutputs() = outputs().size();
     coll ArrayList<FVariable> FClass.outputs() 
-        [new ArrayList<FVariable>()] with add root FClass;
+        [new ArrayList<FVariable>()] with add root FlatRoot;
     FVariable contributes
         this when isOutput() && shouldContribute()
     to FClass.outputs() for myFClass();
@@ -1300,19 +1265,19 @@ aspect FlatAPI {
     }
     
     coll ArrayList<FSampleExp> FClass.sampleExpsWithTimeEvent() 
-        [new ArrayList<FSampleExp>()] with add root FClass;
+        [new ArrayList<FSampleExp>()] with add root FlatRoot;
     FSampleExp contributes this when generatesEventInDAE()
         to FClass.sampleExpsWithTimeEvent() for myFClass();
     
     syn int FClass.numSpatialDistSwitches() = spatialDistExpsWithStateEvent().size();
     coll ArrayList<FSpatialDistExp> FClass.spatialDistExpsWithStateEvent() 
-        [new ArrayList<FSpatialDistExp>()] with add root FClass;
+        [new ArrayList<FSpatialDistExp>()] with add root FlatRoot;
     FSpatialDistExp contributes this when generatesEventInDAE()
         to FClass.spatialDistExpsWithStateEvent() for myFClass();
     
     syn int FClass.numDelaySwitches() = 2*delayExpsWithStateEvent().size();
     coll ArrayList<FDelayExp> FClass.delayExpsWithStateEvent() 
-        [new ArrayList<FDelayExp>()] with add root FClass;
+        [new ArrayList<FDelayExp>()] with add root FlatRoot;
     FDelayExp contributes this when generatesEventInDAE() && !isTimeEventGenerating()
         to FClass.delayExpsWithStateEvent() for myFClass();
     
@@ -1399,7 +1364,7 @@ aspect FlatAPI {
      * Does not check context further than expressions.
      */
     syn boolean FExp.hasEventGeneratingVariability(boolean checkNonFixedParameters) =
-            !variability().parameterOrLess() || (checkNonFixedParameters && containsNonFixedParameter());
+            !variability().lessOrEqual(fParameter()) || (checkNonFixedParameters && containsNonFixedParameter());
 
     syn boolean FExp.inEventGeneratingLocation() = !inFunction() && !inNoEventExp() && !inSmoothExp(1);
 
@@ -1410,16 +1375,13 @@ aspect FlatAPI {
     eq FDelayExp.hasEventGeneratingType()     = true;
     eq FSampleExp.hasEventGeneratingType()    = true;
     
-    syn boolean FExp.generatesEventInDAE() = generatesEventInDAE(originalFExp());
-    syn boolean FRelExp.generatesEventInInitDAE() = generatesEventInInitDAE(originalFExp());
-    
-    syn boolean FExp.generatesEventInDAE(FExp orig) = inEquationSection() && orig==this && generatesEvent(false);
-    syn boolean FRelExp.generatesEventInInitDAE(FExp orig) =
+    syn boolean FExp.generatesEventInDAE() = inEquationSection() && originalFExp()==this && generatesEvent(false);
+    syn boolean FRelExp.generatesEventInInitDAE() =
             (inInitialEquationSection() || inEquationSection() && containsNonFixedParameter())
-            && orig==this && generatesEvent(true);
+            && originalFExp()==this && generatesEvent(true);
     
     coll ArrayList<FRelExp> FClass.relExpsWithEvent() 
-        [new ArrayList<FRelExp>()] with add root FClass;
+        [new ArrayList<FRelExp>()] with add root FlatRoot;
     FRelExp contributes this when generatesEventInDAE() 
         to FClass.relExpsWithEvent() for myFClass();
     
@@ -1445,7 +1407,7 @@ aspect FlatAPI {
 
     coll ArrayList<FRelExp> FAbstractEquation.relExpInEquation() 
         [new ArrayList<FRelExp>()] with add root FAbstractEquation;
-    FRelExp contributes this when generatesEventInDAE(this)
+    FRelExp contributes this when generatesEventInDAE()
     to FAbstractEquation.relExpInEquation() for myFEquation();
 
     coll ArrayList<FRelExp> FStatement.relExpInStmt() 
@@ -1496,24 +1458,24 @@ aspect FlatAPI {
     
     syn int FClass.numRelExpInInitialEquations() = relExpInInitialEquations().size();
     coll ArrayList<FRelExp> FClass.relExpInInitialEquations()
-        [new ArrayList<FRelExp>()] with add root FClass;
+        [new ArrayList<FRelExp>()] with add root FlatRoot;
     FRelExp contributes this when generatesEventInInitDAE()
     to FClass.relExpInInitialEquations() for myFClass();
 
     coll ArrayList<FRelExp> FAbstractEquation.relExpInInitialEquation() 
         [new ArrayList<FRelExp>()] with add root FAbstractEquation;
-    FRelExp contributes this when generatesEventInInitDAE(this)
+    FRelExp contributes this when generatesEventInInitDAE()
     to FAbstractEquation.relExpInInitialEquation() for myFEquation();
     
     syn int FRelExp.relExpInInitialEquationsIndex()  = checkIndex(myFClass().relExpInInitialEquations().indexOf(originalFExp()));
 /*  
 
-    coll ArrayList<FVariable> FClass.structuralParameters() [new ArrayList<FVariable>()] with add root FClass;
+    coll ArrayList<FVariable> FClass.structuralParameters() [new ArrayList<FVariable>()] with add root FlatRoot;
     FIdUseExp contributes
         (FVariable)myFV() when inArraySubscripts()
     to FClass.structuralParameters() for myFClass();
 
-    coll ArrayList<FEquation> FVariable.variableIncidence() [new ArrayList<FEquation>()] with add root FClass;
+    coll ArrayList<FEquation> FVariable.variableIncidence() [new ArrayList<FEquation>()] with add root FlatRoot;
     FIdUseExp contributes
         myFEquation() when inFEquation()
     to FVariable.variableIncidence() for (FVariable)myFV();
@@ -2021,117 +1983,87 @@ aspect FlatAPI {
 }
 
 aspect ReferencedVariables {
-    
-    public interface FIdUseExpLookupVisitor {
-        public void visit(ASTNode<? extends ASTNode> node, Set<FIdUseExp> set);
-    }
-    
-    public class DefaultFidUseExpLookupVisitor implements FIdUseExpLookupVisitor {
-        public static final FIdUseExpLookupVisitor instance = new DefaultFidUseExpLookupVisitor();
-        
-        @Override
-        public void visit(ASTNode<? extends ASTNode> node, Set<FIdUseExp> set) {
-            node.findFIdUseExpsInTree(set, this);
-        }
-    }
-    
     public Set<FIdUseExp> ASTNode.findFIdUseExpsInTree() {
-        return findFIdUseExpsInTree(DefaultFidUseExpLookupVisitor.instance);
-    }
-    
-    public Set<FIdUseExp> ASTNode.findFIdUseExpsInTree(FIdUseExpLookupVisitor visitor) {
         Set<FIdUseExp> set = new LinkedHashSet<FIdUseExp>();
-        visitor.visit(this, set);
+        findFIdUseExpsInTree(set);
         return set;
     }
     
-    public void ASTNode.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
-        for (ASTNode n : this) {
-            visitor.visit(n, set);
-        }
+    public void ASTNode.findFIdUseExpsInTree(Set<FIdUseExp> set) {
+        for (ASTNode n : this)
+            n.findFIdUseExpsInTree(set);
     }
     
-    @Override
-    public void FIdUseExp.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
+    public void FIdUseExp.findFIdUseExpsInTree(Set<FIdUseExp> set) {
         set.add(this);
-        super.findFIdUseExpsInTree(set, visitor);
+        super.findFIdUseExpsInTree(set);
     }
     
-    @Override
-    public void FAttribute.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
+    public void FAttribute.findFIdUseExpsInTree(Set<FIdUseExp> set) {
     }
-
-    syn Set<FIdUseExp> FAbstractEquation.FIdUseExpsInRHS() = FIdUseExpsInRHS(DefaultFidUseExpLookupVisitor.instance);
-
-    syn Set<FIdUseExp> FAbstractEquation.FIdUseExpsInRHS(FIdUseExpLookupVisitor visitor) = Collections.emptySet();
-    eq FEquation.FIdUseExpsInRHS(FIdUseExpLookupVisitor visitor)                         = getRight().findFIdUseExpsInTree(visitor);
-    eq FFunctionCallEquation.FIdUseExpsInRHS(FIdUseExpLookupVisitor visitor)             = getCall().findFIdUseExpsInTree(visitor);
-    eq FAlgorithm.FIdUseExpsInRHS(FIdUseExpLookupVisitor visitor) {
+    
+    syn Set<FIdUseExp> FAbstractEquation.FIdUseExpsInRHS() = Collections.emptySet();
+    eq FEquation.FIdUseExpsInRHS()                         = getRight().findFIdUseExpsInTree();
+    eq FFunctionCallEquation.FIdUseExpsInRHS()             = getCall().findFIdUseExpsInTree();
+    eq FAlgorithm.FIdUseExpsInRHS() {
         Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
         for (FStatement stmt : getFStatements())
-            res.addAll(stmt.FIdUseExpsInRHS(visitor));
+            res.addAll(stmt.FIdUseExpsInRHS());
         return res;
     }
-
-    syn Set<FIdUseExp> FStatement.FIdUseExpsInRHS() = FIdUseExpsInRHS(DefaultFidUseExpLookupVisitor.instance);
-
-    syn Set<FIdUseExp> FStatement.FIdUseExpsInRHS(FIdUseExpLookupVisitor visitor) {
+    syn Set<FIdUseExp> FStatement.FIdUseExpsInRHS() {
         Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
-        for (FIdUseExp use : findFIdUseExpsInTree(visitor))
+        for (FIdUseExp use : findFIdUseExpsInTree())
             if (!use.useIsAssignment() && !use.myFV().isForIndex())
                 res.add(use);
-        res.removeAll(FIdUseExpsInLHS(visitor));
+        res.removeAll(FIdUseExpsInLHS());
         return res;
     }
     
-    eq FIfWhenElseEquation.FIdUseExpsInRHS(FIdUseExpLookupVisitor visitor) {
+    syn Set<FIdUseExp> FIfWhenElseEquation.FIdUseExpsInRHS() {
         Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
         for (FAbstractEquation fae : getFAbstractEquations())
-            res.addAll(fae.FIdUseExpsInRHS(visitor));
+            res.addAll(fae.FIdUseExpsInRHS());
         return res;
     }
     
-    eq FIfWhenEquation.FIdUseExpsInRHS(FIdUseExpLookupVisitor visitor) {
-        Set<FIdUseExp> res = super.FIdUseExpsInRHS(visitor);
-        getTest().findFIdUseExpsInTree(res, visitor);
+    syn Set<FIdUseExp> FIfWhenEquation.FIdUseExpsInRHS() {
+        Set<FIdUseExp> res = super.FIdUseExpsInRHS();
+        getTest().findFIdUseExpsInTree(res);
         if (hasElse())
-            res.addAll(getElse().FIdUseExpsInRHS(visitor));
+            res.addAll(getElse().FIdUseExpsInRHS());
         return res;
     }
     
-    syn Set<FIdUseExp> FAbstractEquation.FIdUseExpsInLHS() = FIdUseExpsInLHS(DefaultFidUseExpLookupVisitor.instance);
-    
-    syn Set<FIdUseExp> FAbstractEquation.FIdUseExpsInLHS(FIdUseExpLookupVisitor visitor) = Collections.emptySet();
-    eq FEquation.FIdUseExpsInLHS(FIdUseExpLookupVisitor visitor)                         = getLeft().findFIdUseExpsInTree(visitor);
-    eq FFunctionCallEquation.FIdUseExpsInLHS(FIdUseExpLookupVisitor visitor)             = getLefts().findFIdUseExpsInTree(visitor);
-    eq FAlgorithm.FIdUseExpsInLHS(FIdUseExpLookupVisitor visitor) {
+    syn Set<FIdUseExp> FAbstractEquation.FIdUseExpsInLHS() = Collections.emptySet();
+    eq FEquation.FIdUseExpsInLHS()                         = getLeft().findFIdUseExpsInTree();
+    eq FFunctionCallEquation.FIdUseExpsInLHS()             = getLefts().findFIdUseExpsInTree();
+    eq FAlgorithm.FIdUseExpsInLHS() {
         Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
         for (FStatement stmt : getFStatements())
-            res.addAll(stmt.FIdUseExpsInLHS(visitor));
+            res.addAll(stmt.FIdUseExpsInLHS());
         return res;
     }
     
-    syn Set<FIdUseExp> FStatement.FIdUseExpsInLHS() = FIdUseExpsInLHS(DefaultFidUseExpLookupVisitor.instance);
-    
-    syn Set<FIdUseExp> FStatement.FIdUseExpsInLHS(FIdUseExpLookupVisitor visitor) {
+    syn Set<FIdUseExp> FStatement.FIdUseExpsInLHS() {
         Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
-        for (FIdUseExp use : findFIdUseExpsInTree(visitor))
+        for (FIdUseExp use : findFIdUseExpsInTree())
             if (use.useIsAssignment() && !use.myFV().isForIndex())
                 res.add(use);
         return res;
     }
     
-    eq FIfWhenElseEquation.FIdUseExpsInLHS(FIdUseExpLookupVisitor visitor) {
+    syn Set<FIdUseExp> FIfWhenElseEquation.FIdUseExpsInLHS() {
         Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
         for (FAbstractEquation fae : getFAbstractEquations())
-            res.addAll(fae.FIdUseExpsInLHS(visitor));
+            res.addAll(fae.FIdUseExpsInLHS());
         return res;
     }
     
-    eq FIfWhenEquation.FIdUseExpsInLHS(FIdUseExpLookupVisitor visitor) {
-        Set<FIdUseExp> res = super.FIdUseExpsInLHS(visitor);
+    syn Set<FIdUseExp> FIfWhenEquation.FIdUseExpsInLHS() {
+        Set<FIdUseExp> res = super.FIdUseExpsInLHS();
         if (hasElse())
-            res.addAll(getElse().FIdUseExpsInLHS(visitor));
+            res.addAll(getElse().FIdUseExpsInLHS());
         return res;
     }
     
@@ -2180,48 +2112,6 @@ aspect ReferencedVariables {
     syn Set<FVariable> FFunctionCallEquation.referencedParametersInLHS() = parametersInSet(referencedFVariablesInLHS());
     syn Set<FVariable> FExp.referencedParametersInFExp()                 = parametersInSet(referencedFVariablesInFExp());
 
-    syn boolean FAbstractEquation.assignedInAllBranches(FAbstractVariable var) = true;
-    eq FEquation.assignedInAllBranches(FAbstractVariable var) = assignedInAllBranchesVariables().contains(var.name());
-
-    syn lazy Set<String> FEquation.assignedInAllBranchesVariables() {
-        Set<String> res = new HashSet<String>();
-        getLeft().assignedInAllBranchesVariables(res);
-        getRight().assignedInAllBranchesVariables(res);
-        return res;
-    }
-
-    public final Set<String> FExp.assignedInAllBranchesVariables() {
-        Set<String> res = new HashSet<String>();
-        assignedInAllBranchesVariables(res);
-        return res;
-    }
-
-    public void FExp.assignedInAllBranchesVariables(Set<String> res) {
-        for (FExp exp : childFExps())
-            exp.assignedInAllBranchesVariables(res);
-    }
-
-    @Override
-    public void FIdUseExp.assignedInAllBranchesVariables(Set<String> res) {
-        res.add(name());
-    }
-
-    @Override
-    public void FIfExp.assignedInAllBranchesVariables(Set<String> res) {
-        getIfExp().assignedInAllBranchesVariables(res);
-        Set<String> a = getThenExp().assignedInAllBranchesVariables();
-        Set<String> b = getElseExp().assignedInAllBranchesVariables();
-        if (a.size() > b.size()) {
-            Set<String> tmp = a;
-            a = b;
-            b = tmp;
-        }
-        for (String name : a) {
-            if (b.contains(name)) {
-                res.add(name);
-            }
-        }
-    }
 }
 
 
@@ -2341,7 +2231,11 @@ aspect FlatTypes {
     }
     
     syn FExp FRecordDecl.extractArg(FRecordConstructor frc, String name) {
-        return frc.getArg(indexOf(name));
+        FVariable fv = getFVariable(indexOf(name));
+        if (fv.modifiableInRecord)
+            return frc.getArg(indexOfArg(name));
+        else
+            return fv.getBindingExp();
     }
     
     syn FExp FRecordConstructor.myArgFExp(String name) {
@@ -2600,81 +2494,13 @@ aspect Attributes {
 
 }
 
-aspect Nominals {
-    syn FExp FAbstractEquation.nominal() {
-        FExp nom = FExp.nominalDefault();
-        nom.setParent(this);
-        return nom;
-    }
-    eq FEquation.nominal() {
-        FExp nom = getLeft().dynamicFExp(FExp.nominalMax(getLeft(), getRight()));
-        if (nom.variability().knownParameterOrLess()) {
-            try {
-                nom = getLeft().dynamicFExp(nom.ceval().buildLiteral());
-            } catch (ConstantEvaluationException e) {
-                
-            }
-        }
-        return nom;
-    }
-    
-    public static FExp FExp.nominalMax(FExp e1, FExp e2) {
-        return new FMaxExp(e1.nominal(), new Opt<FExp>(e2.nominal()));
-    }
-    public static FExp FExp.nominalDefault() {
-        return new FIntegerLitExp(1);
-    }
-    
-    syn FExp FExp.nominal() = FExp.nominalDefault();
-    eq FLitExp.nominal()    = new FAbsExp(fullCopy());
-    
-    eq FDotAddExp.nominal() = FExp.nominalMax(getLeft(), getRight());
-    eq FDotSubExp.nominal() = FExp.nominalMax(getLeft(), getRight());
-    eq FDotMulExp.nominal() = new FMulExp(getLeft().nominal(), getRight().nominal());
-    eq FDotDivExp.nominal() = new FDivExp(getLeft().nominal(), getRight().nominal());
-    eq FNegExp.nominal()    = getFExp().nominal();
-    eq FAbsExp.nominal()    = getFExp().nominal();
-    eq FMinMaxExp.nominal() = hasY() ? FExp.nominalMax(getX(), getY()) : getX().nominal();
-    
-    eq FIfExp.nominal()     = FExp.nominalMax(getThenExp(), getElseExp());
-    
-    eq FNoEventExp.nominal() = getFExp().nominal();
-    eq FSmoothExp.nominal()  = getFExp().nominal();
-    
-    eq FHomotopyExp.nominal()    = FExp.nominalMax(getActual(), getSimplified());
-    eq FSpatialDistExp.nominal() = FExp.nominalMax(getIn0(), getIn1());
-    eq FDelayExp.nominal()       = getFExp().nominal();
-    
-    eq FIdUseExp.nominal() = myFV().nominal();
-    
-    syn FExp FAbstractVariable.nominal() {
-        if (variability().parameterOrLess() && valueIsFixed()) {
-            return new FAbsExp(createUseExp());
-        } else {
-            return variableNominal();
-        }
-    }
-    
-    syn FExp FAbstractVariable.variableNominal() {
-        return FExp.nominalDefault();
-    }
-    
-    eq FRealVariable.variableNominal() {
-        if (nominalAttributeSet()) {
-            return new FAbsExp(nominalAttributeExp().unboundCopy());
-        } else {
-            return super.variableNominal();
-        }
-    }
-}
-
 aspect FVariableUses {
     
     /**
      * Collection attribute returning all variable uses in expressions.
      */
     coll HashSet<FIdUseExp> FAbstractVariable.uses() [new LinkedHashSet<FIdUseExp>()] 
-        with add root FClass;
+        with add root FlatRoot;
     
     FIdUseExp contributes this to FAbstractVariable.uses() for myFV();
     
@@ -2710,7 +2536,7 @@ aspect FVariableUses {
      * Check if this variable is used on the left hand side of a function call equation or statement.
      */
     syn lazy boolean FAbstractVariable.usedAsFunctionCallLeft() {
-        for (FExp e : definingUses()) 
+        for (FExp e : nonDefiningUses()) 
             if (e.inFunctionCallLeft())
                 return true;
         return false;
@@ -2721,12 +2547,6 @@ aspect FVariableUses {
     eq FClass.getChild().inFunctionCallLeft()            = false;
     eq InstRoot.getChild().inFunctionCallLeft()          = false;
     
-    inh boolean FExp.inFunctionCallLeftTop();
-    eq FFunctionCallLeft.getChild().inFunctionCallLeftTop() = true;
-    eq FExp.getChild().inFunctionCallLeftTop()              = false;
-    eq FClass.getChild().inFunctionCallLeftTop()            = false;
-    eq InstRoot.getChild().inFunctionCallLeftTop()          = false;
-    
     /**
      * Checks if this expression is used in a function call
      */
@@ -2735,9 +2555,8 @@ aspect FVariableUses {
     eq FClass.getChild().inFunctionCall()        = false;
     eq InstRoot.getChild().inFunctionCall()      = false;
     
-    inh boolean FExp.isFunctionCallArg();
-    eq FFunctionCall.getArg().isFunctionCallArg() = true;
-    eq BaseNode.getChild().isFunctionCallArg()    = false;
+    
+    
     
     /**
      * Returnes the function input that this expressions corresponds to.
@@ -2757,29 +2576,35 @@ aspect FVariableUses {
      * All uses of this variable that are the left-hand side of an assignment or 
      * function call statement. 
      */
-    coll HashSet<FIdUseExp> FFunctionVariable.assigningUses() [new HashSet<FIdUseExp>()] 
+    coll HashSet<FIdUse> FFunctionVariable.assigningUses() [new HashSet<FIdUse>()] 
         with add root FFunctionDecl;
-    FIdUseExp contributes this when isAssignedTo() && myFuncVar() != null
+    FIdUse contributes this when isAssignedTo() && myFuncVar() != null
         to FFunctionVariable.assigningUses() for myFuncVar();
+//  syn lazy Set<FIdUse> FAbstractVariable.assigningUses() {
+//      Set<FIdUseExp> res = new HashSet<FIdUseExp>();
+//      for (FIdUseExp use : uses())
+//          if (use.isAssignedTo())
+//              res.add(use);
+//      return res;
+//  }
     
     /**
      * Check if this is the left hand side of an equation.
      */
-    inh boolean FExp.isLeftHandSide();
+    inh boolean FIdUseExp.isLeftHandSide();
     eq BaseNode.getChild().isLeftHandSide()    = false;
     eq FEquation.getLeft().isLeftHandSide()    = true;
-    eq FFunctionCallLeft.getChild().isLeftHandSide()  = true;
-    eq FArray.getChild().isLeftHandSide()             = isLeftHandSide();
-    eq FRecordConstructor.getChild().isLeftHandSide() = isLeftHandSide();
     
     /**
      * Check if this is the left hand side of an assignment or function call statement.
      */
-    inh boolean FAssignableExp.isAssignedTo();
+    inh boolean FIdUse.isAssignedTo();
+    inh boolean FIdUseExp.isAssignedTo();
     inh boolean FFunctionCallLeft.isAssignedTo();
     eq BaseNode.getChild().isAssignedTo()         = false;
     eq FAssignStmt.getLeft().isAssignedTo()       = true;
     eq FFunctionCallStmt.getLeft().isAssignedTo() = true;
+    eq FIdUseExp.getFIdUse().isAssignedTo()       = isAssignedTo();
     eq FFunctionCallLeft.getFExp().isAssignedTo() = isAssignedTo();
     
     inh boolean FExp.inBindingExp();
@@ -2801,12 +2626,7 @@ aspect FVariableUses {
     
     inh FTypePrefixVariability FExp.bindingExpVariability();
     eq Root.getChild().bindingExpVariability() = fContinuous();
-    eq FVariable.getChild().bindingExpVariability() = variability();
-    eq FVariable.getFAttribute().bindingExpVariability() = fParameter();
-    eq FRecordVariable.getFAttribute(int i).bindingExpVariability() {
-        int partIndex = myFRecordDecl().indexOf(getFAttribute(i).name());
-        return variability().getPart(partIndex);
-    }
+    eq FVariable.getBindingExp().bindingExpVariability() = variability();
     
     /**
      * Collection attribute returning all dependent parameters which
@@ -2878,6 +2698,8 @@ aspect FVariableUses {
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
     FIdUseExp contributes (FVariable) myFV() when isAlgebraicVariableAccess() to 
+        FAbstractEquation.algebraicVariables() for each enclosingEquationsIterator();
+    FAssignStmt contributes (FVariable) getLeft().myFV() when getLeft().myFV().isAlgebraicVariable() to 
         FAbstractEquation.algebraicVariables() for each enclosingEquationsIterator();
 
     syn boolean FIdUseExp.isAlgebraicVariableAccess() = inAlgebraicAccessLocation() && myFV().isAlgebraicVariable();
@@ -3625,13 +3447,13 @@ aspect FlatAlgorithmAPI {
         to FClass.myAlgorithms() for myFClass();
     
     inh boolean FIdUse.useIsAssignment();
-    inh boolean FAssignableExp.useIsAssignment();
+    inh boolean FIdUseExp.useIsAssignment();
     inh boolean FArray.useIsAssignment();
     inh boolean FRecordConstructor.useIsAssignment();
     eq FAssignStmt.getLeft().useIsAssignment()       = true;
+    eq InstAssignStmt.getLeft().useIsAssignment()    = true;
     eq FFunctionCallLeft.getFExp().useIsAssignment() = true;
-    eq FAssignableExp.getChild().useIsAssignment()   = useIsAssignment();
-    eq FArraySubscripts.getChild().useIsAssignment() = false;
+    eq FIdUseExp.getFIdUse().useIsAssignment()       = useIsAssignment();
     eq FArray.getFExp().useIsAssignment()            = useIsAssignment();
     eq FRecordConstructor.getArg().useIsAssignment() = useIsAssignment();
     eq FExp.getChild().useIsAssignment()             = false;
@@ -3752,6 +3574,20 @@ aspect FlatExternalFunctionAPI {
     
     public void FExternalStmt.extractLibrary(InstExternal n) {
         library = n.annotation("Library").asStringVector();
+        if (library != null) {
+            ArrayList<String> libs = new ArrayList<String>();
+            String lapackLib = n.myOptions().getStringOption("lapack_lib");
+            for (int i = 0; i < library.length; i++) {
+                if (library[i].equals("lapack") && !lapackLib.equals("lapack")) {
+                    n.warning("Removing use of external library 'lapack'. Will use '"
+                            + lapackLib + "' specified by option 'lapack_lib'");
+                } else {
+                    libs.add(library[i]);
+                }
+            }
+            library = new String[libs.size()];
+            library = libs.toArray(library);
+        }
         include = n.annotation("Include").string();
         libraryDir = n.annotation("LibraryDirectory").string();
         includeDir = n.annotation("IncludeDirectory").string();

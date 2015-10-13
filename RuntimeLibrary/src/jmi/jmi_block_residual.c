@@ -35,10 +35,10 @@
 #define nbr_allocated_iterations 30
 
 
-int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_sr, int n_nr, int n_dinr, int n_nrt, int n_sw, int n_disw, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index) {
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_sr, int n_nr, int n_dinr, int n_sw, int n_disw, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index) {
     jmi_block_residual_t* b;
     int flag;
-    flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_sr, n_nr, n_dinr, n_nrt, n_sw, n_disw, jacobian_variability, index, label);
+    flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_sr, n_nr, n_dinr, n_sw, n_disw, jacobian_variability, index, label);
     jmi->dae_block_residuals[index] = b;
 #ifdef JMI_PROFILE_RUNTIME
 	if (b != 0) {
@@ -49,10 +49,10 @@ int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_bloc
     return flag;
 }
 
-int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_sr, int n_nr, int n_dinr, int n_nrt, int n_sw, int n_disw, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index) {
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_sr, int n_nr, int n_dinr, int n_sw, int n_disw, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index) {
     jmi_block_residual_t* b;
     int flag;
-    flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_sr, n_nr, n_dinr, n_nrt, n_sw, n_disw, jacobian_variability, index, label);
+    flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_sr, n_nr, n_dinr, n_sw, n_disw, jacobian_variability, index, label);
 #ifdef JMI_PROFILE_RUNTIME
 	if (b != 0) {
 		b->parent_index = parent_index;
@@ -65,17 +65,7 @@ int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi
 
 int jmi_block_residual(void* b, double* x, double* residual, int mode) {
     jmi_block_residual_t* block = (jmi_block_residual_t*)b;
-    jmi_t* jmi = block->jmi;
-    int ret;
-    int depth = jmi_prepare_try(jmi);
-    if(jmi_try(jmi, depth)) {
-        ret = -1;
-    }
-    else {
-        ret = block->F(block->jmi, x, residual, mode);
-    }
-    jmi_finalize_try(jmi,depth);
-    return ret;     
+    return block->F(block->jmi, x, residual, mode);
 }
 
 int jmi_block_dir_der(void* b, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int mode) {
@@ -83,20 +73,14 @@ int jmi_block_dir_der(void* b, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residua
     jmi_t* jmi = block->jmi;
     jmi_real_t* store_dz = jmi->dz[0]; 
     int i, ef;
-    int depth = jmi_prepare_try(jmi);
     jmi->dz[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
     jmi->dz_active_variables[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
 
     for (i=0;i<jmi->n_v;i++) {
         jmi->dz_active_variables[0][i] = 0;
     }
-    if(jmi_try(jmi, depth)) {
-        ef = -1;
-    }
-    else {
-        ef = block->dF(block->jmi,x,dx,residual,dRes,mode);
-    }
-    jmi_finalize_try(jmi,depth);
+
+    ef = block->dF(block->jmi,x,dx,residual,dRes,mode);
     jmi->dz_active_variables[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
     jmi->dz[0] = store_dz;
     return ef;
@@ -367,7 +351,7 @@ int jmi_block_set_sw_nr(jmi_block_residual_t* block, jmi_real_t* switches, jmi_r
     return 0;
 }
 
-int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_solver_kind_t solver, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_sr, int n_nr, int n_dinr, int n_nrt, int n_sw, int n_disw, int jacobian_variability, int index, jmi_string_t label){
+int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_solver_kind_t solver, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_sr, int n_nr, int n_dinr, int n_sw, int n_disw, int jacobian_variability, int index, jmi_string_t label){
     jmi_block_residual_t* b = (jmi_block_residual_t*)calloc(1,sizeof(jmi_block_residual_t));
     int flag = 0;
     if(!b) return -1;
@@ -381,7 +365,6 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     b->n = n;
     b->n_sr = n_sr;
     b->n_nr = n_nr;
-    b->n_nrt = n_nrt;
     b->n_sw = n_sw;
     b->n_direct_nr = n_dinr;
     b->n_direct_sw = n_disw;
@@ -659,7 +642,6 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
     free(b->nr_pre_index);
     free(b->nr_direct_index);
     free(b->nr_vref);
-    free(b->sr_vref);
     free(b->jac);
     free(b->ipiv);
     free(b->min);

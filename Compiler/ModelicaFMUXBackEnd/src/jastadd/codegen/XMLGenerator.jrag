@@ -447,7 +447,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 					}
 					
 					//direct dependency - not supported
-					if (variable.isOutput()) {
+					if (variable.isOutput() && variable.isReal()) {
 						genPrinter.print("\n\t\t\t<DirectDependency>");
 						for (FVariable dv : variable.dependsOn()) {
 							if (dv.isInput()) {
@@ -551,15 +551,15 @@ public class XMLGenerator extends GenericXMLGenerator {
 		//genPrinter.print("declaredType=\"String\" ");		
 		//quantity
 		if(realvariable.quantityAttributeSet()) {
-			genPrinter.print("quantity=\""+realvariable.quantityXML(this)+"\" ");
+			genPrinter.print("quantity=\""+realvariable.quantityAttribute()+"\" ");
 		}
 		//unit
 		if(realvariable.unitAttributeSet()) {
-			genPrinter.print("unit=\""+realvariable.unitXML(this)+"\" ");
+			genPrinter.print("unit=\""+realvariable.unitAttribute()+"\" ");
 		}
 		//default display unit
 		if(realvariable.displayUnitAttributeSet()) {
-			genPrinter.print("displayUnit=\""+realvariable.displayUnitXML(this)+"\" ");
+			genPrinter.print("displayUnit=\""+realvariable.displayUnitAttribute()+"\" ");
 		}		
 		//relativeQuantity
 		genPrinter.print("relativeQuantity=\"false\" ");
@@ -592,7 +592,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		//genPrinter.print("declaredType=\"String\" ");		
 		//quantity
 		if(integervariable.quantityAttributeSet()) {
-			genPrinter.print("quantity=\""+integervariable.quantityXML(this)+"\" ");
+			genPrinter.print("quantity=\""+integervariable.quantityAttribute()+"\" ");
 		}					
 		//min
 		if(integervariable.minAttributeSet()) {
@@ -619,7 +619,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		
 		//quantity
 		if(enumvariable.quantityAttributeSet()) {
-			genPrinter.print("quantity=\""+enumvariable.quantityXML(this)+"\" ");
+			genPrinter.print("quantity=\""+enumvariable.quantityAttribute()+"\" ");
 		}					
 		//min
 		if(enumvariable.minAttributeSet()) {

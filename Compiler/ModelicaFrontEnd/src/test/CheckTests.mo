@@ -15,131 +15,50 @@
 */
 
 package CheckTests
-
+	
 model InnerOuter1
-    partial model A
-        Real x;
-    end A;
-    
-    outer A a;
+    outer Real x;
 equation
-    a.x = true; // To generate another error to show up in an error check
+    x = true; // To generate another error to show up in an error check
 
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="InnerOuter1",
-            description="Check that error is not generated for partial outer without inner in check mode",
+            description="Check that error is not generated for outer without inner in check mode",
             checkType=check,
             errorMessage="
 1 errors found:
 
-Error at line 26, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 22, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   The right and left expression types of equation are not compatible
 ")})));
 end InnerOuter1;
 
 
 model InnerOuter2
-    partial model A
-        function f
-            input Real x;
-            output Real y;
-        algorithm
-            y := x + 1;
-        end f;
-    end A;
-    
-    outer A a;
-    Real z = a.f(time);
-    Real w = true; // To generate another error to show up in an error check
+	model A
+		function f
+			input Real x;
+			output Real y;
+		algorithm
+			y := x + 1;
+		end f;
+	end A;
+	
+	outer A a;
+	Real z = a.f(time);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="InnerOuter2",
-            description="Check that no extra errors are generated for function called through outer withour inner",
-            checkType=check,
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InnerOuter2",
+			description="Check that no extra errors are generated for function called through outer withour inner",
+			errorMessage="
 1 errors found:
 
-Error at line 54, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
-  The binding expression of the variable w does not match the declared type of the variable
+Error at line 46, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+  Cannot find inner declaration for outer a
 ")})));
 end InnerOuter2;
-
-
-model InnerOuter3
-    model A
-        outer Real x;
-    end A;
-    
-    Real x;
-    A a;
-    Real w = true; // To generate another error to show up in an error check
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="InnerOuter3",
-            description="Check that error is not generated in check mode for outer without inner and component on top level with same name",
-            checkType=check,
-            errorMessage="
-1 errors found:
-
-Error at line 77, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
-  The binding expression of the variable w does not match the declared type of the variable
-")})));
-end InnerOuter3;
-
-
-model InnerOuter4
-    model A
-        outer Real x;
-    end A;
-    
-    model B
-        outer Integer x;
-    end B;
-    
-    A a;
-    B b;
-    Real w = true; // To generate another error to show up in an error check
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="InnerOuter4",
-            description="Check that error is not generated for multiple outers without inner with same name but different types in check mode",
-            checkType=check,
-            errorMessage="
-1 errors found:
-
-Error at line 104, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
-  The binding expression of the variable w does not match the declared type of the variable
-")})));
-end InnerOuter4;
-
-
-model InnerOuter5
-    model A
-        outer Real x;
-    equation
-        x = time;
-    end A;
-    
-    A a;
-    parameter Real w; // To generate another warning to show up in an error check
-
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="InnerOuter5",
-            description="Check that warning is not generated for outer without inner in check mode",
-            checkType=check,
-            errorMessage="
-1 errors found:
-
-Warning at line 127, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
-  The parameter w does not have a binding expression
-")})));
-end InnerOuter5;
-
 
 
 model ConditionalError1
@@ -150,12 +69,12 @@ model ConditionalError1
 	A a if b;
 	parameter Boolean b = false;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConditionalError1",
-            description="Check that errors in conditional components are found in check mode",
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConditionalError1",
+			description="Check that errors in conditional components are found in check mode",
             checkType=check,
-            errorMessage="
+			errorMessage="
 1 errors found:
 
 Error at line 66, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
@@ -235,29 +154,6 @@ Error at line 137, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/CheckT
 end ConditionalError4;
 
 
-model ConditionalError5
-    model A
-        parameter Integer n = 1;
-        Real x[n] = (1:n) * time;
-        Real y = x[1] + 1;
-    end A;
-    
-    parameter Integer n = 0;
-    A a(n=n) if n > 0;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConditionalError5",
-            description="Check that array bounds errors are allowed in disabled conditionals in check mode",
-            checkType=check,
-            flatModel="
-fclass CheckTests.ConditionalError5
- structural parameter Integer n = 0 /* 0 */;
-end CheckTests.ConditionalError5;
-")})));
-end ConditionalError5;
-
-
 model ParamBinding1
 	type B = enumeration(a,b,c);
 	model A
@@ -276,12 +172,12 @@ model ParamBinding1
 	A a(b = b2);
 	Integer y = 1.2; // Generate an error to be able to use error test case
 
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="ParamBinding1",
-            description="Check that no error messages are generated for structural parameters without binding expression in check mode",
-            checkType=check,
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="ParamBinding1",
+			description="Check that no error messages are generated for structural parameters without binding expression in check mode",
+			checkType=check,
+			errorMessage="
 1 errors found:
 
 Error at line 173, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
@@ -299,12 +195,12 @@ model ParamBinding2
 	constant Real p = f(1);
     Integer y = 1.2; // Generate an error to be able to use error test case
 
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="ParamBinding2",
-            description="Check that no error messages are generated for structural parameters that can't be evaluated in check mode",
-            checkType=check,
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="ParamBinding2",
+			description="Check that no error messages are generated for structural parameters that can't be evaluated in check mode",
+			checkType=check,
+			errorMessage="
 1 errors found:
 
 Error at line 196, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
@@ -321,12 +217,12 @@ model ArraySize1
 	
     Integer e = 1.2; // Generate an error to be able to use error test case
 
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="ArraySize1",
-            description="Check that no error message is generated for incomplete array size in check mode",
-            checkType=check,
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="ArraySize1",
+			description="Check that no error message is generated for incomplete array size in check mode",
+			checkType=check,
+			errorMessage="
 1 errors found:
 
 Error at line 218, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
@@ -344,12 +240,12 @@ model FunctionNoAlgorithm1
     Real z = f(time);
     Integer y = 1.2; // Generate an error to be able to use error test case
 
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="FunctionNoAlgorithm1",
-            description="Check that no error message is generated replaceable incomplete function in check mode",
-            checkType=check,
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="FunctionNoAlgorithm1",
+			description="Check that no error message is generated replaceable incomplete function in check mode",
+			checkType=check,
+			errorMessage="
 1 errors found:
 
 Error at line 241, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
@@ -369,12 +265,12 @@ model FunctionNoAlgorithm2
     Real z = A.f(time);
     Integer y = 1.2; // Generate an error to be able to use error test case
 
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="FunctionNoAlgorithm2",
-            description="Check that no error message is generated incomplete function in replaceable package in check mode",
-            checkType=check,
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="FunctionNoAlgorithm2",
+			description="Check that no error message is generated incomplete function in replaceable package in check mode",
+			checkType=check,
+			errorMessage="
 1 errors found:
 
 Error at line 266, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
@@ -391,77 +287,18 @@ model FunctionNoAlgorithm3
     
     Real z = f(time);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="FunctionNoAlgorithm3",
-            description="Check that errors are generated for use of incomplete non-replaceable function in check mode",
-            checkType=check,
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="FunctionNoAlgorithm3",
+			description="Check that errors are generated for use of incomplete non-replaceable function in check mode",
+			checkType=check,
+			errorMessage="
 1 errors found:
 
 Error at line 288, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Calling function f(): can only call functions that have one algorithm section or external function specification
 ")})));
 end FunctionNoAlgorithm3;
-
-
-model FunctionNoAlgorithm4
-    function f
-        input Real x;
-        output Real y;
-    end f;
-    
-    function f2 = f3;
-    
-    replaceable function f3 = f;
-
-    Real z = f2(time);
-    Integer y = 1.2; // Generate an error to be able to use error test case
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="FunctionNoAlgorithm4",
-            description="",
-            checkType=check,
-            errorMessage="
-1 errors found:
-
-Error at line 315, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
-  The binding expression of the variable y does not match the declared type of the variable
-")})));
-end FunctionNoAlgorithm4;
-
-
-model FunctionNoAlgorithm5
-    function f
-        input Real x;
-        output Real y;
-    end f;
-    
-    model A
-        replaceable function f2 = f;
-        Real z = f2(time);
-    end A;
-    
-    replaceable function f3 = f;
-
-    A a(redeclare function f2 = f3);
-    Integer y = 1.2; // Generate an error to be able to use error test case
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="FunctionNoAlgorithm5",
-            description="",
-            checkType=check,
-            errorMessage="
-1 errors found:
-
-Error at line 345, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
-  The binding expression of the variable y does not match the declared type of the variable
-")})));
-end FunctionNoAlgorithm5;
-
-
 
 model IfEquationElse1
   Real x;
@@ -631,8 +468,8 @@ model ComponentNameError2
 
 Error at line 514, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo',
 In components:
-    a1
-    a2
+  a1
+  a2
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end ComponentNameError2;
@@ -687,38 +524,6 @@ Error at line 570, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckT
   Constructors for external objects can only be used as binding expressions
 ")})));
 end ExtObjConstructor;
-
-model ExtObjConstructor2
-    model X
-        extends ExternalObject;
-        function constructor
-            output X x;
-            external "C";
-        end constructor;
-        function destructor
-            input X x;
-            external "C";
-        end destructor;
-    end X;
-    
-    model X1
-        extends X;
-        extends ExternalObject;
-    end X1;
-    
-    parameter X x;
-    
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExtObjConstructor2",
-            description="No external object binding expression",
-            errorMessage="
-1 errors found:
-
-Error at line 603, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
-  Missing binding expression for external object
-")})));
-end ExtObjConstructor2;
 
 
 
@@ -1142,60 +947,5 @@ Error at line 1028, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/Check
   Calling function spatialDistribution(): missing argument for required input positiveVelocity
 ")})));
 end SpatialDist1;
-
-model FixedFalseIfEquTest1
-    Real x;
-    parameter Boolean b(fixed=false);
-  initial equation
-    b = true;
-  equation
-    if b then
-        x = time;
-    else
-        x = 0;
-    end if;
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="FixedFalseIfEquTest1",
-            description="Test that fixed false parameter if test in if equation is not marked as structural.",
-            flatModel="
-fclass CheckTests.FixedFalseIfEquTest1
- Real x;
- parameter Boolean b(fixed = false);
-initial equation 
- b = true;
-equation
- x = if b then time else 0;
-end CheckTests.FixedFalseIfEquTest1;
-
-")})));
-end FixedFalseIfEquTest1;
-
-model FixedFalseIndex1
-    parameter Integer p(fixed=false);
-    Real xp;
-    Real[:] x = 1:2;
-  initial equation
-    p = 1;
-  equation 
-    xp = x[p];
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="FixedFalseIndex1",
-            description="Test that fixed false parameter index is handled correctly",
-            flatModel="
-fclass CheckTests.FixedFalseIndex1
- parameter Integer p(fixed = false);
- parameter Real xp(fixed = false);
- constant Real x[1] = 1;
- constant Real x[2] = 2;
-initial equation 
- p = 1;
- xp = ({1.0, 2.0})[p];
-end CheckTests.FixedFalseIndex1;
-")})));
-end FixedFalseIndex1;
 
 end CheckTests;

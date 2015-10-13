@@ -198,7 +198,6 @@ top_srcdir = @top_srcdir@
 RUNTIMELIBRARY_BUILD_DIR = $(abs_builddir)/build
 RUNTIMELIBRARY_BUILD_DIR64 = $(abs_builddir)/build64
 RUNTIMELIBRARY_SRC_DIR = $(abs_top_srcdir)/RuntimeLibrary
-RUNTIMELIBRARY_COMMON_ARGS = "-DCMAKE_INSTALL_DIR:PATH=$(prefix)" "$(RUNTIMELIBRARY_SRC_DIR)" "-DSUNDIALS_HOME=$(SUNDIALS_HOME)" "-DTOP_SRC=$(abs_top_srcdir)" "-DEXTRA_RUNTIME_MODULES=$(EXTRA_RUNTIME_MODULES)"
 all: all-am
 
 .SUFFIXES:
@@ -278,7 +277,6 @@ distdir: $(DISTFILES)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-local
 check: check-am
-@JM_WIN64_FALSE@all-local:
 all-am: Makefile all-local
 installdirs:
 install: install-am
@@ -306,7 +304,6 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-@JM_WIN64_TRUE@install-exec-local:
 clean: clean-am
 
 clean-am: clean-generic clean-libtool clean-local mostlyclean-am
@@ -333,7 +330,7 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-exec-local
+install-exec-am:
 
 install-html: install-html-am
 
@@ -380,13 +377,12 @@ uninstall-am:
 	distclean-generic distclean-libtool distdir dvi dvi-am html \
 	html-am info info-am install install-am install-data \
 	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-exec-local install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	uninstall uninstall-am
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am
 
 
 # This is to ensure that the install target of the Sundials
@@ -399,23 +395,23 @@ $(RUNTIMELIBRARY_BUILD_DIR):
 	cd $(RUNTIMELIBRARY_BUILD_DIR) && \
 	case $(build) in \
 	*-cygwin*|*-mingw*) \
-	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m32" $(RUNTIMELIBRARY_COMMON_ARGS) ;; \
+	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m32" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir) ;; \
 	*-apple*) \
-	cmake $(RUNTIMELIBRARY_COMMON_ARGS) ;; \
+	cmake -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir) ;; \
 	*) \
-	cmake $(RUNTIMELIBRARY_COMMON_ARGS) ;; \
+	cmake -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir) ;; \
 	esac
 
 @JM_WIN64_TRUE@$(RUNTIMELIBRARY_BUILD_DIR64):
 @JM_WIN64_TRUE@	mkdir -p $(RUNTIMELIBRARY_BUILD_DIR64)
 @JM_WIN64_TRUE@	cd $(RUNTIMELIBRARY_BUILD_DIR64) && \
-@JM_WIN64_TRUE@	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m64" $(RUNTIMELIBRARY_COMMON_ARGS)
+@JM_WIN64_TRUE@	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m64" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir)
 
 @JM_WIN64_TRUE@all-local: $(RUNTIMELIBRARY_BUILD_DIR) $(RUNTIMELIBRARY_BUILD_DIR64)
 @JM_WIN64_TRUE@	cd $(RUNTIMELIBRARY_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
 @JM_WIN64_TRUE@	cd $(RUNTIMELIBRARY_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install
 
-@JM_WIN64_FALSE@install-exec-local: $(RUNTIMELIBRARY_BUILD_DIR)
+@JM_WIN64_FALSE@all-local: $(RUNTIMELIBRARY_BUILD_DIR)
 @JM_WIN64_FALSE@	cd $(RUNTIMELIBRARY_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
 
 check-local:

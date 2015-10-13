@@ -82,11 +82,11 @@ end NameTests.NameTest2;
 A a;
 
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="NameTest3_Err",
-            description="Basic test of name lookup",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest3_Err",
+			description="Basic test of name lookup",
+			errorMessage="
 1 errors found:
 
 Error at line 82, column 1, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -109,11 +109,11 @@ model NameTest4_Err
   M m;
 
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="NameTest4_Err",
-            description="Basic test of name lookup",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest4_Err",
+			description="Basic test of name lookup",
+			errorMessage="
 1 errors found:
 
 Error at line 106, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -134,11 +134,11 @@ model NameTest5_Err
 equation
   b.y = y + a.x;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="NameTest5_Err",
-            description="Basic test of name lookup",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest5_Err",
+			description="Basic test of name lookup",
+			errorMessage="
 2 errors found:
 
 Error at line 135, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -160,11 +160,11 @@ model NameTest55_Err
   
   A a;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="NameTest55_Err",
-            description="Basic test of name lookup",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest55_Err",
+			description="Basic test of name lookup",
+			errorMessage="
 1 errors found:
 
 Error at line 158, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -182,11 +182,11 @@ model NameTest6_Err
   
   A a;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="NameTest6_Err",
-            description="Basic test of name lookup",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest6_Err",
+			description="Basic test of name lookup",
+			errorMessage="
 1 errors found:
 
 Error at line 180, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -204,11 +204,11 @@ model NameTest7_Err
   A a1;
   A a2;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="NameTest7_Err",
-            description="Basic test of name lookup",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest7_Err",
+			description="Basic test of name lookup",
+			errorMessage="
 1 errors found:
 
 Error at line 201, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -223,11 +223,11 @@ model NameTest8_Err
   
   C c;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="NameTest8_Err",
-            description="Basic test of name lookup",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest8_Err",
+			description="Basic test of name lookup",
+			errorMessage="
 1 errors found:
 
 Error at line 222, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -313,11 +313,11 @@ Error at line 291, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/NameTes
  A a(p1=p1);
   
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="NameTest11_Err",
-            description="Test that names are looked up correct.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest11_Err",
+			description="Test that names are looked up correct.",
+			errorMessage="
 1 errors found:
 
 Error at line 313, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -347,11 +347,11 @@ M m(redeclare B a);
 
   
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="NameTest12_Err",
-            description="Test that names are looked up correct.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest12_Err",
+			description="Test that names are looked up correct.",
+			errorMessage="
 1 errors found:
 
 Error at line 346, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -389,11 +389,11 @@ end NameTest12_Err;
   PP.BB bb(y=6);
  
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="NameTest13_Err",
-            description="Test that names are looked up correct.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest13_Err",
+			description="Test that names are looked up correct.",
+			errorMessage="
 4 errors found:
 
 Error at line 381, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -403,9 +403,6 @@ Error at line 386, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/NameTe
   Cannot find class declaration for C
 
 Error at line 386, column 39, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-  Cannot find component declaration for y
-
-Error at line 389, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find component declaration for y
 ")})));
 end NameTest13_Err;
@@ -440,19 +437,19 @@ end NameTest13_Err;
    PP.BB bb(z=pp);
  
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="NameTest14_Err",
-            description="Test that names are looked up correct.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest14_Err",
+			description="Test that names are looked up correct.",
+			errorMessage="
 3 errors found:
-
+ 
 Error at line 438, column 56, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find component declaration for z
-
+ 
 Error at line 440, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find component declaration for z
-
+  
 Error at line 440, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class or component declaration for pp
 ")})));
@@ -775,7 +772,7 @@ model NameTest25_Err
 1 errors found:
 
 Error at line 768, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-  Cannot use component y, because it is not present in constraining type of declaration 'replaceable B b constrainedby B'
+  Cannot use component y, because it is not present in constraining type of declaration 'redeclare replaceable C b'
 ")})));
 end NameTest25_Err;
 
@@ -953,11 +950,11 @@ class ConstantLookup10
  import NameTests.ConstantLookup10.P.x;
  parameter Real p = x;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConstantLookup10",
-            description="Constant lookup: trying to import non-constant component",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConstantLookup10",
+			description="Constant lookup: trying to import non-constant component",
+			errorMessage="
 2 errors found:
 
 Error at line 949, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -977,11 +974,11 @@ class ConstantLookup11
  import x2 = NameTests.ConstantLookup11.P.x;
  parameter Real p = x2;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConstantLookup11",
-            description="Constant lookup: trying to import non-constant component (named import)",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConstantLookup11",
+			description="Constant lookup: trying to import non-constant component (named import)",
+			errorMessage="
 2 errors found:
 
 Error at line 973, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -1002,11 +999,11 @@ class ConstantLookup12
  import NameTests.ConstantLookup12.P.*;
  parameter Real p = x;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConstantLookup12",
-            description="Constant lookup: trying to import non-constant component (unqualified import)",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConstantLookup12",
+			description="Constant lookup: trying to import non-constant component (unqualified import)",
+			errorMessage="
 1 errors found:
 
 Error at line 1003, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -1055,11 +1052,11 @@ model ConstantLookup16
 	constant Real[3] b = {1, 2, 3};
 	constant Integer c = d;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConstantLookup16",
-            description="Using constant with bad value as array index",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConstantLookup16",
+			description="Using constant with bad value as array index",
+			errorMessage="
 3 errors found:
 
 Error at line 1054, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -1086,11 +1083,11 @@ model ConstantLookup17
 	Real a = A.n;
 	Real b = B.n;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConstantLookup17",
-            description="Illegal accesses of components in local classes",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConstantLookup17",
+			description="Illegal accesses of components in local classes",
+			errorMessage="
 1 errors found:
 
 Error at line 1078, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -1955,11 +1952,11 @@ model ConstantLookup39
     
     Real z = D.f;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConstantLookup39",
-            description="Error in constant used from other package",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConstantLookup39",
+			description="Error in constant used from other package",
+			errorMessage="
 2 errors found:
 
 Error at line 1945, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -2044,11 +2041,11 @@ class ExtendsTest3
   extends C;
   extends D;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExtendsTest3",
-            description="Test that local classes that becomes visible through inheritance can not be used as super classes",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExtendsTest3",
+			description="Test that local classes that becomes visible through inheritance can not be used as super classes",
+			errorMessage="
 1 errors found:
 
 Error at line 2045, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -2169,11 +2166,11 @@ model ImportTest3
   B b;
   
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ImportTest3",
-            description="Test that only a class imported with qualified import is visible.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ImportTest3",
+			description="Test that only a class imported with qualified import is visible.",
+			errorMessage="
 1 errors found:
 
 Error at line 2169, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -2478,11 +2475,11 @@ model ShortClassDeclTest35_Err
   MyReal x(start=3,t=5);
 
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ShortClassDeclTest35_Err",
-            description="Short class declaration of Real.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ShortClassDeclTest35_Err",
+			description="Short class declaration of Real.",
+			errorMessage="
 2 errors found:
 
 Error at line 2477, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -2707,7 +2704,7 @@ equation
 fclass NameTests.EndExpTest1
  Real x[1];
 equation 
- x[1] = 2;
+ x[end] = 2;
 
 end NameTests.EndExpTest1;
 ")})));
@@ -2745,11 +2742,11 @@ equation
     x[i,j] = i + k;
   end for;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ForTest2_Err",
-            description="Test for equations.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ForTest2_Err",
+			description="Test for equations.",
+			errorMessage="
 1 errors found:
 
 Error at line 2745, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -2813,8 +2810,8 @@ model IndexLookup1
 			flatModel="
 fclass NameTests.IndexLookup1
  parameter Integer i = 2 /* 2 */;
- Real y.z[2] = {1, 2};
- Real x = (y.z[1:2])[i];
+ Real y.z[2] = {1,2};
+ Real x = y.z[i];
 
 end NameTests.IndexLookup1;
 ")})));
@@ -2839,8 +2836,8 @@ model IndexLookup2
 fclass NameTests.IndexLookup2
  parameter Integer i = 2 /* 2 */;
  parameter Integer y.i = 1 /* 1 */;
- Real y.z[2] = {1, 2};
- Real x = (y.z[1:2])[i];
+ Real y.z[2] = {1,2};
+ Real x = y.z[i];
 
 end NameTests.IndexLookup2;
 ")})));
@@ -2849,11 +2846,11 @@ end IndexLookup2;
 model ConditionalComponentTest1_Err
   parameter Real x = 1 if 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConditionalComponentTest1_Err",
-            description="Test of type checking of conditional components.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConditionalComponentTest1_Err",
+			description="Test of type checking of conditional components.",
+			errorMessage="
 1 errors found:
 
 Error at line 2849, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -2865,11 +2862,11 @@ model ConditionalComponentTest2_Err
   parameter Boolean b[2] = {true,true};
   parameter Real x = 1 if b;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConditionalComponentTest2_Err",
-            description="Test of type checking of conditional components.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConditionalComponentTest2_Err",
+			description="Test of type checking of conditional components.",
+			errorMessage="
 1 errors found:
 
 Error at line 2865, column 39, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -2881,11 +2878,11 @@ model ConditionalComponentTest3_Err
   parameter Integer b[2] = {1,1};
   parameter Real x = 1 if b;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConditionalComponentTest3_Err",
-            description="Test of type checking of conditional components.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConditionalComponentTest3_Err",
+			description="Test of type checking of conditional components.",
+			errorMessage="
 2 errors found:
 
 Error at line 2881, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -2938,11 +2935,11 @@ model ConditionalComponentTest6_Err
   parameter Real x = 1 if b;
   Real y = x;  
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConditionalComponentTest6_Err",
-            description="Test of type checking of conditional components.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConditionalComponentTest6_Err",
+			description="Test of type checking of conditional components.",
+			errorMessage="
 1 errors found:
 
 Error at line 2939, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -2958,11 +2955,11 @@ model ConditionalComponentTest7_Err
   M m if b;
   Real y = m.x;  
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConditionalComponentTest7_Err",
-            description="Test of type checking of conditional components.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConditionalComponentTest7_Err",
+			description="Test of type checking of conditional components.",
+			errorMessage="
 1 errors found:
 
 Error at line 2959, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -3182,11 +3179,11 @@ model ConditionalComponentTest13_Err
     Real y2 if not b.flag;
 	B b(a1(x = y1), a2(x = y2));
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConditionalComponentTest13_Err",
-            description="Using value of conditional component in modification for other conditional component",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConditionalComponentTest13_Err",
+			description="Using value of conditional component in modification for other conditional component",
+			errorMessage="
 2 errors found:
 
 Error at line 3183, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -3197,32 +3194,17 @@ Error at line 3183, column 25, in file 'Compiler/ModelicaFrontEnd/src/test/NameT
 ")})));
 end ConditionalComponentTest13_Err;
 
-model ConditionalComponentTest14
-    record R
-        parameter Real x;
-    end R;
-    
-    parameter R r if false;
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConditionalComponentTest14",
-            description="Flattening type of conditional component",
-            flatModel="
-fclass NameTests.ConditionalComponentTest14
-end NameTests.ConditionalComponentTest14;
-")})));
-end ConditionalComponentTest14;
 
 model AttributeDot1
   Real x=1;
   parameter Real p = x.start;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="AttributeDot1",
-            description="Access to attribute with dot notation",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AttributeDot1",
+			description="Access to attribute with dot notation",
+			errorMessage="
 1 errors found:
 
 Error at line 3219, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -3504,11 +3486,11 @@ model InheritInputTest3
     
     input A a;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="InheritInputTest3",
-            description="Check that it isn't allowed to declare a component containing an input as input",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InheritInputTest3",
+			description="Check that it isn't allowed to declare a component containing an input as input",
+			errorMessage="
 1 errors found:
 
 Error at line 3503, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -3524,11 +3506,11 @@ model InheritInputTest4
     
     input A a;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="InheritInputTest4",
-            description="Check that it isn't allowed to declare a component containing an output as input",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InheritInputTest4",
+			description="Check that it isn't allowed to declare a component containing an output as input",
+			errorMessage="
 1 errors found:
 
 Error at line 3523, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -3586,11 +3568,11 @@ model InheritOutputTest3
     
     output A a;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="InheritOutputTest3",
-            description="Check that it isn't allowed to declare a component containing an output as output",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InheritOutputTest3",
+			description="Check that it isn't allowed to declare a component containing an output as output",
+			errorMessage="
 1 errors found:
 
 Error at line 3585, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -3606,11 +3588,11 @@ model InheritOutputTest4
     
     output A a;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="InheritOutputTest4",
-            description="Check that it isn't allowed to declare a component containing an input as output",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InheritOutputTest4",
+			description="Check that it isn't allowed to declare a component containing an input as output",
+			errorMessage="
 1 errors found:
 
 Error at line 3605, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -3660,11 +3642,11 @@ model InheritFlowTest2
     
     flow A a;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="InheritFlowTest2",
-            description="Check that it isn't allowed to declare a component containing an flow as flow",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InheritFlowTest2",
+			description="Check that it isn't allowed to declare a component containing an flow as flow",
+			errorMessage="
 1 errors found:
 
 Error at line 3659, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':

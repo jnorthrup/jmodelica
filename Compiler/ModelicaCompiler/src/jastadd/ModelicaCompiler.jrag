@@ -25,7 +25,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
@@ -36,9 +35,7 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Stack;
@@ -52,7 +49,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.jmodelica.util.logging.ModelicaLogger;
-import org.jmodelica.util.logging.MemoryLogger;
 import org.jmodelica.util.logging.Level;
 import org.jmodelica.util.OptionRegistry;
 import org.jmodelica.util.OptionRegistry.UnknownOptionException;
@@ -70,6 +66,7 @@ import org.jmodelica.util.PassAndForget;
 import org.jmodelica.util.logging.IllegalLogStringException;
 import org.jmodelica.util.ErrorCheckType;
 import org.jmodelica.util.streams.CloneOutputStream;
+
 import org.xml.sax.SAXException;
 
 aspect ModelicaCompilerMain {
@@ -98,16 +95,15 @@ aspect ModelicaCompilerMain {
  * <code>org.jmodelica.applications.ModelicaCompiler myModels/models.mo models.model1
  * XMLtemplate1.xml XMLtemplate2.xml cppTemplate.cpp</code>
  * <p>
- * Logging can be set with the optional argument -log=d, v, i, w or e where:
+ * Logging can be set with the optional argument -log=i, w or e where:
  * <p>
- *  - d : log debug, verbose, info, warning and error messages
- *  - v : log verbose, info, warning and error messages
- *  - i : log info, warning and error messages
- *  - w : log warning and error messages
- *  - e : log error messages only (default if the log option is not used)
+ *  - -d : log debug, info, warning and error messages
+ *  - -i : log info, warning and error messages
+ *  - -w : log warning and error messages
+ *  - -e : log error messages only (default if the log option is not used)
  * <p>
  * Example with log level set to INFO: <br>
- * <code>org.jmodelica.applications.ModelicaCompiler -log=i myModels/models.mo 
+ * <code>org.jmodelica.applications.ModelicaCompiler -i myModels/models.mo 
  * models.model1</code>
  * <p>
  * The logs will be printed to standard out.
@@ -140,9 +136,12 @@ public class ModelicaCompiler {
 	
 	// If true, assume that JMODELICA_HOME points to the source folder - for easier debugging while developing
 	protected boolean debugSrcIsHome = false;
-    public void setDebugSrcIsHome(boolean b) {
-        debugSrcIsHome = b;
-    }
+	protected static final String[] DEBUG_TEMPLATE_IN_SRC = new String[] {
+	    "Compiler/ModelicaCBackEnd/templates",
+        "Compiler/ModelicaFMUXBackEnd/templates",
+        "Compiler/OptimicaCBackEnd/templates",
+        "Compiler/OptimicaFMUXBackEnd/templates",
+	};
 	
 	protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<CompilationHooks>();
 	protected LinkedList<CompilationHooks> hooksList = new LinkedList<CompilationHooks>(globalHooksList);
@@ -157,113 +156,30 @@ public class ModelicaCompiler {
 	protected String[] targetPlatforms = null;
 	protected Collection<Problem> warnings = new ArrayList<Problem>();
 
-    private static final String OPTION_EXPORT_TEMPLATE = "==OPTIONS-LIST==";
-
     /**
      * Exports default options to XML.
      */
     public static class OptionExporter {
         /**
-         * Exports list of options.
+         * Exports default options to XML.
          * 
-         * Allowed arguments:
-         *   -x <file>    export as XML to <file>
-         *   -d <file>    export as DocBook table to <file>
-         *   -p <file>    export as plain text table to <file>
-         *   -t <file>    next export argument will use <file> as a template, replacing any line containing 
-         *                the value of <code>OPTION_EXPORT_TEMPLATE</code> with generated output
-         * 
-         * For the last export type argument given, the file argument may be ommited, 
-         * in that case it is printed on stdout.
+         * If given an argument, XML is saved in a file with that path.
          */
         public static void main(String[] args) {
-            OptionRegistry or = createOptions();
-            Type t = null;
-            BufferedReader tmpl = null;
-            for (String arg : args) {
-                if (t == null) {
-                    t = type(arg);
-                } else {
-                    if (t == Type.Template) {
-                        try {
-                            tmpl = new BufferedReader(new FileReader(arg));
-                        } catch (FileNotFoundException e) {
-                            System.err.println("Could not open template file for reading: " + e.getMessage());
-                        }
-                    } else {
-                        try {
-                            PrintStream out = new PrintStream(new FileOutputStream(arg));
-                            if (tmpl != null) {
-                                String line = tmpl.readLine();
-                                while (line != null) {
-                                    if (line.contains(OPTION_EXPORT_TEMPLATE)) {
-                                        emit(t, or, out);
-                                    } else {
-                                        out.println(line);
-                                    }
-                                    line = tmpl.readLine();
-                                }
-                            } else {
-                                emit(t, or, out);
-                            }
-                            out.close();
-                        } catch (FileNotFoundException e) {
-                            System.err.println("Could not open file for writing: " + e.getMessage());
-                        } catch (IOException e) {
-                        }
-                        tmpl = null;
-                    }
-                    t = null;
-                }
+            try {
+                OptionRegistry or = createOptions();
+                if (args.length < 1) 
+                    or.exportXML(System.out);
+                else 
+                    or.exportXML(args[0]);
+            } catch (FileNotFoundException e) {
+                System.err.println("Could not open file for writing: " + e.getMessage());
             }
-            if (t != null) {
-                emit(t, or, System.out);
-            }
-        }
-        
-        private static void emit(Type t, OptionRegistry or, PrintStream out) {
-            switch (t) {
-            case XML:
-                or.exportXML(out, OptionRegistry.Category.experimental);
-                break;
-            case DocBook:
-                or.exportDocBook(out, OptionRegistry.Category.experimental);
-                break;
-            case PlainText:
-                or.exportPlainText(out, OptionRegistry.Category.experimental);
-                break;
-            case Template:
-                throw new IllegalArgumentException();
-            }
-        }
-        
-        private static Type type(String arg) {
-            if (arg.equals("-x")) {
-                return Type.XML;
-            } else if (arg.equals("-d")) {
-                return Type.DocBook;
-            } else if (arg.equals("-p")) {
-                return Type.PlainText;
-            } else if (arg.equals("-t")) {
-                return Type.Template;
-            } else {
-                System.err.println("Unknown output type argument: " + arg);
-                return null;
-            }
-        }
-        
-        private enum Type {
-            XML, DocBook, PlainText, Template;
         }
     }
 
     public static OptionRegistry createOptions() {
         return new OptionRegistry() {};
-    }
-
-    public static ModulesSettings createModulesSettings(OptionRegistry options)    
-    {
-       return new ModulesSettings(options);
     }
 
     public ModelicaCompiler(OptionRegistry options) {
@@ -541,7 +457,7 @@ public class ModelicaCompiler {
 	 * @param path The new modelicapath.
 	 */
 	public void setModelicapath(String path) {
-		options.setStringOption("MODELICAPATH", path);
+		options.addStringOption("MODELICAPATH", path);
 	}
 
 	protected final static int NUM_USED_MEMORY_SLOTS = 6;
@@ -825,10 +741,6 @@ public class ModelicaCompiler {
                 // Might be used by constant evaluation
                 CCompilerDelegator ccompiler = getCCompiler();
                 ccompiler.setTargetPlatforms(targetPlatforms);
-
-                // Get loadable module settings
-                ModulesSettings modulesSettings = createModulesSettings(options);
-                ccompiler.setModuleLibraryNames(modulesSettings.getLibraryNames());
             }
             
             // compile mo-file + generate code for all templates that are not null
@@ -853,7 +765,9 @@ public class ModelicaCompiler {
                 ASTNode.beginStep("compileCCode()");
                 String cFileName = (flatName != null) ? flatName : FClass.convertClassNameToUnderscore(className);
                 CCompilerDelegator ccompiler = getCCompiler();
-                ccompiler.compileCCode(cFileName, target, outDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories(), options.getIntegerOption("max_n_proc"));
+                Set<String> extLibs = new HashSet<String>(fc.externalLibraries());
+                extLibs.add(options.getStringOption("lapack_lib"));
+                ccompiler.compileCCode(cFileName, target, outDir, extLibs, fc.externalLibraryDirectories(), fc.externalIncludeDirectories(), options.getIntegerOption("max_n_proc"));
                 ccompiler.copySharedLibs(outDir, fc.externalLibraries(), fc.externalLibraryDirectories());
                 ASTNode.endStep("compileCCode()");
             }
@@ -1257,8 +1171,8 @@ public class ModelicaCompiler {
             log.debug("... raw .mof file created.");
         }
 
-        log.verbose("Raw flattened model:");
-        log.verbose(fc);
+        log.info("Raw flattened model:");
+        log.info(fc);
         ASTNode.endStep("prettyPrintRawFlat()");
 
         if (fc.myOptions().getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
@@ -1271,7 +1185,6 @@ public class ModelicaCompiler {
         fc.transformCanonical();
         
         /* Temporary fix to problems with long compilation times due to later evaluations */
-        getExternalFunctionCache().tearDown(getOptions());
         fc.myOptions().setIntegerOption("external_constant_evaluation", 0);
         
         hookModelTransformed(fc);
@@ -1286,15 +1199,15 @@ public class ModelicaCompiler {
             log.debug("... transformed .mof file created.");
         }
         
-        log.verbose("Diagnostics for transformed flattened model:");
-        log.verbose(new Object() {
+        log.info("Diagnostics for transformed flattened model:");
+        log.info(new Object() {
             public String toString() {
                 return fc.diagnostics();
             };
         });
         
-        log.verbose("Transformed flattened model:");
-        log.verbose(fc);
+        log.info("Transformed flattened model:");
+        log.info(fc);
         
         ASTNode.endStep("prettyPrintFlat()");
         
@@ -1342,9 +1255,7 @@ public class ModelicaCompiler {
     }
     
     protected ExternCEvalGenerator createCGenerator(FExternalStmt ext) {
-        CodeGenContext cgc = new CodeGenContext();
-        Map<String,String> tempMap = new HashMap<String,String>();
-        return new ExternCEvalGenerator(new PrettyPrinter(), '$', null, ext, cgc, tempMap);
+        return new ExternCEvalGenerator(new PrettyPrinter(), '$', null, ext);
     }
 
     /**
@@ -1361,6 +1272,8 @@ public class ModelicaCompiler {
         if (tmpl != null || gen instanceof GenericXMLGenerator) {
             hookCheckAbort();
             hookCodeGeneratorCreated(gen);
+            if (tmpl != null && debugSrcIsHome) 
+                tmpl = debugFindTemplateInSrcDir(tmpl);
             File outFile = new File(dir, name);
             OutputStream output = new FileOutputStream(outFile);
             boolean debugGen = options.getBooleanOption("debug_duplicate_generated");
@@ -1370,6 +1283,17 @@ public class ModelicaCompiler {
             log.debug("Generated file '" + outFile + "'.");
         }
     }
+
+	private static String debugFindTemplateInSrcDir(String tmpl) {
+	    String name = new File(tmpl).getName();
+	    String src = getJModelicaHome();
+	    for (String dir : DEBUG_TEMPLATE_IN_SRC) {
+	        File f = new File(new File(src, dir), name);
+	        if (f.exists())
+	            return f.getPath();
+	    }
+	    return tmpl;
+	}
 	
 	/**
 	 * 
@@ -1401,10 +1325,8 @@ public class ModelicaCompiler {
 		log.info("Generating code...");
 		String name = fc.nameUnderscore();
 		
-		Templates templates = target.getTemplates(getOptions());
-	
-        templates.generateXMLFiles(this, fc, target.getXMLGenerator(fc), outDir, "modelDescription");
-        templates.generateCFiles(this, fc, createCGenerator(fc), sourceDir, name);
+        target.getTemplates().generateXMLFiles(this, fc, target.getXMLGenerator(fc), outDir, "modelDescription");
+        target.getTemplates().generateCFiles(this, fc, createCGenerator(fc), sourceDir, name);
 		
 		hookCodeGenerated(outDir);
 		log.debug("... code generated.");
@@ -1453,34 +1375,26 @@ public class ModelicaCompiler {
 		return res;
 	}
 	
-    /**
-     * Executes the given command as a separate process, writing any output to the logger.
-     */
-    public static int loggedProcess(String[] cmd, Map<String,String> env, File workDir) {
-        MemoryLogger logger = log.memoryLogger(Level.WARNING);
-        try {
-            String[] e = (env != null) ? convertEnv(env) : null;
-            Process proc = Runtime.getRuntime().exec(cmd, e, workDir);
-            
-            // Eat any output
-            new StreamGobbler(proc.getErrorStream(), logger.warningStream()).start();
-            new StreamGobbler(proc.getInputStream(), logger.verboseStream()).start();
-            
-            // Wait for process to finish and return result
-            int code = proc.waitFor();
-            if (code > 0) {
-                logger.printCache();
-            }
-            return code;
-        } catch (IOException e) {
-            logger.printCache();
-        } catch (InterruptedException e) {
-            logger.printCache();
-        } finally {
-            logger.close();
-        }
-        return 1;
-    }
+	/**
+	 * Executes the given command as a separate process, writing any output to the logger.
+	 */
+	public static int loggedProcess(String[] cmd, Map<String,String> env, File workDir) {
+		try {
+			String[] e = (env != null) ? convertEnv(env) : null;
+			Process proc = Runtime.getRuntime().exec(cmd, e, workDir);
+			
+			// Eat any output
+			new StreamGobbler(proc.getErrorStream(), log.warningStream()).start();
+			new StreamGobbler(proc.getInputStream(), log.infoStream()).start();
+			
+			// Wait for process to finish and return result
+			return proc.waitFor();
+			
+		} catch (IOException e) {
+		} catch (InterruptedException e) {
+		}
+		return 1;
+	}
 
     private void setOptions(Arguments programarguments) {
         // Create option registry
@@ -1505,7 +1419,7 @@ public class ModelicaCompiler {
             else
                 modelicapath = String.format("%s%sThirdParty%sMSL", jmodelicaHome, File.separator, File.separator);
         }
-        options.setStringOption("MODELICAPATH", modelicapath);
+        options.addStringOption("MODELICAPATH", modelicapath);
     }
     
     public OptionRegistry getOptions() {
@@ -1536,7 +1450,7 @@ public class ModelicaCompiler {
         setFindFlatToInstanceLinks(programarguments.containsKey("findflatinst"));
         
         if (programarguments.containsKey("debugSrcIsHome")) 
-            setDebugSrcIsHome(true);
+            debugSrcIsHome = true;
         
         // platform argument
         String platforms = programarguments.get("platform");
@@ -1690,8 +1604,115 @@ public class ModelicaCompiler {
         return platform;
     }
     
-    public enum TargetType {
-        FMUME10, FMUME20, FMUCS10, FMUCS20, FMUMECS20, JMU, FMUX, FMUME20a, FMUCS20a, CEVAL, NULL
+    
+    /**
+     * Maps external functions names to compiled executables.
+     * A null/nonexistent entry means it has not been compiled yet.
+     * An empty string means compilation was not succesful.
+     */
+    private Map<String, String> compiledExternals = new HashMap<String, String>();
+    
+    /**
+     * If there is no executable corresponding to <code>ext</code>, create one.
+     */
+    private String getCompiledExternal(FExternalStmt ext) {
+        String executable = compiledExternals.get(ext.getName());
+        if (executable == null) {
+            if (outDir == null)
+                setRandomOutDir();
+            String source = ext.getName().replace(".", "_");
+            TargetObject target = createTargetObject("ceval", "0.1");
+            Set<String> libs = new HashSet<String>();
+            Set<String> libDirs = new HashSet<String>();
+            Set<String> incDirs = new HashSet<String>();
+            if (ext.library() != null)
+                for (String lib : ext.library())
+                    libs.add(lib);
+            libs.add(options.getStringOption("lapack_lib"));
+            if (ext.libraryDirectory() != null)
+                libDirs.add(ext.libraryDirectory());
+            if (ext.includeDirectory() != null)
+                incDirs.add(ext.includeDirectory());
+            try {
+                target.getTemplates().generateCFiles(this, null, createCGenerator(ext), sourceDir, source);
+                executable = getCCompiler().compileCCodeLocal(source, target, outDir, libs, libDirs, incDirs, 1);
+                new File(sourceDir, source + ".c").delete();
+                log.debug(String.format("Compiled external function \"%s\" to executable \"%s\" for constant evaluation.", ext.getName(), executable));
+            } catch (FileNotFoundException e) {
+                executable = "";
+                log.debug(String.format("Could not generate code for constant evaluation of external function \"%s\".", ext.getName()));
+            } catch (CcodeCompilationException e) {
+                executable = "";
+                log.debug(String.format("Could not compile external function \"%s\" for constant evaluation.", ext.getName()));
+                e.printStackTrace(new PrintStream(log.debugStream()));
+            }
+            compiledExternals.put(ext.getName(), executable);
+        }
+        return executable;
+    }
+    
+    /**
+     * Remove executables compiled by the constant evaluation framework.
+     */
+    private void removeCompiledExternals() {
+        for (String key : compiledExternals.keySet()) {
+            String executable = compiledExternals.get(key);
+            if (executable.length() > 0) {
+                new File(executable).delete();
+            }
+        }
+        compiledExternals = new HashMap<String,String>();
+    }
+    
+    /**
+     * Make sure <code>ext</code> executable is not used.
+     */
+    public void invalidateExternal(FExternalStmt ext) {
+        String key = ext.getName();
+        String executable = compiledExternals.get(key);
+        if (executable != null && executable.length() > 0) {
+            new File(executable).delete();
+        }
+        compiledExternals.put(key, "");
+    }
+    
+    /**
+     * Start a process for constant evaluation of <code>ext</code>.
+     */
+    public Process createExternCEvalProc(FExternalStmt ext) {
+        Process proc = null;
+        String executable = getCompiledExternal(ext);
+        if (executable.length() > 0) {
+            try {
+                ProcessBuilder pb = new ProcessBuilder(executable);
+                pb.redirectErrorStream(true);
+                if (ext.libraryDirectory() != null) {
+                    // Update environment in case of shared library
+                    String platform = reduceBits(getPlatform(), getCCompiler().getTargetPlatforms());
+                    File f = new File(ext.libraryDirectory(), platform);
+                    String libLoc = f.isDirectory() ? f.getPath() : ext.libraryDirectory();
+                    appendPath(pb, libLoc, platform);
+                }
+                proc = pb.start();
+            } catch (IOException e) {
+                log.debug("Could not execute external function process for constant evaluation. Executable: " + executable);
+            }
+        }
+        return proc;
+    }
+    
+    /**
+     * Append a library location <code>libLoc</code> to the path variable in environment of <code>pb</code>.
+     */
+    private void appendPath(ProcessBuilder pb, String libLoc, String platform) {
+        String sep = platform.startsWith("win") ? ";" : ":";
+        String var = platform.startsWith("win") ? "PATH" : "LD_LIBRARY_PATH";
+        String res = pb.environment().get(var);
+        if (res == null)
+            res = libLoc;
+        else
+            res = res + sep + libLoc;
+        pb.environment().put(var, res);
     }
     
     /**
@@ -1701,29 +1722,29 @@ public class ModelicaCompiler {
     */
     public enum TargetObject {
         
-        FMUME10   (TargetType.FMUME10,   "fmume10",   "fmu",  XMLGeneratorHolder.FMI1),
-        FMUME20   (TargetType.FMUME20,   "fmume20",   "fmu",  XMLGeneratorHolder.FMI2),
-        FMUCS10   (TargetType.FMUCS10,   "fmucs10",   "fmu",  XMLGeneratorHolder.FMI1),
-        FMUCS20   (TargetType.FMUCS20,   "fmucs20",   "fmu",  XMLGeneratorHolder.FMI2),
-        FMUMECS20 (TargetType.FMUMECS20, "fmumecs20", "fmu",  XMLGeneratorHolder.FMI2), 
-        JMU       (TargetType.JMU,       "jmu",       "jmu",  XMLGeneratorHolder.JMI),
-        FMUX      (TargetType.FMUX,       null,       "fmux", XMLGeneratorHolder.FMIX),
-        FMUME20a  (TargetType.FMUME10,   "fmume10",   "fmu",  XMLGeneratorHolder.FMI1), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
-        FMUCS20a  (TargetType.FMUCS10,   "fmucs10",   "fmu",  XMLGeneratorHolder.FMI1), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
-        CHECK     (TargetType.NULL,      null,        null,   XMLGeneratorHolder.NULL, ErrorCheckType.CHECK, false),
-        PARSE     (TargetType.NULL,      null,        null,   XMLGeneratorHolder.NULL, ErrorCheckType.CHECK, false),
-        NOCODEGEN (TargetType.NULL,      null,        null,   XMLGeneratorHolder.NULL, ErrorCheckType.COMPILE, false),
-        CEVAL     (TargetType.CEVAL,     "ceval",     null  , null);
+        FMUME10   (Templates.FMUME10,   "fmume10",   "fmu",  XMLGeneratorHolder.FMI1),
+        FMUME20   (Templates.FMUME20,   "fmume20",   "fmu",  XMLGeneratorHolder.FMI2),
+        FMUCS10   (Templates.FMUCS10,   "fmucs10",   "fmu",  XMLGeneratorHolder.FMI1),
+        FMUCS20   (Templates.FMUCS20,   "fmucs20",   "fmu",  XMLGeneratorHolder.FMI2),
+        FMUMECS20 (Templates.FMUMECS20, "fmumecs20", "fmu",  XMLGeneratorHolder.FMI2), 
+        JMU       (Templates.JMU,       "jmu",       "jmu",  XMLGeneratorHolder.JMI),
+        FMUX      (Templates.FMUX,       null,       "fmux", XMLGeneratorHolder.FMIX),
+        FMUME20a  (Templates.FMUME10,   "fmume10",   "fmu",  XMLGeneratorHolder.FMI1), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
+        FMUCS20a  (Templates.FMUCS10,   "fmucs10",   "fmu",  XMLGeneratorHolder.FMI1), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
+        CHECK     (Templates.NULL,      null,        null,   XMLGeneratorHolder.NULL, ErrorCheckType.CHECK, false),
+        PARSE     (Templates.NULL,      null,        null,   XMLGeneratorHolder.NULL, ErrorCheckType.CHECK, false),
+        NOCODEGEN (Templates.NULL,      null,        null,   XMLGeneratorHolder.NULL, ErrorCheckType.COMPILE, false),
+        CEVAL     (Templates.CEVAL,     "ceval",     null  , null);
 
-        private final TargetType type;
+        private final Templates templates;
         private final String makeFileFlag;
         private final String suffix;
         private final XMLGeneratorHolder xmlGenerator;
         private final ErrorCheckType checkType;
         private final boolean codeGen;
 
-        private TargetObject(TargetType type, String makeFileFlag, String suffix, XMLGeneratorHolder xmlGenerator, ErrorCheckType checkType, boolean codeGen) {
-            this.type = type;
+        private TargetObject(Templates templates, String makeFileFlag, String suffix, XMLGeneratorHolder xmlGenerator, ErrorCheckType checkType, boolean codeGen) {
+            this.templates = templates;
             this.makeFileFlag = makeFileFlag;
             this.suffix = suffix;
             this.checkType = checkType;
@@ -1731,16 +1752,16 @@ public class ModelicaCompiler {
             this.xmlGenerator = xmlGenerator;
         }
 
-        private TargetObject(TargetType type, String makeFileFlag, String suffix, XMLGeneratorHolder xmlGenerator, ErrorCheckType checkType) {
-            this(type, makeFileFlag, suffix, xmlGenerator, checkType, true);
+        private TargetObject(Templates templates, String makeFileFlag, String suffix, XMLGeneratorHolder xmlGenerator, ErrorCheckType checkType) {
+            this(templates, makeFileFlag, suffix, xmlGenerator, checkType, true);
         }
         
-        private TargetObject(TargetType type, String makeFileFlag, String suffix, XMLGeneratorHolder xmlGenerator) {
-            this(type, makeFileFlag, suffix, xmlGenerator, ErrorCheckType.COMPILE);
+        private TargetObject(Templates templates, String makeFileFlag, String suffix, XMLGeneratorHolder xmlGenerator) {
+            this(templates, makeFileFlag, suffix, xmlGenerator, ErrorCheckType.COMPILE);
         }
         
-        public Templates getTemplates(OptionRegistry options) {
-            return new Templates(type, options);
+        public Templates getTemplates() {
+            return templates;
         }
         
         /**
@@ -1751,7 +1772,6 @@ public class ModelicaCompiler {
         */
         public static TargetObject getTarget(String targetType, String version)
                 throws IllegalCompilerArgumentException {
-            
         	if (targetType.equals("nocodegen")) {
         		return NOCODEGEN;
             } else if (targetType.equals("me")) {
@@ -2001,6 +2021,7 @@ public class ModelicaCompiler {
             }
             
             fc.loadResources(new File(outDir, "resources"));
+            removeCompiledExternals();
             
         } finally {
         }
@@ -2127,178 +2148,85 @@ eq NamedAccess.findOutermostLibraryDirForWithin(File f) {
  * Support class for the target enum. Contains all templates, when creating
  * an instance templates are specified with a number.
  */
-
 public class Templates {
+    
+    public static final Templates NULL      = new Templates();
+    public static final Templates FMUME10   = new FMUTemplates(null,                           "fmi1_me_modelica_template.c");
+    public static final Templates FMUME20   = new FMUTemplates(null,                           "fmi2_master_modelica_template.c");
+    public static final Templates FMUCS10   = new FMUTemplates(null,                           "fmi1_cs_modelica_template.c");
+    public static final Templates FMUCS20   = new FMUTemplates(null,                           "fmi2_master_modelica_template.c");
+    public static final Templates FMUMECS20 = new FMUTemplates(null,                           "fmi2_master_modelica_template.c");
+    public static final Templates CEVAL     = new Templates(null,                              "ceval_external_template.c");
+    public static final Templates JMU       = new Templates("jmodelica_model_description.tpl", "jmi_modelica_template.c");
+    public static final Templates FMUX      = new Templates("jmodelica_model_description.tpl");
     
     private static final int XML = 0;
     private static final int C   = 1;
     
-    private ModelicaCompiler.TargetType type;
-    
     private String[] templates;
-    private String templatePathPrefix;
-    private boolean fmuTemplate;
     
-    protected static final String[] DEBUG_TEMPLATE_IN_SRC = new String[] {
-        "Compiler/ModelicaCBackEnd/templates",
-        "Compiler/ModelicaFMUXBackEnd/templates",
-        "Compiler/OptimicaCBackEnd/templates",
-        "Compiler/OptimicaFMUXBackEnd/templates",
-    };
-    
-    
-    public Templates(ModelicaCompiler.TargetType type, OptionRegistry options) {
-        switch (type) {
-        case FMUME10:
-        case FMUME20a:               
-            templates = new String[] { null, "fmi1_me_modelica_template.c" };
-            fmuTemplate = true;
-            break;
-        case FMUME20:
-            templates = new String[] {null, "fmi2_master_modelica_template.c" };
-            fmuTemplate = true;
-            break;
-        case FMUCS10:
-        case FMUCS20a:
-            templates = new String[] { null, "fmi1_cs_modelica_template.c" };
-            fmuTemplate = true;
-            break;
-        case FMUCS20:
-        case FMUMECS20:
-            templates = new String[] { null, "fmi2_master_modelica_template.c" };
-            fmuTemplate = true;
-            break;
-        case JMU:
-            templates = new String[] { "jmodelica_model_description.tpl", "jmi_modelica_template.c" };
-            break;
-        case FMUX:
-            templates = new String[] { "jmodelica_model_description.tpl" };
-            break;
-        case CEVAL:
-            templates = new String[] { null, "ceval_external_template.c" };
-            break;
-        case NULL:
-            templates = null;
-            break;
-        }
-
-        this.type = type;
+    private Templates(String... templates) {
         this.templates = templates;
-        
-        if (CONTRIBUTORS != null) {
-            for (TemplateContributor contributor : CONTRIBUTORS) {
-                contributor.addTemplates(this, options);
-            }
-        }
     }
     
     private String template(int i) {
         return (i < templates.length) ? templates[i] : null;
     }
     
-    private String templatePath(String fileName, boolean debugSrcIsHome) {
-        if (fileName == null) {
+    private static String templatePath(String fileName) {
+        if (fileName == null)
             return null;
-        }
-        
-        String home = ModelicaCompiler.getJModelicaHome();
-        if (debugSrcIsHome) {
-            for (String dir : DEBUG_TEMPLATE_IN_SRC) {
-                File f = new File(new File(home, dir), fileName);
-                if (f.exists())
-                    return f.getAbsolutePath();
-            }
-        }
-        return new File(templateDir(), fileName).getAbsolutePath();
+        return new File(templateDir(), fileName).getPath();
     }
     
-    private File templateDir() {
+    protected static File templateDir() {
         return new File(ModelicaCompiler.getJModelicaHome(), "CodeGenTemplates");
     }
     
     public void generateXMLFiles(ModelicaCompiler mc, FClass fc, AbstractGenerator gen, File sourceDir, String name)
             throws FileNotFoundException {
-        mc.generateFile(templatePath(getXMLTemplateName(fc), mc.debugSrcIsHome), gen, sourceDir, name + ".xml", "");
+        mc.generateFile(templatePath(getXMLTemplateName(fc)), gen, sourceDir, name + ".xml", "");
     }
     
     public void generateCFiles(ModelicaCompiler mc, FClass fc, AbstractGenerator gen, File sourceDir, String name)
             throws FileNotFoundException {
-        String header = "";
-        
-        if (fmuTemplate) {
-            if (C_HEADER_TEMPLATES != null) {
-                for (String tpl : C_HEADER_TEMPLATES) {
-                    header = header + "#include \"" + name + "_" + tpl + ".h\"\n";
-                }
-            }
-        }
-        
-        generateCFiles(mc, fc, gen, sourceDir, name, header);
-        
-        if (fmuTemplate) {
-            if (C_HEADER_TEMPLATES != null) {
-                for (String tpl : C_HEADER_TEMPLATES) {
-                    String filename = tpl + ".h";
-                    String path = new File("FMIBase", filename).toString();
-                    
-                    mc.generateFile(templatePath(path, mc.debugSrcIsHome), gen, sourceDir, name + "_" + filename, "");
-                }
-            }
-
-            if (C_SOURCE_TEMPLATES != null) { 
-                for (String tpl : C_SOURCE_TEMPLATES) {
-                    String filename = tpl + ".c";
-                    String path = new File("FMIBase", filename).toString();
-                    
-                    mc.generateFile(templatePath(path, mc.debugSrcIsHome), gen, sourceDir, name + "_" + filename, header);
-                }
-            }
-        }
+        generateCFiles(mc, fc, gen, sourceDir, name, "");
     }
     
-    private void generateCFiles(ModelicaCompiler mc, FClass fc, AbstractGenerator gen, File sourceDir, String name, String header)
+    protected void generateCFiles(ModelicaCompiler mc, FClass fc, AbstractGenerator gen, File sourceDir, String name, String header)
             throws FileNotFoundException {
-        mc.generateFile(templatePath(getCTemplateName(fc), mc.debugSrcIsHome), gen, sourceDir, name + ".c", header);
-    }
-   
-    private static ArrayList<TemplateContributor> CONTRIBUTORS;
-    private static LinkedHashSet<String> XML_TEMPLATES;
-    private static LinkedHashSet<String> C_HEADER_TEMPLATES;
-    private static LinkedHashSet<String> C_SOURCE_TEMPLATES;    
-    
-    public abstract static class TemplateContributor {
-        public void addTemplates(Templates templates, OptionRegistry options) { }
-    }
-
-    public static <T extends TemplateContributor> T addContributor(T contributor) {
-        if (CONTRIBUTORS == null) { CONTRIBUTORS = new ArrayList<TemplateContributor>(); }
-        
-        CONTRIBUTORS.add(contributor);
-        
-        return contributor;
+        mc.generateFile(templatePath(getCTemplateName(fc)), gen, sourceDir, name + ".c", header);
     }
     
-    public void addXMLTemplates(String ...template) {
-        if (XML_TEMPLATES == null) { XML_TEMPLATES = new LinkedHashSet<String>(); }
+    private static class FMUTemplates extends Templates {
+        private String[] heads = {"base"};
+        private String[] tpls = {"base", "start", "param", "equ_init", "equ", "funcs"};
+        private String subDir = "FMIBase";
         
-        for (String tmpl : template) {
-            XML_TEMPLATES.add(tmpl);
+        protected FMUTemplates(String... templates) {
+            super(templates);
         }
-    }
-    
-    public void addCSourceTemplates(String ...template) {
-        if (C_SOURCE_TEMPLATES == null) { C_SOURCE_TEMPLATES = new LinkedHashSet<String>(); }
         
-        for (String tmpl : template) {
-            C_SOURCE_TEMPLATES.add(tmpl);
+        private String subTemplatePath(String file) {
+            File dir = new File(templateDir(), subDir);
+            return new File(dir, file).getPath();
         }
-    }
-    
-    public void addCHeaderTemplates(String ...template) {
-        if (C_HEADER_TEMPLATES == null) { C_HEADER_TEMPLATES = new LinkedHashSet<String>(); }
         
-        for (String tmpl : template) {
-            C_HEADER_TEMPLATES.add(tmpl);
+        protected void generateCFiles(ModelicaCompiler mc, FClass fc, AbstractGenerator gen, File sourceDir, String name, String header)
+                throws FileNotFoundException {
+            
+            for (String tpl : heads) {
+                header = header + "#include \"" + name + "_" + tpl + ".h\"\n";
+            }
+            
+            super.generateCFiles(mc, fc, gen, sourceDir, name, header);
+            
+            for (String tpl : heads) {
+                mc.generateFile(subTemplatePath(tpl) + ".h", gen, sourceDir, name + "_" + tpl + ".h", "");
+            }
+            for (String tpl : tpls) {
+                mc.generateFile(subTemplatePath(tpl) + ".c", gen, sourceDir, name + "_" + tpl + ".c", header);
+            }
         }
     }
 }
@@ -2310,16 +2238,6 @@ private String Templates.getCTemplateName(FClass fc) {
 private String Templates.getXMLTemplateName(FClass fc) {
     return template(XML);
 }
-
-private static final Templates.TemplateContributor ModelicaCompiler.BASIC_TEMPLATES =
-    Templates.addContributor(new Templates.TemplateContributor() {
-
-        @Override
-        public void addTemplates(Templates templates, OptionRegistry options) {
-            templates.addCHeaderTemplates("base");
-            templates.addCSourceTemplates("base", "start", "param", "equ_init", "equ", "funcs");
-        }
-    });
 
 public class XMLGeneratorHolder {
 
@@ -2346,57 +2264,6 @@ public GenericXMLGenerator XMLGeneratorHolder.getXMLGenerator(FClass fc) {
     }
 	
 	return (GenericXMLGenerator) xmlGen.create(new PrettyPrinter(), '$', fc);
-}
-
-public enum Module { GET_SET }
-
-public class ModulesSettings {
-    
-    public ModulesSettings(OptionRegistry options) {
-        /* Add default modules */
-        addLibrary(Module.GET_SET, "jmi_get_set_default");
-        
-        for (ModuleContributor contributor : CONTRIBUTORS) {
-            contributor.addModule(this, options);
-        }
-    }
-     
-    public void addLibrary(Module module, String name) {
-        HashSet<String> names;
-        
-        if (libraryNames.contains(module)) {
-            names = libraryNames.get(module);
-        } else {
-            names = new HashSet<String>();
-            libraryNames.put(module,  names);
-        }
-        
-        names.add(name);
-    }
-    
-    public java.util.List<String> getLibraryNames() {
-        LinkedList<String> libNames = new LinkedList<String>();
-        
-        for (HashSet<String> n : libraryNames.values()) {
-            for (String s : n) {
-                libNames.add(s);
-            }
-        }
-        return libNames;
-    }
-    
-    private static ArrayList<ModuleContributor> CONTRIBUTORS = new ArrayList<ModuleContributor>();
-    private static Hashtable<Module, HashSet<String>> libraryNames = new Hashtable<Module, HashSet<String>>();
-    
-    public abstract static class ModuleContributor {
-        public void addModule(ModulesSettings settings, OptionRegistry options) { }
-    }
-    
-    public static <T extends ModuleContributor> T addContributor(T contributor) {
-        CONTRIBUTORS.add(contributor);
-        
-        return contributor;
-    }
 }
 
 /**
@@ -2489,12 +2356,7 @@ public class CompilationAbortedException extends RuntimeException {
 private static final OptionRegistry.OptionContributor ModelicaCompiler.CCOMPILER_OPTIONS = 
     OptionRegistry.addContributor(new OptionRegistry.OptionContributor() {
         public void addOptions(OptionRegistry opt) {
-            opt.addStringOption(CCompilerDelegator.OPTION, 
-                    OptionRegistry.OptionType.compiler, 
-                    OptionRegistry.Category.user, 
-                    GccCompilerDelegator.NAME, 
-                    CCompilerDelegator.OPTION_DESC, 
-                    new String[0]);
+            opt.addStringOption(CCompilerDelegator.OPTION, GccCompilerDelegator.NAME, CCompilerDelegator.OPTION_DESC, new String[0]);
         }
         
         public void modifyOptions(OptionRegistry opt) {
@@ -2564,12 +2426,6 @@ public abstract class CCompilerDelegator {
 	
 	private Map<String, String> env = System.getenv();
 	private String[] targetPlatforms = null;
-	
-	protected java.util.List<String> moduleLibNames;
-	
-	public void setModuleLibraryNames(java.util.List<String> names) {
-	    moduleLibNames = names;
-	}
 	
     /**
      * Compile DLL(s) from generated C code.
@@ -2676,7 +2532,7 @@ public abstract class CCompilerDelegator {
 		return (buf.length() == 0) ? null : buf.toString();
 	}
 	
-	protected interface StringOperation {
+	interface StringOperation {
 		
 		public static final StringOperation NULL_OP = new StringOperation() {
 			public String op(String str) { return str; }
@@ -2847,7 +2703,6 @@ public class GccCompilerDelegator extends CCompilerDelegator {
 					  (varFromList(ext_libs) + " " + varFromList(ext_libs)): null);
 		vars.put("EXT_INC_DIRS", varFromList(ext_incl_dirs, INC_OP));
 		vars.put("JMTABLES_HOME", jmodelicaHome + filesep + "ThirdParty" + filesep + "Tables");
-		vars.put("MODULE_HOME", getEnv().get("MODULE_HOME"));
 	}
 	
 	/**
@@ -2882,16 +2737,10 @@ public class GccCompilerDelegator extends CCompilerDelegator {
         String buildPlatform = ModelicaCompiler.getPlatform();
         String make = getMake(buildPlatform);
         
-        if (moduleLibNames != null) {
-            for (String name : moduleLibNames) {
-                ext_libs.add(name);
-            }
-        }
-        
         Map<String, String> vars = new HashMap<String, String>();
         addFixedMakeVars(vars, fileName, jmodelicaHome, ext_libs, ext_incl_dirs);
         addBuildPlatformMakeVars(vars, buildPlatform);
-
+        
         for (String platform : platforms) {
             Map<String, String> pVars = new HashMap<String, String>(vars);
             addTargetPlatformMakeVars(pVars, ext_lib_dirs, platform);

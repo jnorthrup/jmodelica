@@ -20,11 +20,11 @@ package TypeTests
 		Integer x = true;
 	
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="TypeTest1",
-            description="Basic expression type test.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TypeTest1",
+			description="Basic expression type test.",
+			errorMessage="
 1 errors found:
 
 Error at line 20, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
@@ -38,11 +38,11 @@ Error at line 20, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTes
 	equation
 	  x=true;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="TypeTest2",
-            description="Basic expression type test.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TypeTest2",
+			description="Basic expression type test.",
+			errorMessage="
 1 errors found:
 
 Error at line 39, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
@@ -115,27 +115,27 @@ Error at line 96, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTest
 	equation
 	  x+y=3;  
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="TypeTest6",
-            description="Basic expression type test.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TypeTest6",
+			description="Basic expression type test.",
+			errorMessage="
 5 errors found:
 
 Error at line 114, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-  The type of the binding expression of the attribute start for the variable y does not match the declared type of the variable
+  The type of the binding expression of the attribute start does not match the declared type of the variable
 
 Error at line 114, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-  The type of the binding expression of the attribute unit for the variable y does not match the declared type of the variable
+  The type of the binding expression of the attribute unit does not match the declared type of the variable
 
 Error at line 114, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-  The type of the binding expression of the attribute nominal for the variable y does not match the declared type of the variable
+  The type of the binding expression of the attribute nominal does not match the declared type of the variable
 
 Error at line 114, column 40, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-  The type of the binding expression of the attribute min for the variable y does not match the declared type of the variable
+  The type of the binding expression of the attribute min does not match the declared type of the variable
 
 Error at line 114, column 49, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-  The type of the binding expression of the attribute max for the variable y does not match the declared type of the variable
+  The type of the binding expression of the attribute max does not match the declared type of the variable
 ")})));
 	end TypeTest6;
 
@@ -421,10 +421,7 @@ model AbsType5
             name="AbsType5",
             description="abs() operator: String arg",
             errorMessage="
-2 errors found:
-
-Error at line 416, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-  Could not evaluate binding expression of structural parameter x
+1 errors found:
 
 Error at line 417, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function abs(): types of positional argument 1 and input v are not compatible
@@ -436,13 +433,13 @@ end AbsType5;
 model AbsType6
  Real x[2] = abs({1,-1});
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="AbsType6",
-            description="abs() operator: array arg",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="AbsType6",
+			description="abs() operator: array arg",
+			flatModel="
 fclass TypeTests.AbsType6
- Real x[2] = abs({1, -1});
+ Real x[2] = abs({1, - 1});
 end TypeTests.AbsType6;
 ")})));
 end AbsType6;
@@ -451,11 +448,11 @@ end AbsType6;
 model AbsType7
  Real x = abs(1,-1);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="AbsType7",
-            description="abs() operator: too many args",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AbsType7",
+			description="abs() operator: too many args",
+			errorMessage="
 1 errors found:
 
 Error at line 452, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
@@ -467,11 +464,11 @@ end AbsType7;
 model AbsType8
  Real x = abs();
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="AbsType8",
-            description="abs() operator: no args",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AbsType8",
+			description="abs() operator: no args",
+			errorMessage="
 1 errors found:
 
 Error at line 468, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
@@ -975,11 +972,11 @@ model UnknownTypeAccess1
 equation
  c.x = c;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="UnknownTypeAccess1",
-            description="Using component of model type as expression",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="UnknownTypeAccess1",
+			description="Using component of model type as expression",
+			errorMessage="
 1 errors found:
 
 Error at line 976, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
@@ -1038,11 +1035,11 @@ model RecursiveStructure1
 	
 	A a2;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="RecursiveStructure1",
-            description="Detect recursive class structures",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RecursiveStructure1",
+			description="Detect recursive class structures",
+			errorMessage="
 1 errors found:
 
 Error at line 1035, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
@@ -1062,11 +1059,11 @@ model RecursiveStructure2
 	
 	A a;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="RecursiveStructure2",
-            description="Detect recursive class structures",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RecursiveStructure2",
+			description="Detect recursive class structures",
+			errorMessage="
 1 errors found:
 
 Error at line 1060, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
@@ -1086,11 +1083,11 @@ model RecursiveStructure3
 	
 	A a2;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="RecursiveStructure3",
-            description="Detect recursive class structures",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RecursiveStructure3",
+			description="Detect recursive class structures",
+			errorMessage="
 1 errors found:
 
 Error at line 1083, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
@@ -1105,11 +1102,11 @@ model RecursiveStructure4
 	
 	A a;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="RecursiveStructure4",
-            description="Detect recursive class structures",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RecursiveStructure4",
+			description="Detect recursive class structures",
+			errorMessage="
 1 errors found:
 
 Error at line 1103, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
@@ -1155,11 +1152,11 @@ equation
 		x = 2;
 	end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="WhenType1",
-            description="Using test expression of wrong type",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="WhenType1",
+			description="Using test expression of wrong type",
+			errorMessage="
 1 errors found:
 
 Error at line 1154, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
@@ -1175,11 +1172,11 @@ equation
 		x = 2;
 	end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="WhenType2",
-            description="Using test expression with too many dimensions",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="WhenType2",
+			description="Using test expression with too many dimensions",
+			errorMessage="
 1 errors found:
 
 Error at line 1174, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
@@ -1355,11 +1352,11 @@ equation
         z = 2*pre(x);
     end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="PreTest1",
-            description="Testing that continuous variables can't be accessed in pre expressions in normal equations",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="PreTest1",
+			description="Testing that continuous variables can't be accessed in pre expressions in normal equations",
+			errorMessage="
 1 errors found:
 
 Error at line 1351, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
@@ -1511,11 +1508,11 @@ equation
     z2 = edge(x2);
   end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="EdgeTest1",
-            description="Testing that input to edge has to be boolean.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="EdgeTest1",
+			description="Testing that input to edge has to be boolean.",
+			errorMessage="
 2 errors found:
 
 Error at line 1507, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
@@ -1536,11 +1533,11 @@ equation
     z = change(x);
   end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ChangeTest1",
-            description="Testing that continuous variables can be accessed in change expressions only inside when clauses.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ChangeTest1",
+			description="Testing that continuous variables can be accessed in change expressions only inside when clauses.",
+			errorMessage="
 1 errors found:
 
 Error at line 1534, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
@@ -1577,17 +1574,17 @@ end ChangeTest2;
 
 
 model HomotopyTest1
-  Real x[2] = homotopy({1,2}, {1});
+  Real x = homotopy(1, {1});
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="HomotopyTest1",
-            description="Testing error when type of homotopy arguments differ",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="HomotopyTest1",
+			description="Testing error when type of homotopy arguments differ",
+			errorMessage="
 1 errors found:
 
-Error at line 1, column 1, in file '...':
-  Mismatching sizes in homotopy. All non-scalar arguments need matching sizes
+Error at line 1580, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+  Calling function homotopy(): arguments must be same type
 ")})));
 end HomotopyTest1;
 
@@ -1619,11 +1616,11 @@ end IfExpType1;
 model IfExpType2
     Real x = if 1 then 1 else 2;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="IfExpType2",
-            description="If expression errors: non-boolean test expression",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="IfExpType2",
+			description="If expression errors: non-boolean test expression",
+			errorMessage="
 1 errors found:
 
 Error at line 1620, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
@@ -1641,11 +1638,11 @@ model IfExpType3
     parameter Integer n = 3;
     M m(n=n, y = if n==1 then {true} else 1:n);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="IfExpType3",
-            description="If expression errors: incompatible types of branches",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="IfExpType3",
+			description="If expression errors: incompatible types of branches",
+			errorMessage="
 1 errors found:
 
 Error at line 1642, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
@@ -1664,11 +1661,11 @@ model IfExpType4
     Integer k = n;
     M m(n=n, y = if k==1 then {2} else 1:n);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="IfExpType4",
-            description="If expression errors: non-parameter test expression",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="IfExpType4",
+			description="If expression errors: non-parameter test expression",
+			errorMessage="
 1 errors found:
 
 Error at line 1665, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
@@ -1895,19 +1892,11 @@ model StringExpType1
             name="StringExpType1",
             description="",
             errorMessage="
-4 errors found:
-
-Error at line 1889, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-  Could not evaluate binding expression of structural parameter a
-
-Error at line 1890, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+2 errors found:
+Error at line 1802, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function String(): types of positional argument 1 and input x are not compatible
     type of '{1, 2}' is Integer[2]
-
-Error at line 1890, column 36, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-  Could not evaluate binding expression of structural parameter b
-
-Error at line 1891, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 1803, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function String(): types of positional argument 1 and input x are not compatible
     type of '\"a\"' is String
 ")})));
@@ -2024,11 +2013,11 @@ algorithm
 	r := noEvent(r > 2) and noEvent(r < 4);
 	i := if b then "one" else "two";
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="AlgorithmType3",
-            description="Incorrect types in algorithm",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AlgorithmType3",
+			description="Incorrect types in algorithm",
+			errorMessage="
 3 errors found:
 
 Error at line 2023, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
@@ -2057,11 +2046,11 @@ algorithm
 	x := 2;
 	y := 3;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="AlgorithmType4",
-            description="Algorithm assigning to parameters and constants.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AlgorithmType4",
+			description="Algorithm assigning to parameters and constants.",
+			errorMessage="
 3 errors found:
 
 Error at line 2054, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
@@ -2484,8 +2473,8 @@ model CircularIfExp1
             flatModel="
 fclass TypeTests.CircularIfExp1
  eval parameter Boolean a = true /* true */;
- parameter Real b = 1 /* 1 */;
- parameter Real c = b;
+ parameter Real b = if true then 1 else c;
+ parameter Real c = if true then b else 2;
 end TypeTests.CircularIfExp1;
 ")})));
 end CircularIfExp1;
@@ -2505,8 +2494,8 @@ model CircularIfExp2
 fclass TypeTests.CircularIfExp2
  eval parameter Boolean a = true /* true */;
  eval parameter Boolean b = true /* true */;
- parameter Real c = 1 /* 1 */;
- parameter Real d = c;
+ parameter Real c = if true and true then 1 else d;
+ parameter Real d = if true and true then c else 2;
 end TypeTests.CircularIfExp2;
 ")})));
 end CircularIfExp2;
@@ -2526,8 +2515,8 @@ model CircularIfExp3
 fclass TypeTests.CircularIfExp3
  eval parameter Boolean a = true /* true */;
  eval parameter Boolean b = true /* true */;
- parameter Real c = 1 /* 1 */;
- parameter Real d = c;
+ parameter Real c = if true then 1 else d;
+ parameter Real d = if true then c else 2;
 end TypeTests.CircularIfExp3;
 ")})));
 end CircularIfExp3;
@@ -2591,49 +2580,5 @@ Error at line 2581, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/TypeT
   Circularity in binding expression of parameter: a = if a < 2 then 3 else 1
 ")})));
 end CircularIfExp6;
-
-model DivType1
-    function f
-        input Integer n;
-        output Real[n] x;
-        Real[:] t = 1:5;
-    algorithm
-        x := t[div(2:n+1,n)];
-    end f;
-    
-    Real[3] x = f(3);
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="DivType1",
-            description="Type calculation for div() operator",
-            flatModel="
-fclass TypeTests.DivType1
- parameter Real x[1];
- constant Real x[2] = 1;
- constant Real x[3] = 1;
-parameter equation
- ({x[1], , }) = TypeTests.DivType1.f(3);
-
-public
- function TypeTests.DivType1.f
-  input Integer n;
-  output Real[:] x;
-  Real[5] t;
- algorithm
-  size(x) := {n};
-  t[1] := 1;
-  t[2] := 2;
-  t[3] := 3;
-  t[4] := 4;
-  t[5] := 5;
-  for i1 in 1:max(integer(n + 1 - 2) + 1, 0) loop
-   x[i1] := t[div(2 + (i1 - 1), n)];
-  end for;
-  return;
- end TypeTests.DivType1.f;
-
-end TypeTests.DivType1;
-")})));
-end DivType1;
 
 end TypeTests;

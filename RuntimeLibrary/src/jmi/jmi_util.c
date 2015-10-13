@@ -40,7 +40,6 @@ void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, jmi_ad_var_
 void jmi_internal_error(jmi_t *jmi, const char msg[]) {
     jmi_log_node(jmi->log, logError, "Error", "Internal error <msg:%s>", msg);
     jmi_throw();
-    jmi_log_node(jmi->log, logError, "Error", "Could not throw an exception after internal error", msg);
 }
 
 /* Helper function for logging warnings from the "_equation"- and "_function"-functions below */
@@ -260,9 +259,9 @@ jmi_ad_var_t jmi_tan_equation(jmi_t *jmi, jmi_ad_var_t x, const char msg[]) {
 }
 
 void jmi_flag_termination(jmi_t *jmi, const char* msg) {
-    jmi->model_terminate = 1;
-    /* TODO: This is an informative message, not a warning, but is rather important. Change once log level is made separate from message category. */
-    jmi_log_node(jmi->log, logWarning, "SimulationTerminated", "<msg:%s>", msg);
+	jmi->model_terminate = 1;
+	/* TODO: This is an informative message, not a warning, but is rather important. Change once log level is made separate from message category. */
+	jmi_log_node(jmi->log, logWarning, "SimulationTerminated", "<msg:%s>", msg);
 }
 
 jmi_ad_var_t jmi_abs(jmi_ad_var_t v) {
@@ -363,17 +362,16 @@ int jmi_func_delete(jmi_func_t *func) {
 int jmi_func_sym_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
         int independent_vars, int* mask, jmi_real_t* jac) {
     int return_status;
-    int depth;
 
     if (func->sym_dF==NULL) {
         return -1;
     }
-    depth = jmi_prepare_try(jmi);
-    if (jmi_try(jmi,depth))
-        return_status = -1;
-    else
-        return_status = func->sym_dF(jmi, sparsity, independent_vars, mask, jac);
-    jmi_finalize_try(jmi, depth);
+	jmi_set_current(jmi);
+	if (jmi_try(jmi))
+		return_status = -1;
+	else
+		return_status = func->sym_dF(jmi, sparsity, independent_vars, mask, jac);
+    jmi_set_current(NULL);
     return return_status;
 
 }
@@ -999,6 +997,127 @@ int jmi_func_fd_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
     return 0;
 }
 
+
+int jmi_get_sizes(jmi_t* jmi, int* n_real_ci, int* n_real_cd, int* n_real_pi, int* n_real_pd,
+        int* n_integer_ci, int* n_integer_cd, int* n_integer_pi, int* n_integer_pd,
+        int* n_boolean_ci, int* n_boolean_cd, int* n_boolean_pi, int* n_boolean_pd,
+        int* n_real_dx, int* n_real_x, int* n_real_u, int* n_real_w,
+        int* n_real_d, int* n_integer_d, int* n_integer_u, int* n_boolean_d, int* n_boolean_u,
+        int* n_outputs, int* n_sw, int* n_sw_init, int* n_guards, int* n_guards_init, int* n_z) {
+
+    *n_real_ci = jmi->n_real_ci;
+    *n_real_cd = jmi->n_real_cd;
+    *n_real_pi = jmi->n_real_pi;
+    *n_real_pd = jmi->n_real_pd;
+
+    *n_integer_ci = jmi->n_integer_ci;
+    *n_integer_cd = jmi->n_integer_cd;
+    *n_integer_pi = jmi->n_integer_pi;
+    *n_integer_pd = jmi->n_integer_pd;
+
+    *n_boolean_ci = jmi->n_boolean_ci;
+    *n_boolean_cd = jmi->n_boolean_cd;
+    *n_boolean_pi = jmi->n_boolean_pi;
+    *n_boolean_pd = jmi->n_boolean_pd;
+
+    *n_real_dx = jmi->n_real_dx;
+    *n_real_x = jmi->n_real_x;
+    *n_real_u = jmi->n_real_u;
+    *n_real_w = jmi->n_real_w;
+    *n_real_d = jmi->n_real_d;
+    *n_integer_d = jmi->n_integer_d;
+    *n_integer_u = jmi->n_integer_u;
+    *n_boolean_d = jmi->n_boolean_d;
+    *n_boolean_u = jmi->n_boolean_u;
+
+    *n_outputs = jmi->n_outputs;
+
+    *n_sw = jmi->n_sw;
+    *n_sw_init = jmi->n_sw_init;
+    *n_guards = jmi->n_guards;
+    *n_guards_init = jmi->n_guards_init;
+
+    *n_z = jmi->n_z;
+
+    return 0;
+}
+
+int jmi_get_offsets(jmi_t* jmi, int* offs_real_ci, int* offs_real_cd,
+        int* offs_real_pi, int* offs_real_pd,
+        int* offs_integer_ci, int* offs_integer_cd,
+        int* offs_integer_pi, int* offs_integer_pd,
+        int* offs_boolean_ci, int* offs_boolean_cd,
+        int* offs_boolean_pi, int* offs_boolean_pd,
+        int* offs_real_dx, int* offs_real_x, int* offs_real_u,
+        int* offs_real_w, int *offs_t,
+        int* offs_real_d, int* offs_integer_d, int* offs_integer_u,
+        int* offs_boolean_d, int* offs_boolean_u,
+        int* offs_sw, int* offs_sw_init,
+        int* offs_guards, int* offs_guards_init,
+        int* offs_pre_real_dx, int* offs_pre_real_x, int* offs_pre_real_u,
+        int* offs_pre_real_w,
+        int* offs_pre_real_d, int* offs_pre_integer_d, int* offs_pre_integer_u,
+        int* offs_pre_boolean_d, int* offs_pre_boolean_u,
+        int* offs_pre_sw, int* offs_pre_sw_init,
+        int* offs_pre_guards, int* offs_pre_guards_init) {
+
+    *offs_real_ci = jmi->offs_real_ci;
+    *offs_real_cd = jmi->offs_real_cd;
+    *offs_real_pi = jmi->offs_real_pi;
+    *offs_real_pd = jmi->offs_real_pd;
+
+    *offs_integer_ci = jmi->offs_integer_ci;
+    *offs_integer_cd = jmi->offs_integer_cd;
+    *offs_integer_pi = jmi->offs_integer_pi;
+    *offs_integer_pd = jmi->offs_integer_pd;
+
+    *offs_boolean_ci = jmi->offs_boolean_ci;
+    *offs_boolean_cd = jmi->offs_boolean_cd;
+    *offs_boolean_pi = jmi->offs_boolean_pi;
+    *offs_boolean_pd = jmi->offs_boolean_pd;
+
+    *offs_real_dx = jmi->offs_real_dx;
+    *offs_real_x = jmi->offs_real_x;
+    *offs_real_u = jmi->offs_real_u;
+    *offs_real_w = jmi->offs_real_w;
+    *offs_t = jmi->offs_t;
+
+    *offs_real_d = jmi->offs_real_d;
+
+    *offs_integer_d = jmi->offs_integer_d;
+    *offs_integer_u = jmi->offs_integer_u;
+
+    *offs_boolean_d = jmi->offs_boolean_d;
+    *offs_boolean_u = jmi->offs_boolean_u;
+
+    *offs_sw = jmi->offs_sw;
+    *offs_sw_init = jmi->offs_sw_init;
+
+    *offs_guards = jmi->offs_guards;
+    *offs_guards_init = jmi->offs_guards_init;
+
+    *offs_pre_real_dx = jmi->offs_pre_real_dx;
+    *offs_pre_real_x = jmi->offs_pre_real_x;
+    *offs_pre_real_u = jmi->offs_pre_real_u;
+    *offs_pre_real_w = jmi->offs_pre_real_w;
+
+    *offs_pre_real_d = jmi->offs_pre_real_d;
+
+    *offs_pre_integer_d = jmi->offs_pre_integer_d;
+    *offs_pre_integer_u = jmi->offs_pre_integer_u;
+
+    *offs_pre_boolean_d = jmi->offs_pre_boolean_d;
+    *offs_pre_boolean_u = jmi->offs_pre_boolean_u;
+
+    *offs_pre_sw = jmi->offs_pre_sw;
+    *offs_pre_sw_init = jmi->offs_pre_sw_init;
+
+    *offs_pre_guards = jmi->offs_pre_guards;
+    *offs_pre_guards_init = jmi->offs_pre_guards_init;
+
+    return 0;
+}
+
 int jmi_copy_pre_values(jmi_t *jmi) {
     int i;
     jmi_real_t* z;
@@ -1009,6 +1128,33 @@ int jmi_copy_pre_values(jmi_t *jmi) {
     for (i=jmi->offs_real_d;i<jmi->offs_pre_real_dx;i++) {
         z[i - jmi->offs_real_d + jmi->offs_pre_real_d] = z[i];
     }
+    return 0;
+}
+
+int jmi_save_last_successful_values(jmi_t *jmi) {
+    jmi_real_t* z;
+    jmi_real_t* z_last;
+    z = jmi_get_z(jmi);
+    z_last = jmi_get_z_last(jmi);
+    memcpy(z_last, z, jmi->n_z*sizeof(jmi_real_t));
+    return 0;
+}
+
+int jmi_reset_last_successful_values(jmi_t *jmi) {
+    jmi_real_t* z;
+    jmi_real_t* z_last;
+    z = jmi_get_z(jmi);
+    z_last = jmi_get_z_last(jmi);
+    memcpy(z, z_last, jmi->n_z*sizeof(jmi_real_t));
+    return 0;
+}
+
+int jmi_reset_last_internal_successful_values(jmi_t *jmi) {
+    jmi_real_t* z;
+    jmi_real_t* z_last;
+    z = jmi_get_z(jmi);
+    z_last = jmi_get_z_last(jmi);
+    memcpy(&z[jmi->offs_real_dx], &z_last[jmi->offs_real_dx], (jmi->n_z-jmi->offs_real_dx)*sizeof(jmi_real_t));
     return 0;
 }
 
@@ -2310,12 +2456,12 @@ jmi_real_t jmi_turn_switch_time(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps
 
 int jmi_generic_func(jmi_t *jmi, jmi_generic_func_t func) {
     int return_status;
-    int depth = jmi_prepare_try(jmi);
-    if (jmi_try(jmi, depth))
-        return_status = -1;
-    else
-        return_status = func(jmi);
-    jmi_finalize_try(jmi, depth);
+    jmi_set_current(jmi);
+    if (jmi_try(jmi))
+		return_status = -1;
+	else
+		return_status = func(jmi);
+    jmi_set_current(NULL);
     return return_status;
 }
 

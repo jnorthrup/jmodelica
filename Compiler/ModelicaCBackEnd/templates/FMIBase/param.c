@@ -16,8 +16,7 @@
 
 $C_enum_strings$
 
-$C_DAE_initial_dependent_parameter_assignments$
-
 int model_init_eval_parameters(jmi_t* jmi) {
-    return model_init_eval_parameters_base(jmi);
+$C_DAE_initial_dependent_parameter_assignments$
+    return 0;
 }

@@ -15,14 +15,18 @@
 */
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Iterator;
 import java.util.Locale;
-import java.util.Map;
-
 import org.jmodelica.util.BinaryOperation;
-import org.jmodelica.util.collections.ConstArrayIterator;
-import org.jmodelica.util.collections.SingleIterator;
+import org.jmodelica.util.SingleIterator;
+import org.jmodelica.util.ConstArrayIterator;
 
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Provides methods to evaluate flat constant 
@@ -229,40 +233,33 @@ aspect ConstantEvaluation {
             return buildLiteral(); 
         }
 
-        /**
-         * Constrain value to be between min and max, inclusively
-         */
-        public CValue constrainWithin(CValue min, CValue max) {
-            throw new ConstantEvaluationException(this, "do relational comparison on "); 
-        }
-
-        /**
-         * Convert to CValueInteger, default implementation.
-         */
-        public CValue convertInteger() {
-            return new CValueInteger(intValue());
-        }
-
-        /**
-         * Convert to CValueReal, default implementation.
-         */
-        public CValue convertReal() {
-            return new CValueReal(realValue());
-        }
-
-        /**
-         * Convert to CValueBoolean, default implementation.
-         */
-        public CValue convertBoolean() {
-            return new CValueBoolean(booleanValue());
-        }
-
-        /**
-         * Convert to CValueString, default implementation.
-         */
-        public CValue convertString() {
-            return new CValueString(stringValue());
-        }
+	    /**
+	     * Convert to CValueInteger, default implementation.
+	     */
+	    public CValue convertInteger() {
+	    	return new CValueInteger(intValue());
+	    }
+	    
+	    /**
+	     * Convert to CValueReal, default implementation.
+	     */
+	    public CValue convertReal() {
+	    	return new CValueReal(realValue());
+	    }
+	    
+	    /**
+	     * Convert to CValueBoolean, default implementation.
+	     */
+	    public CValue convertBoolean() {
+	    	return new CValueBoolean(booleanValue());
+	    }
+	    
+	    /**
+	     * Convert to CValueString, default implementation.
+	     */
+	    public CValue convertString() {
+	    	return new CValueString(stringValue());
+	    }
 
         /**
          * Returns true if the constant value is of integer type or array that
@@ -590,30 +587,22 @@ aspect ConstantEvaluation {
             return value;
         }
 
-        public CValue constrainWithin(CValue min, CValue max) {
-            if (!min.isUnknown() && min.intValue() > value)
-                return min;
-            if (!max.isUnknown() && max.intValue() < value)
-                return max;
-            return this;
-        }
-
+	    /**
+	     * Convert to CValueInteger.
+	     */
+	    public CValue convertInteger() {
+	    	return this;
+	    }
+        
         /**
-         * Convert to CValueInteger.
-         */
-        public CValue convertInteger() {
-            return this;
-        }
-
-        /**
-         * Convert to string.
-         * 
-         * @return Value converted to string.
-         */
+	     * Convert to string.
+	     * 
+	     * @return Value converted to string.
+	     */
         public String stringValue() { 
-            return Integer.toString(value); 
+        	return Integer.toString(value); 
         }
-
+        
         /**
          * Create a new integer literal AST node.
          * 
@@ -693,31 +682,23 @@ aspect ConstantEvaluation {
         public double maxValue() {
             return value;
         }
-
-        public CValue constrainWithin(CValue min, CValue max) {
-            if (!min.isUnknown() && min.realValue() > value)
-                return min;
-            if (!max.isUnknown() && max.realValue() < value)
-                return max;
-            return this;
-        }
-
-        /**
-         * Convert to CValueReal.
-         */
-        public CValue convertReal() {
-            return this;
-        }
+	    
+	    /**
+	     * Convert to CValueReal.
+	     */
+	    public CValue convertReal() {
+	    	return this;
+	    }
 
         /**
-         * Convert to string.
-         * 
-         * @return Value converted to string.
-         */
+	     * Convert to string.
+	     * 
+	     * @return Value converted to string.
+	     */
         public String stringValue() { 
-            return Double.toString(value);
+        	return Double.toString(value); 
         }
-
+        
         /**
          * Create a new literal expression AST node.
          * 
@@ -1017,17 +998,7 @@ aspect ConstantEvaluation {
                     return true;
             return false;
         }
-
-        public CValue constrainWithin(CValue min, CValue max) {
-            CValueArray res = new CValueArray(size());
-            for (int i = 0; i < values.length; i++) {
-                CValue cellMin = min.isArray() ? min.array().getCell(i) : min;
-                CValue cellMax = max.isArray() ? max.array().getCell(i) : max;
-                res.values[i] = values[i].constrainWithin(cellMin, cellMax);
-            }
-            return res;
-        }
-
+        
         @Override
         public boolean isReal() {
             boolean res = true;
@@ -1608,81 +1579,73 @@ aspect ConstantEvaluation {
         }
 
     }
-
+    
     /**
      * Constant value for enumeration literal.
      */
     public class CValueEnum extends CValue {
-
-        private FEnumType type;
-        private String value;
-        private int index;
-
-        /**
-         * Create a new constant value for enumeration literal.
-         * 
-         * @param type   the type of the enumeration
-         * @param value  the name of the enumeration literal
-         */
-        public CValueEnum(FType type, String value) {
-            this.type = (FEnumType) type;
-            this.value = value;
-            index = 0;
-            int n = this.type.getNumFEnumLiteralType();
-            for (int i = 0; i < n && index == 0; i++)
-                if (this.type.getFEnumLiteralType(i).getName().equals(value))
-                    index = i + 1;
-        }
-
-        /**
-         * Create a new constant value for enumeration literal.
-         * 
-         * @param type   the type of the enumeration
-         * @param index  the ordinal for the enumeration literal
-         */
-        public CValueEnum(FType type, int index) {
-            this.type = (FEnumType) type;
-            if (index < 0)
-                index = this.type.getNumFEnumLiteralType() + index + 1;
-            this.index = index;
-            value = this.type.getFEnumLiteralType(index - 1).getName();
-        }
-
+    	
+    	private FEnumType type;
+    	private String value;
+    	private int index;
+    	
+    	/**
+    	 * Create a new constant value for enumeration literal.
+    	 * 
+    	 * @param type   the type of the enumeration
+    	 * @param value  the name of the enumeration literal
+    	 */
+    	public CValueEnum(FType type, String value) {
+    		this.type = (FEnumType) type;
+    		this.value = value;
+    		index = 0;
+    		int n = this.type.getNumFEnumLiteralType();
+    		for (int i = 0; i < n && index == 0; i++)
+    			if (this.type.getFEnumLiteralType(i).getName().equals(value))
+    				index = i + 1;
+    	}
+    	
+    	/**
+    	 * Create a new constant value for enumeration literal.
+    	 * 
+    	 * @param type   the type of the enumeration
+    	 * @param index  the ordinal for the enumeration literal
+    	 */
+    	public CValueEnum(FType type, int index) {
+    		this.type = (FEnumType) type;
+    		if (index < 0)
+    		    index = this.type.getNumFEnumLiteralType() + index + 1;
+     		this.index = index;
+     		value = this.type.getFEnumLiteralType(index - 1).getName();
+    	}
+        
         public int intValue() {
             return index;
         }
-
+        
         public double realValue() {
             return index;
         }
-
-        public String stringValue() {
-            return value;
-        }
-
-        public String toString() {
-            return type.getName() + "." + value;
-        }
-
-        /**
-         * Create a literal AST node from constant.
-         * 
-         * Always creates node for the flat tree.
-         *  
-         *  @return an FIdUseExp pointing to the literal in the FEnumDecl.
-         */
-        public FExp buildLiteral() {
-            return type.createLiteral(index);
-        }
-
-        public CValue constrainWithin(CValue min, CValue max) {
-            if (!min.isUnknown() && min.intValue() > index)
-                return min;
-            if (!max.isUnknown() && max.intValue() < index)
-                return max;
-            return this;
-        }
-
+    	
+    	public String stringValue() {
+    		return value;
+    	}
+    	
+    	public String toString() {
+    		return type.getName() + "." + value;
+    	}
+	    
+	    /**
+	     * Create a literal AST node from constant.
+	     * 
+	     * Always creates node for the flat tree.
+	     *  
+	     *  @return an FIdUseExp pointing to the literal in the FEnumDecl.
+	     */
+	    public FExp buildLiteral() {
+	    	return type.createLiteral(index);
+	    }
+    	
         @Override
         public boolean isValid() {
             return true;
@@ -2084,6 +2047,7 @@ aspect ConstantEvaluation {
     // Bypass for nodes with inherent support for constant evaluation of arrays.
     eq FFunctionCall.cevalArray(VariableEvaluator evaluator, Index i)    = cevalCalc(evaluator);
     eq InstFunctionCall.cevalArray(VariableEvaluator evaluator, Index i) = cevalCalc(evaluator);
+    eq FInstAccessExp.cevalArray(VariableEvaluator evaluator, Index i)   = isSlice() ? super.cevalArray(evaluator, i) : getInstAccess().ceval(evaluator, i);
     eq FIdUseExp.cevalArray(VariableEvaluator evaluator, Index i)        = isSlice() ? super.cevalArray(evaluator, i) : cevalCalc(evaluator);
     eq FIfExp.cevalArray(VariableEvaluator evaluator, Index i)           = cevalSelectExp(evaluator).cevalArray(evaluator, i);
 
@@ -2174,16 +2138,8 @@ aspect ConstantEvaluation {
     eq InstRecordConstructor.cevalCalc(VariableEvaluator evaluator) {
         CValueRecord res = new CValueRecord((FRecordType) type());
         int i = 0;
-        int i_arg = 0;
-        for (InstComponentDecl icd : getRecord().myInstClassDecl().allInstComponentDecls()) {
-            CValue val;
-            if (icd.isModifiable()) {
-                val = getArg(i_arg++).getFExp().ceval(evaluator);
-            } else {
-                val = icd.ceval(evaluator);
-            }
-            res.setMember(i++, val);
-        }
+        for (InstFunctionArgument arg : getArgs())
+            res.setMember(i++, arg.getFExp().ceval(evaluator));
         return res;
     }
 
@@ -2200,10 +2156,8 @@ aspect ConstantEvaluation {
         return getFExp().ceval(evaluator, i).array().getCell(i);
     }
 
-    eq FCardinality.cevalCalc(VariableEvaluator evaluator) {
-        final int v = getFExp().cardinalityValue();
-        return (v <= 0) ? CValue.UNKNOWN : new CValueInteger(v);
-    }
+    // Rewritten after flattening - give dummy value here to prevent error messages about structural parameters
+    eq FCardinality.cevalCalc(VariableEvaluator evaluator) = new CValueInteger(1);
 
     eq FConnectionsOp.cevalCalc(VariableEvaluator evaluator) {
         throw new ConstantEvaluationException();
@@ -2457,6 +2411,8 @@ aspect ConstantEvaluation {
     }
     
     
+    eq FInstAccessExp.cevalCalc(VariableEvaluator evaluator) = getInstAccess().ceval(evaluator);
+
     syn CValue InstAccess.ceval(VariableEvaluator evaluator)        = ceval(evaluator, Index.NULL);
     syn CValue InstAccess.ceval(VariableEvaluator evaluator, Index i) = CValue.UNKNOWN;
     eq InstDot.ceval(VariableEvaluator evaluator, Index i)            = getLastInstAccess().ceval(evaluator, i);
@@ -2466,6 +2422,11 @@ aspect ConstantEvaluation {
         if (myInstComponentDecl().isAssignable()) {
           Index iHere = Index.NULL;
           InstAssignable var = (InstAssignable) myInstComponentDecl();
+          if (!var.inFunction()) {
+              InstComponentDecl inner = var.myInnerInstComponentDecl();
+              if (!inner.isUnknown())
+                  var = (InstAssignable) inner;
+          }
           
           if (hasFArraySubscripts()) {
               FArraySubscripts fas = getFArraySubscripts();
@@ -2662,7 +2623,7 @@ aspect ConstantEvaluation {
         CValue val = CValue.UNKNOWN;
         if (hasEvaluationValue(evaluator)) {
             val = evaluationValue(evaluator);
-        } else if ((variability().fixedParameterOrLess() || (inFunction() && !isInput())) && !isForIndex()) {
+        } else if ((variability().parameterOrLess() || (inFunction() && !isInput())) && !isForIndex()) {
             boolean func = inFunction();
             i = func ? i : Index.NULL;
             if (hasBindingFExp()) {
@@ -2679,28 +2640,13 @@ aspect ConstantEvaluation {
         return val;
     }
     
-    eq InstExternalObject.ceval(VariableEvaluator evaluator, Index i) {
-        CValue val = super.ceval(evaluator, i);
-        val.markExternalObject(qualifiedName());
-        return val;
-    }
-    
     syn CValue InstAssignable.cevalNoBExp(VariableEvaluator evaluator, Index i) {
         CValue val = startAttributeCValue(evaluator);
-        if (i != Index.NULL) 
-            val = val.array().getCell(i);
-        if (isInteger() || isReal() || isEnum()) {
-            try {
-                CValue min = minAttributeCValue(evaluator);
-                if (i != Index.NULL) 
-                    min = min.array().getCell(i);
-                CValue max = maxAttributeCValue(evaluator);
-                if (i != Index.NULL) 
-                    max = max.array().getCell(i);
-                val =  val.constrainWithin(min, max);
-            } catch (ConstantEvaluationException e) {}
+        if (i == Index.NULL) {
+            return val;
+        } else {
+            return val.array().getCell(i);
         }
-        return val;
     }
     
     eq InstRecord.cevalNoBExp(VariableEvaluator evaluator, Index i) {
@@ -2939,14 +2885,7 @@ aspect ConstantEvaluation {
         }
 		return val;
 	}
-    
-    eq FExternalObjectVariable.ceval(VariableEvaluator evaluator, boolean inParameterRecord) {
-        CValue val = super.ceval(evaluator, inParameterRecord);
-        val.markExternalObject(name());
-        return val;
-    }
-    
-	
+
 	/**
 	 * Constant evaluation of FVariable binding expressions.
 	 * 
@@ -2964,26 +2903,24 @@ aspect ConstantEvaluation {
 	syn CValue FAbstractVariable.ceval(VariableEvaluator evaluator, Index i) = CValue.UNKNOWN;
 	eq FFunctionVariable.ceval(VariableEvaluator evaluator, Index i)         = evaluationValue(evaluator).array().getCell(i);
 	eq FVariable.ceval(VariableEvaluator evaluator, Index i) {
-        CValue val;
-        if (isForIndex())
-            val = evaluationValue(evaluator);
-        else if (hasParameterEquation())
-            val = parameterEquation().cevalParameter(evaluator, this, i);
-        else if (hasBindingExp())
-            val = getBindingExp().ceval(evaluator, i);
-        else
-            val = startAttributeCValue();
-        val = val.array().getCell(i);
-        if (isReal())
-            val = val.convertReal();
-        return val;
-    }
-    
-    eq FExternalObjectVariable.ceval(VariableEvaluator evaluator, Index i) {
-        CValue val = super.ceval(evaluator, i);
-        val.markExternalObject(name());
-        return val;
-    }
+		if (!isConstant() && !isParameter() && !inRecord()) {
+			return CValue.UNKNOWN;
+		} else {
+			CValue val;
+			if (isForIndex())
+				val = evaluationValue(evaluator);
+			else if (hasParameterEquation())
+				val = parameterEquation().cevalParameter(evaluator, this, i);
+			else if (hasBindingExp())
+				val = getBindingExp().ceval(evaluator, i);
+			else
+				val = startAttributeCValue();
+			val = val.array().getCell(i);
+			if (isReal())
+				val = val.convertReal();
+			return val;
+		}
+	}
 
   /**
    * Constant evaluation of binding equation for dependent parameter.
@@ -3062,30 +2999,20 @@ aspect ConstantEvaluation {
    * Uses the start value for non-records.
    */
   syn CValue FVariable.defaultCValueCell(VariableEvaluator evaluator, Index i, boolean inParameterRecord) = startAttributeCValue();
-    
-    private boolean FRecordVariable.circular = false;
-    eq FRecordVariable.defaultCValueCell(VariableEvaluator evaluator, Index i, boolean inParameterRecord) {
-        if (circular) {
-            throw new ConstantEvaluationException(null, "Circular evaluation in record component");
-        }
-        circular = true;
-        try {
-            CValueRecord res = new CValueRecord((FRecordType) type().scalarType());
-            FRecordDecl rec = myFRecordDecl();
-            for (int j = 0, n = rec.getNumFVariable(); j < n; j++) {
-                FVariable fv = rec.getFVariable(j);
-                if (inParameterRecord || fv.isParameter() || fv.isRecord())
-                    res.setMember(j, fv.ceval(evaluator, inParameterRecord));
-                else
-                    res.setMember(j, CValue.UNKNOWN);
-            }
-            for (FAttribute a : getFAttributes())
-                a.applyToCValue(evaluator, res, i);
-            return res;
-        } finally {
-            circular = false;
-        }
-    }
+  eq FRecordVariable.defaultCValueCell(VariableEvaluator evaluator, Index i, boolean inParameterRecord) {
+	  CValueRecord res = new CValueRecord((FRecordType) type().scalarType());
+	  FRecordDecl rec = myFRecordDecl();
+	  for (int j = 0, n = rec.getNumFVariable(); j < n; j++) {
+		  FVariable fv = rec.getFVariable(j);
+		  if (inParameterRecord || fv.isParameter() || fv.isRecord())
+			  res.setMember(j, fv.ceval(evaluator, inParameterRecord));
+		  else
+			  res.setMember(j, CValue.UNKNOWN);
+	  }
+	  for (FAttribute a : getFAttributes())
+		  a.applyToCValue(evaluator, res, i);
+	  return res;
+  }
   
   /**
    * Apply any binding expressions for record members to a record CValue.
@@ -3264,16 +3191,6 @@ aspect ConstantEvaluation {
     }
     
     @Override
-    public void FAssert.evaluateCell(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
-        boolean val = getTest().ceval().booleanValue();
-        if (!val && (!hasLevel() || getLevel().ceval().stringValue().equals(LEVEL_ERROR))) {
-            String msg = "Assertion failed: " + getMsg().ceval().stringValue();
-            throw new ConstantEvaluationException(null , msg);
-        }
-    }
-    
-    
-    @Override
     public void FFunctionCall.evaluateCell(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
         myCommonCallable().evaluate(evaluator, values);
     }
@@ -3366,21 +3283,10 @@ aspect ConstantEvaluation {
 
     public void FExp.flushUnknownSizes() {
         // Flush so that getArray() is cleared for unknown sizes, and then recalculate size and make sure it is evaluated
-        if (size().flushUnknownSizes()) {
+        if (size().isUnknown()) {
             flushCache();
             size().isUnknown();
         }
-    }
-    
-    public boolean Size.flushUnknownSizes() {
-        return false;
-    }
-    
-    public boolean MutableSize.flushUnknownSizes() {
-        for (FExp e : exps)
-            if (e != null)
-                return true;
-        return false;
     }
 
     public void FFunctionCall.flushUnknownSizes() {}
@@ -3899,6 +3805,19 @@ aspect ConstantEvaluation {
     }
     
     /**
+     * Evaluate statement during function evaluation.
+     * 
+     * @param evaluator the evaluator used to evaluate the algorithm
+     */
+    @Override
+    public int InstAssignStmt.evaluate(AlgorithmEvaluator evaluator) {
+        getLeft().getInstAccess().assignToInFuncEval(evaluator, getRight().ceval(evaluator));
+        return EVAL_CONT;
+    }
+    
+    
+    
+    /**
      * Evaluate an assignment with this as the left side during function evaluation.
      * 
      * @param evaluator the evaluator used to evaluate the algorithm
@@ -3920,9 +3839,6 @@ aspect ConstantEvaluation {
         throw new ConstantEvaluationException();
     }
     
-    @Override
-    public abstract void FAssignableExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right);
-    
     /**
      * Evaluate an assignment with this as the left side during function evaluation.
      * 
@@ -3933,13 +3849,6 @@ aspect ConstantEvaluation {
     public void FIdUseExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
         getFIdUse().assignToInFuncEval(evaluator, right);
     }
-    
-    @Override
-    public void FSubscriptedExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
-        ((FAssignableExp)select()).assignToInFuncEval(evaluator, right);
-    }
-    
-    syn FExp FSubscriptedExp.select() = getFExp().getArray().get(getFArraySubscripts().createIndex());
     
     /**
      * Evaluate an assignment with this as the left side during function evaluation.
@@ -4211,7 +4120,6 @@ aspect ConstantEvaluation {
         int res = EVAL_CONT;
         for (Index i : ivals.indices()) {
             getIndex().setEvaluationValue(defaultVariableEvaluator(), ivals.getCell(i));
-            getForStmts().prepareForFunctionEval();
             res = getForStmts().evaluateList(evaluator);
             if (res != EVAL_CONT) {
                 break;
@@ -4239,7 +4147,6 @@ aspect ConstantEvaluation {
 	  CValueArray ivals = getFExp().ceval(evaluator).array();
 	  for (Index j : ivals.indices()) {
 		  var.setEvaluationValue(evaluator, ivals.getCell(j));
-		  stmts.prepareForFunctionEval();
 		  int res = last ? stmts.evaluateList(evaluator) : 
 				  indices.getChild(i + 1).evaluateInFunc(evaluator, indices, i + 1, stmts);
 		  if (res != FStatement.EVAL_CONT) {
@@ -4561,6 +4468,7 @@ aspect LiteralExpressions {
 	}
 	
 	eq FIdUseExp.hasOnlyLiterals()      = false;
+	eq FInstAccessExp.hasOnlyLiterals() = false;
 	eq FFunctionCall.hasOnlyLiterals()  = false;
 	
 }
@@ -4594,6 +4502,7 @@ aspect CircularExpressions {
 	private boolean FAbstractExp.inIsCircular = false; 
 	
 	eq FIdUseExp.isCircularCalc() = getFIdUse().isCircular();
+	eq FInstAccessExp.isCircularCalc() = getInstAccess().myInstComponentDecl().isCircular();
 	
 	syn boolean FIdUse.isCircular()  = myFV().isCircular();
 	eq FIdUseInstAccess.isCircular() = getInstAccess().myInstComponentDecl().isCircular();
@@ -4619,6 +4528,7 @@ aspect CircularExpressions {
 
 	syn boolean FExp.isUnknownSizeVarUse()  = false;
 	eq FIdUseExp.isUnknownSizeVarUse()      = getFIdUse().isUnknownSizeVarUse();
+	eq FInstAccessExp.isUnknownSizeVarUse() = getInstAccess().isUnknownSizeVarUse();
 	
 	syn boolean FIdUse.isUnknownSizeVarUse()  = myFV().isUnknownSizeVar();
 	eq FIdUseInstAccess.isUnknownSizeVarUse() = getInstAccess().isUnknownSizeVarUse();
@@ -4750,6 +4660,345 @@ aspect AritmeticTransformations {
     eq FIntegerLitExp.hasSimpleNegation() = true;
     eq FRealLitExp.hasSimpleNegation()    = true;
 
+}
+
+aspect ExternalCEval {
+    
+    /**
+     * Retrieve ModelicaCompiler from root. Might be null.
+     */
+    syn ModelicaCompiler FExternalStmt.myCompiler() = root().getUtilInterface().getModelicaCompiler();
+    
+    /**
+     * Check external arguments
+     */
+    syn boolean FExternalStmt.canEvaluate() {
+        if (myOptions().getIntegerOption("external_constant_evaluation") == 0)
+            return false;
+        for (CommonVariableDecl cvd : varsToSerialize()) {
+            if (cvd.type().isRecord()) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * Create a process of this external function. Returns null if there was no
+     * compiler or the process could not be started.
+     */
+    public Process FExternalStmt.createExternCEvalProc(FExternalStmt ext) {
+        ModelicaCompiler mc = myCompiler();
+        if (mc != null)
+            return mc.createExternCEvalProc(this);
+        return null;
+    }
+    
+    /**
+     * External functions does not have a FAlgorithm in the instance tree
+     * so we have to generate one.
+     */
+    syn nta FAlgorithm InstExternal.getFAlgorithm() {
+        FAlgorithm fab = new FAlgorithm(new List());
+        fab.addFStatement(createStmt(surroundingInstClass(), new FQNameFull(""), false));
+        return fab;
+    }
+    
+    public int FExternalStmt.evaluateConstructor(Map<CommonVariableDecl, CValue> values) {
+        ArrayList<FExp> args = myConstructorArgs();
+        CValue[] vals = new CValue[args.size()];
+        for (int i = 0; i < args.size(); i++)
+            vals[i] = args.get(i).ceval();
+        values.put(myConstructorOutput(), new CValueExternalObject(vals));
+        return EVAL_CONT;
+    }
+    
+    inh boolean FExternalStmt.isConstructorStmt();
+    eq Root.getChild().isConstructorStmt() = false;
+    eq FFunctionDecl.getChild().isConstructorStmt() = isConstructor();
+    eq InstClassDecl.getChild().isConstructorStmt() = isConstructor();
+    
+    inh boolean FExternalStmt.isDestructorStmt();
+    eq Root.getChild().isDestructorStmt() = false;
+    eq FFunctionDecl.getChild().isDestructorStmt() = isDestructor();
+    eq InstClassDecl.getChild().isDestructorStmt() = isDestructor();
+    
+    /**
+     * Evaluate this external statement.
+     */
+    public int FExternalStmt.evaluateExternal(Map<CommonVariableDecl, CValue> values) {
+        
+        if (isConstructorStmt()) {
+            return evaluateConstructor(values);
+        }
+        
+        Process proc = createExternCEvalProc(this);
+        
+        if (proc == null) {
+            throw new ConstantEvaluationException(null, "Failed to evaluate external function call, could not start process");
+        } 
+        
+        int res = 0;
+        int timeout = myOptions().getIntegerOption("external_constant_evaluation");
+        ProcessCommunicator com = new ProcessCommunicator(proc, timeout);
+        try {
+            com.accept("START");
+            for (CommonVariableDecl cvd : varsToSerialize()) {
+                com.put(values.get(cvd), cvd.type(), cvd.canBeUnknown());
+            }
+            com.accept("CALC");
+            com.accept("DONE");
+            for (CommonVariableDecl cvd : varsToDeserialize())
+                values.put(cvd, com.get(cvd.type()));
+            com.accept("END");
+            res = com.end();
+        } catch (IOException e) {
+//            ModelicaCompiler.log.debug(e);
+            res = -2;
+        }
+        com.destroy();
+        
+        if (res != 0) {
+            ModelicaCompiler.log.debug("Could not evaluate external function " + getName() + ", error code: " + res);
+            throw new ConstantEvaluationException(null, "Failed to evaluate external function call, error during evaluation");
+        }
+        
+        return EVAL_CONT;
+    }
+    
+    
+    /**
+     * A class for handling communication with an external process during
+     * constant evaluation.
+     */
+    public class ProcessCommunicator {
+        private BufferedReader in;
+        private BufferedWriter out;
+        private Process process;
+        private Timer timer;
+        String buffLine = null;
+        
+        public ProcessCommunicator(Process proc, int timeout) {
+            process = proc;
+            in  = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            out = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+            timer = new Timer();
+            if (timeout >= 0) {
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        process.destroy();
+                        cancel();
+                    }
+                }, timeout);
+            }
+        }
+        
+        private String getLine() throws IOException {
+            String line = buffLine;
+            if (line == null)
+                line = in.readLine();
+            if (line == null)
+                throw new IOException();
+            buffLine = null;
+            return line;
+        }
+        
+        private void buffLine(String line) {
+            buffLine = line;
+        }
+        
+        /**
+         * Print <code>val</code>, serialized, to the process 
+         */
+        public void put(CValue val, FType type, boolean allowUninitialized) throws IOException {
+//            ModelicaCompiler.log.debug("ProcessCommunicator WRITE: " + val.toString() + " of type: "+type.toString());
+            val.serialize(out, type, allowUninitialized);
+            out.flush();
+        }
+        
+        /**
+         * Read <code>type</code>, serialized, from the process 
+         */
+        public CValue get(FType type) throws IOException {
+            CValue val = type.deserialize(this);
+//            ModelicaCompiler.log.debug("ProcessCommunicator READ: " + val.toString());
+            return val;
+        }
+        
+        /**
+         * Read a line. Check equals to <code>s</code>.
+         */
+        public void accept(String s) throws IOException {
+            log();
+            String line = getLine();
+            if (line == null || !line.equals(s)) {
+                ModelicaCompiler.log.debug(String.format("ProcessCommunicator did not receive expected line\n\t'%s' != '%s'", s, (line == null ? "null" : line)));
+                throw new IOException();
+            }
+        }
+        
+        private void log() throws IOException {
+            String line = getLine();
+            while (line.equals("LOG")) {
+                double warning = deserializeReal();
+                String name    = deserializeString();
+                String format  = deserializeString();
+                String value   = deserializeString();
+                if (warning != 0)
+                    ModelicaCompiler.log.warning("%s: " + format, name, value);
+                else
+                    ModelicaCompiler.log.info("%s: " + format, name, value);
+                line = getLine();
+            }
+            buffLine(line);
+        }
+        
+        /**
+         * Wait for and retrieve exit value from process.
+         */
+        public int end() {
+            int res;
+            try {
+                process.waitFor();
+                res = process.exitValue();
+            } catch (InterruptedException e) {
+                res = -99;
+            } catch (IllegalThreadStateException e) {
+                res = -100;
+            }
+            return res;
+        }
+        
+        /**
+         * Tear down everything
+         */
+        public void destroy() {
+            try {
+                in.close();
+            } catch (IOException e) {
+            }
+            try {
+                out.close();
+            } catch (IOException e) {
+            }
+            
+            process.destroy();
+            process = null;
+            timer.cancel();
+            timer.purge();
+            timer = null;
+        }
+        
+        public double deserializeReal() throws IOException {
+            String s = in.readLine();
+            if (s == null)
+                throw new IOException();
+            try {
+                return Double.parseDouble(s);
+            } catch (NumberFormatException e) {
+                throw new IOException();
+            }
+        }
+        
+        public String deserializeString() throws IOException {
+            String s = in.readLine();
+            if (s == null)
+                throw new IOException();
+            try {
+                int len = Integer.parseInt(s);
+                char[] c = new char[len];
+                in.read(c,0,len);
+                s = in.readLine();
+                return new String(c);
+            } catch (NumberFormatException e) {
+                throw new IOException();
+            }
+        }
+    }
+    
+    /**
+     * Print this constant value to <code>buff</code>
+     */
+    public void CValue.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
+        throw new IOException();
+    }
+    public void CValueUnknown.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
+        if (allowUninitialized)
+            type.uninitialized().serialize(buff, type, false);
+        else
+            super.serialize(buff, type, allowUninitialized);
+    }
+    public void CValueArray.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
+        for (int s : size().size) {
+            buff.write("" + s + "\n");
+        }
+        for (Index i : indices()) {
+            getCell(i).serialize(buff, type.scalarType(), allowUninitialized);
+        }
+    }
+    public void CValueReal.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
+        buff.write(Double.toString(realValue()));
+        buff.write("\n");
+    }
+    public void CValueInteger.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
+        buff.write(Integer.toString(intValue()));
+        buff.write("\n");
+    }
+    public void CValueBoolean.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
+        buff.write(booleanValue() ? "1\n" : "0\n");
+    }
+    public void CValueString.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
+        String s = stringValue();
+        buff.write("" + s.length() + " ");
+        buff.write(s);
+        buff.write("\n");
+    }
+    public void CValueEnum.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
+        buff.write(Integer.toString(intValue()));
+        buff.write("\n");
+    }
+    public void CValueExternalObject.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
+        for (CValue v : values)
+            v.serialize(buff, type, allowUninitialized);
+    }
+    
+    public CValue FType.uninitialized() { return zeroCValue(); }
+    public CValue FEnumType.uninitialized() { return (new FIntegerType(size())).zeroCValue(); }
+    
+    
+    /**
+     * Read a constant value of <code>this</code> type from <code>buff</code>
+     */
+    public CValue FType.deserialize(ProcessCommunicator com) throws IOException {
+        if (isArray()) {
+            CValueArray a = new CValueArray(size().ceval());
+            for (Index i : a.indices()) {
+                a.setCell(i, deserializeScalar(com));
+            }
+            return a;
+        } else {
+            return deserializeScalar(com);
+        }
+    }
+    public CValue FType.deserializeScalar(ProcessCommunicator com) throws IOException {
+        throw new IOException();
+    }
+    public CValue FRealType.deserializeScalar(ProcessCommunicator com) throws IOException {
+        return new CValueReal(com.deserializeReal());
+    }
+    public CValue FIntegerType.deserializeScalar(ProcessCommunicator com) throws IOException {
+        return new CValueInteger((int) com.deserializeReal());
+    }
+    public CValue FBooleanType.deserializeScalar(ProcessCommunicator com) throws IOException {
+        return new CValueBoolean(com.deserializeReal() != 0);
+    }
+    public CValue FStringType.deserializeScalar(ProcessCommunicator com) throws IOException {
+        return new CValueString(com.deserializeString());
+    }
+    public CValue FEnumType.deserializeScalar(ProcessCommunicator com) throws IOException {
+        return new CValueEnum(this, (int) com.deserializeReal());
+    }
 }
 
 aspect SourceCeval {

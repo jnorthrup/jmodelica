@@ -86,11 +86,11 @@ end TransformCanonicalTests.TransformCanonicalTest2;
   	parameter Real p2 = p4*p1;
   	parameter Real p1 = 4;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
             name="TransformCanonicalTest3_Err",
-            description="Test parameter sorting.",
-            errorMessage="
+			description="Test parameter sorting.",
+			errorMessage="
 3 errors found:
 
 Error at line 84, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
@@ -112,11 +112,11 @@ Error at line 86, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/Transf
   	parameter Real p2 = p1*p2;
   	parameter Real p1 = 4;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
             name="TransformCanonicalTest4_Err",
-            description="Test parameter sorting.",
-            errorMessage="
+			description="Test parameter sorting.",
+			errorMessage="
 3 errors found:
 
 Error at line 110, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
@@ -774,11 +774,11 @@ Alias sets:
     x3=-x1;
 
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="AliasTest16_Err",
-            description="Test alias error.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AliasTest16_Err",
+			description="Test alias error.",
+			errorMessage="
 1 errors found:
 
 Error in flattened model:
@@ -795,11 +795,11 @@ Error in flattened model:
     x3=x1;
 
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="AliasTest17_Err",
-            description="Test alias error.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AliasTest17_Err",
+			description="Test alias error.",
+			errorMessage=" 
 1 errors found:
 
 Error in flattened model:
@@ -816,11 +816,11 @@ Error in flattened model:
     x3=x1;
 
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="AliasTest18_Err",
-            description="Test alias error.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AliasTest18_Err",
+			description="Test alias error.",
+			errorMessage=" 
 1 errors found:
 
 Error in flattened model:
@@ -837,11 +837,11 @@ Error in flattened model:
     x3=-x1;
 
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="AliasTest19_Err",
-            description="Test alias error.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AliasTest19_Err",
+			description="Test alias error.",
+			errorMessage=" 
 1 errors found:
 
 Error in flattened model:
@@ -1236,47 +1236,6 @@ Alias sets:
 ")})));
   end AliasTest33;
 
-model AliasTest34
-  Real x(start = 0.1);
-  Real y;
-  discrete Real switchTime(start=-1e60, fixed=true);
-  parameter Boolean yOn = true;
-  
-  initial equation
-    pre(x) + pre(y) = 2 * switchTime ^2;
-    pre(x) = pre(y);
-  
-  equation
-    when yOn then
-      switchTime = time;
-    end when;
-    x = y;
-    der(x) = x * (time - switchTime);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="AliasTest34",
-            methodName="printDAEInitBLT",
-            description="Test so that initial equations which link two alias variables are removed. In this case it is important that switchTime = pre(switchTime)",
-            methodResult="
---- Solved equation ---
-pre(switchTime) := -1.0E60
-
---- Solved equation ---
-switchTime := pre(switchTime)
-
---- Solved equation ---
-x := 0.1
-
---- Solved equation ---
-der(x) := x * (time - switchTime)
-
---- Solved equation ---
-pre(x) := 2 * switchTime ^ 2 / (1.0 + 1.0)
--------------------------------
-")})));
-  end AliasTest34;
-
 model AliasFuncTest1
     function f
         input Real a;
@@ -1384,11 +1343,11 @@ equation
         a1 = A.c;
     end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="AliasPropMinMax2",
-            description="Test errors on impossible min/max combinations",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AliasPropMinMax2",
+			description="Test errors on impossible min/max combinations",
+			errorMessage="
 3 errors found:
 
 Error in flattened model:
@@ -1687,47 +1646,15 @@ end TransformCanonicalTests.AliasStateSelect5;
 end AliasStateSelect5;
 
 
-model AliasPropNegSecondRound1
-    Real x(stateSelect=StateSelect.always);
-    Real y(min=ymin);
-    Real z;
-    parameter Real ymin = 2;
-equation
-    x = -y * z;
-    z = 1;
-    der(x) = time - 3;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AliasPropNegSecondRound1",
-            description="Test against crash when propagating negated attribute during second round of alias elimination",
-            flatModel="
-fclass TransformCanonicalTests.AliasPropNegSecondRound1
- Real x(stateSelect = StateSelect.always,max = - ymin);
- constant Real z = 1;
- parameter Real ymin = 2 /* 2 */;
-initial equation 
- x = 0.0;
-equation
- der(x) = time - 3;
-
-public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
-
-end TransformCanonicalTests.AliasPropNegSecondRound1;
-")})));
-end AliasPropNegSecondRound1;
-
-
 model ParameterBindingExpTest3_Warn
 
   parameter Real p;
 
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="ParameterBindingExpTest3_Warn",
-            description="Test errors in binding expressions.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		WarningTestCase(
+			name="ParameterBindingExpTest3_Warn",
+			description="Test errors in binding expressions.",
+			errorMessage="
 1 errors found:
 
 Warning at line 1681, column 35, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
@@ -1743,11 +1670,11 @@ model AttributeBindingExpTest1_Err
 equation
   der(x) = -x;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="AttributeBindingExpTest1_Err",
-            description="Test errors in binding expressions.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AttributeBindingExpTest1_Err",
+			description="Test errors in binding expressions.",
+			errorMessage="
 1 errors found:
 
 Error at line 1701, column 16, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
@@ -1763,11 +1690,11 @@ model AttributeBindingExpTest2_Err
 equation
   der(x) = -x;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="AttributeBindingExpTest2_Err",
-            description="Test errors in binding expressions..",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AttributeBindingExpTest2_Err",
+			description="Test errors in binding expressions..",
+			errorMessage="
 1 errors found:
 
 Error at line 1721, column 16, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
@@ -1782,11 +1709,11 @@ model AttributeBindingExpTest3_Err
 equation
   der(x) = -x;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="AttributeBindingExpTest3_Err",
-            description="Test errors in binding expressions..",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AttributeBindingExpTest3_Err",
+			description="Test errors in binding expressions..",
+			errorMessage="
 2 errors found:
 
 Error at line 1740, column 16, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
@@ -1806,11 +1733,11 @@ model AttributeBindingExpTest4_Err
 equation
   der(x) = -x;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="AttributeBindingExpTest4_Err",
-            description="Test errors in binding expressions..",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AttributeBindingExpTest4_Err",
+			description="Test errors in binding expressions..",
+			errorMessage="
 3 errors found:
 
 Error at line 1761, column 23, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
@@ -1834,11 +1761,11 @@ model AttributeBindingExpTest5_Err
   Real p2;	
   A a(x(start=p2));
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="AttributeBindingExpTest5_Err",
-            description="Test errors in binding expressions..",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AttributeBindingExpTest5_Err",
+			description="Test errors in binding expressions..",
+			errorMessage="
 2 errors found:
 
 Error at line 1790, column 18, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
@@ -2618,43 +2545,6 @@ end TransformCanonicalTests.InitialEqTest19;
 ")})));
 end InitialEqTest19;
 
-model InitialEqTest20
-    discrete Integer i(start=0, fixed=true);
-    discrete Real t;
-algorithm
-    when {initial(), time > 1+t} then
-        t := time + 1;
-    end when;
-    i := integer(time);
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="InitialEqTest20",
-            description="Test BiPGraph matching prioritazion for discrete variables (pre variables should be unmatched)",
-            flatModel="
-fclass TransformCanonicalTests.InitialEqTest20
- discrete Integer i(start = 0,fixed = true);
- discrete Real t;
- discrete Integer temp_1;
- Real temp_2;
- discrete Boolean temp_3;
-initial equation 
- pre(temp_1) = 0;
- pre(i) = 0;
- pre(t) = 0.0;
- pre(temp_3) = false;
-algorithm
- temp_2 := time - (1 + t);
- temp_3 := time > 1 + t;
- if initial() or temp_3 and not pre(temp_3) then
-  t := time + 1;
- end if;
- temp_1 := if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
- i := temp_1;
-end TransformCanonicalTests.InitialEqTest20;
-")})));
-end InitialEqTest20;
-
 model ParameterDerivativeTest
  Real x(start=1);
  Real y;
@@ -2683,11 +2573,11 @@ model UnbalancedTest1_Err
   Real y;
   Real z;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="UnbalancedTest1_Err",
-            description="Test error messages for unbalanced systems.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="UnbalancedTest1_Err",
+			description="Test error messages for unbalanced systems.",
+			errorMessage="
 1 errors found:
 
 Error in flattened model:
@@ -2705,12 +2595,12 @@ equation
   x = 1;
   x = 1+2;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="UnbalancedTest2_Err",
-            description="Test error messages for unbalanced systems.",
-            variability_propagation=false,
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="UnbalancedTest2_Err",
+			description="Test error messages for unbalanced systems.",
+			variability_propagation=false,
+			errorMessage="
 1 errors found:
 
 Error in flattened model:
@@ -2728,11 +2618,11 @@ equation
   x = 4;
   x = 5;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="UnbalancedTest3_Err",
-            description="Test error messages for unbalanced systems.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="UnbalancedTest3_Err",
+			description="Test error messages for unbalanced systems.",
+			errorMessage="
 1 errors found:
 
 Error in flattened model:
@@ -2745,11 +2635,11 @@ model UnbalancedTest4_Err
   Real x;
 equation
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="UnbalancedTest4_Err",
-            description="Test error messages for unbalanced systems.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="UnbalancedTest4_Err",
+			description="Test error messages for unbalanced systems.",
+			errorMessage="
 1 errors found:
 
 Error in flattened model:
@@ -2764,12 +2654,12 @@ model UnbalancedTest5_Err
 equation
     x = if y then 1 else 2;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="UnbalancedTest5_Err",
-            description="Test error messages for unbalanced systems.",
-            variability_propagation=false,
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="UnbalancedTest5_Err",
+			description="Test error messages for unbalanced systems.",
+			variability_propagation=false,
+			errorMessage="
 1 errors found:
 
 Error in flattened model:
@@ -3491,7 +3381,6 @@ initial equation
  x_c = pre(x_c);
  x_p = 1;
  pre(sampleTrigger) = false;
- pre(x_c) = 0.0;
  pre(u_c) = 0.0;
  pre(atInit) = false;
 equation
@@ -3651,115 +3540,6 @@ pre(temp_1) := false
 -------------------------------
 ")})));
 end WhenEqu14;
-
-model WhenEqu16
-    Boolean a;
-initial equation
-    pre(a) = a;
-    a = if time > 1 then true else false;
-equation
-    when time > 2 then
-        a = true;
-    end when;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="WhenEqu16",
-            description="Test of when equation and initial equation assigning to pre variable",
-            methodName="printDAEInitBLT",
-            methodResult="
---- Solved equation ---
-temp_1 := time > 2
-
---- Solved equation ---
-a := if time > 1 then true else false
-
---- Solved equation ---
-pre(a) := a
-
---- Solved equation ---
-pre(temp_1) := false
--------------------------------
-")})));
-end WhenEqu16;
-
-model WhenEqu17
-    Real a;
-    Real b (start = 2);
-    Real c;
-    Real d;
-    Real e;
-    Real f;
-    Real g;
-initial equation
-    pre(a) = -1;
-    c = 1;
-equation
-    when time > 2 then
-        a = time;
-    end when;
-    0 = if time > 2 then b + a else b;
-    c = der(d) + b + e;
-    der(d) * time = 0;
-    e = f + time;
-    f * g = 0;
-    when time > pre(g) then
-        g = time + 1;
-    end when;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="WhenEqu17",
-            description="Ensure that the pre propagation equations are inserted in the first init BiPGraph if necessary (e.g. all other matchings for that variables are bad)",
-            methodName="printDAEInitBLT",
-            methodResult="
---- Solved equation ---
-temp_1 := time > 2
-
---- Solved equation ---
-pre(a) := -1
-
---- Solved equation ---
-a := pre(a)
-
---- Unsolved equation (Block 1) ---
-0 = if time > 2 then b + a else b
-  Computed variables: b
-
---- Solved equation ---
-c := 1
-
---- Unsolved equation (Block 2) ---
-der(d) * time = 0
-  Computed variables: der(d)
-
---- Solved equation ---
-e := c - der(d) - b
-
---- Solved equation ---
-f := e - time
-
---- Unsolved equation (Block 3) ---
-f * g = 0
-  Computed variables: g
-
---- Solved equation ---
-pre(g) := g
-
---- Solved equation ---
-temp_2 := time > pre(g)
-
---- Solved equation ---
-d := 0.0
-
---- Solved equation ---
-pre(temp_1) := false
-
---- Solved equation ---
-pre(temp_2) := false
--------------------------------
-")})));
-end WhenEqu17;
 
 model IntialWhenAlgorithm1
     Boolean a;
@@ -4298,11 +4078,11 @@ equation
         (a, x) = F(b);
     end if;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="IfEqu18",
-            description="Check compliance warning for if equations",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="IfEqu18",
+			description="Check compliance warning for if equations",
+			errorMessage="
 1 errors found:
 
 Compliance error in flattened model:
@@ -4570,12 +4350,9 @@ equation
 fclass TransformCanonicalTests.IfEqu25
  Real x;
  Real y;
- parameter Real temp_1;
-parameter equation
- temp_1 = TransformCanonicalTests.IfEqu25.f(2);
 equation
- x = if temp_1 > 0 then time else 2;
- y = if temp_1 > 0 then x else x * x;
+ x = if TransformCanonicalTests.IfEqu25.f(2) > 0 then time else 2;
+ y = if TransformCanonicalTests.IfEqu25.f(2) > 0 then x else x * x;
 
 public
  function TransformCanonicalTests.IfEqu25.f
@@ -6186,11 +5963,11 @@ end TestExternalObj1;
 model TestExternalObj2
 	extends MyExternalObject;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="TestExternalObj2",
-            description="Extending from external object",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TestExternalObj2",
+			description="Extending from external object",
+			errorMessage="
 1 errors found:
 
 Error at line 6038, column 2, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
@@ -6211,11 +5988,11 @@ model TestExternalObj3
     
     NoConstructor eo = NoConstructor();
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="TestExternalObj3",
-            description="Non-complete external object",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TestExternalObj3",
+			description="Non-complete external object",
+			errorMessage="
 1 errors found:
 
 Error at line 6063, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
@@ -6236,11 +6013,11 @@ model TestExternalObj4
     
     NoDestructor eo = NoDestructor();
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="TestExternalObj4",
-            description="Non-complete external object",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TestExternalObj4",
+			description="Non-complete external object",
+			errorMessage="
 1 errors found:
 
 Error at line 6086, column 21, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
@@ -6265,11 +6042,11 @@ model TestExternalObj5
     
     BadConstructor eo = BadConstructor();
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="TestExternalObj5",
-            description="Non-complete external object",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TestExternalObj5",
+			description="Non-complete external object",
+			errorMessage="
 2 errors found:
 
 Error at line 6107, column 3, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
@@ -6297,11 +6074,11 @@ model TestExternalObj6
     
     BadDestructor eo = BadDestructor();
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="TestExternalObj6",
-            description="Non-complete external object",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TestExternalObj6",
+			description="Non-complete external object",
+			errorMessage="
 2 errors found:
 
 Error at line 6144, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
@@ -6337,11 +6114,11 @@ model TestExternalObj7
     
     ExtraContent eo = ExtraContent();
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="TestExternalObj7",
-            description="External object with extra elements",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TestExternalObj7",
+			description="External object with extra elements",
+			errorMessage="
 1 errors found:
 
 Error at line 6168, column 5, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
@@ -6369,11 +6146,11 @@ model TestExternalObj8
     
     ExtraContent eo = ExtraContent();
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="TestExternalObj8",
-            description="External object with extra elements",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TestExternalObj8",
+			description="External object with extra elements",
+			errorMessage="
 1 errors found:
 
 Error at line 6205, column 5, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
@@ -6401,11 +6178,11 @@ model TestExternalObj9
     
     BadArgs eo = BadArgs();
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="TestExternalObj9",
-            description="Extra inputs/outputs to constructor/destructor",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TestExternalObj9",
+			description="Extra inputs/outputs to constructor/destructor",
+			errorMessage="
 2 errors found:
 
 Error at line 6240, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
@@ -6423,11 +6200,11 @@ equation
 	MyExternalObject.constructor();
 	MyExternalObject.destructor(myEO);
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="TestExternalObj10",
-            description="",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="TestExternalObj10",
+			description="",
+			errorMessage="
 3 errors found:
 
 Error at line 6272, column 26, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
@@ -6813,84 +6590,17 @@ model AssertEval2
 equation
     assert(false, "Test assertion");
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="AssertEval2",
-            description="Test assertation evaluation: failed assert",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AssertEval2",
+			description="Test assertation evaluation: failed assert",
+			errorMessage="
 1 errors found:
 
 Error in flattened model:
   Assertion failed: Test assertion
 ")})));
 end AssertEval2;
-
-model AssertEval3
-    Real x = time;
-equation
-    when initial() then
-        assert(true, "Test assertion");
-    end when;
-    when initial() then
-        assert(true, "Test assertion");
-    elsewhen time > 1 then
-        assert(true, "Test assertion");
-    end when;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AssertEval3",
-            description="Test assertation evaluation: in when equation",
-            flatModel="
-fclass TransformCanonicalTests.AssertEval3
- Real x;
- discrete Boolean temp_1;
-initial equation 
- pre(temp_1) = false;
-equation
- temp_1 = time > 1;
- x = time;
-end TransformCanonicalTests.AssertEval3;
-")})));
-end AssertEval3;
-
-model AssertEval4
-    Real x = time;
-equation
-    when initial() then
-        assert(false, "Test assertion");
-    end when;
-    when initial() then
-        assert(true, "Test assertion");
-    elsewhen time > 1 then
-        assert(false, "Test assertion");
-    end when;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AssertEval4",
-            description="Test assertation evaluation: in when equation",
-            flatModel="
-fclass TransformCanonicalTests.AssertEval4
- Real x;
- discrete Boolean temp_1;
-initial equation 
- pre(temp_1) = false;
-equation
- if initial() then
-  assert(false, \"Test assertion\");
- end if;
- temp_1 = time > 1;
- if initial() then
- else
-  if temp_1 and not pre(temp_1) then
-   assert(false, \"Test assertion\");
-  end if;
- end if;
- x = time;
-end TransformCanonicalTests.AssertEval4;
-")})));
-end AssertEval4;
 
 model MetaEqn1
     function F
@@ -7017,11 +6727,11 @@ model IllegalWhen1_Err
       x = pre(x) + 1;
     end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="IllegalWhen1_Err",
-            description="Test illegal when, guard in loop",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="IllegalWhen1_Err",
+			description="Test illegal when, guard in loop",
+			errorMessage="
 1 errors found:
 
 Error in flattened model:
@@ -7045,11 +6755,11 @@ model IllegalWhen2_Err
 
 	x = y - 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="IllegalWhen2_Err",
-            description="Test illegal when, guard in loop",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="IllegalWhen2_Err",
+			description="Test illegal when, guard in loop",
+			errorMessage="
 1 errors found:
 
 Error in flattened model:
@@ -7070,11 +6780,11 @@ model IllegalWhen3_Err
 
     y + 3 = time;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="IllegalWhen3_Err",
-            description="Test illegal when-matching",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="IllegalWhen3_Err",
+			description="Test illegal when-matching",
+			errorMessage="
 1 errors found:
 
 Error in flattened model:
@@ -7101,11 +6811,8 @@ equation
 1 errors found:
 
 Error in flattened model:
-  The system is structurally singular. The following varible(s) could not be matched to any equation:
-     i
-
-  The following equation(s) could not be matched to any variable:
-    42 * (i + 1) = temp_1
+  Unable to solve variable 'i' from equation:
+42 * (i + 1) = temp_1
 ")})));
 end BLTError1;
 
@@ -7113,7 +6820,7 @@ model BLTError2
     Integer i, j;
 equation
     i = j + integer(time);
-    j = 1/i;
+    i * j = 0;
 
     annotation(__JModelica(UnitTesting(tests={
         ComplianceErrorTestCase(
@@ -7125,34 +6832,9 @@ equation
 Error in flattened model:
   Non-real equations contains an algebraic loop:
 i = j + temp_1
-j = 1 / i
+i * j = 0
 ")})));
 end BLTError2;
-
-model BLTError3
-    Real x;
-    Integer i;
-algorithm
-    x := i;
-equation
-    x = integer(time);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="BLTError3",
-            description="Test error message given by BLT when non-real equations are unsolved",
-            errorMessage="
-1 errors found:
-
-Error in flattened model:
-  The system is structurally singular. The following varible(s) could not be matched to any equation:
-     i
-
-  The following equation(s) could not be matched to any variable:
-    algorithm
-     x := i;
-")})));
-end BLTError3;
 
 model LinearBlockTest1
     Real x,y,z,a;
@@ -7320,96 +7002,5 @@ end TransformCanonicalTests.Sample2;
 ")})));
 end Sample2;
 
-model InsertTempLHS1
-    record R
-        Real x;
-    end R;
-    
-    function f
-        input Real x;
-        output R r = R(x);
-    algorithm
-        annotation(Inline=false);
-    end f;
-    
-    Real x,y;
-equation
-    R(-y) = f(x);
-    y = 0;
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="InsertTempLHS1",
-            description="Test temps in lhs of function call equation",
-            flatModel="
-fclass TransformCanonicalTests.InsertTempLHS1
- Real x;
- constant Real y = 0;
- Real temp_3;
-equation
- (TransformCanonicalTests.InsertTempLHS1.R(temp_3)) = TransformCanonicalTests.InsertTempLHS1.f(x);
- -0.0 = temp_3;
-
-public
- function TransformCanonicalTests.InsertTempLHS1.f
-  input Real x;
-  output TransformCanonicalTests.InsertTempLHS1.R r;
- algorithm
-  r.x := x;
-  return;
- annotation(Inline = false);
- end TransformCanonicalTests.InsertTempLHS1.f;
-
- record TransformCanonicalTests.InsertTempLHS1.R
-  Real x;
- end TransformCanonicalTests.InsertTempLHS1.R;
-
-end TransformCanonicalTests.InsertTempLHS1;
-")})));
-end InsertTempLHS1;
-
-package Operators
-    package Homotopy
-        model Simple1
-            Real x,y;
-        equation
-            x = homotopy(x * x,time);
-            y = homotopy(y * x,time);
-        annotation(__JModelica(UnitTesting(tests={
-	        FClassMethodTestCase(
-	            name="Operators.Homotopy.Simple1.DAE",
-	            description="Simple test that tests DAE BLT generation for homotopy",
-                homotopy_type="homotopy",
-	            methodName="printDAEBLT",
-	            methodResult="
---- Unsolved equation (Block 1) ---
-x = homotopy(x * x, time)
-  Computed variables: x
-
---- Unsolved equation (Block 2) ---
-y = homotopy(y * x, time)
-  Computed variables: y
--------------------------------
-"),FClassMethodTestCase(
-                name="Operators.Homotopy.Simple1.DAEInit",
-                description="Simple test that tests DAE init BLT generation for homotopy",
-                homotopy_type="homotopy",
-                methodName="printDAEInitBLT",
-                methodResult="
---- Unsolved system (Block 1) of 2 variables ---
-Unknown variables:
-  y ()
-  x ()
-
-Equations:
-  y = homotopy(y * x, time)
-    Iteration variables: y
-  x = homotopy(x * x, time)
-    Iteration variables: x
--------------------------------
-")})));
-        end Simple1;
-        
-    end Homotopy;
-end Operators;
 
 end TransformCanonicalTests;

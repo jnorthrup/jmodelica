@@ -175,9 +175,7 @@
         if (report instanceof Report)
             ((Report) report).setFileName(fn);
     }
-    
-    Symbol annotationTok = null;
-    
+
 :};
  
 SourceRoot source_root
@@ -687,11 +685,11 @@ Argument argument =
   final_? 
   parse_access 
   modification? 
-  comment {: return new ComponentModification(each, 
+  string_comment? {: return new ComponentModification(each, 
                                                     final_,
                                                     parse_access,
                                                     modification,
-                                                    comment); :}
+                                                    string_comment); :}
   |each? 
    final_? 
    replaceable 
@@ -835,17 +833,9 @@ Argument argument =
    ;
 
 Annotation annotation = 
-  annotation_tok class_modification {: annotationTok = null; return new ParseAnnotation(class_modification); :}
+  ANNOTATION class_modification    {: return new ParseAnnotation(class_modification); :}
   ;  
-Symbol annotation_tok =
-  ANNOTATION {:
-    if (annotationTok != null) {
-        getReport().syntaxError(ANNOTATION);
-    }
-    annotationTok = ANNOTATION;
-    return new Symbol(ANNOTATION);
-    :}
-  ;
+   
    
 AbstractEquation abstract_equation =
   exp.left EQUALS exp.right comment SEMICOLON
@@ -890,7 +880,7 @@ ForIndex for_index =
                                                               new Opt(),
                                                               new Opt(),
                                                               new Opt(),
-                                                              new Opt(new IndexParameter()),
+                                                              new Opt(new Parameter()),
                                                               new Opt(),
                                                               new ParseAccess("Integer",new Opt()),
                                                               new Opt(),

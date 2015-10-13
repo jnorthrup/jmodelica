@@ -15,13 +15,9 @@
 */
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.ArrayList;
-import java.util.Map;
 
-import org.jmodelica.util.collections.ListMap;
-import org.jmodelica.util.collections.LinkedHashListMap;
 import org.jmodelica.util.Problem;
 import org.jmodelica.util.ErrorCheckType;
 
@@ -341,7 +337,6 @@ aspect ErrorCheck {
   inh boolean FExp.lockBranch(ErrorCheckType checkType);
   inh boolean FExpSubscript.lockBranch(ErrorCheckType checkType);
   inh boolean FAbstractEquation.lockBranch(ErrorCheckType checkType);
-  inh boolean InstComponentDecl.lockBranch(ErrorCheckType checkType);
   inh boolean FFunctionCallLeft.lockBranch(ErrorCheckType checkType);
   eq FIfExp.getThenExp().lockBranch(ErrorCheckType checkType)                     = lockMyBranch(checkType, true);
   eq FIfExp.getElseExp().lockBranch(ErrorCheckType checkType)                     = lockMyBranch(checkType, false);
@@ -349,9 +344,8 @@ aspect ErrorCheck {
   eq FIfEquation.getElse().lockBranch(ErrorCheckType checkType)                   = lockMyBranch(checkType, false);
   eq FConnectClause.getConnector1().lockBranch(ErrorCheckType checkType)          = getConnector2().isDisabled() || lockBranch(checkType);
   eq FConnectClause.getConnector2().lockBranch(ErrorCheckType checkType)          = getConnector1().isDisabled() || lockBranch(checkType);
-  eq InstComponentDecl.getChild().lockBranch(ErrorCheckType checkType)            = isDisabled() || lockBranch(checkType);
-  eq InstClassDecl.getChild().lockBranch(ErrorCheckType checkType)                = false;
-  eq InstRoot.getChild().lockBranch(ErrorCheckType checkType)                     = false;
+  eq InstComponentDecl.getInstModification().lockBranch(ErrorCheckType checkType) = isDisabled();
+  eq InstNode.getChild().lockBranch(ErrorCheckType checkType)                     = false;
   eq FClass.getChild().lockBranch(ErrorCheckType checkType)                       = false;
   
   /**
@@ -365,24 +359,13 @@ aspect ErrorCheck {
    * @param then       if true, we are trying to remove the then-branch, otherwise the else-branch
    */
   public boolean FIfExp.lockMyBranch(ErrorCheckType checkType, boolean then) {
-        if (getIfExp().lockable(then)) {
+	  if (getIfExp().variability().parameterOrLess() && getIfExp().ceval().booleanValue() != then) {
 		  getIfExp().markAsStructuralParameter(checkType);
 		  return true;
 	  } else {
 		  return lockBranch(checkType);
 	  }
   }
-  
-    syn boolean FExp.lockable(boolean then) {
-        if (variability().fixedParameterOrLess()) {
-            try {
-                return ceval().booleanValue() != then;
-            } catch (ConstantEvaluationException e) {
-                
-            }
-        }
-        return false;
-    }
   
   /**
    * Lock this if-expression and return true if it only has only parameter-expression 
@@ -395,7 +378,7 @@ aspect ErrorCheck {
    * @param then       if true, we are trying to remove the then-branch, otherwise the else-branch
    */
   public boolean FIfEquation.lockMyBranch(ErrorCheckType checkType, boolean then) {
-        if (getTest().lockable(then)) {
+	  if (getTest().variability().parameterOrLess() && getTest().ceval().booleanValue() != then) {
 		  getTest().markAsStructuralParameter(checkType);
 		  return true;
 	  } else {
@@ -573,9 +556,8 @@ aspect InstanceErrorCheck {
             if (hasInstConstraining())
                 getInstConstraining().collectErrors(checkType);
             getInstRestriction().collectErrors(checkType);
-            getInstGeneratedInners().collectErrors(checkType);
-            if (getBaseClassDecl() instanceof FullClassDecl) {
-                FullClassDecl fcd = (FullClassDecl) getBaseClassDecl();
+            if (getBaseClassDecl() instanceof FullClassDecl) {  
+                FullClassDecl fcd = (FullClassDecl)getBaseClassDecl();
                 if (!(fcd.getName().getID().equals(fcd.getEndDecl().getEndID()))) {
                     error("The declaration and end names of a class should be the same");
                 }
@@ -590,49 +572,6 @@ aspect InstanceErrorCheck {
             getInstExternalOpt().collectErrors(checkType);
             if (isFunction())
                 errorCheckDerivativeAnnotations(checkType);
-        }
-    }
-
-    public void InstGeneratedInner.collectErrors(ErrorCheckType checkType) {
-        if (!checkType.allowBadGeneratedInner()) {
-            boolean error = false;
-            if (getMatchingNonInner() != null) {
-                getCopiedOuter().error("Can not generate missing inner declaration for %s, due to presence of component with same name on top level", name());
-                error = true;
-            } else {
-                ListMap<String, String> map = new LinkedHashListMap<String, String>();
-                for (InstComponentDecl outer : outers) {
-                    if (outer.myInstClass().isPartial()) {
-                        outer.error("Can not generate missing inner declaration for outer component %s of partial type %s", 
-                                outer.name(), outer.myInstClass().qualifiedName());
-                        error = true;
-                    } else {
-                        map.add(outer.myInstClass().actualInstClass().qualifiedName(), outer.qualifiedName());
-                    }
-                }
-                if (map.size() > 1) {
-                    StringBuilder sb = new StringBuilder();
-                    java.util.List<String> classes = new ArrayList<String>(map.keySet());
-                    Collections.sort(classes);
-                    for (String cls : classes) {
-                        java.util.List<String> components = map.get(cls);
-                        Collections.sort(components);
-                        for (String outer : components) {
-                            sb.append("\n    ");
-                            sb.append(cls);
-                            sb.append(" ");
-                            sb.append(outer);
-                        }
-                    }
-                    getCopiedOuter().error("Can't generate missing inner declaration for %s, due to the outer declarations being of different types: %s", name(), sb);
-                    error = true;
-                }
-            }
-            if (!error) {
-                getInstComponentDecl().collectErrors(checkType);
-                // TODO: Use missingInnerMessage annotation
-                getCopiedOuter().warning("Generated missing inner declaration for '%s'", getCopiedOuter());
-            }
         }
     }
 
@@ -721,10 +660,17 @@ aspect InstanceErrorCheck {
     public void InstComponentDecl.collectErrors(ErrorCheckType checkType) {
         if (!errorChecked) {
             errorChecked = true;
+            boolean checkInner = isOuter() && 
+                    !(myInnerInstComponentDecl().isUnknown() && checkType.allowOuterWithoutInner());
             if (isRecursed()) {
                 error("Recursive class structure");
-            } else if (isOuter()) {
-                myInnerInstComponentDecl().collectErrors(checkType);
+            } else if (checkInner) {
+                if (myInnerInstComponentDecl().isUnknown())
+                    error("Cannot find inner declaration for outer " + name());
+                else
+                    myInnerInstComponentDecl().collectErrors(checkType);
+            } else if (inOuter()) {
+                surroundingOuterComponentDecl().collectErrors(checkType);
             } else {
                 collectErrorsInClassName(checkType);
                 myInstClass().checkRestriction(checkType);
@@ -862,7 +808,7 @@ aspect InstanceErrorCheck {
 					FExp val_mod = icm.getInstModification().instValueMod();
 					if (val_mod.variability().lessOrEqual(fConstant())) 
 						val_mod.checkConstantExpression(checkType, "attribute", icm.getName().name());
-					else if (!val_mod.variability().parameterOrLess()) 
+					else if (!val_mod.variability().lessOrEqual(fParameter())) 
 						val_mod.error("Variability of binding expression for attribute '%s' is not less than or equal to parameter variability: %s", 
 								icm.getName().name(), val_mod);
 					if (val_mod.isCircular() && !checkType.allowConstantNoValue())
@@ -1082,9 +1028,6 @@ aspect InstanceErrorCheck {
 			super.collectErrors(checkType);
 	    	errorChecked = true;
 	    	if (!inFunction()) {
-                if (!hasBindingExp()) {
-                    error("Missing binding expression for external object");
-                }
 	    		getDestructorCall().collectErrors(checkType);
 	    		myInstClass().collectErrors(checkType);
 	    	}
@@ -1162,25 +1105,19 @@ aspect InstanceErrorCheck {
             errorChecked = true;
             // Check that the function exists
             InstCallable func = getName().myInstCallable();
-            String name = getName().name();
-            if (getName().hasLookupError() || func.isUnknown()) {
-                // Function does not exist or can't be used due to constraining classes, or name refers to component
-                getName().classLookupError("function", name + "()");
-            } else if (!func.isCallable()) {
+            if (!func.isCallable()) {
+                // Report that function does not exist
+                String name = getName().name();
                 if (func.isExternalObject()) {
-                    // Something is be wrong with constructor
                     name += ".constructor";
                     func = func.asInstClassDecl().myConstructor();
-                    if (func.isUnknown()) {
-                        // The constructor does not exist
+                    if (func.isUnknown()) 
                         error("Cannot find function declaration for " + name + "()");
-                    }
-                    // Constructor exists, but is not a function - delegate to default case
-                }
-                if (!func.isUnknown()) {
-                    // Not a function
+                } else if (func.isUnknown()) {
+                    getName().classLookupError("function", name + "()");
+                } 
+                if (!func.isUnknown())
                     error("The class " + name + " is not a function");
-                }
             } else if (!func.isRecord() && !func.isCompleteFunction()) {
                 // TODO: add check if function is partial?
                 if (!checkType.allowIncompleteReplaceableFunc() || !canBeReplacedForMe(func.asInstNode()))
@@ -1209,20 +1146,16 @@ aspect InstanceErrorCheck {
     inh boolean ASTNode.canBeReplacedForMe(InstNode node);
     eq InstNode.getChild().canBeReplacedForMe(InstNode node) = node.canBeReplacedFor(this);
     eq Root.getChild().canBeReplacedForMe(InstNode node)     = false;
-
-    /**
-     * Is this node or any node before the closest common ancestor with <code>source</code> replaceable?
-     */
-    syn boolean InstNode.canBeReplacedFor(InstNode source)        = canBeReplacedIn(commonAncestor(source));
-    eq InstSimpleShortClassDecl.canBeReplacedFor(InstNode source) = 
-        super.canBeReplacedFor(source) || myTargetInstClassDecl().canBeReplacedFor(source);
-    eq InstShortClassDecl.canBeReplacedFor(InstNode source)       = 
-        super.canBeReplacedFor(source) || myTargetInstClassDecl().canBeReplacedFor(source);
-
+	
+	/**
+	 * Is this node or any node before the closest common ancestor with <code>source</code> replaceable?
+	 */
+	syn boolean InstNode.canBeReplacedFor(InstNode source) = canBeReplacedIn(commonAncestor(source));
+	
     /**
      * Is this class or any class before <code>ancestor</code> replaceable?
      */
-    syn boolean InstNode.canBeReplacedIn(InstNode ancestor) = isReplaceable() || canBeReplacedInHelper(ancestor);
+	syn boolean InstNode.canBeReplacedIn(InstNode ancestor) = isReplaceable() || canBeReplacedInHelper(ancestor);
 
     /**
      * Helper method for {@link #canBeReplacedIn(InstNode)} - use it instead.
@@ -1328,14 +1261,14 @@ aspect InstanceErrorCheck {
 		for (InstExtends ie : getInstExtendss())
 			ie.calcIsRecursive(visited);
 	}
-
-    public void InstSimpleShortClassDecl.calcIsRecursive(HashSet<InstNode> visited) {
-        recursiveCache = visited.contains(this) ? RECURSIVE_YES : RECURSIVE_NO;
-        visited.add(this);
-        if (recursiveCache == RECURSIVE_NO) 
-            myTargetInstClassDecl().calcIsRecursive(visited);
-    }
-
+	
+	public void InstSimpleShortClassDecl.calcIsRecursive(HashSet<InstNode> visited) {
+		recursiveCache = visited.contains(this) ? RECURSIVE_YES : RECURSIVE_NO;
+		visited.add(this);
+		if (recursiveCache == RECURSIVE_NO) 
+			getTarget().myInstClassDecl().calcIsRecursive(visited);
+	}
+	
 	private byte InstExtends.recursiveCache              = RECURSIVE_UNKNOWN;
 	private byte InstSimpleShortClassDecl.recursiveCache = RECURSIVE_UNKNOWN;
 	protected static final byte InstNode.RECURSIVE_UNKNOWN = 0;
@@ -1372,12 +1305,12 @@ aspect AssertEval {
          */
         public class evaluateAsserts extends Transformation {
             public void perform() {
+                for (FAbstractEquation eqn : getFAbstractEquations())
+                    eqn.evaluateAsserts();
                 List<FAbstractEquation> l = new List<FAbstractEquation>();
-                for (FAbstractEquation eqn : getFAbstractEquations()) {
-                    if (!eqn.evaluateAsserts(true)) {
+                for (FAbstractEquation eqn : getFAbstractEquations())
+                    if (!eqn.markedForRemoval)
                         l.add(eqn);
-                    }
-                }
                 setFAbstractEquationList(l);
             }
         }
@@ -1386,37 +1319,12 @@ aspect AssertEval {
     /**
      * Try to evaluate asserts with constant tests in this equation.
      * 
-     * If this equation should be removed, returns true.
+     * If this equation should be removed, <code>markedForRemoval</code> is set.
      */
-    public boolean FAbstractEquation.evaluateAsserts(boolean inClause) {
-        return false;
-    }
+    public void FAbstractEquation.evaluateAsserts() {}
     
-    @Override
-    public boolean FFunctionCallEquation.evaluateAsserts(boolean inClause) {
-        return getCall().evaluateAsserts(inClause);
-    }
-    
-    @Override
-    public boolean FIfWhenEquation.evaluateAsserts(boolean inClause) {
-        boolean res = super.evaluateAsserts(inClause);
-        if (hasElse())
-            res = res && getElse().evaluateAsserts(inClause);
-        return res;
-    }
-    
-    @Override
-    public boolean FIfWhenElseEquation.evaluateAsserts(boolean inClause) {
-        boolean res = true;
-        List<FAbstractEquation> l = new List<FAbstractEquation>();
-        for (FAbstractEquation eqn : getFAbstractEquations()) {
-            if (!eqn.evaluateAsserts(false)) {
-                l.add(eqn);
-                res = false;
-            }
-        }
-        setFAbstractEquationList(l);
-        return res;
+    public void FFunctionCallEquation.evaluateAsserts() {
+        markedForRemoval = getCall().evaluateAsserts();
     }
     
     /**
@@ -1424,25 +1332,25 @@ aspect AssertEval {
      * 
      * @return  <code>true</code> if this is an assert that should be removed
      */
-    public boolean FAbstractFunctionCall.evaluateAsserts(boolean error) {
+    public boolean FAbstractFunctionCall.evaluateAsserts() {
         return false;
     }
     
     private static final String FAssert.LEVEL_ERROR = "error";
     
-    public boolean FAssert.evaluateAsserts(boolean error) {
+    public boolean FAssert.evaluateAsserts() {
         boolean remove = false;
         if (getTest().isConstantExp()) {
             try {
                 boolean val = getTest().ceval().booleanValue();
-                if (error && !val) {
+                if (!val) {
                     String msg = "Assertion failed: " + getMsg().ceval().stringValue();
                     if (!hasLevel() || getLevel().ceval().stringValue().equals(LEVEL_ERROR))
                         error(msg);
                     else
                         warning(msg);
                 }
-                remove = val || error;
+                remove = true;
             } catch (ConstantEvaluationException e) {}
         }
         return remove;

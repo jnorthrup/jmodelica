@@ -18,7 +18,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "jmi.h"
-#include "jmi_dyn_mem.h"
 #include "ModelicaUtilities.h"
 #include <fcntl.h>
 
@@ -102,22 +101,9 @@ void* jmi_global_calloc(size_t n, size_t s)
     return calloc(n, s);
 }
 
-jmp_buf jmceval_try_location;
-
-int JMCEVAL_try() {
-    return setjmp(jmceval_try_location) == 0;
-}
-
 void jmi_throw()
 {
-    longjmp(jmceval_try_location, 1);
-}
-
-jmi_dynamic_list dyn_mem_head = {NULL, NULL};
-jmi_dynamic_list* dyn_mem_last = &dyn_mem_head;
-
-jmi_dynamic_list** jmi_dyn_mem_last() {
-    return &dyn_mem_last;
+    exit(1);
 }
 
 void JMCEVAL_setup() {
@@ -125,31 +111,6 @@ void JMCEVAL_setup() {
     /* Prevent win from translating \n to \r\n */
     _setmode(fileno(stdout), _O_BINARY);
 #endif
-}
-
-int JMCEVAL_cont(const char* word) {
-    char l[10];
-    char* s = fgets(l, 10, stdin);
-    if (strlen(s) == 1) {
-        s = fgets(l, 10, stdin); /* Extra call to fix stray newline */
-    }
-    if (s == NULL) {
-        exit(2);
-    }
-    if (strlen(s) == strlen(word)) {
-        return strncmp(l, word, strlen(word)) == 0;
-    }
-    return 0;
-}
-
-void JMCEVAL_check(const char* str) {
-    printf(str);
-    printf("\n");
-    fflush(stdout);
-}
-
-void JMCEVAL_failed() {
-    JMCEVAL_check("ABORT");
 }
 
 /* Main */
@@ -161,44 +122,11 @@ int main(int argc, const char* argv[])
     /* Indices for parsing/printing vars, dimensions */
     size_t vi,di;
     
-    $ECE_decl$
-
-
     JMI_DYNAMIC_INIT()
-    JMCEVAL_setup(); /* This needs to happen first */
-
-    JMCEVAL_check("START");
-    if (JMCEVAL_try()) {
-        /* Init phase */
-        $ECE_init$
-    } else {
-        JMCEVAL_failed();
-    }
     
-    JMCEVAL_check("READY");
-    while (JMCEVAL_cont("EVAL\n")) {
-        JMI_DYNAMIC_INIT()
-        $ECE_calc_init$
-        JMCEVAL_check("CALC");
-        if (JMCEVAL_try()) {
-            /* Calc phase */
-            $ECE_calc$
-        } else {
-            JMCEVAL_failed();
-        }
-        $ECE_calc_free$
-        JMI_DYNAMIC_FREE()
-        JMCEVAL_check("READY");
-    }
-
-    if (JMCEVAL_try()) {
-        /* End phase */
-        $ECE_end$
-    } else {
-        JMCEVAL_failed();
-    }
+    $ECE_main$
+    
     JMI_DYNAMIC_FREE()
-    JMCEVAL_check("END");
     return 0;
 }
 

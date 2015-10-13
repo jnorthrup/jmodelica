@@ -1,18 +1,3 @@
-/*
-    Copyright (C) 2015 Modelon AB
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, version 3 of the License.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 package org.jmodelica.separateProcess;
 
 import java.io.EOFException;
@@ -27,12 +12,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.jmodelica.util.CompiledUnit;
 import org.jmodelica.util.Criteria;
+import org.jmodelica.util.FilteredIterator;
 import org.jmodelica.util.Problem;
 import org.jmodelica.util.streams.StreamGobbler;
-import org.jmodelica.util.collections.FilteredIterator;
 import org.jmodelica.util.logging.ObjectStreamLogger;
-import org.jmodelica.util.logging.units.LoggingUnit;
-import org.jmodelica.util.logging.units.ThrowableLoggingUnit;
 
 public final class Compilation {
     
@@ -114,11 +97,9 @@ public final class Compilation {
                         problems.add((Problem) o);
                     } else if (o instanceof CompiledUnit) {
                         compiledUnit = (CompiledUnit) o;
-                    } else if (o instanceof ThrowableLoggingUnit) {
+                    } else if (o instanceof Throwable) {
                         if (exception == null)
-                            exception = ((ThrowableLoggingUnit) o).getException();
-                    } else if (o instanceof LoggingUnit) {
-                        // Ignore these... E.g. sometimes we get StringLoggingUnits here...
+                            exception = (Throwable) o;
                     } else {
                         throw new SeparateProcessException("Unknown object type '" + o.getClass().getName() + "' received on compiler log");
                     }

@@ -90,8 +90,6 @@ algorithm
   x := x + 1;
   if noEvent(x > 2) then
    temp_1 := false;
-  else
-   x := x + 1;
   end if;
   if temp_1 then
    x := x + 1;
@@ -101,8 +99,6 @@ algorithm
   x := x + 1;
   if noEvent(x > 2) then
    temp_1 := false;
-  else
-   x := x + 1;
   end if;
   if temp_1 then
    x := x + 2;
@@ -111,7 +107,8 @@ algorithm
 end AlgorithmTests.For.Break2;
 ")})));
 end Break2;
-
+/*
+// Enable this after #3631 is done
 model Break3
     Real x;
     algorithm
@@ -141,9 +138,6 @@ fclass AlgorithmTests.For.Break3
  Real x;
  discrete Boolean temp_1;
  discrete Boolean temp_2;
-initial equation 
- pre(temp_1) = false;
- pre(temp_2) = false;
 algorithm
  x := 1;
  temp_1 := true;
@@ -182,7 +176,7 @@ algorithm
 end AlgorithmTests.For.Break3;
 ")})));
 end Break3;
-
+*/
 end For;
 
 model TempAssign1
@@ -352,16 +346,16 @@ public
    y[i1].b := x[i1].b;
   end for;
   t := size(x, 1);
-  size(temp_1) := {max(t, 0)};
-  size(temp_2) := {max(t, 0)};
-  for i2 in 1:max(t, 0) loop
+  size(temp_1) := {t};
+  size(temp_2) := {t};
+  for i2 in 1:t loop
    temp_2[i2] := t + 1 - i2;
   end for;
-  for i1 in 1:max(t, 0) loop
+  for i1 in 1:t loop
    temp_1[i1].a := y[temp_2[i1]].a;
    temp_1[i1].b := y[temp_2[i1]].b;
   end for;
-  for i1 in 1:max(t, 0) loop
+  for i1 in 1:t loop
    y[i1].a := temp_1[i1].a;
    y[i1].b := temp_1[i1].b;
   end for;
@@ -456,16 +450,16 @@ public
    y[i1].a[2] := x[i1].a[2];
   end for;
   t := size(x, 1);
-  size(temp_1) := {max(t, 0)};
-  size(temp_2) := {max(t, 0)};
-  for i2 in 1:max(t, 0) loop
+  size(temp_1) := {t};
+  size(temp_2) := {t};
+  for i2 in 1:t loop
    temp_2[i2] := t + 1 - i2;
   end for;
-  for i1 in 1:max(t, 0) loop
+  for i1 in 1:t loop
    temp_1[i1].a[1] := y[temp_2[i1]].a[1];
    temp_1[i1].a[2] := y[temp_2[i1]].a[2];
   end for;
-  for i1 in 1:max(t, 0) loop
+  for i1 in 1:t loop
    y[i1].a[1] := temp_1[i1].a[1];
    y[i1].a[2] := temp_1[i1].a[2];
   end for;

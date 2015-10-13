@@ -40,70 +40,25 @@ typedef void* jmi_extobj_t; /*< Typedef for the external object
 #define JMI_MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 #define JMI_ABS(X)   ((X) < (0) ? (-1*X) : (X))
 
-
-#define JMI_DEF(TYPE, NAME) \
-    JMI_DEF_##TYPE(NAME)
-#define JMI_DEF_REA(NAME) \
-    jmi_real_t NAME = 0;
-#define JMI_DEF_INT(NAME) \
-    JMI_DEF_REA(NAME)
-#define JMI_DEF_BOO(NAME) \
-    JMI_DEF_REA(NAME)
-#define JMI_DEF_ENU(NAME) \
-    JMI_DEF_REA(NAME)
-#define JMI_DEF_STR(NAME) \
-    jmi_string_t NAME = "";
-#define JMI_DEF_EXO(NAME) \
-    jmi_extobj_t NAME = NULL;
-
-#define JMI_DEF_REA_EXT(NAME) \
-    JMI_DEF_REA(NAME)
-#define JMI_DEF_INT_EXT(NAME) \
-    jmi_int_t NAME = 0;
-#define JMI_DEF_BOO_EXT(NAME) \
-    JMI_DEF_INT_EXT(NAME)
-#define JMI_DEF_ENU_EXT(NAME) \
-    JMI_DEF_INT_EXT(NAME)
-#define JMI_DEF_STR_EXT(NAME) \
-    JMI_DEF_STR(NAME)
-#define JMI_DEF_EXO_EXT(NAME) \
-    JMI_DEF_EXO(NAME)
-
 /* Max allowed length of strings */
 #define JMI_STR_MAX 16 * 1024 - 1
 
 /* Declaration for string */
 #define JMI_DEF_STR_STAT(NAME, LEN) \
-    size_t NAME##_len = JMI_MIN(LEN, JMI_STR_MAX) + 1; \
     char NAME[JMI_MIN(LEN, JMI_STR_MAX) + 1];
 #define JMI_DEF_STR_DYNA(NAME) \
-    size_t NAME##_len; \
     jmi_string_t NAME;
 
-/* Initialization of strings from expressions */
+/* Initialization of string */
 #define JMI_INI_STR_STAT(NAME) \
     NAME[0] = '\0';
 #define JMI_INI_STR_DYNA(NAME, LEN) \
-    NAME##_len = JMI_MIN(LEN, JMI_STR_MAX) + 1; \
     NAME = calloc(JMI_MIN(LEN, JMI_STR_MAX) + 1, 1); \
     JMI_INI_STR_STAT(NAME)
-
-/* Initialization of function variables */
-#define JMI_INI(TYPE, NAME) \
-    JMI_INI_##TYPE(NAME)
-#define JMI_INI_STR(NAME) \
-    NAME = "";
 
 /* Assign (copy) SRC to DEST */
 #define JMI_ASG(TYPE, DEST, SRC) \
     JMI_ASG_##TYPE(DEST, SRC)
-#define JMI_ASG_GEN_ARR(DEST, SRC) \
-    { \
-      int i; \
-      for (i = 1; i <= DEST->num_elems; i++) { \
-        jmi_array_ref_1(DEST,i) = jmi_array_val_1(SRC,i); \
-      }\
-    }
 #define JMI_ASG_STR(DEST,SRC) \
     JMI_SET_STR(DEST, SRC) \
     JMI_DYNAMIC_ADD_POINTER(DEST)
@@ -117,7 +72,7 @@ typedef void* jmi_extobj_t; /*< Typedef for the external object
     }
     
 #define JMI_SET_STR(DEST, SRC) \
-    DEST = calloc(JMI_MIN(JMI_LEN(SRC), JMI_STR_MAX) + 1, 1); \
+    JMI_INI_STR_DYNA(DEST, JMI_LEN(SRC)) \
     strcpy(DEST,SRC);
     
 /* Handle return value */
@@ -148,7 +103,7 @@ typedef void* jmi_extobj_t; /*< Typedef for the external object
 #define JMI_STR_END(DEST) DEST + JMI_LEN(DEST)
     
 /* Number of empty bytes at end of string */
-#define JMI_STR_LEFT(DEST) DEST##_len - JMI_LEN(DEST)
+#define JMI_STR_LEFT(DEST) JMI_STR_MAX - JMI_LEN(DEST)
 
 /* Temporary remains of CppAD*/            
 typedef jmi_real_t jmi_ad_var_t; 

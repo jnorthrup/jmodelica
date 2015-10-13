@@ -28,7 +28,6 @@
 #include "jmi_log.h"
 #include "jmi_delay_impl.h"
 #include "jmi_dynamic_state.h"
-#include "module_include/jmi_get_set.h"
 
 int jmi_init(jmi_t** jmi,
         int n_real_ci, int n_real_cd, int n_real_pi,
@@ -50,8 +49,7 @@ int jmi_init(jmi_t** jmi,
         int n_initial_relations, int* initial_relations,
         int n_relations, int* relations, int n_dynamic_state_sets,
         jmi_real_t* nominals,
-        int scaling_method, int n_ext_objs,
-        int homotopy_block, jmi_callbacks_t* jmi_callbacks) {
+        int scaling_method, int n_ext_objs, jmi_callbacks_t* jmi_callbacks) {
     jmi_t* jmi_ ;
     int i;
     
@@ -147,11 +145,9 @@ int jmi_init(jmi_t** jmi,
     jmi_->offs_real_x = jmi_->offs_real_dx + n_real_dx;
     jmi_->offs_real_u = jmi_->offs_real_x + n_real_x;
     jmi_->offs_real_w = jmi_->offs_real_u + n_real_u;
-
     jmi_->offs_t = jmi_->offs_real_w + n_real_w;
-    jmi_->offs_homotopy_lambda = jmi_->offs_t + 1;
 
-    jmi_->offs_real_d = jmi_->offs_homotopy_lambda + 1;
+    jmi_->offs_real_d = jmi_->offs_t + 1;
 
     jmi_->offs_integer_d = jmi_->offs_real_d + n_real_d;
     jmi_->offs_integer_u = jmi_->offs_integer_d + n_integer_d;
@@ -183,8 +179,8 @@ int jmi_init(jmi_t** jmi,
     jmi_->offs_pre_guards = jmi_->offs_pre_sw_init + n_sw_init;
     jmi_->offs_pre_guards_init = jmi_->offs_pre_guards + n_guards;
 
-    jmi_->n_v = n_real_dx + n_real_x + n_real_u + n_real_w + 2;
-    jmi_->n_z = jmi_->offs_real_dx + 2*(jmi_->n_v) - 2 + 
+    jmi_->n_v = n_real_dx + n_real_x + n_real_u + n_real_w + 1;
+    jmi_->n_z = jmi_->offs_real_dx + 2*(jmi_->n_v) - 1 + 
         2*(n_real_d + n_integer_d + n_integer_u + n_boolean_d + n_boolean_u) + 
         2*n_sw + 2*n_sw_init + 2*n_guards + 2*n_guards_init;
 
@@ -212,9 +208,8 @@ int jmi_init(jmi_t** jmi,
     for (i=0;i<jmi_->n_z;i++) {
         jmi_->variable_scaling_factors[i] = 1.0;
         (*(jmi_->z))[i] = 0;
-        (*(jmi_->z_last))[i] = 0;
     }
-    /* jmi_save_last_successful_values(jmi_); */
+    jmi_save_last_successful_values(jmi_);
 
     for (i=0;i<jmi_->n_v;i++) {
         int j;
@@ -274,11 +269,7 @@ int jmi_init(jmi_t** jmi,
 
     jmi_->is_initialized = 0;
 
-    jmi_->nbr_event_iter = 0;
-
-    jmi_->dyn_mem_head.next = NULL;
-    jmi_->dyn_mem_head.data = NULL;
-    jmi_dyn_mem_init(&jmi_->dyn_mem, &jmi_->dyn_mem_head, &jmi_->dyn_mem_last);
+	jmi_->nbr_event_iter = 0;
 
     return 0;
 
@@ -286,9 +277,6 @@ int jmi_init(jmi_t** jmi,
 
 int jmi_delete(jmi_t* jmi){
     int i;
-
-    jmi_me_delete_modules(jmi);
-
     if (jmi->dae != NULL) {
         jmi_func_delete(jmi->dae->F);
         jmi_func_delete(jmi->dae->R);
@@ -389,31 +377,29 @@ int jmi_destroy_delay_if(jmi_t* jmi) {
 
 int jmi_func_F(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res) {
     int return_status;
-    int depth = jmi_prepare_try(jmi);
 
-    if (jmi_try(jmi, depth)) {
-        return_status = -1;
+    if (jmi_current_is_set()) {
+    	return_status = func->F(jmi, &res);
+    } else {
+    	jmi_set_current(jmi);
+		if (jmi_try(jmi))
+			return_status = -1;
+		else
+			return_status = func->F(jmi, &res);
+		jmi_set_current(NULL);
     }
-    else {
-        return_status = func->F(jmi, &res);
-    }
-
-    jmi_finalize_try(jmi, depth);
-
     return return_status;
 }
 
 int jmi_func_cad_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
              jmi_real_t *dF, jmi_real_t* dv) {
-    int return_status;
-    int depth = jmi_prepare_try(jmi);
-    if (jmi_try(jmi, depth)) {
-        return_status = -1;
-    }
-    else {
-        return_status = func->cad_dir_dF(jmi, &res, &dF, &dv);
-    }
-    jmi_finalize_try(jmi, depth);
+	int return_status;
+	jmi_set_current(jmi);
+	if (jmi_try(jmi))
+		return_status = -1;
+	else
+		return_status = func->cad_dir_dF(jmi, &res, &dF, &dv);
+    jmi_set_current(NULL);
     return return_status;
 }
 
@@ -529,7 +515,7 @@ int jmi_ode_derivatives(jmi_t* jmi) {
     jmi_log_node_t node;
     jmi_real_t *t = jmi_get_t(jmi);
 
-    if ((jmi->jmi_callbacks.log_options.log_level >= 5)) {
+    if((jmi->jmi_callbacks.log_options.log_level >= 5)) {
         node = jmi_log_enter_fmt(jmi->log, logInfo, "EquationSolve", 
                                  "Model equations evaluation invoked at <t:%E>", t[0]);
         jmi_log_reals(jmi->log, node, logInfo, "States", jmi_get_real_x(jmi), jmi->n_real_x);
@@ -538,10 +524,10 @@ int jmi_ode_derivatives(jmi_t* jmi) {
     jmi->block_level = 0; /* to recover from errors */
     return_status = jmi_generic_func(jmi, jmi->dae->ode_derivatives);
 
-    if ((jmi->jmi_callbacks.log_options.log_level >= 5)) {
+    if((jmi->jmi_callbacks.log_options.log_level >= 5)) {
         jmi_log_reals(jmi->log, node, logInfo, "Derivatives", jmi_get_real_dx(jmi), jmi->n_real_x);
         jmi_log_fmt(jmi->log, node, logInfo, "Model equations evaluation finished");
-        jmi_log_unwind(jmi->log, node);
+        jmi_log_leave(jmi->log, node);
     }
 
     return return_status;
@@ -572,16 +558,16 @@ int jmi_ode_initialize(jmi_t* jmi) {
     jmi_log_node_t node;
     jmi_real_t* t = jmi_get_t(jmi);
 
-    if ((jmi->jmi_callbacks.log_options.log_level >= 5)) {
+    if((jmi->jmi_callbacks.log_options.log_level >= 5)) {
         node = jmi_log_enter_fmt(jmi->log, logInfo, "EquationSolve", 
                                  "Model equations evaluation invoked at <t:%E>", t[0]);
     }
 
     return_status = jmi_generic_func(jmi, jmi->dae->ode_initialize);
 
-    if ((jmi->jmi_callbacks.log_options.log_level >= 5)) {
+    if((jmi->jmi_callbacks.log_options.log_level >= 5)) {
         jmi_log_fmt(jmi->log, node, logInfo, "Model equations evaluation finished");
-        jmi_log_unwind(jmi->log, node);
+        jmi_log_leave(jmi->log, node);
     }
     return return_status;
 }
@@ -607,15 +593,16 @@ int jmi_ode_guards_init(jmi_t* jmi) {
 int jmi_ode_next_time_event(jmi_t* jmi, jmi_time_event_t* event) {
 
     int return_status;
-    int depth = jmi_prepare_try(jmi);
 
-    if (jmi_try(jmi, depth)) {
-        return_status = -1;
+    jmi_set_current(jmi);
+    if (jmi_try(jmi)) {
+		return_status = -1;
     }
-    else {
+	else {
         return_status = jmi->dae->ode_next_time_event(jmi, event);
     }
-    jmi_finalize_try(jmi, depth);
+    jmi_set_current(NULL);
+
     return return_status;
 }
 
@@ -657,7 +644,7 @@ int jmi_dae_dF_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
         return jmi_func_sym_dF_n_nz(jmi, jmi->dae->F, n_nz);
     } else if (eval_alg & JMI_DER_CAD) {
         return jmi_func_cad_dF_n_nz(jmi, jmi->dae->F, n_nz);
-    } else if (eval_alg & JMI_DER_FD) {
+    } else if(eval_alg & JMI_DER_FD) {
         return jmi_func_fd_dF_n_nz(jmi, jmi->dae->F, n_nz);
     } else {
         return -1;

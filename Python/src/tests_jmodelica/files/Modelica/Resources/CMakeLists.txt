@@ -20,14 +20,7 @@
 # interface changes). CMake 2.8.4 and 2.8.5 are not tested.
 cmake_minimum_required (VERSION 2.8.6 FATAL_ERROR)
 
-project (TestLibraries)
-
-#Enable Fortran if not MSVC
-if(NOT MSVC)
-  enable_language(Fortran)
-else()
-  message(STATUS "No Fortran support")
-endif()
+project (TestLibraries C Fortran)
 
 #Inputs through flags
 add_definitions(-DTOP_SRC)
@@ -64,18 +57,16 @@ endif()
 
 
 #Make the directory for header files to be installed in. 
-install(CODE "file(MAKE_DIRECTORY $ENV{DESTDIR}${JMODELICA_INSTALL_DIR}/Python/tests_jmodelica/files/Modelica/Resources/Include/)")
+file(MAKE_DIRECTORY ${JMODELICA_INSTALL_DIR}/Python/tests_jmodelica/files/Modelica/Resources/Include/)
 
 #Make the directory for lib files to be installed in.
 set(TEST_LIBRARY_INSTALL_DIR ${JMODELICA_INSTALL_DIR}/Python/tests_jmodelica/files/Modelica/Resources/Library/${JM_PLATFORM})
-install(CODE "file(MAKE_DIRECTORY  $ENV{DESTDIR}${TEST_LIBRARY_INSTALL_DIR})")
+file(MAKE_DIRECTORY ${TEST_LIBRARY_INSTALL_DIR})
 
 if(NOT(WIN32 OR CYGWIN OR APPLE))
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS}")
     SET(WITH_PIC ON)
 elseif(MSVC)
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MT")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MTd")
     add_definitions(/D _CRT_SECURE_NO_WARNINGS)
 endif()
 

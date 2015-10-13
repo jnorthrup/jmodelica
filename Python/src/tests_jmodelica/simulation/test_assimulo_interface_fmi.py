@@ -76,51 +76,6 @@ class Test_When:
         assert res.final("nextTime") == 4.0
         assert res.final("nextTime2") == 3.0
         assert res.final("nextTime3") == 8.0
-        
-class Test_Sensitivities_FMI2:
-    @classmethod
-    def setUpClass(cls):
-        file_name = os.path.join(get_files_path(), 'Modelica', 'Sensitivities.mo')
-        compile_fmu("BasicSens1", file_name, version=2.0)
-        compile_fmu("BasicSens2", file_name, version=2.0, compiler_options={"generate_ode_jacobian": True})
-        compile_fmu("BasicSens1", file_name, version=2.0, compiler_options={"generate_ode_jacobian": True}, compile_to="BasicSens1Dir.fmu")
-        
-    @testattr(stddist = True)
-    def test_basicsens1(self):
-        model = load_fmu("BasicSens1.fmu")
-        
-        opts = model.simulate_options()
-        opts["sensitivities"] = ["d"]
-
-        res = model.simulate(options=opts)
-        nose.tools.assert_almost_equal(res.final('dx/dd'), 0.36789, 3)
-        
-        assert res.solver.statistics["nsensfcnfcns"] > 0
-        
-    @testattr(stddist = True)
-    def test_basicsens1dir(self):
-        model = load_fmu("BasicSens1Dir.fmu")
-        
-        opts = model.simulate_options()
-        opts["sensitivities"] = ["d"]
-
-        res = model.simulate(options=opts)
-        nose.tools.assert_almost_equal(res.final('dx/dd'), 0.36789, 3)
-        
-        assert res.solver.statistics["nsensfcnfcns"] > 0
-        
-    @testattr(stddist = True)
-    def test_basicsens2(self):
-        model = load_fmu("BasicSens2.fmu")
-        
-        opts = model.simulate_options()
-        opts["sensitivities"] = ["d"]
-
-        res = model.simulate(options=opts)
-        nose.tools.assert_almost_equal(res.final('dx/dd'), 0.36789, 3)
-        
-        assert res.solver.statistics["nsensfcnfcns"] == 0
-        
 
 class Test_Time_Events:
     @classmethod
@@ -438,63 +393,6 @@ class Test_Relations:
         nose.tools.assert_almost_equal(N.interp(7.00,res["time"],res["der(v2)"]),0.0,places=3)
         nose.tools.assert_almost_equal(N.interp(7.20,res["time"],res["der(v2)"]),1.0,places=3)
 
-class Test_NonLinear_Systems:
-    
-    @classmethod
-    def setUpClass(cls):
-        """
-        Compile the test model.
-        """
-        file_name = os.path.join(get_files_path(), 'Modelica', 'NonLinear.mo')
-
-        compile_fmu("NonLinear.NominalStart1", file_name)
-        compile_fmu("NonLinear.NominalStart2", file_name)
-        compile_fmu("NonLinear.NominalStart3", file_name)
-        compile_fmu("NonLinear.NominalStart4", file_name)
-        compile_fmu("NonLinear.NominalStart5", file_name)
-    
-    @testattr(stddist = True)
-    def test_nominals_fallback_1(self):
-        model = load_fmu("NonLinear_NominalStart1.fmu")
-        model.set("_nle_solver_use_nominals_as_fallback", True)
-        model.initialize()
-    
-    @testattr(stddist = True)
-    def test_nominals_fallback_2(self):
-        model = load_fmu("NonLinear_NominalStart1.fmu")
-        model.set("_nle_solver_use_nominals_as_fallback", False)
-        nose.tools.assert_raises(FMUException, model.initialize)
-        
-    @testattr(stddist = True)
-    def test_nominals_fallback_3(self):
-        model = load_fmu("NonLinear_NominalStart2.fmu")
-        model.set("_nle_solver_use_nominals_as_fallback", True)
-        nose.tools.assert_raises(FMUException, model.initialize)
-        
-    @testattr(stddist = True)
-    def test_nominals_fallback_4(self):
-        model = load_fmu("NonLinear_NominalStart4.fmu")
-        model.set("_use_Brent_in_1d", False)
-        model.set("_nle_solver_use_nominals_as_fallback", True)
-        nose.tools.assert_raises(FMUException, model.initialize)
-
-    @testattr(stddist = True)
-    def test_nominals_fallback_5(self):
-        model = load_fmu("NonLinear_NominalStart5.fmu")
-        model.set("_use_Brent_in_1d", False)
-        model.set("_nle_solver_use_nominals_as_fallback", True)
-        nose.tools.assert_raises(FMUException, model.initialize)
-        
-    @testattr(stddist = True)
-    def test_nominals_fallback_6(self):
-        model = load_fmu("NonLinear_NominalStart3.fmu")
-        model.set("_use_Brent_in_1d", False)
-        model.set("_nle_solver_use_nominals_as_fallback", True)
-        model.initialize()
-        
-        nose.tools.assert_almost_equal(model.get("x") ,2.76929235)
-    
-
 class Test_Singular_Systems:
     
     @classmethod
@@ -508,9 +406,6 @@ class Test_Singular_Systems:
         compile_fmu("Singular.Linear2", file_name)
         compile_fmu("Singular.LinearEvent1", file_name)
         compile_fmu("Singular.LinearEvent2", file_name)
-        compile_fmu("Singular.NonLinear1", file_name)
-        compile_fmu("Singular.NonLinear4", file_name)
-        compile_fmu("Singular.NonLinear5", file_name)
     
     @testattr(stddist = True)
     def test_linear_event_1(self):
@@ -565,81 +460,6 @@ class Test_Singular_Systems:
         
         model.set("b[1]", N.inf)
         nose.tools.assert_raises(FMUException, model.initialize)
-        
-    @testattr(stddist = True)
-    def test_nonlinear_1(self):
-        
-        model = load_fmu("Singular_NonLinear1.fmu")
-        model.set("a33", 0)
-        model.set("b[3]", 0)
-        
-        model.initialize()
-        
-        nose.tools.assert_almost_equal(model.get("x") ,1.000000000)
-        nose.tools.assert_almost_equal(model.get("y") ,2.000000000)
-        nose.tools.assert_almost_equal(model.get("z") ,0.000000000)
-        
-    @testattr(stddist = True)
-    def test_nonlinear_2(self):
-        
-        model = load_fmu("Singular_NonLinear1.fmu")
-        model.set("a33", 0)
-        model.set("b[3]", 3)
-        
-        nose.tools.assert_raises(FMUException, model.initialize)
-        
-    @testattr(stddist = True)
-    def test_nonlinear_3(self):
-        
-        model = load_fmu("Singular_NonLinear1.fmu")
-        model.set("a33", 0)
-        model.set("a22", 1e-5)
-        model.set("b[3]", 0)
-        
-        model.initialize()
-        
-        nose.tools.assert_almost_equal(model.get("x") ,1.000000000)
-        nose.tools.assert_almost_equal(model.get("y") ,200000.0000)
-        nose.tools.assert_almost_equal(model.get("z") ,0.000000000)
-        
-    @testattr(stddist = True)
-    def test_nonlinear_4(self):
-        
-        model = load_fmu("Singular_NonLinear1.fmu")
-        model.set("a33", 0)
-        model.set("a22", 1e10)
-        model.set("b[3]", 0)
-        
-        model.initialize()
-        
-        nose.tools.assert_almost_equal(model.get("x") ,1.000000000)
-        nose.tools.assert_almost_equal(model.get("y") ,2e-10)
-        nose.tools.assert_almost_equal(model.get("z") ,0.000000000)
-        
-    @testattr(stddist = True)
-    def test_nonlinear_6(self):
-        
-        model = load_fmu("Singular_NonLinear5.fmu")
-        
-        model.initialize()
-        
-        nose.tools.assert_almost_equal(model.get("x") ,5)
-        nose.tools.assert_almost_equal(model.get("y") ,0)
-        nose.tools.assert_almost_equal(model.get("z") ,0.000000000)
-    
-    @testattr(stddist = True)
-    def test_nonlinear_5(self):
-        model = load_fmu("Singular_NonLinear4.fmu")
-
-        model.set("b[3]", 0)
-        model.set("a31", 1)
-        model.set("a32", -0.5)
-
-        res = model.simulate()
-        
-        nose.tools.assert_almost_equal(res["z"][0] ,0.000000000)
-        nose.tools.assert_almost_equal(res["z"][-1] ,-1.000000000)
-
 
 class Test_FMI_ODE:
     """
