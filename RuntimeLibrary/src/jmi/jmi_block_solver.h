@@ -24,9 +24,7 @@
 
 #ifndef _JMI_BLOCK_SOLVER_H
 #define _JMI_BLOCK_SOLVER_H
-
 #include "jmi_log.h"
-
 
 /** \brief Evaluation modes for the residual function.*/
 /** TODO: convert into enum */
@@ -50,9 +48,6 @@
 #define JMI_BLOCK_NON_REAL_TEMP_VALUE_REFERENCE                 65536
 #define JMI_BLOCK_START_SET                                     131072
 #define JMI_BLOCK_EQUATION_NOMINAL_AUTO                         262144
-#define JMI_BLOCK_EVALUATE_JAC                                  524288
-
-#define JMI_LIMIT_VALUE 1e30
 
 /** \brief Jacobian variability for the linear solver */
 typedef enum jmi_block_solver_jac_variability_t {
@@ -85,20 +80,6 @@ typedef enum jmi_block_solver_iv_scaling_mode_t {
     jmi_iter_var_scaling_heuristics = 2
 } jmi_block_solver_iv_scaling_mode_t;
 
-/** \brief Exit criterion mode for the non-linear solver*/
-typedef enum jmi_block_solver_exit_criterion_mode_t {
-    jmi_exit_criterion_step_residual = 0, /* must be zero */
-    jmi_exit_criterion_step = 1,
-    jmi_exit_criterion_residual = 2,
-    jmi_exit_criterion_hybrid = 3
-} jmi_block_solver_exit_criterion_mode_t;
-
-/** \brief Mode for Jacobian updates*/
-typedef enum jmi_block_solver_jacobian_update_mode_t {
-    jmi_full_jacobian_update_mode = 0, 
-    jmi_broyden_jacobian_update_mode = 1,
-    jmi_reuse_jacobian_update_mode = 2
-} jmi_block_solver_jacobian_update_mode_t;
 
 /** \brief Experimental features in the solver */
 typedef enum jmi_block_solver_experimental_mode_t {
@@ -109,9 +90,9 @@ typedef enum jmi_block_solver_experimental_mode_t {
     jmi_block_solver_experimental_Brent_with_newton = 16,
     jmi_block_solver_experimental_active_bounds_threshold = 32,
     jmi_block_solver_experimental_nom_in_active_bounds = 128,
+    jmi_block_solver_experimental_residual_monitoring = 256,
     jmi_block_solver_experimental_check_descent_direction = 512,
-    jmi_block_solver_experimental_Sparse_Broyden = 2048,
-    jmi_block_solver_experimental_use_modifiedBFGS = 4096
+    jmi_block_solver_experimental_use_Broyden = 2048
 } jmi_block_solver_experimental_mode_t;
 
 typedef enum jmi_block_solver_status_t {
@@ -158,22 +139,7 @@ typedef int (*jmi_block_solver_residual_func_t)(void* problem_data, jmi_real_t* 
  * @return Error code.
  */
 typedef int (*jmi_block_solver_dir_der_func_t)(void* problem_data, jmi_real_t* x,
-         jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int mode);
-
-/**
- * \brief Function signature for evaluation of the jacobian corresponding to 
- * an equation block residual in the block solver interface.
- *
- * @param problem_data Problem data pointer passed in the jmi_block_solver_new.
- * @param x (Input/Output) If mode is set to JMI_BLOCK_EVALUATE_JAC, then x is an input
- * argument used in the evaluation of the jacobian.
- * @param jac(Output) The jacobian matrix if mode is set to
- * JMI_BLOCK_EVALUATE_JAC, otherwise this argument is not used.
- * @param mode Evaluation mode define
- * @return Error code.
- */
-typedef int (*jmi_block_solver_jacobian_func_t)(void* problem_data, jmi_real_t* x,
-         jmi_real_t** jac, int mode);
+         jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int mdoe);
 
 /**
  * \brief Function signature for checking if discrete variables would change
@@ -209,7 +175,6 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
                          jmi_log_t* log,
                          jmi_block_solver_residual_func_t F,
                          jmi_block_solver_dir_der_func_t dF,  /* can be NULL if no directional derivative function is provided */
-                         jmi_block_solver_jacobian_func_t Jacobian, /* can be NULL if, e.g., kin_dF should be used for Jacobian calculation */
                          jmi_block_solver_check_discrete_variables_change_func_t check_discrete_variables_change,
                          jmi_block_solver_update_discrete_variables_func_t update_discrete_variables,
                          jmi_block_solver_log_discrete_variables log_discrete_variables, /* Function for logging the discrete variables, can be NULL and then there is no logging of discrete variables */
@@ -250,10 +215,6 @@ struct jmi_block_solver_options_t {
     double step_limit_factor;               /**< \brief Step limiting factor */
     double regularization_tolerance;        /**< \brief Tolerance for deciding when regularization should be performed */
     int max_iter;                           /**< \brief Maximum number of iterations for the equation block solver before failure */
-    int max_iter_no_jacobian;               /**< \brief Maximum number of iterations for the equation block solver without full jacobian recalculation */
-
-    jmi_block_solver_exit_criterion_mode_t solver_exit_criterion_mode; /**< \brief Exit criterion mode for non-linear block solver:
-                                                                       0 - step length + residual, 1 - step length, 2 - residual, 3 -hybrid (default) */
 
     int enforce_bounds_flag;                /**< \brief Enforce min-max bounds on variables in the equation blocks*/
     int use_jacobian_equilibration_flag;    /**< \brief If jacobian equlibration should be used in equation block solvers */
@@ -262,7 +223,6 @@ struct jmi_block_solver_options_t {
     int block_jacobian_check;               /**< \brief Compares analytic block jacobian with finite difference block jacobian */ 
     double block_jacobian_check_tol;        /**< \brief Tolerance for block jacobian comparison */
     
-    jmi_block_solver_jacobian_update_mode_t jacobian_update_mode; /**< \brief Jacobian update mode in equation block solvers: 0 - full Jacobian, 1 - Broyden update */
     jmi_block_solver_residual_scaling_mode_t residual_equation_scaling_mode; /**< \brief Equations scaling mode in equation block solvers:0-no scaling,1-automatic scaling,2-manual scaling */
 
     double max_residual_scaling_factor;    /**< \breif Maximum residual scaling factor used in nle solver */
@@ -282,8 +242,7 @@ struct jmi_block_solver_options_t {
     double active_bounds_threshold; /**< \brief Threshold for when we are at active bounds. */
     int use_nominals_as_fallback_in_init; /**< \brief If set, uses the nominals as initial guess in case everything else failed during initialization */
     int start_from_last_integrator_step; /**< \brief If set, uses the iteration variables from the last integrator step as initial guess. */
-    int calculate_jacobian_externally; /**< \bried Flag indicating if the solver should use callback for calculating Jacobian */
-
+    
     /* Options below are not supposed to change between invocations of the solver*/
     jmi_block_solver_kind_t solver; /**< brief Kind of block solver to use */
     jmi_block_solver_jac_variability_t jacobian_variability; /**< brief Jac variability for linear block solver */
@@ -300,9 +259,5 @@ int jmi_block_solver_completed_integrator_step(jmi_block_solver_t * block_solver
 /** \brief Initialize the options with defaults */
 void jmi_block_solver_init_default_options(jmi_block_solver_options_t* op);
 
-/** \brief Check and log illegal iv inputs */
-int jmi_check_and_log_illegal_iv_input(jmi_block_solver_t* block, double* ivs, int N);
 
-/** \brief Check and log illegal residual output(s) */
-int jmi_check_and_log_illegal_residual_output(jmi_block_solver_t *block, double* f, double* ivs, double* heuristic_nominal,int N);
 #endif /* _JMI_BLOCK_SOLVER_H */

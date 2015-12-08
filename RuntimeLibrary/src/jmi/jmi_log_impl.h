@@ -27,8 +27,7 @@
 #include "jmi_log.h"
 
 typedef enum log_flag_t {
-    logFlagIndex = 1,
-    logFlagResidualIndex = 2
+    logFlagIndex = 1
 } log_flag_t;
 
 

@@ -460,11 +460,7 @@ void transferFAttributeListForVariable(ModelicaCasADi::Ref<ModelicaCasADi::Varia
     Attribute attr;
     for (int i = 0; i < attributeList.getNumChild(); ++i) {
         attr = Attribute(attributeList.getChild(i).this$);
-        std::string name = env->toString(attr.name().this$);
-        if (name != "stateSelect") {
-            // Don't transfer stateSelect attribute, since enumerations are not supported
-            var->setAttribute(name, toMX(attr.getValue()));
-        }
+        var->setAttribute(env->toString(attr.name().this$), toMX(attr.getValue()));
     }
 }
 

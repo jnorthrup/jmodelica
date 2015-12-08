@@ -59,7 +59,6 @@ set(JMISources
     # Block solver sources
     jmi_block_solver.h
     jmi_block_solver_impl.h
-	jmi_block_log.h
     jmi_kinsol_solver.h
     jmi_brent_solver.h
     jmi_minpack_solver.h
@@ -67,7 +66,6 @@ set(JMISources
     jmi_simple_newton.h
 
     jmi_block_solver.c
-	jmi_block_log.c
     jmi_kinsol_solver.c
     jmi_brent_solver.c
     jmi_minpack_solver.c

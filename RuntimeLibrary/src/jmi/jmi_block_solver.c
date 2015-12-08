@@ -36,7 +36,6 @@
 #include "jmi_minpack_solver.h"
 #include "jmi_block_solver_impl.h"
 
-#define Ith(v,i)    NV_Ith_S(v,i)
 
 const double jmi_block_solver_canari = 3.14159;
 
@@ -48,7 +47,6 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
                            jmi_log_t* log,                          
                            jmi_block_solver_residual_func_t F, 
                            jmi_block_solver_dir_der_func_t dF,
-                           jmi_block_solver_jacobian_func_t Jacobian, 
                            jmi_block_solver_check_discrete_variables_change_func_t check_discrete_variables_change,
                            jmi_block_solver_update_discrete_variables_func_t update_discrete_variables,
                            jmi_block_solver_log_discrete_variables log_discrete_variables,
@@ -57,7 +55,7 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
                            void* problem_data){
     jmi_block_solver_t* block_solver = (jmi_block_solver_t*)calloc(1, sizeof(jmi_block_solver_t));
     if(!block_solver) {
-        jmi_log_node(log, logError, "MemoryAllocationFailed","Could not allocate memory for block solver");
+        jmi_log_comment(log, logError, "Could not allocate memory for block solver");
         return 1;
     }
     *block_solver_ptr = block_solver;
@@ -92,7 +90,6 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
     block_solver->message_buffer = 0;
 #endif
     
-    block_solver->residual_error_indicator = (jmi_int_t*)calloc(n,sizeof(jmi_int_t));  
     block_solver->jacobian_variability = options->jacobian_variability;
 
     block_solver->cur_time = 0;
@@ -156,7 +153,6 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
 
     block_solver->F = F;
     block_solver->dF =dF;
-    block_solver->Jacobian = Jacobian;
     block_solver->check_discrete_variables_change = check_discrete_variables_change;
     block_solver->update_discrete_variables = update_discrete_variables;
     block_solver->log_discrete_variables = log_discrete_variables;
@@ -200,7 +196,6 @@ void jmi_delete_block_solver(jmi_block_solver_t** block_solver_ptr) {
     free(block_solver->jac);
     free(block_solver->ipiv);
       
-    free(block_solver->residual_error_indicator);
     free(block_solver->min);
     free(block_solver->max);
     free(block_solver->nominal);
@@ -638,7 +633,6 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     /* We use tighter:  1e-12 */
     bsop->min_tol = 1e-12;       /**< \brief Minimum tolerance for the equation block solver */
     bsop->max_iter = 100;
-    bsop->max_iter_no_jacobian = 10;
     bsop->events_epsilon = 1e-10;
     bsop->step_limit_factor = 10; /** < \brief Step limiting factor */
     bsop->regularization_tolerance = -1;
@@ -653,9 +647,7 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->block_jacobian_check = 0;
     bsop->block_jacobian_check_tol = 1e-6;
 
-    bsop->residual_equation_scaling_mode = jmi_residual_scaling_auto; 
-    bsop->solver_exit_criterion_mode = jmi_exit_criterion_hybrid;
-    bsop->jacobian_update_mode = jmi_full_jacobian_update_mode;
+    bsop->residual_equation_scaling_mode = jmi_residual_scaling_auto;  
 
     bsop->min_residual_scaling_factor = 1e-10;
     bsop->max_residual_scaling_factor = 1e10;
@@ -664,7 +656,6 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->rescale_each_step_flag = 0;
     bsop->rescale_after_singular_jac_flag = 0;
     bsop->check_jac_cond_flag = 0;  /**< \brief NLE solver should check Jacobian condition number and log it. */
-    bsop->calculate_jacobian_externally = 0;
     bsop->brent_ignore_error_flag = 0;
     bsop->experimental_mode = 0;
     bsop->use_nominals_as_fallback_in_init = 0;
@@ -673,4 +664,3 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->jacobian_variability = JMI_CONTINUOUS_VARIABILITY;
     bsop->label = "";
 }
-

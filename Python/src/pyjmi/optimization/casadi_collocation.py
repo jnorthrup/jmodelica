@@ -577,7 +577,7 @@ class CasadiCollocator(object):
                 Duration (seconds) of call to nonlinear programming solver.
                 Type: float
         """
-        t0_update = time.clock()
+        init = time.clock()
         if self.equation_scaling:
             self._update_equation_scaling()
         # Initialize solver
@@ -598,8 +598,8 @@ class CasadiCollocator(object):
             self._init_and_set_solver_inputs()
         # Solve the problem
         t0 = time.clock()
-        self.extra_update = t0-t0_update
-        self.times['update'] += self.extra_update # should be reset by warm start framework in each optimize, allows adding more update time from that
+        self.extra_init = t0 - init
+        self.times['init'] += self.extra_init
         self.solver_object.evaluate()
 
         # Get the result
@@ -976,9 +976,8 @@ class LocalDAECollocator(CasadiCollocator):
         # to work against this collocator instance
         self.wrapper = OptimizationSolver(self)
 
-        self.times['init'] = time.clock() - t0_init 
-        self.times['update'] = 0
-        
+        self.times['init'] = time.clock() - t0_init
+
     def solve_and_write_result(self):
         """
         Solve the nonlinear program and write the results to a file.
@@ -988,9 +987,9 @@ class LocalDAECollocator(CasadiCollocator):
         # todo: account for preprocessing time within solve_nlp separately?
         self.times['sol'] = self.solve_nlp()
         self.result_file_name = self.export_result_dymola(self.result_file_name)
-        self.times['post_processing'] = time.clock() - t0 - self.times['sol'] - self.extra_update
+        self.times['post_processing'] = time.clock() - t0 - self.times['sol'] -self.extra_init
 
-    def get_result_object(self, include_init = True):
+    def get_result_object(self):
         """ 
         Load result data saved in e.g. solve_and_write_result and create a LocalDAECollocationAlgResult object.
 
@@ -1004,13 +1003,10 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Get optimized element lengths
         h_opt = self.get_h_opt()
-	
+
         self.times['post_processing'] += time.clock() - t0
-        self.times['tot'] = self.times['update'] + self.times['sol'] + self.times['post_processing']
-        
-        if include_init:
-		    self.times['tot'] += self.times['init']
-			
+        self.times['tot'] = self.times['init'] + self.times['sol'] + self.times['post_processing']
+
         # Create and return result object
         return LocalDAECollocationAlgResult(self.op, resultfile, self,
                                             res, self.options, self.times,
@@ -5014,8 +5010,8 @@ class LocalDAECollocator(CasadiCollocator):
             (t,dx_opt,x_opt,u_opt,w_opt,p_fixed,p_opt, elim_vars) = self.get_result()
             data = N.hstack((t,dx_opt,x_opt,u_opt,w_opt,elim_vars))
         else:
-            (t,dx_opt,x_opt,u_opt,w_opt,p_fixed,p_opt, elim_vars) = result
-            data = N.hstack((t,dx_opt,x_opt,u_opt,w_opt,elim_vars))
+            (t,dx_opt,x_opt,u_opt,w_opt,p_fixed,p_opt) = result
+            data = N.hstack((t,dx_opt,x_opt,u_opt,w_opt))
 
         if (format=='txt'):
             op = self.op
@@ -5811,9 +5807,6 @@ class LocalDAECollocationAlgResult(JMResultBase):
 
             times['init'] is the time spent creating the NLP.
             
-            times['update'] is the time spent initializing the solver and 
-            other things related to pre-processing when using warm start.
-            
             times['sol'] is the time spent solving the NLP (total Ipopt
             time).
             
@@ -5851,10 +5844,8 @@ class LocalDAECollocationAlgResult(JMResultBase):
 
         if times is not None:
             # Print times
-            print("\nInitialization time: %.2f seconds" % times['init'])
-            
             print("\nTotal time: %.2f seconds" % times['tot'])
-            print("Pre-processing time: %.2f seconds" % times['update'])
+            print("Pre-processing time: %.2f seconds" % times['init'])
             print("Solution time: %.2f seconds" % times['sol'])
             print("Post-processing time: %.2f seconds\n" %
                   times['post_processing'])
@@ -5939,7 +5930,6 @@ class OptimizationSolver(object):
         self.collocator = collocator
         self.init_traj_set = False
         self.solver_options_changed = False
-        self.extra_update = 0
 
     def set(self, name, value):
         """Set the value of the named parameter from the original OptimizationProblem"""
@@ -5993,7 +5983,7 @@ class OptimizationSolver(object):
             sim_result --
                 The result from which the initial guess is to be extracted.
         """
-        t0 = time.clock()
+
         self.collocator.init_traj = sim_result
         try:
             self.collocator.init_traj = self.collocator.init_traj.result_data
@@ -6003,11 +5993,9 @@ class OptimizationSolver(object):
         self.init_traj_set = True
         self.collocator._create_initial_trajectories()        
         self.collocator._compute_bounds_and_init()
-        self.extra_update = time.clock() - t0
-		
+
     def optimize(self):
         """Solve the optimization problem with the current settings, and return the result."""
-        t0 = time.clock()
         self.collocator._recalculate_model_parameters()
 
         if self.solver_options_changed:
@@ -6021,13 +6009,9 @@ class OptimizationSolver(object):
             self.collocator._init_and_set_solver_inputs()
 
         self.init_traj_set = False
-        # Add extra update times to update and reset
-        self.collocator.times['update'] = time.clock() - t0 + self.extra_update # 'update' must be set before call to solve_and_write_result
-        self.extra_update = 0
-        
+
         self.collocator.solve_and_write_result()
-       
-        return self.collocator.get_result_object(include_init=False)
+        return self.collocator.get_result_object()
 
     def set_warm_start(self, warm_start):
         """

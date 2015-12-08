@@ -25,7 +25,6 @@
 #ifndef _JMI_BLOCK_SOLVER_IMPL_H
 #define _JMI_BLOCK_SOLVER_IMPL_H
 #include "jmi_block_solver.h"
-
 /**
     \brief Main data structure used in the block solver.
 */
@@ -54,14 +53,6 @@ struct jmi_block_solver_t {
     double time_df;
 #endif
 
-    double func_eval_time;          /**< \brief Total time spend in function evaluations */
-    double jac_eval_time;           /**< \brief Total time spend in jacobian evaluations */
-    double broyden_update_time;     /**< \brief Total time spend on Broyden updates */
-    double step_calc_time;          /**< \brief Total time spend in solving linear system */
-    double factorization_time;      /**< \brief Total time spend on factorizing jacobian matrix */
-    double bounds_handling_time;    /**< \brief Total time spend on step limiting */
-    double logging_time;            /**< \brief Total time spend on logging of kin_info and kin_err */
-
     jmi_real_t* min;               /**< \brief Min values for iteration variables */
     jmi_real_t* max;               /**< \brief Max values for iteration variables */
     jmi_real_t* nominal;           /**< \brief Nominal values for iteration variables */
@@ -86,7 +77,6 @@ struct jmi_block_solver_t {
 
     jmi_block_solver_residual_func_t F;
     jmi_block_solver_dir_der_func_t dF;
-    jmi_block_solver_jacobian_func_t Jacobian;
     jmi_block_solver_check_discrete_variables_change_func_t check_discrete_variables_change;
     jmi_block_solver_update_discrete_variables_func_t update_discrete_variables;
     jmi_block_solver_log_discrete_variables log_discrete_variables;
@@ -99,8 +89,6 @@ struct jmi_block_solver_t {
     char* message_buffer ; /**< \brief Message buffer used for debugging purposes */
 
     double canari; /* for debugging */
-
-    int* residual_error_indicator;  /**< \brief flags indicating if NaN, Inf or Limiting values output of residual vector */
 
 } ;
 

@@ -83,8 +83,6 @@ struct jmi_kinsol_solver_t {
 
     void* kin_mem;                 /**< \brief A pointer to the Kinsol solver */
     N_Vector kin_y;                /**< \brief Work vector for Kinsol y */
-    N_Vector last_residual;        /**< \brief Last residual vector submitted to linear solver */
-
     N_Vector kin_y_scale;          /**< \brief Work vector for Kinsol scaling of y */
     N_Vector kin_f_scale;          /**< \brief Work vector for Kinsol scaling of f */
     N_Vector gradient;              /**< \brief Steepest descent direction */
@@ -114,8 +112,6 @@ struct jmi_kinsol_solver_t {
     realtype* rScale;               /**< \brief Row scale factors */
     realtype* cScale;               /**< \brief Column scale factors */
     
-    N_Vector work_vector;           /**< \brief work vector for vector operations */
-    N_Vector work_vector2;           /**< \brief work vector for vector operations */
     realtype* lapack_work;         /**< \brief work vector for lapack */
     int * lapack_iwork;            /**< \brief work vector for lapack */
     int * lapack_ipiv;            /**< \brief work vector for lapack */

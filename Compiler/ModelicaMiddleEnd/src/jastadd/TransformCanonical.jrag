@@ -1421,7 +1421,7 @@ aspect TransformCanonical {
 	 * Creates an indicator for this FRelExp
 	 */
 	public void FRelExp.genIndicator() {
-		FVariable v = new FRealVariable(new FPublicVisibilityType(), fContinuous(), new FQNameFull(calcIndicatorVarName()));
+		FVariable v = new FRealVariable(new FPublicVisibilityType(), fContinuous(), new FQNameFull(calcTempVarName()));
 		myFClass().addFVariable(v);
 		setIndicator(v.createUseExp());
 	}
@@ -2028,7 +2028,7 @@ aspect TransformCanonical {
             if (myFV().isFVariable() && myFV().isAlias()) {
                 FVariable fv = (FVariable) myFV();
                 FIdUseExp new_exp = fv.alias().createUseExp();
-                new_exp.setOriginalVariable(this, fv);
+                new_exp.setOriginalStateSelect(originalStateSelect(fv));
                 new_exp.rewriteAlias = true;
                 if (fv.isNegated()) 
                     return new FNegExp(new_exp);
@@ -2042,7 +2042,7 @@ aspect TransformCanonical {
                     && !inWhen() && !inFunctionCallLeft()) {
                 FVariable var = myFV().derivativeEquivalent();
                 FIdUseExp exp =  var.getMeDifferentiated().createUseExp();
-                exp.setOriginalVariable(this, var);
+                exp.setOriginalStateSelect(originalStateSelect(var));
                 if (var.isAlias())
                     exp.rewriteAlias = true;
                 return exp;
@@ -2058,7 +2058,7 @@ aspect TransformCanonical {
             if (myNonPreFV().isFVariable() && myNonPreFV().isAlias()) {
                 FVariable fv = (FVariable) myNonPreFV();
                 FIdUseExp new_exp = fv.alias().createFPreExp();
-                new_exp.setOriginalVariable(this, fv);
+                new_exp.setOriginalStateSelect(originalStateSelect(fv));
                 if (fv.isNegated()) 
                     return new FNegExp(new_exp);
                 else
@@ -2077,7 +2077,7 @@ aspect TransformCanonical {
                 FVariable fv = (FVariable) left.myFV();
                 FIdUseExp exp = fv.alias().createUseExp();
                 setLeft(exp);
-                exp.setOriginalVariable(left, fv);
+                exp.setOriginalStateSelect(left.originalStateSelect(fv));
                 if (fv.isNegated()) 
                     setRight(new FNegExp(getRight()));
                 return this;
@@ -2102,7 +2102,7 @@ aspect TransformCanonical {
             if (myFV().isAlias()) {
                 FVariable fv = (FVariable) myFV();
                 FIdUseExp new_exp = fv.alias().createUseExp();
-                new_exp.setOriginalVariable(this, fv);
+                new_exp.setOriginalStateSelect(originalStateSelect(fv));
                 if (myFV().isNegated()) 
                     return new FNegExp(new_exp);
                 else
@@ -2112,7 +2112,7 @@ aspect TransformCanonical {
                 FAbstractDerExp new_exp = createEmptyNode();
                 new_exp.setFIdUse(new FIdUse(new_name));
                 new_exp.setOrder(order());
-                new_exp.setOriginalVariable(this, getFIdUse().myFV());
+                new_exp.setOriginalStateSelect(originalStateSelect(getFIdUse().myFV()));
                 if (getFIdUse().myFV().isNegated())
                     return new FNegExp(new_exp);
                 else
@@ -2121,26 +2121,20 @@ aspect TransformCanonical {
         }
     }
 
-    public void FIdUseExp.setOriginalVariable(FIdUseExp oldExp, FAbstractVariable var) {
-        setOriginalVariable(computeOriginalVariable(oldExp, var));
-    }
-    private static String FIdUseExp.computeOriginalVariable(FIdUseExp oldExp, FAbstractVariable var) {
-        if (!oldExp.getOriginalVariable().isEmpty()) {
-            return oldExp.getOriginalVariable();
+    syn FVariable.StateSelect FIdUseExp.originalStateSelect(FAbstractVariable from) {
+        if (getOriginalStateSelect() != null) {
+            return getOriginalStateSelect();
         }
-        while (var.isTemporary()) {
-            AliasManager.AliasVariable av = var.asFVariable().myFClass().getAliasManager().getAliasVariable(var.asFVariable());
+        if (from.isTemporary()) {
+            AliasManager.AliasVariable av = from.asFVariable().myFClass().getAliasManager().getAliasVariable(from.asFVariable());
             if (av.getTempAssignRight() != null) {
-                var = av.getTempAssignRight();
+                return av.getTempAssignRight().stateSelection();
             } else {
                 return null;
             }
-            
         }
-        return var.name();
+        return getFIdUse().myFV().stateSelection();
     }
-    
-    syn FAbstractVariable FIdUseExp.myOriginalFV() = myFClass().lookupFV(getOriginalVariable());
     
     /*
      * Rewrite derivatives of parameters to zeros.
@@ -2151,50 +2145,33 @@ aspect TransformCanonical {
         }
     }
 
-    /**
-     * Remove all unused temporary variables, and inline temporaries only used once.
-     */
-    public void FClass.removeUnusedTemporaries() {
-        ArrayList<FVariable> temps = tempVariables();
-        Collection<FVariable> tempsToRemove = new ArrayList<FVariable>();
-        int oldSize = Integer.MAX_VALUE;
-        while (temps.size() < oldSize) {
-            ArrayList<FVariable> temps2 = new ArrayList<FVariable>(temps.size());
-            for (FVariable fv : temps) {
+	/**
+	 * Remove all unused temporary variables, and inline temporaries only used once.
+	 */
+	public void FClass.removeUnusedTemporaries() {
+		ArrayList<FVariable> temps = tempVariables();
+		int oldSize = Integer.MAX_VALUE;
+		while (temps.size() < oldSize) {
+			ArrayList<FVariable> temps2 = new ArrayList<FVariable>(temps.size());
+			for (FVariable fv : temps) {
                 if (!fv.inlineUses()) {
-                    temps2.add(fv);
-                } else {
-                    tempsToRemove.add(fv);
+					temps2.add(fv);
                 }
-            }
-            oldSize = temps.size();
-            temps = temps2;
-        }
-        
-        ArrayList<FVariable> vars = new ArrayList<FVariable>();
-        for (FVariable fv : getFVariables())
-            if (!fv.isTemporary())
-                vars.add(fv);
-        for (FVariable fv : temps)
-            vars.add(fv);
-        
-        removeMarkedEqns();
-        setFVariableList(new List(vars));
-        
-        Set<FVariable> aliasVarsToRemove = new HashSet<FVariable>();
-        
-        for (FVariable fv : tempsToRemove) {
-            aliasVarsToRemove.addAll(getAliasManager().removeTemporaryVariableSet(fv));
-        }
-        
-        ArrayList<FVariable> newAliasVars = new ArrayList<FVariable>();
-        for (FVariable fv : getAliasVariables()) {
-            if (!aliasVarsToRemove.contains(fv)) {
-                newAliasVars.add(fv);
-            }
-        }
-        setAliasVariableList(new List(newAliasVars));
-    }
+			}
+			oldSize = temps.size();
+			temps = temps2;
+		}
+		
+		ArrayList<FVariable> vars = new ArrayList<FVariable>();
+		for (FVariable fv : getFVariables())
+			if (!fv.isTemporary())
+				vars.add(fv);
+		for (FVariable fv : temps)
+			vars.add(fv);
+		
+		removeMarkedEqns();
+		setFVariableList(new List(vars));
+	}
 
     /**
      * Check if this is a temporary variable that should be eliminated.
@@ -3468,7 +3445,7 @@ aspect DummyDerivatives {
 
     rewrite FDerExp {
         when (myFV().isDummyDerivativeVariable()) to FDummyDerExp {
-            return new FDummyDerExp(getFIdUse(), getOriginalVariable(), order());
+            return new FDummyDerExp(getFIdUse(), getOriginalStateSelect(), order());
         }
     }
 
@@ -4106,12 +4083,11 @@ aspect SemiLinear {
             new FMulExp(getX().treeCopy(), getPosSlope().treeCopy()),
             new FMulExp(getX().treeCopy(), getNegSlope().treeCopy()));
         if (isSmoothInSemiLinear()) {
-            exp = new FSmoothExp(0, exp);
+            exp = new FNoEventExp(exp);
         }
         return exp;
     }
 
-    // TODO: should be replaced with a generic method that calculates smoothness of any expression (considering sub-expressions)
     /**
      * Checks if this expression allows a semiLinear() with it as argument to be smooth(0, ...).
      */

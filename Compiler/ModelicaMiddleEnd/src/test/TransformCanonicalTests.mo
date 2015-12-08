@@ -1275,61 +1275,7 @@ der(x) := x * (time - switchTime)
 pre(x) := 2 * switchTime ^ 2 / (1.0 + 1.0)
 -------------------------------
 ")})));
-end AliasTest34;
-
-    model AliasTest35
-        function F
-            input Real i1;
-            input Real i2;
-            output Real o1;
-            output Real o2;
-        algorithm
-            o1 := i1 * 2;
-            o2 := i2 * 2;
-            annotation(InlineAfterIndexReduction=true,derivative=F_der);
-        end F;
-    
-        function F_der
-            input Real i1;
-            input Real i1_der;
-            input Real i2;
-            input Real i2_der;
-            output Real o1_der;
-            output Real o2_der;
-        protected
-            Real v1;
-            Real v2;
-        algorithm
-            v1 := 1 * i1_der;
-            v2 := 1 * i2_der;
-            (o1_der, o2_der) := F(v1, v2);
-            annotation(Inline=true);
-        end F_der;
-    
-        Real x;
-        Real y;
-        Real vx;
-        Real vy;
-        Real vx2;
-        Real vy2;
-        Real a;
-    equation
-        der(x) = vx;
-        der(y) = vy;
-        (vx, vy) = F(vx2, vy2);
-        der(vx2) = a*x;
-        der(vy2) = a*y;
-        x^2 + y^2 = 2;
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="AliasTest35",
-            methodName="aliasDiagnostics",
-            description="Test so that alias sets with only temporaries in are removed",
-            methodResult="
-Alias sets:
-0 variables can be eliminated
-")})));
-    end AliasTest35;
+  end AliasTest34;
 
 model AliasFuncTest1
     function f
@@ -2784,17 +2730,17 @@ fclass TransformCanonicalTests.InitialEqTest20
  discrete Integer i(start = 0,fixed = true);
  discrete Real t;
  discrete Integer temp_1;
- Real _eventIndicator_1;
- discrete Boolean temp_2;
+ Real temp_2;
+ discrete Boolean temp_3;
 initial equation 
  pre(temp_1) = 0;
  pre(i) = 0;
  pre(t) = 0.0;
- pre(temp_2) = false;
+ pre(temp_3) = false;
 algorithm
- _eventIndicator_1 := time - (1 + t);
- temp_2 := time > 1 + t;
- if initial() or temp_2 and not pre(temp_2) then
+ temp_2 := time - (1 + t);
+ temp_3 := time > 1 + t;
+ if initial() or temp_3 and not pre(temp_3) then
   t := time + 1;
  end if;
  temp_1 := if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
@@ -5308,10 +5254,10 @@ z := (x + (- y)) / (1.0 / x)
 x := 1
 
 --- Solved equation ---
-y := (x + 3) / (1.0 + -3)
+y := (x + 3) / (1.0 - 3)
 
 --- Solved equation ---
-z := (x + (- y)) / (1.0 + (-x - 3))
+z := (x + (- y)) / (1.0 - (x + 3))
 -------------------------------
 ")})));
   end SolveEqTest5;
@@ -5366,10 +5312,10 @@ x / z = x - y
 x := 1
 
 --- Solved equation ---
-y := (x + 3) / (-1.0 + 1.0 + -4)
+y := (x + 3) / (- 1.0 + 1.0 - 4)
 
 --- Solved equation ---
-z := (x + (- y)) / (-1.0 + 1.0 + 5)
+z := (x + (- y)) / (- 1.0 + 1.0 + 5)
 -------------------------------
 ")})));
   end SolveEqTest7;
@@ -5389,50 +5335,10 @@ z := (x + (- y)) / (-1.0 + 1.0 + 5)
 			methodName="printDAEBLT",
 			methodResult="
 --- Solved equation ---
-der(x) := (- x) / (-1.0 + 1.0 + -1.0)
+der(x) := (- x) / (-1.0 - -1.0 - 1.0)
 -------------------------------
 ")})));
-  end SolveEqTest8;
-  
-  model SolveEqTest9
-        Real x;
-    equation
-        0 = x;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="SolveEqTest9",
-            description="Test bug found in solution framework",
-            flatModel="
-fclass TransformCanonicalTests.SolveEqTest9
- constant Real x = 0;
-end TransformCanonicalTests.SolveEqTest9;
-")})));
-  end SolveEqTest9;
-
-  model SolveEqTest10
-        Real x,y;
-    equation
-        y = time;
-        y * x = 0;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="SolveEqTest10",
-            description="Test bug found in solution framework",
-            equation_sorting=true,
-            variability_propagation=false,
-            methodName="printDAEBLT",
-            methodResult="
---- Solved equation ---
-y := time
-
---- Unsolved equation (Block 1) ---
-y * x = 0
-  Computed variables: x
--------------------------------
-")})));
-  end SolveEqTest10;
+end SolveEqTest8;
 
 model BlockTest1
 record R
@@ -6675,18 +6581,19 @@ fclass TransformCanonicalTests.EventGeneratingExps.InAlgorithm
  Real x;
  discrete Real temp_1;
  discrete Integer temp_2;
- Real _eventIndicator_1;
- Real _eventIndicator_2;
+ Real temp_3;
+ Real temp_4;
 initial equation 
  pre(temp_1) = 0.0;
  pre(temp_2) = 0;
 algorithm
  temp_1 := if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= pre(temp_1) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
- _eventIndicator_1 := 3 + temp_1 * 4 - pre(temp_2);
- _eventIndicator_2 := 3 + temp_1 * 4 - (pre(temp_2) + 1);
+ temp_3 := 3 + temp_1 * 4 - pre(temp_2);
+ temp_4 := 3 + temp_1 * 4 - (pre(temp_2) + 1);
  temp_2 := if 3 + temp_1 * 4 < pre(temp_2) or 3 + temp_1 * 4 >= (pre(temp_2) + 1) or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
  x := temp_2;
 end TransformCanonicalTests.EventGeneratingExps.InAlgorithm;
+			
 ")})));
 end InAlgorithm;
 
