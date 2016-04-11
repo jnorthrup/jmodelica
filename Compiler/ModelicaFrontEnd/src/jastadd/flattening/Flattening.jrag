@@ -2439,12 +2439,7 @@ aspect FlatExpressions {
     
 	// These operators save reference to source node in instance tree until end of flattening - used for error checking them
 	public FExp FChangeExp.flatten(FQName prefix)      { return new FNeqExp(getFExp().flatten(prefix), FPreExp.create(getFExp().flatten(prefix), this)); }
-    public FExp InstPreExp.flatten(FQName prefix)      {
-        if (getFExp().variability().parameterOrLess()) {
-            return getFExp().flatten(prefix);
-        }
-        return FPreExp.create(getFExp().flatten(prefix), this);
-    }
+	public FExp InstPreExp.flatten(FQName prefix)      { return FPreExp.create(getFExp().flatten(prefix), this); }
 
 	public FExp                 FNoArgBuiltIn.flatten(FQName prefix)             { return createEmptyNode(); }
 	public FBuiltInFunctionCall FMathematicalFunctionCall.flatten(FQName prefix) { return createNode(getFExp().flatten(prefix)); }
@@ -2577,9 +2572,8 @@ aspect FlatExpressions {
     }
     
     inh FQName FExp.sizeFlatteningPrefix();
-    eq Root.getChild().sizeFlatteningPrefix()          = new FQNameEmpty();
-    eq InstNode.getChild().sizeFlatteningPrefix()      = retrieveFQName();
-    eq InstClassDecl.getChild().sizeFlatteningPrefix() = new FQNameEmpty();
+    eq Root.getChild().sizeFlatteningPrefix()              = new FQNameEmpty();
+    eq InstNode.getChild().sizeFlatteningPrefix()          = retrieveFQName();
     
     inh FExp DummyModification.myFExp();
     eq InstFunctionArgument.getChild().myFExp()   = null;
@@ -2588,9 +2582,23 @@ aspect FlatExpressions {
     eq Root.getChild().myFExp()                   = null;
 
     public FRecordConstructor InstRecordConstructor.flatten(FQName prefix) {
-        List<FExp> args = new List();
-        for (InstFunctionArgument ifa : getArgs()) {
-            args.add(ifa.flatten(prefix));
+        List args = new List();
+        int i = 0;
+        Iterator<InstComponentDecl> constructorComponents = allInstComponentDecls().iterator();
+        for (InstComponentDecl icd : getRecord().myInstClassDecl().allInstComponentDecls()) {
+            InstComponentDecl cicd = constructorComponents.next();
+            if (icd.isModifiable()) {
+                args.add(getArg(i++).flatten(prefix));
+            } else {
+                if (cicd.variability().knownParameterOrLess()) {
+                    try {
+                        args.add(cicd.ceval().buildLiteral());
+                        continue;
+                    } catch (ConstantEvaluationException e) {
+                    }
+                }
+                args.add(icd.flattenInRecordConstructor(prefix));
+            }
         }
         return new FRecordConstructor(getRecord().flattenRecordName(), args);
     }

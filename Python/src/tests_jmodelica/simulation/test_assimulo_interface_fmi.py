@@ -14,6 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 """Tests for the pyfmi.simulation.assimulo module."""
 import logging
 import nose
@@ -286,7 +287,6 @@ class Test_Events:
         compile_fmu("EventIter.EnhancedEventIteration2", file_name)
         compile_fmu("EventIter.SingularSystem1", file_name)
         compile_fmu("EventIter.InitialPhasing1", file_name)
-        compile_fmu("EventIter.EventIterDiscreteReals", file_name)
     
     @testattr(stddist = True)
     def test_event_infinite_iteration_1(self):
@@ -344,14 +344,6 @@ class Test_Events:
         res = model.simulate(final_time=0.1)
         nose.tools.assert_almost_equal(res["b1"][0], 0.0)
         nose.tools.assert_almost_equal(res["b2"][0], 1.0)
-        
-    @testattr(stddist=True)
-    def test_discrete_real_event_iteration(self):
-        model = load_fmu("EventIter_EventIterDiscreteReals.fmu")
-        res = model.simulate(final_time=1.0)
-        nose.tools.assert_almost_equal(res["T1"][0], 0.0)
-        nose.tools.assert_almost_equal(res["start"][0], 1.0)
-        nose.tools.assert_almost_equal(res["T2"][0], 0.0)
 
 class Test_Relations:
     @classmethod
@@ -476,7 +468,6 @@ class Test_NonLinear_Systems:
         compile_fmu("NonLinear.NominalStart3", file_name)
         compile_fmu("NonLinear.NominalStart4", file_name)
         compile_fmu("NonLinear.NominalStart5", file_name)
-        compile_fmu("NonLinear.NominalStart6", file_name)
         compile_fmu("NonLinear.DoubleRoot1", file_name)
         compile_fmu("NonLinear.NonLinear3", file_name)
         compile_fmu("NonLinear.NonLinear4", file_name)
@@ -611,15 +602,6 @@ class Test_NonLinear_Systems:
         model.initialize()
         
         nose.tools.assert_almost_equal(model.get("x") ,2.76929235)
-        
-    @testattr(stddist = True)
-    def test_nominals_fallback_7(self):
-        model = load_fmu("NonLinear_NominalStart6.fmu")
-        model.set("_nle_solver_use_nominals_as_fallback", True)
-        model.initialize()
-        
-        nose.tools.assert_almost_equal(model.get("x"), 0.680716920494911)
-        nose.tools.assert_almost_equal(model.get("y"), 0.0)
         
     @testattr(stddist = True)
     def test_residual_scaling_heuristics(self):
