@@ -308,7 +308,6 @@ aspect IndexReduction {
         private IndexReductionEq meIntegrated = null;
         private Set<String> nonDiffVars;
         private Set<FAbstractEquation> nonDiffEqns;
-        private Set<IndexReductionVar> remoteVars = null;
 
         public IndexReductionEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta) {
             super(name, eqn, groupNumber, variability, type, isMeta);
@@ -467,32 +466,6 @@ aspect IndexReduction {
             }
             return sb.toString();
         }
-        
-        /**
-         * Used by index reduction for indicating that the incidence isn't
-         * direct but through other low order equations and variables.
-         */
-        public void addVariable(IndexReductionVar var, boolean remote) {
-            super.addVariable(var);
-            if (remote) {
-                if (remoteVars == null) {
-                    remoteVars = new HashSet<IndexReductionVar>();
-                }
-                remoteVars.add(var);
-            }
-        }
-        
-        /**
-         * Used by index reduction for indicating that the incidence isn't
-         * direct but through other low order equations and variables.
-         */
-        public boolean isRemoteVar(IndexReductionVar var) {
-            if (remoteVars == null) {
-                return false;
-            } else {
-                return remoteVars.contains(var);
-            }
-        }
     }
 
     public class IndexReductionVar extends AbstractVar<IndexReductionEq, IndexReductionVar> {
@@ -567,9 +540,9 @@ aspect IndexReduction {
         }
 
         @Override
-        public boolean isInlinable(FFunctionDecl func, FFunctionCall call) {
+        public boolean isInlinable(FFunctionDecl func) {
             if (inlineEnabled)
-                return func.isTrivialInlinable(false, call);
+                return func.isTrivialInlinable(false);
             else
                 return false;
         }
@@ -632,68 +605,6 @@ aspect IndexReduction {
         return inliner.dynamicEquation(diffedFEqns.iterator().next());
     }
     
-
-    public <V> AbstractBiPGraph.AssignmentIncidenceMap FAbstractEquation.assignmentIncidenceMap(AbstractBiPGraph g, EnumSet<AbstractBiPGraph.VarType> variableTypes, AbstractBiPGraph.VariableResolver resolver) {
-        throw new UnsupportedOperationException("FAbstractEquation.assignmentIncidenceMap() isn't implemented for equations of type " + getClass().getSimpleName() + "!");
-    }
-
-    @Override
-    public <V> AbstractBiPGraph.AssignmentIncidenceMap FEquation.assignmentIncidenceMap(AbstractBiPGraph g, EnumSet<AbstractBiPGraph.VarType> variableTypes, AbstractBiPGraph.VariableResolver resolver) {
-        return g.new SingleAssignmentIncidenceMap(this, resolver);
-    }
-
-    @Override
-    public <V> AbstractBiPGraph.AssignmentIncidenceMap FFunctionCallEquation.assignmentIncidenceMap(AbstractBiPGraph g, EnumSet<AbstractBiPGraph.VarType> variableTypes, AbstractBiPGraph.VariableResolver resolver) {
-        return g.new SplitIncidenceMap(this, resolver, variableTypes);
-    }
-
-    public class IndexReductionBiPGraph {
-        private class ExtraEquationVariableResolver implements VariableResolver<IndexReductionEq, IndexReductionVar> {
-            
-            private final Map<String, AssignmentIncidenceMap> extraEqMap;
-            private final Set<String> evaluationStack = new LinkedHashSet<String>();
-            
-            private ExtraEquationVariableResolver(Collection<FAbstractEquation> equations) {
-                extraEqMap = new HashMap<String, AssignmentIncidenceMap>();
-                for (FAbstractEquation equation : equations) {
-                    AssignmentIncidenceMap incidenceMap = equation.assignmentIncidenceMap(IndexReductionBiPGraph.this, null, this);
-                    for (FIdUseExp lhs : incidenceMap.assigned()) {
-                        extraEqMap.put(lhs.name(), incidenceMap);
-                    }
-                }
-            }
-            
-            @Override
-            public Set<IndexReductionVar> lookupVars(Iterable<FIdUseExp> set) {
-                Set<IndexReductionVar> res = new LinkedHashSet<IndexReductionVar>();
-                lookupVars(set, res);
-                return res;
-            }
-    
-            private void lookupVars(Iterable<FIdUseExp> set, Set<IndexReductionVar> resolvedVars) {
-                for (FIdUseExp use : set) {
-                    String varName = use.name();
-                    IndexReductionVar var = getVariable(varName);
-                    if (var != null) {
-                        resolvedVars.add(var);
-                    } else {
-                        AssignmentIncidenceMap incidenceMap = extraEqMap.get(varName);
-                        if (incidenceMap != null) {
-                            if (!evaluationStack.add(varName)) {
-                                throw new UnsupportedOperationException("Oh boy, we have a circularity in our evaluation of extra equations during index reduction, this is not supported. Stack: " + evaluationStack);
-                            }
-                            try {
-                                lookupVars(incidenceMap.rhs(varName), resolvedVars);
-                            } finally {
-                                evaluationStack.remove(varName);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
     /**
      * This method is big and complex due to that function inlining has to be
      * done on the differentiated equation. This results in additional
@@ -730,15 +641,14 @@ aspect IndexReduction {
             throw new IndexReductionException("Maximum number of differentiations has been reached");
         
         // Handle nonscalar equations and LHS variables that needs to be differentiated
-        for (IndexReductionEq eqn : baseEqn.getGroupMembers()) {
-            for (IndexReductionVar var : eqn.getVariables()) {
-                if (!eqn.isNonDiffUse(var)) {
-                    if (var.getMatching() != null && var.getMatching() != eqn)
-                        eqToMatchStack.add(var.getMatching());
-                    differentiateVariable(var, newDiffedVars, varsToRemove);
-                }
+        for (FAbstractEquation originalFEqn : originalFEqns) {
+            for (IndexReductionVar variable : lookupVarsInSet(originalFEqn.FIdUseExpsInLHS())) {
+                if (variable.getMatching() != null && variable.getMatching() != baseEqn)
+                    eqToMatchStack.add(variable.getMatching());
+                differentiateVariable(variable, newDiffedVars, varsToRemove);
             }
         }
+        
         
         // Differentiate equations
         java.util.List<FAbstractEquation> diffedFEqns = new ArrayList<FAbstractEquation>();
@@ -842,7 +752,9 @@ aspect IndexReduction {
         // Construct a list of all the variables that should be common in all
         // of the equations.
         // Always add variables from extra equations
-        ExtraEquationVariableResolver extraResolver = new ExtraEquationVariableResolver(extraEquations);
+        Set<IndexReductionVar> additionalDependencies = new HashSet<IndexReductionVar>();
+        for (FAbstractEquation extraFEqn : extraEquations)
+            additionalDependencies.addAll(lookupVarsInSet(extraFEqn.referencedFIdUseExps()));
         
         Collection<IndexReductionEq> diffedOriginalEqs = new ArrayList<IndexReductionEq>();
         
@@ -863,7 +775,7 @@ aspect IndexReduction {
         for (FAbstractEquation newEqn : originalDiffedFEqns) {
             result.addEquation(newEqn);
             
-            IncidenceMap incMap = newEqn.createIncidenceMap(this, null, extraResolver);
+            IncidenceMap incMap = newEqn.createIncidenceMap(this, additionalDependencies, null);
             
             // Build new differentiated BiP equations for each scalar.
             for (int i = 0; i < newEqn.numScalarEquations(); i++) {
@@ -1246,15 +1158,6 @@ aspect IndexReduction {
             FTypePrefixVariability variability = ASTNode.fConstant();
             for (FAbstractEquation feqd : feqds)
                 variability = variability.combine(feqd.variability());
-            if (feqds.size() > 1) {
-                Iterator<FAbstractEquation> it = feqds.iterator();
-                while (it.hasNext() && feqds.size() > 1) {
-                    FAbstractEquation eqn = it.next();
-                    if (eqn.isZeroEquation()) {
-                        it.remove();
-                    }
-                }
-            }
             FAbstractEquation eqn = feqds.iterator().next();
             coefficients.put(var, new IndexReductionBiPGraph.Coefficient(feqds.size() > 1 ? new FNoExp() : eqn.asSubExp(), IndexReductionBiPGraph.COEFFICIENT_STATE.create(variability)));
             
@@ -1322,23 +1225,22 @@ aspect IndexReduction {
     }
     eq FVariable.stateSelection() = getTopIntegrated().stateSelectAttribute();
     
-    public class IndexReductionBiPGraph {
+    public abstract class AbstractBiPGraph {
         
         public static class IndexReductionCost implements SparseMunkresCost<IndexReductionCost> {
             
             public static IndexReductionCost UNMATCHED_WEIGHT = new IndexReductionCost();
             
-            private static final int NUM_WEIGHTS = 10;
+            private static final int NUM_WEIGHTS = 9;
             public static final int UNMATCHED  = 0;
             public static final int STATE_SELECT_ALWAYS_WEIGHT_POSITION  = 1;
             public static final int STATE_SELECT_PREFER_WEIGHT_POSITION  = 2;
             public static final int STATE_SELECT_DEFAULT_WEIGHT_POSITION = 3;
             public static final int STATE_SELECT_AVOID_WEIGHT_POSITION   = 4;
             public static final int STATE_SELECT_NEVER_WEIGHT_POSITION   = 5;
-            public static final int REMOTE_VAR_POSITION                  = 6;
-            private static final int FIXED_WEIGHT_POSITION               = 7;
-            private static final int ORDER_WEIGHT_POSITION               = 8;
-            private static final int LINEARITY_WEIGHT_POSITION           = 9;
+            private static final int FIXED_WEIGHT_POSITION               = 6;
+            private static final int ORDER_WEIGHT_POSITION               = 7;
+            private static final int LINEARITY_WEIGHT_POSITION           = 8;
             
             private int[] weights = new int[NUM_WEIGHTS];
             
@@ -1427,19 +1329,8 @@ aspect IndexReduction {
         
         for (IndexReductionEq eqn : getEquations()) {
             int j = 0;
-            for (IndexReductionVar var : variableMap.values()) {
-                IndexReductionCost incideceCost;
-                if (eqn.getVariables().contains(var) && var.numDifferentiations() >= eqn.numDifferentiations()) {
-                    incideceCost = weights.get(var);
-                    if (eqn.isRemoteVar(var)) {
-                        incideceCost = incideceCost.copy();
-                        incideceCost.weights[IndexReductionCost.REMOTE_VAR_POSITION]++;
-                    }
-                } else {
-                    incideceCost = IndexReductionCost.UNMATCHED_WEIGHT;
-                }
-                cost[i][j++] = incideceCost;
-            }
+            for (IndexReductionVar var : variableMap.values())
+                cost[i][j++] = eqn.getVariables().contains(var) && var.numDifferentiations() >= eqn.numDifferentiations() ? weights.get(var) : IndexReductionCost.UNMATCHED_WEIGHT;
             i++;
         }
         
@@ -1532,7 +1423,7 @@ aspect IndexReduction {
             }
         }
         for (IndexReductionVar incidence : newIncidences) {
-            addVariable(incidence, true);
+            addVariable(incidence);
         }
     }
 

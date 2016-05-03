@@ -107,8 +107,7 @@ aspect FlatNames {
     
     inh lazy FQName InstNode.retrieveFQName();
     inh FQName FExp.retrieveFQName();
-    eq InstComponentDecl.getChild().retrieveFQName()                             = getFQName().copyAndAddFas(null);
-    eq InstArrayComponentDecl.getChild().retrieveFQName()                        = getFQName();
+    eq InstComponentDecl.getChild().retrieveFQName()                             = getFQName();
     eq InstComponentDecl.getInstModification().retrieveFQName()                  = retrieveFQName();
     eq InstReplacingRecord.getOriginalInstComponent().retrieveFQName()           = retrieveFQName();
     eq InstReplacingComposite.getOriginalInstComponent().retrieveFQName()        = retrieveFQName();
@@ -1495,15 +1494,15 @@ aspect FlatFunctionUtils {
     eq FConstructorDecl.requiresDerivative()       = false;
     eq FDestructorDecl.requiresDerivative()        = false;
     
-    syn boolean FFunctionDecl.derivativeEqualsZero() = !containsRealInputs() || !containsRealOutputs();
+    syn boolean FFunctionDecl.derivativEqualsZero() = !containsRealInputs() || !containsRealOutputs();
     
     /**
      * Determines if the compiler is able to differentiate this function declaration
      */
     syn boolean FFunctionDecl.canDifferentiate() {
-        if (derivativeFunctionUnrestricted() != null)
+        if (derivativeFunction() != null)
             return true;
-        if (derivativeEqualsZero())
+        if (derivativEqualsZero())
             return true;
         for (FStatement statement : getFAlgorithm().getFStatements())
             if (!statement.canDifferentiate())

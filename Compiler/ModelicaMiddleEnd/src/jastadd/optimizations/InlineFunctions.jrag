@@ -154,7 +154,7 @@ aspect FunctionInlining {
         private FFunctionDecl func;
         private Map<String,FExp> replMap;
         private FlatVariableMap lookupMap;
-        private Map<String,FType> typeMap;
+        private Map<String,Size> sizeMap;
         private Queue<FAbstractEquation> outerMostWorklist = null;
 
         /**
@@ -199,7 +199,7 @@ aspect FunctionInlining {
         /**
          * Check if a given function should be inlined under the current inlining level.
          */
-        public abstract boolean isInlinable(FFunctionDecl func, FFunctionCall call);
+        public abstract boolean isInlinable(FFunctionDecl func);
 
         /**
          * Prepare for inlining a new function call.
@@ -209,12 +209,12 @@ aspect FunctionInlining {
         public FlatVariableMap startFunction(FFunctionDecl f) {
             replMap = new HashMap<String,FExp>();
             lookupMap = new FlatVariableMap();
-            typeMap = new HashMap<String,FType>();
+            sizeMap = new HashMap<String,Size>();
             return lookupMap;
         }
 
-        public void setTypeOf(String name, FType type) {
-            typeMap.put(name, type);
+        public void setSizeOf(String name, Size size) {
+            sizeMap.put(name, size);
         }
 
         /**
@@ -252,8 +252,8 @@ aspect FunctionInlining {
          * 
          * @param name  the name of the variable
          */
-        public FType lookupType(String name) {
-            return typeMap.get(name);
+        public Size lookupSize(String name) {
+            return sizeMap.get(name);
         }
 
         /**
@@ -349,7 +349,7 @@ aspect FunctionInlining {
                     new FQNameFull(n, type.size().flattenFArraySubscripts(new FQNameEmpty())) : 
                     new FQNameString(n);
             FVariable var = addVar(name, variability, type, nonFixedParam);
-            setTypeOf(oldName, type);
+            setSizeOf(oldName, type.size());
             replMap.put(oldName, var.createUseExp());
             return var;
         }
@@ -400,11 +400,11 @@ aspect FunctionInlining {
         }
         
         @Override
-        public boolean isInlinable(FFunctionDecl func, FFunctionCall call) {
+        public boolean isInlinable(FFunctionDecl func) {
             if (level == OptionRegistry.Inlining.ALL)
-                return func.isInlinable(late, call);
+                return func.isInlinable(late);
             if (level == OptionRegistry.Inlining.TRIVIAL)
-                return func.isTrivialInlinable(late, call);
+                return func.isTrivialInlinable(late);
             return false;
         }
 
@@ -478,6 +478,7 @@ aspect FunctionInlining {
     }
     
     public void FArray.addInliningVarsAndEqns(AbstractFunctionInliner fi, String oldName, boolean noEvent) {
+        fi.setSizeOf(oldName, size());
         Array arr = getArray();
         for (Index i : indices())
             arr.get(i).addInliningVarsAndEqns(fi, oldName + i, noEvent);
@@ -500,6 +501,7 @@ aspect FunctionInlining {
                     
                 }
             }
+            fi.setSizeOf(oldName, size());
             String tempName = fi.nextTempVarName();
             FExp exp = type().addInliningVarsAndEqns(fi, oldName, noEvent, this, tempName);
             List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
@@ -755,7 +757,7 @@ aspect FunctionInlining {
      * Check if an expression is a call to a function that we can inline.
      */
     syn boolean FExp.isInlinableFunctionCall(AbstractFunctionInliner fi) = false;
-    eq FFunctionCall.isInlinableFunctionCall(AbstractFunctionInliner fi) = myFCallable().isInlinable(fi, this);
+    eq FFunctionCall.isInlinableFunctionCall(AbstractFunctionInliner fi) = myFCallable().isInlinable(fi);
     eq FPartialFunctionCall.isInlinableFunctionCall(AbstractFunctionInliner fi) = false;
 
 
@@ -1026,8 +1028,8 @@ aspect FunctionInlining {
     }
 
     public interface FCallable {
-        public boolean isInlinable(AbstractFunctionInliner fi, FFunctionCall call);
-        public boolean isTrivialInlinable(boolean last, FFunctionCall call);
+        public boolean isInlinable(AbstractFunctionInliner fi);
+        public boolean isTrivialInlinable(boolean last);
         public void inline(AbstractFunctionInliner fi, List<FExp> args);
     }
 
@@ -1035,10 +1037,10 @@ aspect FunctionInlining {
     /**
      * Check if we can inline this function, given the inlining level set in <code>fi</code>.
      */
-    syn boolean FFunctionDecl.isInlinable(AbstractFunctionInliner fi, FFunctionCall call) =
-        fi.isInlinable(this, call);
+    syn boolean FFunctionDecl.isInlinable(AbstractFunctionInliner fi) =
+        fi.isInlinable(this);
     
-    syn boolean FFunctionVariable.isInlinable(AbstractFunctionInliner fi, FFunctionCall call) = false;
+    syn boolean FFunctionVariable.isInlinable(AbstractFunctionInliner fi) = false;
 
     private boolean FFunctionDecl.containsExtObjArrays(ArrayList<FFunctionVariable> variables) {
         for (FFunctionVariable var : variables)
@@ -1062,7 +1064,7 @@ aspect FunctionInlining {
     /**
      * Check if we can inline this function.
      */
-    syn lazy boolean FFunctionDecl.isInlinable(boolean late, FFunctionCall call) =
+    syn lazy boolean FFunctionDecl.isInlinable(boolean late) =
         inlineAnnotation().may() && (late || !inlineAnnotation().late()) && 
         isAllInlinable(getFAlgorithm().getFStatements()) && hasInlinableIO();
     // TODO: Add warning if a function where user suggests inlining can't be inlined?
@@ -1070,21 +1072,19 @@ aspect FunctionInlining {
     /**
      * Check if this function falls under the "trivial" inlining category.
      */
-    syn lazy boolean FFunctionDecl.isTrivialInlinable(boolean late, FFunctionCall call) {
+    syn lazy boolean FFunctionDecl.isTrivialInlinable(boolean late) {
         if (!inlineAnnotation().may())
             return false;
         if (!late && inlineAnnotation().late())
             return false;
         if (inlineAnnotation().always())
-            return isInlinable(late, call);
-        if (!late && call.derivativeAnnotation().exists())
-            return false;
+            return isInlinable(late);
         if (myProtected().size() > 0)
             return false;
-        if (!hasInlinableIO())
+        if (!hasInlinableIO())  // TODO: shouldn't this be before checking always()?
             return false;
         for (FStatement stmt : getFAlgorithm().getFStatements())
-            if (!stmt.isOkTrivialInline())
+            if (!stmt.isOkTrivialInline(late))
                 return false;
         for (FFunctionVariable out : myOutputs()) {
             TrivialInlineCheck chk = out.createTrivialInlineCheck();
@@ -1095,24 +1095,24 @@ aspect FunctionInlining {
         }
         return true;
     }
-
-    syn boolean FFunctionVariable.isTrivialInlinable(boolean late, FFunctionCall call) = false;
-
-    /**
-     * Helper method to find unsupported statements in isTrivialInlinable().
-     */
-    syn boolean FStatement.isOkTrivialInline() = false;
-    eq FInitArrayStmt.isOkTrivialInline()      = true;
-    eq FAssignStmt.isOkTrivialInline()         = true;
-    eq FFunctionCallStmt.isOkTrivialInline()   = getCall().isOkTrivialInline();
-    eq FReturnStmt.isOkTrivialInline()         = isLast();
-    eq FForStmt.isOkTrivialInline()            = isOkTrivialInlineInFor();
+    
+    syn boolean FFunctionVariable.isTrivialInlinable(boolean late) = false;
 
     /**
      * Helper method to find unsupported statements in isTrivialInlinable().
      */
-    syn boolean FAbstractFunctionCall.isOkTrivialInline() = isIgnored();
-    eq FFunctionCall.isOkTrivialInline()                  = true;
+    syn boolean FStatement.isOkTrivialInline(boolean last) = false;
+    eq FInitArrayStmt.isOkTrivialInline(boolean last)      = true;
+    eq FAssignStmt.isOkTrivialInline(boolean last)         = true;
+    eq FFunctionCallStmt.isOkTrivialInline(boolean last)   = getCall().isOkTrivialInline(last);
+    eq FReturnStmt.isOkTrivialInline(boolean last)         = isLast();
+    eq FForStmt.isOkTrivialInline(boolean last)            = isOkTrivialInlineInFor();
+
+    /**
+     * Helper method to find unsupported statements in isTrivialInlinable().
+     */
+    syn boolean FAbstractFunctionCall.isOkTrivialInline(boolean last) = isIgnored();
+    eq FFunctionCall.isOkTrivialInline(boolean last)                  = myFCallable().isTrivialInlinable(last);
 
     /**
      * Helper method to unsupported statements in isTrivialInlinable().
@@ -1172,10 +1172,9 @@ aspect FunctionInlining {
         public static class KnownArray extends Scalar {
             // TODO: check that each cell is assigned?
             protected int size;
-            public KnownArray(int nElems)           { size = nElems; };
-            protected void check(FIdUse use, int i) { n += use.isArray() ? size : 1; }
-            protected void checkAll(FIdUse use)     { n += size; }
-            public boolean isOk()                   { return n == size; }
+            public KnownArray(int nElems)       { size = nElems; };
+            protected void checkAll(FIdUse use) { n += size; }
+            public boolean isOk()               { return n == size; }
         }
 
         public static class UnknownArray extends Scalar {
@@ -1285,19 +1284,17 @@ aspect FunctionInlining {
         tempLookupMap = fi.startFunction(this);
         flushAllRecursive();
         
-        int i = 0;
-        ArrayList<FFunctionVariable> inp = myInputs();
-        for (FFunctionVariable var : myInputs()) {
-            FExp arg = args.getChild(i++);
-            fi.setTypeOf(var.name(), arg.type());
-            arg.addInliningVarsAndEqns(fi, var.name(), false);
+        for (FFunctionVariable var : getFFunctionVariables())
             var.functionInliner = fi;
-        }
         
-        for (FFunctionVariable var : myNonInputs()) {
-            fi.setTypeOf(var.name(), var.getType().copyAndReplaceReferences(fi, getDummyExp()));
-            var.functionInliner = fi;
-        }
+        ArrayList<FFunctionVariable> inp = myInputs();
+        for (int i = 0; i < inp.size(); i++) 
+            args.getChild(i).addInliningVarsAndEqns(fi, inp.get(i).name(), false);
+        
+        ArrayList<FFunctionVariable> outp = myOutputs();
+        for (FFunctionVariable fv : outp) 
+            if (fv.isArray())
+                fi.setSizeOf(fv.name(), fv.size().copyAndReplaceReferences(fi, getDummyExp()));
         
         for (FStatement stmt : getFAlgorithm().getFStatements()) 
             stmt.inline(fi);
@@ -1355,7 +1352,7 @@ aspect FunctionInlining {
 
     public void FInitArrayStmt.inline(AbstractFunctionInliner fi) {
         FAbstractVariable fv = getFIdUseExp().myFV();
-        fi.setTypeOf(fv.name(), fv.type().copyAndReplaceReferences(fi, getFIdUseExp()));
+        fi.setSizeOf(fv.name(), fv.size().copyAndReplaceReferences(fi, getFIdUseExp()));
         fv.flushCache();
     }
 
@@ -1528,11 +1525,16 @@ aspect FunctionInlining {
     }
 
     public FExp FSizeExp.replaceReferences(AbstractFunctionInliner fi) {
-        FExp res = getFExp().size().createFExp(dimension());
-        replaceMe(res);
-        return res;
+        if (getFExp() instanceof FIdUseExp) {
+            String name = ((FIdUseExp) getFExp()).getFIdUse().name();
+            FExp exp = fi.lookupSize(name).createFExp(dimension());
+            replaceMe(exp);
+            return exp;
+        } else {
+            return super.replaceReferences(fi);
+        }
     }
-    
+
     // TODO: Should probably be removed after simplification step has been added
     public FExp FIfExp.replaceReferences(AbstractFunctionInliner fi) {
         super.replaceReferences(fi);
@@ -1675,7 +1677,7 @@ aspect FunctionInlining {
         Size[] sizes = new Size[old.length];
         for (int i = 0; i < old.length; i++)
             if (old[i] != null)
-                sizes[i] = old[i].replaceReferences(fi, this);
+                sizes[i] = old[i].copyAndReplaceReferences(fi, this);
         setSizes(sizes);
         return this;
     }
@@ -1720,41 +1722,14 @@ aspect FunctionInlining {
     }
 
     /**
-     * Make a copy of this type with all variable references replaced according to the 
+     * Make a copy of this size with all variable references replaced according to the 
      * function inliner.
      */
-    public FType FType.copyAndReplaceReferences(AbstractFunctionInliner fi, FExp context) {
-        FType res = fullCopy();
-        res.replaceReferences(fi, context);
-        return res;
+    public Size Size.copyAndReplaceReferences(AbstractFunctionInliner fi, FExp context) {
+        return clone();
     }
-    
-    public void FType.replaceReferences(AbstractFunctionInliner fi, FExp context) {
-        setSize(getSize().replaceReferences(fi, context));
-    }
-    
-    public void FRecordType.replaceReferences(AbstractFunctionInliner fi, FExp context) {
-        super.replaceReferences(fi, context);
-        for (FRecordComponentType frct : getComponents()) {
-            frct.getFType().replaceReferences(fi, context);
-        }
-    }
-    
-    public void FFunctionType.replaceReferences(AbstractFunctionInliner fi, FExp context) {
-        super.replaceReferences(fi, context);
-        for (FRecordComponentType frct : getInputs()) {
-            frct.getFType().replaceReferences(fi, context);
-        }
-        for (FRecordComponentType frct : getOutputs()) {
-            frct.getFType().replaceReferences(fi, context);
-        }
-    }
-    
-    public Size Size.replaceReferences(AbstractFunctionInliner fi, FExp context) {
-        return this;
-    }
-    
-    public MutableSize MutableSize.replaceReferences(AbstractFunctionInliner fi, FExp context) {
+
+    public MutableSize MutableSize.copyAndReplaceReferences(AbstractFunctionInliner fi, FExp context) {
         MutableSize res = clone();
         for (int i = 0; i < exps.length; i++)
             if (res.exps[i] != null)
@@ -1772,7 +1747,7 @@ aspect FunctionInlining {
      * We want to be able to scalarize all expressions (except size exps) fully during inlining.
      */
     refine Scalarization eq FFunctionCallLeft.getFExp().canAcceptArray() = 
-        refined() && !duringFunctionInlining();
+        Scalarization.FFunctionCallLeft.getFExp().canAcceptArray() && !duringFunctionInlining();
     refine Scalarization eq FFunctionCall.getArg(int i).canAcceptArray()      = 
         refined() && (!duringFunctionInlining() || getArg(i).isFFunctionCall());
     refine Scalarization eq FFunctionCall.getArg(int i).wantsRecordCon()      = 
@@ -1788,11 +1763,11 @@ aspect FunctionInlining {
     /*
      * Use the information we have on unknown sizes during inlining.
      */
-    refine FlatTypeAnalysis eq FFunctionVariable.type() {
-        FType res = null;
-        if (functionInliner != null) {
-            res = functionInliner.lookupType(name());
-        }
-        return res == null ? refined() : res;
+    refine Arrays eq FFunctionArray.size() {
+        Size s = null;
+        if (functionInliner != null)
+            s = functionInliner.lookupSize(name());
+        return (s == null) ? Arrays.FFunctionArray.size() : s;
     }
+
 }

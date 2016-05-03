@@ -633,19 +633,17 @@ parameter equation
 public
  function VariabilityPropagationTests.FunctionCallEquation2.f
   input Real i1;
-  output Real[:] c;
+  output Real[2] c;
  algorithm
-  init c as Real[2];
   c[1] := i1;
   c[2] := 2 * i1;
   return;
  end VariabilityPropagationTests.FunctionCallEquation2.f;
-
+ 
  function VariabilityPropagationTests.FunctionCallEquation2.e
   input Real i1;
-  output Real[:] c;
+  output Real[2] c;
  algorithm
-  init c as Real[2];
   external \"C\" e(i1, c, size(c, 1));
   return;
  end VariabilityPropagationTests.FunctionCallEquation2.e;
@@ -745,12 +743,12 @@ parameter equation
 
 public
  function Modelica.Math.Matrices.solve
-  input Real[:,:] A;
-  input Real[:] b;
+  input Real[:, size(A, 1)] A;
+  input Real[size(A, 1)] b;
   output Real[:] x;
   Integer info;
  algorithm
-  init x as Real[size(b, 1)];
+  size(x) := {size(b, 1)};
   (x, info) := Modelica.Math.Matrices.LAPACK.dgesv_vec(A, b);
   assert(info == 0, \"Solving a linear system of equations with function
 \\\"Matrices.solve\\\" is not possible, because the system has either
@@ -759,8 +757,8 @@ no or infinitely many solutions (A is singular).\");
  end Modelica.Math.Matrices.solve;
 
  function Modelica.Math.Matrices.LAPACK.dgesv_vec
-  input Real[:,:] A;
-  input Real[:] b;
+  input Real[:, size(A, 1)] A;
+  input Real[size(A, 1)] b;
   output Real[:] x;
   output Integer info;
   Real[:,:] Awork;
@@ -768,19 +766,19 @@ no or infinitely many solutions (A is singular).\");
   Integer ldb;
   Integer[:] ipiv;
  algorithm
-  init x as Real[size(A, 1)];
-  for i1 in 1:size(b, 1) loop
+  size(x) := {size(A, 1)};
+  size(Awork) := {size(A, 1), size(A, 1)};
+  size(ipiv) := {size(A, 1)};
+  for i1 in 1:size(A, 1) loop
    x[i1] := b[i1];
   end for;
-  init Awork as Real[size(A, 1), size(A, 1)];
   for i1 in 1:size(A, 1) loop
-   for i2 in 1:size(A, 2) loop
+   for i2 in 1:size(A, 1) loop
     Awork[i1,i2] := A[i1,i2];
    end for;
   end for;
   lda := max(1, size(A, 1));
   ldb := max(1, size(b, 1));
-  init ipiv as Integer[size(A, 1)];
   external \"FORTRAN 77\" dgesv(size(A, 1), 1, Awork, lda, ipiv, x, ldb, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dgesv_vec;
@@ -1112,9 +1110,8 @@ public
  function VariabilityPropagationTests.PartiallyKnownComposite1.f
   input Real x1;
   input Real x2;
-  output Real[:] y;
+  output Real[2] y;
  algorithm
-  init y as Real[2];
   y[1] := x1;
   y[2] := x2;
   return;
@@ -1199,9 +1196,8 @@ public
  function VariabilityPropagationTests.PartiallyKnownComposite3.f
   input Real x1;
   input Real x2;
-  output Real[:] y;
+  output Real[2] y;
  algorithm
-  init y as Real[2];
   y[1] := x1;
   y[2] := x2;
   return;
@@ -1320,7 +1316,7 @@ public
   input Integer n;
   output Real[:] y;
  algorithm
-  init y as Real[size(x, 1)];
+  size(y) := {size(x, 1)};
   for i1 in 1:size(x, 1) loop
    y[i1] := x[i1];
   end for;
@@ -1655,9 +1651,8 @@ parameter equation
 
 public
  function VariabilityPropagationTests.ConstantStartFunc1.f
-  output Real[:] o;
+  output Real[2] o;
  algorithm
-  init o as Real[2];
   o[1] := 1;
   o[2] := 2;
   return;
@@ -2114,9 +2109,8 @@ parameter equation
 
 public
  function VariabilityPropagationTests.EvalFail2.f
-  output Real[:] y;
+  output Real[1] y;
  algorithm
-  init y as Real[1];
   y[1] := 1;
   assert(false, \"nope\");
   return;
@@ -2147,56 +2141,5 @@ parameter equation
 end VariabilityPropagationTests.AlgebraicLoopParameter1;
 ")})));
 end AlgebraicLoopParameter1;
-
-model AlgorithmFolding1
-    function f
-        input Real x;
-        output Real y1 = x;
-        output Real y2 = x;
-        algorithm
-    end f;
-    Real y;
-    Real x = 1;
-    Real z;
-    parameter Real p;
-    Real a = p;
-algorithm
-    y := x;
-    (y, ) := f(x);
-    x := z + pre(p);
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AlgorithmFolding1",
-            description="Folding in algorithm",
-            flatModel="
-fclass VariabilityPropagationTests.AlgorithmFolding1
- Real y;
- constant Real x = 1;
- Real z;
- parameter Real p;
- parameter Real a;
-parameter equation
- a = p;
-algorithm
- y := 1.0;
- (y, ) := VariabilityPropagationTests.AlgorithmFolding1.f(1.0);
- x := z + p;
-
-public
- function VariabilityPropagationTests.AlgorithmFolding1.f
-  input Real x;
-  output Real y1;
-  output Real y2;
- algorithm
-  y1 := x;
-  y2 := x;
-  return;
- end VariabilityPropagationTests.AlgorithmFolding1.f;
-
-end VariabilityPropagationTests.AlgorithmFolding1;
-")})));
-end AlgorithmFolding1;
-
 
 end VariabilityPropagationTests;

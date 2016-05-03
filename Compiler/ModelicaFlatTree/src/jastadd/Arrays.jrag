@@ -529,15 +529,13 @@ aspect Arrays {
 	 */		
 	syn int FQName.accessNdims() = 0;
 	eq FQNameFull.accessNdims() {
-        int res = 0;
-        for (FQNamePart fqnp : getFQNameParts()) {
-            res = res + fqnp.accessNdims();
-        }
-        return res;
-    }
-    
-    syn int FQNamePart.accessNdims() = 0;
-    eq FQNamePartArray.accessNdims() = getFArraySubscripts().accessNdims();
+		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
+		if (last.hasFArraySubscripts()) {
+			return last.getFArraySubscripts().accessNdims(); 
+		} else {
+			return 0;
+		}
+	}
 
 	
 	// Array sizes
@@ -844,14 +842,14 @@ aspect Arrays {
 	
 	eq FCross.size()     = new Size(3);
 	eq FSkew.size()      = new Size(3, 3);
-
-    eq FOuterProduct.size() {
-        MutableSize s = new MutableSize(2);
-        s.append(getX().size(), 0);
-        s.append(getY().size(), 0);
-        return s;
-    }
-
+	
+	eq FOuterProduct.size() {
+		MutableSize s = new MutableSize(2);
+		s.append(getX().size());
+		s.append(getY().size());
+		return s;
+	}
+	
 	eq FIdentity.size() {
 		MutableSize s = new MutableSize(2);
 		s.append(getFExp());
@@ -1067,7 +1065,7 @@ aspect Arrays {
 	 */	
 	syn lazy Size FAbstractVariable.size() = Size.SCALAR;
 	eq FVariable.size()      = isScalarized()? Size.SCALAR: getFQName().size();
-	eq FFunctionArray.size() = type().size();
+	eq FFunctionArray.size() = getType().size();
 		
 	/**
 	 * Get the array sizes of the loop index expression. 
@@ -1094,12 +1092,7 @@ aspect Arrays {
 	 * @return True if array dimension > 0 else false
 	 */
 	syn boolean FExp.isArray() = ndims()>0;
-
-    /**
-     * Check if an expression is an array expression.
-     */
-    syn boolean FIdUse.isArray() = ndims() > 0;
-
+	
 	/**
 	 * check if an access is an array expression.
 	 * 
@@ -1570,10 +1563,19 @@ aspect Arrays {
             return new ScalarAsArray(new FSubscriptedExp(old.buildFArray(), getFArraySubscripts().fullCopy()));
         }
         
-        NonConsecutiveIndices expIs = NonConsecutiveIndices.expIndices(getFArraySubscripts());
-        NonConsecutiveIndices fasIs = NonConsecutiveIndices.fasIndices(getFArraySubscripts());
-        Array arr = new Array(indices());
-        Iterator<Index> it = arr.indices().iterator();
+        NonConsecutiveIndices ind = NonConsecutiveIndices.createFromFas(getFArraySubscripts());
+        Array arr = new Array(ind);
+        
+        if (indexVariability().indexParameterOrLess()) {
+            for (Index i : ind) {
+                arr.set(i, old.get(ind.translate(i)));
+            }
+            return arr;
+        }
+        
+        NonConsecutiveIndices expIs = ind.expIndices(getFArraySubscripts());
+        NonConsecutiveIndices fasIs = ind.fasIndices(getFArraySubscripts());
+        Iterator<Index> it = ind.iterator();
         
         for (Index i : expIs) {
             FExp e;
@@ -2249,6 +2251,13 @@ aspect Arrays {
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
 	syn Indices InstAccess.indices() = Indices.createFromFas(qualifiedAllFArraySubscripts());
+		
+	/**
+	 * Get the set of all array indices of an subscripted array expression. 
+	 * 
+	 * @return An Indices object containing all indices in each array dimension.
+	 */
+	syn Indices FSubscriptedExp.indices() = getFArraySubscripts().indices();
 
 	/**
 	 * Get the set of all array indices of an instance primitive component. 
@@ -2424,7 +2433,7 @@ aspect ArrayHelpers {
 		 * Get length in the <code>i</code>th dimension.
 		 */
 		public int get(int i) {
-			return has(i) ? size[i] : UNKNOWN;
+			return (i >= 0 && i < size.length) ? size[i] : UNKNOWN;
 		}
 		
 		/**
@@ -2438,7 +2447,7 @@ aspect ArrayHelpers {
 		 * Check if this size has an <code>i</code>th dimension.
 		 */
 		public boolean has(int i) {
-			return i >= 0 && i < size.length;
+			return size.length > i;
 		}
 		
 		/**
@@ -2511,7 +2520,7 @@ aspect ArrayHelpers {
          * Check if length in dimension d is unknown.
          */
         public boolean isUnknown(int d) {
-            return !has(d) || size[d] == UNKNOWN;
+            return size[d] == UNKNOWN;
         }
         
 		/**
@@ -3065,23 +3074,18 @@ aspect ArrayHelpers {
 			size[d] = s;
 			exps[d] = (s == UNKNOWN) ? e : null;
 		}
-
-        /**
-         * Sets length <code>d1</code> to the length of dimension <code>d2</code> 
-         *        of <code>s</code>.
-         * 
-         * May overwrite lengths set with <code>set()</code>.
-         */
-        public void set(int d1, Size s, int d2) {
-            if (d2 >= s.size.length) {
-                size[d1] = -1;
-                exps[d1] = null;
-            } else {
-                size[d1] = s.size[d2];
-                exps[d1] = (s instanceof MutableSize) ? ((MutableSize) s).exps[d2] : null;
-            }
-        }
-
+		
+		/**
+		 * Sets length <code>d1</code> to the length of dimension <code>d2</code> 
+		 *        of <code>s</code>.
+		 * 
+		 * May overwrite lengths set with <code>set()</code>.
+		 */
+		public void set(int d1, Size s, int d2) {
+			size[d1] = s.size[d2];
+			exps[d1] = (s instanceof MutableSize) ? ((MutableSize) s).exps[d2] : null;
+		}
+		
 		/**
 		 * Make sure dimension i of size is ready to use.
 		 */
@@ -4485,15 +4489,15 @@ aspect ArrayHelpers {
          * enabled and replaced using the surrounding size for the corresponding
          * dimension in fas. 
          */
-        public static NonConsecutiveIndices expIndices(FArraySubscripts fas) {
+        public NonConsecutiveIndices expIndices(FArraySubscripts fas) {
             ArrayList<int[]> newInd = new ArrayList<int[]>();
-            boolean[] newTrim = new boolean[fas.getNumFSubscript()];
-            for (int k = 0; k < newTrim.length; k++) {
+            boolean[] newTrim = new boolean[indices.size()];
+            int l = 0;
+            for (int k = 0; k < indices.size(); k++) {
                 FSubscript fs = fas.getFSubscript(k);
                 if (fs.variability().indexParameterOrLess()) {
-                    int[] i = fs.myIndices();
-                    newInd.add(i);
-                    newTrim[k] = fs.ndims() == 0;
+                    newInd.add(indices.get(k));
+                    newTrim[k] = trim[k];
                 } else {
                     newInd.add(ASTNode.range(fs.mySize().get(0)));
                     newTrim[k] = true;
@@ -4507,10 +4511,11 @@ aspect ArrayHelpers {
          * enabled and replaced using subscript size for the corresponding
          * dimension in fas. Earlier active dimensions are disabled.
          */
-        public static NonConsecutiveIndices fasIndices(FArraySubscripts fas) {
+        public NonConsecutiveIndices fasIndices(FArraySubscripts fas) {
             ArrayList<int[]> newInd = new ArrayList<int[]>();
-            boolean[] newTrim = new boolean[fas.getNumFSubscript()];
-            for (int k = 0; k < newTrim.length; k++) {
+            boolean[] newTrim = new boolean[indices.size()];
+            int l = 0;
+            for (int k = 0; k < indices.size(); k++) {
                 FSubscript fs = fas.getFSubscript(k);
                 if (fs.ndims() == 0 || fs.variability().indexParameterOrLess()) {
                     newInd.add(new int[0]);

@@ -569,7 +569,6 @@ Error at line 555, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/Operat
     end OperatorOverload10;
 
 
-// TODO: This is wrong! Function OperatorRecordTests.Cplx.'+' is not present in flat model.
     model OperatorOverload11
         Cplx[2,2] c1 = { { Cplx(1, 2), Cplx(3, 4) }, { Cplx(5, 6), Cplx(7, 8) } };
         Cplx[2,2] c2 = { { Cplx(11, 12), Cplx(13, 14) }, { Cplx(15, 16), Cplx(17, 18) } };
@@ -788,7 +787,7 @@ public
 
  function OperatorRecordTests.Cplx.'*'.prod
   input OperatorRecordTests.Cplx[:] a;
-  input OperatorRecordTests.Cplx[:] b;
+  input OperatorRecordTests.Cplx[size(a, 1)] b;
   output OperatorRecordTests.Cplx c;
  algorithm
   c := Complex.'constructor'.fromReal(0, 0);
@@ -2695,7 +2694,6 @@ end OperatorRecordTests.OperatorLimitations24;
     end OperatorLimitations24;
 
 
-// TODO: This is wrong! Function OperatorRecordTests.OperatorLimitations25.A.'0' is not present in flat model.
     model OperatorLimitations25
         operator record A
             Real x;
@@ -3209,9 +3207,8 @@ equation
 public
  function OperatorRecordTests.BuildArrayInInst1.f
   input Integer n;
-  output OperatorRecordTests.Cplx[:] y;
+  output OperatorRecordTests.Cplx[n] y;
  algorithm
-  init y as OperatorRecordTests.Cplx[n];
   y[:] := {OperatorRecordTests.Cplx.'constructor'(i, 0) for i in 1:n};
   return;
  end OperatorRecordTests.BuildArrayInInst1.f;

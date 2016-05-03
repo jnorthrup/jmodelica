@@ -1523,14 +1523,6 @@ aspect FlatAPI {
     
     */
     
-    /**
-     * Utility function that returns true if this equation on the form zero
-     * equal to zero.
-     */
-    syn boolean FAbstractEquation.isZeroEquation() = false;
-    eq FEquation.isZeroEquation() = getLeft().isLiteralZero() && getRight().isLiteralZero();
-    
-    
     inh Set<FVariable> FExp.boundParameters();
     eq FVariable.getBindingExp().boundParameters()       = Collections.singleton(this);
     eq Root.getChild().boundParameters()                 = Collections.emptySet();
@@ -2161,18 +2153,6 @@ aspect ReferencedVariables {
         return res;
     }
 
-    /***
-     * DANGER! Use this method and its results with caution. It will probably
-     * not work before saclarization but should be safe afterwards!
-     */
-    syn Set<String> FAbstractEquation.referencedVariablesAsStrings() {
-        Set<FIdUseExp> exps = new LinkedHashSet<FIdUseExp>();
-        Set<String> res = new LinkedHashSet<String>();
-        for (FIdUseExp exp : exps) {
-            res.add(exp.name());
-        }
-        return res;
-    }
     public static Set<FVariable> ASTNode.lookupFVariablesInSet(Set<FIdUseExp> set) {
         Set<FVariable> res = new LinkedHashSet<FVariable>();
         for (FIdUseExp use : set)
@@ -2428,29 +2408,14 @@ aspect Attributes {
     syn FExp    FVariable.attributeExp(String name)    = attributeExp(findAttribute(name));
     syn String  FVariable.attributeString(String name) = attributeCValueString(name).stringValue();
     
-    syn FExp FRecordVariable.findHierarchicalAttributeValue(FQName name, int n, String attrName) {
-        FAttribute attr = findHierarchicalAttribute(name, n);
-        if (attr != null) {
-            attr = attr.findAttribute(attrName);
-            if (attr != null) {
-                return attr.getValue();
-            }
-        }
-        return null;
-    }
+    syn FAttribute FAbstractVariable.findHierarchicalAttribute(FQName name) = null;
+    eq FVariable.findHierarchicalAttribute(FQName name) = name.findHierarchicalAttribute(getFQName(), this);
     
-    syn FAttribute FAbstractVariable.findHierarchicalAttribute(FQName name) =
-            findHierarchicalAttribute(name, name.numParts());
-    
-    syn FAttribute FAbstractVariable.findHierarchicalAttribute(FQName name, int n) = null;
-    eq FVariable.findHierarchicalAttribute(FQName name, int n) =
-            name.findHierarchicalAttribute(getFQName(), this, n);
-    
-    syn FAttribute FQName.findHierarchicalAttribute(FQName prefix, FVariable var, int n) = null;
-    eq FQNameString.findHierarchicalAttribute(FQName prefix, FVariable var, int n)       =
-            var.findAttribute(getName());
-    eq FQNameFull.findHierarchicalAttribute(FQName prefix, FVariable var, int n) {
+    syn FAttribute FQName.findHierarchicalAttribute(FQName prefix, FVariable var) = null;
+    eq FQNameString.findHierarchicalAttribute(FQName prefix, FVariable var)       = var.findAttribute(getName());
+    eq FQNameFull.findHierarchicalAttribute(FQName prefix, FVariable var) {
         int i = prefix.numMatchingParts(this);
+        int n = getNumFQNamePart();
         if (i >= n)
             return null;
         FAttribute attr = var.findAttribute(getFQNamePart(i).getName());
@@ -3214,8 +3179,7 @@ aspect LinearFVariables {
     eq FFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;
     eq FMathematicalFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;
     eq FAbstractFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;
-    eq FIfExp.getIfExp().isLinear(Set<FVariable> vars) = !isWhen() && (!inNoEventExp() || getIfExp().isIndependent(vars)); 
-    eq FNoEventExp.getFExp().isLinear(Set<FVariable> vars) = isLinear(vars);
+    eq FIfExp.getIfExp().isLinear(Set<FVariable> vars) = !isWhen();
     
     syn boolean FExp.isIndependent(Set<FVariable> set) {
         for (FExp e : childFExps()) {
@@ -3864,12 +3828,33 @@ aspect FlatExternalFunctionAPI {
         }
         
         if (includeDir != null) 
-            includeDir = n.resolve(includeDir);
+            includeDir = n.uri2path(includeDir);
         if (libraryDir != null) {
-            libraryDir = n.resolve(libraryDir);
+            libraryDir = n.uri2path(libraryDir);
         }
     }
-
+    
+    /**
+     * Converts an URI to a file-system path.
+     * 
+     * Only modelica:// and file:// URIs are supported.
+     * 
+     * @param str  the string to interpret as an URI
+     */
+    public String InstExternal.uri2path(String str) {
+        try {
+            URI uri = new URI(str);
+            if (uri.getScheme().equals("file")) {
+                return uri.getPath();
+            } else if (uri.getScheme().equals("modelica")) {
+                String pack = new File(packagePath(uri.getAuthority())).getAbsolutePath();
+                return pack != null ? pack + uri.getPath() : null;
+            }
+        } catch (URISyntaxException e) {
+        }
+        return null;
+    }
+    
 }
 
 aspect Sparsity {

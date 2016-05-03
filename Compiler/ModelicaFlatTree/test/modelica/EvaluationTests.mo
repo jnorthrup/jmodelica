@@ -25,12 +25,13 @@ model VectorMul
 	parameter Real x = z * y;
 	Real q = x;
 
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="VectorMul",
-            description="Constant evaluation of vector multiplication",
-            variables="x",
-            values="10.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="VectorMul",
+			description="Constant evaluation of vector multiplication",
+			variables="x",
+			values="
+10.0"
  )})));
 end VectorMul;
 
@@ -44,12 +45,13 @@ model FunctionEval1
 	
 	parameter Real x = f(1.0);
 
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="FunctionEval1",
-            description="Constant evaluation of functions: basic test",
-            variables="x",
-            values="3.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval1",
+			description="Constant evaluation of functions: basic test",
+			variables="x",
+			values="
+3.0"
  )})));
 end FunctionEval1;
 
@@ -79,11 +81,11 @@ model FunctionEval2
 
 	parameter Real x[6] = { fib(1), fib(2), fib(3), fib(4), fib(5), fib(6) };
 
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="FunctionEval2",
-            description="Constant evaluation of functions: while and if",
-            variables="
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval2",
+			description="Constant evaluation of functions: while and if",
+			variables="
 x[1]
 x[2]
 x[3]
@@ -91,7 +93,7 @@ x[4]
 x[5]
 x[6]
 ",
-            values="
+         values="
 1.0
 1.0
 2.0
@@ -117,12 +119,13 @@ model FunctionEval3
 	
 	parameter Real x = f({1,2,3});
 
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="FunctionEval3",
-            description="Constant evaluation of functions: array inputs and for loops",
-            variables="x",
-            values="48.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval3",
+			description="Constant evaluation of functions: array inputs and for loops",
+			variables="x",
+			values="
+48.0"
  )})));
 end FunctionEval3;
 
@@ -142,12 +145,13 @@ model FunctionEval4
 	
 	parameter Real x = f({1,2,3});
 
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="FunctionEval4",
-            description="Constant evaluation of functions: unknown array sizes",
-            variables="x",
-            values="48.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval4",
+			description="Constant evaluation of functions: unknown array sizes",
+			variables="x",
+			values="
+48.0"
  )})));
 end FunctionEval4;
 
@@ -165,12 +169,13 @@ model FunctionEval5
 	
 	parameter Real x = f({1,2,3});
 
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="FunctionEval5",
-            description="Constant evaluation of functions: using input as for index expression",
-            variables="x",
-            values="6.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval5",
+			description="Constant evaluation of functions: using input as for index expression",
+			variables="x",
+			values="
+6.0"
  )})));
 end FunctionEval5;
 
@@ -186,15 +191,15 @@ model FunctionEval6
 		o := i;
 	end f;
 
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="FunctionEval6",
-            description="Constant evaluation of functions: array output",
-            variables="
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval6",
+			description="Constant evaluation of functions: array output",
+			variables="
 x[1]
 x[2]
 ",
-            values="
+         values="
 1.0
 2.0
 ")})));
@@ -212,15 +217,15 @@ model FunctionEval7
 		o := i;
 	end f;
 
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="FunctionEval7",
-            description="Constant evaluation of functions: array output, unknown size",
-            variables="
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval7",
+			description="Constant evaluation of functions: array output, unknown size",
+			variables="
 x[1]
 x[2]
 ",
-            values="
+         values="
 1.0
 2.0
 ")})));
@@ -236,15 +241,15 @@ model FunctionEval8
 	
 	parameter Real x[2] = { f(i) for i in 1:2 };
 
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="FunctionEval8",
-            description="Constant evaluation and variability of iter exp containing function call",
-            variables="
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval8",
+			description="Constant evaluation and variability of iter exp containing function call",
+			variables="
 x[1]
 x[2]
 ",
-            values="
+         values="
 2.0
 4.0
 ")})));
@@ -268,12 +273,13 @@ model FunctionEval9
 
 	parameter Real x = f(5);
 
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="FunctionEval9",
-            description="Constant evaluation of functions: while loops (flat tree, independent param)",
-            variables="x",
-            values="120.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval9",
+			description="Constant evaluation of functions: while loops (flat tree, independent param)",
+			variables="x",
+			values="
+120.0"
  )})));
 end FunctionEval9;
 
@@ -296,11 +302,11 @@ model FunctionEval10
 	constant Real x = f(5);
 	Real y = x;
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="FunctionEval10",
-            description="Constant evaluation of functions: while loops (instance tree)",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="FunctionEval10",
+			description="Constant evaluation of functions: while loops (instance tree)",
+			flatModel="
 fclass EvaluationTests.FunctionEval10
  constant Real x = 120.0;
  Real y = 120.0;
@@ -343,12 +349,13 @@ model FunctionEval11
 	parameter Real x = f(y);
 	parameter Real y = 5;
 
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="FunctionEval11",
-            description="Constant evaluation of functions: while loops (flat tree, dependent param)",
-            variables="x",
-            values="120.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval11",
+			description="Constant evaluation of functions: while loops (flat tree, dependent param)",
+			variables="x",
+			values="
+120.0"
  )})));
 end FunctionEval11;
 
@@ -376,11 +383,11 @@ model FunctionEval12
 	constant Real x = f2(f1(2));
 	Real y = x;
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="FunctionEval12",
-            description="Constant evaluation of functions: records",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="FunctionEval12",
+			description="Constant evaluation of functions: records",
+			flatModel="
 fclass EvaluationTests.FunctionEval12
  constant Real x = 6.0;
  Real y = 6.0;
@@ -428,11 +435,11 @@ model FunctionEval13
 	constant R x = f(2);
 	R y = x;
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="FunctionEval13",
-            description="Constant evaluation of functions: records",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="FunctionEval13",
+			description="Constant evaluation of functions: records",
+			flatModel="
 fclass EvaluationTests.FunctionEval13
  constant EvaluationTests.FunctionEval13.R x = EvaluationTests.FunctionEval13.R(2, 4.0);
  EvaluationTests.FunctionEval13.R y = EvaluationTests.FunctionEval13.R(2, 4.0);
@@ -472,11 +479,11 @@ model FunctionEval14
 	constant Real x = f(R(1, 2));
 	Real y = x;
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="FunctionEval14",
-            description="Constant evaluation of functions: records",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="FunctionEval14",
+			description="Constant evaluation of functions: records",
+			flatModel="
 fclass EvaluationTests.FunctionEval14
  constant Real x = 3.0;
  Real y = 3.0;
@@ -534,18 +541,18 @@ model FunctionEval15
 	constant Real x = f1(f2());
 	Real y = x;
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="FunctionEval15",
-            description="",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="FunctionEval15",
+			description="",
+			flatModel="
 fclass EvaluationTests.FunctionEval15
  constant Real x = 50.0;
  Real y = 50.0;
 
 public
  function EvaluationTests.FunctionEval15.f1
-  input EvaluationTests.FunctionEval15.R2[:] a;
+  input EvaluationTests.FunctionEval15.R2[2] a;
   output Real x;
  algorithm
   x := sum(a[1:2].a[1:2].a[1:2]) + sum(a[1:2].a[1:2].b[1:3]) + sum(a[1:2].b[1:3].a[1:2]) + sum(a[1:2].b[1:3].b[1:3]);
@@ -553,9 +560,8 @@ public
  end EvaluationTests.FunctionEval15.f1;
 
  function EvaluationTests.FunctionEval15.f2
-  output EvaluationTests.FunctionEval15.R2[:] x;
+  output EvaluationTests.FunctionEval15.R2[2] x;
  algorithm
-  init x as EvaluationTests.FunctionEval15.R2[2];
   x[1:2].a[1:2].a[1:2] := ones(2, 2, 2);
   for i in 1:2 loop
    for j in 1:2 loop
@@ -606,12 +612,13 @@ model FunctionEval16
 	
 	parameter Real x = f2(f1(2));
 
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="FunctionEval16",
-            description="Constant evaluation of functions: records",
-            variables="x",
-            values="6.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval16",
+			description="Constant evaluation of functions: records",
+			variables="x",
+			values="
+6.0"
  )})));
 end FunctionEval16;
 
@@ -631,15 +638,15 @@ model FunctionEval17
 	
 	parameter R x = f(2);
 
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="FunctionEval17",
-            description="Constant evaluation of functions: records",
-            variables="
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval17",
+			description="Constant evaluation of functions: records",
+			variables="
 x.a
 x.b
 ",
-            values="
+         values="
 2.0
 4.0
 ")})));
@@ -661,12 +668,13 @@ model FunctionEval18
 	
 	parameter Real x = f(R(1, 2));
 
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="FunctionEval18",
-            description="Constant evaluation of functions: records",
-            variables="x",
-            values="3.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval18",
+			description="Constant evaluation of functions: records",
+			variables="x",
+			values="
+3.0"
  )})));
 end FunctionEval18;
 
@@ -704,12 +712,13 @@ model FunctionEval19
 	
 	parameter Real x = f1(f2());
 
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="FunctionEval19",
-            description="Constant evaluation of functions: arrays of records",
-            variables="x",
-            values="50.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval19",
+			description="Constant evaluation of functions: arrays of records",
+			variables="x",
+			values="
+50.0"
  )})));
 end FunctionEval19;
 
@@ -725,15 +734,15 @@ model FunctionEval20
 	parameter Real a = f({1, 2});
 	parameter Real b = f({1, 2, 3});
 
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="FunctionEval20",
-            description="",
-            variables="
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval20",
+			description="",
+			variables="
 a
 b
 ",
-            values="
+         values="
 5.0
 14.0
 ")})));
@@ -751,12 +760,13 @@ model FunctionEval21
 	
 	parameter Real x = f(1);
 
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="FunctionEval21",
-            description="Evaluation of function containing assert()",
-            variables="x",
-            values="1.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval21",
+			description="Evaluation of function containing assert()",
+			variables="x",
+			values="
+1.0"
  )})));
 end FunctionEval21;
 
@@ -786,12 +796,13 @@ model FunctionEval22
 	
     parameter Real x = f1(1,2);
 
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="FunctionEval22",
-            description="Test evaluation of function containing function call statement using more than one output",
-            variables="x",
-            values="5.0"
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionEval22",
+			description="Test evaluation of function containing function call statement using more than one output",
+			variables="x",
+			values="
+5.0"
  )})));
 end FunctionEval22;
 
@@ -813,13 +824,13 @@ model FunctionEval23
             errorMessage="
 3 errors found:
 
-Error at line 802, column 9, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
+Error at line 814, column 9, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo':
   Cannot find class or component declaration for z
 
-Error at line 803, column 18, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
+Error at line 815, column 18, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo':
   Cannot find class or component declaration for z
 
-Error at line 806, column 23, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
+Error at line 818, column 23, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo':
   Could not evaluate binding expression for constant 'p': 'f(3)'
 ")})));
 end FunctionEval23;
@@ -841,10 +852,10 @@ model FunctionEval24
             errorMessage="
 2 errors found:
 
-Error at line 834, column 20, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
+Error at line 843, column 20, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo':
   Calling function f(): missing argument for required input x
 
-Error at line 834, column 20, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
+Error at line 843, column 20, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo':
   Could not evaluate binding expression for constant 'z': 'f()'
     Unspecified constant evaluation failure
 ")})));
@@ -866,11 +877,11 @@ model FunctionEval25
     parameter Integer n = f(ones(4));
 	Real z[n];
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="FunctionEval25",
-            description="Check that functions containing scalar expressions depending on unknown sizes can be evaluated after being error checked",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="FunctionEval25",
+			description="Check that functions containing scalar expressions depending on unknown sizes can be evaluated after being error checked",
+			flatModel="
 fclass EvaluationTests.FunctionEval25
  Real x = EvaluationTests.FunctionEval25.f(ones(3));
  structural parameter Integer n = 6 /* 6 */;
@@ -923,7 +934,8 @@ a2.y
 4.0
 2.0
 4.0
-")})));
+"
+ )})));
 end FunctionEval26a;
 
 model FunctionEval26b
@@ -957,7 +969,8 @@ a2.y
 4.0
 2.0
 4.0
-")})));
+"
+ )})));
 end FunctionEval26b;
 
 
@@ -1111,7 +1124,8 @@ model FunctionEval30
             name="FunctionEval30",
             description="Constant evaluation of vector multiplication",
             variables="x",
-            values="3.0"
+            values="
+3.0"
  )})));
 end FunctionEval30;
 
@@ -1143,7 +1157,8 @@ y2
             values="
 3.0
 3.0
-")})));
+"
+ )})));
 end FunctionEval31;
 
 model FunctionEval32
@@ -1161,8 +1176,12 @@ model FunctionEval32
         EvalTestCase(
             name="FunctionEval32",
             description="Constant evaluation record component in input",
-            variables="r[1]",
-            values="0.0"
+            variables="
+r[1]
+",
+            values="
+0.0
+"
  )})));
 end FunctionEval32;
 
@@ -1479,7 +1498,8 @@ y2[2]
 4.0
 2.0
 4.0
-")})));
+"
+ )})));
 end VectorFuncEval1;
 
 model VectorFuncEval2
@@ -1511,7 +1531,8 @@ y2[3]
 4.0
 9.0
 14.0
-")})));
+"
+ )})));
 end VectorFuncEval2;
 
 model VectorFuncEval3
@@ -1537,7 +1558,8 @@ y1[3]
 10.0
 15.0
 20.0
-")})));
+"
+ )})));
 end VectorFuncEval3;
 
 model VectorFuncEval4
@@ -1563,7 +1585,8 @@ y1[3]
 8.0
 14.0
 20.0
-")})));
+"
+ )})));
 end VectorFuncEval4;
 
 model StringConcat
@@ -1572,18 +1595,18 @@ model StringConcat
  parameter String[2] c = { "1", "2" } .+ "3";
  parameter String[2] d = { "1", "2" } + { "3", "4" };
 
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="StringConcat",
-            description="",
-            variables="
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="StringConcat",
+			description="",
+			variables="
 b
 c[1]
 c[2]
 d[1]
 d[2]
 ",
-            values="
+         values="
 \"12\"
 \"13\"
 \"23\"
@@ -1605,11 +1628,11 @@ model ParameterEval1
 equation
 x = if a[1,1] > a[1,2] then true else false;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TimeTestCase(
-            name="ParameterEval1",
-            description="Make sure time complexity of evaluation of array parameters is of an acceptable order",
-            maxTime=2.0
+	annotation(__JModelica(UnitTesting(tests={ 
+		TimeTestCase(
+			name="ParameterEval1",
+			description="Make sure time complexity of evaluation of array parameters is of an acceptable order",
+			maxTime=2.0
  )})));
 end ParameterEval1;
 
@@ -1635,9 +1658,8 @@ fclass EvaluationTests.Structural1
 
 public
  function EvaluationTests.Structural1.f
-  output Integer[:] y;
+  output Integer[2] y;
  algorithm
-  init y as Integer[2];
   y := {2, 1};
   return;
  end EvaluationTests.Structural1.f;
@@ -1652,11 +1674,11 @@ model EvaluateAnnotation1
 	parameter Real b = a annotation(Evaluate=true);
 	Real c = a + b;
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="EvaluateAnnotation1",
-            description="Check that annotation(Evaluate=true) is honored",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="EvaluateAnnotation1",
+			description="Check that annotation(Evaluate=true) is honored",
+			flatModel="
 fclass EvaluationTests.EvaluateAnnotation1
  eval parameter Real a = 1.0 /* 1.0 */;
  eval parameter Real b = 1.0 /* 1.0 */;
@@ -1680,26 +1702,16 @@ fclass EvaluationTests.EvaluateAnnotation2
 initial equation 
  p = 1;
 end EvaluationTests.EvaluateAnnotation2;
-")})));
-end EvaluateAnnotation2;
-
-model EvaluateAnnotation2_Warn
-    parameter Real p(fixed=false) annotation (Evaluate=true);
-initial equation
-    p = 1;
-
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
+"), WarningTestCase(
             name="EvaluateAnnotation2_Warn",
             description="Check that a warning is given when annotation(Evaluate=true) and fixed equals false",
             errorMessage="
-1 warnings found:
+2 warnings found:
 
-Warning at line 1684, column 30, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
+Warning at line 1552, column 25, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo':
   Evaluate annotation is ignored for parameters with fixed=false
 ")})));
-end EvaluateAnnotation2_Warn;
-
+end EvaluateAnnotation2;
 
 model EvaluateAnnotation3
     parameter Real p[2](fixed={false, true}) annotation (Evaluate=true);
@@ -1999,6 +2011,7 @@ model FinalParameterEval1
             flatModel="
 fclass EvaluationTests.FinalParameterEval1
  final parameter Real a.p = 2 /* 2 */;
+
  Real a.x = 2.0;
 end EvaluationTests.FinalParameterEval1;
 ")})));
@@ -2016,6 +2029,7 @@ model FinalParameterEval2
             flatModel="
 fclass EvaluationTests.FinalParameterEval2
  final parameter Real p = 1 /* 1 */;
+
  Real x = 1.0;
 end EvaluationTests.FinalParameterEval2;
 ")})));
@@ -2037,6 +2051,7 @@ model FinalParameterEval3
             flatModel="
 fclass EvaluationTests.FinalParameterEval3
  final parameter EvaluationTests.FinalParameterEval3.R r = EvaluationTests.FinalParameterEval3.R(1) /* EvaluationTests.FinalParameterEval3.R(1) */;
+
  Real x = 1.0;
 
 public
@@ -2069,6 +2084,7 @@ model FinalParameterEval4
             flatModel="
 fclass EvaluationTests.FinalParameterEval4
  final parameter EvaluationTests.FinalParameterEval4.R a.r = EvaluationTests.FinalParameterEval4.R(1) /* EvaluationTests.FinalParameterEval4.R(1) */;
+
  Real a.x = 1.0;
 
 public
@@ -2240,6 +2256,7 @@ public
  end EvaluationTests.EvalNoBinding4.R;
 
 end EvaluationTests.EvalNoBinding4;
+
 ")})));
 end EvalNoBinding4;
 
@@ -2263,6 +2280,7 @@ model EvalColonSizeCell
         FlatteningTestCase(
             name="EvalColonSizeCell",
             description="Evaluation of function returning array dependent on colon size",
+            checkAll=true,
             flatModel="
 fclass EvaluationTests.EvalColonSizeCell
  eval parameter Real a[1] = {1} /* { 1 } */;
@@ -2272,9 +2290,8 @@ fclass EvaluationTests.EvalColonSizeCell
 public
  function EvaluationTests.EvalColonSizeCell.f
   input Real[:] x;
-  output Real[:] y;
+  output Real[size(x, 1) + 1] y;
  algorithm
-  init y as Real[size(x, 1) + 1];
   for i in 1:size(x, 1) loop
    y[i] := x[i] / 2;
    y[i + 1] := y[i] + 1;
@@ -2299,11 +2316,11 @@ model SignEval1
     constant Integer e1 = sign(1.0);
     constant Integer e2 = e1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="SignEval1",
-            description="Test constant evaluation of sign()",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="SignEval1",
+			description="Test constant evaluation of sign()",
+			flatModel="
 fclass EvaluationTests.SignEval1
  constant Integer a1 = -1;
  constant Integer a2 = -1;
@@ -2324,12 +2341,11 @@ model ParameterEvalAnnotation1
 	Real[3] r;
 equation
 	r = {1,2,3} .* p1;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="ParameterEvalAnnotation1",
-            description="Test constant evaluation Evaluate parameter",
-            flatModel="
+		annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ParameterEvalAnnotation1",
+			description="Test constant evaluation Evaluate parameter",
+			flatModel="
 fclass EvaluationTests.ParameterEvalAnnotation1
  eval parameter Real p1[1] = 1 /* 1 */;
  eval parameter Real p1[2] = 2 /* 2 */;
@@ -2353,12 +2369,12 @@ model ParameterEvalAnnotation2
 	
 	constant Real c = 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="ParameterEvalAnnotation2",
-            description="Test constant evaluation Evaluate parameter",
+		annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ParameterEvalAnnotation2",
+			description="Test constant evaluation Evaluate parameter",
             eliminate_alias_variables=false,
-            flatModel="
+			flatModel="
 fclass EvaluationTests.ParameterEvalAnnotation2
  parameter Real p;
  parameter Real dp;
@@ -2396,12 +2412,12 @@ end fs;
 	parameter Real[2] z = 2*f(y);
 equation
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="ParameterEvalAnnotation3",
-            description="Test constant evaluation Evaluate parameter",
+		annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ParameterEvalAnnotation3",
+			description="Test constant evaluation Evaluate parameter",
             eliminate_alias_variables=false,
-            flatModel="
+			flatModel="
 fclass EvaluationTests.ParameterEvalAnnotation3
  constant Real c[1] = 1;
  constant Real c[2] = 2;
@@ -2445,23 +2461,11 @@ model ShortClassWithInstanceNameHelper
     
     A a;
     parameter Real c = 1;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ShortClassWithInstanceNameHelper",
-            description="",
-            flatModel="
-fclass EvaluationTests.ShortClassWithInstanceNameHelper
- constant String a.b = \"ShortClassWithInstanceNameHelper.a\";
- parameter Real c = 1 /* 1 */;
-end EvaluationTests.ShortClassWithInstanceNameHelper;
-")})));
 end ShortClassWithInstanceNameHelper;
 
 
 // TODO: this test gives the wrong value (may not be able to fix that in a reasonable way, since simple short class decl is only a pointer)
 model ShortClassWithInstanceName1 = ShortClassWithInstanceNameHelper
-
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
             name="ShortClassWithInstanceName1",
@@ -3205,7 +3209,7 @@ public
   input Real n;
   output Real[:] y;
  algorithm
-  init y as Real[size(x, 1)];
+  size(y) := {size(x, 1)};
   for i1 in 1:size(x, 1) loop
    y[i1] := x[i1];
   end for;
@@ -3313,7 +3317,7 @@ public
   input Real n;
   output Real[:] y;
  algorithm
-  init y as Real[size(x, 1)];
+  size(y) := {size(x, 1)};
   if x[1] < x[2] then
    for i1 in 1:size(x, 1) loop
     y[i1] := x[i1] .* n;
@@ -3363,7 +3367,7 @@ public
   input Real n;
   output Real[:] y;
  algorithm
-  init y as Real[size(x, 1)];
+  size(y) := {size(x, 1)};
   for i1 in 1:size(x, 1) loop
    y[i1] := x[i1];
   end for;
@@ -3453,7 +3457,7 @@ public
   input Real n;
   output Real[:] y;
  algorithm
-  init y as Real[size(x, 1)];
+  size(y) := {size(x, 1)};
   for i1 in 1:size(x, 1) loop
    y[i1] := x[i1];
   end for;
@@ -3617,7 +3621,7 @@ public
   input Real n;
   output Real[:] y;
  algorithm
-  init y as Real[size(x, 1)];
+  size(y) := {size(x, 1)};
   for i1 in 1:size(x, 1) loop
    y[i1] := x[i1];
   end for;
@@ -3717,7 +3721,7 @@ public
   output Real y2;
   output Real y3;
  algorithm
-  init y1 as Real[size(x, 1)];
+  size(y1) := {size(x, 1)};
   for i1 in 1:size(x, 1) loop
    y1[i1] := x[i1];
   end for;
@@ -3864,9 +3868,8 @@ public
  function EvaluationTests.Partial.IfStmt15.f
   input Real x1;
   input Real x2;
-  output Real[:] r;
+  output Real[2] r;
  algorithm
-  init r as Real[2];
   if x1 < x2 then
    r[1] := x1;
    r[2] := x1;
@@ -3950,9 +3953,8 @@ fclass EvaluationTests.AssigningCached2
 public
  function EvaluationTests.AssigningCached2.f
   input Real[:] x;
-  output Real[:] y;
+  output Real[size(x, 1)] y;
  algorithm
-  init y as Real[size(x, 1)];
   y := x[:];
   y[2] := 3;
   return;
@@ -3987,7 +3989,7 @@ fclass EvaluationTests.AssigningCached3
 
 public
  function EvaluationTests.AssigningCached3.f
-  input Real[:] x;
+  input Real[2] x;
   output EvaluationTests.AssigningCached3.R y;
  algorithm
   y := EvaluationTests.AssigningCached3.R(x);
@@ -4031,11 +4033,10 @@ fclass EvaluationTests.AssigningCached4
 
 public
  function EvaluationTests.AssigningCached4.f
-  input Real[:] x;
-  Real[:] t;
+  input Real[3] x;
+  Real[3] t;
   output EvaluationTests.AssigningCached4.R y1;
  algorithm
-  init t as Real[3];
   t[1:3] := x[1:3];
   y1 := EvaluationTests.AssigningCached4.R(t);
   t[1] := 0;
@@ -4325,30 +4326,5 @@ Error at line 4135, column 17, in file 'Compiler/ModelicaFlatTree/src/test/Evalu
   The binding expression of the variable y does not match the declared type of the variable
 ")})));
 end FScalarExpEval;
-
-model Atan2
-    constant Real x1 = atan2(1,5);
-    Real x2 = atan2(1,5);
-    
-    constant Real x3 = atan2(0,5);
-    constant Real x4 = atan2(1,0);
-
-    constant Real x5 = atan2(0,0);
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Atan2",
-            description="Basic test of atan2().",
-            eliminate_alias_variables=false,
-            flatModel="
-fclass EvaluationTests.Atan2
- constant Real x1 = 0.19739555984988078;
- constant Real x2 = 0.19739555984988078;
- constant Real x3 = 0.0;
- constant Real x4 = 1.5707963267948966;
- constant Real x5 = 0.0;
-end EvaluationTests.Atan2;
-")})));
-end Atan2;
 
 end EvaluationTests;

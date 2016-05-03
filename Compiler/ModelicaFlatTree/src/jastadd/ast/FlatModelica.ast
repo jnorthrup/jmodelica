@@ -493,7 +493,7 @@ FAttribute : BaseNode ::= Type:FIdUse
 FInternalAttribute : FAttribute;
 
 /**
- * Represents an attribute that was generated from an annotation.
+ * Represents and attribute that was generated from an annotation.
  */
 FAnnotationAttribute : FAttribute;
 
@@ -657,11 +657,6 @@ FConnRootedDep : FConnRooted;
  * The cardinality() function-like operator.
  */
 FCardinality : FUnaryBuiltIn;
-
-/**
- * The Subtask.decouple() function-like operator.
- */
-FDecouple : FUnaryBuiltIn;
 
 /**
  * For equation clause.

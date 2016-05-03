@@ -1822,140 +1822,6 @@ der(_ds.1.s1) := dsDer(1, 1)
 -------------------------------
 ")})));
         end FunctionCallEquation1;
-        model FunctionCallEquationJacobian
-            function F1
-                input Real i1;
-                input Real i2;
-                output Real[2] o1;
-            algorithm
-                o1 := {i1 + i2, i1 - i2};
-            annotation(derivative(order = 1) = F1_der, Inline=false);
-            end F1;
-        
-            function F1_der
-                input Real i1;
-                input Real i2;
-                input Real i1_der;
-                input Real i2_der;
-                output Real[2] o1_der;
-            algorithm
-                o1_der := {i1_der + i2_der, i1_der - i2_der};
-            annotation(derivative(order = 2) = F1_der_der, Inline=false);
-            end F1_der;
-        
-            function F1_der_der
-                input Real i1;
-                input Real i2;
-                input Real i1_der;
-                input Real i2_der;
-                input Real i1_der_der;
-                input Real i2_der_der;
-                output Real[2] o1_der_der;
-            algorithm
-                o1_der_der := {i1_der_der + i2_der_der,i1_der_der - i2_der_der};
-                annotation(Inline=false);
-            end F1_der_der;
-        
-            Real sx;
-            Real der_sx = cos(time);
-            Real sy;
-            Real der_sy = sin(time);
-            Real der2_sx = der(der_sx);
-            Real der2_sy = der(der_sy);
-            Real r[2] = F1(sx, sy);
-            Real der_r[2] = der(r);
-            Real der_r_check[2] = F1_der(sx, sy, der_sx, der_sy);
-            Real der_der_r[2] = der(der_r);
-            Real der_der_r_check[2] = F1_der_der(sx, sy, der_sx, der_sy, der2_sx, der2_sy);
-        equation
-            der(sx) = der_sx;
-            der(sy) = der_sy;
-
-        annotation(__JModelica(UnitTesting(tests={
-            FClassMethodTestCase(
-                name="FunctionCallEquationJacobian",
-                description="Test that verifies that we are able to compute the jacobian for a function call equation correctly, no dynamic states should be needed for this model!",
-                dynamic_states=true,
-                methodName="printDAEBLT",
-                methodResult="
---- Solved equation ---
-der(sx) := cos(time)
-
---- Solved equation ---
-der_sx := der(sx)
-
---- Solved equation ---
-der(sy) := sin(time)
-
---- Solved equation ---
-der_sy := der(sy)
-
---- Solved equation ---
-_der_der_sx := - sin(time)
-
---- Solved equation ---
-_der_der_sx := _der_der_sx
-
---- Solved equation ---
-der2_sx := _der_der_sx
-
---- Solved equation ---
-_der_der_sy := cos(time)
-
---- Solved equation ---
-_der_der_sy := _der_der_sy
-
---- Solved equation ---
-der2_sy := _der_der_sy
-
---- Solved function call equation ---
-({r[1], r[2]}) = DynamicStates.Special.FunctionCallEquationJacobian.F1(sx, sy)
-  Assigned variables: r[1]
-                      r[2]
-
---- Solved function call equation ---
-({der_r_check[1], der_r_check[2]}) = DynamicStates.Special.FunctionCallEquationJacobian.F1_der(sx, sy, der(sx), der(sy))
-  Assigned variables: der_r_check[2]
-                      der_r_check[1]
-
---- Solved equation ---
-_der_r[1] := der_r_check[1]
-
---- Solved equation ---
-der_r[1] := _der_r[1]
-
---- Solved equation ---
-_der_r[2] := der_r_check[2]
-
---- Solved equation ---
-der_r[2] := _der_r[2]
-
---- Solved function call equation ---
-({der_der_r_check[1], der_der_r_check[2]}) = DynamicStates.Special.FunctionCallEquationJacobian.F1_der_der(sx, sy, der(sx), der(sy), _der_der_sx, _der_der_sy)
-  Assigned variables: der_der_r_check[2]
-                      der_der_r_check[1]
-
---- Solved equation ---
-_der_der_r[1] := der_der_r_check[1]
-
---- Solved equation ---
-_der_der_r[1] := _der_der_r[1]
-
---- Solved equation ---
-der_der_r[1] := _der_der_r[1]
-
---- Solved equation ---
-_der_der_r[2] := der_der_r_check[2]
-
---- Solved equation ---
-_der_der_r[2] := _der_der_r[2]
-
---- Solved equation ---
-der_der_r[2] := _der_der_r[2]
--------------------------------
-")})));
-        end FunctionCallEquationJacobian;
-        
         model NoDerivative1
             function F
                 input Real i;
@@ -2016,9 +1882,9 @@ temp_3 := _der_b
     --- Torn system (Block 1(_der_y, y).1) of 2 iteration variables and 4 solved variables ---
     Torn variables:
       c
+      t
       temp_6
       dynDer(t)
-      t
 
     Iteration variables:
       _der_x ()
@@ -2026,9 +1892,9 @@ temp_3 := _der_b
 
     Torn equations:
       c := cos(_der_x)
+      t := DynamicStates.Special.NoDerivative1.F(b, c)
       temp_6 := c
       dynDer(t) := DynamicStates.Special.NoDerivative1.F(temp_3 * temp_6, temp_6)
-      t := DynamicStates.Special.NoDerivative1.F(b, c)
 
     Residual equations:
       x * ds(2, y) * ds(2, t) = 0
@@ -2037,28 +1903,28 @@ temp_3 := _der_b
         Iteration variables: x
 
     --- Solved equation ---
-    _der_x := _der_x
+    _der_t := dynDer(t)
     -------------------------------
   --- States: _der_y, t ---
     --- Unsolved equation (Block 1(_der_y, t).1) ---
     ds(2, t) = DynamicStates.Special.NoDerivative1.F(b, c)
       Computed variables: c
 
-    --- Unsolved equation (Block 1(_der_y, t).2) ---
-    c = cos(_der_x)
-      Computed variables: _der_x
-
-    --- Solved equation ---
-    _der_x := _der_x
-
-    --- Solved equation ---
-    dynDer(y) := ds(1, _der_y)
-
     --- Solved equation ---
     temp_6 := c
 
     --- Solved equation ---
     dynDer(t) := DynamicStates.Special.NoDerivative1.F(temp_3 * temp_6, temp_6)
+
+    --- Solved equation ---
+    _der_t := dynDer(t)
+
+    --- Solved equation ---
+    dynDer(y) := ds(1, _der_y)
+
+    --- Unsolved equation (Block 1(_der_y, t).2) ---
+    c = cos(_der_x)
+      Computed variables: _der_x
 
     --- Unsolved system (Block 1(_der_y, t).3) of 2 variables ---
     Unknown variables:
@@ -2071,34 +1937,36 @@ temp_3 := _der_b
       x * ds(2, y) * ds(2, t) = 0
         Iteration variables: x
     -------------------------------
-  --- States: _der_x, y ---
+  --- States: _der_t, y ---
     --- Solved equation ---
-    _der_x := ds(1, _der_x)
+    dynDer(t) := ds(1, _der_t)
+
+    --- Unsolved equation (Block 1(_der_t, y).1) ---
+    dynDer(t) = DynamicStates.Special.NoDerivative1.F(temp_3 * temp_6, temp_6)
+      Computed variables: temp_6
 
     --- Solved equation ---
-    c := cos(_der_x)
+    c := temp_6
 
     --- Solved equation ---
     t := DynamicStates.Special.NoDerivative1.F(b, c)
 
-    --- Unsolved equation (Block 1(_der_x, y).1) ---
+    --- Unsolved equation (Block 1(_der_t, y).2) ---
     x * ds(2, y) * ds(2, t) = 0
       Computed variables: x
 
-    --- Solved equation ---
-    temp_6 := c
+    --- Unsolved equation (Block 1(_der_t, y).3) ---
+    c = cos(_der_x)
+      Computed variables: _der_x
 
-    --- Solved equation ---
-    dynDer(t) := DynamicStates.Special.NoDerivative1.F(temp_3 * temp_6, temp_6)
-
-    --- Unsolved equation (Block 1(_der_x, y).2) ---
+    --- Unsolved equation (Block 1(_der_t, y).4) ---
     x * ds(2, y) * dynDer(t) + (x * dynDer(y) + _der_x * ds(2, y)) * ds(2, t) = 0
       Computed variables: dynDer(y)
 
     --- Solved equation ---
     _der_y := dynDer(y)
     -------------------------------
-  --- States: _der_x, t ---
+  --- States: _der_t, t ---
 
 --- Solved equation ---
 vx := _der_x
@@ -2112,9 +1980,9 @@ _der_der_b := 0.0
 --- Torn system (Block 2) of 1 iteration variables and 6 solved variables ---
 Torn variables:
   _der_vx
-  dynDer(_der_x)
+  _der_der_x
   _der_c
-  _der_der_t
+  dynDer(_der_t)
   _der_vy
   dynDer(_der_y)
 
@@ -2123,14 +1991,14 @@ Iteration variables:
 
 Torn equations:
   _der_vx := a * x
-  dynDer(_der_x) := _der_vx
-  _der_c := - sin(_der_x) * dynDer(_der_x)
-  _der_der_t := DynamicStates.Special.NoDerivative1.F((temp_3 * _der_c + _der_der_b * temp_6) * temp_6, temp_6)
+  _der_der_x := _der_vx
+  _der_c := - sin(_der_x) * _der_der_x
+  dynDer(_der_t) := DynamicStates.Special.NoDerivative1.F((temp_3 * _der_c + _der_der_b * temp_6) * temp_6, temp_6)
   _der_vy := a * ds(2, y)
   dynDer(_der_y) := _der_vy
 
 Residual equations:
-  x * ds(2, y) * _der_der_t + (x * dynDer(y) + _der_x * ds(2, y)) * dynDer(t) + ((x * dynDer(y) + _der_x * ds(2, y)) * dynDer(t) + (x * dynDer(_der_y) + _der_x * dynDer(y) + (_der_x * dynDer(y) + dynDer(_der_x) * ds(2, y))) * ds(2, t)) = 0
+  x * ds(2, y) * dynDer(_der_t) + (x * dynDer(y) + _der_x * ds(2, y)) * dynDer(t) + ((x * dynDer(y) + _der_x * ds(2, y)) * dynDer(t) + (x * dynDer(_der_y) + _der_x * dynDer(y) + (_der_x * dynDer(y) + _der_der_x * ds(2, y))) * ds(2, t)) = 0
     Iteration variables: a
 
 --- Solved equation ---

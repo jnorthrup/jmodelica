@@ -524,11 +524,10 @@ equation
 
 public
  function IndexReduction.IndexReduction27_DerFunc.f
-  input Real[:] x;
-  input Real[:,:] A;
-  output Real[:] y;
+  input Real[2] x;
+  input Real[2, 2] A;
+  output Real[2] y;
  algorithm
-  init y as Real[2];
   y[1] := A[1,1] * x[1] + A[1,2] * x[2];
   y[2] := A[2,1] * x[1] + A[2,2] * x[2];
   return;
@@ -536,13 +535,12 @@ public
  end IndexReduction.IndexReduction27_DerFunc.f;
 
  function IndexReduction.IndexReduction27_DerFunc.f_der
-  input Real[:] x;
-  input Real[:,:] A;
-  input Real[:] der_x;
-  input Real[:,:] der_A;
-  output Real[:] der_y;
+  input Real[2] x;
+  input Real[2, 2] A;
+  input Real[2] der_x;
+  input Real[2, 2] der_A;
+  output Real[2] der_y;
  algorithm
-  init der_y as Real[2];
   der_y[1] := A[1,1] * der_x[1] + A[1,2] * der_x[2];
   der_y[2] := A[2,1] * der_x[1] + A[2,2] * der_x[2];
   return;
@@ -622,8 +620,8 @@ equation
 
 public
  function IndexReduction.IndexReduction28_Record.f
-  input Real[:] x;
-  input Real[:,:] A;
+  input Real[2] x;
+  input Real[2, 2] A;
   output IndexReduction.IndexReduction28_Record.R y;
  algorithm
   y.a[1] := A[1,1] * x[1] + A[1,2] * x[2];
@@ -633,10 +631,10 @@ public
  end IndexReduction.IndexReduction28_Record.f;
 
  function IndexReduction.IndexReduction28_Record.f_der
-  input Real[:] x;
-  input Real[:,:] A;
-  input Real[:] der_x;
-  input Real[:,:] der_A;
+  input Real[2] x;
+  input Real[2, 2] A;
+  input Real[2] der_x;
+  input Real[2, 2] der_A;
   output IndexReduction.IndexReduction28_Record.R der_y;
  algorithm
   der_y.a[1] := A[1,1] * der_x[1] + A[1,2] * der_x[2];
@@ -1644,125 +1642,6 @@ equation
 end IndexReduction.AlgorithmVariability1;")})));
   end AlgorithmVariability1;
 
-  model AlgorithmVariability2
-    Real x;
-    Real y;
-    Real z;
-    parameter Integer p = 1;
-    parameter Integer[:] it = {1};
-    parameter Real[:] rt = {2.0};
-equation
-    // Trigger index reduction
-    y = time;
-    z = x + der(y);
-algorithm
-    x := if it[1] == p then rt[1] else 0;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AlgorithmVariability2",
-            description="Test so that variability calculations are done propperly for algorithms",
-            flatModel="
-fclass IndexReduction.AlgorithmVariability2
- Real x;
- Real y;
- Real z;
- parameter Integer p = 1 /* 1 */;
- parameter Integer it[1] = 1 /* 1 */;
- parameter Real rt[1] = 2.0 /* 2.0 */;
- Real _der_y;
-equation
- y = time;
- z = x + _der_y;
-algorithm
- x := if it[1] == p then rt[1] else 0;
-equation
- _der_y = 1.0;
-end IndexReduction.AlgorithmVariability2;
-")})));
-  end AlgorithmVariability2;
-
-  model AlgorithmVariability3
-    Real y;
-    Real x;
-    Real z;
-equation
-    // Trigger index reduction
-    y = time * 2;
-    z = x + der(y);
-algorithm
-    when time > 0.25 then
-        x := y / 2;
-    end when;
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AlgorithmVariability3",
-            description="Test so that variability calculations are done propperly for algorithms, it should honor in discrete location",
-            flatModel="
-fclass IndexReduction.AlgorithmVariability3
- Real y;
- discrete Real x;
- Real z;
- discrete Boolean temp_1;
- Real _der_y;
-initial equation 
- pre(x) = 0.0;
- pre(temp_1) = false;
-equation
- y = time * 2;
- z = x + _der_y;
-algorithm
- if temp_1 and not pre(temp_1) then
-  x := y / 2;
- end if;
-equation
- temp_1 = time > 0.25;
- _der_y = 2;
-end IndexReduction.AlgorithmVariability3;
-")})));
-  end AlgorithmVariability3;
-
-  model AlgorithmVariability4
-    Real x;
-    Real y;
-    Boolean b;
-    parameter Integer p = 1;
-    parameter Integer[:] it = {1};
-    parameter Real[:] rt = {2.0};
-equation
-    // Trigger index reduction
-    x = time;
-    y = der(x);
-algorithm
-    b := y > 0;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AlgorithmVariability4",
-            description="Test so that variability calculations are done propperly for algorithms",
-            flatModel="
-fclass IndexReduction.AlgorithmVariability4
- Real x;
- Real y;
- discrete Boolean b;
- parameter Integer p = 1 /* 1 */;
- parameter Integer it[1] = 1 /* 1 */;
- parameter Real rt[1] = 2.0 /* 2.0 */;
- Real _der_x;
-initial equation 
- pre(b) = false;
-equation
- x = time;
- y = _der_x;
-algorithm
- b := _der_x > 0;
-equation
- _der_x = 1.0;
-end IndexReduction.AlgorithmVariability4;
-")})));
-  end AlgorithmVariability4;
-
     model Variability1
         function F1
             input Real a;
@@ -1951,7 +1830,7 @@ equation
 public
  function IndexReduction.FunctionAttributeScalarization2.F1
   input Real x;
-  input Real[:] a;
+  input Real[2] a;
   output Real y;
  algorithm
   y := x + (a[1] + a[2]);
@@ -1961,7 +1840,7 @@ public
 
  function IndexReduction.FunctionAttributeScalarization2.F1_der
   input Real x;
-  input Real[:] a;
+  input Real[2] a;
   input Real x_der;
   output Real y_der;
  algorithm
@@ -2168,104 +2047,6 @@ end IndexReduction.NonDiffArgsTest2;
 ")})));
 end NonDiffArgsTest2;
 
-model NonDiffArgsTest3
-    record R
-        Real a,b;
-    end R;
-    function F1
-        input Real i1;
-        input R i2;
-        output Real o1;
-    algorithm
-        o1 := i1 * i2.a + i1 * i2.b;
-        annotation(InlineAfterIndexReduction=true, derivative(noDerivative=i2)=F1_der);
-    end F1;
-    function F1_der
-        input Real i1;
-        input R i2;
-        input Real i1_der;
-        output Real o1_der;
-    algorithm
-        o1_der := F1(i1_der, i2) * i1_der;
-        annotation(Inline=true);
-    end F1_der;
-    
-    function F2
-        input Real i1;
-        output R o1;
-    algorithm
-        o1.a := -i1;
-        o1.b := i1;
-    annotation(InlineAfterIndexReduction=false);
-    end F2;
-    
-    function F3
-        input Real i1;
-        output Real o1;
-    algorithm
-        o1 := i1 + 1;
-    annotation(InlineAfterIndexReduction=false);
-    end F3;
-    
-    
-    Real x,y,z;
-equation
-    der(y) * der(x) = 1;
-    z = F3(time);
-    y = F1(x, F2(z));
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="NonDiffArgsTest3",
-            description="Test so that no diff for variables in nested function calls is computed correctly",
-            flatModel="
-fclass IndexReduction.NonDiffArgsTest3
- Real x;
- Real y;
- Real z;
- Real _der_y;
- Real temp_12;
- Real temp_13;
- Real temp_14;
-initial equation 
- x = 0.0;
-equation
- _der_y * der(x) = 1;
- z = IndexReduction.NonDiffArgsTest3.F3(time);
- y = x * temp_13 + x * temp_14;
- temp_12 = der(x);
- _der_y = (temp_12 * temp_13 + temp_12 * temp_14) * temp_12;
- (IndexReduction.NonDiffArgsTest3.R(temp_13, temp_14)) = IndexReduction.NonDiffArgsTest3.F2(z);
-
-public
- function IndexReduction.NonDiffArgsTest3.F3
-  input Real i1;
-  output Real o1;
- algorithm
-  o1 := i1 + 1;
-  return;
- annotation(InlineAfterIndexReduction = false);
- end IndexReduction.NonDiffArgsTest3.F3;
-
- function IndexReduction.NonDiffArgsTest3.F2
-  input Real i1;
-  output IndexReduction.NonDiffArgsTest3.R o1;
- algorithm
-  o1.a := - i1;
-  o1.b := i1;
-  return;
- annotation(InlineAfterIndexReduction = false);
- end IndexReduction.NonDiffArgsTest3.F2;
-
- record IndexReduction.NonDiffArgsTest3.R
-  Real a;
-  Real b;
- end IndexReduction.NonDiffArgsTest3.R;
-
-end IndexReduction.NonDiffArgsTest3;
-")})));
-end NonDiffArgsTest3;
-
 model FunctionCallEquation1
     function f
         input Real x;
@@ -2307,9 +2088,8 @@ equation
 public
  function IndexReduction.FunctionCallEquation1.f
   input Real x;
-  output Real[:] y;
+  output Real[2] y;
  algorithm
-  init y as Real[2];
   y[1] := x;
   y[2] := - x;
   return;
@@ -2319,11 +2099,9 @@ public
  function IndexReduction.FunctionCallEquation1._der_f
   input Real x;
   input Real _der_x;
-  output Real[:] _der_y;
-  Real[:] y;
+  output Real[2] _der_y;
+  Real[2] y;
  algorithm
-  init y as Real[2];
-  init _der_y as Real[2];
   _der_y[1] := _der_x;
   y[1] := x;
   _der_y[2] := - _der_x;
@@ -2522,10 +2300,9 @@ equation
 
 public
  function IndexReduction.FunctionCallEquation4.F2
-  input Real[:] a;
-  output Real[:] y;
+  input Real[2] a;
+  output Real[2] y;
  algorithm
-  init y as Real[2];
   y[1] := a[1] + a[2];
   y[2] := a[1] - a[2];
   return;
@@ -2533,11 +2310,10 @@ public
  end IndexReduction.FunctionCallEquation4.F2;
 
  function IndexReduction.FunctionCallEquation4.F2_der
-  input Real[:] a;
-  input Real[:] a_der;
-  output Real[:] y_der;
+  input Real[2] a;
+  input Real[2] a_der;
+  output Real[2] y_der;
  algorithm
-  init y_der as Real[2];
   y_der[1] := a_der[1] + a_der[2];
   y_der[2] := a_der[1] - a_der[2];
   return;
@@ -2608,10 +2384,9 @@ equation
 
 public
  function IndexReduction.FunctionCallEquation5.F2
-  input Real[:] a;
-  output Real[:] y;
+  input Real[2] a;
+  output Real[2] y;
  algorithm
-  init y as Real[2];
   y[1] := a[1] + a[2];
   y[2] := a[1] - a[2];
   return;
@@ -2619,11 +2394,10 @@ public
  end IndexReduction.FunctionCallEquation5.F2;
 
  function IndexReduction.FunctionCallEquation5.F2_der
-  input Real[:] a;
-  input Real[:] a_der;
-  output Real[:] y_der;
+  input Real[2] a;
+  input Real[2] a_der;
+  output Real[2] y_der;
  algorithm
-  init y_der as Real[2];
   y_der[1] := a_der[1] + a_der[2];
   y_der[2] := a_der[1] - a_der[2];
   return;
@@ -2951,9 +2725,8 @@ public
  function IndexReduction.PartiallyPropagatedComposite1.f
   input Real x1;
   input Real x2;
-  output Real[:] y;
+  output Real[2] y;
  algorithm
-  init y as Real[2];
   y[1] := x1;
   y[2] := x2;
   return;
@@ -2965,11 +2738,9 @@ public
   input Real x2;
   input Real _der_x1;
   input Real _der_x2;
-  output Real[:] _der_y;
-  Real[:] y;
+  output Real[2] _der_y;
+  Real[2] y;
  algorithm
-  init y as Real[2];
-  init _der_y as Real[2];
   _der_y[1] := _der_x1;
   y[1] := x1;
   _der_y[2] := _der_x2;
@@ -3171,9 +2942,8 @@ equation
 public
  function IndexReduction.FunctionInlining.Test2.F
   input Real i;
-  output Real[:] o1;
+  output Real[2] o1;
  algorithm
-  init o1 as Real[2];
   o1[1] := i;
   o1[2] := - i;
   return;
@@ -3367,9 +3137,8 @@ equation
 public
  function IndexReduction.FunctionInlining.Test4.F
   input Real i;
-  output Real[:] o1;
+  output Real[2] o1;
  algorithm
-  init o1 as Real[2];
   o1[1] := i;
   o1[2] := - i;
   return;
@@ -3816,7 +3585,7 @@ equation
 
 public
  function IndexReduction.FunctionInlining.Test9.F
-  input Real[:] i1;
+  input Real[1] i1;
   input Real i2;
   output Real o1;
  algorithm
@@ -3830,206 +3599,6 @@ end IndexReduction.FunctionInlining.Test9;
     end Test9;
 
 end FunctionInlining;
-
-    package IncidencesThroughFunctions
-        
-        model RevoluteWithTranslation
-            parameter Real[3] r(each stateSelect=StateSelect.never) = {1,0,0};
-            inner Modelica.Mechanics.MultiBody.World world(n={0,0,-1});
-            Modelica.Mechanics.MultiBody.Joints.Revolute revolute(w(start=1, fixed=true),phi(stateSelect=StateSelect.avoid),animation=false);
-            Modelica.Mechanics.MultiBody.Parts.Body body(animation=false);
-            Real[3] r_0(each stateSelect={StateSelect.never,StateSelect.never,StateSelect.prefer}), v_0, a_0;
-        equation 
-            connect(revolute.frame_a, world.frame_b);
-            connect(body.frame_a, revolute.frame_b);
-            r_0 = revolute.frame_b.r_0 + Modelica.Mechanics.MultiBody.Frames.resolve1(revolute.frame_b.R, r);
-            v_0 = der(r_0);
-            a_0 = der(v_0);
-
-        annotation(__JModelica(UnitTesting(tests={
-            FClassMethodTestCase(
-                name="IncidencesThroughFunctions_RevoluteWithTranslation",
-                description="Test a specific case where we need to look at the incidences through functions",
-                methodName="stateDiagnosticsObj",
-                methodResult="
-States:
-  Modelica.SIunits.Angle revolute.phi(stateSelect = StateSelect.avoid,start = 0) \"Relative rotation angle from frame_a to frame_b\"
-  Modelica.SIunits.AngularVelocity revolute.w(start = 1,fixed = true,stateSelect = revolute.stateSelect) \"First derivative of angle phi (relative angular velocity)\"
-")})));
-        end RevoluteWithTranslation;
-        
-        model InlinedFunctionCall
-            function F
-                input Real i1;
-                input Real i2;
-                output Real o1;
-                output Real o2;
-            algorithm
-                o1 := i1;
-                o2 := i2;
-                annotation(InlineAfterIndexReduction=true, derivative=F_der);
-            end F;
-            function F_der
-                input Real i1;
-                input Real i2;
-                input Real i1_der;
-                input Real i2_der;
-                output Real o1_der;
-                output Real o2_der;
-            algorithm
-                (o1_der, o2_der) := F(i1_der, i2_der);
-                annotation(Inline=true);
-            end F_der;
-            
-            Real a1,a2,a3,a4,b1,b2,b3,b4;
-        equation
-            der(a1) = a2;
-            der(a2) = a3;
-            der(b1) = b2;
-            der(b2) = b3;
-            a4 = time;
-            b4 = time * 2;
-            (a4,b4) = F(a1,b1);
-
-        annotation(__JModelica(UnitTesting(tests={
-            TransformCanonicalTestCase(
-                name="IncidencesThroughFunctions_InlinedFunctionCall",
-                description="Ensure that all variables referenced in the function call equation are differentiated as expected",
-                flatModel="
-fclass IndexReduction.IncidencesThroughFunctions.InlinedFunctionCall
- Real a1;
- Real a2;
- Real a3;
- Real a4;
- Real b1;
- Real b2;
- Real b3;
- Real b4;
- Real _der_a1;
- Real _der_a2;
- Real _der_b1;
- Real _der_b2;
- Real _der_b4;
- Real _der_a4;
- Real _der_der_a1;
- Real _der_der_a4;
- Real _der_der_b4;
- Real _der_der_b1;
-equation
- _der_a1 = a2;
- _der_a2 = a3;
- _der_b1 = b2;
- _der_b2 = b3;
- a4 = time;
- b4 = time * 2;
- a4 = a1;
- b4 = b1;
- _der_b4 = 2;
- _der_a4 = _der_a1;
- _der_b4 = _der_b1;
- _der_a4 = 1.0;
- _der_der_a1 = _der_a2;
- _der_der_a4 = _der_der_a1;
- _der_der_b4 = _der_der_b1;
- _der_der_a4 = 0.0;
- _der_der_b1 = _der_b2;
- _der_der_b4 = 0;
-end IndexReduction.IncidencesThroughFunctions.InlinedFunctionCall;
-")})));
-        end InlinedFunctionCall;
-        
-        model AllIncidencesFallback
-            record R
-                Real a,b;
-            end R;
-            function F1
-                input Real i1;
-                input R i2;
-                output Real o1;
-            algorithm
-                o1 := i1 * i2.a + i1 * i2.b;
-                annotation(InlineAfterIndexReduction=true, derivative(noDerivative=i2)=F1_der);
-            end F1;
-            function F1_der
-                input Real i1;
-                input R i2;
-                input Real i1_der;
-                output Real o1_der;
-            algorithm
-                o1_der := F1(i1_der, i2) * i1_der;
-                annotation(Inline=true);
-            end F1_der;
-            
-            function F2
-                input Real i1;
-                output R o1;
-            algorithm
-                if i1 > 3.14 then
-                    o1.a := i1 + 1;
-                end if;
-                o1.a := -i1;
-                o1.b := i1;
-            annotation(InlineAfterIndexReduction=false);
-            end F2;
-            
-            function F3
-                input Real i1;
-                output Real o1;
-            algorithm
-                o1 := i1 - 1;
-            annotation(InlineAfterIndexReduction=false);
-            end F3;
-            
-            Real x,y;
-        equation
-            der(y) * der(x) = 1;
-            y = F1(x, F2(x));
-
-        annotation(__JModelica(UnitTesting(tests={
-            TransformCanonicalTestCase(
-                name="IncidencesThroughFunctions_AllIncidencesFallback",
-                description="If we fail with the incidence calculation (if statement in F2) then we should fall back to using all incidences",
-                flatModel="
-fclass IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback
- Real x;
- Real y;
- Real _der_y;
- Real temp_12;
- Real temp_13;
- Real temp_14;
-initial equation 
- x = 0.0;
-equation
- _der_y * der(x) = 1;
- y = x * temp_13 + x * temp_14;
- temp_12 = der(x);
- _der_y = (temp_12 * temp_13 + temp_12 * temp_14) * temp_12;
- (IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback.R(temp_13, temp_14)) = IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback.F2(x);
-
-public
- function IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback.F2
-  input Real i1;
-  output IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback.R o1;
- algorithm
-  if i1 > 3.14 then
-   o1.a := i1 + 1;
-  end if;
-  o1.a := - i1;
-  o1.b := i1;
-  return;
- annotation(InlineAfterIndexReduction = false);
- end IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback.F2;
-
- record IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback.R
-  Real a;
-  Real b;
- end IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback.R;
-
-end IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback;
-")})));
-        end AllIncidencesFallback;
-        
-    end IncidencesThroughFunctions;
 
 end IndexReduction;
 

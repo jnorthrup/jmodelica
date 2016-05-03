@@ -634,11 +634,6 @@ aspect PrettyPrint {
 		p.print(getExp(),str,indent);
 	}
 	
-    public void DummyModification.prettyPrint(Printer p, CodeStream str, String indent) {
-        str.print(" = ");
-        p.print(myFExp(),str,indent);
-    }
-	
 	public void ClassModification.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("(");
 		for (int i = 0; i < getNumArgument(); i++) {
@@ -1220,17 +1215,18 @@ aspect FlatPrettyPrint {
     		str.print(getFTypePrefixInputOutput());
     		str.print(" ");
     	}
-        str.print(getType().scalarType());
-        if (isArray()) {
-            str.print("[");
-            for (int i = 0; i < ndims(); i++) {
-                str.print(":");
-                if (i < ndims()-1) {
-                    str.print(",");
-                }
-            }
-            str.print("]");
-        }
+    	if (hasInitArrayStmt) {
+    		str.print(getType().scalarType());
+    		str.print("[");
+    		for (int i = 0; i < ndims(); i++) {
+    			str.print(":");
+    			if (i < ndims()-1)
+    				str.print(",");
+    		}
+    		str.print("]");
+    	} else {
+    		str.print(getType());
+    	}
     	str.print(" ");
     	str.print(name());
     	getFAttributeList().prettyPrintFAttributeList(str, p);
@@ -1465,15 +1461,9 @@ aspect FlatPrettyPrint {
 	}
 	
 	public void FInitArrayStmt.prettyPrint(Printer p, CodeStream str, String indent) {
-        str.print("init ");
-        p.print(getFIdUseExp(), str, indent);
-        str.print(" as ");
-        str.print(type().scalarType());
-        if (type().isArray()) {
-            str.print("[");
-            str.print(type().size().toUnclosedString());
-            str.print("]");
-        }
+		FFunctionVariable fv = (FFunctionVariable) getFIdUseExp().myFV();
+		str.print("size(" + fv.name() + ") := {");
+		str.print(fv.size().toUnclosedString() + "}");
 	}
 	
 	public void FExternalLanguage.prettyPrint(Printer p, CodeStream str, String indent) {
@@ -1925,7 +1915,6 @@ aspect FlatPrettyPrint {
 	eq FLinspace.builtInName()           = "linspace";
 	eq FHomotopyExp.builtInName()        = "homotopy";
     eq FCardinality.builtInName()        = "cardinality";
-    eq FDecouple.builtInName()           = "Subtask.decouple";
 	eq FSemiLinearExp.builtInName()      = "semiLinear";
 	eq FInStream.builtInName()           = "inStream";
 	eq FDerInStream.builtInName()        = "derInStream";

@@ -48,15 +48,6 @@ jmi_value_reference is_negated(jmi_value_reference valueref) {
     return negated;
 }
 
-int is_real_input(jmi_t* jmi, jmi_value_reference valueref) {
-    jmi_value_reference index = get_index_from_value_ref(valueref);
-    if (index >= jmi->offs_real_u && index < jmi->offs_real_w) {
-        return TRUE;
-    } else {
-        return FALSE;
-    }
-}
-
 int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi_string_t resource_location) {
                        
     jmi_t* jmi_ = jmi;
@@ -227,8 +218,6 @@ int jmi_initialize(jmi_t* jmi) {
 
     jmi_save_last_successful_values(jmi);
     
-    /* Save restore mode activated after initialization */
-    jmi->save_restore_solver_state_mode = 1;
     jmi->is_initialized = 1;
     
     /* Initialize delay blocks */
@@ -583,10 +572,6 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 
         /* We are at an event -> set atEvent to true. */
         jmi->atEvent = JMI_TRUE;
-        
-        /* We don't need to save and restore state during event iteration */
-        jmi->save_restore_solver_state_mode = 0;
-        
         /* We are at an time event -> set atTimeEvent to true. */
         if (jmi->nextTimeEvent.defined) {
             jmi->atTimeEvent = ALMOST_ZERO(jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time);
@@ -712,8 +697,13 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         /* Reset atEvent flag */
         jmi->atEvent = JMI_FALSE;
 
-        /* Deprecated, does nothing. */
+        /* Evaluate the guards with the event flag set to false in order to
+         * reset guards depending on samplers before copying pre values.
+         * If this is not done, then the corresponding pre values for these guards
+         * will be true, and no event will be triggered at the next sample.
+         */
         retval = jmi_ode_guards(jmi);
+
         if (retval != 0) { /* Error check */
             jmi_log_comment(jmi->log, logError, "Computation of guard expressions failed.");
             jmi_log_unwind(jmi->log, top_node);
@@ -769,8 +759,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         
         /* Save the z values to the z_last vector */
         jmi_save_last_successful_values(jmi);
-        /* Block completed step, it should be saved and used when integrating */
-        jmi->save_restore_solver_state_mode = 1;
+        /* Block completed step */
         retval = jmi_block_completed_integrator_step(jmi);
         if(retval != 0) {
             jmi_log_comment(jmi->log, logError, "Completed block steps during event iteration failed.");

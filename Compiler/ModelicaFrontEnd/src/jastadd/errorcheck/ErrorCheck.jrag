@@ -726,17 +726,19 @@ aspect InstanceErrorCheck {
     }
 
     public void InstBaseClassDecl.errorCheckDerivativeAnnotations(ErrorCheckType checkType) {
-        errorCheckDerivativeAnnotations(checkType, findDerivativeAnnotationRoot());
+        errorCheckDerivativeAnnotations(checkType, annotation());
+        InstExternal ie = findFunctionExternal();
+        if (ie != null)
+            errorCheckDerivativeAnnotations(checkType, ie.annotation());
     }
     
     private void InstBaseClassDecl.errorCheckDerivativeAnnotations(ErrorCheckType checkType, AnnotationNode src) {
-        for (AnnotationNode derivative : src.allFor("derivative")) {
-            errorCheckDerivativeAnnotation(checkType, derivative);
-        }
+        for (AnnotationNode derivative : src)
+            if ("derivative".equals(derivative.name()))
+                errorCheckDerivativeAnnotation(checkType, derivative);
     }
 
     private void InstBaseClassDecl.errorCheckDerivativeAnnotation(ErrorCheckType checkType, AnnotationNode derivative) {
-        // TODO: Check that inputs/outputs of target function matches this function
         if (!derivative.isValue()) {
             derivative.ast().error("Function name is missing in derivative annotation declaration");
             return;
@@ -904,9 +906,6 @@ aspect InstanceErrorCheck {
     public static final SimpleProblemProducer ASTNode.CONSTANT_MISSING_BINDING_EXPRESSION =
             new SimpleWarningProducer("CONSTANT_MISSING_BINDING_EXPRESSION", ProblemKind.SEMANTIC, "The constant %s does not have a binding expression");
 
-    syn boolean InstModification.collectErrorsInBindingExp() = true;
-    eq InstDefaultRecordModification.collectErrorsInBindingExp() = false;
-    
     public void InstAssignable.collectErrors(ErrorCheckType checkType) {
         //log.debug(toString());
         if (!errorChecked) {
@@ -918,11 +917,9 @@ aspect InstanceErrorCheck {
             if (bexp != null) {
                 String type = isParameter() ? "parameter" : "constant";
                 // TODO: Check structural parameters as well
-                if (myInstValueMod().collectErrorsInBindingExp()) {
-                    bexp.collectErrors(checkType);
-                }
+                bexp.collectErrors(checkType);
                 // Check if the binding expression of constants can be evaluated
-                if (isConstant() && !bexp.type().isUnknown()) 
+                if (isConstant()) 
                     bexp.checkConstantExpression(checkType, "constant", qualifiedName());
                 else if (isParameter() && bexp.isCircular())
                     bexp.error("Circularity in binding expression of parameter: %s = %s", 

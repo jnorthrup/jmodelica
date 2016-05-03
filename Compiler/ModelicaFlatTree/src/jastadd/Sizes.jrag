@@ -41,44 +41,20 @@ aspect AccessSizes {
     inh Size FEndExp.mySize();
     eq FExpSubscript.getChild().mySize()   = accessContextSize();
     
-    eq FIdUse.getChild().mySize() = getFQName().calcMySize(getFQName().numParts());
-    eq FQNameFull.getFQNamePart(int i).mySize() = calcMySize(i+1);
-    
-    syn Size FQName.calcMySize(int i) = lookupFV(asFQNameFull()).size();
-    eq FQNameFull.calcMySize(int i) {
-        if (numParts() > 1) {
-            int j;
-            FAbstractVariable fv = null;
-            FQNameFull fqn = new FQNameFull();
-            fqn.parent = this;
-            for (j = 0; j < i; j++) {
-                fqn.addFQNamePart(getFQNamePart(j).copyFirstElement());
-                fv = lookupFV(fqn);
-                if (!fv.isUnknown()) {
-                    break;
-                }
+    eq FIdUse.getChild().mySize() {
+        if (inFunction()) {
+            FQNameFull fqn = getFQName().asFQNameFull();
+            if (fqn.numParts() > 1) {
+                FType type = lookupFV(fqn.copyPrefix(1)).type();
+                return type.lookupHierarchical(fqn, 1).size();
             }
-            return fv.lookupHierarchicalSize(this, j, i);
         }
-        return super.calcMySize(i);
+        return myFV().size();
     }
-    
-    syn FQNamePart FQNamePart.copyFirstElement() = new FQNamePart(getName());
-    eq FQNamePartArray.copyFirstElement()        = new FQNamePartArray(getName(), accessContextFAS());
-    
-    public Size FAbstractVariable.lookupHierarchicalSize(FQNameFull name, int part, int last) {
-        return type().lookupHierarchical(name, part+1, last).size();
-    }
-    
-    public Size FRecordVariable.lookupHierarchicalSize(FQNameFull name, int part, int last) {
-        FExp res = findHierarchicalAttributeValue(name, last, FAttribute.SIZE);
-        if (res != null) {
-            for (int i = part; i < last - 1; i++) {
-                res = res.cell(name.getFQNamePart(i).getFArraySubscripts());
-            }
-            return new MutableSize(res);
-        }
-        return super.lookupHierarchicalSize(name, part, last);
+    eq FQNameFull.getFQNamePart(int i).mySize() {
+        FQName n = copyPrefix(i + 1).removeFArraySubscripts();
+        n.setParent(this);
+        return lookupFV(n).size();
     }
     
     public Size Size.contract(int i) {
@@ -96,7 +72,7 @@ aspect AccessSizes {
     }
     
     public Size MutableSize.accessContextSize(FSubscript sub) {
-        if (isCircular(0) || size[0] != Size.UNKNOWN) {
+        if (size[0] != Size.UNKNOWN || sub == null || isCircular()) {
             return super.accessContextSize(sub);
         }
         MutableSize ms = new MutableSize(1);
@@ -159,7 +135,7 @@ aspect AccessSizes {
             new FIdUseExp(new FIdUseInstAccess(new InstDot(buildAccessContext(name(), null))));
     eq FQNamePart.getChild().buildAccessContextSizeExp() =
             new FIdUseExp(new FIdUse(new FQNameFull(buildAccessContext(name(), null))));
-    eq FIdUse.getChild().buildAccessContextSizeExp() =
+    eq FIdUse.getExpandedSubscripts().buildAccessContextSizeExp() =
             new FIdUseExp(new FIdUse(new FQNameFull(getFQName().buildAccessContext())));
     
     syn List<FQNamePart> FQName.buildAccessContext() = null;

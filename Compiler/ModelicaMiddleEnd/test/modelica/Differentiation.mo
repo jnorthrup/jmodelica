@@ -23,11 +23,11 @@ package Differentiation
             der(x1) + der(x2) = 1;
             x1 + cos(x2) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_Cos",
-            description="Test differentiation of cos",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_Cos",
+                description="Test differentiation of cos",
+                flatModel="
 fclass Differentiation.Expressions.Cos
  Real x1;
  Real x2;
@@ -48,11 +48,11 @@ end Differentiation.Expressions.Cos;
             der(x1) + der(x2) = 1;
             x1 + sin(x2) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_Sin",
-            description="Test of index reduction",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_Sin",
+                description="Test of index reduction",
+                flatModel="
 fclass Differentiation.Expressions.Sin
  Real x1;
  Real x2;
@@ -73,11 +73,11 @@ end Differentiation.Expressions.Sin;
             der(x1) + der(x2) = 1;
 -           x1 + 2*x2 = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_Neg",
-            description="Test of index reduction",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_Neg",
+                description="Test of index reduction",
+                flatModel="
 fclass Differentiation.Expressions.Neg
  Real x1;
  Real x2(stateSelect = StateSelect.prefer);
@@ -103,11 +103,11 @@ end Differentiation.Expressions.Neg;
             der(x1) + der(x2) = 1;
             x1 + exp(x2*p*time) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_Exp",
-            description="Test of index reduction",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_Exp",
+                description="Test of index reduction",
+                flatModel="
 fclass Differentiation.Expressions.Exp
  Real x1;
  Real x2(stateSelect = StateSelect.prefer);
@@ -134,11 +134,11 @@ end Differentiation.Expressions.Exp;
             der(x1) + der(x2) = 1;
             x1 + tan(x2) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_Tan",
-            description="Test of index reduction",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_Tan",
+                description="Test of index reduction",
+                flatModel="
 fclass Differentiation.Expressions.Tan
  Real x1;
  Real x2;
@@ -161,11 +161,11 @@ end Differentiation.Expressions.Tan;
             der(x1) + der(x2) = 1;
             x1 + asin(x2) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_Asin",
-            description="Test of index reduction",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_Asin",
+                description="Test of index reduction",
+                flatModel="
 fclass Differentiation.Expressions.Asin
  Real x1;
  Real x2;
@@ -188,11 +188,11 @@ end Differentiation.Expressions.Asin;
             der(x1) + der(x2) = 1;
             x1 + acos(x2) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_Acos",
-            description="Test of index reduction",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_Acos",
+                description="Test of index reduction",
+                flatModel="
 fclass Differentiation.Expressions.Acos
  Real x1;
  Real x2;
@@ -215,11 +215,11 @@ end Differentiation.Expressions.Acos;
             der(x1) + der(x2) = 1;
             x1 + atan(x2) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_Atan",
-            description="Test of index reduction",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_Atan",
+                description="Test of index reduction",
+                flatModel="
 fclass Differentiation.Expressions.Atan
  Real x1;
  Real x2;
@@ -243,11 +243,11 @@ end Differentiation.Expressions.Atan;
             der(x3) = time;
             x1 + atan2(x2,x3) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_Atan2",
-            description="Test of index reduction",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_Atan2",
+                description="Test of index reduction",
+                flatModel="
 fclass Differentiation.Expressions.Atan2
  Real x1;
  Real x2;
@@ -273,11 +273,11 @@ end Differentiation.Expressions.Atan2;
             der(x1) + der(x2) = 1;
             x1 + sinh(x2) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_Sinh",
-            description="Test of index reduction",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_Sinh",
+                description="Test of index reduction",
+                flatModel="
 fclass Differentiation.Expressions.Sinh
  Real x1;
  Real x2;
@@ -300,11 +300,11 @@ end Differentiation.Expressions.Sinh;
             der(x1) + der(x2) = 1;
             x1 + cosh(x2) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_Cosh",
-            description="Test of index reduction",
-            flatModel="
+            annotation(__JModelica(UnitTesting(tests={
+                TransformCanonicalTestCase(
+                    name="Expressions_Cosh",
+                    description="Test of index reduction",
+                    flatModel="
 fclass Differentiation.Expressions.Cosh
  Real x1;
  Real x2;
@@ -327,11 +327,11 @@ end Differentiation.Expressions.Cosh;
             der(x1) + der(x2) = 1;
             x1 + tanh(x2) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_Tanh",
-            description="Test of index reduction",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_Tanh",
+                description="Test of index reduction",
+                flatModel="
 fclass Differentiation.Expressions.Tanh
  Real x1;
  Real x2;
@@ -354,11 +354,11 @@ end Differentiation.Expressions.Tanh;
             der(x1) + der(x2) = 1;
             x1 + log(x2) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_Log",
-            description="Test of index reduction",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_Log",
+                description="Test of index reduction",
+                flatModel="
 fclass Differentiation.Expressions.Log
  Real x1;
  Real x2;
@@ -381,11 +381,11 @@ end Differentiation.Expressions.Log;
             der(x1) + der(x2) = 1;
             x1 + log10(x2) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_Log10",
-            description="Test of index reduction",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_Log10",
+                description="Test of index reduction",
+                flatModel="
 fclass Differentiation.Expressions.Log10
  Real x1;
  Real x2;
@@ -408,11 +408,11 @@ end Differentiation.Expressions.Log10;
             der(x1) + der(x2) = 1;
             x1 + sqrt(x2) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_Sqrt",
-            description="Test of index reduction",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_Sqrt",
+                description="Test of index reduction",
+                flatModel="
 fclass Differentiation.Expressions.Sqrt
  Real x1;
  Real x2;
@@ -435,11 +435,11 @@ end Differentiation.Expressions.Sqrt;
             der(x1) + der(x2) = 1;
             x1 + (if p>3 then 3*x2 else if p<=3 then sin(x2) else 2*x2) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_If",
-            description="Test of index reduction",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_If",
+                description="Test of index reduction",
+                flatModel="
 fclass Differentiation.Expressions.If
  Real x1;
  Real x2(stateSelect = StateSelect.prefer);
@@ -466,11 +466,11 @@ end Differentiation.Expressions.If;
             der(x1) + der(x2) = 1;
             x1 + x2^p + x2^1.4 = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_Pow",
-            description="Test of index reduction",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_Pow",
+                description="Test of index reduction",
+                flatModel="
 fclass Differentiation.Expressions.Pow
  Real x1;
  Real x2;
@@ -493,12 +493,12 @@ end Differentiation.Expressions.Pow;
             der(x1) + der(x2) = 1;
             (x1 + x2)/(x1 + p) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_Div1",
-            description="Test of index reduction",
-            dynamic_states=false,
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_Div1",
+                dynamic_states=false,
+                description="Test of index reduction",
+                flatModel="
 fclass Differentiation.Expressions.Div1
  Real x1;
  Real x2;
@@ -522,11 +522,11 @@ end Differentiation.Expressions.Div1;
             der(x1) + der(x2) = 1;
             (x1 + x2)/(p1*p2) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_Div2",
-            description="Test of index reduction",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_Div2",
+                description="Test of index reduction",
+                flatModel="
 fclass Differentiation.Expressions.Div2
  Real x1;
  Real x2;
@@ -550,11 +550,11 @@ end Differentiation.Expressions.Div2;
             der(x1) + der(x2) = 1;
             noEvent(x1 + sin(x2)) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_NoEvent",
-            description="Test of index reduction",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_NoEvent",
+                description="Test of index reduction",
+                flatModel="
 fclass Differentiation.Expressions.NoEvent
  Real x1;
  Real x2;
@@ -577,12 +577,12 @@ end Differentiation.Expressions.NoEvent;
             min({x1,x2}) = 0;
             min(x1,x3) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_MinExp",
-            description="Test of index reduction. Min expression.",
-            dynamic_states=false,
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="IMinExp",
+                description="Test of index reduction. Min expression.",
+                dynamic_states=false,
+                flatModel="
 fclass Differentiation.Expressions.MinExp
  Real x1;
  Real x2;
@@ -608,12 +608,12 @@ end Differentiation.Expressions.MinExp;
             max({x1,x2}) = 0;
             max(x1,x3) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_MaxExp",
-            description="Test of index reduction. Max expression.",
-            dynamic_states=false,
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_MaxExp",
+                description="Test of index reduction. Max expression.",
+                dynamic_states=false,
+                flatModel="
 fclass Differentiation.Expressions.MaxExp
  Real x1;
  Real x2;
@@ -639,11 +639,11 @@ end Differentiation.Expressions.MaxExp;
             der(x1) + der(x2) = 1;
             homotopy(x1,x2) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_Homotopy",
-            description="Test of index reduction. Homotopy expression.",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_Homotopy",
+                description="Test of index reduction. Homotopy expression.",
+                flatModel="
 fclass Differentiation.Expressions.Homotopy
  constant Real x1 = 0;
  Real x2;
@@ -652,6 +652,7 @@ initial equation
 equation
  der(x2) = 1;
 end Differentiation.Expressions.Homotopy;
+            
 ")})));
         end Homotopy;
 
@@ -661,11 +662,11 @@ end Differentiation.Expressions.Homotopy;
             der(x1) .+ der(x2) = {1,1};
             x1 .+ x2 = {0,0};
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_DotAdd",
-            description="Test of index reduction",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_DotAdd",
+                description="Test of index reduction",
+                flatModel="
 fclass Differentiation.Expressions.DotAdd
  Real x1[1];
  Real x1[2];
@@ -685,11 +686,11 @@ end Differentiation.Expressions.DotAdd;
             der(x1) .+ der(x2) = {1,1};
             x1 .- x2 = {0,0};
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_DotSub",
-            description="Test of index reduction",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_DotSub",
+                description="Test of index reduction",
+                flatModel="
 fclass Differentiation.Expressions.DotSub
  Real x1[1];
  Real x1[2];
@@ -709,12 +710,12 @@ end Differentiation.Expressions.DotSub;
             der(x1) .+ der(x2) = {1,1};
             x1 .* x2 = {0,0};
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_DotMul",
-            description="Test of index reduction",
-            dynamic_states=false,
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_DotMul",
+                description="Test of index reduction",
+                dynamic_states=false,
+                flatModel="
 fclass Differentiation.Expressions.DotMul
  Real x1[1];
  Real x1[2];
@@ -742,12 +743,12 @@ end Differentiation.Expressions.DotMul;
             der(x1) .+ der(x2) = {1,1};
             x1 ./ x2 = {0,0};
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_DotDiv",
-            description="Test of index reduction",
-            dynamic_states=false,
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_DotDiv",
+                description="Test of index reduction",
+                dynamic_states=false,
+                flatModel="
 fclass Differentiation.Expressions.DotDiv
  Real x1[1];
  Real x1[2];
@@ -775,11 +776,11 @@ end Differentiation.Expressions.DotDiv;
             der(x1) .+ der(x2) = {1,1};
             x1 .^ x2 = {0,0};
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_DotPow",
-            description="Test of index reduction",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_DotPow",
+                description="Test of index reduction",
+                flatModel="
 fclass Differentiation.Expressions.DotPow
  Real x1[1];
  Real x1[2];
@@ -808,11 +809,11 @@ end Differentiation.Expressions.DotPow;
             der(x1) + der(x2) = 1;
             x1 + div(x2, 3.14) = 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_DivFunc",
-            description="Test differentiation of div() operator. This model probably makes no sence in the real world!",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_DivFunc",
+                description="Test differentiation of div() operator. This model probably makes no sence in the real world!",
+                flatModel="
 fclass Differentiation.Expressions.DivFunc
  Real x1;
  Real x2;
@@ -843,12 +844,11 @@ end Differentiation.Expressions.DivFunc;
         equation
             x = f(time, 2);
             y = der(x);
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Expressions_FunctionCall1",
-            description="Test differentiation of function calls where the function have mixed order among inputs and outputs (also mixed type).",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_FunctionCall1",
+                description="Test differentiation of function calls where the function have mixed order among inputs and outputs (also mixed type).",
+                flatModel="
 fclass Differentiation.Expressions.FunctionCall1
  Real x;
  Real y;
@@ -938,6 +938,7 @@ equation
  m[1]._der_der_y = der(m[1].vy);
  2 * m[1].x * m[1]._der_der_x + 2 * m[1]._der_x * m[1]._der_x + (2 * m[1].y * m[1]._der_der_y + 2 * der(m[1].y) * der(m[1].y)) = 0.0;
 end Differentiation.ComponentArray;
+
 ")})));
     end ComponentArray;
 
@@ -995,171 +996,25 @@ end Differentiation.IntegerVariable;
 ")})));
 end IntegerVariable;
 
-package DiscreteTime
-    model DifferentiatedDiscreteVariable
-        Real x1,x2;
-    equation
-        der(x1) + der(x2) = 1;
-        when time > 2 then
-            x1 = sin(x2) + time;
-        end when;
-    
-        annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="DifferentiatedDiscreteVariable",
-            description="Test error given when differentiating a discrete real",
-            errorMessage="
+model DifferentiatedDiscreteVariable
+    Real x1,x2;
+equation
+    der(x1) + der(x2) = 1;
+    when time > 2 then
+        x1 = sin(x2) + time;
+    end when;
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="DifferentiatedDiscreteVariable",
+        description="Test error given when differentiating a discrete real",
+        errorMessage="
 1 errors found:
 
 Error in flattened model, DIFFERENTIATED_DISCRETE_VARIALBE:
   Unable to differentiate the variable x1 which is declared or infered to be discrete
 ")})));
-    end DifferentiatedDiscreteVariable;
-    
-    model AutoDiffOfDiscrete1
-        Real L(start=3.14) "Pendulum length";
-        parameter Real g =9.81 "Acceleration due to gravity";
-        Real x "Cartesian x coordinate";
-        Real y "Cartesian x coordinate";
-        Real vx "Velocity in x coordinate";
-        Real vy "Velocity in y coordinate";
-        Real lambda "Lagrange multiplier";
-    equation
-        when time > 5 then
-            L = 6.28;
-        end when;
-        der(x) = vx;
-        der(y) = vy;
-        der(vx) = lambda*x;
-        der(vy) + 0 = lambda*y - g;
-        x^2 + y^2 = L;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="IntegerVariable1",
-            description="Ensure that we allow the index reduction to differentiate discete variable references",
-            flatModel="
-fclass Differentiation.DiscreteTime.AutoDiffOfDiscrete1
- discrete Real L(start = 3.14) \"Pendulum length\";
- parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
- Real x \"Cartesian x coordinate\";
- Real y \"Cartesian x coordinate\";
- Real vx \"Velocity in x coordinate\";
- Real vy \"Velocity in y coordinate\";
- Real lambda \"Lagrange multiplier\";
- discrete Boolean temp_1;
- Real _der_vx;
- Real _der_vy;
- Real _der_x;
- Real _der_y;
- Real _ds.1.a1;
- Real _ds.1.s1;
- Real _ds.2.a1;
- Real _ds.2.s1;
- Real dynDer(x);
- Real dynDer(y);
- Real dynDer(_der_x);
- Real dynDer(_der_y);
-initial equation 
- _ds.1.s1 = 0.0;
- _ds.2.s1 = 0.0;
- y = 0.0;
- _der_y = 0.0;
- pre(L) = 3.14;
- pre(temp_1) = false;
-equation
- temp_1 = time > 5;
- L = if temp_1 and not pre(temp_1) then 6.28 else pre(L);
- dynDer(x) = vx;
- dynDer(y) = vy;
- _der_vx = lambda * ds(2, x);
- _der_vy = lambda * ds(2, y) - g;
- ds(2, x) ^ 2 + ds(2, y) ^ 2 = L;
- 2 * ds(2, x) * dynDer(x) + 2 * ds(2, y) * dynDer(y) = 0.0;
- dynDer(_der_x) = _der_vx;
- dynDer(_der_y) = _der_vy;
- 2 * ds(2, x) * dynDer(_der_x) + 2 * dynDer(x) * dynDer(x) + (2 * ds(2, y) * dynDer(_der_y) + 2 * dynDer(y) * dynDer(y)) = 0.0;
- ds(1, _der_x) = dynDer(x);
- ds(1, _der_y) = dynDer(y);
- der(_ds.1.s1) = dsDer(1, 1);
- der(_ds.2.s1) = dsDer(2, 1);
-end Differentiation.DiscreteTime.AutoDiffOfDiscrete1;
-")})));
-    end AutoDiffOfDiscrete1;
-    
-    model AutoDiffOfDiscrete2
-        Real L(start=3.14) "Pendulum length";
-        parameter Real g =9.81 "Acceleration due to gravity";
-        Real x "Cartesian x coordinate";
-        Real y "Cartesian x coordinate";
-        Real vx "Velocity in x coordinate";
-        Real vy "Velocity in y coordinate";
-        Real lambda "Lagrange multiplier";
-    equation
-        when time > 5 then
-            L = 6.28;
-        end when;
-        der(x) = vx;
-        der(y) = vy;
-        der(vx) = lambda*x;
-        der(vy) + 0 = lambda*y - g;
-        x^2 + y^2 = L;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="IntegerVariable2",
-            description="Ensure that we allow the index reduction to differentiate discete variable references",
-            flatModel="
-fclass Differentiation.DiscreteTime.AutoDiffOfDiscrete2
- discrete Real L(start = 3.14) \"Pendulum length\";
- parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
- Real x \"Cartesian x coordinate\";
- Real y \"Cartesian x coordinate\";
- Real vx \"Velocity in x coordinate\";
- Real vy \"Velocity in y coordinate\";
- Real lambda \"Lagrange multiplier\";
- discrete Boolean temp_1;
- Real _der_vx;
- Real _der_vy;
- Real _der_x;
- Real _der_y;
- Real _ds.1.a1;
- Real _ds.1.s1;
- Real _ds.2.a1;
- Real _ds.2.s1;
- Real dynDer(x);
- Real dynDer(y);
- Real dynDer(_der_x);
- Real dynDer(_der_y);
-initial equation 
- _ds.1.s1 = 0.0;
- _ds.2.s1 = 0.0;
- y = 0.0;
- _der_y = 0.0;
- pre(L) = 3.14;
- pre(temp_1) = false;
-equation
- temp_1 = time > 5;
- L = if temp_1 and not pre(temp_1) then 6.28 else pre(L);
- dynDer(x) = vx;
- dynDer(y) = vy;
- _der_vx = lambda * ds(2, x);
- _der_vy = lambda * ds(2, y) - g;
- ds(2, x) ^ 2 + ds(2, y) ^ 2 = L;
- 2 * ds(2, x) * dynDer(x) + 2 * ds(2, y) * dynDer(y) = 0.0;
- dynDer(_der_x) = _der_vx;
- dynDer(_der_y) = _der_vy;
- 2 * ds(2, x) * dynDer(_der_x) + 2 * dynDer(x) * dynDer(x) + (2 * ds(2, y) * dynDer(_der_y) + 2 * dynDer(y) * dynDer(y)) = 0.0;
- ds(1, _der_x) = dynDer(x);
- ds(1, _der_y) = dynDer(y);
- der(_ds.1.s1) = dsDer(1, 1);
- der(_ds.2.s1) = dsDer(2, 1);
-end Differentiation.DiscreteTime.AutoDiffOfDiscrete2;
-")})));
-    end AutoDiffOfDiscrete2;
-    
-    
-end DiscreteTime;
+end DifferentiatedDiscreteVariable;
 
 model ErrorMessage1
   Real x1;
@@ -1208,12 +1063,12 @@ Error in flattened model:
             der(x1) + der(x2) = 1;
             x1 + f(x2) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="DerivativeAnnotation_Test1",
-            description="Test of index reduction",
-            inline_functions="none",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="DerivativeAnnotation_Test1",
+                description="Test of index reduction",
+                inline_functions="none",
+                flatModel="
 fclass Differentiation.DerivativeAnnotation.Test1
  Real x1;
  Real x2;
@@ -1275,12 +1130,12 @@ end Differentiation.DerivativeAnnotation.Test1;
             x1[1] + f(x2,A) = 0;
             x1[2] = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="DerivativeAnnotation_Test2",
-            description="Test of index reduction",
-            inline_functions="none",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="DerivativeAnnotation_Test2",
+                description="Test of index reduction",
+                inline_functions="none",
+                flatModel="
 fclass Differentiation.DerivativeAnnotation.Test2
  parameter Real A[1,1] = 1 /* 1 */;
  parameter Real A[1,2] = 2 /* 2 */;
@@ -1302,8 +1157,8 @@ equation
 
 public
  function Differentiation.DerivativeAnnotation.Test2.f
-  input Real[:] x;
-  input Real[:,:] A;
+  input Real[2] x;
+  input Real[2, 2] A;
   output Real y;
  algorithm
   y := (x[1] * A[1,1] + x[2] * A[2,1]) * x[1] + (x[1] * A[1,2] + x[2] * A[2,2]) * x[2];
@@ -1312,10 +1167,10 @@ public
  end Differentiation.DerivativeAnnotation.Test2.f;
 
  function Differentiation.DerivativeAnnotation.Test2.f_der
-  input Real[:] x;
-  input Real[:,:] A;
-  input Real[:] der_x;
-  input Real[:,:] der_A;
+  input Real[2] x;
+  input Real[2, 2] A;
+  input Real[2] der_x;
+  input Real[2, 2] der_A;
   output Real der_y;
  algorithm
   der_y := (2 * x[1] * A[1,1] + 2 * x[2] * A[2,1]) * der_x[1] + (2 * x[1] * A[1,2] + 2 * x[2] * A[2,2]) * der_x[2] + ((x[1] * der_A[1,1] + x[2] * der_A[2,1]) * x[1] + (x[1] * der_A[1,2] + x[2] * der_A[2,2]) * x[2]);
@@ -1349,12 +1204,12 @@ end Differentiation.DerivativeAnnotation.Test2;
             x1[1] + f(x2) = 0;
             x1[2] = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="DerivativeAnnotation_Test3",
-            description="Test of index reduction",
-            inline_functions="none",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="DerivativeAnnotation_Test3",
+                description="Test of index reduction",
+                inline_functions="none",
+                flatModel="
 fclass Differentiation.DerivativeAnnotation.Test3
  Real x1[1];
  constant Real x1[2] = 0;
@@ -1372,7 +1227,7 @@ equation
 
 public
  function Differentiation.DerivativeAnnotation.Test3.f
-  input Real[:] x;
+  input Real[2] x;
   output Real y;
  algorithm
   y := x[1] ^ 2 + x[2] ^ 3;
@@ -1381,8 +1236,8 @@ public
  end Differentiation.DerivativeAnnotation.Test3.f;
 
  function Differentiation.DerivativeAnnotation.Test3.f_der
-  input Real[:] x;
-  input Real[:] der_x;
+  input Real[2] x;
+  input Real[2] der_x;
   output Real der_y;
  algorithm
   der_y := 2 * x[1] * der_x[1] + 3 * x[2] ^ 2 * der_x[2];
@@ -1424,12 +1279,12 @@ end Differentiation.DerivativeAnnotation.Test3;
             der(x) + der(y) = 0;
             x + F(y,x,0,x) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="DerivativeAnnotation_NoDerivative1",
-            description="Index reduction: function with record input & output",
-            inline_functions="none",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="DerivativeAnnotation_NoDerivative1",
+                description="Index reduction: function with record input & output",
+                inline_functions="none",
+                flatModel="
 fclass Differentiation.DerivativeAnnotation.NoDerivative1
  Real x;
  Real y;
@@ -1511,11 +1366,11 @@ end Differentiation.DerivativeAnnotation.NoDerivative1;
             der(dx) + der(dy) = 0;
             x + f(y) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="DerivativeAnnotation_Order1",
-            description="Test use of order argument to derivative annotation",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="DerivativeAnnotation_Order1",
+                description="Test use of order argument to derivative annotation",
+                flatModel="
 fclass Differentiation.DerivativeAnnotation.Order1
  Real x;
  Real dx;
@@ -1622,11 +1477,11 @@ end Differentiation.DerivativeAnnotation.Order1;
             der(dx) + der(dy) = 0;
             x + f(y, time) = 0;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="DerivativeAnnotation_Order2",
-            description="Test use of order argument to derivative annotation for function with two arguments",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="DerivativeAnnotation_Order2",
+                description="Test use of order argument to derivative annotation for function with two arguments",
+                flatModel="
 fclass Differentiation.DerivativeAnnotation.Order2
  Real x;
  Real dx;
@@ -1689,6 +1544,7 @@ public
  end Differentiation.DerivativeAnnotation.Order2.ddf;
 
 end Differentiation.DerivativeAnnotation.Order2;
+
 ")})));
         end Order2;
 
@@ -1749,11 +1605,11 @@ Error in flattened model:
             der(x1) + der(x2) = 1;
             x1 + F(x2) = 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AlgorithmDifferentiation_Simple",
-            description="Test differentiation of simple function",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="AlgorithmDifferentiation_Simple",
+                description="Test differentiation of simple function",
+                flatModel="
 fclass Differentiation.AlgorithmDifferentiation.Simple
  Real x1;
  Real x2;
@@ -1809,11 +1665,11 @@ end Differentiation.AlgorithmDifferentiation.Simple;
             der(x1) + der(x2.x[1]) = 1;
             x1 + F(x2) = 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AlgorithmDifferentiation_RecordInput",
-            description="Test differentiation of function with record input",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="AlgorithmDifferentiation_RecordInput",
+                description="Test differentiation of function with record input",
+                flatModel="
 fclass Differentiation.AlgorithmDifferentiation.RecordInput
  Real x1;
  Real x2.x[1];
@@ -1874,11 +1730,11 @@ end Differentiation.AlgorithmDifferentiation.RecordInput;
             r = F(x2);
             x1 + r.x[1] = 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AlgorithmDifferentiation_RecordOutput",
-            description="Test differentiation of function with record output",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="AlgorithmDifferentiation_RecordOutput",
+                description="Test differentiation of function with record output",
+                flatModel="
 fclass Differentiation.AlgorithmDifferentiation.RecordOutput
  Real x1;
  Real x2;
@@ -1946,11 +1802,11 @@ end Differentiation.AlgorithmDifferentiation.RecordOutput;
             der(x1) + der(x2) = 1;
             x1 + F(x2) = 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AlgorithmDifferentiation_For",
-            description="Test differentiation of function with for statement",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="AlgorithmDifferentiation_For",
+                description="Test differentiation of function with for statement",
+                flatModel="
 fclass Differentiation.AlgorithmDifferentiation.For
  Real x1;
  Real x2;
@@ -2033,11 +1889,11 @@ end Differentiation.AlgorithmDifferentiation.For;
             der(x1) + der(x2) = 1;
             F1(x1, x2) = 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AlgorithmDifferentiation_FunctionCall",
-            description="Test differentiation of function with function call statement",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="AlgorithmDifferentiation_FunctionCall",
+                description="Test differentiation of function with function call statement",
+                flatModel="
 fclass Differentiation.AlgorithmDifferentiation.FunctionCall
  Real x1;
  Real x2;
@@ -2137,11 +1993,11 @@ end Differentiation.AlgorithmDifferentiation.FunctionCall;
             der(x1) + der(x2) = 1;
             x1 + F(x2) = 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AlgorithmDifferentiation_If",
-            description="Test differentiation of function with if statement",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="AlgorithmDifferentiation_If",
+                description="Test differentiation of function with if statement",
+                flatModel="
 fclass Differentiation.AlgorithmDifferentiation.If
  Real x1;
  Real x2;
@@ -2209,11 +2065,11 @@ end Differentiation.AlgorithmDifferentiation.If;
             der(x1) + der(x2) = 1;
             x1 + F({x2}) = 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AlgorithmDifferentiation_InitArray",
-            description="Test differentiation of function with initial array statement",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="AlgorithmDifferentiation_InitArray",
+                description="Test differentiation of function with initial array statement",
+                flatModel="
 fclass Differentiation.AlgorithmDifferentiation.InitArray
  Real x1;
  Real x2;
@@ -2231,7 +2087,7 @@ public
   output Real y;
   Real[:] a;
  algorithm
-  init a as Real[size(x, 1)];
+  size(a) := {size(x, 1)};
   for i1 in 1:size(x, 1) loop
    a[i1] := x[i1] .^ 2;
   end for;
@@ -2248,8 +2104,8 @@ public
   Real[:] a;
   Real[:] _der_a;
  algorithm
-  init a as Real[size(x, 1)];
-  init _der_a as Real[size(x, 1)];
+  size(a) := {size(x, 1)};
+  size(_der_a) := {size(x, 1)};
   for i1 in 1:size(x, 1) loop
    _der_a[i1] := 2 .* x[i1] .* _der_x[i1];
    a[i1] := x[i1] .^ 2;
@@ -2288,13 +2144,13 @@ end Differentiation.AlgorithmDifferentiation.InitArray;
             der(x1) + der(x2) = 1;
             x1 + e(F({R(x2)})) = 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="AlgorithmDifferentiation_RecordArray",
-            description="Test code gen of differentiated function with array of records #3611",
-            dynamic_states=false,
-            template="$C_functions$",
-            generatedCode="
+        annotation(__JModelica(UnitTesting(tests={
+            CCodeGenTestCase(
+                name="AlgorithmDifferentiation_RecordArray",
+                description="Test code gen of differentiated function with array of records #3611",
+                template="$C_functions$",
+                dynamic_states=false,
+                generatedCode="
 void func_Differentiation_AlgorithmDifferentiation_RecordArray_F_def0(R_0_ra* x_a, R_0_ra* y_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, R_0_r, R_0_ra, y_an, 1, 1)
@@ -2311,17 +2167,16 @@ void func_Differentiation_AlgorithmDifferentiation_RecordArray__der_F_def1(R_0_r
     JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, R_0_r, R_0_ra, _der_y_an, 1, 1)
     JMI_ARR(STAT, R_0_r, R_0_ra, y_a, 1, 1)
-    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, y_a, 1, 1, 1)
     if (_der_y_a == NULL) {
         JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, _der_y_an, 1, 1, 1)
         _der_y_a = _der_y_an;
     }
+    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, y_a, 1, 1, 1)
     jmi_array_rec_1(_der_y_a, 1)->x = jmi_array_rec_1(_der_x_a, 1)->x;
     jmi_array_rec_1(y_a, 1)->x = jmi_array_rec_1(x_a, 1)->x;
     JMI_DYNAMIC_FREE()
     return;
 }
-
 ")})));
         end RecordArray;
 
@@ -2344,11 +2199,11 @@ void func_Differentiation_AlgorithmDifferentiation_RecordArray__der_F_def1(R_0_r
             der(x1) + der(x2) = 1;
             x1 + F(x2) = 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AlgorithmDifferentiation_While",
-            description="Test differentiation of function with while statement",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="AlgorithmDifferentiation_While",
+                description="Test differentiation of function with while statement",
+                flatModel="
 fclass Differentiation.AlgorithmDifferentiation.While
  Real x1;
  Real x2;
@@ -2372,7 +2227,7 @@ public
   end while;
   y := sin(x);
   return;
- annotation(Inline = false,smoothOrder = 1,derivative(order = 1) = Differentiation.AlgorithmDifferentiation.While._der_F);
+ annotation(Inline = false, smoothOrder = 1,derivative(order = 1) = Differentiation.AlgorithmDifferentiation.While._der_F);
  end Differentiation.AlgorithmDifferentiation.While.F;
 
  function Differentiation.AlgorithmDifferentiation.While._der_F
@@ -2433,11 +2288,11 @@ end Differentiation.AlgorithmDifferentiation.While;
             der(x1) + der(x2) = 1;
             F1(x1, x2) = 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AlgorithmDifferentiation_Recursive",
-            description="Test differentiation of Recursive function",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="AlgorithmDifferentiation_Recursive",
+                description="Test differentiation of Recursive function",
+                flatModel="
 fclass Differentiation.AlgorithmDifferentiation.Recursive
  Real x1;
  Real x2;
@@ -2546,11 +2401,11 @@ end Differentiation.AlgorithmDifferentiation.Recursive;
             der(x1) + der(x2) = 1;
             x1 + F(x2) = 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AlgorithmDifferentiation_DiscreteComponents",
-            description="Test differentiation of function with discrete components",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="AlgorithmDifferentiation_DiscreteComponents",
+                description="Test differentiation of function with discrete components",
+                flatModel="
 fclass Differentiation.AlgorithmDifferentiation.DiscreteComponents
  Real x1;
  Real x2;
@@ -2569,7 +2424,7 @@ public
   output Integer c;
  algorithm
   c := 0;
-  c := if x > 23 then 2 else -2;
+  c := if x > 23 then 2 else - 2;
   c := c + 23;
   y := sin(x);
   return;
@@ -2584,7 +2439,7 @@ public
   Integer c;
  algorithm
   c := 0;
-  c := if x > 23 then 2 else -2;
+  c := if x > 23 then 2 else - 2;
   c := c + 23;
   _der_y := cos(x) * _der_x;
   y := sin(x);
@@ -2619,12 +2474,12 @@ end Differentiation.AlgorithmDifferentiation.DiscreteComponents;
             der(vy) = lambda*y - g;
             square(x) + square(y) = L;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AlgorithmDifferentiation_PlanarPendulum",
-            description="Test differentiation of simple function twice",
-            dynamic_states=false,
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="AlgorithmDifferentiation_PlanarPendulum",
+                description="Test differentiation of simple function twice",
+                dynamic_states=false,
+                flatModel="
 fclass Differentiation.AlgorithmDifferentiation.PlanarPendulum
  parameter Real L = 1 \"Pendulum length\" /* 1 */;
  parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
@@ -2704,11 +2559,11 @@ end Differentiation.AlgorithmDifferentiation.PlanarPendulum;
             Real a = F(time * 2);
             Real b = der(a);
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AlgorithmDifferentiation_SelfReference_AssignStmt",
-            description="Test differentiation of statements with lsh variable in rhs",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="AlgorithmDifferentiation_SelfReference_AssignStmt",
+                description="Test differentiation of statements with lsh variable in rhs",
+                flatModel="
 fclass Differentiation.AlgorithmDifferentiation.SelfReference_AssignStmt
  Real a;
  Real b;
@@ -2769,11 +2624,11 @@ end Differentiation.AlgorithmDifferentiation.SelfReference_AssignStmt;
             Real a = F1(time * 2);
             Real b = der(a);
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AlgorithmDifferentiation_SelfReference_FunctionCall",
-            description="Test differentiation of statements with lsh variable in rhs",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="AlgorithmDifferentiation_SelfReference_FunctionCall",
+                description="Test differentiation of statements with lsh variable in rhs",
+                flatModel="
 fclass Differentiation.AlgorithmDifferentiation.SelfReference_FunctionCall
  Real a;
  Real b;
@@ -2858,11 +2713,11 @@ equation
     x = f(y, {time});
     der(y) = der(x);
     
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="TempDiff",
-            description="Test differentiation of temporary array from scalarization",
-            flatModel="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="TempDiff",
+                description="Test differentiation of temporary array from scalarization",
+                flatModel="
 fclass Differentiation.TempDiff
  Real x;
  Real y;
@@ -2881,10 +2736,9 @@ public
   output Real y;
   Real temp_1;
   Real[:] temp_2;
-  Real[:] temp_3;
+  Real[1] temp_3;
  algorithm
-  init temp_2 as Real[1 + size(x2, 1)];
-  init temp_3 as Real[1];
+  size(temp_2) := {1 + size(x2, 1)};
   temp_3[1] := x1;
   for i2 in 1:1 loop
    temp_2[i2] := temp_3[i2];
@@ -2912,13 +2766,11 @@ public
   Real _der_temp_1;
   Real[:] temp_2;
   Real[:] _der_temp_2;
-  Real[:] temp_3;
-  Real[:] _der_temp_3;
+  Real[1] temp_3;
+  Real[1] _der_temp_3;
  algorithm
-  init temp_2 as Real[1 + size(x2, 1)];
-  init _der_temp_2 as Real[1 + size(x2, 1)];
-  init temp_3 as Real[1];
-  init _der_temp_3 as Real[1];
+  size(temp_2) := {1 + size(x2, 1)};
+  size(_der_temp_2) := {1 + size(x2, 1)};
   _der_temp_3[1] := _der_x1;
   temp_3[1] := x1;
   for i2 in 1:1 loop
@@ -2944,325 +2796,5 @@ public
 end Differentiation.TempDiff;
 ")})));
 end TempDiff;
-
-
-model MultipleDerivativeAnnotation1
-    function f
-        input Real x;
-        output Real y;
-    algorithm
-        y := x;
-        annotation (derivative(order=1) = df,
-                    Inline=false);
-    end f;
-
-    function df
-        input Real x;
-        input Real dx;
-        output Real dy;
-    algorithm
-        dy := x + dx;
-        annotation (derivative(order=2) = d2f,
-                    derivative(order=1) = ddf,
-                    Inline=false);
-    end df;
-
-    function ddf
-        input Real x;
-        input Real dx;
-        input Real dx2;
-        input Real ddx;
-        output Real ddy;
-    algorithm
-        ddy := 0;
-        annotation (Inline=false);
-     end ddf;
-
-    function d2f
-        input Real x;
-        input Real dx;
-        input Real d2x;
-        output Real d2y;
-    algorithm
-        d2y := x + dx + d2x;
-        annotation (Inline=false);
-    end d2f;
-
-    Real x;
-    Real y;
-    Real z;
-    Real dx;
-    Real dy;
-equation
-    x = f(time);
-    der(x) = y;
-    der(y) = z;
-    dx = df(2.0 * time, 2.0);
-    der(dx) = dy;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="MultipleDerivativeAnnotation1",
-            description="Multiple derivative annotation - different order",
-            flatModel="
-fclass Differentiation.MultipleDerivativeAnnotation1
- Real x;
- Real y;
- Real z;
- Real dx;
- Real dy;
- Real _der_x;
- Real _der_y;
- Real _der_dx;
- Real _der_der_x;
-equation
- x = Differentiation.MultipleDerivativeAnnotation1.f(time);
- _der_x = y;
- _der_y = z;
- dx = Differentiation.MultipleDerivativeAnnotation1.df(2.0 * time, 2.0);
- _der_dx = dy;
- _der_x = Differentiation.MultipleDerivativeAnnotation1.df(time, 1.0);
- _der_der_x = _der_y;
- _der_der_x = Differentiation.MultipleDerivativeAnnotation1.d2f(time, 1.0, 0.0);
- _der_dx = Differentiation.MultipleDerivativeAnnotation1.ddf(2.0 * time, 2.0, 2.0, 0.0);
-
-public
- function Differentiation.MultipleDerivativeAnnotation1.f
-  input Real x;
-  output Real y;
- algorithm
-  y := x;
-  return;
- annotation(derivative(order = 1) = Differentiation.MultipleDerivativeAnnotation1.df,Inline = false);
- end Differentiation.MultipleDerivativeAnnotation1.f;
-
- function Differentiation.MultipleDerivativeAnnotation1.df
-  input Real x;
-  input Real dx;
-  output Real dy;
- algorithm
-  dy := x + dx;
-  return;
- annotation(derivative(order = 2) = Differentiation.MultipleDerivativeAnnotation1.d2f,derivative(order = 1) = Differentiation.MultipleDerivativeAnnotation1.ddf,Inline = false);
- end Differentiation.MultipleDerivativeAnnotation1.df;
-
- function Differentiation.MultipleDerivativeAnnotation1.d2f
-  input Real x;
-  input Real dx;
-  input Real d2x;
-  output Real d2y;
- algorithm
-  d2y := x + dx + d2x;
-  return;
- annotation(Inline = false);
- end Differentiation.MultipleDerivativeAnnotation1.d2f;
-
- function Differentiation.MultipleDerivativeAnnotation1.ddf
-  input Real x;
-  input Real dx;
-  input Real dx2;
-  input Real ddx;
-  output Real ddy;
- algorithm
-  ddy := 0;
-  return;
- annotation(Inline = false);
- end Differentiation.MultipleDerivativeAnnotation1.ddf;
-
-end Differentiation.MultipleDerivativeAnnotation1;
-")})));
-end MultipleDerivativeAnnotation1;
-
-
-model MultipleDerivativeAnnotation2
-    function f
-        input Real x;
-        input Real y;
-        input Real t;
-        output Real z;
-    algorithm
-        z := x + y;
-        annotation (derivative(zeroDerivative=x, zeroDerivative=y, noDerivative=t) = dfcxy,
-                    derivative(zeroDerivative=x, noDerivative=t) = dfcx,
-                    derivative(zeroDerivative=y, noDerivative=t) = dfcy,
-                    derivative(order=1, noDerivative=t) = df,
-                    Inline=false);
-    end f;
-
-    function df
-        input Real x;
-        input Real y;
-        input Real t;
-        input Real dx;
-        input Real dy;
-        output Real dz;
-    algorithm
-        dz := dx + dy;
-        annotation (Inline=false);
-    end df;
-
-    function dfcx
-        input Real x;
-        input Real y;
-        input Real t;
-        input Real dy;
-        output Real dz;
-    algorithm
-        dz := dy;
-        annotation (Inline=false);
-     end dfcx;
-
-    function dfcy
-        input Real x;
-        input Real y;
-        input Real t;
-        input Real dx;
-        output Real dz;
-    algorithm
-        dz := dx;
-        annotation (Inline=false);
-     end dfcy;
-
-    function dfcxy
-        input Real x;
-        input Real y;
-        input Real t;
-        output Real dz;
-    algorithm
-        dz := 0;
-        annotation (Inline=false);
-     end dfcxy;
-
-    Real t[4] = (1:4) * time;
-    Real x1;
-    Real y1;
-    Real x2;
-    Real y2;
-    Real x3;
-    Real y3;
-    Real x4;
-    Real y4;
-equation
-    x1 = f(t[1], t[2], time);
-    der(x1) = y1;
-    x2 = f(t[3], 5, time);
-    der(x2) = y2;
-    x3 = f(6, t[4], time);
-    der(x3) = y3;
-    x4 = f(7, 8, time);
-    der(x4) = y4;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="MultipleDerivativeAnnotation2",
-            description="Multiple derivative annotation - different zeroDerivative",
-            flatModel="
-fclass Differentiation.MultipleDerivativeAnnotation2
- Real t[1];
- Real t[2];
- Real t[3];
- Real t[4];
- Real x1;
- Real y1;
- Real x2;
- Real y2;
- Real x3;
- Real y3;
- Real x4;
- Real y4;
- Real _der_x1;
- Real _der_x2;
- Real _der_x3;
- Real _der_x4;
- Real _der_t[1];
- Real _der_t[2];
- Real _der_t[3];
- Real _der_t[4];
-equation
- x1 = Differentiation.MultipleDerivativeAnnotation2.f(t[1], t[2], time);
- _der_x1 = y1;
- x2 = Differentiation.MultipleDerivativeAnnotation2.f(t[3], 5, time);
- _der_x2 = y2;
- x3 = Differentiation.MultipleDerivativeAnnotation2.f(6, t[4], time);
- _der_x3 = y3;
- x4 = Differentiation.MultipleDerivativeAnnotation2.f(7, 8, time);
- _der_x4 = y4;
- t[1] = time;
- t[2] = 2 * time;
- t[3] = 3 * time;
- t[4] = 4 * time;
- _der_x4 = Differentiation.MultipleDerivativeAnnotation2.dfcxy(7, 8, time);
- _der_x1 = Differentiation.MultipleDerivativeAnnotation2.df(t[1], t[2], time, _der_t[1], _der_t[2]);
- _der_t[1] = 1.0;
- _der_t[2] = 2;
- _der_x2 = Differentiation.MultipleDerivativeAnnotation2.dfcy(t[3], 5, time, _der_t[3]);
- _der_t[3] = 3;
- _der_x3 = Differentiation.MultipleDerivativeAnnotation2.dfcx(6, t[4], time, _der_t[4]);
- _der_t[4] = 4;
-
-public
- function Differentiation.MultipleDerivativeAnnotation2.f
-  input Real x;
-  input Real y;
-  input Real t;
-  output Real z;
- algorithm
-  z := x + y;
-  return;
- annotation(derivative(zeroDerivative = x,zeroDerivative = y,noDerivative = t) = Differentiation.MultipleDerivativeAnnotation2.dfcxy,derivative(zeroDerivative = x,noDerivative = t) = Differentiation.MultipleDerivativeAnnotation2.dfcx,derivative(zeroDerivative = y,noDerivative = t) = Differentiation.MultipleDerivativeAnnotation2.dfcy,derivative(order = 1,noDerivative = t) = Differentiation.MultipleDerivativeAnnotation2.df,Inline = false);
- end Differentiation.MultipleDerivativeAnnotation2.f;
-
- function Differentiation.MultipleDerivativeAnnotation2.dfcxy
-  input Real x;
-  input Real y;
-  input Real t;
-  output Real dz;
- algorithm
-  dz := 0;
-  return;
- annotation(Inline = false);
- end Differentiation.MultipleDerivativeAnnotation2.dfcxy;
-
- function Differentiation.MultipleDerivativeAnnotation2.dfcx
-  input Real x;
-  input Real y;
-  input Real t;
-  input Real dy;
-  output Real dz;
- algorithm
-  dz := dy;
-  return;
- annotation(Inline = false);
- end Differentiation.MultipleDerivativeAnnotation2.dfcx;
-
- function Differentiation.MultipleDerivativeAnnotation2.dfcy
-  input Real x;
-  input Real y;
-  input Real t;
-  input Real dx;
-  output Real dz;
- algorithm
-  dz := dx;
-  return;
- annotation(Inline = false);
- end Differentiation.MultipleDerivativeAnnotation2.dfcy;
-
- function Differentiation.MultipleDerivativeAnnotation2.df
-  input Real x;
-  input Real y;
-  input Real t;
-  input Real dx;
-  input Real dy;
-  output Real dz;
- algorithm
-  dz := dx + dy;
-  return;
- annotation(Inline = false);
- end Differentiation.MultipleDerivativeAnnotation2.df;
-
-end Differentiation.MultipleDerivativeAnnotation2;
-")})));
-end MultipleDerivativeAnnotation2;
-
 
 end Differentiation;
