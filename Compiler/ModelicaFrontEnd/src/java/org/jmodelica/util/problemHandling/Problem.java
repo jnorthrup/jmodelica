@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.jmodelica.api.problemHandling;
+package org.jmodelica.util.problemHandling;
 
 import java.util.Collection;
 import java.util.Set;
@@ -22,8 +22,6 @@ import java.util.TreeSet;
 import org.jmodelica.util.logging.Level;
 import org.jmodelica.util.logging.XMLLogger;
 import org.jmodelica.util.logging.units.LoggingUnit;
-import org.jmodelica.util.problemHandling.ReporterNode;
-import org.jmodelica.util.problemHandling.WarningFilteredProblem;
 
 /**
  * Represents a error or warning given by the compiler during compilation of

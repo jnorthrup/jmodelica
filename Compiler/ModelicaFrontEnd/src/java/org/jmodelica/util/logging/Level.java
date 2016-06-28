@@ -15,7 +15,7 @@
 */
 package org.jmodelica.util.logging;
 
-import org.jmodelica.api.problemHandling.ProblemSeverity;
+import org.jmodelica.util.problemHandling.ProblemSeverity;
 
 
 public enum Level {
