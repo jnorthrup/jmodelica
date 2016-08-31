@@ -479,7 +479,7 @@ aspect FunctionInlining {
         } else if (type().isRecord()) {
             oldName += ".";
             for (FRecordComponentType part : ((FRecordType) type()).getComponents()) {
-                component(part.getName()).addInliningVarsAndEqns(fi, oldName + part.getName(), noEvent);
+                dynamicFExp(extractRecordFExp(part.getName())).addInliningVarsAndEqns(fi, oldName + part.getName(), noEvent);
             }
         } else {
             fi.addVarAndEqn(oldName, this, noEvent);

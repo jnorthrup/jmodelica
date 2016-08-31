@@ -388,6 +388,8 @@ aspect CCodeGen {
         FAbstractVariable fv = myFV();
         if (fv.isUnknown()) {
             fv = myNonPreFV();
+            if (!fv.isContinuous())
+                throw new UnsupportedOperationException();
         }
         str.print(fv.preName_C());
     }
@@ -3579,7 +3581,7 @@ aspect CCodeGen {
 	}
 	
     public FExp FRecordConstructor.extractRecordComponentExp(String name) {
-        return component(name);
+        return myArgFExp(name);
     }
     
     public void AbstractEquationBlock.genEvalModeValueReferences_C(CodePrinter p, CodeStream str, String indent, 
