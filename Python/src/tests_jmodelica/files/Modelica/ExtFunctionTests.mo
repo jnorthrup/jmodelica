@@ -225,17 +225,6 @@ equation
     x = whileTrue(1);
 end ExternalInfinityTest;
 
-model ExternalInfinityTestCeval
-function whileTrue
-    input Real a;
-    output Real b;
-    external "C" annotation(
-        Library="arrayFunctions",
-        Include="#include \"arrayFunctions.h\"");
-end whileTrue;
-    constant Real x = whileTrue(1);
-end ExternalInfinityTestCeval;
-
 package CEval
   package C
     model RealTest

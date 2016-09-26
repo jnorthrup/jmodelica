@@ -230,30 +230,16 @@ class TestExternalInf:
         """
         Sets up the test class. Check timeout of infinite loop during constant evaluation.
         """
+        self.cpath = "ExtFunctionTests.ExternalInfinityTest"
         self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
         
     @testattr(stddist = True)
-    def test_InfiniteLoopExternalEvaluation(self):
+    def test_ExtFuncShared(self):
         """ 
         Test compiling a model with external functions in a shared library. Infinite loop.
         """
-        fmu_name = compile_fmu("ExtFunctionTests.ExternalInfinityTest", self.fpath)
+        fmu_name = compile_fmu(self.cpath, self.fpath)
         
-    @testattr(stddist = True)
-    def test_InfiniteLoopExternalEvaluationError(self):
-        """ 
-        Test compiling a model with external functions in a shared library. Infinite loop.
-        """
-        try:
-            fmu_name = compile_fmu("ExtFunctionTests.ExternalInfinityTestCeval", self.fpath, compiler_options={"external_constant_evaluation":100}, compiler_log_level="e:e.txt")
-        except:
-            pass
-        file=open("e.txt")
-        i = 0
-        for line in file.readlines():
-            if "timed out" in line:
-                i = i+1
-        assert i == 1, 'Wrong error message'
         
 class TestExternalObject:
     
@@ -516,13 +502,12 @@ class TestFortranBasic:
         '''
         Constant evaluation of basic external fortran function with Reals.
         '''
-        pass
-        #cpath = "ExtFunctionTests.CEval.Fortran.RealTestMatrix"
-        #fmu_name = compile_fmu(cpath, self.fpath)
-        #model = load_fmu(fmu_name)
-        #res = model.simulate()
-        #nose.tools.assert_equals(res.final('y1[1,1]'), 1)
-        #nose.tools.assert_equals(res.final('y2[1,1]'), 9)
+        cpath = "ExtFunctionTests.CEval.Fortran.RealTestMatrix"
+        fmu_name = compile_fmu(cpath, self.fpath)
+        model = load_fmu(fmu_name)
+        res = model.simulate()
+        nose.tools.assert_equals(res.final('y1[1,1]'), 1)
+        nose.tools.assert_equals(res.final('y2[1,1]'), 9)
         
     @testattr(stddist = True)
     def testCEvalInteger(self):

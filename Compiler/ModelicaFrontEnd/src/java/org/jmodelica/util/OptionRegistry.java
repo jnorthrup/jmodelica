@@ -340,7 +340,7 @@ abstract public class OptionRegistry {
              Category.internal,
              "", 
              "The value of this option is appended to the MODELICAPATH " +
-             "when searching for libraries. Deprecated."),
+             "when searching for libraries. Decrepated."),
         START_FIX
             ("state_start_values_fixed", 
              OptionType.compiler, 
@@ -367,12 +367,6 @@ abstract public class OptionRegistry {
              Category.uncommon,
              true,
              "If enabled, then alias constants are eliminated from the model."),
-        ELIM_LINEAR_EQNS
-            ("eliminate_linear_equations",
-             OptionType.compiler,
-             Category.uncommon,
-             true,
-             "If enabled, then equations with linear sub expressions are substituted and eliminated."),
         VPROP
             ("variability_propagation", 
              OptionType.compiler, 
