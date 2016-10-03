@@ -989,8 +989,9 @@ class Test_FMI_Compile:
         """ Test compiling with compiler options."""
         libdir = os.path.join(get_files_path(), 'MODELICAPATH_test', 'LibLoc1',
             'LibA')
-        co = {"index_reduction":True, "equation_sorting":True}
-        compile_fmu('RLC_Circuit', [os.path.join(path_to_mofiles,'RLC_Circuit.mo'), libdir],
+        co = {"index_reduction":True, "equation_sorting":True,
+            "extra_lib_dirs":[libdir]}
+        compile_fmu('RLC_Circuit', os.path.join(path_to_mofiles,'RLC_Circuit.mo'),
             compiler_options = co)
 
 class TestDependentParameters(object):
