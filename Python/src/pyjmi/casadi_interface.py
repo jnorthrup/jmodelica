@@ -48,6 +48,9 @@ if modelicacasadi_present:
     from modelicacasadi_wrapper import Model as CI_Model
     from modelicacasadi_transfer import transfer_model as _transfer_model
     from modelicacasadi_transfer import transfer_optimization_problem as _transfer_optimization_problem 
+    
+import warnings
+warnings.filterwarnings("ignore",category=DeprecationWarning)
 
 def transfer_model(class_name, file_name=[],
                    compiler_options={}, compiler_log_level='warning'):
@@ -242,7 +245,7 @@ class Model(CI_Model):
                     else:
                         raise RuntimeError("BUG: Unable to evaluate " +
                                            "value of %s." % var.getName())
-            return val.getValue()
+            return float(val)
         elif attr == "comment":
             var_desc = var.getAttribute("comment")
             if var_desc is None:
@@ -498,7 +501,7 @@ class OptimizationProblem(Model, CI_OP, ModelBase):
         """
         time_points = map(casadi.MX, time_points)
         sensitivities = N.array([[self.getVariable('d%s/d%s' % (var, par)) for par in parameters] for var in outputs])
-        timed_mx_vars = [N.array([[casadi.MX.sym(sens.getName() + "(%s)" % tp.getValue()) for sens in sensitivities[i]]
+        timed_mx_vars = [N.array([[casadi.MX.sym(sens.getName() + "(%s)" % float(tp)) for sens in sensitivities[i]]
                                   for i in xrange(len(outputs))]) for tp in time_points]
         timed_sens = []
         for i in xrange(len(time_points)):

@@ -1142,7 +1142,7 @@ model RecursiveStructure5
             description="Don't trigger recursiveness check on for expression in binding exp of Integer",
             flatModel="
 fclass TypeTests.RecursiveStructure5
- discrete Integer i = sum({1, 2});
+ discrete Integer i = sum(i for i in 1:2);
 end TypeTests.RecursiveStructure5;
 ")})));
 end RecursiveStructure5;
@@ -1157,7 +1157,7 @@ model RecursiveStructure6
             description="Don't trigger recursiveness check on for expression in modifier on Integer",
             flatModel="
 fclass TypeTests.RecursiveStructure6
- discrete Integer i(start = sum({1, 2})) = 1;
+ discrete Integer i(start = sum(i for i in 1:2)) = 1;
 end TypeTests.RecursiveStructure6;
 ")})));
 end RecursiveStructure6;
@@ -1899,8 +1899,6 @@ public
   input Real[:] y;
   output Real[:,:] z;
  algorithm
-  assert(3 == size(x, 1), \"Mismatching sizes in function 'TypeTests.Primitive4.f', component 'x', dimension '1'\");
-  assert(3 == size(y, 1), \"Mismatching sizes in function 'TypeTests.Primitive4.f', component 'y', dimension '1'\");
   init z as Real[3, 3];
   z[1:3,1:3] := {x[1:3], cross(x[1:3], y[1:3]), y[1:3]};
   return;

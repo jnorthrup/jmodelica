@@ -77,7 +77,7 @@ def run_demo(with_plots=True):
     except:
         pass
     else:
-        cost = float(res.solver.solver_object.output(casadi.NLP_SOLVER_F))
+        cost = float(res.solver.solver_object.getOutput('f'))
         N.testing.assert_allclose(cost, 1.0455646e-03, rtol=5e-3)
 
     # Plot solution

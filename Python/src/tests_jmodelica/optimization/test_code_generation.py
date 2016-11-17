@@ -37,10 +37,11 @@ def test_code_gen():
     var_names = ('x1', 'x2', 'u')
     func_names = ['nlp_test', 'grad_f_test', 'jac_g_test', 'hess_lag_test']
     exts = ['.c']
-    if os.name == 'nt':
-        exts.append('.dll')
-    else:
-        exts.append('.so')
+    # if os.name == 'nt':
+    #     exts.append('.dll')
+    # else:
+    #     exts.append('.so')
+    exts.append('.so') # CasADi 2.4 seems to expect .so even on Windows
     
     file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
     op = transfer_optimization_problem("VDP_pack.VDP_Opt2", file_path)
@@ -59,7 +60,7 @@ def test_code_gen():
     file_ctimes = {}
     for func_name in func_names:
         for ext in exts:
-            file_name = func_name + ext
+            file_name = "__func_" + func_name + ext
             assert os.path.isfile(file_name)
             file_ctimes[file_name] = os.stat(file_name).st_ctime
     
@@ -72,7 +73,7 @@ def test_code_gen():
     # Check that files weren't modified
     for func_name in func_names:
         for ext in exts:
-            file_name = func_name + ext
+            file_name = "__func_" + func_name + ext
             assert file_ctimes[file_name] == os.stat(file_name).st_ctime
     
     res2 = solver2.optimize()

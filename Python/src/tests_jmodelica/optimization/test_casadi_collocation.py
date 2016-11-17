@@ -50,7 +50,7 @@ path_to_data = os.path.join(get_files_path(), 'Data')
 def assert_results(res, cost_ref, u_norm_ref,
                    cost_rtol=1e-3, u_norm_rtol=1e-4, input_name="u"):
     """Helper function for asserting optimization results."""
-    cost = float(res.solver.solver_object.output(casadi.NLP_SOLVER_F))
+    cost = float(res.solver.solver_object.getOutput('f'))
     u = res[input_name]
     u_norm = N.linalg.norm(u) / N.sqrt(len(u))
     N.testing.assert_allclose(cost, cost_ref, cost_rtol)
@@ -508,14 +508,14 @@ class TestLocalDAECollocator(object):
         
         res_update = solver.optimize()
         
-        cost_update = float(res_update.solver.solver_object.output(casadi.NLP_SOLVER_F))
+        cost_update = float(res_update.solver.solver_object.getOutput('f'))
         
         # Optimize using nominal and initial trajectories
         opts['nominal_traj'] = ResultDymolaTextual("vdp_nom_traj_result.txt")
         opts['nominal_traj_mode'] = {'_default_mode': "affine"}
         res = op.optimize(self.algorithm, opts)
         
-        cost = float(res.solver.solver_object.output(casadi.NLP_SOLVER_F))
+        cost = float(res.solver.solver_object.getOutput('f'))
 
         N.testing.assert_equal(cost_update, cost)
         

@@ -1167,8 +1167,12 @@ aspect Scalarization {
 	 */
     public void FFunctionCallEquation.scalarize(Scalarizer.Equation s) {
         createArrayTemporaries(s);
-	    if (getCall().isOperatorWithoutOutputs()) { // Special case
-	        getCall().scalarizeOperatorWithoutOutputs(s);
+	    if (getCall().isVectorizedOperatorWithoutOutputs()) { // Special case
+	        for (FExp e : getCall().getArray().iterable()) {
+                FAbstractFunctionCall call = (FAbstractFunctionCall) e.scalarizeExp(s.map());
+	            List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
+                s.add(new FFunctionCallEquation(lefts, call));
+	        }
 	    } else {
 	        List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
             for (FFunctionCallLeft id : getLefts()) {
@@ -1177,26 +1181,9 @@ aspect Scalarization {
 	        s.add(new FFunctionCallEquation(lefts, (FAbstractFunctionCall) getCall().scalarizeExp(s.map())));
 	    }
 	}
-    
-    syn boolean FAbstractFunctionCall.isOperatorWithoutOutputs() = false;
-    eq FReinit.isOperatorWithoutOutputs()                        = true;
-    eq FAssert.isOperatorWithoutOutputs()                        = true;
-    
-    public void FExp.scalarizeOperatorWithoutOutputs(Scalarizer.Equation s) {
-        if (isArray()) {
-            for (FExp e : getArray().iterable()) {
-                e.scalarizeOperatorWithoutOutputs(s);
-            }
-        } else if (type().isRecord()) {
-            for (FRecordComponentType frct : ((FRecordType)type()).getComponents()) {
-                component(frct.getName()).scalarizeOperatorWithoutOutputs(s);
-            }
-        } else {
-            FAbstractFunctionCall call = (FAbstractFunctionCall) scalarizeExp(s.map());
-            List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
-            s.add(new FFunctionCallEquation(lefts, call));
-        }
-    }
+	
+	syn boolean FAbstractFunctionCall.isVectorizedOperatorWithoutOutputs() = false;
+	eq FReinit.isVectorizedOperatorWithoutOutputs()                        = getVar().isArray();
     
     public FExp FEndExp.scalarizeExp(Map<String,FExp> indexMap) {
         return mySize().createFExp(0);
@@ -1658,10 +1645,6 @@ aspect Scalarization {
         }
 	}
 	
-    public FExp FUnknownSizeExp.scalarizeExp(Map<String,FExp> indexMap) {
-        return new FSizeExp(getFExp().scalarize(indexMap), new Opt<FExp>(getDim().scalarize(indexMap)));
-    }
-	
 	public FExp FNdimsExp.scalarizeExp(Map<String,FExp> indexMap) {
 		return ceval().buildLiteral();
 	}
@@ -1830,44 +1813,8 @@ aspect Scalarization {
         for (FExp arg : getArgs()) {
             args.add(arg.scalarize(indexMap));
         }
-        FFunctionCall res = createScalarized(getName().fullCopy(), args, null);
-        res.setFType(getFType().scalarize(indexMap, res));
-        return res;
-    }
-    
-    public FType FType.scalarize(Map<String,FExp> indexMap, FExp context) {
-        FType res = treeCopy();
-        res.scalarizeTypeSizes(indexMap, context);
-        return res;
-    }
-    
-    public void ASTNode.scalarizeTypeSizes(Map<String,FExp> indexMap, FExp context) {
-        for (ASTNode n : this) {
-            n.scalarizeTypeSizes(indexMap, context);
-        }
-    }
-    
-    public void FType.scalarizeTypeSizes(Map<String,FExp> indexMap, FExp context) {
-        setSize(getSize().scalarize(indexMap, context));
-        super.scalarizeTypeSizes(indexMap, context);
-    }
-    
-    public Size Size.scalarize(Map<String,FExp> indexMap, FExp context) {
-        return this;
-    }
-    
-    @Override
-    public Size MutableSize.scalarize(Map<String,FExp> indexMap, FExp context) {
-        MutableSize res = new MutableSize(ndims());
-        for (int i = 0; i < exps.length; i++) {
-            res.size[i] = size[i];
-            if (exps[i] != null) {
-                res.exps[i] = exps[i].scalarize(indexMap);
-                context.dynamicFExp(res.exps[i]);
-            }
-        }
-        return res;
-    }
+        return createScalarized(getName().fullCopy(), args, getFType().scalarType());
+	}
     
     protected FFunctionCall FFunctionCall.createScalarized(FIdUse name, List<FExp> args, FType type) {
         return new FFunctionCall(name, args, type); 

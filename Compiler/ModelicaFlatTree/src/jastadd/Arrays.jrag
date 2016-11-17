@@ -222,9 +222,6 @@ aspect Arrays {
 
     eq FDelayExp.ndims()       = vectorizedNdims();
     eq FSpatialDistExp.ndims() = vectorizedNdims();
-    
-    eq FReinit.ndims()         = vectorizedNdims();
-    eq FAssert.ndims()         = vectorizedNdims();
 
 	eq FSizeExp.ndims() = hasDim() ? 0 : 1;
 	eq FNdimsExp.ndims() = 0;
@@ -928,9 +925,6 @@ aspect Arrays {
     eq FDelayExp.size()                 = vectorizedSize();
     eq FSpatialDistExp.size()           = vectorizedSize();
     
-    eq FReinit.size()                   = vectorizedSize();
-    eq FAssert.size()                   = vectorizedSize();
-    
     eq FStringExp.size()                = getValue().size();
 
     eq FExInStream.size()               = expDefiningSize().size();
@@ -1567,7 +1561,7 @@ aspect Arrays {
 		return new FIterExp(exp, fil);
 	}
 	
-    syn lazy Array FIterExp.createArray() = getFExp().getArray().createExpanded(getForIndexList(), false);
+    syn lazy Array FIterExp.createArray() = getFExp().getArray().createExpanded(getForIndexList(), getFExp().myFClass() != null);
 	eq FIterExp.getArray() = copyArray();
 	
     eq FSubscriptedExp.getArray() {
@@ -1739,33 +1733,14 @@ aspect Arrays {
     }
 
     eq FReinit.getArray() {
-        if (!isArray()) {
+        if (!getVar().isArray())
             return super.getArray();
-        }
         
-        Array arr = new Array(indices());
+        Array arr = new Array(getVar().indices());
         Array inner1 = getVar().getArray();
         Array inner2 = getFExp().getArray();
         for (Index i : arr.indices())
             arr.set(i, new FReinit(inner1.get(i), inner2.get(i)));
-        return arr;
-    }
-    
-    eq FAssert.getArray() {
-        if (!isArray()) {
-            return super.getArray();
-        }
-        
-        Array arr = new Array(indices());
-        Array inner1 = getTest().getArray();
-        Array inner2 = getMsg().getArray();
-        Array inner3 = null;
-        if (hasLevel()) {
-            inner3 = getLevel().getArray();
-        }
-        for (Index i : arr.indices()) {
-            arr.set(i, new FAssert(inner1.get(i), inner2.get(i), hasLevel() ? new Opt<FExp>(inner3.get(i)) : new Opt<FExp>()));
-        }
         return arr;
     }
 
@@ -2877,30 +2852,23 @@ aspect ArrayHelpers {
 				res.addFSubscript(createExpandedFSubscript(i));
 			return res;
 		}
-
-        /**
-         * Create an FSubscript that spans the length of dimension <code>d</code>.
-         * 
-         * If nothing is known of the length of the dimension, an FColonSubscript is created.
-         */
-        public FSubscript createExpandedFSubscript(int d) {
-            if (!isUnknown(d)) {
-                return new FExpSubscript(createRangeExp(d));
-            } else {
-                return new FColonSubscript();
-            }
-        }
-
-        /**
-         * Create a range expression spanning this size.
-         */
-        public FRangeExp createRangeExp(int d) {
-            List<FExp> lim = new List<FExp>();
-            lim.add(new FIntegerLitExp(1));
-            lim.add(createFExp(d));
-            return new FRangeExp(lim);
-        }
-
+		
+		/**
+		 * Create an FSubscript that spans the length of dimension <code>d</code>.
+		 * 
+		 * If nothing is known of the length of the dimension, an FColonSubscript is created.
+		 */
+		public FSubscript createExpandedFSubscript(int d) {
+			if (!isUnknown(d)) {
+				List<FExp> lim = new List<FExp>();
+				lim.add(new FIntegerLitExp(1));
+				lim.add(createFExp(d));
+				return new FExpSubscript(new FRangeExp(lim));
+			} else {
+				return new FColonSubscript();
+			}
+		}
+		
 		/**
 		 * Create an FExp that describes this size.
 		 * 

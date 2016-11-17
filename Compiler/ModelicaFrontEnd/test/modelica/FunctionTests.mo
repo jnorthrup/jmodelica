@@ -2126,38 +2126,6 @@ end FunctionTests.RecursionTest2;
 ")})));
 end RecursionTest2;
 
-model RecursionTest3
- function f
-  input Real x[:];
-  output Real y[size(x,1)];
-  Integer n = size(x,1);
- algorithm
-  if n == 1 then
-    y[1] := x[1];
-  elseif n > 1 then
-    y[1:integer(n/2)] := f(x[1:integer(n/2)]);
-    y[integer(1+n/2):n] := f(x[integer(1+n/2):n])-fill(0.0,integer(1+n/2)+1);
-  end if;
- end f;
- 
-  constant Real[:] y1 = f({1,2,3,4,5});
-  Real[:] y2 = f({1,2,3,4,5});
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="RecursionTest3",
-            description="Type calculation of recursive function call during constant evaluation",
-            flatModel="
-fclass FunctionTests.RecursionTest3
- constant Real y1[1] = 1;
- constant Real y1[2] = 2;
- constant Real y1[3] = 3;
- constant Real y1[4] = 4;
- constant Real y1[5] = 5;
-end FunctionTests.RecursionTest3;
-")})));
-end RecursionTest3;
-
 /* ====================== Function call type checks ====================== */
 
 model FunctionType0
@@ -8327,10 +8295,6 @@ public
   output Real dummy;
  algorithm
   init o as FunctionTests.ArrayOutputScalarization25.R[2];
-  for i1 in 1:2 loop
-   assert(2 == size(i[i1].x, 1), \"Mismatching sizes in function 'FunctionTests.ArrayOutputScalarization25.fwrap', component 'i[i1].x', dimension '1'\");
-   assert(2 == size(i[i1].y, 1), \"Mismatching sizes in function 'FunctionTests.ArrayOutputScalarization25.fwrap', component 'i[i1].y', dimension '1'\");
-  end for;
   (o) := FunctionTests.ArrayOutputScalarization25.f(i);
   dummy := 1;
   return;
@@ -8341,10 +8305,6 @@ public
   output FunctionTests.ArrayOutputScalarization25.R[:] o;
  algorithm
   init o as FunctionTests.ArrayOutputScalarization25.R[2];
-  for i1 in 1:2 loop
-   assert(2 == size(i[i1].x, 1), \"Mismatching sizes in function 'FunctionTests.ArrayOutputScalarization25.f', component 'i[i1].x', dimension '1'\");
-   assert(2 == size(i[i1].y, 1), \"Mismatching sizes in function 'FunctionTests.ArrayOutputScalarization25.f', component 'i[i1].y', dimension '1'\");
-  end for;
   o[1].x[1] := i[1].x[1];
   o[1].x[2] := i[1].x[2];
   o[1].y[1] := i[1].y[1];
@@ -8852,7 +8812,6 @@ public
   Real[:,:] d;
   Real[:,:] e;
  algorithm
-  assert(size(a, 2) == size(b, 2), \"Mismatching sizes in function 'FunctionTests.UnknownArray9.f', component 'b', dimension '2'\");
   init c as Real[size(d, 1), size(d, 2)];
   init d as Real[size(a, 1) + size(b, 1), size(a, 2)];
   d := cat(1, a[:,:], b[:,:]);
@@ -10476,9 +10435,6 @@ public
  algorithm
   init o as FunctionTests.UnknownArray40.R[size(i, 1)];
   for i1 in 1:size(i, 1) loop
-   assert(2 == size(i[i1].y, 1), \"Mismatching sizes in function 'FunctionTests.UnknownArray40.f', component 'i[i1].y', dimension '1'\");
-  end for;
-  for i1 in 1:size(i, 1) loop
    o[i1].y[1] := i[i1].y[1];
    o[i1].y[2] := i[i1].y[2];
   end for;
@@ -10731,9 +10687,6 @@ public
   input FunctionTests.UnknownArray44.R1[:] r1;
   output FunctionTests.UnknownArray44.R2 r2;
  algorithm
-  for i1 in 1:size(r1, 1) loop
-   assert(1 == size(r1[i1].x, 1), \"Mismatching sizes in function 'FunctionTests.UnknownArray44.f', component 'r1[i1].x', dimension '1'\");
-  end for;
   assert(size(r1, 1) == 1, \"Mismatching sizes in FunctionTests.UnknownArray44.f\");
   r2.y[1].x[1] := r1[1].x[1];
   return;
@@ -11245,7 +11198,6 @@ public
   output Real q;
   Real a;
  algorithm
-  assert(2 == size(x, 2), \"Mismatching sizes in function 'FunctionTests.ExternalFunc2.f', component 'x', dimension '2'\");
   a := y + 2;
   external \"C\" f(x, size(x, 1), size(x, 2), y, z, q, a);
   return;
@@ -11283,7 +11235,6 @@ public
   output Real z;
   output Real q;
  algorithm
-  assert(2 == size(x, 2), \"Mismatching sizes in function 'FunctionTests.ExternalFunc3.f', component 'x', dimension '2'\");
   external \"C\" foo(size(x, 1), 2, x, z, y, q);
   return;
  end FunctionTests.ExternalFunc3.f;
@@ -11320,7 +11271,6 @@ public
   output Real z;
   output Real q;
  algorithm
-  assert(2 == size(x, 2), \"Mismatching sizes in function 'FunctionTests.ExternalFunc4.f', component 'x', dimension '2'\");
   external \"C\" q = foo(size(x, 1), 2, x, z, y);
   return;
  end FunctionTests.ExternalFunc4.f;
@@ -14774,29 +14724,6 @@ equation
 end FunctionTests.FunctionLike.Special.SemiLinear7;
 ")})));
 end SemiLinear7;
-
-model SemiLinear8
-    Real y,x;
-    parameter Real sa=1,s1=2,s2=3;
-equation
-    y = semiLinear(x, sa, s1+1); 
-    y = semiLinear(x, s1, s2);
-    
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="FunctionLike_Special_SemiLinear8",
-            description="",
-            errorMessage="
-1 errors found:
-
-Error in flattened model:
-  Could not construct zero flow chain for a set of semilinear equations. This leads to an undetermined system. Involved equations:
-y = semiLinear(x, sa, s1 + 1)
-y = semiLinear(x, s1, s2)
-
-")})));
-end SemiLinear8;
-
 
 end Special;
 

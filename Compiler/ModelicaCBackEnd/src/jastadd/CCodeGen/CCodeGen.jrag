@@ -955,7 +955,7 @@ aspect CCodeGen {
 
     public void FFunctionVariable.print(TypePrinter_C tp, String name, String indent) {
         setDummyExp();
-        tp.reset(name, getBindingExp(), size(), false, indent);
+        tp.reset(name, getBindingExp(), size().isUnknown(), false, indent);
         type().print(tp);
         resetDummyExp();
     }
@@ -982,7 +982,7 @@ aspect CCodeGen {
     }
 
     public void FType.print(TypePrinter_C tp, String indent, String name, FExp src, boolean external) {
-        tp.reset(name, src, size(), external, indent);
+        tp.reset(name, src, size().isUnknown(), external, indent);
         print(tp);
     }
 
@@ -1004,23 +1004,16 @@ aspect CCodeGen {
             this.str = str;
         }
         
-        public TypePrinter_C(CodePrinter p, CodeStream str, String indent, String name, FExp src, Size s, boolean external) {
+        public TypePrinter_C(CodePrinter p, CodeStream str, String indent, String name, FExp src, boolean dynamic, boolean external) {
             this(p, str);
-            reset(name, src, s, external, indent);
+            reset(name, src, dynamic, external, indent);
         }
         
-        public void reset(String name, FExp src, Size s, boolean external, String indent) {
+        public void reset(String name, FExp src, boolean dynamic, boolean external, String indent) {
             this.src = src;
             levels = new Stack<Level>();
-            levels.push(new Level(name, indent, !s.variability().knownParameterOrLess() || external));
+            levels.push(new Level(name, indent, dynamic || external));
             this.external = external;
-        }
-        
-        public void resetUnknown(String name, FType type, String indent) {
-            this.src = null;
-            levels = new Stack<Level>();
-            levels.push(new Level(name, indent, type.isArray() || type.isExternalObject()));
-            this.external = false;
         }
         
         public void setSubDecls(boolean subDecls) { this.subDecls = subDecls; }
@@ -1040,12 +1033,8 @@ aspect CCodeGen {
             }
         }
         
-        protected void pushLevel(String name, boolean indent, Size s) {
-            levels.push(new Level(name, indent ? p.indent(indent()) : indent(), !s.variability().knownParameterOrLess() || dynamic()));
-        }
-        
-        protected void pushLevelExt(String name, boolean indent, Size s) {
-            levels.push(new Level(name, indent ? p.indent(indent()) : indent(), s.ndims() > 0));
+        protected void pushLevel(String name, boolean indent, boolean dynamic) {
+            levels.push(new Level(name, indent ? p.indent(indent()) : indent(), dynamic || dynamic()));
         }
         
         protected void popLevel() {
@@ -1081,7 +1070,7 @@ aspect CCodeGen {
                     printDynArray(type);
                 } else {
                     for (Index i : type.indices()) {
-                        pushLevel(type.arrayAccess(type.ndims(), name(), i.toUnclosedString()), false, Size.SCALAR);
+                        pushLevel(type.arrayAccess(type.ndims(), name(), i.toUnclosedString()), false, false);
                         printComps(type);
                         popLevel();
                     }
@@ -1103,7 +1092,7 @@ aspect CCodeGen {
                     String compName = name() + "->" + comp.getName();
                     boolean useTempName = !dynamic() && comp.getFType().isComposite();
                     String tempName = useTempName ? acquireTemp(compName) : compName;
-                    pushLevel(tempName, false, comp.getFType().size());
+                    pushLevel(tempName, false, comp.getFType().size().isUnknown());
                     comp.getFType().print(this);
                     popLevel();
                     if (useTempName)
@@ -1124,7 +1113,7 @@ aspect CCodeGen {
             int i = 0;
             String name = acquireTemp(name());
             for (FExp arg : type.myConstructorStmt().myConstructorArgs()) {
-                pushLevelExt(name + "_arg" + i, false, arg.size());
+                pushLevel(name + "_arg" + i, false, arg.size().isUnknown());
                 FType t = arg.type();
                 boolean b = t.parent == null;
                 if (b) {
@@ -1216,14 +1205,14 @@ aspect CCodeGen {
             String ind    = acquireTemp(name());
             String maxind = ind + "_max";
             print = true;
-            pushLevel(ind, false, Size.SCALAR);
+            pushLevel(ind, false, false);
             type.fRealScalarType().print(this);
             popLevel();
-            pushLevel(maxind, false, Size.SCALAR);
+            pushLevel(maxind, false, false);
             type.fRealScalarType().print(this);
             popLevel();
             print = type.isExternalObject();
-            pushLevel(type.arrayAccess(1, name(), ind), false, new MutableSize(1));
+            pushLevel(type.arrayAccess(1, name(), ind), false, true);
             printComps(type);
             popLevel();
             print = true;
@@ -1258,7 +1247,7 @@ aspect CCodeGen {
                 str.println(" + 1;");
             }
             str.formatln("%sfor (%s = 1; %s < %s; %s++) {", indent(), ind, ind, maxind, ind);
-            pushLevel(type.arrayAccess(1, name(), ind), true, new MutableSize(1));
+            pushLevel(type.arrayAccess(1, name(), ind), true, true);
             printComps(type);
             popLevel();
             str.println(indent() + "}");
@@ -1316,27 +1305,33 @@ aspect CCodeGen {
 
     @Override
     public void MutableSize.printNumElements_C(CodePrinter p, CodeStream str, String indent, ASTNode src) {
-        if (!variability().knownParameterOrLess()) {
-            for (int i = 0; i < size.length; i++) {
+        evaluate();
+        int known = 1;
+        boolean printed = false;
+        boolean calced = false;
+        for (int i = 0; i < size.length; i++) {
+            // TODO: this will fail if hasValue(i) == false
+            if (size[i] == UNKNOWN) {
                 FExp exp = exps[i];
-                if (i > 0) {
+                if (printed)
                     str.print(" * ");
-                }
-                if (exp == null) {
-                    str.print(size[i]);
-                } else {
-                    boolean addParenthesis = exp.addParenthesis(FExp.PRECEDENCE_MULTIPLICATIVE);
-                    if (addParenthesis) {
-                        str.print("(");
-                    }
-                    p.print(exp, str, indent);
-                    if (addParenthesis) {
-                        str.print(")");
-                    }
-                }
+                boolean addParenthesis = exp.addParenthesis(FExp.PRECEDENCE_MULTIPLICATIVE);
+                if (addParenthesis)
+                    str.print("(");
+                p.print(exp, str, indent);
+                if (addParenthesis)
+                    str.print(")");
+                printed = true;
+            } else {
+                calced = true;
+                known *= size[i];
             }
-        } else {
-            super.printNumElements_C(p, str, indent, src);
+        }
+        
+        if (calced) {
+            if (printed)
+                str.print(" * ");
+            str.print(known);
         }
 	}
 	
@@ -1346,11 +1341,11 @@ aspect CCodeGen {
 
 	@Override
 	public void MutableSize.printDimensions_C(CodePrinter p, CodeStream str, String indent, ASTNode src) {
-        if (!variability().knownParameterOrLess()) {
+		if (isUnknown()) {
 			for (int i = 0; i < size.length; i++) {
 				if (i > 0)
 					str.print(", ");
-                if (exps[i] == null) {
+				if (size[i] != Size.UNKNOWN || exps[i] == null) {
 					str.print(size[i]);
 				} else {
                     FExp exp = exps[i];
@@ -1548,12 +1543,12 @@ aspect CCodeGen {
             String next = p.indent(indent);
             String iniName = name + C_SUFFIX_NULL;
             str.print(indent + "if (" + name + " == NULL) {\n");
-            tp.reset(iniName, fv.getBindingExp(), type.size(), false, next);
+            tp.reset(iniName, fv.getBindingExp(), type.size().isUnknown(), false, next);
             type.print(tp);
             str.print(next + name + " = " + iniName + ";\n");
             str.print(indent + "}\n");
         } else {
-            tp.reset(name, fv.getBindingExp(), type.size(), false, indent);
+            tp.reset(name, fv.getBindingExp(), type.size().isUnknown(), false, indent);
             type.print(tp);
         }
         fv.resetDummyExp();
@@ -3092,14 +3087,8 @@ aspect CCodeGen {
             eo.genDestructorCall_C(p, str, indent);
         }
         str.print(indent);
-        if (left.type().isString()) {
-             str.print("JMI_ASG(STR_Z, ");
-             p.print(left.getFIdUse(), str, "");
-             str.print(", ");
-        } else {
-            p.print(left.getFIdUse(), str, "");
-            str.print(" = ");
-        }
+        p.print(left.getFIdUse(), str, "");
+        str.print(" = ");
         if (getLeft().isNegated()) {
             str.print("-");
         }
@@ -3111,11 +3100,7 @@ aspect CCodeGen {
             str.print(left.myFV().valueReference());
             str.print(")");
         }
-        if (left.type().isString()) {
-            str.print(")");
-        } else {
-            str.print(";\n");
-        }
+        str.print(";\n");
         
         p.printPostSteps(this, str, indent);
 	}
@@ -3544,15 +3529,7 @@ aspect CCodeGen {
 
     public void FVariable.genStartValue_C(CodePrinter p, CodeStream str, String indent) {
         p.printPreSteps(this, str, indent);
-        str.print(indent);
-        if (isString()) {
-             str.print("JMI_ASG(STR_Z, ");
-             str.print(name_C());
-             str.print(", ");
-        } else {
-            str.print(name_C());
-            str.print(" = ");
-        }
+		str.print(indent + name_C() + " = ");
 		FExp exp = useBindingExpAsStart() ? getBindingExp() : startAttributeExp();
 		boolean noExp = exp == null;
 		if (noExp)
@@ -3563,9 +3540,6 @@ aspect CCodeGen {
 		str.print(")");
 		if (isReal() && opt.getBooleanOption("enable_variable_scaling"))
 			str.format("/sf(%d)", valueReference());
-        if (isString()) {
-            str.print(")");
-        }
 		if (noExp)
 			setBindingExpOpt(new Opt());
 		str.print(";\n");

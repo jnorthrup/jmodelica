@@ -26,9 +26,6 @@
 
 #include <stdio.h>
 
-
-void jmi_set_str(char **dest, const char* src);
-
 /* Typedef for the doubles used in the interface. */
 typedef double jmi_real_t; /*< Typedef for the real number
                < representation used in the Runtime
@@ -127,18 +124,10 @@ typedef struct jmi_chattering_t jmi_chattering_t;                   /**< \brief 
         jmi_array_ref_1(DEST,i) = jmi_array_val_1(SRC,i); \
       }\
     }
-
-/* Assign string not in z vector */
 #define JMI_ASG_STR(DEST,SRC) \
-    jmi_set_str(&(DEST), SRC); \
+    JMI_SET_STR(DEST, SRC) \
     JMI_DYNAMIC_ADD_POINTER(DEST)
-
-/* Assign string in z vector */
-#define JMI_ASG_STR_Z(DEST,SRC) \
-    JMI_FREE(DEST) \
-    jmi_set_str(&(DEST), SRC);
     
-/* Assign string array not in z vector */
 #define JMI_ASG_STR_ARR(DEST, SRC) \
     { \
       int i; \
@@ -146,6 +135,10 @@ typedef struct jmi_chattering_t jmi_chattering_t;                   /**< \brief 
         JMI_ASG_STR(jmi_array_ref_1(DEST,i), jmi_array_val_1(SRC,i)) \
       }\
     }
+    
+#define JMI_SET_STR(DEST, SRC) \
+    DEST = calloc(JMI_MIN(JMI_LEN(SRC), JMI_STR_MAX) + 1, 1); \
+    strcpy(DEST,SRC);
     
 /* Handle return value */
 #define JMI_RET(TYPE, DEST, SRC) \
@@ -155,7 +148,7 @@ typedef struct jmi_chattering_t jmi_chattering_t;                   /**< \brief 
 #define JMI_RET_GEN(DEST, SRC) \
     *DEST = SRC;
 #define JMI_RET_STR(DEST, SRC) \
-    jmi_set_str(DEST, SRC);
+    JMI_SET_STR(*DEST, SRC)
 #define JMI_RET_STR_ARR(DEST, SRC) \
     { \
       int i; \
@@ -195,37 +188,5 @@ typedef enum {
 typedef char jmi_boolean;
 typedef const char* jmi_string;
 typedef unsigned int jmi_value_reference;
-
-typedef enum {
-    JMI_MATRIX_DENSE,     /* Dense */
-    JMI_MATRIX_SPARSE_CSC /* Compressed Sparse Column*/
-} jmi_matrix_type_t;
-
-typedef struct jmi_matrix_t {
-    jmi_matrix_type_t type;
-} jmi_matrix_t;
-
-typedef enum {
-    JMI_MATRIX_DENSE_COLUMN_MAJOR,
-    JMI_MATRIX_DENSE_ROW_MAJOR
-} jmi_matrix_dense_order_t;
-
-typedef struct jmi_matrix_dense_t {
-    jmi_matrix_t type; /* Type of matrix */
-    jmi_matrix_dense_order_t order; /* Order of the matrix (column/row major) */
-    size_t nbr_cols; /* Number of columns */
-    size_t nbr_rows; /* Number of rows */
-    double *x;       /* Data values */
-} jmi_matrix_dense_t;
-
-typedef struct jmi_matrix_sparse_csc_t {
-    jmi_matrix_t type; /* Type of matrix */
-    size_t nbr_cols;   /* Number of columns */
-    size_t nbr_rows;   /* Number of rows */
-    size_t nnz;        /* Number of non zero elements */
-    size_t *col_ptrs;  /* Column pointers (size nbr_cols+1) */ 
-    size_t *row_ind;   /* Row indices (size nnz) */
-    double *x;         /* Data values (size nnz) */
-} jmi_matrix_sparse_csc_t;
 
 #endif
