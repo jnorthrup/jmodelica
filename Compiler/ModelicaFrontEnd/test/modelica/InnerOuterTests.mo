@@ -618,7 +618,6 @@ public
   input Real[:] x;
   output Real[:] y;
  algorithm
-  assert(2 == size(x, 1), \"Mismatching sizes in function 'InnerOuterTests.InnerOuterTest21.b.m.f', component 'x', dimension '1'\");
   init y as Real[2];
   y[1:2] := x[1:2];
   return;

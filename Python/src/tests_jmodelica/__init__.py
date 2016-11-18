@@ -15,8 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""
-JModelica test package.
+"""JModelica test package.
 
 This __init__.py file holds functions used to load
 """
@@ -31,7 +30,7 @@ __all__ = ['general', 'initialization', 'optimization', 'simulation',
            'test_examples_casadi_new', 'test_examples_fmi',
            'test_examples_jmi', 'test_fmi', 'test_fmi_jacobians', 'test_init',
            'test_io', 'test_jmi', 'test_linearization', 'test_xmlparser',
-           'test_fmi_2', 'test_delay', 'test_symbolic_elimination']
+           'test_fmi_2', 'test_delay']
 
 #create working directory for tests
 if sys.platform == 'win32':

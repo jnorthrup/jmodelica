@@ -4711,48 +4711,6 @@ end RedeclareTests.RedeclareTest77;
 end RedeclareTest77;
 
 
-model RedeclareTest78
-    package P
-        record R1
-            Real x = 1;
-        end R1;
-        
-        record R2
-            extends R1;
-        end R2;
-        
-        model M
-            R2 r2 = R2();
-        end M;
-    end P;
-    
-    package P2
-        extends P;
-        redeclare record extends R2
-            
-        end R2;
-    end P2;
-    
-    P2.M m(r2=P2.R2(2));
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclareTest78",
-            description="Record constructor of redeclare extend record",
-            flatModel="
-fclass RedeclareTests.RedeclareTest78
- RedeclareTests.RedeclareTest78.P2.R2 m.r2 = RedeclareTests.RedeclareTest78.P2.R2(2);
-
-public
- record RedeclareTests.RedeclareTest78.P2.R2
-  Real x;
- end RedeclareTests.RedeclareTest78.P2.R2;
-
-end RedeclareTests.RedeclareTest78;
-")})));
-end RedeclareTest78;
-
-
 
 model RedeclareElement1
   model A
@@ -5997,7 +5955,6 @@ public
   input Real[:] i;
   output Real[:] o;
  algorithm
-  assert(2 == size(i, 1), \"Mismatching sizes in function 'RedeclareTests.RedeclareFunction1.C.B', component 'i', dimension '1'\");
   init o as Real[2];
   o[1:2] := i[1:2];
   return;
@@ -6049,7 +6006,6 @@ public
   input Real[:] i;
   output RedeclareTests.RedeclareFunction2.C.D o;
  algorithm
-  assert(2 == size(i, 1), \"Mismatching sizes in function 'RedeclareTests.RedeclareFunction2.C.B', component 'i', dimension '1'\");
   o.a[1:2] := i[1:2];
   return;
  end RedeclareTests.RedeclareFunction2.C.B;

@@ -1167,8 +1167,12 @@ aspect Scalarization {
 	 */
     public void FFunctionCallEquation.scalarize(Scalarizer.Equation s) {
         createArrayTemporaries(s);
-	    if (getCall().isOperatorWithoutOutputs()) { // Special case
-	        getCall().scalarizeOperatorWithoutOutputs(s);
+	    if (getCall().isVectorizedOperatorWithoutOutputs()) { // Special case
+	        for (FExp e : getCall().getArray().iterable()) {
+                FAbstractFunctionCall call = (FAbstractFunctionCall) e.scalarizeExp(s.map());
+	            List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
+                s.add(new FFunctionCallEquation(lefts, call));
+	        }
 	    } else {
 	        List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
             for (FFunctionCallLeft id : getLefts()) {
@@ -1177,26 +1181,9 @@ aspect Scalarization {
 	        s.add(new FFunctionCallEquation(lefts, (FAbstractFunctionCall) getCall().scalarizeExp(s.map())));
 	    }
 	}
-    
-    syn boolean FAbstractFunctionCall.isOperatorWithoutOutputs() = false;
-    eq FReinit.isOperatorWithoutOutputs()                        = true;
-    eq FAssert.isOperatorWithoutOutputs()                        = true;
-    
-    public void FExp.scalarizeOperatorWithoutOutputs(Scalarizer.Equation s) {
-        if (isArray()) {
-            for (FExp e : getArray().iterable()) {
-                e.scalarizeOperatorWithoutOutputs(s);
-            }
-        } else if (type().isRecord()) {
-            for (FRecordComponentType frct : ((FRecordType)type()).getComponents()) {
-                component(frct.getName()).scalarizeOperatorWithoutOutputs(s);
-            }
-        } else {
-            FAbstractFunctionCall call = (FAbstractFunctionCall) scalarizeExp(s.map());
-            List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
-            s.add(new FFunctionCallEquation(lefts, call));
-        }
-    }
+	
+	syn boolean FAbstractFunctionCall.isVectorizedOperatorWithoutOutputs() = false;
+	eq FReinit.isVectorizedOperatorWithoutOutputs()                        = getVar().isArray();
     
     public FExp FEndExp.scalarizeExp(Map<String,FExp> indexMap) {
         return mySize().createFExp(0);
@@ -1327,8 +1314,13 @@ aspect Scalarization {
 	 * variable or member with the given name.
 	 */
 	public FExp FType.createRecordConstructorArray(Map<String,FExp> indexMap, FExp exp, Iterator<Index> it, int dim) {
-        if (isEmpty()) {
-            return createEmptyExp();
+        Size s = size();
+        if (s.isEmpty()) {
+            List<FExp> dims = new List<FExp>();
+            for (int i = 0, n = s.ndims(); i < n ; i++) {
+                dims.add(s.createFExp(i));
+            }
+            return new FFillExp(dims, zeroLiteral());
         }
 		FArray arr = new FArray();
 		boolean last = dim == ndims() - 1;
@@ -1342,16 +1334,6 @@ aspect Scalarization {
 		}
 		return arr;
 	}
-	
-    syn boolean FType.isEmpty() = size().isEmpty();
-    syn FExp FType.createEmptyExp() {
-        Size s = size();
-        List<FExp> dims = new List<FExp>();
-        for (int i = 0, n = s.ndims(); i < n ; i++) {
-            dims.add(s.createFExp(i));
-        }
-        return new FFillExp(dims, zeroLiteral());
-    }
 	
 	/**
 	 * Create a record constructor with the arguments taken from a record 
@@ -1516,8 +1498,7 @@ aspect Scalarization {
         return scalarize(s.map());
     }
     
-    syn boolean FExp.scalarizeExpanded()       = 
-        isComposite() && indexNames == null && !(size().isUnknown() || inUnknownSize()) && !(useTempVar && isForIndexExp());
+    syn boolean FExp.scalarizeExpanded()       = isComposite() && indexNames == null && !(size().isUnknown() || inUnknownSize());
     eq FIdUseExp.scalarizeExpanded()           = !inFunction() && super.scalarizeExpanded();
     eq FFunctionCall.scalarizeExpanded()       = ((useTempVar && !inFunction()) || isVectorized()) && super.scalarizeExpanded();
     eq FArray.scalarizeExpanded()              = useTempVar && super.scalarizeExpanded();
@@ -1658,10 +1639,6 @@ aspect Scalarization {
         }
 	}
 	
-    public FExp FUnknownSizeExp.scalarizeExp(Map<String,FExp> indexMap) {
-        return new FSizeExp(getFExp().scalarize(indexMap), new Opt<FExp>(getDim().scalarize(indexMap)));
-    }
-	
 	public FExp FNdimsExp.scalarizeExp(Map<String,FExp> indexMap) {
 		return ceval().buildLiteral();
 	}
@@ -1755,7 +1732,7 @@ aspect Scalarization {
 	public FExp FBinExp.scalarizeExp(Map<String,FExp> indexMap) { return createNode(getLeft().scalarize(indexMap), getRight().scalarize(indexMap)); }
 	public FExp FUnaryExp.scalarizeExp(Map<String,FExp> indexMap) { return createNode(getFExp().scalarize(indexMap)); }
 	public FExp FMathematicalFunctionCall.scalarizeExp(Map<String,FExp> indexMap) { return createNode(getFExp().scalarize(indexMap)); }
-	public FExp FAtan2Exp.scalarizeExp(Map<String,FExp> indexMap)     { return createNode(getFExp().scalarize(indexMap), getY().scalarize(indexMap)); }
+	public FExp FAtan2Exp.scalarizeExp(Map<String,FExp> indexMap) { return new FAtan2Exp(getFExp().scalarize(indexMap), getY().scalarize(indexMap)); }
 	public FExp FUnaryBuiltIn.scalarizeExp(Map<String,FExp> indexMap) { return createNode(getFExp().scalarize(indexMap)); }
 	public FExp FTranspose.scalarizeExp(Map<String,FExp> indexMap)    { return getFExp().scalarize(indexMap); }
 	
@@ -1830,44 +1807,8 @@ aspect Scalarization {
         for (FExp arg : getArgs()) {
             args.add(arg.scalarize(indexMap));
         }
-        FFunctionCall res = createScalarized(getName().fullCopy(), args, null);
-        res.setFType(getFType().scalarize(indexMap, res));
-        return res;
-    }
-    
-    public FType FType.scalarize(Map<String,FExp> indexMap, FExp context) {
-        FType res = treeCopy();
-        res.scalarizeTypeSizes(indexMap, context);
-        return res;
-    }
-    
-    public void ASTNode.scalarizeTypeSizes(Map<String,FExp> indexMap, FExp context) {
-        for (ASTNode n : this) {
-            n.scalarizeTypeSizes(indexMap, context);
-        }
-    }
-    
-    public void FType.scalarizeTypeSizes(Map<String,FExp> indexMap, FExp context) {
-        setSize(getSize().scalarize(indexMap, context));
-        super.scalarizeTypeSizes(indexMap, context);
-    }
-    
-    public Size Size.scalarize(Map<String,FExp> indexMap, FExp context) {
-        return this;
-    }
-    
-    @Override
-    public Size MutableSize.scalarize(Map<String,FExp> indexMap, FExp context) {
-        MutableSize res = new MutableSize(ndims());
-        for (int i = 0; i < exps.length; i++) {
-            res.size[i] = size[i];
-            if (exps[i] != null) {
-                res.exps[i] = exps[i].scalarize(indexMap);
-                context.dynamicFExp(res.exps[i]);
-            }
-        }
-        return res;
-    }
+        return createScalarized(getName().fullCopy(), args, getFType().scalarType());
+	}
     
     protected FFunctionCall FFunctionCall.createScalarized(FIdUse name, List<FExp> args, FType type) {
         return new FFunctionCall(name, args, type); 
@@ -1879,7 +1820,7 @@ aspect Scalarization {
     
 	public FAssert FAssert.scalarizeExp(Map<String,FExp> indexMap) {
 		Opt level = hasLevel() ? new Opt(getLevel().scalarize(indexMap)) : new Opt();
-        return createNode(getTest().scalarize(indexMap), getMsg().scalarize(indexMap), level);
+		return new FAssert(getTest().scalarize(indexMap), getMsg().scalarize(indexMap), level);
 	}
 
     public FReinit FReinit.scalarizeExp(Map<String,FExp> indexMap) {
@@ -1888,7 +1829,7 @@ aspect Scalarization {
 
     public FDelayExp FDelayExp.scalarizeExp(Map<String,FExp> indexMap) {
         Opt max = hasMax() ? new Opt(getMax().scalarize(indexMap)) : new Opt();
-        return createNode(getFExp().scalarize(indexMap), getDelay().scalarize(indexMap), max);
+        return new FDelayExp(getFExp().scalarize(indexMap), getDelay().scalarize(indexMap), max);
     }
     
     public FSpatialDistExp FSpatialDistExp.scalarizeExp(Map<String,FExp> indexMap) {
@@ -1896,11 +1837,12 @@ aspect Scalarization {
                 getX().scalarize(indexMap), getPositiveVelocity().scalarize(indexMap),
                 getInitialPoints().scalarize(indexMap), getInitialValues().scalarize(indexMap));
     }
-
-    public FForIndex FForIndex.scalarize(Map<String,FExp> indexMap) {
-        return new FForIndex(getFVariable().fullCopy(), getFExp().scalarizeIndexExp(indexMap));
-    }
-
+	
+	public FForIndex FForIndex.scalarize(Map<String,FExp> indexMap) {
+		return new FForIndex(hasFExp() ? new Opt(getFExp().scalarizeIndexExp(indexMap)) : new Opt(), 
+				(FVariable) getFVariable().fullCopy());
+	}
+	
 	/**
 	 * Scalarize the expression of an FForIndex. 
 	 */

@@ -76,14 +76,8 @@ class Test_FMUModelBase:
         """
         Sets up the test class.
         """
-        cls.negAliasFmu = compile_fmu("NegatedAlias",os.path.join(path_to_mofiles,"NegatedAlias.mo"), version=1.0)
-        cls.enumFMU = compile_fmu('Parameter.Enum', os.path.join(path_to_mofiles,'ParameterTests.mo'), version=1.0)
-
-    @testattr(fmi = True)
-    def test_version(self):
-        negated_alias  = load_fmu(Test_FMUModelBase.negAliasFmu)
-        
-        assert negated_alias.get_version() == "1.0"
+        cls.negAliasFmu = compile_fmu("NegatedAlias",os.path.join(path_to_mofiles,"NegatedAlias.mo"))
+        cls.enumFMU = compile_fmu('Parameter.Enum', os.path.join(path_to_mofiles,'ParameterTests.mo'))
 
     @testattr(fmi = True)
     def test_caching(self):
@@ -182,14 +176,14 @@ class Test_FMUModelCS1:
         """
         Sets up the test class.
         """
-        cls.rlc_circuit = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="cs", version="1.0")
-        cls.rlc_circuit_square = compile_fmu("RLC_Circuit_Square",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="cs", version="1.0")
-        cls.no_state3 = compile_fmu("NoState.Example3",os.path.join(path_to_mofiles,"noState.mo"),target="cs", version="1.0")
-        cls.simple_input = compile_fmu("Inputs.SimpleInput",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs", version="1.0")
-        cls.simple_input2 = compile_fmu("Inputs.SimpleInput2",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs", version="1.0")
-        cls.input_discontinuity = compile_fmu("Inputs.InputDiscontinuity",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs", version="1.0")
-        cls.terminate = compile_fmu("Terminate",os.path.join(path_to_mofiles,"Terminate.mo"),target="cs", version="1.0")
-        cls.assert_fail = compile_fmu("AssertFail",os.path.join(path_to_mofiles,"Terminate.mo"),target="cs", version="1.0")
+        cls.rlc_circuit = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="cs")
+        cls.rlc_circuit_square = compile_fmu("RLC_Circuit_Square",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="cs")
+        cls.no_state3 = compile_fmu("NoState.Example3",os.path.join(path_to_mofiles,"noState.mo"),target="cs")
+        cls.simple_input = compile_fmu("Inputs.SimpleInput",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs")
+        cls.simple_input2 = compile_fmu("Inputs.SimpleInput2",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs")
+        cls.input_discontinuity = compile_fmu("Inputs.InputDiscontinuity",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs")
+        cls.terminate = compile_fmu("Terminate",os.path.join(path_to_mofiles,"Terminate.mo"),target="cs")
+        cls.assert_fail = compile_fmu("AssertFail",os.path.join(path_to_mofiles,"Terminate.mo"),target="cs")
     
     @testattr(fmi = True)
     def test_asseert_fail(self):
@@ -517,9 +511,9 @@ class Test_FMUModelME1:
         """
         Sets up the test class.
         """
-        cls.rlc_circuit = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"), version="1.0")
-        cls.depPar1 = compile_fmu("DepParTests.DepPar1",os.path.join(path_to_mofiles,"DepParTests.mo"), version="1.0")
-        cls.string1 = compile_fmu("StringModel1",os.path.join(path_to_mofiles,"TestString.mo"), version="1.0")
+        cls.rlc_circuit = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"))
+        cls.depPar1 = compile_fmu("DepParTests.DepPar1",os.path.join(path_to_mofiles,"DepParTests.mo"))
+        cls.string1 = compile_fmu("StringModel1",os.path.join(path_to_mofiles,"TestString.mo"))
     
     @testattr(fmi = True)
     def test_get_string(self):
@@ -972,13 +966,13 @@ class Test_FMI_Compile:
         Sets up the test class.
         """
         fpath = os.path.join(path_to_mofiles,'RLC_Circuit.mo')
-        cls.fmuname = compile_fmu('RLC_Circuit',fpath, version="1.0")
+        cls.fmuname = compile_fmu('RLC_Circuit',fpath)
 
     def setUp(self):
         """
         Sets up the test case.
         """
-        self._model  = load_fmu(Test_FMI_Compile.fmuname)
+        self._model  = FMUModelME1(Test_FMI_Compile.fmuname)
 
     @testattr(fmi = True)
     def test_get_version(self):
@@ -995,8 +989,9 @@ class Test_FMI_Compile:
         """ Test compiling with compiler options."""
         libdir = os.path.join(get_files_path(), 'MODELICAPATH_test', 'LibLoc1',
             'LibA')
-        co = {"index_reduction":True, "equation_sorting":True}
-        compile_fmu('RLC_Circuit', [os.path.join(path_to_mofiles,'RLC_Circuit.mo'), libdir],
+        co = {"index_reduction":True, "equation_sorting":True,
+            "extra_lib_dirs":[libdir]}
+        compile_fmu('RLC_Circuit', os.path.join(path_to_mofiles,'RLC_Circuit.mo'),
             compiler_options = co)
 
 class TestDependentParameters(object):
@@ -1011,14 +1006,14 @@ class TestDependentParameters(object):
         """
         fpath = os.path.join(get_files_path(), 'Modelica', "DepPar.mo")
         cpath = "DepPar.DepPar1"
-        cls.fmu_name = compile_fmu(cpath, fpath, version="1.0")
+        cls.fmu_name = compile_fmu(cpath, fpath)
 
     @testattr(fmi = True)
     def test_parameter_eval(self):
        """
        Test that the parameters are evaluated correctly.
        """
-       model = load_fmu(TestDependentParameters.fmu_name)
+       model = FMUModelME1(TestDependentParameters.fmu_name)
        model.set('p1',2.0)
 
        p2 = model.get('p2')
@@ -1038,7 +1033,7 @@ class Test_Logger:
         Sets up the test class.
         """
         cls.fmu =  compile_fmu('LoggerTest',os.path.join(path_to_mofiles,'LoggerTest.mo'),compiler_log_level='e',
-                compiler_options={'generate_only_initial_system':True}, version="1.0")
+                compiler_options={'generate_only_initial_system':True})
 
     def setUp(self):
         """
@@ -1131,7 +1126,7 @@ class Test_SetDependentParameterError:
         """
         Sets up the test class.
         """
-        self.fmu =  compile_fmu('Parameter.Error.Dependent',os.path.join(path_to_mofiles,'ParameterTests.mo'), version="1.0")
+        self.fmu =  compile_fmu('Parameter.Error.Dependent',os.path.join(path_to_mofiles,'ParameterTests.mo'))
 
     def setUp(self):
         """
@@ -1164,7 +1159,7 @@ class Test_DependentParameterEvaluationError:
         """
         Sets up the test class.
         """
-        self.fmu =  compile_fmu('Parameter.Error.DependentCheck',os.path.join(path_to_mofiles,'ParameterTests.mo'), version="1.0")
+        self.fmu =  compile_fmu('Parameter.Error.DependentCheck',os.path.join(path_to_mofiles,'ParameterTests.mo'))
 
     def setUp(self):
         """
@@ -1192,7 +1187,7 @@ class Test_StructuralParameterError:
         """
         Sets up the test class.
         """
-        self.fmu =  compile_fmu('Parameter.Error.Structural',os.path.join(path_to_mofiles,'ParameterTests.mo'), version="1.0")
+        self.fmu =  compile_fmu('Parameter.Error.Structural',os.path.join(path_to_mofiles,'ParameterTests.mo'))
 
     def setUp(self):
         """
@@ -1220,7 +1215,7 @@ class Test_RaisesIfNonConverge:
         """
         Sets up the test class.
         """
-        cls.fmu =  compile_fmu('InitTest1',os.path.join(path_to_mofiles,'InitTest.mo'), version="1.0")
+        cls.fmu =  compile_fmu('InitTest1',os.path.join(path_to_mofiles,'InitTest.mo'))
 
     def setUp(self):
         """

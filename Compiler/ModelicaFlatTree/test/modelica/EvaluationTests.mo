@@ -548,19 +548,6 @@ public
   input EvaluationTests.FunctionEval15.R2[:] a;
   output Real x;
  algorithm
-  assert(2 == size(a, 1), \"Mismatching sizes in function 'EvaluationTests.FunctionEval15.f1', component 'a', dimension '1'\");
-  for i1 in 1:size(a, 1) loop
-   assert(2 == size(a[i1].a, 1), \"Mismatching sizes in function 'EvaluationTests.FunctionEval15.f1', component 'a[i1].a', dimension '1'\");
-   for i2 in 1:size(a[i1].a, 1) loop
-    assert(2 == size(a[i1].a[i2].a, 1), \"Mismatching sizes in function 'EvaluationTests.FunctionEval15.f1', component 'a[i1].a[i2].a', dimension '1'\");
-    assert(3 == size(a[i1].a[i2].b, 1), \"Mismatching sizes in function 'EvaluationTests.FunctionEval15.f1', component 'a[i1].a[i2].b', dimension '1'\");
-   end for;
-   assert(3 == size(a[i1].b, 1), \"Mismatching sizes in function 'EvaluationTests.FunctionEval15.f1', component 'a[i1].b', dimension '1'\");
-   for i2 in 1:size(a[i1].b, 1) loop
-    assert(2 == size(a[i1].b[i2].a, 1), \"Mismatching sizes in function 'EvaluationTests.FunctionEval15.f1', component 'a[i1].b[i2].a', dimension '1'\");
-    assert(3 == size(a[i1].b[i2].b, 1), \"Mismatching sizes in function 'EvaluationTests.FunctionEval15.f1', component 'a[i1].b[i2].b', dimension '1'\");
-   end for;
-  end for;
   x := sum(a[1:2].a[1:2].a[1:2]) + sum(a[1:2].a[1:2].b[1:3]) + sum(a[1:2].b[1:3].a[1:2]) + sum(a[1:2].b[1:3].b[1:3]);
   return;
  end EvaluationTests.FunctionEval15.f1;
@@ -1545,65 +1532,6 @@ end EvaluationTests.FunctionEval43;
 ")})));
 end FunctionEval43;
 
-model FunctionEval44
-    constant Real[:] x = {sum(j for j in i:3) for i in 1:3};
-
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="FunctionEval44",
-            description="Constant evaluation of iter exp containing function call",
-            variables="
-x[1]
-x[2]
-x[3]
-",
-            values="
-6.0
-5.0
-3.0
-")})));
-end FunctionEval44;
-
-model FunctionEval45
-    function f
-        input Real[:] x;
-        output Real y = 0;
-        Integer i = 1;
-    algorithm
-        while i <= size(x,1) loop
-            y := y + sum(x[i:size(x,1)]);
-            i := i + 1;
-        end while;
-    end f;
-    constant Real y = f({1,2,3});
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="FunctionEval45",
-            description="Constant evaluation of functions: records",
-            flatModel="
-fclass EvaluationTests.FunctionEval45
- constant Real y = 14.0;
-
-public
- function EvaluationTests.FunctionEval45.f
-  input Real[:] x;
-  output Real y;
-  Integer i;
- algorithm
-  y := 0;
-  i := 1;
-  while i <= size(x, 1) loop
-   y := y + sum(x[i:size(x, 1)]);
-   i := i + 1;
-  end while;
-  return;
- end EvaluationTests.FunctionEval45.f;
-
-end EvaluationTests.FunctionEval45;
-")})));
-end FunctionEval45;
-
 
 model VectorFuncEval1
     function f
@@ -2392,53 +2320,6 @@ public
 end EvaluationTests.EvalNoBinding4;
 ")})));
 end EvalNoBinding4;
-
-model EvalNoBinding5
-    class A
-        extends ExternalObject;
-        
-        function constructor
-            input Real b;
-            output A a;
-            external;
-        end constructor;
-        
-        function destructor
-            input A a;
-            external;
-        end destructor;
-    end A;
-    
-    function f
-        input A a;
-        output Integer b;
-        external;
-    end f;
-    
-    parameter A a;
-    parameter Integer n = f(a);
-    Real x[n] = (1:n) * time;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="EvalNoBinding5",
-            description="Constant eval of external object lacking binding exp",
-            errorMessage="
-3 errors found:
-
-Error at line 2416, column 10, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
-  Missing binding expression for external object
-
-Error at line 2419, column 27, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
-  Could not evaluate binding expression for structural parameter 'n': 'f(a)'
-    in function 'EvaluationTests.EvalNoBinding5.f'
-    Failed to evaluate external function 'f', external function cache unavailable
-
-Error at line 2420, column 12, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
-  Could not evaluate array size expression: n
-")})));
-end EvalNoBinding5;
-
 
 
 model EvalColonSizeCell
@@ -4187,7 +4068,6 @@ public
   input Real[:] x;
   output EvaluationTests.AssigningCached3.R y;
  algorithm
-  assert(2 == size(x, 1), \"Mismatching sizes in function 'EvaluationTests.AssigningCached3.f', component 'x', dimension '1'\");
   y := EvaluationTests.AssigningCached3.R(x);
   y.a[2] := 3;
   return;
@@ -4233,7 +4113,6 @@ public
   Real[:] t;
   output EvaluationTests.AssigningCached4.R y1;
  algorithm
-  assert(3 == size(x, 1), \"Mismatching sizes in function 'EvaluationTests.AssigningCached4.f', component 'x', dimension '1'\");
   init t as Real[3];
   t[1:3] := x[1:3];
   y1 := EvaluationTests.AssigningCached4.R(t);

@@ -343,24 +343,8 @@ class TestAssertEqu2(SimulationTest):
             assert False, 'Simulation not stopped by failed assertions'
         except FMUException, e:
             self.assert_equals('Simulation stopped at wrong time', self.model.time, 2.0)
-            
-class TestAssertEqu3(SimulationTest):
-    '''Test structural verification assert'''
-    @classmethod
-    def setUpClass(cls):
-        SimulationTest.setup_class_base(
-            "ExtFunctionTests.mo",
-            'ExtFunctionTests.StructuralAsserts')
-            
-    @testattr(stddist = True)
-    def test_simulate(self):
-        try:
-            self.setup_base()
-            self.run()
-            assert False, 'Simulation not stopped by failed assertions'
-        except FMUException, e:
-            pass
     
+     
 class TestAssertFunc(SimulationTest):
     
     @classmethod
@@ -514,7 +498,7 @@ class TestFortranBasic:
     def setUpClass(self):
         self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
     
-    @testattr(disabled = True)
+    @testattr(stddist = True)
     def testCEvalReal(self):
         '''
         Constant evaluation of basic external fortran function with Reals.
@@ -527,7 +511,7 @@ class TestFortranBasic:
         nose.tools.assert_equals(res.final('xArray[2]'), 4)
         nose.tools.assert_equals(res.final('xArrayUnknown[2]'), 6)
         
-    @testattr(disabled = True)
+    @testattr(stddist = True)
     def testCEvalMatrixReal(self):
         '''
         Constant evaluation of basic external fortran function with Reals.
@@ -539,7 +523,7 @@ class TestFortranBasic:
         nose.tools.assert_equals(res.final('y1[1,1]'), 1)
         nose.tools.assert_equals(res.final('y2[1,1]'), 9)
         
-    @testattr(disabled = True)
+    @testattr(stddist = True)
     def testCEvalInteger(self):
         '''
         Constant evaluation of basic external fortran function with Integers.
@@ -552,7 +536,7 @@ class TestFortranBasic:
         nose.tools.assert_equals(res.final('xArray[2]'), 4)
         nose.tools.assert_equals(res.final('xArrayUnknown[2]'), 6)
     
-    @testattr(disabled = True)
+    @testattr(stddist = True)
     def testCEvalBoolean(self):
         '''
         Constant evaluation of basic external fortran function with Booleans.
@@ -565,7 +549,7 @@ class TestFortranBasic:
         nose.tools.assert_equals(res.final('xArray[2]'), True)
         nose.tools.assert_equals(res.final('xArrayUnknown[2]'), False)
     
-    @testattr(disabled = True)
+    @testattr(stddist = True)
     def testCEvalEnum(self):
         '''
         Constant evaluation of basic external fortran function with Enums.

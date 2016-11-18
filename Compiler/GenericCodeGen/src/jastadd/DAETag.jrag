@@ -176,11 +176,11 @@ public abstract class DAETag extends AbstractTag {
         }
         
         public void printStatusDecl() {
-            ASTNode.genFunctionStart(str, indent);
+            str.print(indent + "int ef = 0;\n");
         }
         
         public void printStatusReturn() {
-            ASTNode.genFunctionEnd(str, indent);
+            str.print(indent + "return ef;\n");
         }
         
         public void genFuncHeads() {

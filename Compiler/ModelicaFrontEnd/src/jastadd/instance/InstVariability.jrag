@@ -84,9 +84,11 @@ aspect InstVariability {
     }
     
     eq InstRecord.calcVariability() {
-        InstComponentDecl rec = scalar();
-        if (rec == null) {
-            return fContinuous();
+        InstComponentDecl rec = this;
+        for (int i = 0; i < ndims(); i++) {
+            if (rec.getNumInstComponentDecl() == 0)
+                return fContinuous();
+            rec = rec.getInstComponentDecl(0);
         }
         List<FComponentVariability> l = new List<FComponentVariability>();
         for (InstComponentDecl icd : rec.allInstComponentDecls()) {
@@ -97,7 +99,7 @@ aspect InstVariability {
     
     syn boolean InstAssignable.isFinalIndependent() {
         InstValueModification mod = myInstValueMod();
-        return mod != null && mod.isFinal() && getBindingFExp().isIndependentParameterExp();
+        return mod != null && mod.isFinal() && mod.getFExp().isIndependentParameterExp();
     }
     syn boolean InstAssignable.isEvalAnnotated() = annotation().forPath("Evaluate").bool() || inEvalAnnotated();
     inh boolean InstComponentDecl.inEvalAnnotated();
@@ -136,10 +138,11 @@ aspect InstVariability {
     syn FTypePrefixVariability InstComponentDecl.bExpVariability() = fContinuous();
     eq InstAssignable.bExpVariability() {
         FTypePrefixVariability v = super.bExpVariability();
-        if (!circularVariability && hasBindingFExp()) {
-            if (!getBindingFExp().type().isUnknown()) {
+        if (!circularVariability) {
+            InstValueModification ivm = myInstValueMod();
+            if (ivm != null && !ivm.getFExp().type().isUnknown()) {
                 circularVariability = true;
-                v = getBindingFExp().variability();
+                v = ivm.getFExp().variability();
                 circularVariability = false;
             }
         }

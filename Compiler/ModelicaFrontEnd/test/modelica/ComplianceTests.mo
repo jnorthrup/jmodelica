@@ -565,6 +565,50 @@ package UnknownArraySizes
 /* Tests compliance errors for array exps 
    of unknown size in functions. #2155 #698 */
 
+model Error1
+	
+record R
+	Real[2] x;
+end R;
+  function f
+    input Real x[2,:];
+	input R[:] recsIn; 
+	Boolean b[size(x,2)];
+    Real c[2,size(x,2)*2];
+	Real known[2,4];
+    output Real y[size(x,2),2];
+	output R[size(recsIn,1)] recsOut;
+  algorithm
+    c := cat(2,x,x); // Concat unknown size.
+	recsOut := recsIn;
+	recsOut[1] := R(x[1,:]);
+	
+	for i in x[2,:] loop // In exp is unknown size array.
+		b[i] := x[i] > 4;
+	end for;
+	for i in 1:size(x,2) loop // Shouldn't trigger, range exp allowed
+		b[i] := x[i] > 4;
+	end for;
+	
+/*	when b then // Array guard, unknown size.
+		x := x;
+	end when;*/
+  end f;
+  
+  Real x[4,2] = f({{1,2,3,4},{5,6,7,8}}, {R({1,1})});
+
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="UnknownArraySizes_Error1",
+            description="Test that compliance errors are given.",
+            errorMessage="
+1 errors found:
+
+Compliance error at line 577, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo', UNSUPPORTED_IN_FUNCTION_UNKNOWN_SIZE_ARRAY_FOR_INDEX:
+  Unknown size array as a for index is not supported in functions
+")})));
+end Error1;
+
 model Error2
   function f
     input Real x[:,:];
@@ -605,22 +649,23 @@ Compliance error at line 619, column 7, in file 'Compiler/ModelicaFrontEnd/src/t
 end Error2;
 
 model ArrayIterTest
-    type E = enumeration(a, b, c);
-    Real x[E];
-    Real y[E] = { x[i] for i };
+ Real x[1,1] = { i * j for i, j };
 
     annotation(__JModelica(UnitTesting(tests={
         ComplianceErrorTestCase(
             name="UnknownArraySizes_ArrayIterTest",
-            description="Array constructor with iterators: without in for non-integer indexed array",
+            description="Array constructor with iterators: without in",
             errorMessage="
-2 errors found:
+3 errors found:
 
-Error at line 610, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo':
-  Expected array index of type 'ComplianceTests.UnknownArraySizes.ArrayIterTest.E' found 'Integer'
+Error at line 643, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
+  Array size mismatch in declaration of x, size of declaration is [1, 1] and size of binding expression is [:, :]
 
-Compliance error at line 610, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', IMPLICIT_FOR_RANGE_NON_INTEGER:
-  Non-integer for iteration range not supported
+Compliance error at line 643, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo', UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION:
+  For index without in expression isn't supported
+
+Compliance error at line 643, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo', UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION:
+  For index without in expression isn't supported
 ")})));
 end ArrayIterTest;
 

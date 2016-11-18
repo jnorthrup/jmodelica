@@ -411,56 +411,28 @@ aspect FlatTypeCheck {
                 if (exp.type().isUnknown())
                     return;
             typeError(checkType);
-        } else {
+        } else if (!inFunction()) {
             size().markAsStructuralParameter(checkType, this);
         }
+    }
+    
+    protected static boolean FExp.isUnknownFExp(ASTNode n) {
+        return n instanceof FExp && ((FExp) n).type().isUnknown();
     }
     
     public void Size.markAsStructuralParameter(ErrorCheckType checkType, FExp src) {}
     
     public void MutableSize.markAsStructuralParameter(ErrorCheckType checkType, FExp src) {
-        if (src.errorCheckUnknownSize()) {
-            for (int i = 0; i < ndims(); i++) {
-                FExp exp = exps[i];
-                if (exp != null) {
-                    exp.markAsStructuralParameter(checkType);
-                    if (!exp.variability().parameterOrLess()) {
-                        ASTNode.NON_PARAMETER_SIZE_IN_EXPRESSION.invoke(src, exp, i, src);
-                    }
+        for (int i = 0; i < ndims(); i++) {
+            FExp exp = exps[i];
+            if (exp != null) {
+                exp.markAsStructuralParameter(checkType);
+                if (!exp.variability().parameterOrLess()) {
+                    ASTNode.NON_PARAMETER_SIZE_IN_EXPRESSION.invoke(src, exp, i, src);
                 }
             }
         }
     }
-    
-    syn boolean FExp.errorCheckUnknownSize() = !inFunction() && !allowUnknownSize();
-    
-    syn boolean BaseNode.allowUnknownSize()    = false;
-    eq InstFunctionArgument.allowUnknownSize() = inAllowUnknownSize();
-    eq FIfExp.allowUnknownSize()               = inAllowUnknownSize();
-    eq InstFunctionCall.allowUnknownSize()     = inAllowUnknownSize() && myCommonCallable().isExternalFunction();
-    eq FFunctionCall.allowUnknownSize()        = inAllowUnknownSize() && myCommonCallable().isExternalFunction();
-    
-    inh boolean BaseNode.inAllowUnknownSize();
-    eq BaseNode.getChild().inAllowUnknownSize()         = allowUnknownSize();
-    eq InstFunctionCall.getChild().inAllowUnknownSize() = allowUnknownSize() || myCommonCallable().isExternalFunction();
-    eq FFunctionCall.getChild().inAllowUnknownSize()    = allowUnknownSize() || myCommonCallable().isExternalFunction();
-    
-    interface CommonCallable { public boolean isExternalFunction(); }
-    syn boolean InstPartialFunction.isExternalFunction() = false;
-    syn boolean FFunctionVariable.isExternalFunction()   = false;
-    
-    syn boolean InstClassDecl.isExternalFunction() = findFunctionExternal() != null;
-    syn boolean FFunctionDecl.isExternalFunction() {
-        for (FStatement stmt : getFAlgorithm().getFStatements()) {
-            if (stmt.isExternalStatement()) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    syn boolean FStatement.isExternalStatement() = false;
-    eq FExternalStmt.isExternalStatement()       = true;
     
     public static final ErrorProducerUnlessDisabled ASTNode.NON_PARAMETER_SIZE_IN_EXPRESSION =
             new ErrorProducerUnlessDisabled("NON_PARAMETER_SIZE_IN_EXPRESSION", ProblemKind.COMPLIANCE,
@@ -713,6 +685,8 @@ aspect FlatTypeCheck {
             if ((inner == 0 || inner == Size.UNKNOWN) && type().matchOverloadedZero() == null) 
                 error("Matrix multiplication of operator records with an inner dimension of 0 or : requires that an '0' operator is defined");
         }
+        getLeft().size().forceVariability(checkType, fStructParameter());
+        getRight().size().forceVariability(checkType, fStructParameter());
         super.typeCheck(checkType);
     }
 
@@ -760,79 +734,15 @@ aspect FlatTypeCheck {
   eq FIdUseInstAccess.isAccessToStream() = getInstAccess().isAccessToStream();
   
   syn boolean InstAccess.isAccessToStream() = myInstComponentDecl().isStream();
-
-
-
-    public void InstForIndexWithExp.typeCheck(ErrorCheckType checkType) {
-        if (!getFExp().type().isUnknown() && getFExp().ndims() != 1)
-            error("The expression of for index " + name() + " must be a vector expression: " + 
-                    getFExp() + " has " + getFExp().ndims() + " dimension(s)");
-    }
-
-    public void InstForIndexNoExp.typeCheck(ErrorCheckType checkType) {
-        hasFExp(); // Force eval of NTA, thus checking if a consistent range can be computed
-    }
-
-    public static final SimpleErrorProducer InstForIndexNoExp.IMPLICIT_FOR_RANGE_NON_INTEGER =
-            new SimpleErrorProducer("IMPLICIT_FOR_RANGE_NON_INTEGER", ProblemKind.COMPLIANCE, 
-                    "Non-integer for iteration range not supported");
-
-    public static final SimpleErrorProducer InstForIndexNoExp.IMPLICIT_FOR_RANGE_INCONSISTENT =
-            new SimpleErrorProducer("IMPLICIT_FOR_RANGE_INCONSISTENT", ProblemKind.SEMANTIC, 
-                    "For index with implicit iteration range used for inconsistent sizes, here used for size %s and earlier for size %s");
-
-    public static final SimpleErrorProducer InstForIndexNoExp.IMPLICIT_FOR_RANGE_NOT_USED =
-            new SimpleErrorProducer("IMPLICIT_FOR_RANGE_NOT_USED", ProblemKind.SEMANTIC, 
-                    "For index with implicit iteration range must be used as array index");
-
-    // TODO: handle other index types than integer (see #3597)
-    syn lazy Opt<FExp> InstForIndexNoExp.getFExpOpt() {
-        Size size = null;
-        for (FExpSubscript use : mySubscriptUses()) {
-            Size useSize = use.mySize();
-            if (!use.myIndexType().isInteger()) {
-                IMPLICIT_FOR_RANGE_NON_INTEGER.invoke(use);
-            }
-            if (size == null) {
-                size = useSize;
-            } else if (!size.equivalent(useSize, true)) {
-                IMPLICIT_FOR_RANGE_INCONSISTENT.invoke(use, useSize, size);
-            }
-        }
-        if (size == null) {
-            IMPLICIT_FOR_RANGE_NOT_USED.invoke(this);
-            return new Opt();
-        } else {
-            return new Opt(size.createRangeExp(0));
-        }
-    }
-
-    syn lazy Collection<FExpSubscript> InstForIndexNoExp.mySubscriptUses() = mySubscriptUses(name());
-
-    inh Collection<FExpSubscript> InstForIndexNoExp.mySubscriptUses(String name);
-    eq InstForClauseE.getInstForIndex(int i).mySubscriptUses(String name) = collectSubscriptUses(name);
-    eq InstForStmt.getInstForIndex(int i).mySubscriptUses(String name)    = collectSubscriptUses(name);
-    eq FIterExp.getForIndex(int i).mySubscriptUses(String name)           = collectSubscriptUses(name);
-
-    public Collection<FExpSubscript> ASTNode.collectSubscriptUses(String name) {
-        Collection<FExpSubscript> nodes = new ArrayList<FExpSubscript>();
-        collectSubscriptUses(name, nodes);
-        return nodes;
-    }
-
-    public void ASTNode.collectSubscriptUses(String name, Collection<FExpSubscript> nodes) {
-        for (ASTNode n : this) {
-            n.collectSubscriptUses(name, nodes);
-        }
-    }
-
-    public void FExpSubscript.collectSubscriptUses(String name, Collection<FExpSubscript> nodes) {
-        if (getFExp().isIdentifier(name)) {
-            nodes.add(this);
-        }
-        super.collectSubscriptUses(name, nodes);
-    }
-
+  
+  
+  
+  public void InstForIndex.typeCheck(ErrorCheckType checkType) {
+	  if (hasFExp() && !getFExp().type().isUnknown() && getFExp().ndims() != 1)
+		  error("The expression of for index " + name() + " must be a vector expression: " + 
+				  getFExp() + " has " + getFExp().ndims() + " dimension(s)");
+  }
+  
   public void FExpSubscript.typeCheckAsSize(ErrorCheckType checkType) {
 	  if (ndims() > 0) { 
 		  error("Array size must be scalar expression: " + getFExp());
@@ -861,7 +771,7 @@ aspect FlatTypeCheck {
         } else if (!inFunction()) { 
               if (!getFExp().variability().fixedParameterOrLess()) {
                 warning("Variable array index in equation can result in slow simulation time");
-              } else if (!reportedOutOfBound && !inUnknownAccess() && !mySize().isUnknown()) {
+            } else if (!reportedOutOfBound && !inUnknownAccess()) {
                 // Check array bounds
                 // TODO: Perform bounds check in functions if index has parameter variability or lower?
                 try {
@@ -1196,19 +1106,21 @@ aspect FlatTypeCheck {
     public void InstFunctionCall.typeCheck(ErrorCheckType checkType) {
         if (!isFunctionCallClause() && !getName().myInstClassDecl().isRecord() && !hasOutputs() && !isPartialFunctionCall()) {
             error("Function " + getName().name() + "() has no outputs, but is used in expression");
-        } else if (!isFunctionCallClause() && size().isUnknown() && errorCheckUnknownSize()) {
+        } else if (!isFunctionCallClause() && !inFunction() && size().isUnknown()) {
             CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT.invoke(this, expOutput().name());
         }
         if (myCallOutputs().size() < myLefts().size()) {
             error("Too many components assigned from function call: " + getName().name() + 
                     "() has " + myCallOutputs().size() + " output(s)");
         }
-        if (isFunctionCallClause()) {
-            for (int i = 0, n = myCallOutputs().size(); i < n; i++) {
-                sizeOfOutput(i).markAsStructuralParameter(checkType, this);
+        if (!inFunction()) {
+            if (isFunctionCallClause()) {
+                for (int i = 0, n = myCallOutputs().size(); i < n; i++) {
+                    sizeOfOutput(i).markAsStructuralParameter(checkType, this);
+                }
+            } else {
+                size().markAsStructuralParameter(checkType, this);
             }
-        } else {
-            size().markAsStructuralParameter(checkType, this);
         }
     }
   
@@ -1223,7 +1135,7 @@ aspect FlatTypeCheck {
                 FType outType = type();
                 if (use.isForIndex()) {
                     error("Can not assign a value to a for loop index");
-                } else if (outType.size().isUnknown() && !inFunction() && !checkType.allowIncompleteSizes()) {
+                } else if (outType.size().isUnknown() && !inFunction()) {
                     error(functionCallDecription() + ": could not evaluate array size of output " + 
                             myOutput().name());
                 } else if (!useType.typeCompatible(outType, true)) {
@@ -1257,7 +1169,7 @@ aspect FlatTypeCheck {
                         boundType = boundType.sizedType(boundType.size().expand(vectorizedSize()));
                     else if (isDestructorArgument())
                         boundType = boundType.sizedType(type.size());
-                    typeOk = boundType.typeCompatible(type, true) || lockBranch(checkType);
+                    typeOk = boundType.typeCompatible(type, true);
                 }
             } else {
                 typeOk = argumentTypeValid(type);

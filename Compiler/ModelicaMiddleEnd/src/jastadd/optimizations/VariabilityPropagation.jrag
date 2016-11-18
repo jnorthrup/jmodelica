@@ -651,10 +651,7 @@ aspect ConstantFolding {
         
     }
     
-    public void FFunctionCallEquation.enableConstantFolding() {
-        if (getCall() instanceof FAssert) {
-            return;
-        }
+	public void FFunctionCallEquation.enableConstantFolding() {
 		for (FExp childExp : getCall().childFExps()) {
 			childExp.enableConstantFolding();
 		}

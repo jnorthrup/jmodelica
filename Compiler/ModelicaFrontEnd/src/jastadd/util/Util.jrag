@@ -157,17 +157,12 @@ aspect Parsers {
     public static SourceRoot ParserHandler.parseString(UtilInterface uif, String str, String fileName) 
             throws CompilerException, beaver.Parser.Exception, IOException {
         try {
-            return parseStringNoCatch(uif, str, fileName);
+            return parseModelicaString(uif, str, fileName);
         } catch (ParserException e) {
             CompilerException ce = new CompilerException();
             ce.addProblem(e.getProblem());
             throw ce;
         }
-    }
-
-    public static SourceRoot ParserHandler.parseStringNoCatch(UtilInterface uif, String str, String fileName) 
-            throws CompilerException, beaver.Parser.Exception, IOException {
-        return parseModelicaString(uif, str, fileName);
     }
 
     public static Exp ParserHandler.parseExpString(String str)
@@ -702,6 +697,7 @@ aspect Names {
     eq InstGlobalAccess.enclosingName()  = name().substring(0, name().lastIndexOf('.'));
 
     eq InstComponentDecl.getInstModification().calcInstanceName() = buildInstanceName(surroundingInstClass(), getFQNamePrefix());
+    eq InstAssignable.getBindingFExp().calcInstanceName()         = buildInstanceName(surroundingInstClass(), getFQNamePrefix());
     eq InstComponentDecl.getChild().calcInstanceName()            = buildInstanceName(surroundingInstClass(), getFQName());
     eq InstClassDecl.getChild().calcInstanceName()                = buildInstanceName(this, new FQNameEmpty());
     eq InstProgramRoot.getChild().calcInstanceName() {
@@ -1510,7 +1506,6 @@ aspect MultiDeclMethods {
         public ArrayList<InstComponentDecl> myCallInputs();
         public ArrayList<InstComponentDecl> myInputs();
         public ArrayList<InstComponentDecl> myOutputs();
-        public ArrayList<InstComponentDecl> myNonInputs();
         
         public void flattenFunction(FClass fc);
     }

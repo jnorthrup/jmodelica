@@ -183,7 +183,6 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
     block_solver->F = solver_callbacks.F;
     block_solver->dF = solver_callbacks.dF;
     block_solver->Jacobian = solver_callbacks.Jacobian;
-    block_solver->Jacobian_structure = solver_callbacks.Jacobian_structure;
     block_solver->check_discrete_variables_change = solver_callbacks.check_discrete_variables_change;
     block_solver->update_discrete_variables = solver_callbacks.update_discrete_variables;
     block_solver->log_discrete_variables = solver_callbacks.log_discrete_variables;
@@ -523,8 +522,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
         }
         
         /* ENHANCED FIXED POINT ITERATION */
-        if (converged==0 && (ef==0 || ef==jmi_block_solver_status_event_non_converge || ef==jmi_block_solver_status_inf_event_loop) 
-            && block_solver->check_discrete_variables_change && block_solver->n > 0){
+        if (converged==0 && (ef==0 || ef==jmi_block_solver_status_event_non_converge || ef==jmi_block_solver_status_inf_event_loop) && block_solver->check_discrete_variables_change){
             int non_reals_changed_flag;
             int non_reals_not_changed_flag;
             jmi_log_node_t ebi_node = jmi_log_enter_fmt(log, logInfo, "EnhancedBlockIterations",
@@ -553,7 +551,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                 /* Set the correct solution */ 
                 block_solver->F(block_solver->problem_data, x_new, NULL, JMI_BLOCK_WRITE_BACK); 
                 /* block_solver->update_discrete_variables(block_solver->problem_data, &non_reals_changed_flag);  Not needed, nothing changed */
-                jmi_log_node(log, logInfo, "FirstEnhancedSolutionConsistent","Found consistent solution on first try in enhanced fixed point iteration in <block:%s, iter:%I> at <t:%E>", 
+                jmi_log_node(log, logInfo, "Found consistent solution on first try in enhanced fixed point iteration in <block:%s, iter:%I> at <t:%E>", 
                         block_solver->label, iter, cur_time); 
                 converged = 1; 
             }
@@ -723,7 +721,6 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->step_limit_factor = 10; /** < \brief Step limiting factor */
     bsop->regularization_tolerance = -1;
     bsop->use_newton_for_brent = 0; 
-    bsop->linear_sparse_jacobian_threshold = -1;
 
     bsop->active_bounds_threshold = 0; /** < \brief Threshold for when at active bound. */
 

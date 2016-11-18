@@ -791,11 +791,6 @@ public
   input OperatorRecordTests.Cplx[:] b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  for i1 in 1:size(a, 1) loop
-  end for;
-  assert(size(a, 1) == size(b, 1), \"Mismatching sizes in function 'OperatorRecordTests.Cplx.'*'.prod', component 'b', dimension '1'\");
-  for i1 in 1:size(b, 1) loop
-  end for;
   c := Complex.'constructor'.fromReal(0, 0);
   for i in 1:size(a, 1) loop
    c := OperatorRecordTests.Cplx.'+'(c, OperatorRecordTests.Cplx.'*'.mul(a[i], b[i]));
@@ -2699,6 +2694,8 @@ end OperatorRecordTests.OperatorLimitations24;
 ")})));
     end OperatorLimitations24;
 
+
+// TODO: This is wrong! Function OperatorRecordTests.OperatorLimitations25.A.'0' is not present in flat model.
     model OperatorLimitations25
         operator record A
             Real x;
@@ -2732,7 +2729,7 @@ fclass OperatorRecordTests.OperatorLimitations25
  structural parameter Integer n = 0 /* 0 */;
  OperatorRecordTests.OperatorLimitations25.A a[2,0] = fill(OperatorRecordTests.OperatorLimitations25.A(time), 2, 0);
  OperatorRecordTests.OperatorLimitations25.A b[0,2] = fill(OperatorRecordTests.OperatorLimitations25.A(time + 1), 0, 2);
- OperatorRecordTests.OperatorLimitations25.A c[2,2] = {{OperatorRecordTests.OperatorLimitations25.A(0), OperatorRecordTests.OperatorLimitations25.A(0)}, {OperatorRecordTests.OperatorLimitations25.A(0), OperatorRecordTests.OperatorLimitations25.A(0)}};
+ OperatorRecordTests.OperatorLimitations25.A c[2,2] = {{OperatorRecordTests.OperatorLimitations25.A.'0'(), OperatorRecordTests.OperatorLimitations25.A.'0'()}, {OperatorRecordTests.OperatorLimitations25.A.'0'(), OperatorRecordTests.OperatorLimitations25.A.'0'()}};
 
 public
  function OperatorRecordTests.OperatorLimitations25.A.'*'

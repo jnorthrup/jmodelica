@@ -348,21 +348,18 @@ aspect FlatNames {
     
     syn String FQNamePart.name() = getName();
 
-    syn String FIdUse.name()    = getFQName().name();
-    syn String FIdUseExp.name() = getFIdUse().name();
-    eq FAbstractDerExp.name()   = derName(order());
-    eq FPreExp.name()           = preName();
-    eq FIdUseInstAccess.name()  = getInstAccessNoTransform().name();
-
+    syn String FIdUse.name()           = getFQName().name();
+    syn String FIdUseExp.name()        = getFIdUse().name();
+    eq FAbstractDerExp.name()          = derName(order());
+    eq FPreExp.name()                  = preName();
+    syn String FIdUseInstAccess.name() = getInstAccessNoTransform().name();
+    
     syn String FIdDecl.name() = getFQNameNoTransform().name();
 
     syn String FClass.name()        = getFQNameNoTransform().name();
     syn String FFunctionDecl.name() = getFQNameNoTransform().name();
     syn String FRecordDecl.name()   = getFQNameNoTransform().name();
     syn String FAttribute.name()    = getName().name();
-    
-    syn String FFunctionDecl.qualifiedName()     = name();
-    syn String FFunctionVariable.qualifiedName() = name();
     
     syn String FAbstractFunctionCall.name();
     eq InstFunctionCall.name()      = getNameNoTransform().name();
@@ -461,11 +458,6 @@ aspect FlatNames {
     syn String FFunctionCall.funcNameUnderscore(String suffix)     = getName().funcNameUnderscore(suffix) + functionIndex();
     syn String FFunctionDecl.funcNameUnderscore(String suffix)     = getFQName().funcNameUnderscore(suffix) + functionIndex();
     syn String FFunctionVariable.funcNameUnderscore(String suffix) = myFCallable().funcNameUnderscore(suffix);
-
-    syn boolean FExp.isIdentifier(String name) = false;
-    eq FIdUseExp.isIdentifier(String name) = name.equals(name());
-    eq FDSRefExp.isIdentifier(String name) = getOrg().isIdentifier(name);
-
 
     public interface FCallable {
         public String funcNameUnderscore(String suffix);
@@ -1240,10 +1232,8 @@ aspect FlatFunctionUtils {
      */
     public interface CommonCallable {
         public String name();
-        public String qualifiedName();
         public ArrayList<? extends CommonVariableDecl> myInputs();
         public ArrayList<? extends CommonVariableDecl> myOutputs();
-        public ArrayList<? extends CommonVariableDecl> myNonInputs();
     }
     
     public interface FCallable        extends CommonCallable {}
@@ -1260,7 +1250,6 @@ aspect FlatFunctionUtils {
     public interface FCallable {
         public ArrayList<FFunctionVariable> myInputs();
         public ArrayList<FFunctionVariable> myOutputs();
-        public ArrayList<FFunctionVariable> myNonInputs();
         public FFunctionVariable myInput(int i);
         public boolean hasOutputs();
         public FFunctionVariable expOutput();
@@ -1390,9 +1379,7 @@ aspect FlatFunctionUtils {
          return l;
      }
      
-     syn ArrayList<FFunctionVariable> FFunctionVariable.myInputs()    = myFCallable().myInputs();
-     syn ArrayList<FFunctionVariable> FFunctionVariable.myOutputs()   = myFCallable().myOutputs();
-     syn ArrayList<FFunctionVariable> FFunctionVariable.myNonInputs() = myFCallable().myNonInputs();
+     syn ArrayList<FFunctionVariable> FFunctionVariable.myInputs() = myFCallable().myInputs();
      
     /**
      * Returns the i:th FFunctionVariable that is  declared as "input".
@@ -1432,6 +1419,8 @@ aspect FlatFunctionUtils {
                  l.add(var);
          return l;
      }
+     
+     syn ArrayList<FFunctionVariable> FFunctionVariable.myOutputs() = myFCallable().myOutputs();
      
     /**
      * \brief List of CommonVariableDecl used as inputs in this function call
@@ -1608,11 +1597,24 @@ aspect FlatFunctionUtils {
      /**
       * Check is this node is in a function.
       */
-     inh boolean ASTNode.inFunction();
-     eq Root.getChild().inFunction()              = false;
-     eq FFunctionDecl.getChild().inFunction()     = true;
+     inh boolean FQName.inFunction();
+     inh boolean InstFunctionArgument.inFunction();
+     inh boolean InstComponentDecl.inFunction();
+     inh boolean InstExternal.inFunction();
+     inh boolean InstAccess.inFunction();
+     inh boolean InstForIndex.inFunction();
+     inh boolean FExp.inFunction();
+     inh boolean FIdUse.inFunction();
+     inh boolean FStatement.inFunction();
+     inh boolean FAbstractEquation.inFunction();
+     inh boolean FSubscript.inFunction();
+     inh boolean FFunctionCallLeft.inFunction();
+     inh boolean FAttribute.inFunction();
+     inh boolean InstExtends.inFunction();
      eq InstBaseClassDecl.getChild().inFunction() = isFunction();
+     eq FFunctionDecl.getChild().inFunction()     = true;
      eq InstAssignable.getChild().inFunction()    = (temporarilyInFunction != null) || inFunction();
+     eq Root.getChild().inFunction()              = false;
      eq InstNormalExtends.getInstClassModification().inFunction() = extendsInFunction();
      
      inh boolean InstExtends.extendsInFunction();
@@ -1722,15 +1724,13 @@ aspect FlatFunctionUtils {
      eq InstFunctionCall.findOutput(int i)                         = 
          (i >= myCallOutputs().size()) ? unknownInstComponentDecl() : myCallOutputs().get(i);
      
-     inh boolean FExp.functionCallIsExp();
+     inh boolean FAbstractFunctionCall.functionCallIsExp();
      eq FExp.getChild().functionCallIsExp()                 = true;
      eq FClass.getChild().functionCallIsExp()               = true;
      eq InstNode.getChild().functionCallIsExp()             = true;
      eq FFunctionCallEquation.getCall().functionCallIsExp() = false;
      eq FFunctionCallStmt.getCall().functionCallIsExp()     = false;
      eq FFunctionCall.getArg(int i).functionCallIsExp()     = !getArg(i).isComposite();
-     eq FIfExp.getThenExp().functionCallIsExp()             = functionCallIsExp();
-     eq FIfExp.getElseExp().functionCallIsExp()             = functionCallIsExp();
      
      inh lazy ArrayList<FFunctionCallLeft> FAbstractFunctionCall.myLefts();
      eq FExp.getChild().myLefts()                 = new ArrayList<FFunctionCallLeft>();
@@ -1976,9 +1976,7 @@ aspect FlatExpressions {
     eq FExp.numFExp() {
         return super.numFExp() + 1;
     }
-
-    public abstract FExp CommonForIndex.getFExp();
-
+    
 }
 
 

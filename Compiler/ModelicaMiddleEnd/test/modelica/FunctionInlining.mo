@@ -1744,28 +1744,28 @@ end FunctionInlining.IfStatementInline6;
         Real v = 3;
         Real z = f(v);
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="ForStatementInline1",
-            description="",
-            variability_propagation=false,
-            inline_functions="all",
-            eliminate_alias_variables=false,
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ForStatementInline1",
+			description="",
+			variability_propagation=false,
+			inline_functions="all",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass FunctionInlining.ForStatementInline1
  Real v;
  Real z;
- Real temp_2;
- Real temp_10;
- Real temp_12;
- Real temp_14;
+ Real temp_1;
+ Real temp_5;
+ Real temp_7;
+ Real temp_9;
 equation
  v = 3;
- z = 1 + temp_10 * temp_10 + temp_12 * temp_12 + temp_14 * temp_14;
- temp_2 = v;
- temp_10 = 1 + (temp_2 - 1) / 3;
- temp_12 = 1 + 2 * ((temp_2 - 1) / 3);
- temp_14 = 1 + 3 * ((temp_2 - 1) / 3);
+ z = 1 + temp_5 * temp_5 + temp_7 * temp_7 + temp_9 * temp_9;
+ temp_1 = v;
+ temp_5 = 1 + (temp_1 - 1) / 3;
+ temp_7 = 1 + 2 * ((temp_1 - 1) / 3);
+ temp_9 = 1 + 3 * ((temp_1 - 1) / 3);
 end FunctionInlining.ForStatementInline1;
 ")})));
     end ForStatementInline1;
@@ -3882,10 +3882,6 @@ equation
  z = 2 / (temp_1 - 5);
  temp_1 = time;
  assert(noEvent(temp_1 < 5), \"Bad x: \" + String(temp_1));
-
-public
- type AssertionLevel = enumeration(error, warning);
-
 end FunctionInlining.AssertInline1;
 ")})));
 end AssertInline1;
@@ -4224,10 +4220,10 @@ annotation(__JModelica(UnitTesting(tests={
             flatModel="
 fclass FunctionInlining.ChainedCallInlining4
  Real y;
- Real temp_14;
+ Real temp_11;
 equation
- y = temp_14 + 4 + (temp_14 + 5);
- temp_14 = time;
+ y = temp_11 + 4 + (temp_11 + 5);
+ temp_11 = time;
 end FunctionInlining.ChainedCallInlining4;
 ")})));
 end ChainedCallInlining4;
@@ -4265,10 +4261,10 @@ annotation(__JModelica(UnitTesting(tests={
             flatModel="
 fclass FunctionInlining.ChainedCallInlining5
  Real y;
- Real temp_14;
+ Real temp_11;
 equation
- y = (temp_14 + 4) / (temp_14 + 5);
- temp_14 = time;
+ y = (temp_11 + 4) / (temp_11 + 5);
+ temp_11 = time;
 end FunctionInlining.ChainedCallInlining5;
 ")})));
 end ChainedCallInlining5;
@@ -4306,12 +4302,12 @@ model ChainedCallInlining6
             flatModel="
 fclass FunctionInlining.ChainedCallInlining6
  Real y;
- Real temp_14;
- Real temp_36;
+ Real temp_11;
+ Real temp_30;
 equation
- y = (temp_14 + 4) / (temp_14 + 5);
- temp_14 = (temp_36 + 4) / (temp_36 + 5);
- temp_36 = time;
+ y = (temp_11 + 4) / (temp_11 + 5);
+ temp_11 = (temp_30 + 4) / (temp_30 + 5);
+ temp_30 = time;
 end FunctionInlining.ChainedCallInlining6;
 ")})));
 end ChainedCallInlining6;
@@ -4356,12 +4352,12 @@ model ChainedCallInlining7
             flatModel="
 fclass FunctionInlining.ChainedCallInlining7
  Real y;
- Real temp_16;
- Real temp_38;
+ Real temp_13;
+ Real temp_32;
 equation
- y = (temp_16 + 4) / (temp_16 + 5);
- temp_16 = (temp_38 + 4) / (temp_38 + 5);
- temp_38 = time;
+ y = (temp_13 + 4) / (temp_13 + 5);
+ temp_13 = (temp_32 + 4) / (temp_32 + 5);
+ temp_32 = time;
 end FunctionInlining.ChainedCallInlining7;
 ")})));
 end ChainedCallInlining7;
@@ -4583,41 +4579,6 @@ public
 end FunctionInlining.ChainedCallInlining12;
 ")})));
 end ChainedCallInlining12;
-
-model ChainedCallInlining13
-    record R
-        Real[2] x;
-    end R;
-    
-    function f1
-        input Real[:] x;
-        output R r = if size(x,1) >= 2 then R(x[1:2]) else R(cat(1,x,{1}));
-    algorithm
-        annotation(Inline=true);
-    end f1;
-    
-    function f2
-        input R r;
-        output Real y = sum(r.x);
-        algorithm
-        annotation(Inline=true);
-    end f2;
-    
-    parameter R r = f1({1,2});
-    parameter Real y = f2(f1({1}));
-    
-  annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="ChainedCallInlining13",
-            description="Test bug in #5165",
-            flatModel="
-fclass FunctionInlining.ChainedCallInlining13
- parameter Real r.x[1] = 1 /* 1 */;
- parameter Real r.x[2] = 2 /* 2 */;
- parameter Real y = 2 /* 2 */;
-end FunctionInlining.ChainedCallInlining13;
-")})));
-end ChainedCallInlining13;
 
 
 model InputAsIndex1

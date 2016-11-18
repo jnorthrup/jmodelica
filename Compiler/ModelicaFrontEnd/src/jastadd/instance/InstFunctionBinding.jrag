@@ -117,13 +117,16 @@ aspect InstFunctionBinding {
         InstComponentDecl bi = getBoundInput();
         if (bi != boundInput) {
             InstValueModification mod = bi.myInstValueMod();
-            if (mod != null) {
+            if (mod != null && !mod.isDefaultRecordMod()) {
                 return mod.getFExp();
             }
         }
         return getDeclarationFExp();
     }
-    
+
+    syn boolean InstModification.isDefaultRecordMod()     = false;
+    eq InstDefaultRecordModification.isDefaultRecordMod() = true;
+
 	/**
 	 * Argument nodes representing arguments that are missing or given multiple times do 
 	 * not get a location set when they are created. Set the location for those nodes, do nothing 
@@ -154,6 +157,19 @@ aspect InstFunctionBinding {
 		unbindableArgs = list;
 	}
 	public void FUnsupportedBuiltIn.setUnbindableArgsList(ArrayList<InstFunctionArgument> list) {
+	}
+	
+	private ArrayList<InstFunctionArgument> FBuiltInFunctionCall.originalArgs = 
+		new ArrayList<InstFunctionArgument>();
+	public void FBuiltInFunctionCall.addToOriginalArgs(InstFunctionArgument arg) { 
+		originalArgs.add(arg);
+	}
+
+	syn lazy List<InstFunctionArgument> FBuiltInFunctionCall.getOriginalArgList() {
+		List<InstFunctionArgument> res = new List<InstFunctionArgument>();
+		for (InstFunctionArgument arg : originalArgs)
+			res.add(arg);
+		return res;
 	}
 	
 	/**
@@ -234,7 +250,7 @@ aspect InstFunctionBinding {
                 FBuiltInFunctionCall res = creator.create(args);
                 if (res != null)
                     for (InstFunctionArgument arg : args)
-                        res.addOriginalArg(arg);
+                        res.addToOriginalArgs(arg);
                 return res;
             }
 
@@ -364,10 +380,8 @@ aspect InstFunctionBinding {
 				}
 				
 				protected void setArguments(FBuiltInFunctionCall res, InstFunctionArgument[] args) {
-                    int o = res.argsOffset();
-                    for (int i = 0; i < numArgs; i++) {
-                        res.setChild(extractFExp(args[i]), i + o);
-                    }
+					for (int i = 0; i < numArgs; i++)
+						res.setChild(extractFExp(args[i]), i);
 				}
 				
 				public boolean isInfArgs() {
@@ -394,11 +408,9 @@ aspect InstFunctionBinding {
 					List<FExp> exps = new List<FExp>();
 					for (int i = numArgs; i < args.length; i++)
 						exps.add(extractFExp(args[i]));
-                    res.setChild(exps, 1);
-                    int o = res.argsOffset();
-                    for (int i = 0; i < numArgs; i++) {
-                        res.setChild(extractFExp(args[i]), i + o);
-                    }
+					res.setChild(exps, 0);
+					for (int i = 0; i < numArgs; i++)
+						res.setChild(extractFExp(args[i]), i + 1);
 				}
 				
 				public boolean isInfArgs() {
@@ -423,12 +435,11 @@ aspect InstFunctionBinding {
                 
                 protected void setArguments(FBuiltInFunctionCall res, InstFunctionArgument[] args) {
                     super.setArguments(res, args);
-                    int o = res.argsOffset();
                     for (int i = numArgs; i < maxArgs; i++) {
                         if (generateMissing) {
-                            res.setChild(extractFExp(args[i]), i + o);
+                            res.setChild(extractFExp(args[i]), i);
                         } else {
-                            res.setChild(args[i].isGiven() ? new Opt(extractFExp(args[i])) : new Opt(), i + o);
+                            res.setChild(args[i].isGiven() ? new Opt(extractFExp(args[i])) : new Opt(), i);
                         }
                     }
                 }
@@ -468,11 +479,7 @@ aspect InstFunctionBinding {
 		}
 		
 	}
-    
-    syn int FExp.argsOffset()            = 0;
-    eq FBuiltInFunctionCall.argsOffset() = super.argsOffset() + 1;
-    eq FInfArgsFunctionCall.argsOffset() = super.argsOffset() + 1;
-    
+
 	/**
 	 * Change access to point to <code>this</code> class instead of <code>orig</code>.
 	 * 

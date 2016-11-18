@@ -300,13 +300,11 @@ model LoadResource1
 end LoadResource1;
 
 model StringArray1
-    function fstrlen
+    function strlen
         input String s;
         output Integer n;
-    external "C" n = fStrlen(s) annotation(
-        Library="externalFunctionsC",
-        Include="#include \"externalFunctionsC.h\"");
-    end fstrlen;
+        external;
+    end strlen;
     
     function stringify
         input Real[:] x;
@@ -335,7 +333,7 @@ model StringArray1
         String tx = stringcat(sx);
       algorithm
         Modelica.Utilities.Streams.print(tx);
-        n := fstrlen(tx);
+        n := strlen(tx);
     end f;
     
     Integer n;
