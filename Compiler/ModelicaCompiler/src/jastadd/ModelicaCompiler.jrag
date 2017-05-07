@@ -2718,11 +2718,8 @@ public abstract class CCompilerDelegator {
     }
 
     private void expandLibraries(Set<String> newPaths, String[] subDirs, String workingPath, int currentIndex) {
-        String newPath = workingPath;
-        if (currentIndex > 0) {
-            newPath = newPath + "/" + subDirs[currentIndex - 1];
-        }
-        if (currentIndex < subDirs.length) {
+        String newPath = workingPath + "/" + subDirs[currentIndex];
+        if (currentIndex < subDirs.length - 1) {
             expandLibraries(newPaths, subDirs, newPath, currentIndex + 1);
         }
         newPaths.add(newPath);
@@ -2751,21 +2748,10 @@ public abstract class CCompilerDelegator {
             this.target = target;
             
             this.externalLibraries = externalLibraries;
-            this.externalLibraryDirectories = sanitizeDirectories(externalLibraryDirectories);
-            this.externalIncludeDirectories = sanitizeDirectories(externalIncludeDirectories);
+            this.externalLibraryDirectories = externalLibraryDirectories;
+            this.externalIncludeDirectories = externalIncludeDirectories;
         }
-
-        /**
-         * Make sure the paths are on a form acceptable to the c-compiler.
-         */
-        private Set<String> sanitizeDirectories(Set<String> dirs) {
-            Set<String> res = new LinkedHashSet<String>();
-            for (String dir : dirs) {
-                res.add(new File(dir).getAbsolutePath());
-            }
-            return res;
-        }
-
+        
         public OptionRegistry getOptions() {
             return options;
         }

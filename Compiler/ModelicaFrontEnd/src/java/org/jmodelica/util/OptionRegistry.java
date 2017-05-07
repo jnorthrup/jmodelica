@@ -750,14 +750,14 @@ abstract public class OptionRegistry {
             Category.uncommon,
             1000,
             "When generating code for large systems, the code is split into multiple functions and files for performance reasons."
-            + " This option controls how many scalar elements can be evaluated by a function. Value less than 1 indicates no split."),
+            + " This option controls how many scalar elements can be evaluated by a function. Value < 1 indicates no split."),
         CC_SPLIT_FUNCTION_LIMIT
             ("cc_split_function_limit",
             OptionType.compiler,
             Category.uncommon,
             20,
             "When generating code for large systems, the code is split into multiple functions and files for performance reasons."
-            + " This option controls how many functions can be generated in a file. Value less than 1 indicates no split."),
+            + " This option controls how many functions can be generated in a file. Value < 1 indicates no split."),
         DYNAMIC_STATES
             ("dynamic_states",
              OptionType.compiler,
@@ -1887,19 +1887,9 @@ abstract public class OptionRegistry {
          */
         public void exportDocBook(DocBookPrinter out) {
             out.enter("row");
-            
-            out.enter("entry");
-            out.printLiteral(StringUtil.wrapUnderscoreName(key, 26));
-            out.exit();
-            
-            out.enter("entry");
-            out.printLiteral(getType());
-            out.text("/", 80);
-            out.printLiteral(getValueForDoc());
-            out.exit();
-            
-            out.printWrappedPreFormatedText("entry", description);
-            
+            out.oneLine("entry", out.lit(StringUtil.wrapUnderscoreName(key, 26)));
+            out.oneLine("entry", String.format("%s / %s", out.lit(getType()), out.lit(getValueForDoc())));
+            out.oneLine("entry", out.prepare(description));
             out.exit();
         }
 
