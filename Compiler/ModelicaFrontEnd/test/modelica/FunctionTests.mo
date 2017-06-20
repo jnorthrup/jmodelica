@@ -3259,7 +3259,7 @@ fclass FunctionTests.AlgorithmFlatten9
  Real x;
  discrete Boolean temp_1;
  discrete Boolean temp_2;
-initial equation
+initial equation 
  pre(y1) = 0.0;
  pre(y3) = 0.0;
  pre(temp_1) = false;
@@ -3283,14 +3283,14 @@ end FunctionTests.AlgorithmFlatten9;
 end AlgorithmFlatten9;
 
 model AlgorithmFlatten10
-  Real y1,y2;
+ Real y1,y2;
 algorithm
-  when time > 1 then
-    y1 := 1;
-  elsewhen time > 2 then
-    y2 := 2;
-  end when;
-
+	when time > 1 then
+		y1 := 1;
+	elsewhen time > 2 then
+		y2 := 2;
+	end when;
+	
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="AlgorithmFlatten10",
@@ -3301,7 +3301,7 @@ fclass FunctionTests.AlgorithmFlatten10
  discrete Real y2;
  discrete Boolean temp_1;
  discrete Boolean temp_2;
-initial equation
+initial equation 
  pre(y1) = 0.0;
  pre(y2) = 0.0;
  pre(temp_1) = false;
@@ -15055,9 +15055,8 @@ y
 ")})));
 end Integer2;
 
-
-
 end EventGen;
+
 
 
 package Math
@@ -15659,94 +15658,6 @@ y = semiLinear(x, s1, s2)
 end SemiLinear8;
 
 
-model Delay1
-    Real x = delay(time, y, z);
-    Real y = time;
-    Real z = time ^ 2;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="FunctionLike_Special_Delay1",
-            description="Delay, non-parameter max",
-            errorMessage="
-1 errors found:
-
-Error at line 15662, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', DELAY_MAX_NOT_PARAMETER:
-  Calling function delay(): third argument must be of parameter variability: z
-")})));
-end Delay1;
-
-
-model Delay2
-    Real x = delay(time, y);
-    Real y = time;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="FunctionLike_Special_Delay2",
-            description="Delay, non-parameter delay without max",
-            errorMessage="
-1 errors found:
-
-Error at line 15680, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', DELAY_NOT_PARAMETER:
-  Calling function delay(): second argument must be of parameter variability when third argument is not given: y
-")})));
-end Delay2;
-
-
-model Delay3
-    Real x = delay(time, y, z);
-    parameter Real y = 2;
-    parameter Real z = 1;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="FunctionLike_Special_Delay3",
-            description="Delay, delay > max",
-            errorMessage="
-1 errors found:
-
-Error at line 15697, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', DELAY_OVER_MAX:
-  Calling function delay(): second argument may not be larger than third argument: y = 2.0 > z = 1.0
-")})));
-end Delay3;
-
-
-model Delay4
-    Real x = delay(time, y);
-    parameter Real y = -1;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="FunctionLike_Special_Delay4",
-            description="Delay, delay < 0",
-            errorMessage="
-1 errors found:
-
-Error at line 15715, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', DELAY_NEGATIVE:
-  Calling function delay(): second argument may not be negative: y = -1.0 < 0
-")})));
-end Delay4;
-
-
-model Delay5
-    Real x = delay(time, y, z);
-    Real y = time;
-    parameter Real z = -1;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="FunctionLike_Special_Delay5",
-            description="Delay, max < 0",
-            errorMessage="
-1 errors found:
-
-Error at line 15732, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', DELAY_MAX_NEGATIVE:
-  Calling function delay(): third argument may not be negative: z = -1.0 < 0
-")})));
-end Delay5;
-
-
 end Special;
 
 package EventRel
@@ -15873,8 +15784,8 @@ fclass FunctionTests.FunctionLike.EventRel.Smooth2
  Real d;
 equation
  b = time;
- c = b * 2;
- d = 3 * b;
+ c = -2 * (- time);
+ d = c + b;
  a = smooth(0, if a < 0.65 then b / c * d else 0.42250000000000004 / b + d * (b - 0.65) / c);
 end FunctionTests.FunctionLike.EventRel.Smooth2;
 ")})));

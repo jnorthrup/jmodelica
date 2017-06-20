@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <map>
 
-#include "types/VariableType.hpp"
 #include "types/PrimitiveType.hpp"
 namespace ModelicaCasADi 
 {
@@ -43,6 +42,7 @@ class RealType : public PrimitiveType {
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
 };
-
+inline const std::string RealType::getName() const { return "Real"; }
+inline bool RealType::hasAttribute(const AttributeKey key) const { return attributes.find(AttributeKeyInternal(key))!=attributes.end(); }
 }; // End namespace
 #endif

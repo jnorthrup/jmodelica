@@ -1587,7 +1587,7 @@ algorithm
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="AlgorithmVariability1",
-            description="Test so that variability calculations are done properly for algorithms",
+            description="Test so that variability calculations are done propperly for algorithms",
             dynamic_states=false,
             flatModel="
 fclass IndexReduction.AlgorithmVariability1
@@ -1603,7 +1603,7 @@ fclass IndexReduction.AlgorithmVariability1
  Real _der_vx;
  Real _der_der_x;
  Real _der_der_y;
-initial equation
+initial equation 
  y = 0.0;
  vy = 0.0;
  pre(i) = 0;
@@ -1624,8 +1624,7 @@ equation
  _der_der_x = _der_vx;
  _der_der_y = der(vy);
  2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
-end IndexReduction.AlgorithmVariability1;
-")})));
+end IndexReduction.AlgorithmVariability1;")})));
   end AlgorithmVariability1;
 
   model AlgorithmVariability2
@@ -1645,7 +1644,7 @@ algorithm
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="AlgorithmVariability2",
-            description="Test so that variability calculations are done properly for algorithms",
+            description="Test so that variability calculations are done propperly for algorithms",
             variability_propagation=false,
             flatModel="
 fclass IndexReduction.AlgorithmVariability2
@@ -1683,7 +1682,7 @@ algorithm
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="AlgorithmVariability3",
-            description="Test so that variability calculations are done properly for algorithms, it should honor in discrete location",
+            description="Test so that variability calculations are done propperly for algorithms, it should honor in discrete location",
             flatModel="
 fclass IndexReduction.AlgorithmVariability3
  Real y;
@@ -1691,7 +1690,7 @@ fclass IndexReduction.AlgorithmVariability3
  Real z;
  discrete Boolean temp_1;
  Real _der_y;
-initial equation
+initial equation 
  pre(x) = 0.0;
  pre(temp_1) = false;
 equation
@@ -1725,7 +1724,7 @@ algorithm
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="AlgorithmVariability4",
-            description="Test so that variability calculations are done properly for algorithms",
+            description="Test so that variability calculations are done propperly for algorithms",
             flatModel="
 fclass IndexReduction.AlgorithmVariability4
  Real x;
@@ -1735,7 +1734,7 @@ fclass IndexReduction.AlgorithmVariability4
  parameter Integer it[1] = 1 /* 1 */;
  parameter Real rt[1] = 2.0 /* 2.0 */;
  Real _der_x;
-initial equation
+initial equation 
  pre(b) = false;
 equation
  x = time;
@@ -1776,7 +1775,7 @@ end IndexReduction.AlgorithmVariability4;
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="Variability1",
-            description="Test so that variability calculations are done properly for function call equations with parameters in left hand side",
+            description="Test so that variability calculations are done propperly for function call equations with parameters in left hand side",
             flatModel="
 fclass IndexReduction.Variability1
  parameter Real p = 2 /* 2 */;

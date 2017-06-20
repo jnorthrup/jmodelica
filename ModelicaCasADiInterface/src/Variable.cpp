@@ -202,5 +202,4 @@ void Variable::print(ostream& os) const {
     } 
     os << ";";
 }
-const Variable::Type Variable::getType() const { throw std::runtime_error("Variable does not have a type"); }
 }; // End namespace

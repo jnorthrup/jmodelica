@@ -26,14 +26,12 @@ import org.jmodelica.util.logging.units.LoggingUnit;
  */
 public class CompiledUnit implements LoggingUnit {
 
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = -4515905183271933348L;
 
-    private final File file;
-    private final int numberOfComponents;
+    private File file;
 
-    public CompiledUnit(File file, int numberOfComponents) {
+    public CompiledUnit(File file) {
         this.file = file;
-        this.numberOfComponents = numberOfComponents;
     }
 
     /**
@@ -41,10 +39,6 @@ public class CompiledUnit implements LoggingUnit {
      */
     public File getFile() {
         return file;
-    }
-
-    public int getNumberOfComponents() {
-        return numberOfComponents;
     }
 
     @Override

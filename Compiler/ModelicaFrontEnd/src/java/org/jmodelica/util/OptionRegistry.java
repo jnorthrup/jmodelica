@@ -697,20 +697,6 @@ abstract public class OptionRegistry {
              Category.user,
              true,
              "If enabled, then relational operators are allowed to generate time events."),
-        EVENT_OUTPUT_VARS
-            ("event_output_vars",
-             OptionType.compiler,
-             Category.user,
-             false,
-             "If enabled, output variables are generated for each generated event."),
-        EQUATION_EVENT_INDICATORS
-            ("equation_event_indicators",
-             OptionType.compiler,
-             Category.internal,
-             true,
-             false,
-             "If enabled, event indicators are generated from equations."
-             + "This is disabled by default when running tests"),
         DISABLE_SMOOTH_EVENTS
             ("disable_smooth_events",
              OptionType.compiler,
@@ -979,7 +965,7 @@ abstract public class OptionRegistry {
              OptionType.runtime, 
              Category.uncommon,
              10,
-             "Factor limiting the step-size taken by the nonlinear block solver.",
+             "Factor limiting the step-size taken by the nonlinear solver.",
              0, 1e10),
         NLE_SOLVER_REGULARIZATION_TOLERANCE
             ("nle_solver_regularization_tolerance",

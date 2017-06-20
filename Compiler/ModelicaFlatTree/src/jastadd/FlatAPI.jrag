@@ -2575,29 +2575,25 @@ aspect FlatAPI {
     syn boolean FAbstractVariable.isAlgebraicContinousRealVariable() = false;
     syn boolean FVariable.isAlgebraicContinousRealVariable()    = zCategory() == FClass.ZOrdinaryCategory.CONTINUOUS;
 
-    private String FClass.guid = null;
-    public String FClass.guid() {
-        if (guid == null) {
-            try {
-                PipedInputStream in = new PipedInputStream();
-                PipedOutputStream out = new PipedOutputStream(in);
-
-                MessageDigest md5 = MessageDigest.getInstance("MD5");
-                new StreamGobbler(in).start();
-                prettyPrint(new CodeStream(new DigestOutputStream(out, md5)), "");
-                out.close();
-
-                guid = new BigInteger(1,md5.digest()).toString(16);
-
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
-            }
+    syn lazy String FClass.guid() {
+        try {
+            PipedInputStream in = new PipedInputStream();
+            PipedOutputStream out = new PipedOutputStream(in);
+            
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            new StreamGobbler(in).start();
+            prettyPrint(new CodeStream(new DigestOutputStream(out, md5)), "");
+            out.close();
+            
+            return new BigInteger(1,md5.digest()).toString(16);
+            
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
-        return guid;
     }
-
+    
     private FAbstractEquation FAbstractEquation.meDifferentiated = null;
     private FAbstractEquation FAbstractEquation.meIntegrated = null;
     private FVariable FVariable.meDifferentiated = null;
@@ -3463,17 +3459,7 @@ aspect FVariableUses {
     eq FFunctionCall.getArg().isFunctionCallArg() = true;
     eq FIfExp.getThenExp().isFunctionCallArg()    = isFunctionCallArg();
     eq FIfExp.getElseExp().isFunctionCallArg()    = isFunctionCallArg();
-
-    syn boolean FExp.containsCommonFunctionCallExp() {
-        for (FExp exp : childFExps()) {
-            if (exp.containsCommonFunctionCallExp()) {
-                return true;
-            }
-        }
-        return false;
-    }
-    eq CommonFunctionCall.containsCommonFunctionCallExp() = true;
-
+    
     /**
      * Returnes the function input that this expressions corresponds to.
      * NOTICE, this method will throw exception if this exp does not reside in a function call.
@@ -4044,7 +4030,7 @@ aspect FlatDiagnostics {
     }
 
     public String FClass.aliasDiagnosticsShort() {
-        StringBuilder str = new StringBuilder();
+        StringBuilder str = new StringBuilder(" (");
         if (getAliasManager()!=null) {
             int n_elim = 0;
             Set<AliasManager.AliasSet> aliasSets = getAliasManager().getAliasSets();
@@ -4058,7 +4044,7 @@ aspect FlatDiagnostics {
         } else {
             str.append("Alias sets not computed");
         }
-        return str.toString();  
+        return str.append(")").toString();  
         
     }
 

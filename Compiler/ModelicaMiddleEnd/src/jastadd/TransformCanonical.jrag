@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009-2017 Modelon AB
+    Copyright (C) 2009 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -118,8 +118,8 @@ aspect TransformCanonical {
             transformations.add(new MakeReinitedVarsStates());
             transformations.add(new enableIfEquationElimination());
             transformations.add(new enableStreamsRewrite());
-            transformations.add(new ExtractEventGeneratingExpressions());
-            transformations.add(new GenerateEventIndicators());
+            transformations.add(new extractEventGeneratingExps());
+            transformations.add(new transformAlgorithms());
             transformations.add(new convertWhenToIf());
             transformations.add(new FunctionInliningIfSet());
             transformations.add(new setFDerivativeVariables());
@@ -144,7 +144,6 @@ aspect TransformCanonical {
             transformations.add(new aliasEliminationIfSet());
             transformations.add(new sortDependentParameters());
             transformations.add(new addRuntimeOptionParameters());
-            transformations.add(new eliminateLinearEquations());
             transformations.add(new computeMatchingsAndBLT());
         }
 
@@ -254,11 +253,6 @@ aspect TransformCanonical {
                 setDAEInitBLT(BLT.EMPTY_BLT);
                 DAEBiPGraph = null;
                 root().flushAllRecursiveClearFinal();
-            }
-            
-            @Override
-            public String toString() {
-                return getClass().getSimpleName() + ", operating on:\n\n" + FClass.this;
             }
         }
 
@@ -528,7 +522,7 @@ aspect TransformCanonical {
                     BiPGraph.VarType.NON_FIXED_PARAMETERS);
     
     private BiPGraph FClass.computeMatchedDAEBiPGraph() {
-        BiPGraph g = new BiPGraph();
+        BiPGraph g = new BiPGraph(myOptions());
         g.addVariables(this, VAR_TYPES_NORMAL);
         g.addEquations(equations(), VAR_TYPES_NORMAL);
         g.maximumMatching(true);
@@ -588,23 +582,23 @@ aspect TransformCanonical {
         // Make sure that we don't do this if any errors have been reported
         breakOnErrors();
 
-        log.verbose("Flat tree before matching and BLT:");
-        log.verbose(this);
+        logCanonical("Flat tree before matching and BLT:");
+        logCanonical(this);
 
         BiPGraph g;
         if (DAEBiPGraph == null) {
             g = computeMatchedDAEBiPGraph();
-            log.verbose("DAE BiPGraph");
-            log.verbose(g);
-            log.verbose("DAE BiPGraph matching");
-            log.verbose(g.printMatchingObj());
+            logCanonical("DAE BiPGraph");
+            logCanonical(g);
+            logCanonical("DAE BiPGraph matching");
+            logCanonical(g.printMatchingObj());
         } else {
             g = DAEBiPGraph;
             DAEBiPGraph = null;
         }
-		
-        log.verbose(g);
-        
+
+        logCanonical(g);
+
         // If no complete matching found, then fail
         if (!g.isComplete()) {
             checkStructure();
@@ -626,19 +620,19 @@ aspect TransformCanonical {
                 return;
             }
             setDAEBLT(daeBLT);
-            log.verbose(getDAEStructuredBLT());
-            log.verbose(getDAEBLT());
+            logCanonical(getDAEStructuredBLT());
+            logCanonical(getDAEBLT());
         } else {
             setDAEBLT(BLT.EMPTY_BLT);
         }
-        
+
         g.removeVariables(dynamicAlgebraicVariables());
-        
+
         // Find matching for the initialization system
         g.addVariables(this, VAR_TYPES_INIT);
         g.addEquations(equations(), VAR_TYPES_INIT);
         g.setAsInitialSystem();
-        
+
         // Replace when equations
         java.util.List<FAbstractEquation> equationsToReplace = new ArrayList<FAbstractEquation>();
         for (FAbstractEquation e : equations()) {
@@ -646,21 +640,21 @@ aspect TransformCanonical {
                 equationsToReplace.add(e);
             }
         }
-        
+
         Set<FAbstractVariable> existingPrePropagationLikeInitialEquations = new HashSet<FAbstractVariable>();
         for (FAbstractEquation eqn : initialEquations()) {
             FAbstractVariable var = eqn.isPrePropagationEquation();
             if (var != null)
                 existingPrePropagationLikeInitialEquations.add(var);
         }
-        
+
         Map<FAbstractVariable, FAbstractEquation> prePropagationEquations = new HashMap<FAbstractVariable, FAbstractEquation>();
         // Loop over all equations to replace
         for (FAbstractEquation equationToReplace : equationsToReplace) {
-            
+
             // How many equations are there in this when clause?
             List<FAbstractEquation> newEquations = equationToReplace.getInitialEquations();
-            
+
             // Put the Equations in an ArrayList rather than a List
             // TODO: There are probably more elegant ways to do this...
             java.util.List<FAbstractEquation> newEquations_ = new ArrayList<FAbstractEquation>();
@@ -688,33 +682,33 @@ aspect TransformCanonical {
                         newEquations_.add(e);
                 }
             }
-            
+
             // - equationToReplace is an FAbstractEquation that should be replaced
             // - newEquations contains the new equations that replaces the equationToReplace
             // - Note that newEquations may contain several equations
-            
+
             java.util.List<Eq> eq_list = new ArrayList<Eq>(g.getEquations(equationToReplace));
-            
+
             for (Eq eqq : eq_list) {
                 g.removeEquation(eqq);
             }
-            
+
             if (!eq_list.isEmpty())
                 g.addEquations(newEquations_, VAR_TYPES_ALL, eq_list.get(0).getName() + "_init_", new Enumerator(1));
         }
-        
-        log.verbose(g);
-        
+
+        logCanonical(g);
+
         g.addEquations(initialEquations(), VAR_TYPES_ALL);
-        
+
         g.maximumMatching(false, prePropagationEquations.keySet());
-        log.verbose("Init DAE BiPGraph");
-        log.verbose(g);
-        log.verbose("Init BiPGraph matching");
-        log.verbose(g.printMatchingObj());
-        
+        logCanonical("Init DAE BiPGraph");
+        logCanonical(g);
+        logCanonical("Init BiPGraph matching");
+        logCanonical(g.printMatchingObj());
+
         g = overdeterminedInitialSystem(g);
-        
+
         // Add initial equations if needed
         if (g.getUnmatchedEquations().isEmpty() && myOptions().getBooleanOption("automatic_add_initial_equations")) {
             for (Var var : g.getUnmatchedVariables()) {
@@ -732,28 +726,28 @@ aspect TransformCanonical {
                 g.addEquations(Collections.singletonList(fe), VAR_TYPES_ALL);
             }
             root().flushAllRecursive();
-            
+
             g.maximumMatching(false);
-            log.verbose("Init DAE BiPGraph after addition of initial equations");
-            log.verbose(g);
-            log.verbose("Init BiPGraph matching after addition of initial equations");
-            log.verbose(g.printMatchingObj());
+            logCanonical("Init DAE BiPGraph after addition of initial equations");
+            logCanonical(g);
+            logCanonical("Init BiPGraph matching after addition of initial equations");
+            logCanonical(g.printMatchingObj());
         }
-        
+
         numIgnoredPrePropagationEquations = prePropagationEquations.size() 
                 + existingPrePropagationLikeInitialEquations.size();
-        
+
         for (Var var : g.getUnmatchedVariables()) {
             daeInitUnmatchedVariables.add(var.getVariable());
         }
-        
+
         for (Eq ee : g.getUnmatchedEquations()) {
             daeInitUnmatchedEquations.add(ee.getEquation());
         }
-        
+
         collectErrors(ErrorCheckType.COMPILE);
         breakOnErrors();
-        
+
         if (myOptions().getBooleanOption("equation_sorting") && g.isComplete()) {
             g.tarjanReset();
             BLT daeInitBLT;
@@ -767,21 +761,25 @@ aspect TransformCanonical {
                 return;
             }
             setDAEInitBLT(daeInitBLT);
-            log.verbose(daeInitBLT);
+            logCanonical(daeInitBLT);
         } else {
             setDAEInitBLT(BLT.EMPTY_BLT);
         }
     }
-    
+
+    private void FClass.logCanonical(Object... objects) {
+        log.verbose(objects);
+    }
+
     syn FAbstractVariable FAbstractEquation.isPrePropagationEquation() = null;
     eq FEquation.isPrePropagationEquation() {
         FAbstractVariable left = getLeft().isAccess() ? getLeft().asFIdUse().myFV() : null;
         FAbstractVariable right = getRight().isAccess() ? getRight().asFIdUse().myFV() : null;
         return left == right ? left : null;
     }
-    
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public void FClass.checkStructure() {
 		if (myOptions().getBooleanOption("enable_structural_diagnosis")) {
 			StringBuffer err_str = new StringBuffer("The system is structurally singular. ");
@@ -977,6 +975,169 @@ aspect TransformCanonical {
 		}
 	}
 
+	public class FClass {
+		public class transformAlgorithms extends Transformation {
+			public void perform() {
+				AlgorithmTransformer.visit(algorithms(), new IndicatorAlgoTransformer());
+				flushAllRecursive();
+			}
+		}
+	}
+    
+    /**
+     * Visitor pattern for inserting new statements in an algorithm
+     * <code>transform(FAlgorithm)</code> is called at start of algorithm
+     * <code>transform(FStatement)</code> is called at each statement
+     */
+    public abstract class AlgorithmTransformer {
+        private ArrayList<ArrayList<FStatement>> blocks = new ArrayList<ArrayList<FStatement>>();
+        
+        protected void add(FStatement stmt) {
+            blocks.get(blocks.size()-1).add(stmt);
+        }
+
+        protected void addAll(Collection<? extends FStatement> stmts) {
+            for (FStatement stmt : stmts) {
+                add(stmt);
+            }
+        }
+
+		public static void visit(Collection<FAlgorithm> algs, AlgorithmTransformer tf) {
+			for (FAlgorithm alg : algs)
+				tf.visit(alg);
+		}
+		
+		public void visit(FAlgorithm alg) {
+			blocks.add(new ArrayList<FStatement>());
+			if (transform(alg))
+				for (FStatement stmt : alg.getFStatements())
+					stmt.acceptTransform(this);
+			else
+				for (FStatement stmt : alg.getFStatements())
+					add(stmt);
+			alg.setFStatementList(new List<FStatement>(blocks.remove(blocks.size()-1)));
+		}
+		
+		public List<FStatement> visit(List<FStatement> stmts) {
+			blocks.add(new ArrayList<FStatement>());
+			for (FStatement stmt : stmts)
+				stmt.acceptTransform(this);
+			return new List<FStatement>(blocks.remove(blocks.size()-1));
+		}
+		
+		public void visit(FStatement stmt) {
+			transform(stmt);
+		}
+		
+		public void visit(FForStmt stmt) {
+			stmt.setForStmtList(visit(stmt.getForStmts()));
+			transform(stmt);
+		}
+		
+		public void visit(FWhileStmt stmt) {
+			stmt.setWhileStmtList(visit(stmt.getWhileStmts()));
+			transform(stmt);
+		}
+		
+		public void visit(FIfStmt stmt) {
+			for (FIfWhenClause clause : stmt.getFIfWhenClauses()) {
+				clause.setFStatementList(visit(clause.getFStatements()));
+			}
+			stmt.setElseStmtList(visit(stmt.getElseStmts()));
+			transform(stmt);
+		}
+		
+		public void visit(FWhenStmt stmt) {
+			for (FIfWhenClause clause : stmt.getFIfWhenClauses()) {
+				clause.setFStatementList(visit(clause.getFStatements()));
+			}
+			transform(stmt);
+		}
+		
+		/**
+		 * Returns true if other statements should be visited
+		 */
+		public boolean transform(FAlgorithm alg) {return true;}
+		
+		public void transform(FStatement stmt) {add(stmt);}
+	}
+	
+	public void FAlgorithm.acceptTransform(AlgorithmTransformer tf)  { tf.visit(this); }
+	public void FStatement.acceptTransform(AlgorithmTransformer tf)  { tf.visit(this); }
+	public void FAssignStmt.acceptTransform(AlgorithmTransformer tf) { tf.visit(this); }
+	public void FIfStmt.acceptTransform(AlgorithmTransformer tf)     { tf.visit(this); }
+	public void FForStmt.acceptTransform(AlgorithmTransformer tf)    { tf.visit(this); }
+	public void FWhileStmt.acceptTransform(AlgorithmTransformer tf)  { tf.visit(this); }
+	public void FWhenStmt.acceptTransform(AlgorithmTransformer tf)   { tf.visit(this); }
+	
+	/**
+	 * Generates initial statements and indicator statements for relational expressions.
+	 */
+	public class IndicatorAlgoTransformer extends AlgorithmTransformer {
+		public boolean transform(FAlgorithm alg) {
+			// Generate indicator ntas
+			for (FRelExp exp : alg.relExpInEquation())
+				if (exp.dependsOn(alg.referencedFVariablesInLHS()))
+					exp.genIndicator();
+			// Add indicator initial statements
+			for (FRelExp exp : alg.relExpInEquation())
+				if (exp.hasIndicator() && exp.needsIndicatorInit())
+					add(exp.indicatorInitStmt());
+			return true;
+		}
+		
+		public void transform(FStatement stmt) {
+			// Add indicator stmts
+			for (FRelExp exp : stmt.relExpInStmt())
+				if (exp.hasIndicator())
+					add(exp.indicatorStmt());
+			add(stmt);
+		}
+	}
+
+	syn boolean FExp.dependsOn(Collection<FVariable> fvs) {
+		for (FVariable fv : lookupFVariablesInSet(findFIdUseExpsInTree()))
+			if (fvs.contains(fv))
+				return true;
+		return false;
+	}
+	
+	
+	inh boolean FRelExp.needsIndicatorInit();
+	eq Root.getChild().needsIndicatorInit()                = false;
+	eq FAlgorithm.getChild().needsIndicatorInit()          = false;
+	eq FForStmt.getForStmt().needsIndicatorInit()          = true;
+	eq FIfStmt.getElseStmt().needsIndicatorInit()          = true;
+	eq FIfWhenClause.getFStatement().needsIndicatorInit()  = true;
+	eq FWhileStmt.getWhileStmt().needsIndicatorInit()      = true;
+
+	/**
+	 * Creates an indicator for this FRelExp
+	 */
+	public void FRelExp.genIndicator() {
+		FVariable v = new FRealVariable(new FPublicVisibilityType(), fContinuous(), new FQNameFull(calcIndicatorVarName()));
+		myFClass().addFVariable(v);
+		setIndicator(v.createUseExp());
+	}
+	
+	/**
+	 * Creates an initial assign statement for the indicator
+	 */
+    syn FStatement FRelExp.indicatorInitStmt() = new FAssignStmt(getIndicator().fullCopy(), new FIntegerLitExp(1));
+    
+	/**
+	 * Creates an assign statement for the indicator
+	 */
+    syn FStatement FRelExp.indicatorStmt() = new FAssignStmt(getIndicator().fullCopy(), indicatorExp());
+    
+    syn FExp FRelExp.indicatorExp() {
+        FExp res = new FSubExp(getLeft(), getRight());
+        if (myOptions().getBooleanOption("event_indicator_scaling")) {
+            res = new FDivExp(res, nominal());
+        }
+        return res;
+    }
+	
 	/**
 	 * Replace one equation with another.
 	 */
@@ -2696,6 +2857,259 @@ aspect RuntimeOptions {
 	
 }
 
+
+
+aspect EventGeneratingExps {
+
+    public class FClass {
+        /**
+         * Extracts event generating expressions into if expressions
+         * and replaces the exp with a temp var.
+         */
+        public class extractEventGeneratingExps extends Transformation {
+            public void perform() {
+                HashSet<FAlgorithm> algs = new HashSet<FAlgorithm>();
+                ArrayList<FExp> eventExps = eventGenExps();
+                Collections.reverse(eventExps);
+
+                // Equations
+                for (FExp exp: eventExps) {
+                    FVariable fv = exp.type().createFVariable(new FPublicVisibilityType(),
+                            new FQNameFull(exp.tempVarName()), exp.variability());
+                    addFVariable(fv);
+                    addFInitialEquation(new FEquation(exp.tempPreExp(), fv.createStartAttributeExp()));
+
+                    if (exp.inAlgorithm()) {
+                        algs.add((FAlgorithm) exp.myFEquation());
+                        continue;
+                    }
+                    addFEquation(new FEquation(exp.tempUseExp(), exp.eventTempExpCalc()));
+                    exp.replaceMe(exp.eventTempExpUse());
+
+                    addFEquations(exp.extractEventGenEquation());
+                    addFInitialEquations(exp.extractEventGenInitialEquation());
+                }
+
+                // Algorithms
+                AlgorithmTransformer.visit(algs, new EventAlgoTransformer());
+
+                root().flushAllRecursive();
+            }
+        }
+    }
+
+    /**
+     * Collects all event generating expressions
+     */
+    coll ArrayList<FExp> FClass.eventGenExps() 
+        [new ArrayList<FExp>()] with add root FClass;
+	FEventGenExp contributes this
+		when inEquationSection() && generatesEvent()
+		to FClass.eventGenExps()
+		for myFClass();
+    FSampleExp contributes this
+        when inEquationSection() && generatesEvent()
+        to FClass.eventGenExps()
+        for myFClass();
+
+    /**
+     * Collects event generating expressions in this statements
+     */
+    coll ArrayList<FExp> FStatement.eventGenExps() 
+        [new ArrayList<FExp>()] with add root FAlgorithm;
+    FEventGenExp contributes this
+        when inEquationSection() && generatesEvent()
+        to FStatement.eventGenExps()
+        for myFStatement();
+    FSampleExp contributes this
+        when inEquationSection() && generatesEvent()
+        to FStatement.eventGenExps()
+        for myFStatement();
+
+    /**
+     * Extracts event generating expressions into if-expressions
+     */
+    public class EventAlgoTransformer extends AlgorithmTransformer {
+        public void transform(FStatement stmt) {
+            ArrayList<FExp> eventExps = stmt.eventGenExps();
+            Collections.reverse(eventExps);
+            for (FExp exp : eventExps) {
+                add(new FAssignStmt(exp.tempUseExp(), exp.eventTempExpCalc()));
+                exp.replaceMe(exp.eventTempExpUse());
+                addAll(exp.extractEventGenStatement());
+            }
+            add(stmt);
+        }
+    }
+
+    public java.util.List<FAbstractEquation> FExp.extractEventGenEquation() {
+        return Collections. <FAbstractEquation> emptyList();
+    }
+
+    public java.util.List<FAbstractEquation> FExp.extractEventGenInitialEquation() {
+        return Collections. <FAbstractEquation> emptyList();
+    }
+
+    public java.util.List<FStatement> FExp.extractEventGenStatement() {
+        return Collections. <FStatement> emptyList();
+    }
+
+    public java.util.List<FAbstractEquation> FSampleExp.extractEventGenEquation() {
+        FExp interval = getInterval();
+        FExp offset = getOffset();
+        FAssignableExp var = tempUseExp();
+
+        /*
+         *  Create the when statement.
+         */
+        FPreExp preExp = new FPreExp(indexVariable().createFIdUse());
+        FExp mulExp = new FMulExp(new FAddExp(preExp.treeCopyNoTransform(), new FIntegerLitExp(1)), interval);
+        FExp addExp = new FAddExp(offset.treeCopyNoTransform(), mulExp);
+
+        FAbstractEquation assign = new FEquation(indexVariable().createUseExp(),
+                new FAddExp(preExp, new FIntegerLitExp(1)));
+        FAbstractEquation when = new FWhenEquation(new FNormalEquation(), new List<FAbstractEquation>(assign),
+                var.treeCopyNoTransform(), new Opt<FIfWhenElseEquation>());
+
+        /*
+         *  Create the assert statement.
+         */
+        FExp ltExp = new FLtExp(new FTimeExp(), addExp);
+        FAbstractEquation assertEq = new FFunctionCallEquation(new List<FFunctionCallLeft>(),
+                new FAssert(ltExp, new FStringLitExp(SAMPLE_ASSERT_MESSAGE), new Opt<FExp>()));
+
+        /*
+         *  Add statements to the result list.
+         */
+        java.util.List<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
+        eqns.add(when);
+        eqns.add(assertEq);
+
+        return eqns;
+    }
+    
+    //initial equation
+    // sampleInd1 = if time < offset then 0 else ceil((initial_time - offset) / interval);
+    public java.util.List<FAbstractEquation> FSampleExp.extractEventGenInitialEquation() {
+        java.util.List<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
+        FExp offset = getOffset();
+        
+        FExp subExp = new FSubExp(new FTimeExp(), offset.treeCopyNoTransform());
+        FExp eval = new FCeilFuncExp(new List<InstFunctionArgument>(),
+                new FDivExp(subExp, getInterval().treeCopyNoTransform())); 
+
+        FExp guards = new FLtExp(new FTimeExp(), offset.treeCopyNoTransform());
+        FIfExp ifExp = new FIfExp(guards, new FIntegerLitExp(0), eval);
+        eqns.add(new FEquation(indexVariable().createUseExp(), ifExp));
+        return eqns;
+    }
+
+    public java.util.List<FStatement> FSampleExp.extractEventGenStatement() {
+        FExp interval = getInterval();
+        FExp offset = getOffset();
+        FAssignableExp var = tempUseExp();
+
+        /*
+         *  Create the when statement.
+         */
+        FPreExp preExp = new FPreExp(indexVariable().createFIdUse());
+        FExp mulExp = new FMulExp(new FAddExp(preExp.treeCopyNoTransform(), new FIntegerLitExp(1)), interval);
+        FExp addExp = new FAddExp(offset.treeCopyNoTransform(), mulExp);
+
+        FStatement assignStmt = new FAssignStmt(indexVariable().createUseExp(),
+                new FAddExp(preExp.treeCopyNoTransform(), new FIntegerLitExp(1)));
+        FStatement when = new FWhenStmt(new List<FIfWhenClause>(new FWhenClause(
+                var.treeCopyNoTransform(), new List<FStatement>(assignStmt))));
+
+        /*
+         *  Create the assert statement.
+         */
+        FExp ltExp = new FLtExp(new FTimeExp(), addExp);
+        FStatement assertEq = new FFunctionCallStmt(new List<FFunctionCallLeft>(),
+                new FAssert(ltExp, new FStringLitExp(SAMPLE_ASSERT_MESSAGE), new Opt<FExp>()));
+
+        /*
+         *  Add statements to the result list.
+         */
+        java.util.List<FStatement> stmts = new ArrayList<FStatement>();
+        stmts.add(when);
+        stmts.add(assertEq);
+
+        return stmts;
+    }
+
+    private static final String FSampleExp.SAMPLE_ASSERT_MESSAGE = "Too long time steps relative to sample interval.";
+    
+    private FVariable FSampleExp.indexVariable = null;
+    private FVariable FSampleExp.indexVariable() {
+        if (indexVariable == null) {
+            indexVariable = new FIntegerVariable(new FPublicVisibilityType(),
+                    fDiscrete(), new FQNameFull(calcIndexVarName()));
+            myFClass().addFVariable(indexVariable);
+        }
+        return indexVariable;
+    }
+
+    syn FExp FExp.eventTempExpUse()     = null;
+    eq FSampleExp.eventTempExpUse()     = tempUseExp();
+    eq FEventGenExp.eventTempExpUse()   = tempUseExp();
+    
+    // Use TreeCopyNoTransform
+    syn FExp FExp.eventTempExpCalc()    = null;
+    eq FSampleExp.eventTempExpCalc() {
+        FExp preExp = new FPreExp(indexVariable().createFIdUse());
+        FExp mulExp = new FMulExp(preExp, getInterval().treeCopyNoTransform());
+        FExp addExp = new FAddExp(getOffset().treeCopyNoTransform(), mulExp);
+        FExp notInitial = new FNotExp(new FInitialExp());
+        FExp geqExp = new FGeqExp(new FTimeExp(), addExp);
+        return new FAndExp(notInitial, geqExp);
+    }
+    
+    eq FEventGenExp.eventTempExpCalc() {
+        FExp guards = new FOrExp(createGuardExp(tempPreExp()), new FInitialExp());
+        FIfExp e = new FIfExp();
+        e.setIfExp(guards);
+        e.setThenExp(treeCopy());
+        e.setElseExp(tempPreExp());
+        return e;
+    }
+    
+	/**
+	 * Creates a guard expression for an event generating expression
+	 * extracted to a when equation. (Integer inherits from floor.)
+	 */
+	syn FExp FEventGenExp.createGuardExp(FExp preExp);
+	eq FFloorFuncExp.createGuardExp(FExp preExp) {
+		FOrExp guards = new FOrExp(
+			new FLtExp(getX().fullCopy(), preExp.fullCopy()),
+			new FGeqExp(getX().fullCopy(), new FAddExp(preExp.fullCopy(), new FIntegerLitExp(1)))
+		);
+		return guards;
+	}
+	eq FCeilFuncExp.createGuardExp(FExp preExp) {
+		FOrExp guards = new FOrExp(
+			new FLeqExp(getX().fullCopy(), new FSubExp(preExp.fullCopy(), new FIntegerLitExp(1))),
+			new FGtExp(getX().fullCopy(), preExp.fullCopy())
+		);
+		return guards;
+	}
+	eq FDivFuncExp.createGuardExp(FExp preExp) {
+		FOrExp guards = new FOrExp(
+			new FLtExp(new FDivFuncExp(getX().fullCopy(), getY().fullCopy()), preExp.fullCopy()),
+			new FGeqExp(new FDivFuncExp(getX().fullCopy(), getY().fullCopy()), new FAddExp(preExp.fullCopy(), new FIntegerLitExp(1)))
+		);
+		return guards;
+	} 
+	
+	// These two are rewritten to floor and div containing expressions during flattening.
+	eq FModFuncExp.createGuardExp(FExp preExp) {
+		throw new UnsupportedOperationException();
+	}
+	eq FRemFuncExp.createGuardExp(FExp preExp) {
+		throw new UnsupportedOperationException();
+	}
+}
+
 aspect SemiLinear {
 
     public class FClass {
@@ -3026,6 +3440,83 @@ aspect ReinitStates {
         }
     }
     
+}
+
+aspect EliminateEqualSwitches{
+    public class FClass {
+        /**
+         * Reduce the number of event indicators by eliminating relative
+         * operators that are equal. This is done by traversing the normal
+         * equation system and the initial equation system and storing all
+         * relative operations in a map that translate toString() to a list
+         * of relative operators that are equal.
+         * Operatorns are then eliminating by setting the originalFRelExp
+         * field in the redundant operators.
+         * The normal operator should be used if equal operators exists in
+         * both the normal and initial blocks. This is achived by inserting all
+         * normal equations into the map before the initial equations and then
+         * selecting the first in the list as the original operator.
+         */
+        public class eliminateEqualSwitches extends Transformation {
+            public void perform() {
+                Map<String, Collection<FRelExp>> candidates = new HashMap<String, Collection<FRelExp>>();
+                for (FRelExp exp : relExpsWithEvent()) {
+                    exp.collectEqualSwitches(candidates);
+                    exp.setOriginalFExp(exp);
+                } 
+                for (FRelExp exp : eventExpInInitialEquations()) {
+                    exp.collectEqualSwitches(candidates);
+                    exp.setOriginalFExp(exp);
+                }
+                for (Map.Entry<String, Collection<FRelExp>> entry : candidates.entrySet()) {
+                    if (entry.getValue().size() < 2)
+                        continue;
+                    log.verbose("Eliminated %d equal switches: %s", entry.getValue().size() - 1, entry.getKey());
+                    FRelExp original = null;
+                    for (FRelExp exp : entry.getValue()) {
+                        if (!exp.hasBrancher() && !(exp.inFArray() && exp.inFunctionCall())) {
+                            original = exp;
+                            break;
+                        }
+                    }
+                    if (original != null) {
+                        for (FRelExp exp : entry.getValue()) {
+                            exp.setOriginalFExp(original);
+                        }
+                    }
+                }
+                root().flushAllRecursive();
+            }
+        }
+    }
+    
+    /**
+     * Check if this expression is in an FArray expression. Either directly or
+     * a thorugh a sequence of other expressions.
+     */
+    inh boolean FExp.inFArray();
+    eq FExp.getChild().inFArray()    = inFArray();
+    eq FArray.getChild().inFArray()   = true;
+    eq BaseNode.getChild().inFArray() = false;
+
+    
+    public void FExp.collectEqualSwitches(Map<String, Collection<FRelExp>> candidates) {
+        
+    }
+    
+    public void FRelExp.collectEqualSwitches(Map<String, Collection<FRelExp>> candidates) {
+        FAlgorithm alg = myFAlgorithm();
+        if (alg != null && dependsOn(alg.referencedFVariablesInLHS())) {
+            return;
+        }
+        String key = toString();
+        Collection<FRelExp> list = candidates.get(key);
+        if (list == null) {
+            list = new ArrayList<FRelExp>();
+            candidates.put(key, list);
+        }
+        list.add(this);
+    }
 }
 
 aspect LoadResource {
