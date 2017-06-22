@@ -40,9 +40,7 @@
 #include "jmi_kinsol_solver.h"
 #include "jmi_brent_solver.h"
 #include "jmi_linear_solver.h"
-#ifdef JMI_INCLUDE_MINPACK
 #include "jmi_minpack_solver.h"
-#endif
 #include "jmi_block_solver_impl.h"
 #include "jmi_math.h"
 
@@ -150,7 +148,6 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
         }
         break;
         
-#ifdef JMI_INCLUDE_MINPACK
         case JMI_MINPACK_SOLVER: {
             jmi_minpack_solver_t* solver;    
             jmi_minpack_solver_new(&solver, block_solver);
@@ -159,9 +156,7 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
             block_solver->delete_solver = jmi_minpack_solver_delete;
         }
         break;
-#else
-        assert(0);
-#endif
+
         case JMI_SIMPLE_NEWTON_SOLVER: {
             block_solver->solver = 0;
             block_solver->solve = jmi_simple_newton_solve;

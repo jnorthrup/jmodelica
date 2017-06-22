@@ -3557,9 +3557,9 @@ aspect CCodeGen {
 	}
 
     @Override
-    public String CValueBoolean.cCodeValue() {
-        return ASTNode.boolValue_C(value);
-    }
+	public String CValueBoolean.cCodeValue() {
+		return value ? "JMI_TRUE" : "JMI_FALSE";
+	}
 
     @Override
 	public String CValueEnum.cCodeValue() {

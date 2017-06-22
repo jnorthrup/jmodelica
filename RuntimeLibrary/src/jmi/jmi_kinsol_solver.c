@@ -32,7 +32,6 @@
 #include "jmi_block_solver_impl.h"
 #include "jmi_block_solver.h"
 #include "jmi_block_log.h"
-#include "jmi_linear_algebra.h"
 
 #include "jmi_brent_search.h"
 /* RCONST from SUNDIALS and defines a compatible type, usually double precision */
@@ -63,6 +62,34 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data);
 static void jmi_regularize_and_do_condition_estimate_on_scaled_jacobian(jmi_block_solver_t *block);
 
 static realtype jmi_calculate_jacobian_condition_number(jmi_block_solver_t * block);
+
+/* Calculate matrix vector product vv = M*v or vv = M^T*v */
+static void jmi_kinsol_calc_Mv(DlsMat M, int transpose, N_Vector v, N_Vector vv) {
+    realtype*  vd = N_VGetArrayPointer(v);
+    realtype*  vvd = N_VGetArrayPointer(vv);
+    long int N = NV_LENGTH_S(v);
+    long int i,j;
+
+    if(transpose) {
+        for (i=0;i<N;i++) {
+            vvd[i] = 0;
+            for (j=0;j<N;j++){
+                vvd[i] += DENSE_ELEM(M, j, i) * vd[j];
+            }
+        }
+    } else {
+        for (i=0;i<N;i++) {
+            vvd[i] = 0;
+        }
+        for (i=0;i<N;i++) {
+            for (j=0;j<N;j++){
+                vvd[j] += DENSE_ELEM(M, j, i) * vd[i];
+                
+            }
+        }
+    }
+}
+
 
 /* Calculate Transpose(v1)*diag(w)*diag(w)*v2.
    w can be NULL in which case it is set to identity */
@@ -1279,7 +1306,7 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
 }
 
 /* Limit the maximum step to be within bounds. Do projection if needed. */
-static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, realtype *sJpnorm, realtype *sFdotJp) {
+static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vector b) {
     jmi_block_solver_t *block = (jmi_block_solver_t *)kin_mem->kin_user_data;
     jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;  
     realtype xnorm;        /* step norm */
@@ -1346,10 +1373,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         realtype pi = xd[index];            /* solved step length for the variable*/
         realtype bound = solver->bounds[i]; 
         realtype pbi = (bound - ui)*(1 - UNIT_ROUNDOFF);  /* distance to the bound */
-        realtype nom_step_ratio_i;
-        realtype nom_i;
-        realtype step_ratio_i;
-        double eps = solver->kin_stol;
+        realtype step_ratio_i;        
         int nom_criteria = FALSE;        
 
         if(    ((kind == 1)&& (pbi >= pi))
@@ -1362,20 +1386,23 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         limitingBounds = TRUE ;
         solver->last_num_limiting_bounds++;
         step_ratio_i =pbi/pi;   /* step ratio to bound */
-        nom_i = JMI_ABS(block->nominal[index]);
-
-        nom_step_ratio_i = (eps*kind*nom_i+ui-bound)/-pi; /* The fraction delta of the step so that (bound-(ui+pi*delta))*kind=stol*nom */
-        if(nom_step_ratio_i < min_step_ratio) {
-            nom_criteria = TRUE;
-        }
-        if( (kind == 1 && ui > bound-eps*nom_i && ui <= bound) ||
-            (kind== -1 && ui < bound+eps*nom_i && ui >= bound)) {
+        if(jmi_block_solver_experimental_nom_in_active_bounds & block->options->experimental_mode) {
+            realtype nom_step_ratio_i;
+            realtype nom_i = JMI_ABS(block->nominal[index]);
+            double eps = solver->kin_stol;
+            nom_step_ratio_i = (eps*kind*nom_i+ui-bound)/-pi; /* The fraction delta of the step so that (bound-(ui+pi*delta))*kind=stol*nom */
+            if(nom_step_ratio_i < min_step_ratio) {
                 nom_criteria = TRUE;
+            }
+            if( (kind == 1 && ui > bound-eps*nom_i && ui <= bound) ||
+                (kind== -1 && ui < bound+eps*nom_i && ui >= bound)) {
+                    nom_criteria = TRUE;
+            }
+            if( (kind == 1 && ui+pi < bound+eps*nom_i) || (kind==-1 && ui+pi > bound-eps*nom_i) ) {
+                nom_criteria = TRUE;
+            }
         }
-        if( (kind == 1 && ui+pi < bound+eps*nom_i) || (kind==-1 && ui+pi > bound-eps*nom_i) ) {
-            nom_criteria = TRUE;
-        }
-        if(step_ratio_i < min_step_ratio || nom_criteria) {
+        if(step_ratio_i < min_step_ratio || (jmi_block_solver_experimental_nom_in_active_bounds & block->options->experimental_mode && nom_criteria)) {
             /* this bound is active (we need to follow it) */
             activeBounds = TRUE;
             solver->bound_limiting[i] = 2;
@@ -1571,9 +1598,9 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     }
     if(max_step_ratio < 1.0) {
         /* reduce the norms of Jp. This is only approximate since active bounds are not accounted for.*/
-        *sFdotJp *= max_step_ratio;
-        *sJpnorm *= max_step_ratio;
-        solver->sJpnorm = *sJpnorm;
+        kin_mem->kin_sFdotJp *= max_step_ratio;
+        kin_mem->kin_sJpnorm *= max_step_ratio;
+        solver->sJpnorm = kin_mem->kin_sJpnorm;
     }
     /* The maximum newton step leads to the bound  
     -> store the "x" and set maximum step to be L2 norm of x */
@@ -1792,7 +1819,8 @@ static int jmi_kin_make_Broyden_update(jmi_block_solver_t *block, N_Vector b) {
     See algorithm A8.3.1 in "Numerical methods for Unconstrained Opt and NLE" */
     denom = jmi_kinsol_calc_v1twwv2(kin_mem->kin_pp,kin_mem->kin_pp,solver->kin_y_scale);
     /* work_vector = Jac * step */
-    jmi_linear_algebra_dgemv(1.0, block->J->data, N_VGetArrayPointer(kin_mem->kin_pp), 0, N_VGetArrayPointer(solver->work_vector), N, FALSE);
+    jmi_kinsol_calc_Mv(block->J, 0, kin_mem->kin_pp, solver->work_vector);
+
     /* work_vector = (ResidualDelta  - Jac * step) unless below update tolerance */
     for(i = 0; i < N; i++) {
         double tempi = -(Ith(b,i) - Ith(solver->last_residual,i)) - Ith(solver->work_vector,i);
@@ -1838,7 +1866,8 @@ static int jmi_kin_make_sparse_Broyden_update(jmi_block_solver_t *block, N_Vecto
     int N = block->n;
 
     /* work_vector = Jac * step */
-    jmi_linear_algebra_dgemv(1.0, block->J->data, N_VGetArrayPointer(kin_mem->kin_pp), 0, N_VGetArrayPointer(solver->work_vector), N, FALSE);
+    jmi_kinsol_calc_Mv(block->J, 0, kin_mem->kin_pp, solver->work_vector);
+
     /* work_vector = (ResidualDelta  - Jac * step) unless below update tolerance */
     for(i = 0; i < N; i++) {
         double tempi = -(Ith(b,i) - Ith(solver->last_residual,i)) - Ith(solver->work_vector,i);
@@ -1893,11 +1922,12 @@ static int jmi_kin_make_modifiedBFGS_update(jmi_block_solver_t *block, N_Vector 
     N_VProd(solver->work_vector, block->f_scale, solver->work_vector);
     N_VProd(solver->work_vector, block->f_scale, solver->work_vector);
     /* work_vector2 = res_diff^T*f_scale^2*Jac */
-    jmi_linear_algebra_dgemv(1.0, block->J->data, N_VGetArrayPointer(solver->work_vector), 0, N_VGetArrayPointer(solver->work_vector2), N, TRUE);
+    jmi_kinsol_calc_Mv(block->J, TRUE, solver->work_vector, solver->work_vector2);
+
     /* denom1 = step^T.*kin_y_scale^2*step */
     denom1 = jmi_kinsol_calc_v1twwv2(kin_mem->kin_pp,kin_mem->kin_pp,solver->kin_y_scale);
     /* work_vector = Jac * step */
-    jmi_linear_algebra_dgemv(1.0, block->J->data, N_VGetArrayPointer(kin_mem->kin_pp), 0, N_VGetArrayPointer(solver->work_vector), N, FALSE);
+    jmi_kinsol_calc_Mv(block->J, 0, kin_mem->kin_pp, solver->work_vector);
     /* denom2 = res_diff^T.*kin_f_scale^2*Jac*step */
     denom2 = 0;
     for(i = 0; i < N; i++) {
@@ -2115,7 +2145,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             bd[i] *= solver->rScale[i];
         }
     }
-    if(solver->use_steepest_descent_flag || block->options->active_bounds_mode == jmi_use_steepest_descent_active_bounds_mode) {
+    if(solver->use_steepest_descent_flag ||block->options->enforce_bounds_flag) {
         /* calculate steepest descent direction */
 
         /*  gradient = Transpose(J) W*W F, 
@@ -2124,7 +2154,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             solver->gradient is the negative gradient.
          */
 
-        jmi_linear_algebra_dgemv(1, block->J->data, N_VGetArrayPointer(x), 0, N_VGetArrayPointer(solver->gradient), N, TRUE);
+        jmi_kinsol_calc_Mv(block->J, TRUE, x, solver->gradient);
     }
     if(solver->use_steepest_descent_flag) {
         /* Make step in steepest descent direction and not Newton*/
@@ -2255,7 +2285,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         realtype*  gd = N_VGetArrayPointer(solver->gradient);
         for(i = 0; i < block->n; i++) {
             xd[i] *= solver->cScale[i];
-            if(solver->use_steepest_descent_flag || block->options->active_bounds_mode == jmi_use_steepest_descent_active_bounds_mode) {
+            if(solver->use_steepest_descent_flag ||block->options->enforce_bounds_flag) {
                 gd[i] *= solver->cScale[i];
             }
         }
@@ -2268,7 +2298,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             topnode = jmi_log_enter_(block->log,logInfo,"StepDirection");
             jmi_log_reals(block->log, topnode, logInfo, "unbounded_step", xd, block->n);
         }
-        jmi_kinsol_limit_step(kin_mem, x, b, sJpnorm, sFdotJp);
+        jmi_kinsol_limit_step(kin_mem, x, b);
         t = jmi_block_solver_start_clock(block);
         if(solver->last_num_active_bounds > 0 && (block->options->active_bounds_mode == jmi_use_steepest_descent_active_bounds_mode)) {
             realtype sfJp, fnorm, g_scale;
@@ -2299,7 +2329,10 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
                     jmi_log_node(block->log, logInfo, "GradientScaling", "Used gradient scaling is <gs: %g> in <block: %s>", g_scale, block->label);
                 }
                 N_VScale(g_scale, solver->gradient, x);
-                jmi_kinsol_limit_step(kin_mem, x, b, sJpnorm, sFdotJp);
+             /*   sfJp *= g_scale;
+                jmi_kinsol_calc_Mv(solver->J, FALSE, solver->gradient, b);
+                sJpnorm = N_VWL2Norm(b,solver->kin_f_scale); */
+                jmi_kinsol_limit_step(kin_mem, x, b);
 
                 sfJp = jmi_kinsol_calc_v1twwv2(x, solver->gradient, 0); 
 
@@ -2309,8 +2342,10 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             }
             
             /* recalculate sJpnorm  */ 
-            jmi_linear_algebra_dgemv(1.0, block->J->data, N_VGetArrayPointer(x), 0, N_VGetArrayPointer(b), N, FALSE);
+            jmi_kinsol_calc_Mv(block->J, FALSE, x, b);
             *sJpnorm = N_VWL2Norm(b,block->f_scale);
+            /* update sJpnorm and sfdotJp for Kinsol */ 
+            /* kin_mem->kin_sJpnorm = sJpnorm; */
             *sFdotJp = -sfJp; /* Due to opposite sign of solver->gradient minus is present here. */
             solver->sJpnorm = *sJpnorm;
 

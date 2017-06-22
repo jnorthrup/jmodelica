@@ -872,17 +872,8 @@ abstract public class TestAnnotationizerHelper {
                 compile();
                 throw new ModelicaException(noExceptionMessage());
             } catch (CompilerException e) {
-                message = prepareErrorMsg(e.getMessage(true));
+                message = prepare(e.getMessage(true));
             }
-        }
-
-        /**
-         * Remove location information from error message, since it is unreliable anyway, 
-         * in addition to escaping characters that aren't allowed in the annotation.
-         */
-        protected static String prepareErrorMsg(String str) {
-            str = str.replaceAll(" at line [0-9]+, column [0-9]+, in file ", " at line 0, column 0, in file ");
-            return prepare(str);
         }
 
 		/**
@@ -1110,40 +1101,6 @@ abstract public class TestAnnotationizerHelper {
         }
 
     }
-
-	/**
-	 * An SourceRoot method test case.
-	 */
-	public static class SourceMethodTestCase extends MethodTestCase {
-
-
-		/**
-		 * Constructor for SourceRoot method test case.
-		 *
-		 * Compiles the model.
-		 */
-		public SourceMethodTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
-			super(filePath, className, description, opts, data);
-		}
-
-		/**
-		 * Test regeneration constructor for SourceRoot method test case.
-		 *
-		 * Delegates to superclass implementation.
-		 *
-		 * @param filePath     the path to the Modelica file containing the test model
-		 * @param className    the name of the test model
-		 */
-		public SourceMethodTestCase(ClassDecl cd, String filePath, String className) throws Exception {
-			super(cd, filePath, className);
-		}
-
-		protected void process() throws Exception {
-			super.process();
-			callMethod(root);
-		}
-
-	}
 
 	/**
 	 * A constant evaluation test case.

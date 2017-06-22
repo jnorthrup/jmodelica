@@ -15,8 +15,6 @@
 */
 package org.jmodelica.util.annotations;
 
-import java.util.Stack;
-
 public class AnnotationEditException extends RuntimeException {
     
     private static final long serialVersionUID = 3169144097373344835L;
@@ -30,20 +28,15 @@ public class AnnotationEditException extends RuntimeException {
     }
 
     private static String constructAnnotationStack(GenericAnnotationNode<?, ?, ?> node) {
-        Stack<String> names = new Stack<String>();
-
         StringBuilder sb = new StringBuilder();
-        sb.append(" for annotation path ");
-
+        sb.append(" for annotation path /");
+        boolean first = true;
         while (node != null && node.name() != null) {
-            names.push(node.name());
-            node = node.parent();
-        }
-
-        char prefix = '\0';
-        while (!names.isEmpty()) {
-            sb.append(prefix + names.pop());
-            prefix = '/';
+            if (!first) {
+                sb.append('/');
+            }
+            first = false;
+            sb.append(node.name());
         }
         return sb.toString();
     }

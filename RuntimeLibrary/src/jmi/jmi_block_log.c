@@ -25,6 +25,11 @@
 
 #include "jmi_block_log.h"
 #include "jmi_log.h"
+#include "jmi_simple_newton.h"
+#include "jmi_kinsol_solver.h"
+#include "jmi_brent_solver.h"
+#include "jmi_linear_solver.h"
+#include "jmi_minpack_solver.h"
 #include "jmi_block_solver_impl.h"
 
 #define Ith(v,i)    NV_Ith_S(v,i)

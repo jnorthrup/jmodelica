@@ -63,6 +63,8 @@ class TimedVariable : public Variable {
         Ref<Variable> baseVariable;
         casadi::MX timePoint;
 };
-
+inline const Variable::Type TimedVariable::getType() const { return Variable::REAL; }
+inline const Ref<Variable> TimedVariable::getBaseVariable() { return this->baseVariable; }
+inline const casadi::MX TimedVariable::getTimePoint() { return this->timePoint; }
 }; // End namespace
 #endif

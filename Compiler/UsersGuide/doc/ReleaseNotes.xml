@@ -20,11 +20,10 @@
       example models in the bundled MSL version simulate correctly with this
       release, with marginal additions, see <xref linkend="MSL20"/>. There
       is also support for IBPSA, see <xref linkend="IBPSA20"/></para>
-      
+
       <para>A novel co-simulation master is available in PyFMI. It implements
       a number of master algorithms, see <citation>And2016</citation> for
       details.</para>
-
     </section>
 
     <section>
@@ -82,11 +81,7 @@
       
       </para>
       </section>
-    </section>
-    <section><title>Simulation</title>
-    <para>For JModelica.org 2.0 improvements have been made for numerical
-    robustness during initialization and simulation, 
-    especially with regards to event handling.</para>
+      </section>
     </section>
 
     <section>
@@ -98,6 +93,11 @@
       Jacobi approach as well as a step-size controlled algorithm based on
       Richardson extrapolation. The theory and implementation of the software
       is described in <citation>And2016</citation>. </para>
+    </section>
+    <section><title>Simulation</title>
+    <para>For JModelica.org 2.0 improvements have been made for numerical
+    robustness during initialization and simulation, 
+    especially with regards to event handling.</para>
     </section>
     <section><title>HTML Diagnostics</title>
     <para>Improved HTML diagnostics with formatting and interactive functions.</para>

@@ -19,9 +19,4 @@ using casadi::MX;
 namespace ModelicaCasADi 
 {
 Equation::Equation(MX lhs, MX rhs) : lhs(lhs), rhs(rhs), tearing(false) {}
-void Equation::print(std::ostream& os) const { 
-    os << ModelicaCasADi::normalizeMXRespresentation(lhs);
-    os << " = ";
-    os << ModelicaCasADi::normalizeMXRespresentation(rhs); 
-}
 }; // End namespace

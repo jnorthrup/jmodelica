@@ -1,4 +1,4 @@
-package org.jmodelica.util.files;
+package org.jmodelica.util.documentation;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

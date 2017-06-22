@@ -797,6 +797,7 @@ static int jacobian_struct_0(jmi_t *jmi, jmi_real_t *x, jmi_int_t **jac, int mod
     free(jc);
     return ef;
 }
+
 ")})));
 end MultipleSolvedRealInAlgorithm;
 
