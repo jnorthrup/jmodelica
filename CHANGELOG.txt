@@ -1,10 +1,4 @@
 ================= Unreleased ==================
-; Fixed ; Minor ; Python ; #5455
-Fixed build system to handle 64bit FMIL builds correctly.
-
-; Fixed ; Minor ; Python ; #5454
-Fixed build system to handle 64bit SuperLU builds correctly.
-
 ; Feature ; Major ; Python ; #5344
 Added support for the sparse solver SuperLU when simulating FMI2 FMUs
 for ME.
@@ -15,6 +9,7 @@ The temporary directory is always deleted, regardless of whether compilation fai
 
 ; Changed ; Minor ; Compiler ; #5430
 Added option removers to the option registry. Also added a test case for options.
+
 
 ================= Stable-2017-08-09 ==================
 ; Fixed ; Minor ; Compiler ; #5416
@@ -63,5 +58,6 @@ generated for each event indicator.
 
 ; Other ; Minor ; General ; #5393
 Added a changelog to JModelica.org.
+
 
 ==================== JM 2.0 ===================
