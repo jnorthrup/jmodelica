@@ -560,10 +560,10 @@ aspect NodeMethods {
 	    /**
 	     * Adds all nodes in an iterable to the list.
 	     */
-//	    public void addAll(Iterable<? extends T> list) {
-//	        for (T e : list)
-//	            add(e);
-//	    }
+	    public void addAll(Iterable<? extends T> list) {
+	        for (T e : list)
+	            add(e);
+	    }
 	    
 	    /**
 	     * Adds all nodes in an array to the list.
@@ -1795,7 +1795,7 @@ aspect MultiDeclMethods {
         public ArrayList<InstComponentDecl> myOutputs();
         public ArrayList<InstComponentDecl> myNonInputs();
         
-        public void flattenFunction(Flattener f);
+        public void flattenFunction(FClass fc);
     }
     
     syn InstClassDecl InstClassDecl.asInstClassDecl() = this;
