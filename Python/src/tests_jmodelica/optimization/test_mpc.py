@@ -17,6 +17,7 @@ from tests_jmodelica import testattr, get_files_path
 from pyjmi.common.io import ResultDymolaTextual
 from pymodelica import compile_fmu
 from pyfmi import load_fmu
+from IPython.core.debugger import Tracer; dh = Tracer()
 
 try:
     from pyjmi import transfer_to_casadi_interface

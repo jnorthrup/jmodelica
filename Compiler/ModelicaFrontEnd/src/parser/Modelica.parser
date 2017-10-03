@@ -23,8 +23,7 @@
 %header {:
  package $PARSER_PACKAGE$;
  import $AST_PACKAGE$.*;
- import org.jmodelica.util.formatting.FormattingRecorder;
- import org.jmodelica.util.formatting.FormattingType;
+ import org.jmodelica.util.formattedPrint.FormattingInfo;
  import org.jmodelica.api.problemHandling.Problem;
  import org.jmodelica.api.problemHandling.ProblemSeverity;
  import org.jmodelica.api.problemHandling.ProblemKind;
@@ -172,10 +171,10 @@
         lineBreakMap = map;
     }
 
-    private FormattingRecorder<ASTNode<?>> formattingRecorder;
+    private FormattingInfo formatting;
 
-    public void setFormattingRecorder(FormattingRecorder<ASTNode<?>> formattingRecorder) {
-        this.formattingRecorder = formattingRecorder;
+    public void setFormattingInfo(FormattingInfo formatting) {
+        this.formatting = formatting;
     }
 
     public void setFileName(String fn) {
@@ -206,7 +205,7 @@ StoredDefinition stored_definition
     = within? base_class_decl_list {:
         StoredDefinition def = new StoredDefinition(within, base_class_decl_list);
         def.setLineBreakMap(lineBreakMap);
-        formattingRecorder.postParsing(def);
+        def.setFormatting(formatting);
     	return def; 
     :}
     | error {: 
@@ -459,9 +458,8 @@ ExternalLanguage external_language =
 	;	
 	
 Annotation annotation_sc =
-    annotation SEMICOLON {: formattingRecorder.addItem(FormattingType.VISIBILITY_INFO, ";", SEMICOLON);
-                            return annotation; :}
-    ;
+	annotation SEMICOLON {: return annotation; :}
+   	;
 
 ExternalFunctionCall external_function_call =
 	parse_access EQUALS id_decl LPAREN arg_list RPAREN  
@@ -1134,9 +1132,8 @@ Exp primary =
   | STRING.s               {: return new StringLitExp(s); :}
   | access_expression   {: return access_expression; :}
   | der_expression      {: return der_expression; :}
-  | LPAREN exp.a RPAREN {: formattingRecorder.addItem(FormattingType.PARENTHESIS, "(", LPAREN);
-                           formattingRecorder.addItem(FormattingType.PARENTHESIS, ")", RPAREN);
-                           return a; :}
+  | LPAREN exp.a RPAREN {: formatting.addParenthesis(LPAREN, RPAREN);
+						   return a; :}
   | function_call        {: return function_call; :}
   | LBRACK matrix RBRACK {: return matrix; :}
   | LBRACE function_arguments RBRACE {: return new ArrayConstructor(function_arguments); :}

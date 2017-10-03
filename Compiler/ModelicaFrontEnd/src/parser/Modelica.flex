@@ -18,8 +18,7 @@ package $PARSER_PACKAGE$;
 
 import $PARSER_PACKAGE$.ModelicaParser.Terminals;
 import org.jmodelica.util.AbstractModelicaScanner;
-import org.jmodelica.util.formatting.FormattingType;
-import $AST_PACKAGE$.ASTNode;
+import org.jmodelica.util.formattedPrint.FormattingItem;
 import beaver.Scanner;
 
 
@@ -28,7 +27,7 @@ import beaver.Scanner;
 %public
 %final
 %class ModelicaScanner
-%extends AbstractModelicaScanner<ASTNode<?>>
+%extends AbstractModelicaScanner
 %unicode
 %function nextTokenInner
 %type Symbol
@@ -176,9 +175,9 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "external"      { return newSymbol(Terminals.EXTERNAL); }
 
 
-  "public"        { addFormattingInformation(FormattingType.VISIBILITY_INFO, yytext());
+  "public"        { addFormattingInformation(FormattingItem.Type.VISIBILITY_INFO, yytext());
                     return newSymbol(Terminals.PUBLIC); }
-  "protected"     { addFormattingInformation(FormattingType.VISIBILITY_INFO, yytext());
+  "protected"     { addFormattingInformation(FormattingItem.Type.VISIBILITY_INFO, yytext());
                     return newSymbol(Terminals.PROTECTED); }
 
   "extends"       { return newSymbol(Terminals.EXTENDS); }
@@ -276,7 +275,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "."             { return newSymbol(Terminals.DOT); }
   ","             { return newSymbol(Terminals.COMMA); }
 
-  "+"             { addFormattingInformation(FormattingType.NON_BREAKING_WHITESPACE, yytext());
+  "+"             { addFormattingInformation(FormattingItem.Type.NON_BREAKING_WHITESPACE, yytext());
                     return newSymbol(Terminals.PLUS); }  
   "-"             { return newSymbol(Terminals.MINUS); }
   "*"             { return newSymbol(Terminals.MULT); }
@@ -312,12 +311,12 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
                              if (yytext().charAt(1) == '/') {
                                  numberOfLineBreaks = 0;
                              }
-                             addFormattingInformation(FormattingType.COMMENT, yytext(), numberOfLineBreaks); 
+                             addFormattingInformation(FormattingItem.Type.COMMENT, yytext(), numberOfLineBreaks); 
                              return null; }
-  {NonBreakingWhiteSpace}  { addFormattingInformation(FormattingType.NON_BREAKING_WHITESPACE, yytext()); 
+  {NonBreakingWhiteSpace}  { addFormattingInformation(FormattingItem.Type.NON_BREAKING_WHITESPACE, yytext()); 
                              return null; }
   {LineTerminator}         { addLineBreak();
-                             addFormattingInformation(FormattingType.LINE_BREAK, yytext()); 
+                             addFormattingInformation(FormattingItem.Type.LINE_BREAK, yytext()); 
                              return null; }
                              
   .|\n                     { throw new Exception("Character '" + yytext() + "' is not legal in this context"); }

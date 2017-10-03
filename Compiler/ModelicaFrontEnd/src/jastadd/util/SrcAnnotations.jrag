@@ -70,13 +70,13 @@ aspect SrcAnnotations {
         return SrcAnnotation.createFor(srcAnnotationProvider(), evaluator, path);
     }
     public SrcAnnotation ExtendsClause.srcAnnotation(Evaluator<Exp> evaluator, String ... path) {
-        return SrcAnnotation.createFor(this, evaluator, path);
+        return SrcAnnotation.createFor(getAnnotationOpt(), evaluator, path);
     }
     public SrcAnnotation ExternalClause.srcAnnotation(Evaluator<Exp> evaluator, String ... path) {
-        return SrcAnnotation.createFor(this, evaluator, path);
+        return SrcAnnotation.createFor(getAnnotationOpt(), evaluator, path);
     }
     public SrcAnnotation Comment.srcAnnotation(Evaluator<Exp> evaluator, String ... path) {
-        return SrcAnnotation.createFor(this, evaluator, path);
+        return SrcAnnotation.createFor(getAnnotationOpt(), evaluator, path);
     }
 
 
@@ -215,10 +215,11 @@ aspect SrcAnnotations {
     }
     @Override
     public void ComponentModification.setAnnotationValue(Exp newValue) throws FailedToSetAnnotationValueException {
-        if (!hasModification()) {
-            setModification(new CompleteModification(new ClassModification()));
+        if (hasModification()) {
+            getModification().setAnnotationValue(newValue);
+        } else {
+            throw new FailedToSetAnnotationValueException();
         }
-        getModification().setAnnotationValue(newValue);
     }
     @Override
     public void CompleteModification.setAnnotationValue(Exp newValue) throws FailedToSetAnnotationValueException {
@@ -235,21 +236,14 @@ aspect SrcAnnotations {
     }
     @Override
     public SrcAnnotationProvider ClassModification.addAnnotationSubNode(String name) {
-        ComponentModification cm = new ComponentModification(new Opt<Each>(), new Opt<Final>(), new ParseAccess(name),
-                new Opt<Modification>(), new Comment());
+        ComponentModification cm =
+                new ComponentModification(new ParseAccess(name), new CompleteModification(new ClassModification()));
         addArgument(cm);
         return cm;
     }
     @Override
     public SrcAnnotationProvider CompleteModification.addAnnotationSubNode(String name) {
         return getClassModification().addAnnotationSubNode(name);
-    }
-    @Override
-    public SrcAnnotationProvider ComponentModification.addAnnotationSubNode(String name) {
-        if (!hasModification()) {
-            setModification(new CompleteModification(new ClassModification()));
-        }
-        return getModification().addAnnotationSubNode(name);
     }
 
     syn boolean Modification.isEach() = false;
@@ -262,15 +256,15 @@ aspect SrcAnnotations {
      *   Class Decls    
      ******************/
     syn SrcAnnotationProvider ClassDecl.srcAnnotationProvider() = null;
-    eq FullClassDecl.srcAnnotationProvider() = SrcAnnotation.createProviderFor(this);
+    eq FullClassDecl.srcAnnotationProvider() = SrcAnnotation.createProviderFor(getAnnotationOpt());
     eq ShortClassDecl.srcAnnotationProvider() {
-        Comment comment = getExtendsClauseShortClass().getComment();
-        Opt<Comment> ccCommentOpt = getConstrainingClauseCommentOpt();
+        Opt<Annotation> annotationOpt = getExtendsClauseShortClass().getComment().getAnnotationOpt();
+        Opt<Comment> commentOpt = getConstrainingClauseCommentOpt();
 
-        if (ccCommentOpt.numChildren() > 0) {
-            return SrcAnnotation.createProviderFor(comment, ccCommentOpt.getChild(0));
+        if (commentOpt.numChildren() > 0) {
+            return SrcAnnotation.createProviderFor(annotationOpt, commentOpt.getChild(0).getAnnotationOpt());
         }
-        return SrcAnnotation.createProviderFor(comment);
+        return SrcAnnotation.createProviderFor(annotationOpt);
     }
     eq LibNode.srcAnnotationProvider() = resolveLib().srcAnnotationProvider();
 
@@ -279,38 +273,22 @@ aspect SrcAnnotations {
      ******************/
     syn SrcAnnotationProvider ComponentDecl.srcAnnotationProvider() {
         if (getCCComment().hasAnnotation()) {
-            return SrcAnnotation.createProviderFor(getComment(), getCCComment());
+            return SrcAnnotation.createProviderFor(getComment().getAnnotationOpt(), getCCComment().getAnnotationOpt());
         }
-        return SrcAnnotation.createProviderFor(getComment());
+        return SrcAnnotation.createProviderFor(getComment().getAnnotationOpt());
     }
     syn SrcAnnotationProvider InstComponentDecl.srcAnnotationProvider() = getComponentDecl().srcAnnotationProvider();
     eq InstReplacingComposite.srcAnnotationProvider() = getOriginalDecl().srcAnnotationProvider();
 
     /*******************
-     *  AST Annotation  
+     *  Annotation Opt  
      ******************/
-    /**
-     * Interface which should be implemented by all AST nodes which have a
-     * Opt<Annotation> as child (which we wan't to traverse with this API).
-     */
-    public interface ASTNodeWithAnnotation {
-        public Annotation getAnnotation();
-        public boolean hasAnnotation();
-        public void setAnnotation(Annotation annotation);
-        public String resolveURI(String str);
-    }
+    class AnnotationOptAnnotationProvider implements SrcAnnotationProvider {
 
-    FullClassDecl implements ASTNodeWithAnnotation;
-    ExternalClause implements ASTNodeWithAnnotation;
-    ExtendsClause implements ASTNodeWithAnnotation;
-    Comment implements ASTNodeWithAnnotation;
+        private final Opt<Annotation> opt;
 
-    class ASTAnnotationAnnotationProvider<T extends ASTNode & ASTNodeWithAnnotation> implements SrcAnnotationProvider {
-
-        private final T owningNode;
-
-        public ASTAnnotationAnnotationProvider(T owningNode) {
-            this.owningNode = owningNode;
+        public AnnotationOptAnnotationProvider(Opt<Annotation> opt) {
+            this.opt = opt;
         }
 
         @Override
@@ -320,9 +298,8 @@ aspect SrcAnnotations {
 
         @Override
         public Iterable<SubNodePair<SrcAnnotationProvider>> annotationSubNodes() {
-            Annotation astNode = owningNode.getAnnotation();
-            if (astNode != null) {
-                return astNode.annotationSubNodes();
+            if (opt.getNumChild() > 0) {
+                return opt.getChild(0).annotationSubNodes();
             } else {
                 return Collections.<SubNodePair<SrcAnnotationProvider>>emptyList();
             }
@@ -335,11 +312,11 @@ aspect SrcAnnotations {
 
         @Override
         public SrcAnnotationProvider addAnnotationSubNode(String name) {
-            if (!owningNode.hasAnnotation()) {
+            if (opt.getNumChild() == 0) {
                 ClassModification cm = new ClassModification();
-                owningNode.setAnnotation(new ParseAnnotation(cm));
+                opt.setChild(new ParseAnnotation(cm), 0);
             }
-            return owningNode.getAnnotation().addAnnotationSubNode(name);
+            return opt.getChild(0).addAnnotationSubNode(name);
         }
 
         @Override
@@ -354,23 +331,20 @@ aspect SrcAnnotations {
 
         @Override
         public String resolveURI(String str) {
-            return owningNode.resolveURI(str);
+            return opt.resolveURI(str);
         }
 
     }
 
     public class SrcAnnotation {
-        public static <T extends ASTNode & ASTNodeWithAnnotation> SrcAnnotation
-        createFor(T nodeWithAnnotation, Evaluator<Exp> evaluator, String[] path) {
-            return createFor(createProviderFor(nodeWithAnnotation), evaluator, path);
+        public static SrcAnnotation createFor(Opt<Annotation> opt, Evaluator<Exp> evaluator, String[] path) {
+            return createFor(createProviderFor(opt), evaluator, path);
         }
-        public static <T extends ASTNode & ASTNodeWithAnnotation> SrcAnnotationProvider
-        createProviderFor(T nodeWithAnnotation) {
-            return new ASTAnnotationAnnotationProvider<T>(nodeWithAnnotation);
+        public static SrcAnnotationProvider createProviderFor(Opt<Annotation> opt) {
+            return new AnnotationOptAnnotationProvider(opt);
         }
-        public static <T extends ASTNode & ASTNodeWithAnnotation> SrcAnnotationProvider
-        createProviderFor(T ... nodesWithAnnotation) {
-            return new SrcAnnotationsIteratorProvider(nodesWithAnnotation);
+        public static SrcAnnotationProvider createProviderFor(Opt<Annotation>... opts) {
+            return new SrcAnnotationsIteratorProvider(opts);
         }
     }
 
@@ -586,10 +560,10 @@ aspect SrcAnnotations {
 
         private java.util.List<SrcAnnotationProvider> providers;
 
-        public <T extends ASTNode & ASTNodeWithAnnotation> SrcAnnotationsIteratorProvider(T[] nodesWithAnnotation) {
+        public SrcAnnotationsIteratorProvider(Opt<Annotation>[] opts) {
             this.providers = new ArrayList<SrcAnnotationProvider>();
-            for (T nodeWithAnnotation : nodesWithAnnotation) {
-                this.providers.add(SrcAnnotation.createProviderFor(nodeWithAnnotation));
+            for (Opt<Annotation> opt : opts) {
+                this.providers.add(SrcAnnotation.createProviderFor(opt));
             }
         }
 
