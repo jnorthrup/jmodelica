@@ -3200,13 +3200,18 @@ aspect FunctionAndRecordCleanup {
         UseType oldType = functionUsed;
         functionUsed = functionUsed.combine(type);
         if (functionUsed != oldType) {
-            markUsedFunctionsAndRecordsExtra(type);
+            if (functionUsed == UseType.DIRECT &&
+               (myOptions().getBooleanOption("generate_block_jacobian") ||
+                myOptions().getBooleanOption("generate_dae_jacobian") ||
+                myOptions().getBooleanOption("generate_ode_jacobian"))) {
+                if (requiresDerivative() && !canDifferentiate()) {
+                    error("Unable to determine derivative function for function '" + name() + "'");
+                } else if (derivativeFunctionUnrestricted() != null) {
+                    derivativeFunctionUnrestricted().markUsedFunctionsAndRecords(UseType.ANNOTATION_DERIVATIVE);
+                }
+            }
             super.markUsedFunctionsAndRecords(functionUsed);
         }
-    }
-    
-    public void FFunctionDecl.markUsedFunctionsAndRecordsExtra(UseType type) {
-        // Hook to facilitate extensions
     }
     
     @Override

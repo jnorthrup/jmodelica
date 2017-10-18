@@ -24,7 +24,7 @@ import os
 
 from pymodelica.compiler import compile_fmu
 from pyfmi.fmi import load_fmu, FMUModelCS1, FMUModelME1, FMUModelCS2, FMUModelME2
-from pyjmi.common.io import ResultDymolaTextual, ResultDymolaBinary
+from pyjmi.common.io import ResultDymolaTextual
 from tests_jmodelica import get_files_path
 
 _model_name = ''
@@ -72,8 +72,8 @@ class _BaseSimOptTest:
         Run simulation and load result. 
         Call this from setUp() or within a test depending if all tests should run simulation.
         """
-        res = self._run_and_write_data(cvode_options)
-        self.data = res.result_data#ResultDymolaTextual(self.model_name[:-len('.fmu')] + '_result.txt')
+        self._run_and_write_data(cvode_options)
+        self.data = ResultDymolaTextual(self.model_name[:-len('.fmu')] + '_result.txt')
 
 
     def load_expected_data(self, name):
@@ -82,10 +82,7 @@ class _BaseSimOptTest:
           name -  the file name of the results file, relative to files dir
         """
         path = os.path.join(get_files_path(), 'Results', name)
-        if path.endswith("txt"):
-            self.expected = ResultDymolaTextual(path)
-        else:
-            self.expected = ResultDymolaBinary(path)
+        self.expected = ResultDymolaTextual(path)
 
 
     def assert_all_inital_values(self, variables, rel_tol = None, abs_tol = None):
@@ -285,18 +282,17 @@ class SimulationTest(_BaseSimOptTest):
             cvode_options = {'atol':self.abs_tol,'rtol':self.rel_tol}
         
         if isinstance(self.model, FMUModelME1) or isinstance(self.model, FMUModelME2):
-            res = self.model.simulate(start_time=self.start_time,
+            self.model.simulate(start_time=self.start_time,
                                 final_time=self.final_time,
                                 input=self.input,
                                 options={'ncp':self.ncp,
                                          'CVode_options':cvode_options})
         else:
-            res = self.model.simulate(start_time=self.start_time,
+            self.model.simulate(start_time=self.start_time,
                                 final_time=self.final_time,
                                 input=self.input,
                                 options={'ncp':self.ncp})
-        return res
-        
+
 class OptimizationTest(_BaseSimOptTest):
     """
     Base class for optimization tests.
@@ -332,8 +328,7 @@ class OptimizationTest(_BaseSimOptTest):
         """
         Run optimization and write result to file.
         """
-        res = self.model.optimize(options=self._opt_options)
-        return res
+        self.model.optimize(options=self._opt_options)
 
 
 # =========== Helper functions =============

@@ -1648,9 +1648,8 @@ model IfExpType2
             errorMessage="
 1 errors found:
 
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo':
-  Test expression of if expression must be scalar boolean:
-    1 is Integer
+Error at line 1642, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo':
+  Test expression of if expression must be scalar boolean
 ")})));
 end IfExpType2;
 
@@ -1671,10 +1670,8 @@ model IfExpType3
             errorMessage="
 1 errors found:
 
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo':
-  Branches of if expression have incompatible types:
-    {true} is Boolean[1]
-    1:n is Integer[3]
+Error at line 1664, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo':
+  Branches of if expression has incompatible types
 ")})));
 end IfExpType3;
 
@@ -1696,10 +1693,8 @@ model IfExpType4
             errorMessage="
 1 errors found:
 
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo':
-  If expression with branches that have different array sizes must have parameter test expression:
-    {2} has size [1]
-    1:n has size [3]
+Error at line 1687, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo':
+  If expression with branches that have different array sizes must have parameter test expression
 ")})));
 end IfExpType4;
 
@@ -1759,25 +1754,6 @@ public
 end TypeTests.IfExpType5;
 ")})));
 end IfExpType5;
-
-
-model IfExpType6
-    Real[1] x = if true then {1} else {{1}};
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="IfExpType6",
-            description="",
-            errorMessage="
-1 errors found:
-
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo':
-  Branches of if expression have different number of array dimensions:
-    {1} has size [1]
-    {{1}} has size [1, 1]
-")})));
-end IfExpType6;
-
 
 model Primitive1
     type T2 = Real[3];

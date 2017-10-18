@@ -227,6 +227,81 @@ end TransformCanonicalTests.TransformCanonicalTest7;
 ")})));
   end TransformCanonicalTest7;
 
+model TransformCanonicalTest8
+  function f
+	input Real x;
+	output Real y;
+  algorithm
+	y := f1(x)*2;
+  end f;
+	
+  function f1
+	input Real x;
+	output Real y;
+  algorithm
+	y := x^2;
+	annotation(derivative=f_der);
+  end f1;
+		
+  function f_der
+	input Real x;
+	input Real der_x;
+	output Real der_y;
+  algorithm
+	der_y := 2*x*der_x;
+  end f_der;
+
+  Real x1,x2;
+equation
+  x1 = f(x2);
+  x2 = f1(x1);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="TransformCanonicalTest8",
+			description="Test that derivative functions are included in the flattened model if Jacobians are to be generated.",
+			generate_block_jacobian=true,
+			generate_ode_jacobian=true,
+			inline_functions="none",
+			flatModel="
+fclass TransformCanonicalTests.TransformCanonicalTest8
+ Real x1;
+ Real x2;
+equation
+ x1 = TransformCanonicalTests.TransformCanonicalTest8.f(x2);
+ x2 = TransformCanonicalTests.TransformCanonicalTest8.f1(x1);
+
+public
+ function TransformCanonicalTests.TransformCanonicalTest8.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := TransformCanonicalTests.TransformCanonicalTest8.f1(x) * 2;
+  return;
+ end TransformCanonicalTests.TransformCanonicalTest8.f;
+
+ function TransformCanonicalTests.TransformCanonicalTest8.f1
+  input Real x;
+  output Real y;
+ algorithm
+  y := x ^ 2;
+  return;
+ annotation(derivative = TransformCanonicalTests.TransformCanonicalTest8.f_der);
+ end TransformCanonicalTests.TransformCanonicalTest8.f1;
+
+ function TransformCanonicalTests.TransformCanonicalTest8.f_der
+  input Real x;
+  input Real der_x;
+  output Real der_y;
+ algorithm
+  der_y := 2 * x * der_x;
+  return;
+ end TransformCanonicalTests.TransformCanonicalTest8.f_der;
+
+end TransformCanonicalTests.TransformCanonicalTest8;
+")})));
+end TransformCanonicalTest8;
+
   model TransformCanonicalTest9_Err
         model EO
             extends ExternalObject;
@@ -1954,7 +2029,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1701, column 16, in file '...', START_VALUE_NOT_PARAMETER:
+Error at line 1701, column 16, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1
 ")})));
 end AttributeBindingExpTest1_Err;
@@ -1974,7 +2049,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1721, column 16, in file '...', START_VALUE_NOT_PARAMETER:
+Error at line 1721, column 16, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1 + 2
 ")})));
 end AttributeBindingExpTest2_Err;
@@ -1993,7 +2068,7 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 1740, column 16, in file '...', START_VALUE_NOT_PARAMETER:
+Error at line 1740, column 16, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1 + 2 + p
 
 Error at line 1740, column 21, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
@@ -2045,32 +2120,14 @@ model AttributeBindingExpTest5_Err
             errorMessage="
 2 errors found:
 
-Error at line 1790, column 18, in file '...', START_VALUE_NOT_PARAMETER,
+Error at line 1790, column 18, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo',
 In component a:
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1
 
-Error at line 1794, column 15, in file '...', START_VALUE_NOT_PARAMETER:
+Error at line 1794, column 15, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p2
 ")})));
 end AttributeBindingExpTest5_Err;
-
-model AttributeBindingExpTest6_Warn
-
-    parameter Real p(fixed=false);
-    Real x(start=p) = time;
-
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="AttributeBindingExpTest6_Warn",
-            description="Test errors in binding expressions..",
-            errorMessage="
-1 warnings found:
-
-Compliance warning at line 0, column 0, in file '...', START_VALUE_INITIAL_PARAMETER:
-  Variability of binding expression for attribute 'start' is  initial parameter variability: p
-
-")})));
-end AttributeBindingExpTest6_Warn;
 
 model IncidenceTest1
 
