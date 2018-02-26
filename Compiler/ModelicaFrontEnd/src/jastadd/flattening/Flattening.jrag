@@ -3336,53 +3336,53 @@ aspect AttributeContributer {
          * created.
          * Instance accesses are expected if component references are made.
          */
-        protected void contribute(AbstractEquation src, FAbstractEquation dest) {}
+        protected abstract void contribute(AbstractEquation src, FAbstractEquation dest);
 
         /**
          * This method is called during flattening of components. All
          * expressions that are added must be flattened.
          */
-        protected void contribute(InstAssignable src, FVariable dest) {}
+        protected abstract void contribute(InstAssignable src, FVariable dest);
 
         /**
          * This method is called during flattening of functions. All
          * expressions that are added must be flattened.
          */
-        protected void contribute(InstBaseClassDecl src, FFunctionDecl dest) {}
+        protected abstract void contribute(InstBaseClassDecl src, FFunctionDecl dest);
 
         /**
          * This method is called during flattening of the model. All
          * expressions that are added must be flattened.
          */
-        protected void contribute(InstNode src, FClass dest) {}
+        protected abstract void contribute(InstNode src, FClass dest);
 
         /**
          * This method is called in order to determine if an attribute should
          * be considered as active. Return true if the attributes that was
          * added earlier alters the models behaviour.
          */
-        protected boolean containsActiveAttributes(FAbstractEquation equation) { return false; }
+        protected abstract boolean containsActiveAttributes(FAbstractEquation equation);
 
         /**
          * This method is called in order to determine if an attribute should
          * be considered as active. Return true if the attributes that was
          * added earlier alters the models behaviour.
          */
-        protected boolean containsActiveAttributes(FVariable variable) { return false; }
+        protected abstract boolean containsActiveAttributes(FVariable variable);
 
         /**
          * This method is called in order to determine if an attribute should
          * be considered as active. Return true if the attributes that was
          * added earlier alters the models behaviour.
          */
-        protected boolean containsActiveAttributes(FFunctionDecl function) { return false; }
+        protected abstract boolean containsActiveAttributes(FFunctionDecl function);
 
         /**
          * This method is called in order to determine if an attribute should
          * be considered as active. Return true if the attributes that was
          * added earlier alters the models behaviour.
          */
-        protected boolean containsActiveAttributes(FClass fClass) { return false; }
+        protected abstract boolean containsActiveAttributes(FClass fClass);
 
         @Override
         public String toString() {

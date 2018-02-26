@@ -405,17 +405,14 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
      */
     protected boolean generateStartAttribute(FVariable var) {
         FExp startExp = var.generateXMLStartExp();
-        return startExp != null && startExp.isConstantExp() || 
-                (!var.variability().parameterOrLess() && var.fixedAttribute());
+        return startExp != null && startExp.isConstantExp();
     }
 
     protected void generateStartAttributeIfSet(FVariable var, CodeStream genPrinter) {
         if (generateStartAttribute(var)) {
             FExp startExp = var.generateXMLStartExp();
-            CValue val = startExp != null ?
-                    var.type().convert(startExp.ceval()) :
-                    var.startAttributeCValue();
-            generateAttribute(FAttribute.START, val.xmlValue(), genPrinter);
+            String val = var.type().convert(startExp.ceval()).xmlValue();
+            generateAttribute(FAttribute.START, val, genPrinter);
         }
     }
 
@@ -804,7 +801,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 			public void generateAttributes(CodeStream genPrinter) {
                 generateAttributeIfSet(FAttribute.QUANTITY, variable, genPrinter);
                 generateUnitAndDisplayUnitAttribute(genPrinter, variable);
-                generateAttribute("relativeQuantity", !variable.isAbsoluteValue(), genPrinter);
+                generateAttribute("relativeQuantity", false, genPrinter);
                 generateAttributeIfSet(FAttribute.MIN,     variable, genPrinter);
                 generateAttributeIfSet(FAttribute.MAX,     variable, genPrinter);
                 generateAttributeIfSet(FAttribute.NOMINAL, variable, genPrinter);
@@ -1481,7 +1478,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             public void generateAttributes(CodeStream genPrinter) {
                 generateAttributeIfSet(FAttribute.QUANTITY, variable, genPrinter);
                 generateUnitAndDisplayUnitAttribute(genPrinter, variable);
-                generateAttribute("relativeQuantity", !variable.isAbsoluteValue(), genPrinter);
+                generateAttribute("relativeQuantity", false, genPrinter);
                 generateAttributeIfSet(FAttribute.MIN,     variable, genPrinter);
                 generateAttributeIfSet(FAttribute.MAX,     variable, genPrinter);
                 generateAttributeIfSet(FAttribute.NOMINAL, variable, genPrinter);
