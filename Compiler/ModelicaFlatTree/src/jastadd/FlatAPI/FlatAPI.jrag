@@ -4389,9 +4389,9 @@ aspect FlatExternalFunctionAPI {
         }
         
         if (includeDir != null) 
-            includeDir = URIResolver.DEFAULT.resolve(n, includeDir);
+            includeDir = n.resolve(includeDir);
         if (libraryDir != null) {
-            libraryDir = URIResolver.DEFAULT.resolve(n, libraryDir);
+            libraryDir = n.resolve(libraryDir);
         }
     }
 
