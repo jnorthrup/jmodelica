@@ -1,43 +1,4 @@
 ================= Unreleased ==================
-; Feature ; Minor ; PyFMI ; #5587
-Added functionality to set enumerations with strings
-
-; Fixed ; Minor ; Compiler ; #5579 
-Improved handling of event generating relational expressions
-with nested blocks.
-
-; Feature ; Minor ; Compiler ; #5584
-Added variable index comment before each variable in the FMI ModelVariables
-XML.
-
-; Fixed ; Minor ; Compiler ; #5490
-Fixed bug that caused some errors to be reported on the wrong line.
-
-; Feature ; Minor ; PyFMI ; #5089
-Added option to limit the maximum size of the log file.
-
-; Fixed ; Minor ; Compiler ; #5564
-Using absoluteValue annotation to generate relativeQuantity attribute
-
-; Fixed ; Minor ; Compiler ; #5563
-Fixed bugs for start attribute generation in xml
-
-; Fixed ; Minor ; Compiler ; #5560
-Improved temporary counting leading to smaller generated c-functions
-
-; Fixed ; Minor ; Compiler ; #5559
-Fixed a problem with vectorized functions where the 
-sizes of the dimensions where incorrectly handled.
-
-; Fixed ; Minor ; Compiler ; #5557
-Fixed dependency computation for dynamic derivatives, the FMU XML didn't list
-the corresponding dynamic states as dependencies for the dynamic derivatives.
-
-================= Stable-2018-02-09 ==================
-; Change ; Minor ; Runtime; #5555
-Added so that the internal solver is re-initialized if inputs are
-changed in a co-simulation FMU.
-
 ; Change ; Minor ; Compiler ; #5549
 Moved static variable declarations for generated temporaries to
 generated struct in order to improve multithreading capabilities.

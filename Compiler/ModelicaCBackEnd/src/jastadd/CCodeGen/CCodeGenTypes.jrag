@@ -88,9 +88,27 @@ aspect CCodeGenTypes {
     eq FStringType.macroTypeDeclScalar()         = "STR";
     eq FExternalObjectType.macroTypeDeclScalar() = "EXO";
 
-    public void FAbstractVariable.print(TypePrinter_C tp, String name, String indent) {
-        tp.reset(name, this, size(), false, indent);
+
+    private FExp FFunctionVariable.dummyFExp = null;
+
+    public void FFunctionVariable.setDummyExp() {
+        if (dummyFExp == null) {
+            dummyFExp = new FNoExp();
+        }
+        setBindingExp(dummyFExp);
+    }
+
+    public void FFunctionVariable.resetDummyExp() {
+        if (dummyFExp != null) {
+            setBindingExpOpt(new Opt());
+        }
+    }
+
+    public void FFunctionVariable.print(TypePrinter_C tp, String name, String indent) {
+        setDummyExp();
+        tp.reset(name, getBindingExp(), size(), false, indent);
         type().print(tp);
+        resetDummyExp();
     }
 
     @Override
@@ -114,34 +132,11 @@ aspect CCodeGenTypes {
         print(p.createInitSetPrinter(str), indent, name, src, external);
     }
 
-    interface TypePrintable_C extends Named_C {
-        public FExp myBackingFExp();
-        public CodeGenContext myCodeGenContext();
-        public boolean useAlias_C();
-        public String alias_C(CodePrinter p);
-    }
-
-    FExp              implements TypePrintable_C;
-    FFunctionCallLeft implements TypePrintable_C;
-    FAbstractVariable implements TypePrintable_C;
-
-    syn FExp FExp             .myBackingFExp() = this;
-    syn FExp FFunctionCallLeft.myBackingFExp() = getFExp();
-    syn FExp FAbstractVariable.myBackingFExp() = null;
-
-    syn boolean FExp.useAlias_C()              = false;
-    syn boolean FFunctionCallLeft.useAlias_C() = getFExp().useAlias_C();
-    syn boolean FAbstractVariable.useAlias_C() = true;
-
-    syn String FExp             .alias_C(CodePrinter p) = myCodeGenContext().alias(prettyPrint_C());
-    syn String FFunctionCallLeft.alias_C(CodePrinter p) = getFExp().alias_C(p);
-    syn String FAbstractVariable.alias_C(CodePrinter p) = p.getExecStep().name(this);
-
-    public void FType.print(TypePrinter_C tp, String indent, CodePrinter.ExecuteCodePrinter ep, TypePrintable_C src, boolean external) {
+    public void FType.print(TypePrinter_C tp, String indent, CodePrinter.ExecuteCodePrinter ep, FExp src, boolean external) {
         print(tp, indent, ep.name(src), src, external);
     }
 
-    public void FType.print(TypePrinter_C tp, String indent, String name, TypePrintable_C src, boolean external) {
+    public void FType.print(TypePrinter_C tp, String indent, String name, FExp src, boolean external) {
         tp.reset(name, src, size(), external, indent);
         print(tp);
     }
@@ -153,7 +148,7 @@ aspect CCodeGenTypes {
     public abstract class TypePrinter_C {
         protected CodePrinter p;
         protected CodeStream str;
-        protected TypePrintable_C src;
+        protected FExp src;
         protected boolean external = false;
         protected boolean subDecls = false; // Used in CAD
         
@@ -164,12 +159,12 @@ aspect CCodeGenTypes {
             this.str = str;
         }
         
-        public TypePrinter_C(CodePrinter p, CodeStream str, String indent, String name, TypePrintable_C src, Size s, boolean external) {
+        public TypePrinter_C(CodePrinter p, CodeStream str, String indent, String name, FExp src, Size s, boolean external) {
             this(p, str);
             reset(name, src, s, external, indent);
         }
         
-        public void reset(String name, TypePrintable_C src, Size s, boolean external, String indent) {
+        public void reset(String name, FExp src, Size s, boolean external, String indent) {
             this.src = src;
             levels = new Stack<Level>();
             levels.push(new Level(name, indent, !s.variability().knownParameterOrLess() || external, src));
@@ -193,8 +188,8 @@ aspect CCodeGenTypes {
             String name;
             String indent;
             boolean dynamic;
-            TypePrintable_C src;
-            public Level(String name, String indent, boolean dynamic, TypePrintable_C src) {
+            FExp src;
+            public Level(String name, String indent, boolean dynamic, FExp src) {
                 this.name    = name;
                 this.indent  = indent;
                 this.dynamic = dynamic;
@@ -202,7 +197,7 @@ aspect CCodeGenTypes {
             }
         }
         
-        protected void pushLevel(String name, boolean indent, Size s, TypePrintable_C src) {
+        protected void pushLevel(String name, boolean indent, Size s, FExp src) {
             levels.push(new Level(name, indent ? p.indent(indent()) : indent(), !s.variability().knownParameterOrLess() || dynamic(), src));
         }
         
@@ -236,23 +231,17 @@ aspect CCodeGenTypes {
         }
         
         FExp levelSrc(Index i) {
-            TypePrintable_C levelSrc = levels.peek().src;
-            if (levelSrc != null) {
-                FExp exp = levelSrc.myBackingFExp();
-                if (exp != null && exp instanceof FArray && exp.type().isRecord()) {
-                    return exp.fArrayCell(i, 0);
-                }
+            FExp exp = levels.peek().src;
+            if (exp != null && exp instanceof FArray && exp.type().isRecord()) {
+                return exp.fArrayCell(i, 0);
             }
             return null;
         }
         
         FExp levelSrc(String name) {
-            TypePrintable_C levelSrc = levels.peek().src;
-            if (levelSrc != null) {
-                FExp exp = levelSrc.myBackingFExp();
-                if (exp != null && exp instanceof FRecordConstructor) {
-                    return exp.component(name);
-                }
+            FExp exp = levels.peek().src;
+            if (exp != null && exp instanceof FRecordConstructor) {
+                return exp.component(name);
             }
             return null;
         }
@@ -342,19 +331,17 @@ aspect CCodeGenTypes {
             printDimensions(type);
         }
         protected void printNumElements(FType type) {
-            if (external && dynamic()) {
-                type.size().printNumElements_C(p, str, indent(), src.alias_C(p));
-            } else {
+            if (external && dynamic())
+                type.size().printNumElements_C(p, str, indent(), src.alias());
+            else
                 type.size().printNumElements_C(p, str, indent(), src);
-            }
         }
         protected void printDimensions(FType type) {
             str.print(", ");
-            if (external && dynamic()) {
-                type.size().printDimensions_C(p, str, indent(), src.alias_C(p));
-            } else {
+            if (external && dynamic())
+                type.size().printDimensions_C(p, str, indent(), src.alias());
+            else
                 type.size().printDimensions_C(p, str, indent(), src);
-            }
         }
     }
     
@@ -367,7 +354,7 @@ aspect CCodeGenTypes {
         @Override
         protected String acquireTemp(String key) {
             String tmp = src.nextTempName_C();
-            src.myCodeGenContext().recordChildTempNames().put(key, tmp);
+            src.recordChildTempNames().put(key, tmp);
             return tmp;
         }
 
@@ -430,7 +417,7 @@ aspect CCodeGenTypes {
 
         @Override
         protected String acquireTemp(String key) {
-            return src.myCodeGenContext().recordChildTempNames().get(key);
+            return src.recordChildTempNames().get(key);
         }
 
         @Override
@@ -498,21 +485,28 @@ aspect CCodeGenTypes {
         str.print(")\n");
     }
 
-    public void Size.printNumElements_C(CodePrinter p, CodeStream str, String indent, TypePrintable_C src) {
+    private Map<String,String> FExp.recordChildTempNameMap = null;
+
+    public Map<String,String> FExp.recordChildTempNames() {
+        if (recordChildTempNameMap == null) {
+            recordChildTempNameMap = new HashMap<String,String>();
+        }
+        return recordChildTempNameMap;
+    }
+
+    public void Size.printNumElements_C(CodePrinter p, CodeStream str, String indent, ASTNode src) {
         str.print(numElements());
     }
 
     @Override
-    public void MutableSize.printNumElements_C(CodePrinter p, CodeStream str, String indent, TypePrintable_C src) {
+    public void MutableSize.printNumElements_C(CodePrinter p, CodeStream str, String indent, ASTNode src) {
         if (!variability().knownParameterOrLess()) {
             for (int i = 0; i < size.length; i++) {
                 FExp exp = exps[i];
                 if (i > 0) {
                     str.print(" * ");
                 }
-                if (exps[i] == null && size[i] == Size.UNKNOWN) {
-                    printSize_C(p, str, indent, src.alias_C(p), i);
-                } else if (exp == null) {
+                if (exp == null) {
                     str.print(size[i]);
                 } else {
                     boolean addParenthesis = exp.addParenthesis(Precedence.MULTIPLICATIVE);
@@ -530,23 +524,22 @@ aspect CCodeGenTypes {
         }
     }
 
-    public void Size.printDimensions_C(CodePrinter p, CodeStream str, String indent, TypePrintable_C src) {
+    public void Size.printDimensions_C(CodePrinter p, CodeStream str, String indent, ASTNode src) {
         str.print(toUnclosedString());
     }
 
     @Override
-    public void MutableSize.printDimensions_C(CodePrinter p, CodeStream str, String indent, TypePrintable_C src) {
+    public void MutableSize.printDimensions_C(CodePrinter p, CodeStream str, String indent, ASTNode src) {
         if (!variability().knownParameterOrLess()) {
             for (int i = 0; i < size.length; i++) {
                 if (i > 0) {
                     str.print(", ");
                 }
-                if (exps[i] == null && size[i] == Size.UNKNOWN) {
-                    printSize_C(p, str, indent, src.alias_C(p), i);
-                } else if (exps[i] == null) {
+                if (exps[i] == null) {
                     str.print(size[i]);
                 } else {
-                    exps[i].prettyPrint_C(p, str, indent);
+                    FExp exp = exps[i];
+                    exp.prettyPrint_C(p, str, indent); // TODO: This is a hack to get CAD gen to work!
                 }
             }
         } else {
@@ -571,27 +564,67 @@ aspect CCodeGenTypes {
     }
 
     public void Size.printSize_C(CodePrinter p, CodeStream str, String indent, String name, int dim) {
-        str.print("jmi_array_size(", name, p.sep(), dim, ")");
+        str.print("jmi_array_size(");
+        str.print(name);
+        str.print(", ");
+        str.print(dim);
+        str.print(")");
     }
 
     public void Size.printSize_C(CodePrinter p, CodeStream str, String indent, FExp e, int dim) {
         str.print("jmi_array_size(");
         p.print(e, str, indent);
-        str.print(p.sep(), dim, ")");
+        str.print(", ");
+        str.print(dim);
+        str.print(")");
     }
 
-    public void Size.print(CodePrinter.StepPrinter p, CodeStream str, String indent) {}
+    public void Size.genVarDecls_C(CodePrinter p, CodeStream str, String indent, FExp src) {}
 
     @Override
-    public void MutableSize.print(CodePrinter.StepPrinter p, CodeStream str, String indent) {
+    public void MutableSize.genVarDecls_C(CodePrinter p, CodeStream str, String indent, FExp src) {
         if (isUnknown()) {
             for (int i = 0; i < size.length; i++) {
-                if (size[i] == Size.UNKNOWN && exps[i] != null) {
-                    p.print(exps[i], str, indent);
+                if (size[i] == Size.UNKNOWN) {
+                    FExp exp = src.dynamicFExp(exps[i]);
+                    p.printVarDecls(exp, str, indent); // TODO: This is a hack to get CAD gen to work!
                 }
             }
         } else {
-            super.print(p, str, indent);
+            super.genVarDecls_C(p, str, indent, src);
+        }
+    }
+
+	
+    public void Size.genTempVars_C(CodePrinter p, CodeStream str, String indent, FExp src) {}
+
+    @Override
+    public void MutableSize.genTempVars_C(CodePrinter p, CodeStream str, String indent, FExp src) {
+        if (isUnknown()) {
+            for (int i = 0; i < size.length; i++) {
+                if (size[i] == Size.UNKNOWN) {
+                    FExp exp = src.dynamicFExp(exps[i]);
+                    p.printPreSteps(exp, str, indent); // TODO: This is a hack to get CAD gen to work!
+                }
+            }
+        } else {
+            super.genTempVars_C(p, str, indent, src);
+        }
+    }
+
+    public void Size.genTempFree_C(CodePrinter p, CodeStream str, String indent, FExp src) {}
+
+    @Override
+    public void MutableSize.genTempFree_C(CodePrinter p, CodeStream str, String indent, FExp src) {
+        if (isUnknown()) {
+            for (int i = 0; i < size.length; i++) {
+                if (size[i] == Size.UNKNOWN) {
+                    FExp exp = src.dynamicFExp(exps[i]);
+                    p.printPostSteps(exp, str, indent); // TODO: This is a hack to get CAD gen to work!
+                }
+            }
+        } else {
+            super.genTempFree_C(p, str, indent, src);
         }
     }
 

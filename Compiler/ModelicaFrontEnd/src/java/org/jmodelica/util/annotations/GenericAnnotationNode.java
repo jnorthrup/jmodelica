@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jmodelica.common.URIResolver.URIException;
 import org.jmodelica.util.annotations.AnnotationProvider.SubNodePair;
 import org.jmodelica.util.values.ConstValue;
 import org.jmodelica.util.values.ConstantEvaluationException;
@@ -277,7 +276,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @param str String to resolve as URI
      * @return canonical file:// URI or null on failure
      */
-    public String resolveURI(String str) throws URIException {
+    public String resolveURI(String str) {
         if (node == null) {
             if (parent == null) {
                 return null; // We did our best, we cant do more
@@ -340,15 +339,11 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     public T valueAsAnnotation() {
         if (!valueAnnotation_cacheComputed) {
             valueAnnotation_cacheComputed = true;
-            if (exists()) {
-                N annotationNode = valueAsProvider();
-                if (hasValue() && annotationNode == null) {
-                    valueAnnotation_cache = null;
-                } else {
-                    valueAnnotation_cache = createNode(null, annotationNode);
-                }
-            } else {
+            N annotationNode = valueAsProvider();
+            if (hasValue() && annotationNode == null) {
                 valueAnnotation_cache = null;
+            } else {
+                valueAnnotation_cache = createNode(null, annotationNode);
             }
         }
         return valueAnnotation_cache;

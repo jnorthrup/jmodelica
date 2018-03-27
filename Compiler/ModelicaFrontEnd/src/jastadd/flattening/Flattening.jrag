@@ -1421,11 +1421,11 @@ aspect Flattening {
      * Flattening of string comments.
      */
 
-    private static final char[][] SrcStringComment.ESCAPE_CHARS = {
+    private static final char[][] StringComment.ESCAPE_CHARS = {
         {'b', '\b'}, {'\"', '\"'}, {'f', '\f'}, {'n', '\n'}, {'r', '\r'}, {'t', '\t'}, { '\'', '\''}
     };
-    private static final Map<Character, Character> SrcStringComment.ESCAPE_MAP = initializeEscapeMap();
-    private static final char SrcStringComment.BACKSLASH = '\\';
+    private static final Map<Character, Character> StringComment.ESCAPE_MAP = initializeEscapeMap();
+    private static final char StringComment.BACKSLASH = '\\';
 
     /**
      * Creates a {@link Map} instance mapping all the pairs in {@code ESCAPE_CHARS}.
@@ -1433,7 +1433,7 @@ aspect Flattening {
      * The first character in each pair of {@code ESCAPE_CHARS} is a key to the value,
      * i.e. the second character in the pair.
      */ 
-    private static final Map<Character, Character> SrcStringComment.initializeEscapeMap() {
+    private static final Map<Character, Character> StringComment.initializeEscapeMap() {
         Map<Character, Character> map = new HashMap<Character, Character>();
         for (char[] pair : ESCAPE_CHARS) {
             map.put(pair[0], pair[1]);
@@ -1449,8 +1449,8 @@ aspect Flattening {
      * @return
      *          a {@link FStringComment} instance (a comment node in the flat tree).
      */
-    public FStringComment SrcStringComment.flatten() {
-        String comment = getSrcComment();
+    public FStringComment StringComment.flatten() {
+        String comment = getComment();
         StringBuilder escapedComment = new StringBuilder();
         int length = comment.length();
 
@@ -1475,28 +1475,27 @@ aspect Flattening {
     }
 
     public FEnumLiteral InstEnumLiteral.createFEnumLiteral() {
-        FEnumLiteral e = new FEnumLiteral(new FIdUse(name()), new Opt());
-        SrcStringComment comment = myStringComment();
-        if (comment != null) {
-            e.setFStringComment(comment.flatten());
-        }
+        FEnumLiteral e = new FEnumLiteral(new FIdUse(name()),new Opt());
+        if (getComponentDecl().getComment().hasStringComment())
+            e.setFStringComment(getComponentDecl().getComment().getStringComment().flatten());
         return e;
     }
 
-    public void InstClassDecl.flattenEnum(Flattener f) {
+    public void InstClassDecl.flattenEnum(Flattener f) {      
         if (!f.isFlattened(this)) {
             // Flatten all InstEnums corresponding to FEnumLiterals
             FEnumLiteralList l = new FEnumLiteralList();
             for (InstEnumLiteral ie : enumLiterals()) 
                 l.addFEnumLiteral(ie.createFEnumLiteral());
             FIdDecl id = new FIdDecl(new FQNameString(qualifiedName()));
-            FEnumDecl ed = new FEnumDecl(id, l, new Opt());
-            SrcStringComment comment = myStringComment();
-            if (comment != null) {
-                ed.setFStringComment(comment.flatten());
-            }
+            ClassDecl classDecl = getClassDecl();
+            Opt comment = null;
+            if (classDecl.hasStringComment()) 
+                comment = new Opt(classDecl.getStringComment().flatten());
+            else 
+                comment = new Opt();
             addFDerivedType(f);
-            f.addFEnumDecl(ed); 
+            f.addFEnumDecl(new FEnumDecl(id, l, comment)); 
         }
     }
     
@@ -1695,10 +1694,8 @@ aspect Flattening {
                 fv.setBindingExp(e);
         }
         
-        SrcStringComment comment = myStringComment();
-        if (comment != null) {
-            fv.setFStringComment(comment.flatten());
-        }
+        if (getComponentDecl().getComment().hasStringComment())
+            fv.setFStringComment(getComponentDecl().getComment().getStringComment().flatten());
         
         fv.setFQName(name);
         fv.setLocation(this);
@@ -2090,8 +2087,8 @@ aspect Flattening {
             getChild(i).collectAttributes(attrs, prefix, aer, cls);
     }
 
-    // This is just to avoid collecting SrcComponentModification:s that resides inside
-    // SrcClassRedeclares.
+    // This is just to avoid collecting ComponentModification:s that resides inside
+    // ClassRedeclares.
     public void InstClassRedeclare.collectAttributes(
             List<FAttribute> attrs, FQName prefix, AttributeExpRetriever aer, boolean cls) {}
 
@@ -2112,9 +2109,9 @@ aspect Flattening {
                     InstValueModification ivm = im.getInstValueMod();
                     a.setValue(aer.retrieve(ivm, ivm.hasEach()).flatten(prefix));
                 }
-                if (getSrcComponentModification().getEach())
+                if (getComponentModification().hasEach())
                     a.setFEach(new FEach());
-                if (getSrcComponentModification().getFinal())
+                if (getComponentModification().hasFinal())
                     a.setFFinal(new FFinal());
                 List<FAttribute> l = new List<FAttribute>();
                 l.addAll(a.getFAttributes());
@@ -2221,6 +2218,15 @@ aspect FlatteningDebug {
         this 
     to FClass.collectInstAccesses() for myFClass();
     inh FClass InstAccess.myFClass();
+
+}
+
+
+aspect InstNodeInterface {
+
+    syn ArraySubscripts InstComponentDecl.arraySubscripts() = 
+        getComponentDecl().arraySubscripts()!=null?
+            getComponentDecl().arraySubscripts(): null;
 
 }
 
@@ -2691,7 +2697,7 @@ aspect FlatExpressions {
     eq InstNode.getChild().sizeFlatteningPrefix()      = retrieveFQName();
     eq InstClassDecl.getChild().sizeFlatteningPrefix() = new FQNameEmpty();
     
-    inh FExp SrcDummyModification.myFExp();
+    inh FExp DummyModification.myFExp();
     eq InstFunctionArgument.getChild().myFExp()   = null;
     eq InstPositionalArgument.getChild().myFExp() = getFExp();
     eq InstNamedArgument.getChild().myFExp()      = getFExp();
@@ -2839,43 +2845,45 @@ aspect FlatExpressions {
      *
      * This is done during variability calculation to keep compatibility with FExp. 
      */
-    abstract public FTypePrefixVariability SrcTypePrefixVariability.flatten();
-    public FTypePrefixVariability SrcContinuous.flatten()     { return fContinuous();     }
-    public FTypePrefixVariability SrcDiscrete.flatten()       { return fDiscrete();       }
-    public FTypePrefixVariability SrcParameter.flatten()      { return fFixedParameter(); }
-    public FTypePrefixVariability SrcIndexParameter.flatten() { return fIndexParameter(); }
-    public FTypePrefixVariability SrcConstant.flatten()       { return fConstant();       }
+    abstract public FTypePrefixVariability TypePrefixVariability.flatten();
+    public FTypePrefixVariability Continuous.flatten()     { return fContinuous();     }
+    public FTypePrefixVariability Discrete.flatten()       { return fDiscrete();       }
+    public FTypePrefixVariability Parameter.flatten()      { return fFixedParameter(); }
+    public FTypePrefixVariability IndexParameter.flatten() { return fIndexParameter(); }
+    public FTypePrefixVariability Constant.flatten()       { return fConstant();       }
 }
 
 aspect InstantiatedExpressions {
 
     
-    public FEquationType SrcAbstractEquation.equationType() {
+    public FEquationType AbstractEquation.equationType() {
         return isInitial() ? new FInitialEquation() : new FNormalEquation();
     }
 
-    public FEquationType SrcAlgorithm.equationType() {
-        return isInitial() ? new FInitialEquation() : new FNormalEquation();
+    public FEquationType Algorithm.equationType() {
+        return hasInitial() ? new FInitialEquation() : new FNormalEquation();
     }
 
-    public <T extends FAbstractEquation> T SrcAbstractEquation.copyStringComment(T eqn) {
-        SrcStringComment comment = myStringComment();
-        if (comment != null) {
-            eqn.setFStringComment(comment.flatten());
+    public <T extends FAbstractEquation> T AbstractEquation.copyStringComment(T eqn) {
+        if (getComment().hasStringComment()) {
+            eqn.setFStringComment(getComment().getStringComment().flatten());
         }
         return eqn;
     }
 
-    public FAbstractEquation SrcAbstractEquation.instantiate() {
+    syn String AbstractEquation.stringComment() =
+            getComment().hasStringComment() ? getComment().getStringComment().getComment() : null;
+
+    public FAbstractEquation AbstractEquation.instantiate() {
         return contribute(copyLocationTo(new FUnsupportedEquation(equationType())));
     }
 
-    public FAbstractEquation SrcEquation.instantiate() {
+    public FAbstractEquation Equation.instantiate() {
         return contribute(copyLocationTo(copyStringComment(new FEquation(
                 equationType(), getLeft().instantiate(), getRight().instantiate()))));
     }
     
-    public FAbstractEquation SrcConnectClause.instantiate() {
+    public FAbstractEquation ConnectClause.instantiate() {
         FConnectClause c = new FConnectClause(equationType(), this,
                 new FIdUseInstAccess(getConnector1().newInstAccess()),
                 new FIdUseInstAccess(getConnector2().newInstAccess()));
@@ -2883,15 +2891,15 @@ aspect InstantiatedExpressions {
         return contribute(copyStringComment(c));
     }
     
-    protected FIfWhenElseEquation SrcIfWhenElseEquation.instantiate(FIfWhenElseEquation res) {
+    protected FIfWhenElseEquation IfWhenElseEquation.instantiate(FIfWhenElseEquation res) {
         res.setType(equationType());
-        for (SrcAbstractEquation eqn : getSrcAbstractEquations())
+        for (AbstractEquation eqn : getAbstractEquations())
             res.addFAbstractEquation(eqn.instantiate());
         res.setLocation(this);
         return contribute(copyStringComment(res));
     }
     
-    protected FIfWhenEquation SrcIfWhenEquation.instantiate(FIfWhenEquation res) {
+    protected FIfWhenEquation IfWhenEquation.instantiate(FIfWhenEquation res) {
         super.instantiate(res);
         res.setTest(getTest().instantiate());
         if (hasElse())
@@ -2899,44 +2907,44 @@ aspect InstantiatedExpressions {
         return res;
     }
     
-    public abstract FIfWhenElseEquation SrcIfWhenElseEquation.instantiate();
+    public abstract FIfWhenElseEquation IfWhenElseEquation.instantiate();
     
-    public FIfWhenElseEquation SrcIfEquation.instantiate() {
+    public FIfWhenElseEquation IfEquation.instantiate() {
         return instantiate(new FIfEquation());
     }
     
-    public FIfWhenElseEquation SrcWhenEquation.instantiate() {
+    public FIfWhenElseEquation WhenEquation.instantiate() {
         return instantiate(new FWhenEquation());
     }
     
-    public FIfWhenElseEquation SrcElseEquation.instantiate() {
+    public FIfWhenElseEquation ElseEquation.instantiate() {
         return instantiate(new FElseEquation());
     }
         
-    public FFunctionCallEquation SrcFunctionCallEquation.instantiate() {
+    public FFunctionCallEquation FunctionCallEquation.instantiate() {
         List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
-        for (SrcFunctionCallLeft a : getLefts()) 
+        for (FunctionCallLeft a : getLefts()) 
             l.add(a.instantiate());
         return contribute(copyLocationTo(copyStringComment(
                 new FFunctionCallEquation(equationType(), l, getCall().instantiate()))));
     }
     
-    public  FFunctionCallLeft SrcFunctionCallLeft.instantiate() {
-        Opt id = hasSrcAccess() ? 
-                new Opt(setLocationOf(new FIdUseExp(new FIdUseInstAccess(getSrcAccess().newInstAccess())))) : 
+    public  FFunctionCallLeft FunctionCallLeft.instantiate() {
+        Opt id = hasAccess() ? 
+                new Opt(setLocationOf(new FIdUseExp(new FIdUseInstAccess(getAccess().newInstAccess())))) : 
                 new Opt();
         return new FFunctionCallLeft(id);
     }
     
-    public FAlgorithm SrcAlgorithm.instantiate() {
-        List l = SrcStatement.instantiateStatementList(getSrcStatements());
+    public FAlgorithm Algorithm.instantiate() {
+        List l = Statement.instantiateStatementList(getStatements());
         return copyLocationTo(new FAlgorithm(equationType(), l));
     }
     
-    public InstExternal SrcExternalClause.instantiate() {
+    public InstExternal ExternalClause.instantiate() {
         // TODO: Interpret annotations and add information to InstExternal
-        Opt lang = hasSrcExternalLanguage() ? new Opt(getSrcExternalLanguage().instantiate()) : new Opt();
-        Opt call = hasSrcExternalFunctionCall() ? new Opt(getSrcExternalFunctionCall().instantiate()) : new Opt();
+        Opt lang = hasExternalLanguage() ? new Opt(getExternalLanguage().instantiate()) : new Opt();
+        Opt call = hasExternalFunctionCall() ? new Opt(getExternalFunctionCall().instantiate()) : new Opt();
         return copyLocationTo(new InstExternal(this, lang, call));
     }
     
@@ -2944,7 +2952,7 @@ aspect InstantiatedExpressions {
     public static final String FFortran77ExternalLanguage.LANGUAGE_STRING = "FORTRAN 77";
     public static final String FBuiltinExternalLanguage.LANGUAGE_STRING   = "builtin";
     
-    public FExternalLanguage SrcExternalLanguage.instantiate() {
+    public FExternalLanguage ExternalLanguage.instantiate() {
         String lang = getLanguage();
         if (lang.equals(FCExternalLanguage.LANGUAGE_STRING))
             return new FCExternalLanguage();
@@ -2956,273 +2964,273 @@ aspect InstantiatedExpressions {
             return new FUnknownExternalLanguage(lang);
     }
     
-    public InstExternalCall SrcExternalFunctionCall.instantiate() {
+    public InstExternalCall ExternalFunctionCall.instantiate() {
         InstExternalCall res = new InstExternalCall();
         if (hasReturnVar())
             res.setReturnVar(getReturnVar().newInstAccess());
         res.setName(getFunctionName().name());
-        for (SrcExp e : getArgs())
+        for (Exp e : getArgs())
             res.addArg(e.instantiate());
         return res;
     }
     
-    public static List SrcStatement.instantiateStatementList(List<SrcStatement> l) {
+    public static List Statement.instantiateStatementList(List<Statement> l) {
         List l2 = new List();
-        for (SrcStatement s : l) 
+        for (Statement s : l) 
             l2.add(s.instantiate());
         return l2;
     }
     
-    public FStatement SrcStatement.instantiate() {
+    public FStatement Statement.instantiate() {
         FStatement s = instantiateStatement();
         s.setLocation(this);
         return s;
     }
     
-    protected abstract FStatement SrcStatement.instantiateStatement();
+    protected abstract FStatement Statement.instantiateStatement();
     
-    protected FStatement SrcAlgorithmAnnotation.instantiateStatement() {
+    protected FStatement AlgorithmAnnotation.instantiateStatement() {
         return null;
     }
     
-    protected FAssignStmt SrcAssignStmt.instantiateStatement() {
+    protected FAssignStmt AssignStmt.instantiateStatement() {
         FIdUseExp left = new FIdUseExp(new FIdUseInstAccess(getLeft().newInstAccess()));
         left.setLocation(this);
         return new FAssignStmt(left, getRight().instantiate());
     }
     
-    protected FFunctionCallStmt SrcFunctionCallStmt.instantiateStatement() {
+    protected FFunctionCallStmt FunctionCallStmt.instantiateStatement() {
         List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
-        for (SrcFunctionCallLeft a : getLefts()) 
+        for (FunctionCallLeft a : getLefts()) 
             l.add(a.instantiate());
-        return new FFunctionCallStmt(l, getSrcFunctionCall().instantiate());
+        return new FFunctionCallStmt(l, getFunctionCall().instantiate());
     }
     
-    protected FBreakStmt SrcBreakStmt.instantiateStatement() {
+    protected FBreakStmt BreakStmt.instantiateStatement() {
         return new FBreakStmt();
     }
     
-    protected FReturnStmt SrcReturnStmt.instantiateStatement() {
+    protected FReturnStmt ReturnStmt.instantiateStatement() {
         return new FReturnStmt();
     }
     
-    protected FIfWhenStmt SrcIfWhenStmt.instantiateStatement() {
+    protected FIfWhenStmt IfWhenStmt.instantiateStatement() {
         List l = new List();
-        for (SrcIfWhenClause c : getSrcIfWhenClauses()) 
+        for (IfWhenClause c : getIfWhenClauses()) 
             l.add(c.instantiate());
         return instantiateIfWhenStmt(l);
     }
     
-    protected abstract FIfWhenStmt SrcIfWhenStmt.instantiateIfWhenStmt(List l);
+    protected abstract FIfWhenStmt IfWhenStmt.instantiateIfWhenStmt(List l);
     
-    protected FIfStmt SrcIfStmt.instantiateIfWhenStmt(List icl) {
+    protected FIfStmt IfStmt.instantiateIfWhenStmt(List icl) {
         List esl = new List();
-        if (hasSrcElseClause()) {
-            esl = SrcStatement.instantiateStatementList(getSrcElseClause().getStmts());
+        if (hasElseClause()) {
+            esl = Statement.instantiateStatementList(getElseClause().getStmts());
         }
         return new FIfStmt(icl, esl);
     }
     
-    protected FWhenStmt SrcWhenStmt.instantiateIfWhenStmt(List l) {
+    protected FWhenStmt WhenStmt.instantiateIfWhenStmt(List l) {
         return new FWhenStmt(l);
     }
     
-    public FIfWhenClause SrcIfWhenClause.instantiate() {
+    public FIfWhenClause IfWhenClause.instantiate() {
         FExp t = getTest().instantiate();
-        List l = SrcStatement.instantiateStatementList(getSrcStatements());
+        List l = Statement.instantiateStatementList(getStatements());
         FIfWhenClause c = instantiateIfWhenClause(t, l);
         c.setLocation(this);
         return c;
     }
     
-    protected abstract FIfWhenClause SrcIfWhenClause.instantiateIfWhenClause(FExp t, List l);
+    protected abstract FIfWhenClause IfWhenClause.instantiateIfWhenClause(FExp t, List l);
     
-    protected FIfClause SrcIfClause.instantiateIfWhenClause(FExp t, List l) {
+    protected FIfClause IfClause.instantiateIfWhenClause(FExp t, List l) {
         return new FIfClause(t, l);
     }
     
-    protected FWhenClause SrcWhenClause.instantiateIfWhenClause(FExp t, List l) {
+    protected FWhenClause WhenClause.instantiateIfWhenClause(FExp t, List l) {
         return new FWhenClause(t, l);
     }
     
     
-    protected InstForStmt SrcForStmt.instantiateStatement() {
+    protected InstForStmt ForStmt.instantiateStatement() {
         List il = new List();
-        for (SrcForIndex i : getSrcForIndexList()) 
+        for (ForIndex i : getForIndexList()) 
             il.add(i.instantiate());
-        List sl = SrcStatement.instantiateStatementList(getSrcForStmtList().getStmts());
+        List sl = Statement.instantiateStatementList(getForStmtList().getStmts());
         return new InstForStmt(il, sl);
     }
     
-    protected FWhileStmt SrcWhileStmt.instantiateStatement() {
-        List l = SrcStatement.instantiateStatementList(getSrcWhileStmts());
+    protected FWhileStmt WhileStmt.instantiateStatement() {
+        List l = Statement.instantiateStatementList(getWhileStmts());
         return new FWhileStmt(getTest().instantiate(), l);
     }
 
-    public FArraySubscripts SrcArraySubscripts.instantiate() {
+    public FArraySubscripts ArraySubscripts.instantiate() {
         List l = new List();
-        for (SrcSubscript s : getSrcSubscripts())
+        for (Subscript s : getSubscripts())
             l.add(s.instantiate());
         return copyLocationTo(new FArraySubscripts(l));
     }
     
-    abstract public FSubscript SrcSubscript.instantiate();
-    public FSubscript SrcColonSubscript.instantiate() { 
+    abstract public FSubscript Subscript.instantiate();
+    public FSubscript ColonSubscript.instantiate() { 
         return copyLocationTo(new FColonSubscript());
     }
     
-    public FSubscript SrcExpSubscript.instantiate() {
-        return copyLocationTo(new FExpSubscript(getSrcExp().instantiate()));
+    public FSubscript ExpSubscript.instantiate() {
+        return copyLocationTo(new FExpSubscript(getExp().instantiate()));
     }
     
-    public FExp SrcExp.instantiate() {
+    public FExp Exp.instantiate() {
         return copyLocationTo(new FUnsupportedExp());
     }
 
     
-    public InstDerExp SrcDerExp.instantiate() {
-        return copyLocationTo(new InstDerExp(getSrcExp().instantiate()));
+    public InstDerExp DerExp.instantiate() {
+        return copyLocationTo(new InstDerExp(getExp().instantiate()));
     }
     
 
-    public FExp SrcAccessExp.instantiate() {
-        return copyLocationTo(new FIdUseExp(new FIdUseInstAccess(getSrcAccess().newInstAccess())));
+    public FExp AccessExp.instantiate() {
+        return copyLocationTo(new FIdUseExp(new FIdUseInstAccess(getAccess().newInstAccess())));
     }
 
 
-    public InstAccess SrcAccess.instantiate() { 
+    public InstAccess Access.instantiate() { 
         return copyLocationTo(newInstAccess());
     }
 
-    public FExp SrcArrayConstructor.instantiate() {
+    public FExp ArrayConstructor.instantiate() {
        List l = new List();
-       for (SrcExp e : getSrcFunctionArguments().getSrcExps())
+       for (Exp e : getFunctionArguments().getExps())
            l.add(e.instantiate());
        return copyLocationTo(new FArray(l));
     }
     
-    public FExp SrcIterExp.instantiate() {
+    public FExp IterExp.instantiate() {
         List<CommonForIndex> ifil = new List<CommonForIndex>();
         // Add indices backwards, since they should be interpreted in the opposite order compared to for loops
-        for (int i = getNumSrcForIndex() - 1; i >= 0; i--)
-            ifil.add(getSrcForIndex(i).instantiate());
-        return copyLocationTo(new FIterExp(getSrcExp().instantiate(), ifil));
+        for (int i = getNumForIndex() - 1; i >= 0; i--)
+            ifil.add(getForIndex(i).instantiate());
+        return copyLocationTo(new FIterExp(getExp().instantiate(), ifil));
     }
 
-    public FExp SrcRangeExp.instantiate() {
+    public FExp RangeExp.instantiate() {
         List l = new List();
-        for (SrcExp e : getSrcExps()) 
+        for (Exp e : getExps()) 
             l.add(e.instantiate());
         return copyLocationTo(new FRangeExp(l));
     }
 
-    public FExp SrcIfExp.instantiate() {
-        FIfExp n = new FIfExp(getSrcIfExp().instantiate(),
+    public FExp IfExp.instantiate() {
+        FIfExp n = new FIfExp(getIfExp().instantiate(),
                               getThenExp().instantiate(),
                               getElseExp().instantiate());
         return copyLocationTo(n);
     }
 
-    public FExp SrcMatrix.instantiate() {
+    public FExp Matrix.instantiate() {
         FMatrix m = new FMatrix();
-        for (SrcMatrixRow r : getRows())
+        for (MatrixRow r : getRows())
             m.addFExp(r.instantiate());
         return copyLocationTo(m);
     }
     
-    public FMatrixRow SrcMatrixRow.instantiate() {
+    public FMatrixRow MatrixRow.instantiate() {
         FMatrixRow r = new FMatrixRow();
-        for (SrcExp e : getSrcExps())
+        for (Exp e : getExps())
             r.addFExp(e.instantiate());
         return copyLocationTo(r);
     }
     
-    public FExp SrcAddExp.instantiate() { 
+    public FExp AddExp.instantiate() { 
         return copyLocationTo(new FAddExp(getLeft().instantiate(),getRight().instantiate()));
     }
     
-    public FExp SrcSubExp.instantiate() { 
+    public FExp SubExp.instantiate() { 
         return copyLocationTo(new FSubExp(getLeft().instantiate(),getRight().instantiate()));
     }
 
-    public FExp SrcMulExp.instantiate() { 
+    public FExp MulExp.instantiate() { 
         return copyLocationTo(new FMulExp(getLeft().instantiate(),getRight().instantiate()));
     }
     
-    public FExp SrcDivExp.instantiate() { 
+    public FExp DivExp.instantiate() { 
         return copyLocationTo(new FDivExp(getLeft().instantiate(),getRight().instantiate()));
     }
     
-    public FExp SrcPowExp.instantiate() { 
+    public FExp PowExp.instantiate() { 
         return copyLocationTo(new FPowExp(getLeft().instantiate(),getRight().instantiate()));
     }
     
-    public FExp SrcDotAddExp.instantiate() { 
+    public FExp DotAddExp.instantiate() { 
         return copyLocationTo(new FDotAddExp(getLeft().instantiate(),getRight().instantiate()));
     }
     
-    public FExp SrcDotSubExp.instantiate() { 
+    public FExp DotSubExp.instantiate() { 
         return copyLocationTo(new FDotSubExp(getLeft().instantiate(),getRight().instantiate()));
     }
 
-    public FExp SrcDotMulExp.instantiate() { 
+    public FExp DotMulExp.instantiate() { 
         return copyLocationTo(new FDotMulExp(getLeft().instantiate(),getRight().instantiate()));
     }
     
-    public FExp SrcDotDivExp.instantiate() { 
+    public FExp DotDivExp.instantiate() { 
         return copyLocationTo(new FDotDivExp(getLeft().instantiate(),getRight().instantiate()));
     }
     
-    public FExp SrcDotPowExp.instantiate() { 
+    public FExp DotPowExp.instantiate() { 
         return copyLocationTo(new FDotPowExp(getLeft().instantiate(),getRight().instantiate()));
     }
     
-    public FExp SrcNegExp.instantiate() { 
-        return copyLocationTo(new FNegExp(getSrcExp().instantiate()));
+    public FExp NegExp.instantiate() { 
+        return copyLocationTo(new FNegExp(getExp().instantiate()));
     }
 
-    public FExp SrcLtExp.instantiate() { 
+    public FExp LtExp.instantiate() { 
         return copyLocationTo(new FLtExp(getLeft().instantiate(),getRight().instantiate()));
     }
 
-    public FExp SrcLeqExp.instantiate() { 
+    public FExp LeqExp.instantiate() { 
         return copyLocationTo(new FLeqExp(getLeft().instantiate(),getRight().instantiate()));
     }
     
-    public FExp SrcGtExp.instantiate() { 
+    public FExp GtExp.instantiate() { 
         return copyLocationTo(new FGtExp(getLeft().instantiate(),getRight().instantiate()));
     }
     
-    public FExp SrcGeqExp.instantiate() { 
+    public FExp GeqExp.instantiate() { 
         return copyLocationTo(new FGeqExp(getLeft().instantiate(),getRight().instantiate()));
     }
     
-    public FExp SrcEqExp.instantiate() { 
+    public FExp EqExp.instantiate() { 
         return copyLocationTo(new FEqExp(getLeft().instantiate(),getRight().instantiate()));
     }
     
-    public FExp SrcNeqExp.instantiate() { 
+    public FExp NeqExp.instantiate() { 
         return copyLocationTo(new FNeqExp(getLeft().instantiate(),getRight().instantiate()));
     }
     
-    public FExp SrcNotExp.instantiate() { 
-        return copyLocationTo(new FNotExp(getSrcExp().instantiate()));
+    public FExp NotExp.instantiate() { 
+        return copyLocationTo(new FNotExp(getExp().instantiate()));
     }
     
-    public FExp SrcOrExp.instantiate() { 
+    public FExp OrExp.instantiate() { 
         return copyLocationTo(new FOrExp(getLeft().instantiate(),getRight().instantiate()));
     }
     
-    public FExp SrcAndExp.instantiate() { 
+    public FExp AndExp.instantiate() { 
         return copyLocationTo(new FAndExp(getLeft().instantiate(),getRight().instantiate()));
     }
 
-    public FExp SrcRealLitExp.instantiate() {
+    public FExp RealLitExp.instantiate() {
         double value = Double.parseDouble(getUNSIGNED_NUMBER());
         return copyLocationTo(new FRealLitExp(value));
     }
     
-    public FExp SrcIntegerLitExp.instantiate() { 
+    public FExp IntegerLitExp.instantiate() { 
         try {
             int value = Integer.parseInt(getUNSIGNED_INTEGER());
             return copyLocationTo(new FIntegerLitExp(value));
@@ -3232,49 +3240,49 @@ aspect InstantiatedExpressions {
         }
     }
     
-    public FExp SrcStringLitExp.instantiate() { 
+    public FExp StringLitExp.instantiate() { 
         return copyLocationTo(new FStringLitExp(getSTRING()));
     }
     
-    public FExp SrcBooleanLitExpTrue.instantiate() { 
+    public FExp BooleanLitExpTrue.instantiate() { 
         return copyLocationTo(new FBooleanLitExpTrue());
     }
     
-    public FExp SrcBooleanLitExpFalse.instantiate() { 
+    public FExp BooleanLitExpFalse.instantiate() { 
         return copyLocationTo(new FBooleanLitExpFalse());
     }
     
-    public FExp SrcTimeExp.instantiate() { 
+    public FExp TimeExp.instantiate() { 
         return copyLocationTo(new FTimeExp());
     }   
 
-    public FExp SrcEndExp.instantiate() { 
+    public FExp EndExp.instantiate() { 
         return copyLocationTo(new FEndExp());
     }
     
-    public InstNamedArgument SrcNamedArgument.instantiate() {
-        return copyLocationTo(new InstNamedArgument(getSrcExp().instantiate(), getName().instantiate()));
+    public InstNamedArgument NamedArgument.instantiate() {
+        return copyLocationTo(new InstNamedArgument(getExp().instantiate(), getName().instantiate()));
     }
     
-    protected FAbstractFunctionCall SrcFunctionCall.createInstNode(InstAccess name, List<InstFunctionArgument> args) {
+    protected FAbstractFunctionCall FunctionCall.createInstNode(InstAccess name, List<InstFunctionArgument> args) {
         return new InstFunctionCall(name, args);
     }
     
-    protected FAbstractFunctionCall SrcPartialFunctionCall.createInstNode(InstAccess name, List<InstFunctionArgument> args) {
+    protected FAbstractFunctionCall PartialFunctionCall.createInstNode(InstAccess name, List<InstFunctionArgument> args) {
         return new InstPartialFunctionCall(name, args);
     }
     
-    public FAbstractFunctionCall SrcFunctionCall.instantiate() {
+    public FAbstractFunctionCall FunctionCall.instantiate() {
         // Instantiate arguments
         List<InstFunctionArgument> args = new List<InstFunctionArgument>();
-        if (hasSrcFunctionArguments()) {
+        if (hasFunctionArguments()) {
             int i = 0;
-            for (SrcExp arg : getSrcFunctionArguments().getSrcExpList()) {
+            for (Exp arg : getFunctionArguments().getExpList()) {
                 InstPositionalArgument iarg = new InstPositionalArgument(arg.instantiate(), i++);
                 iarg.setLocation(arg);
                 args.add(iarg);
             }
-            for (SrcNamedArgument arg : getSrcFunctionArguments().getSrcNamedArguments())
+            for (NamedArgument arg : getFunctionArguments().getNamedArguments())
                 args.add(arg.instantiate());
         }
         
@@ -3282,26 +3290,26 @@ aspect InstantiatedExpressions {
         return copyLocationTo(createInstNode(getName().newInstAccess(), args));
     }
 
-    public InstForIndex SrcForIndex.instantiate() {
-        InstForIndexPrimitive ip = new InstForIndexPrimitive(getSrcForIndexDecl().name(), 
-                new InstParseAccess("Integer"), new Opt<FArraySubscripts>(), getSrcForIndexDecl(), 
+    public InstForIndex ForIndex.instantiate() {
+        InstForIndexPrimitive ip = new InstForIndexPrimitive(getForIndexDecl().name(), 
+                new InstParseAccess("Integer"), new Opt<FArraySubscripts>(), getForIndexDecl(), 
                 new Opt<InstModification>(), new Opt<InstConstrainingComponent>(), new Opt<FExp>());
         InstForIndex res;
-        if (hasSrcExp()) {
-            res = new InstForIndexWithExp(ip, getSrcExp().instantiate());
+        if (hasExp()) {
+            res = new InstForIndexWithExp(ip, getExp().instantiate());
         } else {
             res = new InstForIndexNoExp(ip);
         }
         return copyLocationTo(res);
     }
     
-    public InstForClauseE SrcForClauseE.instantiate() {
+    public InstForClauseE ForClauseE.instantiate() {
         List<InstForIndex> forIndex = new List();
         List<FAbstractEquation> eqns = new List();
-        for (SrcForIndex fi : getSrcForIndexs()) {
+        for (ForIndex fi : getForIndexs()) {
             forIndex.add(fi.instantiate());     
         }
-        for (SrcAbstractEquation ae : getSrcAbstractEquations()) {
+        for (AbstractEquation ae : getAbstractEquations()) {
             eqns.add(ae.instantiate());
         }
         return copyStringComment(new InstForClauseE(equationType(), forIndex, eqns));
@@ -3328,53 +3336,53 @@ aspect AttributeContributer {
          * created.
          * Instance accesses are expected if component references are made.
          */
-        protected void contribute(SrcAbstractEquation src, FAbstractEquation dest) {}
+        protected abstract void contribute(AbstractEquation src, FAbstractEquation dest);
 
         /**
          * This method is called during flattening of components. All
          * expressions that are added must be flattened.
          */
-        protected void contribute(InstAssignable src, FVariable dest) {}
+        protected abstract void contribute(InstAssignable src, FVariable dest);
 
         /**
          * This method is called during flattening of functions. All
          * expressions that are added must be flattened.
          */
-        protected void contribute(InstBaseClassDecl src, FFunctionDecl dest) {}
+        protected abstract void contribute(InstBaseClassDecl src, FFunctionDecl dest);
 
         /**
          * This method is called during flattening of the model. All
          * expressions that are added must be flattened.
          */
-        protected void contribute(InstNode src, FClass dest) {}
+        protected abstract void contribute(InstNode src, FClass dest);
 
         /**
          * This method is called in order to determine if an attribute should
          * be considered as active. Return true if the attributes that was
          * added earlier alters the models behaviour.
          */
-        protected boolean containsActiveAttributes(FAbstractEquation equation) { return false; }
+        protected abstract boolean containsActiveAttributes(FAbstractEquation equation);
 
         /**
          * This method is called in order to determine if an attribute should
          * be considered as active. Return true if the attributes that was
          * added earlier alters the models behaviour.
          */
-        protected boolean containsActiveAttributes(FVariable variable) { return false; }
+        protected abstract boolean containsActiveAttributes(FVariable variable);
 
         /**
          * This method is called in order to determine if an attribute should
          * be considered as active. Return true if the attributes that was
          * added earlier alters the models behaviour.
          */
-        protected boolean containsActiveAttributes(FFunctionDecl function) { return false; }
+        protected abstract boolean containsActiveAttributes(FFunctionDecl function);
 
         /**
          * This method is called in order to determine if an attribute should
          * be considered as active. Return true if the attributes that was
          * added earlier alters the models behaviour.
          */
-        protected boolean containsActiveAttributes(FClass fClass) { return false; }
+        protected abstract boolean containsActiveAttributes(FClass fClass);
 
         @Override
         public String toString() {
@@ -3392,7 +3400,7 @@ aspect AttributeContributer {
     
     /**
      * Add InstantiationContributer to the list of contributers. This method
-     * should only be called from SrcAbstractEquation in order to ensure that the
+     * should only be called from AbstractEquation in order to ensure that the
      * checker is added corretly during static evaluation, hence the private
      * visibility.
      */
@@ -3407,7 +3415,7 @@ aspect AttributeContributer {
         return Collections.unmodifiableCollection(ATTRIBUTE_CONTRIBUTES);
     }
     
-    public class SrcAbstractEquation {
+    public class AbstractEquation {
         public <N extends FAbstractEquation> N contribute(N equation) {
             for (AttributeContributer contributer : attributeContributers())
                 contributer.contribute(this, equation);

@@ -45,13 +45,12 @@ public class TreeJModelicaRunner extends ParentRunner<TreeModuleRunner> {
         super(testClass);
         if (TestSpecification.class.isAssignableFrom(testClass)) {
             try {
-                UniqueNameCreator nc = new UniqueNameCreator();
                 TestSpecification spec = (TestSpecification) testClass.newInstance();
                 children = new ArrayList<TreeModuleRunner>();
                 for (File f : spec.getModuleDirs()) {
                     File testDir = new File(f, TEST_SUB_PATH);
                     if (testDir.isDirectory() && testDir.listFiles(MODELICA_FILES).length > 0) 
-                        children.add(new TreeModuleRunner(spec, nc, f, testClass.getCanonicalName()));
+                        children.add(new TreeModuleRunner(spec, f));
                 }
             } catch (Exception e) {
                 throw new InitializationError(Collections.<Throwable>singletonList(e));

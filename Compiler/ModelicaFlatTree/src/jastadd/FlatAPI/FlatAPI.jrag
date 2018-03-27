@@ -1901,7 +1901,48 @@ aspect FlatAPI {
     
     syn int FExp.numScalarElements() = type().numScalarElements();
     eq FNoExp.numScalarElements() = 0;
-
+    
+    public int AbstractEquationBlock.numScalarTemporaries() {
+        int n = 0;
+        for (FAbstractEquation eqn : allEquations()) {
+            n += eqn.numScalarTemporaries();
+        }
+        return n;
+    }
+    
+    syn int ASTNode.numScalarTemporaries() {
+        int n = 0;
+        for (ASTNode node : this) {
+            n += node.numScalarTemporaries();
+        }
+        return n;
+    }
+    eq FFunctionCall.numScalarTemporaries() {
+        int n = super.numScalarTemporaries();
+        for (FExp exp : getArgs()) { 
+            if (exp.replaceWithTemp(false)) {
+                n = n + exp.type().numScalarElements();
+            }
+        }
+        if (isStringExp()) {
+            ++n;
+        }
+        return n;
+    }
+    eq FFunctionCallLeft.numScalarTemporaries() = replaceWithTemp() ? 1 : 0;
+    eq FAbstractEquation.numScalarTemporaries() {
+        int n = 0;
+        ASTNode attributeList = getFAttributeList();
+        for (ASTNode node : this) {
+            if (node != attributeList) {
+                n += node.numScalarTemporaries();
+            }
+        }
+        return n;
+    }
+    eq FIfEquation.numScalarTemporaries() = getTest().numScalarTemporaries();
+    eq FVariable.numScalarTemporaries() = isTemporary() ? 1 : 0;
+    
     public Iterable<FExp> FFunctionCallLeft.flatChildFExps() {
         ArrayList<FExp> res = new ArrayList<FExp>();
         getFExp().flatChildFExps(res);
@@ -3289,12 +3330,6 @@ aspect FVariableUses {
     eq FClass.getChild().inFunctionCallLeft()            = false;
     eq InstRoot.getChild().inFunctionCallLeft()          = false;
     
-    inh boolean FExp.isFunctionCallLeft();
-    eq FFunctionCallLeft.getChild().isFunctionCallLeft() = true;
-    eq FExp.getChild().isFunctionCallLeft()              = false;
-    eq FClass.getChild().isFunctionCallLeft()            = false;
-    eq InstRoot.getChild().isFunctionCallLeft()          = false;
-    
     /**
      * Checks if this expression is used in a function call
      */
@@ -4395,9 +4430,9 @@ aspect FlatExternalFunctionAPI {
         }
         
         if (includeDir != null) 
-            includeDir = URIResolver.DEFAULT.resolve(n, includeDir);
+            includeDir = n.resolve(includeDir);
         if (libraryDir != null) {
-            libraryDir = URIResolver.DEFAULT.resolve(n, libraryDir);
+            libraryDir = n.resolve(libraryDir);
         }
     }
 

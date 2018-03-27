@@ -54,7 +54,6 @@ class Test_FMUModelBase2:
         """
         cls.negAliasFmu = compile_fmu("NegatedAlias",os.path.join(path_to_mofiles,"NegatedAlias.mo"), version=2.0)
         cls.enumeration3 = compile_fmu("Enumerations.Enumeration3",os.path.join(path_to_mofiles,"Enumerations.mo"), version=2.0)
-        cls.enumeration4 = compile_fmu("Enumerations.Enumeration4",os.path.join(path_to_mofiles,"Enumerations.mo"), version=2.0)
         #cls.enumFMU = compile_fmu('Parameter.Enum', os.path.join(path_to_mofiles,'ParameterTests.mo'))
     
     @testattr(stddist_full = True)
@@ -81,24 +80,7 @@ class Test_FMUModelBase2:
         assert len(enum.items.keys()) == 4
         
         nose.tools.assert_raises(FMUException, enumeration_model.get_variable_declared_type, "z")
-    
-    @testattr(stddist_full = True)
-    def test_set_enumeration(self):
-        enumeration_model = load_fmu(Test_FMUModelBase2.enumeration4)
-        
-        assert enumeration_model.get("tsize")[0] == 2
-        
-        enumeration_model.set("tsize", "small")
-        assert enumeration_model.get("tsize")[0] == 1
-        
-        enumeration_model.set("tsize", "large")
-        assert enumeration_model.get("tsize")[0] == 3
-        
-        enumeration_model.set("tsize", 2)
-        assert enumeration_model.get("tsize")[0] == 2
-        
-        nose.tools.assert_raises(FMUException, enumeration_model.set, "tsize", "hej")
-    
+       
     @testattr(stddist_full = True)
     def test_version(self):
         negated_alias  = load_fmu(Test_FMUModelBase2.negAliasFmu)
@@ -197,20 +179,7 @@ class Test_FMUModelCS2:
         cls.bouncing_name = compile_fmu("BouncingBall",os.path.join(path_to_mofiles,"BouncingBall.mo"), target="cs", version="2.0", compiler_options={'eliminate_alias_constants':False})
         cls.terminate = compile_fmu("Terminate",os.path.join(path_to_mofiles,"Terminate.mo"),target="cs", version="2.0")
         cls.assert_fail = compile_fmu("AssertFail",os.path.join(path_to_mofiles,"Terminate.mo"),target="cs", version="2.0")
-        cls.initialize_solver = compile_fmu("Inputs.DiscChange",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs", version="2.0")
     
-    @testattr(stddist_full = True)
-    def test_reinitialize_solver(self):
-        model = load_fmu(Test_FMUModelCS2.initialize_solver)
-        
-        model.initialize()
-
-        model.set("u", 0.0)
-        flag = model.do_step(0.0, 0.1)
-        assert flag == 0
-        model.set("u", 20)
-        flag = model.do_step(0.1, 0.1)
-        assert flag == 0
         
     @testattr(stddist_full = True)
     def test_assert_fail(self):
@@ -975,7 +944,7 @@ class Test_FMUModelME2:
 
         opts=coupled.simulate_options()
         assert opts['initialize']
-        assert opts['with_jacobian'] == "Default"
+        assert not opts['with_jacobian']
         assert opts['ncp'] == 0
 
         #Test the result file

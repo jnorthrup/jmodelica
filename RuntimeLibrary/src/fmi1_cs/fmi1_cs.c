@@ -43,7 +43,7 @@ fmiStatus fmi1_cs_set_debug_logging(fmiComponent c, fmiBoolean loggingOn){
     fmi1_cs_t* fmi1_cs;
     
     if (c == NULL) {
-        return fmiFatal;
+		return fmiFatal;
     }
     
     fmi1_cs = (fmi1_cs_t*)c;
@@ -66,7 +66,7 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
     jmi_log_node_t top_node;
     
     if (c == NULL) {
-        return fmiFatal;
+		return fmiFatal;
     }
     
     fmi1_cs = (fmi1_cs_t*)c;
@@ -122,7 +122,7 @@ void fmi1_cs_free_slave_instance(fmiComponent c) {
     fmiCallbackFreeMemory fmi_free;
     
     if (fmi1_cs == NULL) {
-        return;
+		return;
     }
     
     jmi_free_ode_solver(fmi1_cs->ode_problem->ode_solver);
@@ -248,7 +248,7 @@ fmiStatus fmi1_cs_terminate_slave(fmiComponent c) {
     fmi1_cs_t* fmi1_cs;
     
     if (c == NULL) {
-        return fmiFatal;
+		return fmiFatal;
     }
     
     fmi1_cs = (fmi1_cs_t*)c;
@@ -269,7 +269,7 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
     fmiEventInfo event_info;
     
     if (c == NULL) {
-        return fmiFatal;
+		return fmiFatal;
     }
     
     fmi1_cs = (fmi1_cs_t*)c;
@@ -322,7 +322,7 @@ fmiStatus fmi1_cs_reset_slave(fmiComponent c) {
     fmi1_me_t* fmi1_me;
     
     if (c == NULL) {
-        return fmiFatal;
+		return fmiFatal;
     }
     
     fmi1_cs = (fmi1_cs_t*)c;
@@ -354,7 +354,7 @@ fmiStatus fmi1_cs_set_real(fmiComponent c, const fmiValueReference vr[], size_t 
     jmi_t* jmi;
     
     if (c == NULL) {
-        return fmiFatal;
+		return fmiFatal;
     }
     
     jmi = &((fmi1_me_t*)fmi1_cs->cs_data->fmix_me)->jmi;
@@ -363,12 +363,6 @@ fmiStatus fmi1_cs_set_real(fmiComponent c, const fmiValueReference vr[], size_t 
     {
         jmi_ode_solver_external_event(fmi1_cs->ode_problem->ode_solver);
     }
-    if (fmi1_cs->ode_problem->ode_solver != NULL &&
-        jmi_cs_check_input_change(jmi, vr, nvr, value))
-    {
-        jmi_ode_solver_need_to_initialize(fmi1_cs->ode_problem->ode_solver);
-    }
-    
         
     return fmi1_me_set_real(fmi1_cs->cs_data->fmix_me, vr, nvr, value);
 }
@@ -378,7 +372,7 @@ fmiStatus fmi1_cs_set_integer (fmiComponent c, const fmiValueReference vr[], siz
     jmi_t* jmi;
     
     if (c == NULL) {
-        return fmiFatal;
+		return fmiFatal;
     }
     
     jmi = &((fmi1_me_t*)fmi1_cs->cs_data->fmix_me)->jmi;
@@ -395,7 +389,7 @@ fmiStatus fmi1_cs_set_boolean (fmiComponent c, const fmiValueReference vr[], siz
     jmi_t* jmi;
     
     if (c == NULL) {
-        return fmiFatal;
+		return fmiFatal;
     }
     
     jmi = &((fmi1_me_t*)fmi1_cs->cs_data->fmix_me)->jmi;
@@ -409,7 +403,7 @@ fmiStatus fmi1_cs_set_boolean (fmiComponent c, const fmiValueReference vr[], siz
 
 fmiStatus fmi1_cs_set_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString value[]){
     if (c == NULL) {
-        return fmiFatal;
+		return fmiFatal;
     }
     
     return fmi1_me_set_string(((fmi1_cs_t *)c)->cs_data->fmix_me,vr,nvr,value);
@@ -417,7 +411,7 @@ fmiStatus fmi1_cs_set_string(fmiComponent c, const fmiValueReference vr[], size_
 
 fmiStatus fmi1_cs_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[]){
     if (c == NULL) {
-        return fmiFatal;
+		return fmiFatal;
     }
     
     return fmi1_me_get_real(((fmi1_cs_t *)c)->cs_data->fmix_me,vr,nvr,value);
@@ -425,7 +419,7 @@ fmiStatus fmi1_cs_get_real(fmiComponent c, const fmiValueReference vr[], size_t 
 
 fmiStatus fmi1_cs_get_integer(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiInteger value[]){
     if (c == NULL) {
-        return fmiFatal;
+		return fmiFatal;
     }
     
     return fmi1_me_get_integer(((fmi1_cs_t *)c)->cs_data->fmix_me,vr,nvr,value);
@@ -433,7 +427,7 @@ fmiStatus fmi1_cs_get_integer(fmiComponent c, const fmiValueReference vr[], size
 
 fmiStatus fmi1_cs_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiBoolean value[]){
     if (c == NULL) {
-        return fmiFatal;
+		return fmiFatal;
     }
     
     return fmi1_me_get_boolean(((fmi1_cs_t *)c)->cs_data->fmix_me,vr,nvr,value);
@@ -441,7 +435,7 @@ fmiStatus fmi1_cs_get_boolean(fmiComponent c, const fmiValueReference vr[], size
 
 fmiStatus fmi1_cs_get_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]){
     if (c == NULL) {
-        return fmiFatal;
+		return fmiFatal;
     }
     
     return fmi1_me_get_string(((fmi1_cs_t*)c)->cs_data->fmix_me,vr,nvr,value);
@@ -458,7 +452,7 @@ fmiStatus fmi1_cs_set_real_input_derivatives(fmiComponent c, const fmiValueRefer
     fmiInteger retval;
     
     if (c == NULL) {
-        return fmiFatal;
+		return fmiFatal;
     }
     
     retval = jmi_cs_set_real_input_derivatives(cs_data, log, vr, nvr, order, value);

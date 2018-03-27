@@ -1756,30 +1756,6 @@ y1[3]
 ")})));
 end VectorFuncEval4;
 
-model VectorFuncEval5
-    function f
-            input Real x1;
-            input Real[:] x2;
-            output Real y = x1;
-        algorithm
-    end f;
-    Real[:,:] y = f({{time,time}}, {{{time},{time}}});
-    Real[1,2] y1 = f({{1,2}}, {{{3},{4}}});
-    
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="VectorFuncEval4",
-            description="Constant evaluation of vectorized function call",
-            variables="
-y1[1,1]
-y1[1,2]
-",
-            values="
-1.0
-2.0
-")})));
-end VectorFuncEval5;
-
 model StringConcat
  Real a = 1;
  parameter String b = "1" + "2";
@@ -1960,7 +1936,7 @@ model EvalNoBinding5
             errorMessage="
 3 errors found:
 
-Error at line 23, column 5, in file '...', EXTERNAL_OBJECT_MISSING_BINDING_EXPRESSION:
+Error at line 21, column 10, in file '...', EXTERNAL_OBJECT_MISSING_BINDING_EXPRESSION:
   The external object 'a' does not have a binding expression
 
 Error at line 24, column 27, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
