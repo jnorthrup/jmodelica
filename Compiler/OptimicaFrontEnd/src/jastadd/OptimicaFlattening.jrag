@@ -28,15 +28,15 @@ aspect OptimicaFlatTree {
 
 aspect OptimicaFlattening {
 
-    public InstFullClassDecl SrcOptClassDecl.newInstClassDecl() {
+    public InstFullClassDecl OptClassDecl.newInstClassDecl() {
         InstOptClassDecl fcd = new InstOptClassDecl(this, new Opt(), newInstRestriction(), newInstExternalOpt(), new Opt());
         fcd.setInstConstrainingClassOpt(newInstConstrainingClassOpt(null));
-        if (hasSrcClassModification()) 
-            fcd.setInstClassModification(getSrcClassModification().newInstModification());
+        if (hasClassModification()) 
+            fcd.setInstClassModification(getClassModification().newInstModification());
         return copyLocationTo(fcd);
     }
 
-    public InstOptimizationClass SrcOptimizationClass.newInstRestriction() {
+    public InstOptimizationClass OptimizationClass.newInstRestriction() {
     	return copyLocationTo(new InstOptimizationClass());
     }
     
@@ -112,37 +112,46 @@ aspect OptimicaFlattening {
 		getInstExtendsList().buildConnectionSets(prefix, csm, connect);
 	}
 
-	syn Iterable<SrcConstraint> InstNode.constraints() = Collections.emptyList();
-	eq InstOptClassDecl.constraints() = getSrcClassDecl().constraints();
+	syn lazy ArrayList<Constraint> ClassDecl.constraints() = new ArrayList<Constraint>();
+	eq OptClassDecl.constraints() {
+	    ArrayList<Constraint> l = new ArrayList<Constraint>();
+		for (Constraint c : getConstraints())
+			l.add(c);
+		return l;
+	}
+	//eq ShortClassDecl.constraints() = getExtendsClauseShortClass().getSuper().myClassDecl().constraints();
+	
+	syn ArrayList<Constraint> InstNode.constraints() = new ArrayList<Constraint>();
+	eq InstOptClassDecl.constraints() = getClassDecl().constraints();
 	eq InstComponentDecl.constraints() = myInstClass().constraints();
 	eq InstExtends.constraints() = myInstClass().constraints();
 	
-    public abstract FConstraint SrcConstraint.instantiate();
+    public abstract FConstraint Constraint.instantiate();
 	
-	public FConstraintEq SrcConstraintEq.instantiate() {
+	public FConstraintEq ConstraintEq.instantiate() {
 		return copyLocationTo(new FConstraintEq(getLeft().instantiate(),getRight().instantiate()));
 	}
 
-	public FConstraintLeq SrcConstraintLeq.instantiate() {
+	public FConstraintLeq ConstraintLeq.instantiate() {
 		return copyLocationTo(new FConstraintLeq(getLeft().instantiate(),getRight().instantiate()));
 	}
 	
-	public FConstraintGeq SrcConstraintGeq.instantiate() {
+	public FConstraintGeq ConstraintGeq.instantiate() {
 		return copyLocationTo(new FConstraintGeq(getLeft().instantiate(),getRight().instantiate()));
 	}
 	
-	public InstForClauseC SrcForClauseC.instantiate() {
+	public InstForClauseC ForClauseC.instantiate() {
 		List<InstForIndex> forIndex = new List();
 		List<FConstraint> cons = new List();
-		for (SrcForIndex fi : getSrcForIndexs()) 
+		for (ForIndex fi : getForIndexs()) 
     		forIndex.add(fi.instantiate());    	
-		for (SrcConstraint c : getSrcConstraints()) 
+		for (Constraint c : getConstraints()) 
 			cons.add(c.instantiate());
 		return new InstForClauseC(forIndex, cons);
 	}
 
 	
-	public FTimedVariable SrcTimedVariable.instantiate() {
+	public FTimedVariable TimedVariable.instantiate() {
 		FIdUseInstAccess name = new FIdUseInstAccess(getName().newInstAccess());
 		return copyLocationTo(new FTimedVariable(name, getArg().instantiate()));
 	}
@@ -178,7 +187,7 @@ aspect OptimicaFlattening {
 
 	syn nta List<FConstraint> InstNode.getFConstraintList()  { 
 	    List l = new List();
-	    for (SrcConstraint c : constraints()) {
+	    for (Constraint c : constraints()) {
 	    	l.add(c.instantiate());
 	    }
 	    return l;

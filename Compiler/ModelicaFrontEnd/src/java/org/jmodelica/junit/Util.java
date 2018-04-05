@@ -3,18 +3,10 @@ package org.jmodelica.junit;
 public class Util {
 
     /**
-     * Get the path to a file using the class loader for provided object, e.g.
-     * JUnit test.
+     * Get the path to a file placed in the same directory as a JUnit test.
      */
     public static String resource(Object test, String name) {
-        return resource(test.getClass(), name);
-    }
-
-    /**
-     * Get the path to a file using the class loader for provided class object.
-     */
-    public static String resource(Class<?> clazz, String name) {
-        return clazz.getResource(name).getPath();
+        return test.getClass().getResource(name).getPath();
     }
 
 }

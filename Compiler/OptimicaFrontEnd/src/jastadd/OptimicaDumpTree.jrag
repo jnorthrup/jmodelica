@@ -14,8 +14,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-BadDefinition: StoredDefinition;
-BadClassDecl: ClassDecl;
-BadElement: Element;
-BadArgument: Argument;
-BadStatement: Statement; 
+aspect OptimicaDumpTree {
+  public void Constraint.dumpTree(String indent) {
+  	log.debug("** Constraint.dumpTree");
+  	super.dumpTree(indent);
+  }
+
+}

@@ -1189,6 +1189,7 @@ public class ModelicaCompiler {
         hookModelFlattened(fc);
         hookCheckAbort();
         
+        //fc.dumpTree("");
         // Output the untransformed flattened model
         ASTNode.beginStep("prettyPrintRawFlat()");
         if (fc.myOptions().getBooleanOption("generate_mof_files")) {
@@ -2023,7 +2024,7 @@ public class ModelicaCompiler {
     }
     protected void ModelicaCompiler.setUp(IErrorHandler eh) {
         if (isSetUp) {
-            throw new InternalCompilerError("Compiler setup can only be performed once");
+            throw new InternalCompilerError("Compiler setup can only be performed once", null);
         }
         if (eh == null) {
             eh = new DefaultErrorHandler(options.getBooleanOption("halt_on_warning"));
@@ -2037,7 +2038,7 @@ public class ModelicaCompiler {
     
     public void ModelicaCompiler.checkSetUp() {
         if (!isSetUp) {
-            throw new InternalCompilerError("Compiler setup not performed. Use ModelicaCompiler.setUp()");
+            throw new InternalCompilerError("Compiler setup not performed. Use ModelicaCompiler.setUp()", null);
         }
     }
     
@@ -2060,11 +2061,11 @@ public class ModelicaCompiler {
     }
     
     protected void ModelicaCompiler.warning(String message) {
-        errorHandler.problem(new Problem(message, ProblemSeverity.WARNING));
+        errorHandler.problem(new Problem("", message, ProblemSeverity.WARNING));
     }
     
     protected void ModelicaCompiler.error(String message) {
-        errorHandler.problem(new Problem(message, ProblemSeverity.ERROR));
+        errorHandler.problem(new Problem("", message, ProblemSeverity.ERROR));
     }
 
     /**
@@ -2194,25 +2195,25 @@ syn lazy String SourceRoot.findOutermostLibraryDir() {
         return getProgram().getUnstructuredEntity(0).findOutermostLibraryDir();
 }
 
-syn String SrcStoredDefinition.findOutermostLibraryDir() {
-    if (!hasSrcWithin() || !getSrcWithin().hasPackageName())
+syn String StoredDefinition.findOutermostLibraryDir() {
+    if (!hasWithin() || !getWithin().hasPackageName())
         return null;
     File me = new File(fileName()).getAbsoluteFile();
-    if (SrcLibNode.isPackageFile(me))
+    if (LibNode.isPackageFile(me))
         me = me.getParentFile();
-    File lib = getSrcWithin().getPackageName().findOutermostLibraryDirForWithin(me);
+    File lib = getWithin().getPackageName().findOutermostLibraryDirForWithin(me);
     return (lib != null) ? lib.getPath() : null;
 }
 
-syn File SrcAccess.findOutermostLibraryDirForWithin(File f) = null;
-eq SrcDot.findOutermostLibraryDirForWithin(File f) {
-    for (int i = getNumSrcAccess() - 1; i >= 0 && f != null; i--)
-        f = getSrcAccess(i).findOutermostLibraryDirForWithin(f);
+syn File Access.findOutermostLibraryDirForWithin(File f) = null;
+eq Dot.findOutermostLibraryDirForWithin(File f) {
+    for (int i = getNumAccess() - 1; i >= 0 && f != null; i--)
+        f = getAccess(i).findOutermostLibraryDirForWithin(f);
     return f;
 }
-eq SrcNamedAccess.findOutermostLibraryDirForWithin(File f) {
+eq NamedAccess.findOutermostLibraryDirForWithin(File f) {
     f = f.getParentFile();
-    if (f != null && f.getName().equals(getID()) && SrcLibNode.isStructuredLib(f))
+    if (f != null && f.getName().equals(getID()) && LibNode.isStructuredLib(f))
         return f;
     else 
         return null;
