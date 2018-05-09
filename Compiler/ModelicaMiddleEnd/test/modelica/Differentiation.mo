@@ -90,7 +90,7 @@ equation
  - _der_x1 + 2 * der(x2) = 0;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end Differentiation.Expressions.Neg;
 ")})));
@@ -121,7 +121,7 @@ equation
  _der_x1 + exp(x2 * p * time) * (x2 * p + der(x2) * p * time) = 0;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end Differentiation.Expressions.Exp;
 ")})));
@@ -453,7 +453,7 @@ equation
  _der_x1 + (if p > 3 then 3 * der(x2) elseif p <= 3 then cos(x2) * der(x2) else 2 * der(x2)) = 0;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end Differentiation.Expressions.If;
 ")})));
@@ -1540,7 +1540,7 @@ package DiscreteTime
             errorMessage="
 1 errors found:
 
-Error at line 2, column 9, in file 'Compiler/ModelicaMiddleEnd/test/modelica/Differentiation.mo', DIFFERENTIATED_DISCRETE_VARIABLE:
+Error at line 1, column 40, in file 'Compiler/ModelicaMiddleEnd/test/modelica/Differentiation.mo', DIFFERENTIATED_DISCRETE_VARIABLE:
   Unable to differentiate the variable x1 which is declared or infered to be discrete
 ")})));
     end DifferentiatedDiscreteVariable;
@@ -2813,13 +2813,13 @@ end Differentiation.AlgorithmDifferentiation.InitArray;
             der(x1) + der(x2) = 1;
             x1 + e(F({R(x2)})) = 1;
 
-        annotation(__JModelica(UnitTesting(tests={
-            CCodeGenTestCase(
-                name="AlgorithmDifferentiation_RecordArray",
-                description="Test code gen of differentiated function with array of records #3611",
-                dynamic_states=false,
-                template="$C_functions$",
-                generatedCode="
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="AlgorithmDifferentiation_RecordArray",
+            description="Test code gen of differentiated function with array of records #3611",
+            dynamic_states=false,
+            template="$C_functions$",
+            generatedCode="
 void func_Differentiation_AlgorithmDifferentiation_RecordArray_F_def0(R_0_ra* x_a, R_0_ra* y_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, R_0_r, R_0_ra, y_an, 1, 1)
@@ -3290,11 +3290,11 @@ end Differentiation.AlgorithmDifferentiation.SelfReference_AssignStmt;
             Real a = F1(time * 2);
             Real b = der(a);
 
-        annotation(__JModelica(UnitTesting(tests={
-            TransformCanonicalTestCase(
-                name="AlgorithmDifferentiation_SelfReference_FunctionCall",
-                description="Test differentiation of statements with lsh variable in rhs",
-                flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgorithmDifferentiation_SelfReference_FunctionCall",
+            description="Test differentiation of statements with lsh variable in rhs",
+            flatModel="
 fclass Differentiation.AlgorithmDifferentiation.SelfReference_FunctionCall
  Real a;
  Real b;

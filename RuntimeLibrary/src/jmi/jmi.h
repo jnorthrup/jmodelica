@@ -29,7 +29,6 @@
 #include "jmi_global.h"
 #include "jmi_block_solver.h"
 #include "jmi_delay.h"
-#include "jmi_work_array.h"
 
 
 /* @{ */
@@ -260,7 +259,6 @@ typedef struct jmi_z {
     jmi_z_strings_t strings;
 } jmi_z_t;
 
-
 /**
  * \brief The main struct of the JMI Model interface containing
  * dimension information and model function pointers in jmi_model_t.
@@ -449,8 +447,6 @@ struct jmi_t {
 
     jmi_real_t* real_x_work;             /**< \brief Work array for the real x variables */
     jmi_real_t* real_u_work;             /**< \brief Work array for the real u variables */
-	jmi_real_work_array_t* real_work;		 /**< \brief Work array for real variables */
-	jmi_int_work_array_t* int_work;		 /**< \brief Work array for int variables */
     
     jmp_buf try_location[JMI_MAX_EXCEPTION_DEPTH+1];                /**< \brief Buffer for setjmp/longjmp, for exception handling. */
     jmi_int_t current_try_depth;
@@ -612,11 +608,6 @@ int jmi_destroy_delay_if(jmi_t* jmi);
 /* Initialize delay blocks 
  * Called after model initalization */
 int jmi_init_delay_blocks(jmi_t* jmi);
-
-/** 
- * \brief Destroys external objects
- */
-int jmi_destruct_external_objects(jmi_t* jmi);
 
 /* Sample delay blocks
  * Called after each completed integrator step and event iteration.

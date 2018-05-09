@@ -627,7 +627,7 @@ FFunctionCallLeft : BaseNode ::= [FExp];
  * connect statements has been transformed into regular equations, but only
  * as an intermediate node type.
  */
-FConnectClause : FAbstractEquation ::= <SrcConnectClause:SrcConnectClause>
+FConnectClause : FAbstractEquation ::= <ConnectClause:ConnectClause>
                                        Connector1:FIdUseInstAccess 
                                        Connector2:FIdUseInstAccess;
 
@@ -819,10 +819,8 @@ FWhileStmt : FStatement ::= Test:FExp WhileStmt:FStatement*;
 
 /**
  * An external function interface in the flat tree. Implemented as a statement.
- *
- * LibTopPackagePath is the file path of the package file of the library that this external statement originated from.
  */
-FExternalStmt : FStatement ::= FExternalLanguage [ReturnVar:FIdUseExp] <Name> Arg:FExp* <LibTopPackagePath>;
+FExternalStmt : FStatement ::= FExternalLanguage [ReturnVar:FIdUseExp] <Name> Arg:FExp*;
 
 /**
  * A language specification for an external function.
@@ -981,7 +979,7 @@ abstract FBoolBinExp : FBinExp;
 /**
  * Base class for relational expressions.
  */
-abstract FRelExp : FBoolBinExp ::= [Indicator:FExp] <IndicatorVarName:String>;
+abstract FRelExp : FBoolBinExp ::= [Indicator:FExp];
 
 /**
  * Less than expression.

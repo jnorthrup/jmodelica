@@ -17,7 +17,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <jmi.h>
-#include <jmi_math_ad.h>
 #include <jmi_block_residual.h>
 #include "ModelicaUtilities.h"
 #include "ModelicaStandardTables.h"

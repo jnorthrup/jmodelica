@@ -232,7 +232,7 @@ equation
  inertia1.a = idealGear.ratio * inertia2.a;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
  type Modelica.SIunits.Torque = Real(final quantity = \"Torque\",final unit = \"N.m\");
  type Modelica.SIunits.Frequency = Real(final quantity = \"Frequency\",final unit = \"Hz\");
@@ -512,7 +512,7 @@ public
   return;
  end IndexReduction.IndexReduction27_DerFunc.f_der;
 
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.IndexReduction27_DerFunc;
 ")})));
@@ -612,7 +612,7 @@ public
   Real a[2];
  end IndexReduction.IndexReduction28_Record.R;
 
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.IndexReduction28_Record;
 ")})));
@@ -665,7 +665,7 @@ equation
  2 * x * _der_der_x + 2 * der(x) * der(x) + (2 * y * _der_vy + 2 * _der_y * _der_y) = 0.0;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.IndexReduction30_PlanarPendulum_StatePrefer;
 ")})));
@@ -718,7 +718,7 @@ equation
  2 * x * _der_der_x + 2 * der(x) * der(x) + (2 * y * _der_vy + 2 * _der_y * _der_y) = 0.0;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.IndexReduction31_PlanarPendulum_StateAlways;
 ")})));
@@ -770,7 +770,7 @@ equation
  2 * x * _der_vx + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.IndexReduction32_PlanarPendulum_StatePreferAlways;
 ")})));
@@ -822,7 +822,7 @@ equation
  2 * x * _der_vx + 2 * der(x) * der(x) + (2 * y * _der_der_y + 2 * _der_y * _der_y) = 0.0;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.IndexReduction32_PlanarPendulum_StatePreferNever;
 ")})));
@@ -874,7 +874,7 @@ equation
  2 * x * _der_vx + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.IndexReduction32_PlanarPendulum_StateAvoidNever;
 ")})));
@@ -919,7 +919,7 @@ equation
  der(c1_w) = c2_a;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.IndexReduction50;
 ")})));
@@ -969,7 +969,7 @@ equation
  der(c1_w) = c2_a;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.IndexReduction51;
 ")})));
@@ -1078,7 +1078,7 @@ equation
  der(y) = 100 * _der_x;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.NonDifferentiatedVariableWithPrefer;
 ")})));
@@ -1106,7 +1106,7 @@ equation
  y = 100 * x;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.NonDifferentiatedVariableWithPreferWithoutIndexReduction;
 ")})));
@@ -1160,7 +1160,7 @@ public
  annotation(Inline = false);
  end IndexReduction.IndexReduction53b.F;
 
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.IndexReduction53b;
 ")})));
@@ -1189,7 +1189,7 @@ equation
  _der_y = 100 * der(x);
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.IndexReduction54;
 ")})));
@@ -1233,7 +1233,7 @@ public
  annotation(Inline = false);
  end IndexReduction.SSPreferBackoff1.f;
 
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.SSPreferBackoff1;
 ")})));
@@ -1308,7 +1308,7 @@ equation
  0 = v1 * a_a + _der_v1 * _der_b_v + (_der_v1 * _der_b_v + _der_der_v1 * b_v);
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.IndexReduction55;
 ")})));
@@ -1356,7 +1356,7 @@ equation
  0 = v1 * a_a + _der_v1 * _der_b_v + (_der_v1 * _der_b_v + _der_der_v1 * b_v);
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.IndexReduction56;
 ")})));
@@ -1429,7 +1429,7 @@ equation
  temp_9 = x2[2];
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.TemporaryVarStates1;
 ")})));
@@ -1458,13 +1458,13 @@ equation
             errorMessage="
 3 errors found:
 
-Warning at line 3, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/IndexReduction.mo':
+Warning at line 2, column 13, in file 'Compiler/ModelicaMiddleEnd/test/modelica/IndexReduction.mo':
   a_v has stateSelect=always, but could not be selected as state
 
-Warning at line 6, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/IndexReduction.mo':
+Warning at line 5, column 13, in file 'Compiler/ModelicaMiddleEnd/test/modelica/IndexReduction.mo':
   Iteration variable \"b_v\" is missing start value!
 
-Warning at line 7, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/IndexReduction.mo':
+Warning at line 6, column 13, in file 'Compiler/ModelicaMiddleEnd/test/modelica/IndexReduction.mo':
   Iteration variable \"v1\" is missing start value!
 ")})));
 end IndexReduction57;
@@ -1475,12 +1475,14 @@ equation
     der(y) = der(x);
     y = abs(x);
 
-annotation(__JModelica(UnitTesting(tests={
-    CCodeGenTestCase(
-        name="IndexReduction58",
-        description="Code generation of diffed abs expression",
-        template="$C_dae_blocks_residual_functions$",
-        generatedCode="
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="IndexReduction58",
+            description="Code generation of diffed abs expression",
+            template="
+$C_dae_blocks_residual_functions$
+",
+            generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
@@ -1495,25 +1497,25 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _der_x_3;
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE_JACOBIAN) {
-            jmi_real_t* Q1 = calloc(1, sizeof(jmi_real_t));
-            jmi_real_t* Q2 = calloc(1, sizeof(jmi_real_t));
-            jmi_real_t* Q3 = residual;
-            int i;
-            char trans = 'N';
-            double alpha = -1;
-            double beta = 1;
-            int n1 = 1;
-            int n2 = 1;
-            Q1[0] = - COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1.0), AD_WRAP_LITERAL(-1.0));
-            for (i = 0; i < 1; i += 1) {
-                Q1[i + 0] = (Q1[i + 0]) / (1.0);
-            }
-            Q2[0] = 1.0;
-            memset(Q3, 0, 1 * sizeof(jmi_real_t));
-            Q3[0] = -1.0;
-            dgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);
-            free(Q1);
-            free(Q2);
+        jmi_real_t* Q1 = calloc(1, sizeof(jmi_real_t));
+        jmi_real_t* Q2 = calloc(1, sizeof(jmi_real_t));
+        jmi_real_t* Q3 = residual;
+        int i;
+        char trans = 'N';
+        double alpha = -1;
+        double beta = 1;
+        int n1 = 1;
+        int n2 = 1;
+        Q1[0] = - COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1.0), AD_WRAP_LITERAL(-1.0));
+        for (i = 0; i < 1; i += 1) {
+            Q1[i + 0] = (Q1[i + 0]) / (1.0);
+        }
+        Q2[0] = 1.0;
+        memset(Q3, 0, 1 * sizeof(jmi_real_t));
+        Q3[0] = -1.0;
+        dgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);
+        free(Q1);
+        free(Q2);
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _der_x_3 = x[0];
@@ -1529,7 +1531,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DYNAMIC_FREE()
     return ef;
 }
-
 ")})));
 end IndexReduction58;
 
@@ -2285,7 +2286,7 @@ equation
  a3 = der(v1);
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.NonDiffArgs.Test4;
 ")})));
@@ -2700,7 +2701,7 @@ public
  annotation(derivative(noDerivative = y,noDerivative = T) = IndexReduction.NonDiffArgs.ExtraIncidences.Test4.F1_der,Inline = false);
  end IndexReduction.NonDiffArgs.ExtraIncidences.Test4.F1;
 
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.NonDiffArgs.ExtraIncidences.Test4;
 ")})));
@@ -3403,7 +3404,7 @@ equation
  _der_x = 1.0;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.Algorithm2;
 ")})));
@@ -3461,7 +3462,7 @@ equation
  2 * x * _der_vx + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.DoubleDifferentiationWithSS1;
 ")})));
@@ -4279,7 +4280,7 @@ public
  annotation(derivative(order = 2) = IndexReduction.FunctionInlining.Test7.F_der2,Inline = false);
  end IndexReduction.FunctionInlining.Test7.F_der;
 
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.FunctionInlining.Test7;
 ")})));
