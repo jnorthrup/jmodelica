@@ -393,24 +393,24 @@ aspect NodeTypes {
     /**
      * Is this element a short class decl?
      */
-    syn boolean SrcElement.isShortClassDecl() = false;
-    eq SrcShortClassDecl.isShortClassDecl()   = true;
+    syn boolean Element.isShortClassDecl() = false;
+    eq ShortClassDecl.isShortClassDecl()   = true;
 
-    syn SrcShortClassDecl SrcElement.asShortClassDecl() {
+    syn ShortClassDecl Element.asShortClassDecl() {
         throw new UnsupportedOperationException("asShortClassDecl() is not supported for class type " + getClass().getSimpleName());
     }
-    eq SrcShortClassDecl.asShortClassDecl() = this;
+    eq ShortClassDecl.asShortClassDecl() = this;
 
     /**
      * Is this element a full class decl?
      */
-    syn boolean SrcElement.isFullClassDecl() = false;
-    eq SrcFullClassDecl.isFullClassDecl()    = true;
+    syn boolean Element.isFullClassDecl() = false;
+    eq FullClassDecl.isFullClassDecl()    = true;
 
-    syn SrcFullClassDecl SrcElement.asFullClassDecl() {
+    syn FullClassDecl Element.asFullClassDecl() {
         throw new UnsupportedOperationException("asFullClassDecl() is not supported for class type " + getClass().getSimpleName());
     }
-    eq SrcFullClassDecl.asFullClassDecl() = this;
+    eq FullClassDecl.asFullClassDecl() = this;
 }
 
 
@@ -419,69 +419,69 @@ aspect ClassRestriction {
     /**
      * Is this class partial?
      */
-    syn boolean SrcClassDecl.isPartial() = false;
-    eq SrcBaseClassDecl.isPartial()      = getPartial();
-    eq SrcLibNode.isPartial()            = myClass().isPartial();
+    syn boolean ClassDecl.isPartial() = false;
+    eq BaseClassDecl.isPartial()      = hasPartial();
+    eq LibNode.isPartial()            = myClass().isPartial();
 
     /**
      * Is this class encapsulated?
      */
-    syn boolean SrcClassDecl.isEncapsulated() = false;
-    eq SrcBaseClassDecl.isEncapsulated()      = getEncapsulated();
-    eq SrcLibNode.isEncapsulated()            = myClass().isEncapsulated();
+    syn boolean ClassDecl.isEncapsulated() = false;
+    eq BaseClassDecl.isEncapsulated()      = hasEncapsulated();
+    eq LibNode.isEncapsulated()            = myClass().isEncapsulated();
 
     /**
      * Is this class a model?
      */
-    syn boolean SrcClassDecl.isModel() = false;
-    eq SrcBaseClassDecl.isModel()      = getSrcRestriction().isModel();
-    eq SrcLibNode.isModel()            = myClass().isModel();
+    syn boolean ClassDecl.isModel() = false;
+    eq BaseClassDecl.isModel()      = getRestriction().isModel();
+    eq LibNode.isModel()            = myClass().isModel();
 
     /**
      * Is this restriction "model"?
      */
-    syn boolean SrcRestriction.isModel() = false;
-    eq SrcModel.isModel()                = true;
+    syn boolean Restriction.isModel() = false;
+    eq Model.isModel()                = true;
 
     /**
      * Is this class a block?
      */
-    syn boolean SrcClassDecl.isBlock() = false;
-    eq SrcBaseClassDecl.isBlock()      = getSrcRestriction().isBlock();
-    eq SrcLibNode.isBlock()            = myClass().isBlock();
+    syn boolean ClassDecl.isBlock() = false;
+    eq BaseClassDecl.isBlock()      = getRestriction().isBlock();
+    eq LibNode.isBlock()            = myClass().isBlock();
 
     /**
      * Is this restriction "block"?
      */
-    syn boolean SrcRestriction.isBlock() = false;
-    eq SrcBlock.isBlock()                = true;
+    syn boolean Restriction.isBlock() = false;
+    eq Block.isBlock()                = true;
 
     /**
      * Is this class a class?
      */
-    syn boolean SrcClassDecl.isClass() = false;
-    eq SrcBaseClassDecl.isClass()      = getSrcRestriction().isClass();
-    eq SrcLibNode.isClass()            = myClass().isClass();
+    syn boolean ClassDecl.isClass() = false;
+    eq BaseClassDecl.isClass()      = getRestriction().isClass();
+    eq LibNode.isClass()            = myClass().isClass();
 
     /**
      * Is this restriction "class"?
      */
-    syn boolean SrcRestriction.isClass() = false;
-    eq SrcClass.isClass()               = true;
+    syn boolean Restriction.isClass() = false;
+    eq MClass.isClass()               = true;
 
     /**
      * Is this class a package?
      */
-    syn boolean SrcClassDecl.isPackage() = false;
-    eq SrcBaseClassDecl.isPackage()      = getSrcRestriction().isPackage();
-    eq SrcUnknownClassDecl.isPackage()   = false;
-    eq SrcLibNode.isPackage()            = myClass().isPackage();
+    syn boolean ClassDecl.isPackage() = false;
+    eq BaseClassDecl.isPackage()      = getRestriction().isPackage();
+    eq UnknownClassDecl.isPackage()   = false;
+    eq LibNode.isPackage()            = myClass().isPackage();
 
     /**
      * Is this restriction "package"?
      */
-    syn boolean SrcRestriction.isPackage() = false;
-    eq SrcPackage.isPackage()             = true;
+    syn boolean Restriction.isPackage() = false;
+    eq MPackage.isPackage()             = true;
 
 }
 
@@ -491,12 +491,12 @@ aspect InstClassRestriction {
     /**
      * Is this class partial?
      */
-    syn boolean InstClassDecl.isPartial() = getSrcClassDecl().isPartial();
+    syn boolean InstClassDecl.isPartial() = getClassDecl().isPartial();
 
     /**
      * Is this class encapsulated?
      */
-    syn boolean InstClassDecl.isEncapsulated() = getSrcClassDecl().isEncapsulated();
+    syn boolean InstClassDecl.isEncapsulated() = getClassDecl().isEncapsulated();
 
     /**
      * Is this class a connector?
@@ -719,7 +719,7 @@ aspect InstModificationType {
     inh boolean InstComponentDecl.inheritsFinal();
     inh boolean InstExtends.inheritsFinal();
     eq InstModification.getChild().inheritsFinal()  = isFinal();
-    eq InstComponentDecl.getChild().inheritsFinal() = getSrcComponentDecl().hasFinal() || inheritsFinal();
+    eq InstComponentDecl.getChild().inheritsFinal() = getComponentDecl().hasFinal() || inheritsFinal();
     eq InstExtends.getChild().inheritsFinal()       = inheritsFinal();
     eq BaseNode.getChild().inheritsFinal()          = false;
 

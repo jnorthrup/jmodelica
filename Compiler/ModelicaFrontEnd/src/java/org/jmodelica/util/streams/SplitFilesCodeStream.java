@@ -17,6 +17,7 @@
 package org.jmodelica.util.streams;
 
 import java.io.File;
+import java.io.PrintStream;
 
 public class SplitFilesCodeStream extends CodeStream {
     private File file;

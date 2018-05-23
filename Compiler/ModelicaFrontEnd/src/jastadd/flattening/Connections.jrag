@@ -1448,7 +1448,7 @@ aspect OverconstrainedConnections {
 			right.setName(new FQNameString(func.qualifiedName()).createFIdUse());
             right.addArg(cse1.createFIdUseExp());
             right.addArg(cse2.createFIdUseExp());
-            right.setFType(func.functionType().flatten(Flattener.expressionFlattener(), null, true));
+            right.setFType(func.functionType().flatten(prefix, null, true));
 			FAbstractEquation eqn;
 			if (!s.isUnknown() && s.numElements() == 0) 
 				eqn = new FFunctionCallEquation(new List<FFunctionCallLeft>(), right);
@@ -2662,7 +2662,7 @@ aspect ExpandableConnectors {
                         }
                         res = tmpl;
                     } else {
-                        SrcComponentDecl cd = tmpl.getSrcComponentDecl();
+                        ComponentDecl cd = tmpl.getComponentDecl();
                         res = tmpl.myInstClass().newInstComponentDeclCopy(
                                 name, subscripts(), cd, cd.getClassName());
                     }

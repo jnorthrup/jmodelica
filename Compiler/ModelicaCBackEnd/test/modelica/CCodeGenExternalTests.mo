@@ -2294,16 +2294,16 @@ end IntegerExternalFortran4;
 model StringExternalFortran1
     Real[1] a = Modelica.Math.Matrices.LAPACK.dgeev({{1}});
 
-annotation(__JModelica(UnitTesting(tests={
-    CCodeGenTestCase(
-        name="StringExternalFortran1",
-        description="External Fortran function, scalar string input",
-        variability_propagation=false,
-        template="
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="StringExternalFortran1",
+            description="External Fortran function, scalar string input",
+            variability_propagation=false,
+            template="
 $C_function_headers$
 $C_functions$
 ",
-        generatedCode="
+            generatedCode="
 void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t* eigenReal_a, jmi_array_t* eigenImag_a, jmi_array_t* eigenVectors_a, jmi_real_t* info_o);
 
 void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t* eigenReal_a, jmi_array_t* eigenImag_a, jmi_array_t* eigenVectors_a, jmi_real_t* info_o) {
@@ -2376,6 +2376,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
     JMI_DYNAMIC_FREE()
     return;
 }
+
 
 ")})));
 end StringExternalFortran1;
@@ -3332,87 +3333,6 @@ int model_init_eval_parameters_base(jmi_t* jmi) {
 ")})));
 end TestExtObject8;
 
-model TestExtObject9
-    model EO
-        extends ExternalObject;
-        function constructor
-            input Real x;
-            output EO eo;
-            external;
-        end constructor;
-        function destructor
-            input EO eo;
-            external;
-        end destructor;
-    end EO;
-    
-    function f
-        input EO eo;
-        output Real y;
-        external;
-    end f;
-    
-    parameter Real x(fixed=false);
-    parameter EO eo = EO(x);
-    parameter Real y = f(eo);
-    
-
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="TestExtObject9",
-            description="",
-            template="
-$C_set_start_values$
-$C_DAE_initial_dependent_parameter_assignments$
-$C_ode_initialization$
-$C_dae_init_blocks_residual_functions$
-$C_destruct_external_object$
-",
-            generatedCode="
-int jmi_set_start_values_1_0(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    _x_0 = (0.0);
-    _y_2 = (0.0);
-    _eo_1 = (NULL);
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-
-int jmi_set_start_values_1_0(jmi_t* jmi);
-
-int jmi_set_start_values_base(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    model_init_eval_parameters(jmi);
-    ef |= jmi_set_start_values_1_0(jmi);
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-
-int model_init_eval_parameters_base(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-
-int model_ode_initialize_base(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    _x_0 = 0.0;
-    _eo_1 = func_CCodeGenExternalTests_TestExtObject9_EO_constructor_exp1(_x_0);
-    _y_2 = func_CCodeGenExternalTests_TestExtObject9_f_exp2(_eo_1);
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-")})));
-end TestExtObject9;
-
 model TestExtObjectArray1
     ExtObject myEOs[2] = { ExtObject(), ExtObject() };
     Real z;
@@ -3427,16 +3347,16 @@ model TestExtObjectArray1
 equation
     z = get_y(myEOs);    
 
-annotation(__JModelica(UnitTesting(tests={
-    CCodeGenTestCase(
-        name="TestExtObjectArray1",
-        description="",
-        template="
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TestExtObjectArray1",
+            description="",
+            template="
 $C_variable_aliases$
 $C_DAE_initial_dependent_parameter_assignments$
 $C_functions$
 ",
-        generatedCode="
+            generatedCode="
 #define _z_2 ((*(jmi->z))[0])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
@@ -3509,6 +3429,7 @@ jmi_real_t func_CCodeGenExternalTests_useMyEO_exp3(jmi_extobj_t eo_v) {
     func_CCodeGenExternalTests_useMyEO_def3(eo_v, &r_v);
     return r_v;
 }
+
 
 ")})));
 end TestExtObjectArray1;

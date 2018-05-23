@@ -2,44 +2,8 @@
 ; Change ; Minor ; MSL ; #5619
 Patched MSL resources to work with VS2015.
 
-; Feature ; Minor ; Compiler ; #5605
-Support for initial parameter external objects.
-
-; Fixed ; Minor ; PyFMI ; #5615
-Improved input handling for FMI2
-
-; Fixed ; Minor ; PyFMI ; #5613
-Fixed simulation logging when there are no states.
-
-; Fixed ; Minor ; Compiler ; #5569
-Fixed bug where generic annotation framework returned wrong value or threw
-exception (depended on underlying implementation) if the node was ambiguous,
-instead it now returns another ambiguous node.
-
 ; Fixed ; Minor ; Runtime ; #5608
 Removed the -g flag when building FMUs
-
-; Fixed ; Minor ; Compiler ; #5606
-Improved ability to obtain annotation value and 
-remove modifications.
-
-; Fixed ; Minor ; Compiler ; #5594
-Added functionality to remove annotations/modifications.
-
-; Fixed ; Minor ; Compiler ; #5604
-Fixed bug where using an iterator expression to set the binding 
-expression of a member of a record array member in a record declaration 
-would cause a crash in certain circumstances.
-
-; Fixed ; Minor ; PyFMI ; #5597
-Fixed issue with getting time varying variables (sometimes wrong 
-variables was returned)
-
-; Fixed ; Minor ; Runtime ; #5590
-Fixed solver trace when beta condition failures occur.
-
-; Feature ; Minor ; PyFMI ; #5587
-Added functionality to set enumerations with strings
 
 ; Fixed ; Minor ; Compiler ; #5579 
 Improved handling of event generating relational expressions

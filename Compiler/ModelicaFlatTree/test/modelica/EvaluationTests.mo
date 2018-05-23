@@ -1886,9 +1886,9 @@ fclass EvaluationTests.EvalNoBinding3
 
 public
  record EvaluationTests.EvalNoBinding3.R
-  parameter Real x;
-  Real c[2,2];
-  Real d[2,2];
+  parameter Real x(start = 2);
+  Real c[2,2](start = {{3, 4}, {5, 6}});
+  Real d[2,2](each start = 7);
  end EvaluationTests.EvalNoBinding3.R;
 
 end EvaluationTests.EvalNoBinding3;
@@ -1918,9 +1918,9 @@ fclass EvaluationTests.EvalNoBinding4
 
 public
  record EvaluationTests.EvalNoBinding4.R
-  parameter Real x;
-  Real c[2,2];
-  Real d[2,2];
+  parameter Real x(start = 2);
+  Real c[2,2](start = {{3, 4}, {5, 6}});
+  Real d[2,2](each start = 7);
  end EvaluationTests.EvalNoBinding4.R;
 
 end EvaluationTests.EvalNoBinding4;
@@ -1960,7 +1960,7 @@ model EvalNoBinding5
             errorMessage="
 3 errors found:
 
-Error at line 23, column 5, in file '...', EXTERNAL_OBJECT_MISSING_BINDING_EXPRESSION:
+Error at line 21, column 10, in file '...', EXTERNAL_OBJECT_MISSING_BINDING_EXPRESSION:
   The external object 'a' does not have a binding expression
 
 Error at line 24, column 27, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':

@@ -101,9 +101,7 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
             
         compile_to --
             Specify target file or directory. If file, any intermediate directories 
-            will be created if they don't exist. Furthermore, the Modelica model will
-            be renamed to this name. If directory, the path given must exist and the model
-            will keep its original name.
+            will be created if they don't exist. If directory, the path given must exist.
             Default: Current directory.
 
         compiler_log_level --
@@ -182,9 +180,7 @@ def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={},
             
         compile_to --
             Specify target file or directory. If file, any intermediate directories 
-            will be created if they don't exist. Furthermore, the Modelica model will
-            be renamed to this name. If directory, the path given must exist and the model
-            will keep its original name.
+            will be created if they don't exist. If directory, the path given must exist.
             Default: Current directory.
 
         compiler_log_level --
@@ -304,9 +300,7 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
             
         compile_to --
             Specify target file or directory. If file, any intermediate directories 
-            will be created if they don't exist. Furthermore, the Modelica model will
-            be renamed to this name. If directory, the path given must exist and the model
-            will keep its original name.
+            will be created if they don't exist. If directory, the path given must exist.
             Default: Current directory.
         
         compiler_log_level --

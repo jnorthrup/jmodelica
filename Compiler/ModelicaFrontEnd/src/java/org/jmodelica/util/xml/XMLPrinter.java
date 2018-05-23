@@ -3,7 +3,6 @@ package org.jmodelica.util.xml;
 import java.io.PrintStream;
 import java.util.Stack;
 
-import org.jmodelica.util.StringUtil;
 import org.jmodelica.util.XMLUtil;
 
 public class XMLPrinter {
