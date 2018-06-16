@@ -48,11 +48,11 @@ if pym._optimica_class:
     OptimicaCompilerInterface = jpype.JClass(pym._optimica_class)
 
 # Options registry
-OptionRegistryInterface = org.jmodelica.common.options.OptionRegistry
+OptionRegistryInterface = org.jmodelica.util.OptionRegistry
 
 # Exceptions
 UnknownOptionException = jpype.JClass(
-    'org.jmodelica.common.options.OptionRegistry$UnknownOptionException')
+    'org.jmodelica.util.OptionRegistry$UnknownOptionException')
     
 IllegalLogStringException = org.jmodelica.util.logging.IllegalLogStringException
 
