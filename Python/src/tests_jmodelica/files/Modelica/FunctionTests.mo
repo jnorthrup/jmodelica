@@ -284,12 +284,12 @@ model TestUnkRecArray
 end TestUnkRecArray;
 
 model LoadResource1
-    parameter String s1 = Modelica.Utilities.Files.loadResource("C:\\a\\b\\file.txt") annotation(Evaluate=true);
-    parameter String s2 = Modelica.Utilities.Files.loadResource("a\\b\\file.txt") annotation(Evaluate=true);
-    parameter String s3 = Modelica.Utilities.Files.loadResource("/C:/a/b/file.txt") annotation(Evaluate=true);
-    parameter String s4 = Modelica.Utilities.Files.loadResource("a/b/file.txt") annotation(Evaluate=true);
-    parameter String s5 = Modelica.Utilities.Files.loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt") annotation(Evaluate=true);
-    parameter String s6 = Modelica.Utilities.Files.loadResource("file:///C:/a/b/file.txt") annotation(Evaluate=true);
+    parameter String s1 = Modelica.Utilities.Files.loadResource("C:\\a\\b\\file.txt");
+    parameter String s2 = Modelica.Utilities.Files.loadResource("a\\b\\file.txt");
+    parameter String s3 = Modelica.Utilities.Files.loadResource("/C:/a/b/file.txt");
+    parameter String s4 = Modelica.Utilities.Files.loadResource("a/b/file.txt");
+    parameter String s5 = Modelica.Utilities.Files.loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt");
+    parameter String s6 = Modelica.Utilities.Files.loadResource("file:///C:/a/b/file.txt");
   equation
     assert(time < 2, s1);
     assert(time < 2, s2);
@@ -300,13 +300,11 @@ model LoadResource1
 end LoadResource1;
 
 model StringArray1
-    function fstrlen
+    function strlen
         input String s;
         output Integer n;
-    external "C" n = fStrlen(s) annotation(
-        Library="externalFunctionsC",
-        Include="#include \"externalFunctionsC.h\"");
-    end fstrlen;
+        external;
+    end strlen;
     
     function stringify
         input Real[:] x;
@@ -335,7 +333,7 @@ model StringArray1
         String tx = stringcat(sx);
       algorithm
         Modelica.Utilities.Streams.print(tx);
-        n := fstrlen(tx);
+        n := strlen(tx);
     end f;
     
     Integer n;

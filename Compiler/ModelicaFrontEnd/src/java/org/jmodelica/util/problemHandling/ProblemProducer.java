@@ -4,9 +4,6 @@ import java.io.PrintStream;
 import java.util.Collection;
 import java.util.TreeSet;
 
-import org.jmodelica.api.problemHandling.Problem;
-import org.jmodelica.api.problemHandling.ProblemKind;
-import org.jmodelica.api.problemHandling.ProblemSeverity;
 import org.jmodelica.util.xml.XMLPrinter;
 
 /**

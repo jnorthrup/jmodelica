@@ -35,7 +35,7 @@ from pymodelica.common import xmlparser
 from pymodelica.common.core import get_unit_name, list_to_string
 
 
-def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version='2.0', 
+def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version='1.0', 
                 platform='auto', compiler_options={}, compile_to='.', 
                 compiler_log_level='warning', separate_process=True, jvm_args=''):
     """ 
@@ -54,6 +54,15 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
           compiler will be selected based on model file ending, i.e. 
           ModelicaCompiler if a .mo file and OptimicaCompiler if a .mop file is 
           found in file_name list.
+    
+    Library directories can be added to MODELICAPATH by listing them in a 
+    special compiler option 'extra_lib_dirs', for example:
+    
+        compiler_options = 
+            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
+        
+    Other options for the compiler should also be listed in the compiler_options 
+    dict.
     
     The compiler target is 'me' by default which means that the shared 
     file contains the FMI for Model Exchange API. Setting this parameter to 
@@ -83,7 +92,7 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
             
         version --
             The FMI version. Valid options are '1.0' and '2.0'.
-            Default: '2.0'
+            Default: '1.0'
             
         platform --
             Set platform, controls whether a 32 or 64 bit FMU is generated. This 
@@ -101,9 +110,7 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
             
         compile_to --
             Specify target file or directory. If file, any intermediate directories 
-            will be created if they don't exist. Furthermore, the Modelica model will
-            be renamed to this name. If directory, the path given must exist and the model
-            will keep its original name.
+            will be created if they don't exist. If directory, the path given must exist.
             Default: Current directory.
 
         compiler_log_level --
@@ -135,9 +142,6 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
         created and a list of warnings that was raised.
     
     """
-    #Remove in JModelica.org version 2.3
-    if compiler_options.has_key("extra_lib_dirs"):
-        print "Warning: The option 'extra_lib_dirs' has been deprecated and will be removed. Please use the 'file_name' to pass additional libraries."
     
     if (target != "me" and target != "cs" and target != "me+cs"):
         raise IllegalCompilerArgumentError("Unknown target '" + target + "'. Use 'me', 'cs' or 'me+cs' to compile an FMU.")
@@ -161,6 +165,15 @@ def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={},
         - file_name can be a single path as a string or a list of paths 
           (strings). The paths can be to files or libraries
     
+    Library directories can be added to MODELICAPATH by listing them in a 
+    special compiler option 'extra_lib_dirs', for example:
+    
+        compiler_options = 
+            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
+        
+    Other options for the compiler should also be listed in the compiler_options 
+    dict.
+    
     
     Parameters::
     
@@ -182,9 +195,7 @@ def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={},
             
         compile_to --
             Specify target file or directory. If file, any intermediate directories 
-            will be created if they don't exist. Furthermore, the Modelica model will
-            be renamed to this name. If directory, the path given must exist and the model
-            will keep its original name.
+            will be created if they don't exist. If directory, the path given must exist.
             Default: Current directory.
 
         compiler_log_level --
@@ -219,11 +230,99 @@ def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={},
                 compiler_options, compile_to, compiler_log_level,
                 separate_process, jvm_args)
 
+def compile_jmu(class_name, file_name=[], compiler='auto', compiler_options={}, 
+                compile_to='.', compiler_log_level='warning', separate_process=True,
+                jvm_args=''):
+    """ 
+    Compile a Modelica or Optimica model to a JMU.
+    
+    A model class name must be passed, all other arguments have default values. 
+    The different scenarios are:
+    
+    * Only class_name is passed: 
+        - Class is assumed to be in MODELICAPATH.
+        - Default compiler is ModelicaCompiler.
+    
+    * class_name and file_name is passed:
+        - file_name can be a single path as a string or a list of paths 
+          (strings). The paths can be for files or libraries
+        - Default compiler setting is 'auto' which means that the appropriate 
+          compiler will be selected based on model file ending, i.e. 
+          ModelicaCompiler if .mo file and OptimicaCompiler if a .mop file is 
+          found in file_name list.
+    
+    Library directories can be added to MODELICAPATH by listing them in a 
+    special compiler option 'extra_lib_dirs', for example:
+    
+        compiler_options = 
+            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
+        
+    Other options for the compiler should also be listed in the compiler_options 
+    dict.
+    
+    Parameters::
+    
+        class_name -- 
+            The name of the model class.
+            
+        file_name -- 
+            A path (string) or paths (list of strings) to model files and/or 
+            libraries.
+            Default: Empty list.
+            
+        compiler -- 
+            'auto' if a compiler should be selected automatically depending on 
+            file ending, 'modelica' if a ModelicaCompiler should be used or 
+            'optimica' if a OptimicaCompiler should be used.
+            Default: 'auto' (i.e. depends on argument file_name)
+            
+        compiler_options --
+            Options for the compiler.
+            Default: Empty dict.
+            
+        compile_to --
+            Specify target file or directory. If file, any intermediate directories 
+            will be created if they don't exist. If directory, the path given must exist.
+            Default: Current directory.
+            
+        compiler_log_level --
+            Set the logging for the compiler. Takes a comma separated list with
+            log outputs. Log outputs start with a flag :'warning'/'w',
+            'error'/'e', 'verbose'/'v', 'info'/'i' or 'debug'/'d'. The log can
+            be written to file by appended flag with a colon and file name.
+            Default: 'warning'
+        
+        separate_process --
+            Run the compilation of the model in a separate process. 
+            Checks the environment variables (in this order):
+                1. SEPARATE_PROCESS_JVM
+                2. JAVA_HOME
+            to locate the Java installation to use. 
+            For example (on Windows) this could be:
+                SEPARATE_PROCESS_JVM = C:\Program Files\Java\jdk1.6.0_37
+            Default: True
+            
+        jvm_args --
+            String of arguments to be passed to the JVM when compiling in a 
+            separate process.
+            Default: Empty string
+                
+            
+    Returns::
+    
+        A compilation result, represents the name of the JMU which has been
+        created and a list of warnings that was raised.
+    
+    """
+    return _compile_unit(class_name, file_name, compiler, 'jmu', None, 'auto',
+                compiler_options, compile_to, compiler_log_level,
+                separate_process, jvm_args)
+
 def _compile_unit(class_name, file_name, compiler, target, version,
                 platform, compiler_options, compile_to, compiler_log_level,
                 separate_process, jvm_args):
     """
-    Helper function for compile_fmu and compile_fmux.
+    Helper function for compile_fmu, compile_jmu and compile_fmux.
     """
     for key, value in compiler_options.iteritems():
         if isinstance(value, list):
@@ -281,7 +380,7 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
             Default: 'auto'
             
         target --
-            Compiler target. Valid options are 'me', 'cs' or 'fmux'.
+            Compiler target. Valid options are 'me', 'cs', 'fmux' or 'jmu'.
             Default: 'me'
             
         version --
@@ -304,9 +403,7 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
             
         compile_to --
             Specify target file or directory. If file, any intermediate directories 
-            will be created if they don't exist. Furthermore, the Modelica model will
-            be renamed to this name. If directory, the path given must exist and the model
-            will keep its original name.
+            will be created if they don't exist. If directory, the path given must exist.
             Default: Current directory.
         
         compiler_log_level --

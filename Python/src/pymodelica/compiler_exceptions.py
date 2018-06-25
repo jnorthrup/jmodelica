@@ -206,21 +206,13 @@ class CompilationProblem():
         """
         Prints a nice textural representation of the problem
         """
-        kind = self.kind.lower()
-        if kind == 'lexical' or kind == 'syntactic':
-            desc = 'Syntax ' + self.type
-        elif kind == 'compliance':
-            desc = 'Compliance ' + self.type
+        if self.kind.lower() == 'other':
+            kind = 'At'
         else:
-            desc = self.type.title()
-        
-        if self.file == 'null':
-            location = 'in flattened model'
-        else:
-            location = "at line %s, column %s, in file '%s'" % \
-                (self.line, self.column, self.file)
-        
-        return '%s %s:\n  %s\n' % (desc, location, self.message)
+            kind = self.kind.title() + ' error at'
+        return "%s: in file '%s':\n%s line %s, column %s:\n  %s\n" % ( \
+            self.type.title(), self.file, kind, self.line, \
+                self.column, self.message)
     
     def __repr__(self):
         """

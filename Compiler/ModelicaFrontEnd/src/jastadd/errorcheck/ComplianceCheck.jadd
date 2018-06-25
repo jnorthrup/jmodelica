@@ -101,7 +101,7 @@ aspect ComplianceCheck {
                 !getFArraySubscripts().variability().parameterOrLess()) {
             ONLY_FMU_NON_FIXED_RECORD_ARRAY_INDEX.invoke(this);
         }
-        if (decl.isExternalObject() && !decl.inFunction() && decl.getSrcComponentDecl().isConstant() && inFunction()) {
+        if (decl.isExternalObject() && !decl.inFunction() && decl.getComponentDecl().isConstant() && inFunction()) {
             EXTERNAL_OBJECT_CONSTANT_FROM_FUNCTION.invoke(this);
         }
     }
@@ -168,13 +168,6 @@ aspect ComplianceCheck {
         ONLY_FMU_FUNCTION_LIKE_OPERATOR.invoke(this, "semiLinear");
     }
 
-    public static final SimpleProblemProducer ASTNode.DEPRECATED_DECOUPLE =
-            new SimpleWarningProducer("DEPRECATED_DECOUPLE", ProblemKind.SEMANTIC, "The Subtask.decouple() function-like operator is removed as of Modelica version 3.2r2");
-
-    public void FDecouple.complianceCheck(ErrorCheckType checkType) {
-        DEPRECATED_DECOUPLE.invoke(this);
-    }
-
     public static final SimpleProblemProducer ASTNode.DEPRECATED_CARDINALITY =
             new SimpleWarningProducer("DEPRECATED_CARDINALITY", ProblemKind.SEMANTIC, "The cardinality() function-like operator is deprecated, and will be removed in a future version of Modelica");
 
@@ -186,7 +179,7 @@ aspect ComplianceCheck {
         if (!inAssert() && !inIfTestWithoutConnect()) 
             INCORRECT_USE_OF_CARDINALITY.invoke(this);
     }
-
+	
     public void FDelayExp.complianceCheck(ErrorCheckType checkType) {
         ONLY_FMU_FUNCTION_LIKE_OPERATOR.invoke(this, "delay");
     }
@@ -239,18 +232,30 @@ aspect ComplianceCheck {
 	syn boolean FUnaryBuiltIn.unknownSizeSupported() = true;
 	eq FSymmetric.unknownSizeSupported()             = false;
 
+    public static final SimpleProblemProducer ASTNode.UNSUPPORTED_IN_FUNCTION_UNKNOWN_SIZE_ARRAY_FOR_INDEX =
+            new SimpleErrorProducer("UNSUPPORTED_IN_FUNCTION_UNKNOWN_SIZE_ARRAY_FOR_INDEX", ProblemKind.COMPLIANCE, "Unknown size array as a for index is not supported in functions");
+
+    public static final SimpleProblemProducer ASTNode.UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION =
+            new SimpleErrorProducer("UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION", ProblemKind.COMPLIANCE, "For index without in expression isn't supported");
+
     public static final SimpleProblemProducer ASTNode.UNSUPPORTED_NON_FIXED_FOR_INDEX =
             new SimpleErrorProducer("UNSUPPORTED_NON_FIXED_FOR_INDEX", ProblemKind.COMPLIANCE, "For index with higher than parameter variability is not supported in equations and algorithms");
-
-    public void InstForIndexWithExp.complianceCheck(ErrorCheckType checkType) {
+    
+    public void InstForIndex.complianceCheck(ErrorCheckType checkType) {
         super.complianceCheck(checkType);
-        if (!getFExp().variability().parameterOrLess() && !inFunction()) {
+        if (hasFExp() && getFExp().size().isUnknown() && getFExp().isAccess() && inFunction()) {
+            UNSUPPORTED_IN_FUNCTION_UNKNOWN_SIZE_ARRAY_FOR_INDEX.invoke(this);
+        }
+        if (!hasFExp()) {
+            UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION.invoke(this);
+        }
+        if (hasFExp() && !getFExp().variability().parameterOrLess() && !inFunction()) {
             UNSUPPORTED_NON_FIXED_FOR_INDEX.invoke(this);
         }
     }
 
-    public void InstForIndex.contentCheck(ErrorCheckType checkType) {
-    }
+	public void InstForIndex.contentCheck(ErrorCheckType checkType) {
+	}
 
     public void FPowExp.complianceCheck(ErrorCheckType checkType) {
         super.complianceCheck(checkType);
@@ -286,24 +291,29 @@ aspect ComplianceCheck {
 
     public void FStringExp.complianceCheck(ErrorCheckType checkType) {
         super.complianceCheck(checkType);
-        boolean func = inFunction();
-        if (!func && hasMinimumLength()) {
+        if (hasMinimumLength()) {
             getMinimumLength().markAsStructuralParameter(checkType);
             if (!getMinimumLength().variability().parameterOrLess())
                 UNSUPPORTED_NON_FIXED_STRING_ARGUMENT.invoke(getMinimumLength(), "minimumLength");
         }
-        if (!func && hasLeftJustified()) {
+        if (hasLeftJustified()) {
             getLeftJustified().markAsStructuralParameter(checkType);
            if (!getLeftJustified().variability().parameterOrLess())
                UNSUPPORTED_NON_FIXED_STRING_ARGUMENT.invoke(getLeftJustified(), "leftJustified");
         }
-        if (!func && hasSignificantDigits()) {
+        if (hasSignificantDigits()) {
             getSignificantDigits().markAsStructuralParameter(checkType);
             if (!getSignificantDigits().variability().parameterOrLess())
                 UNSUPPORTED_NON_FIXED_STRING_ARGUMENT.invoke(getSignificantDigits(), "significantDigits");
        }
     }
 
+    public static final SimpleProblemProducer ASTNode.PARTIALLY_SUPPORTED_STRING_ARGUMENTS =
+            new SimpleWarningProducer("PARTIALLY_SUPPORTED_STRING_ARGUMENTS", ProblemKind.COMPLIANCE, "String arguments in functions are only partially supported");
+    public static final SimpleProblemProducer ASTNode.PARTIALLY_SUPPORTED_STRING_PARAMETERS =
+            new SimpleWarningProducer("PARTIALLY_SUPPORTED_STRING_PARAMETERS", ProblemKind.COMPLIANCE, "String parameters are only partially supported");
+    public static final SimpleProblemProducer ASTNode.UNSUPPORTED_STRING_VARIABLES =
+            new SimpleErrorProducer("UNSUPPORTED_STRING_VARIABLES", ProblemKind.COMPLIANCE, "String variables are not supported");
     public static final SimpleProblemProducer ASTNode.ONLY_FMU_INTEGER_VARIABLES =
             new ComplianceFMUOnlyProducer("ONLY_FMU_INTEGER_VARIABLES", "Integer variables of discrete variability is");
     public static final SimpleProblemProducer ASTNode.ONLY_FMU_BOOLEAN_VARIABLES =
@@ -311,6 +321,17 @@ aspect ComplianceCheck {
 
     public void InstPrimitive.complianceCheck(ErrorCheckType checkType) {
         super.complianceCheck(checkType);
+        if (isString()) {
+            if (inFunction()) {
+                PARTIALLY_SUPPORTED_STRING_ARGUMENTS.invoke(this);
+            } else if (variability().parameterOrLess()) {
+                PARTIALLY_SUPPORTED_STRING_PARAMETERS.invoke(this);
+                if (isParameter())
+                    forceVariability(checkType, fStructParameter());
+            } else {
+                UNSUPPORTED_STRING_VARIABLES.invoke(this);
+            }
+        }
         if (!myOptions().getBooleanOption("generate_ode")) {
             if (isInteger() && !variability().parameterOrLess() && !inFunction())
                 ONLY_FMU_INTEGER_VARIABLES.invoke(this);
@@ -374,21 +395,4 @@ aspect ComplianceCheck {
             UNSUPPORTED_EXTERNAL_OBJECT_CONSTRUCTORS.invoke(this);
         }
     }
-    
-    public static final SimpleProblemProducer ASTNode.UNSUPPORTED_EXTERNAL_FUNCTION_RECORD_RETURN_VALUE =
-            new SimpleErrorProducer("UNSUPPORTED_EXTERNAL_FUNCTION_RECORD_RETURN_VALUE", ProblemKind.COMPLIANCE, "Using records as return value from external functions is not supported");
-
-    public void FExternalStmt.complianceCheck(ErrorCheckType checkType) {
-        getFExternalLanguage().complianceCheck(checkType, this);
-    }
-    
-    public void FExternalLanguage.complianceCheck(ErrorCheckType checkType, FExternalStmt stmt) {}
-    public void FCExternalLanguage.complianceCheck(ErrorCheckType checkType, FExternalStmt stmt) {
-        if (stmt.hasReturnVar() && stmt.getReturnVar().type().isRecord()) {
-            UNSUPPORTED_EXTERNAL_FUNCTION_RECORD_RETURN_VALUE.invoke(stmt);
-        }
-    }
-    
-
-    
 }

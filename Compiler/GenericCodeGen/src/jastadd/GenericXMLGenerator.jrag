@@ -16,7 +16,6 @@ import java.io.PrintStream;
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import org.jmodelica.util.XMLUtil;
 
 /**
  * A generator class containing basic functionality for generating XML files.
@@ -25,6 +24,7 @@ import org.jmodelica.util.XMLUtil;
  */
 public abstract class GenericXMLGenerator extends GenericGenerator {
 
+    private HashMap<Character,String> illegalCharsSub;
     private String indentStep;
     private int indentation;
     
@@ -48,6 +48,22 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
     protected String indentStep() { return "\t"; }
     
     /**
+     * Replace characters that are illegal in XML values with their HTML escape sequences.
+     */
+    protected String replaceIllegalChars(String s) {
+        StringBuilder buf = new StringBuilder();
+        int l = s.length();
+        for (int i = 0; i < l; i++) {
+            char ch = s.charAt(i);
+            if (illegalCharsSub.containsKey(ch))
+                buf.append(illegalCharsSub.get(ch));
+            else
+                buf.append(ch);
+        }
+        return buf.toString();
+    }
+    
+    /**
      * Constructor.
      * 
      * @param expPrinter Printer object used to generate code for expressions.
@@ -56,6 +72,12 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      */
     public GenericXMLGenerator(Printer expPrinter, char escapeCharacter, FClass fclass) {
         super(expPrinter,escapeCharacter, fclass);
+        
+        illegalCharsSub = new HashMap<Character,String>();
+        illegalCharsSub.put('&',"&amp;");
+        illegalCharsSub.put('<',"&lt;");
+        illegalCharsSub.put('>',"&gt;");
+        illegalCharsSub.put('"', "&quot;");
         
         indentStep = indentStep();
         indentation = 0;
@@ -86,8 +108,8 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      */
     protected void generateXMLDeclaration(CodeStream printer) {
         printer.print("<?xml");
-        generateAttribute("version", getXMLVersion(), printer);
-        generateAttribute("encoding", getXMLEncoding(), printer);
+        printer.format(" %s=\"%s\"", "version", getXMLVersion());
+        printer.format(" %s=\"%s\"", "encoding", getXMLEncoding());
         printer.print("?>\n");
     }
     
@@ -153,23 +175,6 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
     }
     
     /**
-     * Generates an open XML start tag. This is the same as first calling
-     * generateTagStart() followed by generateOpenEnd().
-     */
-    protected void generateOpenTag(String name, CodeStream printer) {
-        generateTagStart(name, printer);
-        generateOpenEnd(printer);
-    }
-    
-    /**
-     * Generates an one line tag with text contents inside.
-     */
-    protected void generateOneLineTag(String name, Object contents, CodeStream printer) {
-        generateTagStart(name, printer);
-        printer.print(">", XMLUtil.escape(contents.toString()), "</", name, ">\n");
-    }
-    
-    /**
      * Generate the end of an XML closed tag.
      * 
      * Closed tags can not contain other tags, and ends with "/>".
@@ -189,7 +194,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
     protected void generateClosing(String name, CodeStream printer) {
         indentation--;
         indent(printer);
-        printer.print("</", name, ">\n");
+        printer.format("</%s>\n", name);
     }
     
     /**
@@ -200,56 +205,10 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      * @param printer  the print stream to use
      */
     protected void generateAttribute(String name, Object value, CodeStream printer) {
-        printer.print(" ", name, "=\"", XMLUtil.escape(value.toString()), "\"");
+        printer.format(" %s=\"%s\"", name, value);
     }
     
-    /**
-     * Generate an XML attribute.
-     * 
-     * @param name     the name of the attribute
-     * @param variable variable to fetch the value of the attribute from
-     * @param printer  the print stream to use
-     */
-    protected void generateAttributeIfSet(String name, FVariable variable, CodeStream printer) {
-        if (variable.attributeSet(name)) {
-            String value = variable.attributeCValue(name).xmlValue();
-            generateAttribute(name, value, printer);
-        }
-    }
     
-    /**
-     * Generate an XML attribute representing a list, the entires will be
-     * space separated.
-     * 
-     * @param name     the name of the attribute
-     * @param values   the values of the attribute
-     * @param printer  the print stream to use
-     */
-    protected void generateListAttribute(String name, Iterable<? extends Object> values, CodeStream printer) {
-        printer.print(" ", name, "=\"");
-        boolean first = true;
-        for (Object value : values) {
-            if (!first) {
-                printer.print(" ");
-            }
-            first = false;
-            printer.print(XMLUtil.escape(value.toString()));
-        }
-        printer.print("\"");
-    }
-
-    /**
-     * Generates an XML comment with the provided contents. Special characters
-     * are escaped in the provided content before printing.
-     * 
-     * @param contents Contents of the comment
-     * @param printer the print stream to use
-     */
-    protected void generateComment(String contents, CodeStream printer) {
-        indent(printer);
-        printer.print("<!-- " + XMLUtil.escape(contents) + " -->\n");
-    }
-
     /**
      * Print the current indentation to printer.
      */
@@ -314,32 +273,6 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
             if (attributeTags == null) 
                 attributeTags = findTags(attributes());
             return attributeTags;
-        }
-        
-        /**
-         * Does this tag have any child tags that are active?
-         */
-        public boolean hasActiveChildren() {
-            return anyTagActive(childTags());
-        }
-        
-        /**
-         * Does this tag have any attribute tags that are active?
-         */
-        public boolean hasActiveAttributes() {
-            return anyTagActive(attributeTags());
-        }
-        
-        /**
-         * Checks if any of the given tags are active.
-         */
-        public boolean anyTagActive(AbstractTag[] tags) {
-            for (AbstractTag tag : tags) {
-                if (tag.isActive()) {
-                    return true;
-                }
-            }
-            return false;
         }
         
         /**

@@ -45,7 +45,8 @@ def run_demo(with_plots=True):
     u_2_nom = 15
 
     # Simulate model with sensititivies to generate initial guess for optimization
-    model = load_fmu(os.path.join(get_files_path(), "FMUs", "FedBatchReactor.fmu"))
+    file_path = os.path.join(get_files_path(), "fed_batch_reactor.mop")
+    model = load_fmu(compile_fmu('FedBatchReactor', file_path))
     sim_opts = model.simulate_options()
     sim_opts['sensitivities'] = parameters
     sim_opts['CVode_options']['rtol'] = 1e-8
@@ -55,7 +56,7 @@ def run_demo(with_plots=True):
     op = transfer_optimization_problem('FedBatchReactor_OED', file_path)
 
     # Transform the optimization problem into an OED problem
-    op.setup_oed(outputs, parameters, sigma, time_points, "T")
+    op.setup_oed(outputs, parameters, sigma, time_points, "A")
 
     # Set solver options
     opts = op.optimize_options()
@@ -63,8 +64,6 @@ def run_demo(with_plots=True):
     opts['nominal_traj'] = sim_res
     opts['blocking_factors'] = 10 * [3] # Piecewise constant inputs
     opts['n_e'] = 30 # Number of collocation elements
-    opts['IPOPT_options']['linear_solver'] = "ma27"
-    opts['verbosity'] = 1
 
     # Solve
     opt_res = op.optimize(options=opts)
@@ -95,7 +94,7 @@ def run_demo(with_plots=True):
         pass
     else:
         cost = float(opt_res.solver.solver_object.output(casadi.NLP_SOLVER_F))
-        N.testing.assert_allclose(cost, -1.311920e+07, rtol=1e-3)
+        N.testing.assert_allclose(cost, 3.657565715e-3, rtol=1e-3)
 
     # Plot solution
     if with_plots:

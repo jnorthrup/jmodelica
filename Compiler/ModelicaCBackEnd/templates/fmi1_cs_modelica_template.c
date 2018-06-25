@@ -1,26 +1,28 @@
 /*
-    Copyright (C) 2009-2018 Modelon AB
+    Copyright (C) 2009 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
-    it under the terms of the Common Public License as published by
-    IBM, version 1.0 of the License.
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
 
     This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY. See the Common Public License for more details.
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-    You should have received a copy of the Common Public License
-    along with this program. If not, see
-    <http://www.ibm.com/developerworks/library/os-cpl.html/>.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "fmiCSFunctions.h"
 #include "fmi1_functions.h"
 #include <jmi.h>
+#include <jmi_block_residual.h>
 #include <fmi1_me.h>
 #include <fmi1_cs.h>
+#include "jmi_log.h"
 #include "ModelicaUtilities.h"
 #include "ModelicaStandardTables.h"
 
@@ -135,3 +137,14 @@ DllExport fmiStatus fmiGetBooleanStatus(fmiComponent c, const fmiStatusKind s, f
 DllExport fmiStatus fmiGetStringStatus(fmiComponent c, const fmiStatusKind s, fmiString* value){
     return fmi1_cs_get_string_status(c,s,value);
 }
+
+/* NOTE IN THE FILE FMICSFUNCTIONS.H WHY? */
+/*
+DLLExport fmiStatus fmiSaveState(fmiComponent c, size_t index){
+    return fmi_save_state(c,index);
+}
+
+DLLExport fmiStatus fmiRestoreState(fmiComponent c, size_t index){
+    return fmi_restore_state(c,index);
+}
+*/

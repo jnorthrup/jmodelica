@@ -45,29 +45,24 @@ class Equation: public RefCountedNode {
         casadi::MX getResidual() const; 
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;
-        
-        /** @param bool. */
-        void setTearing(bool); 
-        /** @return True if this variable is a tearing variable */
-        bool getTearing() const;
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
         casadi::MX lhs;
         casadi::MX rhs;
-        bool tearing;
 };
 
 inline casadi::MX Equation::getLhs() const { return lhs; }
 inline casadi::MX Equation::getRhs() const { return rhs; }
 inline casadi::MX Equation::getResidual() const { return lhs - rhs; }
+inline void Equation::print(std::ostream& os) const { 
+    os << ModelicaCasADi::normalizeMXRespresentation(lhs);
+    os << " = ";
+    os << ModelicaCasADi::normalizeMXRespresentation(rhs); 
+}
 
 inline void Equation::setLhs(casadi::MX nlhs) { lhs = nlhs; }
 inline void Equation::setRhs(casadi::MX nrhs) { rhs = nrhs; }
-inline void Equation::setTearing(bool ntearing) {
-    this->tearing = ntearing; 
-}
-inline bool Equation::getTearing() const {return tearing;}
 
 }; // End namespace
 #endif

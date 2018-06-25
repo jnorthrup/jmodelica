@@ -1,6 +1,6 @@
 package org.jmodelica.util.problemHandling;
 
-import org.jmodelica.common.options.OptionRegistry;
+import org.jmodelica.util.OptionRegistry;
 
 public interface ProblemOptionsProvider {
     public OptionRegistry getOptionRegistry();

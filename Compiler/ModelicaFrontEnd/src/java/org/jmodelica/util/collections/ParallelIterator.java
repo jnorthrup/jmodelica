@@ -26,13 +26,11 @@ public class ParallelIterator<T> implements Iterator<T[]> {
 	private T[] elems;
 	private Iterator<? extends T>[] iters;
 	private boolean max;
-
-    @SafeVarargs
+	
 	public ParallelIterator(T[] res, Iterator<? extends T>... iterators) {
 		this(res, false, iterators);
 	}
-
-    @SafeVarargs
+	
 	public ParallelIterator(T[] res, boolean max, Iterator<? extends T>... iterators) {
 		iters = iterators;
 		elems = res;

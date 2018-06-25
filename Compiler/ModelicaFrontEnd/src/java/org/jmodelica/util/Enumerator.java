@@ -65,9 +65,4 @@ public class Enumerator {
 		return count;
 	}
 
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + ", next value: " + count;
-    }
-
 }

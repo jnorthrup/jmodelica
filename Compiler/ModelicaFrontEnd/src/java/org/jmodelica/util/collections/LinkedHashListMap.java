@@ -24,8 +24,6 @@ import java.util.List;
 
 public class LinkedHashListMap<K, V> extends LinkedHashMap<K, List<V>> implements ListMap<K, V> {
 
-    private static final long serialVersionUID = 1L;
-
     public LinkedHashListMap() {
         super();
     }
@@ -38,32 +36,20 @@ public class LinkedHashListMap<K, V> extends LinkedHashMap<K, List<V>> implement
         super(initialCapacity);
     }
 
-    @Override
     public void add(K key, V value) {
-        List<V> list = getList(key, true);
+        List<V> list = get(key);
+        if (list == null) {
+            list = new ArrayList<V>();
+            put(key, list);
+        }
         list.add(value);
     }
 
-    @Override
     public List<V> getList(K key) {
-        return getList(key, false);
-    }
-
-    @Override
-    public List<V> getList(K key, boolean create) {
         java.util.List<V> list = get(key);
-        if (list != null) {
-            return list;
-        } else if (create) {
-            list = new ArrayList<V>();
-            put(key, list);
-            return list;
-        } else {
-            return Collections.<V>emptyList();
-        }
+        return (list == null) ? Collections.<V>emptyList() : list;
     }
 
-    @Override
     public boolean removeFirst(K key, V value) {
         java.util.List<V> l = get(key);
         if (l != null) {

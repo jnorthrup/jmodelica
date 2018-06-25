@@ -40,18 +40,14 @@ namespace ModelicaCasADi
             Block(): simple_flag(false),linear_flag(false),solve_flag(false){}
             //~Block(){std::cout<<"\nDELETE_BLOCK\n";}
 
-            /***************************TO BE REMOVED******************************/
+            /***************************TO BE REMOVE*******************************/
             //Might be kept
             /**
              * @return A vector with the MX representation of the block variables.
              */
             std::vector< casadi::MX > variablesVector() const;
             /**
-             * Mark the chosen tearing residuals.
-             */
-            void markTearingResiduals();
-            /**
-             * Set the block as unsolvable. Used when tearing is activated.
+             * Set the block as unsolvable. Used when tearing is activated
              */
             void moveAllEquationsToUnsolvable();
             /**********************************************************************/
@@ -228,9 +224,9 @@ namespace ModelicaCasADi
              * @return A boolean
              */
             bool isSolvable() const;
-            void setasSimple(bool flag){simple_flag=flag;}
-            void setasLinear(bool flag){linear_flag=flag;}
-            void setasSolvable(bool flag){solve_flag=flag;}
+            bool setasSimple(bool flag){simple_flag=flag;}
+            bool setasLinear(bool flag){linear_flag=flag;}
+            bool setasSolvable(bool flag){solve_flag=flag;}
 
             //Requires the jacobian to be computed in beforehand
             /**

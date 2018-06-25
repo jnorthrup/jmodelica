@@ -8,16 +8,15 @@ project(ModelicaCompilerCasADi CXX)
 
 # copied from ModelicaCasadiInterface/CMakeLists.txt
 
+# import environment variables
+set(CASADI_HOME $ENV{CASADI_HOME})
+set(CASADI_BUILD_DIR $ENV{CASADI_BUILD_DIR})
+
 find_library(CASADI_DLL
   NAMES libcasadi_core.so libcasadi_core.dll
   PATHS ${CASADI_BUILD_DIR}/lib
   NO_DEFAULT_PATH
 )
-
-if(" ${CMAKE_C_FLAGS} " MATCHES " -m64 " AND CMAKE_HOST_WIN32)
-    add_definitions(-DMS_WIN64)
-    message(STATUS "Adding MS_WIN64 definition")
-endif()
 
 #JNI
 find_package(JNI REQUIRED)
@@ -41,7 +40,7 @@ include_directories(${CASADI_HOME})
 include_directories(${CASADI_HOME}/swig)
 include_directories(${CASADI_BUILD_DIR})
 
-set(CMAKE_SWIG_OUTDIR "${IFCASADI_OUTDIR}/src/java-generated/ifcasadi")
+set(CMAKE_SWIG_OUTDIR "$ENV{IFCASADI_OUTDIR}/src/java-generated/ifcasadi")
 
 find_package(SWIG REQUIRED)
 include(UseSWIG)

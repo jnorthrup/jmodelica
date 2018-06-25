@@ -17,6 +17,14 @@ Module :mod:`RLC`
     :undoc-members:
     :show-inheritance:
 
+Module :mod:`RLC_linearization` 
+-------------------------------
+
+.. automodule:: pyjmi.examples.RLC_linearization
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Module :mod:`SolAng` 
 --------------------
 
@@ -57,10 +65,42 @@ Module :mod:`crystallizer`
     :undoc-members:
     :show-inheritance:
 
+Module :mod:`cstr` 
+------------------
+
+.. automodule:: pyjmi.examples.cstr
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Module :mod:`cstr2` 
+-------------------
+
+.. automodule:: pyjmi.examples.cstr2
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Module :mod:`cstr_casadi` 
 -------------------------
 
 .. automodule:: pyjmi.examples.cstr_casadi
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Module :mod:`cstr_mpc` 
+----------------------
+
+.. automodule:: pyjmi.examples.cstr_mpc
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Module :mod:`distillation` 
+--------------------------
+
+.. automodule:: pyjmi.examples.distillation
     :members:
     :undoc-members:
     :show-inheritance:
@@ -137,6 +177,22 @@ Module :mod:`if_example_2`
     :undoc-members:
     :show-inheritance:
 
+Module :mod:`lagrange_cost` 
+---------------------------
+
+.. automodule:: pyjmi.examples.lagrange_cost
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Module :mod:`leadtransport` 
+---------------------------
+
+.. automodule:: pyjmi.examples.leadtransport
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Module :mod:`mechanical_rotational_examples_coupled_clutches` 
 -------------------------------------------------------------
 
@@ -177,6 +233,14 @@ Module :mod:`parameter_estimation_1_casadi`
     :undoc-members:
     :show-inheritance:
 
+Module :mod:`pendulum` 
+----------------------
+
+.. automodule:: pyjmi.examples.pendulum
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Module :mod:`planar_pendulum` 
 -----------------------------
 
@@ -209,6 +273,22 @@ Module :mod:`qt_par_est_dfo`
     :undoc-members:
     :show-inheritance:
 
+Module :mod:`quadtank` 
+----------------------
+
+.. automodule:: pyjmi.examples.quadtank
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Module :mod:`quadtank_static_opt` 
+---------------------------------
+
+.. automodule:: pyjmi.examples.quadtank_static_opt
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Module :mod:`robertson` 
 -----------------------
 
@@ -233,6 +313,14 @@ Module :mod:`simulation_with_input_function`
     :undoc-members:
     :show-inheritance:
 
+Module :mod:`vdp` 
+-----------------
+
+.. automodule:: pyjmi.examples.vdp
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Module :mod:`vdp_casadi` 
 ------------------------
 
@@ -245,6 +333,14 @@ Module :mod:`vdp_casadi_ps`
 ---------------------------
 
 .. automodule:: pyjmi.examples.vdp_casadi_ps
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Module :mod:`vdp_minimum_time` 
+------------------------------
+
+.. automodule:: pyjmi.examples.vdp_minimum_time
     :members:
     :undoc-members:
     :show-inheritance:

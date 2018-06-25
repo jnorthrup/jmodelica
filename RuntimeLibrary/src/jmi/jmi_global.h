@@ -28,7 +28,7 @@
 
 #include <setjmp.h>
 
-#include "jmi.h"
+#include "jmi_util.h"
 
 
 /**

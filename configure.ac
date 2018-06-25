@@ -16,9 +16,10 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.62)
+AC_PREREQ(2.61)
 AC_INIT([jmodelica.org], 0.0.0, BUG-REPORT-ADDRESS)
 AM_INIT_AUTOMAKE
+AC_CONFIG_SRCDIR([JMI/src/jmi.h])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -59,7 +60,7 @@ AC_DEFUN([C_FLAG_CHECK],
   AC_MSG_RESULT([$c_flag_check])
   CFLAGS="$ac_saved_cflags" 
   AC_LANG_POP([C])
-])  
+])
 
 # F77_FLAG_CHECK [compiler flags]
 # check whether compiler supports given Fortran 77 flags or not
@@ -78,6 +79,7 @@ AC_DEFUN([F77_FLAG_CHECK],
   AC_LANG_POP([Fortran 77])
 ])
 
+
 # ALL_FLAG_CHECK [compiler flags]
 # check whether compilers supports given flags or not for all of C, C++ and Fortran 77
 AC_DEFUN([ALL_FLAG_CHECK], 
@@ -91,8 +93,7 @@ AC_DEFUN([ALL_FLAG_CHECK],
 ])
 
 # ============= end of helper macros ===================
-AC_OPENMP
-AM_CONDITIONAL([WITH_OPENMP],[test "x$OPENMP_CFLAGS" != x])
+
 
 # Checks for programs.
 AC_PROG_CXX
@@ -181,44 +182,38 @@ AS_IF([test "$WIN32" = yes],
       ])
 AM_CONDITIONAL([JM_WIN64],[test "$jm_win64" = yes])
 
-AC_DEFUN([IPOPT_ARG_CHECK],
-[
 # Checks for libraries.
-AC_ARG_WITH([$1],
-   [AS_HELP_STRING([--$2],
+AC_ARG_WITH([ipopt],
+   [AS_HELP_STRING([--with-ipopt],
      [IPOPT installation directory @<:@default=check@:>@])],
-   [$1=$withval],
-   [$3=no])
+   [ipopt=$withval],
+   [with_ipopt=no])
 
-AS_IF([test "x$$3" = xno],
+AS_IF([test "x$with_ipopt" = xno],
       [AC_MSG_RESULT([ ])
        AC_MSG_RESULT([***********************************************************************])
-       AC_MSG_RESULT([* --$2 option not specified - compiling without $4 support *])
+       AC_MSG_RESULT([* --with-ipopt option not specified - compiling without IPOPT support *])
        AC_MSG_RESULT([***********************************************************************])
        AC_MSG_RESULT([ ])],
        [AC_MSG_RESULT([ ])
        AC_MSG_RESULT([***********************************************************************])
-       AC_MSG_RESULT([* --$2 option specified - compiling with $4 support        *])
+       AC_MSG_RESULT([* --with-ipopt option specified - compiling with IPOPT support        *])
        AC_MSG_RESULT([***********************************************************************])
        AC_MSG_RESULT([ ])
-       AC_CHECK_FILE($$1/include/coin/IpStdCInterface.h,
+       AC_CHECK_FILE($ipopt/include/coin/IpStdCInterface.h,
                      [],
-                     [AC_MSG_FAILURE([--$2 option was specified but does not seem to point at a valid IPOPT installation])])])
+                     [AC_MSG_FAILURE([--with-ipopt option was specified but does not seem to point at a valid IPOPT installation])])])
 
-AM_CONDITIONAL([$8],[test "x$$3" != xno])
+AM_CONDITIONAL([COMPILE_WITH_IPOPT],[test "x$with_ipopt" != xno])
 
 # Set output variables to be exported to the Makefiles
-AC_SUBST($5)
-AC_SUBST($6)
-AC_SUBST($7)
+AC_SUBST(IPOPT_INC)
+AC_SUBST(IPOPT_LIB)
+AC_SUBST(IPOPT_HOME)
 
-$5=$$1/include/coin
-$6=$$1/lib
-$7=$$1
-])
-
-IPOPT_ARG_CHECK([ipopt], [with-ipopt], [with_ipopt], [IPOPT], [IPOPT_INC], [IPOPT_LIB], [IPOPT_HOME], [COMPILE_WITH_IPOPT])
-IPOPT_ARG_CHECK([ipopt64], [with-ipopt64], [with_ipopt64], [IPOPT64], [IPOPT64_INC], [IPOPT64_LIB], [IPOPT64_HOME], [COMPILE_WITH_IPOPT64])
+IPOPT_INC=$ipopt/include/coin
+IPOPT_LIB=$ipopt/lib
+IPOPT_HOME=$ipopt
 
 AC_SUBST(WITH_CASADI)
 AS_IF([test "x$with_casadi" != xno],
@@ -336,8 +331,6 @@ AS_IF([test "$with_mingw" != no],
       ])
 
 AM_CONDITIONAL([COPY_PTHREADS_LIB],[test "$with_mingw" != no -a "$with_tdm" = no])
-AM_CONDITIONAL([NUMPY_NO_MSVCR],[test "$with_mingw" != no -a "$with_tdm" = yes])
-AM_CONDITIONAL([USE_TDM_GCC], [test "$with_tdm" = yes])
 
 
 # Set output variables to be exported to the Makefiles
@@ -358,6 +351,41 @@ case $build in
 	_JAVA_HOME_=`$(dirname $0)/run_java.sh org.jmodelica.util.GetJavaHome`
     ;;  
 esac
+
+
+# Detect CppAD
+AC_ARG_WITH([cppad],
+   [AS_HELP_STRING([--with-cppad],
+     [CppAD installation directory @<:@default=no@:>@])],
+   [cppad=$withval],
+   [with_cppad=no])
+
+AS_IF([test "x$with_cppad" = xno],
+      [cppad="ThirdParty/CppAD/cppad-20100325/"])
+
+AS_IF([test "x$with_cppad" = xno],
+      [AC_CHECK_FILE($srcdir/$cppad/cppad/cppad.hpp,
+                     [],
+                     [AC_MSG_FAILURE([CppAD sources not found - distribution corrupt?])])],
+      [AC_CHECK_FILE($cppad/cppad/cppad.hpp,
+                     [],
+                     [AC_MSG_FAILURE([--with-cppad option was specified but does not seem to point at a valid CppAD installation])])])
+
+AS_IF([test "x$with_cppad" = xno],
+      [with_cppad=automatic])
+
+AM_CONDITIONAL([COMPILE_WITH_CPPAD],[test "x$with_cppad" != xno])
+
+# Set output variables to be exported to the Makefiles
+AC_SUBST(CPPAD_HOME)
+AC_SUBST(WITH_CPPAD)
+AS_IF([test "x$with_cppad" = xautomatic],
+      [CPPAD_HOME=`cd $srcdir; pwd`/$cppad],
+      [CPPAD_HOME=$cppad])
+
+AS_IF([test "x$with_cppad" != xno],
+      [WITH_CPPAD="true"],
+      [WITH_CPPAD="false"]) 
 
 AC_SUBST(ipoptlib)
 case $build in
@@ -387,61 +415,21 @@ AS_IF([test "x$with_ipopt" != xno],
       [jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm"])  
 AC_SUBST(jmilib)
 
+#jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad";
+AS_IF([test "x$with_ipopt" != xno],
+      [jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad"], 
+      [jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad"])  
+AC_SUBST(jmi_cppadlib)
+
 AC_PATH_PROG([ANT], [ant], [])
 AC_SUBST(ANT_OPTS)
-ANT_OPTS="ANT_OPTS=-Xmx2g"
+ANT_OPTS="ANT_OPTS=-Xmx1024M"
 
 AM_CONDITIONAL([HAVE_ANT],[test "x$ANT" != x])
 
 AS_IF([test "x$ANT" = x],
       [AC_MSG_FAILURE([Cannot find Apache Ant - please install in order to build compiler front-ends.])])
 
-AC_DEFUN([PYTHON_DISTRO_CHECK],
-[   
-# Detect if Python installation is specified with environment var
-AC_ARG_VAR($1, [Python $7 installation to use])
-AS_IF([test "${$1}"],
-      [
-          $2="`cd ${$1}; pwd`"
-          AC_MSG_RESULT([Using Python $7 installation ${$2}])
-          $5="-DPYTHON_LIBRARY=${$2}/libs/libpython27.a"
-          $6="-DPYTHON_INCLUDE_DIR=${$2}/include"
-      ], [
-          AS_IF([test "${$3}" && test "${$4}"], 
-            [
-                AC_MSG_RESULT([Using Python lib ${$3} and Python include ${$4}])
-                $5="-DPYTHON_LIBRARY=${$3}"
-                $6="-DPYTHON_INCLUDE_DIR=${$4}"
-            ], [
-                AC_MSG_RESULT([Python $7 installation not specified.])
-                # Empty arguments will make cmake fail, so use dummies instead
-                $5="-DPYTHON_LIBRARY_DUMMY="
-                $6="-DPYTHON_INCLUDE_DIR_DUMMY="
-            ])
-      ])
-AC_SUBST($5)
-AC_SUBST($6)
-AC_SUBST($1)
-$1=$$2
-])
-
-PYTHON_DISTRO_CHECK([PYTHON_HOME], [PYTHON_HOME_ABS], [PYTHON_LIB], [PYTHON_INCLUDE], [CMAKE_PYTHON_LIB], [CMAKE_PYTHON_INCLUDE], [])
-AC_SUBST(ORIG_PYTHON_HOME)
-ORIG_PYTHON_HOME=$PYTHON_HOME_ABS
-   
-PYTHON_DISTRO_CHECK([PYTHON64_HOME], [PYTHON64_HOME_ABS], [PYTHON64_LIB], [PYTHON64_INCLUDE], [CMAKE_PYTHON64_LIB], [CMAKE_PYTHON64_INCLUDE], [64bit])
-AM_CONDITIONAL([WITH_PYTHON64], [test "x$PYTHON64_HOME" != x])
-
-AC_SUBST(ORIG_PATH)
-ORIG_PATH=$PATH
-AS_IF([test "x$JVMDLL_HOME" != x], 
-[jvmdll_home=["$JVMDLL_HOME"]])
-AC_SUBST(JVMDLL_HOME)
-JVMDLL_HOME=$jvmdll_home
-AS_IF([test "x$JVMDLL64_HOME" != x], 
-[jvmdll64_home=["$JVMDLL64_HOME"]])
-AC_SUBST(JVMDLL64_HOME)
-JVMDLL64_HOME=$jvmdll64_home
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -453,42 +441,21 @@ AC_C_CONST
 
 #AC_CONFIG_SUBDIRS([ThirdParty/Sundials/sundials-2.5.0])
 
-REQUIRE_IPOPT_HOME=True
-REQUIRE_SUNDIALS_HOME=True
-REQUIRE_COMPILER_JARS=True
-REQUIRE_BEAVER_PATH=True
-REQUIRE_MODELICAPATH=True
-REQUIRE_JPYPE_JVM=True
-REQUIRE_JVM_ARGS=False
-REQUIRE_MINGW_HOME=True
-REQUIRE_OPTIMICA_COMPILER=True
-
-AC_SUBST(REQUIRE_IPOPT_HOME)
-AC_SUBST(REQUIRE_SUNDIALS_HOME)
-AC_SUBST(REQUIRE_COMPILER_JARS)
-AC_SUBST(REQUIRE_BEAVER_PATH)
-AC_SUBST(REQUIRE_MODELICAPATH)
-AC_SUBST(REQUIRE_JPYPE_JVM)
-AC_SUBST(REQUIRE_JVM_ARGS)
-AC_SUBST(REQUIRE_MINGW_HOME)
-AC_SUBST(REQUIRE_OPTIMICA_COMPILER)
-
 AC_CONFIG_FILES([
  Makefile
  ThirdParty/Blas/Makefile
  ThirdParty/Lapack/Makefile
- ThirdParty/SuperLU/Makefile
  ThirdParty/Sundials/Makefile
  ThirdParty/Minpack/Makefile
  ThirdParty/CasADi/Makefile
- ThirdParty/MSL/Makefile
  external/FMILibrary/Makefile
+ JMI/src/Makefile
+ JMI/Makefile
  Python/jm_ipython.sh
  Python/jm_python.sh
- Python/Makefile
+ Python/src/tests_jmodelica/files/Modelica/Resources/Makefile
  RuntimeLibrary/Makefile
  jm_tests
- Python/src/required_defaults.py
 ])
 
 AC_OUTPUT

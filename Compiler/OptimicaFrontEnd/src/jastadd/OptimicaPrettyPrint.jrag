@@ -16,42 +16,103 @@
 
 aspect OptimicaPrettyPrint {
 
-
-    public void SrcOptClassDecl.prettyPrintClassName(Printer p, CodeStream str, String indent) {
-        p.print(getName(), str, indent);
-        if (hasSrcClassModification()) {
-            str.print(" ");
-            p.print(getSrcClassModification(), str, indent);
-        }
-    }
-
-    eq SrcConstraintClause.clauseHeader(String separator) = "constraint";
-
-    @Override
-    public void SrcConstraintClause.prettyPrintClauseBody(Printer p, CodeStream str, String indent, boolean doFormatting) {
-        for (SrcConstraint c : getSrcConstraints()) {
-            p.print(c, str, indent);
-            if (doFormatting) {
-                str.println(";");
-            }
-        }
-    }
-
-	public void SrcRelationConstraint.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void OptClassDecl.prettyPrint(Printer p, CodeStream str, String indent) {
+ 		str.print(indent + getRestriction().toString());
+ 		str.print(" " + getName().getID());
+ 		if (hasClassModification()) {
+ 			str.print(" ");
+ 			p.print(getClassModification(),str,"");
+ 		}
+		str.print("\n");
+		
+ 		// Print all local classes
+ 		int numPubClass = 0;
+// 		str.print(indent + "public\n");
+ 		for (int i=0;i<getNumClassDecl();i++)
+ 			if (((BaseClassDecl)getClassDecl(i)).isPublic()) {
+ 			 	numPubClass++;
+	 			p.print(getClassDecl(i), str, p.indent(indent));
+	 			str.print(";\n\n");
+			}
+			
+		if (getNumClassDecl()-numPubClass>0) {	
+	 		str.print(indent + "protected\n");
+ 			for (int i=0;i<getNumClassDecl();i++)
+ 				if (((BaseClassDecl)getClassDecl(i)).isProtected()) {
+		 			p.print(getClassDecl(i), str, p.indent(indent));
+		 			str.print(";\n\n");
+		 		}
+		}
+			
+		// Print all extends clauses
+ 		for (int i=0;i<getNumSuper();i++) {
+ 			p.print(getSuper(i), str, p.indent(indent));
+ 			str.print(";\n");
+		} 			
+			
+ 		// Print all components
+ 		int numPubComp = 0;
+// 		str.print(indent + "public\n");
+ 		for (int i=0;i<getNumComponentDecl();i++)
+ 			if (getComponentDecl(i).isPublic()) {
+ 			 	numPubComp++;
+	 			p.print(getComponentDecl(i), str, p.indent(indent));
+	 			str.print(";\n");
+			}
+			
+		if (getNumComponentDecl()-numPubComp>0) {	
+	 		str.print(indent + "protected\n");
+ 			for (int i=0;i<getNumComponentDecl();i++)
+ 				if (getComponentDecl(i).isProtected()) {
+		 			p.print(getComponentDecl(i), str, p.indent(indent));
+		 			str.print(";\n");
+			}
+		}	
+		
+		if (getNumEquation()>0) {
+			str.print(indent + "equation\n");
+			for (int i=0;i<getNumEquation();i++) {
+				str.print(indent + "  ");
+				p.print(getEquation(i),str,indent);
+				str.print(";\n");
+			}
+		}
+		
+		if (getNumConstraint()>0) {
+			str.print(indent + "constraint\n");
+			for (int i=0;i<getNumConstraint();i++) {
+				str.print(indent + "  ");
+				p.print(getConstraint(i),str,indent);
+				str.print(";\n");
+			}
+		}
+		
+		str.print(indent + "end " + getName().getID());
+	} 
+	
+	public void RelationConstraint.prettyPrint(Printer p, CodeStream str, String indent) {
 		p.print(getLeft(),str,indent);
 		str.print(op());
 		p.print(getRight(),str,indent);
 	}
 
-	syn String SrcRelationConstraint.op();
-	eq SrcConstraintEq.op()  = " = ";
-	eq SrcConstraintLeq.op() = " <= ";
-	eq SrcConstraintGeq.op() = " >= ";
+	syn String RelationConstraint.op();
+	eq ConstraintEq.op()  = " = ";
+	eq ConstraintLeq.op() = " <= ";
+	eq ConstraintGeq.op() = " >= ";
 	
-    eq SrcOptimizationClass.toString()  = "optimization";
+	public void FForClauseC.prettyPrint(Printer p, CodeStream str, String indent) {
+		str.print(indent+"for ");
+		getFForIndexList().prettyPrintWithSep(p, str, indent, ", ");
+		str.print(" loop\n");
+		getFConstraints().prettyPrintWithFix(p, str, p.indent(indent), "", ";\n");
+		str.print(indent + "end for");
+	}
+
+    eq OptimizationClass.toString()     = "optimization";
     eq InstOptimizationClass.toString() = "optimization";
 
-	public void SrcTimedVariable.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void TimedVariable.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(getName().name());
 		str.print("(");
 		p.print(getArg(), str, indent);
@@ -73,20 +134,20 @@ aspect FlatOptimicaPrettyPrint {
 		String nextInd = p.indent(indent);
 		str.print(indent+"optimization "+ name());
 		getFAttributeList().prettyPrintFAttributeList(str,p);
-		str.println();
+		str.print("\n");
 		
 		for (int i=0;i<getNumFVariable();i++) {
 			//log.debug("FClass.prettyPrint(): FVariable: " + getFVariable(i).name() + " is$Final: " + is$Final);
 	  		p.print(getFVariable(i), str, p.indent(indent));
-	  		str.println(";");
+	  		str.print(";\n");  
 		}
 		
 		if (getNumFInitialEquation()>0)
-			str.println(indent + "initial equation");
+			str.print(indent + "initial equation \n");
 	    for (int j=0;j<getNumFInitialEquation();j++) {
 			//log.debug("FClass.prettyPrint(): Equation nr: " + j);
 	  		p.print(getFInitialEquation(j), str, p.indent(indent));
-			str.println(";");
+			str.print(";\n");
 		}
 
 	    boolean wroteEquation = false;
@@ -98,24 +159,24 @@ aspect FlatOptimicaPrettyPrint {
     			if (!e.isIgnored()) {
 	    			if (!wroteEquation) {
 	    				str.print(indent);
-	    				str.println("equation");
+	    				str.print("equation\n");
 	    				wroteEquation = true;
 	    			}
 	    			p.print(e, str, nextInd);
-		    		str.println(";");
+		    		str.print(";\n");
     			}
     		}
     	}
 	  	
 		if (getNumFParameterEquation()>0)
-			str.println(indent + "parameter equation");
-		getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";" + str.getLineEnder());
+			str.print(indent + "parameter equation\n");
+		getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";\n");
 	  	
-		str.println(indent + "constraint");
+		str.print(indent + "constraint \n");
 	  	for (int j=0;j<getNumFConstraint();j++) {
 			//log.debug("FClass.prettyPrint(): Equation nr: " + j);
 	  		p.print(getFConstraint(j), str, p.indent(indent));
-			str.println(";");
+			str.print(";\n");
 		}
 	    
     	p.print(getFFunctionDecls(), str, p.indent(indent));
@@ -124,7 +185,7 @@ aspect FlatOptimicaPrettyPrint {
     	str.print(indent);
   		str.print("end ");
   		str.print(name());
-  		str.println(";");
+  		str.print(";\n");
 	}
 
 	public void FRelationConstraint.prettyPrint(Printer p, CodeStream str, String indent) {
@@ -138,7 +199,7 @@ aspect FlatOptimicaPrettyPrint {
 	eq FConstraintEq.op()  = " = ";
 	eq FConstraintLeq.op() = " <= ";
 	eq FConstraintGeq.op() = " >= ";
-
+	
 	protected void FTimedVariable.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		p.print(getName(), str, indent);
 		str.print("(");
@@ -149,10 +210,10 @@ aspect FlatOptimicaPrettyPrint {
 	protected void FStartTimeExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print("startTime");
 	}
-
+	
 	protected void FFinalTimeExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print("finalTime");
 	}
-
+	
 }
 

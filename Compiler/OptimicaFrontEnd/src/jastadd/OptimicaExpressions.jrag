@@ -23,6 +23,7 @@ aspect OptimicaExpressions {
 				getName().getLastInstAccess() instanceof InstComponentArrayAccess) &&
 				getNumArg()==1 && !getName().myInstComponentDecl().isPartialFunction())
 		 to InstTimedVariable {
+//			System.out.println("rewrite InstFunctionCall: " + getName().name());
 		 	InstTimedVariable iv = new InstTimedVariable(getName(), getArg(0).getFExp());
 		 	iv.setLocation(this);
 		 	return iv;
@@ -41,9 +42,6 @@ aspect OptimicaExpressions {
 		}
 	}
 	*/
-
-    eq InstTimedVariable.getName().kind() = Kind.COMPONENT_ACCESS;
-
 	refine InstNameClassification eq InstFunctionCall.getName().kind() = Kind.AMBIGUOUS_ACCESS;
 	
 	eq FStartTimeExp.cevalCalc(VariableEvaluator evaluator) {
@@ -170,6 +168,7 @@ aspect OptimicaArrays {
 	 */
 	syn Indices FConstraint.indices()      = null;
 	eq FRelationConstraint.indices()       = getLeft().indices();
+	syn lazy Indices FForClauseC.indices() = Indices.create(getFForIndexs());
 	
 	eq InstTimedVariable.ndims() = getName().ndims();
 	eq FTimedVariable.ndims() = getName().ndims();

@@ -22,9 +22,9 @@ import java.util.Map;
 
 import org.jmodelica.util.collections.ListMap;
 import org.jmodelica.util.collections.LinkedHashListMap;
-import org.jmodelica.api.problemHandling.Problem;
-import org.jmodelica.api.problemHandling.ProblemSeverity;
-import org.jmodelica.api.problemHandling.ProblemKind;
+import org.jmodelica.util.problemHandling.Problem;
+import org.jmodelica.util.problemHandling.ProblemSeverity;
+import org.jmodelica.util.problemHandling.ProblemKind;
 import org.jmodelica.util.problemHandling.ReporterNode;
 import org.jmodelica.util.problemHandling.ProblemOptionsProvider;
 import org.jmodelica.util.ErrorCheckType;
@@ -275,6 +275,10 @@ aspect ErrorCheck {
 	  return getUtilInterface().getErrorHandler();
   }
 
+  syn int ASTNode.lineNumber() = (start != 0 || getParent()==null)? beginLine() : getParent().lineNumber();
+  syn int ASTNode.columnNumber() = (start != 0 || getParent()==null)? beginColumn() : getParent().columnNumber();
+  
+  
   ASTNode implements ReporterNode;
   
   public void ASTNode.reportProblem(Problem problem) {
@@ -399,116 +403,84 @@ aspect ErrorCheck {
         }
     }
 
-    public interface LockBranch {
-        /**
-         * Lock the closest surrounding if-equation or if-expression that have only 
-         * parameter-expression tests and evaluates to another branch. Returns true 
-         * if any such if exists. 
-         * 
-         * Any parameters used in the test will be marked as structural.
-         * 
-         * NB: This has side-effects, despite being an inherited attribute.
-         * 
-         * @param checkType  the type of error checks to use when marking structural parameters
-         */
-        public boolean lockBranch(ErrorCheckType checkType);
-    }
-    FExp implements LockBranch;
-    FExpSubscript implements LockBranch;
-    FAbstractEquation implements LockBranch;
-    FStatement implements LockBranch;
-    FIfWhenClause implements LockBranch;
-    InstComponentDecl implements LockBranch;
-    InstFunctionArgument implements LockBranch;
-    FFunctionCallLeft implements LockBranch;
-    InstValueModification implements LockBranch;
-
-    // TODO: find way to move side-effects out from inh attr
-    inh boolean FExp.lockBranch(ErrorCheckType checkType);
-    inh boolean FExpSubscript.lockBranch(ErrorCheckType checkType);
-    inh boolean FAbstractEquation.lockBranch(ErrorCheckType checkType);
-    inh boolean FStatement.lockBranch(ErrorCheckType checkType);
-    inh boolean FIfWhenClause.lockBranch(ErrorCheckType checkType);
-    inh boolean InstComponentDecl.lockBranch(ErrorCheckType checkType);
-    inh boolean InstFunctionArgument.lockBranch(ErrorCheckType checkType); 
-    inh boolean FFunctionCallLeft.lockBranch(ErrorCheckType checkType);
-    inh boolean InstValueModification.lockBranch(ErrorCheckType checkType);
-    eq FIfExp.getThenExp().lockBranch(ErrorCheckType checkType)                = lockMyBranch(this, checkType, getIfExp(), true);
-    eq FIfExp.getElseExp().lockBranch(ErrorCheckType checkType)                = lockMyBranch(this, checkType, getIfExp(), false);
-    eq FIfEquation.getFAbstractEquation().lockBranch(ErrorCheckType checkType) = lockMyBranch(this, checkType, getTest(), true);
-    eq FIfEquation.getElse().lockBranch(ErrorCheckType checkType)              = lockMyBranch(this, checkType, getTest(), false);
-    eq FIfClause.getFStatement().lockBranch(ErrorCheckType checkType)          = lockMyBranch(this, checkType, getTest(), true);
-    eq FIfStmt.getFIfWhenClause(int i).lockBranch(ErrorCheckType checkType)    = lockMyBranch(checkType, i);
-    eq FIfStmt.getElseStmt().lockBranch(ErrorCheckType checkType)              = lockMyBranch(checkType, getNumFIfWhenClause());
-    eq FConnectClause.getConnector1().lockBranch(ErrorCheckType checkType)     = getConnector2().isDisabled() || lockBranch(checkType);
-    eq FConnectClause.getConnector2().lockBranch(ErrorCheckType checkType)     = getConnector1().isDisabled() || lockBranch(checkType);
-    eq InstComponentDecl.getChild().lockBranch(ErrorCheckType checkType)       = isDisabled() || lockBranch(checkType);
-    eq InstValueModification.getFExp().lockBranch(ErrorCheckType checkType)    = isSuperseded() || lockBranch(checkType);
-    eq InstClassDecl.getChild().lockBranch(ErrorCheckType checkType)           = false;
-    eq InstRoot.getChild().lockBranch(ErrorCheckType checkType)                = false;
-    eq FClass.getChild().lockBranch(ErrorCheckType checkType)                  = false;
-
-    /**
-     * Lock branch on src and return true if it only has parameter-expression 
-     * tests that evaluates to use the branch not indicated by <code>then</code>. 
-     * Otherwise delegates to {@link LockBranch#lockBranch(ErrorCheckType)}.
-     * 
-     * Any parameters used in the test will be marked as structural.
-     * 
-     * @param checkType  the type of error checks to use when marking structural parameters
-     * @param then       if true, we are trying to remove the then-branch, otherwise the else-branch
-     */
-    public static boolean ASTNode.lockMyBranch(LockBranch src, ErrorCheckType checkType, FExp exp, boolean then) {
-        if (exp.lockable(then)) {
-            exp.markAsStructuralParameter(checkType);
-            return true;
-        } else {
-            return src.lockBranch(checkType);
-        }
-    }
-
+  /**
+   * Lock the closest surrounding if-equation or if-expression that have only 
+   * parameter-expression tests and evaluates to another branch. Returns true 
+   * if any such if exists. 
+   * 
+   * Any parameters used in the test will be marked as structural.
+   * 
+   * NB: This has side-effects, dispite being an inherited attribute.
+   * 
+   * @param checkType  the type of error checks to use when marking structural parameters
+   */
+  // TODO: find way to move side-effects out from inh attr
+  inh boolean FExp.lockBranch(ErrorCheckType checkType);
+  inh boolean FExpSubscript.lockBranch(ErrorCheckType checkType);
+  inh boolean FAbstractEquation.lockBranch(ErrorCheckType checkType);
+  inh boolean InstComponentDecl.lockBranch(ErrorCheckType checkType);
+  inh boolean FFunctionCallLeft.lockBranch(ErrorCheckType checkType);
+  eq FIfExp.getThenExp().lockBranch(ErrorCheckType checkType)                     = lockMyBranch(checkType, true);
+  eq FIfExp.getElseExp().lockBranch(ErrorCheckType checkType)                     = lockMyBranch(checkType, false);
+  eq FIfEquation.getFAbstractEquation().lockBranch(ErrorCheckType checkType)      = lockMyBranch(checkType, true);
+  eq FIfEquation.getElse().lockBranch(ErrorCheckType checkType)                   = lockMyBranch(checkType, false);
+  eq FConnectClause.getConnector1().lockBranch(ErrorCheckType checkType)          = getConnector2().isDisabled() || lockBranch(checkType);
+  eq FConnectClause.getConnector2().lockBranch(ErrorCheckType checkType)          = getConnector1().isDisabled() || lockBranch(checkType);
+  eq InstComponentDecl.getChild().lockBranch(ErrorCheckType checkType)            = isDisabled() || lockBranch(checkType);
+  eq InstClassDecl.getChild().lockBranch(ErrorCheckType checkType)                = false;
+  eq InstRoot.getChild().lockBranch(ErrorCheckType checkType)                     = false;
+  eq FClass.getChild().lockBranch(ErrorCheckType checkType)                       = false;
+  
+  /**
+   * Lock this if-expression and return true if it only has only parameter-expression 
+   * tests and evaluates to the branch not indicated by <code>then</code>. Otherwise 
+   * delegates to {@link #lockBranch(ErrorCheckType)}.
+   * 
+   * Any parameters used in the test will be marked as structural.
+   * 
+   * @param checkType  the type of error checks to use when marking structural parameters
+   * @param then       if true, we are trying to remove the then-branch, otherwise the else-branch
+   */
+  public boolean FIfExp.lockMyBranch(ErrorCheckType checkType, boolean then) {
+        if (getIfExp().lockable(then)) {
+		  getIfExp().markAsStructuralParameter(checkType);
+		  return true;
+	  } else {
+		  return lockBranch(checkType);
+	  }
+  }
+  
     syn boolean FExp.lockable(boolean then) {
         if (variability().fixedParameterOrLess()) {
             try {
-                CValue val = ceval();
-                return val.hasBooleanValue() && val.booleanValue() != then;
-            } catch (ConstantEvaluationException e) {}
+                return ceval().booleanValue() != then;
+            } catch (ConstantEvaluationException e) {
+                
+            }
         }
         return false;
     }
+  
+  /**
+   * Lock this if-expression and return true if it only has only parameter-expression 
+   * tests and evaluates to the branch not indicated by <code>then</code>. Otherwise 
+   * delegates to {@link #lockBranch(ErrorCheckType)}.
+   * 
+   * Any parameters used in the test will be marked as structural.
+   * 
+   * @param checkType  the type of error checks to use when marking structural parameters
+   * @param then       if true, we are trying to remove the then-branch, otherwise the else-branch
+   */
+  public boolean FIfEquation.lockMyBranch(ErrorCheckType checkType, boolean then) {
+        if (getTest().lockable(then)) {
+		  getTest().markAsStructuralParameter(checkType);
+		  return true;
+	  } else {
+		  return lockBranch(checkType);
+	  }
+  }
 
-    public boolean FIfStmt.lockMyBranch(ErrorCheckType checkType, int i) {
-        if (i == 0) {
-            return lockBranch(checkType);
-        } else {
-            FIfWhenClause next = getFIfWhenClause(i - 1);
-            return lockMyBranch(next, checkType, next.getTest(), false);
-        }
-    }
-
-    syn boolean InstValueModification.isSuperseded() {
-        InstComponentDecl cmp = myTargetComponent();
-        InstModification mod = cmp.isAttribute() ? 
-                parentTargetComponent().totalMergedEnvironment().find(cmp.name()) : 
-                cmp.myInstValueMod();
-        return mod != null && mod != this;
-    }
-
-    inh InstComponentDecl InstModification.myTargetComponent();
-    eq InstComponentModification.getChild().myTargetComponent() = getName().myInstComponentDecl();
-    eq InstComponentDecl.getChild().myTargetComponent()         = this;
-    eq InstNode.getChild().myTargetComponent()                  = unknownInstComponentDecl();
-    eq InstRecordConstructor.getChild().myTargetComponent()     = unknownInstComponentDecl();
-
-    inh InstComponentDecl InstModification.parentTargetComponent();
-    eq InstComponentModification.getChild().parentTargetComponent() = myTargetComponent();
-    eq InstNode.getChild().parentTargetComponent()                  = unknownInstComponentDecl();
-    eq InstRecordConstructor.getChild().parentTargetComponent()     = unknownInstComponentDecl();
-
-    syn boolean InstComponentDecl.isAttribute() = false;
-    eq InstBuiltIn.isAttribute()                = true;
-
-
+  
     /**
      * Class used by the error check to delegate to different error checks.
      * This class is subtyped for each error check with different
@@ -562,30 +534,31 @@ aspect ErrorCheck {
         for (ErrorChecker checker : ERROR_CHECKERS)
             checker.check(this, checkType);
     }
+  
+  public void ASTNode.collectErrors(ErrorCheckType checkType) {
+	  allChecks(checkType);
+	  for(int i = 0; i < getNumChild(); i++) {
+		  getChild(i).collectErrors(checkType);
+	  }
+  }
 
-    public void ASTNode.collectErrors(ErrorCheckType checkType) {
-        for (ASTNode n : this) {
-            n.collectErrors(checkType);
-        }
-        allChecks(checkType);
-    }
 
-
-    public void ASTNode.errorCheck(ErrorCheckType checkType) {
-        collectErrors(checkType);
-        breakOnErrors();
-    }
+	public void ASTNode.errorCheck(ErrorCheckType checkType) {
+		collectErrors(checkType);
+		breakOnErrors();
+	}
 
     inh InstComponentDecl ASTNode.errorEnclosingComponent();
     eq InstNode.getChild().errorEnclosingComponent() = containingInstComponent();
     eq InstComponentDecl.getChild().errorEnclosingComponent() {
-        if (isRedeclared() || getSrcComponentDecl().hasRedeclare()) {
+        if (isRedeclared() || getComponentDecl().hasRedeclare()) {
             return errorEnclosingComponent();
         } else {
             return containingInstComponent();
         }
     }
     eq InstComponentDecl.getFAbstractEquation().errorEnclosingComponent() = this;
+    eq InstAssignable.getBindingFExp().errorEnclosingComponent() = myInstValueMod().errorEnclosingComponent();
     
     eq FlatRoot.getChild().errorEnclosingComponent() = null;
     eq InstRoot.getChild().errorEnclosingComponent() = null;
@@ -669,7 +642,6 @@ aspect InstanceErrorCheck {
     eq InstClassDecl.getChild().inInstComponent()     = false;
     eq InstRoot.getChild().inInstComponent()          = false;
     eq FlatRoot.getChild().inInstComponent()          = false;
-    eq InstRecordConstructor.getChild().inInstComponent() = false;
     
     
     public void FExp.collectErrors(ErrorCheckType checkType) {
@@ -691,9 +663,9 @@ aspect InstanceErrorCheck {
             }
             getInstRestriction().collectErrors(checkType);
             getInstGeneratedInners().collectErrors(checkType);
-            if (getSrcBaseClassDecl() instanceof SrcFullClassDecl) {
-                SrcFullClassDecl fcd = (SrcFullClassDecl) getSrcBaseClassDecl();
-                if (!(fcd.getName().getID().equals(fcd.getSrcEndDecl().getEndID()))) {
+            if (getBaseClassDecl() instanceof FullClassDecl) {
+                FullClassDecl fcd = (FullClassDecl) getBaseClassDecl();
+                if (!(fcd.getName().getID().equals(fcd.getEndDecl().getEndID()))) {
                     error("The declaration and end names of a class should be the same");
                 }
             }
@@ -754,17 +726,19 @@ aspect InstanceErrorCheck {
     }
 
     public void InstBaseClassDecl.errorCheckDerivativeAnnotations(ErrorCheckType checkType) {
-        errorCheckDerivativeAnnotations(checkType, findDerivativeAnnotationRoot());
+        errorCheckDerivativeAnnotations(checkType, annotation());
+        InstExternal ie = findFunctionExternal();
+        if (ie != null)
+            errorCheckDerivativeAnnotations(checkType, ie.annotation());
     }
     
     private void InstBaseClassDecl.errorCheckDerivativeAnnotations(ErrorCheckType checkType, AnnotationNode src) {
-        for (AnnotationNode derivative : src.allFor("derivative")) {
-            errorCheckDerivativeAnnotation(checkType, derivative);
-        }
+        for (AnnotationNode derivative : src)
+            if ("derivative".equals(derivative.name()))
+                errorCheckDerivativeAnnotation(checkType, derivative);
     }
 
     private void InstBaseClassDecl.errorCheckDerivativeAnnotation(ErrorCheckType checkType, AnnotationNode derivative) {
-        // TODO: Check that inputs/outputs of target function matches this function
         if (!derivative.isValue()) {
             derivative.ast().error("Function name is missing in derivative annotation declaration");
             return;
@@ -775,13 +749,11 @@ aspect InstanceErrorCheck {
             return;
         }
         InstLookupResult<InstClassDecl> lr = lookupDerivativeFunction(name);
-        if (lr.isProblem()) {
-            lr.problem(derivative.ast(), "function", name);
-            if (lr.isError()) {
-                return;
-            }
+        if (!lr.successful()) {
+            lr.error(derivative.ast(), "function", name);
+            return;
         }
-        InstClassDecl icd = lr.target().actualInstClass();
+        InstClassDecl icd = lr.target();
         if (!icd.isFunction()) {
             derivative.ast().error("The class " + name + " is not a function");
             return;
@@ -828,13 +800,6 @@ aspect InstanceErrorCheck {
         }
     }
 
-    public void InstLibNode.collectErrors(ErrorCheckType checkType) {
-        if (!errorChecked) {
-            errorChecked = true;
-            actualInstClass().collectErrors(checkType);
-        }
-    }
-
     public void InstImport.collectErrors(ErrorCheckType checkType) {
         if (!errorChecked) {
             errorChecked = true;
@@ -845,7 +810,7 @@ aspect InstanceErrorCheck {
     public void InstComponentDecl.collectErrors(ErrorCheckType checkType) {
         if (!errorChecked) {
             errorChecked = true;
-            if (checkType.checkForRecursiveStructure() && isRecursed()) {
+            if (isRecursed()) {
                 error("Recursive class structure");
             } else if (isOuter()) {
                 myInnerInstComponentDecl().collectErrors(checkType);
@@ -938,29 +903,28 @@ aspect InstanceErrorCheck {
             new SimpleWarningProducer("PARAMETER_MISSING_BINDING_EXPRESSION", ProblemKind.SEMANTIC, "The parameter %s does not have a binding expression");
     public static final SimpleProblemProducer ASTNode.CONSTANT_MISSING_BINDING_EXPRESSION =
             new SimpleWarningProducer("CONSTANT_MISSING_BINDING_EXPRESSION", ProblemKind.SEMANTIC, "The constant %s does not have a binding expression");
-    
+
     public void InstAssignable.collectErrors(ErrorCheckType checkType) {
         //log.debug(toString());
         if (!errorChecked) {
             super.collectErrors(checkType);
             errorChecked = true;
-            
-            // Check modification
-            if (hasInstValueMod()) {
-                myInstValueMod().collectErrors(checkType);
-            }
-            
-            if (hasBindingFExp()) {
+
+            // Check binding expression
+            FExp bexp = myBindingInstExp();
+            if (bexp != null) {
+                String type = isParameter() ? "parameter" : "constant";
+                // TODO: Check structural parameters as well
+                bexp.collectErrors(checkType);
                 // Check if the binding expression of constants can be evaluated
-                FExp bexp = getBindingFExp();
-                if (isConstant() && !bexp.type().isUnknown()) {
+                if (isConstant()) 
                     bexp.checkConstantExpression(checkType, "constant", qualifiedName());
-                } else if (isParameter() && bexp.isCircular()) {
-                    bexp.error("Circularity in binding expression of parameter: %s = %s", qualifiedName(), bexp);
-                }
+                else if (isParameter() && bexp.isCircular())
+                    bexp.error("Circularity in binding expression of parameter: %s = %s", 
+                            qualifiedName(), bexp);
             } else {
                 // Warn if constant or parameter does not have a binding expression (start is used)
-                if (variability().fixedParameterOrLess() && !isForIndex() && !isRecord() && 
+                if ((isConstant() || isParameter()) && !isForIndex() && !isRecord() && 
                         !hasParentRecordWithBindingExp() && !inFunction()) {
                     if (isParameter()) {
                         PARAMETER_MISSING_BINDING_EXPRESSION.invoke(this, qualifiedName());
@@ -970,14 +934,12 @@ aspect InstanceErrorCheck {
                 }
             }
             
-            FTypePrefixVariability v = variability().combine();
             // Mark parameters with Evaluate=true as structural
-            if (v.parameterVariability() && isEvalAnnotated(true)) {
-                if (v.fixedParameterOrLess()) {
-                    forceVariability(checkType, fStructParameter());
-                } else {
+            if (variability().combine().parameterVariability() && annotation().forPath("Evaluate").bool()) {
+                if (isEvalFixed())
+                    forceVariability(checkType, fEvalParameter());
+                else
                     warning("Evaluate annotation is ignored for parameters with fixed=false");
-                }
             }
             
             // Check array indices
@@ -990,16 +952,7 @@ aspect InstanceErrorCheck {
     }
     
 	public void InstAssignable.checkAttributes(ErrorCheckType checkType) {}
-
-    public static final SimpleProblemProducer ASTNode.START_VALUE_NOT_PARAMETER =
-            new SimpleErrorProducer("START_VALUE_NOT_PARAMETER", ProblemKind.SEMANTIC,
-                    "Variability of binding expression for attribute '%s' is not less"
-                    + " than or equal to parameter variability: %s");
-    public static final SimpleProblemProducer ASTNode.START_VALUE_INITIAL_PARAMETER =
-            new SimpleWarningProducer("START_VALUE_INITIAL_PARAMETER", ProblemKind.COMPLIANCE,
-                    "Variability of binding expression for attribute '%s' is "
-                    + " initial parameter variability: %s");
-
+	
 	public void InstPrimitive.checkAttributes(ErrorCheckType checkType) {
 		// Check if the expressions of the attributes can be evaluated
 		// Note that this check has to be done locally in the
@@ -1012,11 +965,14 @@ aspect InstanceErrorCheck {
 				InstComponentModification icm = (InstComponentModification)im;
 				if (icm.hasInstModification() && icm.getInstModification().hasInstValueMod()) {
 					FExp val_mod = icm.getInstModification().instValueMod();
-                    if (val_mod.variability().lessOrEqual(fConstant())) {
-                        val_mod.checkConstantExpression(checkType, "attribute", icm.getName().name());
-                    } else if (!val_mod.variability().parameterOrLess()) {
-                        ASTNode.START_VALUE_NOT_PARAMETER.invoke(val_mod, icm.getName().name(), val_mod);
-                    }
+					if (val_mod.variability().lessOrEqual(fConstant())) 
+						val_mod.checkConstantExpression(checkType, "attribute", icm.getName().name());
+					else if (!val_mod.variability().parameterOrLess()) 
+						val_mod.error("Variability of binding expression for attribute '%s' is not less than or equal to parameter variability: %s", 
+								icm.getName().name(), val_mod);
+					if (val_mod.isCircular() && !checkType.allowConstantNoValue())
+						error("Could not evaluate binding expression for attribute '%s' due to circularity: %s", 
+								icm.getName().name(), val_mod);
 				}
 			}
 		}
@@ -1024,7 +980,7 @@ aspect InstanceErrorCheck {
 	
 	public void InstExtends.collectErrors(ErrorCheckType checkType) {
 	    if (!errorChecked) {
-	    	if (checkType.checkForRecursiveStructure() && isRecursed()) {
+	    	if (isRecursed()) {
 	    		error("Recursive class structure");
 	    		errorChecked = true;
 	    	} else {
@@ -1182,11 +1138,11 @@ aspect InstanceErrorCheck {
 	
 	public void FArraySubscripts.collectErrors(ErrorCheckType checkType) {
 		// Should this check be in the access instead?
-        int ndims = myDims();
+		int ndims = mySize().ndims();
 		if (getNumFSubscript() > ndims && !isInstComponentSize() && myAccessExists()) {
 			// TODO: shouldn't this check for to few as well? (no [] or all dimensions given)
 			error("Too many array subscripts for access: " + getNumFSubscript() + 
-                    " subscripts given, component has " + ndims + " dimensions");
+					" subscripts given, component has " + mySize().ndims() + " dimensions");
 			allChecks(checkType);
 			for (int i = 0; i < ndims; i++)
 				getFSubscript(i).collectErrors(checkType);
@@ -1216,8 +1172,7 @@ aspect InstanceErrorCheck {
 			n += ie.myInstClass().numInstExternal();
 		return n;
 	}
-    eq InstSimpleShortClassDecl.numInstExternal() = actualInstClass().numInstExternal();
-    eq InstLibNode.numInstExternal()              = actualInstClass().numInstExternal();
+	eq InstSimpleShortClassDecl.numInstExternal() = actualInstClass().numInstExternal();
 	
 	syn int InstClassDecl.numFAlgorithm() {
 		int n = 0;
@@ -1228,27 +1183,22 @@ aspect InstanceErrorCheck {
 			n += ie.myInstClass().numFAlgorithm();
 		return n;
 	}
-    eq InstSimpleShortClassDecl.numFAlgorithm() = actualInstClass().numFAlgorithm();
-    eq InstLibNode.numFAlgorithm()              = actualInstClass().numFAlgorithm();
+	eq InstSimpleShortClassDecl.numFAlgorithm() = actualInstClass().numFAlgorithm();
 	
 	public void InstExternalObject.collectErrors(ErrorCheckType checkType) {
 	    if (!errorChecked) {
 			super.collectErrors(checkType);
 	    	errorChecked = true;
 	    	if (!inFunction()) {
-                if (!hasBindingExp() && !checkType.allowExternalObjectMissingBindingExpression()) {
-                    ASTNode.EXTERNAL_OBJECT_MISSING_BINDING_EXPRESSION.invoke(this, name());
+                if (!hasBindingExp()) {
+                    error("Missing binding expression for external object");
                 }
 	    		getDestructorCall().collectErrors(checkType);
 	    		myInstClass().collectErrors(checkType);
 	    	}
 	    }
 	}
-
-    public static final SimpleProblemProducer ASTNode.EXTERNAL_OBJECT_MISSING_BINDING_EXPRESSION =
-            new SimpleErrorProducer("EXTERNAL_OBJECT_MISSING_BINDING_EXPRESSION", ProblemKind.SEMANTIC,
-                    "The external object '%s' does not have a binding expression");
-
+	  
 	public void InstForClauseE.collectErrors(ErrorCheckType checkType) {
 	    collectErrorsInFor(getFAbstractEquationList(), getInstForIndexList(), checkType);
 	}
@@ -1294,38 +1244,26 @@ aspect InstanceErrorCheck {
             List<? extends CommonForIndex> indices, int i, ASTNode child, ErrorCheckType checkType) {
         throw new UnsupportedOperationException();
     }
-
-    @Override
+    
     public void InstForIndex.collectErrorsForAllIndices(
-        List<? extends CommonForIndex> indices, int i, ASTNode child, ErrorCheckType checkType) {
-        InstComponentDecl var = getInstPrimitive();
-        CValue oldVal = var.evaluationValue;
-        boolean last = i == indices.getNumChild() - 1;
-        CommonForIndex next = last ? null : indices.getChild(i + 1);
-        CValueArray ivals = getFExp().ceval().array();
-
-        if (ivals.hasUnknowns()) {
-            return;
-        }
-
-        for (Index j : ivals.indices()) {
-            var.setLocalCachedEvaluationValue(ivals.getCell(j));
-            if (last) {
-                child.resetCollectErrors();
-                child.collectErrors(checkType);
-                child.flushAllRecursive();
-            } else {
-                next.collectErrorsForAllIndices(indices, i + 1, child, checkType);
-            }
-        }
-        var.setLocalCachedEvaluationValue(oldVal);
-    }
-
-    @Override
-    public void InstForIndexNoExp.collectErrorsForAllIndices(
             List<? extends CommonForIndex> indices, int i, ASTNode child, ErrorCheckType checkType) {
         if (hasFExp()) {
-            super.collectErrorsForAllIndices(indices, i, child, checkType);
+            InstComponentDecl var = getInstPrimitive();
+            CValue oldVal = var.evaluationValue;
+            boolean last = i == indices.getNumChild() - 1;
+            CommonForIndex next = last ? null : indices.getChild(i + 1);
+            CValueArray ivals = getFExp().ceval().array();
+            for (Index j : ivals.indices()) {
+                var.setLocalCachedEvaluationValue(ivals.getCell(j));
+                if (last) {
+                    child.resetCollectErrors();
+                    child.collectErrors(checkType);
+                    child.flushAllRecursive();
+                } else {
+                    next.collectErrorsForAllIndices(indices, i + 1, child, checkType);
+                }
+            }
+            var.setLocalCachedEvaluationValue(oldVal);
         }
     }
 
@@ -1334,12 +1272,11 @@ aspect InstanceErrorCheck {
         if (!errorChecked) {
             errorChecked = true;
             // Check that the function exists
-            InstLookupResult<InstCallable> lp = getName().myInstLookupCallable();
             InstCallable func = getName().myInstCallable();
             String name = getName().name();
-            if (lp.isError()) {
+            if (getName().hasLookupError() || func.isUnknown()) {
                 // Function does not exist or can't be used due to constraining classes, or name refers to component
-                getName().generateClassLookupProblems(lp, this);
+                getName().classLookupError("function", name + "()");
             } else if (!func.isCallable()) {
                 if (func.isExternalObject()) {
                     // Something is be wrong with constructor
@@ -1376,30 +1313,7 @@ aspect InstanceErrorCheck {
             }
         }
     }
-    
-    public static final SimpleProblemProducer ASTNode.NEGATIVE_SIZE_FILL =
-        new SimpleErrorProducer("NEGATIVE_SIZE_FILL", ProblemKind.SEMANTIC, "The dimension arguments of the fill()"
-                + " operator may not be negative");
-    
-    public void FFillExp.collectErrors(ErrorCheckType checkType) {
-        super.collectErrors(checkType);
-        if (!lockBranch(checkType)) {
-            for (FExp exp : getFExps()) {
-                if (exp.variability().knownParameterOrLess()) {
-                    try {
-                        CValue val = exp.ceval();
-                            if (val.hasIntValue()) {
-                            int d = val.intValue();
-                            if (d < 0) {
-                                NEGATIVE_SIZE_FILL.invoke(exp);
-                            }
-                        }
-                    } catch (ConstantEvaluationException e) {}
-                }
-            }
-        }
-    }
-    
+
     /**
      * Can <code>node</code> be replaced as seen from here?
      */
@@ -1498,25 +1412,16 @@ aspect InstanceErrorCheck {
 			calcIsRecursive(new HashSet<InstNode>());
 		return recursiveCache == RECURSIVE_YES;
 	}
-
-    /**
-     * Check if extends tree is recursive.
-     */
-    public boolean InstSimpleShortClassDecl.isRecursive() {
-        if (recursiveCache == RECURSIVE_UNKNOWN)
-            calcIsRecursive(new HashSet<InstNode>());
-        return recursiveCache == RECURSIVE_YES;
-    }
-
-    /**
-     * Check if extends tree is recursive.
-     */
-    public boolean InstLibNode.isRecursive() {
-        if (recursiveCache == RECURSIVE_UNKNOWN)
-            calcIsRecursive(new HashSet<InstNode>());
-        return recursiveCache == RECURSIVE_YES;
-    }
-
+	
+	/**
+	 * Check if extends tree is recursive.
+	 */
+	public boolean InstSimpleShortClassDecl.isRecursive() {
+		if (recursiveCache == RECURSIVE_UNKNOWN)
+			calcIsRecursive(new HashSet<InstNode>());
+		return recursiveCache == RECURSIVE_YES;
+	}
+	
 	/**
 	 * Examine extends tree to find recursive extends nodes.
 	 */
@@ -1540,24 +1445,14 @@ aspect InstanceErrorCheck {
         visited.add(this);
         if (recursiveCache == RECURSIVE_NO) 
             myTargetInstClassDecl().calcIsRecursive(visited);
-        // Can't use actualInstClass() here, since it uses isRecursive()
     }
 
-    public void InstLibNode.calcIsRecursive(HashSet<InstNode> visited) {
-        recursiveCache = visited.contains(this) ? RECURSIVE_YES : RECURSIVE_NO;
-        visited.add(this);
-        if (recursiveCache == RECURSIVE_NO) 
-            resolveLib().calcIsRecursive(visited);
-        // Can't use actualInstClass() here, since it uses isRecursive()
-    }
-
-    private byte InstExtends.recursiveCache              = RECURSIVE_UNKNOWN;
-    private byte InstSimpleShortClassDecl.recursiveCache = RECURSIVE_UNKNOWN;
-    private byte InstLibNode.recursiveCache              = RECURSIVE_UNKNOWN;
-    protected static final byte InstNode.RECURSIVE_UNKNOWN = 0;
-    protected static final byte InstNode.RECURSIVE_YES     = 1;
-    protected static final byte InstNode.RECURSIVE_NO      = 2;
-
+	private byte InstExtends.recursiveCache              = RECURSIVE_UNKNOWN;
+	private byte InstSimpleShortClassDecl.recursiveCache = RECURSIVE_UNKNOWN;
+	protected static final byte InstNode.RECURSIVE_UNKNOWN = 0;
+	protected static final byte InstNode.RECURSIVE_YES     = 1;
+	protected static final byte InstNode.RECURSIVE_NO      = 2;
+	
 	/**
 	 * Check if <code>icd</code> is an ancestor of this node or any ancestor is an 
 	 *        instance of <code>icd</code>.
@@ -1650,23 +1545,15 @@ aspect AssertEval {
         boolean remove = false;
         if (getTest().isConstantExp()) {
             try {
-                CValue cVal = getTest().ceval();
-                if (cVal.hasBooleanValue()) {
-                    boolean val = cVal.booleanValue();
-                    if (error && !val) {
-                        CValue cMsg = getMsg().ceval();
-                        CValue cLevel = hasLevel() ? getLevel().ceval() : null;
-                        if (cMsg.hasStringValue() && (cLevel == null || cLevel.hasStringValue())) {
-                            String msg = "Assertion failed: " + cMsg.stringValue();
-                            if (cLevel == null || cLevel.stringValue().equals(LEVEL_ERROR)) {
-                                error(msg);
-                            } else {
-                                warning(msg);
-                            }
-                        }
-                    }
-                    remove = val || error;
+                boolean val = getTest().ceval().booleanValue();
+                if (error && !val) {
+                    String msg = "Assertion failed: " + getMsg().ceval().stringValue();
+                    if (!hasLevel() || getLevel().ceval().stringValue().equals(LEVEL_ERROR))
+                        error(msg);
+                    else
+                        warning(msg);
                 }
+                remove = val || error;
             } catch (ConstantEvaluationException e) {}
         }
         return remove;

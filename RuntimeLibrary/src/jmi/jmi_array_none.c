@@ -19,51 +19,6 @@
 
 #include "jmi_util.h"
 
-void jmi_swap_real(jmi_real_t *dest, jmi_real_t *src) {
-    jmi_real_t tmp;
-    tmp = *dest;
-    *dest = *src;
-    *src = tmp;
-}
-
-void jmi_swap_string(jmi_string_t *dest, jmi_string_t *src) {
-    JMI_DYNAMIC_INIT()
-    jmi_string_t tmp;
-    JMI_ASG_STR(tmp, *dest);
-    JMI_ASG_STR_Z(*dest, *src);
-    *src = tmp;
-    /* JMI_DYNAMIC_FREE() Is called in surrounding context, src will be used there */
-}
-
-void jmi_set_str(char **dest, const char* src, jmi_local_dynamic_function_memory_t* local_block) {
-    size_t len = JMI_MIN(JMI_LEN(src), JMI_STR_MAX) + 1;
-    if (local_block == NULL) {
-        *dest = calloc(len, sizeof(char));
-    } else {
-        *dest = jmi_dynamic_function_pool_alloc(local_block, len*sizeof(char), FALSE);
-    }
-    /* strncpy(*dest, src, len); */
-    memmove(*dest, src, len*sizeof(char)); /* Handle overlapping regions */
-    (*dest)[len-1] = '\0';
-}
-
-
-void jmi_set(jmi_real_t* dest, jmi_real_t src, jmi_array_t* arr, size_t offset) {
-	size_t i;
-	for(i=offset;i<(offset+arr->num_elems);i++) {
-		dest[i] = src;
-	}
-
-}
-
-void jmi_copy_to_arr(jmi_array_t* dest, jmi_real_t* src, size_t offset) {
-	memcpy(dest->var, src+offset, dest->num_elems*sizeof(jmi_real_t));
-}
-
-void jmi_copy_to_ptr(jmi_real_t* dest, jmi_array_t* src, size_t offset) {
-	memcpy(dest+offset, src->var, src->num_elems*sizeof(jmi_real_t));
-}
-
 #define TRANSPOSE_FUNC(name, src_type, dst_type, to_fortran) \
 void name(jmi_array_t* arr, src_type* src, dst_type* dest) { \
     int i, j, tmp1, tmp2, k, n, dim, s; \
@@ -98,10 +53,16 @@ void name(jmi_array_t* arr, src_type* src, dst_type* dest) { \
     } \
 }
 
-TRANSPOSE_FUNC(jmi_matrix_to_fortran_real, jmi_real_t, jmi_real_t, 1)
-TRANSPOSE_FUNC(jmi_matrix_from_fortran_real, jmi_real_t, jmi_real_t, 0)
-TRANSPOSE_FUNC(jmi_matrix_to_fortran_int, jmi_real_t, jmi_int_t, 1)
-TRANSPOSE_FUNC(jmi_matrix_from_fortran_int, jmi_int_t, jmi_real_t, 0)
-COPY_FUNC(jmi_copy_matrix_to_int, jmi_real_t, jmi_int_t)
-COPY_FUNC(jmi_copy_matrix_from_int, jmi_int_t, jmi_real_t)
+TRANSPOSE_FUNC(jmi_matrix_to_fortran_real, jmi_ad_var_t, jmi_ad_var_t, 1)
+TRANSPOSE_FUNC(jmi_matrix_from_fortran_real, jmi_ad_var_t, jmi_ad_var_t, 0)
+TRANSPOSE_FUNC(jmi_matrix_to_fortran_int, jmi_ad_var_t, jmi_int_t, 1)
+TRANSPOSE_FUNC(jmi_matrix_from_fortran_int, jmi_int_t, jmi_ad_var_t, 0)
+COPY_FUNC(jmi_copy_matrix_to_int, jmi_ad_var_t, jmi_int_t)
+COPY_FUNC(jmi_copy_matrix_from_int, jmi_int_t, jmi_ad_var_t)
 
+void jmi_free_str_arr(jmi_string_array_t* arr) {
+    int i;
+    for (i = 1; i <= arr->num_elems; i++) {
+        JMI_FREE(jmi_array_val_1(arr,i));
+    }
+}

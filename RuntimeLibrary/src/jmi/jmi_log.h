@@ -64,7 +64,7 @@ struct jmi_log_node_t {
     int inner_id;
 };
 
-/** \brief Allocate and initialize a log, with output to `jmi` */
+/** \brief Allocate and intialize a log, with output to `jmi` */
 jmi_log_t *jmi_log_init(jmi_callbacks_t* jmi_callbacks);
 
 /** \brief Deallocate the log */
@@ -102,8 +102,8 @@ void jmi_log_node( jmi_log_t *log, jmi_log_category_t c, const char *type, const
  *      * *name* is an identifier and
  *      * *format* is one of the printf format characters
  *          `diu` for `int`,
- *          `I` for `int`; mark it as an iv index (to be converted from 0- to 1-based by recipient if needed)
- *          `R` for `int`; mark it as a residual index (to be converted from 0- to 1-based by recipient if needed)
+ *          `I` for `int`; mark it as an iv index (to be converted from 0- to 1-based by recepient if needed)
+ *          `R` for `int`; mark it as a residual index (to be converted from 0- to 1-based by recepient if needed)
  *          `eEfFgG` for `jmi_real_t`, or
  *          `s` for `char *`.
  *        No format specifiers beyond the single character are supported;
@@ -129,9 +129,6 @@ void jmi_log_reals(jmi_log_t *log,  jmi_log_node_t node,
 /** \brief Log a vector of `n` ints. */
 void jmi_log_ints( jmi_log_t *log, jmi_log_node_t node,
                    jmi_log_category_t c, const char *name, const int *data, int n);
-
-void jmi_log_strings(jmi_log_t *log,  jmi_log_node_t node,
-                   jmi_log_category_t c, const char *name, const jmi_string_t *data, int n);
 
 /** \brief Log a vector of `n` variable references of type `t`, which should be one of `ribs`. */
 void jmi_log_vrefs(jmi_log_t *log, jmi_log_node_t node,

@@ -16,14 +16,10 @@
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.ArrayList;
 import org.jmodelica.util.Criteria;
 import org.jmodelica.util.ErrorCheckType;
 import org.jmodelica.util.problemHandling.ErrorProducerUnlessDisabled;
 import org.jmodelica.util.problemHandling.AbstractErrorProducerUnlessDisabled;
-import org.jmodelica.util.collections.ReverseListIterable;
 
 aspect FlatTypeCheck {
 
@@ -46,16 +42,10 @@ aspect FlatTypeCheck {
 
     public static final SimpleProblemProducer ASTNode.CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS =
             new SimpleErrorProducer("CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS", ProblemKind.SEMANTIC,
-                    "In the declaration '%s', the declared class is not a subtype of the " + 
-                    "constraining class,\n    because %s");
+                    "In the declaration '%s', the declared class is not a subtype of the constraining class");
     public static final SimpleProblemProducer ASTNode.REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS =
             new SimpleErrorProducer("REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS", ProblemKind.SEMANTIC,
-                    "In the declaration '%s', the replacing class is not a subtype of the " + 
-                    "constraining class from the declaration '%s',\n    because %s");
-    public static final SimpleProblemProducer ASTNode.PREV_REDECLARE_NOT_REPLACEABLE =
-            new SimpleWarningProducer("PREV_REDECLARE_NOT_REPLACEABLE", ProblemKind.SEMANTIC,
-                    "In the declaration '%s', %s can't be redeclared since it has already been " + 
-                    "redeclared without 'replaceable'");
+                    "In the declaration '%s', the replacing class is not a subtype of the constraining class from the declaration '%s'");
 
     public void InstComposite.typeCheck(ErrorCheckType checkType) {
         super.typeCheck(checkType);
@@ -63,12 +53,9 @@ aspect FlatTypeCheck {
         // are applied to the declaration itself and is therefore also type checked.
         if (hasInstConstrainingComponent()) {
               InstNode superType = getInstConstrainingComponent().getInstNode();
-              InstComponentDecl declaredType = this;
-              String subTypeMsg = declaredType.subType(superType);
-              if (subTypeMsg != null) {
-                  SrcComponentClause cc = declaredType.myComponentClause();
-                  CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(declaredType, cc, subTypeMsg);
-              }
+              InstComponentDecl declaredType = this; 
+              if (!declaredType.subType(superType))
+                  CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(declaredType.getComponentDecl(), declaredType.getComponentDecl());
         }
     }
 
@@ -93,93 +80,46 @@ aspect FlatTypeCheck {
         
         // Type check the original component
         InstComponentDecl superType = declaredType.constrainingInstComponentDecl();
-        if (declaredType.hasInstConstrainingComponent()) {
-            String subTypeMsg = declaredType.subType(superType);
-            if (subTypeMsg != null) {
-                SrcComponentClause cc = declaredType.myComponentClause();
-                CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(declaredType, cc, subTypeMsg);
-            }
-        }
+        if (declaredType.hasInstConstrainingComponent() && !declaredType.subType(superType))
+            CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(superType.getComponentDecl(), declaredType.getComponentDecl());
 
         // The environment should be traversed backwards in order to perform correct
-        // subtype tests in redeclaration chains.
-        InstComponentRedeclare prevRedeclare = null;
-        for (InstComponentRedeclare redeclare : myEnvironment().reverseComponentRedeclares(name())) {
-            InstComponentDecl declaredSubType = redeclare.getInstComponentDecl();
-            InstComponentDecl constrainingSubType = declaredSubType.constrainingInstComponentDecl();
-                
-            // Check consistency of the redeclaring component
-            if (declaredSubType.hasInstConstrainingComponent()) {
-                String subTypeMsg = declaredSubType.subType(constrainingSubType);
-                if (subTypeMsg != null) {
-                    SrcComponentClause cc = declaredSubType.myComponentClause();
-                    CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(declaredSubType, cc, subTypeMsg);
-                }
-            }
+        // subtype tests in redeclaration chains.       
+        for (int i = myEnvironment().size() - 1; i >= 0; i--) {
+            InstModification im = myEnvironment().get(i);
+            InstComponentRedeclare redeclare = im.matchInstComponentRedeclare(name());
+            if (redeclare != null) { 
+                InstComponentDecl declaredSubType = redeclare.getInstComponentDecl();
+                InstComponentDecl constrainingSubType = declaredSubType.constrainingInstComponentDecl();
+                    
+                // Check consistency of the redeclaring component
+                if (declaredSubType.hasInstConstrainingComponent() && !declaredSubType.subType(constrainingSubType))
+                    CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(declaredSubType.getComponentDecl(), declaredSubType.getComponentDecl());
 
-            // It is ok to check against the constrainingSubType, since the declaredSubType is a subtype
-            // of the constrainingSubType. Then if constrainingSubType is a subtype of superType, then it
-            // follows that declaredSubType is a subtype of superType by transitivity.
-            String subTypeMsg = constrainingSubType.subType(superType);
-            if (subTypeMsg != null) {
-                SrcComponentClause cc = constrainingSubType.myComponentClause();
-                SrcComponentClause scc = superType.myComponentClause();
-                REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(constrainingSubType, 
-                        cc, scc, subTypeMsg);
-            }
-        
-            // If the redeclaring declaration has a constraining clause, the constraining
-            // type of the redeclaring declaration of should be used in following subtype-test 
-            // instead of the constraining type of the original declaration.
-            if (declaredSubType.hasInstConstrainingComponent()) 
-                superType = constrainingSubType;
+                // It is ok to check against the constrainingSubType, since the declaredSubType is a subtype
+                // of the constrainingSubType. Then if constrainingSubType is a subtype of superType, then it
+                // follows that declaredSubType is a subtype of superType by transitivity.
+                if (!constrainingSubType.subType(superType))
+                    REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(constrainingSubType.getComponentDecl(), 
+                            constrainingSubType.getComponentDecl(), superType.getComponentDecl());
             
-            // If the previous redeclare is declared without "replaceable", then it is illegal 
-            // to redeclare further. The check on commonAncestor() checks that this redeclare actually 
-            // replaces the previous one. 
-            InstNode containingNode = redeclare.myInstNode();
-            if (prevRedeclare != null && !prevRedeclare.getInstComponentDecl().isReplaceable() && 
-                    prevRedeclare.myInstNode().commonAncestor(containingNode) == containingNode) {
-                PREV_REDECLARE_NOT_REPLACEABLE.invoke(declaredSubType, 
-                        declaredSubType.myComponentClause(), declaredSubType.name());
+                // If the redeclaring declaration has a constraining clause, the constraining
+                // type of the redeclaring declaration of should be used in following subtype-test 
+                // instead of the constraining type of the orignal declaration.
+                if (declaredSubType.hasInstConstrainingComponent()) 
+                    superType = constrainingSubType;
             }
-            
-            prevRedeclare = redeclare;
         }
     }
-    
-    public Iterable<InstComponentRedeclare> Environment.reverseComponentRedeclares(String name) {
-        Set<SrcModificationOrRedeclareElement> seen = new HashSet<>();
-        ArrayList<InstComponentRedeclare> list = new ArrayList<>();
-        
-        for (InstModification im : this) {
-            InstComponentRedeclare red = im.matchInstComponentRedeclare(name);
-            if (red != null) {
-                SrcModificationOrRedeclareElement mod = red.getSrcModification();
-                if (!seen.contains(mod)) {
-                    seen.add(mod);
-                    list.add(red);
-                }
-            }
-        }
-        
-        return new ReverseListIterable(list);
-    }
-    
     
     public static final SimpleProblemProducer ASTNode.CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE =
             new SimpleErrorProducer("CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE", ProblemKind.SEMANTIC,
                     "Can not infer array size of the variable %s");
-    public static final SimpleProblemProducer ASTNode.CANNOT_INFER_ARRAY_SIZE_OF_FUNCTION_OUTPUT =
-            new SimpleErrorProducer("CANNOT_INFER_ARRAY_SIZE_OF_FUNCTION_OUTPUT", ProblemKind.COMPLIANCE,
-                    "Can not infer array size of the function output %s");
     public static final SimpleProblemProducer ASTNode.BINDING_EXPRESSION_TYPE_MISMATCH =
             new SimpleErrorProducer("BINDING_EXPRESSION_TYPE_MISMATCH", ProblemKind.SEMANTIC,
                     "The binding expression of the variable %s does not match the declared type of the variable");
     public static final SimpleProblemProducer ASTNode.ASSUMING_EACH =
             new SimpleWarningProducer("ASSUMING_EACH", ProblemKind.SEMANTIC, "Assuming 'each' for the modification '%s'");
-    public static final SimpleProblemProducer ASTNode.IGNORING_EACH =
-            new SimpleWarningProducer("IGNORING_EACH", ProblemKind.SEMANTIC, "Ignoring erroneous 'each' for the modification '%s'");
     public static final ErrorProducerUnlessDisabled ASTNode.ARRAY_SIZE_MISMATCH_IN_DECLARATION =
             new ErrorProducerUnlessDisabled("ARRAY_SIZE_MISMATCH_IN_DECLARATION", ProblemKind.SEMANTIC,
                     "Array size mismatch in declaration of %s, size of declaration is %s and size of binding expression is %s");
@@ -201,32 +141,20 @@ aspect FlatTypeCheck {
 
     public void InstAssignable.typeCheck(ErrorCheckType checkType) {
         FExp bexp = myBindingInstExp();
-        boolean function = inFunction();
-        boolean record = inRecordDecl();
-        boolean output = isOutput();
-        boolean incompleteAllowed = (function && !output) || record;
-        boolean unknownAllowed = function || record;
+        boolean func = inFunction();
         Size componentSize = size();
-        if (!componentSize.isComplete() && !incompleteAllowed && !checkType.allowIncompleteSizes()) {
-            if (function && output) {
-                CANNOT_INFER_ARRAY_SIZE_OF_FUNCTION_OUTPUT.invoke(surroundingInstClass(), qualifiedName());
-            } else {
-                CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE.invoke(this, name());
-            }
-        }
-        if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown() && checkType.checkTypes()) {
+        if (!componentSize.isComplete() && !func && !inRecordDecl() && !checkType.allowIncompleteSizes()) 
+            CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE.invoke(this, name());
+        if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown()) {
             InstValueModification ivm = myInstValueMod();
             FType expectedBT = bindingType();
             FType actualBT = bexp.type();
-            if (!expectedBT.typeCompatible(actualBT, unknownAllowed) && !expectedBT.isUnknown()) {
+            if (!expectedBT.typeCompatible(actualBT, func) && !expectedBT.isUnknown()) {
                 InstModification needsEach = ivm.findModificationLackingEach(actualBT.size());
-                if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
-                    BINDING_EXPRESSION_TYPE_MISMATCH.invoke(bexp, name());
-                } else if (needsEach != null) {
+                if (needsEach != null) {
                     ASSUMING_EACH.invoke(needsEach, needsEach);
-                } else if (ivm.expectedSizeNoEach().equivalent(actualBT.size(), unknownAllowed)) {
-                    InstModification parIM = ivm.parentInstModification();
-                    IGNORING_EACH.invoke(parIM, parIM);
+                } else if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
+                    BINDING_EXPRESSION_TYPE_MISMATCH.invoke(bexp, name());
                 } else {
                     ErrorProducerUnlessDisabled reporter;
                     if (ivm.myInstNode() == this) {
@@ -248,26 +176,14 @@ aspect FlatTypeCheck {
                     NON_SCALAR_CONDITIONAL_GUARD.invoke(this);
                 if (!cond.type().isBoolean()) 
                     NON_BOOLEAN_CONDITIONAL_GUARD.invoke(this);
-                if (!cond.variability().parameterOrLess()) {
+                if (!cond.variability().parameterOrLess()) 
                     NON_FIXED_CONDITIONAL_GUARD.invoke(this);
-                } else {
-                    cond.markAsStructuralParameter(checkType);
-                }
             }
         }
         
         typeCheckAttributes();
         super.typeCheck(checkType);
     }
-
-    inh InstModification InstModification.parentInstModification();
-    eq InstComponentModification.getChild().parentInstModification()             = this;
-    eq InstNode.getElementInstModification(int i).parentInstModification()       = getElementInstModification(i);
-    eq InstComponentDecl.getInstModification().parentInstModification()          = getInstModification();
-    eq InstComponentDecl.getAnnotation().parentInstModification()                = getAnnotation();
-    eq InstClassDecl.getClassAnnotation().parentInstModification()               = getClassAnnotation();
-    eq InstConstraining.getInstClassModification().parentInstModification()      = getInstClassModification();
-    eq InstRecordConstructor.getInstModification(int i).parentInstModification() = getInstModification(i);
 
     inh boolean InstComponentDecl.inRecordWithBindingExp();
     eq InstRecord.getChild().inRecordWithBindingExp()             = myBindingInstExp() != null;
@@ -300,15 +216,12 @@ aspect FlatTypeCheck {
             FExp valMod = getInstModification().instValueMod();
             if (!type().isUnknown() && !valMod.type().isUnknown()) {
                 Size attrSize = expectedSize();
-                Size modSize = valMod.size();
                 if (!type().typeCompatible(valMod.type().scalarType())) {
                     TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION.invoke(this, name(), owner.kindDescription(), owner.name());
-                } else if (!attrSize.equivalent(modSize, true)) {
-                    InstModification im = findModificationLackingEach(modSize);
+                } else if (!attrSize.equivalent(valMod.size(), true)) {
+                    InstModification im = findModificationLackingEach(valMod.size());
                     if (im != null) {
                         ASSUMING_EACH.invoke(im, im);
-                    } else if (expectedSizeNoEach().equivalent(modSize, false)) {
-                        IGNORING_EACH.invoke(this, this);
                     } else {
                         ErrorProducerUnlessDisabled producer;
                         if (hasEach()) {
@@ -317,7 +230,7 @@ aspect FlatTypeCheck {
                             producer = ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION;
                         }
                         producer.invokeWithCondition(this, attrSize.ndims() != valMod.ndims(), name(),
-                                owner.kindDescription(), owner.name(), attrSize, name(), modSize);
+                                owner.kindDescription(), owner.name(), attrSize, name(), valMod.size());
                     }
                 } else {
                     if (name().equals("nominal")) {
@@ -341,14 +254,13 @@ aspect FlatTypeCheck {
             if (val.isArray()) {
                 CValueArray arr = (CValueArray) val;
                 for (Index i : arr.indices()) {
-                    CValue cell = arr.getCell(i);
-                    if (cell.hasRealValue() && cell.realValue() == 0.0) {
+                    if (arr.getCell(i).realValue() == 0.0) {
                         NOMINAL_ELEMENT_EQUAL_TO_ZERO.invoke(this, owner.kindDescription(), owner.name(), valMod, i);
                         break;
                     }
                 }
             } else {
-                if (val.hasRealValue() && val.realValue() == 0.0) {
+                if (val.realValue() == 0.0) {
                     NOMINAL_EQUAL_TO_ZERO.invoke(this, owner.kindDescription(), owner.name(), valMod);
                 }
             }
@@ -367,7 +279,7 @@ aspect FlatTypeCheck {
                     "The 'each' keyword should not be applied to a modification of a scalar component: %s");
 
     public void InstArgument.typeCheck(ErrorCheckType checkType) {
-        if (checkType.checkTypes() && getEach() && expectedSizeFromParent() == Size.SCALAR) 
+        if (getEach() && expectedSizeFromParent() == Size.SCALAR) 
             EACH_APPLIED_ON_SCALAR.invoke(this, this);
     }
 
@@ -442,142 +354,21 @@ aspect FlatTypeCheck {
         }
     }
 
-    // Generic typeCheck(checkType) that calls typeError() if type is unknown and no FExp child has unknown type
-    public void FExp.typeCheck(ErrorCheckType checkType) {
-        if (generateTypeError()) {
-            for (FExp exp : childFExps())
-                if (exp.type().isUnknown())
-                    return;
-            typeError(checkType);
-        } else {
-            size().markAsStructuralParameter(checkType, this);
-        }
-    }
+  // Generic typeCheck(checkType) that calls typeError() if type is unknown and no FExp child has unknown type
+  public void FExp.typeCheck(ErrorCheckType checkType) {
+	  if (type().isUnknown()) {
+		  for (FExp exp : childFExps())
+			  if (exp.type().isUnknown())
+				  return;
+		  typeError(checkType);
+	  }
+  }
+  
+  protected static boolean FExp.isUnknownFExp(ASTNode n) {
+	  return n instanceof FExp && ((FExp) n).type().isUnknown();
+  }
 
-    syn boolean FExp.generateTypeError() = type().isUnknown();
-    eq FEqRelExp.generateTypeError()     = super.generateTypeError() ||
-            (getLeft().type().isReal() || getRight().type().isReal()) && !inFunction();
-
-    public void FIfExp.typeCheck(ErrorCheckType checkType) {
-        if (!generateTypeError()) {
-            if (!getThenExp().size().equivalent(getElseExp().size(), false)) {
-                getIfExp().markAsStructuralParameter(checkType);
-            }
-        }
-        super.typeCheck(checkType);
-    }
-
-    public void Size.markAsStructuralParameter(ErrorCheckType checkType, FExp src) {}
-    
-    public void MutableSize.markAsStructuralParameter(ErrorCheckType checkType, FExp src) {
-        if (src.errorCheckUnknownSize()) {
-            for (int i = 0; i < ndims(); i++) {
-                FExp exp = exps[i];
-                if (exp != null) {
-                    exp.markAsStructuralParameter(checkType);
-                    if (!exp.variability().parameterOrLess()) {
-                        ASTNode.NON_PARAMETER_SIZE_IN_EXPRESSION.invoke(src, exp, i, src);
-                    }
-                }
-            }
-        }
-    }
-    
-    syn boolean FExp.errorCheckUnknownSize() = !inFunction() && !allowUnknownSize();
-
-    syn boolean BaseNode.allowUnknownSize()    = false;
-    eq InstFunctionArgument.allowUnknownSize() = inAllowUnknownSize();
-    eq FIfExp.allowUnknownSize()               = inAllowUnknownSize();
-    eq InstFunctionCall.allowUnknownSize()     = inAllowUnknownSize() && callsExternal();
-    eq FFunctionCall.allowUnknownSize()        = inAllowUnknownSize() && callsExternal();
-
-    inh boolean BaseNode.inAllowUnknownSize();
-    eq BaseNode.getChild().inAllowUnknownSize()         = allowUnknownSize();
-    eq InstFunctionCall.getChild().inAllowUnknownSize() = allowUnknownSize() || callsExternal();
-    eq FFunctionCall.getChild().inAllowUnknownSize()    = allowUnknownSize() || callsExternal();
-
-    class FFunctionDecl {
-        public enum FunctionType {
-            EXTERNAL, LOADRESOURCE;
-            
-            public boolean containsFunction(CommonCallable cc) {
-                if (this == EXTERNAL) {
-                    return cc.isExternalFunction();
-                } else {
-                    return cc.containsFunction(this);
-                }
-            }
-        }
-    }
-
-    interface CommonCallable {
-        public boolean containsFunction(FFunctionDecl.FunctionType ft);
-        public boolean isExternalFunction();
-    }
-
-    syn boolean InstPartialFunction.isExternalFunction() = false;
-    syn boolean FFunctionVariable.isExternalFunction()   = false;
-
-    syn boolean InstClassDecl.isExternalFunction() = findFunctionExternal() != null;
-    syn boolean FFunctionDecl.isExternalFunction() = getFirstExternalStmt() != null;
-
-    syn FExternalStmt FFunctionDecl.getFirstExternalStmt() {
-        for (FStatement stmt : getFAlgorithm().getFStatements()) {
-            if (stmt.isExternalStatement()) {
-                return (FExternalStmt) stmt;
-            }
-        }
-        return null;
-    }
-
-    syn boolean FStatement.isExternalStatement() = false;
-    eq FExternalStmt.isExternalStatement()       = true;
-
-    syn boolean FAbstractFunctionCall.callsExternal() =
-            FFunctionDecl.FunctionType.EXTERNAL.containsFunction(myCommonCallable());
-    syn boolean FAbstractFunctionCall.callsLoadResource() =
-            FFunctionDecl.FunctionType.LOADRESOURCE.containsFunction(myCommonCallable());
-    
-    syn boolean ASTNode.containsFunction(FFunctionDecl.FunctionType ft) {
-        for (ASTNode n : this) {
-            if (n.containsFunction(ft)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    syn boolean InstNode.containsFunction(FFunctionDecl.FunctionType ft) =
-        getInstComponentDecls().containsFunction(ft) || getInstExtendss().containsFunction(ft) ||
-        getFAbstractEquations().containsFunction(ft) || super.containsFunction(ft);
-
-    eq InstComponentDecl.containsFunction(FFunctionDecl.FunctionType ft) =
-        (hasInstModification() && getInstModification().containsFunction(ft)) ||  super.containsFunction(ft);
-    eq InstValueModification.containsFunction(FFunctionDecl.FunctionType ft) =
-        getFExp().containsFunction(ft) ||  super.containsFunction(ft);
-    eq InstFunctionCall.containsFunction(FFunctionDecl.FunctionType ft) =
-        ft.containsFunction(myCommonCallable()) || super.containsFunction(ft);
-    eq FFunctionCall.containsFunction(FFunctionDecl.FunctionType ft) =
-        ft.containsFunction(myCommonCallable()) || super.containsFunction(ft);
-    eq FLoadResource.containsFunction(FFunctionDecl.FunctionType ft) =
-        ft == FFunctionDecl.FunctionType.LOADRESOURCE || super.containsFunction(ft);
-
-    syn lazy boolean InstClassDecl.containsFunction(FFunctionDecl.FunctionType ft) circular [false] =
-            super.containsFunction(ft);
-    eq InstSimpleShortClassDecl.containsFunction(FFunctionDecl.FunctionType ft) =
-            actualInstClass().containsFunction(ft);
-
-    public static final ErrorProducerUnlessDisabled ASTNode.NON_PARAMETER_SIZE_IN_EXPRESSION =
-            new ErrorProducerUnlessDisabled("NON_PARAMETER_SIZE_IN_EXPRESSION", ProblemKind.COMPLIANCE,
-                    "Non-parameter expression sizes not supported, '%s', dimension %d in '%s'");
-    
-    @Override
-    public void FLoadResource.typeCheck(ErrorCheckType checkType) {
-        super.complianceCheck(checkType);
-        getFExp().forceVariability(checkType, ASTNode.fStructParameter("loadResource"));
-    }
-    
+  
     public class FExp {
         public static class ExpTypeErrorProducer extends AbstractErrorProducerUnlessDisabled<ReporterNode> {
             private final String message;
@@ -666,7 +457,7 @@ aspect FlatTypeCheck {
     }
 
     public void FLinspace.typeError(ErrorCheckType checkType) {
-        boolean badVar = !getN().variability().fixedParameterOrLess();
+        boolean badVar = !getN().variability().parameterOrLess();
         boolean canCeval = getN().canCeval();
         boolean badVal = canCeval && getN().ceval().intValue() < 2;
         if (badVar || !canCeval || badVal) {
@@ -762,34 +553,25 @@ aspect FlatTypeCheck {
 	  if (!isComponentSizeClass() || !isInstComponentSize())
 		  top.error("Illegal access to class in expression: " + top.name());
   }
-
-    public void FIfExp.typeError(ErrorCheckType checkType) {
-        FType thenType = getThenExp().type();
-        FType elseType = getElseExp().type();
-        FType scalar = thenType.scalarType().typePromotion(elseType.scalarType());
-        
-        if (!getIfExp().isOKTestExp()) {
-            getIfExp().error("Test expression of if expression must be scalar boolean:\n    %s is %s", 
-                    getIfExp(), getIfExp().type());
-        } else if (thenType.ndims() != elseType.ndims()) { 
-            error("Branches of if expression have different number of array dimensions:" + 
-                    "\n    %s has size %s\n    %s has size %s", 
-                getThenExp(), thenType.size(), getElseExp(), elseType.size());
-        } else if (scalar.isUnknown()) { 
-            error("Branches of if expression have incompatible types:\n    %s is %s\n    %s is %s", 
-                    getThenExp(), thenType, getElseExp(), elseType);
-        } else {
-            if (isParameterIf())
-                error("Failed to evaluate test expression in if expression with branches that have different array sizes:" + 
-                        "\n    %s has size %s\n    %s has size %s", 
-                    getThenExp(), thenType.size(), getElseExp(), elseType.size());
-            else
-                error("If expression with branches that have different array sizes must have parameter test expression:" + 
-                        "\n    %s has size %s\n    %s has size %s", 
-                    getThenExp(), thenType.size(), getElseExp(), elseType.size());
-        }
-    }
-
+  
+  public void FIfExp.typeError(ErrorCheckType checkType) {
+		FType thenType = getThenExp().type();
+		FType elseType = getElseExp().type();
+		FType scalar = thenType.scalarType();
+		scalar = scalar.typePromotion(elseType.scalarType());
+		
+		if (!getIfExp().isOKTestExp() || thenType.ndims() != elseType.ndims()) {
+			getIfExp().error("Test expression of if expression must be scalar boolean");
+		} else if (scalar.isUnknown()) { 
+			error("Branches of if expression has incompatible types");
+		} else {
+			if (isParameterIf())
+				error("Failed to evaluate test expression in if expression with branches that have different array sizes");
+			else
+				error("If expression with branches that have different array sizes must have parameter test expression");
+		}
+  }
+  
   public void FIdUseExp.typeCheck(ErrorCheckType checkType) {
 	  if (!getFIdUse().isUnknown() && type().isUnknown() && !accessToModelOK())
             getFIdUse().typeError(checkType, this);
@@ -834,6 +616,8 @@ aspect FlatTypeCheck {
             if ((inner == 0 || inner == Size.UNKNOWN) && type().matchOverloadedZero() == null) 
                 error("Matrix multiplication of operator records with an inner dimension of 0 or : requires that an '0' operator is defined");
         }
+        getLeft().size().forceVariability(checkType, fStructParameter());
+        getRight().size().forceVariability(checkType, fStructParameter());
         super.typeCheck(checkType);
     }
 
@@ -881,98 +665,32 @@ aspect FlatTypeCheck {
   eq FIdUseInstAccess.isAccessToStream() = getInstAccess().isAccessToStream();
   
   syn boolean InstAccess.isAccessToStream() = myInstComponentDecl().isStream();
-
-
-
-    public void InstForIndexWithExp.typeCheck(ErrorCheckType checkType) {
-        if (!getFExp().type().isUnknown() && getFExp().ndims() != 1)
-            error("The expression of for index " + name() + " must be a vector expression: " + 
-                    getFExp() + " has " + getFExp().ndims() + " dimension(s)");
-    }
-
-    public void InstForIndexNoExp.typeCheck(ErrorCheckType checkType) {
-        hasFExp(); // Force eval of NTA, thus checking if a consistent range can be computed
-    }
-
-    public static final SimpleErrorProducer InstForIndexNoExp.IMPLICIT_FOR_RANGE_NON_INTEGER =
-            new SimpleErrorProducer("IMPLICIT_FOR_RANGE_NON_INTEGER", ProblemKind.COMPLIANCE, 
-                    "Non-integer for iteration range not supported");
-
-    public static final SimpleErrorProducer InstForIndexNoExp.IMPLICIT_FOR_RANGE_INCONSISTENT =
-            new SimpleErrorProducer("IMPLICIT_FOR_RANGE_INCONSISTENT", ProblemKind.SEMANTIC, 
-                    "For index with implicit iteration range used for inconsistent sizes, here used for size %s and earlier for size %s");
-
-    public static final SimpleErrorProducer InstForIndexNoExp.IMPLICIT_FOR_RANGE_NOT_USED =
-            new SimpleErrorProducer("IMPLICIT_FOR_RANGE_NOT_USED", ProblemKind.SEMANTIC, 
-                    "For index with implicit iteration range must be used as array index");
-
-    // TODO: handle other index types than integer (see #3597)
-    syn lazy Opt<FExp> InstForIndexNoExp.getFExpOpt() {
-        Size size = null;
-        for (FExpSubscript use : mySubscriptUses()) {
-            Size useSize = use.mySize();
-            if (!use.myIndexType().isInteger()) {
-                IMPLICIT_FOR_RANGE_NON_INTEGER.invoke(use);
-            }
-            if (size == null) {
-                size = useSize;
-            } else if (!size.equivalent(useSize, true)) {
-                IMPLICIT_FOR_RANGE_INCONSISTENT.invoke(use, useSize, size);
-            }
-        }
-        if (size == null) {
-            IMPLICIT_FOR_RANGE_NOT_USED.invoke(this);
-            return new Opt();
-        } else {
-            return new Opt(size.createRangeExp(0));
-        }
-    }
-
-    syn lazy Collection<FExpSubscript> InstForIndexNoExp.mySubscriptUses() = mySubscriptUses(name());
-
-    inh Collection<FExpSubscript> InstForIndexNoExp.mySubscriptUses(String name);
-    eq InstForClauseE.getInstForIndex(int i).mySubscriptUses(String name) = collectSubscriptUses(name);
-    eq InstForStmt.getInstForIndex(int i).mySubscriptUses(String name)    = collectSubscriptUses(name);
-    eq FIterExp.getForIndex(int i).mySubscriptUses(String name)           = collectSubscriptUses(name);
-
-    public Collection<FExpSubscript> ASTNode.collectSubscriptUses(String name) {
-        Collection<FExpSubscript> nodes = new ArrayList<FExpSubscript>();
-        collectSubscriptUses(name, nodes);
-        return nodes;
-    }
-
-    public void ASTNode.collectSubscriptUses(String name, Collection<FExpSubscript> nodes) {
-        for (ASTNode n : this) {
-            n.collectSubscriptUses(name, nodes);
-        }
-    }
-
-    public void FExpSubscript.collectSubscriptUses(String name, Collection<FExpSubscript> nodes) {
-        if (getFExp().isIdentifier(name)) {
-            nodes.add(this);
-        }
-        super.collectSubscriptUses(name, nodes);
-    }
-
-    public void FExpSubscript.typeCheckAsSize(ErrorCheckType checkType) {
-        if (ndims() > 0) { 
-            error("Array size must be scalar expression: " + getFExp());
-        } else if (!type().isUnknown() && !getFExp().canBeComponentSize()) {
-            error("Array size must be Integer expression, Boolean type or enumeration type: " + getFExp());
-        } else if (!inFunction()) { 
-            if (!getFExp().variability().parameterOrLess()) {
-                error("Array size must be constant or parameter: " + getFExp());
-            } else if (!checkType.allowIncompleteSizes()) {
-                boolean ok = false;
-                try {
-                    ok = getFExp().ceval().hasIntValue();
-                } catch (ConstantEvaluationException e) {}
-                if (!ok) {
-                    error("Could not evaluate array size expression: " + getFExp());
-                }
-            }
-        }
-    }
+  
+  
+  
+  public void InstForIndex.typeCheck(ErrorCheckType checkType) {
+	  if (hasFExp() && !getFExp().type().isUnknown() && getFExp().ndims() != 1)
+		  error("The expression of for index " + name() + " must be a vector expression: " + 
+				  getFExp() + " has " + getFExp().ndims() + " dimension(s)");
+  }
+  
+  public void FExpSubscript.typeCheckAsSize(ErrorCheckType checkType) {
+	  if (ndims() > 0) { 
+		  error("Array size must be scalar expression: " + getFExp());
+      } else if (!type().isUnknown() && !getFExp().canBeComponentSize()) {
+          error("Array size must be Integer expression, Boolean type or enumeration type: " + getFExp());
+	  } else if (!inFunction()) { 
+		  if (!getFExp().variability().parameterOrLess()) {
+			  error("Array size must be constant or parameter: " + getFExp());
+		  } else if (!checkType.allowIncompleteSizes()) {
+			  try {
+				  getFExp().ceval().intValue();
+			  } catch (ConstantEvaluationException e) {
+				  error("Could not evaluate array size expression: " + getFExp());
+			  }
+		  }
+	  }
+  }
 
     public void FExpSubscript.typeCheckAsIndex(ErrorCheckType checkType) {
         if (ndims() > 1) { 
@@ -984,22 +702,18 @@ aspect FlatTypeCheck {
         } else if (!inFunction()) { 
               if (!getFExp().variability().fixedParameterOrLess()) {
                 warning("Variable array index in equation can result in slow simulation time");
-              } else if (!reportedOutOfBound && !inUnknownAccess() && !mySize().isUnknown()) {
+            } else if (!reportedOutOfBound && !inUnknownAccess()) {
                 // Check array bounds
                 // TODO: Perform bounds check in functions if index has parameter variability or lower?
                 try {
                     int max = mySize().get(0);
                     for (FExp e : getFExp().getArray().iterable()) {
-                        CValue cval = e.ceval();
-                        if (cval.hasIntValue()) {
-                            int i = cval.intValue();
-                            if (i < 1 || i > max) {
-                                if (!lockBranch(checkType))
-                                    errorUnlessDisabled("Array index out of bounds: " + i + 
-                                                        ", index expression: " + getFExp());
-                                reportedOutOfBound = true;
-                                return;
-                            }
+                        int i = e.ceval().intValue();
+                        if (i < 1 || i > max) {
+                            if (!lockBranch(checkType))
+                                errorUnlessDisabled("Array index out of bounds: " + i + ", index expression: " + getFExp());
+                            reportedOutOfBound = true;
+                            return;
                         }
                     }
                 } catch (ConstantEvaluationException e) {
@@ -1072,6 +786,12 @@ aspect FlatTypeCheck {
               return false;
       return true;
   }
+  
+  
+  public void InstComponentAccess.typeCheck(ErrorCheckType checkType) {
+	//  log.debug("InstComponentAccess.typeCheck: " + printSlice());
+  }
+  
 
   public void FAssignStmt.typeCheck(ErrorCheckType checkType) {
       FType left = getLeft().type();
@@ -1160,7 +880,6 @@ aspect FlatTypeCheck {
 
     syn int FInfArgsFunctionCall.numArgs() = getNumFExp();
     eq FFillExp.numArgs()                  = getNumFExp() + 1;
-    eq FCatExp.numArgs()                   = getNumFExp() + 1;
 
   syn boolean FInfArgsFunctionCall.typeOfArgIsOK(FExp exp)        = 
 		  fIntegerScalarType().typeCompatible(exp.type());
@@ -1170,20 +889,17 @@ aspect FlatTypeCheck {
 		  "compatible with Integer";
   syn String FInfArgsFunctionCall.getOKArgVariabilityString()     = 
 		  "constant or parameter";
-
-    public void FBuiltInFunctionCall.typeCheck(ErrorCheckType checkType) {
-        if (checkTypeAsExpression()) {
-            super.typeCheck(checkType);
-        } else if (!inFunction()) {
-            size().markAsStructuralParameter(checkType, this);
-        }
-        int n = builtInNumOutput();
-        if (myLefts().size() > n)
-            error("Too many components assigned from function call: " + builtInName() + 
-                    "() has " + n + " output(s)");
-        else if (!isFunctionCallClause() && n == 0)
-            error("Function " + builtInName() + "() has no outputs, but is used in expression");
-    }
+   
+  public void FBuiltInFunctionCall.typeCheck(ErrorCheckType checkType) {
+	  if (checkTypeAsExpression())
+		  super.typeCheck(checkType);
+	  int n = builtInNumOutput();
+	  if (myLefts().size() > n)
+		  error("Too many components assigned from function call: " + builtInName() + 
+				  "() has " + n + " output(s)");
+	  else if (!isFunctionCallClause() && n == 0)
+		  error("Function " + builtInName() + "() has no outputs, but is used in expression");
+  }
 
     public void FSemiLinearExp.typeCheck(ErrorCheckType checkType) {
         checkVectorizedSizes(checkType);
@@ -1252,64 +968,9 @@ aspect FlatTypeCheck {
             error("Calling function change(): argument must be a variable access");
     }
 
-    public static final SimpleProblemProducer ASTNode.DELAY_MAX_NOT_PARAMETER =
-            new SimpleErrorProducer("DELAY_MAX_NOT_PARAMETER", ProblemKind.SEMANTIC,
-                    "Calling function delay(): third argument must be of parameter variability: %s");
-    public static final SimpleProblemProducer ASTNode.DELAY_NOT_PARAMETER =
-            new SimpleErrorProducer("DELAY_NOT_PARAMETER", ProblemKind.SEMANTIC,
-                    "Calling function delay(): second argument must be of parameter variability when third argument is not given: %s");
-    public static final SimpleProblemProducer ASTNode.DELAY_OVER_MAX =
-            new SimpleErrorProducer("DELAY_OVER_MAX", ProblemKind.SEMANTIC,
-                    "Calling function delay(): second argument may not be larger than third argument: %s = %s > %s = %s");
-    public static final SimpleProblemProducer ASTNode.DELAY_NEGATIVE =
-            new SimpleErrorProducer("DELAY_NEGATIVE", ProblemKind.SEMANTIC,
-                    "Calling function delay(): second argument may not be negative: %s = %s < 0");
-    public static final SimpleProblemProducer ASTNode.DELAY_MAX_NEGATIVE =
-            new SimpleErrorProducer("DELAY_MAX_NEGATIVE", ProblemKind.SEMANTIC,
-                    "Calling function delay(): third argument may not be negative: %s = %s < 0");
-
     public void FDelayExp.typeCheck(ErrorCheckType checkType) {
-        boolean max = hasMax();
-        boolean maxParam = max ? getMax().variability().parameterOrLess() : false;
-        boolean delayParam = getDelay().variability().parameterOrLess();
-        if (max && !maxParam) {
-            DELAY_MAX_NOT_PARAMETER.invoke(this, getMax());
-        }
-        if (!max && !delayParam) {
-            DELAY_NOT_PARAMETER.invoke(this, getDelay());
-        }
-        
-        double maxVal = 0.0;
-        boolean maxEval = false;
-        if (max && maxParam) {
-            try {
-                CValue maxCVal = getMax().ceval();
-                if (maxCVal.hasRealValue()) {
-                    maxVal = maxCVal.realValue();
-                    maxEval = true;
-                }
-            } catch (ConstantEvaluationException e) {}
-        }
-        double delayVal = 0.0;
-        boolean delayEval = false;
-        if (delayParam) {
-            try {
-                CValue delayCVal = getDelay().ceval();
-                if (delayCVal.hasRealValue()) {
-                    delayVal = delayCVal.realValue();
-                    delayEval = true;
-                }
-            } catch (ConstantEvaluationException e) {}
-        }
-        if (maxEval && delayEval && delayVal > maxVal) {
-            DELAY_OVER_MAX.invoke(this, getDelay(), delayVal, getMax(), maxVal);
-        }
-        if (delayEval && delayVal < 0.0) {
-            DELAY_NEGATIVE.invoke(this, getDelay(), delayVal);
-        }
-        if (maxEval && maxVal < 0.0) {
-            DELAY_MAX_NEGATIVE.invoke(this, getMax(), maxVal);
-        }
+        if (!(hasMax() ? getMax() : getDelay()).variability().parameterOrLess())
+            error("Calling function delay(): last argument supplied must be of parameter variability");
     }
     
     public void FSpatialDistExp.typeCheck(ErrorCheckType checkType) {
@@ -1369,27 +1030,15 @@ aspect FlatTypeCheck {
             new SimpleErrorProducer("CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT", ProblemKind.SEMANTIC,
                     "Could not evaluate array size of output %s");
 
-    public void InstFunctionCall.typeCheck(ErrorCheckType checkType) {
-        if (!isFunctionCallClause() && !getName().myInstClassDecl().isRecord() && !hasOutputs() && !isPartialFunctionCall()) {
-            error("Function " + getName().name() + "() has no outputs, but is used in expression");
-        } else if (!isFunctionCallClause() && size().isUnknown() && errorCheckUnknownSize()) {
-            CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT.invoke(this, expOutput().name());
-        }
-        if (myCallOutputs().size() < myLefts().size()) {
-            error("Too many components assigned from function call: " + getName().name() + 
-                    "() has " + myCallOutputs().size() + " output(s)");
-        }
-        if (isFunctionCallClause()) {
-            for (int i = 0, n = myCallOutputs().size(); i < n; i++) {
-                sizeOfOutput(i).markAsStructuralParameter(checkType, this);
-            }
-        } else {
-            size().markAsStructuralParameter(checkType, this);
-        }
-        if (callsLoadResource()) {
-            getArgs().forceUsesVariability(checkType, ASTNode.fStructParameter("loadResource"));
-        }
-    }
+  public void InstFunctionCall.typeCheck(ErrorCheckType checkType) {
+	  if (!isFunctionCallClause() && !getName().myInstClassDecl().isRecord() && !hasOutputs() && !isPartialFunctionCall())
+		  error("Function " + getName().name() + "() has no outputs, but is used in expression");
+	  else if (!isFunctionCallClause() && !inFunction() && size().isUnknown())
+	      CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT.invoke(this, expOutput().name());
+        if (myCallOutputs().size() < myLefts().size())
+		  error("Too many components assigned from function call: " + getName().name() + 
+                "() has " + myCallOutputs().size() + " output(s)");
+  }
   
   syn boolean InstFunctionCall.isPartialFunctionCall() = false;
   eq InstPartialFunctionCall.isPartialFunctionCall()   = true;
@@ -1400,19 +1049,19 @@ aspect FlatTypeCheck {
                 FIdUse use = getFExp().asFIdUse();
                 FType useType = use.type();
                 FType outType = type();
-                if (!use.isForIndex()) {
-                    if (outType.size().isUnknown() && !inFunction() && !checkType.allowIncompleteSizes()) {
-                        error(functionCallDecription() + ": could not evaluate array size of output " + 
-                                myOutput().name());
-                    } else if (!useType.typeCompatible(outType, true)) {
-                        if (useType.typeCompatibleExceptLengths(outType)) {
-                            if (!lockBranch(checkType))
-                                errorUnlessDisabled("%s: component %s is of size %s and output %s is of size %s - they are not compatible", 
-                                        functionCallDecription(), use.name(), useType.size(), myOutput().name(), outType.size());
-                        } else {
-                            error("%s: component %s is of type %s and output %s is of type %s - they are not compatible", 
-                                    functionCallDecription(), use.name(), useType, myOutput().name(), outType);
-                        }
+                if (use.isForIndex()) {
+                    error("Can not assign a value to a for loop index");
+                } else if (outType.size().isUnknown() && !inFunction()) {
+                    error(functionCallDecription() + ": could not evaluate array size of output " + 
+                            myOutput().name());
+                } else if (!useType.typeCompatible(outType, true)) {
+                    if (useType.typeCompatibleExceptLengths(outType)) {
+                        if (!lockBranch(checkType))
+                            errorUnlessDisabled("%s: component %s is of size %s and output %s is of size %s - they are not compatible", 
+                                    functionCallDecription(), use.name(), useType.size(), myOutput().name(), outType.size());
+                    } else {
+                        error("%s: component %s is of type %s and output %s is of type %s - they are not compatible", 
+                                functionCallDecription(), use.name(), useType, myOutput().name(), outType);
                     }
                 }
             }
@@ -1436,7 +1085,7 @@ aspect FlatTypeCheck {
                         boundType = boundType.sizedType(boundType.size().expand(vectorizedSize()));
                     else if (isDestructorArgument())
                         boundType = boundType.sizedType(type.size());
-                    typeOk = boundType.typeCompatible(type, true) || lockBranch(checkType);
+                    typeOk = boundType.typeCompatible(type, true);
                 }
             } else {
                 typeOk = argumentTypeValid(type);
@@ -1460,25 +1109,24 @@ aspect FlatTypeCheck {
         }
     }
 
-    public void InstMissingArgument.typeCheck(ErrorCheckType checkType) {
-        if (!isDestructorArgument())
-            error(functionCallDecription() + ": missing argument for required input " + getBoundInput().name());
-    }
-
-    public void InstMultipleBoundArgument.typeCheck(ErrorCheckType checkType) {
-        error(functionCallDecription() + ": multiple arguments matches input " + getBoundInput().name());
-    }
-
-    inh boolean InstFunctionArgument.isDestructorArgument();
-    eq InstFunctionCall.getArg().isDestructorArgument() = isDestructorCall();
-    eq BaseNode.getChild().isDestructorArgument()       = false;
-
-    inh boolean InstClassDecl.inExternalObject();
-    eq InstNode.getChild().inExternalObject()              = isExternalObject();
-    eq InstRecordConstructor.getChild().inExternalObject() = false;
-
-    public void InstDefaultArgument.typeCheck(ErrorCheckType checkType) {}
-
+  public void InstMissingArgument.typeCheck(ErrorCheckType checkType) {
+	  if (!isDestructorArgument())
+		  error(functionCallDecription() + ": missing argument for required input " + getBoundInput().name());
+  }
+  
+  public void InstMultipleBoundArgument.typeCheck(ErrorCheckType checkType) {
+	  error(functionCallDecription() + ": multiple arguments matches input " + getBoundInput().name());
+  }
+  
+  inh boolean InstFunctionArgument.isDestructorArgument();
+  eq InstFunctionCall.getArg().isDestructorArgument() = isDestructorCall();
+  eq BaseNode.getChild().isDestructorArgument()       = false;
+  
+  inh boolean InstClassDecl.inExternalObject();
+  eq InstNode.getChild().inExternalObject() = isExternalObject();
+  
+  public void InstDefaultArgument.typeCheck(ErrorCheckType checkType) {}
+  
     inh String InstFunctionArgument.nonBoundArgumentTypeError();
     eq FExp.getChild().nonBoundArgumentTypeError() {
         throw new UnsupportedOperationException("Method nonBoundArgumentTypeError() not implemented for type " + getClass().getSimpleName());
@@ -1495,125 +1143,72 @@ aspect FlatTypeCheck {
     eq InstNamedArgument.argumentDesc()      = "named argument " + getName();
 
   public void InstAccess.typeCheck(ErrorCheckType checkType) {
-      if (myInstComponentDecl().size().isUndefined() && myInstComponentDecl().inFunction() && 
-              !myInstComponentDecl().isInput() && !checkType.allowIncompleteSizes()) {
-          compliance("Using variables with undefined size is not supported");
-      }
+//	  if (getTopInstAccess() == this && !type().isUnknown()) {
+		  // TODO: if this is a slice, check that all branches are of equal size
+//	  }
   }
   
-  public boolean Size.isUndefined() {
-      for (int i = 0; i < ndims(); i++) {
-          if (size[i] == Size.UNKNOWN) {
-              return true;
-          }
-      }
-      return false;
+  public void InstDot.typeCheck(ErrorCheckType checkType) {
+	  // Check for accesses to non-constant component in class
+	  int n = getNumInstAccess();
+	  for (int i = 0; i < n - 1; i++)
+		  getInstAccess(i).checkAccessCompInClassLeft(getInstAccess(i + 1), checkType);
+	  super.typeCheck(checkType);
   }
-
-  public boolean MutableSize.isUndefined() {
-      for (int i = 0; i < ndims(); i++) {
-          if (size[i] == Size.UNKNOWN && (exps[i] == null || exps[i] instanceof FColonSizeExp)) {
-              return true;
-          }
-      }
-      return false;
+  
+  public void InstAccess.checkAccessCompInClassLeft(InstAccess right, ErrorCheckType checkType) {}
+  
+  public void InstClassAccess.checkAccessCompInClassLeft(InstAccess right, ErrorCheckType checkType) {
+	  right.checkAccessCompInClassRight(myInstClassDecl(), checkType);
   }
-
-    public static final SimpleProblemProducer ASTNode.ACCESS_TO_CLASS_THROUGH_COMPONENT = 
-            new SimpleErrorProducer("ACCESS_TO_CLASS_THROUGH_COMPONENT", ProblemKind.SEMANTIC,
-                    "Can not access non-function class through component access: '%s'");
-    public static final SimpleProblemProducer ASTNode.ACCESS_TO_FUNCTION_THROUGH_MULTIPLE_COMPONENTS = 
-            new SimpleErrorProducer("ACCESS_TO_FUNCTION_THROUGH_MULTIPLE_COMPONENTS", ProblemKind.SEMANTIC,
-                    "Can not access function through component unless only the first part of the name is a component: '%s'");
-    public static final SimpleProblemProducer ASTNode.ACCESS_TO_FUNCTION_THROUGH_ARRAY_COMPONENT = 
-            new SimpleErrorProducer("ACCESS_TO_FUNCTION_THROUGH_ARRAY_COMPONENT", ProblemKind.SEMANTIC,
-                    "Can not access function through array component access: '%s'");
-
-    public void InstDot.typeCheck(ErrorCheckType checkType) {
-        // Check for accesses to component in class or class in component
-        int n = getNumInstAccess();
-        for (int i = 0; i < n - 1; i++)
-            getInstAccess(i).checkMixedAccessLeft(getInstAccess(i + 1), this, checkType, i, n);
-        super.typeCheck(checkType);
-    }
-
-    public void InstAccess.checkMixedAccessLeft(
-            InstAccess right, InstAccess top, ErrorCheckType checkType, int i, int n) {}
-
-    public void InstClassAccess.checkMixedAccessLeft(
-            InstAccess right, InstAccess top, ErrorCheckType checkType, int i, int n) {
-        right.checkMixedAccessRight(myInstClassDecl(), top, checkType, i, n);
-    }
-
-    public void InstComponentAccess.checkMixedAccessLeft(
-            InstAccess right, InstAccess top, ErrorCheckType checkType, int i, int n) {
-        right.checkMixedAccessRight(myInstComponentDecl(), top, checkType, isArray(), i, n);
-    }
-
-    public void InstComponentArrayAccess.checkMixedAccessLeft(
-            InstAccess right, InstAccess top, ErrorCheckType checkType, int i, int n) {
-        right.checkMixedAccessRight(myInstComponentDecl(), top, checkType, true, i, n);
-    }
-
-    public void InstAccess.checkMixedAccessRight(
-            InstClassDecl left, InstAccess top, ErrorCheckType checkType, int i, int n) {}
-
-    public void InstComponentAccess.checkMixedAccessRight(
-            InstClassDecl left, InstAccess top, ErrorCheckType checkType, int i, int n) {
-        checkMixedAccessRightForComponent(left, top, checkType, i, n);
-    }
-
-    public void InstComponentArrayAccess.checkMixedAccessRight(
-            InstClassDecl left, InstAccess top, ErrorCheckType checkType, int i, int n) {
-        checkMixedAccessRightForComponent(left, top, checkType, i, n);
-    }
-
-    public void InstAccess.checkMixedAccessRightForComponent(
-            InstClassDecl left, InstAccess top, ErrorCheckType checkType, int i, int n) {
-        String type = null;
-        if (left.extendsEnum()) {
-            if (!myInstComponentDecl().isEnumLiteral())
-                type = "attribute of primitive with dot notation";
-        } else if (left.isPackage()) {
-            left.checkRestriction(checkType);
-        } else if (!left.isOkPackage()) {
-            type = "component in non-package class";
-        }
-        if (type != null) {
-            top.error("Can not access " + type + ": " + top.name());
-        }
-    }
-
-    public void InstAccess.checkMixedAccessRight(
-            InstComponentDecl left, InstAccess top, ErrorCheckType checkType, boolean array, int i, int n) {}
-
-    public void InstClassAccess.checkMixedAccessRight(
-            InstComponentDecl left, InstAccess top, ErrorCheckType checkType, boolean array, int i, int n) {
-        if (!top.myInstClassDecl().isFunction()) {
-            ACCESS_TO_CLASS_THROUGH_COMPONENT.invoke(top, top);
-        } else if (i != 0) {
-            ACCESS_TO_FUNCTION_THROUGH_MULTIPLE_COMPONENTS.invoke(top, top);
-        } else if (array) {
-            ACCESS_TO_FUNCTION_THROUGH_ARRAY_COMPONENT.invoke(top, top);
-         }
-    }
-
-    public void InstComponentAccess.checkMixedAccessRight(
-            InstComponentDecl left, InstAccess top, ErrorCheckType checkType, boolean array, int i, int n) {
-        checkMixedAccessRightForComponent(left, top, checkType, array, i, n);
-    }
-
-    public void InstComponentArrayAccess.checkMixedAccessRight(
-            InstComponentDecl left, InstAccess top, ErrorCheckType checkType, boolean array, int i, int n) {
-        checkMixedAccessRightForComponent(left, top, checkType, array, i, n);
-    }
-
-    public void InstAccess.checkMixedAccessRightForComponent(
-            InstComponentDecl left, InstAccess top, ErrorCheckType checkType, boolean array, int i, int n) {
-        if (left.isPrimitive()) {
-            top.error("Can not access attribute of primitive with dot notation: " + top.name());
-        }
-    }
+  
+  public void InstComponentAccess.checkAccessCompInClassLeft(InstAccess right, ErrorCheckType checkType) {
+	  if (myInstComponentDecl().isPrimitive()) {
+		  InstAccess top = getTopInstAccess();
+		  top.error("Can not access attribute of primitive with dot notation: " + top.name());
+	  }
+  }
+  
+  public void InstComponentArrayAccess.checkAccessCompInClassLeft(InstAccess right, ErrorCheckType checkType) {
+	  if (myInstComponentDecl().isPrimitive()) {
+		  InstAccess top = getTopInstAccess();
+		  top.error("Can not access attribute of primitive with dot notation: " + top.name());
+	  }
+  }
+  
+  public void InstAccess.checkAccessCompInClassRight(InstClassDecl icd, ErrorCheckType checkType) {}
+  
+  public void InstComponentAccess.checkAccessCompInClassRight(InstClassDecl icd, ErrorCheckType checkType) {
+	  String type = null;
+	  if (icd.extendsEnum()) {
+		  if (!myInstComponentDecl().isEnumLiteral())
+			  type = "attribute of primitive with dot notation";
+	  } else if (icd.isPackage()) {
+		  icd.checkRestriction(checkType);
+	  } else if (!icd.isOkPackage()) {
+		  type = "component in non-package class";
+	  }
+	  if (type != null) {
+		  InstAccess top = getTopInstAccess();
+		  top.error("Can not access " + type + ": " + top.name());
+	  }
+  }
+  
+  public void InstComponentArrayAccess.checkAccessCompInClassRight(InstClassDecl icd, ErrorCheckType checkType) {
+	  String type = null;
+	  if (icd.extendsEnum()) {
+		  if (!myInstComponentDecl().isEnumLiteral())
+			  type = "attribute of primitive with dot notation";
+	  } else if (icd.isPackage()) {
+		  icd.checkRestriction(checkType);
+	  } else if (!icd.isOkPackage()) {
+		  type = "component in non-package class";
+	  }
+	  if (type != null) {
+		  InstAccess top = getTopInstAccess();
+		  top.error("Can not access " + type + ": " + top.name());
+	  }
+  }
 
     /**
      * Check if the type defined for this argument in the built-in function list 
@@ -1634,7 +1229,6 @@ aspect FlatTypeCheck {
     eq FDimensionConvert.getOriginalArg().argumentDefinedTypeValid()         = false;
     eq FEventGenExp.getOriginalArg().argumentDefinedTypeValid()              = false;
     eq FCardinality.getOriginalArg().argumentDefinedTypeValid()              = false;
-    eq FDecouple.getOriginalArg().argumentDefinedTypeValid()                 = false;
     eq FMathematicalFunctionCall.getOriginalArg().argumentDefinedTypeValid() = false;
     eq FConnectionsOp.getOriginalArg().argumentDefinedTypeValid()            = false;
     eq FStringExp.getOriginalArg(int i).argumentDefinedTypeValid()           = i > 0;
@@ -1669,7 +1263,6 @@ aspect FlatTypeCheck {
     eq FDimensionConvert.getChild().argumentTypeValid(FType type)         = argumentSizeValid(type.size());
     eq FCardinality.getChild().argumentTypeValid(FType type)              = 
         type.isScalar() && getFExp().isComponentReference(ALLOWED_COMPONENTS);
-    eq FDecouple.getChild().argumentTypeValid(FType type)                 = true;
     eq FConnectionsOp.getOriginalArg(int i).argumentTypeValid(FType type) = 
         getOriginalArg(i).getFExp().isComponentReference(ALLOWED_COMPONENTS);
     eq FStringExp.getChild().argumentTypeValid(FType type)                = 
@@ -1750,24 +1343,22 @@ aspect FlatTypeCheck {
 
     protected static void ASTNode.typeCheckEnabled(ErrorCheckType checkType, FExp enabledExp, FType parentType, boolean eachSet) {
         enabledExp.collectErrors(checkType);
-        if (checkType.checkTypes()) {
-            if (!enabledExp.type().isBoolean() && !enabledExp.type().isUnknown()) {
-                enabledExp.error("The type of the enabled expression is not boolean");
-            } else if (!eachSet && !parentType.dimensionCompatible(enabledExp.type())) { 
-                if (enabledExp.ndims() == 0) {
-                    enabledExp.warning("Assuming 'each' for enabled expression");
-                } else {
-                    enabledExp.errorUnlessDisabledAnd(parentType.ndims() == enabledExp.ndims(), 
-                            "Array size mismatch for the enabled attribute, " + 
-                            "size of component declaration is %s and size of expression is %s", 
-                            parentType.size(), enabledExp.size());
-                }
-            } else if (eachSet) { 
-                if (parentType.ndims() == 0) {
-                    enabledExp.warning("The 'each' keyword should not be applied to attributes of scalar components");
-                } else if (enabledExp.ndims() > 0) {
-                    enabledExp.error("The enabled attribute is declared 'each' and the expression is not scalar");
-                }
+        if (!enabledExp.type().isBoolean() && !enabledExp.type().isUnknown()) {
+            enabledExp.error("The type of the enabled expression is not boolean");
+        } else if (!eachSet && !parentType.dimensionCompatible(enabledExp.type())) { 
+            if (enabledExp.ndims() == 0) {
+                enabledExp.warning("Assuming 'each' for enabled expression");
+            } else {
+                enabledExp.errorUnlessDisabledAnd(parentType.ndims() == enabledExp.ndims(), 
+                        "Array size mismatch for the enabled attribute, " + 
+                        "size of component declaration is %s and size of expression is %s", 
+                        parentType.size(), enabledExp.size());
+            }
+        } else if (eachSet) { 
+            if (parentType.ndims() == 0) {
+                enabledExp.warning("The 'each' keyword should not be applied to attributes of scalar components");
+            } else if (enabledExp.ndims() > 0) {
+                enabledExp.error("The enabled attribute is declared 'each' and the expression is not scalar");
             }
         }
     }
@@ -1796,7 +1387,7 @@ aspect VariabilityCheck {
      * to <code>source</code>.
      */
     public static FExp FPreExp.create(FExp exp, FExp source) {
-        exp = exp.createFPreExp();
+        exp = create(exp);
         exp.setInstanceTreeSource(source);
         return exp;
     }

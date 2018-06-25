@@ -131,14 +131,7 @@ aspect OptimicaTransformCanonical {
 	
 	private FRealVariable FOptClass.addExperimentTimeParameter(
 			String name, FAttribute attr, double defaultValue) {
-        FTypePrefixVariability v = fParameter();
-        if (attr != null) {
-            FAttribute freeAttr = findMatching(attr.getFAttributes(), FAttribute.FREE);
-            if (freeAttr != null && freeAttr.hasValue() && freeAttr.getValue().ceval().booleanValue()) {
-                v = fOptParameter();
-            }
-        }
-        FRealVariable fv = new FRealVariable(new FPublicVisibilityType(), v, new FQNameString(name));
+		FRealVariable fv = new FRealVariable(new FPublicVisibilityType(), fParameter(), new FQNameString(name));
 		if (attr != null) 
 			fv.setFAttributeList(attr.getFAttributeList().fullCopy());
 		if (attr != null && attr.hasValue())
@@ -152,47 +145,81 @@ aspect OptimicaTransformCanonical {
 	// Don't add initial equations for optimization problems
 	public void FOptClass.addInitialEquations() {}
 	
-    @Override
-    protected void FOptClass.scalarizeVars(Scalarizer.Variable s) {
-        super.scalarizeVars(s);
-        scalarizeConstraints(s.sc);
-        scalarizeClassAttributes(s.sp);
-    }
-
-    protected void FOptClass.scalarizeConstraints(Scalarizer.Equation s) {
-        List<FConstraint> constr = new List<FConstraint>();
-        for (FConstraint c : getFConstraints()) {
-            c.scalarize(s, constr);
-        }
-        setFConstraintList(constr);
-    }
-
-    protected void FOptClass.scalarizeClassAttributes(Scalarizer.Equation s) {
-        List<FAttribute> al = new List<FAttribute>();
-        for (FAttribute a : getFAttributes()) {
-            a.scalarize(al, Index.NULL, s);
-        }
-        setFAttributeList(al);
-    }
-
-    /**
-     * Scalarize constraint and put all scalarized equations in list eqns.
-     */
-    public void FConstraint.scalarize(Scalarizer.Equation s, List<FConstraint> constr) {}
-
-    public void FRelationConstraint.scalarize(Scalarizer.Equation s, List<FConstraint> constr) {
-        createArrayTemporaries(s);
-        for (Index i : indices()) {
-            constr.add(createNode(getLeft().cell(i).scalarize(s), getRight().cell(i).scalarize(s)));
-        }
+    protected void FOptClass.scalarizeVars(List<FVariable> vars, List<FVariable> alias_vars) {
+        super.scalarizeVars(vars, alias_vars);
+		scalarizeConstraints(vars);
+		scalarizeClassAttributes();
 	}
-
-    public FExp FTimedVariable.scalarizeExp(Scalarizer s) { 
-        return new FTimedVariable(getName().scalarize(s, null), getArg().scalarize(s));  
-    }
-
-    eq FOptClass.indexReductionErrorsAsWarnings() = true;
-
+	
+	protected void FOptClass.scalarizeConstraints(List<FVariable> vars) {
+		List<FAbstractEquation> eqns = getFAbstractEquations();
+		List<FConstraint> constr = new List<FConstraint>();
+		for (FConstraint c : getFConstraints()) 
+			c.scalarize(constr, eqns, vars, Collections.<String,FExp>emptyMap());
+		setFConstraintList(constr);
+	}
+	
+	protected void FOptClass.scalarizeClassAttributes() {
+		List<FAttribute> al = new List<FAttribute>();
+		for (FAttribute a : getFAttributes()) 
+			a.scalarize(al, Index.NULL, Collections.<String,FExp>emptyMap());
+		setFAttributeList(al);
+	}
+	
+	/**
+	 * Scalarize constraint and put all scalarized equations in list eqns.
+	 */
+	public void FConstraint.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns, 
+			List<FVariable> vars, Map<String,FExp> indexMap) {}
+	
+	public void FRelationConstraint.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns, 
+			List<FVariable> vars, Map<String,FExp> indexMap) {
+		createArrayTemporaries(eqns, vars, indexMap);
+		//log.debug("FEquation.scalarize() " + ndims());
+		if (ndims()==0) {
+			/**
+			 * If the constraint is of dimension 0, i.e, already scalar,
+			 * the constraint is "scalarized" into a simple constraint where
+			 * e.g. built in functions are replaced by elementary operations.
+			 */
+			constr.add(createNode(getLeft().scalarize(indexMap), getRight().scalarize(indexMap)));
+		} else if (ndims() > 0) {
+			/**
+			 * If the expression is an array expression, then the FExp.getArray()
+			 * element is used to generate scalar constraints.
+			 */
+			// Iterate over array elements and create scalarized equation for each
+			for (Index i : indices()) {
+				constr.add(createNode(getLeft().getArray().get(i).scalarize(indexMap), 
+						getRight().getArray().get(i).scalarize(indexMap)));
+			}
+		}
+	}
+	
+	public void FForClauseC.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns,
+			List<FVariable> vars, Map<String,FExp> indexMap) {
+		createArrayTemporaries(eqns, vars, indexMap);
+		Map<String,FExp> myIndexMap = new HashMap<String,FExp>();
+		myIndexMap.putAll(indexMap);
+		Indices indices = indices();
+		for (Index i : indices) {
+			indices.fillIndexMap(myIndexMap, i, getFForIndexs());
+			for (FConstraint c : getFConstraints()) 
+				c.scalarize(constr, eqns, vars, myIndexMap);
+		}
+        for (CommonForIndex fi : getFForIndexs())
+            fi.clearEvaluationValue();
+	}
+	
+	public FExp FTimedVariable.scalarize(Map<String,FExp> indexMap) { 
+		return new FTimedVariable(getName().scalarize(indexMap),getArg().scalarize(indexMap)); 
+	}
+	
+	public FExp FStartTimeExp.scalarize(Map<String,FExp> indexMap) { return new FStartTimeExp(); } 
+	public FExp FFinalTimeExp.scalarize(Map<String,FExp> indexMap) { return new FFinalTimeExp(); } 
+	
+	eq FOptClass.indexReductionErrorsAsWarnings() = true;
+	
 }
 
 aspect NormalizeFinalTimeProblems {
@@ -212,6 +239,7 @@ aspect NormalizeFinalTimeProblems {
 	boolean FDerExp.rewritten = false;
 	
 	rewrite FDerExp {when (rewriteStartAndFinalTime && !rewritten) to FExp {
+		    //System.out.println("hej");
 			FDivExp e = new FDivExp(this,new FSubExp(new FIdUseExp(new FIdUse("finalTime")),
 					new FIdUseExp(new FIdUse("startTime"))));
 			rewritten = true;

@@ -13,6 +13,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+package org.jmodelica.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,18 +32,12 @@ import java.util.EnumSet;
 import org.jmodelica.util.collections.ListMap;
 import org.jmodelica.util.collections.LinkedHashListMap;
 import org.jmodelica.util.collections.FilteredIterator;
-import org.jmodelica.util.collections.HashStack;
-
-import org.jmodelica.util.tarjan.Tarjan;
-import org.jmodelica.util.tarjan.SimpleTarjan;
-import org.jmodelica.util.tarjan.TarjanComponent;
 
 aspect Graphs {
 
 public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>> {
 
-    private static final String DEFAULT_EQ_PREFIX = "eq_";
-    private static final String DEFAULT_EQ_SUBFIX = "";
+    private static final String DEFAULT_EQ_PREFIX = "eq";
     
     protected Map<String, V> variableMap = new LinkedHashMap<String, V>();
     protected Map<String, E> equationMap = new LinkedHashMap<String, E>();
@@ -53,7 +48,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     public AbstractBiPGraph() {
     }
 
-    public <E_OTHER extends AbstractEq<E_OTHER, V_OTHER>, V_OTHER extends AbstractVar<E_OTHER, V_OTHER>> AbstractBiPGraph(Collection<E_OTHER> eqs, Collection<V_OTHER> vars) {
+    public <E_OTHER extends AbstractEq<E_OTHER, V_OTHER>, V_OTHER extends AbstractVar<E_OTHER, V_OTHER>> AbstractBiPGraph(Collection<E_OTHER> eqs, Collection<V_OTHER> vars, boolean preserveGroupMembers) {
         for (E_OTHER oldE : eqs)
             addEquation(oldE.getEquation(), oldE.groupNumber(), oldE.variability(), oldE.type(), oldE.isMeta(), oldE.getName());
         for (V_OTHER oldV : vars)
@@ -65,11 +60,18 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
                 if (v != null)
                     addInsidence(e, v);
             }
+            if (preserveGroupMembers) {
+                for (E_OTHER oldOtherE : oldE.getGroupMembers()) {
+                    E otherE = getEquation(oldOtherE.getName());
+                    if (otherE != null)
+                        e.addGroupMember(otherE);
+                }
+            }
         }
     }
 
-    public <E_OTHER extends AbstractEq<E_OTHER, V_OTHER>, V_OTHER extends AbstractVar<E_OTHER, V_OTHER>> AbstractBiPGraph(Collection<E_OTHER> block, boolean isInitial) {
-        this(block, collectMatchingVariables(block));
+    public <E_OTHER extends AbstractEq<E_OTHER, V_OTHER>, V_OTHER extends AbstractVar<E_OTHER, V_OTHER>> AbstractBiPGraph(Collection<E_OTHER> block, boolean isInitial, boolean preserveGroupMembers) {
+        this(block, collectMatchingVariables(block), preserveGroupMembers);
         initialSystem = isInitial;
         for (E_OTHER e : block) {
             if (!e.isMeta()) {
@@ -107,13 +109,8 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     public void setAsInitialSystem() {
         initialSystem = true;
         for (E eqn : getEquations()) {
-            if (eqn.groupNumber() != 0) {
-                continue;
-            }
-            for (V var : lookupVars(eqn.getEquation().findInitUniqueDAEVarUsesInTree())) {
-                for (E groupEqn : eqn.getGroupMembers()) {
-                    addEdge(groupEqn, var);
-                }
+            for (V var : lookupVarsInSet(eqn.getEquation().findInitUniqueDAEVarUsesInTree())) {
+                addEdge(eqn, var);
             }
         }
     }
@@ -126,33 +123,41 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         return equationIndexMap.getList(eqn);
     }
 
-    private E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta, String prefix, String subfix, Enumerator enumerator) {
+    public E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type) {
+        return addEquation(eqn, groupNumber, variability, type, false);
+        
+    }
+    
+    public E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta) {
+        return addEquation(eqn, groupNumber, variability, type, isMeta, DEFAULT_EQ_PREFIX, enumerator);
+        
+    }
+    
+    private E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta, String prefix, Enumerator enumerator) {
         String name;
+        prefix = prefix + "_";
         do {
-            name = prefix + enumerator.next() + subfix;
+            name = prefix + enumerator.next();
         } while (getEquation(name) != null);
         return addEquation(eqn, groupNumber, variability, type, isMeta, name);
     }
 
-    protected E addEquation(FAbstractEquation eqn, int groupNumber, Collection<E> groupMemberList, FTypePrefixVariability variability, FType type, String name) {
-        return addEquation(eqn, groupNumber, groupMemberList, variability, type, false, name);
+    protected E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, String name) {
+        return addEquation(eqn, groupNumber, variability, type, false, name);
     }
 
     protected E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta, String name) {
-        return addEquation(eqn, groupNumber, equationIndexMap.getList(eqn, true), variability, type, isMeta, name);
-    }
-
-    protected E addEquation(FAbstractEquation eqn, int groupNumber, Collection<E> groupMemberList, FTypePrefixVariability variability, FType type, boolean isMeta, String name) {
         E e = equationMap.get(name);
         if (e != null)
             throw new IllegalArgumentException("Equation with the name '" + name + "' already exists:\n" + e.getEquation() + "\nNew equation:\n" + eqn);
-        e = createEq(name, eqn, groupNumber, groupMemberList, variability, type, isMeta);
+        e = createEq(name, eqn, groupNumber, variability, type, isMeta);
+        e.addGroupMember(e);
         equationMap.put(name,e);
         insertIntoEquationIndexMap(eqn,e);
         return e;
     }
 
-    protected abstract E createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<E> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta);
+    protected abstract E createEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta);
 
     public V addVariable(FVariable var) {
         return addVariable(var.name(), var);
@@ -248,8 +253,8 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             public boolean isOk(FTypePrefixVariability variability)               { return variability.discreteVariability(); }
         },
         NON_FIXED_PARAMETERS {
-            public Collection<? extends FVariable> variables(FClass c)            { return c.initialParameters(); }
-            public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.initialParameters(); }
+            public Collection<? extends FVariable> variables(FClass c)            { return c.nonFixedParameters(); }
+            public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.nonFixedParameters(); }
             public boolean isOk(FTypePrefixVariability variability)               { return variability.parameterVariability(); }
         };
 
@@ -278,7 +283,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         Set<FVariable> emptySet = Collections.emptySet();
         for (FAbstractEquation e : eqns) {
             
-            IncidenceMap incMap = e.createIncidenceMap(this, variableTypes);
+            IncidenceMap incMap = e.createIncidenceMap(this, Collections.<V>emptySet(), variableTypes);
             int n_eq = incMap.numEqs();
             
             Collection<E> groupMembers = getEquations(e);
@@ -290,27 +295,24 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
                     n_existing_meta++;
                 }
             }
-            if (n_existing != 0 && (n_existing - n_existing_meta) != n_eq) {
+            if (n_existing != 0 && (n_existing - n_existing_meta) != n_eq)
                 throw new IllegalArgumentException("Equation already exist in BiPGraph but with different number of scalars, previously " + n_existing + ", now " + n_eq + ", equation:\n" + e);
-            }
+            
             if (n_existing == 0) {
                 groupMembers = new ArrayList<E>();
-                Enumerator subEnumerator = enumerator;
-                String prefix = eqNamePrefix;
-                String subfix = "";
-                if (n_eq > 1) {
-                    subEnumerator = new Enumerator(1);
-                    prefix += enumerator.next() + "[";
-                    subfix = "]";
-                }
                 if (n_eq == 0) {
-                    E eqn = addEquation(e, 0, incMap.variability(0), incMap.type(0), true, prefix, subfix, subEnumerator);
+                    E eqn = addEquation(e, 0, incMap.variability(0), incMap.type(0), true, eqNamePrefix, enumerator);
                     groupMembers.add(eqn);
                 } else {
                     for (int i = n_eq - 1; 0 <= i; i--) { // During tarjan the order will be reversed,
                         // need to reverse here to preserve the initial order.
-                        E eqn = addEquation(e, i, incMap.variability(i), incMap.type(i), false, prefix, subfix, subEnumerator);
+                        E eqn = addEquation(e, i, incMap.variability(i), incMap.type(i), false, eqNamePrefix, enumerator);
                         groupMembers.add(eqn);
+                    }
+                }
+                for (E ee : groupMembers) {
+                    for (E eee : groupMembers) {
+                        ee.addGroupMember(eee);
                     }
                 }
             }
@@ -334,20 +336,13 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
      * dependent on each other.
      */
     protected class IncidenceMap {
-        private Set<V> vars = null;
-        protected final FAbstractEquation equation;
-        protected final VariableResolver<E, V> resolver;
+        protected Set<V> vars;
+        protected FAbstractEquation equation;
         
-        public IncidenceMap(FAbstractEquation e, VariableResolver<E, V> resolver) {
+        public IncidenceMap(FAbstractEquation e, Set<V> additionalDeps) {
             equation = e;
-            this.resolver = resolver;
-        }
-        
-        protected Set<V> vars() {
-            if (vars == null) {
-                vars = resolver.lookupVars(equation.findFIdUseExpsInTree(getFIdUseExpLookupVisitor()));
-            }
-            return vars;
+            vars = lookupVarsInSet(equation.findFIdUseExpsInTree(getFIdUseExpLookupVisitor()));
+            vars.addAll(additionalDeps);
         }
         
         public FTypePrefixVariability variability(int i) {
@@ -359,7 +354,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
         
         public void addEdges(E eqn, boolean log) {
-            for (V var : vars()) {
+            for (V var : vars) {
                 if (log) {
                     ASTNode.log.verbose("*** %s", var);
                 }
@@ -373,96 +368,33 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     }
     
     /**
-     * An interface that should be implemented by all IncidenceMap classes that
-     * represent an equation which only has one or more variables on the left hand
-     * side (one variable on the left hand side per scalar equation)
-     */
-    protected interface AssignmentIncidenceMap {
-        public Iterable<FIdUseExp> rhs(String assignedLHS);
-        public Collection<FIdUseExp> assigned();
-    }
-    
-    /**
-     * Handles normal equations which are on the form "x = ...".
-     */
-    protected class SingleAssignmentIncidenceMap extends IncidenceMap implements AssignmentIncidenceMap {
-        private final FIdUseExp assigned;
-        private Collection<FIdUseExp> rhsUses;
-        
-        public SingleAssignmentIncidenceMap(FEquation eqn, VariableResolver<E, V> resolver) {
-            super(eqn, resolver);
-            assigned = eqn.getLeft().asFIdUseExp();
-           
-        }
-        
-        private Collection<FIdUseExp> rhsUses() {
-            if (rhsUses == null) {
-                rhsUses = equation.FIdUseExpsInRHS(getFIdUseExpLookupVisitor());
-            }
-            return rhsUses;
-        }
-        
-        @Override
-        public Iterable<FIdUseExp> rhs(String assignedLHS) {
-            if (assignedLHS.equals(assigned.name())) {
-                return rhsUses();
-            } else {
-                return Collections.emptyList();
-            }
-        }
-        
-        @Override
-        public Collection<FIdUseExp> assigned() {
-            return Collections.singletonList(assigned);
-        }
-    }
-    
-    /**
      * Handles incidences between variables in a non-scalar FAbstractEquation.
      * Isolates LHS variables from each other.
      */
     protected abstract class MultiIncidenceMap extends IncidenceMap {
-        private Map<Integer, V> lhs = null;
-        private Set<FIdUseExp> lhsUses = null;
-        protected final EnumSet<VarType> variableTypes;
+        protected Map<Integer, V> lhs;
+        protected Set<FIdUseExp> lhsUses;
         
-        public MultiIncidenceMap(FAbstractEquation e, VariableResolver<E, V> resolver, EnumSet<VarType> variableTypes) {
-            super(e, resolver);
-            this.variableTypes = variableTypes;
+        public MultiIncidenceMap(FAbstractEquation e, Set<V> additionalDeps, EnumSet<VarType> variableTypes) {
+            super(e, additionalDeps);
+            lhsUses = equation.FIdUseExpsInLHS(getFIdUseExpLookupVisitor());
+            lhs = new HashMap<Integer, V>();
         }
         
-        protected Set<FIdUseExp> lhsUses() {
-            if (lhsUses == null) {
-                lhsUses = equation.FIdUseExpsInLHS(getFIdUseExpLookupVisitor());
-            }
-            return lhsUses;
-        }
-        
-        protected abstract void computeLHS(Map<Integer, V> lhs);
-        
-        protected Map<Integer, V> lhs() {
-            if (lhs == null) {
-                Map<Integer, V> lhsTmp = new HashMap<Integer, V>();
-                computeLHS(lhsTmp);
-                lhs = lhsTmp;
-            }
-            return lhs;
-        }
-        
-        protected void buildLhsFunction(Map<Integer, V> lhs, EnumSet<VarType> variableTypes) {
+        protected void buildLhsFunction(EnumSet<VarType> variableTypes) {
             int i = 0;
-            for (FIdUseExp use : lhsUses()) {
+            for (FIdUseExp use : lhsUses) {
                 if (variableTypes != null) {
                     FAbstractVariable fv = use.myFV();
                     if (fv != null && !addLhs(fv, variableTypes)) {
                         continue;
                     }
                 }
-                buildLhsFunction(lhs, use, i++);
+                buildLhsFunction(use, i++);
             }
         }
         
-        protected void buildLhsFunction(Map<Integer, V> lhs, FIdUseExp use, int i) {
+        protected void buildLhsFunction(FIdUseExp use, int i) {
             V var = getVariable(use.name());
             lhs.put(i, var);
         }
@@ -478,7 +410,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         
         @Override
         public FTypePrefixVariability variability(int i) {
-            V var = lhs().get(i);
+            V var = lhs.get(i);
             if (var == null) {
                 return super.variability(i);
             }
@@ -495,7 +427,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         
         @Override
         public FType type(int i) {
-            V var = lhs().get(i);
+            V var = lhs.get(i);
             if (var == null) {
                 return super.type(i);
             }
@@ -505,19 +437,19 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         @Override
         public void addEdges(E eqn, boolean log) {
             int i = eqn.groupNumber();
-            V lhsVar = lhs().get(i);
-            for (V var : vars()) {
+            V lhsVar = lhs.get(i);
+            for (V var : vars) {
                 if (var == lhsVar || rhs(i).contains(var)) {
                     addEdge(eqn, var);
                 }
             }
         }
-
+        
         protected abstract Set<V> rhs(int i);
-
+        
         @Override
         public int numEqs() {
-            return lhs().size();
+            return lhs.size();
         }
     }
     
@@ -528,33 +460,26 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
      */
     protected class ManyIncidenceMap extends MultiIncidenceMap {
         
-        private Set<V> rhs = null;
+        protected Set<V> rhs;
         
-        public ManyIncidenceMap(FAbstractEquation e, VariableResolver<E, V> resolver, EnumSet<VarType> variableTypes) {
-            super(e, resolver, variableTypes);
-        }
-        
-        protected Set<V> rhs() {
-            if (rhs == null) {
-                rhs = resolver.lookupVars(equation.FIdUseExpsInRHS());
-                if (equation instanceof FAlgorithm) {
-                    rhs.removeAll(resolver.lookupVars(lhsUses()));
-                }
+        public ManyIncidenceMap(FAbstractEquation e, Set<V> additionalDeps, EnumSet<VarType> variableTypes) {
+            super(e, additionalDeps, variableTypes);
+            rhs = lookupVarsInSet(equation.FIdUseExpsInRHS());
+            if (equation instanceof FAlgorithm) {
+                rhs.removeAll(lookupVarsInSet(lhsUses));
             }
-            return rhs;
-        }
-        
-        protected void computeLHS(Map<Integer, V> lhs) {
+            rhs.addAll(additionalDeps);
+            
             if (equation instanceof FFunctionCallEquation) {
-                buildLhsFunction(lhs, variableTypes);
+                buildLhsFunction(variableTypes);
             } else {
-                buildLhsOther(lhs, variableTypes);
+                buildLhsOther(variableTypes);
             }
         }
         
-        private void buildLhsOther(Map<Integer, V> lhs, EnumSet<VarType> variableTypes) {
+        private void buildLhsOther(EnumSet<VarType> variableTypes) {
             int i = 0;
-            for (FAbstractVariable fv : ASTNode.lookupFVariablesInSet(lhsUses())) {
+            for (FAbstractVariable fv : ASTNode.lookupFVariablesInSet(lhsUses)) {
                 if (variableTypes != null) {
                     if (!addLhs(fv, variableTypes)) {
                         continue;
@@ -568,7 +493,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         
         @Override
         protected Set<V> rhs(int i) {
-            return rhs();
+            return rhs;
         }
     }
     
@@ -577,104 +502,36 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
      * Isolates LHS variables from each other.
      * Computes RHS dependencies for LHS.
      */
-    protected class SplitIncidenceMap extends MultiIncidenceMap implements AssignmentIncidenceMap {
+    protected class SplitIncidenceMap extends MultiIncidenceMap {
         protected ArrayList<Set<V>> splitMap;
-        protected Map<FIdUseExp, Collection<FIdUseExp>> resolvedDependencies;
-        private Map<String, FIdUseExp> nameToAssignedMap;
+        protected Map<FIdUseExp, Set<FIdUseExp>> resolvedDependencies;
+        protected Set<V> additionalDeps;
         
-        public SplitIncidenceMap(FFunctionCallEquation e, VariableResolver<E, V> resolver, EnumSet<VarType> variableTypes) {
-            super(e, resolver, variableTypes);
-        }
-        
-        private Map<FIdUseExp, Collection<FIdUseExp>> sortDependencies(Map<FIdUseExp, Set<FIdUseExp>> unsortedDependencies) {
-            final Map<String, Integer> varToPosMap = new HashMap<String, Integer>();
-            int counter = 0;
-            for (FIdUseExp use : equation.FIdUseExpsInRHS()) {
-                if (!varToPosMap.containsKey(use.name())) {
-                    varToPosMap.put(use.name(), counter++);
-                }
-            }
-            Map<FIdUseExp, Collection<FIdUseExp>> resolvedDependencies = new HashMap<FIdUseExp, Collection<FIdUseExp>>();
-            for (Map.Entry<FIdUseExp, Set<FIdUseExp>> entry : unsortedDependencies.entrySet()) {
-                ArrayList<FIdUseExp> uses = new ArrayList<FIdUseExp>(entry.getValue());
-                Collections.sort(uses, new Comparator<FIdUseExp>() {
-                    public int compare(FIdUseExp a, FIdUseExp b) {
-                        return varToPosMap.get(a.name()) - varToPosMap.get(b.name());
-                    }
-                });
-                resolvedDependencies.put(entry.getKey(), uses);
-            }
-            return resolvedDependencies;
-        }
-        
-        protected Map<FIdUseExp, Collection<FIdUseExp>> resolvedDependencies() {
-            if (resolvedDependencies == null) {
-                DependencyVariableEvaluator pve = new DependencyVariableEvaluator();
-                FFunctionCallEquation equation = (FFunctionCallEquation) this.equation;
-                try {
-                    equation.getCall().evaluate(pve);
-                    Map<FIdUseExp, Set<FIdUseExp>> unsortedDependencies = pve.resolveDependencies(equation);
-                    resolvedDependencies = sortDependencies(unsortedDependencies);
-                } catch (ConstantEvaluationException e) {
-                    ASTNode.log.debug("SplitIncidenceMap failed to compute dependency information, falling back to normal heuristics!");
-                    resolvedDependencies = new HashMap<FIdUseExp, Collection<FIdUseExp>>();
-                    Collection<FIdUseExp> rhs = equation.FIdUseExpsInRHS();
-                    for (FIdUseExp lhs : lhsUses()) {
-                        resolvedDependencies.put(lhs, rhs);
-                    }
-                }
-            }
-            return resolvedDependencies;
-        }
-        
-        protected Map<String, FIdUseExp> nameToAssignedMap() {
-            if (nameToAssignedMap == null) {
-                nameToAssignedMap = new HashMap<String, FIdUseExp>();
-                for (FIdUseExp use : lhsUses()) {
-                    FIdUseExp old = nameToAssignedMap.put(use.name(), use);
-                    if (old != null) {
-                        throw new UnsupportedOperationException("The following equation assignes the same variable twice, " + old + ", this class doesn't handle that:\n" + equation);
-                    }
-                }
-            }
-            return nameToAssignedMap;
-        }
-        
-    
-        @Override
-        protected void computeLHS(Map<Integer, V> lhs) {
+        public SplitIncidenceMap(FFunctionCallEquation e, Set<V> additionalDeps, EnumSet<VarType> variableTypes) {
+            super(e, additionalDeps, variableTypes);
             splitMap = new ArrayList<Set<V>>();
-            buildLhsFunction(lhs, variableTypes);
+            
+            this.additionalDeps = additionalDeps;
+            
+            DependencyVariableEvaluator pve = new DependencyVariableEvaluator();
+            e.getCall().evaluate(pve);
+            resolvedDependencies = pve.resolveDependencies(e);
+            
+            buildLhsFunction(variableTypes);
         }
         
         @Override
-        protected void buildLhsFunction(Map<Integer, V> lhs, FIdUseExp use, int i) {
-            super.buildLhsFunction(lhs, use, i);
-            Set<V> s = resolver.lookupVars(resolvedDependencies().get(use));
+        protected void buildLhsFunction(FIdUseExp use, int i) {
+            super.buildLhsFunction(use, i);
+            Set<V> s = lookupVarsInSet(resolvedDependencies.get(use));
+            s.addAll(additionalDeps);
             splitMap.add(s);
         }
-
+        
         @Override
         protected Set<V> rhs(int i) {
-            lhs(); // Just ensure that splitMap is computed.
            return splitMap.get(i);
         }
-
-        @Override
-        public Collection<FIdUseExp> assigned() {
-            return lhsUses();
-        }
-
-        @Override
-        public final Iterable<FIdUseExp> rhs(String assignedLHS) {
-            FIdUseExp use = nameToAssignedMap().get(assignedLHS);
-            if (use == null) {
-                return Collections.emptyList();
-            } else {
-                return resolvedDependencies().get(use);
-            }
-        }
-        
     }
     
     
@@ -733,14 +590,6 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         return unmatched;
     }
 
-    /**
-     * Comparator that is used during matching of variables to equations. We 
-     * need to use a comparator during this since we wan't to prioritize
-     * matching of certain variables. For example, when matching the initial
-     * system, there is usually more variables than equations. In that case it
-     * is better to leave a variable with start value unmatched since we then
-     * can use the start value as an extra initial condition (equation).
-     */
     private static class VarMatchingComparator implements Comparator<AbstractVar<?,?>> {
         private Set<FAbstractVariable> hasExtraStartConditions;
         private VarMatchingComparator(Set<FAbstractVariable> hasExtraStartConditions) {
@@ -748,40 +597,23 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
                 hasExtraStartConditions = Collections.emptySet();
             this.hasExtraStartConditions = hasExtraStartConditions;
         }
-        
-        /**
-         * Variable o1 will be prefered over o2 by returning a negative number.
-         * This means that o1 will be matched (if possible) before o2, which
-         * means that we wan't to return a positive number for the variables
-         * that we wan't to be unmatched (and used as initial conditions).
-         */
         @Override
         public int compare(AbstractVar<?,?> o1, AbstractVar<?,?> o2) {
             FVariable v1 = o1.getVariable();
             FVariable v2 = o2.getVariable();
-            
-            // Variables that has an extra start condition (equation already in
-            // the system) should be matched last
             boolean b1 = (v1.isPreVariable() && hasExtraStartConditions.contains(v1.myNonPreVariable())) || hasExtraStartConditions.contains(v1);
             boolean b2 = (v2.isPreVariable() && hasExtraStartConditions.contains(v2.myNonPreVariable())) || hasExtraStartConditions.contains(v2);
             int diff = (b1 ? 1 : 0) - (b2 ? 1 : 0);
             if (diff != 0)
                 return diff;
-            
-            // Discrete pre() and continuous variables with start value should
-            // be matched last
             b1 = (v1.isDiscrete() && v1.isPreVariable() || v1.isContinuous()) && v1.startAttributeSet();
             b2 = (v2.isDiscrete() && v2.isPreVariable() || v2.isContinuous()) && v2.startAttributeSet();
             diff = (b1 ? 1 : 0) - (b2 ? 1 : 0);
             if (diff != 0)
                 return diff;
-            
-            // pre() variables should be matched last (why?)
             diff = (v1.isPreVariable() ? 1 : 0) - (v2.isPreVariable() ? 1 : 0);
             if (diff != 0)
                 return diff;
-            
-            // Make the sorting deterministic by comparing the names
             return o1.getName().compareTo(o2.getName());
         }
     }
@@ -1078,23 +910,6 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         public abstract <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<E> members(E equation, AbstractBiPGraph<E, V, ?> graph);
 
         /**
-         * This method returns a list of equations that the supplied equation
-         * should be in the same group as. It is important that there is a
-         * symmetry in the lists returned. If A return a list containing B and
-         * C. Then the list for B should contain A and C, finally the list for
-         * C should contain A and B. Unexepected behaviour otherwise! The list
-         * for A may contain A itself. This method is implemented by the
-         * overriding class.
-         * 
-         * Use this method instead of members() when it is known from the start
-         * that the lists are symetric. The implementation that backs this
-         * method is way more efficient for large lists.
-         * 
-         * Surounding BiPGraph is provided for convenience
-         */
-        public abstract <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<E> sameBlockMembers(E equation, AbstractBiPGraph<E, V, ?> graph);
-
-        /**
          * This method returns a map that map an equation to a list of object
          * identifiers. All equations that are associated with the same object
          * identifier are kept in the same block.
@@ -1102,13 +917,9 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
          * Surounding BiPGraph is provided for convenience
          */
         public abstract <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Map<E, Collection<? extends Object>> memberSets(E equation, AbstractBiPGraph<E, V, ?> graph);
-        
-        public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>> Collection<C> mergeComponents(Collection<C> components, AbstractBiPGraph<E, V, ?> graph) {
-            return components;
-        }
     }
     
-    private static final GroupMemberContributor GROUP_MEMBER_CONTRIBUTOR = new GroupMemberContributor();
+    private static final GroupMemberContributor GROUP_MEMBER_CONTRIBUTOR = addSCCContributor(new GroupMemberContributor());
     
     /**
      * Contributor that describes the relationship between BiPGrah equations
@@ -1118,14 +929,8 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         
         @Override
         public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<E> members(E equation, AbstractBiPGraph<E, V, ?> graph) {
-            return Collections.emptyList();
-        }
-        
-        @Override
-        public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<E> sameBlockMembers(E equation, AbstractBiPGraph<E, V, ?> graph) {
             return equation.getGroupMembers();
         }
-
         
         @Override
         public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Map<E, Collection<? extends Object>> memberSets(E equation, AbstractBiPGraph<E, V, ?> graph) {
@@ -1133,6 +938,54 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
     }
     
+    public static final PreVariableContributor PRE_VARIABLE_CONTRIBUTOR = new PreVariableContributor();
+    
+    /**
+     * Contributor that ensures that discrete variables are bound with their
+     * pre variable.
+     */
+    private static class PreVariableContributor extends SCCContributor {
+
+        @Override
+        public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<E> members(E equation, AbstractBiPGraph<E, V, ?> graph) {
+            Collection<E> depends = Collections.emptyList();
+            for (FVariable var : equation.getEquation().discretePreVariables()) {
+                FAbstractVariable nonPre = var.myNonPreVariable();
+                if (nonPre.isUnknown())
+                    continue;
+                V v = graph.getVariable(nonPre.name());
+                if (v == null)
+                    continue;
+                if (depends.isEmpty())
+                    depends = new ArrayList<E>();
+                depends.add(v.getMatching());
+            }
+            if (!equation.isMeta()) {
+                V var = equation.getMatching();
+                FVariable fVar = var.getVariable();
+                if (fVar.isDiscrete()) {
+                    FAbstractVariable preVar = fVar.myPreVariable();
+                    for (FIdUseExp exp : preVar.uses()) {
+                        FAbstractEquation fae = exp.myFEquation().outermostEnclosingEquation();
+                        if (fae == null || fae.isPrePropagationEquation() != null)
+                            continue;
+                        Collection<E> eqns = graph.getEquations(fae);
+                        if (eqns != null) {
+                            if (depends.isEmpty())
+                                depends = new ArrayList<E>();
+                            depends.addAll(eqns);
+                        }
+                    }
+                }
+            }
+            return depends;
+        }
+
+        @Override
+        public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Map<E, Collection<? extends Object>> memberSets(E equation, AbstractBiPGraph<E, V, ?> graph) {
+            return Collections.emptyMap();
+        }
+    }
     
     private static final HomotopyContributor HOMOTOPY_CONTRIBUTOR = addSCCContributor(new HomotopyContributor());
     
@@ -1147,12 +1000,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<E> members(E equation, AbstractBiPGraph<E, V, ?> graph) {
             return Collections.emptyList();
         }
-
-        @Override
-        public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<E> sameBlockMembers(E equation, AbstractBiPGraph<E, V, ?> graph) {
-            return Collections.emptyList();
-        }
-
+        
         @Override
         public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Map<E, Collection<? extends Object>> memberSets(E equation, AbstractBiPGraph<E, V, ?> graph) {
             if (!graph.isInitialSystem() || graph.insideHomotopySimplified() || !equation.getEquation().containsFHomotopyExp()) {
@@ -1166,151 +1014,100 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     
     protected abstract C createComponentBlock();
 
-    public Collection<C> tarjan(boolean forceGroupMembersIntoSameBlock) {
-        return tarjan(null, forceGroupMembersIntoSameBlock);
+    public Collection<C> tarjan() {
+        return tarjan(null);
     }
     
 
-    public Collection<C> tarjan(OptionRegistry options, boolean forceGroupMembersIntoSameBlock) {
-        return tarjan(options, Collections.<SCCContributor>emptyList(), forceGroupMembersIntoSameBlock);
+    public Collection<C> tarjan(OptionRegistry options) {
+        return tarjan(options, Collections.<SCCContributor>emptyList());
     }
 
-    public Collection<C> tarjan(OptionRegistry options, Collection<SCCContributor> extraContributors,
-            boolean forceGroupMembersIntoSameBlock) {
+    public Collection<C> tarjan(OptionRegistry options, Collection<SCCContributor> extraContributors) {
+        Enumerator indexer = new Enumerator();
+        Stack<E> stack = new Stack<E>();
+        Collection<C> components = new ArrayList<C>();
         tarjanReset();
-        
-        Collection<SCCContributor> groupMemberContributers;
-        if (forceGroupMembersIntoSameBlock) {
-            groupMemberContributers = Collections.<SCCContributor>singletonList(GROUP_MEMBER_CONTRIBUTOR);
-        } else {
-            groupMemberContributers = Collections.<SCCContributor>emptyList();
-        }
-        
+
         Collection<SCCContributor> contributors = new ArrayList<SCCContributor>();
-        for (SCCContributor contributor : new ChainedIterable<SCCContributor>(getSCCContributors(), groupMemberContributers, extraContributors)) {
+        Map<Object, Collection<E>> memberSetsMap = new HashMap<Object, Collection<E>>();
+        Map<E, Collection<Collection<E>>> keepTogetherMap = new LinkedHashMap<E, Collection<Collection<E>>>();
+
+        for (SCCContributor contributor : new ChainedIterable<SCCContributor>(getSCCContributors(), extraContributors)) {
             if (!contributor.isActive(options))
                 continue;
             contributors.add(contributor);
+            for (E equation : getEquations()) {
+                for (Map.Entry<E, Collection<? extends Object>> eqIdent : contributor.memberSets(equation, this).entrySet()) {
+                    for (Object identifier : eqIdent.getValue()) {
+                        Collection<E> memberSet = memberSetsMap.get(identifier);
+                        if (memberSet == null) {
+                            memberSet = new ArrayList<E>();
+                            memberSetsMap.put(identifier, memberSet);
+                        }
+                        Collection<Collection<E>> keepTogetherLists = keepTogetherMap.get(eqIdent.getKey());
+                        if (keepTogetherLists == null) {
+                            keepTogetherLists = new ArrayList<Collection<E>>();
+                            keepTogetherMap.put(eqIdent.getKey(), keepTogetherLists);
+                        }
+                        memberSet.add(eqIdent.getKey());
+                        keepTogetherLists.add(memberSet);
+                    }
+                }
+            }
         }
-        
-        
-        BiPTarjan tarjan = new BiPTarjan(contributors);
-        Collection<C> components = tarjan.tarjan(getEquations());
-//        for (SCCContributor contributor : contributors) {
-//            components = contributor.mergeComponents(components, this);
-//        }
+
+        Map<E, Collection<E>> eqToVisitMap = new HashMap<E, Collection<E>>();
+
+        for (E e : getEquations()) {
+            if (!e.isVisited() && e.tarjanVisit())
+                tarjan(indexer, stack, components, contributors, keepTogetherMap, eqToVisitMap, e);
+        }
+
         return components;
     }
 
-    private class BiPTarjan extends Tarjan<E, C> {
-        
-        private final Collection<SCCContributor> contributors;
-        Map<E, Collection<Collection<E>>> keepTogetherMap = new LinkedHashMap<E, Collection<Collection<E>>>();
-        
-        public BiPTarjan(Collection<SCCContributor> contributors) {
-            this.contributors = contributors;
-            Map<Object, Collection<E>> memberSetsMap = new HashMap<Object, Collection<E>>();
-            for (SCCContributor contributor : contributors) {
-                for (E equation : getEquations()) {
-                    for (Map.Entry<E, Collection<? extends Object>> eqIdent : contributor.memberSets(equation, AbstractBiPGraph.this).entrySet()) {
-                        for (Object identifier : eqIdent.getValue()) {
-                            Collection<E> memberSet = memberSetsMap.get(identifier);
-                            if (memberSet == null) {
-                                memberSet = new ArrayList<E>();
-                                memberSetsMap.put(identifier, memberSet);
-                            }
-                            Collection<Collection<E>> keepTogetherLists = keepTogetherMap.get(eqIdent.getKey());
-                            if (keepTogetherLists == null) {
-                                keepTogetherLists = new ArrayList<Collection<E>>();
-                                keepTogetherMap.put(eqIdent.getKey(), keepTogetherLists);
-                            }
-                            memberSet.add(eqIdent.getKey());
-                            keepTogetherLists.add(memberSet);
-                        }
-                    }
-                }
+    public void tarjan(Enumerator indexer, Stack<E> stack, Collection<C> components, Collection<SCCContributor> contributors, Map<E, Collection<Collection<E>>> keepTogetherMap, Map<E, Collection<E>> eqToVisitMap,  E e) {
+        int index = indexer.next();
+        e.setTarjanNbr(index);
+        e.setTarjanLowLink(index);
+        e.setVisited(true);
+        Collection<E> eqToVisit = new ArrayList<E>();
+        Collection<Collection<E>> keepTogetherLists = keepTogetherMap.get(e);
+        if (keepTogetherLists != null)
+            for (Collection<E> keepTogether : keepTogetherLists)
+                for (E ee : keepTogether)
+                    if (ee != e && ee.tarjanVisit())
+                        eqToVisit.add(ee);
+        for (V v : e.getVariables()) {
+            E ee = v.getMatching();
+            if (ee != null && e != ee && v.tarjanVisit())
+                eqToVisit.add(ee);
+        }
+        for (SCCContributor contributor : contributors)
+            for (E ee : contributor.members(e, this))
+                if (e != ee && ee.tarjanVisit())
+                    eqToVisit.add(ee);
+        stack.add(e);
+        eqToVisitMap.put(e, eqToVisit);
+        for (E ee : eqToVisit) {
+            if (!ee.isVisited()) {
+                tarjan(indexer, stack, components, contributors, keepTogetherMap, eqToVisitMap, ee);
+                e.setTarjanLowLink(Math.min(e.getTarjanLowLink(), ee.getTarjanLowLink()));
+            } else if (stack.contains(ee)) { //TODO: should not be stack.contains, it's slow...
+                e.setTarjanLowLink(Math.min(e.getTarjanLowLink(), ee.getTarjanNbr()));
             }
         }
-
-        @Override
-        protected boolean visited(E e) {
-            return e.isVisited();
+        if (e.getTarjanNbr() == e.getTarjanLowLink()) {
+            C component = createComponentBlock();
+            E ee;
+            do {
+                ee = stack.pop();
+                component.addMember(ee);
+                component.addPredecessors(eqToVisitMap.remove(ee));
+            } while (ee != e);
+            components.add(component);
         }
-
-        @Override
-        protected void setVisited(E e, boolean val) {
-            e.setVisited(val);
-        }
-
-        @Override
-        protected boolean shouldVisit(E e) {
-            return e.tarjanVisit();
-        }
-
-        @Override
-        protected void addPredecessors(E e, Collection<E> predecessors) {
-            for (V v : e.getVariables()) {
-                E ee = v.getMatching();
-                if (ee != null && e != ee && v.tarjanVisit())
-                    predecessors.add(ee);
-            }
-            for (SCCContributor contributor : contributors)
-                for (E ee : contributor.members(e, AbstractBiPGraph.this))
-                    if (e != ee && ee.tarjanVisit())
-                        predecessors.add(ee);
-        }
-
-        @Override
-        protected int getIndex(E e) {
-            return e.getTarjanNbr();
-        }
-
-        @Override
-        protected void setIndex(E e, int val) {
-            e.setTarjanNbr(val);
-        }
-
-        @Override
-        protected int getLowLink(E e) {
-            return e.getTarjanLowLink();
-        }
-
-        @Override
-        protected void setLowLink(E e, int val) {
-            e.setTarjanLowLink(val);
-        }
-
-        @Override
-        protected void forceIntoSame(E e, Set<E> members) {
-            members.remove(e); // Added later
-            forceIntoSameInternal(e, members);
-        }
-
-        private void forceIntoSameInternal(E e, Set<E> members) {
-            if (members.contains(e)) {
-                return;
-            }
-            members.add(e);
-            Collection<Collection<E>> keepTogetherLists = keepTogetherMap.get(e);
-            if (keepTogetherLists != null) {
-                for (Collection<E> keepTogether : keepTogetherLists) {
-                    for (E ee : keepTogether) {
-                        forceIntoSameInternal(ee, members);
-                    }
-                }
-            }
-            for (SCCContributor contributor : contributors) {
-                for (E member : contributor.sameBlockMembers(e, AbstractBiPGraph.this)) {
-                    forceIntoSameInternal(member, members);
-                }
-            }
-        }
-
-        @Override
-        protected C createComponent() {
-            return createComponentBlock();
-        }
-        
     }
 
     public void reset() {
@@ -1392,33 +1189,13 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             str.append(" ");
         }
         str.append("}\n");
-        Map<FAbstractEquation, E> printedMap = new HashMap<FAbstractEquation, E>();
         for (E e : getEquations()) {
             str.append(e);
             str.append(" : ");
             for (V v : e.getVariables()) {
-                str.append(v);
-                str.append(canMatch(e, v) ? '@' : '#');
-                if (v.getMatching() == e || e.getMatching() == v) {
-                    str.append('M');
-                }
-                str.append(' ');
+                str.append(v + (canMatch(e, v) ? "@ " : "# "));
             }
-            String previousPrintLabel = null;
-            if (e.getGroupMembers().size() > 1) {
-                E previous = printedMap.get(e.getEquation());
-                
-                if (previous == null) {
-                    printedMap.put(e.getEquation(), e);
-                } else {
-                    previousPrintLabel = previous.getName();
-                }
-            }
-            if (previousPrintLabel == null) {
-                str.append("// " + e.printEquation() + "\n");
-            } else {
-                str.append("// Already printed, see " + previousPrintLabel + "\n");
-            }
+            str.append("// " + e.printEquation() + "\n");
         }
         return str.toString();
     }
@@ -1467,14 +1244,6 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             }
         }
         return map;
-    }
-
-    public int countNumberOfIncidences() {
-        int count = 0;
-        for (E e : getEquations()) {
-            count += e.getVariables().size();
-        }
-        return count;
     }
 }
 
@@ -1542,21 +1311,54 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
  * It is basically a list of equations that depends on eachother and a list of
  * equations that they depend upon.
  */
-public class SCCBlock<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> extends TarjanComponent<E> {
+public class SCCBlock<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> implements Iterable<E> {
+    private Collection<E> members = new LinkedHashSet<E>();
+    private Collection<E> predecessors = null;
     private boolean containsHomotopy = false;
 
+    
+    public SCCBlock() {}
+    
+    public void addPredecessors(Collection<E> newPredecessors) {
+        if (predecessors == null)
+            predecessors = new LinkedHashSet<E>();
+        for (E eqn : newPredecessors)
+            if (!members.contains(eqn))
+                predecessors.add(eqn);
+    }
+
     public void addMember(E member) {
-        super.addMember(member);
+        // Ensure that the member isn't in the list of predecessors
+        if (predecessors != null)
+            predecessors.remove(member);
+        members.add(member);
         if (!containsHomotopy && member.getEquation().containsFHomotopyExp())
             containsHomotopy = true;
     }
     
-    public boolean containsHomotopy() {
-        return containsHomotopy;
+    public Collection<E> getMembers() {
+        return members;
     }
     
-    public AbstractEquationBlock createEquationBlock(EquationBlockFactory.BlockProducer producer, OptionRegistry options, boolean isInitial) {
-        return EquationBlockFactory.createEquationBlock(this, producer, options, isInitial);
+    @Override
+    public Iterator<E> iterator() {
+        return members.iterator();
+    }
+    
+    public boolean hasPredecessorInfo() {
+        return predecessors != null;
+    }
+    
+    public Collection<E> getPredecessors() {
+        return predecessors;
+    }
+    @Override
+    public String toString() {
+        return members.toString();
+    }
+    
+    public boolean containsHomotopy() {
+        return containsHomotopy;
     }
 }
 
@@ -1566,17 +1368,17 @@ public class BiPGraph extends AbstractBiPGraph<Eq, Var, SCCBlock<Eq, Var>> {
         super();
     }
 
-    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> BiPGraph(Collection<E> block, boolean isInitial) {
-        super(block, isInitial);
+    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> BiPGraph(Collection<E> block, boolean isInitial, boolean preserveGroupMembers) {
+        super(block, isInitial, preserveGroupMembers);
     }
 
-    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> BiPGraph(Collection<E> eqns, Collection<V> vars) {
-        super(eqns, vars);
+    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> BiPGraph(Collection<E> eqns, Collection<V> vars, boolean preserveGroupMembers) {
+        super(eqns, vars, preserveGroupMembers);
     }
 
     @Override
-    protected Eq createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<Eq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
-        return new Eq(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
+    protected Eq createEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta) {
+        return new Eq(name, eqn, groupNumber, variability, type, isMeta);
     }
 
     @Override
@@ -1592,8 +1394,8 @@ public class BiPGraph extends AbstractBiPGraph<Eq, Var, SCCBlock<Eq, Var>> {
 
 public class Eq extends AbstractEq<Eq, Var> {
 
-    public Eq(String name, FAbstractEquation eqn, int groupNumber, Collection<Eq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
-        super(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
+    public Eq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta) {
+        super(name, eqn, groupNumber, variability, type, isMeta);
     }
 
 }
@@ -1609,12 +1411,12 @@ public class Var extends AbstractVar<Eq, Var> {
 
 public class SolvingBiPGraph extends AbstractBiPGraph<SolvingEq, SolvingVar, SCCBlock<SolvingEq, SolvingVar>> {
 
-    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> SolvingBiPGraph(Collection<E> eqns, Collection<V> vars) {
-        super(eqns, vars);
+    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> SolvingBiPGraph(Collection<E> eqns, Collection<V> vars, boolean preserveGroupMembers) {
+        super(eqns, vars, preserveGroupMembers);
     }
 
-    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> SolvingBiPGraph(Collection<E> block, boolean isInitial) {
-        super(block, isInitial);
+    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> SolvingBiPGraph(Collection<E> block, boolean isInitial, boolean preserveGroupMembers) {
+        super(block, isInitial, preserveGroupMembers);
     }
 
     @Override
@@ -1648,8 +1450,8 @@ public class SolvingBiPGraph extends AbstractBiPGraph<SolvingEq, SolvingVar, SCC
     }
 
     @Override
-    protected SolvingEq createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<SolvingEq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
-        return new SolvingEq(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
+    protected SolvingEq createEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta) {
+        return new SolvingEq(name, eqn, groupNumber, variability, type, isMeta);
     }
 
     @Override
@@ -1678,8 +1480,8 @@ public class SolvingEq extends AbstractEq<SolvingEq, SolvingVar> implements Comp
     private int sameTypeOccurrences = 0;
     private boolean isRes = false;
 
-    public SolvingEq(String name, FAbstractEquation eqn, int groupNumber, Collection<SolvingEq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
-        super(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
+    public SolvingEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta) {
+        super(name, eqn, groupNumber, variability, type, isMeta);
     }
 
     public void sameTypeOccurrence(){
@@ -1852,13 +1654,12 @@ public abstract class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractV
      * itself. This approach makes handling of equation groups more consistent,
      * e.g., when a function call equation needs to be differentiated.
      */
-    private final Collection<E> groupMembers;
+    private Set<E> groupMembers = new LinkedHashSet<E>();
 
-    public AbstractEq(String name, FAbstractEquation eqn, int groupNumber, Collection<E> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
+    public AbstractEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta) {
         this.name = name;
         this.eqn = eqn;
         this.groupNumber = groupNumber;
-        this.groupMembers = Collections.unmodifiableCollection(groupMembers);
         this.variability = variability;
         this.type = type;
         this.isMeta = isMeta;
@@ -1973,7 +1774,11 @@ public abstract class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractV
         this.depth = d;
     }
 
-    public Collection<E> getGroupMembers() {
+    public void addGroupMember(E eqn) {
+        groupMembers.add(eqn);
+    }
+
+    public Set<E> getGroupMembers() {
         return groupMembers;
     }
 
@@ -2100,21 +1905,7 @@ public abstract class AbstractVar<E extends AbstractEq<E, V>, V extends Abstract
     }
 }
 
-public class AbstractBiPGraph {
-    protected static interface VariableResolver<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> {
-        public Set<V> lookupVars(Iterable<FIdUseExp> set);
-    }
-}
-
-public VariableResolver<E, V> AbstractBiPGraph.defaultVariableResolver() {
-    return new VariableResolver<E,V>() {
-        public Set<V> lookupVars(Iterable<FIdUseExp> set) {
-            return AbstractBiPGraph.this.lookupVars(set);
-        }
-    };
-}
-
-public Set<V> AbstractBiPGraph.lookupVars(Iterable<FIdUseExp> set) {
+public Set<V> AbstractBiPGraph.lookupVarsInSet(Set<FIdUseExp> set) {
     Set<V> res = new LinkedHashSet<V>();
     for (FIdUseExp use : set) {
         V var = getVariable(use.name());
@@ -2124,50 +1915,27 @@ public Set<V> AbstractBiPGraph.lookupVars(Iterable<FIdUseExp> set) {
     return res;
 }
 
-    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>>
-    AbstractBiPGraph<E, V, C>.IncidenceMap
-    FAbstractEquation.createIncidenceMap(AbstractBiPGraph<E, V, C> g, EnumSet<AbstractBiPGraph.VarType> variableTypes) {
-        return createIncidenceMap(g, variableTypes, g.defaultVariableResolver());
-    }
-    
-    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>>
-    AbstractBiPGraph<E, V, C>.IncidenceMap
-    FAbstractEquation.createIncidenceMap(AbstractBiPGraph<E, V, C> g, EnumSet<AbstractBiPGraph.VarType> variableTypes,
-            AbstractBiPGraph.VariableResolver<E, V> resolver) {
-        return g.new IncidenceMap(this, resolver);
+    public <V> AbstractBiPGraph.IncidenceMap FAbstractEquation.createIncidenceMap(AbstractBiPGraph g, Set<V> additionalDependencies, EnumSet<AbstractBiPGraph.VarType> variableTypes) {
+        return g.new IncidenceMap(this, additionalDependencies);
     }
 
-    @Override
-    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>>
-    AbstractBiPGraph<E, V ,C>.IncidenceMap
-    FAlgorithm.createIncidenceMap(AbstractBiPGraph<E, V, C> g, EnumSet<AbstractBiPGraph.VarType> variableTypes,
-            AbstractBiPGraph.VariableResolver<E, V> resolver) {
-        return g.new ManyIncidenceMap(this, resolver, variableTypes);
+    public <V> AbstractBiPGraph.IncidenceMap FAlgorithm.createIncidenceMap(AbstractBiPGraph g, Set<V> additionalDependencies, EnumSet<AbstractBiPGraph.VarType> variableTypes) {
+        return g.new ManyIncidenceMap(this, additionalDependencies, variableTypes);
     }
 
-    @Override
-    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>>
-    AbstractBiPGraph<E, V, C>.IncidenceMap
-    FIfEquation.createIncidenceMap(AbstractBiPGraph<E, V, C> g, EnumSet<AbstractBiPGraph.VarType> variableTypes,
-            AbstractBiPGraph.VariableResolver<E, V> resolver) {
-        return g.new ManyIncidenceMap(this, resolver, variableTypes);
+    public <V> AbstractBiPGraph.IncidenceMap FIfEquation.createIncidenceMap(AbstractBiPGraph g, Set<V> additionalDependencies, EnumSet<AbstractBiPGraph.VarType> variableTypes) {
+        return g.new ManyIncidenceMap(this, additionalDependencies, variableTypes);
     }
 
-    @Override
-    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>> 
-    AbstractBiPGraph<E, V, C>.IncidenceMap
-    FFunctionCallEquation.createIncidenceMap(AbstractBiPGraph<E, V, C> g, EnumSet<AbstractBiPGraph.VarType> variableTypes,
-            AbstractBiPGraph.VariableResolver<E, V> resolver) {
+    public <V> AbstractBiPGraph.IncidenceMap FFunctionCallEquation.createIncidenceMap(AbstractBiPGraph g, Set<V> additionalDependencies, EnumSet<AbstractBiPGraph.VarType> variableTypes) {
         if (myOptions().getStringOption("function_incidence_computation").equals("all")) {
             try {
-                AbstractBiPGraph<E, V, C>.SplitIncidenceMap splitIncidenceMap = g.new SplitIncidenceMap(this, resolver, variableTypes);
-                splitIncidenceMap.lhs(); // trigger cache calculations
-                return splitIncidenceMap;
+                return g.new SplitIncidenceMap(this, additionalDependencies, variableTypes);
             } catch (ConstantEvaluationException e) {
                 
             }
         }
-        return g.new ManyIncidenceMap(this, resolver, variableTypes);
+        return g.new ManyIncidenceMap(this, additionalDependencies, variableTypes);
     }
     
 

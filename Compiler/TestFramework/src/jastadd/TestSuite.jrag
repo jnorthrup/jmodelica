@@ -23,7 +23,6 @@ import org.jmodelica.util.test.GenericTestCase;
 import org.jmodelica.util.test.GenericTestSuite;
 import org.jmodelica.util.test.Assert;
 import org.jmodelica.util.test.TestTree;
-import org.jmodelica.common.options.TestOptions;
 
 public class TestSuite implements GenericTestSuite {
     String name;
@@ -39,13 +38,13 @@ public class TestSuite implements GenericTestSuite {
         name = className;
         l = new ArrayList<TestCase>();
         SourceRoot sr = null;
-        File modelicapath = EnvironmentUtils.getThirdPartyMSL();
-        OptionRegistry options = new TestOptions();
-        OptionsAggregated.addTo(options);
-        options.setStringOption("MODELICAPATH", modelicapath.getPath());
+        String modelica_path = System.getenv("JMODELICA_HOME") + File.separator + 
+                "ThirdParty" + File.separator + "MSL";
+        OptionRegistry options = ModelicaCompiler.createOptions();
+        options.setStringOption("MODELICAPATH", modelica_path);
         ASTNode.log = new SysErrLogger();
         try {
-            sr = TestCase.PARSER_HANDLER.parseFile(UtilInterface.create(options), fileName);
+            sr = ParserHandler.parseFile(UtilInterface.create(options), fileName);
         } catch (Exception e) {
             asserter.fail("Error when parsing file: " + fileName + "\n" + e);
         }

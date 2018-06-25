@@ -15,151 +15,66 @@
 */
 package org.jmodelica.util.streams;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.Collection;
 
 public class CodeStream {
-
-    protected PrintStream out;
-    protected CodeStream parent;
-    protected String lineEnder = "\n";
-
+    private PrintStream out;
+    
     public CodeStream(PrintStream ps) {
         this.out = ps;
     }
-
-    public CodeStream(CodeStream parent) {
-        this.parent = parent;
-    }
-
+    
     public CodeStream(OutputStream os) {
-        this(new PrintStream(os));
+        this.out = new PrintStream(os);
     }
-
-    public CodeStream(String file) throws IOException {
-        this(new File(file));
+    
+    public CodeStream(File file) throws FileNotFoundException {
+        this.out = new PrintStream(file);
     }
-
-    public CodeStream(File file) throws IOException {
-        this(createPrintStream(file, false));
+    
+    public CodeStream(String file) throws FileNotFoundException {
+        this.out = new PrintStream(file);
     }
-
-    public static PrintStream createPrintStream(File file, boolean cloneToSysOut) {
-        try {
-            return createPrintStream(new BufferedOutputStream(new FileOutputStream(file)),
-                    cloneToSysOut ? System.out : null);
-        } catch (IOException e) {
-            throw new RuntimeException("File I/O problem during code generation", e);
-        }
+    
+    public CodeStream(CodeStream str) {
+        this(str.out);
     }
-
-    public static PrintStream createPrintStream(OutputStream os, boolean cloneToSysOut) {
-        return createPrintStream(os, cloneToSysOut ? System.out : null);
-    }
-
-    public static PrintStream createPrintStream(OutputStream os, PrintStream clone) {
-        if (clone != null) {
-            os = new CloneOutputStream(os, clone).setClose(true, false);
-        }
-        try {
-            return new PrintStream(os, clone != null, "UTF-8");
-        } catch (IOException e) {
-            throw new RuntimeException("File I/O problem during code generation", e);
-        }
-    }
-
-    public void switchParent(CodeStream par) {
-        if (parent != null) {
-            parent.close();
-        }
-        parent = par;
-    }
-
+    
     public void close() {
-        if (parent != null) {
-            parent.close();
-            parent = null;
-        } else {
-            out.close();
-            out = null;
-        }
+        out.close();
+        out = null;
     }
-
-    public void print(String s) {
-        if (parent != null) {
-            parent.print(s);
-        } else {
-            out.print(s);
-        }
-    }
-
-    public void format(String format, Object... args) {
-        if (parent != null) {
-            parent.format(format, args);
-        } else {
-            out.format(format, args);
-        }
-    }
-
-    public void splitFile() {}
-
+    
     public void println() {
-        print(lineEnder);
+        print("\n");
     }
-
+    
+    public void print(String s) {
+        out.print(s);
+    }
+    
     public void print(Object o) {
         print(o.toString());
     }
-
-    public void print(Object... os) {
-        for (Object s : os) {
-            print(s);
-        }
-    }
-
+    
     public void println(String s) {
         print(s);
         println();
     }
-
+    
     public void println(Object o) {
         print(o);
         println();
     }
-
-    public void println(Object... o) {
-        print(o);
-        println();
+    
+    public void format(String format, Object... args) {
+        print(String.format(format, args));
     }
-
-
+    
     public void formatln(String format, Object... args) {
-        format(format, args);
-        println();
+        println(String.format(format, args));
     }
-
-    public void print(Collection<? extends Object> collection, String separator) {
-        boolean first = true;
-        for (Object o : collection) {
-            if (!first) {
-                print(separator);
-            }
-            first = false;
-            print(o);
-        }
-    }
-
-    public void setLineEnder(String lineEnder) {
-        this.lineEnder = lineEnder;
-    }
-
-    public String getLineEnder() {
-        return lineEnder;
-    }
-
 }

@@ -33,26 +33,4 @@ model Enumeration2
     
 end Enumeration2;
 
-model Enumeration3
-    type numbers = enumeration(one, two);
-    type cities  = enumeration(atlantis "Position unknown", berlin, chicago, delhi);
-	type Temperature = Real(unit="K");
-	
-    parameter numbers y = numbers.one;
-    parameter numbers x = numbers.two;
-    parameter cities home = cities.atlantis;
-    parameter cities vacation = cities.delhi;
-    
-	parameter Real z = 3;
-	
-	parameter Temperature temp = 100;
-
-end Enumeration3;
-
-model Enumeration4
-    type Size = enumeration(small, medium, large, xlarge); 
-    parameter Size tsize = Size.medium;
-end Enumeration4;
-
-
 end Enumerations;

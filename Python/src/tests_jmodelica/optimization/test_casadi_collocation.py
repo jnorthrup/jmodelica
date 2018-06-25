@@ -164,14 +164,6 @@ class TestLocalDAECollocator(object):
         class_path = "QuadTankPack.QuadTank_ParEstCasADi_Degenerate"
         self.qt_par_est_degenerate_op = \
                 transfer_to_casadi_interface(class_path, qt_file_path, self.compiler_opts)
-                
-        stream_file_path = os.path.join(get_files_path(), 'Modelica', 'TestOptimizationProblems.mop')
-        class_path = "InStream"
-        stream_comp_opts = self.compiler_opts
-        stream_comp_opts['eliminate_alias_variables'] = False
-        stream_comp_opts['eliminate_linear_equations'] = False
-        stream_comp_opts['variability_propagation'] = False
-        self.stream_op = transfer_to_casadi_interface(class_path, stream_file_path, stream_comp_opts)
         
         self.algorithm = "LocalDAECollocationAlg"
         
@@ -183,10 +175,10 @@ class TestLocalDAECollocator(object):
     
     @staticmethod
     def compile_options():
-        compiler_options = {"common_subexp_elim":False}
+        compiler_options = dict()
         return compiler_options
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_free_horizon_tdlagrange(self):
         """
         Test solving a minimum time problem with a time dependent Lagrange 
@@ -215,7 +207,7 @@ class TestLocalDAECollocator(object):
         assert_results(res, cost_ref, u_norm_ref)
         op.setObjectiveIntegrand(objInt)
         
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_result_modes(self):
         """
         Test all combinations of discretization schemes and result modes.
@@ -285,7 +277,7 @@ class TestLocalDAECollocator(object):
         op.set('startTime', t0 - dt)
         op.set('finalTime', tf - dt)
        
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_nominal_zero(self):
         """
         Test a parameter estimation example with a nominal trajectory equal to
@@ -341,7 +333,7 @@ class TestLocalDAECollocator(object):
                                 op.optimize, self.algorithm, opts)
         op.getVariable('z').setNominal(1)
         
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_init_traj_sim(self):
         """Test initial trajectories based on an existing simulation."""
         model = self.cstr_model
@@ -382,7 +374,7 @@ class TestLocalDAECollocator(object):
         N.testing.assert_allclose(xx_init[col.var_indices[vt][ind]], 300.,
                                   rtol=1e-4)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_init_dual(self):
         """Test initializing dual variables."""
         op = self.vdp_bounds_lagrange_op
@@ -415,7 +407,7 @@ class TestLocalDAECollocator(object):
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, 5e-2, 5e-2)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_init_traj_opt(self):
         """Test optimizing based on an existing optimization reult."""
         op = self.vdp_bounds_lagrange_op
@@ -440,127 +432,8 @@ class TestLocalDAECollocator(object):
                 "VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt")
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, 5e-2, 5e-2)
-    
-    """
-    @testattr(casadi_base = True)
-    def test_nominal_traj_with_check_point_vdp(self):
-        op = self.vdp_bounds_lagrange_op
-        
-        # References values
-        cost_ref_traj = 3.19495079586595e0
-        u_norm_ref_traj = 2.80997269112246e-1
-        cost_ref = 3.1749908234182826e0
-        u_norm_ref = 2.848606420347583e-1
-        
-        # Get nominal and initial trajectories
-        opts = self.optimize_options(op, self.algorithm)
-        opts['n_e'] = 40
-        opts['n_cp'] = 2
-        opts["checkpoint"] = True
-        res = op.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref_traj, u_norm_ref_traj)
 
-        init_data = ResultDymolaTextual(res.result_file)
-
-        # Optimize using only initial trajectories
-        opts['n_e'] = 75
-        opts['n_cp'] = 4
-        opts['init_traj'] = init_data
-        res = op.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref, u_norm_ref)
-        
-        # Optimize using nominal and initial trajectories
-        opts['nominal_traj'] = init_data
-        opts['nominal_traj_mode'] = {'_default_mode': "affine"}
-        res = op.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref, u_norm_ref)
-        col = res.solver
-        xx_init = col.get_xx_init()
-        N.testing.assert_allclose(
-                xx_init[col.var_indices['x'][opts['n_e']][opts['n_cp']]],
-                [0.85693481, 0.12910473])
-
-        # Test disabling scaling
-        opts['variable_scaling'] = False
-        res = op.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref, u_norm_ref)
-    """
-    
-    @testattr(casadi_base = True)
-    def test_updated_nominal_traj_vdp(self):
-        """Test optimizing a VDP using nominal and initial trajectories."""
-        op = self.vdp_bounds_lagrange_op
-        
-        # References values
-        cost_ref_traj = 3.19495079586595e0
-        u_norm_ref_traj = 2.80997269112246e-1
-        cost_ref = 3.1749908234182826e0
-        u_norm_ref = 2.848606420347583e-1
-        
-        # Get nominal and initial trajectories
-        opts = self.optimize_options(op, self.algorithm)
-        opts['n_e'] = 40
-        opts['n_cp'] = 2
-        opts["variable_scaling_allow_update"] = True
-        res = op.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref_traj, u_norm_ref_traj)
-        try:
-            os.remove("vdp_nom_traj_result.txt")
-        except OSError:
-            pass
-        os.rename("VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt",
-                  "vdp_nom_traj_result.txt")
-        
-        solver = res.get_solver()
-        solver.set_nominal_traj(ResultDymolaTextual("vdp_nom_traj_result.txt"), {'_default_mode': "affine"})
-        
-        res_update = solver.optimize()
-        
-        cost_update = float(res_update.solver.solver_object.output(casadi.NLP_SOLVER_F))
-        
-        # Optimize using nominal and initial trajectories
-        opts['nominal_traj'] = ResultDymolaTextual("vdp_nom_traj_result.txt")
-        opts['nominal_traj_mode'] = {'_default_mode': "affine"}
-        res = op.optimize(self.algorithm, opts)
-        
-        cost = float(res.solver.solver_object.output(casadi.NLP_SOLVER_F))
-
-        N.testing.assert_equal(cost_update, cost)
-        
-    @testattr(casadi_base = True)
-    def test_no_updated_nominal_traj_vdp(self):
-        """Test optimizing a VDP using nominal and initial trajectories."""
-        op = self.vdp_bounds_lagrange_op
-        
-        # References values
-        cost_ref_traj = 3.19495079586595e0
-        u_norm_ref_traj = 2.80997269112246e-1
-        cost_ref = 3.1749908234182826e0
-        u_norm_ref = 2.848606420347583e-1
-        
-        # Get nominal and initial trajectories
-        opts = self.optimize_options(op, self.algorithm)
-        opts['n_e'] = 40
-        opts['n_cp'] = 2
-        opts["variable_scaling_allow_update"] = False
-        res = op.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref_traj, u_norm_ref_traj)
-        try:
-            os.remove("vdp_nom_traj_result.txt")
-        except OSError:
-            pass
-        os.rename("VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt",
-                  "vdp_nom_traj_result.txt")
-        
-        assert res.get_solver().collocator.pp.shape[0] == 2 #Two parameters
-        
-        solver = res.get_solver()
-        
-        N.testing.assert_raises(CasadiCollocatorException,
-                                solver.set_nominal_traj, res)
-
-    
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_nominal_traj_vdp(self):
         """Test optimizing a VDP using nominal and initial trajectories."""
         op = self.vdp_bounds_lagrange_op
@@ -617,70 +490,8 @@ class TestLocalDAECollocator(object):
         opts['variable_scaling'] = False
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
-        
-    @testattr(casadi_base = True)
-    def test_nominal_traj_vdp_lg(self):
-        """Test optimizing a VDP using nominal and initial trajectories."""
-        op = self.vdp_bounds_lagrange_op
-        
-        # References values
-        #cost_ref_traj = 3.19495079586595e0
-        cost_ref_traj = 3.171799772935013
-        #u_norm_ref_traj = 2.80997269112246e-1
-        u_norm_ref_traj = 2.8094758146374343e-1
-        cost_ref = 3.1749908234182826e0
-        #u_norm_ref = 2.848606420347583e-1
-        u_norm_ref = 2.844516216499257e-1
-        
-        # Get nominal and initial trajectories
-        opts = self.optimize_options(op, self.algorithm)
-        opts['n_e'] = 40
-        opts['n_cp'] = 2
-        opts['discr'] = "LG" #TEST LG DISCR
-        res = op.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref_traj, u_norm_ref_traj)
-        try:
-            os.remove("vdp_nom_traj_result.txt")
-        except OSError:
-            pass
-        os.rename("VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt",
-                  "vdp_nom_traj_result.txt")
-        
-        # Optimize using only initial trajectories
-        opts['n_e'] = 75
-        opts['n_cp'] = 4
-        opts['init_traj'] = ResultDymolaTextual("vdp_nom_traj_result.txt")
-        res = op.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref, u_norm_ref)
-        
-        # Optimize using nominal and initial trajectories
-        opts['nominal_traj'] = ResultDymolaTextual("vdp_nom_traj_result.txt")
-        opts['nominal_traj_mode'] = {'_default_mode': "affine"}
-        res = op.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref, u_norm_ref)
-        col = res.solver
-        xx_init = col.get_xx_init()
-        N.testing.assert_allclose(
-                xx_init[col.var_indices['x'][opts['n_e']][opts['n_cp']]],
-                [0.866368, 0.118284], rtol=1e-5) #[0.85693481, 0.12910473]
 
-        # #3509
-        #~ # Test with eliminated continuity variables
-        #~ opts['eliminate_cont_var'] = True
-        #~ res = op.optimize(self.algorithm, opts)
-        #~ assert_results(res, cost_ref, u_norm_ref)
-        #~ 
-        #~ # Test with eliminated continuity and derivative variables
-        #~ opts['eliminate_der_var'] = True
-        #~ res = op.optimize(self.algorithm, opts)
-        #~ assert_results(res, cost_ref, u_norm_ref)
-        
-        # Test disabling scaling
-        opts['variable_scaling'] = False
-        res = op.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref, u_norm_ref)
-
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_nominal_traj_cstr(self):
         """Test optimizing a CSTR using nominal and initial trajectories."""
         op = self.cstr_lagrange_op
@@ -738,73 +549,8 @@ class TestLocalDAECollocator(object):
         opts['variable_scaling'] = False
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
-        
-    @testattr(casadi_base = True)
-    def test_nominal_traj_cstr_lg(self):
-        """Test optimizing a CSTR using nominal and initial trajectories."""
-        op = self.cstr_lagrange_op
-        
-        # References values
-        #cost_ref_traj = 1.8549259545339369e3
-        cost_ref_traj = 1.86034214743738e3
-        #u_norm_ref_traj = 3.0455503580669716e2
-        u_norm_ref_traj = 3.053311192625306e2
-        cost_ref = 1.858428662785409e3
-        cost_ref_nominal = 1.6584308942977912e3
-        #u_norm_ref = 3.0507636243132043e2
-        u_norm_ref = 3.049332451630398e2
-        u_norm_ref_nominal = 3.0106051481333594e2
-        
-        # Get nominal and initial trajectories
-        opts = self.optimize_options(op, self.algorithm)
-        opts['n_e'] = 40
-        opts['n_cp'] = 2
-        opts["discr"] = "LG"
-        res = op.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref_traj, u_norm_ref_traj)
-        try:
-            os.remove("cstr_nom_traj_result.txt")
-        except OSError:
-            pass
-        os.rename("CSTR_CSTR_Opt_Bounds_Lagrange_result.txt",
-                  "cstr_nom_traj_result.txt")
-        
-        # Optimize using only initial trajectories
-        n_e = 75
-        n_cp = 4
-        opts['n_e'] = n_e
-        opts['n_cp'] = n_cp
-        opts['init_traj'] = ResultDymolaTextual("cstr_nom_traj_result.txt")
-        res = op.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref, u_norm_ref)
-        
-        # Optimize using nominal and initial trajectories
-        opts['nominal_traj'] = ResultDymolaTextual("cstr_nom_traj_result.txt")
-        opts['nominal_traj_mode'] = {'_default_mode': 'time-variant'}
-        res = op.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref_nominal, u_norm_ref_nominal)
-        col = res.solver
-        xx_init = col.get_xx_init()
-        #N.testing.assert_equal(sum(xx_init == 1.),
-        #                       (n_e * n_cp + 1) * 4 + 2 * n_e)
 
-        # #3509
-        #~ # Test with eliminated continuity variables
-        #~ opts['eliminate_cont_var'] = True
-        #~ res = op.optimize(self.algorithm, opts)
-        #~ assert_results(res, cost_ref, u_norm_ref)
-        #~ 
-        #~ # Test with eliminated continuity and derivative variables
-        #~ opts['eliminate_der_var'] = True
-        #~ res = op.optimize(self.algorithm, opts)
-        #~ assert_results(res, cost_ref, u_norm_ref)
-        
-        # Test disabling scaling
-        opts['variable_scaling'] = False
-        res = op.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref, u_norm_ref)
-
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_nominal_traj_mode(self):
         """Test nominal_traj_mode on the CSTR."""
         op = self.cstr_lagrange_op
@@ -873,7 +619,7 @@ class TestLocalDAECollocator(object):
         N.testing.assert_raises(ValueError, op.optimize, self.algorithm,
                                 opts)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_cstr(self):
         """
         Test optimizing the CSTR.
@@ -899,7 +645,7 @@ class TestLocalDAECollocator(object):
         res = lagrange_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=5e-3)
         
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_cstr_checkpoint(self):
         """
         Test optimizing the CSTR with check point.
@@ -927,7 +673,7 @@ class TestLocalDAECollocator(object):
         res = lagrange_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=5e-3)    
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_parameter_estimation(self):
         """
         Test a parameter estimation example with and without scaling.
@@ -974,7 +720,7 @@ class TestLocalDAECollocator(object):
         N.testing.assert_allclose(w_scaled, w_ref, 1e-2)
         N.testing.assert_allclose(z_scaled, z_ref, 1e-2)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_parameter_estimation_traj(self):
         """
         Test estimation with and without initial and nominal trajectories.
@@ -1026,7 +772,7 @@ class TestLocalDAECollocator(object):
         N.testing.assert_allclose(w_traj, w_ref, 1e-2)
         N.testing.assert_allclose(z_traj, z_ref, 1e-2)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_qt_par_est_quad_pen(self):
         """
         Test parameter estimation for the quad tank with quad_pen inputs.
@@ -1081,7 +827,7 @@ class TestLocalDAECollocator(object):
                                                  opt_res.final("qt.a2")]),
                                   a_ref, rtol=1e-4)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_qt_par_est_eliminated(self):
         """
         Test parameter estimation for the quad tank with eliminated inputs.
@@ -1176,7 +922,7 @@ class TestLocalDAECollocator(object):
         N.testing.assert_raises(CasadiCollocatorException,
                                 op.optimize, self.algorithm, opts)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_qt_par_est_constr_quad_pen(self):
         """
         Test parameter estimation for quad tank with constr_quad_pen inputs.
@@ -1252,7 +998,7 @@ class TestLocalDAECollocator(object):
         N.testing.assert_raises(VariableNotFoundError,
                                 op.optimize, self.algorithm, opts)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_qt_par_est_semi_eliminated(self):
         """
         Test parameter estimation for the quad tank with 1 eliminated input.
@@ -1332,7 +1078,7 @@ class TestLocalDAECollocator(object):
                                                  opt_res.final("qt.a2")]),
                                   a_ref, rtol=1e-4)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_qt_par_est_user_interpolator(self):
         """
         Test parameter estimation for the quad tank with user-defined function.
@@ -1389,7 +1135,7 @@ class TestLocalDAECollocator(object):
                                 op.optimize, self.algorithm, opts)
         op.getVariable('u1').setMin(-N.inf)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_vdp_minimum_time(self):
         """
         Test solving minimum time problems based on the VDP oscillator.
@@ -1448,39 +1194,9 @@ class TestLocalDAECollocator(object):
         opts['nominal_traj'] = res_radau
         res = unscaled_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        
 
-    @testattr(casadi_base = True)
-    def test_reorder(self):
-        """Test reordered NLP."""
-        op = self.cstr_lagrange_op
-        
-        # References values
-        cost_ref = 1.858428662785409e3
-        u_norm_ref = 305.5673000177923
-        
-        # Default order
-        opts = self.optimize_options(op, self.algorithm)
-        opts['write_scaled_result'] = True
-        opts['order'] = "default"
-        res = op.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref, u_norm_ref)
-        
-        # Reverse order
-        opts['order'] = "reverse"
-        res = op.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref, u_norm_ref)
-        
-        # Random order #1
-        N.random.seed(1)
-        opts['order'] = "random"
-        res = op.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref, u_norm_ref)
-        
-        # Random order #2
-        res = op.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref, u_norm_ref)
-
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_cstr_minimum_time(self):
         """
         Test solving minimum time problems based on the CSTR.
@@ -1498,32 +1214,28 @@ class TestLocalDAECollocator(object):
         # Scaled, Radau
         opts = self.optimize_options(scaled_op, self.algorithm)
         opts['discr'] = "LGR"
-        opts['IPOPT_options']['linear_solver'] = "mumps"
         res = scaled_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, input_name="Tc")
         
         # Scaled, Gauss
         opts['discr'] = "LG"
-        opts['IPOPT_options']['linear_solver'] = "mumps"
         res = scaled_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2,
                        input_name="Tc")
         
         # Unscaled, Radau
         opts['discr'] = "LGR"
-        opts['IPOPT_options']['linear_solver'] = "mumps"
         res = unscaled_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2,
                        input_name="Tc")
         
         # Unscaled, Gauss
         opts['discr'] = "LG"
-        opts['IPOPT_options']['linear_solver'] = "mumps"
         res = unscaled_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2,
                        input_name="Tc")
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_path_constraints(self):
         """Test a simple path constraint with and without exact Hessian."""
         op = self.vdp_constraints_mayer_op
@@ -1543,7 +1255,7 @@ class TestLocalDAECollocator(object):
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_initial_equations(self):
         """Test initial equations with and without eliminated derivatives."""
         op = self.vdp_initial_equations_op
@@ -1564,7 +1276,7 @@ class TestLocalDAECollocator(object):
         #~ res = op.optimize(self.algorithm, opts)
         #~ assert_results(res, cost_ref, u_norm_ref)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_element_lengths(self):
         """Test non-uniformly distributed elements."""
         op = self.vdp_bounds_mayer_op
@@ -1576,7 +1288,7 @@ class TestLocalDAECollocator(object):
         res = op.optimize(self.algorithm, opts)
         assert_results(res, 3.174936706809e0, 3.707273799325e-1)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_free_element_lengths(self):
         """Test optimized element lengths with both result modes."""
         op = self.vdp_bounds_lagrange_op
@@ -1610,7 +1322,7 @@ class TestLocalDAECollocator(object):
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=3e-2)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_named_vars(self):
         """
         Test variable renaming.
@@ -1641,25 +1353,19 @@ class TestLocalDAECollocator(object):
         c_e_10 = res_renaming.solver.get_equality_constraint()[self.test_named_vars_c_e_10_id()]
         c_e_20 = res_renaming.solver.get_equality_constraint()[20]
         
-        #comp_str1 = "SX((((der(x1)_1_1_d_sf*der(x1)_1_1)+der(x1)_1_1_e_sf)-((((1-sq(((x2_1_1_d_sf*x2_1_1)+x2_1_1_e_sf)))*((der(x2)_1_1_d_sf*der(x2)_1_1)+der(x2)_1_1_e_sf))-((x2_1_1_d_sf*x2_1_1)+x2_1_1_e_sf))+((u_1_1_d_sf*u_1_1)+u_1_1_e_sf))))" 
-        #comp_str1 = "SX((((der(x1)_d_sf*der(x1)_1_1)+der(x1)_e_sf)-((((1-sq(((x2_d_sf*x2_1_1)+x2_e_sf)))*((der(x2)_d_sf*der(x2)_1_1)+der(x2)_e_sf))-((x2_d_sf*x2_1_1)+x2_e_sf))+((u_d_sf*u_1_1)+u_e_sf))))"
-        comp_str1 = "SX((der(x1)_1_1-((((1-sq(x2_1_1))*der(x2)_1_1)-x2_1_1)+u_1_1)))"
-        
-        #comp_str2 = "SX((((((-3*((x2_1_0_d_sf*x2_1_0)+x2_1_0_e_sf))+(5.53197*((x2_1_1_d_sf*x2_1_1)+x2_1_1_e_sf)))+(-7.53197*((x2_1_2_d_sf*x2_1_2)+x2_1_2_e_sf)))+(5*((x2_1_3_d_sf*x2_1_3)+x2_1_3_e_sf)))-(10*((der(x2)_1_3_d_sf*der(x2)_1_3)+der(x2)_1_3_e_sf))))"
-        #comp_str2 = "SX((((((-3*((x2_d_sf*x2_1_0)+x2_e_sf))+(5.53197*((x2_d_sf*x2_1_1)+x2_e_sf)))+(-7.53197*((x2_d_sf*x2_1_2)+x2_e_sf)))+(5*((x2_d_sf*x2_1_3)+x2_e_sf)))-(10*((der(x2)_d_sf*der(x2)_1_3)+der(x2)_e_sf))))"
-        comp_str2 = "SX((((((-3*x2_1_0)+(5.53197*x2_1_1))+(-7.53197*x2_1_2))+(5*x2_1_3))-(10*der(x2)_1_3)))"
-        
         N.testing.assert_string_equal(
             repr(res_renaming.solver.get_named_var_expr(c_e_10)),
-                 comp_str1)
+                 "SX((der(x1)_1_1-((((1-sq(x2_1_1))*der(x2)_1_1)" +
+                 "-x2_1_1)+u_1_1)))")
         N.testing.assert_string_equal(
             repr(res_renaming.solver.get_named_var_expr(c_e_20)),
-            comp_str2)
+            "SX((((((-3*x2_1_0)+(5.53197*x2_1_1))+" +
+            "(-7.53197*x2_1_2))+(5*x2_1_3))-(10*der(x2)_1_3)))")
 
     def test_named_vars_c_e_10_id(self):
         return 10;
     
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_scaling(self):
         """
         Test optimizing the CSTR with and without scaling.
@@ -1713,7 +1419,7 @@ class TestLocalDAECollocator(object):
         #~ N.testing.assert_allclose(c_unscaled, 500. * c_scaled,
                                   #~ rtol=0, atol=1e-5)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_result_file_name(self):
         """
         Test different result file names.
@@ -1738,7 +1444,7 @@ class TestLocalDAECollocator(object):
         op.optimize(self.algorithm, opts)
         assert(os.path.exists("vdp_custom_file_name.txt"))
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_result_mode(self):
         """
         Test the two different result modes.
@@ -1774,7 +1480,7 @@ class TestLocalDAECollocator(object):
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=5e-3)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_parameter_setting(self):
         """
         Test setting parameters post-compilation.
@@ -1800,7 +1506,7 @@ class TestLocalDAECollocator(object):
         # Test dependent parameter setting
         N.testing.assert_raises(RuntimeError, op.set, 'cstr.F', 500)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_blocking_factors(self):
         """Test blocking factors."""
         op = self.vdp_bounds_lagrange_op
@@ -1832,7 +1538,7 @@ class TestLocalDAECollocator(object):
         assert_results(res, 3.883757e0, 3.068191e-1,
                        cost_rtol=1e-2, u_norm_rtol=5e-3)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_blocking_factors_cstr(self):
         """Test blocking factors for CSTR."""
         op = self.cstr_lagrange_op
@@ -1871,7 +1577,7 @@ class TestLocalDAECollocator(object):
         assert_results(res, 2.280259e3, 3.07723e2,
                        cost_rtol=1e-2, u_norm_rtol=5e-3)
 
-    @testattr(casadi_base_new = True)
+    @testattr(casadi_new = True)
     def test_eliminate_der_var(self):
         """
         Test that results are consistent regardless of eliminate_der_var.
@@ -1900,7 +1606,7 @@ class TestLocalDAECollocator(object):
         res = lagrange_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
 
-    @testattr(casadi_base_new = True)
+    @testattr(casadi_new = True)
     def test_eliminate_cont_var(self):
         """
         Test that results are consistent regardless of eliminate_cont_var.
@@ -1941,7 +1647,7 @@ class TestLocalDAECollocator(object):
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref_gauss)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_quadrature_constraint(self):
         """
         Test that optimization results of the CSTR is consistent regardless of
@@ -1979,7 +1685,7 @@ class TestLocalDAECollocator(object):
         #~ res = op.optimize(self.algorithm, opts)
         #~ assert_results(res, cost_ref, u_norm_ref)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_n_cp(self):
         """
         Test varying n_e and n_cp.
@@ -2007,7 +1713,7 @@ class TestLocalDAECollocator(object):
         res = op.optimize(self.algorithm, opts)
         assert_results(res, 3.17620203643878e0, 2.803233013e-1)
 
-    @testattr(casadi_base_new = True)
+    @testattr(casadi_new = True)
     def test_graphs_and_hessian(self):
         """
         Test that results are consistent regardless of graph and Hessian.
@@ -2080,7 +1786,7 @@ class TestLocalDAECollocator(object):
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_solver_statistics(self):
         """
         Test getting IPOPT statistics
@@ -2098,7 +1804,7 @@ class TestLocalDAECollocator(object):
         N.testing.assert_array_less([total_exec_time, -total_exec_time],
                                     [1., 0.])
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_input_interpolator(self):
         """
         Test the input interpolator for simulation purposes
@@ -2123,7 +1829,7 @@ class TestLocalDAECollocator(object):
         N.testing.assert_allclose([res.final("T"), res.final("c")],
                                   [284.60202203, 346.31140851], rtol=5e-4)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_matrix_evaluations(self):
         """
         Test evaluating NLP matrices.
@@ -2143,10 +1849,10 @@ class TestLocalDAECollocator(object):
         # Compute Jacobian condition numbers
         J_init = res.solver.get_J("init")
         J_init_cond = N.linalg.cond(J_init)
-        N.testing.assert_allclose(J_init_cond, 3.3368e5, rtol=1e-2) #3.3368e5 , #2.93e4
+        N.testing.assert_allclose(J_init_cond, 2.93e4, rtol=1e-2)
         J_opt = res.solver.get_J("opt")
         J_opt_cond = N.linalg.cond(J_opt)
-        N.testing.assert_allclose(J_opt_cond, 3.6453652e7, rtol=1e-2) #3.6453652e7 , #3.37e6
+        N.testing.assert_allclose(J_opt_cond, 3.37e6, rtol=1e-2)
 
         # Compute Hessian norms
         H_init = res.solver.get_H("init")
@@ -2159,10 +1865,10 @@ class TestLocalDAECollocator(object):
         # Compute KKT condition numbers
         KKT_init = res.solver.get_KKT("init")
         KKT_init_cond = N.linalg.cond(KKT_init)
-        N.testing.assert_allclose(KKT_init_cond, 2.637e9, rtol=1e-2) #2.637e9 #2.72e8
+        N.testing.assert_allclose(KKT_init_cond, 2.72e8, rtol=1e-2)
         KKT_opt = res.solver.get_KKT("opt")
         KKT_opt_cond = N.linalg.cond(KKT_opt)
-        N.testing.assert_allclose(KKT_opt_cond, 9.705e9, rtol=1e-2) #9.705e11 #1.18e10
+        N.testing.assert_allclose(KKT_opt_cond, 1.18e10, rtol=1e-2)
 
         # Obtain symbolic matrices and matrix functions
         res.solver.get_J("sym")
@@ -2172,7 +1878,7 @@ class TestLocalDAECollocator(object):
         res.solver.get_KKT("sym")
         res.solver.get_KKT("fcn")
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_expand_to_sx(self):
         """
         Test the different levels of SX expansion.
@@ -2199,7 +1905,7 @@ class TestLocalDAECollocator(object):
         res = op.optimize(options=opts)
         assert_results(res, cost_ref, u_norm_ref)
 
-    @testattr(casadi_base = True)
+    @testattr(casadi = True)
     def test_vdp_function(self):
         """
         Test a VDP model containing a function.
@@ -2242,30 +1948,6 @@ class TestLocalDAECollocator(object):
         # Test with WORHP
         opts['solver'] = 'WORHP'
         opts['WORHP_options']['NLPprint'] = -1
-        res = op.optimize(options=opts)
-        assert_results(res, cost_ref, u_norm_ref)
-    
-    @testattr(casadi_base = True)
-    def test_instream(self):
-        """
-        Test inStream operator support.
-        """
-        op = self.stream_op
-        opts = self.optimize_options(op)
-        
-        # Set arbitrary non-zero guesses
-        guesses = N.linspace(0.5, 1.8, len(op.getAllVariables()))
-        for (var, ig) in itertools.izip(op.getAllVariables(), guesses):
-            var.setAttribute('initialGuess', ig)
-
-        # Reference values
-        cost_ref = 63.99032036914
-        u_norm_ref = 5.9669830727
-        
-        # Solve and verify result
-        opts['solver'] = 'IPOPT'
-        opts['n_e'] = 3
-        opts['named_vars'] = True
         res = op.optimize(options=opts)
         assert_results(res, cost_ref, u_norm_ref)
 

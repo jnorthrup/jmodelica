@@ -15,8 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""
-JModelica test package.
+"""JModelica test package.
 
 This __init__.py file holds functions used to load
 """
@@ -25,14 +24,13 @@ import os
 import sys
 import os, os.path
 import shutil
-import platform
 
 __all__ = ['general', 'initialization', 'optimization', 'simulation', 
            'test_compiler', 'test_core', 'test_examples_casadi',
-           'test_examples_casadi_2', 'test_examples_fmi',
+           'test_examples_casadi_new', 'test_examples_fmi',
            'test_examples_jmi', 'test_fmi', 'test_fmi_jacobians', 'test_init',
            'test_io', 'test_jmi', 'test_linearization', 'test_xmlparser',
-           'test_fmi_2', 'test_delay', 'test_symbolic_elimination']
+           'test_fmi_2', 'test_delay']
 
 #create working directory for tests
 if sys.platform == 'win32':
@@ -73,8 +71,4 @@ def get_files_path():
     assert jmhome is not None, "You have to specify" \
                                " JMODELICA_HOME environment" \
                                " variable."
-    pycompiler = platform.python_compiler()
-    if "64 bit" in pycompiler and "win" in sys.platform:
-        return os.path.join(jmhome, 'Python_64', 'tests_jmodelica', 'files')
-    else:
-        return os.path.join(jmhome, 'Python', 'tests_jmodelica', 'files')
+    return os.path.join(jmhome, 'Python', 'tests_jmodelica', 'files')

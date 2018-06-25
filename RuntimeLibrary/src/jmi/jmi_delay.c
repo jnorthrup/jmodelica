@@ -158,7 +158,8 @@ int jmi_delay_set_event_mode(jmi_t *jmi, jmi_boolean in_event) {
     return 0;
 }
 
-int jmi_delay_next_time_event(jmi_t *jmi, jmi_time_event_t* nextTimeEvent) {
+jmi_real_t jmi_delay_next_time_event(jmi_t *jmi) {
+    jmi_real_t t_event = JMI_INF;
     int index;
     /* consider: More efficient strategy than linear iteration over all (fixed and variable time, event and noevent) delays? */
     for (index = 0; index < jmi->n_delays; index++) {
@@ -166,12 +167,10 @@ int jmi_delay_next_time_event(jmi_t *jmi, jmi_time_event_t* nextTimeEvent) {
         if (delay->fixed && !delay->no_event) {
             jmi_real_t t = jmi_delaybuffer_next_event_time(&(delay->buffer), &(delay->position));
             /* Don't add the delay time here since it has already been added when recording for fixed delays. */
-            if ((t != JMI_INF) && (JMI_TRUE == SURELY_GT_ZERO(t - get_t(jmi)))) {
-                jmi_min_time_event(nextTimeEvent, 1, 0, t);
-            }
+            if (t < t_event) t_event = t;
         }
     }
-    return 0;
+    return t_event;
 }
 
 static int jmi_delay_event_indicator(jmi_t *jmi, int index, jmi_real_t delay_time, jmi_real_t *event_indicator, jmi_boolean first) {
@@ -381,7 +380,7 @@ The indexing and reallocation functions below must be kept consistent with this.
 
 
 /** \brief (Re)initialize the buffer as empty, without changing the current allocation */
-static void clear_delay_buffer(jmi_delaybuffer_t *buffer, jmi_real_t max_delay) {
+static void clear(jmi_delaybuffer_t *buffer, jmi_real_t max_delay) {
     buffer->size = buffer->head_index = 0;
     buffer->max_delay = max_delay;
 }
@@ -590,8 +589,7 @@ static int record(jmi_t *jmi, jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_
             if (buffer->size > 1) {
                 /* Filter out the event, or the current sample? */
 
-                /* Filter out this event since it has the same y. NB: only valid for linear interpolation. */
-                if (JMI_ABS(buf[end_pos].y - y) < JMI_MAX(1.0, JMI_ABS(y))*jmi->events_epsilon) return 0;
+                if (buf[end_pos].y == y) return 0; /* Filter out this event since it has the same y. NB: only valid for linear interpolation. */
 
                 /* If there is already an event at the end, discard it. */
                 if (at_right && event_left_of(buffer, end_index)) {
@@ -651,7 +649,7 @@ static int jmi_delaybuffer_new(jmi_t *jmi, jmi_delaybuffer_t *buffer) {
     buffer->event_buf = (int *)calloc(buffer->event_capacity, sizeof(int));
     if (buffer->event_buf == NULL) jmi_internal_error(jmi, "Unable to allocate space for delay buffer");
 
-    clear_delay_buffer(buffer, 0); /* sets max_delay to zero; will be set to correct value in jmi_delaybuffer_init */
+    clear(buffer, 0); /* sets max_delay to zero; will be set to correct value in jmi_delaybuffer_init */
     return 0;
 }
 static int jmi_delaybuffer_delete(jmi_delaybuffer_t *buffer) {
@@ -664,7 +662,7 @@ static int jmi_delaybuffer_delete(jmi_delaybuffer_t *buffer) {
 }
 
 static int jmi_delaybuffer_init(jmi_delaybuffer_t *buffer, jmi_real_t max_delay) {
-    clear_delay_buffer(buffer, max_delay);
+    clear(buffer, max_delay);
     return 0;
 }
 

@@ -15,12 +15,14 @@
 */
 package org.jmodelica.util;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.regex.Pattern;
 
@@ -128,7 +130,7 @@ public class GeneratedFilePatcher {
 			File org = new File(dir, fileName);
 			File temp = new File(org.getPath() + ".temp");
 			BufferedReader in = new BufferedReader(new FileReader(org));
-			PrintStream out = new PrintStream(new BufferedOutputStream(new FileOutputStream(temp)));
+			PrintStream out = new PrintStream(new FileOutputStream(temp));
 			apply(in, out);
 			in.close();
 			out.close();
@@ -138,6 +140,7 @@ public class GeneratedFilePatcher {
 		}
 
 		private void apply(BufferedReader in, PrintStream out) throws IOException {
+			boolean print = true;
 			String line;
 			while ((line = in.readLine()) != null) {
 				for (Change ch : changes)

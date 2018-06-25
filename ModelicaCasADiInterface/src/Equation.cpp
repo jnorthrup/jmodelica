@@ -18,10 +18,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using casadi::MX;
 namespace ModelicaCasADi 
 {
-Equation::Equation(MX lhs, MX rhs) : lhs(lhs), rhs(rhs), tearing(false) {}
-void Equation::print(std::ostream& os) const { 
-    os << ModelicaCasADi::normalizeMXRespresentation(lhs);
-    os << " = ";
-    os << ModelicaCasADi::normalizeMXRespresentation(rhs); 
-}
+Equation::Equation(MX lhs, MX rhs) : lhs(lhs), rhs(rhs) {}
 }; // End namespace

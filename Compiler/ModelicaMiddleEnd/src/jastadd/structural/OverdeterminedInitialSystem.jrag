@@ -45,7 +45,7 @@ aspect OverdeterminedInitialSystem {
         for (FVariable var : res.visitedParameters) {
             if (!var.isParameter())
                 continue;
-            var.setFTypePrefixVariability(ASTNode.fStructParameter());
+            var.setFTypePrefixVariability(new FStructParameter());
         }
         
         return g;
@@ -103,13 +103,9 @@ aspect OverdeterminedInitialSystem {
             private Map<CommonVariableDecl, CValue> evaluationCache = new LinkedHashMap<CommonVariableDecl, CValue>();
             private Set<FVariable> visitedParameters = new LinkedHashSet<FVariable>();
             
-            public OISVariableEvaluator() {
-                super(true);
-            }
-            
             @Override
             public CValue ceval(CommonVariableDecl variable) {
-                ASTNode.log.verbose("    %s", variable.name());
+                ASTNode.log.verbose(variable.name());
                 CValue val = evaluationCache.get(variable);
                 if (val != null)
                     return val;
@@ -137,7 +133,7 @@ aspect OverdeterminedInitialSystem {
             
             @Override
             public CValue ceval(CommonVariableDecl variable, Index i) {
-                return ceval(variable).array().getCell(i);
+                return CValue.UNKNOWN;
             }
         }
     }
@@ -173,14 +169,9 @@ aspect OverdeterminedInitialSystem {
     syn boolean FAbstractEquation.OIS_consistencyCheck(VariableEvaluator evaluator) = false;
     eq FEquation.OIS_consistencyCheck(VariableEvaluator evaluator) {
         try {
-            log.verbose("  Right:");
-            CValue right = getRight().ceval(evaluator);
-            log.verbose("    Calculated value: %s", right);
-            log.verbose("  Left:");
             CValue left = getLeft().ceval(evaluator);
-            log.verbose("    Calculated value: %s", left);
-            CValue equ = type().equ(left, right);
-            return equ.hasBooleanValue() && equ.booleanValue();
+            CValue right = getRight().ceval(evaluator);
+            return left.isValid() && right.isValid() && type().equ(left, right).booleanValue();
         } catch (ConstantEvaluationException e) {
             return false;
         }

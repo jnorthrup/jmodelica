@@ -24,12 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 aspect XMLCodeGen {
-
-    /**
-     * Static printer instance.
-     */
-    public static XMLPrettyPrinter ASTNode.printer_XML = new XMLPrettyPrinter();
-
+	
 	public class XMLPrettyPrinter extends Printer {
 		public XMLPrettyPrinter() {
 			super("\t");
@@ -47,10 +42,10 @@ aspect XMLCodeGen {
 		return os.toString();
 	}
 
-    public void ASTNode.prettyPrint_XML(CodeStream str, String indent) {
-        prettyPrint_XML(printer_XML, str, indent);
-    }
-
+	public void ASTNode.prettyPrint_XML(CodeStream str, String indent) {
+ 		prettyPrint_XML(new XMLPrettyPrinter(), str, indent);
+	}
+	
 	public void ASTNode.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		prettyPrint(p, str, indent);
 	}
@@ -78,7 +73,7 @@ aspect XMLCodeGen {
 	public void ASTNode.tag_XML(CodeStream str, String format, String indent, String tag, Map<String, String> attr) {
 		str.format(format, indent, xmlNamespace(), addAttrs_XML(tag, attr));
 	}
-
+	
 	private static String ASTNode.addAttrs_XML(String tag, Map<String, String> attr) {
 		StringBuilder buf = new StringBuilder(tag);
 		for (String name : attr.keySet()) {
@@ -401,9 +396,11 @@ aspect XMLCodeGen {
         qVarName.prettyPrint_XML(str,p.indent(indent+"\t"));
         str.println(indent + "\t</" + namespace + ":" + varTag + ">"); 
         
-        str.println(indent + "\t<" + namespace + ":" + expTag + ">");
-        this.getFExp().prettyPrint_XML(str,p.indent(indent+"\t"));
-        str.println(indent + "\t</" + namespace + ":" + expTag + ">");
+        if (this.hasFExp()){
+        	str.println(indent + "\t<" + namespace + ":" + expTag + ">");
+        	this.getFExp().prettyPrint_XML(str,p.indent(indent+"\t"));
+        	str.println(indent + "\t</" + namespace + ":" + expTag + ">");
+        }     	
         str.println(indent + "</" + namespace + ":" + tag + ">"); 
      
     }
@@ -536,113 +533,10 @@ aspect XMLCodeGen {
 			
 	}
 
-    syn String FVariable.quantity_XML()    =  quantityAttribute();
-    syn String FVariable.unit_XML()        =  unitAttribute();
-    syn String FVariable.displayUnit_XML() =  displayUnitAttribute();
-    syn String FVariable.variability_XML() {
-        if (variability().knownParameterOrLess()) {
-            return "constant";
-        } else if (isParameter()) {
-            return "parameter";
-        } else if (isDiscrete()) {
-            return "discrete";
-        } else {
-            //default
-            return "continuous";
-        }
-    }
-    syn String FVariable.causality_XML() {
-        if (isInput()) {
-            return "input";
-        } else if (isOutput()) {
-            return "output";
-        } else {
-            //default
-            return "internal";
-        }
-    }
-    syn String FVariable.alias_XML() {
-        if (isAlias()) {
-            if (isNegated()) {
-                return "negatedAlias";
-            } else {
-                return "alias";
-            }
-        } else {
-            return "noAlias";
-        }
-    }
-
-    
-    public void FVariable.genDecl_XML(XMLGenerator gen, CodeStream str) {
-        throw new IllegalArgumentException("FVariable.genDecl_XML() is not implemented for " + getClass().getSimpleName() + "!");
-    }
-
-    @Override
-    public void FRealVariable.genDecl_XML(XMLGenerator gen, CodeStream str) {
-        // Start of tag
-        gen.generateTagStart("Real", str);
-        gen.addRealAttributes(str, this);
-        // Close tag
-        gen.generateClosedEnd(str);
-    }
-    
-
-    @Override
-    public void FIntegerVariable.genDecl_XML(XMLGenerator gen, CodeStream str) {
-        // Start of tag
-        gen.generateTagStart("Integer", str);
-        gen.addIntegerAttributes(str, this);
-        // Close tag
-        gen.generateClosedEnd(str);
-    }
-
-    @Override
-    public void FEnumVariable.genDecl_XML(XMLGenerator gen, CodeStream str) {
-        // Start of tag
-        gen.generateTagStart("Enumeration", str);
-        gen.addEnumAttributes(str, this);
-        // Close tag
-        gen.generateClosedEnd(str);
-    }
-
-    @Override
-    public void FBooleanVariable.genDecl_XML(XMLGenerator gen, CodeStream str) {
-        // Start of tag
-        gen.generateTagStart("Boolean", str);
-        gen.addBooleanAttributes(str, this);
-        // Close tag
-        gen.generateClosedEnd(str);
-    }
-
-    @Override
-    public void FStringVariable.genDecl_XML(XMLGenerator gen, CodeStream str) {
-        // Start of tag
-        gen.generateTagStart("String", str);
-        gen.addStringAttributes(str, this);
-        // Close tag
-        gen.generateClosedEnd(str);
-    }
-
-    syn String FVariable.category_XML() {
-        if (isDerivativeVariable()) {
-            return "derivative";
-        } else if (isDifferentiatedVariable()) {
-            return "state";
-        } else if (isDependentConstant()) {
-            return "dependentConstant";
-        } else if (isIndependentConstant()) {
-            return "independentConstant";
-        } else if (isDependentParameter()) {
-            return "dependentParameter";
-        } else if (isIndependentParameter()) {
-            return "independentParameter";
-        } else {
-            return "algebraic";
-        }
-    }
-
-    
+    syn String FVariable.quantityXML(GenericXMLGenerator gen)    =  gen.replaceIllegalChars(quantityAttribute());
+    syn String FVariable.unitXML(GenericXMLGenerator gen)        =  gen.replaceIllegalChars(unitAttribute());
+    syn String FVariable.displayUnitXML(GenericXMLGenerator gen) =  gen.replaceIllegalChars(displayUnitAttribute());
+	
 }//aspect end
 
 aspect XMLTagBinding{

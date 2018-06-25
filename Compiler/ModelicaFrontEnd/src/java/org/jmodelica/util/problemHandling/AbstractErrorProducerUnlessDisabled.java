@@ -1,8 +1,5 @@
 package org.jmodelica.util.problemHandling;
 
-import org.jmodelica.api.problemHandling.ProblemKind;
-import org.jmodelica.api.problemHandling.ProblemSeverity;
-
 public abstract class AbstractErrorProducerUnlessDisabled<T extends ReporterNode> extends ProblemProducer<T> {
 
     public AbstractErrorProducerUnlessDisabled(String identifier, ProblemKind kind) {

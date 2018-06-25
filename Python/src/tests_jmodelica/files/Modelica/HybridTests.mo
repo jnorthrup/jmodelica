@@ -182,15 +182,5 @@ equation
 
 end WhenFunction1;
 
-model IfTest1
-    input Real u;
-    Real x;
-equation
-    if u > 1 then
-        der(x) = 1;
-    else
-        der(x) = -1;
-    end if;
-end IfTest1;
 
 end HybridTests;

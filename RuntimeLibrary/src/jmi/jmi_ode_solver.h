@@ -25,91 +25,61 @@
 #ifndef _JMI_ODE_SOLVER_H
 #define _JMI_ODE_SOLVER_H
 
-#include "jmi_types.h"
+#include "jmi_util.h"
+#include "jmi_ode_problem.h"
+#include "jmi.h"
 #include "jmi_log.h"
 
-typedef enum {
-    JMI_ODE_ERROR = -1,
-    JMI_ODE_OK = 0,
-    JMI_ODE_EVENT = 1,
-    JMI_ODE_TERMINATE = 2
-} jmi_ode_status_t;
 
-/** \brief Integrator methods the solver can use */
-typedef enum {
-    JMI_ODE_CVODE,
-    JMI_ODE_EULER
-} jmi_ode_method_t;
+/**
+ * \brief A ode solver function signature.
+ *
+ * @param block A jmi_block_residual_t struct.
+ * @return Error code.
+ */
+typedef int (*jmi_ode_solve_func_t)(jmi_ode_solver_t* block, jmi_real_t time_final, int initialize);
 
-/** \brief Solver options specific for the cvode integrator */
-typedef struct {
-    jmi_real_t rel_tol;
-} jmi_ode_cvode_options_t;
+/**
+ * \brief A ode solver destructor signature.
+ *
+ * @param block A jmi_ode_solver_t struct.
+  */
+typedef void (*jmi_ode_delete_func_t)(jmi_ode_solver_t* block);
 
-/** \brief Solver options specific for the euler integrator */
-typedef struct {
+
+
+struct jmi_ode_solver_t {
+    jmi_ode_problem_t* ode_problem;                    /**< \brief A pointer to the corresponding jmi_ode_problem_t struct */
+
+    void *integrator;
     jmi_real_t step_size;
-} jmi_ode_euler_options_t;
+    jmi_real_t rel_tol;
+    int experimental_mode;
+    jmi_ode_solve_func_t solve;
+    jmi_ode_delete_func_t delete_solver;
+};
 
 /** \brief Experimental features in the solver */
-typedef enum {
-    jmi_cs_experimental_none = 0,
-    jmi_cs_experimental_no_reinit_for_input_change = 1
+typedef enum jmi_cs_experimental_mode_t {
+    jmi_cs_experimental_none = 0
 } jmi_cs_experimental_mode_t;
-
-/** \brief All solver options */
-typedef struct {
-    jmi_ode_method_t method;
-    jmi_ode_cvode_options_t cvode_options;
-    jmi_ode_euler_options_t euler_options;
-    
-    jmi_cs_experimental_mode_t experimental_mode;
-} jmi_ode_solver_options_t;
 
 /**
  * \brief Creates a new jmi_ode_solver_t instance.
  *
  * @param ode_problem A jmi_ode_problem_t struct.
- * @param method A jmi_ode_solver_options_t struct.
- * @return A jmi_ode_solver_t struct, NULL on failure.
+ * @param method A jmi_ode_method_t struct. 
+ * @param step_size The step size for the mehtod.
+ * @param rel_tol The relative tolerance for the method.
+ * @return Error code.
   */
-jmi_ode_solver_t* jmi_new_ode_solver(jmi_ode_problem_t* problem, jmi_ode_solver_options_t solver_options);
+int jmi_new_ode_solver(jmi_ode_problem_t* problem, jmi_ode_method_t method, jmi_real_t step_size, jmi_real_t rel_tol, int experimental_mode);
 
 /**
  * \brief Deletes the jmi_ode_solver_t instance.
  *
- * @param solver A jmi_ode_solver_t struct.
+ * @param ode_problem A jmi_ode_problem_t struct.
   */
-void jmi_free_ode_solver(jmi_ode_solver_t* solver);
-
-/**
- * \brief Indicate that the ode solver need to event update the ode problem.
- *
- * @param solver A jmi_ode_solver_t struct.
-  */
-void jmi_ode_solver_external_event(jmi_ode_solver_t* solver);
-
-/**
- * \brief Indicate that the ode solver need to (re)initialize.
- *
- * @param solver A jmi_ode_solver_t struct.
-  */
-void jmi_ode_solver_need_to_initialize(jmi_ode_solver_t* solver);
-
-/**
- * \brief Solves the ODE problem given when creating the solver instance.
- *
- * @param solver A jmi_ode_solver_t struct.
- * @param final_time The final time the integrator will integrate to.
- * @return Error code, will not be JMI_ODE_EVENT.
-  */
-jmi_ode_status_t jmi_ode_solver_solve(jmi_ode_solver_t* solver, jmi_real_t final_time);
-
-/**
- * \brief Returns a jmi_ode_solver_options_t struct with default values.
- *
- * @return A jmi_ode_solver_options_t struct with default values.
-  */
-jmi_ode_solver_options_t jmi_ode_solver_default_options(void);
+void jmi_delete_ode_solver(jmi_ode_problem_t* problem);
 
 #endif

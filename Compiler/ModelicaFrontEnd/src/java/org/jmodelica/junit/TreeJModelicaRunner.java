@@ -16,7 +16,6 @@
 package org.jmodelica.junit;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,29 +28,18 @@ import org.junit.runners.model.InitializationError;
 
 public class TreeJModelicaRunner extends ParentRunner<TreeModuleRunner> {
 
-    public static final String TEST_SUB_PATH = "test/modelica";
-
-    public static final String MODELICA_EXT = ".mo";
-
-    public static final FilenameFilter MODELICA_FILES = new FilenameFilter() {
-        public boolean accept(File dir, String name) {
-            return name.endsWith(MODELICA_EXT);
-        }
-    };
-
     private List<TreeModuleRunner> children;
 
     public TreeJModelicaRunner(Class testClass) throws InitializationError {
         super(testClass);
         if (TestSpecification.class.isAssignableFrom(testClass)) {
             try {
-                UniqueNameCreator nc = new UniqueNameCreator();
                 TestSpecification spec = (TestSpecification) testClass.newInstance();
                 children = new ArrayList<TreeModuleRunner>();
                 for (File f : spec.getModuleDirs()) {
-                    File testDir = new File(f, TEST_SUB_PATH);
-                    if (testDir.isDirectory() && testDir.listFiles(MODELICA_FILES).length > 0) 
-                        children.add(new TreeModuleRunner(spec, nc, f, testClass.getCanonicalName()));
+                    File testDir = new File(f, "src/test");
+                    if (testDir.isDirectory() && testDir.listFiles().length > 0) 
+                        children.add(new TreeModuleRunner(spec, f));
                 }
             } catch (Exception e) {
                 throw new InitializationError(Collections.<Throwable>singletonList(e));

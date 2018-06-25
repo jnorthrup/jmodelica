@@ -20,12 +20,12 @@
 import os
 import numpy as N
 from tests_jmodelica import testattr, get_files_path
+from pyjmi.optimization.greybox import GreyBox, Identification
 from collections import OrderedDict
 
 try:
     from pyjmi import transfer_optimization_problem
     from pyjmi.optimization.casadi_collocation import ExternalData
-    from pyjmi.optimization.greybox import GreyBox, Identification
 except (NameError, ImportError):
     pass
 
@@ -36,7 +36,7 @@ def strnorm(StringnotNorm):
         StringnotNorm = StringnotNorm.replace(c, '')
     return StringnotNorm
     
-@testattr(casadi_base = True)
+@testattr(casadi = True)
 def test_op_structure():
     
     # Locate the model and file paths 
@@ -85,7 +85,7 @@ def test_op_structure():
     assert strnorm(GB.op.getObjectiveIntegrand().getDescription()) == strnorm('(((0.499*sq((E-GreyBox_measured_E)))/GreyBox_r_E)+((0.499*sq((P-GreyBox_measured_P)))/GreyBox_r_P))')
     assert strnorm(GB.op.getObjective().getDescription()) == strnorm('((((500*log(GreyBox_r_E))+(sq((E(0.000000)-133.837))/GreyBox_r_E))+(500*log(GreyBox_r_P)))+(sq((P(0.000000)-138))/GreyBox_r_P))')
 
-@testattr(casadi_base = True)
+@testattr(casadi = True)
 def test_op_structure_sum():
     # Locate the model and file paths 
     file_path = os.path.join(get_files_path(),'Modelica',"DrumBoiler.mo")
@@ -131,7 +131,7 @@ def test_op_structure_sum():
     print strnorm(GB.op.getObjective().getDescription())
     assert strnorm(GB.op.getObjective().getDescription()) == strnorm('((((((((sq((E(0.000000)-133.837))/GreyBox_r_E)+(sq((E(2.004008)-132.493))/GreyBox_r_E))+(sq((E(4.008016)-129.124))/GreyBox_r_E))+(3*log(GreyBox_r_E)))+(sq((P(0.000000)-138))/GreyBox_r_P))+(sq((P(2.004008)-141.156))/GreyBox_r_P))+(sq((P(4.008016)-132.906))/GreyBox_r_P))+(3*log(GreyBox_r_P)))')
 
-@testattr(casadi_base = True)
+@testattr(casadi = True)
 def test_identification_object():
     # Locate the model and file paths 
     file_path = os.path.join(get_files_path(),'Modelica',"DrumBoiler.mo")
@@ -176,13 +176,13 @@ def test_identification_object():
 		
     #Assert value of free variables
     res = identification.result
-    N.testing.assert_allclose(res.final('GreyBox_r_E'), 99.999995739422701, 1e-3)
-    N.testing.assert_allclose(res.final('GreyBox_r_P'), 74.464755778693103, 1e-3)
-    N.testing.assert_allclose(res.final('x10'), 138.77236665852601, 1e-3)
-    N.testing.assert_allclose(res.final('x20'), 40.696009354038303, 1e-3)
+    assert abs(res.final('GreyBox_r_E') - 99.999995739422701) <1e-6
+    assert abs(res.final('GreyBox_r_P') - 74.464755778693103) <1e-6
+    assert abs(res.final('x10') - 138.77236665852601) <1e-6
+    assert abs(res.final('x20') - 40.696009354038303) <1e-6
 
 
-@testattr(casadi_base = True)
+@testattr(casadi = True)
 def test_nonuniform_element_length():
     # Locate the model and file paths 
     file_path = os.path.join(get_files_path(),'Modelica',"DrumBoiler.mo")
@@ -231,7 +231,7 @@ def test_nonuniform_element_length():
     
     assert N.allclose(GB.options['hs'][0:4], [ 0.00200803,  0.00401606,  0.00200803,  0.00401606])
     
-@testattr(casadi_base = True)
+@testattr(casadi = True)
 def test_compare():
     # Locate the model and file paths 
     file_path = os.path.join(get_files_path(),'Modelica',"DrumBoiler.mo")
@@ -304,17 +304,18 @@ def test_compare():
     result = identification.compare([idObj1, idObj2])
     
     # assert results
-    N.testing.assert_allclose(result[0]['cost'], 5466.596970228651, 1e-3)
-    N.testing.assert_allclose(result[1]['cost'], 5630.90033894926, 1e-3)
-    N.testing.assert_allclose(result[0]['costred'], 164.47186155134114, 5e-3)
-    N.testing.assert_allclose(result[1]['costred'], 0.16849283073224797, 5e-3)
+    assert abs(result[0]['cost'] - 5466.596970228651) < 1e-6
+    assert abs(result[1]['cost'] - 5630.90033894926) <1e-6
+    
+    assert abs(result[0]['costred'] - 164.47186155134114) < 1e-6
+    assert abs(result[1]['costred'] - 0.16849283073224797) < 1e-6
     
     # assert risk
     assert identification.calculate_risk(identification.get_cost()-idObj2.get_cost(),1,2) == result[1]['risk'] 
     assert identification.calculate_risk(identification.get_cost()-idObj1.get_cost(),1,2) == result[0]['risk'] 
     
 
-@testattr(casadi_base = True)
+@testattr(casadi = True)
 def test_risk_calculation():
 	
     idObj = Identification([],[],[],0)

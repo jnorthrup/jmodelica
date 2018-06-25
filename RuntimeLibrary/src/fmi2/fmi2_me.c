@@ -40,7 +40,7 @@ fmi2Status fmi2_set_debug_logging(fmi2Component    c,
     size_t i;
     int max_log_level, tmp_log_level;
     if (c == NULL) {
-        return fmi2Fatal;
+		return fmi2Fatal;
     }
 
     max_log_level = 0;
@@ -114,12 +114,12 @@ fmi2Component fmi2_instantiate(fmi2String instanceName,
         if (retval != fmi2OK) {
             functions->freeMemory(component);
             return NULL;
-        }
+		}
     } else {
-        /* We have to use the raw logger callback here; the logger in the jmi_t struct is not yet initialized. */
+		/* We have to use the raw logger callback here; the logger in the jmi_t struct is not yet initialized. */
         functions->logger(0, instanceName, fmi2Error, "ERROR", "Valid choises for fmuType are fmi2ModelExchange and fmi2CoSimulation");
         component = NULL;
-    }
+	}
     
     return component;
 }
@@ -212,15 +212,14 @@ fmi2Status fmi2_setup_experiment(fmi2Component c,
     fmi2Status retval;
     fmi2_me_t* fmi2_me; 
     
-    if (c == NULL) {
-        return fmi2Fatal;
+	if (c == NULL) {
+		return fmi2Fatal;
     }
 
     fmi2_me = (fmi2_me_t*)c;
 
     if (fmi2_me->fmu_mode != instantiatedMode) {
-        jmi_log_node(fmi2_me->jmi.log, logError, "FMIState",
-            "Can only set up an experiment right after the model is instantiated or has been reset.");
+        jmi_log_comment(fmi2_me->jmi.log, logError, "Can only set up an experiment right after the model is instantiated or has been reset.");
         return fmi2Error;
     }
     
@@ -232,7 +231,8 @@ fmi2Status fmi2_setup_experiment(fmi2Component c,
     retval = fmi2_set_time(c, startTime);
     
     if (fmi2_me->fmu_type == fmi2CoSimulation) {
-        ((fmi2_cs_t*)c)->ode_problem->time = startTime;
+        jmi_init_ode_problem(((fmi2_cs_t*)c)->ode_problem, startTime, fmi2_cs_rhs_fcn,
+                             fmi2_cs_root_fcn, fmi2_cs_completed_integrator_step);
     }
     
     return retval;
@@ -241,17 +241,18 @@ fmi2Status fmi2_setup_experiment(fmi2Component c,
 fmi2Status fmi2_enter_initialization_mode(fmi2Component c) {
     fmi2Integer retval;
     jmi_ode_problem_t* ode_problem;
-    jmi_ode_solver_options_t options;
     jmi_t* jmi;
-    jmi_cs_data_t* cs_data;
+    jmi_ode_method_t ode_method;
+    jmi_real_t ode_step_size;
+    jmi_real_t ode_rel_tol;
+    int        ode_experimental_mode;
 
-    if (c == NULL) {
-        return fmi2Fatal;
+	if (c == NULL) {
+		return fmi2Fatal;
     }
     
     if (((fmi2_me_t *)c)->fmu_mode != instantiatedMode) {
-        jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "FMIState",
-            "Can only enter initialization mode after instantiating the model.");
+        jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only enter initialization mode after instantiating the model.");
         return fmi2Error;
     }
     jmi = &((fmi2_me_t*)c)->jmi;
@@ -265,22 +266,22 @@ fmi2Status fmi2_enter_initialization_mode(fmi2Component c) {
     
     if (((fmi2_me_t *)c) -> fmu_type == fmi2CoSimulation) {
         ode_problem = ((fmi2_cs_t *)c) -> ode_problem; 
-        cs_data = ((fmi2_cs_t *)c)->cs_data;
-        /*Get the states and the nominals for the ODE problem. Initialization. */
-        fmi2_get_continuous_states(cs_data->fmix_me, ode_problem->states, ode_problem->sizes.states);
-        fmi2_get_nominals_of_continuous_states(cs_data->fmix_me, ode_problem->nominals, ode_problem->sizes.states);
+        /*Get the states, event indicators and the nominals for the ODE problem. Initialization. */
+        fmi2_get_continuous_states(ode_problem->fmix_me, ode_problem->states, ode_problem->n_real_x);
+        fmi2_get_event_indicators(ode_problem->fmix_me, ode_problem->event_indicators, ode_problem->n_sw);
+        fmi2_get_event_indicators(ode_problem->fmix_me, ode_problem->event_indicators_previous, ode_problem->n_sw);
+        fmi2_get_nominals_of_continuous_states(ode_problem->fmix_me, ode_problem->nominal, ode_problem->n_real_x);
         
         
         /* These options for the solver need to be found in a better way. */
-        options = jmi_ode_solver_default_options();
-        options.method                  = jmi->options.cs_solver;
-        options.euler_options.step_size = jmi->options.cs_step_size;
-        options.cvode_options.rel_tol   = jmi->options.cs_rel_tol;
-        options.experimental_mode       = jmi->options.cs_experimental_mode;
+        ode_method            = jmi->options.cs_solver;
+        ode_step_size         = jmi->options.cs_step_size;
+        ode_rel_tol           = jmi->options.cs_rel_tol;
+        ode_experimental_mode = jmi->options.cs_experimental_mode;
         
         /* Create solver */
-        ode_problem->ode_solver = jmi_new_ode_solver(ode_problem, options);
-        if (ode_problem->ode_solver == NULL) { 
+        retval = jmi_new_ode_solver(ode_problem, ode_method, ode_step_size, ode_rel_tol, ode_experimental_mode);
+        if (retval != fmi2OK) { 
             return fmi2Error;
         }
     }
@@ -289,21 +290,19 @@ fmi2Status fmi2_enter_initialization_mode(fmi2Component c) {
 }
 
 fmi2Status fmi2_exit_initialization_mode(fmi2Component c) {
-    if (c == NULL) {
-        return fmi2Fatal;
+	if (c == NULL) {
+		return fmi2Fatal;
     }
 
     if (((fmi2_me_t *)c)->fmu_mode != initializationMode) {
-        jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "FMIState",
-            "Can only exit initialization mode when being in initialization mode.");
+        jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only exit initialization mode when being in initialization mode.");
         return fmi2Error;
     }
     if (((fmi2_me_t *)c)->fmu_type == fmi2ModelExchange) {
         ((fmi2_me_t *)c)->fmu_mode = eventMode;
     } else if (((fmi2_me_t *)c)->fmu_type == fmi2CoSimulation) {
         ((fmi2_me_t *)c)->fmu_mode = slaveInitialized;
-        /* Start event iteration after initialization: */
-        jmi_ode_solver_external_event(((fmi2_cs_t *)c)->ode_problem->ode_solver);
+		((fmi2_cs_t *)c)->event_info.newDiscreteStatesNeeded = fmi2True; /* To start event iteration after initialization. */
     }
     return fmi2OK;
 }
@@ -313,7 +312,7 @@ fmi2Status fmi2_terminate(fmi2Component c) {
     int retval;
 
     if (c == NULL) {
-        return fmi2Fatal;
+		return fmi2Fatal;
     }
     
     retval = jmi_update_and_terminate(&((fmi2_me_t*)c)->jmi);
@@ -328,17 +327,17 @@ fmi2Status fmi2_reset(fmi2Component c) {
     fmi2_me_t* fmi2_me;
     jmi_callbacks_t* cb;
     char*  tmp_resource_location;
-    
+	
     if (c == NULL) {
-        return fmi2Fatal;
+		return fmi2Fatal;
     }
     
     fmi2_me = (fmi2_me_t*)c;
     jmi = &fmi2_me->jmi;
     
     /* Clear the ode_solver in case of CoSimulation */
-    if (fmi2_me->fmu_type == fmi2CoSimulation) {
-        jmi_free_ode_solver(((fmi2_cs_t *)c)->ode_problem->ode_solver);
+    if (fmi2_me->fmu_type == fmi2CoSimulation && ((fmi2_cs_t *)c)->ode_problem->ode_solver) {
+        jmi_delete_ode_solver(((fmi2_cs_t *)c)->ode_problem);
     }
     
     /* Save some information from the jmi struct */
@@ -357,14 +356,13 @@ fmi2Status fmi2_reset(fmi2Component c) {
     jmi_me_init(cb, &fmi2_me->jmi, fmi2_me->fmu_GUID, tmp_resource_location);
     
     /* Instantiate the ode_problem in case of CoSimulation */
-    if (fmi2_me->fmu_type == fmi2CoSimulation) {
+    if (fmi2_me->fmu_type == fmi2CoSimulation && ((fmi2_cs_t *)c)->ode_problem->ode_solver) {
+        jmi_ode_problem_t* ode_problem = 0;
         fmi2_cs_t* fmi2_cs = (fmi2_cs_t*)c;
-        
-        jmi_reset_cs_data(fmi2_cs->cs_data);
-        jmi_reset_ode_problem(fmi2_cs->ode_problem);
-        /* Due to no jmi_t reset, pointers may have changed: */
-        fmi2_cs->ode_problem->log = jmi->log;
-        fmi2_cs->ode_problem->jmi_callbacks = &jmi->jmi_callbacks;
+
+        jmi_new_ode_problem(&ode_problem, &jmi->jmi_callbacks, c, jmi->n_real_x,
+                            jmi->n_relations, jmi->n_real_u, jmi->log);
+        fmi2_cs -> ode_problem = ode_problem;
     }
     
     /* The FMU is reset */
@@ -379,7 +377,7 @@ fmi2Status fmi2_get_real(fmi2Component c, const fmi2ValueReference vr[],
     size_t i;
     
     if (c == NULL) {
-        return fmi2Fatal;
+		return fmi2Fatal;
     }
 
     retval = jmi_get_real(&((fmi2_me_t *)c)->jmi, vr, nvr, value);
@@ -389,7 +387,7 @@ fmi2Status fmi2_get_real(fmi2Component c, const fmi2ValueReference vr[],
     
     /* Negate the values of the retrieved "negate alias" variables. */
     for (i = 0; i < nvr; i++) {
-        if (jmi_value_ref_is_negated(vr[i])) {
+        if (is_negated(vr[i])) {
             value[i] = -value[i];
         }
     }
@@ -403,7 +401,7 @@ fmi2Status fmi2_get_integer(fmi2Component c, const fmi2ValueReference vr[],
     size_t i;
     
     if (c == NULL) {
-        return fmi2Fatal;
+		return fmi2Fatal;
     }
 
     retval = jmi_get_integer(&((fmi2_me_t *)c)->jmi, vr, nvr, value);
@@ -413,7 +411,7 @@ fmi2Status fmi2_get_integer(fmi2Component c, const fmi2ValueReference vr[],
     
     /* Negate the values of the retrieved "negate alias" variables. */
     for (i = 0; i < nvr; i++) {
-        if (jmi_value_ref_is_negated(vr[i])) {
+        if (is_negated(vr[i])) {
             value[i] = -value[i];
         }
     }
@@ -428,7 +426,7 @@ fmi2Status fmi2_get_boolean(fmi2Component c, const fmi2ValueReference vr[],
     size_t i;
     
     if (c == NULL) {
-        return fmi2Fatal;
+		return fmi2Fatal;
     }
 
     retval = jmi_get_boolean(&((fmi2_me_t *)c)->jmi, vr, nvr, jmi_boolean_values);
@@ -449,7 +447,7 @@ fmi2Status fmi2_get_string(fmi2Component c, const fmi2ValueReference vr[],
     fmi2Integer retval;
     
     if (c == NULL) {
-        return fmi2Fatal;
+		return fmi2Fatal;
     }
 
     retval = jmi_get_string(&((fmi2_me_t *)c)->jmi, vr, nvr, value);
@@ -467,30 +465,17 @@ fmi2Status fmi2_set_real(fmi2Component c, const fmi2ValueReference vr[],
     size_t i;
     
     if (c == NULL) {
-        return fmi2Fatal;
+		return fmi2Fatal;
     }
     
+    /* Negate the values before setting the "negate alias" variables. */
     for (i = 0; i < nvr; i++) {
-        /* Negate the values before setting the "negate alias" variables. */
-        if (jmi_value_ref_is_negated(vr[i])) {
+        if (is_negated(vr[i])) {
             fmi2_me->work_real_array[i] = -value[i];
         } else {
             fmi2_me->work_real_array[i] = value[i];
         }
     }
-    
-    if (fmi2_me->fmu_type == fmi2CoSimulation &&
-        ((fmi2_cs_t *)c)->ode_problem->ode_solver != NULL &&
-        jmi_cs_check_discrete_input_change(&fmi2_me->jmi, vr, nvr, (void*)fmi2_me->work_real_array))
-    {
-        jmi_ode_solver_external_event(((fmi2_cs_t *)c)->ode_problem->ode_solver);
-    }
-    if (fmi2_me->fmu_type == fmi2CoSimulation &&
-        ((fmi2_cs_t *)c)->ode_problem->ode_solver != NULL &&
-        jmi_cs_check_input_change(&fmi2_me->jmi, vr, nvr, fmi2_me->work_real_array))
-    {
-        jmi_ode_solver_need_to_initialize(((fmi2_cs_t *)c)->ode_problem->ode_solver);
-    } 
     
     retval = jmi_set_real(&((fmi2_me_t *)c)->jmi, vr, nvr, fmi2_me->work_real_array);
     if (retval != 0) {
@@ -507,23 +492,16 @@ fmi2Status fmi2_set_integer(fmi2Component c, const fmi2ValueReference vr[],
     size_t i;
     
     if (c == NULL) {
-        return fmi2Fatal;
+		return fmi2Fatal;
     }
     
     /* Negate the values before setting the "negate alias" variables. */
     for (i = 0; i < nvr; i++) {
-        if (jmi_value_ref_is_negated(vr[i])) {
+        if (is_negated(vr[i])) {
             fmi2_me->work_int_array[i] = -value[i];
         } else {
             fmi2_me->work_int_array[i] = value[i];
         }
-    }
-    
-    if (fmi2_me->fmu_type == fmi2CoSimulation &&
-        ((fmi2_cs_t *)c)->ode_problem->ode_solver != NULL &&
-        jmi_cs_check_discrete_input_change(&fmi2_me->jmi, vr, nvr, (void*)fmi2_me->work_int_array))
-    {
-        jmi_ode_solver_external_event(((fmi2_cs_t *)c)->ode_problem->ode_solver);
     }
     
     retval = jmi_set_integer(&((fmi2_me_t *)c)->jmi, vr, nvr, fmi2_me->work_int_array);
@@ -537,33 +515,25 @@ fmi2Status fmi2_set_integer(fmi2Component c, const fmi2ValueReference vr[],
 fmi2Status fmi2_set_boolean(fmi2Component c, const fmi2ValueReference vr[],
                             size_t nvr, const fmi2Boolean value[]) {
     fmi2Integer retval;
-    fmi2_me_t* fmi2_me = (fmi2_me_t *)c;
     size_t i;
-    jmi_boolean* jmi_boolean_values;
+
+	jmi_boolean* jmi_boolean_values = (jmi_boolean*)calloc(nvr, sizeof(char));;
     
     if (c == NULL) {
-        return fmi2Fatal;
+		return fmi2Fatal;
     }
     
-    jmi_boolean_values = (jmi_boolean*)calloc(nvr, sizeof(jmi_boolean));
     for (i = 0; i < nvr; i++) {
         jmi_boolean_values[i] = value[i];
     }
     
-    if (fmi2_me->fmu_type == fmi2CoSimulation  &&
-        ((fmi2_cs_t *)c)->ode_problem->ode_solver != NULL &&
-        jmi_cs_check_discrete_input_change(&fmi2_me->jmi, vr, nvr, (void*)jmi_boolean_values))
-    {
-        jmi_ode_solver_external_event(((fmi2_cs_t *)c)->ode_problem->ode_solver);
-    }
-    
-    retval = jmi_set_boolean(&fmi2_me->jmi, vr, nvr, jmi_boolean_values);
-    free(jmi_boolean_values);
-    
+    retval = jmi_set_boolean(&((fmi2_me_t *)c)->jmi, vr, nvr, jmi_boolean_values);
     if (retval != 0) {
         return fmi2Error;
     }
 
+	free(jmi_boolean_values);
+    
     return fmi2OK;
 }
 
@@ -572,7 +542,7 @@ fmi2Status fmi2_set_string(fmi2Component c, const fmi2ValueReference vr[],
     fmi2Integer retval;
     
     if (c == NULL) {
-        return fmi2Fatal;
+		return fmi2Fatal;
     }
     
     retval = jmi_set_string(&((fmi2_me_t *)c)->jmi, vr, nvr, value);
@@ -580,7 +550,8 @@ fmi2Status fmi2_set_string(fmi2Component c, const fmi2ValueReference vr[],
         return fmi2Error;
     }
     
-    return fmi2OK;
+    /* Strings not yet supported. */
+    return fmi2Warning;
 }
 
 fmi2Status fmi2_get_fmu_state(fmi2Component c, fmi2FMUstate* FMUstate) {
@@ -618,7 +589,7 @@ fmi2Status fmi2_get_directional_derivative(fmi2Component c,
     fmi2Integer retval;
     
     if (c == NULL) {
-        return fmi2Fatal;
+		return fmi2Fatal;
     }
     
     retval = jmi_get_directional_derivative(&((fmi2_me_t *)c)->jmi, vUnknown_ref,
@@ -631,13 +602,12 @@ fmi2Status fmi2_get_directional_derivative(fmi2Component c,
 }
 
 fmi2Status fmi2_enter_event_mode(fmi2Component c) {
-    if (c == NULL) {
-        return fmi2Fatal;
+	if (c == NULL) {
+		return fmi2Fatal;
     }
 
     if (((fmi2_me_t *)c)->fmu_mode != continuousTimeMode) {
-        jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "FMIState",
-            "Can only enter event mode from continuous time mode.");
+        jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only enter event mode from continuous time mode.");
         return fmi2Error;
     }
     
@@ -650,7 +620,7 @@ fmi2Status fmi2_new_discrete_state(fmi2Component  c, fmi2EventInfo* fmiEventInfo
     fmi2_me_t* fmi2_me = (fmi2_me_t *)c;
     
     if (c == NULL) {
-        return fmi2Fatal;
+		return fmi2Fatal;
     }
     
     fmi2_me->event_info->iteration_converged        = !fmiEventInfo->newDiscreteStatesNeeded;
@@ -676,13 +646,12 @@ fmi2Status fmi2_new_discrete_state(fmi2Component  c, fmi2EventInfo* fmiEventInfo
 }
 
 fmi2Status fmi2_enter_continuous_time_mode(fmi2Component c) {
-    if (c == NULL) {
-        return fmi2Fatal;
+	if (c == NULL) {
+		return fmi2Fatal;
     }
 
     if (((fmi2_me_t *)c)->fmu_mode != eventMode) {
-        jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "FMIState",
-            "Can only enter continuous time mode from event mode.");
+        jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only enter continuous time mode from event mode.");
         return fmi2Error;
     }
     
@@ -700,7 +669,7 @@ fmi2Status fmi2_completed_integrator_step(fmi2Component c,
     fmi2Real triggered_event;
 
     if (c == NULL) {
-        return fmi2Fatal;
+		return fmi2Fatal;
     }
     
     self = (fmi2_me_t*)c;
@@ -723,7 +692,7 @@ fmi2Status fmi2_set_time(fmi2Component c, fmi2Real time) {
     fmi2Integer retval;
 
     if (c == NULL) {
-        return fmi2Fatal;
+		return fmi2Fatal;
     }
 
     if (((fmi2_me_t*)c)->stopTime*(1+JMI_ALMOST_EPS) < time) {
@@ -744,7 +713,7 @@ fmi2Status fmi2_set_continuous_states(fmi2Component c, const fmi2Real x[],
     fmi2Integer retval;
 
     if (c == NULL) {
-        return fmi2Fatal;
+		return fmi2Fatal;
     }
     
     retval = jmi_set_continuous_states(&((fmi2_me_t*)c)->jmi, x, nx);
@@ -759,7 +728,7 @@ fmi2Status fmi2_get_derivatives(fmi2Component c, fmi2Real derivatives[], size_t 
     fmi2Integer retval;
     
     if (c == NULL) {
-        return fmi2Fatal;
+		return fmi2Fatal;
     }
     
     retval = jmi_get_derivatives(&((fmi2_me_t *)c)->jmi, derivatives, nx);
@@ -775,7 +744,7 @@ fmi2Status fmi2_get_event_indicators(fmi2Component c,
     fmi2Integer retval;
     
     if (c == NULL) {
-        return fmi2Fatal;
+		return fmi2Fatal;
     }
     
     retval = jmi_get_event_indicators(&((fmi2_me_t *)c)->jmi, eventIndicators, ni);
@@ -788,7 +757,7 @@ fmi2Status fmi2_get_event_indicators(fmi2Component c,
 
 fmi2Status fmi2_get_continuous_states(fmi2Component c, fmi2Real x[], size_t nx) {
     if (c == NULL) {
-        return fmi2Fatal;
+		return fmi2Fatal;
     }
     
     memcpy (x, jmi_get_real_x(&((fmi2_me_t *)c)->jmi), nx*sizeof(fmi2Real));
@@ -801,7 +770,7 @@ fmi2Status fmi2_get_nominals_of_continuous_states(fmi2Component c,
     fmi2Integer retval;
     
     if (c == NULL) {
-        return fmi2Fatal;
+		return fmi2Fatal;
     }
     
     retval = jmi_get_nominal_continuous_states(&((fmi2_me_t *)c)->jmi, x_nominal, nx);
@@ -873,9 +842,9 @@ fmi2Status fmi2_me_instantiate(fmi2Component c,
     size_t inst_GUID_len;
     
     fmi2_me_t* fmi2_me = (fmi2_me_t*)c;
-    jmi_callbacks_t* cb = &fmi2_me->jmi.jmi_callbacks;
+	jmi_callbacks_t* cb = &fmi2_me->jmi.jmi_callbacks;
 
-    inst_name_len = strlen(instanceName)+1;
+	inst_name_len = strlen(instanceName)+1;
     tmpname = (char*)(fmi2_me_t *)functions->allocateMemory(inst_name_len, sizeof(char));
     strncpy(tmpname, instanceName, inst_name_len);
     

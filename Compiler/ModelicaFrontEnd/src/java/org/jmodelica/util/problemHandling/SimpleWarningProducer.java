@@ -1,8 +1,5 @@
 package org.jmodelica.util.problemHandling;
 
-import org.jmodelica.api.problemHandling.ProblemKind;
-import org.jmodelica.api.problemHandling.ProblemSeverity;
-
 /**
  * Convenient class which takes a string message on construction, an
  * optional list of format arguments when invoked and produces a warning.

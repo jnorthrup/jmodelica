@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "jni.h"
 #include "RefCountedNode.hpp"
-#include "org/jmodelica/common/options/OptionRegistry.h"
+#include "org/jmodelica/util/OptionRegistry.h"
 #include "org/jmodelica/modelica/compiler/ModelicaCompiler.h"
 
 namespace ModelicaCasADi 
@@ -36,20 +36,25 @@ class CompilerOptionsWrapper: public RefCountedNode {
         
         bool getBooleanOption(std::string opt);
         
+        void addStringOption(std::string opt, std::string val);
+        void addBooleanOption(std::string opt, bool val);
+        void addIntegerOption(std::string opt, int val);
+        void addRealOption(std::string opt, double val);
+        
         void printCompilerOptions(std::ostream& out);
         void printOpts();
         
-        org::jmodelica::common::options::OptionRegistry getOptionRegistry();
+        org::jmodelica::util::OptionRegistry getOptionRegistry();
         
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
-        org::jmodelica::common::options::OptionRegistry optr;
+        org::jmodelica::util::OptionRegistry optr;
 };
 inline CompilerOptionsWrapper::CompilerOptionsWrapper() : optr(org::jmodelica::modelica::compiler::ModelicaCompiler::createOptions()) {}
-inline org::jmodelica::common::options::OptionRegistry CompilerOptionsWrapper::getOptionRegistry() { return optr; }
+inline org::jmodelica::util::OptionRegistry CompilerOptionsWrapper::getOptionRegistry() { return optr; }
 inline void CompilerOptionsWrapper::printOpts() {printCompilerOptions(std::cout);}
 }; // End namespace
 #endif

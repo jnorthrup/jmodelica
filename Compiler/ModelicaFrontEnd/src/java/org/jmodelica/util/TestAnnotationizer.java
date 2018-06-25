@@ -26,7 +26,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Scanner;
 
 /**
  * \brief Generates a test case annotation for a test model.
@@ -43,7 +42,6 @@ import java.util.Scanner;
  *     -r           regenerate an already present annotation
  *     -e           continue generating until an empty modelname is given
  *     -a           regenerate annotations for all models in test file (implies -r)
- *     -f=<file>    input file that specifies .mo file path and model name. comma-separated one entry per line
  *     -t=<type>    set type of test, e.g. ErrorTestCase
  *     -c=<class>   set name of class to generate annotation for, if name 
  *                  does not contain a dot, base name of .mo file is prepended
@@ -59,28 +57,23 @@ import java.util.Scanner;
  *   the test annotation.
  */
 public class TestAnnotationizer {
+	
+	private enum Lang { none, modelica, optimica };
 
-    private enum Lang { none, modelica, optimica };
-
-    public static void main(String[] args) throws Exception {
-        if (args.length == 0) {
-            usageError();
-            System.exit(1);
-        }
-        
-        String filePath = null;
-        String inputFilePath = null;
-        boolean hasInputFilePath = false;
-        String testType = null;
-        String modelName = null;
-        String description = "";
-        String data = null;
-        boolean write = false;
-        boolean regenerate = false;
-        boolean repeat = false;
-        Lang inputlang = Lang.none;
-        Lang lang = Lang.none;
-        String opts = null;
+	public static void main(String[] args) throws Exception {
+		if (args.length == 0)
+			usageError(1);
+		
+		String filePath = null;
+		String testType = null;
+		String modelName = null;
+		String description = "";
+		String data = null;
+		boolean write = false;
+		boolean regenerate = false;
+		boolean repeat = false;
+		Lang lang = Lang.none;
+		String opts = null;
         String checkType = null;
         String libs = null;
         boolean all_models = false;
@@ -99,9 +92,6 @@ public class TestAnnotationizer {
                 checkType = value;
             } else if (arg.startsWith("-l=")) {
                 libs = value;
-            } else if (arg.startsWith("-f=")) {
-                inputFilePath = value;
-                hasInputFilePath = true;
             } else if (arg.equals("-w")) {
                 write = true;
             } else if (arg.equals("-r")) {
@@ -109,12 +99,11 @@ public class TestAnnotationizer {
             } else if (arg.equals("-e")) {
                 repeat = true;
             } else if (arg.equals("-h")) {
-                usageError();
-                return;
+                usageError(0);
             } else if (arg.equals("-o")) {
-                inputlang = Lang.optimica;
+                lang = Lang.optimica;
             } else if (arg.equals("-m")) {
-                inputlang = Lang.modelica;
+                lang = Lang.modelica;
             } else if (arg.equals("-a")) {
                 all_models = true;
                 regenerate = true;
@@ -124,7 +113,6 @@ public class TestAnnotationizer {
                 filePath = arg;
             } else {
                 description += " " + arg;
-                description = description.trim();
             }
         }
         
@@ -134,87 +122,51 @@ public class TestAnnotationizer {
             System.exit(1);
         }
         
-        if (filePath == null && !hasInputFilePath) {
-            System.err.println("No input file specified. give path as argument or use -file");
-        }
-
-        if (all_models && hasInputFilePath) {
-            System.err.println("Cannot use -a and -file at the same time");
-        }
+        description = description.trim();
+        String packageName = getPackageName(filePath);
+        modelName = composeModelName(packageName, modelName);
+        if (lang == Lang.none)
+            lang = filePath.contains("Optimica") ? Lang.optimica : Lang.modelica;
+        boolean optimica = lang == Lang.optimica;
         
-        Scanner inputFileScanner = null;
+        Iterator<String> allModelsIterator = all_models ? collectAllModels(filePath) : null;
         boolean cont = true;
-        Iterator<String> allModelsIterator = null;
-        if (all_models) {
-            allModelsIterator = collectAllModels(filePath);
-            cont = allModelsIterator.hasNext();
-        }
-        if (hasInputFilePath) {
-            inputFileScanner = new Scanner(new File(inputFilePath));
-            cont = inputFileScanner.hasNextLine();
-        }
         while (cont) {
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-            if(hasInputFilePath) {
-                String line = inputFileScanner.nextLine();
-                String[] parts = line.split(",");
-                filePath = parts[0];
-                modelName = parts[1];
-            }
-            String packageName = null;
-            if(!(all_models || hasInputFilePath)) {
-                packageName = getPackageName(filePath);
-                modelName = composeModelName(packageName, modelName);
-            } else if (hasInputFilePath) {
-                packageName = getPackageName(filePath);
-                modelName = packageName + "." + modelName;
-            }
             if (all_models) {
+                if (!allModelsIterator.hasNext()) {
+                    break;
+                }
                 modelName = allModelsIterator.next();
             } else if (!modelName.contains(".")) {
-                System.out.print("Enter class name: ");
-                System.out.flush();
-                String given = in.readLine().trim();
-                if (given.isEmpty()) {
-                    System.out.println("Empty modelname given, exiting.");
-                    System.exit(0);
-                }
-                modelName = composeModelName(modelName, given);
-            }
-            
-            if (inputlang == Lang.none)
-                lang = filePath.contains("Optimica") ? Lang.optimica : Lang.modelica;
-            else {
-                lang = inputlang;
-            }
-            boolean optimica = lang == Lang.optimica;
-            if (regenerate) {
-                doRegenerate(optimica, filePath, modelName, write);
-            } else {
-                if (testType == null) {
-                    System.out.print("Enter type of test: ");
-                    System.out.flush();
-                    testType = in.readLine().trim();
-                }
-                
-                doAnnotation(optimica, filePath, testType, modelName, description, opts, data, checkType, libs, write);
-            }
-            
-            if (repeat) {
-                modelName = packageName;
-            } else if (all_models) {
-                cont = allModelsIterator.hasNext();
-            } else if (hasInputFilePath) {
-                cont = inputFileScanner.hasNextLine();
-            } else {
-                cont = false;
-            }
-        }
-
-        if (hasInputFilePath) {
-            inputFileScanner.close();
-        }
-    }
+				System.out.print("Enter class name: ");
+				System.out.flush();
+				String given = in.readLine().trim();
+				if (given.isEmpty()) {
+					System.out.println("Empty modelname given, exiting.");
+					System.exit(0);
+				}
+				modelName = composeModelName(modelName, given);
+			}
+			
+			if (regenerate) {
+			    doRegenerate(optimica, filePath, modelName, write);
+			} else {
+				if (testType == null) {
+					System.out.print("Enter type of test: ");
+					System.out.flush();
+					testType = in.readLine().trim();
+				}
+				
+				doAnnotation(optimica, filePath, testType, modelName, description, opts, data, checkType, libs, write);
+			}
+			
+			if (repeat) 
+				modelName = packageName;
+			else
+				cont = false;
+		}
+	}
 
     private static Iterator<String> collectAllModels(String filePath) throws FileNotFoundException,
             IOException {
@@ -242,9 +194,7 @@ public class TestAnnotationizer {
                         models.add(top);
                     }
                 }
-                if (!(line.length > 2 && line[2].startsWith("="))) {
-                    packStack.add(top);
-                }
+                packStack.add(top);
             } else if (line[0].equals("end")){
                 String[] t = packStack.get(packStack.size()-1).split("\\.");
                 if (line[1].equals(t[t.length-1] + ";")) {
@@ -275,9 +225,9 @@ public class TestAnnotationizer {
         m.invoke(null, filePath, testType, modelName, description, opts, data, checkType, libs, write);
     }
 
-    private static void usageError() throws Exception {
-        getHelperClass(ANY).getMethod("usageError").invoke(null);
-    }
+	private static void usageError(int level) throws Exception {
+		getHelperClass(ANY).getMethod("usageError", int.class).invoke(null, Integer.valueOf(level));
+	}
 
 	private static final String[] MODELICA = { "org.jmodelica.modelica.compiler.TestAnnotationizerHelper" };
 	private static final String[] OPTIMICA = { "org.jmodelica.optimica.compiler.TestAnnotationizerHelper" };

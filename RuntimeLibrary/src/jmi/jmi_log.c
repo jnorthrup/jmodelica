@@ -482,8 +482,6 @@ static void initialize(log_t *log) {
 }
 
 static void delete_log(log_t *log) {
-    if (log == NULL) return;
-
     leave_all(log);
     if (log->log_file) {
         fprintf(log->log_file, "</JMILog>\n");
@@ -640,7 +638,7 @@ static int emitted_category(log_t *log, category_t c) {
     }
 
     /* interim solution to allow to pass a log level >= 4 instead of a category */
-    if (((int)c) >= 4) {
+    if (c >= 4) {
         if (cb->log_options.log_level < c) return FALSE;
         c = logInfo;
     }
@@ -922,15 +920,6 @@ void jmi_log_ints(log_t *log, node_t parent, category_t c, const char *name, con
     if (!emitted_category(log, c)) return;
     node = jmi_log_enter_vector_(log, parent, c, name);
     for (k=0; k < n; k++) jmi_log_int_(log, data[k]);
-    jmi_log_leave(log, node);
-}
-
-void jmi_log_strings(log_t *log, node_t parent, category_t c, const char *name, const jmi_string_t *data, int n) {
-    int k;
-    node_t node;
-    if (!emitted_category(log, c)) return;
-    node = jmi_log_enter_vector_(log, parent, c, name);
-    for (k=0; k < n; k++) jmi_log_string_(log, data[k]);
     jmi_log_leave(log, node);
 }
 

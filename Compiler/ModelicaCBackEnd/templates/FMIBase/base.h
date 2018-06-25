@@ -1,34 +1,33 @@
 /*
-    Copyright (C) 2015-2018 Modelon AB
+    Copyright (C) 2015 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
-    it under the terms of the Common Public License as published by
-    IBM, version 1.0 of the License.
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
 
     This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY. See the Common Public License for more details.
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-    You should have received a copy of the Common Public License
-    along with this program. If not, see
-    <http://www.ibm.com/developerworks/library/os-cpl.html/>.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <jmi.h>
-#include <jmi_math_ad.h>
 #include <jmi_block_residual.h>
+#include "jmi_log.h"
 #include "ModelicaUtilities.h"
 #include "ModelicaStandardTables.h"
-
-$fmu_type_define$
 
 extern void dgemm_(char* TRANSA, char* TRANSB, int* M, int* N, int* K, double* ALPHA, double* A, int* LDA, double* B, int* LDB, double* BETA, double* C, int* LDC);
 
 int model_ode_derivatives(jmi_t* jmi);
 int model_ode_initialize(jmi_t* jmi);
-int model_ode_event_indicators(jmi_t* jmi, jmi_real_t** res);
+int model_dae_R(jmi_t* jmi, jmi_real_t** res);
 int model_init_R0(jmi_t* jmi, jmi_real_t** res);
 void model_add_blocks(jmi_t** jmi);
 void model_init_add_blocks(jmi_t** jmi);
@@ -39,6 +38,8 @@ int model_ode_guards_init(jmi_t* jmi);
 
 
 $C_variable_aliases$
+
+$C_z_aliases_strings$
 
 #define sf(i) (jmi->variable_scaling_factors[i])
 
@@ -85,11 +86,4 @@ $C_records$
 $C_function_headers$
 
 $CAD_function_headers$
-
-typedef struct jmi_globals {
-    int dummy; /* Empty struct not allowed */
-$C_global_temps$
-} jmi_globals_t;
-#define JMI_GLOBAL(v)        (((jmi_globals_t*)jmi->globals)->v)
-#define JMI_CACHED(var, exp) ((!JMI_GLOBAL(var##_computed) && (JMI_GLOBAL(var##_computed) = 1)) ? (JMI_GLOBAL(var) = exp) : JMI_GLOBAL(var))
 

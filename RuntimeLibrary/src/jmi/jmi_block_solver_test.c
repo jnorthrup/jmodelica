@@ -105,7 +105,6 @@ jmi_block_solver_status_t update_discrete_variables(switch_state_t *sw, int* non
 int main() {
     jmi_block_solver_t* block_solver;
     jmi_block_solver_options_t options;
-    jmi_block_solver_callbacks_t solver_callbacks;
     switch_state_t sw;
     jmi_callbacks_t cb;
     jmi_log_t* log;
@@ -123,7 +122,7 @@ int main() {
     cb.allocate_memory = calloc;
     cb.free_memory = free;
     cb.model_name = "test";
-    cb.instance_name = "test_instance";  
+    cb.instance_name = "test instance";  
     cb.model_data = &sw;      
 
     log = jmi_log_init(&cb);
@@ -132,20 +131,19 @@ int main() {
     jmi_block_solver_init_default_options(&options);
     update_discrete_variables(&sw, &flag);
 
-    solver_callbacks = jmi_block_solver_default_callbacks();
-    solver_callbacks.F = f;
-    solver_callbacks.update_discrete_variables = update_discrete_variables;
     jmi_new_block_solver(&block_solver, 
-                         &cb,
-                         log,
-                         solver_callbacks,
-                         1,
-                         &options,
-                         &sw);
-    jmi_block_solver_solve(block_solver, 0, 1, 0);
+                          &cb, 
+                          log,                          
+                          f, 
+                          0, /* no dF*/
+                          0, /* no Jacobian */
+                          0, /* no check discrete vars */
+                          update_discrete_variables,
+                          0, /* can be NULL, only needed after a regularization. */
+                           1,                            
+                           &options,
+                           &sw);
+    jmi_block_solver_solve(block_solver, 0, 1);
     jmi_delete_block_solver(&block_solver);
-	if (JMI_ABS(sw.x - 1.3333333333) > 1e-4) {
-        return -1; /* Something went wrong */
-    }
     return 0;
 }

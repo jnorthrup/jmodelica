@@ -38,7 +38,7 @@ def run_demo(with_plots=True):
     u = N.cos(t)
     u_traj = N.transpose(N.vstack((t,u)))
     
-    # Compile the Modelica model to FMU
+    # Compile the Modelica model to JMU
     fmu_name = compile_fmu(model_name,mofile)
 
     # Load the dynamic library and XML data

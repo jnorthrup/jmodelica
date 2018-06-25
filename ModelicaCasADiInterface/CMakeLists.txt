@@ -4,11 +4,6 @@ project(ModelicaCasADi CXX)
 
 set(Python_ADDITIONAL_VERSIONS 2.7 2.6 2.5 2.4)
 
-if(" ${CMAKE_CXX_FLAGS} " MATCHES " -m64 " AND CMAKE_HOST_WIN32)
-    add_definitions(-DMS_WIN64)
-    message(STATUS "Adding MS_WIN64 definition")
-endif()
-
 function(make_paths_absolute DEST_VAR DIRS)  
   set(ABS_DIRS "")
   foreach(DIR ${DIRS})
@@ -48,6 +43,10 @@ else(WIN32)
 endif(WIN32)
 
 # import environment variables
+set(CASADI_HOME $ENV{CASADI_HOME})
+set(CASADI_BUILD_DIR $ENV{CASADI_BUILD_DIR})
+set(MC_BUILD $ENV{MC_BUILD})
+set(IPOPT_HOME $ENV{IPOPT_HOME})
 set(BOOST_HOME $ENV{BOOST_HOME})
 
 # locate JCC installation, store in JCC_DIR
@@ -71,7 +70,7 @@ link_directories(${IPOPT_HOME}/lib)
 get_filename_component(ABS_MC_BUILD "${MC_BUILD}" REALPATH)
 
 # Jar file location provided from environment
-set(COMPILERS_DIR "${IFCASADI_JAR_BASE}")
+set(COMPILERS_DIR "$ENV{IFCASADI_JAR_BASE}")
 set(THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty")
 
 set(MC_JAR "${COMPILERS_DIR}/ModelicaCompilerCasADi/bin/ModelicaCompiler.jar")

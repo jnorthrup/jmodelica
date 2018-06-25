@@ -18,9 +18,7 @@ package $PARSER_PACKAGE$;
 
 import $PARSER_PACKAGE$.OptimicaParser.Terminals;
 import org.jmodelica.util.AbstractModelicaScanner;
-import org.jmodelica.util.AbstractAdjustableSymbol;
-import org.jmodelica.util.formatting.FormattingType;
-import org.jmodelica.optimica.compiler.ASTNode;
+import org.jmodelica.util.formattedPrint.FormattingItem;
 import beaver.Scanner;
 
 
@@ -29,7 +27,7 @@ import beaver.Scanner;
 %public
 %final
 %class OptimicaScanner
-%extends AbstractModelicaScanner<ASTNode<?>>
+%extends AbstractModelicaScanner
 %unicode
 %function nextTokenInner
 %type Symbol
@@ -43,101 +41,86 @@ import beaver.Scanner;
 %char
 
 %{
-    /**
-     * Subclass of Symbol that carries extra information. 
-     * Used to give error reporting class for parser access to offset & length 
-     * of tokens. Start, end, offset and length are extracted from scanner variables
-     * in constructors.
-     */
-    public class Symbol extends AbstractAdjustableSymbol {
-
-        private int offset;
-        private int length;
-
-        public Symbol(short id) {
-            this(id, yytext());
-        }
-
-        public Symbol(short id, Object value) {
-            super(id, yyline + 1, yycolumn + 1, yylength(), value);
-            offset = yychar;
-            length = yylength();
-        }
-
-        public Symbol(short id, Object value, int lineOffset, int endColumn) {
-            super(id, makePosition(yyline + 1,  yycolumn + 1), makePosition(yyline + 1 + lineOffset, endColumn), value);
-            offset = yychar;
-            length = yylength();
-        }
-        
-        public int getOffset() {
-            return offset;
-        }
-
-        public int getEndOffset() {
-            return offset + length - 1;
-        }
-
-        public int getLength() {
-            return length;
-        }
-
-    }
-
-
-    /**
-     * Subclass of Scanner.Exception that carries extra information. 
-     * Used to give error reporting class for parser access to offset of error. 
-     * Offset is extracted from scanner variables in constructors.
-     */
-    public class Exception extends Scanner.Exception {
-        
-        public final int offset;
-        
-        public Exception(String msg) {
-            this(yyline + 1, yycolumn + 1, msg);
-        }
-        
-        public Exception(int line, int column, String msg) {
-            super(line, column, msg);
-            offset = yychar;
-        }
-        
-    }
-
-    private Symbol newSymbol(short id) {
-        return new Symbol(id);
-    }
-
-    private Symbol newSymbol(short id, Object value) {
-        return new Symbol(id, value);
+  /**
+   * Subclass of Symbol that carries extra information. 
+   * Used to give error reporting class for parser access to offset & length 
+   * of tokens. Start, end, offset and length are extracted from scanner variables
+   * in constructors.
+   */
+  public class Symbol extends beaver.Symbol {
+  
+    private int offset;
+    private int length;
+    
+    public Symbol(short id) {
+      this(id, yytext());
     }
     
-    private Symbol newSymbolCountLineBreaks(short id, String value, int numLineBreaks) {
-        if (numLineBreaks > 0) {
-            int endColumn = value.length() - value.lastIndexOf('\n');
-            return new Symbol(id, value, numLineBreaks, endColumn);
-        }
-        return new Symbol(id, value);
+    public Symbol(short id, Object value) {
+      super(id, yyline + 1, yycolumn + 1, yylength(), value);
+      offset = yychar;
+      length = yylength();
     }
     
-    public void reset(java.io.Reader reader) {
-        yyreset(reader);
-        resetFormatting();
+    public int getOffset() {
+      return offset;
     }
-
-    protected int matchLine()     { return yyline; }
-    protected int matchColumn() { return yycolumn; }
-    protected int matchOffset() { return yychar; }
-    protected int matchLength() { return yylength(); }
     
-    public Symbol nextToken() throws java.io.IOException, Scanner.Exception {
-        Symbol res = null;
-        while (res == null)
-            res = nextTokenInner();
-        return res;
+    public int getEndOffset() {
+      return offset + length - 1;
     }
+    
+    public int getLength() {
+      return length;
+    }
+    
+  }
+  
+  /**
+   * Subclass of Scanner.Exception that carries extra information. 
+   * Used to give error reporting class for parser access to offset of error. 
+   * Offset is extracted from scanner variables in constructors.
+   */
+  public class Exception extends Scanner.Exception {
+    
+    public final int offset;
+    
+    public Exception(String msg) {
+      this(yyline + 1, yycolumn + 1, msg);
+    }
+    
+    public Exception(int line, int column, String msg) {
+      super(line, column, msg);
+      offset = yychar;
+    }
+    
+  }
 
+  private Symbol newSymbol(short id) {
+    return new Symbol(id);
+  }
+
+  private Symbol newSymbol(short id, Object value) {
+    return new Symbol(id, value);
+  }
+  
+  public void reset(java.io.Reader reader) {
+    yyreset(reader);
+    resetFormatting();
+  }
+
+  protected int matchLine()   { return yyline; }
+  protected int matchColumn() { return yycolumn; }
+  protected int matchOffset() { return yychar; }
+  protected int matchLength() { return yylength(); }
+  
+  public Symbol nextToken() throws java.io.IOException, Scanner.Exception {
+    Symbol res = null;
+    while (res == null)
+      res = nextTokenInner();
+    return res;
+  }
+  
 %}
 
 
@@ -192,8 +175,10 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "external"      { return newSymbol(Terminals.EXTERNAL); }
   
   
-  "public"        { return newSymbol(Terminals.PUBLIC); }
-  "protected"     { return newSymbol(Terminals.PROTECTED); }
+  "public"        { addFormattingInformation(FormattingItem.Type.VISIBILITY_INFO, yytext());
+	  				return newSymbol(Terminals.PUBLIC); }
+  "protected"     { addFormattingInformation(FormattingItem.Type.VISIBILITY_INFO, yytext());
+	  				return newSymbol(Terminals.PROTECTED); }
   
   "extends"       { return newSymbol(Terminals.EXTENDS); }
   "constrainedby" { return newSymbol(Terminals.CONSTRAINEDBY); }
@@ -291,7 +276,8 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "."             { return newSymbol(Terminals.DOT); }
   ","             { return newSymbol(Terminals.COMMA); }
 
-  "+"             { return newSymbol(Terminals.PLUS); }
+  "+"             { addFormattingInformation(FormattingItem.Type.NON_BREAKING_WHITESPACE, yytext());
+                    return newSymbol(Terminals.PLUS); }  
   "-"             { return newSymbol(Terminals.MINUS); }
   "*"             { return newSymbol(Terminals.MULT); }
   "/"             { return newSymbol(Terminals.DIV); }
@@ -312,12 +298,12 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "<>"            { return newSymbol(Terminals.NEQ); }
   
   {STRING}  { String s = yytext();
-              int numLineBreaks = addLineBreaks(s);
+              addLineBreaks(s);
               s = s.substring(1,s.length()-1);
-              return newSymbolCountLineBreaks(Terminals.STRING, s, numLineBreaks); }
+              return newSymbol(Terminals.STRING,s); }
   {ID}      { String s = yytext();
-              int numLineBreaks = addLineBreaks(s);
-              return newSymbolCountLineBreaks(Terminals.ID, s, numLineBreaks); }
+  			  addLineBreaks(s);
+  			  return newSymbol(Terminals.ID, s); }
   			  
   {UNSIGNED_INTEGER}       { return newSymbol(Terminals.UNSIGNED_INTEGER, yytext()); }
   {UNSIGNED_NUMBER}        { return newSymbol(Terminals.UNSIGNED_NUMBER, yytext()); }
@@ -326,12 +312,12 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   							 if (yytext().charAt(1) == '/') {
   								 numberOfLineBreaks = 0;
   							 }
-                             addFormattingInformation(FormattingType.COMMENT, yytext(), numberOfLineBreaks); 
+                             addFormattingInformation(FormattingItem.Type.COMMENT, yytext(), numberOfLineBreaks); 
                              return null; }
-  {NonBreakingWhiteSpace}  { addFormattingInformation(FormattingType.NON_BREAKING_WHITESPACE, yytext()); 
+  {NonBreakingWhiteSpace}  { addFormattingInformation(FormattingItem.Type.NON_BREAKING_WHITESPACE, yytext()); 
                              return null; }
   {LineTerminator} 		   { addLineBreak();
-                             addFormattingInformation(FormattingType.LINE_BREAK, yytext()); 
+                             addFormattingInformation(FormattingItem.Type.LINE_BREAK, yytext()); 
                              return null; }
                              
   .|\n                { throw new Exception("Illegal character \""+yytext()+ "\""); }

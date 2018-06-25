@@ -1,7 +1,7 @@
 #!/usr/bin/env python 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2010-2017 Modelon AB
+# Copyright (C) 2010 Modelon AB
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ class TestExternalStatic:
         """
         cls.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
     
-    @testattr(stddist_base = True)
+    @testattr(stddist = True)
     def test_ExtFuncStatic(self):
         """ 
         Test compiling a model with external functions in a static library.
@@ -50,7 +50,7 @@ class TestExternalStatic:
         fmu_name = compile_fmu(cpath, TestExternalStatic.fpath)
         model = load_fmu(fmu_name)
     
-    @testattr(stddist_base = True)
+    @testattr(stddist = True)
     def test_IntegerArrays(self):
         """
         Test a model with external functions containing integer array and literal inputs.
@@ -66,56 +66,46 @@ class TestExternalStatic:
         
 class TestUtilities:
     
-    @testattr(stddist_base = True)
+    @testattr(stddist = True)
     def test_ModelicaUtilities(self):
         """ 
         Test compiling a model with external functions using the functions in ModelicaUtilities.
         """
         fpath = path(get_files_path(), 'Modelica', "ExtFunctionTests.mo")
         cpath = "ExtFunctionTests.ExtFunctionTest3"
-        fmu_name = compile_fmu(cpath, fpath, compiler_options={'variability_propagation':False})
-        model = load_fmu(fmu_name)
+        jmu_name = compile_fmu(cpath, fpath, compiler_options={'variability_propagation':False})
+        model = load_fmu(jmu_name)
         #model.simulate()
 
 class TestExternalShared:
     
     @classmethod
-    def setUpClass(self):
+    def setUpClass(cls):
         """
         Sets up the test class.
         """
-        self.cpath = "ExtFunctionTests.ExtFunctionTest1"
-        self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
+        cls.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
         
-    @testattr(stddist_base = True)
+    @testattr(stddist = True)
     def test_ExtFuncShared(self):
         """ 
         Test compiling a model with external functions in a shared library. Simple.
         """
-        fmu_name = compile_fmu(self.cpath, self.fpath, compiler_options={'variability_propagation':False})
+        cpath = "ExtFunctionTests.ExtFunctionTest1"
+        fmu_name = compile_fmu(cpath, TestExternalShared.fpath, compiler_options={'variability_propagation':False})
         model = load_fmu(fmu_name)
         res = model.simulate()
         nose.tools.assert_equals(res.final('c'), 3) 
         
-    @testattr(stddist_base = True)
+    @testattr(stddist = True)
     def test_ExtFuncSharedCeval(self):
         """ 
         Test compiling a model with external functions in a shared library. Constant evaluation during compilation.
         """
-        fmu_name = compile_fmu(self.cpath, self.fpath, compiler_options={'variability_propagation':True})
+        cpath = "ExtFunctionTests.ExtFunctionTest1"
+        fmu_name = compile_fmu(cpath, TestExternalShared.fpath, compiler_options={'variability_propagation':True})
         model = load_fmu(fmu_name)
         nose.tools.assert_equals(model.get('c'), 3)
-        
-    @testattr(stddist_full = True)
-    def test_ExtFuncSharedCevalDisabled(self):
-        """ 
-        Test compiling a model with external functions in a shared library. Disabling external evaluation during
-        variability propagation.
-        """
-        fmu_name = compile_fmu(self.cpath, self.fpath, compiler_options={'variability_propagation':True,
-            'variability_propagation_external':False})
-        model = load_fmu(fmu_name)
-        nose.tools.assert_equals(model.get_variable_variability('c'), 1)
 
 class TestExternalBool:
     
@@ -127,7 +117,7 @@ class TestExternalBool:
         self.cpath = "ExtFunctionTests.ExtFunctionBool"
         self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
         
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def test_ExtFuncBool(self):
         """ 
         Test compiling a model with external functions in a shared library. Boolean arrays.
@@ -142,69 +132,6 @@ class TestExternalBool:
         for i in falseInd:
             assert(not model.get('res[' + str(i) + ']'))
 
-class TestExternalRecord(SimulationTest):
-    @classmethod
-    def setUpClass(cls):
-        SimulationTest.setup_class_base('ExtFunctionTests.mo', 
-            'ExtFunctionTests.ExtFunctionRecord')
-
-    @testattr(stddist_full = True)
-    def setUp(self):
-        self.setup_base(start_time=0.0, final_time=0.1, time_step=0.01)
-        self.run()
-
-    @testattr(stddist_full = True)
-    def test_result(self):
-        self.assert_end_value('y.x', 0.1)
-
-class TestExternalRecordCeval(SimulationTest):
-    @classmethod
-    def setUpClass(cls):
-        SimulationTest.setup_class_base('ExtFunctionTests.mo', 
-            'ExtFunctionTests.ExtFunctionRecordCeval')
-
-    @testattr(stddist_full = True)
-    def setUp(self):
-        self.setup_base(start_time=0.0, final_time=0.1, time_step=0.01)
-        self.run()
-
-    @testattr(stddist_full = True)
-    def test_result(self):
-        self.assert_end_value('y1.x', 3)
-        self.assert_end_value('y2.x', 3)
-
-
-class TestExternalRecordObj(SimulationTest):
-    @classmethod
-    def setUpClass(cls):
-        SimulationTest.setup_class_base('ExtFunctionTests.mo', 
-            'ExtFunctionTests.ExtFunctionRecordObj')
-
-    @testattr(stddist_full = True)
-    def setUp(self):
-        self.setup_base(start_time=0.0, final_time=0.1, time_step=0.01)
-        self.run()
-
-    @testattr(stddist_full = True)
-    def test_result(self):
-        self.assert_end_value('y', 3)
-
-class TestExternalRecordObjCeval(SimulationTest):
-    @classmethod
-    def setUpClass(cls):
-        SimulationTest.setup_class_base('ExtFunctionTests.mo', 
-            'ExtFunctionTests.ExtFunctionRecordObjCeval')
-
-    @testattr(stddist_full = True)
-    def setUp(self):
-        self.setup_base(start_time=0.0, final_time=0.1, time_step=0.01)
-        self.run()
-
-    @testattr(stddist_full = True)
-    def test_result(self):
-        self.assert_end_value('y', 3)
-
-
 class TestExternalShared2:
     
     @classmethod
@@ -215,7 +142,7 @@ class TestExternalShared2:
         self.cpath = "ExtFunctionTests.ExtFunctionTest2"
         self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
         
-    @testattr(stddist_base = True)
+    @testattr(stddist = True)
     def test_ExtFuncShared(self):
         """ 
         Test compiling a model with external functions in a shared library. Real, Integer, and Boolean arrays.
@@ -240,30 +167,16 @@ class TestExternalInf:
         """
         Sets up the test class. Check timeout of infinite loop during constant evaluation.
         """
+        self.cpath = "ExtFunctionTests.ExternalInfinityTest"
         self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
         
-    @testattr(stddist_full = True)
-    def test_InfiniteLoopExternalEvaluation(self):
+    @testattr(stddist = True)
+    def test_ExtFuncShared(self):
         """ 
         Test compiling a model with external functions in a shared library. Infinite loop.
         """
-        fmu_name = compile_fmu("ExtFunctionTests.ExternalInfinityTest", self.fpath)
+        fmu_name = compile_fmu(self.cpath, self.fpath)
         
-    @testattr(stddist_full = True)
-    def test_InfiniteLoopExternalEvaluationError(self):
-        """ 
-        Test compiling a model with external functions in a shared library. Infinite loop.
-        """
-        try:
-            fmu_name = compile_fmu("ExtFunctionTests.ExternalInfinityTestCeval", self.fpath, compiler_options={"external_constant_evaluation":100}, compiler_log_level="e:e.txt")
-        except:
-            pass
-        file=open("e.txt")
-        i = 0
-        for line in file.readlines():
-            if "timed out" in line:
-                i = i+1
-        assert i == 1, 'Wrong error message'
         
 class TestExternalObject:
     
@@ -274,7 +187,7 @@ class TestExternalObject:
         """
         cls.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
         
-    @testattr(stddist_base = True)
+    @testattr(stddist = True)
     def test_ExtObjectDestructor(self):
         """ 
         Test compiling a model with external object functions in a static library.
@@ -298,7 +211,7 @@ class TestExternalObject2:
         """
         cls.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
         
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def test_ExtObjectDestructor(self):
         """ 
         Test compiling a model with external object functions in a static library.
@@ -314,43 +227,87 @@ class TestExternalObject2:
         else:
             assert False, 'External object destructor not called.'
             
-class TestExternalObject3:
-    
-    @classmethod
-    def setUpClass(cls):
-        """
-        Sets up the test class.
-        """
-        cls.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
-        
-    @testattr(stddist_full = True)
-    def test_ExtObjectDestructor(self):
-        cpath = 'ExtFunctionTests.ExternalObjectTests3'
-        fmu_name = compile_fmu(cpath, TestExternalObject2.fpath)
-        model = load_fmu(fmu_name, log_level=6)
-        model.set("_log_level", 6)
-        model.simulate()
-        model.terminate() #Test that we do not segfault at this point
-        log = model.get_log()[-1]
-        assert "This should not lead to a segfault" in log
-            
-class TestAssertEqu3(SimulationTest):
-    '''Test structural verification assert'''
+class TestAssertEqu1(SimulationTest):
+    '''Test assert in equation without event'''
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-            "ExtFunctionTests.mo",
-            'ExtFunctionTests.StructuralAsserts')
-            
-    @testattr(stddist_base = True)
+            'Asserts.mo',
+            'Asserts.AssertEqu1')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(final_time=3)
+        
+    @testattr(stddist = True)
     def test_simulate(self):
         try:
-            self.setup_base()
+            self.run(cvode_options={"minh":1e-15})
+            assert False, 'Simulation not stopped by failed assertions'
+        except CVodeError, e:
+            self.assert_equals('Simulation stopped at wrong time', e.t, 2.0)
+    
+class TestAssertEqu2(SimulationTest):
+    '''Test assert in equation with event'''
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Asserts.mo',
+            'Asserts.AssertEqu2')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(final_time=3)
+        
+    @testattr(stddist = True)
+    def test_simulate(self):
+        try:
             self.run()
             assert False, 'Simulation not stopped by failed assertions'
         except FMUException, e:
-            pass
+            self.assert_equals('Simulation stopped at wrong time', self.model.time, 2.0)
     
+     
+class TestAssertFunc(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Asserts.mo',
+            'Asserts.AssertFunc')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(final_time=3)
+        
+    @testattr(stddist = True)
+    def test_simulate(self):
+        try:
+            self.run(cvode_options={"minh":1e-15})
+            assert False, 'Simulation not stopped by failed assertions'
+        except CVodeError, e:
+            self.assert_equals('Simulation stopped at wrong time', e.t, 2.0)
+
+     
+class TestTerminateWhen(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Asserts.mo',
+            'Asserts.TerminateWhen')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(final_time=3)
+        self.run()
+
+    @testattr(stddist = True)
+    def test_end_values(self):
+        self.assert_end_value('time', 2.0)
+        self.assert_end_value('x', 2.0)
+
+     
 class TestModelicaError:
     
     @classmethod
@@ -360,7 +317,7 @@ class TestModelicaError:
         """
         cls.fpath = path(path_to_mofiles, 'Asserts.mo')
         
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def test_simulate(self):
         cpath = 'Asserts.ModelicaError'
         fmu_name = compile_fmu(cpath, TestModelicaError.fpath)
@@ -371,22 +328,6 @@ class TestModelicaError:
         except CVodeError, e:
             assert abs(e.t - 2.0) < 0.01, 'Simulation stopped at wrong time'
         
-
-class TestStrings:
-    @classmethod
-    def setUpClass(self):
-        self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
-        
-    @testattr(stddist_full = True)
-    def testTmpString(self):
-        '''
-        Test that strings are propagated correctly
-        '''
-        cpath = "ExtFunctionTests.TestString"
-        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"variability_propagation":False, "inline_functions":"none"})
-        model = load_fmu(fmu_name)
-        res = model.simulate() #No asserts should be raised (in the model)
-
         
 class TestCBasic:
     '''
@@ -396,7 +337,7 @@ class TestCBasic:
     def setUpClass(self):
         self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
     
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def testCEvalReal(self):
         '''
         Constant evaluation of basic external C function with Reals.
@@ -409,7 +350,7 @@ class TestCBasic:
         nose.tools.assert_equals(res.final('xArray[2]'), 4)
         nose.tools.assert_equals(res.final('xArrayUnknown[2]'), 6)
         
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def testCEvalInteger(self):
         '''
         Constant evaluation of basic external C function with Integers.
@@ -422,7 +363,7 @@ class TestCBasic:
         nose.tools.assert_equals(res.final('xArray[2]'), 4)
         nose.tools.assert_equals(res.final('xArrayUnknown[2]'), 6)
     
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def testCEvalBoolean(self):
         '''
         Constant evaluation of basic external C function with Booleans.
@@ -434,21 +375,19 @@ class TestCBasic:
         nose.tools.assert_equals(res.final('xScalar'), False)
         nose.tools.assert_equals(res.final('xArray[2]'), True)
         nose.tools.assert_equals(res.final('xArrayUnknown[2]'), False)
-
-    @testattr(stddist_full = True)
+    
+    @testattr(stddist = True)
     def test_ExtFuncString(self):
         cpath = "ExtFunctionTests.CEval.C.StringTest"
         fmu_name = compile_fmu(cpath, self.fpath)
         model = load_fmu(fmu_name)
         res = model.simulate()
-        nose.tools.assert_equals(model.get('len'), 5)
         #TODO: enable when model.get_string implemented
         #nose.tools.assert_equals(model.get('xScalar'), 'dcb')
-        #nose.tools.assert_equals(model.get('xScalarLit'), 'dcb')
         #nose.tools.assert_equals(model.get('xArray[2]'), 'dbf')
         #nose.tools.assert_equals(model.get('xArrayUnknown[2]'), 'dbf')
     
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def testCEvalEnum(self):
         '''
         Constant evaluation of basic external C function with Enums.
@@ -461,7 +400,7 @@ class TestCBasic:
         nose.tools.assert_equals(model.get('xArray[2]'), 2)
         nose.tools.assert_equals(model.get('xArrayUnknown[2]'), 1)
         
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def testCEvalShortClass(self):
         '''
         Constant evaluation of function modified by short class decl
@@ -471,7 +410,7 @@ class TestCBasic:
         model = load_fmu(fmu_name)
         resConst = model.simulate()
         nose.tools.assert_almost_equal(resConst.final('a1'), 10*3.14)
-
+        
 class TestFortranBasic:
     '''
     Test basic external fortran functions.
@@ -480,7 +419,7 @@ class TestFortranBasic:
     def setUpClass(self):
         self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
     
-    @testattr(stddist_base = True)
+    @testattr(stddist = True)
     def testCEvalReal(self):
         '''
         Constant evaluation of basic external fortran function with Reals.
@@ -493,19 +432,7 @@ class TestFortranBasic:
         nose.tools.assert_equals(res.final('xArray[2]'), 4)
         nose.tools.assert_equals(res.final('xArrayUnknown[2]'), 6)
         
-    @testattr(stddist_base = True)
-    def testCEvalMatrixReal(self):
-        '''
-        Constant evaluation of basic external fortran function with Reals.
-        '''
-        cpath = "ExtFunctionTests.CEval.Fortran.RealTestMatrix"
-        fmu_name = compile_fmu(cpath, self.fpath)
-        model = load_fmu(fmu_name)
-        res = model.simulate()
-        nose.tools.assert_equals(res.final('y1[1,1]'), 1)
-        nose.tools.assert_equals(res.final('y2[1,1]'), 9)
-        
-    @testattr(stddist_base = True)
+    @testattr(stddist = True)
     def testCEvalInteger(self):
         '''
         Constant evaluation of basic external fortran function with Integers.
@@ -518,7 +445,7 @@ class TestFortranBasic:
         nose.tools.assert_equals(res.final('xArray[2]'), 4)
         nose.tools.assert_equals(res.final('xArrayUnknown[2]'), 6)
     
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def testCEvalBoolean(self):
         '''
         Constant evaluation of basic external fortran function with Booleans.
@@ -531,7 +458,7 @@ class TestFortranBasic:
         nose.tools.assert_equals(res.final('xArray[2]'), True)
         nose.tools.assert_equals(res.final('xArrayUnknown[2]'), False)
     
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def testCEvalEnum(self):
         '''
         Constant evaluation of basic external fortran function with Enums.
@@ -552,7 +479,7 @@ class TestAdvanced:
     def setUpClass(self):
         self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
     
-    @testattr(stddist_base = True)
+    @testattr(stddist = True)
     def testDGELSX(self):
         '''
         A test using the external fortran function dgelsx from lapack.
@@ -572,7 +499,7 @@ class TestAdvanced:
         nose.tools.assert_equals(resSim.final('a'), resConst.final('a'))
         nose.tools.assert_equals(resSim.final('b'), resConst.final('b'))
         
-    @testattr(stddist_base = True)
+    @testattr(stddist = True)
     def testExtObjScalar(self):
         '''
         Test constant evaluation of a simple external object.
@@ -583,7 +510,7 @@ class TestAdvanced:
         resConst = model.simulate()
         nose.tools.assert_equals(resConst.final('x'), 6.13)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist = True)
     def testExtObjArrays(self):
         '''
         Test constant evaluation of arrays of external objects.
@@ -594,7 +521,7 @@ class TestAdvanced:
         resConst = model.simulate()
         nose.tools.assert_equals(resConst.final('x'), 13.27)
         
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def testExtObjRecursive(self):
         '''
         Test constant evaluation of external object encapsulating 
@@ -606,19 +533,15 @@ class TestAdvanced:
         resConst = model.simulate()
         nose.tools.assert_equals(resConst.final('x'), 32.67)
     
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def testExtObjRecursive(self):
         '''
         Test failing of partial constant evaluation on external function
         '''
         cpath = "ExtFunctionTests.CEval.Advanced.UnknownInput"
-        fmu_name = compile_fmu(cpath, self.fpath, version=1.0) 
+        fmu_name = compile_fmu(cpath, self.fpath)
         model = load_fmu(fmu_name)
         assert model.get_variable_variability("y") == 3, 'y should be continuous'
-        
-        fmu_name = compile_fmu(cpath, self.fpath, version=2.0) #Continuous variability is == 4 with FMI2
-        model = load_fmu(fmu_name)
-        assert model.get_variable_variability("y") == 4, 'y should be continuous'
         
         
     
@@ -630,7 +553,7 @@ class TestUtilitiesCEval:
     def setUpClass(self):
         self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
     
-    @testattr(stddist_base = True)
+    @testattr(stddist = True)
     def testCEvalLog(self):
         '''
         Constant evaluation of external C logging function.
@@ -654,7 +577,7 @@ class TestCevalCaching:
     def setUpClass(self):
         self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
     
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def testCaching1(self):
         '''
         Test caching of external objects during constant evaluation
@@ -665,7 +588,7 @@ class TestCevalCaching:
         res = model.simulate()
         nose.tools.assert_equals(res.final('n3'), 5)
         
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def testCaching2(self):
         '''
         Test caching process limit of external objects during constant evaluation
@@ -676,7 +599,7 @@ class TestCevalCaching:
         res = model.simulate()
         nose.tools.assert_equals(res.final('n3'), 20)
         
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def testCaching3(self):
         '''
         Test disabling process caching
@@ -687,7 +610,7 @@ class TestCevalCaching:
         res = model.simulate()
         nose.tools.assert_equals(res.final('n3'), 4)
         
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def testConError(self):
         '''
         Test caching of external objects during constant evaluation, ModelicaError in constructor.
@@ -695,7 +618,7 @@ class TestCevalCaching:
         cpath = "ExtFunctionTests.CEval.Caching.ConError"
         fmu_name = compile_fmu(cpath, self.fpath)
         
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def testDeconError(self):
         '''
         Test caching of external objects during constant evaluation, ModelicaError in deconstructor.
@@ -703,7 +626,7 @@ class TestCevalCaching:
         cpath = "ExtFunctionTests.CEval.Caching.DeconError"
         fmu_name = compile_fmu(cpath, self.fpath)
         
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def testUseError(self):
         '''
         Test caching of external objects during constant evaluation, ModelicaError in use.
@@ -712,7 +635,7 @@ class TestCevalCaching:
         fmu_name = compile_fmu(cpath, self.fpath)
         
         
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def testConCrash(self):
         '''
         Test caching of external objects during constant evaluation, Crash in constructor.
@@ -720,7 +643,7 @@ class TestCevalCaching:
         cpath = "ExtFunctionTests.CEval.Caching.ConCrash"
         fmu_name = compile_fmu(cpath, self.fpath)
         
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def testDeconCrash(self):
         '''
         Test caching of external objects during constant evaluation, Crash in deconstructor.
@@ -728,7 +651,7 @@ class TestCevalCaching:
         cpath = "ExtFunctionTests.CEval.Caching.DeconCrash"
         fmu_name = compile_fmu(cpath, self.fpath)
         
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def testUseCrash(self):
         '''
         Test caching of external objects during constant evaluation, Crash in use.

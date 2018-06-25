@@ -317,9 +317,8 @@ aspect DynamicStateSelect{
                 continue;
             lightReset();
             ASTNode.log.debug("  SAP1");
-            if (sap1.augmentingPath(eqn)) {
+            if (sap1.augmentingPath(eqn))
                 continue;
-            }
             DSSet set = dsLookup.get(eqn);
             if (set == null)
                 set = new DSSet();
@@ -482,18 +481,14 @@ aspect DynamicStateSelect{
         Collections.sort(res, new Comparator<IndexReductionVar>() {
             @Override
             public int compare(IndexReductionVar a, IndexReductionVar b) {
-                // Get unmatched first
                 int diff = (a.getMatching() == null ? 1 : 0) - (b.getMatching() == null ? 1 : 0);
                 if (diff != 0) {
                     return -diff;
                 }
-                // Get other variables after the one matched to the equation
                 diff = (a.getMatching() == IndexReductionEq.this ? 1 : 0) - (b.getMatching() == IndexReductionEq.this ? 1 : 0);
                 if (diff != 0) {
                     return -diff;
                 }
-                // Get non-temporary variables first. Then temporary variables
-                // that are not assigned in its "temporary equation"
                 IndexReductionEq aEq = tempAssignmentMap.get(a);
                 IndexReductionEq bEq = tempAssignmentMap.get(b);
                 diff = (aEq != null ? (aEq.getMatching() != a ? 2 : 1) : 0) - (bEq != null ? (bEq.getMatching() != b ? 2 : 1) : 0);
@@ -636,9 +631,6 @@ aspect DynamicStateSelect{
             protected boolean shouldVisit(IndexReductionEq eqn, IndexReductionVar var) {
                 if (!super.shouldVisit(eqn, var))
                     return false;
-                if (var.numDifferentiations() < eqn.numDifferentiations()) {
-                    return false;
-                }
                 Map<IndexReductionVar, Coefficient> coefficients =  coefficientsMatrix.get(eqn);
                 if (coefficients != null) {
                     Coefficient coff = coefficients.get(var);
@@ -646,12 +638,6 @@ aspect DynamicStateSelect{
                         return false;
                 }
                 return var.dynamicSetCandidate(computeIncidenceStateSelect(eqn, var));
-            }
-            @Override
-            protected void match(IndexReductionEq eqn, IndexReductionVar var) {
-                IndexReductionVar previous = eqn.getMatching();
-                super.match(eqn, var);
-                ASTNode.log.debug("      Rematch %s to %s (previous %s)", eqn, var, previous);
             }
         }
 
@@ -696,9 +682,8 @@ aspect DynamicStateSelect{
     
             @Override
             protected void match(IndexReductionEq eqn, IndexReductionVar var) {
-                IndexReductionVar previous = eqn.getMatching();
                 super.match(eqn, var);
-                ASTNode.log.debug("      Rematch %s to %s (previous %s)", eqn, var, previous);
+                ASTNode.log.debug("      Rematch %s to %s", eqn, var);
                 Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
                 if (coefficients == null)
                     return;
@@ -714,9 +699,6 @@ aspect DynamicStateSelect{
                 if (!super.shouldVisit(eqn, var)) {
                     return false;
                 }
-                if (var.numDifferentiations() < eqn.numDifferentiations()) {
-                    return false;
-                }
                 return var.dynamicSetCandidate(computeIncidenceStateSelect(eqn, var));
             }
         }
@@ -730,20 +712,17 @@ aspect DynamicStateSelect{
     }
     
     public boolean SCCBlock.containsDynamicStates() {
-        for (E eqn : this)
+        for (E eqn : members)
             if (!eqn.isMeta() && eqn.getMatching().getVariable().isFDynamicAlgebraicVariable())
                 return true;
         return false;
     }
     
     public class EquationBlockFactory {
-        private static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> DynamicStateBlock computeDynamicStateBlock(SCCBlock<E, V> component, BlockProducer producer, OptionRegistry options) {
+        public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> DynamicStateBlock computeDynamicStateBlock(SCCBlock<E, V> component, BlockProducer producer, OptionRegistry options) {
             Map<DynamicStateSet, FDynamicAlgebraicVariable[]> setVarMap = new LinkedHashMap<DynamicStateSet, FDynamicAlgebraicVariable[]>();
             Collection<V> otherVars = new ArrayList<V>();
             for (E eqn : component.getMembers()) {
-                if (eqn.isMeta()) {
-                    continue;
-                }
                 FVariable fVar = eqn.getMatching().getVariable();
                 if (!fVar.isFDynamicAlgebraicVariable()) {
                     otherVars.add(eqn.getMatching());
@@ -811,7 +790,7 @@ aspect DynamicStateSelect{
                     sb.append(combination[j].name() + " ");
                 }
                 ASTNode.log.debug("Generating BLT for: %s", sb);
-                BiPGraph graph = new BiPGraph(component.getMembers(), otherVars);
+                BiPGraph graph = new BiPGraph(component.getMembers(), otherVars, true);
                 for (FVariable var : combination)
                     graph.addVariable(var);
                 for (Eq eqn : graph.getEquations()) {

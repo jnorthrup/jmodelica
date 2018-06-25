@@ -63,72 +63,6 @@ equation
     res = copyBoolArray(arg);
 end ExtFunctionBool;
 
-model ExtFunctionRecord
-    record R
-        Real x;
-    end R;
-    function fRecord
-        input R r;
-        output R y;
-      external "C" fRecord(r,y) annotation(
-        Library="externalFunctionsC",
-        Include="#include \"externalFunctionsC.h\"");
-    end fRecord;
-    R y = fRecord(R(time));
-end ExtFunctionRecord;
-
-model ExtFunctionRecordCeval
-    record R
-        Real x;
-    end R;
-    function fRecord
-        input R r;
-        output R y;
-      external "C" fRecord(r,y) annotation(
-        Library="externalFunctionsC",
-        Include="#include \"externalFunctionsC.h\"");
-    end fRecord;
-    constant R y1 = fRecord(R(3));
-    R y2 = fRecord(R(3));
-end ExtFunctionRecordCeval;
-
-model ExtFunctionRecordObj
-    record R1
-        R2 r2;
-    end R1;
-    record R2
-        Real x;
-    end R2;
-    
-    model EO
-        extends ExternalObject;
-        function constructor
-            input R1 r1;
-            output EO eo;
-            external "C" eo=eo_constructor_record(r1) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
-        end constructor;
-        function destructor
-            input EO eo;
-            external "C" eo_destructor_record(eo) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
-        end destructor;
-    end EO;
-    
-    function f
-        input EO eo;
-        output Real y;
-        external "C" y=eo_use_record(eo) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
-    end f;
-    
-    parameter EO eo = EO(R1(R2(3)));
-    parameter Real y = f(eo);
-end ExtFunctionRecordObj;
-
-model ExtFunctionRecordObjCeval
-    extends ExtFunctionRecordObj;
-    parameter Integer n = integer(y);
-    Real[:] x = 1:n;
-end ExtFunctionRecordObjCeval;
-
 model ExtFunctionTest3
  Real a(start=10);
  Real b;
@@ -225,17 +159,6 @@ equation
     x = whileTrue(1);
 end ExternalInfinityTest;
 
-model ExternalInfinityTestCeval
-function whileTrue
-    input Real a;
-    output Real b;
-    external "C" annotation(
-        Library="arrayFunctions",
-        Include="#include \"arrayFunctions.h\"");
-end whileTrue;
-    constant Real x = whileTrue(1);
-end ExternalInfinityTestCeval;
-
 package CEval
   package C
     model RealTest
@@ -258,7 +181,7 @@ package CEval
       function fRealArrayUnknown
         input  Real[:] x_in;
         output Real[size(x_in,1)] x_out;
-      external "C" fRealArray(x_in, size(x_in,1), x_out, size(x_in,1)) annotation(
+      external "C" fRealArray(x_in, x_out) annotation(
         Library="externalFunctionsC",
         Include="#include \"externalFunctionsC.h\"");
       end fRealArrayUnknown;
@@ -288,7 +211,7 @@ package CEval
       function fIntegerArrayUnknown
         input  Integer[:] x_in;
         output Integer[size(x_in,1)] x_out;
-      external "C" fIntegerArray(x_in, size(x_in,1), x_out, size(x_in,1)) annotation(
+      external "C" fIntegerArray(x_in, x_out) annotation(
         Library="externalFunctionsC",
         Include="#include \"externalFunctionsC.h\"");
       end fIntegerArrayUnknown;
@@ -318,7 +241,7 @@ package CEval
       function fBooleanArrayUnknown
         input  Boolean[:] x_in;
         output Boolean[size(x_in,1)] x_out;
-      external "C" fBooleanArray(x_in, size(x_in,1), x_out, size(x_in,1)) annotation(
+      external "C" fBooleanArray(x_in, x_out) annotation(
         Library="externalFunctionsC",
         Include="#include \"externalFunctionsC.h\"");
       end fBooleanArrayUnknown;
@@ -337,14 +260,6 @@ package CEval
         Include="#include \"externalFunctionsC.h\"");
       end fStringScalar;
       
-      function fStringScalarLit
-        input  String x_in;
-        output String x_out;
-      external "C" annotation(
-        Library="externalFunctionsC",
-        Include="#include \"externalFunctionsC.h\"");
-      end fStringScalarLit;
-      
       function fStringArray
         input  String[2] x_in;
         output String[size(x_in,1)] x_out;
@@ -356,22 +271,12 @@ package CEval
       function fStringArrayUnknown
         input  String[:] x_in;
         output String[size(x_in,1)] x_out;
-      external "C" fStringArray(x_in, size(x_in,1), x_out, size(x_in,1)) annotation(
+      external "C" fStringArray(x_in, x_out) annotation(
         Library="externalFunctionsC",
         Include="#include \"externalFunctionsC.h\"");
       end fStringArrayUnknown;
-      
-      function fStrlen
-        input String s;
-        output Integer n;
-      external "C" n = fStrlen(s) annotation(
-        Library="externalFunctionsC",
-        Include="#include \"externalFunctionsC.h\"");
-      end fStrlen;
 
-      constant Integer   len            = fStrlen("abcde");
       constant String    xScalar        = fStringScalar("abcde");
-      constant String    xScalarLit     = fStringScalarLit("abcde");
       constant String[2] xArray         = fStringArray({"abc","def"});
       constant String[2] xArrayUnknown  = fStringArrayUnknown({"abc","def"});
     end StringTest;
@@ -397,7 +302,7 @@ package CEval
       function fEnumArrayUnknown
         input  E[:] x_in;
         output E[size(x_in,1)] x_out;
-      external "C" fEnumArray(x_in, size(x_in,1), x_out, size(x_in,1)) annotation(
+      external "C" fEnumArray(x_in, x_out) annotation(
         Library="externalFunctionsC",
         Include="#include \"externalFunctionsC.h\"");
       end fEnumArrayUnknown;
@@ -441,7 +346,7 @@ package CEval
       function frealarrayunknown
         input  Real[:] x_in;
         output Real[size(x_in,1)] x_out;
-      external "FORTRAN 77" frealarray(x_in, size(x_in,1), x_out, size(x_in,1)) annotation(
+      external "FORTRAN 77" frealarray(x_in, x_out) annotation(
         Library="externalFunctionsFortran");
       end frealarrayunknown;
       
@@ -449,18 +354,6 @@ package CEval
       constant Real[2] xArray         = frealarray({4,5});
       constant Real[2] xArrayUnknown  = frealarrayunknown({6,7});
     end RealTest;
-    
-    model RealTestMatrix
-      function frealmatrix
-        input  Real[:,:] x_in;
-        output Real[size(x_in,1), size(x_in,2)] x_out;
-      external "FORTRAN 77" frealmatrix(size(x_in,1), size(x_in,2), x_in, x_out) annotation(
-        Library="externalFunctionsFortran");
-      end frealmatrix;
-      
-      constant Real[1,1] y1  = frealmatrix({{1}});
-      constant Real[2,2] y2  = frealmatrix({{6,7},{8,9}});
-    end RealTestMatrix;
     
     model IntegerTest
       function fintegerscalar
@@ -480,7 +373,7 @@ package CEval
       function fintegerarrayunknown
         input  Integer[:] x_in;
         output Integer[size(x_in,1)] x_out;
-      external "FORTRAN 77" fintegerarray(x_in, size(x_in,1), x_out, size(x_in,1)) annotation(
+      external "FORTRAN 77" fintegerarray(x_in, x_out) annotation(
         Library="externalFunctionsFortran");
       end fintegerarrayunknown;
       
@@ -507,7 +400,7 @@ package CEval
       function fbooleanarrayunknown
         input  Boolean[:] x_in;
         output Boolean[size(x_in,1)] x_out;
-      external "FORTRAN 77" fbooleanarray(x_in, size(x_in,1), x_out, size(x_in,1)) annotation(
+      external "FORTRAN 77" fbooleanarray(x_in, x_out) annotation(
         Library="externalFunctionsFortran");
       end fbooleanarrayunknown;
       
@@ -535,7 +428,7 @@ package CEval
       function fenumarrayunknown
         input  E[:] x_in;
         output E[size(x_in,1)] x_out;
-      external "FORTRAN 77" fenumarray(x_in, size(x_in,1), x_out, size(x_in,1)) annotation(
+      external "FORTRAN 77" fenumarray(x_in, x_out) annotation(
         Library="externalFunctionsFortran");
       end fenumarrayunknown;
       
@@ -613,7 +506,7 @@ package CEval
             input Boolean b;
             input String s;
             output Obj1 o1;
-            external "C" o1 = my_constructor1(x,y,b,s)
+            external "C" o1 = my_constructor1(x,y,b,s);
                 annotation(Library="extObjects", Include="#include \"extObjects.h\"");
         end constructor;
         function destructor
@@ -631,7 +524,7 @@ package CEval
             input Boolean[:] b;
             input String[:] s;
             output Obj2 o2;
-            external "C" my_constructor2(x,y,o2,b,s)
+            external "C" my_constructor2(x,y,o2,b,s);
                 annotation(Library="extObjects", Include="#include \"extObjects.h\"");
         end constructor;
         function destructor
@@ -646,7 +539,7 @@ package CEval
             input Os.Obj1 o1;
             input Obj2[:] o2;
             output Obj3 o3;
-            external "C" my_constructor3(o1,o2,o3)
+            external "C" my_constructor3(o1,o2,o3);
                 annotation(Library="extObjects", Include="#include \"extObjects.h\"");
         end constructor;
         function destructor
@@ -910,88 +803,5 @@ package CEval
     end UseCrash;
   end Caching;
 end CEval;
-
-model PrintsControlCharacters
-    "This model prints some control characters using ModelicaMessage during compilation"
-    function f
-        input Real i;
-        output Real o;
-        external "C" o = f(i) annotation(Include="double f(double i) {ModelicaMessage(\"\\1\\2\\3\\4\");return i;}");
-    end f;
-    constant Real c = f(2);
-end PrintsControlCharacters;
-
-model StructuralAsserts
-    function f
-        output Integer n;
-        external "C" n = get_time() annotation(Library="externalFunctionsC", Include="#include \"externalFunctionsC.h\"");
-    end f;
-    
-    parameter Integer n = f() annotation(Evaluate=true);
-end StructuralAsserts;
-
-
-model TestString
-    import Modelica.Utilities.Strings.*;
-    function Str1
-        input  Real x;
-        output Real y;
-    protected
-        String str;
-    algorithm
-        str := Str2(x);
-        y := length(str);
-        assert(str == "Hej", "Failed to provide the correct string, was: "+str);
-        annotation(Inline=false);
-    end Str1;
-    function Str2
-        input  Real x;
-        output String str;
-    algorithm
-        str := fStringScalarLit("jeH");
-        assert(str == "Hej", "Failed to provide the correct string, was: "+str);
-        annotation(Inline=false);
-    end Str2;
-    function fStringScalarLit
-        input  String x_in;
-        output String x_out;
-      external "C" annotation(
-        Library="externalFunctionsC",
-        Include="#include \"externalFunctionsC.h\"");
-      end fStringScalarLit;
-    parameter Real x(fixed=false);
-initial equation
-    x = Str1(1.0);
-end TestString;
-
-
-model ExternalObjectTests3
-    class ModelicaMsgOnDelete
-        extends ExternalObject;
-        
-        function constructor
-            input String name;
-            output ModelicaMsgOnDelete out;
-            external "C" out = constructor_modelica_msg(name) 
-                annotation(Library="extObjects", Include="#include \"extObjects.h\"");
-        end constructor;
-        
-        function destructor
-            input ModelicaMsgOnDelete obj;
-            external "C" destructor_modelica_msg(obj) 
-                annotation(Library="extObjects", Include="#include \"extObjects.h\"");
-        end destructor; 
-    end ModelicaMsgOnDelete;
-
-    function use_MMOD
-        input ModelicaMsgOnDelete obj;
-        output Real x;
-        external "C" x = constant_extobj_func(obj) 
-            annotation(Library="extObjects", Include="#include \"extObjects.h\"");
-    end use_MMOD;
-    
-    ModelicaMsgOnDelete obj = ModelicaMsgOnDelete("test_ext_object.marker");
-    Real x = use_MMOD(obj);
-end ExternalObjectTests3;
 
 end ExtFunctionTests;

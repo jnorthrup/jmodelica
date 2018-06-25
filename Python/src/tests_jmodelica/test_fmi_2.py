@@ -23,7 +23,6 @@ import nose
 import os
 import numpy as N
 import sys as S
-import scipy.sparse.csc
 
 from tests_jmodelica import testattr, get_files_path
 from pymodelica.compiler import compile_fmu
@@ -53,88 +52,9 @@ class Test_FMUModelBase2:
         Sets up the test class.
         """
         cls.negAliasFmu = compile_fmu("NegatedAlias",os.path.join(path_to_mofiles,"NegatedAlias.mo"), version=2.0)
-        cls.enumeration3 = compile_fmu("Enumerations.Enumeration3",os.path.join(path_to_mofiles,"Enumerations.mo"), version=2.0)
-        cls.enumeration4 = compile_fmu("Enumerations.Enumeration4",os.path.join(path_to_mofiles,"Enumerations.mo"), version=2.0)
         #cls.enumFMU = compile_fmu('Parameter.Enum', os.path.join(path_to_mofiles,'ParameterTests.mo'))
-    
-    @testattr(stddist_full = True)
-    def test_get_scalar_variable(self):
-        negated_alias  = load_fmu(Test_FMUModelBase2.negAliasFmu)
-        
-        sc_x = negated_alias.get_scalar_variable("x")
-        
-        assert sc_x.name == "x"
-        assert sc_x.value_reference >= 0
-        assert sc_x.type == fmi.FMI2_REAL
-        assert sc_x.variability == fmi.FMI2_CONTINUOUS
-        assert sc_x.causality == fmi.FMI2_LOCAL
 
-        nose.tools.assert_raises(FMUException, negated_alias.get_scalar_variable, "not_existing")
-    
-    @testattr(stddist_full = True)
-    def test_declared_enumeration_type(self):
-        enumeration_model = load_fmu(Test_FMUModelBase2.enumeration3)
-        
-        enum = enumeration_model.get_variable_declared_type("x")
-        assert len(enum.items.keys()) == 2
-        enum = enumeration_model.get_variable_declared_type("home")
-        assert len(enum.items.keys()) == 4
-        
-        nose.tools.assert_raises(FMUException, enumeration_model.get_variable_declared_type, "z")
-    
-    @testattr(stddist_full = True)
-    def test_set_enumeration(self):
-        enumeration_model = load_fmu(Test_FMUModelBase2.enumeration4)
-        
-        assert enumeration_model.get("tsize")[0] == 2
-        
-        enumeration_model.set("tsize", "small")
-        assert enumeration_model.get("tsize")[0] == 1
-        
-        enumeration_model.set("tsize", "large")
-        assert enumeration_model.get("tsize")[0] == 3
-        
-        enumeration_model.set("tsize", 2)
-        assert enumeration_model.get("tsize")[0] == 2
-        
-        nose.tools.assert_raises(FMUException, enumeration_model.set, "tsize", "hej")
-    
-    @testattr(stddist_full = True)
-    def test_version(self):
-        negated_alias  = load_fmu(Test_FMUModelBase2.negAliasFmu)
-        
-        assert negated_alias.get_version() == "2.0"
-
-    @testattr(stddist_full = True)
-    def test_caching(self):
-        negated_alias  = load_fmu(Test_FMUModelBase2.negAliasFmu)
-        
-        assert len(negated_alias.cache) == 0 #No starting cache
-        
-        vars_1 = negated_alias.get_model_variables()
-        vars_2 = negated_alias.get_model_variables()
-        assert id(vars_1) == id(vars_2)
-        
-        vars_3 = negated_alias.get_model_variables(filter="*")
-        assert id(vars_1) != id(vars_3)
-        
-        vars_4 = negated_alias.get_model_variables(type=0)
-        assert id(vars_3) != id(vars_4)
-        
-        vars_5 = negated_alias.get_model_time_varying_value_references()
-        vars_7 = negated_alias.get_model_time_varying_value_references()
-        assert id(vars_5) != id(vars_1)
-        assert id(vars_5) == id(vars_7)
-        
-        negated_alias  = load_fmu(Test_FMUModelBase2.negAliasFmu)
-        
-        assert len(negated_alias.cache) == 0 #No starting cache
-        
-        vars_6 = negated_alias.get_model_variables()
-        assert id(vars_1) != id(vars_6)
-
-
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_set_get_negated_real(self):
         negated_alias  = load_fmu(Test_FMUModelBase2.negAliasFmu)
         x,y = negated_alias.get("x"), negated_alias.get("y")
@@ -153,7 +73,7 @@ class Test_FMUModelBase2:
         nose.tools.assert_almost_equal(x,3.0)
         nose.tools.assert_almost_equal(y,-3.0)
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_set_get_negated_integer(self):
         negated_alias  = load_fmu(Test_FMUModelBase2.negAliasFmu)
         x,y = negated_alias.get("ix"), negated_alias.get("iy")
@@ -172,18 +92,6 @@ class Test_FMUModelBase2:
         nose.tools.assert_almost_equal(x,3.0)
         nose.tools.assert_almost_equal(y,-3.0)
 
-    @testattr(stddist_full = True)
-    def test_set_additional_logger(self):
-        messages = []
-        def my_custom_logger(module, log_level, message):
-            messages.append(message)
-        log_level = 4
-        model = load_fmu(Test_FMUModelBase2.negAliasFmu, log_level=log_level)
-        model.set("_log_level", log_level)
-        model.set_additional_logger(my_custom_logger)
-        model.simulate()
-        assert(len(messages) > 0)
-
 class Test_FMUModelCS2:
     """
     This class tests pyfmi.fmi.FMUModelCS2
@@ -195,78 +103,16 @@ class Test_FMUModelCS2:
         """
         cls.coupled_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="cs", version="2.0", compiler_options={'eliminate_alias_constants':False})
         cls.bouncing_name = compile_fmu("BouncingBall",os.path.join(path_to_mofiles,"BouncingBall.mo"), target="cs", version="2.0", compiler_options={'eliminate_alias_constants':False})
-        cls.terminate = compile_fmu("Terminate",os.path.join(path_to_mofiles,"Terminate.mo"),target="cs", version="2.0")
-        cls.assert_fail = compile_fmu("AssertFail",os.path.join(path_to_mofiles,"Terminate.mo"),target="cs", version="2.0")
-        cls.initialize_solver = compile_fmu("Inputs.DiscChange",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs", version="2.0")
+        cls.jacobian_name = compile_fmu("JacFuncTests.BasicJacobianTest",os.path.join(path_to_mofiles,"JacTest.mo"), target="cs", version="2.0", compiler_options={'generate_ode_jacobian':True})
     
-    @testattr(stddist_full = True)
-    def test_reinitialize_solver(self):
-        model = load_fmu(Test_FMUModelCS2.initialize_solver)
-        
-        model.initialize()
-
-        model.set("u", 0.0)
-        flag = model.do_step(0.0, 0.1)
-        assert flag == 0
-        model.set("u", 20)
-        flag = model.do_step(0.1, 0.1)
-        assert flag == 0
-        
-    @testattr(stddist_full = True)
-    def test_assert_fail(self):
-        model = load_fmu(Test_FMUModelCS2.assert_fail)
-        
-        nose.tools.assert_raises(Exception, model.simulate)
-    
-    @testattr(stddist_full = True)
-    def test_terminate(self):
-        model = load_fmu(Test_FMUModelCS2.terminate)
-        
-        model.initialize()
-        status = model.do_step(0,1)
-        
-        assert status == fmi.FMI_DISCARD
-        assert abs(model.get_real_status(fmi.FMI2_LAST_SUCCESSFUL_TIME) - 0.5) < 1e-3
-        
-    @testattr(stddist_full = True)
-    def test_terminate_2(self):
-        model = load_fmu(Test_FMUModelCS2.terminate)
-        
-        res = model.simulate()
-        
-        assert res.status == fmi.FMI_DISCARD
-        assert abs(res["time"][-1] - 0.5) < 1e-3
-
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_log_file_name(self):
         path, file_name = os.path.split(self.coupled_name)
         coupled = load_fmu(self.coupled_name)
         
         assert coupled.get_log_file_name() == file_name.replace(".","_")[:-4]+"_log.txt"
-        
-    @testattr(stddist_full = True)
-    def test_part_log(self):
-        model = load_fmu(self.coupled_name, log_level=6)
-        
-        model.set("_log_level", 6)
-        
-        model.simulate()
-        
-        num_lines = model.get_number_of_lines_log()
-        assert num_lines > 50 #Assert big log
-        
-        log = model.get_log(start_lines=10)
-        assert len(log) == 10
-        log = model.get_log(end_lines=10)
-        assert len(log) == 10
-        log = model.get_log()
-        assert len(log) == num_lines
-        log = model.get_log(start_lines=10, end_lines=10)
-        assert len(log) == 20
-        log = model.get_log(start_lines=num_lines-10, end_lines=num_lines-10)
-        assert len(log) == num_lines
     
-    @testattr(windows_full = True)
+    @testattr(windows = True)
     def test_init(self):
         """
         Test the method __init__ in FMUModelCS2
@@ -278,7 +124,7 @@ class Test_FMUModelCS2:
         nose.tools.assert_raises(FMUException, FMUModelCS2, fmu=CS1, path=path_to_fmus_cs1)
         nose.tools.assert_raises(FMUException, FMUModelCS2, fmu=ME1, path=path_to_fmus_me1)
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_instantiate_slave(self):
         """
         Test the method instantiate_slave in FMUModelCS2
@@ -293,7 +139,7 @@ class Test_FMUModelCS2:
             name_of_slave = 'slave' + str(i)
             bounce.instantiate(name = name_of_slave)
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_initialize(self):
         """
         Test the method initialize in FMUModelCS2
@@ -313,7 +159,7 @@ class Test_FMUModelCS2:
         bounce.initialize()
         nose.tools.assert_almost_equal(bounce.time, 4.5)
     
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_simulation_past_tstop(self):
         
         coupled = load_fmu(self.coupled_name)
@@ -330,7 +176,7 @@ class Test_FMUModelCS2:
         status = coupled.do_step(total_time, step_size)
         assert status != 0
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_reset_slave(self):
         """
         Test the method reset_slave in FMUModelCS2
@@ -345,7 +191,7 @@ class Test_FMUModelCS2:
         bounce.setup_experiment()
         bounce.initialize()
         
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_terminate(self):
         """
         Test the method terminate in FMUModelCS2
@@ -356,7 +202,7 @@ class Test_FMUModelCS2:
         coupled.initialize()
         coupled.terminate()
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_the_time(self):
         """
         Test the time in FMUModelCS2
@@ -377,7 +223,7 @@ class Test_FMUModelCS2:
         bounce.initialize()
         assert bounce.time == 2.5
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_version(self):
         bounce = load_fmu(self.bouncing_name)
         assert bounce.get_version() == "2.0"
@@ -385,7 +231,7 @@ class Test_FMUModelCS2:
         coupled = load_fmu(self.coupled_name)
         assert coupled.get_version() == "2.0"
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_do_step(self):
         """
         Test the method do_step in FMUModelCS2
@@ -413,7 +259,7 @@ class Test_FMUModelCS2:
             assert status == 0
             nose.tools.assert_almost_equal(coupled.time , current_time + new_step_size)
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_set_input_derivatives(self):
         """
         Test the method set_input_derivatives in FMUModelCS2
@@ -425,7 +271,7 @@ class Test_FMUModelCS2:
         nose.tools.assert_raises(FMUException, coupled.set_input_derivatives, 'J1.phi', 1.0, 1)
         nose.tools.assert_raises(FMUException, coupled.set_input_derivatives, 578, 1.0, 1)
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_get_output_derivatives(self):
         """
         Test the method get_output_derivatives in FMUModelCS2
@@ -440,7 +286,7 @@ class Test_FMUModelCS2:
         nose.tools.assert_raises(FMUException, coupled.get_output_derivatives, 'J1.phi', -1)
         nose.tools.assert_raises(FMUException, coupled.get_output_derivatives, 578, 0)
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_get_directional_derivative_capability(self):
         """
         Test the method get_directional_derivative in FMUModelCS2
@@ -454,7 +300,36 @@ class Test_FMUModelCS2:
         # Bouncing ball don't have the capability, check that this is handled
         nose.tools.assert_raises(FMUException, bounce.get_directional_derivative, [1], [1], [1])
         
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
+    def test_get_directional_derivative(self):
+        """
+        Test the method get_directional_derivative in FMUModelCS2
+        """
+        
+        # Setup
+        jacobian = load_fmu(self.jacobian_name)
+        jacobian.setup_experiment()
+        jacobian.initialize()
+        
+        jacobian.set('x1', 1.0)
+        jacobian.set('x2', 1.0)
+        
+        states_list = jacobian.get_states_list()
+        der_list    = jacobian.get_derivatives_list()
+        states_ref  = [s.value_reference for s in states_list.values()]
+        der_ref     = [s.value_reference for s in der_list.values()]
+
+        dir_der1 = jacobian.get_directional_derivative(states_ref, der_ref, [1, 0])
+        assert len(dir_der1) == 2
+        nose.tools.assert_almost_equal(dir_der1[0], 1.)
+        nose.tools.assert_almost_equal(dir_der1[1], 14.)
+        
+        dir_der2 = jacobian.get_directional_derivative(states_ref, der_ref, [0, 1])
+        assert len(dir_der2) == 2
+        nose.tools.assert_almost_equal(dir_der2[0], 16.)
+        nose.tools.assert_almost_equal(dir_der2[1], 4.)
+
+    @testattr(fmi = True)
     def test_simulate(self):
         """
         Test the main features of the method simulate() in FMUmodelCS2
@@ -531,7 +406,7 @@ class Test_FMUModelCS2:
         nose.tools.assert_almost_equal(abs(diff4), 0.000, 1)
         """
         
-    @testattr(windows_full = True)
+    @testattr(windows = True)
     def test_simulate_extern(self):
         """
         Test the method simulate in FMUModelCS2 on FMU SDK bouncing ball
@@ -561,7 +436,7 @@ class Test_FMUModelCS2:
             height_old = height
             bounce.reset()
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_simulate_options(self):
         """
         Test the method simultaion_options in FMUModelCS2
@@ -570,7 +445,7 @@ class Test_FMUModelCS2:
         coupled = load_fmu(self.coupled_name)
 
         #Test the result file
-        res = coupled.simulate(options={"result_handling":"file"})
+        res = coupled.simulate()
         assert res.result_file == coupled.get_identifier()+'_result.txt'
         assert os.path.exists(res.result_file)
 
@@ -592,6 +467,86 @@ class Test_FMUModelCS2:
         assert len(res['time']) == 251
 
 
+class Test_State_Space_Repr:
+    """
+    This class tests pyfmi.fmi.FMUModelME2.get_state_space_representation
+    """
+    @classmethod
+    def setUpClass(cls):
+        cls.directional1 = compile_fmu("JacFuncTests.BasicJacobianTest",os.path.join(path_to_mofiles,"JacTest.mo"), target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
+        cls.directional2 = compile_fmu("JacFuncTests.BasicJacobianTest2",os.path.join(path_to_mofiles,"JacTest.mo"), target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
+    
+    def _run_test(self, name, matrix):
+        model = load_fmu(name)
+        model.setup_experiment()
+        model.initialize()
+        
+        def get_matrix(matrix):
+            if matrix == "A":
+                M = model._get_A()
+            elif matrix == "B":
+                M = model._get_B()
+            elif matrix == "C":
+                M = model._get_C()
+            elif matrix == "D":
+                M = model._get_D()
+            return M
+        
+        M1 = get_matrix(matrix)
+        model.force_finite_differences = True
+        M2 = get_matrix(matrix)
+        
+        print model.get_states_list()
+        print model.get_input_list()
+        print matrix, M1
+        print matrix, M2
+        
+        M1 = M1.toarray().flatten()
+        M2 = M2.toarray().flatten()
+        
+        for i in range(len(M1)):
+            nose.tools.assert_almost_equal(M1[i], M2[i], places=4)
+    
+    @testattr(fmi = True)
+    def test_A_matrix1(self):
+        pass
+        #Should be actived after https://trac.jmodelica.org/ticket/4739
+        #self._run_test(self.directional1, "A")
+    
+    @testattr(fmi = True)
+    def test_A_matrix2(self):
+        pass
+        ##Should be actived after https://trac.jmodelica.org/ticket/4739
+        #self._run_test(self.directional2, "A")
+    
+    @testattr(fmi = True)
+    def test_B_matrix1(self):
+        pass
+        #self._run_test(self.directional1, "B")
+    
+    @testattr(fmi = True)
+    def test_B_matrix2(self):
+        self._run_test(self.directional2, "B")
+    
+    @testattr(fmi = True)
+    def test_C_matrix1(self):
+        pass
+        #self._run_test(self.directional1, "C")
+    
+    @testattr(fmi = True)
+    def test_C_matrix2(self):
+        self._run_test(self.directional2, "C")
+    
+    @testattr(fmi = True)
+    def test_D_matrix1(self):
+        pass
+        #self._run_test(self.directional1, "D")
+    
+    @testattr(fmi = True)
+    def test_D_matrix2(self):
+        self._run_test(self.directional2, "D")
+
+
 class Test_FMUModelME2:
     """
     This class tests pyfmi.fmi.FMUModelME2
@@ -603,145 +558,18 @@ class Test_FMUModelME2:
         """
         cls.coupled_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="me", version="2.0", compiler_options={'eliminate_alias_constants':False})
         cls.bouncing_name = compile_fmu("BouncingBall",os.path.join(path_to_mofiles,"BouncingBall.mo"), target="me", version="2.0", compiler_options={'eliminate_alias_constants':False})
+        cls.jacobian_name = compile_fmu("JacFuncTests.BasicJacobianTest",os.path.join(path_to_mofiles,"JacTest.mo"), target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
         cls.output2_name = compile_fmu("OutputTest2",os.path.join(path_to_mofiles,"OutputTest.mo"), target="me", version="2.0")
         cls.no_state_name = compile_fmu("NoState.Example1", os.path.join(path_to_mofiles,"noState.mo"), target="me", version="2.0")
-        cls.enum_name = compile_fmu("Enumerations.Enumeration2", os.path.join(path_to_mofiles,"Enumerations.mo"), target="me", version="2.0")    
-        cls.string1 = compile_fmu("StringModel1",os.path.join(path_to_mofiles,"TestString.mo"), target="me", version="2.0")
     
-    @testattr(stddist_full = True)
-    def test_get_time_varying_variables(self):
-        model = load_fmu(self.coupled_name)
-        
-        [r,i,b] = model.get_model_time_varying_value_references()
-        [r_f, i_f, b_f] = model.get_model_time_varying_value_references(filter="*")
-        
-        assert len(r) == len(r_f)
-        assert len(i) == len(i_f)
-        assert len(b) == len(b_f)
-        
-        vars = model.get_variable_alias("J4.phi")
-        for var in vars:
-            [r,i,b] = model.get_model_time_varying_value_references(filter=var)
-            assert len(r) == 1
-        
-        [r,i,b] = model.get_model_time_varying_value_references(filter=vars.keys())
-        assert len(r) == 1
-    
-    @testattr(stddist_full = True)
-    def test_get_string(self):
-        model = load_fmu(self.string1)
-        
-        for i in range(100): #Test so that memory issues are detected
-            assert model.get("str")[0] == "hej"
-    
-    @testattr(stddist_full = True)
-    def test_estimate_directional_derivatives_A(self):
-        
-        model = load_fmu(self.coupled_name)
-        model.initialize()
-        model.event_update()
-        model.enter_continuous_time_mode()
-        
-        A = model._get_A(use_structure_info=True)
-        B = model._get_A(use_structure_info=True, output_matrix=A)
-        assert A is B #Test that the returned matrix is actually the same as the input
-        N.allclose(A.toarray(),B.toarray())
-        A = model._get_A(use_structure_info=False)
-        B = model._get_A(use_structure_info=False, output_matrix=A)
-        assert A is B
-        N.allclose(A,B)
-        C = model._get_A(use_structure_info=True, output_matrix=A)
-        assert A is not C
-        N.allclose(C.toarray(), A)
-        D = model._get_A(use_structure_info=False, output_matrix=C)
-        assert D is not C
-        N.allclose(D, C.toarray())
-    
-    @testattr(stddist_full = True)
-    def test_estimate_directional_derivatives_BCD(self):
-        
-        model = load_fmu(self.output2_name)
-        model.initialize()
-        model.event_update()
-        model.enter_continuous_time_mode()
-        
-        for func in [model._get_B, model._get_C, model._get_C]:
-            A = func(use_structure_info=True)
-            B = func(use_structure_info=True, output_matrix=A)
-            assert A is B #Test that the returned matrix is actually the same as the input
-            N.allclose(A.toarray(),B.toarray())
-            A = func(use_structure_info=False)
-            B = func(use_structure_info=False, output_matrix=A)
-            assert A is B
-            N.allclose(A,B)
-            C = func(use_structure_info=True, output_matrix=A)
-            assert A is not C
-            N.allclose(C.toarray(), A)
-            D = func(use_structure_info=False, output_matrix=C)
-            assert D is not C
-            N.allclose(D, C.toarray())
-    
-    @testattr(stddist_full = True)
-    def test_units(self):
-        
-        model = load_fmu(self.coupled_name)
-        model_bb = load_fmu(self.bouncing_name)
-        
-        assert model.get_variable_unit("J1.w") == "rad/s"
-        assert model.get_variable_unit("J1.phi") == "rad"
-        
-        nose.tools.assert_raises(FMUException, model.get_variable_unit, "clutch1.useHeatPort")
-        nose.tools.assert_raises(FMUException, model.get_variable_unit, "clutch1.sss")
-        nose.tools.assert_raises(FMUException, model.get_variable_unit, "clutch1.sss")
-        nose.tools.assert_raises(FMUException, model_bb.get_variable_unit, "h")
-    
-    @testattr(stddist_full = True)
-    def test_display_units(self):
-        
-        model = load_fmu(self.coupled_name)
-        
-        assert model.get_variable_display_unit("J1.phi") == "deg"
-        nose.tools.assert_raises(FMUException, model.get_variable_display_unit, "J1.w")
-        
-    @testattr(stddist_full = True)
-    def test_display_values(self):
-        model = load_fmu(self.coupled_name)
-        
-        import scipy
-        
-        val = model.get_variable_display_value("J1.phi")
-        val_ref = scipy.rad2deg(model.get("J1.phi"))
-        
-        nose.tools.assert_almost_equal(val, val_ref)
-        
-        model.simulate()
-        
-        val = model.get_variable_display_value("J1.phi")
-        val_ref = scipy.rad2deg(model.get("J1.phi"))
-        
-        nose.tools.assert_almost_equal(val, val_ref)
-    
-    @testattr(stddist_full = True)
-    def test_get_enum(self):
-        model = load_fmu(self.enum_name)
-        
-        assert model.get("one") == 1
-        
-        model.set("one", 2)
-        assert model.get("one") == 2
-
-    @testattr(windows_full = True)
-    def test_malformed_xml(self):
-        nose.tools.assert_raises(FMUException, load_fmu, os.path.join(path_to_fmus_me2, "MalFormed.fmu"))
-
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_log_file_name(self):
         path, file_name = os.path.split(self.coupled_name)
         coupled = load_fmu(self.coupled_name)
         
         assert coupled.get_log_file_name() == file_name.replace(".","_")[:-4]+"_log.txt"
     
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_version(self):
         bounce = load_fmu(self.bouncing_name)
         assert bounce.get_version() == "2.0"
@@ -749,7 +577,7 @@ class Test_FMUModelME2:
         coupled = load_fmu(self.coupled_name)
         assert coupled.get_version() == "2.0"
         
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_variable_initial(self):
         coupled = load_fmu(self.coupled_name)
         
@@ -758,7 +586,7 @@ class Test_FMUModelME2:
         assert vars["sin1.y"].initial == fmi.FMI2_INITIAL_CALCULATED
         
     
-    @testattr(windows_full = True)
+    @testattr(windows = True)
     def test_init(self):
         """
         Test the method __init__ in FMUModelME2
@@ -770,7 +598,7 @@ class Test_FMUModelME2:
         nose.tools.assert_raises(FMUException, FMUModelME2, fmu=CS1, path=path_to_fmus_cs1)
         nose.tools.assert_raises(FMUException, FMUModelME2, fmu=ME1, path=path_to_fmus_me1)
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_instantiate_model(self):
         """
         Test the method instantiate_model in FMUModelME2
@@ -778,7 +606,7 @@ class Test_FMUModelME2:
         for i in range(5):
             bounce = load_fmu(self.bouncing_name)
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_initialize(self):
         """
         Test the method initialize in FMUModelME2
@@ -793,7 +621,7 @@ class Test_FMUModelME2:
         bounce.setup_experiment(tolerance=1e-7)
         bounce.initialize()
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_reset(self):
         """
         Test the method reset in FMUModelME2
@@ -807,7 +635,7 @@ class Test_FMUModelME2:
 
         assert bounce.time is None
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_terminate(self):
         """
         Test the method terminate in FMUModelME2
@@ -818,7 +646,7 @@ class Test_FMUModelME2:
         coupled.initialize()
         coupled.terminate()
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_time(self):
         """
         Test the method get/set_time in FMUModelME2
@@ -840,7 +668,7 @@ class Test_FMUModelME2:
         nose.tools.assert_raises(TypeError, bounce._set_time, '2.0')
         nose.tools.assert_raises(TypeError, bounce._set_time, N.array([1.0, 1.0]))
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_get_event_info(self):
         """
         Test the method get_event_info in FMUModelME2
@@ -860,7 +688,7 @@ class Test_FMUModelME2:
         assert event.nextEventTimeDefined              == False
         assert event.nextEventTime                     == 0.0
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_get_event_indicators(self):
         """
         Test the method get_event_indicators in FMUModelME2
@@ -883,7 +711,7 @@ class Test_FMUModelME2:
         event_ind = bounce.get_event_indicators()
         nose.tools.assert_almost_equal(event_ind[0],5.000000)
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_get_tolerances(self):
         """
         Test the method get_tolerances in FMUModelME2
@@ -899,7 +727,7 @@ class Test_FMUModelME2:
         nose.tools.assert_almost_equal(atol[0],0.0000010)
         nose.tools.assert_almost_equal(atol[1],0.0000010)
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_continuous_states(self):
         """
         Test the method get/set_continuous_states in FMUModelME2
@@ -944,7 +772,7 @@ class Test_FMUModelME2:
         n_states=coupled.nominal_continuous_states
         nose.tools.assert_almost_equal(n_states[0], 0.0001)
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_output_dependencies(self):
         model = load_fmu(self.output2_name)
         
@@ -958,7 +786,7 @@ class Test_FMUModelME2:
         assert input_dep["y3"][0] == "u1"
         assert len(input_dep["y2"]) == 0
         
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_output_dependencies_2(self):
         model = load_fmu(self.coupled_name)
         
@@ -967,7 +795,7 @@ class Test_FMUModelME2:
         assert len(state_dep.keys()) == 0
         assert len(input_dep.keys()) == 0
         
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_derivative_dependencies(self):
         model = load_fmu(self.no_state_name)
         
@@ -976,7 +804,7 @@ class Test_FMUModelME2:
         assert len(state_dep.keys()) == 0
         assert len(input_dep.keys()) == 0
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_get_derivatives(self):
         """
         Test the method get_derivatives in FMUModelME2
@@ -1007,7 +835,7 @@ class Test_FMUModelME2:
         diff = N.sort(N.array([coupled.get_real(i) for i in der_ref]))-N.sort(der)
         nose.tools.assert_almost_equal(N.sum(diff), 0.)
 
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_get_directional_derivative_capability(self):
         """
         Test the method get_directional_derivative in FMUModelME2
@@ -1021,34 +849,36 @@ class Test_FMUModelME2:
         # Bouncing ball don't have the capability, check that this is handled
         nose.tools.assert_raises(FMUException, bounce.get_directional_derivative, [1], [1], [1])
         
+    @testattr(fmi = True)
+    def test_get_directional_derivative(self):
+        """
+        Test the method get_directional_derivative in FMUModelME2
+        """
         
-    @testattr(stddist_full = True)
-    def test_simulate_with_debug_option(self):
-        coupled = load_fmu(self.coupled_name)
+        # Setup
+        jacobian = load_fmu(self.jacobian_name)
+        jacobian.setup_experiment()
+        jacobian.initialize()
+        
+        jacobian.set('x1', 1.0)
+        jacobian.set('x2', 1.0)
+        
+        states_list = jacobian.get_states_list()
+        der_list    = jacobian.get_derivatives_list()
+        states_ref  = [s.value_reference for s in states_list.values()]
+        der_ref     = [s.value_reference for s in der_list.values()]
 
-        opts=coupled.simulate_options()
-        opts["logging"] = True
+        dir_der1 = jacobian.get_directional_derivative(states_ref, der_ref, [1, 0])
+        assert len(dir_der1) == 2
+        nose.tools.assert_almost_equal(dir_der1[0], 1.)
+        nose.tools.assert_almost_equal(dir_der1[1], 14.)
         
-        #Verify that a simulation is successful
-        res=coupled.simulate(options=opts)
+        dir_der2 = jacobian.get_directional_derivative(states_ref, der_ref, [0, 1])
+        assert len(dir_der2) == 2
+        nose.tools.assert_almost_equal(dir_der2[0], 16.)
+        nose.tools.assert_almost_equal(dir_der2[1], 4.)
         
-        from pyfmi.debug import CVodeDebugInformation
-        debug = CVodeDebugInformation(coupled.get_identifier()+"_debug.txt")
-        
-    @testattr(stddist_full = True)
-    def test_simulate_with_debug_option_no_state(self):
-        coupled = load_fmu(self.no_state_name)
-
-        opts=coupled.simulate_options()
-        opts["logging"] = True
-        
-        #Verify that a simulation is successful
-        res=coupled.simulate(options=opts)
-        
-        from pyfmi.debug import CVodeDebugInformation
-        debug = CVodeDebugInformation(coupled.get_identifier()+"_debug.txt")
-        
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_simulate_options(self):
         """
         Test the method simulate_options in FMUModelME2
@@ -1057,11 +887,11 @@ class Test_FMUModelME2:
 
         opts=coupled.simulate_options()
         assert opts['initialize']
-        assert opts['with_jacobian'] == "Default"
+        assert not opts['with_jacobian']
         assert opts['ncp'] == 0
 
         #Test the result file
-        res=coupled.simulate(options={"result_handling":"file"})
+        res=coupled.simulate()
         assert res.result_file == coupled.get_identifier()+'_result.txt'
         assert os.path.exists(res.result_file)
 
@@ -1084,7 +914,18 @@ class Test_FMUModelME2:
         res=coupled.simulate(options=opts)
         assert len(res['time']) > 250
     
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
+    def test_simulate_no_state(self):
+        
+        name = compile_fmu("Modelica.Blocks.Examples.IntegerNetwork1", version = 2.0, compiler_options={"generate_ode_jacobian":True, "eliminate_alias_constants":False})
+
+        model = load_fmu(name)
+
+        res = model.simulate(final_time=3)
+
+        assert res.final("integerStep.y") == 3.0
+    
+    @testattr(fmi = True)
     def test_simulate(self):
         """
         Test the method simulate in FMUModelME2
@@ -1164,7 +1005,7 @@ class Test_FMUModelME2:
         nose.tools.assert_almost_equal(abs(diff4), 0.0000, 2)
         """
         
-    @testattr(windows_full = True)
+    @testattr(windows = True)
     def test_simulate_extern(self):
         """
         Test the method simulate in FMUModelME2 on FMU SDK bouncing ball
@@ -1209,7 +1050,7 @@ class Test_Result_Writing:
         file_name = os.path.join(get_files_path(), 'Modelica', 'Friction.mo')
         cls.enum_name = compile_fmu("Friction2", file_name, target="me", version="2.0")
         
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_enumeration_file(self):
         
         model = load_fmu(self.enum_name)
@@ -1222,7 +1063,7 @@ class Test_Result_Writing:
         res = model.simulate(options=opts)
         res["mode"] #Check that the enumeration variable is in the dict, otherwise exception
         
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_enumeration_memory(self):
         
         model = load_fmu(self.enum_name)
@@ -1236,7 +1077,7 @@ class Test_Result_Writing:
         res = model.simulate(options=opts)
         res["mode"] #Check that the enumeration variable is in the dict, otherwise exception
         
-    @testattr(stddist_full = True)
+    @testattr(fmi = True)
     def test_enumeration_csv(self):
         
         model = load_fmu(self.enum_name)
@@ -1257,7 +1098,7 @@ class Test_load_fmu2:
     """
     This test the functionality of load_fmu method.
     """
-    @testattr(windows_full = True)
+    @testattr(windows = True)
     def test_raise_exception(self):
         """
         This method tests the error-handling of load_fmu
@@ -1271,7 +1112,7 @@ class Test_load_fmu2:
         nose.tools.assert_raises(FMUException, load_fmu, fmu=ME2, path=path_to_fmus_me2, kind='CS')           #loading ME2-model as a CS-model
         nose.tools.assert_raises(FMUException, load_fmu, fmu=CS2, path=path_to_fmus_cs2, kind='ME')           #loading CS2-model as ME-model
 
-    @testattr(windows_full = True)
+    @testattr(windows = True)
     def test_correct_loading(self):
         """
         This method tests the correct loading of FMUs

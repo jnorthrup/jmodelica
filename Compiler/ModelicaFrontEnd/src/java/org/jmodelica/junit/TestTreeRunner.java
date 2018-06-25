@@ -16,10 +16,8 @@
 package org.jmodelica.junit;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,22 +41,15 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
     private Description desc;
     private TestSpecification spec;
     private File testFile;
-    private Map<String,String> modelNames;
-    private static boolean outputFailing = !System.getProperty("output_failing", "").equals("");
-    private static String outputFailingFile = System.getProperty("output_failing", "");
-    private static boolean appendMode;
 
-    public TestTreeRunner(
-            TestSpecification spec, UniqueNameCreator nc, File testFile, String parentName, String packageName) 
-                    throws InitializationError {
-        this(spec, nc, null, parentName, packageName, testFile);
+    public TestTreeRunner(TestSpecification spec, File testFile, String parentName) throws InitializationError {
+        this(spec, null, parentName, testFile);
     }
 
-    public TestTreeRunner(
-            TestSpecification spec, UniqueNameCreator nc, TestTree tree, String parentName, String packageName, File testFile) 
-                    throws InitializationError {
+    public TestTreeRunner(TestSpecification spec, TestTree tree, String parentName, File testFile) throws InitializationError {
         super(spec.getClass());
         String name;
+        char sep;
         if (tree == null) {
             name = testFile.getName();
             tree = spec.createTestSuite(testFile).getTree();
@@ -66,22 +57,16 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
             name = tree.getName();
         }
         String fullName = String.format("%s.%s", parentName, name);
-        desc = Description.createSuiteDescription(nc.makeUnique(name));
+        desc = Description.createSuiteDescription(name);
         this.spec = spec;
         this.testFile = testFile;
         caseDesc = new HashMap<String,Description>();
         runners = new HashMap<String,TestTreeRunner>();
         children = new ArrayList<GenericTestTreeNode>();
-        modelNames = new HashMap<String,String>();
-        int i = 0;
         for (GenericTestTreeNode test : tree) {
-            i++;
             Description chDesc = null;
             GenericTestTreeNode subTest = null;
             String testName = test.getName();
-            if (testName == null) {
-                testName = String.format("[%d]", i);
-            }
             if (test instanceof TestTree) {
                 TestTree subTree = (TestTree) test;
                 if (subTree.numChildren() == 1) {
@@ -90,24 +75,16 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
                 if (subTest != null && !(subTest instanceof TestTree)) {
                     test = subTest;
                 } else {
-                    TestTreeRunner runner = new TestTreeRunner(spec, nc, subTree, fullName, packageName, testFile);
+                    TestTreeRunner runner = new TestTreeRunner(spec, subTree, fullName, testFile);
                     runners.put(subTree.getName(), runner);
                     chDesc = runner.getDescription();
                 }
             } 
             if (!(test instanceof TestTree)) {
-                String maybeSubTestName = test.getName();
                 // TODO: Upgrade JUnit version, then use createTestDescription(String, String) instead
-                String descStr = String.format("%s(%s)", nc.makeUnique(testName), packageName);
+                String descStr = String.format("%s(%s)", testName, fullName);
                 chDesc = Description.createSuiteDescription(descStr);
-                caseDesc.put(maybeSubTestName, chDesc);
-                if(outputFailing) {
-                    if(name.equals(testFile.getName())) { //Top-level test
-                        modelNames.put(maybeSubTestName, testName);
-                    } else {
-                        modelNames.put(maybeSubTestName, String.format("%s.%s", name, testName));
-                    }
-                }
+                caseDesc.put(test.getName(), chDesc);
             }
             desc.addChild(chDesc);
             children.add(test);
@@ -136,14 +113,6 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
                 ((GenericTestCase) test).testMe(spec.asserter());
             } catch (Throwable e) {
                 note.fireTestFailure(new Failure(d, e));
-                if(outputFailing) {
-                    try(PrintWriter pw = new PrintWriter(new FileOutputStream(new File(outputFailingFile), appendMode))) {
-                        pw.println(testFile.getAbsolutePath()+","+modelNames.get(test.getName()));
-                        appendMode = true;
-                    } catch (FileNotFoundException e1) {
-                        e1.printStackTrace();
-                    }
-                }
             }
             note.fireTestFinished(d);
         }

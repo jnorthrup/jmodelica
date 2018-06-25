@@ -32,6 +32,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.nio.charset.Charset;
 
 import org.jmodelica.util.logging.StreamingLogger;
@@ -89,11 +90,51 @@ aspect FlatNames {
         getFIdUse().hasFArraySubscripts();
     syn FArraySubscripts FIdUseExp.getFArraySubscripts() = 
         getFIdUse().getFArraySubscripts();
+    
+    syn FQName InstNode.getFQNamePrefix() = retrieveFQName();
+
+    syn lazy FQName InstNode.getFQName() = getFQNamePrefix();
+    eq InstClassDecl.getFQName()         = new FQNameEmpty();
+    eq InstComponentDecl.getFQName()     = appendMyName(retrieveFQName());
+    
+    syn FQName InstComponentDecl.appendMyName(FQName prefix) = 
+        (isAssignable() && isArrayDecl()) ? 
+                prefix.copyAndAppend(name(), size().flattenFArraySubscripts(prefix)) :
+                prefix.copyAndAppend(name());
+    eq InstArrayComponentDecl.appendMyName(FQName prefix)    = 
+        (getIndex() > 0) ? prefix.copyAndAddSubscript(new FIntegerSubscript(getIndex())) : prefix;
+    eq InstEnumLiteral.appendMyName(FQName prefix)           = prefix.copyAndAppend(name());
+    
+    inh lazy FQName InstNode.retrieveFQName();
+    inh FQName FExp.retrieveFQName();
+    eq InstComponentDecl.getChild().retrieveFQName()                             = getFQName();
+    eq InstComponentDecl.getInstModification().retrieveFQName()                  = retrieveFQName();
+    eq InstReplacingRecord.getOriginalInstComponent().retrieveFQName()           = retrieveFQName();
+    eq InstReplacingComposite.getOriginalInstComponent().retrieveFQName()        = retrieveFQName();
+    eq InstReplacingPrimitive.getOriginalInstComponent().retrieveFQName()        = retrieveFQName();
+    eq InstReplacingFullClassDecl.getOriginalInstClass().retrieveFQName()        = retrieveFQName();
+    eq InstReplacingShortClassDecl.getOriginalInstClass().retrieveFQName()       = retrieveFQName();
+    eq InstReplacingSimpleShortClassDecl.getOriginalInstClass().retrieveFQName() = retrieveFQName();
+    eq InstReplacingShortClassDecl.getChild().retrieveFQName()                   = 
+        (isFunction() || isRecord()) ? new FQNameEmpty() : retrieveFQName();
+    eq InstReplacingSimpleShortClassDecl.getChild().retrieveFQName()             = 
+        (isFunction() || isRecord()) ? new FQNameEmpty() : retrieveFQName();
+    eq InstClassDecl.getChild().retrieveFQName()                                 = new FQNameEmpty();
+    eq InstValueModification.getChild().retrieveFQName()                         = retrieveFQNameFromModification();
+    eq InstForIndex.getChild().retrieveFQName()                                  = new FQNameEmpty();
+    eq InstEnumClassDecl.getChild().retrieveFQName()                             = new FQNameString(qualifiedName());
+    eq InstRoot.getChild().retrieveFQName()                                      = new FQNameEmpty();
+    eq SourceRoot.getProgram().retrieveFQName()                                  = new FQNameEmpty();
+    eq FClass.getChild().retrieveFQName()                                        = null;
+    
+    inh FQName InstModification.retrieveFQNameFromModification();
+    eq InstClassDecl.getChild().retrieveFQNameFromModification()                 = retrieveFQName();
+    eq InstComponentDecl.getChild().retrieveFQNameFromModification()             = retrieveFQName();
+    eq InstRoot.getChild().retrieveFQNameFromModification()                      = new FQNameEmpty();
 
     /**
      * Get a string representation of a prefix of this name.
      * 
-     * @param start The first sub part to include
      * @param n     the number of parts to include. If <code>n <= 0</code>, then 
      *              all but the last <code>-n</code> parts are included.
      * @param op    if not <code>null</code>, generate a name with an operator applied (e.g. "der(a.b)")
@@ -101,7 +142,7 @@ aspect FlatNames {
      * @param index if greater or equal to two, then the index added as a second argument (eg "der(a.b,2)").
      *              This only works if op is not null. 
      */
-    private String FQNameFull.prefixName(int start, int n, String op, boolean eval, int index) {
+    private String FQNameFull.prefixName(int n, String op, boolean eval, int index) {
         int tot = getNumFQNamePart();
         if (n <= 0)
             n = tot + n;
@@ -110,7 +151,7 @@ aspect FlatNames {
             str.append(op);
             str.append("(");
         }
-        for (int i = start; i < n; i++) {
+        for (int i = 0; i < n; i++) {
             FQNamePart part = getFQNamePart(i);
             boolean last = i == n - 1;
             str.append(part.getName());
@@ -160,7 +201,7 @@ aspect FlatNames {
      * Gets the prefix name parts. Considers FQNameString as having one part for each '.'-separated substring.
      */
     syn String FQName.prefixActualPartName();
-    eq FQNameFull.prefixActualPartName()   = prefixName(0, -1, null, false, -1);
+    eq FQNameFull.prefixActualPartName()   = prefixName(-1, null, false, -1);
     eq FQNameString.prefixActualPartName() = getName().lastIndexOf('.') < 0 ? "" : getName().substring(0, getName().lastIndexOf('.'));
     eq FQNameEmpty.prefixActualPartName() {
         throw new UnsupportedOperationException();
@@ -206,7 +247,6 @@ aspect FlatNames {
         FArraySubscripts res = new FArraySubscripts(new List());
         for (FSubscript fs : getFSubscripts())
             res.addFSubscript(fs.createEvaluated());
-        res.setParent(getParent());
         return res;
     }
 
@@ -221,14 +261,12 @@ aspect FlatNames {
     public FSubscript FExpSubscript.createEvaluated() {
         try {
             CValue val = getFExp().ceval();
-            if (val.isArray()) {
+            if (val.isArray())
                 val = val.array().getCell(0);
-            }
-            if (!val.isUnknown()) {
-                return val.createFSubscript();
-            }
-        } catch (ConstantEvaluationException e) {}
-        return fullCopy();
+            return val.createFSubscript();
+        } catch (ConstantEvaluationException e) {
+            return fullCopy();
+        }
     }
     
     syn boolean FSubscript.isColon() = false;
@@ -245,19 +283,22 @@ aspect FlatNames {
     syn FQName FAbstractVariable.getFQName() = null;
 
     syn String FQName.name()                = "";
+    syn String FQName.resolvedName()        = "";
     syn String FQName.derName(int index)    = "";
     syn String FQName.dynDerName(int index) = "";
     syn String FQName.preName()             = "";
     
     eq FQNameString.name()                             = getName();
+    eq FQNameString.resolvedName()                     = getName();
     syn lazy String FQNameString.derName(int index)    = applyOpToName(getName(), DER, index);
     syn lazy String FQNameString.dynDerName(int index) = applyOpToName(getName(), DYN_DER, index);
     syn lazy String FQNameString.preName()             = applyOpToName(getName(), PRE, -1);
     
-    syn lazy String FQNameFull.name()                = prefixName(0, 0, null, false, -1);
-    syn lazy String FQNameFull.derName(int index)    = prefixName(0, 0, DER, false, index);
-    syn lazy String FQNameFull.dynDerName(int index) = prefixName(0, 0, DYN_DER, false, index);
-    syn lazy String FQNameFull.preName()             = prefixName(0, 0, PRE, false, -1);
+    syn lazy String FQNameFull.name()                = prefixName(0, null, false, -1);
+    syn lazy String FQNameFull.resolvedName()        = prefixName(0, null, true, -1);
+    syn lazy String FQNameFull.derName(int index)    = prefixName(0, DER, false, index);
+    syn lazy String FQNameFull.dynDerName(int index) = prefixName(0, DYN_DER, false, index);
+    syn lazy String FQNameFull.preName()             = prefixName(0, PRE, false, -1);
     
     protected static final String FQName.DER = "der";
     protected static final String FQName.PRE = "pre";
@@ -268,13 +309,11 @@ aspect FlatNames {
     }
 
     syn String FQName.scalarName() = scalarName(true);
-    syn String FQName.scalarName(boolean eval) = scalarName(eval, false);
-    syn String FQName.scalarName(boolean eval, boolean onlyLast) = name();
-    eq FQNameFull.scalarName(boolean eval, boolean onlyLast) {
+    syn String FQName.scalarName(boolean eval) = name();
+    eq FQNameFull.scalarName(boolean eval) {
         boolean scalar = scalarized;
         scalarized = true;
-        int start = onlyLast ? numParts() - 1 : 0;
-        String res = prefixName(start, 0, null, eval, -1);
+        String res = prefixName(0, null, eval, -1);
         scalarized = scalar;
         return res;
     }
@@ -308,21 +347,18 @@ aspect FlatNames {
     
     syn String FQNamePart.name() = getName();
 
-    syn String FIdUse.name()    = getFQName().name();
-    syn String FIdUseExp.name() = getFIdUse().name();
-    eq FAbstractDerExp.name()   = derName(order());
-    eq FPreExp.name()           = preName();
-    eq FIdUseInstAccess.name()  = getInstAccessNoTransform().name();
-
+    syn String FIdUse.name()           = getFQName().name();
+    syn String FIdUseExp.name()        = getFIdUse().name();
+    eq FAbstractDerExp.name()          = derName(order());
+    eq FPreExp.name()                  = preName();
+    syn String FIdUseInstAccess.name() = getInstAccessNoTransform().name();
+    
     syn String FIdDecl.name() = getFQNameNoTransform().name();
 
     syn String FClass.name()        = getFQNameNoTransform().name();
     syn String FFunctionDecl.name() = getFQNameNoTransform().name();
     syn String FRecordDecl.name()   = getFQNameNoTransform().name();
     syn String FAttribute.name()    = getName().name();
-    
-    syn String FFunctionDecl.qualifiedName()     = name();
-    syn String FFunctionVariable.qualifiedName() = name();
     
     syn String FAbstractFunctionCall.name();
     eq InstFunctionCall.name()      = getNameNoTransform().name();
@@ -337,8 +373,6 @@ aspect FlatNames {
     syn String FEnumDecl.name() = getName().name();
     
     syn String FEnumLiteral.name() = getName().name();
-
-    syn String FDerivedType.name() = getName();
     
     eq FAbstractDerivativeVariable.name() = getFQNameNoTransform().derName(order());
 
@@ -356,13 +390,9 @@ aspect FlatNames {
     
     syn String FIdUse.scalarName()    = getFQName().scalarName();
     syn String FIdUseExp.scalarName() = getFIdUse().scalarName();
-    
-    public static String ASTNode.underScore(String s) {
-        return s.replaceAll("[^0-9a-zA-Z_]", "_");
-    }
-    
+
     syn String FQName.nameUnderscore()            = "";
-    syn lazy String FQNameString.nameUnderscore() = ASTNode.underScore(getName().replaceAll("]", ""));
+    syn lazy String FQNameString.nameUnderscore() = getName().replaceAll("]", "").replaceAll("[^0-9a-zA-Z_]", "_");
     syn lazy String FQNameFull.nameUnderscore() {
         StringBuilder str = new StringBuilder();
         int i = 0;
@@ -381,9 +411,9 @@ aspect FlatNames {
         }
         return str.toString();
     }
-    
-    syn String FQNamePart.nameUnderscore() = ASTNode.underScore(getName().replaceAll("]", ""));
-    
+
+    syn String FQNamePart.nameUnderscore() = getName().replaceAll("[^0-9a-zA-Z_]", "_");
+
     syn String FIdUse.nameUnderscore() = getFQName().nameUnderscore();
     syn String FIdUseExp.nameUnderscore() = getFIdUse().nameUnderscore();
     eq FAbstractDerExp.nameUnderscore() {
@@ -423,11 +453,6 @@ aspect FlatNames {
     syn String FFunctionCall.funcNameUnderscore(String suffix)     = getName().funcNameUnderscore(suffix) + functionIndex();
     syn String FFunctionDecl.funcNameUnderscore(String suffix)     = getFQName().funcNameUnderscore(suffix) + functionIndex();
     syn String FFunctionVariable.funcNameUnderscore(String suffix) = myFCallable().funcNameUnderscore(suffix);
-
-    syn boolean FExp.isIdentifier(String name) = false;
-    eq FIdUseExp.isIdentifier(String name) = name.equals(name());
-    eq FDSRefExp.isIdentifier(String name) = getOrg().isIdentifier(name);
-
 
     public interface FCallable {
         public String funcNameUnderscore(String suffix);
@@ -531,23 +556,6 @@ aspect FlatNames {
     public FQNameFull FQNameFull.append(String name) {
         addFQNamePart(name);
         return this;
-    }
-    
-    public FQName FQName.append(String name, FArraySubscripts fas) {
-        return asFQNameFull().append(name, fas);
-    }
-    
-    public FQName FQNameFull.append(String name, FArraySubscripts fas) {
-        if (use(fas)) {
-            addFQNamePart(new FQNamePartArray(name, fas));
-        } else {
-            addFQNamePart(new FQNamePart(name));
-        }
-        return this;
-    }
-    
-    public boolean FQName.use(FArraySubscripts fas) {
-        return fas != null && fas.ndims() > 0;
     }
 
     /**
@@ -673,6 +681,10 @@ aspect FlatNames {
             res.setFQNamePart(getFQNamePart(i).fullCopy(), i + n);
         return res;
     }
+    
+    public FQNameFullScalarize FQNameFullScalarize.copyAndPrepend(String name) {
+        return new FQNameFullScalarize(super.copyAndPrepend(name).getFQNamePartList());
+     }
    
     /**
      * Create a copy of the name, with a prefix added to the first name part.
@@ -762,7 +774,7 @@ aspect FlatNames {
         getFArraySubscripts().addFSubscript(s);
         return this;
     }
-
+    
     /**
      * Create a copy of the name, with an FArraySubscripts added to the last part.
      * 
@@ -770,45 +782,23 @@ aspect FlatNames {
      * to calling {@link #removeFArraySubscripts()}.
      */
     public abstract FQName FQName.copyAndAddFas(FArraySubscripts fas);
-
-    public FQNameEmpty FQNameEmpty.copyAndAddFas(FArraySubscripts fas) {
-        throw new InternalCompilerError("Cannot add FArraySubscripts to FQNameEmpty");
+    
+    public FQName FQNameEmpty.copyAndAddFas(FArraySubscripts fas) {
+        if (fas == null)
+            return fullCopy();
+        throw new UnsupportedOperationException();
     }
-
+    
     public FQName FQNameString.copyAndAddFas(FArraySubscripts fas) {
-        if (fas == null) {
-            return treeCopy();
-        }
+        if (fas == null)
+            return fullCopy();
         return new FQNameFull(getName()).addFArraySubscripts(fas);
     }
-
-    public FQNameFull FQNameFull.copyAndAddFas(FArraySubscripts fas) {
-        return treeCopy().addFArraySubscripts(fas);
+    
+    public FQName FQNameFull.copyAndAddFas(FArraySubscripts fas) {
+        return fullCopy().addFArraySubscripts(fas);
     }
-
-
-    public FQName FQName.copyAndRemoveFas() {
-        return copyAndAddFas((FArraySubscripts) null);
-    }
-
-
-    /**
-     * Create a copy of the name with <code>i</code> added as subscripts.
-     */
-    public abstract FQName FQName.copyAndAddFas(Index i);
-
-    public FQNameEmpty FQNameEmpty.copyAndAddFas(Index i) {
-        throw new InternalCompilerError("Cannot add FArraySubscripts to FQNameEmpty");
-    }
-
-    public FQNameString FQNameString.copyAndAddFas(Index i) {
-        return new FQNameString(getName() + i);
-    }
-
-    public FQNameFull FQNameFull.copyAndAddFas(Index i) {
-        return copyAndAddFas(i.createFArraySubscripts());
-    }
-
+    
     /**
      * Copies this and add <code>i</code> as subscripts if <code>i</code>
      * has dimensions. Otherwise returns this.
@@ -955,6 +945,14 @@ aspect FlatNames {
         return res;
     }
 
+    public FQName FQNameFullScalarize.copyPart(int first, int last) {
+        FQName res = super.copyPart(first, last);
+        if (res instanceof FQNameFull)
+            return new FQNameFullScalarize(((FQNameFull) res).getFQNamePartList());
+        else 
+            return res;
+    }
+
     /**
      * Create an FQName containing only a copy of this part.
      */
@@ -965,46 +963,133 @@ aspect FlatNames {
     public FQName FQNamePartArray.createFQName() {
         return new FQNameFull(new List(fullCopy()));
     }
-
+    
+    /**
+     * Create a copy of this name without array subscripts.
+     */
+    public FQName FQName.copyWithoutSubscripts() {
+        return fullCopy();
+    }
+    
+    public FQName FQNameFull.copyWithoutSubscripts() {
+        FQNameFull res = new FQNameFull();
+        for (FQNamePart part : getFQNameParts())
+            res.addFQNamePart(part.getName());
+        return res;
+    }
+    
+    /**
+     * Create a copy of this name with all array subscripts replaced with indices 
+     * from <code>i</code>.
+     * 
+     * The number of dimensions of <code>i</code> must be the same as the number 
+     * of non-literal subscripts. The subscripts to be replaced can be spread out 
+     * over several name parts.
+     */
+    public FQName FQName.copyReplacingSubscripts(Index i) {
+        return fullCopy();
+    }
+    
+    public FQName FQNameFull.copyReplacingSubscripts(Index i) {
+        FQNameFull res = new FQNameFull();
+        int j = 0;
+        for (FQNamePart part : getFQNameParts()) 
+            j = part.appendWithReplacedSubscripts(res, i, j);
+        return res;
+    }
+    
+    /**
+     * Append this name part to <code>name</code>, but with 
+     * all array subscripts replaced with indices from <code>i</code>.
+     * 
+     * The first index in <code>i</code> to use should be given in <code>j</code>, and 
+     * the new value for <code>j</code> is returned.
+     */
+    public int FQNamePart.appendWithReplacedSubscripts(FQNameFull name, Index i, int j) {
+        name.append(getName());
+        return j;
+    }
+    
+    public int FQNamePartArray.appendWithReplacedSubscripts(FQNameFull name, Index i, int j) {
+        int k = j + getFArraySubscripts().getNumFSubscript();
+        name.append(getName());
+        name.addFArraySubscripts(i.partIndex(j, k).createFArraySubscripts());
+        return k;
+    }
+    
     /**
      * Interface for variable declarations in flat and instance trees.
      */
     public interface CommonVariableDecl {
         public FExp createUseExp();
     }
-
-    /**
-     * Create an access expression to this variable.
-     */
-    syn FIdUseExp FVariable.createUseExp() = 
-            isPreVariable() ? new FPreExp(createFIdUse()) : new FIdUseExp(createFIdUse());
-    eq FDerivativeVariable.createUseExp()          = new FDerExp(createFIdUse(), order());
-    eq FDummyDerivativeVariable.createUseExp()     = new FDummyDerExp(createFIdUse(), (String)null, order());
-    eq FDynamicDerivativeVariable.createUseExp()   = new FDynamicDerExp(createFIdUse(), (String)null, order());
-
-    syn FIdUseExp FFunctionVariable.createUseExp() = new FIdUseExp(new FIdUse(getFQName().treeCopy()));
-    syn FExp FEnumLiteral.createUseExp()           = new FEnumLitExp(myFEnumDecl().name(), name(), null);
-    syn FExp UnknownFVariable.createUseExp()       = null;
-
+    
     /**
      * Create an access to this variable.
      */
-    syn FIdUse FVariable.createFIdUse() {
-        if (isArray()) {
-            return new FIdUse(getFQName().copyAndAddFas(size().createExpandedFArraySubscripts()));
-        } else {
-            return new FIdUse(getFQName().treeCopy());
-        }
+    public FIdUse FAbstractVariable.createFIdUse() {
+         return null;
+    }
+    // TODO: Add implementation for enum
+   
+    public FIdUse FVariable.createFIdUse() {
+         return getFQName().createUseFQName().createFIdUse();
+    }  
+   
+    public FIdUse FFunctionVariable.createFIdUse() {
+         return getFQName().createUseFQName().createFIdUse();
+    }  
+   
+    /**
+     * Create an access expression to this variable.
+     */
+    public FIdUseExp FVariable.createUseExp() {
+         return getFQName().createUseFQName().createFIdUseExp();
+    }
+
+    public FIdUseExp FDerivativeVariable.createUseExp() {
+         return getFQName().createUseFQName().createFDerExp(order());
+    }
+
+    public FIdUseExp FDummyDerivativeVariable.createUseExp() {
+         return getFQName().createUseFQName().createFDummyDerExp(order());
+    }
+
+    public FIdUseExp FDynamicDerivativeVariable.createUseExp() {
+        return getFQName().createUseFQName().createFDynamicDerExp(order());
+    }
+    
+    public FIdUseExp FFunctionVariable.createUseExp() {
+         return getFQName().createUseFQName().createFIdUseExp();
+    }
+    
+    public FExp FEnumLiteral.createUseExp() {
+         return new FEnumLitExp(myFEnumDecl().name(), name(), null);
+    }
+    
+    public FExp UnknownFVariable.createUseExp() {
+         return null;
     }
 
     /**
      * Create an access to this variable, from a scope where it can be accessed unqualified.
      */
     public FIdUseExp InstComponentDecl.createUseExp() {
-        return new FIdUseExp(new FIdUseInstAccess(createInstAccess()));
+        return new FIdUseExp(new FIdUseInstAccess(new InstComponentAccess(name())));
     }
-    
-    syn InstAccess InstComponentDecl.createInstAccess() = new InstComponentAccess(name());
+
+    /**
+     * Create an access expression with this access.
+     */
+    abstract public FExp CommonAccess.createFExp();
+
+    public FIdUseExp InstAccess.createFExp() {
+        return new FIdUseExp(new FIdUseInstAccess(this));
+    }
+
+    public FIdUseExp FIdUse.createFExp() {
+        return new FIdUseExp(this);
+    }
 
     /**
      * Create a pre() expression for this variable.
@@ -1014,12 +1099,45 @@ aspect FlatNames {
     }
 
     /**
+     * Create an FDerExp for this name with order order, using a copy if needed.
+     */
+    public FDerExp FQName.createFDerExp(int order) {
+        return new FDerExp(createFIdUse(), order); 
+    }
+
+    /**
+     * Create an FHDummyDerExp for this name with order order, using a copy if needed.
+     */
+    public FDummyDerExp FQName.createFDummyDerExp(int order) {
+        return new FDummyDerExp(createFIdUse(), (String)null, order); 
+    }
+
+    /**
+     * Create an FHDummyDerExp for this name with order order, using a copy if needed.
+     */
+    public FDynamicDerExp FQName.createFDynamicDerExp(int order) {
+        return new FDynamicDerExp(createFIdUse(), (String)null, order); 
+    }
+
+    /**
      * Create an FIdUseExp for this name, using a copy if needed.
      */
     public FIdUseExp FQName.createFIdUseExp() {
         return new FIdUseExp(createFIdUse()); 
     }
-
+    
+    /**
+     * Create a copy of this name that is suitable for an FIdUse.
+     * 
+     * It is assumed that this name is from a variable declaration.
+     */
+    public FQName FQName.createUseFQName() {
+        if (!isScalarized() && ndims() > 0)
+            return copyAndAddFas(size().createExpandedFArraySubscripts());
+        else
+            return fullCopy();
+    }
+    
     /**
      * Create an FIdUse for this name, using a copy if needed.
      */
@@ -1027,9 +1145,25 @@ aspect FlatNames {
         return new FIdUse((FQName) unboundCopy()); 
     }
     
-
+    /**
+     * Create an FIdUseExp using a copy of this name.
+     * 
+     * @param fas  array subscripts to use for the last name part.
+     */
+    public FIdUseExp FQName.createFIdUseExp(FArraySubscripts fas) {
+        return new FIdUseExp(createFIdUse(fas)); 
+    }
+    
+    /**
+     * Create an FIdUse using a copy of this name.
+     * 
+     * @param fas  array subscripts to use for the last name part.
+     */
+    public FIdUse FQName.createFIdUse(FArraySubscripts fas) {
+        return new FIdUse(copyAndAddFas(fas)); 
+    }
+    
     syn String FType.name();
-    eq FArrayType.name()            = getFPrimitiveType().name();
     eq FRealType.name()             = "Real";
     eq FIntegerType.name()          = "Integer";
     eq FBooleanType.name()          = "Boolean";
@@ -1055,26 +1189,14 @@ aspect FlatNames {
     
     syn boolean FAbstractEquation.isIgnored() = false;
     eq FFunctionCallEquation.isIgnored()      = getCall().isIgnored();
-
+    
     /**
      * Add an equation to the first equation block.
      */
     public void FClass.addFEquation(FAbstractEquation feq) {
         addFAbstractEquationNoTransform(feq);
     }
-
-    public void FClass.addFInitialEquations(Collection<? extends FAbstractEquation> eqns) {
-        for (FAbstractEquation feq : eqns) {
-            addFInitialEquation(feq);
-        }
-    }
-
-    public void FClass.addFEquations(Collection<? extends FAbstractEquation> eqns) {
-        for (FAbstractEquation feq : eqns) {
-            addFEquation(feq);
-        }
-    }
-
+    
 }
 
 
@@ -1086,19 +1208,16 @@ aspect FlatFunctionUtils {
      */
     public interface CommonCallable {
         public String name();
-        public String qualifiedName();
         public ArrayList<? extends CommonVariableDecl> myInputs();
         public ArrayList<? extends CommonVariableDecl> myOutputs();
-        public ArrayList<? extends CommonVariableDecl> myNonInputs();
     }
     
     public interface FCallable        extends CommonCallable {}
-    public interface InstCallable     extends CommonCallable {}
+    public interface InstCallable extends CommonCallable {}
     
     syn CommonCallable FAbstractFunctionCall.myCommonCallable() = null;
-    eq FFunctionCall.myCommonCallable()         = myFCallable();
-    eq InstFunctionCall.myCommonCallable()      = myInstCallable();
-    eq InstRecordConstructor.myCommonCallable() = myInstClassDecl();
+    eq FFunctionCall.myCommonCallable()    = myFCallable();
+    eq InstFunctionCall.myCommonCallable() = myInstCallable();
     
     /**
      * Interface for a flat callable (function declaration or partial 
@@ -1107,7 +1226,6 @@ aspect FlatFunctionUtils {
     public interface FCallable {
         public ArrayList<FFunctionVariable> myInputs();
         public ArrayList<FFunctionVariable> myOutputs();
-        public ArrayList<FFunctionVariable> myNonInputs();
         public FFunctionVariable myInput(int i);
         public boolean hasOutputs();
         public FFunctionVariable expOutput();
@@ -1140,23 +1258,13 @@ aspect FlatFunctionUtils {
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myInputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
-         Map<String,Integer> names = new HashMap<String,Integer>();
-         for (InstComponentDecl icd : allInstComponentDecls()) {
-             if (icd.isInput()) {
-                 // Make sure inherited ones are added first, 
-                 // but that any that are also present locally replace them.
-                 if (names.containsKey(icd.name())) {
-                     l.set(names.get(icd.name()), icd);
-                 } else {
-                     names.put(icd.name(), l.size());
-                     l.add(icd);
-                 }
-             }
-         }
+         Set<String> names = new HashSet<String>();
+         for (InstComponentDecl icd : allInstComponentDecls())
+             if (icd.isInput() && names.add(icd.name()))
+                 l.add(icd);
          return l;
      }
      eq InstSimpleShortClassDecl.myInputs() = actualInstClass().myInputs();
-     eq InstLibNode.myInputs()              = actualInstClass().myInputs();
      eq InstPartialFunction.myInputs()      = myInstClass().myInputs();
      
      /**
@@ -1164,46 +1272,26 @@ aspect FlatFunctionUtils {
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myNonInputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
-         Map<String,Integer> names = new HashMap<String,Integer>();
-         for (InstComponentDecl icd : allInstComponentDecls()) {
-             if (!icd.isInput()) {
-                 // Make sure inherited ones are added first, 
-                 // but that any that are also present locally replace them.
-                 if (names.containsKey(icd.name())) {
-                     l.set(names.get(icd.name()), icd);
-                 } else {
-                     names.put(icd.name(), l.size());
-                     l.add(icd);
-                 }
-             }
-         }
+         Set<String> names = new HashSet<String>();
+         for (InstComponentDecl icd : allInstComponentDecls())
+             if (!icd.isInput() && names.add(icd.name()))
+                 l.add(icd);
          return l;
      }
      eq InstSimpleShortClassDecl.myNonInputs() = actualInstClass().myNonInputs();
-     eq InstLibNode.myNonInputs()              = actualInstClass().myNonInputs();
      
      /**
       * Returns a list of all InstComponentDecls declared as "output".
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myOutputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
-         Map<String,Integer> names = new HashMap<String,Integer>();
-         for (InstComponentDecl icd : allInstComponentDecls()) {
-             if (icd.isOutput()) {
-                 // Make sure inherited ones are added first, 
-                 // but that any that are also present locally replace them.
-                 if (names.containsKey(icd.name())) {
-                     l.set(names.get(icd.name()), icd);
-                 } else {
-                     names.put(icd.name(), l.size());
-                     l.add(icd);
-                 }
-             }
-         }
+         Set<String> names = new HashSet<String>();
+         for (InstComponentDecl icd : allInstComponentDecls())
+             if (icd.isOutput() && names.add(icd.name()))
+                 l.add(icd);
          return l;
      }
      eq InstSimpleShortClassDecl.myOutputs() = actualInstClass().myOutputs();
-     eq InstLibNode.myOutputs()              = actualInstClass().myOutputs();
      eq InstPartialFunction.myOutputs()      = myInstClass().myOutputs();
      
      /**
@@ -1217,14 +1305,11 @@ aspect FlatFunctionUtils {
          return l;
      }
      eq InstSimpleShortClassDecl.myModifiableComponents() = actualInstClass().myModifiableComponents();
-     eq InstLibNode.myModifiableComponents()              = actualInstClass().myModifiableComponents();
      
      /**
       * May this component be altered by a modification?
       */
-     syn boolean InstComponentDecl.isModifiable() = 
-             !(definedVariability().constantVariability() && hasBindingExp()) &&
-             !(definedVariability().parameterVariability() && getSrcComponentDecl().hasFinal());
+     syn boolean InstComponentDecl.isModifiable() = !(isConstant()&& hasBindingExp()) && !(isParameter() && getComponentDecl().hasFinal());
      
      /**
       * Returns a list of all FFunctionVariables declared as "input".
@@ -1237,9 +1322,7 @@ aspect FlatFunctionUtils {
          return l;
      }
      
-     syn ArrayList<FFunctionVariable> FFunctionVariable.myInputs()    = myFCallable().myInputs();
-     syn ArrayList<FFunctionVariable> FFunctionVariable.myOutputs()   = myFCallable().myOutputs();
-     syn ArrayList<FFunctionVariable> FFunctionVariable.myNonInputs() = myFCallable().myNonInputs();
+     syn ArrayList<FFunctionVariable> FFunctionVariable.myInputs() = myFCallable().myInputs();
      
     /**
      * Returns the i:th FFunctionVariable that is  declared as "input".
@@ -1279,6 +1362,8 @@ aspect FlatFunctionUtils {
                  l.add(var);
          return l;
      }
+     
+     syn ArrayList<FFunctionVariable> FFunctionVariable.myOutputs() = myFCallable().myOutputs();
      
     /**
      * \brief List of CommonVariableDecl used as inputs in this function call
@@ -1345,6 +1430,12 @@ aspect FlatFunctionUtils {
      syn FFunctionVariable FFunctionVariable.expOutput() = myOutputs().get(0);
      syn FFunctionVariable FFunctionCall.expOutput()     = myCallOutputs().get(0);
      syn InstComponentDecl InstFunctionCall.expOutput()  = myCallOutputs().get(0);
+    
+     syn lazy FunctionReturnDefinition FFunctionDecl.returnDefinition() = new FunctionReturnDefinition(this);
+     inh FunctionReturnDefinition FReturnStmt.returnDefinition();
+     eq FFunctionDecl.getFAlgorithm().returnDefinition() = returnDefinition();
+     eq InstProgramRoot.getChild().returnDefinition()         = null;
+     eq FClass.getChild().returnDefinition()                  = null;
      
      inh String InstFunctionArgument.funcName();
      inh String FFunctionCallLeft.funcName();
@@ -1384,8 +1475,26 @@ aspect FlatFunctionUtils {
     eq FConstructorDecl.requiresDerivative()       = false;
     eq FDestructorDecl.requiresDerivative()        = false;
     
-    syn boolean FFunctionDecl.derivativeEqualsZero() = !containsRealInputs() || !containsRealOutputs();
+    syn boolean FFunctionDecl.derivativEqualsZero() = !containsRealInputs() || !containsRealOutputs();
     
+    /**
+     * Determines if the compiler is able to differentiate this function declaration
+     */
+    syn boolean FFunctionDecl.canDifferentiate() {
+        if (derivativeFunction() != null)
+            return true;
+        if (derivativEqualsZero())
+            return true;
+        for (FStatement statement : getFAlgorithm().getFStatements())
+            if (!statement.canDifferentiate())
+                return false;
+        return true;
+    }
+    
+    syn boolean FStatement.canDifferentiate() = true;
+    eq FExternalStmt.canDifferentiate()       = false;
+    
+     
      /**
       * Returns a string (tersely) describing the signature of the function.
       * 
@@ -1431,11 +1540,24 @@ aspect FlatFunctionUtils {
      /**
       * Check is this node is in a function.
       */
-     inh boolean ASTNode.inFunction();
-     eq Root.getChild().inFunction()              = false;
-     eq FFunctionDecl.getChild().inFunction()     = true;
+     inh boolean FQName.inFunction();
+     inh boolean InstFunctionArgument.inFunction();
+     inh boolean InstComponentDecl.inFunction();
+     inh boolean InstExternal.inFunction();
+     inh boolean InstAccess.inFunction();
+     inh boolean InstForIndex.inFunction();
+     inh boolean FExp.inFunction();
+     inh boolean FIdUse.inFunction();
+     inh boolean FStatement.inFunction();
+     inh boolean FAbstractEquation.inFunction();
+     inh boolean FSubscript.inFunction();
+     inh boolean FFunctionCallLeft.inFunction();
+     inh boolean FAttribute.inFunction();
+     inh boolean InstExtends.inFunction();
      eq InstBaseClassDecl.getChild().inFunction() = isFunction();
+     eq FFunctionDecl.getChild().inFunction()     = true;
      eq InstAssignable.getChild().inFunction()    = (temporarilyInFunction != null) || inFunction();
+     eq Root.getChild().inFunction()              = false;
      eq InstNormalExtends.getInstClassModification().inFunction() = extendsInFunction();
      
      inh boolean InstExtends.extendsInFunction();
@@ -1449,8 +1571,8 @@ aspect FlatFunctionUtils {
       * Only valid in flat tree.
       */
      inh FFunctionDecl FExp.containingFFunctionDecl();
-     inh FFunctionDecl FFunctionVariable.containingFFunctionDecl();
-     inh FFunctionDecl FStatement.containingFFunctionDecl();
+     inh FFunctionDecl FVariable.containingFFunctionDecl();
+     inh FFunctionDecl FExternalStmt.containingFFunctionDecl();
      eq FFunctionDecl.getChild().containingFFunctionDecl()  = this;
      eq InstNode.getChild().containingFFunctionDecl()       = null;
      eq Root.getChild().containingFFunctionDecl()           = null;
@@ -1538,22 +1660,20 @@ aspect FlatFunctionUtils {
          return n;
      }
      
-     inh lazy CommonVariableDecl FFunctionCallLeft.myOutput();
+     inh lazy InstComponentDecl FFunctionCallLeft.myOutput();
      eq FFunctionCallEquation.getLeft(int i).myOutput() = getCall().findOutput(i);
      eq FFunctionCallStmt.getLeft(int i).myOutput()     = getCall().findOutput(i);
-     syn CommonVariableDecl FAbstractFunctionCall.findOutput(int i) = unknownInstComponentDecl();
-     eq CommonFunctionCall.findOutput(int i)                         = 
+     syn InstComponentDecl FAbstractFunctionCall.findOutput(int i) = unknownInstComponentDecl();
+     eq InstFunctionCall.findOutput(int i)                         = 
          (i >= myCallOutputs().size()) ? unknownInstComponentDecl() : myCallOutputs().get(i);
      
-     inh boolean FExp.functionCallIsExp();
+     inh boolean FAbstractFunctionCall.functionCallIsExp();
      eq FExp.getChild().functionCallIsExp()                 = true;
      eq FClass.getChild().functionCallIsExp()               = true;
      eq InstNode.getChild().functionCallIsExp()             = true;
      eq FFunctionCallEquation.getCall().functionCallIsExp() = false;
      eq FFunctionCallStmt.getCall().functionCallIsExp()     = false;
      eq FFunctionCall.getArg(int i).functionCallIsExp()     = !getArg(i).isComposite();
-     eq FIfExp.getThenExp().functionCallIsExp()             = functionCallIsExp();
-     eq FIfExp.getElseExp().functionCallIsExp()             = functionCallIsExp();
      
      inh lazy ArrayList<FFunctionCallLeft> FAbstractFunctionCall.myLefts();
      eq FExp.getChild().myLefts()                 = new ArrayList<FFunctionCallLeft>();
@@ -1587,12 +1707,10 @@ aspect FlatFunctionUtils {
      }
      private String FAssignStmt.myTempVarName;
      
-     syn String FExp.calcTempVarName()          = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.TEMP);
-     syn String FAssignStmt.calcTempVarName()   = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.TEMP);
+     syn String FExp.calcTempVarName() = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.TEMP);
+     syn String FAssignStmt.calcTempVarName() = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.TEMP);
      
-     syn String FRelExp.calcIndicatorVarName()  = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.INDICATOR);
-     
-     syn String FSampleExp.calcIndexVarName()   = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.SAMPLE);
+     syn String FRelExp.calcIndicatorVarName() = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.INDICATOR);
      
      inh String FExp.calcGeneratedVarName(FlatVariableMap.GeneratedVarType gvt);
      inh String FAssignStmt.calcGeneratedVarName(FlatVariableMap.GeneratedVarType gvt);
@@ -1610,8 +1728,19 @@ aspect FlatFunctionUtils {
      syn FVariable FExp.tempVar() = tempVar(variability(), type());
      syn FVariable FExp.tempVar(FTypePrefixVariability variability, FType type)
          = type.createTempFVariable(new FQNameFull(tempVarName()), variability);
-
-
+     
+     /**
+      * Throw away calculated temp names.
+      */
+     public void ASTNode.flushTempVarNames() {
+         for (ASTNode n : this)
+             n.flushTempVarNames();
+     }
+     public void FExp.flushTempVarNames() {
+         myTempVarName = null;
+         super.flushTempVarNames();
+     }
+     
      private FlatVariableMap.NameIndexCache FClass.nameIndexCache = new FlatVariableMap.NameIndexCache();
      private FlatVariableMap.NameIndexCache FFunctionDecl.nameIndexCache = new FlatVariableMap.NameIndexCache();
      
@@ -1653,11 +1782,7 @@ aspect FlatFunctionUtils {
          
          public enum GeneratedVarType {
              TEMP("temp_"),
-             INDICATOR("_eventIndicator_"),
-             SAMPLE("_sampleItr_"),
-             STREAM_S("_stream_s_"),
-             STREAM_ALPHA("_stream_alpha_"),
-             STREAM_POSMAX("_stream_positiveMax_");
+             INDICATOR("_eventIndicator_");
              
              private String prefix;
              
@@ -1665,8 +1790,8 @@ aspect FlatFunctionUtils {
                  this.prefix = prefix;
              }
              
-             public String name(NameIndexCache nic) {
-                 return prefix + nic.nextIndex(this);
+             public String name(NameIndexCache nic, GeneratedVarType gvt) {
+                 return prefix + nic.nextIndex(gvt);
              }
          }
      }
@@ -1674,7 +1799,7 @@ aspect FlatFunctionUtils {
      public String FlatVariableMap.nextGeneratedVarName(NameIndexCache nic, GeneratedVarType gvt) {
          String name;
          do {
-             name = gvt.name(nic);
+             name = gvt.name(nic, gvt);
          } while (lookup(name) != null);
          return name;
      }
@@ -1682,7 +1807,7 @@ aspect FlatFunctionUtils {
      public String FlatVariableMap.nextGeneratedVarName(NameIndexCache nic, GeneratedVarType gvt, FlatVariableMap other) {
          String name;
          do {
-             name = gvt.name(nic);
+             name = gvt.name(nic, gvt);
          } while (lookup(name) != null || other.lookup(name) != null);
          return name;
      }
@@ -1696,98 +1821,6 @@ aspect FlatFunctionUtils {
         return name;
     }
     private int FClass.nextTempFuncIndex = 1;
-
-
-    /**
-     * Creates new temporary variables with the given name.
-     * 
-     * @param vars         list of variable to add the new variable to
-     * @param name         the name of the new variable
-     * @param variability  the variability of the new variable
-     */
-    public void FType.createTempFVariables(List vars, FQNameString name, FTypePrefixVariability variability) {
-        if (isArray()) {
-            for (Index i : indices()) {
-                createTempCellFVariables(vars, name.copyAndAddFas(i), variability);
-            }
-        } else {
-            createTempCellFVariables(vars, name, variability);
-        }
-    }
-
-    public void FType.createTempCellFVariables(List vars, FQNameString name, FTypePrefixVariability variability) {
-        vars.add(createTempFVariable(name, variability));
-    }
-
-    public void FRecordType.createTempCellFVariables(List vars, FQNameString name, FTypePrefixVariability variability) {
-        for (FRecordComponentType comp : getComponents()) {
-            comp.getFType().createTempFVariables(vars, name.copyAndAppend(comp.getName()), variability);
-        }
-    }
-
-    /**
-     * Creates a new temporary variable with the given name and variability.
-     * 
-     * All optional children in the new variable are empty.
-     * 
-     * Default implementation returns <code>null</code>.
-     */
-    public FVariable FType.createTempFVariable(FQName name, FTypePrefixVariability variability) {
-        return createFVariable(new FTemporaryVisibilityType(), name, variability);
-    }
-    
-    /**
-     * Creates a new variable with the given visibility, name and visibility.
-     * 
-     * All optional children in the new variable are empty.
-     * 
-     * Default implementation returns <code>null</code>.
-     */
-    public FVariable FType.createFVariable(FVisibilityType fvt, FQName name, 
-            FTypePrefixVariability variability) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public FVariable FArrayType.createFVariable(FVisibilityType fvt, FQName name, 
-            FTypePrefixVariability variability) {
-        return getFPrimitiveType().createFVariable(fvt, name, variability);
-    }
-        
-    public FVariable FRealType.createFVariable(FVisibilityType fvt, FQName name, 
-            FTypePrefixVariability variability) {
-        return new FRealVariable(fvt, variability, name);
-    }   
-    
-    public FVariable FIntegerType.createFVariable(FVisibilityType fvt, FQName name, 
-            FTypePrefixVariability variability) {
-        return new FIntegerVariable(fvt, variability.combineDown(fDiscrete()), name);
-    }   
-    
-    public FVariable FBooleanType.createFVariable(FVisibilityType fvt, FQName name, 
-            FTypePrefixVariability variability) {
-        return new FBooleanVariable(fvt, variability.combineDown(fDiscrete()), name);
-    }   
-    
-    public FVariable FStringType.createFVariable(FVisibilityType fvt, FQName name, 
-            FTypePrefixVariability variability) {
-        return new FStringVariable(fvt, variability.combineDown(fDiscrete()), name);
-    }   
-    
-    public FVariable FRecordType.createFVariable(FVisibilityType fvt, FQName name, 
-            FTypePrefixVariability variability) {
-        return new FRecordVariable(fvt, variability, name, new FQNameString(getName()));
-    }   
-    
-    public FVariable FEnumType.createFVariable(FVisibilityType fvt, FQName name, 
-            FTypePrefixVariability variability) {
-        return new FEnumVariable(fvt, variability.combineDown(fDiscrete()), name, new FQNameString(getName()));
-    }   
-    
-    public FVariable FExternalObjectType.createFVariable(FVisibilityType fvt, FQName name, 
-            FTypePrefixVariability variability) {
-        return new FExternalObjectVariable(fvt, variability.combineDown(fParameter()), name, getConstructor().fullCopy());
-    }
 }
 
 
@@ -1871,7 +1904,7 @@ aspect FlatExpressions {
     eq FNoExp.isValidExp(boolean allowUnknownSize)              = false;
     eq FUnsupportedExp.isValidExp(boolean allowUnknownSize)     = false;
     eq FUnsupportedBuiltIn.isValidExp(boolean allowUnknownSize) = false;
-    eq FColonSizeExp.isValidExp(boolean allowUnknownSize)     = allowUnknownSize;
+    eq FUnknownSizeExp.isValidExp(boolean allowUnknownSize)     = allowUnknownSize;
     
     /**
      * Counts the total number of FExp nodes in this ASTNode.
@@ -1886,18 +1919,7 @@ aspect FlatExpressions {
     eq FExp.numFExp() {
         return super.numFExp() + 1;
     }
-
-    public abstract FExp CommonForIndex.getFExp();
-
-    /**
-     * Check if this expression is in an FArray expression. Either directly or
-     * a thorugh a sequence of other expressions.
-     */
-    inh boolean FExp.inFArray();
-    eq FExp.getChild().inFArray()    = inFArray();
-    eq FArray.getChild().inFArray()   = true;
-    eq BaseNode.getChild().inFArray() = false;
-
+    
 }
 
 
@@ -1906,7 +1928,7 @@ aspect DefaultExperiment {
     /**
      * Check if a class has an "experiment" annotation.
      */
-    syn boolean SrcClassDecl.isExperiment() = annotation("experiment").exists();
+    syn boolean ClassDecl.isExperiment() = annotation("experiment").exists();
     
     /**
      * Check if a class has an "experiment" annotation.
@@ -2037,19 +2059,6 @@ aspect AttributeUtil {
 
 }
 
-
-aspect JastAddUtils {
-
-    public boolean Opt.hasChild() {
-        return getNumChild() > 0;
-    }
-
-    public T Opt.getChild() {
-        return getChild(0);
-    }
-
-}
-
 /**
 * This aspect contains JastAdd hacks, and should be avoided, however this is
 * necessary evil in order to reduce memory consumption. If used correctly, it
@@ -2067,24 +2076,24 @@ aspect JastAddHacks{
             return var;
         }
     }
-
+    
     public class FClass {
         public <V extends FDynamicResolver> V dynamicResolver(V res) {
             getFDynamicResolverOpt().setChild(res, 0);
             return (V) getFDynamicResolverOpt().getChild(0);
         }
     }
-
-    syn nta Opt FClass.getFDynamicResolverOpt()                   = new DynamicOpt();
-    syn nta Opt FIndexReductionResolver.getFVariableOpt()         = new DynamicOpt();
+    
+    syn nta Opt FClass.getFDynamicResolverOpt() = new DynamicOpt();
+    syn nta Opt FIndexReductionResolver.getFVariableOpt() = new DynamicOpt();
     syn nta Opt FIndexReductionResolver.getFAbstractEquationOpt() = new DynamicOpt();
-
+    
     /**
      * Dynamic resolver used during index reduction to handle differentiated
      * variables and equations.
      */
     public class FIndexReductionResolver {
-
+        
         private final Map<String, FVariable> lookupMap = new HashMap<String, FVariable>();
         /**
          * This method takes a variable and adds it to the tree. This is done by
@@ -2107,11 +2116,11 @@ aspect JastAddHacks{
         }
     }
     
-    eq FIndexReductionResolver.getChild().lookupFV(String name) {
-        FVariable var = lookupMap.get(name);
+    eq FIndexReductionResolver.getChild().lookupFV(FQName fqn) {
+        FVariable var = lookupMap.get(fqn.name());
         if (var != null)
             return var;
-        return getFClass().lookupFV(name);
+        return getFClass().lookupFV(fqn);
     }
     
 }

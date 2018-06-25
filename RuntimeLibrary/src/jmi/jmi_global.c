@@ -27,11 +27,8 @@
 #include <stdio.h>
 #include "jmi_global.h"
 #include "jmi_log.h"
-#include "jmi.h"
+#include "jmi_util.h"
 
-#if !defined(NO_FILE_SYSTEM) && (defined(RT) || defined(NRT))
-#define NO_FILE_SYSTEM
-#endif
 
 #ifdef _MSC_VER
 /* Use Microsoft stuff. */
@@ -70,18 +67,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
 /* Macro for function that gets thread-specific storage value. */
 #define jmi_tls_get_value TlsGetValue
 
-#elif defined(NO_FILE_SYSTEM) /* ifdef _MSC_VER */
-    
-static void* jmi_tls_handle;
-
-void jmi_tls_set_value(void *handle, jmi_t* jmi) {
-    handle = (void*)jmi;
-}
-
-void* jmi_tls_get_value(void *handle) {
-    return handle;
-}
-    
 #else /* ifdef _MSC_VER */
 /* Assume pthreads is available. */
 
@@ -180,6 +165,7 @@ void jmi_finalize_try(jmi_t* jmi, int depth) {
         fprintf(stderr, "jmi_finalize_try(): Unexpected try depth=%d, resetting to 0\n",depth);
         depth = 0;
     }
+    jmi_dyn_mem_free(&jmi->dyn_mem);
     jmi->current_try_depth = depth;
     if (depth == 0) {
         jmi_set_current(NULL);
@@ -212,7 +198,11 @@ void jmi_global_log(int warning, const char* name, const char* fmt, const char* 
  */
 void* jmi_global_calloc(size_t n, size_t s) {
     jmi_t* jmi = jmi_get_current();
-    return jmi_dynamic_function_pool_direct_alloc(jmi->dyn_fcn_mem, n*s, TRUE);
+    if (jmi->jmi_callbacks.allocate_memory != NULL) {
+        return (char*) jmi->jmi_callbacks.allocate_memory(n, s);
+    } else {
+        return (char*) calloc(n, s);
+    }
 }
 
 /**

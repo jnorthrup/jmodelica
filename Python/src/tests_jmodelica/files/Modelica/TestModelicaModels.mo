@@ -14,46 +14,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-model AtomicModelElementaryDivision
-    parameter Real p1[3] = {1,2,3};
-    parameter Real p2[3] = {4,5,6};
-    parameter Real p3[3] = p1./p2;
-    parameter Real p4 = p1[1]/p2[1];
-    parameter Real p5[3] = p1/p2[1];
-end AtomicModelElementaryDivision;
-
-model AtomicModelElementaryMultiplication
-    parameter Real p1[3] = {1,2,3};
-    parameter Real p2[3] = {4,5,6};
-    parameter Real p3[3] = p1.*p2;
-    parameter Real p4 = p1[1]*p2[1];
-    parameter Real p5[3] = p1*p2[1];
-end AtomicModelElementaryMultiplication;
-
-model AtomicModelElementaryAddition
-    parameter Real p1[3] = {1,2,3};
-    parameter Real p2[3] = {4,5,6};
-    parameter Real p3[3] = p1 + p2;
-end AtomicModelElementaryAddition;
-
-model AtomicModelElementarySubtraction
-    parameter Real p1[3] = {1,2,3};
-    parameter Real p2[3] = {4,5,6};
-    parameter Real p3[3] = p1 - p2;
-end AtomicModelElementarySubtraction;
-
-model AtomicModelElementaryExponentiation
-    parameter Real p1[3] = {1,2,3};
-    parameter Real p2[3] = {4,5,6};
-    parameter Real p3[3] = p1.^p2;
-    parameter Real p4[3] = p1.^p2[2];
-    parameter Real p5[3] = p1[1].^p2;
-    parameter Real p6 = p1[1]^p2[1];
-    parameter Real p7[2,2] = [1,2;3,4];
-    parameter Real p8[2,2] = [5,6;7,8];
-    parameter Real p9[2,2] = p7.^p8;
-    parameter Real p10[2,2] = p7[1,1].^p8;
-end AtomicModelElementaryExponentiation;
 
 model AtomicModelElementaryExpressions
     Real x1;
@@ -1199,16 +1159,3 @@ equation
     der(a2) = -2.7*a2-0.3;
     (b1, b2) = f(a1,a2);
 end simpleModelWithFunctions;
-
-model ParameterIndexing1
-
-Real x[N];
-
-final parameter Integer index = max(1, max_index);
-      parameter Integer max_index = 1;
-      parameter Integer N(min=1)=2;
-equation
-
-x[index] = 0;
-x[index+1] = 2;
-end ParameterIndexing1;

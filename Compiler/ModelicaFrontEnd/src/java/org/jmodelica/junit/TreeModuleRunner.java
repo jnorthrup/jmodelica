@@ -16,6 +16,7 @@
 package org.jmodelica.junit;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,17 +28,23 @@ import org.junit.runners.model.InitializationError;
 
 public class TreeModuleRunner extends ParentRunner<TestTreeRunner> {
 
+    private static final FilenameFilter MODELICA_FILES = new FilenameFilter() {
+        public boolean accept(File dir, String name) {
+            return name.endsWith(".mo");
+        }
+    };
+
     private List<TestTreeRunner> children;
     private Description desc;
 
-    public TreeModuleRunner(TestSpecification spec, UniqueNameCreator nc, File path, String packageName) throws InitializationError {
+    public TreeModuleRunner(TestSpecification spec, File path) throws InitializationError {
         super(spec.getClass());
         children = new ArrayList<TestTreeRunner>();
         String name = path.getName();
         desc = Description.createSuiteDescription(name);
-        File testDir = new File(path, TreeJModelicaRunner.TEST_SUB_PATH);
-        for (File f : testDir.listFiles(TreeJModelicaRunner.MODELICA_FILES)) {
-            TestTreeRunner mod = new TestTreeRunner(spec, nc, f, name, packageName);
+        File testDir = new File(path, "src/test");
+        for (File f : testDir.listFiles(MODELICA_FILES)) {
+            TestTreeRunner mod = new TestTreeRunner(spec, f, name);
             children.add(mod);
             desc.addChild(mod.getDescription());
         }

@@ -17,8 +17,6 @@
 
 from tests_jmodelica.general.base_simul import *
 from tests_jmodelica import testattr
-from assimulo.solvers.sundials import CVodeError
-from pyfmi.fmi import FMUException
 
 class TestHomotopy(SimulationTest):
     """
@@ -30,12 +28,12 @@ class TestHomotopy(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.HomotopyTest')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=0.5, time_step=0.01)
         self.run()
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -52,13 +50,13 @@ class TestSemiLinear(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.SemiLinearTest')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run()
         self.load_expected_data('OperatorTests_SemiLinearTest_result.txt')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -75,13 +73,13 @@ class TestDiv(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.DivTest')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run()
         self.load_expected_data('OperatorTests_DivTest_result.txt')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -98,13 +96,13 @@ class TestMod(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.ModTest')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run()
         self.load_expected_data('OperatorTests_ModTest_result.txt')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -121,13 +119,13 @@ class TestRem(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.RemTest')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run()
         self.load_expected_data('OperatorTests_RemTest_result.txt')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -144,13 +142,13 @@ class TestCeil(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.CeilTest')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run(cvode_options={'atol':1.0e-6,'rtol':1.0e-4,'maxh':0.1})
         self.load_expected_data('OperatorTests_CeilTest_result.txt')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -167,13 +165,13 @@ class TestFloor(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.FloorTest')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run(cvode_options={'atol':1.0e-6,'rtol':1.0e-4,'maxh':0.1})
         self.load_expected_data('OperatorTests_FloorTest_result.txt')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -190,13 +188,13 @@ class TestInteger(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.IntegerTest')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run(cvode_options={'atol':1.0e-6,'rtol':1.0e-4,'maxh':0.1})
         self.load_expected_data('OperatorTests_IntegerTest_result.txt')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -213,13 +211,13 @@ class TestNested(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.NestedTest')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run(cvode_options={'atol':1.0e-6,'rtol':1.0e-4,'maxh':0.1})
         self.load_expected_data('OperatorTests_NestedTest_result.txt')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -236,12 +234,12 @@ class TestSign(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.SignTest')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.1)
         self.run()
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -263,13 +261,13 @@ class TestEdge(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.EdgeTest')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run()
         self.load_expected_data('OperatorTests_EdgeTest_result.txt')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -286,13 +284,13 @@ class TestChange(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.ChangeTest')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run()
         self.load_expected_data('OperatorTests_ChangeTest_result.txt')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -308,13 +306,13 @@ class TestReinitME(SimulationTest):
     def setUpClass(cls):
         SimulationTest.setup_class_base('BouncingBall.mo', 'BouncingBall', target="me")
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=10.0, time_step=0.02)
         self.run()
         self.load_expected_data('BouncingBall_result_ME.txt')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -330,13 +328,13 @@ class TestReinitCS(SimulationTest):
     def setUpClass(cls):
         SimulationTest.setup_class_base('BouncingBall.mo', 'BouncingBall', target="cs")
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=10.0, time_step=0.02)
         self.run()
         self.load_expected_data('BouncingBall_result_CS.txt')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -353,12 +351,12 @@ class TestStringExpConstant(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.StringExpConstant')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base()
         self.run()
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -375,12 +373,12 @@ class TestStringExpParameter(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.StringExpParameter')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base()
         self.run()
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -394,22 +392,22 @@ class TestLoadResource(SimulationTest):
 
     @classmethod
     def setUpClass(cls):
-        SimulationTest.setup_class_base('LoadResourceTest/package.mo', 'LoadResourceTest.LoadResource', 
+        SimulationTest.setup_class_base('OperatorTests.mo', 'OperatorTests.LoadResource', 
             options={'variability_propagation':False})
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base()
         self.run()
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
         """
-        self.assert_end_value('x', 9)
-        self.assert_end_value('y', 9)
-        self.assert_end_value('z', 9)
+        self.assert_end_value('x', 110)
+        self.assert_end_value('y', 110)
+        self.assert_end_value('z', 110)
 
 class TestOutOfRangeOps(SimulationTest):
     """
@@ -420,12 +418,12 @@ class TestOutOfRangeOps(SimulationTest):
     def setUpClass(cls):
         SimulationTest.setup_class_base('OperatorTests.mo', 'OperatorTests.OutOfRange')
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(final_time=1.0)
         self.run()
 
-    @testattr(stddist_full = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -438,81 +436,3 @@ class TestOutOfRangeOps(SimulationTest):
         self.assert_end_value('x6', float('Inf'))
         self.assert_end_value('x7', float('Inf'))
         
-class TestAssertEqu1(SimulationTest):
-    '''Test assert in equation without event'''
-    @classmethod
-    def setUpClass(cls):
-        SimulationTest.setup_class_base(
-            'Asserts.mo',
-            'Asserts.AssertEqu1')
-
-    @testattr(stddist_full = True)
-    def setUp(self):
-        self.setup_base(final_time=3)
-        
-    @testattr(stddist_full = True)
-    def test_simulate(self):
-        try:
-            self.run(cvode_options={"minh":1e-15})
-            assert False, 'Simulation not stopped by failed assertions'
-        except CVodeError, e:
-            self.assert_equals('Simulation stopped at wrong time', e.t, 2.0)
-    
-class TestAssertEqu2(SimulationTest):
-    '''Test assert in equation with event'''
-    @classmethod
-    def setUpClass(cls):
-        SimulationTest.setup_class_base(
-            'Asserts.mo',
-            'Asserts.AssertEqu2')
-
-    @testattr(stddist_full = True)
-    def setUp(self):
-        self.setup_base(final_time=3)
-        
-    @testattr(stddist_full = True)
-    def test_simulate(self):
-        try:
-            self.run()
-            assert False, 'Simulation not stopped by failed assertions'
-        except FMUException, e:
-            self.assert_equals('Simulation stopped at wrong time', self.model.time, 2.0)
-        
-class TestAssertFunc(SimulationTest):
-    
-    @classmethod
-    def setUpClass(cls):
-        SimulationTest.setup_class_base(
-            'Asserts.mo',
-            'Asserts.AssertFunc')
-
-    @testattr(stddist_full = True)
-    def setUp(self):
-        self.setup_base(final_time=3)
-        
-    @testattr(stddist_full = True)
-    def test_simulate(self):
-        try:
-            self.run(cvode_options={"minh":1e-15})
-            assert False, 'Simulation not stopped by failed assertions'
-        except CVodeError, e:
-            self.assert_equals('Simulation stopped at wrong time', e.t, 2.0)
-
-     
-class TestTerminateWhen(SimulationTest):
-    
-    @classmethod
-    def setUpClass(cls):
-        SimulationTest.setup_class_base(
-            'Asserts.mo',
-            'Asserts.TerminateWhen')
-
-    @testattr(stddist_full = True)
-    def setUp(self):
-        self.setup_base(final_time=3)
-        self.run()
-
-    @testattr(stddist_full = True)
-    def test_end_values(self):
-        self.assert_end_value('time', 2.0)
-        self.assert_end_value('x', 2.0)

@@ -29,12 +29,6 @@
 #define _JMI_ARRAY_NONE_H
 
 #include <stdlib.h>
-#include "jmi_dyn_mem.h"
-
-/**
- * Copy src to dest. Use local_block memory allocation if available, otherwise malloc.
- */
-void jmi_set_str(char **dest, const char* src, jmi_local_dynamic_function_memory_t* local_block);
 
 /*
  * Array type declaration macro.
@@ -57,6 +51,9 @@ JMI_ARRAY_TYPE(jmi_extobj_t, jmi_extobj_array_t)
 
 /* Size macro - gives the size of array arr for dimension d */
 #define jmi_array_size(arr, d) ((arr)->size[(int) d])
+
+/* Frees strings in this array struct but not the array struct itself */
+void jmi_free_str_arr(jmi_string_array_t* arr);
 
 /* Array decl macro, delegates*/
 #define JMI_ARR(dyn, type, arr, name, ne, nd) \
@@ -86,17 +83,27 @@ JMI_ARRAY_TYPE(jmi_extobj_t, jmi_extobj_array_t)
  * Might be called several times for the same name. */
 #define JMI_ARRAY_INIT_DYNA(type, arr, name, ne, nd) \
     if (name == NULL) {\
-        char *tmp_ptr = jmi_dynamic_function_pool_alloc(&dyn_mem, 1*sizeof(arr)+nd*sizeof(int)+ne*sizeof(type), TRUE);\
-        name            = (arr*) tmp_ptr;\
+        name            = (arr*) calloc((int) 1, sizeof(arr));\
         name->num_dims  = (int)  (nd);\
-        name->size      = (int*) (tmp_ptr+sizeof(arr));\
-        name->num_elems = (int) (ne);\
-        name->num_elems_alloced = (int) (ne);\
-        name->var = (type*) (tmp_ptr+sizeof(arr)+(int)nd*sizeof(int));\
-    } else if ((name->num_elems = (int) (ne)) > name->num_elems_alloced) {\
-        name->var = (type*) jmi_dynamic_function_pool_alloc(&dyn_mem, name->num_elems*sizeof(type), TRUE);\
+        name->size      = (int*) calloc(name->num_dims, sizeof(int));\
+        JMI_DYNAMIC_ADD_POINTER(name)\
+        JMI_DYNAMIC_ADD_POINTER(name->size)\
+    }\
+    name->num_elems = (int) (ne);\
+    if (name == NULL || name->num_elems > name->num_elems_alloced) { \
+        name->var = (type*) calloc(name->num_elems, sizeof(type));\
         name->num_elems_alloced = name->num_elems;\
+        JMI_DYNAMIC_ADD_POINTER(name->var)\
     }
+
+#define JMI_ARRAY_DECL_STATREAL(type, arr, name, ne, nd) \
+    JMI_ARRAY_DECL_STAT(type, arr, name, ne, nd)
+#define JMI_ARRAY_DECL_DYNAREAL(type, arr, name, ne, nd) \
+    JMI_ARRAY_DECL_DYNA(type, arr, name, ne, nd)
+#define JMI_ARRAY_INIT_STATREAL(type, arr, name, ne, nd) \
+    JMI_ARRAY_INIT_STAT(type, arr, name, ne, nd)
+#define JMI_ARRAY_INIT_DYNAREAL(type, arr, name, ne, nd) \
+    JMI_ARRAY_INIT_DYNA(type, arr, name, ne, nd)
 
 #define JMI_ARRAY_INIT_1(dyn, type, arr, name, ne, nd, d1) \
     JMI_ARRAY_INIT(dyn, type, arr, name, ne, nd) \
@@ -282,172 +289,10 @@ JMI_ARRAY_TYPE(jmi_extobj_t, jmi_extobj_array_t)
 #define _JMI_ARR_I_24(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24) (_JMI_ARR_I_23(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23)*(arr)->size[23]+i24-1)
 #define _JMI_ARR_I_25(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25) (_JMI_ARR_I_24(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24)*(arr)->size[24]+i25-1)
 
-#define JMI_DEF(TYPE, NAME) \
-    JMI_DEF_##TYPE(NAME)
-#define JMI_DEF_REA(NAME) \
-    jmi_real_t NAME = 0;
-#define JMI_DEF_INT(NAME) \
-    JMI_DEF_REA(NAME)
-#define JMI_DEF_BOO(NAME) \
-    JMI_DEF_REA(NAME)
-#define JMI_DEF_ENU(NAME) \
-    JMI_DEF_REA(NAME)
-#define JMI_DEF_STR(NAME) \
-    jmi_string_t NAME = "";
-#define JMI_DEF_EXO(NAME) \
-    jmi_extobj_t NAME = NULL;
-
-#define JMI_DEF_REA_EXT(NAME) \
-    JMI_DEF_REA(NAME)
-#define JMI_DEF_INT_EXT(NAME) \
-    jmi_int_t NAME = 0;
-#define JMI_DEF_BOO_EXT(NAME) \
-    JMI_DEF_INT_EXT(NAME)
-#define JMI_DEF_ENU_EXT(NAME) \
-    JMI_DEF_INT_EXT(NAME)
-#define JMI_DEF_STR_EXT(NAME) \
-    JMI_DEF_STR(NAME)
-#define JMI_DEF_EXO_EXT(NAME) \
-    JMI_DEF_EXO(NAME)
-
-/* Max allowed length of strings */
-#define JMI_STR_MAX 16 * 1024 - 1
-
-/* Declaration for string */
-#define JMI_DEF_STR_STAT(NAME, LEN) \
-    size_t NAME##_len = JMI_MIN(LEN, JMI_STR_MAX) + 1; \
-    char NAME[JMI_MIN(LEN, JMI_STR_MAX) + 1];
-#define JMI_DEF_STR_DYNA(NAME) \
-    size_t NAME##_len; \
-    jmi_string_t NAME;
-
-/* Initialization of strings from expressions */
-#define JMI_INI_STR_STAT(NAME) \
-    NAME[0] = '\0';
-#define JMI_INI_STR_DYNA(NAME, LEN) \
-    NAME##_len = JMI_MIN(LEN, JMI_STR_MAX) + 1; \
-    NAME = jmi_dynamic_function_pool_alloc(&dyn_mem, JMI_MIN(LEN, JMI_STR_MAX) + 1, TRUE); \
-    JMI_INI_STR_STAT(NAME)
-
-/* Initialization of function variables */
-#define JMI_INI(TYPE, NAME) \
-    JMI_INI_##TYPE(NAME)
-#define JMI_INI_STR(NAME) \
-    NAME = "";
-
-/* Assign (copy) SRC to DEST */
-#define JMI_ASG(TYPE, DEST, SRC) \
-    JMI_ASG_##TYPE(DEST, SRC)
-#define JMI_ASG_GEN(DEST, SRC) \
-	DEST = SRC;
-#define JMI_ASG_GEN_ARR(DEST, SRC) \
-    { \
-      int i; \
-      for (i = 1; i <= DEST->num_elems; i++) { \
-        jmi_array_ref_1(DEST,i) = jmi_array_val_1(SRC,i); \
-      }\
-    }
-
-/* Assign string not in z vector */
-#define JMI_ASG_STR(DEST,SRC) \
-    jmi_set_str(&(DEST), SRC, &dyn_mem);
-
-/* Assign string in z vector */
-#define JMI_ASG_STR_Z(DEST,SRC) \
-    free(DEST); \
-    jmi_set_str(&(DEST), SRC, NULL);
-    
-/* Assign string array not in z vector */
-#define JMI_ASG_STR_ARR(DEST, SRC) \
-    { \
-      int i; \
-      for (i = 1; i <= DEST->num_elems; i++) { \
-        JMI_ASG_STR(jmi_array_ref_1(DEST,i), jmi_array_val_1(SRC,i)) \
-      }\
-    }
-    
-/* Swap values between scalars. DEST is in z vector, SRC is not */
-#define JMI_SWAP(TYPE,DEST,SRC) \
-    JMI_SWAP_##TYPE(DEST,SRC)
-#define JMI_SWAP_GEN(DEST,SRC) \
-    jmi_swap_real(&(DEST), &(SRC));
-#define JMI_SWAP_STR(DEST,SRC) \
-    jmi_swap_string(&(DEST), &(SRC));
-
-/*
- * Swap the values of the reals.
- */
-void jmi_swap_real(jmi_real_t *dest, jmi_real_t *src);
-
-/*
- * Swap the values of the strings.
- * We don't swap the pointers because they were allocated using different
- * schemes. dest is in the z-vector and was allocated using plain malloc
- * and we need to free it explicitly.
- * src uses the dynamic memory handling and will be deallocated
- * automatically upon JMI_DYNAMIC_FREE
- */
-void jmi_swap_string(jmi_string_t *dest, jmi_string_t *src);
-
-/* Handle return value */
-#define JMI_RET(TYPE, DEST, SRC) \
-    if (DEST != NULL) { JMI_RET_##TYPE(DEST, SRC) }
-    
-/* Put return value in return variable in function */
-#define JMI_RET_GEN(DEST, SRC) *DEST = SRC;
-#define JMI_RET_STR(DEST, SRC) JMI_RET_GEN(DEST, SRC)
-
-#define JMI_RET_STR_ARR(DEST, SRC) \
-    { \
-      int i; \
-      for (i = 1; i <= DEST->num_elems; i++) { \
-        JMI_RET_STR(&jmi_array_ref_1(DEST,i), jmi_array_val_1(SRC,i)) \
-      }\
-    }
-
-/* Length of string */
-#define JMI_LEN(NAME) strlen(NAME)
-    
-/* Pointer to end of string */
-#define JMI_STR_END(DEST) DEST + JMI_LEN(DEST)
-    
-/* Number of empty bytes at end of string */
-#define JMI_STR_LEFT(DEST) DEST##_len - JMI_LEN(DEST)
-
-/**
- * Set dest to value. Assumes dimension of dest is equal to dimension of arr.
- */
-#define JMI_SET(TYPE,DEST,SRC,ARR,OFFSET) \
-    JMI_SET_##TYPE(DEST,SRC,ARR,OFFSET)
-#define JMI_SET_GEN(DEST,SRC,ARR,OFFSET) \
-    DEST[OFFSET] = SRC;
-#define JMI_SET_GEN_ARR(DEST,SRC,ARR,OFFSET) \
-    jmi_set(DEST, SRC, ARR, OFFSET);
-
-void jmi_set(jmi_real_t* dest, jmi_real_t src, jmi_array_t* arr, size_t offset);
-
-#define JMI_COPY(TYPE,DIR,PTR,ARR,OFFSET) \
-    JMI_COPY_##TYPE(DIR,PTR,ARR,OFFSET)
-#define JMI_COPY_GEN(DIR,PTR,ARR,OFFSET) \
-	JMI_COPY_GEN_##DIR(PTR,ARR,OFFSET)
-#define JMI_COPY_GEN_L(PTR,ARR,OFFSET) \
-    PTR[OFFSET] = ARR;
-#define JMI_COPY_GEN_R(PTR,ARR,OFFSET) \
-    ARR = PTR[OFFSET];
-#define JMI_COPY_GEN_ARR(DIR,PTR,ARR,OFFSET) \
-	JMI_COPY_GEN_ARR_##DIR(PTR,ARR,OFFSET)
-#define JMI_COPY_GEN_ARR_L(PTR,ARR,OFFSET) \
-    jmi_copy_to_ptr(PTR, ARR, OFFSET);
-#define JMI_COPY_GEN_ARR_R(PTR,ARR,OFFSET) \
-    jmi_copy_to_arr(ARR, PTR, OFFSET);
-
-void jmi_copy_to_arr(jmi_array_t* dest, jmi_real_t* src, size_t offset);
-void jmi_copy_to_ptr(jmi_real_t* dest, jmi_array_t* src, size_t offset);
-
-void jmi_transpose_matrix(jmi_array_t* arr, jmi_real_t* src, jmi_real_t* dest);
-void jmi_transpose_matrix_to_int(jmi_array_t* arr, jmi_real_t* src, jmi_int_t* dest);
-void jmi_transpose_matrix_from_int(jmi_array_t* arr, jmi_int_t* src, jmi_real_t* dest);
-void jmi_copy_matrix_to_int(jmi_array_t* arr, jmi_real_t* src, jmi_int_t* dest);
-void jmi_copy_matrix_from_int(jmi_array_t* arr, jmi_int_t* src, jmi_real_t* dest);
+void jmi_transpose_matrix(jmi_array_t* arr, jmi_ad_var_t* src, jmi_ad_var_t* dest);
+void jmi_transpose_matrix_to_int(jmi_array_t* arr, jmi_ad_var_t* src, jmi_int_t* dest);
+void jmi_transpose_matrix_from_int(jmi_array_t* arr, jmi_int_t* src, jmi_ad_var_t* dest);
+void jmi_copy_matrix_to_int(jmi_array_t* arr, jmi_ad_var_t* src, jmi_int_t* dest);
+void jmi_copy_matrix_from_int(jmi_array_t* arr, jmi_int_t* src, jmi_ad_var_t* dest);
 
 #endif /* _JMI_ARRAY_NONE_H */

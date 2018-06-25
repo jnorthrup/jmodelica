@@ -1,16 +1,17 @@
 /*
-    Copyright (C) 2015-2018 Modelon AB
+    Copyright (C) 2015 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
-    it under the terms of the Common Public License as published by
-    IBM, version 1.0 of the License.
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
 
     This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY. See the Common Public License for more details.
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-    You should have received a copy of the Common Public License
-    along with this program. If not, see
-    <http://www.ibm.com/developerworks/library/os-cpl.html/>.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 static const int N_real_ci = $n_real_ci$;
@@ -85,6 +86,10 @@ const char *C_GUID = $C_guid$;
 
 $C_DAE_output_vrefs$
 
+$C_DAE_equation_sparsity$
+
+$C_DAE_ODE_jacobian_sparsity$
+
 $C_DAE_initial_relations$
 
 $C_DAE_relations$
@@ -103,7 +108,7 @@ $C_ode_guards$
     return 0;
 }
 
-static int model_ode_next_time_event(jmi_t* jmi, jmi_time_event_t* nextTimeEvent) {
+static int model_ode_next_time_event(jmi_t* jmi, jmi_time_event_t* event) {
 $C_ode_time_events$
     return 0;
 }
@@ -125,6 +130,37 @@ $C_ode_guards_init$
     return 0;
 }
 
+static int model_ode_initialize_dir_der(jmi_t* jmi) {
+    int ef = 0;
+    /* This function is not needed - no derivatives of the initialization system is exposed.*/
+    return ef;
+}
+
+static int model_dae_F(jmi_t* jmi, jmi_real_t** res) {
+$C_DAE_equation_residuals$
+    return 0;
+}
+
+static int model_dae_dir_dF(jmi_t* jmi, jmi_real_t** res, jmi_real_t** dF, jmi_real_t** dz) {
+$C_DAE_equation_directional_derivative$
+    return 0;
+}
+
+static int model_init_F0(jmi_t* jmi, jmi_real_t** res) {
+$C_DAE_initial_equation_residuals$
+    return 0;
+}
+
+static int model_init_F1(jmi_t* jmi, jmi_real_t** res) {
+$C_DAE_initial_guess_equation_residuals$
+    return 0;
+}
+
+static int model_init_Fp(jmi_t* jmi, jmi_real_t** res) {
+    /* C_DAE_initial_dependent_parameter_residuals */
+    return -1;
+}
+
 static int model_init_delay(jmi_t* jmi) {
 $C_delay_init$
     return 0;
@@ -135,50 +171,60 @@ $C_delay_sample$
     return 0;
 }
 
-static int jmi_z_offset_strings(jmi_z_strings_t* z) {
+static int jmi_z_offset_strings(jmi_z_offsets_t* o) {
 $C_z_offsets_strings$
     return 0;
 }
 
 int jmi_new(jmi_t** jmi, jmi_callbacks_t* jmi_callbacks) {
 
-    jmi_z_offset_strings(&(*jmi)->z_t.strings);
+    jmi_z_offset_strings(&(*jmi)->z_t.strings.offsets);
 
-    jmi_init(jmi, N_real_ci,      N_real_cd,      N_real_pi,      N_real_pi_s,
-                  N_real_pi_f,    N_real_pi_e,    N_real_pd,      N_integer_ci,
-                  N_integer_cd,   N_integer_pi,   N_integer_pi_s, N_integer_pi_f,
-                  N_integer_pi_e, N_integer_pd,   N_boolean_ci,   N_boolean_cd,
-                  N_boolean_pi,   N_boolean_pi_s, N_boolean_pi_f, N_boolean_pi_e,
-                  N_boolean_pd,   N_real_dx,      N_real_x,       N_real_u, 
-                  N_real_w,       N_real_d,       N_integer_d,    N_integer_u,
-                  N_boolean_d,    N_boolean_u,    N_sw,           N_sw_init,
-                  N_time_sw,      N_state_sw,     N_guards,       N_guards_init,
-                  N_dae_blocks,   N_dae_init_blocks, N_initial_relations,
-                  (int (*))DAE_initial_relations, N_relations,
-                  (int (*))DAE_relations, N_dynamic_state_sets,
-                  (jmi_real_t *) DAE_nominals, Scaling_method, N_ext_objs,
-                  Homotopy_block, jmi_callbacks);
+    jmi_init(jmi, N_real_ci, N_real_cd,  N_real_pi,    N_real_pi_s,    N_real_pi_f,    N_real_pi_e,    N_real_pd,
+             N_integer_ci, N_integer_cd, N_integer_pi, N_integer_pi_s, N_integer_pi_f, N_integer_pi_e, N_integer_pd,
+             N_boolean_ci, N_boolean_cd, N_boolean_pi, N_boolean_pi_s, N_boolean_pi_f, N_boolean_pi_e, N_boolean_pd,
+             N_real_dx, N_real_x, N_real_u, N_real_w,
+             N_real_d, N_integer_d, N_integer_u, N_boolean_d, N_boolean_u,
+             N_outputs, (int (*))Output_vrefs,
+             N_sw, N_sw_init, N_time_sw,N_state_sw, N_guards, N_guards_init,
+             N_dae_blocks, N_dae_init_blocks,
+             N_initial_relations, (int (*))DAE_initial_relations,
+             N_relations, (int (*))DAE_relations, N_dynamic_state_sets,
+             (jmi_real_t *) DAE_nominals,
+             Scaling_method, N_ext_objs, Homotopy_block, jmi_callbacks);
 
 $C_dynamic_state_add_call$
 
     model_add_blocks(jmi);
+    
     model_init_add_blocks(jmi);
 
-    /* Initialize the model equations interface */
-    jmi_model_init(*jmi,
-                   *model_ode_derivatives_dir_der,
-                   *model_ode_derivatives,
-                   *model_ode_event_indicators,
-                   *model_ode_initialize,
-                   *model_init_eval_parameters,
-                   *model_ode_next_time_event);
+    /* Initialize the DAE interface */
+    jmi_dae_init(*jmi, *model_dae_F, N_eq_F, NULL, 0, NULL, NULL,
+                 *model_dae_dir_dF,
+                 CAD_dae_n_nz,(int (*))CAD_dae_nz_rows,(int (*))CAD_dae_nz_cols,
+                 CAD_ODE_A_n_nz, (int (*))CAD_ODE_A_nz_rows, (int(*))CAD_ODE_A_nz_cols,
+                 CAD_ODE_B_n_nz, (int (*))CAD_ODE_B_nz_rows, (int(*))CAD_ODE_B_nz_cols,
+                 CAD_ODE_C_n_nz, (int (*))CAD_ODE_C_nz_rows, (int(*))CAD_ODE_C_nz_cols,
+                 CAD_ODE_D_n_nz, (int (*))CAD_ODE_D_nz_rows, (int(*))CAD_ODE_D_nz_cols,
+                 *model_dae_R, N_eq_R, NULL, 0, NULL, NULL,*model_ode_derivatives,
+                 *model_ode_derivatives_dir_der,
+                 *model_ode_outputs,*model_ode_initialize,*model_ode_guards,
+                 *model_ode_guards_init,*model_ode_next_time_event);
+
+    /* Initialize the Init interface */
+    jmi_init_init(*jmi, *model_init_F0, N_eq_F0, NULL,
+                  0, NULL, NULL,
+                  *model_init_F1, N_eq_F1, NULL,
+                  0, NULL, NULL,
+                  *model_init_Fp, N_eq_Fp, NULL,
+                  0, NULL, NULL,
+                  *model_init_eval_parameters,
+                  *model_init_R0, N_eq_R0, NULL,
+                  0, NULL, NULL);
     
     /* Initialize the delay interface */
-    jmi_init_delay_if(*jmi, N_delays, N_spatialdists, *model_init_delay,
-                      *model_sample_delay, N_delay_sw);
-
-    /* Initialize globals struct */
-    (*jmi)->globals = calloc(1, sizeof(jmi_globals_t));
+    jmi_init_delay_if(*jmi, N_delays, N_spatialdists, *model_init_delay, *model_sample_delay, N_delay_sw);
 
     return 0;
 }

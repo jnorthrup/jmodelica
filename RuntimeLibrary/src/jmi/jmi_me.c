@@ -23,7 +23,30 @@
 #include "jmi_chattering.h"
 #include "module_include/jmi_get_set.h"
 
+#define indexmask  0x07FFFFFF
+#define negatemask 0x08000000
+#define typemask   0xF0000000
 
+jmi_value_reference get_index_from_value_ref(jmi_value_reference valueref) {
+    /* Translate a ValueReference into variable index in z-vector. */
+    jmi_value_reference index = valueref & indexmask;
+    
+    return index;
+}
+
+jmi_value_reference get_type_from_value_ref(jmi_value_reference valueref) {
+    /* Translate a ValueReference into variable type in z-vector. */
+    jmi_value_reference type = valueref & typemask;
+    
+    return type;
+}
+
+jmi_value_reference is_negated(jmi_value_reference valueref) {
+    /* Checks for a valueReference if it is negated. */
+    jmi_value_reference negated = valueref & negatemask;
+    
+    return negated;
+}
 
 int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi_string_t resource_location) {
                        
@@ -41,9 +64,9 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
     
     retval = jmi_me_init_modules(jmi);
     if (retval != 0) {
-        jmi_log_node(jmi_->log, logError, "ModuleInitializationFailure","Failed to initialize modules");
-        jmi_delete(jmi_);
-        return -1;
+    	jmi_log_node(jmi_->log, logError, "ModuleInitializationFailure","Failed to initialize modules");
+    	jmi_delete(jmi_);
+    	return -1;
     }
 
 
@@ -54,7 +77,12 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
         return -1;
     }
     
-    /* Postpone resource check until it is used. */
+    /* Check resource location */
+    if (resource_location && !jmi_dir_exists(resource_location)) {
+        jmi_log_node(jmi->log, logError, "Error", "Resource location does not exist <Path:%s>", resource_location);
+        jmi_delete(jmi_);
+        return -1;
+    }
     jmi_->resource_location = resource_location;
     
     /* set start values*/
@@ -70,19 +98,48 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
     /* Write start values to the pre vector*/
     jmi_copy_pre_values(jmi);
     
+    /* Print some info about Jacobians, if available. */
+    if (jmi_->color_info_A != NULL) {
+        jmi_log_node_t node = jmi_log_enter(jmi_->log, logInfo, "color_info_A");
+        jmi_log_fmt(jmi_->log, node, logInfo, "<num_nonzeros: %d> in Jacobian A", jmi_->color_info_A->n_nz);
+        jmi_log_fmt(jmi_->log, node, logInfo, "<num_colors: %d> in Jacobian A", jmi_->color_info_A->n_groups);
+        jmi_log_leave(jmi_->log, node);
+    }
+
+    if (jmi_->color_info_B != NULL) {
+        jmi_log_node_t node = jmi_log_enter(jmi_->log, logInfo, "color_info_B");
+        jmi_log_fmt(jmi_->log, node, logInfo, "<num_nonzeros: %d> in Jacobian B", jmi_->color_info_B->n_nz);
+        jmi_log_fmt(jmi_->log, node, logInfo, "<num_colors: %d> in Jacobian B", jmi_->color_info_B->n_groups);
+        jmi_log_leave(jmi_->log, node);
+    }
+
+    if (jmi_->color_info_C != NULL) {
+        jmi_log_node_t node = jmi_log_enter(jmi_->log, logInfo, "color_info_C");
+        jmi_log_fmt(jmi_->log, node, logInfo, "<num_nonzeros: %d> in Jacobian C", jmi_->color_info_C->n_nz);
+        jmi_log_fmt(jmi_->log, node, logInfo, "<num_colors: %d> in Jacobian C", jmi_->color_info_C->n_groups);
+        jmi_log_leave(jmi_->log, node);
+    }
+
+    if (jmi_->color_info_D != NULL) {
+        jmi_log_node_t node = jmi_log_enter(jmi_->log, logInfo, "color_info_D");
+        jmi_log_fmt(jmi_->log, node, logInfo, "<num_nonzeros: %d> in Jacobian D", jmi_->color_info_D->n_nz);
+        jmi_log_fmt(jmi_->log, node, logInfo, "<num_colors: %d> in Jacobian D", jmi_->color_info_D->n_groups);
+        jmi_log_leave(jmi_->log, node);
+    }
+    
     return 0;
 }
 
 int jmi_me_init_modules(jmi_t* jmi) {
-    int retval;
+	int retval;
 
-    retval = jmi_get_set_module_init(jmi);
-    if (retval != 0) {
-        jmi_log_comment(jmi->log, logError, "jmi_get_set_module_init() failed");
-        return -1;
-    }
+	retval = jmi_get_set_module_init(jmi);
+	if (retval != 0) {
+    	jmi_log_comment(jmi->log, logError, "jmi_get_set_module_init() failed");
+    	return -1;
+	}
 
-    return 0;
+	return 0;
 }
 
 void jmi_me_delete_modules(jmi_t* jmi) {
@@ -101,11 +158,8 @@ void jmi_setup_experiment(jmi_t* jmi, jmi_boolean tolerance_defined,
         jmi->events_epsilon = jmi->options.events_tol_factor*relative_tolerance; /* Used in the event detection */
         jmi->newton_tolerance = jmi->options.nle_solver_tol_factor*relative_tolerance; /* Used in the Newton iteration */
     }
-    jmi->time_events_epsilon = jmi->options.time_events_default_tol;
-
     jmi->options.block_solver_options.res_tol = jmi->newton_tolerance;
     jmi->options.block_solver_options.events_epsilon = jmi->events_epsilon;
-    jmi->options.block_solver_options.time_events_epsilon = jmi->time_events_epsilon;
 }
 
 int jmi_initialize(jmi_t* jmi) {
@@ -164,8 +218,6 @@ int jmi_initialize(jmi_t* jmi) {
 
     jmi_save_last_successful_values(jmi);
     
-    /* Save restore mode activated after initialization */
-    jmi->save_restore_solver_state_mode = 1;
     jmi->is_initialized = 1;
     
     /* Initialize delay blocks */
@@ -194,9 +246,6 @@ int jmi_initialize(jmi_t* jmi) {
         jmi_log_leave(jmi->log, top_node);
     }
     
-    /* Resize the dynamic memory pool */
-    jmi_dynamic_function_resize(jmi->dyn_fcn_mem);
-    
     return 0;
 }
 
@@ -206,7 +255,7 @@ int jmi_cannot_set(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
     jmi_value_reference index;
     for (i = 0; i < nvr; i = i + 1) {
         /* Get index in z vector from value reference. */
-        index = jmi_get_index_from_value_ref(vr[i]);
+        index = get_index_from_value_ref(vr[i]);
         if (index >= start && index < end) {
             jmi_log_node(jmi->log, logError, "CannotSetVariable",
                          fmt, vr[i]);
@@ -219,7 +268,7 @@ int jmi_cannot_set(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 int jmi_set_real(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                  const jmi_real_t value[]) {
 
-    if (jmi->user_terminate == 1) {
+	if (jmi->user_terminate == 1) {
         jmi_log_node(jmi->log, logError, "CannotSetVariable",
                          "Cannot set Real variables when the model is terminated");
         return -1;
@@ -300,28 +349,9 @@ int jmi_set_boolean(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 int jmi_set_string(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                    const jmi_string value[]) {
 
-    jmi_z_offsets_t *o, *n;
-    
     if (jmi->user_terminate == 1) {
         jmi_log_node(jmi->log, logError, "CannotSetVariable",
                          "Cannot set String variables when the model is terminated");
-        return -1;
-    }
-    
-    o  = &jmi->z_t.strings.offs;
-    n  = &jmi->z_t.strings.nums;
-    
-    if (jmi_cannot_set(jmi, vr, nvr, o->ci, o->ci + n->ci + n->cd,
-        "Cannot set String constant <variable: #r%d#>")
-        || jmi_cannot_set(jmi, vr, nvr, o->ps, o->ps + n->ps,
-        "Cannot set String structural parameter <variable: #r%d#>")
-        || jmi_cannot_set(jmi, vr, nvr, o->pf, o->pf + n->pf,
-        "Cannot set String final parameter <variable: #r%d#>")
-        || jmi_cannot_set(jmi, vr, nvr, o->pe, o->pe + n->pe,
-        "Cannot set String evaluated parameter <variable: #r%d#>")
-        || jmi_cannot_set(jmi, vr, nvr, o->pd, o->pd + n->pd,
-        "Cannot set String dependent parameter <variable: #r%d#>")) {
-        
         return -1;
     }
 
@@ -364,17 +394,6 @@ int jmi_get_directional_derivative(jmi_t* jmi,
     
     jmi_real_t* store_dz = jmi->dz[0];
     int i, ef;
-    jmi_log_node_t node;
-
-    if (jmi->jmi_callbacks.log_options.log_level >= 5) {
-        node =jmi_log_enter_fmt(jmi->log, logInfo, "GetDirectionalDerivatives",
-                                "Call to get directional derivatives at <t:%g>.", jmi_get_t(jmi)[0]);
-        if (jmi->jmi_callbacks.log_options.log_level >= 6){
-            jmi_log_vrefs(jmi->log, node, logInfo, "known", 'r', (const int*)vKnown_ref, nKnown);
-            jmi_log_vrefs(jmi->log, node, logInfo, "unknown", 'r', (const int*)vUnknown_ref, nUnknown);
-            jmi_log_reals(jmi->log, node, logInfo, "direction", dvKnown, nKnown);
-        }
-    }
     
     jmi->dz[0]                  = jmi->dz_active_variables_buf[jmi->dz_active_index];
     jmi->dz_active_variables[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
@@ -384,28 +403,16 @@ int jmi_get_directional_derivative(jmi_t* jmi,
     }
 
     for (i = 0; i < nKnown; i++) {
-        jmi->dz_active_variables[0][jmi_get_index_from_value_ref(vKnown_ref[i])-jmi->offs_real_dx] = dvKnown[i];
+        jmi->dz_active_variables[0][get_index_from_value_ref(vKnown_ref[i])-jmi->offs_real_dx] = dvKnown[i];
     }
 
-    ef = jmi_ode_derivatives_dir_der(jmi);
-    if (ef != 0) {
-        jmi_log_node(jmi->log, logError, "Error",
-                "Evaluating the directional derivatives failed at <t:%g>.", jmi_get_t(jmi)[0]);
-    }
-
+    ef = jmi_generic_func(jmi, jmi->dae->ode_derivatives_dir_der);
     for (i = 0; i < nUnknown; i++) {
-        dvUnknown[i] = jmi->dz_active_variables[0][jmi_get_index_from_value_ref(vUnknown_ref[i])-jmi->offs_real_dx];
+        dvUnknown[i] = jmi->dz_active_variables[0][get_index_from_value_ref(vUnknown_ref[i])-jmi->offs_real_dx];
     }
 
     jmi->dz_active_variables[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
     jmi->dz[0] = store_dz;
-
-    if (jmi->jmi_callbacks.log_options.log_level >= 5){
-        if (jmi->jmi_callbacks.log_options.log_level >= 6){
-            jmi_log_reals(jmi->log, node, logInfo, "derivative", dvUnknown, nUnknown);
-        }
-        jmi_log_leave(jmi->log, node);
-    }
 
     return ef;
 }
@@ -499,15 +506,6 @@ int jmi_get_nominal_continuous_states(jmi_t* jmi, jmi_real_t x_nominal[], size_t
     return 0;
 }
 
-/* Local helper function */
-static int jmi_exists_grt_than_time_event(jmi_t* jmi) {
-    return jmi->model_terminate == FALSE                            &&
-           jmi->atTimeEvent                                         &&
-           jmi->eventPhase == JMI_TIME_EXACT                        &&
-           jmi->nextTimeEvent.defined                               && 
-           jmi_abs(jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time)< jmi->time_events_epsilon;
-}
-
 int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
                         jmi_event_info_t* event_info) {
                             
@@ -518,18 +516,15 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     jmi_log_node_t top_node;
     jmi_log_node_t iter_node;
     jmi_log_node_t discrete_node;
-    jmi_log_node_t reinit_node;
 
     /* Used for logging */
     switches = jmi_get_sw(jmi);
     
+    jmi->model_terminate = 0;  /* Reset terminate flag. */
     max_iterations = 30;       /* Maximum number of event iterations */
 
-    /* Performed at the first event iteration: */
+    /* Performed at the fist event iteration: */
     if (jmi->nbr_event_iter == 0) {
-        
-        /* Reset terminate flag. */
-        jmi->model_terminate = 0;
 
         /* Reset eventInfo */
         event_info->next_event_time_defined = FALSE;         /* The next event time is not set. */
@@ -567,24 +562,10 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 
         /* We are at an event -> set atEvent to true. */
         jmi->atEvent = JMI_TRUE;
-        
-        /* We don't need to save and restore state during event iteration */
-        jmi->save_restore_solver_state_mode = 0;
-        
-        /* We are at a time event -> set atTimeEvent to true. */
+        /* We are at an time event -> set atTimeEvent to true. */
         if (jmi->nextTimeEvent.defined) {
-            jmi->atTimeEvent = jmi_abs(jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time) < jmi->time_events_epsilon;
-            if(jmi->atTimeEvent) {
-                jmi->eventPhase = jmi->nextTimeEvent.phase;
-            } else {
-                jmi->eventPhase = JMI_TIME_GREATER;
-            }
-            if(!jmi->atTimeEvent && jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time > 0) { /* We passed the next time event, return error */
-                jmi_log_node(jmi->log, logError, "NextTimeEventPassed",
-                    "Current time <t: %E> is after next time event <next_time_event: %E>. Consider to change option <time_events_default_tol: %E>.",
-                    jmi_get_t(jmi)[0], jmi->nextTimeEvent.time, jmi->time_events_epsilon);
-                return -1;
-            }
+            jmi->atTimeEvent = ALMOST_ZERO(jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time);
+            jmi->eventPhase = jmi->nextTimeEvent.phase;
         }else{
             jmi->atTimeEvent = JMI_FALSE;
             jmi->eventPhase = JMI_TIME_GREATER;
@@ -616,6 +597,14 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
             return -1;
         }
         
+        /* This is an implicit accepted step. */
+        retval = jmi_block_completed_integrator_step(jmi);
+        if(retval != 0) {
+            jmi_log_comment(jmi->log, logError, "Completed block steps during event iteration failed.");
+            jmi_log_unwind(jmi->log, top_node);
+            return -1;
+        }
+        
         /* Compare current values with the pre values. If there is an element that differs, set
          * event_info->iteration_converged to false. */
         event_info->iteration_converged = TRUE; /* Assume the iteration converged */
@@ -630,7 +619,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
             if (z[i - jmi->offs_real_d + jmi->offs_pre_real_d] != z[i]) {
                 event_info->iteration_converged = FALSE;
                 
-                /* Extra logging of the discrete variables that have been changed) */
+                /* Extra logging of the discrete variables that has been changed) */
                 if (jmi->jmi_callbacks.log_options.log_level >= 5){
                     if (i < jmi->offs_boolean_d) {
                         jmi_log_node(jmi->log, logInfo, "Info", " <integer: #i%d#> <from: %d> <to: %d>", jmi_get_value_ref_from_index(i, JMI_INTEGER), (jmi_int_t)z[i - jmi->offs_real_d + jmi->offs_pre_real_d], (jmi_int_t)z[i]);
@@ -655,25 +644,8 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         
         /* Check if a reinit triggered - this would mean that state variables changed. */
         if (jmi->reinit_triggered) {
-            int verify_state_value_changed = 0;
             event_info->iteration_converged = FALSE;
             event_info->state_values_changed = TRUE;
-            
-            reinit_node =jmi_log_enter_fmt(jmi->log, logInfo, "ReInitTriggered", 
-                                "A reinit triggered during the last event iteration.");
-            for (i = 0; i < jmi->n_real_x; i++) {
-                if (jmi_get_real_x(jmi)[i] != jmi_get_z(jmi)[jmi->offs_pre_real_x+i]) {
-                    verify_state_value_changed = 1; /* State has changed */
-                    jmi_log_node(jmi->log, logInfo, "StateUpdated", " <real: #r%d#> <from: %E> <to: %E>", jmi_get_value_ref_from_index(i+jmi->offs_real_x, JMI_REAL), jmi_get_z(jmi)[jmi->offs_pre_real_x+i], jmi_get_real_x(jmi)[i]);
-                }
-            }
-            jmi_log_leave(jmi->log, reinit_node);
-            
-            if (verify_state_value_changed != 1) {
-                jmi_log_node(jmi->log, logError, "ReInitFailure", "No state was changed despite a reinit triggered which indicates an error at <t:%E>.",jmi_get_t(jmi)[0]);
-                jmi_log_unwind(jmi->log, top_node);
-                return -1;
-            }
         }
         
         /* No convergence under the allowed number of iterations. */
@@ -705,6 +677,19 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 
         /* Reset atEvent flag */
         jmi->atEvent = JMI_FALSE;
+
+        /* Evaluate the guards with the event flag set to false in order to
+         * reset guards depending on samplers before copying pre values.
+         * If this is not done, then the corresponding pre values for these guards
+         * will be true, and no event will be triggered at the next sample.
+         */
+        retval = jmi_ode_guards(jmi);
+
+        if (retval != 0) { /* Error check */
+            jmi_log_comment(jmi->log, logError, "Computation of guard expressions failed.");
+            jmi_log_unwind(jmi->log, top_node);
+            return -1;
+        }
 
         /* Final evaluation of the model with event flag set to false. It can
          * for example change values of booleans that should only be true during
@@ -748,15 +733,13 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
                 jmi_log_unwind(jmi->log, top_node);
                 return -1;
             }
-            jmi_log_node(jmi->log, logInfo, "NextTimeEvent", "A next time event is defined and computed to occur at <t:%E>",event_info->next_event_time);
         } else {
             event_info->next_event_time_defined = FALSE;
         }
         
         /* Save the z values to the z_last vector */
         jmi_save_last_successful_values(jmi);
-        /* Block completed step, it should be saved and used when integrating */
-        jmi->save_restore_solver_state_mode = 1;
+        /* Block completed step */
         retval = jmi_block_completed_integrator_step(jmi);
         if(retval != 0) {
             jmi_log_comment(jmi->log, logError, "Completed block steps during event iteration failed.");
@@ -773,32 +756,6 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         /* Check for chattering and log it */
         jmi_chattering_check(jmi);
         
-        if (jmi_exists_grt_than_time_event(jmi)) {
-            int ret;
-            jmi_boolean state_values_changed = event_info->state_values_changed;
-            jmi->nbr_consec_time_events++;
-            
-            if (jmi->nbr_consec_time_events > 2) {
-                jmi_log_node(jmi->log, logError, "NextTimeEventFailure",
-                    "Time event phase failure. Got next time event <t:%E> at "
-                    "current time <t:%E> that should already have been handled.",
-                    jmi->nextTimeEvent.time, jmi_get_t(jmi)[0]);
-                jmi_log_unwind(jmi->log, top_node);
-                return -1;
-            }
-            
-            ret = jmi_event_iteration(jmi, intermediate_results, event_info);
-            
-            /* If there was a previous state value changed, restore the flag */
-            if (state_values_changed == TRUE) {
-                event_info->state_values_changed = state_values_changed;
-            } 
-            
-            return ret;
-        } else {
-            jmi->nbr_consec_time_events = 0;
-        }
-        
         jmi_log_leave(jmi->log, top_node);
 
     } else if (intermediate_results) {
@@ -808,9 +765,16 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     /* If everything went well, check if termination of simulation was requested. */
     event_info->terminate_simulation = jmi->model_terminate ? TRUE : FALSE;
     
+    if (jmi->model_terminate == FALSE && jmi->atTimeEvent && 
+        jmi->eventPhase == JMI_TIME_EXACT && jmi->nextTimeEvent.defined 
+        && ALMOST_ZERO(jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time) &&
+        event_info->iteration_converged == TRUE) {
+        return jmi_event_iteration(jmi, intermediate_results, event_info);
+    }
+    
     if (jmi->updated_states == JMI_TRUE) {
         event_info->state_values_changed = TRUE;
-        jmi->updated_states = FALSE;
+        jmi->updated_states = JMI_FALSE;
     }
     
     return 0;
@@ -818,7 +782,6 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 
 int jmi_next_time_event(jmi_t* jmi) {
     int retval;
-    jmi->nextTimeEvent.defined = 0;
     
     retval = jmi_ode_next_time_event(jmi, &jmi->nextTimeEvent);
     if(retval != 0) {
@@ -827,9 +790,11 @@ int jmi_next_time_event(jmi_t* jmi) {
     
     /* See if the delay blocks need to update the next event time. Need to do this after sampling them,
        if the next event is caused by a delay of the current one. */
-    retval = jmi_delay_next_time_event(jmi, &jmi->nextTimeEvent);
-    if (retval != 0) {
-        return -1;
+    {
+        jmi_real_t t_delay = jmi_delay_next_time_event(jmi);
+        if (t_delay != JMI_INF) {
+            jmi_min_time_event(&jmi->nextTimeEvent, 1, 0, t_delay);
+        }
     }
     
     return 0;
@@ -847,7 +812,7 @@ int jmi_update_and_terminate(jmi_t* jmi) {
         jmi->recomputeVariables = 0;
     }
 
-    jmi_destruct_external_objects(jmi);
+    jmi_destruct_external_objs(jmi);
     jmi->user_terminate = 1;
 
     return 0;
@@ -859,7 +824,7 @@ int compare_option_names(const void* a, const void* b) {
     return strcmp(*sa, *sb);
 }
 
-static unsigned int get_option_index(char* option) {
+static int get_option_index(char* option) {
     const char** found=(const char**)bsearch(&option, 
                                              fmi_runtime_options_map_names,
                                              fmi_runtime_options_map_length,
@@ -870,7 +835,7 @@ static unsigned int get_option_index(char* option) {
     index = (int)(found - &fmi_runtime_options_map_names[0]);
     if(index >= fmi_runtime_options_map_length ) return 0;
     vr = fmi_runtime_options_map_vrefs[index];
-    return jmi_get_index_from_value_ref(vr);
+    return get_index_from_value_ref(vr);
 }
 
 /**
@@ -926,11 +891,11 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         case jmi_broyden_jacobian_update_mode:
             bsop->jacobian_update_mode = jmi_broyden_jacobian_update_mode;
             break;
-        case jmi_full_jacobian_update_mode:
-            bsop->jacobian_update_mode = jmi_full_jacobian_update_mode;
+        case jmi_reuse_jacobian_update_mode:
+            bsop->jacobian_update_mode = jmi_reuse_jacobian_update_mode;
             break;
         default:
-            bsop->jacobian_update_mode = jmi_reuse_jacobian_update_mode;
+            bsop->jacobian_update_mode = jmi_full_jacobian_update_mode;
         }
     } 
 
@@ -979,7 +944,7 @@ void jmi_update_runtime_options(jmi_t* jmi) {
             bsop->active_bounds_mode = jmi_use_steepest_descent_active_bounds_mode;
             break;
         default:
-            bsop->active_bounds_mode = jmi_project_newton_step_active_bounds_mode;
+            bsop->active_bounds_mode = jmi_use_steepest_descent_active_bounds_mode;
         }
     } 
         
@@ -989,11 +954,11 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         
     index = get_option_index("_nle_solver_use_nominals_as_fallback");
     if(index)
-        bsop->use_nominals_as_fallback_in_init = (int)z[index];
+        bsop->use_nominals_as_fallback_in_init = z[index];
         
     index = get_option_index("_nle_solver_use_last_integrator_step");
     if(index)
-        bsop->start_from_last_integrator_step = (int)z[index];
+        bsop->start_from_last_integrator_step = z[index];
     
     index = get_option_index("_nle_solver_max_residual_scaling_factor");
     if(index)
@@ -1059,9 +1024,6 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     index = get_option_index("_nle_brent_ignore_error");
     if(index)
         bsop->brent_ignore_error_flag = (int)z[index];
-    index = get_option_index("_nle_jacobian_finite_difference_delta");
-    if(index)
-        bsop->jacobian_finite_difference_delta = z[index];
     index = get_option_index("_nle_solver_step_limit_factor");
     if(index)
         bsop->step_limit_factor = z[index];
@@ -1074,13 +1036,9 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     index = get_option_index("_nle_solver_tol_factor");
     if(index)
         op->nle_solver_tol_factor = z[index]; 
-        
     index = get_option_index("_events_default_tol");
     if(index)
         op->events_default_tol = z[index]; 
-    index = get_option_index("_time_events_default_tol");
-    if(index)
-        op->time_events_default_tol = z[index];
     index = get_option_index("_events_tol_factor");
     if(index)
         op->events_tol_factor = z[index];
@@ -1104,7 +1062,7 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         op->cs_step_size = z[index];
     index = get_option_index("_cs_experimental_mode");
     if(index)
-        op->cs_experimental_mode = (int)z[index];
+        op->cs_experimental_mode = z[index];
     index = get_option_index("_runtime_log_to_file");
     if(index)
         op->log_options->copy_log_to_file_flag = (int)z[index]; 

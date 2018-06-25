@@ -46,6 +46,7 @@ class DerivativeVariable : public RealVariable {
     private:
         Variable *myDifferentiatedVariable;
 };
-
+inline bool DerivativeVariable::isDerivative() const { return true; }
+inline const Ref<Variable> DerivativeVariable::getMyDifferentiatedVariable() const { return myDifferentiatedVariable; }
 }; // End namespace
 #endif

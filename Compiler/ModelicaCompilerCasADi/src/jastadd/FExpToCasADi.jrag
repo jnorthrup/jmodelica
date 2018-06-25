@@ -179,21 +179,13 @@ aspect FExpToCasADi {
      */
     MXVector FAssignStmt.updateExpressionsAccordingToStatement(MXVector expressions, MXVector allVars) {
         MXVector lhsVec = new MXVector();
-        MX left = getLeft().toMX();
-        if (left == null) {
-            throw new UnsupportedOperationException("The variable on the LHS does not exists: " + toString());
-        }
-        lhsVec.add(left);
+        lhsVec.add(getLeft().toMX());
         MXVector rhsVec = getRight().toMXVector();
         
         MX updatedRhsExpression = ifcasadi.substitute(rhsVec, allVars, expressions).get(0);
         int indexInAllCurrVars = findIndexOfMXInMXVector(lhsVec.get(0), allVars);
         expressions.set(indexInAllCurrVars, updatedRhsExpression);
         return expressions;
-    }
-    
-    MXVector FIfStmt.updateExpressionsAccordingToStatement(MXVector expressions, MXVector allVars) {
-        throw new UnsupportedOperationException("If-Statements are unsupported (try to rewrite into if-expressions): " + toString());
     }
     
     /**
@@ -270,27 +262,27 @@ aspect FExpToCasADi {
     }
     
     // Arithmetic expressions
-    eq FDotAddExp.toMX() = getLeft().toMX().__add__(getRight().toMX());
-    eq FDotSubExp.toMX() = getLeft().toMX().__sub__(getRight().toMX());
-    eq FDotMulExp.toMX() = getLeft().toMX().__mul__(getRight().toMX());
-    eq FDotDivExp.toMX() = getLeft().toMX().__div__(getRight().toMX());
+    eq FAddExp.toMX() = getLeft().toMX().__add__(getRight().toMX());
+    eq FSubExp.toMX() = getLeft().toMX().__sub__(getRight().toMX());
+    eq FMulExp.toMX() = getLeft().toMX().__mul__(getRight().toMX());
+    eq FDivExp.toMX() = getLeft().toMX().__div__(getRight().toMX());
     
     // Trigonometric expression
     eq FAtan2Exp.toMX() = getFExp().toMX().arctan2(getY().toMX()); 
-    eq FSinExp.toMX()   = getFExp().toMX().sin();
-    eq FSinhExp.toMX()  = getFExp().toMX().sinh();
-    eq FAsinExp.toMX()  = getFExp().toMX().arcsin();
-    eq FCosExp.toMX()   = getFExp().toMX().cos();
-    eq FCoshExp.toMX()  = getFExp().toMX().cosh();
-    eq FAcosExp.toMX()  = getFExp().toMX().arccos();
-    eq FTanExp.toMX()   = getFExp().toMX().tan();
-    eq FTanhExp.toMX()  = getFExp().toMX().tanh();
-    eq FAtanExp.toMX()  = getFExp().toMX().arctan();
+    eq FSinExp.toMX() = getFExp().toMX().sin();
+    eq FSinhExp.toMX() = getFExp().toMX().sinh();
+    eq FAsinExp.toMX() = getFExp().toMX().arcsin();
+    eq FCosExp.toMX() = getFExp().toMX().cos();
+    eq FCoshExp.toMX() = getFExp().toMX().cosh();
+    eq FAcosExp.toMX() = getFExp().toMX().arccos();
+    eq FTanExp.toMX() = getFExp().toMX().tan();
+    eq FTanhExp.toMX() = getFExp().toMX().tanh();
+    eq FAtanExp.toMX() = getFExp().toMX().arctan();
     
     // Elementary functions  
     eq FMinExp.toMX() = getX().toMX().fmin(getY().toMX());
     eq FMaxExp.toMX() = getX().toMX().fmax(getY().toMX());
-    eq FDotPowExp.toMX() = getLeft().toMX().__pow__(getRight().toMX());
+    eq FPowExp.toMX() = getLeft().toMX().__pow__(getRight().toMX());
     eq FLogExp.toMX() = getFExp().toMX().log();
     eq FLog10Exp.toMX() = getFExp().toMX().log10();
     eq FSqrtExp.toMX() = getFExp().toMX().sqrt();
@@ -309,7 +301,6 @@ aspect FExpToCasADi {
     eq FOrExp.toMX() = getLeft().toMX().logic_or(getRight().toMX());
     
     // Other expressions
-    eq FSubscriptedExp.toMX() = select().toMX();
     syn lazy MX FClass.timeMX() = ifcasadi.msym("time");
     eq FTimeExp.toMX() = myFClass().timeMX();
     /** @return A MX with the first output, and perhaps only output, for this function call */
@@ -413,7 +404,6 @@ aspect FExpToCasADi {
     eq FPreExp.toMX() = myFV().asMXVariable();
     eq FNoEventExp.toMX() = getFExp().toMX();
     eq FSmoothExp.toMX() = getFExp().toMX();
-    eq FInStreamEpsExp.toMX() = new MX(1e-8);
     
     eq FArray.toMXVector() {
         MXVector MXVec = new MXVector();

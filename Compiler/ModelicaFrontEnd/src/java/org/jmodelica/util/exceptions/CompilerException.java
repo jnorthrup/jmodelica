@@ -18,8 +18,8 @@ package org.jmodelica.util.exceptions;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.jmodelica.api.problemHandling.Problem;
-import org.jmodelica.api.problemHandling.ProblemSeverity;
+import org.jmodelica.util.problemHandling.Problem;
+import org.jmodelica.util.problemHandling.ProblemSeverity;
 
 /**
  * Exception containing a list of compiler errors/warnings.

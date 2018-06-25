@@ -24,10 +24,10 @@ from pymodelica import compile_fmu
 from pyfmi import load_fmu
 from pyjmi import get_files_path, transfer_optimization_problem
 
-def run_demo(with_plots=True, use_ma57=True, latex_plots=False):
+def run_demo(with_plots=True, use_ma57=False):
     """
-    This example is based on a binary distillation column. The model has 42
-    states, 1083 algebraic variables and 2 control variables. The task is to
+    This example is based on a binary distillation column. The model has 125
+    states, 1000 algebraic variables and 2 control variables. The task is to
     get back to the desired steady-state after a short reflux breakdown.
     
     The example consists of the following steps:
@@ -99,7 +99,7 @@ def run_demo(with_plots=True, use_ma57=True, latex_plots=False):
         # Plotting options
         plt.rcParams.update(
             {'font.serif': ['Times New Roman'],
-             'text.usetex': latex_plots,
+             'text.usetex': True,
              'font.family': 'serif',
              'axes.labelsize': 20,
              'legend.fontsize': 16,
@@ -142,11 +142,7 @@ def run_demo(with_plots=True, use_ma57=True, latex_plots=False):
             ax.plot(t[[0, -1]], 2 * [T_28_ref + abs_zero], 'g--')
             ax.hold(False)
             ax.grid()
-            if latex_plots:
-                label = '$T_{28}$ [$^\circ$C]'
-            else:
-                label = 'T28'
-            ax.set_ylabel(label, labelpad=pad)
+            ax.set_ylabel('$T_{28}$ [$^\circ$C]', labelpad=pad)
             plt.setp(ax.get_xticklabels(), visible=False)
             scale_axis(ax)
 
@@ -155,11 +151,7 @@ def run_demo(with_plots=True, use_ma57=True, latex_plots=False):
             bx.plot(t[[0, -1]], 2 * [T_14_ref + abs_zero], 'g--')
             bx.hold(False)
             bx.grid()
-            if latex_plots:
-                label = '$T_{14}$ [$^\circ$C]'
-            else:
-                label = 'T14'
-            ax.set_ylabel(label, labelpad=pad)
+            bx.set_ylabel('$T_{14}$ [$^\circ$C]', labelpad=pad)
             plt.setp(bx.get_xticklabels(), visible=False)
             scale_axis(bx)
 
@@ -168,14 +160,8 @@ def run_demo(with_plots=True, use_ma57=True, latex_plots=False):
             cx.plot(t[[0, -1]], 2 * [Q_ref * Q_fac], 'g--')
             cx.hold(False)
             cx.grid()
-            if latex_plots:
-                ylabel = '$Q$ [kW]'
-                xlabel = '$t$ [s]'
-            else:
-                ylabel = 'Q'
-                xlabel = 't'
-            cx.set_ylabel(ylabel, labelpad=pad)
-            cx.set_xlabel(xlabel)
+            cx.set_ylabel('$Q$ [kW]', labelpad=pad)
+            cx.set_xlabel('$t$ [s]')
             scale_axis(cx)
 
             dx.plot(t, L_vol * L_fac, lw=width)
@@ -183,14 +169,8 @@ def run_demo(with_plots=True, use_ma57=True, latex_plots=False):
             dx.plot(t[[0, -1]], 2 * [L_vol_ref * L_fac], 'g--')
             dx.hold(False)
             dx.grid()
-            if latex_plots:
-                ylabel = '$L_{\Large \mbox{vol}}$ [l/h]'
-                xlabel = '$t$ [s]'
-            else:
-                ylabel = 'L'
-                xlabel = 't'
-            dx.set_ylabel(ylabel, labelpad=pad)
-            dx.set_xlabel(xlabel)
+            dx.set_ylabel('$L_{\Large \mbox{vol}}$ [l/h]', labelpad=pad)
+            dx.set_xlabel('$t$ [s]')
             scale_axis(dx)
 
             fig.suptitle(title)
@@ -209,11 +189,7 @@ def run_demo(with_plots=True, use_ma57=True, latex_plots=False):
                            ss_res.initial('absolute_zero'))
             plt.plot(temperature, 43 - i, 'ko')
         plt.title('Steady state temperatures')
-        if latex_plots:
-            label = '$T$ [$^\circ$C]'
-        else:
-            label = 'T'
-        plt.xlabel(label)
+        plt.xlabel('$T$ [$^\circ$C]')
         plt.ylabel('Tray index [1]')
 
     ### 2. Simulate the short reflux breakdown
@@ -226,6 +202,9 @@ def run_demo(with_plots=True, use_ma57=True, latex_plots=False):
     break_model.set('Vdot_L1_ref', L_vol_ref)
     for i in xrange(1, 43):
         break_model.set('xA_init[%d]' % i, ss_res.final('xA[%d]' % i))
+        break_model.set('Temp_init[%d]' % i, ss_res.final('Temp[%d]' % i))
+        if i < 42:
+            break_model.set('V_init[%d]' % i, ss_res.final('V[%d]' % i))
 
     # Define input function for broken reflux
     def input_function(time):
@@ -258,6 +237,11 @@ def run_demo(with_plots=True, use_ma57=True, latex_plots=False):
     for i in xrange(1, 43):
         ref_model.set('xA_init[' + `i` + ']',
                       break_res.final('xA[' + `i` + ']'))
+        ref_model.set('Temp_init[' + `i` + ']',
+                      break_res.final('Temp[' + `i` + ']'))
+        if i < 42:
+            ref_model.set('V_init[' + `i` + ']',
+                          break_res.final('V[' + `i` + ']'))
 
     # Simulate
     ref_res = ref_model.simulate(final_time=5000.,
@@ -278,15 +262,17 @@ def run_demo(with_plots=True, use_ma57=True, latex_plots=False):
 
     ### 4. Solve optimal control problem
     # Compile optimization problem
-    compiler_options={"common_subexp_elim":False}
     op = transfer_optimization_problem("JMExamples_opt.Distillation4_Opt",
-                                       file_name, compiler_options)
+                                       file_name)
 
     # Set initial conditions for post breakdown
     op.set('Q_elec_ref', Q_ref)
     op.set('Vdot_L1_ref', L_vol_ref)
     for i in xrange(1, 43):
         op.set('xA_init[' + `i` + ']', break_res.final('xA[' + `i` + ']'))
+        op.set('Temp_init[' + `i` + ']', break_res.final('Temp[' + `i` + ']'))
+        if i < 42:
+            op.set('V_init[' + `i` + ']', break_res.final('V[' + `i` + ']'))
 
     # Set optimization options and solve
     opts = op.optimize_options()
@@ -316,7 +302,7 @@ def run_demo(with_plots=True, use_ma57=True, latex_plots=False):
         pass
     else:
         cost = float(opt_res.solver.solver_object.output(casadi.NLP_SOLVER_F))
-        N.testing.assert_allclose(cost, 4.611038777467e-02, rtol=1e-2)
+        N.testing.assert_allclose(cost, 4.9995927e-02, rtol=1e-2)
 
     ### 5. Verify optimization discretization by simulation
     verif_model = load_fmu(model_fmu)
@@ -327,6 +313,11 @@ def run_demo(with_plots=True, use_ma57=True, latex_plots=False):
     for i in xrange(1, 43):
         verif_model.set('xA_init[' + `i` + ']',
                         break_res.final('xA[' + `i` + ']'))
+        verif_model.set('Temp_init[' + `i` + ']',
+                        break_res.final('Temp[' + `i` + ']'))
+        if i < 42:
+            verif_model.set('V_init[' + `i` + ']',
+                            break_res.final('V[' + `i` + ']'))
 
     # Simulate with optimal input
     verif_res = verif_model.simulate(final_time=5000.,

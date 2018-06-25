@@ -24,24 +24,16 @@ aspect Variability {
     eq FConstant.constantVariability() = true;	
     syn boolean FTypePrefixVariability.structParameterVariability() = false;
     eq FStructParameter.structParameterVariability() = true;
-    syn boolean FTypePrefixVariability.testParameterVariability() = false;
-    eq FTestParameter.testParameterVariability() = true;
-    syn boolean FTypePrefixVariability.evalTrueParameterVariability() = false;
-    eq FEvalTrueParameter.evalTrueParameterVariability() = true;
+    syn boolean FTypePrefixVariability.evalParameterVariability() = false;
+    eq FEvalParameter.evalParameterVariability() = true;
     syn boolean FTypePrefixVariability.finalParameterVariability() = false;
     eq FFinalParameter.finalParameterVariability() = true;
     syn boolean FTypePrefixVariability.knownParameterVariability() = false;
     eq FKnownParameter.knownParameterVariability() = true;
     syn boolean FTypePrefixVariability.indexParameterVariability() = false;
     eq FIndexParameter.indexParameterVariability() = true;
-    syn boolean FTypePrefixVariability.evalFalseParameterVariability() = false;
-    eq FEvalFalseParameter.evalFalseParameterVariability() = true;
-    syn boolean FTypePrefixVariability.fixedParameterVariability()    = false;
-    eq FFixedParameter.fixedParameterVariability()                    = true;
-    syn boolean FTypePrefixVariability.initialParameterVariability() = false;
-    eq FInitialParameter.initialParameterVariability()              = true;
-    syn boolean FTypePrefixVariability.parameterVariability()         = false;
-    eq FParameter.parameterVariability()                              = true;
+    syn boolean FTypePrefixVariability.parameterVariability() = false;
+    eq FParameter.parameterVariability() = true;	
     syn boolean FTypePrefixVariability.discreteVariability() = false;
     eq FDiscrete.discreteVariability() = true;	
     syn boolean FTypePrefixVariability.continuousVariability() = false;
@@ -63,9 +55,9 @@ aspect Variability {
     syn boolean FTypePrefixVariability.lessOrEqual(FTypePrefixVariability other) = 
             compareTo(other) <= 0;
 	
-    syn boolean FTypePrefixVariability.evalOrLess()           = lessOrEqual(fEvalTrueParameter());
+    syn boolean FTypePrefixVariability.evalOrLess()           = lessOrEqual(fEvalParameter());
     syn boolean FTypePrefixVariability.knownParameterOrLess() = lessOrEqual(fFinalParameter());
-    syn boolean FTypePrefixVariability.parameterOrLess()      = lessOrEqual(fInitialParameter());
+    syn boolean FTypePrefixVariability.parameterOrLess()      = lessOrEqual(fNonFixedParameter());
     syn boolean FTypePrefixVariability.indexParameterOrLess() = lessOrEqual(fIndexParameter());
     syn boolean FTypePrefixVariability.fixedParameterOrLess() = lessOrEqual(fFixedParameter());
     syn boolean FTypePrefixVariability.discreteOrLess()       = lessOrEqual(fDiscrete());
@@ -81,29 +73,25 @@ aspect Variability {
      * Also used to determine the behaviour of {@link #combine(FTypePrefixVariability)}.
      */
     abstract protected int FTypePrefixVariability.variabilityLevel();
-    protected int FConstant.variabilityLevel()             { return VARIABILITY_LEVEL; }
-    protected int FStructParameter.variabilityLevel()      { return VARIABILITY_LEVEL; }
-    protected int FTestParameter.variabilityLevel()        { return VARIABILITY_LEVEL; }
-    protected int FEvalTrueParameter.variabilityLevel()    { return VARIABILITY_LEVEL; }
-    protected int FFinalParameter.variabilityLevel()       { return VARIABILITY_LEVEL; }
-    protected int FIndexParameter.variabilityLevel()       { return VARIABILITY_LEVEL; }
-    protected int FEvalFalseParameter.variabilityLevel()   { return VARIABILITY_LEVEL; }
-    protected int FFixedParameter.variabilityLevel()       { return VARIABILITY_LEVEL; }
-    protected int FInitialParameter.variabilityLevel()     { return VARIABILITY_LEVEL; }
-    protected int FDiscrete.variabilityLevel()             { return VARIABILITY_LEVEL; }
-    protected int FContinuous.variabilityLevel()           { return VARIABILITY_LEVEL; }
+    protected int FConstant.variabilityLevel()        { return VARIABILITY_LEVEL; }
+    protected int FStructParameter.variabilityLevel() { return VARIABILITY_LEVEL; }
+    protected int FEvalParameter.variabilityLevel()   { return VARIABILITY_LEVEL; }
+    protected int FFinalParameter.variabilityLevel()  { return VARIABILITY_LEVEL; }
+    protected int FIndexParameter.variabilityLevel()  { return VARIABILITY_LEVEL; }
+    protected int FFixedParameter.variabilityLevel()  { return VARIABILITY_LEVEL; }
+    protected int FNonFixedParameter.variabilityLevel() { return VARIABILITY_LEVEL; }
+    protected int FDiscrete.variabilityLevel()        { return VARIABILITY_LEVEL; }
+    protected int FContinuous.variabilityLevel()      { return VARIABILITY_LEVEL; }
     protected int FCompositeVariability.variabilityLevel() { return combine().variabilityLevel(); }
-    protected static final int FConstant.VARIABILITY_LEVEL           = 0;
-    protected static final int FEvalTrueParameter.VARIABILITY_LEVEL  = 3;
-    protected static final int FStructParameter.VARIABILITY_LEVEL    = 4;
-    protected static final int FTestParameter.VARIABILITY_LEVEL      = 5;
-    protected static final int FFinalParameter.VARIABILITY_LEVEL     = 6;
-    protected static final int FIndexParameter.VARIABILITY_LEVEL     = 8;
-    protected static final int FEvalFalseParameter.VARIABILITY_LEVEL = 9;
-    protected static final int FFixedParameter.VARIABILITY_LEVEL     = 10;
-    protected static final int FInitialParameter.VARIABILITY_LEVEL   = 11;
-    protected static final int FDiscrete.VARIABILITY_LEVEL           = 20;
-    protected static final int FContinuous.VARIABILITY_LEVEL         = 30;
+    protected static final int FConstant.VARIABILITY_LEVEL          = 0;
+    protected static final int FEvalParameter.VARIABILITY_LEVEL     = 3;
+    protected static final int FStructParameter.VARIABILITY_LEVEL   = 4;
+    protected static final int FFinalParameter.VARIABILITY_LEVEL    = 5;
+    protected static final int FIndexParameter.VARIABILITY_LEVEL    = 8;
+    protected static final int FFixedParameter.VARIABILITY_LEVEL    = 10;
+    protected static final int FNonFixedParameter.VARIABILITY_LEVEL = 11;
+    protected static final int FDiscrete.VARIABILITY_LEVEL          = 20;
+    protected static final int FContinuous.VARIABILITY_LEVEL        = 30;
     
     /**
      * Combines (up) component variabilities to a single primitive variability.
@@ -136,12 +124,20 @@ aspect Variability {
     }
     
     /**
-     * If this is a composite variability, return the named component, else this.
+     * If this is a composite variability, return the i:th component, else this.
      */
-    syn FTypePrefixVariability FTypePrefixVariability.component(String name) = this;
+    syn FTypePrefixVariability FTypePrefixVariability.getPart(int i) {
+        return this;
+    }
+    
+    eq FCompositeVariability.getPart(int i) {
+        return getComponent(i).getVariability();
+    }
+    
+    syn FTypePrefixVariability FTypePrefixVariability.getPart(String name) = this;
     
     private Map<String,Integer> FCompositeVariability.nameMap = null;
-    public FTypePrefixVariability FCompositeVariability.component(String name) {
+    public FTypePrefixVariability FCompositeVariability.getPart(String name) {
         if (nameMap==null) {
             nameMap = new HashMap<String,Integer>();
             for (int i = 0; i < getNumComponent(); i++) {
@@ -151,6 +147,7 @@ aspect Variability {
         return getComponent(nameMap.get(name)).getVariability();
     }
     
+
     syn FTypePrefixVariability FAbstractEquation.variability() = fContinuous();
     eq FEquation.variability() = isWhen() ? fDiscrete() : getLeft().variability().combine(getRight().variability());
     eq FIfWhenElseEquation.variability() {
@@ -175,36 +172,43 @@ aspect Variability {
                 var = var.combine(fl.getFExp().variability());
             }
         }
-        // Check call
-        return var.combine(getCall().variability());
+        // Check all input arguments
+        for (FVariable fv : referencedFVariablesInRHS()) {
+            var = var.combine(fv.variability());
+        }
+        return var;
     }
     eq FAlgorithm.variability() {
-        FTypePrefixVariability variability = fConstant();
-        for (FAbstractVariable variable : referencedFVariablesInLHS()) {
-            variability = variability.combine(variable.variability());
+        FTypePrefixVariability rhsVar = containsFTimeExp() ? fContinuous() : fConstant();
+        FTypePrefixVariability lhsVar = fConstant();
+        for (FVariable fv : referencedFVariablesInLHS()) {
+            lhsVar = lhsVar.combine(fv.variability());
         }
-        return variability;
+        for (FVariable fv : referencedFVariablesInRHS()) {
+            rhsVar = rhsVar.combine(fv.variability());
+        }
+        return lhsVar.combineDown(rhsVar);
     }
-    
-    syn FTypePrefixVariability FAlgorithm.variabilityRHS() {
-        FTypePrefixVariability variability = fConstant();
-        for (FVariable variable : variableDependenciesRHS()) {
-            variability = variability.combine(variable.variability());
-        }
-        for (FExp exp : timeExps()) {
-            variability = variability.combine(exp.variability());
-        }
-        return variability;
-    }
-    
-    coll Set<FExp> FAbstractEquation.timeExps() [new LinkedHashSet<FExp>()]
-            with add root FAbstractEquation;
-    FTimeExp contributes this to FAbstractEquation.timeExps() for myFEquation();
-    
-    syn boolean FAbstractEquation.isConstant()   = variability().constantVariability();
-    syn boolean FAbstractEquation.isParameter()  = variability().parameterVariability();
-    syn boolean FAbstractEquation.isDiscrete()   = variability().discreteVariability();
-    syn boolean FAbstractEquation.isContinuous() = variability().continuousVariability();
+
+    syn boolean FAbstractEquation.isConstant() = false;
+    syn boolean FAbstractEquation.isParameter() = false;
+    syn boolean FAbstractEquation.isDiscrete() = false;
+    syn boolean FAbstractEquation.isContinuous() = false;
+
+    eq FEquation.isConstant() = variability().constantVariability();
+    eq FEquation.isParameter() = variability().parameterVariability();
+    eq FEquation.isDiscrete() = variability().discreteVariability();
+    eq FEquation.isContinuous() = variability().continuousVariability();
+
+    eq FFunctionCallEquation.isConstant() = variability().constantVariability();
+    eq FFunctionCallEquation.isParameter() = variability().parameterVariability();
+    eq FFunctionCallEquation.isDiscrete() = variability().discreteVariability();
+    eq FFunctionCallEquation.isContinuous() = variability().continuousVariability();
+
+    eq FAlgorithm.isConstant() = variability().constantVariability();
+    eq FAlgorithm.isParameter() = variability().parameterVariability();
+    eq FAlgorithm.isDiscrete() = variability().discreteVariability();
+    eq FAlgorithm.isContinuous() = variability().continuousVariability();
 
     syn boolean FAbstractVariable.isConstant()   = false;
     syn boolean FAbstractVariable.isParameter()  = false;
@@ -267,16 +271,15 @@ aspect Variability {
     public void FIfEquation.updateVariabilityForVariablesInWhen(boolean inWhen) {
         if (getTest().variability().knownParameterOrLess()) {
             try {
-                CValue testVal = getTest().ceval();
-                if (testVal.hasBooleanValue()) {
-                    if (testVal.booleanValue()) {
-                        getFAbstractEquations().updateVariabilityForVariablesInWhen(inWhen);
-                    } else if (hasElse()) {
-                        getElse().updateVariabilityForVariablesInWhen(inWhen);
-                    }
-                    return;
+                if (getTest().ceval().booleanValue()) {
+                    getFAbstractEquations().updateVariabilityForVariablesInWhen(inWhen);
+                } else if (hasElse()) {
+                    getElse().updateVariabilityForVariablesInWhen(inWhen);
                 }
-            } catch (ConstantEvaluationException e) {}
+                return;
+            } catch (ConstantEvaluationException e) {
+                
+            }
         }
         super.updateVariabilityForVariablesInWhen(inWhen);
     }
@@ -366,11 +369,38 @@ aspect Variability {
         throw new UnsupportedOperationException("Unable to get variability of FAbstractVariable type " + getClass().getSimpleName());
     }
     eq FVariable.variability() = getFTypePrefixVariability();
-    
+
+
+    /**
+     * Check if all referenced parameters have fixed values.
+     */
+    syn boolean FExp.valueIsFixed() {
+        for (FExp n : childFExps())
+            if (!n.valueIsFixed())
+                return false;
+        return true;
+    }
+    eq FIdUseExp.valueIsFixed()       = getFIdUse().valueIsFixed();
+    syn boolean FIdUse.valueIsFixed() = myFV().valueIsFixed();
+
+    syn boolean FAbstractVariable.valueIsFixed() = true;
+    eq FVariable.valueIsFixed() = fixedAttribute();
+
+    syn boolean FAbstractEquation.rhsIsFixed() = true;
+    eq FEquation.rhsIsFixed()                  = getRight().valueIsFixed();
+    eq FFunctionCallEquation.rhsIsFixed()      = getCall().valueIsFixed();
+
     syn boolean FExp.isConstantExp()   = variability().constantVariability();
     syn boolean FExp.isParameterExp()  = variability().parameterVariability();
     syn boolean FExp.isDiscreteExp()   = variability().discreteVariability();
     syn boolean FExp.isContinuousExp() = variability().continuousVariability();
+    
+    syn boolean FExp.isFixedParamOrLessExp() {
+        if (variability().parameterVariability()) {
+            return !containsNonFixedParameter();
+        }
+        return variability().parameterOrLess();
+    }
     
     syn boolean FSubscript.isConstant() = true;
     eq FExpSubscript.isConstant() = getFExp().isConstantExp();
@@ -390,8 +420,8 @@ aspect Variability {
 
     eq FUnsupportedExp.expVariability() = fContinuous(); // Only here to avoid null pointer 
     
-    eq FSubscriptedExp.expVariability() = getFExp().variability().combine(indexVariability());
-    eq FComponentExp.expVariability()   = getFExp().variability().component(getName());
+    eq FSubscriptedExp.expVariability() = super.expVariability().combine(indexVariability());
+    
 
     public static FTypePrefixVariability FExp.combineFExpListVariability(Iterable<? extends FExp> exps) {
         Iterator<? extends FExp> it = exps.iterator();
@@ -401,53 +431,53 @@ aspect Variability {
         return total;
     }
 
-    eq FLitExp.expVariability()         = fConstant();
-    eq FNoExp.expVariability()          = fConstant();
-    eq FNdimsExp.expVariability()       = fConstant();
-    eq FEndExp.expVariability()         = fStructParameter();
-    eq FTimeExp.expVariability()        = fContinuous();
-    eq FRelExp.expVariability()         = inNoEventExp() ? super.expVariability() : super.expVariability().combineDown(fDiscrete());
-    eq FInStreamEpsExp.expVariability() = fContinuous();
-    // Should be safe, FDSDerExp are introduced by index reduction and represent
-    // derivatives which always are continuous and real typed.
-    eq FDSDerExp.expVariability()       = fContinuous();
-
+    eq FLitExp.expVariability()   = fConstant();
+    eq FNoExp.expVariability()    = fConstant();
+    eq FNdimsExp.expVariability() = fConstant();
+    eq FEndExp.expVariability()   = fStructParameter();
+    eq FTimeExp.expVariability()  = fContinuous();
+    eq FRelExp.expVariability()   = super.expVariability().combineDown(fDiscrete());
 
     eq FSizeExp.expVariability() {
         FTypePrefixVariability res = ASTNode.fConstant();
         if (hasDim()) {
             if (getDim().variability().knownParameterOrLess()) {
                 try {
-                    CValue dimVal = getDim().ceval();
-                    if (dimVal.hasIntValue()) {
-                        int dim = dimVal.intValue() - 1;
-                        if (getFExp().size().has(dim)) {
-                            return getFExp().size().variability(dim);
-                        }
-                    }
-                } catch (ConstantEvaluationException e) {}
+                    CValue v = getDim().ceval();
+                    return getFExp().size().variability(v.intValue() - 1);
+                } catch (ConstantEvaluationException e) {
+                    
+                }
             }
             res = res.combine(getDim().variability());
         }
         res = res.combine(getFExp().size().variability());
         return res;
     }
-    eq FUnknownSizeExp.expVariability() = fParameter().combine(getDim().variability());
     
     public FTypePrefixVariability Size.variability() {
-        FTypePrefixVariability res = ASTNode.fConstant();
-        for (int i = 0; i < ndims(); i++) {
+        return ASTNode.fConstant();
+    }
+    public FTypePrefixVariability MutableSize.variability() {
+        FTypePrefixVariability res = super.variability();
+        for (int i = 0; i < exps.length; i++) {
             res = res.combine(variability(i));
         }
         return res;
     }
     
     public FTypePrefixVariability Size.variability(int d) {
-        return (size[d] == Size.UNKNOWN) ? ASTNode.fDiscrete() : ASTNode.fConstant();
+        return ASTNode.fConstant();
     }
     public FTypePrefixVariability MutableSize.variability(int d) {
-        return (exps[d] != null) ? getFExp(d).variability() : super.variability(d);
+        FTypePrefixVariability res = super.variability(d);
+        if (hasFExp(d)) {
+            res = res.combine(getFExp(d).variability());
+        }
+        return res;
     }
+    
+    eq FUnknownSizeExp.expVariability() = fParameter();
     
     eq FSignExp.expVariability() = getFExp().variability().combineDown(fDiscrete());
 
@@ -458,7 +488,6 @@ aspect Variability {
     eq FHomotopyExp.expVariability() = getActual().variability();
 
     eq FCardinality.expVariability() = fParameter();
-    eq FDecouple.expVariability()    = getFExp().variability();
 
 	eq FIterExp.expVariability() {
         FTypePrefixVariability total;
@@ -470,12 +499,18 @@ aspect Variability {
             total = getArray().iteratorFExp().next().variability();
         
         for (CommonForIndex ind : getForIndexList())
-            total = total.combine(ind.variability());
+            if (ind.hasFExp())
+                total = total.combine(ind.getFExp().variability());
         return total;
     }
 
-    syn FTypePrefixVariability CommonForIndex.variability() = getFExp().variability();
-    eq InstForIndexNoExp.variability()                      = fParameter();
+    eq InstFunctionCall.expVariability() {
+        FTypePrefixVariability total = fConstant();
+        for (InstFunctionArgument arg : getArgs()) 
+            if (arg.isOKArg())
+                total = total.combine(arg.getFExp().variability().combine());
+        return total;
+    }
     
     eq FMulExp.expVariability() {
         // Refined by variability propagation
@@ -488,12 +523,13 @@ aspect Variability {
     }
 
 
-    eq FConnectionsOp.expVariability() = fConstant();
+    // TODO: Maybe there should be a special variability for "no return value"
+    eq FConnectionsOp.expVariability() = null;
     eq FConnBoolOp.expVariability()    = fConstant();
 
-    eq FTerminate.expVariability() = getFExp().variability();
-    eq FReinit.expVariability() = fDiscrete();
-    eq FAssert.expVariability() = getTest().variability().combine(getMsg().variability());
+    eq FTerminate.expVariability() = null;
+    eq FReinit.expVariability() = null;
+    eq FAssert.expVariability() = null;
 
     eq FDelayExp.expVariability() = getFExp().variability();
 
@@ -512,6 +548,8 @@ aspect Variability {
             return (fContinuous());
         }
     }
+
+	syn FTypePrefixVariability FForIndex.variability() = hasFExp() ? getFExp().variability() : fParameter();
 
     syn FTypePrefixVariability FSubscript.variability() = fConstant();
 	eq FExpSubscript.variability() = getFExp().variability();
@@ -550,7 +588,6 @@ aspect Variability {
     eq FChangeExp.expVariability() = getFExp().variability().combineDown(fDiscrete());
     eq FLoadResource.expVariability() = fParameter();
     eq FSampleExp.expVariability() = fDiscrete();
-    eq FStringExp.expVariability() = super.expVariability().combineDown(fDiscrete());
 
     eq FSimulationStateBuiltIn.expVariability() = fParameter();
     eq FInitialExp.expVariability()             = fDiscrete();
@@ -611,7 +648,7 @@ aspect Variability {
         for (FComponentVariability fcv : getComponents()) {
             String name = fcv.getName();
             FTypePrefixVariability v = fcv.getVariability();
-            FTypePrefixVariability nv = other.component(name);
+            FTypePrefixVariability nv = other.getPart(name);
             nv = v.combine(nv, combiner);
             l.add(new FComponentVariability(fcv.getName(), nv));
             low = low.combineDown(nv.combineDown());
@@ -644,17 +681,15 @@ aspect Variability {
 
 aspect VariabilitySingletons {
 
-    public static final FContinuous         FContinuous.instance         = new FContinuous();
-    public static final FDiscrete           FDiscrete.instance           = new FDiscrete();
-    public static final FInitialParameter   FInitialParameter.instance   = new FInitialParameter();
-    public static final FFixedParameter     FFixedParameter.instance     = new FFixedParameter();
-    public static final FEvalFalseParameter FEvalFalseParameter.instance = new FEvalFalseParameter();
-    public static final FIndexParameter     FIndexParameter.instance     = new FIndexParameter();
-    public static final FFinalParameter     FFinalParameter.instance     = new FFinalParameter();
-    public static final FEvalTrueParameter  FEvalTrueParameter.instance  = new FEvalTrueParameter();
-    public static final FStructParameter    FStructParameter.instance    = new FStructParameter("");
-    public static final FTestParameter      FTestParameter.instance      = new FTestParameter();
-    public static final FConstant           FConstant.instance           = new FConstant();
+    public static final FContinuous      FContinuous.instance      = new FContinuous();
+    public static final FDiscrete        FDiscrete.instance        = new FDiscrete();
+    public static final FNonFixedParameter FNonFixedParameter.instance = new FNonFixedParameter();
+    public static final FFixedParameter  FFixedParameter.instance  = new FFixedParameter();
+    public static final FIndexParameter  FIndexParameter.instance  = new FIndexParameter();
+    public static final FFinalParameter  FFinalParameter.instance  = new FFinalParameter();
+    public static final FEvalParameter   FEvalParameter.instance   = new FEvalParameter();
+    public static final FStructParameter FStructParameter.instance = new FStructParameter();
+    public static final FConstant        FConstant.instance        = new FConstant();
 
     public static FContinuous ASTNode.fContinuous() {
         return FContinuous.instance;
@@ -671,16 +706,12 @@ aspect VariabilitySingletons {
         return fFixedParameter();
     }
     
-    public static FParameter ASTNode.fInitialParameter() {
-        return FInitialParameter.instance;
+    public static FParameter ASTNode.fNonFixedParameter() {
+        return FNonFixedParameter.instance;
     }
     
     public static FParameter ASTNode.fFixedParameter() {
         return FFixedParameter.instance;
-    }
-    
-    public static FEvalFalseParameter ASTNode.fEvalFalseParameter() {
-        return FEvalFalseParameter.instance;
     }
     
     public static FParameter ASTNode.fIndexParameter() {
@@ -691,20 +722,12 @@ aspect VariabilitySingletons {
         return FFinalParameter.instance;
     }
     
-    public static FEvalTrueParameter ASTNode.fEvalTrueParameter() {
-        return FEvalTrueParameter.instance;
+    public static FEvalParameter ASTNode.fEvalParameter() {
+        return FEvalParameter.instance;
     }
     
     public static FStructParameter ASTNode.fStructParameter() {
         return FStructParameter.instance;
-    }
-
-    public static FStructParameter ASTNode.fStructParameter(String reason) {
-        return new FStructParameter(reason);
-    }
-
-    public static FTestParameter ASTNode.fTestParameter() {
-        return FTestParameter.instance;
     }
     
     public static FConstant ASTNode.fConstant() {

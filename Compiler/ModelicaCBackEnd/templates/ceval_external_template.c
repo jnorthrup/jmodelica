@@ -1,16 +1,17 @@
 /*
-    Copyright (C) 2015-2018 Modelon AB
+    Copyright (C) 2009 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
-    it under the terms of the Common Public License as published by
-    IBM, version 1.0 of the License.
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
 
     This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY. See the Common Public License for more details.
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-    You should have received a copy of the Common Public License
-    along with this program. If not, see
-    <http://www.ibm.com/developerworks/library/os-cpl.html/>.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <stdio.h>
@@ -27,7 +28,7 @@ $ECE_external_includes$
 #define JMCEVAL_DEBUG 0
 #define JMCEVAL_DBGP(x) if (JMCEVAL_DEBUG) { printf(x); fflush(stdout);}
 
-/* Format specifier when printing jmi_real_t */
+/* Format specifier when printing jmi_ad_var_t */
 #define JMCEVAL_realFormat "%.16f"
 
 /* Used record definitions */
@@ -39,7 +40,7 @@ $ECE_record_definitions$
 
 /* Parse/print basic types */
 double JMCEVAL_parseReal() {
-    /* Char buffer when reading jmi_real_t. This is necessary
+    /* Char buffer when reading jmi_ad_var_t. This is necessary
        since "%lf" is not allowed in c89. */
     char buff[32];
     JMCEVAL_DBGP("Parse number: "); 
@@ -79,10 +80,12 @@ void JMCEVAL_printString(const char* str) {
 #define JMCEVAL_printEnum(X)    JMCEVAL_printInteger(X)
 #define JMCEVAL_parse(TYPE, X)  X = JMCEVAL_parse##TYPE()
 #define JMCEVAL_print(TYPE, X)  JMCEVAL_print##TYPE(X)
+#define JMCEVAL_free(X)         free(X)
 
 /* Parse/print arrays */
 #define JMCEVAL_parseArray(TYPE,ARR) for (vi = 1; vi <= ARR->num_elems; vi++) { JMCEVAL_parse(TYPE, jmi_array_ref_1(ARR,vi)); }
 #define JMCEVAL_printArray(TYPE,ARR) for (vi = 1; vi <= ARR->num_elems; vi++) { JMCEVAL_print(TYPE, jmi_array_val_1(ARR,vi)); }
+#define JMCEVAL_freeArray(ARR)       for (vi = 1; vi <= ARR->num_elems; vi++) { JMCEVAL_free(jmi_array_val_1(ARR,vi)); }
 
 /* Used by ModelicaUtilities */
 void jmi_global_log(int warning, const char* name, const char* fmt, const char* value)
@@ -94,25 +97,27 @@ void jmi_global_log(int warning, const char* name, const char* fmt, const char* 
     JMCEVAL_printString(value);
 }
 
+void* jmi_global_calloc(size_t n, size_t s)
+{
+    return calloc(n, s);
+}
+
 jmp_buf jmceval_try_location;
 
-#define JMCEVAL_try() (setjmp(jmceval_try_location) == 0)
+int JMCEVAL_try() {
+    return setjmp(jmceval_try_location) == 0;
+}
 
 void jmi_throw()
 {
     longjmp(jmceval_try_location, 1);
 }
 
-jmi_dynamic_function_memory_t* dyn_fcn_mem = NULL;
+jmi_dynamic_list dyn_mem_head = {NULL, NULL};
+jmi_dynamic_list* dyn_mem_last = &dyn_mem_head;
 
-jmi_dynamic_function_memory_t* jmi_dynamic_function_memory() {
-    if (dyn_fcn_mem == NULL) { dyn_fcn_mem = jmi_dynamic_function_pool_create(1024*1024); }
-    return dyn_fcn_mem;
-}
-
-void* jmi_global_calloc(size_t n, size_t s)
-{
-    return jmi_dynamic_function_pool_direct_alloc(dyn_fcn_mem, n*s, 1);
+jmi_dynamic_list** jmi_dyn_mem_last() {
+    return &dyn_mem_last;
 }
 
 void JMCEVAL_setup() {
@@ -156,17 +161,16 @@ int main(int argc, const char* argv[])
     /* Indices for parsing/printing vars, dimensions */
     size_t vi,di;
     
-$ECE_decl$
-$ECE_setup_decl$
+    $ECE_decl$
 
+
+    JMI_DYNAMIC_INIT()
     JMCEVAL_setup(); /* This needs to happen first */
 
     JMCEVAL_check("START");
     if (JMCEVAL_try()) {
-        JMI_DYNAMIC_INIT()
         /* Init phase */
-$ECE_setup_init$
-        JMI_DYNAMIC_FREE()
+        $ECE_init$
     } else {
         JMCEVAL_failed();
     }
@@ -174,28 +178,26 @@ $ECE_setup_init$
     JMCEVAL_check("READY");
     while (JMCEVAL_cont("EVAL\n")) {
         JMI_DYNAMIC_INIT()
-$ECE_calc_decl$
-$ECE_calc_init$
+        $ECE_calc_init$
         JMCEVAL_check("CALC");
         if (JMCEVAL_try()) {
             /* Calc phase */
-$ECE_calc$
+            $ECE_calc$
         } else {
             JMCEVAL_failed();
         }
-$ECE_calc_free$
+        $ECE_calc_free$
         JMI_DYNAMIC_FREE()
         JMCEVAL_check("READY");
     }
 
     if (JMCEVAL_try()) {
         /* End phase */
-$ECE_free$
-$ECE_setup_free$
+        $ECE_end$
     } else {
         JMCEVAL_failed();
     }
-    jmi_dynamic_function_pool_destroy(dyn_fcn_mem);
+    JMI_DYNAMIC_FREE()
     JMCEVAL_check("END");
     return 0;
 }

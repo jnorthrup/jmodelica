@@ -29,26 +29,16 @@ static const char *getenv_checked(const char *name) {
 jint initJVM()
 {
     string jmhome = string(getenv_checked("JMODELICA_HOME"));    
-    string mclib;
-    try {
-        mclib = string(getenv_checked("CASADI_INTERFACE_HOME"));
-    } catch (std::runtime_error& e) {
-        mclib = jmhome + "/lib/casadi_interface";
-    }
+    string mclib = jmhome + "/lib/casadi_interface";
     
     string mcjar = mclib + "/ModelicaCompiler.jar";
     string ocjar = mclib + "/OptimicaCompiler.jar";
     string utiljar = mclib + "/util.jar";
     string beaverjar = jmhome + "/ThirdParty/Beaver/lib/beaver-rt.jar";
     string classpath = mcjar + CLASSPATH_SEP + ocjar + CLASSPATH_SEP + utiljar + CLASSPATH_SEP + beaverjar;
-    string casadilib;
-    try {
-        casadilib = string(getenv_checked("CASADI_LIB_HOME"));
-    } catch (std::runtime_error& e) {
-        casadilib = jmhome + "/ThirdParty/CasADi/lib";
-    }
-    string libpath = mclib + CLASSPATH_SEP
-                   + casadilib;
+
+    string libpath = jmhome + "/lib/casadi_interface" + CLASSPATH_SEP
+                   + jmhome + "/ThirdParty/CasADi/lib";
     
     return initJVM(classpath.data(), libpath.data());
 }
@@ -121,7 +111,7 @@ jint initJVM(const char *classpath, const char *libpath)
     vm_args.ignoreUnrecognized = false;
   
     jint res = CreateJavaVM(&jvm, (void**)&vm_env, &vm_args);
-    delete[] options;
+    delete options;
 
     if (res < 0) {
         throw std::runtime_error("Failed to create Java VM");

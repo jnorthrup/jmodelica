@@ -26,8 +26,4 @@ namespace ModelicaCasADi
         }
         return daeRes;
     }
-
-    void FlatEquations::addDaeEquation(Ref<Equation>eq) { daeEquations.push_back(eq); }
-
-    std::vector< Ref< Equation> > FlatEquations::getDaeEquations() const { return daeEquations; }
 }; //End namespace

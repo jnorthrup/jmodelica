@@ -155,15 +155,6 @@ package Singular "Some tests for singular systems"
         der(v) = time;
     end LinearEvent2;
     
-    model LinearEvent3
-		Real x(start=0), y1, y2;
-		parameter Real p1=1, p2=0, p3=2;
-	equation
-	  y1 = noEvent(if - time >= 0.5 then (- p3) * p1 else (- p3) * x);
-	  y2 = - p2 - y1;
-	  y2 = noEvent(if time >= 0.5 then p3 * 0.01 else p3 * x);
-	end LinearEvent3;
-    
     model NonLinear4 "Actually Linear"
         parameter Real a11 = 1;
         parameter Real a12 = 0;
@@ -213,52 +204,5 @@ package Singular "Some tests for singular systems"
         (sin(z)+y) = 0;
         (sin(x*y*z)+z) = 0;
     end NonLinear5;
-	
-	model NoMinimumNormSolution
-        Real x,y,z,v;
-        parameter Real a11 = 1;
-        parameter Real a12 = 2;
-        parameter Real a13 = 3;
-        parameter Real a21 = 1;
-        parameter Real a22 = 1;
-        parameter Real a23 = 1;
-        Real a31(start=0);
-        Real a32(start=0);
-        Real a33(start=0);
-        parameter Real b[3] = {1,2,3};
-    equation
-		a33=a31+a32;
-		a33=a31^2+a32^2;
-		a33=a31-a32;
-        a11*x+a12*y+a13*z = b[1];
-        a21*x+a22*y+a23*z = b[2];
-        a31*x+a32*y+a33*z = b[3];
-        der(v) = time;
-    end NoMinimumNormSolution;
-    
-    model ZeroColumnJacobian
-        Real x(start=0, nominal=1e-1);
-        Real y;
-        Real z;
-        Real w(start=1);
 
-    function f
-        input Real a;
-        input Real b;
-        output Real c;
-        Real d;
-    algorithm
-        d := b;
-        c:= a+d;
-    end f;    
-    equation
-        z=1e-8*x;
-        w^2=y;
-        0=2*y-f(z,w)-1;
-        z-2*y+3-f(x^2,-z)=0;
-    end ZeroColumnJacobian;
-
-    model ZeroColumnJacobian2
-        extends ZeroColumnJacobian(x(nominal=1e-2));
-    end ZeroColumnJacobian2;
 end Singular;
