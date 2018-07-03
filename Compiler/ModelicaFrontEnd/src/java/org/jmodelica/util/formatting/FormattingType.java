@@ -5,6 +5,7 @@ public enum FormattingType {
     NON_BREAKING_WHITESPACE,
     LINE_BREAK,
     COMMENT,
+    VISIBILITY_INFO,
     MIXED,
     EMPTY;
 }
