@@ -86,7 +86,7 @@ aspect RuntimeOptions {
         v.setTypePrefixVariability(Variability.FIXEDPARAMETER);
         v.setTypePrefixInputOutput(TypePrefixInputOutput.NONE);
         v.setBindingExp(bExp);
-        v.setFAccess(new FAccessString(name));
+        v.setFQName(new FQNameString(name));
         return v;
     }
 

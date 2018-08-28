@@ -89,8 +89,8 @@ aspect OptimicaExpressions {
 	 */
 	rewrite FTimedVariable {
 		when (rewriteAlias && !getName().myFV().isUnknown() && getName().myFV().isAlias()) to FExp {
-			FAccess new_name = ((FVariable)getName().myFV()).alias().getFAccess().treeCopy();
-			FExp new_exp = new FTimedVariable(new_name, getArg());
+			FQName new_name = (FQName)((FVariable)getName().myFV()).alias().getFQName().fullCopy();
+			FExp new_exp = new FTimedVariable(new FIdUse(new_name),getArg());
 			if (getName().myFV().isNegated()) 
 				new_exp = new FNegExp(new_exp);
 			return new_exp;
@@ -197,7 +197,7 @@ aspect OptimicaArrays {
 	syn lazy ArrayExp FTimedVariable.getArrayExp() {
 		ArrayExp array = new ArrayExp(indices());
 		for (Index i : array.indices()) {
-			CommonAccess name = getName().specify(i, true);
+			FIdUse name = getName().specify(i, true);
 			FExp arg = getArg().fullCopy();
 			array.set(i, new FTimedVariable(name, arg));
 		}
