@@ -984,17 +984,12 @@ aspect Flattening {
     @Override
     public FType FPrimitiveType.flatten(Flattener f, InstAssignable ia, boolean keepSizeExpressions) {
         FType res;
-        if(keepSizeExpressions && !getSize().variability().knownParameterOrLess()) {
+        if(keepSizeExpressions && ia == null && !getSize().variability().knownParameterOrLess() && !inFunction()) {
             MutableSize mutableSize = (MutableSize) getSize();
             List<FExp> l = mutableSize.flattenExps(f);
-            if (l.getNumChild() > 0 && l.getNumChild() == mutableSize.ndims()) {
-                FPrimitiveType copy = fullCopy();
-                copy.setSize(Size.SCALAR);
-                res = new FArrayType(copy , l);
-            } else {
-                res = fullCopy();
-                res.setSize(getSize().flatten(f, res, keepSizeExpressions));
-            }
+            FPrimitiveType copy = fullCopy();
+            copy.setSize(Size.SCALAR);
+            res = new FArrayType(copy , l);
         } else {
             res = fullCopy();
             res.setSize(getSize().flatten(f, res, keepSizeExpressions));
@@ -1209,7 +1204,7 @@ aspect Flattening {
             for (int i = 0; i < ndims(); i++) {
                 l.add(flattenFSubscript(f, i));
             }
-            return FArraySubscripts.createFArraySubscripts(l);
+            return new FArraySubscripts(l);
         }
         return null;
     }
@@ -1224,7 +1219,7 @@ aspect Flattening {
                 exps[i].variability().knownParameterOrLess()) {
             return super.flattenFSubscript(f, i);
         }
-        return exps[i].flatten(f).createFSubscript();
+        return new FExpSubscript(exps[i].flatten(f));
     }
 
     public void InstAssignable.flatten(Flattener f, FlattenBindingExp binding, int level) {
@@ -1263,7 +1258,7 @@ aspect Flattening {
     public void InstFunctionCall.flattenAssertExternal(Flattener f) {
         if (variability().knownParameterOrLess() && myInstCallable().isExternalFunction()) {
             try {
-                String msg = "Error " + runtimeErrorString("Structural parameter external function call '"
+                String msg = runtimeErrorString("Structural parameter external function call '"
                         + name() + "' did not evaluate to same result as during compilation");
                 CValue cval = ceval();
                 if (cval.hasBuildLiteral()) {
@@ -1277,27 +1272,15 @@ aspect Flattening {
     
     public String ASTNode.runtimeErrorString(String msg) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Error ");
-        errorLocation(sb);
-        sb.append("': ");
-        sb.append(msg);
-        return sb.toString().replace("\\", "\\\\");
-    }
-    
-    public String ASTNode.errorLocation() {
-        StringBuilder sb = new StringBuilder();
-        errorLocation(sb);
-        return sb.toString();
-    }
-    
-    public void ASTNode.errorLocation(StringBuilder sb) {
-        sb.append("at line ");
+        sb.append("Error at line ");
         sb.append(beginLineRecursive());
         sb.append(", column ");
         sb.append(beginColumnRecursive());
         sb.append(", in file '");
-        sb.append(fileName());
-        sb.append("'");
+        sb.append(fileName().replace("\\", "\\\\"));
+        sb.append("': ");
+        sb.append(msg);
+        return sb.toString();
     }
     
     syn boolean ASTNode.externalDependency() {
@@ -1987,7 +1970,7 @@ aspect Flattening {
     
     syn FSubscript FSubscript.specify(int index);
     eq FExpSubscript.specify(int index)     = 
-        getFExp().getArray().getFExp(index - 1).treeCopy().createFSubscript();
+        new FExpSubscript(getFExp().getArray().getFExp(index - 1).fullCopy());
     eq FIntegerSubscript.specify(int index) = this;
     eq FColonSubscript.specify(int index)   = new FIntegerSubscript(index);
 
@@ -2265,7 +2248,7 @@ aspect FlatExpressions {
         List l = new List();
         for (FSubscript fs : getFSubscripts())
             l.add(fs.flatten(f));
-        return FArraySubscripts.createFArraySubscripts(l);
+        return new FArraySubscripts(l);
     }
 
     abstract public FSubscript FSubscript.flatten(Flattener f);
@@ -2308,11 +2291,11 @@ aspect FlatExpressions {
         if (ndims() == 0) {
             return null;
         }
-        List<FSubscript> list = new List<FSubscript>();
+        FArraySubscripts fas = new FArraySubscripts();
         for (int i = 0; i < ndims(); i++) {
-            list.add(flattenSubscript(i));
+            fas.addFSubscript(flattenSubscript(i));
         }
-        return FArraySubscripts.createFArraySubscripts(list);
+        return fas;
     }
     
     public FSubscript FIntegerSubscript.flatten(Flattener f) { 
@@ -2320,7 +2303,7 @@ aspect FlatExpressions {
     }
 
     public FSubscript FExpSubscript.flatten(Flattener f) {
-        return getFExp().flatten(f).createFSubscript();
+        return new FExpSubscript(getFExp().flatten(f));
     }
 
     public FExp FExp.flatten(Flattener f) {
@@ -2351,7 +2334,7 @@ aspect FlatExpressions {
      * Create a constant FSubscript.
      */
     public FSubscript CValue.createFSubscript() {
-        return buildLiteral().createFSubscript();
+        return new FExpSubscript(buildLiteral());
     }
     
     public FSubscript CValueInteger.createFSubscript() {
@@ -3085,7 +3068,7 @@ aspect InstantiatedExpressions {
         List l = new List();
         for (SrcSubscript s : getSrcSubscripts())
             l.add(s.instantiate());
-        return copyLocationTo(new FArrayExpSubscripts(l));
+        return copyLocationTo(new FArraySubscripts(l));
     }
     
     abstract public FSubscript SrcSubscript.instantiate();
@@ -3094,7 +3077,7 @@ aspect InstantiatedExpressions {
     }
     
     public FSubscript SrcExpSubscript.instantiate() {
-        return copyLocationTo(getSrcExp().instantiate().createFSubscript());
+        return copyLocationTo(new FExpSubscript(getSrcExp().instantiate()));
     }
     
     public FExp SrcExp.instantiate() {

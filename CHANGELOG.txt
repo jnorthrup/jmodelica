@@ -7,9 +7,6 @@ with a VS2017 compiled software.
 Update handling of constants, and accesses to package constants, in functions
 for improved compilation and simulation performance.
 
-; Fixed ; Minor ; PyFMI ; #5668
-Fixed issue with reusing the PyFMI computed FD Jacobian.
-
 ; Fixed ; Minor ; Runtime ; #5665
 Updated the loglevel conversion between runtime and Kinsol which in some
 models has significant impact on the performance.
@@ -19,6 +16,7 @@ loadResource on directories now always leads to compile time evaluation of path.
 
 ; Fixed ; Minor ; Compiler ; #5642
 Improved and added tests for SimpleLookup. Now supports Quoted names.
+JavaDoc has also been added.
 
 ; Fixed ; Minor ; Compiler ; #5640 
 Fixed a problem where functions had to restrictive visibility.

@@ -196,31 +196,15 @@ aspect FlatNames {
     }
     
     public FArraySubscripts FArraySubscripts.createEvaluated() {
-        List<FSubscript> list = new List<FSubscript>();
-        for (FSubscript fs : getFSubscripts()) {
-            list.add(fs.createEvaluated());
-        }
-        FArraySubscripts res = FArraySubscripts.createFArraySubscripts(list);
+        FArraySubscripts res = new FArraySubscripts(new List());
+        for (FSubscript fs : getFSubscripts())
+            res.addFSubscript(fs.createEvaluated());
         res.setParent(getParent());
         return res;
     }
 
-    public abstract FExp FSubscript.getFExp();
-
-    public FExp FIntegerSubscript.getFExp() {
-        return new FIntegerLitExp(getValue());
-    }
-
-    public FExp FColonSubscript.getFExp() {
-        throw new UnsupportedOperationException();
-    }
-
-    public int FSubscript.getValue() {
-        throw new UnsupportedOperationException();
-    }
-
     public FSubscript FSubscript.createEvaluated() {
-        return treeCopy();
+        return (FSubscript) fullCopy();
     }
 
     public FSubscript FColonSubscript.createEvaluated() {
@@ -237,7 +221,7 @@ aspect FlatNames {
                 return val.createFSubscript();
             }
         } catch (ConstantEvaluationException e) {}
-        return treeCopy();
+        return fullCopy();
     }
     
     syn boolean FSubscript.isColon() = false;
@@ -245,9 +229,6 @@ aspect FlatNames {
     
     syn boolean FSubscript.isExpSubscript() = false;
     eq FExpSubscript.isExpSubscript()       = true;
-    
-    syn boolean FSubscript.isIntegerSubscript() = false;
-    eq FIntegerSubscript.isIntegerSubscript()   = true;
     
     syn FExpSubscript FSubscript.asExpSubscript() {
         throw new UnsupportedOperationException();
@@ -518,7 +499,6 @@ aspect FlatNames {
                 return true;
         return false;
     }
-    eq FArrayLitSubscripts.hasNonLiteralSubscripts() = false;
 
     /**
      * Check if this array subscript is an expression or colon. 
@@ -706,24 +686,24 @@ aspect FlatNames {
     /**
      * Create a copy of the name, with an FSubscript added to the last part.
      */
-    public abstract FAccess FAccess.copyAndAddSubscript(int s);
+    public abstract FAccess FAccess.copyAndAddSubscript(FSubscript s);
     
-    public FAccess FAccessEmpty.copyAndAddSubscript(int s) {
+    public FAccess FAccessEmpty.copyAndAddSubscript(FSubscript s) {
         throw new UnsupportedOperationException();
     }
     
-    public FAccess FAccessString.copyAndAddSubscript(int s) {
+    public FAccess FAccessString.copyAndAddSubscript(FSubscript s) {
         return new FAccessFull(getName()).addSubscript(s);
     }
     
-    public FAccess FAccessFull.copyAndAddSubscript(int s) {
+    public FAccess FAccessFull.copyAndAddSubscript(FSubscript s) {
         return fullCopy().addSubscript(s);
     }
 
     /**
      * Add new FSubscript to the last name part.
      */
-    public FAccess FAccessFull.addSubscript(int s) {
+    public FAccess FAccessFull.addSubscript(FSubscript s) {
         int i = getNumFAccessPart() - 1;
         setFAccessPart(getFAccessPart(i).addSubscript(s), i);
         return this;
@@ -734,11 +714,11 @@ aspect FlatNames {
      * 
      * This name part might or might not be altered - replace it with the return value.
      */
-    public FAccessPartArray FAccessPart.addSubscript(int s) {
-        return new FAccessPartArray(getName(), new FArrayLitSubscripts(s));
+    public FAccessPartArray FAccessPart.addSubscript(FSubscript s) {
+        return new FAccessPartArray(getName(), new FArraySubscripts(new List(s)));
     }
    
-    public FAccessPartArray FAccessPartArray.addSubscript(int s) {
+    public FAccessPartArray FAccessPartArray.addSubscript(FSubscript s) {
         getFArraySubscripts().addFSubscript(s);
         return this;
     }

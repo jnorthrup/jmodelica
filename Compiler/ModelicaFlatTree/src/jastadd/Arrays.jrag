@@ -49,8 +49,7 @@ aspect Arrays {
 	 * @throws ConstantEvaluationException  if the subscripts can't be evaluated to 
 	 *                                      constant Integer values.
 	 */
-	syn Index FArraySubscripts.asIndex() = createIndex();
-	syn lazy Index FArrayExpSubscripts.asIndex() = createIndex();
+	syn lazy Index FArraySubscripts.asIndex() = createIndex();
 	
 	/**
 	 * Return an Index with these array subscripts.
@@ -71,54 +70,7 @@ aspect Arrays {
 			i[j++] = s.value();
 		return new Index(i);
 	}
-
-    private int[] FArrayLitSubscripts.subscripts = new int[0];
-
-    public abstract FSubscript FArraySubscripts.getFSubscript(int i);
-    public FSubscript FArrayLitSubscripts.getFSubscript(int i) {
-        return new FIntegerSubscript(subscripts[i]);
-    }
-
-    public abstract List<FSubscript> FArraySubscripts.getFSubscriptList(); 
-    public List<FSubscript> FArrayLitSubscripts.getFSubscriptList() {
-        return getFSubscripts();
-    }
-
-    public abstract List<FSubscript> FArraySubscripts.getFSubscriptListNoTransform(); 
-    public List<FSubscript> FArrayLitSubscripts.getFSubscriptListNoTransform() {
-        return getFSubscripts();
-    }
-
-    public abstract List<FSubscript> FArraySubscripts.getFSubscripts(); 
-    public List<FSubscript> FArrayLitSubscripts.getFSubscripts() {
-        java.util.List<FSubscript> list = new ArrayList<>(subscripts.length);
-        for (int i : subscripts) {
-            list.add(new FIntegerSubscript(i));
-        }
-        return new List<>(list);
-    }
-
-    public abstract int FArraySubscripts.getNumFSubscript();
-    public int FArrayLitSubscripts.getNumFSubscript() {
-        return subscripts.length;
-    }
-
-    public abstract void FArraySubscripts.addFSubscript(FSubscript node);
-    public void FArrayLitSubscripts.addFSubscript(FSubscript node) {
-        addFSubscript(node.getValue());
-    }
-
-    public abstract void FArraySubscripts.addFSubscriptNoTransform(FSubscript node);
-    public void FArrayLitSubscripts.addFSubscriptNoTransform(FSubscript node) {
-        addFSubscript(node);
-    }
-
-    public abstract void FArraySubscripts.setFSubscript(FSubscript node, int i);
-    public void FArrayLitSubscripts.setFSubscript(FSubscript node, int i) {
-        subscripts = Arrays.copyOf(subscripts, subscripts.length);
-        subscripts[i] = node.getValue();
-    }
-
+	
 	/**
 	 * Get the dimensions to use in dimension conversion.
 	 */
@@ -172,9 +124,7 @@ aspect Arrays {
 	 * 
 	 * @return Array dimension.
 	 */	
-	syn int FArraySubscripts.accessNdims();
-	eq FArrayLitSubscripts.accessNdims() = 0; 
-	syn lazy int FArrayExpSubscripts.accessNdims() {
+	syn lazy int FArraySubscripts.accessNdims() { 
 		int nd = 0;
 		for (FSubscript fs : getFSubscripts()) {
 			nd += fs.ndims();
@@ -365,7 +315,7 @@ aspect Arrays {
 	/**
 	 * Get the expanded FArraySubscripts of each part of this access.
 	 */
-	eq InstAccess.allFArraySubscripts() = Arrays.<FArraySubscripts>asList(new FArrayLitSubscripts());
+	eq InstAccess.allFArraySubscripts() = Arrays.asList(new FArraySubscripts());
 	eq InstArrayAccess.allFArraySubscripts() = Arrays.asList(getFArraySubscripts());
 	eq InstScalarAccess.allFArraySubscripts() = Arrays.asList(getExpandedSubscripts());
 	eq InstDot.allFArraySubscripts() {
@@ -395,7 +345,7 @@ aspect Arrays {
 		FArraySubscripts fas;
 		ArrayList<FArraySubscripts> res;
 		if (isTopDimension()) {
-			fas = new FArrayLitSubscripts();
+			fas = new FArraySubscripts();
 			res = concatenation(surroundingFArraySubscripts(), Collections.singletonList(fas));
 		} else {
 			res = (ArrayList<FArraySubscripts>) surroundingFArraySubscripts().clone();
@@ -589,27 +539,27 @@ aspect Arrays {
     eq FlatRoot.getChild().parentTotalSize() = Size.SCALAR;
 
 	syn FArraySubscripts FAbstractEquation.expandedSubscripts() {
-        List<FSubscript> list = parentExpandedSubscripts();
+		FArraySubscripts fas = parentExpandedSubscripts();
 		Size size = size();
 		for (int i = 0; i < size.ndims(); i++) {
-			list.add(size.createExpandedFSubscript(i));
+			fas.addFSubscript(size.createExpandedFSubscript(i));
 		}
-		return FArraySubscripts.createFArraySubscripts(list);
+		return fas;
 	}
 
-    inh List<FSubscript> FAbstractEquation.parentExpandedSubscripts();
+    inh FArraySubscripts FAbstractEquation.parentExpandedSubscripts();
     eq InstForClauseE.getChild().parentExpandedSubscripts() {
-        List<FSubscript> list = parentExpandedSubscripts();
+        FArraySubscripts fas = parentExpandedSubscripts();
         for (InstForIndex i : getInstForIndexs()) {
-            list.add(i.createFSubscript());
+            fas.addFSubscript(i.createFSubscript());
         }
-        return list;
+        return fas;
     }
-    eq InstRoot.getChild().parentExpandedSubscripts() = new List<FSubscript>();
-    eq FlatRoot.getChild().parentExpandedSubscripts() = new List<FSubscript>();
+    eq InstRoot.getChild().parentExpandedSubscripts() = new FArraySubscripts();
+    eq FlatRoot.getChild().parentExpandedSubscripts() = new FArraySubscripts();
 
     public FSubscript InstForIndex.createFSubscript() {
-        return getFExp().flatten(Flattener.expressionFlattener()).createFSubscript();
+        return new FExpSubscript(getFExp().flatten(Flattener.expressionFlattener()));
     }
     @Override
     public FSubscript InstForIndexNoExp.createFSubscript() {
@@ -673,15 +623,13 @@ aspect Arrays {
 	 * The dimension this subscript is used for.
 	 */
 	inh int FSubscript.myDim();
-	eq FArrayExpSubscripts.getFSubscript(int i).myDim() = i;
+	eq FArraySubscripts.getFSubscript(int i).myDim() = i;
 
 	/**
 	 * Get the array sizes when the array subscripts are used in an
 	 * access. See also documentation of accessNdims(). 
 	 */
-	syn Size FArraySubscripts.accessSize();
-	eq FArrayLitSubscripts.accessSize() = Size.SCALAR;
-	syn lazy Size FArrayExpSubscripts.accessSize() {
+	syn lazy Size FArraySubscripts.accessSize() {
 		if (accessNdims() == 0)
 			return Size.SCALAR;
 		MutableSize s = new MutableSize(accessNdims());
@@ -1629,25 +1577,24 @@ aspect Arrays {
      * by the corresponding position in index.
      */
     syn FArraySubscripts FArraySubscripts.specify(Index index) {
-        List<FSubscript> list = new List<FSubscript>();
+        FArraySubscripts res = new FArraySubscripts();
         int j = 0;
         for (FSubscript fs : getFSubscripts()) {
             if (!fs.variability().indexParameterOrLess()) {
                 if (fs.ndims() > 0) {
                     fs = fs.specify(index.get(j));
                 } else {
-                    fs = fs.treeCopy();
+                    fs = fs.fullCopy();
                 }
                 j++;
-                list.add(fs);
+                res.addFSubscript(fs);
             }
         }
-        return FArraySubscripts.createFArraySubscripts(list);
+        return res;
     }
-    eq FArrayLitSubscripts.specify(Index index) = treeCopy();
     
     syn FArraySubscripts FArraySubscripts.specifyAll(Index index) {
-        List<FSubscript> list = new List<FSubscript>();
+        FArraySubscripts res = new FArraySubscripts();
         int j = 0;
         for (FSubscript fs : getFSubscripts()) {
             if (fs.ndims() > 0) {
@@ -1655,11 +1602,10 @@ aspect Arrays {
             } else {
                 fs = fs.treeCopy();
             }
-            list.add(fs);
+            res.addFSubscript(fs);
         }
-        return FArraySubscripts.createFArraySubscripts(list);
+        return res;
     }
-    eq FArrayLitSubscripts.specifyAll(Index index) = treeCopy();
 
 	eq FSmoothExp.getArrayExp() {
 		ArrayExp arr = new ArrayExp(indices());
@@ -1967,15 +1913,14 @@ aspect Arrays {
 			FArraySubscripts newfas = null;
 			if (n > 0) {
 				boolean hasfas = part.hasFArraySubscripts();
-				List<FSubscript> newSubscripts = new List<FSubscript>();
+				newfas = new FArraySubscripts();
 				FArraySubscripts oldfas = hasfas ? part.getFArraySubscripts() : null;
 				for (int k = 0; k < n; k++) {
 					FSubscript fs = hasfas ?
 							oldfas.getFSubscript(k).createSpecified(i, dim) :
 							new FIntegerSubscript(i.get(dim[0]++));
-					newSubscripts.add(fs);
+					newfas.addFSubscript(fs);
 				}
-                newfas = FArraySubscripts.createFArraySubscripts(newSubscripts);
                 // If this is last part, append the rest of i to newfas
                 while (j == np - 1 && dim[0] < i.ndims())
                     newfas.addFSubscript(i.get(dim[0]++));
@@ -2015,7 +1960,7 @@ aspect Arrays {
 			return fullCopy();
 		
 		int index = i.get(dim[0]++) - 1;
-		return getFExp().getArray().getFExp(index).createFSubscript();
+		return new FExpSubscript(getFExp().getArray().getFExp(index));
 	}
 	
 	/**
@@ -2068,14 +2013,14 @@ aspect Arrays {
 		FArraySubscripts oldfas = allFArraySubscripts().get(0);
 		int n = oldfas.getNumFSubscript();
 		if (n > 0) {
-            List<FSubscript> newSubscripts = new List<FSubscript>();
+			FArraySubscripts newfas = new FArraySubscripts();
 			for (int k = 0; k < n; k++) {
 				FSubscript fs = oldfas.getFSubscript(k).createSpecified(i, dim);
-				newSubscripts.add(fs);
+				newfas.addFSubscript(fs);
 			}
-			return getArrayCopy(FArraySubscripts.createFArraySubscripts(newSubscripts));
+			return getArrayCopy(newfas);
 		} else {
-			return treeCopy();
+			return fullCopy();
 		}
 	}
 	
@@ -2089,12 +2034,12 @@ aspect Arrays {
 		FArraySubscripts oldfas = allFArraySubscripts().get(0);
 		int n = oldfas.getNumFSubscript();
 		if (n > 0) {
-            List<FSubscript> newSubscripts = new List<FSubscript>();
+			FArraySubscripts newfas = new FArraySubscripts();
 			for (int k = 0; k < n; k++) {
 				FSubscript fs = oldfas.getFSubscript(k).createSpecified(i, dim);
-				newSubscripts.add(fs);
+				newfas.addFSubscript(fs);
 			}
-			res.setFArraySubscripts(FArraySubscripts.createFArraySubscripts(newSubscripts));
+			res.setFArraySubscripts(newfas);
 		}
 		return res;
 	}
@@ -2428,7 +2373,7 @@ aspect ArrayHelpers {
 		 * Create a new FArraySubscripts object with ranges spanning this size.
 		 */
 		public FArraySubscripts rangeFArraySubscripts() {
-			FArraySubscripts fas = new FArrayExpSubscripts();
+			FArraySubscripts fas = new FArraySubscripts();
 			for (int i = 0; i < size.length; i++)
 				fas.addFSubscript(rangeFSubscript(i));
 			return fas;
@@ -2809,11 +2754,10 @@ aspect ArrayHelpers {
          * Dimension that nothing is known about get an FColonSubscript.
          */
         public FArraySubscripts createFArraySubscripts() {
-            List<FSubscript> list = new List<FSubscript>();
-            for (int i = 0; i < ndims(); i++) {
-                list.add(createFSubscript(i));
-            }
-            return FArraySubscripts.createFArraySubscripts(list);
+            FArraySubscripts res = new FArraySubscripts();
+            for (int i = 0; i < ndims(); i++)
+                res.addFSubscript(createFSubscript(i));
+            return res;
         }
         
         /**
@@ -2822,7 +2766,7 @@ aspect ArrayHelpers {
          * If nothing is known of the length of the dimension, an FColonSubscript is created.
          */
         public FSubscript createFSubscript(int d) {
-            return hasValue(d) ? createFExp(d).createFSubscript() : new FColonSubscript();
+            return hasValue(d) ? new FExpSubscript(createFExp(d)) : new FColonSubscript();
         }
 		
 		/**
@@ -2831,11 +2775,10 @@ aspect ArrayHelpers {
 		 * Dimension that nothing is known about get an FColonSubscript.
 		 */
 		public FArraySubscripts createExpandedFArraySubscripts() {
-            List<FSubscript> list = new List<FSubscript>();
-            for (int i = 0; i < ndims(); i++) {
-                list.add(createExpandedFSubscript(i));
-			}
-			return FArraySubscripts.createFArraySubscripts(list);
+			FArraySubscripts res = new FArraySubscripts();
+			for (int i = 0; i < ndims(); i++)
+				res.addFSubscript(createExpandedFSubscript(i));
+			return res;
 		}
 
         /**
@@ -2845,7 +2788,7 @@ aspect ArrayHelpers {
          */
         public FSubscript createExpandedFSubscript(int d) {
             if (!isUnknown(d)) {
-                return createRangeExp(d).createFSubscript();
+                return new FExpSubscript(createRangeExp(d));
             } else {
                 return new FColonSubscript();
             }
@@ -3960,7 +3903,7 @@ aspect ArrayHelpers {
 		 * Create a new FArraySubscripts object describing this index.
 		 */
 		public FArraySubscripts createFArraySubscripts() {
-			return new FArrayLitSubscripts(index);
+			return FArraySubscripts.createLiteralSubscripts(index);
 		}
 		
 		/**

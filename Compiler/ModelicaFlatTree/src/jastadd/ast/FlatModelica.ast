@@ -422,9 +422,7 @@ FStringComment : BaseNode ::= <Comment:String>;
 /**
  * Array subscripts used in FAccesss.
  */
-abstract FArraySubscripts : BaseNode;
-FArrayExpSubscripts : FArraySubscripts ::= FSubscript*;
-FArrayLitSubscripts : FArraySubscripts;
+FArraySubscripts : BaseNode ::= FSubscript*;
 
 /**
  * Base class for array subscripts.
@@ -637,7 +635,7 @@ FReturnStmt : FStatement;
 /**
  * Class for array initalization statements.
  */
-FInitArrayStmt : FStatement ::= FIdUseExp /Type:FType/;
+FInitArrayStmt : FStatement ::= FIdUseExp;
 
 /**
  * Class for derivated array initalization statements.
