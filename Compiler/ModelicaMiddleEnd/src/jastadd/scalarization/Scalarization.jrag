@@ -877,9 +877,9 @@ aspect Scalarization {
         if (subs != null && subs.length > 0) {
             List<FSubscript> l = new List<FSubscript>();
             for (FExp e : subs) {
-                l.add(e.treeCopy().createFSubscript());
+                l.add(new FExpSubscript(e.fullCopy()));
             }
-            fas = new FArrayExpSubscripts(l);
+            fas = new FArraySubscripts(l);
         }
         return tempExp(tempVarName(), fas);
     }
@@ -925,9 +925,9 @@ aspect Scalarization {
     public FArraySubscripts FIdUseExp.createIndexNameFas() {
         List<FSubscript> l = new List<FSubscript>();
         for (FExp e : indexNames) {
-            l.add(e.treeCopy().createFSubscript());
+            l.add(new FExpSubscript(e.fullCopy()));
         }
-        return new FArrayExpSubscripts(l);
+        return new FArraySubscripts(l);
     }
     
     public List<FAttribute> FAbstractEquation.scalarizeAttributeList(Index i, Scalarizer s) {
@@ -1125,7 +1125,7 @@ aspect Scalarization {
         FAccessPart first = getFAccessPart(0);
         FExp arg = con.component(first.getName());
         if (first.hasFArraySubscripts()) {
-            arg = arg.extractArrayCell(s, first.getFArraySubscripts().createIndex());
+            arg = arg.extractArrayCell(s, first.getFArraySubscripts().asIndex());
         }
         return copySuffix().scalarRecordFExp(s, arg);
     }
@@ -1459,9 +1459,9 @@ aspect Scalarization {
     public FExp FIdUseExp.scalarizeExp(Scalarizer s) {
         String fin = myFV().myForIndexName();
         if (fin != null) {
-            return setLocationOf(createNode(new FAccessString(fin)));
+            return setLocationOf(new FIdUseExp(fin));
         }
-        return setLocationOf(createNode(getCommonAccess().asFAccess().scalarize(s, indexNames)));
+        return setLocationOf(new FIdUseExp(getCommonAccess().asFAccess().scalarize(s, indexNames)));
     }
 
     public FExp FIdTempExp.scalarizeExp(Scalarizer s) {
@@ -1540,29 +1540,25 @@ aspect Scalarization {
     }
 
     public FArraySubscripts FArraySubscripts.scalarize(Scalarizer s) {
-        FArraySubscripts fas = new FArrayExpSubscripts();
+        FArraySubscripts fas = new FArraySubscripts();
         for (FSubscript fs : getFSubscripts()) {
             fas.addFSubscript(fs.scalarize(s));
         }
         return fas;
     }
-    
-    public FArraySubscripts FArrayLitSubscripts.scalarize(Scalarizer s) {
-        return treeCopy();
-    }
 
     public FSubscript FSubscript.scalarize(Scalarizer s) {
-        return treeCopy();
+        return (FSubscript) fullCopy();
     }
     
     public FSubscript FColonSubscript.scalarize(Scalarizer s) {
         if (indexName == null)
             throw new UnsupportedOperationException("Colon subscript without index name");
-        return indexName.treeCopy().createFSubscript();
+        return new FExpSubscript(indexName.fullCopy());
     }
     
     public FSubscript FExpSubscript.scalarize(Scalarizer s) {
-        return getFExp().scalarize(s).createFSubscript();
+        return new FExpSubscript(getFExp().scalarize(s));
     }
 
 

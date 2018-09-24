@@ -812,7 +812,7 @@ aspect FunctionInlining {
             ArrayList<FAbstractEquation> list, AbstractFunctionInliner fi, FAccess name) {
         int i = 1;
         for (FExp exp : getFExps()) {
-            FAccess cellName = name.copyAndAddSubscript(i);
+            FAccess cellName = name.copyAndAddSubscript(new FIntegerSubscript(i));
             exp.createInliningOutputEquations(list, fi, cellName);
             i++;
         }
@@ -1550,11 +1550,6 @@ aspect FunctionInlining {
         return exp;
     }
 
-    @Override
-    public FExp FGlobalAccessExp.replaceReferences(AbstractFunctionInliner fi) {
-        replaceReferencesInSubscripts(fi);
-        return this;
-    }
 
     public FIdUseExp FIdUseExp.copyWithNonLiteralSubscriptsAsColon() {
         return createNode(getCommonAccess().copyWithNonLiteralSubscriptsAsColon());
@@ -1585,7 +1580,7 @@ aspect FunctionInlining {
     }
 
     public FArraySubscripts FArraySubscripts.copyWithNonLiteralSubscriptsAsColon() {
-        FArraySubscripts res = new FArrayExpSubscripts();
+        FArraySubscripts res = new FArraySubscripts();
         for (FSubscript s : getFSubscripts()) {
             res.addFSubscriptNoTransform(s.copyWithNonLiteralSubscriptsAsColon());
         }
@@ -1610,11 +1605,11 @@ aspect FunctionInlining {
     }
 
     public FArraySubscripts FAccess.copyNonLiteralSubscripts() {
-        return new FArrayExpSubscripts();
+        return new FArraySubscripts();
     }
 
     public FArraySubscripts FAccessFull.copyNonLiteralSubscripts() {
-        FArraySubscripts fas = new FArrayExpSubscripts();
+        FArraySubscripts fas = new FArraySubscripts();
         for (FAccessPart p : getFAccessParts()) {
             p.copyNonLiteralSubscriptsTo(fas);
         }

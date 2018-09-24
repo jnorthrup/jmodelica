@@ -843,7 +843,7 @@ aspect Flattening {
     
     @Override
     public void InstAssignable.flattenInFunction(Flattener f, List<FFunctionVariable> vars, List<FStatement> stmts) {
-        if (!flattenAsGlobalVariableFromFunction()) {
+        if (!flattenAsFunctionConstant()) {
             if (hasInstValueMod())
                 getBindingFExp().flattenUsedFuncsAndEnums(f);
             Opt eo = new Opt();
@@ -1209,7 +1209,7 @@ aspect Flattening {
             for (int i = 0; i < ndims(); i++) {
                 l.add(flattenFSubscript(f, i));
             }
-            return FArraySubscripts.createFArraySubscripts(l);
+            return new FArraySubscripts(l);
         }
         return null;
     }
@@ -1224,7 +1224,7 @@ aspect Flattening {
                 exps[i].variability().knownParameterOrLess()) {
             return super.flattenFSubscript(f, i);
         }
-        return exps[i].flatten(f).createFSubscript();
+        return new FExpSubscript(exps[i].flatten(f));
     }
 
     public void InstAssignable.flatten(Flattener f, FlattenBindingExp binding, int level) {
@@ -1232,7 +1232,7 @@ aspect Flattening {
     }
 
     public void InstAssignable.flatten(Flattener f, FlattenBindingExp binding, int level, boolean global) {
-        if (useInFlattening() && (global || !flattenAsGlobalVariable())) {
+        if (useInFlattening()) {
             if (hasBindingFExp()) {
                 getBindingFExp().flattenAssertExternal(f);
             }
@@ -1789,12 +1789,10 @@ aspect Flattening {
         try {
             if (variability().knownParameterOrLess()) {
                 CValue cval = ceval();
+                FExp t = dynamicFExp(cval.buildInstLiteral());
+                t.flattenUsedFuncsAndEnums(f);
                 if (cval.hasBuildLiteral()) {
-                    FExp t = dynamicFExp(cval.buildInstLiteral());
-                    t.flattenUsedFuncsAndEnums(f);
-                    FExp res = t.flatten(f);
-                    clearDynamicFExp();
-                    return res;
+                    return cval.buildLiteral();
                 }
             }
         } catch (ConstantEvaluationException e) {}
@@ -1989,7 +1987,7 @@ aspect Flattening {
     
     syn FSubscript FSubscript.specify(int index);
     eq FExpSubscript.specify(int index)     = 
-        getFExp().getArray().getFExp(index - 1).treeCopy().createFSubscript();
+        new FExpSubscript(getFExp().getArray().getFExp(index - 1).fullCopy());
     eq FIntegerSubscript.specify(int index) = this;
     eq FColonSubscript.specify(int index)   = new FIntegerSubscript(index);
 
@@ -2267,7 +2265,7 @@ aspect FlatExpressions {
         List l = new List();
         for (FSubscript fs : getFSubscripts())
             l.add(fs.flatten(f));
-        return FArraySubscripts.createFArraySubscripts(l);
+        return new FArraySubscripts(l);
     }
 
     abstract public FSubscript FSubscript.flatten(Flattener f);
@@ -2310,11 +2308,11 @@ aspect FlatExpressions {
         if (ndims() == 0) {
             return null;
         }
-        List<FSubscript> list = new List<FSubscript>();
+        FArraySubscripts fas = new FArraySubscripts();
         for (int i = 0; i < ndims(); i++) {
-            list.add(flattenSubscript(i));
+            fas.addFSubscript(flattenSubscript(i));
         }
-        return FArraySubscripts.createFArraySubscripts(list);
+        return fas;
     }
     
     public FSubscript FIntegerSubscript.flatten(Flattener f) { 
@@ -2322,7 +2320,7 @@ aspect FlatExpressions {
     }
 
     public FSubscript FExpSubscript.flatten(Flattener f) {
-        return getFExp().flatten(f).createFSubscript();
+        return new FExpSubscript(getFExp().flatten(f));
     }
 
     public FExp FExp.flatten(Flattener f) {
@@ -2353,7 +2351,7 @@ aspect FlatExpressions {
      * Create a constant FSubscript.
      */
     public FSubscript CValue.createFSubscript() {
-        return buildLiteral().createFSubscript();
+        return new FExpSubscript(buildLiteral());
     }
     
     public FSubscript CValueInteger.createFSubscript() {
@@ -2521,7 +2519,7 @@ aspect FlatExpressions {
     }
 
     public FExp FLitExp.flatten(Flattener f)     { return fullCopy(); }
-    public FExp FEnumLitExp.flatten(Flattener f) { return new FEnumLitExp(getEnum(), getValue(), new Opt<FEnumType>()); }
+    public FExp FEnumLitExp.flatten(Flattener f) { return new FEnumLitExp(getEnum(), getValue(), null); }
     
     public FExp FModFuncExp.flatten(Flattener f) {
         FExp toRound = new FDivExp(getX().flatten(f), getY().flatten(f));
@@ -3087,7 +3085,7 @@ aspect InstantiatedExpressions {
         List l = new List();
         for (SrcSubscript s : getSrcSubscripts())
             l.add(s.instantiate());
-        return copyLocationTo(new FArrayExpSubscripts(l));
+        return copyLocationTo(new FArraySubscripts(l));
     }
     
     abstract public FSubscript SrcSubscript.instantiate();
@@ -3096,7 +3094,7 @@ aspect InstantiatedExpressions {
     }
     
     public FSubscript SrcExpSubscript.instantiate() {
-        return copyLocationTo(getSrcExp().instantiate().createFSubscript());
+        return copyLocationTo(new FExpSubscript(getSrcExp().instantiate()));
     }
     
     public FExp SrcExp.instantiate() {

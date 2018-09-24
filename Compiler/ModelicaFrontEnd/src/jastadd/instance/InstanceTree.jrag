@@ -856,11 +856,7 @@ aspect InstanceTreeConstruction {
 		getDynamicFExpOpt().setChild(exp, 0);
 		return (FExp) getDynamicFExpOpt().getChild(0);
 	}
-
-    public void InstNode.clearDynamicFExp() {
-       getDynamicFExpOpt().setChild(null, 0);
-    }
-
+	
     /**
      * Dynamically places an FExp in the tree under this InstExternal.
      * 
@@ -2655,11 +2651,10 @@ aspect InstArrays {
 	syn lazy FArraySubscripts InstComponentDecl.getFArraySubscripts() {
 	    if (myFSubscripts().isEmpty())
 	        return null;
-        List<FSubscript> list = new List<FSubscript>();
-        for (FSubscript fs : myFSubscripts()) { 
-            list.add(fs.deferredCopy());
-        }
-        return FArraySubscripts.createFArraySubscripts(list);
+		FArraySubscripts fas = new FArraySubscripts();
+		for (FSubscript fs : myFSubscripts()) 
+			fas.addFSubscript(fs.deferredCopy());
+		return fas;
 	}
 	
 	syn boolean InstComponentDecl.hasFArraySubscripts() = getFArraySubscripts()!=null;
