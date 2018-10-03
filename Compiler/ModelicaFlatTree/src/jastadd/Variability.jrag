@@ -359,7 +359,7 @@ aspect Variability {
      */
     public void FExp.makeContinuousVariablesDiscrete() {}
     
-    public void FAccessExp.makeContinuousVariablesDiscrete() {
+    public void FIdUseExp.makeContinuousVariablesDiscrete() {
         myFV().makeContinuousVariableDiscrete();
     }
     
@@ -400,7 +400,7 @@ aspect Variability {
      * If this is an flat tree access, return set containing accessed var, otherwise empty set.
      */
     syn FAbstractVariable FExp.assignedFV() = null;
-    eq FAccessExp.assignedFV()              = myFV();
+    eq FIdUseExp.assignedFV()               = myFV();
 
 
     syn TypePrefixVariability FAbstractVariable.variability();
@@ -539,9 +539,9 @@ aspect Variability {
 
     eq FDelayExp.expVariability() = getFExp().variability();
 
-    eq CommonAccessExp.expVariability() = getAccess().variability();
+    eq FIdUseExp.expVariability() = getCommonAccess().variability();
     eq FAbstractDerExp.expVariability() = 
-        getFAccess().variability().discreteOrLess() ? Variability.CONSTANT : getFAccess().variability();
+        getCommonAccess().variability().discreteOrLess() ? Variability.CONSTANT : getCommonAccess().variability();
     eq FPreExp.expVariability() = super.expVariability().combineDown(Variability.DISCRETE);
     eq InstPreExp.expVariability() = getFExp().variability().combineDown(Variability.DISCRETE);
 
@@ -561,15 +561,14 @@ aspect Variability {
 
     syn TypePrefixVariability FSubscript.variability() = Variability.CONSTANT;
 	eq FExpSubscript.variability() = getFExp().variability();
-	public TypePrefixVariability IntegerSubscript.variability() { return Variability.CONSTANT; }
 	
-	syn TypePrefixVariability FArraySubscripts.variability() = Variability.CONSTANT;
-	eq FArrayExpSubscripts.variability() {
+	syn TypePrefixVariability FArraySubscripts.variability() {
 		TypePrefixVariability total = Variability.CONSTANT;
 		for (FSubscript arg : getFSubscripts()) 
 			total = total.combine(arg.variability());
 		return total;
 	}
+	eq FArrayLitSubscripts.variability() = Variability.CONSTANT;
 
     eq FLinspace.expVariability() = getStartExp().variability().combine(getStopExp().variability());
 
@@ -689,14 +688,14 @@ aspect Variability {
         throw new UnsupportedOperationException();
     }
     eq FSubscriptedExp.indexVariability() = getFArraySubscripts().variability();
-    eq CommonAccessExp.indexVariability() = getAccess().indexVariability();
+    eq FIdUseExp.indexVariability()       = getCommonAccess().indexVariability();
 
-    syn TypePrefixVariability CommonAccess.indexVariability();
-    eq FAccess.indexVariability() {
+    syn TypePrefixVariability CommonAccess.indexVariability() {
+        FAccess fqn = asFAccess();
         TypePrefixVariability variability = Variability.CONSTANT;
-        if (isSimple())
+        if (fqn.isSimple())
             return variability;
-        for (FAccessPart part : asFAccessFull().getFAccessParts())
+        for (FAccessPart part : fqn.asFAccessFull().getFAccessParts())
             if (part.hasFArraySubscripts())
                 variability = variability.combine(part.getFArraySubscripts().variability());
         return variability;

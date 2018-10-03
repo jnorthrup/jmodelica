@@ -44,11 +44,6 @@ aspect CCodeGenExpressions {
     }
 
     @Override
-    public void FInitArrayStmt.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        p.printVarDecls(type(), str, indent);
-    }
-
-    @Override
     public void FAssert.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
         p.printPreSteps(getTest(), str, indent);
 		prettyPrint_C(p, str, indent);
@@ -582,11 +577,11 @@ aspect CCodeGenExpressions {
     /**
      * Helper method that prints the variable reference for assignment (LHS).
      */
-    public void FAccessExp.genAssignedRef(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-        p.print(getFAccess(), str, "");
+    public void FIdUseExp.genAssignedRef(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        p.print(getCommonAccess(), str, "");
     }
 
-    public void FAccessExp.genAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+    public void FIdUseExp.genAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
         genAssignedRef(p, str, indent);
     }
 
@@ -599,7 +594,7 @@ aspect CCodeGenExpressions {
         str.print(p.name(v));
     }
 
-    public void FAccessExp.genScaledAssignedRef(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+    public void FIdUseExp.genScaledAssignedRef(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
         if (needsScaling()) {
             genScaledAssignedRef(myFV(), p, str, indent);
         } else {
@@ -610,7 +605,7 @@ aspect CCodeGenExpressions {
     syn boolean FAbstractVariable.needsScaling(WriteBackContext ctx) = isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !ctx.inFunction();
     syn boolean FExp.needsScaling() = type().isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !inFunction();
 
-    public void FAccessExp.genScaledAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+    public void FIdUseExp.genScaledAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
         if (needsScaling()) {
             str.print("(");
             genAssignedRef(v, p, str, indent);
@@ -635,7 +630,7 @@ aspect CCodeGenExpressions {
     }
 
     @Override
-    public void FAccessExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+    public void FIdUseExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         genScaledAssignedRef(p.ExecStep, str, indent);
     }
 
@@ -700,7 +695,7 @@ aspect CCodeGenExpressions {
     eq FAccess.toString_C(CodePrinter p) = toString_C(p.getExecStep());
 
     syn String FAccess.toString_C(CodePrinter.ExecuteCodePrinter p) {
-        return myFV().genUse_C(p, getFArraySubscripts(), myFV().funcArrayType(isAssignUse()));
+        return myFV().genUse_C(p, asFAccess().getFArraySubscripts(), myFV().funcArrayType(isAssignUse()));
     }
 
     syn String FAccessFull.toString_C(CodePrinter.ExecuteCodePrinter p) {
@@ -740,23 +735,14 @@ aspect CCodeGenExpressions {
     public String FArraySubscripts.genFunctionArrayUse_C(CodePrinter p, String name, String type) {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         CodeStream str = new CodeStream(os);
-        str.print("jmi_array_", type, "_", numSubscript(), "(", name, ", ");
+        str.print("jmi_array_", type, "_", getNumFSubscript(), "(", name, ", ");
         p.print(this, str, "");
         str.print(")");
         return os.toString();
     }
 
-    public void FArrayExpSubscripts.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+    public void FArraySubscripts.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         getFSubscripts().prettyPrintWithSep(p, str, "", ", ");
-    }
-
-    public void FArrayLitSubscripts.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        for (int i = 0; i < subscripts.length; i++) {
-            if (i != 0) {
-                str.print(", ");
-            }
-            str.print(subscripts[i]);
-        }
     }
 
     /*=========================================================================
@@ -1271,7 +1257,7 @@ aspect CCodeGenExpressions {
     eq FFunctionCall.needsTemp_C() =
             (!isFunctionCallClause() && isComposite()) || isStringExp() ||
             (!functionCallIsExp() && myFCallable().isPartialFunction() && !isPartialFunctionCall());
-    eq FAccessExp.needsTemp_C() = isSlice() || (isFunctionCallLeft() && (!inFunction() || alsoInRHS() || type().isString()));
+    eq FIdUseExp    .needsTemp_C() = isSlice() || (isFunctionCallLeft() && (!inFunction() || alsoInRHS() || type().isString()));
 
     syn boolean FFunctionCallLeft.needsTemp_C() = hasFExp() && getFExp().needsTemp_C();
     syn boolean FAbstractVariable.needsTemp_C() { return false; }
@@ -1571,9 +1557,9 @@ aspect CCodeGenExpressions {
         }
     }
 
-    syn FAccessExp FExp.first() = null;
+    syn FIdUseExp FExp.first() = null;
     eq FArray.first()          = getFExp(0).first();
-    eq FAccessExp.first()       = this;
+    eq FIdUseExp.first()       = this;
     
     syn lazy boolean FSubscriptedExp.needsTemp() = (getFExp().consecutiveArray(null) == null);
     
@@ -1587,22 +1573,22 @@ aspect CCodeGenExpressions {
         }
         return last;
     }
-    eq FAccessExp.consecutiveArray(FAbstractVariable last) {
+    eq FIdUseExp.consecutiveArray(FAbstractVariable last) {
         if (last == null || last.isConsecutiveInZ(myFV())) {
             return myFV();
         }
         return null;
     }
 
-    public void FAccessExp.genDirectSubscriptedUse_C(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent,
+    public void FIdUseExp.genDirectSubscriptedUse_C(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent,
             FArraySubscripts fas) {
         str.print("(&");
         p.print(this, str, indent);
         str.print(")");
         str.print("[(int)(");
         Size s = fas.mySize();
-        for (int i = fas.numSubscript() - 1; i >= 0; i--) {
-            fas.subscript(i).prettyPrint(p.codePrinter(), str, indent);
+        for (int i = fas.getNumFSubscript() - 1; i >= 0; i--) {
+            p.codePrinter().print(fas.getFSubscript(i), str, indent);
             str.print(" - 1");
             if (i > 0) {
                 str.print(" + ");
@@ -1610,7 +1596,7 @@ aspect CCodeGenExpressions {
                 str.print(" * (");
             }
         }
-        for (int i = 0; i < fas.numSubscript() - 1; i++) {
+        for (int i = 0; i < fas.getNumFSubscript() - 1; i++) {
             str.print(")");
         }
         str.print(")]");

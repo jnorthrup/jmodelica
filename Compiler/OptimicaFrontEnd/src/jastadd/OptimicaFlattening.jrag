@@ -141,9 +141,9 @@ aspect OptimicaFlattening {
 	}
 
 	
-	public InstTimedVariable SrcTimedVariable.instantiate() {
+	public FTimedVariable SrcTimedVariable.instantiate() {
 		InstAccess name = getName().newInstAccess();
-		return copyLocationTo(new InstTimedVariable(name, getArg().instantiate()));
+		return copyLocationTo(new FTimedVariable(name, getArg().instantiate()));
 	}
 	
 	
