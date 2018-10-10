@@ -270,6 +270,8 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
 int jmi_set_start_values_1_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
+    _x_1_2 = (0.0);
+    _x_2_3 = (0.0);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -354,6 +356,15 @@ int jmi_set_start_values_0_1(jmi_t* jmi) {
 int jmi_set_start_values_1_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
+    _x_1_2 = (0.0);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int jmi_set_start_values_1_1(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    _x_2_3 = (0.0);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -362,6 +373,7 @@ int jmi_set_start_values_0_0(jmi_t* jmi);
 int jmi_set_start_values_0_1(jmi_t* jmi);
 
 int jmi_set_start_values_1_0(jmi_t* jmi);
+int jmi_set_start_values_1_1(jmi_t* jmi);
 
 int jmi_set_start_values_base(jmi_t* jmi) {
     int ef = 0;
@@ -370,6 +382,7 @@ int jmi_set_start_values_base(jmi_t* jmi) {
     ef |= jmi_set_start_values_0_1(jmi);
     model_init_eval_parameters(jmi);
     ef |= jmi_set_start_values_1_0(jmi);
+    ef |= jmi_set_start_values_1_1(jmi);
     JMI_DYNAMIC_FREE()
     return ef;
 }

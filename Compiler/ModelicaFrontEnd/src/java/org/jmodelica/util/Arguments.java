@@ -23,8 +23,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
-import org.jmodelica.util.StringUtil;
-
 /**
  * Class representing command line arguments.
  */
@@ -69,7 +67,6 @@ public class Arguments {
     
     private void setDefaultArgs() {
         namedArgs.put("target", "jmu");
-        namedArgs.put("out", ".");
     }
 
     private void extractProgramArguments() throws InvalidArgumentException {
@@ -146,10 +143,6 @@ public class Arguments {
         return libraryPath;
     }
 
-    public String out() {
-        return StringUtil.unquote(namedArgs.get("out"));
-    }
-    
     public boolean isParseTarget() {
         return namedArgs.get("target").equals("parse");
     }
@@ -212,5 +205,4 @@ public class Arguments {
             super(msg);
         }
     }
-
 }

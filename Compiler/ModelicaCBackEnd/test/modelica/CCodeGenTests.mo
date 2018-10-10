@@ -1370,6 +1370,7 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
 int jmi_set_start_values_1_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
+    _dummy_3 = (0.0)/sf(3);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -1534,6 +1535,8 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _reg1_0 = (1);
+    _dummy_1_20 = (0.0);
+    _dummy_2_21 = (0.0);
     _struct1_5 = (1);
     _final1_10 = (1);
     _eval1_15 = (1);
@@ -1744,6 +1747,8 @@ int model_init_eval_parameters_base(jmi_t* jmi) {
 int jmi_set_start_values_1_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
+    _initial1_0 = (0.0);
+    _initial2_1 = (0);
     _initial3_2 = (1);
     _initial4_3 = (JMI_FALSE);
     JMI_ASG(STR_Z, _s_pd_initial5_4, (\"\"));
@@ -3016,6 +3021,8 @@ int jmi_set_start_values_1_0(jmi_t* jmi) {
     jmi_array_ref_1(tmp_2, 1) = _p1_1_0 + _p2_2;
     jmi_array_ref_1(tmp_2, 2) = _p1_2_1 + _p2_2;
     _w_5 = (func_CCodeGenTests_CFunctionTest15_f_exp0(tmp_2));
+    _der_z_6 = (0.0);
+    _der_w_7 = (0.0);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -11717,60 +11724,6 @@ $C_dae_init_add_blocks_residual_functions$
 ")})));
 end BlockTest24;
 
-model BlockTest25
-    record R
-        constant Real y;
-    end R;
-    
-    function f
-        constant R[:] p = {R(3)};
-        input Integer i;
-        output Real y = p[i].y;
-    algorithm
-    end f;
-    
-    function f2
-        input Real x;
-        output Real y = x;
-    algorithm
-        annotation(Inline=false);
-    end f2;
-    
-    parameter Integer i = 1;
-    Real x = f(i) + f2(x);
-
-annotation(__JModelica(UnitTesting(tests={
-    CCodeGenTestCase(
-        name="BlockTest25",
-        description="Nominal with global constant in record",
-        template="$C_dae_blocks_residual_functions$",
-        variability_propagation=false,
-        generatedCode="
-static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: 1 *****/
-    jmi_real_t** res = &residual;
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
-        x[0] = 1;
-    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
-        (*res)[0] = jmi_max(AD_WRAP_LITERAL(1), jmi_max(jmi_abs(jmi_array_rec_1(JMI_GLOBAL(CCodeGenTests_BlockTest25_f_p), _i_0)->y), AD_WRAP_LITERAL(1)));
-    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
-        x[0] = _x_1;
-    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
-        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
-            _x_1 = x[0];
-        }
-        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = jmi_array_rec_1(JMI_GLOBAL(CCodeGenTests_BlockTest25_f_p), _i_0)->y + func_CCodeGenTests_BlockTest25_f2_exp0(_x_1) - (_x_1);
-        }
-    }
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-")})));
-end BlockTest25;
-
 model NestedUnsolvedScalarInSolvedBlock
     Real a;
     Real b;
@@ -12180,6 +12133,8 @@ int jmi_set_start_values_1_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _x_0 = (1);
+    _q_3 = (0.0);
+    _der_x_4 = (0.0);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -12238,7 +12193,10 @@ int jmi_set_start_values_1_0(jmi_t* jmi) {
     _r_3 = (5.5);
     _i_4 = (10);
     _b_5 = (JMI_FALSE);
+    _temp_1_6 = (0);
+    _der_r_10 = (0.0);
     pre_i_4 = (10);
+    pre_temp_1_6 = (0);
     pre_b_5 = (JMI_FALSE);
     JMI_DYNAMIC_FREE()
     return ef;
@@ -13650,8 +13608,13 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
     __nle_solver_step_limit_factor_28 = (10.0);
     __nle_solver_tol_factor_29 = (1.0E-4);
     __time_events_default_tol_36 = (2.220446049250313E-14);
+    __block_solver_experimental_mode_3 = (0);
+    __cs_experimental_mode_5 = (0);
+    __cs_solver_7 = (0);
     __iteration_variable_scaling_12 = (1);
     __log_level_13 = (3);
+    __nle_active_bounds_mode_14 = (0);
+    __nle_jacobian_calculation_mode_16 = (0);
     __nle_jacobian_update_mode_18 = (2);
     __nle_solver_exit_criterion_21 = (3);
     __nle_solver_max_iter_22 = (100);
@@ -13677,6 +13640,7 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
 int jmi_set_start_values_1_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
+    _x_0 = (0.0);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -16283,6 +16247,7 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
 int jmi_set_start_values_1_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
+    _x_1 = (0.0);
     JMI_DYNAMIC_FREE()
     return ef;
 }

@@ -17,21 +17,18 @@
 package org.jmodelica.util.streams;
 
 import java.io.File;
-import java.util.ArrayList;
 
 public class SplitFilesCodeStream extends CodeStream {
     private File file;
     private boolean debugGen;
     private int i = 0;
     private String header;
-    private ArrayList<File> files;
     
     public SplitFilesCodeStream(File file, boolean debugGen, String header) {
         super((CodeStream) null);
         this.file = file;
         this.debugGen = debugGen;
         this.header = header;
-        files = new ArrayList<>();
         switchParent(nextFileStream());
     }
     
@@ -41,9 +38,7 @@ public class SplitFilesCodeStream extends CodeStream {
     }
     
     protected CodeStream nextFileStream() {
-        File nextFile = nextFile();
-        files.add(nextFile);
-        return createCodeStream(nextFile);
+        return createCodeStream(nextFile());
     }
 
     protected File nextFile() {
@@ -57,13 +52,6 @@ public class SplitFilesCodeStream extends CodeStream {
 
     protected NotNullCodeStream createCodeStream(File nextFile) {
         return new NotNullCodeStream(createPrintStream(nextFile, debugGen));
-    }
-
-    /**
-     * All files from this used by this code stream including the original file.
-     */
-    public Iterable<File> files() {
-        return files;
     }
 
 }

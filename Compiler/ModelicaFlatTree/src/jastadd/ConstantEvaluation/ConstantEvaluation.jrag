@@ -749,22 +749,22 @@ aspect ConstantEvaluation {
     }
     
     /**
-     * Unknown value. Keeps track of CommonAccessExps that this value is
+     * Unknown value. Keeps track of FIdUseExps that this value is
      * dependent on. Used when calculating incidences in function 
      * call equations.
      */
     public class CValueUnknownUse extends CValueUnknown {
-        Set<FAccessExp> deps;
+        Set<FIdUseExp> deps;
         
-        public CValueUnknownUse(Set<FAccessExp> deps) {
+        public CValueUnknownUse(Set<FIdUseExp> deps) {
             this.deps = deps;
         }
         
         public CValueUnknownUse() {
-            this(new HashSet<FAccessExp>());
+            this(new HashSet<FIdUseExp>());
         }
         
-        public CValueUnknownUse(FAccessExp dep) {
+        public CValueUnknownUse(FIdUseExp dep) {
             this();
             deps.add(dep);
         }
@@ -776,7 +776,7 @@ aspect ConstantEvaluation {
         public String toString() {
             StringBuilder sb = new StringBuilder();
             sb.append("(unknown value : \"");
-            for (CommonAccessExp dep : deps) {
+            for (FIdUseExp dep : deps) {
                 sb.append(dep.name());
                 sb.append(", ");
             }
@@ -784,7 +784,7 @@ aspect ConstantEvaluation {
             return sb.toString();
         }
         
-        public Set<FAccessExp> getDependencies() {
+        public Set<FIdUseExp> getDependencies() {
             return deps;
         }
     }
@@ -1645,15 +1645,10 @@ aspect ConstantEvaluation {
          * 
          * Always creates node for the flat tree.
          *  
-         *  @return an CommonAccessExp pointing to the literal in the FEnumDecl.
+         *  @return an FIdUseExp pointing to the literal in the FEnumDecl.
          */
         public FExp buildLiteral() {
             return type.createLiteral(index);
-        }
-
-        @Override
-        public FExp buildInstLiteral() {
-            return new FEnumLitExp(type, index);
         }
 
         @Override
@@ -2117,7 +2112,7 @@ aspect ConstantEvaluation {
     // Bypass for nodes with inherent support for constant evaluation of arrays.
     eq FFunctionCall.cevalArray(VariableEvaluator evaluator, Index i)    = cevalCalc(evaluator);
     eq InstFunctionCall.cevalArray(VariableEvaluator evaluator, Index i) = cevalCalc(evaluator);
-    eq CommonAccessExp.cevalArray(VariableEvaluator evaluator, Index i)  = isSlice() ? super.cevalArray(evaluator, i) : cevalCalc(evaluator);
+    eq FIdUseExp.cevalArray(VariableEvaluator evaluator, Index i)        = isSlice() ? super.cevalArray(evaluator, i) : cevalCalc(evaluator);
     eq FIfExp.cevalArray(VariableEvaluator evaluator, Index i)           = cevalSelectExp(evaluator).cevalArray(evaluator, i);
 
     /**
@@ -2435,11 +2430,11 @@ aspect ConstantEvaluation {
         return res.record().getMember(last);
     }
 
-    eq CommonAccessExp.cevalCalc(VariableEvaluator evaluator) = evaluator.cevalUse(this);
+    eq FIdUseExp.cevalCalc(VariableEvaluator evaluator) = evaluator.cevalUse(this);
     
-    syn CValue CommonAccessExp.cevalUse(VariableEvaluator evaluator) = getAccess().ceval(evaluator);
+    syn CValue FIdUseExp.cevalUse(VariableEvaluator evaluator) = getCommonAccess().ceval(evaluator);
     eq FAbstractDerExp.cevalUse(VariableEvaluator evaluator) {
-        if (getFAccess().variability().discreteOrLess())
+        if (getCommonAccess().variability().discreteOrLess())
             return new CValueInteger(0);
         FAbstractVariable decl = myFV();
         return decl == null ? CValue.UNKNOWN : evaluator.ceval(decl);
@@ -2464,7 +2459,7 @@ aspect ConstantEvaluation {
           
           if (isSlice()) {
               FArraySubscripts fas = getFArraySubscripts();
-              iHere = fas.createIndex();
+              iHere = duringFunctionEval() ? fas.createIndex() : fas.asIndex();
               i = iHere.expand(i);
           }
           
@@ -3055,7 +3050,7 @@ aspect ConstantEvaluation {
    *        or <code>null</code> if none match. 
    */
   syn CValue FExp.extractCValue(CValue val, FVariable fv) = null;
-  eq FAccessExp.extractCValue(CValue val, FVariable fv)    = getFAccess().myFV() == fv ? val : null;
+  eq FIdUseExp.extractCValue(CValue val, FVariable fv)    = getCommonAccess().myFV() == fv ? val : null;
   eq FArray.extractCValue(CValue val, FVariable fv) {
 	  CValueArray arr = val.array();
 	  for (Index i : indices()) {
@@ -4339,7 +4334,7 @@ aspect LiteralExpressions {
         return true;
     }
 
-    eq CommonAccessExp.hasOnlyLiterals()= false;
+    eq FIdUseExp.hasOnlyLiterals()      = false;
     eq FFunctionCall.hasOnlyLiterals()  = false;
     eq FTimeExp.hasOnlyLiterals()       = false;
     eq FEndExp.hasOnlyLiterals()        = !inFunction();
@@ -4374,7 +4369,7 @@ aspect CircularExpressions {
 	
 	private boolean FAbstractExp.inIsCircular = false; 
 	
-    eq CommonAccessExp.isCircularCalc() = getAccess().isCircular(-1);
+    eq FIdUseExp.isCircularCalc() = getCommonAccess().isCircular(-1);
     
     syn boolean CommonAccess.isCircular(int dim);
     eq FAccess.isCircular(int dim)     = myFV().isCircular();
@@ -4386,7 +4381,7 @@ aspect CircularExpressions {
 		Size s = getFExp().size();
 		return hasDim() ? s.isCircular(dimension()) : s.isCircular();
 	}
-    eq FUnknownSizeExp.isCircularCalc() = getDim().isCircular() || getFExp().asCommonAccess().isCircular(dimension());
+    eq FUnknownSizeExp.isCircularCalc() = getDim().isCircular() || ((FIdUseExp)getFExp()).getCommonAccess().isCircular(dimension());
     
     eq FIfExp.isCircularCalc() {
         if (getIfExp().variability().evalOrLess()) {
@@ -4404,7 +4399,7 @@ aspect CircularExpressions {
     }
 
 	syn boolean FExp.isUnknownSizeVarUse()  = false;
-	eq CommonAccessExp.isUnknownSizeVarUse()= getAccess().isUnknownSizeVarUse();
+	eq FIdUseExp.isUnknownSizeVarUse()      = getCommonAccess().isUnknownSizeVarUse();
 	
 	syn boolean CommonAccess.isUnknownSizeVarUse();
 	eq FAccess.isUnknownSizeVarUse()     = myFV().isUnknownSizeVar();
@@ -4479,7 +4474,7 @@ aspect CircularExpressions {
                     return true;
                 }
             } else {
-                if (getFArraySubscripts().subscript(dim).isCircular()) {
+                if (getFArraySubscripts().getFSubscript(dim).isCircular()) {
                     return true;
                 }
             }
@@ -4488,8 +4483,7 @@ aspect CircularExpressions {
     }
     eq InstRecord.isCircular(int dim) = false;
 
-	syn boolean FArraySubscripts.isCircular() = false;
-	eq FArrayExpSubscripts.isCircular() {
+	syn boolean FArraySubscripts.isCircular() {
 		for (FSubscript fs : getFSubscripts())
 			if (fs.isCircular())
 				return true;
@@ -4498,7 +4492,6 @@ aspect CircularExpressions {
 	
 	syn boolean FSubscript.isCircular() = false;
 	eq FExpSubscript.isCircular() = getFExp().isCircular();
-	public boolean IntegerSubscript.isCircular() { return false; }
 
 }
 
@@ -4670,8 +4663,8 @@ aspect VariableEvaluator {
             return variable.ceval(this, i);
         }
         
-        public CValue cevalUse(CommonAccessExp access) {
-            return access.cevalUse(this);
+        public CValue cevalUse(FIdUseExp use) {
+            return use.cevalUse(this);
         }
         
         public AlgorithmEvaluator createAlgorithmEvaluator(OptionRegistry options, Map<CommonVariableDecl, CValue> values) {
@@ -4727,16 +4720,16 @@ aspect VariableEvaluator {
         }
         
         @Override
-        public CValue cevalUse(CommonAccessExp access) {
-            if (access.variability().knownParameterOrLess()) {
-                return super.cevalUse(access);
+        public CValue cevalUse(FIdUseExp use) {
+            if (use.variability().knownParameterOrLess()) {
+                return super.cevalUse(use);
             } else {
-                return createUnknownCValue(access);
+                return createUnknownCValue(use);
             }
         }
         
-        protected CValue createUnknownCValue(CommonAccessExp access) {
-            return access.type().unknownCValue();
+        protected CValue createUnknownCValue(FIdUseExp use) {
+            return use.type().unknownCValue();
         }
         
         protected CValue createUnknownCValue(FExp exp) {
@@ -4786,18 +4779,14 @@ aspect VariableEvaluator {
         }
         
         @Override
-        protected CValue createUnknownCValue(CommonAccessExp use) {
-            if (use.getAccess().isFAccess()) {
-                return new CValueUnknownUse(use.asFAccessExp());
-            } else {
-                return new CValueUnknownUse();
-            }
+        protected CValue createUnknownCValue(FIdUseExp use) {
+            return new CValueUnknownUse(use);
         }
         
         @Override
         protected CValue createUnknownCValue(FExp exp) {
             CValue val = new CValueUnknownUse();
-            for (FAccessExp use : exp.findFAccessExpsInTree()) {
+            for (FIdUseExp use : exp.findFIdUseExpsInTree()) {
                 val = val.merge(use.cevalUse(this));
             }
             return val;
@@ -4808,8 +4797,8 @@ aspect VariableEvaluator {
             return new CValueUnknownUse();
         }
         
-        public Map<FAccessExp, Set<FAccessExp>> resolveDependencies(FFunctionCallEquation equation) {
-            Map<FAccessExp, Set<FAccessExp>> res = new HashMap<>();
+        public Map<FIdUseExp, Set<FIdUseExp>> resolveDependencies(FFunctionCallEquation equation) {
+            Map<FIdUseExp, Set<FIdUseExp>> res = new HashMap<FIdUseExp, Set<FIdUseExp>>();
             for (int i = 0; i < equation.getNumLeft(); i++) {
                 if (equation.getLeft(i).hasFExp()) {
                     FExp e = equation.getLeft(i).getFExp();
@@ -4826,47 +4815,47 @@ aspect VariableEvaluator {
         }
     }
     
-    public void FExp.mapComponents(Map<FAccessExp, Set<FAccessExp>> res, CValue val) {
+    public void FExp.mapComponents(Map<FIdUseExp, Set<FIdUseExp>> res, CValue val) {
         throw new UnsupportedOperationException("Unsupported FExp in LHS");
     }
     
-    public void FArray.mapComponents(Map<FAccessExp, Set<FAccessExp>> res, CValue val) {
+    public void FArray.mapComponents(Map<FIdUseExp, Set<FIdUseExp>> res, CValue val) {
         Enumerator e = new Enumerator();
         mapComponentsArray(res, val.array(), e);
     }
     
-    public void FExp.mapComponentsArray(Map<FAccessExp, Set<FAccessExp>> res, CValueArray val, Enumerator e) {
+    public void FExp.mapComponentsArray(Map<FIdUseExp, Set<FIdUseExp>> res, CValueArray val, Enumerator e) {
         mapComponents(res, val.getCell(e.next()));
     }
     
-    public void FArray.mapComponentsArray(Map<FAccessExp, Set<FAccessExp>> res, CValueArray val, Enumerator e) {
+    public void FArray.mapComponentsArray(Map<FIdUseExp, Set<FIdUseExp>> res, CValueArray val, Enumerator e) {
         for (FExp exp : getFExps()) {
             exp.mapComponentsArray(res, val, e);
         }
     }
     
-    public void FRecordConstructor.mapComponents(Map<FAccessExp, Set<FAccessExp>> res, CValue val) {
+    public void FRecordConstructor.mapComponents(Map<FIdUseExp, Set<FIdUseExp>> res, CValue val) {
         CValueRecord rec = val.record();
         for (int i = 0; i < getNumArg(); i++) {
             getArg(i).mapComponents(res, rec.getMember(i));
         }
     }
     
-    public void FAccessExp.mapComponents(Map<FAccessExp, Set<FAccessExp>> res, CValue val) {
-        Set<FAccessExp> s = new HashSet<>();
+    public void FIdUseExp.mapComponents(Map<FIdUseExp, Set<FIdUseExp>> res, CValue val) {
+        Set<FIdUseExp> s = new HashSet<FIdUseExp>();
         s.addAll(val.getDependencies());
         res.put(this, s);
     }
     
-    public Set<FAccessExp> CValue.getDependencies() {
-        return new HashSet<>();
+    public Set<FIdUseExp> CValue.getDependencies() {
+        return new HashSet<FIdUseExp>();
     }
     
-    public Set<FAccessExp> CValueUnknown.getDependencies() {
+    public Set<FIdUseExp> CValueUnknown.getDependencies() {
         return unknownUse().getDependencies();
     }
     
-    public void FNoExp.mapComponents(Map<FAccessExp, Set<FAccessExp>> res, CValue val) {
+    public void FNoExp.mapComponents(Map<FIdUseExp, Set<FIdUseExp>> res, CValue val) {
         
     }
     

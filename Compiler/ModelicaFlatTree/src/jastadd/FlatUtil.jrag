@@ -41,10 +41,6 @@ import org.jmodelica.util.AbstractModelicaScanner;
 
 aspect FlatNames {
     
-    syn CommonAccess CommonAccessExp.getAccess();
-    eq InstAccessExp.getAccess() = getInstAccess();
-    eq FAccessExp.getAccess()    = getFAccess();
-    
     syn String FVariable.varKind() {
         if (isIndependentConstant()) {
             return "ci";
@@ -82,8 +78,10 @@ aspect FlatNames {
     syn boolean CommonAccess.hasFArraySubscripts();
     syn FArraySubscripts CommonAccess.getFArraySubscripts();
 
-    syn boolean CommonAccessExp.hasFArraySubscripts() = getAccess().hasFArraySubscripts();
-    syn FArraySubscripts CommonAccessExp.getFArraySubscripts() = getAccess().getFArraySubscripts();
+    syn boolean FIdUseExp.hasFArraySubscripts() = 
+        getCommonAccess().hasFArraySubscripts();
+    syn FArraySubscripts FIdUseExp.getFArraySubscripts() = 
+        getCommonAccess().getFArraySubscripts();
 
     /**
      * Get a string representation of a prefix of this name.
@@ -186,39 +184,27 @@ aspect FlatNames {
         return n;
     }
     
-    syn int FAccess.numMatchingParts(FAccessFull access)  = 0;
-    eq FAccessString.numMatchingParts(FAccessFull access) = 
-        access.getFAccessPart(0).getName().equals(getName()) ? 1 : 0;
-    eq FAccessFull.numMatchingParts(FAccessFull access) {
+    syn int FAccess.numMatchingParts(FAccessFull fqn)  = 0;
+    eq FAccessString.numMatchingParts(FAccessFull fqn) = 
+        fqn.getFAccessPart(0).getName().equals(getName()) ? 1 : 0;
+    eq FAccessFull.numMatchingParts(FAccessFull fqn) {
         int n = getNumFAccessPart();
         for (int i = 0; i < n; i++)
-            if (!getFAccessPart(i).getName().equals(access.getFAccessPart(i).getName()))
+            if (!getFAccessPart(i).getName().equals(fqn.getFAccessPart(i).getName()))
                 return i;
         return n;
     }
     
     public FArraySubscripts FArraySubscripts.createEvaluated() {
-        return treeCopy();
-    }
-    public FArraySubscripts FArrayExpSubscripts.createEvaluated() {
-        List<FSubscript> list = new List<FSubscript>();
-        for (FSubscript fs : getFSubscripts()) {
-            list.add(fs.createEvaluated());
-        }
-        FArraySubscripts res = FArraySubscripts.createFArraySubscripts(list);
+        FArraySubscripts res = new FArraySubscripts(new List());
+        for (FSubscript fs : getFSubscripts())
+            res.addFSubscript(fs.createEvaluated());
         res.setParent(getParent());
         return res;
     }
 
-    syn FExp FSubscript.createFExp();
-    eq FExpSubscript.createFExp()     = getFExp().treeCopy();
-    eq FIntegerSubscript.createFExp() = new FIntegerLitExp(getValue());
-    eq FColonSubscript.createFExp()   {
-        throw new UnsupportedOperationException();
-    }
-
     public FSubscript FSubscript.createEvaluated() {
-        return treeCopy();
+        return (FSubscript) fullCopy();
     }
 
     public FSubscript FColonSubscript.createEvaluated() {
@@ -235,18 +221,14 @@ aspect FlatNames {
                 return val.createFSubscript();
             }
         } catch (ConstantEvaluationException e) {}
-        return treeCopy();
+        return fullCopy();
     }
     
     syn boolean FSubscript.isColon() = false;
     eq FColonSubscript.isColon()     = true;
-    public boolean IntegerSubscript.isColon() { return false; }
     
     syn boolean FSubscript.isExpSubscript() = false;
     eq FExpSubscript.isExpSubscript()       = true;
-    
-    syn boolean FSubscript.isIntegerSubscript() = false;
-    eq FIntegerSubscript.isIntegerSubscript()   = true;
     
     syn FExpSubscript FSubscript.asExpSubscript() {
         throw new UnsupportedOperationException();
@@ -312,15 +294,15 @@ aspect FlatNames {
     }
     
     syn String FDummyDerivativeVariable.derPrefixName() = getFAccess().derPrefixName(order());
-    syn String FDummyDerExp.derPrefixName() = getFAccess().derPrefixName(order());
+    syn String FDummyDerExp.derPrefixName() = getCommonAccess().asFAccess().derPrefixName(order());
     
     syn String FDynamicDerivativeVariable.dynDerName() = getFAccess().dynDerName(order());
-    syn String FDynamicDerExp.dynDerName() = getFAccess().dynDerName(order());
+    syn String FDynamicDerExp.dynDerName() = getCommonAccess().asFAccess().dynDerName(order());
     
     syn String FAccessPart.name() = getName();
 
     syn String CommonAccess.name();
-    syn String CommonAccessExp.name() = getAccess().name();
+    syn String FIdUseExp.name() = getCommonAccess().name();
     eq FAbstractDerExp.name()   = derName(order());
     eq FPreExp.name()           = preName();
 
@@ -352,7 +334,8 @@ aspect FlatNames {
     
     eq FAbstractDerivativeVariable.name() = getFAccessNoTransform().derName(order());
 
-    syn String FAccessExp.derName(int order) = getFAccessNoTransform().derName(order);
+    syn String CommonAccess.derName(int order) { throw new UnsupportedOperationException(); }
+    syn String FIdUseExp.derName(int order) = getCommonAccessNoTransform().derName(order);
 
     eq FPreRealVariable.name()     = getFAccessNoTransform().preName();
     eq FPreIntegerVariable.name()  = getFAccessNoTransform().preName();  
@@ -360,15 +343,16 @@ aspect FlatNames {
     eq FPreStringVariable.name()   = getFAccessNoTransform().preName();
     eq FPreEnumVariable.name()     = getFAccessNoTransform().preName();
 
-    syn String FAccessExp.preName() = getFAccessNoTransform().preName();
+    syn String CommonAccess.preName() { throw new UnsupportedOperationException(); }
+    syn String FIdUseExp.preName() = getCommonAccessNoTransform().preName();
     
-    syn String FAccessExp.scalarName() = getFAccess().scalarName();
+    syn String FIdUseExp.scalarName() = getCommonAccess().asFAccess().scalarName();
     
     public static String ASTNode.underScore(String s) {
         return s.replaceAll("[^0-9a-zA-Z_]", "_");
     }
     
-    syn String FAccess.nameUnderscore()            = "";
+    eq FAccess.nameUnderscore()            = "";
     syn lazy String FAccessString.nameUnderscore() = ASTNode.underScore(getName().replaceAll("]", ""));
     syn lazy String FAccessFull.nameUnderscore() {
         StringBuilder str = new StringBuilder();
@@ -380,9 +364,9 @@ aspect FlatNames {
             sep = "_";
             str.append(part.nameUnderscore());
             if ((i < last || isScalarized()) && part.hasFArraySubscripts()) {
-                for (Subscript s : part.getFArraySubscripts().subscripts()) {
+                for (FSubscript fs : part.getFArraySubscripts().getFSubscripts()) {
                     str.append(sep);
-                    str.append(s.prettyPrint(""));
+                    str.append(fs.prettyPrint(""));
                 }
             }
         }
@@ -391,12 +375,13 @@ aspect FlatNames {
     
     syn String FAccessPart.nameUnderscore() = ASTNode.underScore(getName().replaceAll("]", ""));
     
-    syn String FAccessExp.nameUnderscore() = getFAccess().nameUnderscore();
+    syn String CommonAccess.nameUnderscore() { throw new UnsupportedOperationException(); }
+    syn String FIdUseExp.nameUnderscore() = getCommonAccess().nameUnderscore();
     eq FAbstractDerExp.nameUnderscore() {
         if (order() == 1)
-            return "der_" + getFAccess().nameUnderscore();
+            return "der_" + getCommonAccess().nameUnderscore();
         else
-            return "der_" + order() + "_" + getFAccess().nameUnderscore();
+            return "der_" + order() + "_" + getCommonAccess().nameUnderscore();
     }
     
     syn String FIdDecl.nameUnderscore() = getFAccess().nameUnderscore();
@@ -431,7 +416,7 @@ aspect FlatNames {
     syn String FFunctionVariable.funcNameUnderscore(String suffix) = myFCallable().funcNameUnderscore(suffix);
 
     syn boolean FExp.isIdentifier(String name) = false;
-    eq CommonAccessExp.isIdentifier(String name) = name.equals(name());
+    eq FIdUseExp.isIdentifier(String name) = name.equals(name());
     eq FDSRefExp.isIdentifier(String name) = getOrg().isIdentifier(name);
 
 
@@ -508,8 +493,7 @@ aspect FlatNames {
     /**
      * Check if this array subscript list has any expression or colon subscripts.
      */
-    syn boolean FArraySubscripts.hasNonLiteralSubscripts() = false;
-    eq FArrayExpSubscripts.hasNonLiteralSubscripts() {
+    syn boolean FArraySubscripts.hasNonLiteralSubscripts() {
         for (FSubscript s : getFSubscripts())
             if (s.hasNonLiteralSubscripts())
                 return true;
@@ -558,30 +542,30 @@ aspect FlatNames {
     }
 
     /**
-     * Copy and append all name parts from <code>access</code>.
+     * Copy and append all name parts from <code>fqn</code>.
      * 
      * @return  <code>this</code>, for convenience
      */
-    public FAccessFull FAccessFull.append(FAccess access) {
-        return access.appendTo(this);
+    public FAccessFull FAccessFull.append(FAccess fqn) {
+        return fqn.appendTo(this);
     }
  
-    protected abstract FAccessFull FAccess.appendTo(FAccessFull access);
+    protected abstract FAccessFull FAccess.appendTo(FAccessFull fqn);
     
-    protected FAccessFull FAccessEmpty.appendTo(FAccessFull access) {
-        return access;
+    protected FAccessFull FAccessEmpty.appendTo(FAccessFull fqn) {
+        return fqn;
     }
     
-    protected FAccessFull FAccessString.appendTo(FAccessFull access) {
-        return access.append(getName());
+    protected FAccessFull FAccessString.appendTo(FAccessFull fqn) {
+        return fqn.append(getName());
     }
     
-    protected FAccessFull FAccessFull.appendTo(FAccessFull access) {
-        return access.appendFull(this);
+    protected FAccessFull FAccessFull.appendTo(FAccessFull fqn) {
+        return fqn.appendFull(this);
     }
     
-    protected FAccessFull FAccessFull.appendFull(FAccessFull access) {
-        for (FAccessPart part : access.getFAccessParts())
+    protected FAccessFull FAccessFull.appendFull(FAccessFull fqn) {
+        for (FAccessPart part : fqn.getFAccessParts())
             addFAccessPart(part.fullCopy());
         return this;
     }
@@ -702,24 +686,24 @@ aspect FlatNames {
     /**
      * Create a copy of the name, with an FSubscript added to the last part.
      */
-    public abstract FAccess FAccess.copyAndAddSubscript(int s);
+    public abstract FAccess FAccess.copyAndAddSubscript(FSubscript s);
     
-    public FAccess FAccessEmpty.copyAndAddSubscript(int s) {
+    public FAccess FAccessEmpty.copyAndAddSubscript(FSubscript s) {
         throw new UnsupportedOperationException();
     }
     
-    public FAccess FAccessString.copyAndAddSubscript(int s) {
+    public FAccess FAccessString.copyAndAddSubscript(FSubscript s) {
         return new FAccessFull(getName()).addSubscript(s);
     }
     
-    public FAccess FAccessFull.copyAndAddSubscript(int s) {
+    public FAccess FAccessFull.copyAndAddSubscript(FSubscript s) {
         return fullCopy().addSubscript(s);
     }
 
     /**
      * Add new FSubscript to the last name part.
      */
-    public FAccess FAccessFull.addSubscript(int s) {
+    public FAccess FAccessFull.addSubscript(FSubscript s) {
         int i = getNumFAccessPart() - 1;
         setFAccessPart(getFAccessPart(i).addSubscript(s), i);
         return this;
@@ -730,11 +714,11 @@ aspect FlatNames {
      * 
      * This name part might or might not be altered - replace it with the return value.
      */
-    public FAccessPartArray FAccessPart.addSubscript(int s) {
-        return new FAccessPartArray(getName(), new FArrayLitSubscripts(s));
+    public FAccessPartArray FAccessPart.addSubscript(FSubscript s) {
+        return new FAccessPartArray(getName(), new FArraySubscripts(new List(s)));
     }
    
-    public FAccessPartArray FAccessPartArray.addSubscript(int s) {
+    public FAccessPartArray FAccessPartArray.addSubscript(FSubscript s) {
         getFArraySubscripts().addFSubscript(s);
         return this;
     }
@@ -946,21 +930,21 @@ aspect FlatNames {
      * Interface for variable declarations in flat and instance trees.
      */
     public interface CommonVariableDecl {
-        public FExp createAccessExp();
+        public FExp createUseExp();
     }
 
     /**
      * Create an access expression to this variable.
      */
-    syn FAccessExp FVariable.createAccessExp() = 
-            isPreVariable() ? new FPreExp(createFAccess()) : new FAccessExp(createFAccess());
-    eq FDerivativeVariable.createAccessExp()          = new FDerExp(createFAccess(), order());
-    eq FDummyDerivativeVariable.createAccessExp()     = new FDummyDerExp(createFAccess(), (String)null, order());
-    eq FDynamicDerivativeVariable.createAccessExp()   = new FDynamicDerExp(createFAccess(), (String)null, order());
+    syn FIdUseExp FVariable.createUseExp() = 
+            isPreVariable() ? new FPreExp(createCommonAccess()) : new FIdUseExp(createCommonAccess());
+    eq FDerivativeVariable.createUseExp()          = new FDerExp(createCommonAccess(), order());
+    eq FDummyDerivativeVariable.createUseExp()     = new FDummyDerExp(createCommonAccess(), (String)null, order());
+    eq FDynamicDerivativeVariable.createUseExp()   = new FDynamicDerExp(createCommonAccess(), (String)null, order());
 
-    syn FAccessExp FFunctionVariable.createAccessExp() = new FAccessExp(getFAccess().treeCopy());
-    syn FExp FEnumLiteral.createAccessExp()           = new FEnumLitExp(myFEnumDecl().name(), name(), null);
-    syn FExp UnknownFVariable.createAccessExp()       = null;
+    syn FIdUseExp FFunctionVariable.createUseExp() = new FIdUseExp(getFAccess().treeCopy());
+    syn FExp FEnumLiteral.createUseExp()           = new FEnumLitExp(myFEnumDecl().name(), name(), null);
+    syn FExp UnknownFVariable.createUseExp()       = null;
 
     syn FAccess CommonAccess.asFAccess() {
         throw new UnsupportedOperationException();
@@ -970,7 +954,7 @@ aspect FlatNames {
     /**
      * Create an access to this variable.
      */
-    syn FAccess FVariable.createFAccess() {
+    syn CommonAccess FVariable.createCommonAccess() {
         if (isArray()) {
             return getFAccess().copyAndAddFas(size().createExpandedFArraySubscripts());
         } else {
@@ -981,8 +965,8 @@ aspect FlatNames {
     /**
      * Create an access to this variable, from a scope where it can be accessed unqualified.
      */
-    public InstAccessExp InstComponentDecl.createAccessExp() {
-        return new InstAccessExp(createInstAccess());
+    public FIdUseExp InstComponentDecl.createUseExp() {
+        return new FIdUseExp(createInstAccess());
     }
     
     syn InstAccess InstComponentDecl.createInstAccess() = new InstComponentAccess(name());
@@ -991,7 +975,7 @@ aspect FlatNames {
      * Create a pre() expression for this variable.
      */
     public FPreExp FVariable.createFPreExp() {
-        return new FPreExp(createFAccess());
+        return new FPreExp(createCommonAccess());
     }
 
     /**
@@ -1572,7 +1556,7 @@ aspect FlatFunctionUtils {
      /**
       * Creates expressions based on tempVarName();
       */
-     syn FAccessExp FExp.tempUseExp() = new FAccessExp(tempVarName());
+     syn FIdUseExp FExp.tempUseExp() = new FIdUseExp(tempVarName());
      syn FPreExp   FExp.tempPreExp() = new FPreExp(new FAccessString(tempVarName()));
      syn FVariable FExp.tempVar() = tempVar(variability(), type());
      syn FVariable FExp.tempVar(TypePrefixVariability variability, FType type)

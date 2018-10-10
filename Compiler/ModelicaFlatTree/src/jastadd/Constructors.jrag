@@ -266,32 +266,32 @@ aspect Constructors {
 	}
 	
 	/**
-	 * Constructs an FAccessExp that refers to the variable with the given FAccess.
+	 * Constructs a flat FIdUseExp that refers to the variable with the given CommonAccess.
 	 */
-	public FAccessExp.FAccessExp(FAccess name) {
+	public FIdUseExp.FIdUseExp(CommonAccess name) {
 		this(name, (String)null);
 	}
 	
 	/**
-	 * Constructs an FAccessExp that refers to the variable with the given name.
+	 * Constructs a flat FIdUseExp that refers to the variable with the given name.
 	 */
-	public FAccessExp.FAccessExp(String name) {
+	public FIdUseExp.FIdUseExp(String name) {
 		this(new FAccessString(name));
 	}
 	
 	/**
-	 * Constructs an FAccessExp that refers to a cell of the variable with the given name.
+	 * Constructs an FIdUseExp that refers to a cell of the variable with the given name.
 	 *
 	 * @param fas  the array subscripts to set for the last name part
 	 */
-	public FAccessExp.FAccessExp(String name, FArraySubscripts fas) {
+	public FIdUseExp.FIdUseExp(String name, FArraySubscripts fas) {
 		this(new FAccessFull(name, fas));
 	}
 
     /**
-     * Constructs an FDerExp that refers to the variable with the given FAccess and order.
+     * Constructs an FDerExp that refers to the variable with the given CommonAccess and order.
      */
-    public FDerExp.FDerExp(FAccess name, int order) {
+    public FDerExp.FDerExp(CommonAccess name, int order) {
         this(name, (String)null, order);
     }
 
@@ -303,16 +303,23 @@ aspect Constructors {
     }
 
     /**
-     * Constructs an FPreExp that refers to the variable with the given FAccess.
+     * Constructs an FDerExp of order that refers to the variable with the given name.
      */
-    public FPreExp.FPreExp(FAccess name) {
+    public FDerExp.FDerExp(CommonAccess name) {
+        this(name, 1);
+    }
+
+    /**
+     * Constructs an FPreExp that refers to the variable with the given CommonAccess.
+     */
+    public FPreExp.FPreExp(CommonAccess name) {
         this(name, (String)null);
     }
     
     /**
-     * Constructs an FTempAccessExp that refers to the variable with the given FAccess.
+     * Constructs an FIdTempExp that refers to the variable with the given CommonAccess.
      */
-    public FTempAccessExp.FTempAccessExp(FAccess name) {
+    public FIdTempExp.FIdTempExp(CommonAccess name) {
         this(name, (String)null);
     }
 
@@ -375,7 +382,7 @@ aspect Constructors {
 	 * Constructs an FSizeExp giving the size in the given dimension for the given variable.
 	 */
 	public FSizeExp.FSizeExp(FAccess var, int dim) {
-		this(new FAccessExp(var), dim);
+		this(new FIdUseExp(var), dim);
 	}
 	
 	/**
@@ -790,34 +797,25 @@ aspect Constructors {
 	 * Create a new FArraySubscripts <code>n</code> literal subscripts from 
 	 *        <code>i</code>, starting at <code>j</code>.
 	 */
-	public FArrayLitSubscripts.FArrayLitSubscripts(Index i, int j, int n) {
+	public FArraySubscripts.FArraySubscripts(Index i, int j, int n) {
 		this();
-		subscripts = new int[n];
-		for (int k = 0; k < n; k++)
-			subscripts[k] = i.get(k+j);
+		for (int k = j; k < n+j; k++)
+			addFSubscript(i.get(k));
 	}
 	
-    public FArrayLitSubscripts.FArrayLitSubscripts(int... subscripts) {
-        this();
-        this.subscripts = Arrays.copyOf(subscripts, subscripts.length);
-    }
-
-
-
+	/**
+	 * Add a new use expression subscript to the list of FSubscripts.
+	 */
+	public void FArraySubscripts.addFSubscript(FExp e) {
+		addFSubscript(new FExpSubscript(e));
+	}
+	
 	/**
 	 * Add a new integer literal subscript to the list of FSubscripts.
 	 */
-    public abstract void FArraySubscripts.addFSubscript(int i);
-
-    public void FArrayExpSubscripts.addFSubscript(int i) {
-        addFSubscript(new FIntegerSubscript(i));
-    }
-
-    public void FArrayLitSubscripts.addFSubscript(int i) {
-        int length = subscripts.length;
-        subscripts = Arrays.copyOf(subscripts, length + 1);
-        subscripts[length] = i;
-    }
+	public void FArraySubscripts.addFSubscript(int i) {
+		addFSubscript(new FIntegerSubscript(i));
+	}
 	
 	/**
 	 * Add new integer literal subscripts for each index to the list of FSubscripts.
@@ -826,12 +824,6 @@ aspect Constructors {
 		for (int i : index)
 			addFSubscript(i);
 	}
-
-    public void FArrayLitSubscripts.addFSubscripts(int[] index) {
-        int length = subscripts.length;
-        subscripts = Arrays.copyOf(subscripts, length + index.length);
-        System.arraycopy(index, 0, subscripts, length, index.length);
-    }
 	
 	/**
 	 * Add new integer literal subscripts for each index to the list of FSubscripts.
@@ -847,30 +839,26 @@ aspect Constructors {
 		List<FSubscript> l = new List<FSubscript>();
 		for (int i = 0; i < n; i++)
 			l.add(new FColonSubscript());
-		return new FArrayExpSubscripts(l);
+		return new FArraySubscripts(l);
 	}
-
-    public static FArraySubscripts FArraySubscripts.createFArraySubscripts(List<FSubscript> list) {
-        for (FSubscript fs : list) {
-            if (!fs.isIntegerSubscript()) {
-                return new FArrayExpSubscripts(list);
-            }
-        }
-        int[] subscripts = new int[list.getNumChildNoTransform()];
-        for (int i = 0; i < subscripts.length; i++) {
-            subscripts[i] = list.getChildNoTransform(i).value();
-        }
-        return new FArrayLitSubscripts(subscripts);
-    }
-
-    public FSubscript FExp.createFSubscript() {
-        return new FExpSubscript(this);
-    }
-
-    public FIntegerSubscript FIntegerLitExp.createFSubscript() {
-        return new FIntegerSubscript(getValue());
-    }
-
+	
+	/**
+	 * Create a new FArraySubscripts containing an integer literal.
+	 */
+	public static FArraySubscripts FArraySubscripts.createLiteralSubscripts(int i) {
+		List<FSubscript> l = new List<FSubscript>();
+		l.add(new FIntegerSubscript(i));
+		return new FArraySubscripts(l);
+	}
+	
+	/**
+	 * Create a new FArraySubscripts containing integer literals.
+	 */
+	public static FArraySubscripts FArraySubscripts.createLiteralSubscripts(int[] index) {
+		FArraySubscripts fas = new FArraySubscripts();
+		fas.addFSubscripts(index);
+		return fas;
+	}
 
     public FFunctionDecl.FFunctionDecl(String name, List<FFunctionVariable> vars, FStatement ... statements) {
         this(new FAccessString(name), vars, new FAlgorithm(new List<FStatement>(statements)), new List<FAttribute>());
@@ -966,18 +954,15 @@ aspect InheritedFactoryMethods {
     public FInStreamEpsExp FInStreamEpsExp.createEmptyNode() { return new FInStreamEpsExp(); }
 
     // Identifier expressions
-    public abstract CommonAccessExp CommonAccessExp.createEmptyNode();
-    public InstAccessExp  InstAccessExp.createEmptyNode()  { return new InstAccessExp();  }
-    public FGlobalAccessExp FGlobalAccessExp.createEmptyNode() { return new FGlobalAccessExp(); }
+    public FIdUseExp      FIdUseExp.createEmptyNode()      { return new FIdUseExp();      }
     public InstDerExp     InstDerExp.createEmptyNode()     { return new InstDerExp();     }
-    public FAccessExp     FAccessExp.createEmptyNode()     { return new FAccessExp();     }
     public FDerExp        FDerExp.createEmptyNode()        { return new FDerExp();        }
     public FDummyDerExp   FDummyDerExp.createEmptyNode()   { return new FDummyDerExp();   }
     public FDynamicDerExp FDynamicDerExp.createEmptyNode() { return new FDynamicDerExp(); }
     public InstHDerExp    InstHDerExp.createEmptyNode()    { return new InstHDerExp();    }
     public FPreExp        FPreExp.createEmptyNode()        { return new FPreExp();        }
     public InstPreExp     InstPreExp.createEmptyNode()     { return new InstPreExp();     }
-    public FTempAccessExp FTempAccessExp.createEmptyNode() { return new FTempAccessExp(); }
+    public FIdTempExp     FIdTempExp.createEmptyNode()     { return new FIdTempExp();     }
     public FDSRefExp      FDSRefExp.createEmptyNode()      { return new FDSRefExp();      }
     public FDSDerExp      FDSDerExp.createEmptyNode()      { return new FDSDerExp();      }
     public abstract FAbstractDerExp FAbstractDerExp.createEmptyNode();
@@ -1092,26 +1077,19 @@ aspect InheritedFactoryMethods {
 	/**
 	 * Create new node of same class as this, with the specified children.
 	 */
-	public InstAccessExp InstAccessExp.createNode(InstAccess use) {
-		InstAccessExp node = createEmptyNode();
-		node.setInstAccess(use);
+	public FIdUseExp FIdUseExp.createNode(CommonAccess use) {
+		FIdUseExp node = createEmptyNode();
+		node.setCommonAccess(use);
 		node.setLocationNoTree(this);
 		return node;
 	}
 
-    public FAccessExp FAccessExp.createNode(FAccess use) {
-        FAccessExp node = createEmptyNode();
-        node.setFAccess(use);
-        node.setLocationNoTree(this);
-        return node;
-    }
-
     /**
      * Create new node of same class as this, with the specified children.
      */
-    public FAbstractDerExp FAbstractDerExp.createNode(FAccess use) {
+    public FIdUseExp FAbstractDerExp.createNode(CommonAccess use) {
         FAbstractDerExp node = createEmptyNode();
-        node.setFAccess(use);
+        node.setCommonAccess(use);
         node.setOrder(order());
         node.setLocationNoTree(this);
         return node;

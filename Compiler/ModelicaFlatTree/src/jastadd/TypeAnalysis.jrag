@@ -79,7 +79,7 @@ aspect FlatTypeAnalysis {
     }
 
     syn boolean FExp.isConstructorTypeArg() = false;
-    eq CommonAccessExp.isConstructorTypeArg()     = !myCommonVarDecl().isOutput();
+    eq FIdUseExp.isConstructorTypeArg()     = !myCommonVarDecl().isOutput();
     eq FSizeExp.isConstructorTypeArg()      = true;
 
     // TODO: Reduce code duplication here
@@ -125,7 +125,8 @@ aspect FlatTypeAnalysis {
     eq FFunctionCallStmt.type()      = getCall().type();
     eq FInitArrayStmt.type()         = getType();
     
-    syn FType FInitArrayStmt.getType() = getFAccessExp().myFV().type().treeCopy();    
+    syn FType FInitArrayStmt.getType() = getFIdUseExp().myFV().type().treeCopy();
+    
     /**
      * True if this equation exclusively equates real types.
      */
@@ -588,7 +589,7 @@ aspect FlatTypeAnalysis {
     eq FArrayDimAsArgsExp.type() = (size().ndims() > 0) ? fIntegerArrayType(size()) : fUnknownType();
     eq FFillExp.type()           = (size().ndims() > 0) ? getFillExp().type().arrayType(size()) : fUnknownType();
 
-    eq CommonAccessExp.type() = getAccess().type();
+    eq FIdUseExp.type() = getCommonAccess().type();
     
     eq FDSRefExp.type() = getOrg().type();
 
@@ -659,11 +660,10 @@ aspect FlatTypeAnalysis {
     }
 
     // TODO: expand to handle boolean and enum index (see #3597)
-    syn FType FSubscript.type();
-    syn lazy FType FColonSubscript.type() = fIntegerArrayType(size());
+    syn lazy FType FSubscript.type();
+    eq FColonSubscript.type()   = fIntegerArrayType(size());
     eq FIntegerSubscript.type() = fIntegerScalarType();
     eq FExpSubscript.type()     = getFExp().type();
-    public FType IntegerSubscript.type() { return FIntegerType.SCALAR; }
 
     public FType FType.lookupHierarchical(FAccess name, int part, int last) {
         return this;
@@ -1359,7 +1359,7 @@ aspect ExternalObjectTypes {
         if (hasBindingExp()) {
             return getBindingExp().isConstructorCall();
         } else {
-            for (FAccessExp use : uses()) {
+            for (FIdUseExp use : uses()) {
                 if (use.isConstructorAssign()) {
                     return true;
                 }
@@ -1369,7 +1369,7 @@ aspect ExternalObjectTypes {
         
     }
 
-    inh boolean CommonAccessExp.isConstructorAssign();
+    inh boolean FIdUseExp.isConstructorAssign();
     eq BaseNode.getChild().isConstructorAssign() = false;
     eq FEquation.getLeft().isConstructorAssign() = getRight().isConstructorCall();
 

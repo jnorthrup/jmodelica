@@ -1067,7 +1067,7 @@ aspect FlatAPI {
      */
     coll LinkedHashSet<FVariable> FClass.differentiatedByFDerExp() 
         [new LinkedHashSet<FVariable>()] with add root FClass;
-    FDerExp contributes getFAccess().myFV().asFVariable() when getFAccess().myFV().isFVariable() && !inDeadIfBranch()
+    FDerExp contributes getCommonAccess().myFV().asFVariable() when getCommonAccess().myFV().isFVariable() && !inDeadIfBranch()
         to FClass.differentiatedByFDerExp() for myFClass();
     FDerivativeVariable contributes myDifferentiatedVariable().asFVariable() when (shouldContribute())
         to FClass.differentiatedByFDerExp() for myFClass();
@@ -1132,7 +1132,7 @@ aspect FlatAPI {
     syn int FAbstractVariable.indexInZ() = -1;
     eq FVariable.indexInZ() = valueReference() & 0x07FFFFFF;
 
-    syn boolean FAccessExp.isConsecutiveInZ(FAccessExp use) = myFV().isConsecutiveInZ(use.myFV());
+    syn boolean FIdUseExp.isConsecutiveInZ(FIdUseExp use) = myFV().isConsecutiveInZ(use.myFV());
 
     syn boolean FAbstractVariable.isConsecutiveInZ(FAbstractVariable fv) = false;
     eq FVariable.isConsecutiveInZ(FAbstractVariable fv) = indexInZ() + 1 == fv.indexInZ();
@@ -1523,7 +1523,7 @@ aspect FlatAPI {
      */
     coll LinkedHashSet<FRealVariable> FClass.differentiatedRealVariablesFilteredSet() 
       [new LinkedHashSet<FRealVariable>()] with add root FClass;
-    FDerExp contributes (FRealVariable) getFAccess().myFV() when getFAccess().myFV().isFVariable() && !inDeadIfBranch()
+    FDerExp contributes (FRealVariable) getCommonAccess().myFV() when getCommonAccess().myFV().isFVariable() && !inDeadIfBranch()
     to FClass.differentiatedRealVariablesFilteredSet() for myFClass();
     FDerivativeVariable contributes
         myDifferentiatedVariable().asFRealVariable() when (shouldContributeFiltered())
@@ -1882,7 +1882,7 @@ aspect FlatAPI {
     eq FConnectClause.numScalarEquations()      = getConnector1().type().numScalarElements();
     syn lazy int FAlgorithm.numScalarEquations() {
         Set<FVariable> assignedVars = new HashSet<FVariable>();
-        for (FAccessExp use : FAccessExpsInLHS()) {
+        for (FIdUseExp use : FIdUseExpsInLHS()) {
             if (!use.myFV().isUnknown() && !assignedVars.contains(use.myFV())) {
                 FVariable fv = (FVariable) use.myFV();
                 assignedVars.add(fv);
@@ -2227,12 +2227,12 @@ aspect FlatAPI {
 /*  
 
     coll ArrayList<FVariable> FClass.structuralParameters() [new ArrayList<FVariable>()] with add root FClass;
-    FAccessExp contributes
+    FIdUseExp contributes
         (FVariable)myFV() when inArraySubscripts()
     to FClass.structuralParameters() for myFClass();
 
     coll ArrayList<FEquation> FVariable.variableIncidence() [new ArrayList<FEquation>()] with add root FClass;
-    FAccessExp contributes
+    FIdUseExp contributes
         myFEquation() when inFEquation()
     to FVariable.variableIncidence() for (FVariable)myFV();
     
@@ -2531,8 +2531,8 @@ aspect FlatAPI {
     eq FAlgorithm.getInitialEquationList() {
         ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
         
-        // Keeps FAccessExps in lhs which have not been removed
-        Set<FAccessExp> usesLHS = FAccessExpsInLHS();
+        // Keeps fiduseexps in lhs which have not been removed
+        Set<FIdUseExp> usesLHS = FIdUseExpsInLHS();
         
         // Keeps track of which variables are definetly set
         Set<FVariable> fvSet  = new HashSet<FVariable>();
@@ -2551,7 +2551,7 @@ aspect FlatAPI {
         ArrayList<FStatement> initStmts = new ArrayList<FStatement>();
         for (FVariable fv : lhs)
             if (!fvSet.contains(fv))
-                initStmts.add(new FAssignStmt(fv.createAccessExp(), fv.createAlgorithmArgument(true)));
+                initStmts.add(new FAssignStmt(fv.createUseExp(), fv.createAlgorithmArgument(true)));
         for (FStatement stmt : stmts)
             initStmts.add(stmt);
         if (initStmts.size() > 0)
@@ -2562,19 +2562,19 @@ aspect FlatAPI {
         Set<FVariable> removedFVs = referencedFVariablesInLHS();
         removedFVs.removeAll(lhs);
         for (FVariable fv : removedFVs)
-            l.add(new FEquation(fv.createAccessExp(), fv.createFPreExp()));
+            l.add(new FEquation(fv.createUseExp(), fv.createFPreExp()));
         
         return new List<FAbstractEquation>(l);
     }
     
     
-    public void FStatement.addAsInitial(ArrayList<FStatement> stmts, Set<FAccessExp> usesLHS, 
+    public void FStatement.addAsInitial(ArrayList<FStatement> stmts, Set<FIdUseExp> usesLHS, 
             Set<FVariable> fvSet, Set<FVariable> fvUse) {
         
         defSet(fvSet, fvUse);
         stmts.add(copySymbolic());
     }
-    public void FIfStmt.addAsInitial(ArrayList<FStatement> stmts, Set<FAccessExp> usesLHS, 
+    public void FIfStmt.addAsInitial(ArrayList<FStatement> stmts, Set<FIdUseExp> usesLHS, 
             Set<FVariable> fvSet, Set<FVariable> fvUse) {
         
         if (!isWhen()) {
@@ -2591,7 +2591,7 @@ aspect FlatAPI {
                 }
                 first = false;
             } else {
-                usesLHS.removeAll(c.findFAccessExpsInTree());
+                usesLHS.removeAll(c.findFIdUseExpsInTree());
             }
         }
     }
@@ -2617,17 +2617,17 @@ aspect FlatAPI {
                 s2.add(fv);
     }
     public void FStatement.defSet(Set<FVariable> fvSet, Set<FVariable> fvUse) {
-        defSetAdd(fvSet, fvUse, lookupFVariablesInSet(FAccessExpsInRHS()));
+        defSetAdd(fvSet, fvUse, lookupFVariablesInSet(FIdUseExpsInRHS()));
     }
     public void FAssignStmt.defSet(Set<FVariable> fvSet, Set<FVariable> fvUse) {
-        defSetAdd(fvSet, fvUse, lookupFVariablesInSet(getRight().findFAccessExpsInTree()));
-        defSetAdd(fvUse, fvSet, lookupFVariablesInSet(getLeft().findFAccessExpsInTree()));
+        defSetAdd(fvSet, fvUse, lookupFVariablesInSet(getRight().findFIdUseExpsInTree()));
+        defSetAdd(fvUse, fvSet, lookupFVariablesInSet(getLeft().findFIdUseExpsInTree()));
     }
     public void FFunctionCallStmt.defSet(Set<FVariable> fvSet, Set<FVariable> fvUse) {
-        defSetAdd(fvSet, fvUse, lookupFVariablesInSet(getCall().findFAccessExpsInTree()));
+        defSetAdd(fvSet, fvUse, lookupFVariablesInSet(getCall().findFIdUseExpsInTree()));
         for (FFunctionCallLeft left : getLefts())
             if (left.hasFExp())
-                defSetAdd(fvUse, fvSet, lookupFVariablesInSet(left.getFExp().findFAccessExpsInTree()));
+                defSetAdd(fvUse, fvSet, lookupFVariablesInSet(left.getFExp().findFIdUseExpsInTree()));
     }
     
     /**
@@ -2810,179 +2810,138 @@ aspect FlatAPI {
 
 aspect ReferencedVariables {
     
-    public interface CommonAccessExpLookupVisitor<T extends CommonAccessExp> {
-        public void visit(ASTNode<? extends ASTNode> node, Set<T> set);
-        public abstract void add(CommonAccessExp access, Set<T> set);
+    public interface FIdUseExpLookupVisitor {
+        public void visit(ASTNode<? extends ASTNode> node, Set<FIdUseExp> set);
     }
     
-    public abstract class InstAccessExpLookupVisitor implements CommonAccessExpLookupVisitor<InstAccessExp> {
-        @Override
-        public void add(CommonAccessExp access, Set<InstAccessExp> set) {
-            access.addToInstAccessExpSet(set);
-        }
-    }
-
-    public abstract class FAccessExpLookupVisitor implements CommonAccessExpLookupVisitor<FAccessExp> {
-        @Override
-        public void add(CommonAccessExp access, Set<FAccessExp> set) {
-            access.addToFAccessExpSet(set);
-        }
-    }
-
-    public class DefaultInstAccessExpLookupVisitor extends InstAccessExpLookupVisitor {
-        public static final DefaultInstAccessExpLookupVisitor instance = new DefaultInstAccessExpLookupVisitor();
+    public class DefaultFidUseExpLookupVisitor implements FIdUseExpLookupVisitor {
+        public static final FIdUseExpLookupVisitor instance = new DefaultFidUseExpLookupVisitor();
         
         @Override
-        public void visit(ASTNode<? extends ASTNode> node, Set<InstAccessExp> set) {
-            node.findCommonAccessExpsInTree(set, this);
+        public void visit(ASTNode<? extends ASTNode> node, Set<FIdUseExp> set) {
+            node.findFIdUseExpsInTree(set, this);
         }
     }
     
-    public class DefaultFAccessExpLookupVisitor extends FAccessExpLookupVisitor {
-        public static final DefaultFAccessExpLookupVisitor instance = new DefaultFAccessExpLookupVisitor();
-        
-        @Override
-        public void visit(ASTNode<? extends ASTNode> node, Set<FAccessExp> set) {
-            node.findCommonAccessExpsInTree(set, this);
-        }
+    public Set<FIdUseExp> ASTNode.findFIdUseExpsInTree() {
+        return findFIdUseExpsInTree(DefaultFidUseExpLookupVisitor.instance);
     }
     
-    public void CommonAccessExp.addToInstAccessExpSet(Set<InstAccessExp> set) {}
-    public void InstAccessExp.addToInstAccessExpSet(Set<InstAccessExp> set) {
-        set.add(this);
-    }
-
-    public void CommonAccessExp.addToFAccessExpSet(Set<FAccessExp> set) {}
-    public void FAccessExp.addToFAccessExpSet(Set<FAccessExp> set) {
-        set.add(this);
-    }
-
-    public Set<InstAccessExp> ASTNode.findInstAccessExpsInTree() {
-        return findCommonAccessExpsInTree(DefaultInstAccessExpLookupVisitor.instance);
-    }
-
-    public Set<FAccessExp> ASTNode.findFAccessExpsInTree() {
-        return findCommonAccessExpsInTree(DefaultFAccessExpLookupVisitor.instance);
-    }
-    
-    public <T extends CommonAccessExp> Set<T> ASTNode.findCommonAccessExpsInTree(CommonAccessExpLookupVisitor<T> visitor) {
-        Set<T> set = new LinkedHashSet<>();
+    public Set<FIdUseExp> ASTNode.findFIdUseExpsInTree(FIdUseExpLookupVisitor visitor) {
+        Set<FIdUseExp> set = new LinkedHashSet<FIdUseExp>();
         visitor.visit(this, set);
         return set;
     }
     
-    public <T extends CommonAccessExp> void ASTNode.findCommonAccessExpsInTree(Set<T> set, CommonAccessExpLookupVisitor<T> visitor) {
+    public void ASTNode.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
         for (ASTNode n : this) {
             visitor.visit(n, set);
         }
     }
 
     @Override
-    public <T extends CommonAccessExp> void CommonAccessExp.findCommonAccessExpsInTree(Set<T> set, CommonAccessExpLookupVisitor<T> visitor) {
-        visitor.add(this, set);
-        super.findCommonAccessExpsInTree(set, visitor);
+    public void FIdUseExp.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
+        set.add(this);
+        super.findFIdUseExpsInTree(set, visitor);
     }
 
     @Override
-    public <T extends CommonAccessExp> void FRelExp.findCommonAccessExpsInTree(Set<T> set, CommonAccessExpLookupVisitor<T> visitor) {
+    public void FRelExp.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
         Opt<FExp> indicator = getIndicatorOpt();
 
         if (indicator == null) {
-            super.findCommonAccessExpsInTree(set, visitor);
+            super.findFIdUseExpsInTree(set, visitor);
         } else {
             for (ASTNode<?> n : this) {
                 if (indicator != n) {
-                    n.findCommonAccessExpsInTree(set, visitor);
+                    n.findFIdUseExpsInTree(set, visitor);
                 }
             }
         }
     }
 
     @Override
-    public <T extends CommonAccessExp> void FAttribute.findCommonAccessExpsInTree(Set<T> set, CommonAccessExpLookupVisitor<T> visitor) {
+    public void FAttribute.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
     }
 
-    syn Set<FAccessExp> FAbstractEquation.FAccessExpsInRHS() = FAccessExpsInRHS(DefaultFAccessExpLookupVisitor.instance);
+    syn Set<FIdUseExp> FAbstractEquation.FIdUseExpsInRHS() = FIdUseExpsInRHS(DefaultFidUseExpLookupVisitor.instance);
 
-    syn Set<FAccessExp> FAbstractEquation.FAccessExpsInRHS(CommonAccessExpLookupVisitor<FAccessExp> visitor)
-        = Collections.emptySet();
-    eq FEquation.FAccessExpsInRHS(CommonAccessExpLookupVisitor<FAccessExp> visitor)
-        = getRight().findCommonAccessExpsInTree(visitor);
-    eq FFunctionCallEquation.FAccessExpsInRHS(CommonAccessExpLookupVisitor<FAccessExp> visitor)
-        = getCall().findCommonAccessExpsInTree(visitor);
-    eq FAlgorithm.FAccessExpsInRHS(CommonAccessExpLookupVisitor<FAccessExp> visitor) {
-        Set<FAccessExp> res = new LinkedHashSet<FAccessExp>();
+    syn Set<FIdUseExp> FAbstractEquation.FIdUseExpsInRHS(FIdUseExpLookupVisitor visitor) = Collections.emptySet();
+    eq FEquation.FIdUseExpsInRHS(FIdUseExpLookupVisitor visitor)                         = getRight().findFIdUseExpsInTree(visitor);
+    eq FFunctionCallEquation.FIdUseExpsInRHS(FIdUseExpLookupVisitor visitor)             = getCall().findFIdUseExpsInTree(visitor);
+    eq FAlgorithm.FIdUseExpsInRHS(FIdUseExpLookupVisitor visitor) {
+        Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
         for (FStatement stmt : getFStatements())
-            res.addAll(stmt.FAccessExpsInRHS(visitor));
+            res.addAll(stmt.FIdUseExpsInRHS(visitor));
         return res;
     }
 
-    syn Set<FAccessExp> FStatement.FAccessExpsInRHS() = FAccessExpsInRHS(DefaultFAccessExpLookupVisitor.instance);
+    syn Set<FIdUseExp> FStatement.FIdUseExpsInRHS() = FIdUseExpsInRHS(DefaultFidUseExpLookupVisitor.instance);
 
-    syn Set<FAccessExp> FStatement.FAccessExpsInRHS(CommonAccessExpLookupVisitor<FAccessExp> visitor) {
-        Set<FAccessExp> res = new LinkedHashSet<>();
-        for (FAccessExp use : findCommonAccessExpsInTree(visitor))
+    syn Set<FIdUseExp> FStatement.FIdUseExpsInRHS(FIdUseExpLookupVisitor visitor) {
+        Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
+        for (FIdUseExp use : findFIdUseExpsInTree(visitor))
             if (!use.useIsAssignment() && !use.myFV().isForIndex())
                 res.add(use);
-        res.removeAll(FAccessExpsInLHS(visitor));
+        res.removeAll(FIdUseExpsInLHS(visitor));
         return res;
     }
     
-    eq FIfWhenElseEquation.FAccessExpsInRHS(CommonAccessExpLookupVisitor<FAccessExp> visitor) {
-        Set<FAccessExp> res = new LinkedHashSet<FAccessExp>();
+    eq FIfWhenElseEquation.FIdUseExpsInRHS(FIdUseExpLookupVisitor visitor) {
+        Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
         for (FAbstractEquation fae : getFAbstractEquations())
-            res.addAll(fae.FAccessExpsInRHS(visitor));
+            res.addAll(fae.FIdUseExpsInRHS(visitor));
         return res;
     }
     
-    eq FIfWhenEquation.FAccessExpsInRHS(CommonAccessExpLookupVisitor<FAccessExp> visitor) {
-        Set<FAccessExp> res = super.FAccessExpsInRHS(visitor);
-        getTest().findCommonAccessExpsInTree(res, visitor);
+    eq FIfWhenEquation.FIdUseExpsInRHS(FIdUseExpLookupVisitor visitor) {
+        Set<FIdUseExp> res = super.FIdUseExpsInRHS(visitor);
+        getTest().findFIdUseExpsInTree(res, visitor);
         if (hasElse())
-            res.addAll(getElse().FAccessExpsInRHS(visitor));
+            res.addAll(getElse().FIdUseExpsInRHS(visitor));
         return res;
     }
     
-    syn Set<FAccessExp> FAbstractEquation.FAccessExpsInLHS() = FAccessExpsInLHS(DefaultFAccessExpLookupVisitor.instance);
+    syn Set<FIdUseExp> FAbstractEquation.FIdUseExpsInLHS() = FIdUseExpsInLHS(DefaultFidUseExpLookupVisitor.instance);
     
-    syn Set<FAccessExp> FAbstractEquation.FAccessExpsInLHS(CommonAccessExpLookupVisitor<FAccessExp> visitor) = Collections.emptySet();
-    eq FEquation.FAccessExpsInLHS(CommonAccessExpLookupVisitor<FAccessExp> visitor)             = getLeft().findCommonAccessExpsInTree(visitor);
-    eq FFunctionCallEquation.FAccessExpsInLHS(CommonAccessExpLookupVisitor<FAccessExp> visitor) = getLefts().findCommonAccessExpsInTree(visitor);
-    eq FAlgorithm.FAccessExpsInLHS(CommonAccessExpLookupVisitor<FAccessExp> visitor) {
-        Set<FAccessExp> res = new LinkedHashSet<FAccessExp>();
+    syn Set<FIdUseExp> FAbstractEquation.FIdUseExpsInLHS(FIdUseExpLookupVisitor visitor) = Collections.emptySet();
+    eq FEquation.FIdUseExpsInLHS(FIdUseExpLookupVisitor visitor)                         = getLeft().findFIdUseExpsInTree(visitor);
+    eq FFunctionCallEquation.FIdUseExpsInLHS(FIdUseExpLookupVisitor visitor)             = getLefts().findFIdUseExpsInTree(visitor);
+    eq FAlgorithm.FIdUseExpsInLHS(FIdUseExpLookupVisitor visitor) {
+        Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
         for (FStatement stmt : getFStatements())
-            res.addAll(stmt.FAccessExpsInLHS(visitor));
+            res.addAll(stmt.FIdUseExpsInLHS(visitor));
         return res;
     }
     
-    syn Set<FAccessExp> FStatement.FAccessExpsInLHS() = FAccessExpsInLHS(DefaultFAccessExpLookupVisitor.instance);
+    syn Set<FIdUseExp> FStatement.FIdUseExpsInLHS() = FIdUseExpsInLHS(DefaultFidUseExpLookupVisitor.instance);
     
-    syn Set<FAccessExp> FStatement.FAccessExpsInLHS(CommonAccessExpLookupVisitor<FAccessExp> visitor) {
-        Set<FAccessExp> res = new LinkedHashSet<>();
-        for (FAccessExp use : findCommonAccessExpsInTree(visitor))
+    syn Set<FIdUseExp> FStatement.FIdUseExpsInLHS(FIdUseExpLookupVisitor visitor) {
+        Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
+        for (FIdUseExp use : findFIdUseExpsInTree(visitor))
             if (use.useIsAssignment() && !use.myFV().isForIndex())
                 res.add(use);
         return res;
     }
     
-    eq FIfWhenElseEquation.FAccessExpsInLHS(CommonAccessExpLookupVisitor<FAccessExp> visitor) {
-        Set<FAccessExp> res = new LinkedHashSet<FAccessExp>();
+    eq FIfWhenElseEquation.FIdUseExpsInLHS(FIdUseExpLookupVisitor visitor) {
+        Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
         for (FAbstractEquation fae : getFAbstractEquations())
-            res.addAll(fae.FAccessExpsInLHS(visitor));
+            res.addAll(fae.FIdUseExpsInLHS(visitor));
         return res;
     }
     
-    eq FIfWhenEquation.FAccessExpsInLHS(CommonAccessExpLookupVisitor<FAccessExp> visitor) {
-        Set<FAccessExp> res = super.FAccessExpsInLHS(visitor);
+    eq FIfWhenEquation.FIdUseExpsInLHS(FIdUseExpLookupVisitor visitor) {
+        Set<FIdUseExp> res = super.FIdUseExpsInLHS(visitor);
         if (hasElse())
-            res.addAll(getElse().FAccessExpsInLHS(visitor));
+            res.addAll(getElse().FIdUseExpsInLHS(visitor));
         return res;
     }
     
-    syn ArrayList<FAccessExp> FAbstractEquation.uniqueFAccessExpsInLHS() {
-        ArrayList<FAccessExp>   res   = new ArrayList<>();
+    syn ArrayList<FIdUseExp> FAbstractEquation.uniqueFIdUseExpsInLHS() {
+        ArrayList<FIdUseExp>   res   = new ArrayList<FIdUseExp>();
         Set<FAbstractVariable> visit = new LinkedHashSet<FAbstractVariable>();
-        for (FAccessExp e : FAccessExpsInLHS()) {
+        for (FIdUseExp e : FIdUseExpsInLHS()) {
             FAbstractVariable fv = e.myFV();
             if (!visit.contains(fv)) {
                 visit.add(fv);
@@ -2992,10 +2951,10 @@ aspect ReferencedVariables {
         return res;
     }
 
-    syn lazy Set<FAccessExp> FAbstractEquation.referencedCommonAccessExps() {
-        Set<FAccessExp> res = new LinkedHashSet<>();
-        res.addAll(FAccessExpsInLHS());
-        res.addAll(FAccessExpsInRHS());
+    syn lazy Set<FIdUseExp> FAbstractEquation.referencedFIdUseExps() {
+        Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
+        res.addAll(FIdUseExpsInLHS());
+        res.addAll(FIdUseExpsInRHS());
         return res;
     }
 
@@ -3004,16 +2963,16 @@ aspect ReferencedVariables {
      * not work before saclarization but should be safe afterwards!
      */
     syn Set<String> FAbstractEquation.referencedVariablesAsStrings() {
-        Set<FAccessExp> exps = new LinkedHashSet<FAccessExp>();
+        Set<FIdUseExp> exps = new LinkedHashSet<FIdUseExp>();
         Set<String> res = new LinkedHashSet<String>();
-        for (FAccessExp exp : exps) {
+        for (FIdUseExp exp : exps) {
             res.add(exp.name());
         }
         return res;
     }
-    public static Set<FVariable> ASTNode.lookupFVariablesInSet(Set<FAccessExp> set) {
+    public static Set<FVariable> ASTNode.lookupFVariablesInSet(Set<FIdUseExp> set) {
         Set<FVariable> res = new LinkedHashSet<FVariable>();
-        for (FAccessExp use : set)
+        for (FIdUseExp use : set)
             if (use.myFV() instanceof FVariable)
                 res.add((FVariable) use.myFV());
         return res;
@@ -3032,13 +2991,13 @@ aspect ReferencedVariables {
         return res;
     }
     
-    syn Set<FVariable> FAbstractEquation.referencedFVariablesInRHS() = lookupFVariablesInSet(FAccessExpsInRHS());
-    syn Set<FVariable> FAbstractEquation.referencedFVariablesInLHS() = lookupFVariablesInSet(FAccessExpsInLHS());
+    syn Set<FVariable> FAbstractEquation.referencedFVariablesInRHS() = lookupFVariablesInSet(FIdUseExpsInRHS());
+    syn Set<FVariable> FAbstractEquation.referencedFVariablesInLHS() = lookupFVariablesInSet(FIdUseExpsInLHS());
     // Lazy is needed for FAlgorithms since the can have large number of scalars
     syn lazy Set<FVariable> FAlgorithm.referencedFVariablesInLHS() = super.referencedFVariablesInLHS();
-    syn Set<FVariable> FExp.referencedFVariablesInFExp()             = lookupFVariablesInSet(findFAccessExpsInTree());
-    syn Set<FVariable> FVariable.referencedFVariablesInBindingExp()  = lookupFVariablesInSet(getBindingExp().findFAccessExpsInTree());
-    syn lazy Set<FVariable> FAbstractEquation.referencedFVariables() = lookupFVariablesInSet(referencedCommonAccessExps());
+    syn Set<FVariable> FExp.referencedFVariablesInFExp()             = lookupFVariablesInSet(findFIdUseExpsInTree());
+    syn Set<FVariable> FVariable.referencedFVariablesInBindingExp()  = lookupFVariablesInSet(getBindingExp().findFIdUseExpsInTree());
+    syn lazy Set<FVariable> FAbstractEquation.referencedFVariables() = lookupFVariablesInSet(referencedFIdUseExps());
 
     public static Set<FVariable> ASTNode.parametersInSet(Set<? extends FVariable> set) {
         Set<FVariable> res = new LinkedHashSet<FVariable>();
@@ -3073,7 +3032,7 @@ aspect ReferencedVariables {
     }
 
     @Override
-    public void FAccessExp.assignedInAllBranchesVariables(Set<String> res) {
+    public void FIdUseExp.assignedInAllBranchesVariables(Set<String> res) {
         res.add(name());
     }
 
@@ -3259,12 +3218,11 @@ aspect Nominals {
     eq FSpatialDistExp.nominal() = FExp.nominalMax(getIn0(), getIn1());
     eq FDelayExp.nominal()       = getFExp().nominal();
     
-    eq FAccessExp.nominal() = myFV().nominal();
-    eq FGlobalAccessExp.nominal() = new FAbsExp(treeCopy());
+    eq FIdUseExp.nominal() = myFV().nominal();
     
     syn FExp FAbstractVariable.nominal() {
         if (variability().fixedParameterOrLess()) {
-            return new FAbsExp(createAccessExp());
+            return new FAbsExp(createUseExp());
         } else {
             return variableNominal();
         }
@@ -3289,18 +3247,18 @@ aspect FVariableUses {
     /**
      * Collection attribute returning all variable uses in expressions.
      */
-    coll HashSet<FAccessExp> FAbstractVariable.uses() [new LinkedHashSet<>()] 
+    coll HashSet<FIdUseExp> FAbstractVariable.uses() [new LinkedHashSet<FIdUseExp>()] 
         with add root FClass;
     
-    FAccessExp contributes this to FAbstractVariable.uses() for myFV();
+    FIdUseExp contributes this to FAbstractVariable.uses() for myFV();
     
     /**
      * All uses of this variable that are not the left-hand side of an equation. 
      * (Unless the variable has a binding expression, then this is the same as uses().)
      */
-    syn lazy Set<FAccessExp> FAbstractVariable.nonDefiningUses() {
-        Set<FAccessExp> res = new HashSet<FAccessExp>();
-        for (FAccessExp use : uses())
+    syn lazy Set<FIdUseExp> FAbstractVariable.nonDefiningUses() {
+        Set<FIdUseExp> res = new HashSet<FIdUseExp>();
+        for (FIdUseExp use : uses())
             if (hasBindingExp() || !use.isLeftHandSide())
                 res.add(use);
         return res;
@@ -3310,12 +3268,12 @@ aspect FVariableUses {
      * All uses of this variable that are the left-hand side of an equation. 
      * (Unless the variable has a binding expression, then this is empty.)
      */
-    syn lazy Set<FAccessExp> FAbstractVariable.definingUses() {
+    syn lazy Set<FIdUseExp> FAbstractVariable.definingUses() {
         if (hasBindingExp()) {
             return Collections.emptySet();
         } else {
-            Set<FAccessExp> res = new HashSet<FAccessExp>();
-            for (FAccessExp use : uses())
+            Set<FIdUseExp> res = new HashSet<FIdUseExp>();
+            for (FIdUseExp use : uses())
                 if (use.isLeftHandSide())
                     res.add(use);
             return res;
@@ -3429,7 +3387,7 @@ aspect FVariableUses {
       [new LinkedHashSet<FVariable>()] 
         with addAll root FlatRoot;
     
-    FAccessExp contributes boundParameters() when myFV().isParameter()
+    FIdUseExp contributes boundParameters() when myFV().isParameter()
         to FAbstractVariable.dependentParameters() for myFV();
     
     syn lazy Collection<FRealVariable> FAbstractVariable.dependentRealParameters() =
@@ -3455,7 +3413,7 @@ aspect FVariableUses {
     coll LinkedHashSet<FVariable> FAbstractEquation.retrieveInputs() 
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-    FAccessExp contributes (FVariable) myFV() when 
+    FIdUseExp contributes (FVariable) myFV() when 
         myFV().isFVariable() && myFV().isInput() to 
         FAbstractEquation.retrieveInputs() for myFEquation();
 
@@ -3489,16 +3447,16 @@ aspect FVariableUses {
     coll LinkedHashSet<FVariable> FAbstractEquation.algebraicVariables() 
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-    FAccessExp contributes (FVariable) myFV() when isAlgebraicVariableAccess() to 
+    FIdUseExp contributes (FVariable) myFV() when isAlgebraicVariableAccess() to 
         FAbstractEquation.algebraicVariables() for each enclosingEquationsIterator();
 
-    syn boolean FAccessExp.isAlgebraicVariableAccess() = inAccessLocation() && myFV().isAlgebraicVariable();
+    syn boolean FIdUseExp.isAlgebraicVariableAccess() = inAccessLocation() && myFV().isAlgebraicVariable();
 
     /**
      * Returns true if this access is in a location where it should be
      * contributed to the equation system.
      */
-    inh boolean FAccessExp.inAccessLocation();
+    inh boolean FIdUseExp.inAccessLocation();
     eq FlatRoot.getChild().inAccessLocation()               = false;
     eq SourceRoot.getChild().inAccessLocation()             = false;
     eq FAbstractEquation.getFAttribute().inAccessLocation() = false;
@@ -3540,7 +3498,7 @@ aspect FVariableUses {
     coll LinkedHashSet<FVariable> FAbstractEquation.differentiatedRealVariables() 
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-    FAccessExp contributes (FVariable) myFV() when myFV().isDifferentiatedVariable() && inAccessLocation() to 
+    FIdUseExp contributes (FVariable) myFV() when myFV().isDifferentiatedVariable() && inAccessLocation() to 
         FAbstractEquation.differentiatedRealVariables() for each enclosingEquationsIterator();
 
     /**
@@ -3550,7 +3508,7 @@ aspect FVariableUses {
     coll LinkedHashSet<FVariable> FAbstractEquation.dependentParameters() 
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-    FAccessExp contributes (FVariable) myFV() when myFV().isDependentParameter() && inAccessLocation() to 
+    FIdUseExp contributes (FVariable) myFV() when myFV().isDependentParameter() && inAccessLocation() to 
         FAbstractEquation.dependentParameters() for each enclosingEquationsIterator();
         
     /**
@@ -3560,7 +3518,7 @@ aspect FVariableUses {
     coll LinkedHashSet<FVariable> FAbstractEquation.parameters() 
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-    FAccessExp contributes (FVariable) myFV() when myFV().isParameter() && inAccessLocation() to 
+    FIdUseExp contributes (FVariable) myFV() when myFV().isParameter() && inAccessLocation() to 
         FAbstractEquation.parameters() for each enclosingEquationsIterator();
 
     /**
@@ -3570,7 +3528,7 @@ aspect FVariableUses {
     coll LinkedHashSet<FVariable> FAbstractEquation.discreteVariables() 
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-    FAccessExp contributes (FVariable) myFV() when myFV().isDiscreteVariable() && inAccessLocation() to 
+    FIdUseExp contributes (FVariable) myFV() when myFV().isDiscreteVariable() && inAccessLocation() to 
         FAbstractEquation.discreteVariables() for each enclosingEquationsIterator();
 
     /**
@@ -3580,7 +3538,7 @@ aspect FVariableUses {
     coll LinkedHashSet<FVariable> FAbstractEquation.initialParameters()
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-    FAccessExp contributes (FVariable) myFV() when myFV().isInitialParameter() && inAccessLocation() to
+    FIdUseExp contributes (FVariable) myFV() when myFV().isInitialParameter() && inAccessLocation() to
         FAbstractEquation.initialParameters() for each enclosingEquationsIterator();
 
     /**
@@ -3664,7 +3622,7 @@ aspect LinearFVariables {
         if (isParameter() || isConstant()) {
             return true;
         }
-        for (FAccessExp e : uses()) {
+        for (FIdUseExp e : uses()) {
             if (!e.isLinear()) {
                 return false;
             }
@@ -3704,7 +3662,7 @@ aspect LinearFVariables {
     syn boolean FExp.isLinearParameterExp() = isParameterExp();
     
     syn boolean FAbstractEquation.checkLinearity(Set<FVariable> vars) {
-        for (FAccessExp e : referencedCommonAccessExps()) {
+        for (FIdUseExp e : referencedFIdUseExps()) {
             if (vars.contains(e.myFV()) && !e.isLinear(vars)) {
                 return false;
             }
@@ -3751,8 +3709,8 @@ aspect LinearFVariables {
         return !set.contains(myFV());
     }
 
-    eq FAccessExp.isIndependent(Set<? extends CommonVariableDecl> set) {
-        return getFAccess().isIndependent(set);
+    eq FIdUseExp.isIndependent(Set<? extends CommonVariableDecl> set) {
+        return getCommonAccess().isIndependent(set);
     }
 
     syn boolean CommonAccess.isIndependent(Set<? extends CommonVariableDecl> set);
@@ -4249,7 +4207,7 @@ aspect FlatAlgorithmAPI {
     
     syn boolean FExp.inFAlgorithm() = myFAlgorithm() != null;
     
-    syn FAlgorithm FAccessExp.myFAlgorithm() = getFAccess().myFAlgorithm();
+    syn FAlgorithm FIdUseExp.myFAlgorithm() = getCommonAccess().myFAlgorithm();
     inh lazy FAlgorithm CommonAccess.myFAlgorithm();
     inh lazy FAlgorithm FStatement.myFAlgorithm();
     inh FAlgorithm FExp.myFAlgorithm();
