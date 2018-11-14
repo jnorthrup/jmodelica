@@ -252,6 +252,7 @@ endif
 
 build-python-packages:
 
+if WITH_SUNDIALS
 if WITH_OPENMP
 	mkdir -p $(assimulo_build_dir); \
 	cd $(abs_top_srcdir)/external; \
@@ -279,6 +280,8 @@ if WITH_PYTHON64
 endif
 endif
 endif
+endif
+if WITH_SUNDIALS
 if !WITH_OPENMP
 	mkdir -p $(assimulo_build_dir); \
 	cd $(abs_top_srcdir)/external; \
@@ -303,6 +306,7 @@ if WITH_PYTHON64
 	python setup.py install --sundials-home=$(SUNDIALS_HOME)64 --blas-home=$(abs_builddir)/blas_install64/ --lapack-home=$(abs_builddir)/lapack_install64/ --force-32bit="false" $(NUMPY_NO_MSVCR_ARG) --prefix=$(assimulo_install_dir64) ; \
 	export PATH="$(ORIG_PATH)"; \
 	export PYTHONHOME=$(ORIG_PYTHON_HOME)
+endif
 endif
 endif
 endif
@@ -373,6 +377,7 @@ if WITH_PYTHON64
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(DESTDIR)$(prefix)/Python_64
 endif
 endif
+if WITH_SUNDIALS
 	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
 	if [ -e $(assimulo_install_dir)/$${pkgdir}/site-packages/ ]; \
 	then \
@@ -380,6 +385,7 @@ endif
 	find assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 	fi; \
 	done
+endif 
 	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
 	if [ -e $(pymodelica_install_dir)/$${pkgdir}/site-packages/ ]; \
 	then \
@@ -405,6 +411,7 @@ endif
 	mkdir -p $(DESTDIR)$(prefix)/Python/tests_jmodelica; \
 	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/tests_jmodelica
 if JM_WIN64
+if WITH_SUNDIALS
 	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
 	if [ -e $(assimulo_install_dir64)/$${pkgdir}/site-packages/ ]; \
 	then \
@@ -412,6 +419,7 @@ if JM_WIN64
 	find assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64; \
 	fi; \
 	done
+endif
 	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
 	if [ -e $(pymodelica_install_dir64)/$${pkgdir}/site-packages/ ]; \
 	then \
@@ -510,6 +518,13 @@ endif
 	*) \
 	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
 	esac
+
+if COPY_PTHREADS_LIB
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/pthreads/lib
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/pthreads/include
+	cp $(abs_top_srcdir)/ThirdParty/pthreads/lib/win32/libpthreadGC2-2-9-1.a $(DESTDIR)$(prefix)/ThirdParty/pthreads/lib
+	cp $(abs_top_srcdir)/ThirdParty/pthreads/include/*.h $(DESTDIR)$(prefix)/ThirdParty/pthreads/include
+endif
 
 	cp $(abs_builddir)/DefaultOptions.xml $(DESTDIR)$(prefix)/DefaultOptions.xml
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty
@@ -613,6 +628,7 @@ endif
 	
 
 clean-python-packages:
+if WITH_SUNDIALS
 	if [ -d $(assimulo_build_dir)/Assimulo ]; then \
 		cd $(assimulo_build_dir)/Assimulo; \
 		python setup.py clean --all --sundials-home=$(SUNDIALS_HOME); \
@@ -620,6 +636,7 @@ clean-python-packages:
 	fi;
 	rm -rf $(assimulo_build_dir) || echo  Could not remove $(assimulo_build_dir)
 	rm -rf $(assimulo_install_dir) || echo  Could not remove $(assimulo_install_dir)
+endif
 	-cd $(abs_top_srcdir)/Python/src; \
 	python setup_pymodelica.py clean --all 
 	-rm -rf $(pymodelica_install_dir) || echo  Could not remove $(pymodelica_install_dir)

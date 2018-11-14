@@ -1855,19 +1855,14 @@ aspect Arrays {
 
     eq InstFunctionCall.getArrayExp() {
         if (variability().knownParameterOrLess()) {
-            try {
-                ArrayExp arr = new ArrayExp(indices());
-                CValue val = cevalArray(Index.NULL);
-                if (val.isArray()) {
-                    CValueArray carr = val.array();
-                    for (Index i : arr.indices()) {
-                        arr.set(i, carr.getCell(i).buildInstLiteral());
-                    }
-                    return arr;
+            ArrayExp arr = new ArrayExp(indices());
+            CValue val = cevalArray(Index.NULL);
+            if (val.isArray()) {
+                CValueArray carr = val.array();
+                for (Index i : arr.indices()) {
+                    arr.set(i, carr.getCell(i).buildInstLiteral());
                 }
-            } catch (ConstantEvaluationException r) {
-                // Constant evaluation may fail even if variability is known parameter or less.
-                // If so we want to do the same thing we would do if variability was higher.
+                return arr;
             }
         }
         return super.getArrayExp();

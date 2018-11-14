@@ -54,7 +54,7 @@ public class GenericAnnotationNodeTest extends AssertMethods {
         n.addNodes(newProvider("a").addNodes(newProvider("n", 3)));
         DummyAnnotationNode testNode = n.createAnnotationNode();
 
-        assertTrue(testNode.forPath("a").nodeExists());
+        assertTrue(testNode.forPath("a").exists());
     }
 
     @Test
@@ -63,7 +63,7 @@ public class GenericAnnotationNodeTest extends AssertMethods {
         n.addNodes(newProvider("a").addNodes(newProvider("n", 3)));
 
         DummyAnnotationNode testNode = n.createAnnotationNode();
-        assertFalse(testNode.forPath("n").nodeExists());
+        assertFalse(testNode.forPath("n").exists());
     }
 
     @Test
@@ -74,7 +74,7 @@ public class GenericAnnotationNodeTest extends AssertMethods {
         top.disconnectFromNode();
         top.testSrcRemoveAll();
         top.updateNode("top", newProvider("p"));
-        assertFalse(replaced.nodeExists());
+        assertFalse(replaced.exists());
     }
 
     @Test
@@ -121,9 +121,9 @@ public class GenericAnnotationNodeTest extends AssertMethods {
     public void testNode() {
         DummyAnnotationNode n = createDefault();
         DummyAnnotationNode newNode = n.forPath("newNode");
-        assertFalse(newNode.nodeExists());
+        assertFalse(newNode.exists());
         newNode.node();
-        assertTrue(newNode.nodeExists()); 
+        assertTrue(newNode.exists()); 
     }
 
     @Test

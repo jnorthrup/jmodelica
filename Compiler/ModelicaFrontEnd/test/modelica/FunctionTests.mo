@@ -481,7 +481,7 @@ fclass FunctionTests.FunctionFlatten9
  constant Real a[3] = 3;
  Real z[1];
  Real z[2];
-global variables
+package constant
  constant Real FunctionTests.FunctionFlatten9.a[3] = {1, 2, 3};
 equation
  ({z[1], z[2]}) = FunctionTests.FunctionFlatten9.f({3, 4}, 1);
@@ -1001,7 +1001,7 @@ model FunctionFlatten21
             flatModel="
 fclass FunctionTests.FunctionFlatten21
  Real x = FunctionTests.FunctionFlatten21.f();
-global variables
+package constant
  constant Real FunctionTests.FunctionFlatten21.f.x; // TODO: Compilation error?
 
 public
@@ -1080,7 +1080,7 @@ model FunctionFlatten23
             flatModel="
 fclass FunctionTests.FunctionFlatten23
  Real y;
-global variables
+package constant
  constant FunctionTests.FunctionFlatten23.R FunctionTests.FunctionFlatten23.f.r = FunctionTests.FunctionFlatten23.R(1, {3.14});
 equation
  y = FunctionTests.FunctionFlatten23.f(time);
@@ -10301,7 +10301,7 @@ fclass FunctionTests.UnknownArray29
  constant Real a[2] = 2;
  constant Real a[3] = 3;
  Real x;
-global variables
+package constant
  constant Real FunctionTests.UnknownArray29.a[3] = {1, 2, 3};
 equation
  x = FunctionTests.UnknownArray29.f1(1);
@@ -12480,7 +12480,7 @@ model ExtendFunc2
 fclass FunctionTests.ExtendFunc2
  constant Real d[2] = {1, 2};
  Real x = FunctionTests.ExtendFunc2.f2(1, 2);
-global variables
+package constant
  constant Real FunctionTests.ExtendFunc2.d[2] = {1, 2};
 
 public
@@ -16779,66 +16779,6 @@ end FunctionTests.DerivativeAnnotation.ExtendsTest1;
 ")})));
     end ExtendsTest1;
 
-    model Local1
-        function f
-            input Real x;
-            output Real y;
-            function my_der = f_der;
-        algorithm
-            y := x;
-            annotation(Inline=false, derivative=my_der);
-        end f;
-        
-        function f_der
-            input Real x;
-            input Real x_der;
-            output Real y_der;
-        algorithm
-            y_der := x_der;
-            annotation(Inline=false);
-        end f_der;
-        
-        Real x, y;
-    equation
-        x = f(time);
-        der(x) * der(y) = 1;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="DerivativeAnnotation_Local1",
-            description="Ensure that derivative function is found also within the function",
-            flatModel="
-fclass FunctionTests.DerivativeAnnotation.Local1
- Real x;
- Real y;
-equation
- x = FunctionTests.DerivativeAnnotation.Local1.f(time);
- der(x) * der(y) = 1;
-
-public
- function FunctionTests.DerivativeAnnotation.Local1.f
-  input Real x;
-  output Real y;
- algorithm
-  y := x;
-  return;
- annotation(derivative = FunctionTests.DerivativeAnnotation.Local1.f_der,Inline = false);
- end FunctionTests.DerivativeAnnotation.Local1.f;
-
- function FunctionTests.DerivativeAnnotation.Local1.f_der
-  input Real x;
-  input Real x_der;
-  output Real y_der;
- algorithm
-  y_der := x_der;
-  return;
- annotation(Inline = false);
- end FunctionTests.DerivativeAnnotation.Local1.f_der;
-
-end FunctionTests.DerivativeAnnotation.Local1;
-")})));
-    end Local1;
-
 end DerivativeAnnotation;
 
 
@@ -17337,7 +17277,7 @@ Error at line 13, column 21, in file '...':
     Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck4.R(Real)[1], and type of right-hand side is FunctionTests.AssignmentSizeCheck4.R(Real)[2] at line 10, column 7, in file 'FunctionTests.mo'
 
 Error at line 13, column 21, in file '...':
-  Could not evaluate binding expression for constant 'r[1].x': '((f(2))[1]).x'
+  Could not evaluate binding expression for constant 'r[1].x': '((f(2)).x)[1]'
     in function 'FunctionTests.AssignmentSizeCheck4.f'
     Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck4.R(Real)[1], and type of right-hand side is FunctionTests.AssignmentSizeCheck4.R(Real)[2] at line 10, column 7, in file 'FunctionTests.mo'
 ")})));

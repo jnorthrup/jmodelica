@@ -64,9 +64,6 @@ aspect FlatAnnotations {
         }
     }
 
-    /**
-     * AnnotationProvider for the attributes in the Flat tree. See overview on AnnotationProvider for more info.
-     */
     public interface FlatAnnotationProvider extends AnnotationProvider<FlatAnnotationProvider, FExp> {
     }
 

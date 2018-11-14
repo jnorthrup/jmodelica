@@ -234,6 +234,7 @@ aspect GlobalsCleanup {
     public void FGlobalVariable.markUsedGlobalVariable(Global.UseType type) {
         if (global().update(type)) {
             markUsedGlobals(type);
+            //type().markUsedGlobals(type);
         }
     }
 }

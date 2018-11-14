@@ -21,7 +21,7 @@ abstract InstNode : BaseNode ::= /InstComponentDecl*/
                                  /RedeclaredInstClassDecl:InstClassDecl*/
                                  /FAbstractEquation*/ 
                                  /ElementInstModification:InstModification*/
-                                 /AnnotationExp:FExp*/;
+                                 /LooseExp:FExp*/;
 
 DynamicOpt : Opt;
 

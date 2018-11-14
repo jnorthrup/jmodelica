@@ -33,8 +33,7 @@ import org.jmodelica.util.values.ConstantEvaluationException;
 import org.jmodelica.util.values.Evaluable;
 
 /**
- * Generic class for handling traversal over different types 
- * of annotations but also other tree structures.
+ * Generic class for handling traversal over different types of annotations.
  * Mainly in the source and flat tree.
  * 
  * In several places in the code we have to upcast a variable in order to
@@ -94,7 +93,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             subNodesNameMap_cache = Collections.emptyMap();
         }
 
-        if(!nodeExists() || isAmbiguous()) {
+        if(!exists() || isAmbiguous()) {
             return;
         }
 
@@ -313,7 +312,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
 
             @Override
             public boolean test(T elem) {
-                return elem.nodeExists();
+                return elem.exists();
             }
 
         });
@@ -413,7 +412,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @return the value of this node, if it has one, otherwise null
      */
     public V value() {
-        if (!nodeExists() || isAmbiguous()) {
+        if (!exists() || isAmbiguous()) {
             return null;
         }
         return node.annotationValue();
@@ -447,7 +446,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             valueAnnotation_cacheComputed = true;
             if (isAmbiguous()) {
                 valueAnnotation_cache = ambiguousNode();
-            } else if (nodeExists()) {
+            } else if (exists()) {
                 N annotationNode = valueAsProvider();
                 if (hasValue() && annotationNode == null) {
                     valueAnnotation_cache = null;
@@ -528,7 +527,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * 
      * @return true if this node does exist.
      */
-    public boolean nodeExists() {
+    public boolean exists() {
         if(parent() != null) {
             asGeneric(parent()).computeSubNodesCache();
         }
