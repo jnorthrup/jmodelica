@@ -45,15 +45,7 @@ aspect OverdeterminedInitialSystem {
         for (FVariable var : res.visitedParameters) {
             if (!var.isParameter())
                 continue;
-            
-            AliasManager.AliasSet aliasSet = var.aliasSet();
-            if (aliasSet != null) {
-                for (AliasManager.AliasVariable alias : aliasSet) {
-                    alias.getFVariable().setTypePrefixVariability(Variability.STRUCTPARAMETER);
-                }
-            } else {
-                var.setTypePrefixVariability(Variability.STRUCTPARAMETER);
-            }
+            var.setTypePrefixVariability(Variability.STRUCTPARAMETER);
         }
         
         return g;
