@@ -318,9 +318,6 @@ class CompilerLogHandler:
         
         if exception.kind == 'org.jmodelica.common.options.OptionRegistry$UnknownOptionException':
             raise UnknownOptionError(exception.message)
-
-        if exception.kind == 'org.jmodelica.common.options.OptionRegistry$InvalidOptionValueException':
-            raise InvalidOptionValueError(exception.message)
         
         if exception.kind == 'org.jmodelica.util.exceptions.CcodeCompilationException':
             raise CcodeCompilationError(exception.message)

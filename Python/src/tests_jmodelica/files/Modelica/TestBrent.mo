@@ -93,9 +93,5 @@ model TestBrent
     y^2+a^2=10;
   end NegativeNominal;
     
-  model Bounds
-    Real x(start=1.2, min=1, max=2);
-  equation
-    sin(x)^2=0.5;
-  end Bounds;
+  annotation (uses(Modelica(version="3.2.1")));
 end TestBrent;
