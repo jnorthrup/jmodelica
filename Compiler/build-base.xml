@@ -815,6 +815,8 @@
     
     <!-- generate all parsers -->
     <target name="parser">
+        <mkdir dir="${parser_output}" />
+        <var name="parsers.workdir" value="${java_temp}" />
         <for list="${modules}" param="module">
             <sequential>
                 <if>
@@ -855,31 +857,31 @@
                                         <if>
                                             <isset property="@{module}.@{parser}.extend" />
                                             <then>
-                                                <concat destfile="${parser_output}/@{parser}.parser">
+                                                <concat destfile="${parsers.workdir}/@{parser}.parser">
                                                     <fileset file="${parser_main_path}" />
                                                     <fileset file="${parser_tail_path}" />
                                                 </concat>
                                             </then>
                                             <else>
-                                                <copy file="${parser_main_path}" tofile="${parser_output}/@{parser}.parser" overwrite="true" />
+                                                <copy file="${parser_main_path}" tofile="${parsers.workdir}/@{parser}.parser" overwrite="true" />
                                             </else>
                                         </if>
                                         <!-- write package names into parser specification -->
-                                        <replace file="${parser_output}/@{parser}.parser">
+                                        <replace file="${parsers.workdir}/@{parser}.parser">
                                             <replacefilter token="$PARSER_PACKAGE$" value="${parser_package}" />
                                             <replacefilter token="$AST_PACKAGE$" value="${ast_package}" />
                                         </replace>
                                         <!-- translate to beaver syntax -->
                                         <java classpath="${jastadd_dir}/JastAddParser.jar:${beaver-rt_jar}" classname="Main">
-                                            <arg value="${parser_output}/@{parser}.parser"/>
-                                            <arg value="${parser_output}/@{parser}.raw.beaver"/>
+                                            <arg value="${parsers.workdir}/@{parser}.parser"/>
+                                            <arg value="${parsers.workdir}/@{parser}.raw.beaver"/>
                                         </java>
                                         <!-- add extra beaver code and generate parser -->
-                                        <concat destfile="${parser_output}/@{parser}.beaver">
+                                        <concat destfile="${parsers.workdir}/@{parser}.beaver">
                                             <fileset file="${parser_header_path}" />
-                                            <fileset file="${parser_output}/@{parser}.raw.beaver" />
+                                            <fileset file="${parsers.workdir}/@{parser}.raw.beaver" />
                                         </concat>
-                                        <beaver file="${parser_output}/@{parser}.beaver" terminalNames="yes" compress="no" useSwitch="yes" />
+                                        <beaver file="${parsers.workdir}/@{parser}.beaver" terminalNames="yes" compress="no" useSwitch="yes" destdir="${parser_output}" />
                                     </then>
                                 </if>
                             </sequential>
@@ -888,22 +890,12 @@
                 </if>
             </sequential>
         </for>
-        <!-- clean up intermediate files -->
-        <if>
-            <available file="${parser_output}" type="dir" />
-            <then>
-                <delete deleteonexit="true">
-                    <fileset dir="${parser_output}">
-                        <include name="*.parser" />
-                        <include name="*.beaver" />
-                    </fileset>
-                </delete>
-            </then>
-        </if>
+        <delete dir="${parsers.workdir}" performGCOnFailedDelete="true" />
     </target>
 
     <!-- generate all scanners -->
     <target name="scanner">
+        <var name="scanners.workdir" value="${java_temp}" />
         <for list="${modules}" param="module">
             <sequential>
                 <if>
@@ -927,7 +919,7 @@
                                         <var name="scanners.output" value="${parser_output}" />
                                     </else>
                                 </if>
-                                <var name="scanners.file" value="${scanners.output}/@{scanner}.flex" />
+                                <var name="scanners.file" value="${scanners.workdir}/@{scanner}.flex" />
                                 <if>
                                     <not><isset property="@{module}.@{scanner}.uptodate" /></not>
                                     <then>
@@ -943,7 +935,6 @@
                                     		scanners.output=${scanners.output}
                                             scanners.package=${scanners.package}
                                     	</echo> -->
-                                        <delete deleteonexit="true" file="${scanners.file}" />
                                     </then>
                                 </if>
                             </sequential>
@@ -952,6 +943,7 @@
                 </if>
             </sequential>
         </for>
+        <delete dir="${scanners.workdir}" performGCOnFailedDelete="true" />
     </target>
 
     <!-- Generate JUnit test class. -->
