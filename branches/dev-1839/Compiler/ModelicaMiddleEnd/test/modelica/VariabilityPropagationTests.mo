@@ -836,6 +836,7 @@ algorithm
         TransformCanonicalTestCase(
             name="Algorithm1",
             description="",
+            variability_propagation_algorithms=true,
             flatModel="
 fclass VariabilityPropagationTests.Algorithm1
  parameter Real p;
@@ -848,6 +849,27 @@ end VariabilityPropagationTests.Algorithm1;
 ")})));
 end Algorithm1;
 
+model Algorithm1_b
+    parameter Real p;
+    Real y;
+algorithm
+    y := p;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Algorithm1_b",
+            description="Test algorithm propagation off",
+            variability_propagation_algorithms=false,
+            flatModel="
+fclass VariabilityPropagationTests.Algorithm1_b
+ parameter Real p;
+ Real y;
+algorithm
+ y := p;
+end VariabilityPropagationTests.Algorithm1_b;
+")})));
+end Algorithm1_b;
+
 model Algorithm2
     parameter Real p;
     Real y;
@@ -858,6 +880,7 @@ algorithm
         TransformCanonicalTestCase(
             name="Algorithm2",
             description="",
+            variability_propagation_algorithms=true,
             flatModel="
 fclass VariabilityPropagationTests.Algorithm2
  parameter Real p;
@@ -881,6 +904,7 @@ equation
         TransformCanonicalTestCase(
             name="Algorithm3",
             description="",
+            variability_propagation_algorithms=true,
             flatModel="
 fclass VariabilityPropagationTests.Algorithm3
  parameter Real p;
@@ -907,6 +931,7 @@ algorithm
         TransformCanonicalTestCase(
             name="Algorithm4",
             description="",
+            variability_propagation_algorithms=true,
             flatModel="
 fclass VariabilityPropagationTests.Algorithm4
  parameter Real p;
@@ -933,6 +958,7 @@ algorithm
         CCodeGenTestCase(
             name="Algorithm5",
             description="Parameter algorithm code generation",
+            variability_propagation_algorithms=true,
             template="
 $C_model_init_eval_dependent_parameters$
 ",
@@ -996,10 +1022,15 @@ parameter equation
 public
  function VariabilityPropagationTests.ConstantStartFunc1.f
   output Real[:] o;
+  Integer[:] temp_1;
  algorithm
   init o as Real[2];
-  o[1] := 1;
-  o[2] := 2;
+  init temp_1 as Integer[2];
+  temp_1[1] := 1;
+  temp_1[2] := 2;
+  for i1 in 1:2 loop
+   o[i1] := temp_1[i1];
+  end for;
   return;
  end VariabilityPropagationTests.ConstantStartFunc1.f;
 
@@ -1324,9 +1355,14 @@ parameter equation
 public
  function VariabilityPropagationTests.EvalFail2.f
   output Real[:] y;
+  Integer[:] temp_1;
  algorithm
   init y as Real[1];
-  y[1] := 1;
+  init temp_1 as Integer[1];
+  temp_1[1] := 1;
+  for i1 in 1:1 loop
+   y[i1] := temp_1[i1];
+  end for;
   assert(false, \"nope\");
   return;
  end VariabilityPropagationTests.EvalFail2.f;
@@ -1467,10 +1503,15 @@ public
  function VariabilityPropagationTests.IfEquationTemp1.f
   input Real x;
   output Real[:] y;
+  Real[:] temp_1;
  algorithm
   init y as Real[2];
-  y[1] := x;
-  y[2] := x + 1;
+  init temp_1 as Real[2];
+  temp_1[1] := x;
+  temp_1[2] := x + 1;
+  for i1 in 1:2 loop
+   y[i1] := temp_1[i1];
+  end for;
   return;
  end VariabilityPropagationTests.IfEquationTemp1.f;
 
@@ -1509,10 +1550,15 @@ public
  function VariabilityPropagationTests.IfEquationTemp2.f
   input Real x;
   output Real[:] y;
+  Real[:] temp_1;
  algorithm
   init y as Real[2];
-  y[1] := x;
-  y[2] := x + 1;
+  init temp_1 as Real[2];
+  temp_1[1] := x;
+  temp_1[2] := x + 1;
+  for i1 in 1:2 loop
+   y[i1] := temp_1[i1];
+  end for;
   return;
  end VariabilityPropagationTests.IfEquationTemp2.f;
 
