@@ -87,7 +87,10 @@
     <propertyregex property="ast_package_dir" input="${ast_package}" defaultValue="${ast_package}" regexp="\." replace="/" global="true" />
     <property name="ast_output" value="${java_output_intermediate}/${ast_package_dir}" />
     <propertyregex property="parser_package_dir" input="${parser_package}" defaultValue="${parser_package}" regexp="\." replace="/" global="true" />
-    <property name="parser_output" value="${java_output_intermediate}/${parser_package_dir}" />
+    <property name="parsers.output" value="${java_output_intermediate}/${parser_package_dir}" />
+    <property name="parsers.builddir" value="${target}/build/${sub_package}/parsers" />
+    <property name="scanners.output" value="${java_output_intermediate}" />
+    <property name="scanners.builddir" value="${target}/build/${sub_package}/scanners" />
     <propertyregex property="test_package_dir" input="${test_package}" defaultValue="${test_package}" regexp="\." replace="/" global="true" />
     <property name="test_package_output" value="${junit_output}/${test_package_dir}" />
     <property name="test_class_name" value="Tests" />
@@ -814,9 +817,7 @@
     </target>
     
     <!-- generate all parsers -->
-    <target name="parser">
-        <mkdir dir="${parser_output}" />
-        <var name="parsers.workdir" value="${java_temp}" />
+    <target name="parser-build">
         <for list="${modules}" param="module">
             <sequential>
                 <if>
@@ -843,7 +844,7 @@
                                     </else>
                                 </if>
                                 <!-- check if files are up to date -->
-                                <uptodate property="@{module}.@{parser}.uptodate" targetfile="${parser_output}/@{parser}.java">
+                                <uptodate property="@{module}.@{parser}.uptodate" targetfile="${parsers.builddir}/@{parser}.java">
                                     <srcresources>
                                         <fileset file="${parser_main_path}" />
                                         <fileset file="${parser_header_path}" />
@@ -857,31 +858,31 @@
                                         <if>
                                             <isset property="@{module}.@{parser}.extend" />
                                             <then>
-                                                <concat destfile="${parsers.workdir}/@{parser}.parser">
+                                                <concat destfile="${parsers.builddir}/@{parser}.parser">
                                                     <fileset file="${parser_main_path}" />
                                                     <fileset file="${parser_tail_path}" />
                                                 </concat>
                                             </then>
                                             <else>
-                                                <copy file="${parser_main_path}" tofile="${parsers.workdir}/@{parser}.parser" overwrite="true" />
+                                                <copy file="${parser_main_path}" tofile="${parsers.builddir}/@{parser}.parser" overwrite="true" />
                                             </else>
                                         </if>
                                         <!-- write package names into parser specification -->
-                                        <replace file="${parsers.workdir}/@{parser}.parser">
+                                        <replace file="${parsers.builddir}/@{parser}.parser">
                                             <replacefilter token="$PARSER_PACKAGE$" value="${parser_package}" />
                                             <replacefilter token="$AST_PACKAGE$" value="${ast_package}" />
                                         </replace>
                                         <!-- translate to beaver syntax -->
                                         <java classpath="${jastadd_dir}/JastAddParser.jar:${beaver-rt_jar}" classname="Main">
-                                            <arg value="${parsers.workdir}/@{parser}.parser"/>
-                                            <arg value="${parsers.workdir}/@{parser}.raw.beaver"/>
+                                            <arg value="${parsers.builddir}/@{parser}.parser"/>
+                                            <arg value="${parsers.builddir}/@{parser}.raw.beaver"/>
                                         </java>
                                         <!-- add extra beaver code and generate parser -->
-                                        <concat destfile="${parsers.workdir}/@{parser}.beaver">
+                                        <concat destfile="${parsers.builddir}/@{parser}.beaver">
                                             <fileset file="${parser_header_path}" />
-                                            <fileset file="${parsers.workdir}/@{parser}.raw.beaver" />
+                                            <fileset file="${parsers.builddir}/@{parser}.raw.beaver" />
                                         </concat>
-                                        <beaver file="${parsers.workdir}/@{parser}.beaver" terminalNames="yes" compress="no" useSwitch="yes" destdir="${parser_output}" />
+                                        <beaver file="${parsers.builddir}/@{parser}.beaver" terminalNames="yes" compress="no" useSwitch="yes" />
                                     </then>
                                 </if>
                             </sequential>
@@ -890,12 +891,27 @@
                 </if>
             </sequential>
         </for>
-        <delete dir="${parsers.workdir}" performGCOnFailedDelete="true" />
+    </target>
+
+    <target name="parser" depends="parser-build">
+        <for list="${modules}" param="module">
+            <sequential>
+                <if>
+                    <isset property="@{module}.parsers"/>
+                    <then>
+                        <for list="${@{module}.parsers}" param="parser">
+                            <sequential>
+                                <copy file="${parsers.builddir}/@{parser}.java" tofile="${parsers.output}/@{parser}.java" overwrite="true" />
+                            </sequential>
+                        </for>
+                    </then>
+                </if>
+            </sequential>
+        </for>
     </target>
 
     <!-- generate all scanners -->
-    <target name="scanner">
-        <var name="scanners.workdir" value="${java_temp}" />
+    <target name="scanner-build">
         <for list="${modules}" param="module">
             <sequential>
                 <if>
@@ -905,36 +921,25 @@
                             <sequential>
                                 <uptodate property="@{module}.@{scanner}.uptodate" 
                                         srcfile="${@{module}.path}/src/parser/${@{module}.@{scanner}}" 
-                                        targetfile="${parser_output}/@{scanner}.java" />
+                                        targetfile="${scanners.builddir}/@{scanner}.java" />
                                 <if>
-                                    <isset property="@{module}.@{scanner}.package" />
+                                    <not><isset property="@{module}.@{scanner}.package" /></not>
                                     <then>
-                                        <var name="scanners.package" value="${@{module}.@{scanner}.package}" />
-                                        <propertyregex property="scanners.package_dir" input="${scanners.package}" defaultValue="${scanners.package}" regexp="\." replace="/" global="true" override="true" />
-                                        <var name="scanners.output" value="${java_output_intermediate}/${scanners.package_dir}" />
-                                        <mkdir dir="${scanners.output}" />
+                                        <var name="@{module}.@{scanner}.package" value="${parser_package}" />
                                     </then>
-                                    <else>
-                                        <var name="scanners.package" value="${parser_package}" />
-                                        <var name="scanners.output" value="${parser_output}" />
-                                    </else>
                                 </if>
-                                <var name="scanners.file" value="${scanners.workdir}/@{scanner}.flex" />
+                                <propertyregex property="scanners.package_dir" input="${@{module}.@{scanner}.package}" defaultValue="${@{module}.@{scanner}.package}" regexp="\." replace="/" global="true" override="true" />
+                                <var name="@{module}.@{scanner}.output" value="${java_output_intermediate}/${scanners.package_dir}" />
+                                <var name="scanners.file" value="${scanners.builddir}/@{scanner}.flex" />
                                 <if>
                                     <not><isset property="@{module}.@{scanner}.uptodate" /></not>
                                     <then>
                                         <copy file="${@{module}.path}/src/parser/${@{module}.@{scanner}}" tofile="${scanners.file}" overwrite="true" />
                                         <replace file="${scanners.file}">
-                                            <replacefilter token="$PARSER_PACKAGE$" value="${scanners.package}" />
+                                            <replacefilter token="$PARSER_PACKAGE$" value="${@{module}.@{scanner}.package}" />
                                             <replacefilter token="$AST_PACKAGE$" value="${ast_package}" />
                                         </replace>
-                                    	<jflex file="${scanners.file}" outdir="${scanners.output}" nobak="yes" />
-                                        <!-- clean up intermediate file
-                                    	<echo>
-                                            scanners.file=${scanners.file}
-                                    		scanners.output=${scanners.output}
-                                            scanners.package=${scanners.package}
-                                    	</echo> -->
+                                        <jflex file="${scanners.file}" nobak="yes" />
                                     </then>
                                 </if>
                             </sequential>
@@ -943,7 +948,23 @@
                 </if>
             </sequential>
         </for>
-        <delete dir="${scanners.workdir}" performGCOnFailedDelete="true" />
+    </target>
+
+    <target name="scanner" depends="scanner-build">
+        <for list="${modules}" param="module">
+            <sequential>
+                <if>
+                    <isset property="@{module}.scanners"/>
+                    <then>
+                        <for list="${@{module}.scanners}" param="scanner">
+                            <sequential>
+                                <copy file="${scanners.builddir}/@{scanner}.java" tofile="${@{module}.@{scanner}.output}/@{scanner}.java" overwrite="true" />
+                            </sequential>
+                        </for>
+                    </then>
+                </if>
+            </sequential>
+        </for>
     </target>
 
     <!-- Generate JUnit test class. -->
@@ -1079,7 +1100,9 @@ ${test_class_extra_defs}
     </target>
 
     <!-- cleans all generated java files -->
-    <target name="clean-gen" depends="clean-ast,clean-test,clean-extra" description="Deletes all generated Java files." />
+    <target name="clean-gen" depends="clean-ast,clean-test,clean-extra" description="Deletes all generated Java files." >
+        <delete dir="${target}/build" />
+    </target>
 
     <!-- cleans all generated java files in the compiler -->
     <target name="clean-ast">
