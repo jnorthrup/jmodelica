@@ -102,9 +102,15 @@ aspect AnnotationAPI {
     public CValue InstNode.ceval(SrcExp exp) {
         return annotationExp(exp).ceval();
     }
+    public CValue InstNode.ceval(SrcExp exp, VariableEvaluator evaluator) {
+        return annotationExp(exp).ceval(evaluator);
+    }
 
     public CValue InstExternal.ceval(SrcExp exp) {
       return surroundingInstClass().ceval(exp);
+    }
+    public CValue InstExternal.ceval(SrcExp exp, VariableEvaluator evaluator) {
+        return surroundingInstClass().ceval(exp, evaluator);
     }
 
     /**
@@ -415,6 +421,7 @@ aspect AnnotationAPI {
      */
     public interface InstContext {
         CValue ceval(SrcExp exp);
+        CValue ceval(SrcExp exp, VariableEvaluator evaluator);
         InstLookupResult<InstClassDecl>     lookupInstClass(SrcExp exp);
         InstLookupResult<InstComponentDecl> lookupInstComponent(SrcExp exp);
         FExp dynamicFExp(FExp exp);
@@ -449,6 +456,10 @@ aspect AnnotationAPI {
         public static final InstContext DEFAULT_EVALUATOR = new InstContext() {
             public CValue ceval(SrcExp exp) {
                 return exp.ceval();
+            }
+
+            public CValue ceval(SrcExp exp, VariableEvaluator evaluator) {
+                return exp.ceval(evaluator);
             }
 
             public InstLookupResult<InstClassDecl> lookupInstClass(SrcExp exp) {
