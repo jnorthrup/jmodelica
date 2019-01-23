@@ -39,6 +39,7 @@
     <property name="junit_output" value="${target}/src/junit-generated" />
     <property name="test_output" value="${target}/doc/junit-reports" />
     <property name="class_output" value="${target}/bin" />
+    <property name="build_class_output" value="${target}/build/bin" />
     <property name="jar_output" value="${target}/bin" />
 
     <property name="jastadd_dir" value="${base.dir}/../ThirdParty/JastAdd" />
@@ -522,25 +523,23 @@
         <attribute name="generate"  default="NOT SET"/>
         <attribute name="gen-extra" default="NOT SET"/>
         <sequential>
-            <mkdir dir="${class_output}" />
+            <mkdir dir="${build_class_output}" />
             <for list="${modules}" param="module">
                 <sequential>
                     <if>
                         <isset property="@{module}.@{generate}"/>
                         <then>
                             <javac  classpath="${beaver-rt_jar}" 
-                                    sourcepath="${java_output_intermediate}:${java_dirs}" 
+                                    srcdir="${java_dirs}:${@{module}.java_path}" 
                                     compiler="${java_compiler}" 
                                     source="${java_version}" 
                                     target="${java_version}" 
                                     fork="true" 
                                     encoding="UTF8" 
                                     debug="false" 
-                                    destdir="${class_output}" 
+                                    destdir="${build_class_output}" 
                                     includeantruntime="false"
                                     excludes="${test_helper_java_patterns}" >
-                                <src path="${@{module}.java_path}" />
-                                <src path="${java_output_intermediate}" />
                                 <include name="${@{module}.@{gen-extra}.javafile}.java" />
                             </javac>
                         </then>
@@ -699,7 +698,7 @@
                             </uptodate>
                             -->
                             <mkdir dir="${@{module}.@{gen-extra}.gen_path}" />
-                            <java classpath="${class_output}:${beaver-rt_jar}" 
+                            <java classpath="${build_class_output}:${beaver-rt_jar}" 
                                     classname="${@{module}.@{generate}}" failonerror="true">
                                 <arg value="${@{module}.@{gen-extra}.gen_path}" />
                                 <arg value="${@{module}.package.@{generated}}" />
@@ -1095,6 +1094,7 @@ ${test_class_extra_defs}
     <!-- cleans all binary files -->
     <target name="clean-bin" description="Deletes all binary files.">
         <delete dir="${class_output}" />
+        <delete dir="${build_class_output}" />
         <delete dir="${test_class_output}" />
         <delete dir="${jar_output}" />
     </target>
