@@ -1,6 +1,12 @@
 package org.jmodelica.util;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Locale;
+
+import org.jmodelica.util.exceptions.InternalCompilerError;
 
 /**
  * Utility class for system-related functions.
@@ -44,6 +50,26 @@ public final class SystemUtil {
         return OS.name().toLowerCase();
     }
 
+    public static String getOSDetailed() {
+        if (isLinux()) {
+            File release = new File("/etc/centos-release");
+            if (release.exists()) {
+                boolean centos6 = false;
+                try {
+                    BufferedReader br = new BufferedReader(new FileReader(release));
+                    centos6 = br.readLine().contains("CentOS release 6");
+                    br.close();
+                } catch (IOException e) {
+                    throw new InternalCompilerError("Could not read centos-release file", e);
+                }
+                if (centos6) {
+                    return "centos6";
+                }
+            }
+        }
+        return OS.name().toLowerCase();
+    }
+    
     /**
      * @return {@code true} if the current operating system is Mac.
      */
