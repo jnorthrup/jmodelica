@@ -72,15 +72,15 @@ abstract public class TestAnnotationizerHelper {
      * @param write        if <code>true</code>, write the annotation directly in the Modelica file
      */
     public static void doAnnotation(String filePath, String testType, String modelName, String description,
-            String[] opts, String data, String checkType, String[] libs, boolean write) throws Exception {
+            String platform, String[] opts, String data, String checkType, String[] libs, boolean write) throws Exception {
 
         try {
             Class cl = getTestCase(testType);
             Constructor constructor =
-                    cl.getConstructor(String.class, String.class, String.class, String[].class, Object[].class);
+                    cl.getConstructor(String.class, String.class, String.class, String.class, String[].class, Object[].class);
 
             TestAnnotationizerHelper ta =
-                    (TestAnnotationizerHelper) constructor.newInstance(filePath, modelName, description, opts, new Object[] { data });
+                    (TestAnnotationizerHelper) constructor.newInstance(filePath, modelName, description, platform, opts, new Object[] { data });
 
             ta.setCheckType(checkType);
             ta.setModelicaLibraries(libs);
@@ -254,6 +254,7 @@ abstract public class TestAnnotationizerHelper {
     protected int endLine;
     protected SourceRoot root;
     protected Object[] data;
+    protected String platform;
     protected String[] opts;
     protected String[] libs;
     protected OptionRegistry or = null;
@@ -269,15 +270,17 @@ abstract public class TestAnnotationizerHelper {
      * @param filePath     the path to the Modelica file containing the test model
      * @param className    the name of the test model
      * @param description  the text to put in the "description" field of the test annotation
+     * @param platform     see {@link #doAnnotation(String, String, String, String, String[], String, String, String[], boolean)}
      * @param opts         comma-separated list of compiler options to override defaults for
      * @param data         any extra data to send to the delegate object
      */
     public TestAnnotationizerHelper(String filePath, String className, String description,
-            String[] opts, Object[] data) throws Exception {
+            String platform, String[] opts, Object[] data) throws Exception {
 
         this.filePath = filePath;
         this.className = className;
         this.description = prepare(description);
+        this.platform = platform;
         this.opts = opts;
         this.data = data;
     }
@@ -300,6 +303,7 @@ abstract public class TestAnnotationizerHelper {
         System.out.println("Test class " + className + " begins at line " + beginLine);
         AnnotationNode a = cd.annotation("__JModelica/UnitTesting/tests").iterator().next();
         this.description = annotationString(a.forPath("description"), false);
+        this.platform = annotationString(a.forPath("platform"), false);
         this.data = getData(a, dataNames(), false);
         setCheckType(annotationString(a.forPath("checkType"), false));
         String libs = annotationString(a.forPath("modelicaLibraries"), false);
@@ -604,6 +608,8 @@ abstract public class TestAnnotationizerHelper {
         out.println(indent + "    " + testClassName() + "(");
         out.println(indent + "        name=\"" + testName + "\",");
         out.println(indent + "        description=\"" + description + "\",");
+        if (platform != null)             
+            out.println(indent + "        platform=\"" + platform + "\",");
         if (hasModelicaLibraries())
             out.println(indent + "        modelicaLibraries=\"" + getModelicaLibrariesString() + "\",");
         for (String opt : opts) 
@@ -754,9 +760,9 @@ abstract public class TestAnnotationizerHelper {
          * <code>data</code> and a code generator created by subclass.
          */
         public CodeGenTestCase(String filePath, String className, String description,
-                String[] opts, Object[] data) throws Exception {
+                String platform, String[] opts, Object[] data) throws Exception {
 
-            super(filePath, className, description, opts, data);
+            super(filePath, className, description, platform, opts, data);
         }
 
 		/**
@@ -819,9 +825,9 @@ abstract public class TestAnnotationizerHelper {
          * Delegates to super class.
          */
         public GenericCodeGenTestCase(String filePath, String className, String description,
-                String[] opts, Object[] data) throws Exception {
+                String platform, String[] opts, Object[] data) throws Exception {
 
-            super(filePath, className, description, opts, data);
+            super(filePath, className, description, platform, opts, data);
         }
 
 		/**
@@ -868,9 +874,9 @@ abstract public class TestAnnotationizerHelper {
          * Performs the flattening and instantiation steps of compilation.
          */
         public FlatteningTestCase(String filePath, String className, String description,
-                String[] opts, Object[] data) throws Exception {
+                String platform, String[] opts, Object[] data) throws Exception {
 
-            super(filePath, className, description, opts, data);
+            super(filePath, className, description, platform, opts, data);
         }
 
 		/**
@@ -915,9 +921,9 @@ abstract public class TestAnnotationizerHelper {
          * (Superclass performs the flattening and instantiation steps.)
          */
         public TransformCanonicalTestCase(String filePath, String className, String description,
-                String[] opts, Object[] data) throws Exception {
+                String platform, String[] opts, Object[] data) throws Exception {
 
-            super(filePath, className, description, opts, data);
+            super(filePath, className, description, platform, opts, data);
         }
 
 		/**
@@ -954,9 +960,9 @@ abstract public class TestAnnotationizerHelper {
          * the annotation.
          */
         public ErrorTestCaseHelper(String filePath, String className, String description,
-                String[] opts, Object[] data) throws Exception {
+                String platform, String[] opts, Object[] data) throws Exception {
 
-            super(filePath, className, description, opts, data);
+            super(filePath, className, description, platform, opts, data);
         }
 
 		/**
@@ -1022,9 +1028,9 @@ abstract public class TestAnnotationizerHelper {
          * Delegates to super class.
          */
         public WarningTestCase(String filePath, String className, String description,
-                String[] opts, Object[] data) throws Exception {
+                String platform, String[] opts, Object[] data) throws Exception {
 
-            super(filePath, className, description, opts, data);
+            super(filePath, className, description, platform, opts, data);
         }
 
 		/**
@@ -1068,9 +1074,9 @@ abstract public class TestAnnotationizerHelper {
          * Delegates to super class.
          */
         public ComplianceErrorTestCase(String filePath, String className, String description,
-                String[] opts, Object[] data) throws Exception {
+                String platform, String[] opts, Object[] data) throws Exception {
 
-            super(filePath, className, description, opts, data);
+            super(filePath, className, description, platform, opts, data);
         }
 
 		/**
@@ -1111,9 +1117,9 @@ abstract public class TestAnnotationizerHelper {
          * Performs any specified processing.
          */
         public MethodTestCase(String filePath, String className, String description,
-                String[] opts, Object[] data) throws Exception {
+                String platform, String[] opts, Object[] data) throws Exception {
 
-            super(filePath, className, description, opts, data);
+            super(filePath, className, description, platform, opts, data);
         }
 
         /**
@@ -1174,9 +1180,9 @@ abstract public class TestAnnotationizerHelper {
          * Compiles the model.
          */
         public FClassMethodTestCase(String filePath, String className, String description,
-                String[] opts, Object[] data) throws Exception {
+                String platform, String[] opts, Object[] data) throws Exception {
 
-            super(filePath, className, description, opts, data);
+            super(filePath, className, description, platform, opts, data);
         }
 
         /**
@@ -1209,10 +1215,10 @@ abstract public class TestAnnotationizerHelper {
          * 
          * Compiles the model.
          */
-        public InstClassMethodTestCase(String filePath, String className, String description, String[] opts,
+        public InstClassMethodTestCase(String filePath, String className, String description, String platform, String[] opts,
                 Object[] data) throws Exception {
 
-            super(filePath, className, description, opts, data);
+            super(filePath, className, description, platform, opts, data);
         }
 
         /**
@@ -1245,9 +1251,9 @@ abstract public class TestAnnotationizerHelper {
          * Compiles the model.
          */
         public SourceMethodTestCase(String filePath, String className, String description,
-                String[] opts, Object[] data) throws Exception {
+                String platform, String[] opts, Object[] data) throws Exception {
 
-            super(filePath, className, description, opts, data);
+            super(filePath, className, description, platform, opts, data);
         }
 
 		/**
@@ -1284,9 +1290,9 @@ abstract public class TestAnnotationizerHelper {
          * Compiles the model.
          */
         public EvalTestCase(String filePath, String className, String description,
-                String[] opts, Object[] data) throws Exception {
+                String platform, String[] opts, Object[] data) throws Exception {
 
-            super(filePath, className, description, opts, data);
+            super(filePath, className, description, platform, opts, data);
         }
 
 		/**
@@ -1384,9 +1390,9 @@ abstract public class TestAnnotationizerHelper {
 		private double time;
 
         public TimeTestCase(String filePath, String className, String description,
-                String[] opts, Object[] data) throws Exception {
+                String platform, String[] opts, Object[] data) throws Exception {
 
-            super(filePath, className, description, opts, data);
+            super(filePath, className, description, platform, opts, data);
         }
 
 		/**
@@ -1449,9 +1455,9 @@ abstract public class TestAnnotationizerHelper {
          * @param data         any extra data to send to the delegate object.
          */
         public OptionTestCase(String filePath, String className,
-                String description, String[] opts, Object[] data) throws Exception {
+                String description, String platform, String[] opts, Object[] data) throws Exception {
 
-            super(filePath, className, description, opts, data);
+            super(filePath, className, description, platform, opts, data);
         }
 
         /**
