@@ -509,7 +509,8 @@ aspect Environments {
         myInstClassDecl().getMergedEnvironment().mergeOuterClone(getInstModifications());
 
     /**
-     *  Gives the Environment only including InstNodes
+     *  Gives the environment filtered on this InstNode. The result includes only include modifications on/for this 
+     *  InstNode. 
      */
     syn Environment InstNode.filteredEnvironment() = nameScope() ? myEnvironment(name()) : myEnvironment();
 
@@ -527,6 +528,9 @@ aspect Environments {
         return env;
     }
 
+    /**
+     * Helper method for calculating the environment.
+     */
     inh Environment InstExtends.myEnvironmentNoClass();
     inh Environment InstExtends.myEnvironmentClass();
     eq Root.getChild().myEnvironmentNoClass()              = null;
