@@ -64,7 +64,8 @@ aspect AnnotationAPI {
     eq InstExternal.annotation(InstContext instContext)      = getSrcExternalClause().annotation(instContext);
 
     eq SrcFullClassDecl.annotation(InstContext instContext)           = annotationOfChild(getSrcAnnotationOpt(), instContext);
-    eq InstClassDecl.annotation(InstContext instContext)              = getSrcClassDecl().annotation(instContext);
+    eq InstClassDecl.annotation(InstContext instContext)              = mySrcAnnotatable().annotation(instContext);
+    eq InstAbstractShortClassDecl.annotation(InstContext instContext) = mySrcAnnotatable().annotation(instContext);
     eq SrcShortClassDecl.annotation(InstContext instContext)          = getSrcExtendsClauseShortClass().annotation(instContext);
     eq SrcLibNode.annotation(InstContext instContext)                 = myClass().annotation(instContext);
     eq SrcExtendsClauseShortClass.annotation(InstContext instContext) = getSrcComment().annotation(instContext);
@@ -72,7 +73,7 @@ aspect AnnotationAPI {
     eq SrcAbstractEquation.annotation(InstContext instContext) = getSrcComment().annotation(instContext);
 
     eq SrcComponentDecl.annotation(InstContext instContext)  = getSrcComment().annotation(instContext);
-    eq InstComponentDecl.annotation(InstContext instContext) = getSrcComponentDecl().annotation(instContext);
+    eq InstComponentDecl.annotation(InstContext instContext) = mySrcAnnotatable().annotation(instContext);
 
     public class FFunctionDecl     implements FAttributeListAnnotationNode.FAttributeList {}
     public class FVariable         implements FAttributeListAnnotationNode.FAttributeList {}
@@ -1892,5 +1893,250 @@ aspect AnnotationAPI {
 		return l.contains(null) ? null : l;
 	}
     
+    SrcModificationOrRedeclareElement extends SrcAnnotatable;
+    SrcClassDecl implements SrcAnnotatable;
+
+    public interface SrcAnnotatable {
+        public SrcAnnotationProvider srcAnnotationProvider();
+        public AnnotationNode annotation(InstContext instContext);
+    }
+
+    public SrcAnnotationProvider SrcModification.srcAnnotationProvider() {
+        return this;
+    }
+
+    
+    /**
+     * Find the topMost enclosing component.
+     * Return null if enclosingComponentDecl.
+     */
+    inh InstComponentDecl InstComponentDecl.topMostComponentDecl();
+    eq InstComponentDecl.getChild().topMostComponentDecl() {
+        InstComponentDecl next = topMostComponentDecl();
+        return next != null ? next : this;
+    }
+    eq InstRoot.getChild().topMostComponentDecl() = null;
+
+    /**
+     * Find the enclosing class to the topmost component
+     */
+    public InstClassDecl InstComponentDecl.enclosingClassTopMostComponentDecl() {
+        InstComponentDecl topComponent = topMostComponentDecl();
+        topComponent = topComponent != null ? topComponent : this;
+        return !topComponent.isUnknown() ? topComponent.enclosingInstClassDecl() : null;
+    }
+
+    /** 
+     * Match the qualified name for a component or class against modifications in the enviroment
+     * Returns something annotatable either of  
+     */
+    public SrcAnnotatable InstClassDecl.matchFromEnviroment(String qualifiedName) {
+        Environment enviroment = myInstClass().myEnvironment();
+        for (InstModification im : enviroment) {
+            if (im.qualifiedMatches(qualifiedName)) {
+                SrcAnnotatable annotatable = im.getSrcModification();
+                SrcAnnotationProvider provider = annotatable.srcAnnotationProvider();
+                annotatable = provider.isClassRedeclare() ?
+                        provider.getSrcClassRedeclare() : annotatable;
+                if (annotatable.srcAnnotationProvider().hasAnnotation()) {
+                    return annotatable;
+                }
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * 
+     */
+    public SrcAnnotatable InstComponentDecl.matchFromEnviroment(String qualifiedName) {
+        Environment enviroment = filteredEnvironment();
+        for (InstModification im : enviroment) {
+            if (im.qualifiedMatches(qualifiedName)) {
+                SrcAnnotatable annotatable = im.getElementModification();
+                SrcAnnotationProvider provider = annotatable.srcAnnotationProvider();
+                annotatable = provider.isClassRedeclare() ?
+                        provider.getSrcClassRedeclare() : annotatable;
+                annotatable = provider.isComponentRedeclare() ?
+                        provider.getSrcClassRedeclare() : annotatable;
+                if (annotatable.srcAnnotationProvider().hasAnnotation()) {
+                    return annotatable;
+                }
+            }
+        }
+        return null;
+    }
+    
+    /**
+    * Includes the qualified class name for the class containing the topmost enclosing component.
+    * Equivalent to enclosingClassTopMostComponentDecl().qualifiedName()+ "." + qualifiedName()
+    */
+    syn String InstComponentDecl.fullyQualifiedName() = 
+        enclosingClassTopMostComponentDecl().qualifiedName() + "." + qualifiedName();
+
+    syn String InstClassDecl.fullyQualifiedName() {
+        InstComponentDecl icomp = containingInstComponent();
+        if (icomp != null) {
+            return icomp.myInstClass().fullyQualifiedName() + "." + name();
+        }
+        return qualifiedName();
+    }
+    
+    syn String InstComponentDecl.fullyQualifiedTypeName() = 
+        topMostComponentDecl().qualifiedTypeName() + "." + qualifiedName().replaceFirst(".*\\.", "");
+    
+    syn SrcAnnotatable InstModification.getElementModification() = getSrcModification();
+    eq InstValueModification.getElementModification() = elementModification();
+    
+    inh SrcAnnotatable InstValueModification.elementModification();
+    eq  InstModification.getChild().elementModification() = getSrcModification();
+    eq  InstComponentDecl.getChild().elementModification() = getSrcComponentDecl();
+    eq  InstClassDecl.getChild().elementModification() = getSrcClassDecl();
+    eq  InstNode.getChild().elementModification() = null;
+    
+    /** Match the correct modification and function  */ 
+    public boolean InstModification.qualifiedMatches(String qualifiedName) {
+        return qualifiedNameWithClass().equals(qualifiedName);
+    }
+    
+    /**
+     * Obtain the fully qualified name including containing class name of this component.
+     * Allows matching with the name provided from InstComponentDecl.fullyQualifiedName().
+     */
+    public String InstModification.qualifiedNameWithClass() {
+        return " ";
+    }
+    
+    public String InstValueModification.qualifiedNameWithClass() {
+        InstModification parent = parentInstModification();
+        if (parent != null && parent != this) {
+            return parent.qualifiedNameWithClass();
+        }
+        return myTargetComponent().fullyQualifiedName();
+    }
+
+    public String InstNamedModification.qualifiedNameWithClass() {
+        InstComponentDecl targetComponent = myTargetComponent();
+      
+        String fullName = "";
+        if (targetComponent.isUnknown()) {
+            InstClassDecl enclosingClass = enclosingInstClassDecl();
+            if (enclosingClass != null) {
+                fullName = enclosingClass.qualifiedName() + ".";
+            }
+            fullName = fullName + name();
+        }else {
+            fullName = targetComponent.fullyQualifiedName() + "." + name();
+        }
+        return fullName;
+    }
+
+    
+    public SrcAnnotatable InstClassDecl.orginalAnnotatable() {
+        return getSrcClassDecl();
+    }
+    
+    public SrcAnnotatable InstComponentDecl.orginalAnnotatable() = getSrcComponentDecl();
+    
+    public SrcAnnotatable InstReplacingShortClassDecl.orginalAnnotatable() {
+    	SrcClassDecl clazz = getOriginalClassDecl();
+        if (!clazz.isUnknown()) {
+            SrcAnnotationProvider provider = clazz.srcAnnotationProvider(); 
+            if (provider.hasAnnotation()) {
+                return clazz; 
+            }
+        }
+        return getSrcClassDecl();
+    }
+    
+    public SrcAnnotatable InstReplacingSimpleShortClassDecl.orginalAnnotatable() {
+    	SrcClassDecl clazz = getOriginalClassDecl();
+        if (!clazz.isUnknown()) {
+            SrcAnnotationProvider provider = clazz.srcAnnotationProvider(); 
+            if (provider.hasAnnotation()) {
+                return clazz; 
+            }
+        }
+        return getSrcClassDecl();
+    }
+
+    public SrcAnnotationProvider InstClassDecl.myAnnotation() {
+        return mySrcAnnotatable().srcAnnotationProvider();
+    }
+
+    public SrcAnnotatable InstComponentDecl.mySrcAnnotatable() {
+        SrcAnnotatable annotatable = matchFromEnviroment(fullyQualifiedName());
+    	if (annotatable != null) {
+    		return annotatable;
+    	}
+    	return getSrcComponentDecl();
+    }
+    
+    public SrcAnnotatable InstAbstractShortClassDecl.mySrcAnnotatable() {
+        boolean hasAnnotations = getSrcClassDecl().srcAnnotationProvider().hasAnnotation();
+        if (!hasAnnotations) {
+            if (myInstClass() != null) {
+                SrcAnnotatable annotatable = matchFromEnviroment(qualifiedName());
+                if (annotatable != null) {
+                    return annotatable;
+                }
+                annotatable = matchFromEnviroment(fullyQualifiedName());
+                if (annotatable != null) {
+                    return annotatable;
+                }
+                return orginalAnnotatable(); 
+            }
+        }
+        return getSrcClassDecl();
+    }
+
+    /**
+     * Obtain the source node which is responsable for annotations.
+     */
+    public SrcAnnotatable InstClassDecl.mySrcAnnotatable() {
+        return getSrcClassDecl();
+    }
+
+    /** 
+     * Test method which obtains the string representation of the 
+     * annotation for the only inner class to this class. 
+     * Should not when multiple internal classes are present.
+     * 
+     */
+    public String InstClassDecl.testOnlyAnnotation() {
+        InstClassDecl iclass = allInstClassDeclsIterator().next();
+        if (iclass == null  || iclass.isUnknown())
+            iclass = allInstClassDeclsIterator().next();
+        
+        Iterator<AnnotationNode> iter = iclass.annotation().iterator();
+        return iter.hasNext() ? iter.next().toString() : "";
+    }
+
+    /**
+     *  Test method which can obtain either a class or component of a given name from a
+     *  component in the current class.
+     */
+    public String InstClassDecl.testComponentAnnotations(boolean clazz, String name) {
+        StringBuilder sb = new StringBuilder();
+        for (InstComponentDecl icd : getInstComponentDecls()) {
+            InstNode annotable = null;
+            if (clazz) {
+                annotable = icd.genericLookupInstClass(name).targetOrNull();
+            } else {
+                for (InstComponentDecl inner : icd.allInstComponentDecls()) {
+                    if (inner.matches(name)) {
+                        annotable = inner;
+                    }
+                }
+            }
+            if (annotable != null) {
+                Iterator<AnnotationNode> iter = annotable.annotation().iterator();
+                sb.append(iter.hasNext() ? iter.next().toString() : "");
+                sb.append(System.lineSeparator());
+            }
+        }
+        return sb.toString();
+    }
+
 }
 
