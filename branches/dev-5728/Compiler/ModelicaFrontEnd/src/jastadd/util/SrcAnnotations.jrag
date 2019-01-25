@@ -44,7 +44,7 @@ aspect SrcAnnotations {
         return srcAnnotation(SrcAnnotationNode.defaultEvaluator(), path);
     }
     public SrcAnnotationNode InstComponentDecl.srcAnnotation(String ... path) {
-        return SrcAnnotationNode.createFor(srcAnnotationProvider(), new SrcAnnotationNode.InstEvaluator(this), path);
+        return SrcAnnotationNode.createFor(srcAnnotationProvider(), new SrcAnnotationNode.InstEvaluator(containingInstNode()), path);
     }
 
     public SrcAnnotationNode SrcExtendsClause.srcAnnotation(String ... path) {
@@ -171,8 +171,7 @@ aspect SrcAnnotations {
             
             @Override
             public ConstValue evaluate(SrcExp evaluable) {
-                FExp fexp = context.dynamicFExp(evaluable.instantiate());
-                return fexp.evaluateValue();
+                return context.ceval(evaluable);
             }
             
         }
