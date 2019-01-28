@@ -1930,27 +1930,8 @@ aspect AnnotationAPI {
      * Match the qualified name for a component or class against modifications in the enviroment
      * Returns something annotatable either of  
      */
-    public SrcAnnotatable InstClassDecl.matchFromEnviroment(String qualifiedName) {
-        Environment enviroment = myInstClass().myEnvironment();
-        for (InstModification im : enviroment) {
-            if (im.qualifiedMatches(qualifiedName)) {
-                SrcAnnotatable annotatable = im.getSrcModification();
-                SrcAnnotationProvider provider = annotatable.srcAnnotationProvider();
-                annotatable = provider.isClassRedeclare() ?
-                        provider.getSrcClassRedeclare() : annotatable;
-                if (annotatable.srcAnnotationProvider().hasAnnotation()) {
-                    return annotatable;
-                }
-            }
-        }
-        return null;
-    }
-    
-    /**
-     * 
-     */
-    public SrcAnnotatable InstComponentDecl.matchFromEnviroment(String qualifiedName) {
-        Environment enviroment = filteredEnvironment();
+    public SrcAnnotatable InstNode.matchFromEnviroment(String qualifiedName) {
+        Environment enviroment = myEnvironment();
         for (InstModification im : enviroment) {
             if (im.qualifiedMatches(qualifiedName)) {
                 SrcAnnotatable annotatable = im.getElementModification();
@@ -1958,7 +1939,7 @@ aspect AnnotationAPI {
                 annotatable = provider.isClassRedeclare() ?
                         provider.getSrcClassRedeclare() : annotatable;
                 annotatable = provider.isComponentRedeclare() ?
-                        provider.getSrcClassRedeclare() : annotatable;
+                        provider.getSrcComponentRedeclare() : annotatable;
                 if (annotatable.srcAnnotationProvider().hasAnnotation()) {
                     return annotatable;
                 }
@@ -1966,7 +1947,7 @@ aspect AnnotationAPI {
         }
         return null;
     }
-    
+
     /**
     * Includes the qualified class name for the class containing the topmost enclosing component.
     * Equivalent to enclosingClassTopMostComponentDecl().qualifiedName()+ "." + qualifiedName()
@@ -1981,10 +1962,19 @@ aspect AnnotationAPI {
         }
         return qualifiedName();
     }
-    
-    syn String InstComponentDecl.fullyQualifiedTypeName() = 
-        topMostComponentDecl().qualifiedTypeName() + "." + qualifiedName().replaceFirst(".*\\.", "");
-    
+
+    syn String InstComponentDecl.fullyQualifiedTypeName() { 
+        String qualifiedName =  qualifiedName();
+        int dot = qualifiedName.indexOf(".");
+        if (dot > -1) {
+            qualifiedName = qualifiedName.substring(dot + 1);
+        }
+        return topMostComponentDecl().myInstClass().qualifiedName() + "." + qualifiedName;
+    }
+
+    /** 
+     * obtaining the owning source modification or entity.
+     */
     syn SrcAnnotatable InstModification.getElementModification() = getSrcModification();
     eq InstValueModification.getElementModification() = elementModification();
     
@@ -1995,9 +1985,8 @@ aspect AnnotationAPI {
     eq  InstNode.getChild().elementModification() = null;
     
     /** Match the correct modification and function  */ 
-    public boolean InstModification.qualifiedMatches(String qualifiedName) {
-        return qualifiedNameWithClass().equals(qualifiedName);
-    }
+    syn boolean InstModification.qualifiedMatches(String qualifiedName) =
+        qualifiedNameWithClass().equals(qualifiedName);
     
     /**
      * Obtain the fully qualified name including containing class name of this component.
@@ -2031,12 +2020,9 @@ aspect AnnotationAPI {
         return fullName;
     }
 
-    
-    public SrcAnnotatable InstClassDecl.orginalAnnotatable() {
-        return getSrcClassDecl();
-    }
-    
-    public SrcAnnotatable InstComponentDecl.orginalAnnotatable() = getSrcComponentDecl();
+    syn SrcAnnotatable InstClassDecl.orginalAnnotatable() = getSrcClassDecl();
+    syn SrcAnnotatable InstComponentDecl.orginalAnnotatable() = getSrcComponentDecl();
+    eq InstReplacingComposite.orginalAnnotatable() = getOriginalInstComponent().getSrcComponentDecl();
     
     public SrcAnnotatable InstReplacingShortClassDecl.orginalAnnotatable() {
     	SrcClassDecl clazz = getOriginalClassDecl();
@@ -2060,6 +2046,9 @@ aspect AnnotationAPI {
         return getSrcClassDecl();
     }
 
+    /**
+     * Obtain the SrcAnnotationProvider respecting the inheritance.
+     */
     public SrcAnnotationProvider InstClassDecl.myAnnotation() {
         return mySrcAnnotatable().srcAnnotationProvider();
     }
@@ -2069,29 +2058,42 @@ aspect AnnotationAPI {
     	if (annotatable != null) {
     		return annotatable;
     	}
-    	return getSrcComponentDecl();
+    	if (topMostComponentDecl()!= null) {
+            annotatable = matchFromEnviroment(fullyQualifiedTypeName());
+            if (annotatable != null) {
+                return annotatable;
+            }
+    	}
+    	SrcAnnotatable orginal = getSrcComponentDecl();
+    	if (orginal.srcAnnotationProvider().hasAnnotation()) {
+    	    return orginal;
+    	}
+    	return myInstClass().mySrcAnnotatable();
     }
     
+    /**
+     * Obtain the source node which is responsable for providing the annotation.
+     * A match against this with the same qualifiedName and same fullyQualifiedName is made in the 
+     * Enviroment. 
+     */
     public SrcAnnotatable InstAbstractShortClassDecl.mySrcAnnotatable() {
         boolean hasAnnotations = getSrcClassDecl().srcAnnotationProvider().hasAnnotation();
         if (!hasAnnotations) {
-            if (myInstClass() != null) {
-                SrcAnnotatable annotatable = matchFromEnviroment(qualifiedName());
-                if (annotatable != null) {
-                    return annotatable;
-                }
-                annotatable = matchFromEnviroment(fullyQualifiedName());
-                if (annotatable != null) {
-                    return annotatable;
-                }
-                return orginalAnnotatable(); 
+            SrcAnnotatable annotatable = matchFromEnviroment(qualifiedName());
+            if (annotatable != null) {
+                return annotatable;
             }
+            annotatable = matchFromEnviroment(fullyQualifiedName());
+            if (annotatable != null) {
+                return annotatable;
+            }
+            return orginalAnnotatable(); 
         }
         return getSrcClassDecl();
     }
 
     /**
-     * Obtain the source node which is responsable for annotations.
+     * Obtain the source node which is responsable for providing the annotation.
      */
     public SrcAnnotatable InstClassDecl.mySrcAnnotatable() {
         return getSrcClassDecl();
@@ -2099,22 +2101,26 @@ aspect AnnotationAPI {
 
     /** 
      * Test method which obtains the string representation of the 
-     * annotation for the only inner class to this class. 
-     * Should not when multiple internal classes are present.
-     * 
+     * annotation for the inner class with the given name. 
+     * This method is only intended for testing 
      */
-    public String InstClassDecl.testOnlyAnnotation() {
-        InstClassDecl iclass = allInstClassDeclsIterator().next();
-        if (iclass == null  || iclass.isUnknown())
-            iclass = allInstClassDeclsIterator().next();
-        
+    public String InstClassDecl.testClassAnnotations(String name) {
+        InstClassDecl iclass = null;
+        for (InstClassDecl icd :  allInstClassDecls()) {
+            if (icd.matches(name)) {
+                iclass = icd;
+                break;
+            }
+        }
         Iterator<AnnotationNode> iter = iclass.annotation().iterator();
         return iter.hasNext() ? iter.next().toString() : "";
     }
 
     /**
-     *  Test method which can obtain either a class or component of a given name from a
-     *  component in the current class.
+     *  Test method which can obtain either a inner class or inner component of a given name from a
+     *  component in the current class. 
+     *  Requires there to only be one component with a inner class or inner component with the given name.
+     *  This method is only intended for testing 
      */
     public String InstClassDecl.testComponentAnnotations(boolean clazz, String name) {
         StringBuilder sb = new StringBuilder();
