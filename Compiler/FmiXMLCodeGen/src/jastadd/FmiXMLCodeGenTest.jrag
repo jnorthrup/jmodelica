@@ -37,9 +37,9 @@ abstract public class TestAnnotationizerHelper {
     public static class FmiXMLCodeGenTestCase extends CodeGenTestCase {
 
         public FmiXMLCodeGenTestCase(String filePath, String className, String description,
-                String[] opts, Object[] data) throws Exception {
+                String platform, String[] opts, Object[] data) throws Exception {
 
-            super(filePath, className, description, opts, data);
+            super(filePath, className, description, platform, opts, data);
         }
 
         public FmiXMLCodeGenTestCase(SrcClassDecl cd, String filePath, String className) throws Exception {

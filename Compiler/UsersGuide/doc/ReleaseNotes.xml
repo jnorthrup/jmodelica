@@ -9,6 +9,12 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <title>Release Notes</title>
+    
+    <section>
+    <title>Release notes for JModelica.org version 2.8</title>    
+        <para>For this release there are some minor performance and debug improvements</para>
+    </section>
+    
     <section>
     <title>Release notes for JModelica.org version 2.6.1</title>    
     
