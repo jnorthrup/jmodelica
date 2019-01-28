@@ -181,7 +181,7 @@ aspect AnnotationAPI {
         }
     }
     public void InstNode.addAnnotationToEvaluator(ArrayList<AnnotationNode> list, InstNode evaluator) {
-        if (annotationExpEvaluator().equals(evaluator) && annotation().exists()) {
+        if (annotation().exists()) {
             list.add(annotation());
         }
     }
@@ -219,18 +219,18 @@ aspect AnnotationAPI {
     }
     eq InstComponentDecl.annotations() {
         ArrayList<AnnotationNode> list = super.annotations();
-        myInstClass().addAnnotationToEvaluatorUnchecked(list);
+        myInstClass().addAnnotationToEvaluator(list, this);
         return list;
     }
     eq InstExtends.annotations() {
         ArrayList<AnnotationNode> list = super.annotations();
-        addAnnotationToEvaluatorUnchecked(list);
-        myInstClass().addAnnotationToEvaluatorUnchecked(list);
+        addAnnotationToEvaluator(list, this);
+        myInstClass().addAnnotationToEvaluator(list, this);
         return list;
     }
     eq InstAbstractShortClassDecl.annotations() {
         ArrayList<AnnotationNode> list = new ArrayList<>();
-        addAnnotationToEvaluatorUnchecked(list);
+        addAnnotationToEvaluator(list, this);
         myTargetInstClassDecl().addAnnotationToEvaluator(list, this);
         return list;
     }
