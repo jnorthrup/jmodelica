@@ -20,6 +20,7 @@
 %goal element;
 %goal abstract_equation;
 %goal argument;
+%goal extends_clause_short_class;
 
 %header {:
  package $PARSER_PACKAGE$;
