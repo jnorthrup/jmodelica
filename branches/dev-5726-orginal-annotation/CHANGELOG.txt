@@ -1,4 +1,8 @@
 ================= Unreleased ==================
+
+; Feature ; Minor ; Compiler ; #5725
+Added splitting of generated C code for initialization of global constants (improves compilation time).
+
 ; Fixed ; Minor ; Compiler ; #5721
 Fix c_compiler so it's case insensitive.
 

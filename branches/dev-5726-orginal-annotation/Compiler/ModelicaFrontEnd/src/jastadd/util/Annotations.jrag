@@ -75,6 +75,9 @@ aspect AnnotationAPI {
     eq SrcComponentDecl.annotation(InstContext instContext)  = getSrcComment().annotation(instContext);
     eq InstComponentDecl.annotation(InstContext instContext) = mySrcAnnotatable().annotation(instContext);
 
+    eq InstExtends.annotation(InstContext instContext)      = getSrcExtendsClause().annotation(instContext);
+    eq SrcExtendsClause.annotation(InstContext instContext) = annotationOfChild(getSrcAnnotationOpt(), instContext);
+    
     public class FFunctionDecl     implements FAttributeListAnnotationNode.FAttributeList {}
     public class FVariable         implements FAttributeListAnnotationNode.FAttributeList {}
     public class FAbstractEquation implements FAttributeListAnnotationNode.FAttributeList {}
@@ -179,7 +182,7 @@ aspect AnnotationAPI {
         }
     }
     public void InstNode.addAnnotationToEvaluator(ArrayList<AnnotationNode> list, InstNode evaluator) {
-        if (annotationExpEvaluator().equals(evaluator) && annotation().exists()) {
+        if (annotation().exists()) {
             list.add(annotation());
         }
     }
@@ -199,11 +202,28 @@ aspect AnnotationAPI {
     }
     eq InstFullClassDecl.annotations() {
         ArrayList<AnnotationNode> list = super.annotations();
-        this.addAnnotationToEvaluator(list, this);
+        addAnnotationToEvaluator(list, this);
         getInstExternalOpt().addAnnotationToEvaluator(list, this);
         return list;
     }
-    
+    eq InstComponentDecl.annotations() {
+        ArrayList<AnnotationNode> list = super.annotations();
+        myInstClass().addAnnotationToEvaluator(list, this);
+        return list;
+    }
+    eq InstExtends.annotations() {
+        ArrayList<AnnotationNode> list = super.annotations();
+        addAnnotationToEvaluator(list, this);
+        myInstClass().addAnnotationToEvaluator(list, this);
+        return list;
+    }
+    eq InstAbstractShortClassDecl.annotations() {
+        ArrayList<AnnotationNode> list = new ArrayList<>();
+        addAnnotationToEvaluator(list, this);
+        myTargetInstClassDecl().addAnnotationToEvaluator(list, this);
+        return list;
+    }
+
     syn ArrayList<SrcExp> InstNode.annotationExps() {
         ArrayList<SrcExp> exps = new ArrayList<>();
         for (AnnotationNode annotation : annotations()) {
@@ -418,7 +438,6 @@ aspect AnnotationAPI {
         CValue ceval(SrcExp exp);
         InstLookupResult<InstClassDecl>     lookupInstClass(SrcExp exp);
         InstLookupResult<InstComponentDecl> lookupInstComponent(SrcExp exp);
-        FExp dynamicFExp(FExp exp);
     }
 
     InstNode implements InstContext;
@@ -457,10 +476,6 @@ aspect AnnotationAPI {
             }
 
             public InstLookupResult<InstComponentDecl> lookupInstComponent(SrcExp exp) {
-                return null;
-            }
-            
-            public FExp dynamicFExp(FExp exp) {
                 return null;
             }
         };
