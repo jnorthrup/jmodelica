@@ -112,26 +112,26 @@ package inheritance
         package BaseNoAnnotation
         end BaseNoAnnotation;
         
-        model A
+        model BaseWithAnnotation
             replaceable package testPackage = BaseNoAnnotation annotation(Dialog(tab="a", group="b"));
             replaceable BaseNoAnnotation testComponent() annotation(Dialog(tab="ac", group="b")); 
                 annotation(__JModelica(UnitTesting(tests={
             InstClassMethodTestCase(
                 name="instAnnotationFromRedeclare",
-                description="Check that the Annotation .",
+                description="Check that the annotation is from the replaceable.",
                 methodName="testClassAnnotations",
                 arguments={"testPackage"},
                 methodResult="
     Dialog(tab = \"a\", group = \"b\")
     ")})));
-        end A;
+        end BaseWithAnnotation;
         
         model B
-            extends A;
+            extends BaseWithAnnotation;
             annotation(__JModelica(UnitTesting(tests={
             InstClassMethodTestCase(
                 name="extendedHaveAnnotation",
-                description="Check that the Annotation .",
+                description="Check that the annotation is inherited.",
                 methodName="testClassAnnotations",
                 arguments={"testPackage"},
                 methodResult="
@@ -140,7 +140,7 @@ package inheritance
         end B;
         
         model C
-            extends A(
+            extends BaseWithAnnotation(
                 redeclare replaceable package testPackage 
                     = BaseNoAnnotation annotation(Dialog(tab="c", group="new")), 
                 redeclare replaceable BaseNoAnnotation testComponent() 
@@ -149,7 +149,7 @@ package inheritance
             annotation(__JModelica(UnitTesting(tests={
             InstClassMethodTestCase(
                 name="replacedInExtend",
-                description="Check that the Annotation .",
+                description="Check that the new annotation is used.",
                 methodName="testClassAnnotations",
                 arguments={"testPackage"},
                 methodResult="Dialog(tab = \"c\", group = \"new\")")})));
@@ -160,7 +160,7 @@ package inheritance
             annotation(__JModelica(UnitTesting(tests={
             InstClassMethodTestCase(
                 name="extendNoRedeclare",
-                description="Check that the Annotation .",
+                description="Check that the inherited annotation is used.",
                 methodName="testClassAnnotations",
                 arguments={"testPackage"},
                 methodResult="Dialog(tab = \"c\", group = \"new\")")})));
@@ -185,7 +185,7 @@ package inheritance
             annotation(__JModelica(UnitTesting(tests={
             InstClassMethodTestCase(
                 name="AnnotationFromReplacedContainingPackage",
-                description="Check that the Annotation .",
+                description="Check that the annotation from the alt class is used.",
                 methodName="testClassAnnotations",
                 arguments={"testPackage"},
                 methodResult="Dialog(tab = \"c4\", group = \"extends\")")})));
@@ -233,9 +233,10 @@ package inheritance
         end C5;
         
         model D
-            extends A(
+            extends BaseWithAnnotation(
                 redeclare replaceable BaseNoAnnotation testComponent() annotation(),
                 redeclare replaceable package testPackage = BaseNoAnnotation annotation());
+            
             annotation(__JModelica(UnitTesting(tests={
             InstClassMethodTestCase(
                 name="emptyExtendReplace",
@@ -257,7 +258,7 @@ package inheritance
         end D2;
         
         model E
-            extends A(
+            extends BaseWithAnnotation(
                 redeclare replaceable package testPackage = BaseNoAnnotation, 
                 redeclare replaceable BaseNoAnnotation testComponent()
                 );
