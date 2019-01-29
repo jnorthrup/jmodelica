@@ -1908,6 +1908,19 @@ aspect AnnotationAPI {
 		return l.contains(null) ? null : l;
 	}
     
+    /** 
+     * obtaining the owning source modification or entity. Primary used to
+     * obtain the Component / ComponentModification
+     */
+    syn SrcAnnotatable InstModification.getElementModification() = getSrcModification();
+    eq InstValueModification.getElementModification() = elementModification();
+    
+    inh SrcAnnotatable InstValueModification.elementModification();
+    eq  InstModification.getChild().elementModification() = getSrcModification();
+    eq  InstComponentDecl.getChild().elementModification() = getSrcComponentDecl();
+    eq  InstClassDecl.getChild().elementModification() = getSrcClassDecl();
+    eq  InstNode.getChild().elementModification() = null;
+
     SrcModificationOrRedeclareElement extends SrcAnnotatable;
     SrcClassDecl implements SrcAnnotatable;
 
@@ -1920,35 +1933,14 @@ aspect AnnotationAPI {
         return this;
     }
 
-    
-    /**
-     * Find the topMost enclosing component.
-     * Return null if enclosingComponentDecl.
-     */
-    inh InstComponentDecl InstComponentDecl.topMostComponentDecl();
-    eq InstComponentDecl.getChild().topMostComponentDecl() {
-        InstComponentDecl next = topMostComponentDecl();
-        return next != null ? next : this;
-    }
-    eq InstRoot.getChild().topMostComponentDecl() = null;
-
-    /**
-     * Find the enclosing class to the topmost component
-     */
-    public InstClassDecl InstComponentDecl.enclosingClassTopMostComponentDecl() {
-        InstComponentDecl topComponent = topMostComponentDecl();
-        topComponent = topComponent != null ? topComponent : this;
-        return !topComponent.isUnknown() ? topComponent.enclosingInstClassDecl() : null;
-    }
-
     /** 
-     * Match the qualified name for a component or class against modifications in the enviroment
-     * Returns something annotatable either of  
+     * Search for the applicable annotation from the enviroment. FilteredEnviroment 
+     * is not used since it peeling which is undesireable 
      */
-    public SrcAnnotatable InstNode.matchFromEnviroment(String qualifiedName) {
+    public SrcAnnotatable InstNode.srcannotatableFromEnviroment() {
         Environment enviroment = myEnvironment();
         for (InstModification im : enviroment) {
-            if (im.qualifiedMatches(qualifiedName)) {
+            if (im.matches(name())) {
                 SrcAnnotatable annotatable = im.getElementModification();
                 SrcAnnotationProvider provider = annotatable.srcAnnotationProvider();
                 annotatable = provider.isClassRedeclare() ?
@@ -1964,80 +1956,19 @@ aspect AnnotationAPI {
     }
 
     /**
-    * Includes the qualified class name for the class containing the topmost enclosing component.
-    * Equivalent to enclosingClassTopMostComponentDecl().qualifiedName()+ "." + qualifiedName()
-    */
-    syn String InstComponentDecl.fullyQualifiedName() = 
-        enclosingClassTopMostComponentDecl().qualifiedName() + "." + qualifiedName();
-
-    syn String InstClassDecl.fullyQualifiedName() {
-        InstComponentDecl icomp = containingInstComponent();
-        if (icomp != null) {
-            return icomp.myInstClass().fullyQualifiedName() + "." + name();
-        }
-        return qualifiedName();
-    }
-
-    syn String InstComponentDecl.fullyQualifiedTypeName() { 
-        String qualifiedName =  qualifiedName();
-        int dot = qualifiedName.indexOf(".");
-        if (dot > -1) {
-            qualifiedName = qualifiedName.substring(dot + 1);
-        }
-        return topMostComponentDecl().myInstClass().qualifiedName() + "." + qualifiedName;
-    }
-
-    /** 
-     * obtaining the owning source modification or entity.
+     * Obtaines the orginal annotatable for a class or component.
+     *   
      */
-    syn SrcAnnotatable InstModification.getElementModification() = getSrcModification();
-    eq InstValueModification.getElementModification() = elementModification();
-    
-    inh SrcAnnotatable InstValueModification.elementModification();
-    eq  InstModification.getChild().elementModification() = getSrcModification();
-    eq  InstComponentDecl.getChild().elementModification() = getSrcComponentDecl();
-    eq  InstClassDecl.getChild().elementModification() = getSrcClassDecl();
-    eq  InstNode.getChild().elementModification() = null;
-    
-    /** Match the correct modification and function  */ 
-    syn boolean InstModification.qualifiedMatches(String qualifiedName) =
-        qualifiedNameWithClass().equals(qualifiedName);
-    
-    /**
-     * Obtain the fully qualified name including containing class name of this component.
-     * Allows matching with the name provided from InstComponentDecl.fullyQualifiedName().
-     */
-    public String InstModification.qualifiedNameWithClass() {
-        return " ";
-    }
-    
-    public String InstValueModification.qualifiedNameWithClass() {
-        InstModification parent = parentInstModification();
-        if (parent != null && parent != this) {
-            return parent.qualifiedNameWithClass();
-        }
-        return myTargetComponent().fullyQualifiedName();
-    }
-
-    public String InstNamedModification.qualifiedNameWithClass() {
-        InstComponentDecl targetComponent = myTargetComponent();
-      
-        String fullName = "";
-        if (targetComponent.isUnknown()) {
-            InstClassDecl enclosingClass = enclosingInstClassDecl();
-            if (enclosingClass != null) {
-                fullName = enclosingClass.qualifiedName() + ".";
-            }
-            fullName = fullName + name();
-        }else {
-            fullName = targetComponent.fullyQualifiedName() + "." + name();
-        }
-        return fullName;
-    }
-
     syn SrcAnnotatable InstClassDecl.orginalAnnotatable() = getSrcClassDecl();
     syn SrcAnnotatable InstComponentDecl.orginalAnnotatable() = getSrcComponentDecl();
-    eq InstReplacingComposite.orginalAnnotatable() = getOriginalInstComponent().getSrcComponentDecl();
+    eq InstReplacingComposite.orginalAnnotatable() {
+        InstComponentDecl component = getOriginalInstComponent();
+        if (!component.isUnknown()) {
+            return component.getSrcComponentDecl();
+        }
+        // Throw or raise suitable exception
+        return getSrcComponentDecl();
+    }
     
     public SrcAnnotatable InstReplacingShortClassDecl.orginalAnnotatable() {
     	SrcClassDecl clazz = getOriginalClassDecl();
@@ -2047,6 +1978,7 @@ aspect AnnotationAPI {
                 return clazz; 
             }
         }
+        // Throw or raise suitable exception
         return getSrcClassDecl();
     }
     
@@ -2069,21 +2001,15 @@ aspect AnnotationAPI {
     }
 
     public SrcAnnotatable InstComponentDecl.mySrcAnnotatable() {
-        SrcAnnotatable annotatable = matchFromEnviroment(fullyQualifiedName());
-    	if (annotatable != null) {
-    		return annotatable;
-    	}
-    	if (topMostComponentDecl()!= null) {
-            annotatable = matchFromEnviroment(fullyQualifiedTypeName());
-            if (annotatable != null) {
-                return annotatable;
-            }
-    	}
-    	SrcAnnotatable orginal = getSrcComponentDecl();
-    	if (orginal.srcAnnotationProvider().hasAnnotation()) {
-    	    return orginal;
-    	}
-    	return myInstClass().mySrcAnnotatable();
+        SrcAnnotatable annotatable = srcannotatableFromEnviroment();
+        if (annotatable != null) {
+            return annotatable;
+        }
+        SrcAnnotatable orginal = getSrcComponentDecl();
+        if (orginal.srcAnnotationProvider().hasAnnotation()) {
+            return orginal;
+        }
+        return myInstClass().mySrcAnnotatable();
     }
     
     /**
@@ -2094,11 +2020,7 @@ aspect AnnotationAPI {
     public SrcAnnotatable InstAbstractShortClassDecl.mySrcAnnotatable() {
         boolean hasAnnotations = getSrcClassDecl().srcAnnotationProvider().hasAnnotation();
         if (!hasAnnotations) {
-            SrcAnnotatable annotatable = matchFromEnviroment(qualifiedName());
-            if (annotatable != null) {
-                return annotatable;
-            }
-            annotatable = matchFromEnviroment(fullyQualifiedName());
+            SrcAnnotatable annotatable = srcannotatableFromEnviroment();
             if (annotatable != null) {
                 return annotatable;
             }
