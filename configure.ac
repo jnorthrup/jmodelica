@@ -213,6 +213,23 @@ $7=$$1
 IPOPT_ARG_CHECK([ipopt], [with-ipopt], [with_ipopt], [IPOPT], [IPOPT_INC], [IPOPT_LIB], [IPOPT_HOME], [COMPILE_WITH_IPOPT])
 IPOPT_ARG_CHECK([ipopt64], [with-ipopt64], [with_ipopt64], [IPOPT64], [IPOPT64_INC], [IPOPT64_LIB], [IPOPT64_HOME], [COMPILE_WITH_IPOPT64])
 
+
+#------------- Configure python packages into build ----------------------------
+
+AC_ARG_ENABLE([python],
+  AS_HELP_STRING([--enable-python], [ use --enable-python=no to remove python modules from build]),
+  [python=${enableval}],
+  [python=yes])
+
+AM_CONDITIONAL(PYTHON_ENABLED, test "$python" = "yes")
+if test "$python" = "yes"; then
+        echo configure: Python modules are enabled
+else
+        echo configure: Python modules are disabled
+fi
+
+
+#-----------------------------------------
 AC_SUBST(WITH_CASADI)
 AS_IF([test "x$with_casadi" != xno],
       [WITH_CASADI="true"],
