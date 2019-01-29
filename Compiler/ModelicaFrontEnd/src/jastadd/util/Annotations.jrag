@@ -1933,6 +1933,69 @@ aspect AnnotationAPI {
         return this;
     }
 
+    public interface SrcAnnotationProvider {
+        /**
+         * Check if there is annotations at this location.
+         */
+        public boolean hasAnnotation();
+    }
+
+    public class SrcSingeltonProvider {
+        @Override
+        public boolean hasAnnotation() {
+            return provider.hasAnnotation();
+        }
+    }
+
+    public class ExpValueProvider {
+        @Override
+        public boolean hasAnnotation() {
+            return annotationSubNodes().iterator().hasNext();
+        }
+    }
+
+    public class SrcAnnotationsIteratorProvider {
+        @Override
+        public boolean hasAnnotation() {
+            return providers.size()>0 && annotationSubNodes().iterator().hasNext();
+        }
+    }
+
+    public class SrcModification {
+        @Override
+        public boolean hasAnnotation() {
+            return annotationSubNodes().iterator().hasNext();
+        }
+    }
+
+    public abstract class RootAnnotationProviderProxy {
+    	@Override
+        public boolean hasAnnotation() {
+            return hasProvider();
+        }
+    }
+
+    @Override
+    public boolean SrcNamedArgument.hasAnnotation() {
+        return annotationSubNodes().iterator().hasNext();
+    }
+
+    @Override
+    public boolean SrcFunctionArguments.hasAnnotation() {
+        return annotationSubNodes().iterator().hasNext();
+    }
+
+    @Override
+    public boolean SrcParseAnnotation.hasAnnotation() {
+        return annotationSubNodes().iterator().hasNext();
+    }
+
+    syn boolean InstModification.isRedeclare() = false;
+    eq InstComponentRedeclare.isRedeclare()    = true;
+    eq InstClassRedeclare.isRedeclare()        = true;
+    
+
+    
     /** 
      * Search for the applicable annotation from the enviroment. FilteredEnviroment 
      * is not used since it peeling which is undesireable 
@@ -1940,7 +2003,7 @@ aspect AnnotationAPI {
     public SrcAnnotatable InstNode.srcannotatableFromEnviroment() {
         Environment enviroment = myEnvironment();
         for (InstModification im : enviroment) {
-            if (im.matches(name())) {
+            if (im.matches(name()) && im.isRedeclare()) {
                 SrcAnnotatable annotatable = im.getElementModification();
                 SrcAnnotationProvider provider = annotatable.srcAnnotationProvider();
                 annotatable = provider.isClassRedeclare() ?
@@ -1960,15 +2023,10 @@ aspect AnnotationAPI {
      *   
      */
     syn SrcAnnotatable InstClassDecl.orginalAnnotatable() = getSrcClassDecl();
+    eq InstReplacingFullClassDecl.orginalAnnotatable() = getOriginalClassDecl();
     syn SrcAnnotatable InstComponentDecl.orginalAnnotatable() = getSrcComponentDecl();
-    eq InstReplacingComposite.orginalAnnotatable() {
-        InstComponentDecl component = getOriginalInstComponent();
-        if (!component.isUnknown()) {
-            return component.getSrcComponentDecl();
-        }
-        // Throw or raise suitable exception
-        return getSrcComponentDecl();
-    }
+    eq InstReplacingComposite.orginalAnnotatable() = getOriginalDecl();
+    eq InstReplacingPrimitive.orginalAnnotatable() = getOriginalDecl();
     
     public SrcAnnotatable InstReplacingShortClassDecl.orginalAnnotatable() {
     	SrcClassDecl clazz = getOriginalClassDecl();
@@ -2001,15 +2059,18 @@ aspect AnnotationAPI {
     }
 
     public SrcAnnotatable InstComponentDecl.mySrcAnnotatable() {
-        SrcAnnotatable annotatable = srcannotatableFromEnviroment();
-        if (annotatable != null) {
-            return annotatable;
+        boolean hasAnnotations = getSrcComponentDecl().srcAnnotationProvider().hasAnnotation();
+        if (!hasAnnotations) {
+            SrcAnnotatable annotatable = srcannotatableFromEnviroment();
+            if (annotatable != null) {
+                return annotatable;
+            }
+            SrcAnnotatable orginal = orginalAnnotatable();
+            if (orginal.srcAnnotationProvider().hasAnnotation()) {
+                return orginal;
+            }
         }
-        SrcAnnotatable orginal = getSrcComponentDecl();
-        if (orginal.srcAnnotationProvider().hasAnnotation()) {
-            return orginal;
-        }
-        return myInstClass().mySrcAnnotatable();
+        return getSrcComponentDecl();
     }
     
     /**
