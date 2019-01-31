@@ -283,13 +283,25 @@ aspect Parsers {
         return eqn;
     }
 
-    public SrcShortClassDecl ParserHandler.parseShortClassDecl(String superClassDeclaration) 
+    public SrcShortClassDecl ParserHandler.parseShortClassDecl(String code, String parentSourceFile) 
             throws ParserException, beaver.Parser.Exception, IOException {
-        final AbstractModelicaScanner<ASTNode<?>> scanner = createModelicaScanner(new StringReader(superClassDeclaration));
-        final beaver.Parser parser = createModelicaParser(scanner, "");
-        return (SrcShortClassDecl) parser.parse(scanner, anonymousClassModelicaGoal());
+        return parseShortClassDecl(code, parentSourceFile, false);
     }
-    
+
+    public SrcShortClassDecl ParserHandler.parseShortClassDecl(String code, String parentSourceFile, boolean preservFormatting) 
+            throws ParserException, beaver.Parser.Exception, IOException {
+        final AbstractModelicaScanner<ASTNode<?>> scanner = createModelicaScanner(new StringReader(code));
+        final beaver.Parser parser = createModelicaParser(scanner, parentSourceFile);
+        final SrcShortClassDecl srcShortClassDecl = (SrcShortClassDecl) parser.parse(scanner,
+                anonymousClassModelicaGoal());
+
+        if (preservFormatting) {
+            scanner.getFormattingRecorder().postParsing(srcShortClassDecl);
+        }
+
+        return srcShortClassDecl;
+    }
+
     public Reader ParserHandler.fileReader(UtilInterface uif, File file) throws FileNotFoundException {
         return new InputStreamReader(new FileInputStream(file), ASTNode.UTF8);
     }
