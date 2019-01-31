@@ -1827,6 +1827,65 @@ x = if a[1,1] > a[1,2] then true else false;
  )})));
 end ParameterEval1;
 
+model EvalInheritedAnnotation
+    model BaseEvalFalse
+        parameter Real x(start=1);
+        parameter Real y(start=3);
+        replaceable parameter Real z = x + y annotation(Evaluate=false);
+    end BaseEvalFalse;
+    
+    model EvalTrue
+        extends BaseEvalFalse(redeclare replaceable parameter Real z = 2*x + y annotation(Evaluate=true)); 
+    end EvalTrue;
+    
+    model EvalStillTrue
+        extends EvalTrue(redeclare replaceable parameter Real z = 3*x + y); 
+        annotation(__JModelica(UnitTesting(tests={
+            FlatteningTestCase(
+                name="C",
+                description="Evaluate primitives without binding exp",
+                flatModel="
+        fclass EvaluationTests.EvalInheritedAnnotation.EvalStillTrue
+         structural parameter Real x = 1 /* 1 */;
+         structural parameter Real y = 3 /* 3 */;
+         eval parameter Real z = 6.0 /* 6.0 */;
+        end EvaluationTests.EvalInheritedAnnotation.EvalStillTrue;
+    ")})));
+    end EvalStillTrue;
+    
+    model EvalStillTrue2
+        extends EvalStillTrue;
+        annotation(__JModelica(UnitTesting(tests={
+            FlatteningTestCase(
+                name="D",
+                description="Evaluate primitives without binding exp",
+                flatModel="
+        fclass EvaluationTests.EvalInheritedAnnotation.EvalStillTrue2
+         structural parameter Real x = 1 /* 1 */;
+         structural parameter Real y = 3 /* 3 */;
+         eval parameter Real z = 6.0 /* 6.0 */;
+        end EvaluationTests.EvalInheritedAnnotation.EvalStillTrue2;
+    ")})));
+    end EvalStillTrue2;
+    
+    model EvalDefaultFalse
+        extends EvalStillTrue2(redeclare replaceable parameter Real z = y annotation());
+        annotation(__JModelica(UnitTesting(tests={
+            FlatteningTestCase(
+                name="E",
+                description="Evaluate primitives without binding exp",
+                flatModel="
+        fclass EvaluationTests.EvalInheritedAnnotation.EvalDefaultFalse
+         parameter Real x(start = 1);
+         parameter Real y(start = 3);
+         parameter Real z = y;
+        end EvaluationTests.EvalInheritedAnnotation.EvalDefaultFalse;
+    ")})));
+    end EvalDefaultFalse;
+end EvalInheritedAnnotation;
+
+
+
 model EvalNoBinding1
     parameter Real x(start=1);
     parameter Real y(start=3);
