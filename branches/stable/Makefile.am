@@ -16,7 +16,11 @@
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = ThirdParty/winpthreads ThirdParty/SuperLU ThirdParty/Sundials ThirdParty/Minpack ThirdParty/Blas ThirdParty/Lapack ThirdParty/MSL external/FMILibrary RuntimeLibrary Python
+SUBDIRS = ThirdParty/winpthreads ThirdParty/SuperLU ThirdParty/Sundials ThirdParty/Minpack ThirdParty/Blas ThirdParty/Lapack ThirdParty/MSL external/FMILibrary RuntimeLibrary
+
+if PYTHON_ENABLED
+SUBDIRS += Python
+endif
 
 assimulo_install_dir=$(abs_builddir)/Assimulo_install
 pymodelica_install_dir=$(abs_builddir)/pymodelica_install
@@ -250,8 +254,9 @@ else
 NUMPY_NO_MSVCR_ARG=
 endif
 
-build-python-packages:
 
+build-python-packages:
+if PYTHON_ENABLED
 if WITH_OPENMP
 	mkdir -p $(assimulo_build_dir); \
 	cd $(abs_top_srcdir)/external; \
@@ -361,7 +366,11 @@ if WITH_PYTHON64
 	rm -rf build
 endif
 endif
+endif
+
+
 install-python-packages: build-python-packages
+if PYTHON_ENABLED
 	mkdir -p $(DESTDIR)$(prefix)/Python
 	cp $(abs_top_srcdir)/Python/src/startup.py $(DESTDIR)$(prefix)/
 	cp Python/src/required_defaults.py $(DESTDIR)$(prefix)/Python/
@@ -451,7 +460,9 @@ endif
 	[ -e $(DESTDIR)$(prefix)/bin/jm_python.sh ] && echo "File exists, don't copy jm_python.sh" || cp Python/jm_python.sh $(DESTDIR)$(prefix)/bin/jm_python.sh
 	[ -e $(DESTDIR)$(prefix)/bin/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(DESTDIR)$(prefix)/bin/jm_ipython.sh
 	chmod ugo+x $(DESTDIR)$(prefix)/bin/jm_*.sh
-
+endif
+	
+	
 # Hooks for extra build or install actions. Must be empty or the path of a shell script to execute. 
 # Both scripts will get the source directory as the first argument and the install directory as the second.
 BUILD_EXTRA=
@@ -611,8 +622,8 @@ if HAVE_ANT
 	$(ANT_OPTS) $(ANT) clean ; rm -rf $(OC_CASADI_BUILD)/src/cpp-generated $(OC_CASADI_BUILD)/src/java-generated/ifcasadi 
 endif
 	
-
 clean-python-packages:
+if PYTHON_ENABLED
 	if [ -d $(assimulo_build_dir)/Assimulo ]; then \
 		cd $(assimulo_build_dir)/Assimulo; \
 		python setup.py clean --all --sundials-home=$(SUNDIALS_HOME); \
@@ -633,6 +644,7 @@ clean-python-packages:
 	-cd $(abs_top_srcdir)/Python/src; \
 	python setup_pyjmi.py clean --all 
 	-rm -rf $(pyjmi_install_dir)|| echo  Could not remove $(pyjmi_install_dir)
+endif
 
 clean-frontends:
 if HAVE_ANT

@@ -8,7 +8,9 @@ yum install -y python-matplotlib
 yum install -y libgomp
 yum install -y tmux vim
 pip install --upgrade setuptools
-pip install scipy lxml
+pip install 'numpy==1.14'
+pip install 'scipy==0.19.0'
+pip install lxml
 sed -i "/^backend/c\\backend:Agg" $(python -c "import matplotlib;print(matplotlib.matplotlib_fname())")
 
 

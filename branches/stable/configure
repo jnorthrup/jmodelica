@@ -653,6 +653,8 @@ MINPACK_HOME
 SUNDIALS_HOME
 CASADI_HOME
 WITH_CASADI
+PYTHON_ENABLED_FALSE
+PYTHON_ENABLED_TRUE
 IPOPT64_HOME
 IPOPT64_LIB
 IPOPT64_INC
@@ -805,6 +807,7 @@ with_sysroot
 enable_libtool_lock
 with_ipopt
 with_ipopt64
+enable_python
 with_casadi
 with_mingw
 '
@@ -1453,6 +1456,8 @@ Optional Features:
   --enable-fast-install[=PKGS]
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
+  --enable-python         use --enable-python=no to remove python modules from
+                          build
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -19116,6 +19121,33 @@ IPOPT64_HOME=$ipopt64
 
 
 
+#------------- Configure python packages into build ----------------------------
+
+# Check whether --enable-python was given.
+if test "${enable_python+set}" = set; then :
+  enableval=$enable_python; python=${enableval}
+else
+  python=yes
+fi
+
+
+ if test "$python" = "yes"; then
+  PYTHON_ENABLED_TRUE=
+  PYTHON_ENABLED_FALSE='#'
+else
+  PYTHON_ENABLED_TRUE='#'
+  PYTHON_ENABLED_FALSE=
+fi
+
+if test "$python" = "yes"; then
+        echo configure: Python modules are enabled
+else
+        echo configure: Python modules are disabled
+fi
+
+
+#-----------------------------------------
+
 if test "x$with_casadi" != xno; then :
   WITH_CASADI="true"
 else
@@ -19914,6 +19946,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${COMPILE_WITH_IPOPT64_TRUE}" && test -z "${COMPILE_WITH_IPOPT64_FALSE}"; then
   as_fn_error $? "conditional \"COMPILE_WITH_IPOPT64\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${PYTHON_ENABLED_TRUE}" && test -z "${PYTHON_ENABLED_FALSE}"; then
+  as_fn_error $? "conditional \"PYTHON_ENABLED\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${WITH_MINGW_TRUE}" && test -z "${WITH_MINGW_FALSE}"; then
