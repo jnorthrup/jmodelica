@@ -111,6 +111,9 @@ package inheritance
     package classes 
         package BaseNoAnnotation
         end BaseNoAnnotation;
+
+        model ModelNoAnnotation
+        end ModelNoAnnotation;
         
         model BaseWithAnnotation
             replaceable package testPackage = BaseNoAnnotation annotation(Dialog(tab="a", group="b"));
@@ -168,27 +171,24 @@ package inheritance
         
         model A2
             package BaseAnnotation
-                replaceable BaseNoAnnotation testComponent();
-                replaceable package testPackage = BaseNoAnnotation;
+                replaceable model TestModel = ModelNoAnnotation;
             end BaseAnnotation;
-            BaseAnnotation.testComponent testComponent;
-            BaseAnnotation.testPackage testPackage;
+            BaseAnnotation.TestModel testModel;
         end A2;
         
         package BaseAnnotationAlt
-                replaceable BaseNoAnnotation testComponent() annotation(Dialog(group="altComponent"));
-                replaceable package testPackage = BaseNoAnnotation annotation(Dialog(group="altPackage"));
+                replaceable model TestModel = ModelNoAnnotation annotation(Dialog(group="altPackage"));
             end BaseAnnotationAlt;
         
         model AnnotationFromReplacedContainingPackage
-            extends A2(redeclare replaceable package BaseAnnotation = BaseAnnotationAlt)
+            extends A2(redeclare replaceable package BaseAnnotation = BaseAnnotationAlt);
             annotation(__JModelica(UnitTesting(tests={
             InstClassMethodTestCase(
                 name="AnnotationFromReplacedContainingPackage",
                 description="Check that the annotation from the alt class is used.",
                 methodName="testClassAnnotations",
-                arguments={"testPackage"},
-                methodResult="Dialog(tab = \"c4\", group = \"extends\")")})));
+                arguments={"BaseAnnotation.TestModel"},
+                methodResult="Dialog(group=\"altPackage\")")})));
         end AnnotationFromReplacedContainingPackage; 
         
         model C3
@@ -515,6 +515,27 @@ package inheritance
         Dialog(tab = \"redeclaredInDeclaration\", group = \"component\")
         ")})));  
         end componentRedeclaredInDeclaration;
+        
+        model ComponentNotAnnotationFromClassTest
+            model ComponentAnnotTest
+                annotation(Dialog(group="alt"));
+            end ComponentAnnotTest;
+            ComponentAnnotTest testComponent;
+        end ComponentNotAnnotationFromClassTest;
+        
+       
+        
+        model componentNoAnnotationFromClass
+            ComponentNotAnnotationFromClassTest componentNoAnnotationFromClass;
+            annotation(__JModelica(UnitTesting(tests={
+                InstClassMethodTestCase(
+                    name="componentRedeclaredWithAnnotationInExtends",
+                    description="Annotation from Extends for component inner component.",
+                    methodName="testComponentAnnotations",
+                    arguments={false, "testComponent"},
+                    methodResult="
+        ")})));  
+        end componentNoAnnotationFromClass;
     end componentsGetComponent;
 end inheritance;
 
