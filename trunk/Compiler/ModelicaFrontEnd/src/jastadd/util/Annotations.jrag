@@ -25,6 +25,7 @@ import java.util.NoSuchElementException;
 import org.jmodelica.util.collections.ChainedIterator;
 import org.jmodelica.util.collections.FilteredIterator;
 import org.jmodelica.util.Criteria;
+import org.jmodelica.util.QualifiedName;
 
 aspect AnnotationAPI {
     /**
@@ -2047,7 +2048,6 @@ aspect AnnotationAPI {
                 return clazz; 
             }
         }
-        // Throw or raise suitable exception
         return getSrcClassDecl();
     }
     
@@ -2111,16 +2111,25 @@ aspect AnnotationAPI {
     /** 
      * Test method which obtains the string representation of the 
      * annotation for the inner class with the given name. 
-     * This method is only intended for testing 
+     * This method is only intended for testing. 
+     * A QualifiedName can be provider for lookup of the class to test. 
+     * Trigger a null pointer if not found.
      */
     public String InstClassDecl.testClassAnnotations(String name) {
-        InstClassDecl iclass = null;
-        for (InstClassDecl icd :  allInstClassDecls()) {
-            if (icd.matches(name)) {
-                iclass = icd;
-                break;
+        InstClassDecl iclass = this;
+        Iterable<InstClassDecl> it = allInstClassDecls();
+        QualifiedName qn = new QualifiedName(name);
+        do {
+            String namePart = qn.next();
+            it = iclass.allInstClassDecls();
+            iclass = null;
+            for (InstClassDecl icd :  it) {
+                if (icd.matches(namePart)) {
+                    iclass = icd;
+                    break;
+                }
             }
-        }
+        } while (qn.hasNext());
         Iterator<AnnotationNode> iter = iclass.annotation().iterator();
         return iter.hasNext() ? iter.next().toString() : "";
     }
@@ -2129,7 +2138,7 @@ aspect AnnotationAPI {
      *  Test method which can obtain either a inner class or inner component of a given name from a
      *  component in the current class. 
      *  Requires there to only be one component with a inner class or inner component with the given name.
-     *  This method is only intended for testing 
+     *  This method is only intended for testing. 
      */
     public String InstClassDecl.testComponentAnnotations(boolean clazz, String name) {
         StringBuilder sb = new StringBuilder();
