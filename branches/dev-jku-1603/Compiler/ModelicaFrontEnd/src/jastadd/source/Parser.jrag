@@ -150,7 +150,11 @@ aspect Parsers {
     public short ParserHandler.modifierGoal() {
         return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.argument;
     }
-    
+
+    public short ParserHandler.extendsClauseShortClassGoal() {
+        return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.extends_clause_short_class;
+    }
+
     public SourceRoot ParserHandler.parseFile(UtilInterface uif, String fileName) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
         return parseModelicaFile(uif, fileName);
@@ -283,23 +287,23 @@ aspect Parsers {
         return eqn;
     }
 
-    public SrcShortClassDecl ParserHandler.parseShortClassDecl(String code, String parentSourceFile) 
+    public SrcExtendsClauseShortClass ParserHandler.parseExtendsClauseShortClass(String code, String parentSourceFile) 
             throws ParserException, beaver.Parser.Exception, IOException {
-        return parseShortClassDecl(code, parentSourceFile, false);
+        return parseExtendsClauseShortClass(code, parentSourceFile, false);
     }
 
-    public SrcShortClassDecl ParserHandler.parseShortClassDecl(String code, String parentSourceFile, boolean preservFormatting) 
+    public SrcExtendsClauseShortClass ParserHandler.parseExtendsClauseShortClass(String code, String parentSourceFile, boolean preservFormatting) 
             throws ParserException, beaver.Parser.Exception, IOException {
         final AbstractModelicaScanner<ASTNode<?>> scanner = createModelicaScanner(new StringReader(code));
         final beaver.Parser parser = createModelicaParser(scanner, parentSourceFile);
-        final SrcShortClassDecl srcShortClassDecl = (SrcShortClassDecl) parser.parse(scanner,
-                anonymousClassModelicaGoal());
+        final SrcExtendsClauseShortClass extendsClauseShortClass = (SrcExtendsClauseShortClass) parser.parse(scanner,
+                extendsClauseShortClassGoal());
 
         if (preservFormatting) {
-            scanner.getFormattingRecorder().postParsing(srcShortClassDecl);
+            scanner.getFormattingRecorder().postParsing(extendsClauseShortClass);
         }
 
-        return srcShortClassDecl;
+        return extendsClauseShortClass;
     }
 
     public Reader ParserHandler.fileReader(UtilInterface uif, File file) throws FileNotFoundException {
