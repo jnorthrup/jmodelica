@@ -859,7 +859,7 @@ aspect InstanceTreeConstruction {
 	 * 
 	 * @return  the final version of the dynamically placed node.
 	 */
-	public FExp InstNode.dynamicFExp(FExp exp) {
+	syn FExp InstNode.dynamicFExp(FExp exp) {
 		getDynamicFExpOpt().setChild(exp, 0);
 		return (FExp) getDynamicFExpOpt().getChild(0);
 	}
@@ -873,11 +873,10 @@ aspect InstanceTreeConstruction {
      * 
      * @return  the final version of the dynamically placed node.
      */
-    public FExp InstExternal.dynamicFExp(FExp exp) {
+    syn FExp InstExternal.dynamicFExp(FExp exp) {
         getDynamicFExpOpt().setChild(exp, 0);
         return (FExp) getDynamicFExpOpt().getChild(0);
     }
-	
 	
 	/**
 	 * Dynamically places an FExp in the tree under this FExp.
@@ -887,16 +886,15 @@ aspect InstanceTreeConstruction {
 	 * 
 	 * @return  the final version of the dynamically placed node.
 	 */
-	public FExp FExp.dynamicFExp(FExp exp) {
-		if (exp == this || exp == null)
-			return exp;
-		if (exp.parent != null) {
-			int i = exp.parent.getIndexOfChild(exp);
-			if (i >= 0)
-				return (FExp) exp.parent.getChild(i);
+	syn nta FExp FExp.dynamicFExp(FExp exp) {
+		if (this == exp) {
+			try {
+				throw new Exception();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
-		getDynamicFExpOpt().setChild(exp, 0);
-		return (FExp) getDynamicFExpOpt().getChild(0);
+		return exp;
 	}
     
     public FVariable FVariable.dynamicFVariable(FVariable fv) {
