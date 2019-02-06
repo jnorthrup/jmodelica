@@ -640,6 +640,7 @@
                     <arg value="--emptyContainerSingletons" />
                     <arg value="--indent=4space" />
                     <arg value="--inhEqCheck=false" />
+                    <arg value="--tracing=cache" />
                     <arg line="${jastadd_files}" />
                 </java>
                 <!-- delete stale java files created in earlier runs -->

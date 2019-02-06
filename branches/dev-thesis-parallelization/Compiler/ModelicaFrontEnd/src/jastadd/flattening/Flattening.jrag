@@ -1599,8 +1599,11 @@ aspect Flattening {
                     FExp exp = super.retrieve(im, isEach);
                     InstNode decl = im.myInstNode();
                     InstNode ancestor = InstAssignable.this.matchingAncestor(decl);
-                    return (isEach || decl == InstAssignable.this || !exp.isArray()) ? 
-                            exp : exp.dynamicFExp(splitBindingFExp(exp, ancestor, ndims()));
+                    if (isEach || decl == InstAssignable.this || !exp.isArray()) 
+                            return exp;
+                    FExp tmp = splitBindingFExp(exp, ancestor, ndims());
+                    tmp = tmp == exp? exp : exp.dynamicFExp(tmp);
+                    return tmp;
                 }
             };
             addAttributes(f, attr, totalMergedEnvironment(), mut, false);
@@ -1774,7 +1777,8 @@ aspect Flattening {
                 } else {
                     InstNode decl = im.myInstNode();
                     decl = matchingAncestor(decl);
-                    exp = exp.dynamicFExp(splitBindingFExp(exp, decl, ndims()));
+					FExp tmp = splitBindingFExp(exp, decl, ndims());
+					exp = tmp == exp ? exp : exp.dynamicFExp(tmp);
                 }
             }
         }
@@ -1827,19 +1831,26 @@ aspect Flattening {
     eq Root.getChild().splitBindingFExp(FExp fe, InstNode node, int dims)          = fe;
     eq InstNode.getChild().splitBindingFExp(FExp fe, InstNode node, int dims)      =
         (node == this) ? fe : splitBindingFExp(fe, node, dims);
-    eq InstArrayComponentDecl.getChild().splitBindingFExp(FExp fe, InstNode node, int dims) =
-        (node == this || fe.ndims() <= dims) ? fe : 
-            fe.dynamicFExp(splitBindingFExp(fe, node, dims + 1)).splitArrayExp(getIndex());
-    eq InstShortClassDecl.getChild().splitBindingFExp(FExp fe, InstNode node, int dims) {
-        if (fe.ndims() <= dims) {
-            return fe;
+    eq InstArrayComponentDecl.getChild().splitBindingFExp(FExp fe, InstNode node, int dims) {
+        if (node == this || fe.ndims() <= dims) {
+        	return fe;
         } else {
-            FExp nfe = (node == this) ? fe : splitBindingFExp(fe, node, dims + nTypeDims());
-            for (int i = 0; i < nTypeDims(); i++) {
-                nfe = fe.dynamicFExp(nfe).splitArrayExp(size().get(i));
-            }
-            return nfe;
+			FExp tmp = splitBindingFExp(fe, node, dims + 1);
+			tmp = tmp == fe ? tmp : fe.dynamicFExp(tmp);
+			return tmp.splitArrayExp(getIndex());
         }
+    }
+    eq InstShortClassDecl.getChild().splitBindingFExp(FExp fe, InstNode node, int dims) {
+		if (fe.ndims() <= dims) {
+			return fe;
+		} else {
+			FExp nfe = (node == this) ? fe : splitBindingFExp(fe, node, dims + nTypeDims());
+			for (int i = 0; i < nTypeDims(); i++) {
+				nfe = fe == nfe ? fe : fe.dynamicFExp(nfe);
+				nfe = nfe.splitArrayExp(size().get(i));
+			}
+			return nfe;
+		}
     }
     
     /**
