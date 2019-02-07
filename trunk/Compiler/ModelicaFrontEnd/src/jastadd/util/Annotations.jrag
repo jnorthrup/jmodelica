@@ -25,7 +25,6 @@ import java.util.NoSuchElementException;
 import org.jmodelica.util.collections.ChainedIterator;
 import org.jmodelica.util.collections.FilteredIterator;
 import org.jmodelica.util.Criteria;
-import org.jmodelica.util.QualifiedName;
 
 aspect AnnotationAPI {
     /**
@@ -65,8 +64,7 @@ aspect AnnotationAPI {
     eq InstExternal.annotation(InstContext instContext)      = getSrcExternalClause().annotation(instContext);
 
     eq SrcFullClassDecl.annotation(InstContext instContext)           = annotationOfChild(getSrcAnnotationOpt(), instContext);
-    eq InstClassDecl.annotation(InstContext instContext)              = mySrcAnnotatable().annotation(instContext);
-    eq InstAbstractShortClassDecl.annotation(InstContext instContext) = mySrcAnnotatable().annotation(instContext);
+    eq InstClassDecl.annotation(InstContext instContext)              = getSrcClassDecl().annotation(instContext);
     eq SrcShortClassDecl.annotation(InstContext instContext)          = getSrcExtendsClauseShortClass().annotation(instContext);
     eq SrcLibNode.annotation(InstContext instContext)                 = myClass().annotation(instContext);
     eq SrcExtendsClauseShortClass.annotation(InstContext instContext) = getSrcComment().annotation(instContext);
@@ -74,7 +72,7 @@ aspect AnnotationAPI {
     eq SrcAbstractEquation.annotation(InstContext instContext) = getSrcComment().annotation(instContext);
 
     eq SrcComponentDecl.annotation(InstContext instContext)  = getSrcComment().annotation(instContext);
-    eq InstComponentDecl.annotation(InstContext instContext) = mySrcAnnotatable().annotation(instContext);
+    eq InstComponentDecl.annotation(InstContext instContext) = getSrcComponentDecl().annotation(instContext);
 
     eq InstExtends.annotation(InstContext instContext)      = getSrcExtendsClause().annotation(instContext);
     eq SrcExtendsClause.annotation(InstContext instContext) = annotationOfChild(getSrcAnnotationOpt(), instContext);
@@ -1920,247 +1918,5 @@ aspect AnnotationAPI {
 		return l.contains(null) ? null : l;
 	}
     
-    /** 
-     * obtaining the owning source modification or entity. Primary used to
-     * obtain the Component / ComponentModification
-     */
-    syn SrcAnnotatable InstModification.getElementModification() = getSrcModification();
-    eq InstValueModification.getElementModification() = elementModification();
-    
-    inh SrcAnnotatable InstValueModification.elementModification();
-    eq  InstModification.getChild().elementModification() = getSrcModification();
-    eq  InstComponentDecl.getChild().elementModification() = getSrcComponentDecl();
-    eq  InstClassDecl.getChild().elementModification() = getSrcClassDecl();
-    eq  InstNode.getChild().elementModification() = null;
-
-    SrcModificationOrRedeclareElement extends SrcAnnotatable;
-    SrcClassDecl implements SrcAnnotatable;
-
-    public interface SrcAnnotatable {
-        public SrcAnnotationProvider srcAnnotationProvider();
-        public AnnotationNode annotation(InstContext instContext);
-    }
-
-    public SrcAnnotationProvider SrcModification.srcAnnotationProvider() {
-        return this;
-    }
-
-    public interface SrcAnnotationProvider {
-        /**
-         * Check if there is annotations at this location.
-         */
-        public boolean hasAnnotation();
-    }
-
-    public class SrcSingeltonProvider {
-        @Override
-        public boolean hasAnnotation() {
-            return provider.hasAnnotation();
-        }
-    }
-
-    public class ExpValueProvider {
-        @Override
-        public boolean hasAnnotation() {
-            return annotationSubNodes().iterator().hasNext();
-        }
-    }
-
-    public class SrcAnnotationsIteratorProvider {
-        @Override
-        public boolean hasAnnotation() {
-            return providers.size()>0 && annotationSubNodes().iterator().hasNext();
-        }
-    }
-
-    public class SrcModification {
-        @Override
-        public boolean hasAnnotation() {
-            return annotationSubNodes().iterator().hasNext();
-        }
-    }
-
-    public abstract class RootAnnotationProviderProxy {
-    	@Override
-        public boolean hasAnnotation() {
-            return hasProvider();
-        }
-    }
-
-    @Override
-    public boolean SrcNamedArgument.hasAnnotation() {
-        return annotationSubNodes().iterator().hasNext();
-    }
-
-    @Override
-    public boolean SrcFunctionArguments.hasAnnotation() {
-        return annotationSubNodes().iterator().hasNext();
-    }
-
-    @Override
-    public boolean SrcParseAnnotation.hasAnnotation() {
-        return annotationSubNodes().iterator().hasNext();
-    }
-
-    syn boolean InstModification.isRedeclare() = false;
-    eq InstComponentRedeclare.isRedeclare()    = true;
-    eq InstClassRedeclare.isRedeclare()        = true;
-    
-
-    
-    /** 
-     * Search for the applicable annotation from the enviroment. FilteredEnviroment 
-     * is not used since it peeling which is undesireable 
-     */
-    public SrcAnnotatable InstNode.srcannotatableFromEnviroment() {
-        Environment enviroment = myEnvironment();
-        for (InstModification im : enviroment) {
-            if (im.matches(name()) && im.isRedeclare()) {
-                SrcAnnotatable annotatable = im.getElementModification();
-                SrcAnnotationProvider provider = annotatable.srcAnnotationProvider();
-                annotatable = provider.isClassRedeclare() ?
-                        provider.getSrcClassRedeclare() : annotatable;
-                annotatable = provider.isComponentRedeclare() ?
-                        provider.getSrcComponentRedeclare() : annotatable;
-                if (annotatable.srcAnnotationProvider().hasAnnotation()) {
-                    return annotatable;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Obtaines the orginal annotatable for a class or component.
-     *   
-     */
-    syn SrcAnnotatable InstClassDecl.orginalAnnotatable() = getSrcClassDecl();
-    eq InstReplacingFullClassDecl.orginalAnnotatable() = getOriginalClassDecl();
-    syn SrcAnnotatable InstComponentDecl.orginalAnnotatable() = getSrcComponentDecl();
-    eq InstReplacingComposite.orginalAnnotatable() = getOriginalDecl();
-    eq InstReplacingPrimitive.orginalAnnotatable() = getOriginalDecl();
-    
-    public SrcAnnotatable InstReplacingShortClassDecl.orginalAnnotatable() {
-    	SrcClassDecl clazz = getOriginalClassDecl();
-        if (!clazz.isUnknown()) {
-            SrcAnnotationProvider provider = clazz.srcAnnotationProvider(); 
-            if (provider.hasAnnotation()) {
-                return clazz; 
-            }
-        }
-        return getSrcClassDecl();
-    }
-    
-    public SrcAnnotatable InstReplacingSimpleShortClassDecl.orginalAnnotatable() {
-    	SrcClassDecl clazz = getOriginalClassDecl();
-        if (!clazz.isUnknown()) {
-            SrcAnnotationProvider provider = clazz.srcAnnotationProvider(); 
-            if (provider.hasAnnotation()) {
-                return clazz; 
-            }
-        }
-        return getSrcClassDecl();
-    }
-
-    /**
-     * Obtain the SrcAnnotationProvider respecting the inheritance.
-     */
-    public SrcAnnotationProvider InstClassDecl.myAnnotation() {
-        return mySrcAnnotatable().srcAnnotationProvider();
-    }
-
-    public SrcAnnotatable InstComponentDecl.mySrcAnnotatable() {
-        boolean hasAnnotations = getSrcComponentDecl().srcAnnotationProvider().hasAnnotation();
-        if (!hasAnnotations) {
-            SrcAnnotatable annotatable = srcannotatableFromEnviroment();
-            if (annotatable != null) {
-                return annotatable;
-            }
-            SrcAnnotatable orginal = orginalAnnotatable();
-            if (orginal.srcAnnotationProvider().hasAnnotation()) {
-                return orginal;
-            }
-        }
-        return getSrcComponentDecl();
-    }
-    
-    /**
-     * Obtain the source node which is responsable for providing the annotation.
-     * A match against this with the same qualifiedName and same fullyQualifiedName is made in the 
-     * Enviroment. 
-     */
-    public SrcAnnotatable InstAbstractShortClassDecl.mySrcAnnotatable() {
-        boolean hasAnnotations = getSrcClassDecl().srcAnnotationProvider().hasAnnotation();
-        if (!hasAnnotations) {
-            SrcAnnotatable annotatable = srcannotatableFromEnviroment();
-            if (annotatable != null) {
-                return annotatable;
-            }
-            return orginalAnnotatable(); 
-        }
-        return getSrcClassDecl();
-    }
-
-    /**
-     * Obtain the source node which is responsable for providing the annotation.
-     */
-    public SrcAnnotatable InstClassDecl.mySrcAnnotatable() {
-        return getSrcClassDecl();
-    }
-
-    /** 
-     * Test method which obtains the string representation of the 
-     * annotation for the inner class with the given name. 
-     * This method is only intended for testing. 
-     * A QualifiedName can be provider for lookup of the class to test. 
-     * Trigger a null pointer if not found.
-     */
-    public String InstClassDecl.testClassAnnotations(String name) {
-        InstClassDecl iclass = this;
-        Iterable<InstClassDecl> it = allInstClassDecls();
-        QualifiedName qn = new QualifiedName(name);
-        do {
-            String namePart = qn.next();
-            it = iclass.allInstClassDecls();
-            iclass = null;
-            for (InstClassDecl icd :  it) {
-                if (icd.matches(namePart)) {
-                    iclass = icd;
-                    break;
-                }
-            }
-        } while (qn.hasNext());
-        Iterator<AnnotationNode> iter = iclass.annotation().iterator();
-        return iter.hasNext() ? iter.next().toString() : "";
-    }
-
-    /**
-     *  Test method which can obtain either a inner class or inner component of a given name from a
-     *  component in the current class. 
-     *  Requires there to only be one component with a inner class or inner component with the given name.
-     *  This method is only intended for testing. 
-     */
-    public String InstClassDecl.testComponentAnnotations(boolean clazz, String name) {
-        StringBuilder sb = new StringBuilder();
-        for (InstComponentDecl icd : getInstComponentDecls()) {
-            InstNode annotable = null;
-            if (clazz) {
-                annotable = icd.genericLookupInstClass(name).targetOrNull();
-            } else {
-                for (InstComponentDecl inner : icd.allInstComponentDecls()) {
-                    if (inner.matches(name)) {
-                        annotable = inner;
-                    }
-                }
-            }
-            if (annotable != null) {
-                Iterator<AnnotationNode> iter = annotable.annotation().iterator();
-                sb.append(iter.hasNext() ? iter.next().toString() : "");
-                sb.append(System.lineSeparator());
-            }
-        }
-        return sb.toString();
-    }
-
 }
 
