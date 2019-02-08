@@ -107,5 +107,324 @@ model ComponentConstrainedByBoth
 ")})));
 end ComponentConstrainedByBoth;
 
+package inheritance
+    package classes 
+        package BaseNoAnnotation
+        end BaseNoAnnotation;
+
+        model ModelNoAnnotation
+        end ModelNoAnnotation;
+        
+        model BaseWithAnnotation
+            replaceable package testPackage = BaseNoAnnotation annotation(Dialog(tab="a", group="b"));
+            replaceable BaseNoAnnotation testComponent() annotation(Dialog(tab="ac", group="b")); 
+                annotation(__JModelica(UnitTesting(tests={
+            InstClassMethodTestCase(
+                name="instAnnotationFromRedeclare",
+                description="Check that the annotation is from the replaceable.",
+                methodName="testElementAnnotations",
+                arguments={"testComponent"},
+                methodResult="
+    Dialog(tab = \"ac\", group = \"b\")
+    ")})));
+        end BaseWithAnnotation;
+        
+        model B
+            extends BaseWithAnnotation;
+            annotation(__JModelica(UnitTesting(tests={
+            InstClassMethodTestCase(
+                name="extendedHaveAnnotation",
+                description="Check that the annotation is inherited.",
+                methodName="testElementAnnotations",
+                arguments={"testComponent"},
+                methodResult="
+    Dialog(tab = \"ac\", group = \"b\")
+    ")})));
+        end B;
+        
+        model C
+            extends BaseWithAnnotation(
+                redeclare replaceable package testPackage 
+                    = BaseNoAnnotation annotation(Dialog(tab="c", group="new")), 
+                redeclare replaceable BaseNoAnnotation testComponent() 
+                    annotation(Dialog(tab="cc", group="new")));
+                    
+            annotation(__JModelica(UnitTesting(tests={
+            InstClassMethodTestCase(
+                name="replacedInExtend",
+                description="Check that the new annotation is used.",
+                methodName="testElementAnnotations",	
+                arguments={"testComponent"},
+                methodResult="Dialog(tab = \"cc\", group = \"new\")")})));
+        end C;
+        
+        model C2
+            extends C(redeclare replaceable BaseNoAnnotation testComponent(),
+            		  redeclare replaceable package testPackage = BaseNoAnnotation);
+            annotation(__JModelica(UnitTesting(tests={
+            InstClassMethodTestCase(
+                name="extendNoRedeclare",
+                description="Check that the inherited annotation is used.",
+                methodName="testElementAnnotations",
+                arguments={"testComponent"},
+                methodResult="Dialog(tab = \"cc\", group = \"new\")")})));
+        end C2;
+        
+        model A2
+            package BaseAnnotation
+                replaceable model TestModel = ModelNoAnnotation;
+            end BaseAnnotation;
+            BaseAnnotation.TestModel testModel;
+        end A2;
+        
+        package BaseAnnotationAlt
+                replaceable model TestModel = ModelNoAnnotation annotation(Dialog(group="altPackage"));
+            end BaseAnnotationAlt;
+        
+        model AnnotationFromReplacedContainingPackage
+            extends A2(redeclare replaceable package BaseAnnotation = BaseAnnotationAlt);
+            annotation(__JModelica(UnitTesting(tests={
+            InstClassMethodTestCase(
+                name="AnnotationFromReplacedContainingPackage",
+                description="Check that the annotation from the alt class is used.",
+                methodName="testElementAnnotations",
+                arguments={"BaseAnnotation.TestModel"},
+                methodResult="Dialog(group=\"altPackage\")")})));
+        end AnnotationFromReplacedContainingPackage; 
+        
+        model C3
+            extends C(
+                        redeclare replaceable BaseNoAnnotation testComponent() annotation(),
+                        redeclare replaceable package testPackage = BaseNoAnnotation annotation()
+                     );
+            annotation(__JModelica(UnitTesting(tests={
+            InstClassMethodTestCase(
+                name="extendsEmptyReplace",
+                description="Check that the empty annotation is used.",
+                methodName="testElementAnnotations",
+                arguments={"testComponent"},
+                methodResult="")})));
+        end C3;
+        
+        model C4
+            extends C(
+                redeclare replaceable package testPackage 
+                    = BaseNoAnnotation annotation(Dialog(tab="c4", group="extends")), 
+                redeclare replaceable BaseNoAnnotation testComponent() 
+                    annotation(Dialog(tab="cc4", group="extends"))
+                    );
+            annotation(__JModelica(UnitTesting(tests={
+            InstClassMethodTestCase(
+                name="extendedReplacement",
+                description="Check that the latest annotation is used.",
+                methodName="testElementAnnotations",
+                arguments={"testComponent"},
+                methodResult="Dialog(tab = \"cc4\", group = \"extends\")")})));
+        end C4;
+            
+        model C5
+            extends C4;
+            annotation(__JModelica(UnitTesting(tests={
+            InstClassMethodTestCase(
+                name="extendExtendReplacement",
+                description="Check that the latest annotation is used.",
+                methodName="testElementAnnotations",
+                arguments={"testComponent"},
+                methodResult="Dialog(tab = \"cc4\", group = \"extends\")")})));
+        end C5;
+        
+        model D
+            extends BaseWithAnnotation(
+                redeclare replaceable BaseNoAnnotation testComponent() annotation(),
+                redeclare replaceable package testPackage = BaseNoAnnotation annotation());
+            
+            annotation(__JModelica(UnitTesting(tests={
+            InstClassMethodTestCase(
+                name="emptyExtendReplace",
+                description="Check that the latest annotation is used.",
+                methodName="testElementAnnotations",
+                arguments={"testComponent"},
+                methodResult="")})));
+        end D;
+        
+        model D2
+            extends D;
+            annotation(__JModelica(UnitTesting(tests={
+            InstClassMethodTestCase(
+                name="extendEmptyFromExtend",
+                description="Check that the latest annotation is used.",
+                methodName="testElementAnnotations",
+                arguments={"testComponent"},
+                methodResult="")})));
+        end D2;
+        
+        model E
+            extends BaseWithAnnotation(
+                redeclare replaceable package testPackage = BaseNoAnnotation, 
+                redeclare replaceable BaseNoAnnotation testComponent()
+                );
+            annotation(__JModelica(UnitTesting(tests={
+            InstClassMethodTestCase(
+                name="noneReplacingRedeclaration",
+                description="Check that the latest inherited annotation is used.",
+                methodName="testElementAnnotations",
+                arguments={"testComponent"},
+                methodResult="
+    Dialog(tab = \"ac\", group = \"b\")
+    ")})));
+        end E;
+    
+        model E2
+            extends E;
+            annotation(__JModelica(UnitTesting(tests={
+            InstClassMethodTestCase(
+                name="extendNoneReplacingRedeclaration",
+                description="Check that the latest inherited annotation is used.",
+                methodName="testElementAnnotations",
+                arguments={"testComponent"},
+                methodResult="
+    Dialog(tab = \"ac\", group = \"b\")
+    ")})));
+        end E2;
+    end classes;
+    
+    
+    package components
+        import AnnotationTests.inheritance.classes.*;
+        model redeclaredWithAnnotationInExtends
+            C redeclaredWithAnnotationInExtends;
+            annotation(__JModelica(UnitTesting(tests={
+                InstClassMethodTestCase(
+                    name="redeclaredWithAnnotationInExtends",
+                    description="Annotation from Extends for component inner component.",
+                    methodName="testElementAnnotations",
+                    arguments={"redeclaredWithAnnotationInExtends.testComponent"},
+                    methodResult="
+        Dialog(tab = \"cc\", group = \"new\")
+        ")})));  
+        end  redeclaredWithAnnotationInExtends;
+        
+        model redeclaredWithNoAnnotationInExtends
+            C2 redeclaredWithNoAnnotationInExtends;
+            annotation(__JModelica(UnitTesting(tests={
+                InstClassMethodTestCase(
+                    name="redeclaredWithNoAnnotationInExtends",
+                    description="Check that the components have correct annotation.",
+                    methodName="testElementAnnotations",
+                    arguments={"redeclaredWithNoAnnotationInExtends.testComponent"},
+                    methodResult="
+        Dialog(tab = \"cc\", group = \"new\")
+        ")})));  
+        end redeclaredWithNoAnnotationInExtends;
+        
+        model redeclaredWithEmptyAnnotationInExtends
+            C3 redeclaredWithEmptyAnnotationInExtends;
+            annotation(__JModelica(UnitTesting(tests={
+                InstClassMethodTestCase(
+                    name="redeclaredWithEmptyAnnotationInExtends",
+                    description="Check that the components have correct annotation.",
+                    methodName="testElementAnnotations",
+                    arguments={"redeclaredWithEmptyAnnotationInExtends.testComponent"},
+                    methodResult="
+
+        ")})));              
+        end redeclaredWithEmptyAnnotationInExtends;
+        
+        model redeclaredInOwnAndAncestorsExtends
+            C4 redeclaredInOwnAndAncestorsExtends;
+            annotation(__JModelica(UnitTesting(tests={
+                InstClassMethodTestCase(
+                    name="redeclaredInOwnAndAncestorsExtends",
+                    description="Check that the components have correct annotation.",
+                    methodName="testElementAnnotations",
+                    arguments={"redeclaredInOwnAndAncestorsExtends.testComponent"},
+                    methodResult="
+        Dialog(tab = \"cc4\", group = \"extends\")
+        ")})));              
+        end redeclaredInOwnAndAncestorsExtends;
+        
+        model redeclaredInParentExtends
+            C5 redeclaredInParentExtends;
+            annotation(__JModelica(UnitTesting(tests={
+                InstClassMethodTestCase(
+                    name="redeclaredInParentExtends",
+                    description="Check that the components have correct annotation.",
+                    methodName="testElementAnnotations",
+                    arguments={"redeclaredInParentExtends.testComponent"},
+                    methodResult="
+        Dialog(tab = \"cc4\", group = \"extends\")
+        ")})));  
+        end redeclaredInParentExtends;
+        
+        model redeclaredInDeclarationNoAnnotation
+            C5 redeclaredInDeclarationNoAnnotation(
+                    redeclare replaceable package testPackage = BaseNoAnnotation,
+                    redeclare replaceable BaseNoAnnotation testComponent());
+            annotation(__JModelica(UnitTesting(tests={
+                InstClassMethodTestCase(
+                    name="redeclaredInDeclarationNoAnnotation",
+                    description="Check that the components have correct annotation.",
+                    methodName="testElementAnnotations",
+                    arguments={"redeclaredInDeclarationNoAnnotation.testComponent"},
+                    methodResult="
+        Dialog(tab=\"cc4\", group=\"extends\")
+        ")})));                  
+        end redeclaredInDeclarationNoAnnotation;
+        
+        model redeclaredInDeclarationWithEmptyAnnotation
+            C5 redeclaredInDeclarationWithEmptyAnnotation(
+                    redeclare replaceable package testPackage = BaseNoAnnotation annotation(),
+                    redeclare replaceable BaseNoAnnotation testComponent() annotation());
+            annotation(__JModelica(UnitTesting(tests={
+                InstClassMethodTestCase(
+                    name="redeclaredInDeclarationWithEmptyAnnotation",
+                    description="Check that the components have correct annotation.",
+                    methodName="testElementAnnotations",
+                    arguments={"redeclaredInDeclarationWithEmptyAnnotation.testComponent"},
+                    methodResult="
+
+        ")})));            
+        end redeclaredInDeclarationWithEmptyAnnotation;
+        
+        model redeclaredInDeclaration
+            C5  redeclaredInDeclaration(
+                    redeclare replaceable package testPackage = BaseNoAnnotation
+                        annotation(Dialog(tab="redeclaredInDeclaration", group="extends")),
+                    redeclare replaceable BaseNoAnnotation testComponent()
+                        annotation(Dialog(tab="redeclaredInDeclaration", group="component"))
+                    );
+            annotation(__JModelica(UnitTesting(tests={
+                InstClassMethodTestCase(
+                    name="redeclaredInDeclaration",
+                    description="Check that the components have correct annotation.",
+                    methodName="testElementAnnotations",
+                    arguments={"redeclaredInDeclaration.testComponent"},
+                    methodResult="
+        Dialog(tab = \"redeclaredInDeclaration\", group = \"component\")
+        ")})));  
+        end redeclaredInDeclaration;
+        
+        model ComponentNotAnnotationFromClassTest
+            model ComponentAnnotTest
+                annotation(Dialog(group="alt"));
+            end ComponentAnnotTest;
+            ComponentAnnotTest testComponent;
+        end ComponentNotAnnotationFromClassTest;
+        
+       
+        
+        model componentNoAnnotationFromClass
+            ComponentNotAnnotationFromClassTest componentNoAnnotationFromClass;
+            annotation(__JModelica(UnitTesting(tests={
+                InstClassMethodTestCase(
+                    name="componentNoAnnotationFromClass",
+                    description="Annotation from Extends for component inner component.",
+                    methodName="testElementAnnotations",
+                    arguments={"componentNoAnnotationFromClass.testComponent"},
+                    methodResult="
+        ")})));  
+        end componentNoAnnotationFromClass;
+    end components;
+end inheritance;
 
 end AnnotationTests;

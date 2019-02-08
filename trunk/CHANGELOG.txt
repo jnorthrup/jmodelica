@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+# Feature ; Minor ; Compiler ; #5726
+Orginal annotations should be preserved when components are redeclared
+ unless new annotations are added in the redeclaring declaration.
 
 ; Feature ; Minor ; Compiler ; #5725
 Added splitting of generated C code for initialization of global constants (improves compilation time).
