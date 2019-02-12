@@ -123,19 +123,69 @@ aspect SimpleClassLookup {
         return cd;
     }
 
+    public abstract class Access {
+        public abstract SrcClassDecl getSrcClassDecl();
+        public abstract SrcComponentDecl getSrcComponentDecl();
+        public abstract String name();
+        public abstract String qualifiedName();
+        public abstract boolean isUnknown();
+        public String globalAccess() {
+            return "." + qualifiedName();
+        }
+        public String toString() {
+            return qualifiedName();
+        }
+    }
+
+    public class ComponentAccess extends Access {
+        private SrcComponentDecl component;
+        private String enclosingClass;
+        
+        public ComponentAccess(SrcComponentDecl component, String enclosingClass) {
+            this.component = component;
+            this.enclosingClass = enclosingClass;
+        }
+        
+        public SrcClassDecl getSrcClassDecl() {
+            throw new UnsupportedOperationException();
+        }
+        
+        public SrcComponentDecl getSrcComponentDecl() {
+            return component;
+        }
+        
+        @Override
+        public String name() {
+            return component.name();
+        }
+        
+        public String qualifiedName() {
+            if (isUnknown()) {
+                return "Unknown";
+            }
+            return enclosingClass + "." + component.name();
+        }
+        
+        @Override
+        public boolean isUnknown() {
+            return component.isUnknown();
+        }
+    }
+
     /**
     * Lookup helper method for SrcAccess and SrcClassDecl. Obtain the SrcClassDecl
     * by looking after the target class one "name" piece at a time in the correct scope.
     */
     inh SrcClassDecl SrcAccess.simpleLookupClassHelper(String name);
     inh SrcClassDecl SrcClassDecl.simpleLookupClassHelper(String name);
-    eq SrcDot.getSrcAccess(int i).simpleLookupClassHelper(String name)          = 
+    eq SrcDot.getSrcAccess(int i).simpleLookupClassHelper(String name)             =
         (i == 0) ? simpleLookupClassHelper(name) : getSrcAccess(i - 1).findClassDecl().simpleLookupClassMemberScope(name);
-    eq SrcGlobalAccess.getSrcAccess().simpleLookupClassHelper(String name)      = simpleLookupClassGlobalScope(name);
-    eq SrcImportClause.getPackageName().simpleLookupClassHelper(String name) = simpleLookupClassGlobalScope(name);
-    eq SrcExtendsClause.getChild().simpleLookupClassHelper(String name)      = simpleLookupClassFromExtends(name);
-    eq SrcFullClassDecl.getChild().simpleLookupClassHelper(String name)      = simpleLookupClassDefaultScope(name);
-    eq Program.getChild().simpleLookupClassHelper(String name)            = simpleLookupClassDefaultScope(name);
+    eq SrcGlobalAccess.getSrcAccess().simpleLookupClassHelper(String name)         = simpleLookupClassGlobalScope(name);
+    eq SrcArrayAccess.getSrcArraySubscripts().simpleLookupClassHelper(String name) = simpleLookupClassBypassDot(name);
+    eq SrcImportClause.getPackageName().simpleLookupClassHelper(String name)       = simpleLookupClassGlobalScope(name);
+    eq SrcExtendsClause.getChild().simpleLookupClassHelper(String name)            = simpleLookupClassFromExtends(name);
+    eq SrcFullClassDecl.getChild().simpleLookupClassHelper(String name)            = simpleLookupClassDefaultScope(name);
+    eq Program.getChild().simpleLookupClassHelper(String name)                     = simpleLookupClassDefaultScope(name);
 
     /**
     * Lookup helper method for SrcExtendsClause. Obtain the SrcClassDecl
@@ -270,6 +320,18 @@ aspect SimpleClassLookup {
     eq SrcLibNode.simpleLookupClassMemberScope(String name)        = 
         myClass().simpleLookupClassMemberScope(name);
 
+    inh SrcClassDecl SrcAccess.simpleLookupClassBypassDot(String name);
+    eq BaseNode.getChild(int i).simpleLookupClassBypassDot(String name) {
+        if (getChild(i) instanceof SrcClassDecl) {
+            return ((SrcClassDecl) getChild(i)).simpleLookupClassHelper(name);
+        } else if (getChild(i) instanceof SrcAccess) {
+            return ((SrcAccess) getChild(i)).simpleLookupClassHelper(name);
+        }
+        throw new UnsupportedOperationException();
+    }
+    eq SrcDot.getSrcAccess().simpleLookupClassBypassDot(String name) = simpleLookupClassHelper(name);
+
+
     /**
     * Helper method which search for the class in the imported class. 
     * Has to be a unqualified classname.
@@ -402,5 +464,155 @@ aspect SimpleClassLookup {
             }
             testLookupAllClassDecls(sb, (ASTNode) sub);
         }
+    }
+
+    /**
+     * Find the SrcComponentDecl referenced by this access, if the access references a constant.
+     */
+    syn SrcComponentDecl SrcAccess.findConstantDecl() = findConstant().getSrcComponentDecl();
+    
+    syn Access SrcAccess.findConstant() {
+        Access component = simpleLookupComponentHelper();
+        if (component.getSrcComponentDecl().isConstant()) {
+            return component;
+        }
+        return new ComponentAccess(unknownComponentDecl(), "");
+    }
+    
+    syn Access SrcAccess.simpleLookupComponentHelper();
+    syn lazy Access SrcNamedAccess.simpleLookupComponentHelper() = simpleLookupComponentHelper(getID());
+    eq SrcDot.simpleLookupComponentHelper()          = getLastAccess().simpleLookupComponentHelper();
+    eq SrcGlobalAccess.simpleLookupComponentHelper() = getLastAccess().simpleLookupComponentHelper();
+    
+    inh Access SrcAccess.simpleLookupComponentHelper(String name);
+    inh Access SrcForStmt.simpleLookupComponentHelper(String name);
+    inh Access SrcClassDecl.simpleLookupComponentHelper(String name);
+    eq Program.getChild().simpleLookupComponentHelper(String name)                     = new ComponentAccess(unknownComponentDecl(), "");
+    eq SrcGlobalAccess.getSrcAccess().simpleLookupComponentHelper(String name)         = new ComponentAccess(unknownComponentDecl(), "");
+    eq SrcFullClassDecl.getChild().simpleLookupComponentHelper(String name)            = simpleLookupComponentDefaultScope(name);
+    eq SrcForStmt.getChild().simpleLookupComponentHelper(String name)                  = simpleLookupComponentFromForStmt(name);
+    eq SrcDot.getSrcAccess(int i).simpleLookupComponentHelper(String name)             = simpleLookupComponentDot(name, i);
+    eq SrcArrayAccess.getSrcArraySubscripts().simpleLookupComponentHelper(String name) = simpleLookupComponentBypassDot(name);
+
+    syn Access SrcFullClassDecl.simpleLookupComponentDefaultScope(String name) {
+        SrcComponentDecl component = getComponentIncludeExtends(name);
+        if (!component.isUnknown()) {
+            return new ComponentAccess(component, qualifiedName());
+        }
+        Access access = simpleLookupComponentInImports(name);
+        if (!access.isUnknown()) {
+            return access;
+        }
+        if (getEncapsulated()) {
+            return new ComponentAccess(unknownComponentDecl(), "");
+        }
+        return simpleLookupComponentHelper(name);
+    }
+
+    syn Access SrcForStmt.simpleLookupComponentFromForStmt(String name) {
+        for (SrcForIndex index : getSrcForIndexs()) {
+            SrcForIndexDecl indexDecl = index.getSrcForIndexDecl();
+            if (indexDecl.name().equals(name)) {
+                return new ComponentAccess(unknownComponentDecl(), "");
+            }
+        }
+        return simpleLookupComponentHelper(name);
+    }
+
+    syn Access SrcDot.simpleLookupComponentDot(String name, int i) {
+        if (i == 0) {
+            simpleLookupComponentHelper(name);
+        }
+        SrcClassDecl classDecl = getSrcAccess(i - 1).findClassDecl();
+        return new ComponentAccess(classDecl.getComponentIncludeExtends(name), classDecl.qualifiedName());
+    }
+
+    syn Access SrcClassDecl.simpleLookupComponentInImports(String name) = new ComponentAccess(unknownComponentDecl(), "");
+    eq SrcFullClassDecl.simpleLookupComponentInImports(String name) {
+        for (SrcImportClause importClause : imports()) {
+            if (!importClause.isUnqualifiedImport()) {
+                Access access = importClause.getPackageName().simpleLookupComponentHelper();
+                if (!access.isUnknown() && access.name().equals(name)) {
+                    return access;
+                }
+            }
+        }
+        Access access = null;
+        for (SrcImportClause importClause : imports()) {
+            if (importClause.isUnqualifiedImport()) {
+                SrcClassDecl packageDecl = importClause.getPackageName().findClassDecl();
+                if (packageDecl.hasComponentIncludeExtends(name)) {
+                    if (access != null) {
+                        return new ComponentAccess(unknownComponentDecl(), "");
+                    }
+                    access = new ComponentAccess(packageDecl.getComponentIncludeExtends(name), packageDecl.qualifiedName());
+                }
+            }
+        }
+        if (access == null) {
+            access = new ComponentAccess(unknownComponentDecl(), "");
+        }
+        return access;
+    }
+
+    inh Access SrcAccess.simpleLookupComponentBypassDot(String name);
+    eq BaseNode.getChild(int i).simpleLookupComponentBypassDot(String name) {
+        if (getChild(i) instanceof SrcClassDecl) {
+            return ((SrcClassDecl) getChild(i)).simpleLookupComponentHelper(name);
+        } else if (getChild(i) instanceof SrcAccess) {
+            return ((SrcAccess) getChild(i)).simpleLookupComponentHelper(name);
+        } else if (getChild(i) instanceof SrcForStmt) {
+            return ((SrcForStmt) getChild(i)).simpleLookupComponentHelper(name);
+        }
+        throw new UnsupportedOperationException();
+    }
+    eq SrcDot.getSrcAccess().simpleLookupComponentBypassDot(String name) = simpleLookupComponentHelper(name);
+    
+    syn boolean SrcClassDecl.hasComponentIncludeExtends(String name) = !getComponentIncludeExtends(name).isUnknown();
+    syn SrcComponentDecl SrcClassDecl.getComponentIncludeExtends(String name) {
+        for (SrcComponentDecl component : components()) {
+            if (component.name().equals(name)) {
+                return component;
+            }
+        }
+        for (SrcExtendsClause extendsClause : superClasses()) {
+            SrcComponentDecl component = extendsClause.findClassDecl().getComponentIncludeExtends(name);
+            if (!component.isUnknown()) {
+                return component;
+            }
+        }
+        return unknownComponentDecl();
+    }
+
+
+    public String InstClassDecl.testFindConstant() {
+        SrcClassDecl sourceClass = getSrcClassDecl();
+        StringBuilder sb = new StringBuilder();
+        sourceClass.testFindConstant(sb);
+        return sb.toString();
+    }
+
+    public void ASTNode.testFindConstant(StringBuilder sb) {
+        for (ASTNode child : this) {
+            child.testFindConstant(sb);
+        }
+    }
+
+    public void SrcNamedAccess.testFindConstant(StringBuilder sb) {
+        SrcClassDecl classDecl = findClassDecl();
+        if (classDecl.isUnknown()) {
+            sb.append(getID());
+            sb.append("=");
+            sb.append(findConstant());
+            sb.append('\n');
+        }
+    }
+
+    public void SrcArrayAccess.testFindConstant(StringBuilder sb) {
+        super.testFindConstant(sb);
+        getSrcArraySubscripts().testFindConstant(sb);
+    }
+
+    public void SrcParseAnnotation.testFindConstant(StringBuilder sb) {
     }
 }
