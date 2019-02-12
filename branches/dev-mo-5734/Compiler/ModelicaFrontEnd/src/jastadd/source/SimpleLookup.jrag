@@ -521,7 +521,7 @@ aspect SimpleClassLookup {
 
     syn Access SrcDot.simpleLookupComponentDot(String name, int i) {
         if (i == 0) {
-            simpleLookupComponentHelper(name);
+            return simpleLookupComponentHelper(name);
         }
         SrcClassDecl classDecl = getSrcAccess(i - 1).findClassDecl();
         return new ComponentAccess(classDecl.getComponentIncludeExtends(name), classDecl.qualifiedName());
