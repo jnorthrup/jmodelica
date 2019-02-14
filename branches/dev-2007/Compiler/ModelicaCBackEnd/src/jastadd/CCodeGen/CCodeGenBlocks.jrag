@@ -506,6 +506,7 @@ aspect CCodeGenBlocks {
         genVarDecls(p, str, indent, null);
         
         p.genResidualFunctionEvalModes(this, p, str, indent, generateSparseThreshold);
+        genReinitWritebacks_C(p, indent, str);
         ASTNode.genFunctionEnd(str, indent);
         str.print(outerIndent + "}\n\n");
 	}

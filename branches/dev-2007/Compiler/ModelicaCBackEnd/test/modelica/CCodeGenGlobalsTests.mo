@@ -107,6 +107,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
         }
     }
+    if (JMI_GLOBAL(tmp_1) != _x_0) {
+        _x_0 = JMI_GLOBAL(tmp_1);
+        jmi->reinit_triggered = 1;
+    }
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -226,6 +230,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
         }
     }
+    if (JMI_GLOBAL(tmp_1) != _x_0) {
+        _x_0 = JMI_GLOBAL(tmp_1);
+        jmi->reinit_triggered = 1;
+    }
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -253,6 +261,10 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
         }
+    }
+    if (JMI_GLOBAL(tmp_2) != _y_1) {
+        _y_1 = JMI_GLOBAL(tmp_2);
+        jmi->reinit_triggered = 1;
     }
     JMI_DYNAMIC_FREE()
     return ef;
@@ -383,6 +395,14 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
         }
     }
+    if (JMI_GLOBAL(tmp_1) != _x_0) {
+        _x_0 = JMI_GLOBAL(tmp_1);
+        jmi->reinit_triggered = 1;
+    }
+    if (JMI_GLOBAL(tmp_2) != _y_1) {
+        _y_1 = JMI_GLOBAL(tmp_2);
+        jmi->reinit_triggered = 1;
+    }
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -502,6 +522,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
         }
+    }
+    if (JMI_GLOBAL(tmp_1) != _x_0) {
+        _x_0 = JMI_GLOBAL(tmp_1);
+        jmi->reinit_triggered = 1;
     }
     JMI_DYNAMIC_FREE()
     return ef;
@@ -675,6 +699,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
         }
+    }
+    if (JMI_GLOBAL(tmp_2) != _x_0) {
+        _x_0 = JMI_GLOBAL(tmp_2);
+        jmi->reinit_triggered = 1;
     }
     JMI_DYNAMIC_FREE()
     return ef;
@@ -931,6 +959,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
         }
+    }
+    if (JMI_GLOBAL(tmp_1) != _x_0) {
+        _x_0 = JMI_GLOBAL(tmp_1);
+        jmi->reinit_triggered = 1;
     }
     JMI_DYNAMIC_FREE()
     return ef;
