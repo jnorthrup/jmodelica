@@ -150,11 +150,7 @@ aspect Parsers {
     public short ParserHandler.modifierGoal() {
         return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.argument;
     }
-
-    public short ParserHandler.accessScalarGoal() {
-        return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.access_scalar;
-    }
-
+    
     public SourceRoot ParserHandler.parseFile(UtilInterface uif, String fileName) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
         return parseModelicaFile(uif, fileName);
@@ -286,25 +282,7 @@ aspect Parsers {
         }
         return eqn;
     }
-
-    public SrcAccess ParserHandler.parseAccessScalar(String code, String parentSourceFile) 
-            throws ParserException, beaver.Parser.Exception, IOException {
-        return parseAccessScalar(code, parentSourceFile, false);
-    }
-
-    public SrcAccess ParserHandler.parseAccessScalar(String code, String parentSourceFile, boolean preserveFormatting) 
-            throws ParserException, beaver.Parser.Exception, IOException {
-        final AbstractModelicaScanner<ASTNode<?>> scanner = createModelicaScanner(new StringReader(code));
-        final beaver.Parser parser = createModelicaParser(scanner, parentSourceFile);
-        final SrcAccess srcAccess = (SrcAccess) parser.parse(scanner, accessScalarGoal());
-
-        if (preserveFormatting) {
-            scanner.getFormattingRecorder().postParsing(srcAccess);
-        }
-
-        return srcAccess;
-    }
-
+    
     public Reader ParserHandler.fileReader(UtilInterface uif, File file) throws FileNotFoundException {
         return new InputStreamReader(new FileInputStream(file), ASTNode.UTF8);
     }
