@@ -25,6 +25,7 @@ import java.util.NoSuchElementException;
 import org.jmodelica.util.collections.ChainedIterator;
 import org.jmodelica.util.collections.FilteredIterator;
 import org.jmodelica.util.Criteria;
+import org.jmodelica.util.QualifiedName;
 
 aspect AnnotationAPI {
     /**
@@ -64,8 +65,7 @@ aspect AnnotationAPI {
     eq InstExternal.annotation(InstContext instContext)      = getSrcExternalClause().annotation(instContext);
 
     eq SrcFullClassDecl.annotation(InstContext instContext)           = annotationOfChild(getSrcAnnotationOpt(), instContext);
-    eq InstClassDecl.annotation(InstContext instContext)              = mySrcAnnotatable().annotation(instContext);
-    eq InstAbstractShortClassDecl.annotation(InstContext instContext) = mySrcAnnotatable().annotation(instContext);
+    eq InstClassDecl.annotation(InstContext instContext)              = getSrcClassDecl().annotation(instContext);
     eq SrcShortClassDecl.annotation(InstContext instContext)          = getSrcExtendsClauseShortClass().annotation(instContext);
     eq SrcLibNode.annotation(InstContext instContext)                 = myClass().annotation(instContext);
     eq SrcExtendsClauseShortClass.annotation(InstContext instContext) = getSrcComment().annotation(instContext);
@@ -2009,7 +2009,8 @@ aspect AnnotationAPI {
     
     /** 
      * Search for the applicable annotation from the enviroment. FilteredEnviroment 
-     * is not used since it peeling which is undesireable 
+     * is not used since it is peeling which is undesired. Retrives latest live annotation
+     * from the chain of redeclares.
      */
     public SrcAnnotatable InstNode.srcannotatableFromEnviroment() {
         Environment enviroment = myEnvironment();
@@ -2031,7 +2032,7 @@ aspect AnnotationAPI {
 
     /**
      * Obtaines the orginal annotatable for a class or component.
-     *   
+     * Gives the orginal class or component for every replacing type.  
      */
     syn SrcAnnotatable InstClassDecl.orginalAnnotatable() = getSrcClassDecl();
     eq InstReplacingFullClassDecl.orginalAnnotatable() = getOriginalClassDecl();
@@ -2047,7 +2048,6 @@ aspect AnnotationAPI {
                 return clazz; 
             }
         }
-        // Throw or raise suitable exception
         return getSrcClassDecl();
     }
     
@@ -2062,12 +2062,6 @@ aspect AnnotationAPI {
         return getSrcClassDecl();
     }
 
-    /**
-     * Obtain the SrcAnnotationProvider respecting the inheritance.
-     */
-    public SrcAnnotationProvider InstClassDecl.myAnnotation() {
-        return mySrcAnnotatable().srcAnnotationProvider();
-    }
 
     public SrcAnnotatable InstComponentDecl.mySrcAnnotatable() {
         boolean hasAnnotations = getSrcComponentDecl().srcAnnotationProvider().hasAnnotation();
@@ -2084,73 +2078,34 @@ aspect AnnotationAPI {
         return getSrcComponentDecl();
     }
     
-    /**
-     * Obtain the source node which is responsable for providing the annotation.
-     * A match against this with the same qualifiedName and same fullyQualifiedName is made in the 
-     * Enviroment. 
-     */
-    public SrcAnnotatable InstAbstractShortClassDecl.mySrcAnnotatable() {
-        boolean hasAnnotations = getSrcClassDecl().srcAnnotationProvider().hasAnnotation();
-        if (!hasAnnotations) {
-            SrcAnnotatable annotatable = srcannotatableFromEnviroment();
-            if (annotatable != null) {
-                return annotatable;
-            }
-            return orginalAnnotatable(); 
-        }
-        return getSrcClassDecl();
-    }
 
     /**
-     * Obtain the source node which is responsable for providing the annotation.
+     *  Test method which obtains the string representation of the 
+     *  annotation for the inner class or component with the given name.  
+     *  A QualifiedName can be provider for lookup of the class or component to test. 
+     *  Supports relative dot lookup of component or class to test. 
+     *  Trigger a null pointer exception if the element is not found.
+     *  
+     *  This method is only intended for testing. 
      */
-    public SrcAnnotatable InstClassDecl.mySrcAnnotatable() {
-        return getSrcClassDecl();
-    }
-
-    /** 
-     * Test method which obtains the string representation of the 
-     * annotation for the inner class with the given name. 
-     * This method is only intended for testing 
-     */
-    public String InstClassDecl.testClassAnnotations(String name) {
-        InstClassDecl iclass = null;
-        for (InstClassDecl icd :  allInstClassDecls()) {
-            if (icd.matches(name)) {
-                iclass = icd;
-                break;
-            }
-        }
-        Iterator<AnnotationNode> iter = iclass.annotation().iterator();
-        return iter.hasNext() ? iter.next().toString() : "";
-    }
-
-    /**
-     *  Test method which can obtain either a inner class or inner component of a given name from a
-     *  component in the current class. 
-     *  Requires there to only be one component with a inner class or inner component with the given name.
-     *  This method is only intended for testing 
-     */
-    public String InstClassDecl.testComponentAnnotations(boolean clazz, String name) {
-        StringBuilder sb = new StringBuilder();
-        for (InstComponentDecl icd : getInstComponentDecls()) {
-            InstNode annotable = null;
-            if (clazz) {
-                annotable = icd.genericLookupInstClass(name).targetOrNull();
-            } else {
-                for (InstComponentDecl inner : icd.allInstComponentDecls()) {
-                    if (inner.matches(name)) {
-                        annotable = inner;
-                    }
+    public String InstClassDecl.testElementAnnotations(String name) {
+    	InstNode iNode = this;
+        Iterable<? extends InstNode> it = null;
+        boolean found = false;
+        QualifiedName qn = new QualifiedName(name);
+        do {
+            String namePart = qn.next();
+            it = new ChainedIterable<> (iNode.allInstComponentDecls(), iNode.allInstClassDecls());
+            iNode = null;
+            for (InstNode icd :  it) {
+                if (icd.matches(namePart)) {
+                    iNode = icd;
+                    break;
                 }
             }
-            if (annotable != null) {
-                Iterator<AnnotationNode> iter = annotable.annotation().iterator();
-                sb.append(iter.hasNext() ? iter.next().toString() : "");
-                sb.append(System.lineSeparator());
-            }
-        }
-        return sb.toString();
+        } while (qn.hasNext());
+        Iterator<AnnotationNode> iter = iNode.annotation().iterator();
+        return iter.hasNext() ? iter.next().toString() : "";
     }
 
 }

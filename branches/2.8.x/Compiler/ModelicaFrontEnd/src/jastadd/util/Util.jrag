@@ -903,6 +903,14 @@ aspect Names {
     eq SrcFullClassDecl.getSrcExternalClause().enclosingClassDecl() = this;
 
     eq SrcShortClassDecl.getSrcExtendsClauseShortClass().enclosingClassDecl() = this;
+    
+    inh Set<SrcClassDecl> SrcClassDecl.enclosingClassDecls();
+    eq Root.getChild().enclosingClassDecls() = Collections.emptySet();
+    eq SrcClassDecl.getChild().enclosingClassDecls() {
+        Set<SrcClassDecl> enclosingClassDecls = new HashSet<>(enclosingClassDecls());
+        enclosingClassDecls.add(this);
+        return enclosingClassDecls;
+    }
 
     inh FStatement FStatement.enclosingLoop();
     eq FAlgorithm.getChild().enclosingLoop()     = null;
