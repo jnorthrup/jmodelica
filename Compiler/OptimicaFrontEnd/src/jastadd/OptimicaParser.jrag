@@ -59,6 +59,10 @@ aspect OptimicaParsers {
         return org.jmodelica.optimica.parser.ModelicaParser.AltGoals.argument;
     }
 
+    refine Parsers public short ParserHandler.accessScalarGoal() {
+        return org.jmodelica.optimica.parser.ModelicaParser.AltGoals.access_scalar;
+    }
+
     public beaver.Parser ParserHandler.createOptimicaParser(AbstractModelicaScanner<ASTNode<?>> scanner, String fileName) {
         org.jmodelica.optimica.parser.OptimicaParser parser = new org.jmodelica.optimica.parser.OptimicaParser();
         parser.setLineBreakMap(scanner.getLineBreakMap());
