@@ -681,7 +681,11 @@ aspect FunctionScalarization {
                 ind = u1;
             }
         }
-        ind = new FAddExp(ind, new FIntegerLitExp(1));
+        if (ind == null) {
+            ind = new FIntegerLitExp(1);
+        } else {
+            ind = new FAddExp(ind, new FIntegerLitExp(1));
+        }
         
         FArrayExpSubscripts fas = new FArrayExpSubscripts();
         fas.addFSubscript(new FExpSubscript(ind));
