@@ -27,7 +27,7 @@ aspect FExpToCasADi {
         public FClass compileModelNoCodeGen(String name[], String cl)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
             OptionRegistry tempOptions = options.copy();
-            TargetObject target = createTargetObject("nocodegen", null)
+            TargetObject target = createTargetObject("nocodegen", null);
             target.setDefaultOptions(options);
             try {
                 return compileModel(name, cl, target, null, null);
