@@ -13602,10 +13602,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             (*res)[1] = COND_EXP_EQ(_b_4, JMI_TRUE, _time, - _time) - (_y_1 + _z_2);
         }
     }
-    if (JMI_GLOBAL(tmp_1) != _x_0) {
-        _x_0 = JMI_GLOBAL(tmp_1);
-        jmi->reinit_triggered = 1;
-    }
     JMI_DYNAMIC_FREE()
     return ef;
 }
