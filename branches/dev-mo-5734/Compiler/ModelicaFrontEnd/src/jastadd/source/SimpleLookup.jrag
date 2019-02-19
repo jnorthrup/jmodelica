@@ -125,22 +125,43 @@ aspect SimpleClassLookup {
         return cd;
     }
 
+
+    syn Access ASTNode.unknownAccess()         = root().unknownAccess();
+    syn lazy Access SourceRoot.unknownAccess() = new UnknownAccess(unknownClassDecl(), unknownComponentDecl());
+    
+    public Access ASTNode.createAccess(SrcClassDecl decl, String context) {
+        return new ClassAccess(decl, unknownComponentDecl(), context, decl.isProtected());
+    }
+    public Access ASTNode.createAccess(SrcComponentDecl decl, String context) {
+        return new ComponentAccess(unknownClassDecl(), decl, context, decl.isProtected());
+    }
+
     public abstract class Access {
 
         private SrcClassDecl classDecl;
         private SrcComponentDecl componentDecl;
         private String context;
+        private boolean isProtected;
         
-        public Access(SrcClassDecl classDecl, SrcComponentDecl componentDecl, String context) {
+        public Access(SrcClassDecl classDecl, SrcComponentDecl componentDecl, String context, boolean isProtected) {
             this.classDecl = classDecl;
             this.componentDecl = componentDecl;
             this.context = context;
+            this.isProtected = isProtected;
         }
         
         public abstract String name();
         public abstract boolean isUnknown();
-        public abstract Access fromContext(String context);
+        public abstract Access fromContext(String context, boolean isProtected);
         public abstract Access simpleLookupMemberScope(String name);
+        
+        public boolean isClassDecl() {
+            return false;
+        }
+        
+        public boolean isComponentDecl() {
+            return false;
+        }
         
         public SrcClassDecl getClassDecl() {
             return classDecl;
@@ -148,8 +169,11 @@ aspect SimpleClassLookup {
         public SrcComponentDecl getComponentDecl() {
             return componentDecl;
         }
+        public boolean isProtected() {
+            return isProtected;
+        }
         public String qualifiedName() {
-            return (context != null ? context + "." : "") + name();
+            return context != null ? context + "." + name() : name();
         }
         public String globalAccess() {
             return "." + qualifiedName();
@@ -162,7 +186,7 @@ aspect SimpleClassLookup {
     public class UnknownAccess extends Access {
         
         public UnknownAccess(SrcClassDecl classDecl, SrcComponentDecl componentDecl) {
-            super(classDecl, componentDecl, null);
+            super(classDecl, componentDecl, null, false);
         }
 
         @Override
@@ -174,7 +198,7 @@ aspect SimpleClassLookup {
             return true;
         }
         @Override
-        public Access fromContext(String context) {
+        public Access fromContext(String context, boolean isProtected) {
             return this;
         }
         @Override
@@ -183,20 +207,10 @@ aspect SimpleClassLookup {
         }
     }
 
-    syn Access ASTNode.unknownAccess()         = root().unknownAccess();
-    syn lazy Access SourceRoot.unknownAccess() = new UnknownAccess(unknownClassDecl(), unknownComponentDecl());
-    
-    public Access ASTNode.createAccess(SrcClassDecl classDecl, String context) {
-        return new ClassAccess(classDecl, unknownComponentDecl(), context);
-    }
-    public Access ASTNode.createAccess(SrcComponentDecl componentDecl, String context) {
-        return new ComponentAccess(unknownClassDecl(), componentDecl, context);
-    }
-
     public class ClassAccess extends Access {
         
-        public ClassAccess(SrcClassDecl classDecl, SrcComponentDecl componentDecl, String context) {
-            super(classDecl, componentDecl, context);
+        public ClassAccess(SrcClassDecl classDecl, SrcComponentDecl componentDecl, String context, boolean isProtected) {
+            super(classDecl, componentDecl, context, isProtected);
         }
         
         @Override
@@ -210,20 +224,25 @@ aspect SimpleClassLookup {
         }
         
         @Override
-        public Access fromContext(String context) {
-            return new ClassAccess(getClassDecl(), getComponentDecl(), context);
+        public Access fromContext(String context, boolean isProtected) {
+            return new ClassAccess(getClassDecl(), getComponentDecl(), context, isProtected || isProtected());
         }
         
         @Override
         public Access simpleLookupMemberScope(String name) {
             return getClassDecl().simpleLookupMemberScope(name);
         }
+        
+        @Override
+        public boolean isClassDecl() {
+            return true;
+        }
     }
 
     public class ComponentAccess extends Access {
         
-        public ComponentAccess(SrcClassDecl classDecl, SrcComponentDecl componentDecl, String context) {
-            super(classDecl, componentDecl, context);
+        public ComponentAccess(SrcClassDecl classDecl, SrcComponentDecl componentDecl, String context, boolean isProtected) {
+            super(classDecl, componentDecl, context, isProtected);
         }
         
         @Override
@@ -237,13 +256,18 @@ aspect SimpleClassLookup {
         }
 
         @Override
-        public Access fromContext(String context) {
-            return new ComponentAccess(getClassDecl(), getComponentDecl(), context);
+        public Access fromContext(String context, boolean isProtected) {
+            return new ComponentAccess(getClassDecl(), getComponentDecl(), context, isProtected || isProtected());
         }
 
         @Override
         public Access simpleLookupMemberScope(String name) {
             return getComponentDecl().findClassDecl().simpleLookupMemberScope(name);
+        }
+        
+        @Override
+        public boolean isComponentDecl() {
+            return true;
         }
     }
 
@@ -434,7 +458,7 @@ aspect SimpleClassLookup {
             return simpleLookupHelper(name);
         }
         Access access = getSrcAccess(i - 1).resolveAccess();
-        return access.simpleLookupMemberScope(name).fromContext((access.qualifiedName()));
+        return access.simpleLookupMemberScope(name).fromContext(access.qualifiedName(), access.isProtected());
     }
 
     inh Access SrcAccess.simpleLookupBypassDot(String name);
@@ -476,10 +500,10 @@ aspect SimpleClassLookup {
      */
     protected Access SrcFullClassDecl.simpleLookupInExtends(String name) {
         Access res;
-        for (SrcExtendsClause sup : superClasses()) {
-            res = sup.findClassDecl().simpleLookupMemberScope(name);
+        for (SrcExtendsClause superClass : superClasses()) {
+            res = superClass.findClassDecl().simpleLookupMemberScope(name);
             if (!res.isUnknown()) {
-                return res.fromContext(qualifiedName());
+                return res.fromContext(qualifiedName(), superClass.isProtected());
             }
         }
         
