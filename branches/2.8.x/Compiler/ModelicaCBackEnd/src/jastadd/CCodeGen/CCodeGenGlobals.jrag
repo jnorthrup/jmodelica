@@ -181,7 +181,9 @@ aspect CCodeGenGlobalsReinit {
      * Generates code that writes back the reinit values to the state. There is
      * no if guard here, that is controlled from the actual reinit statement.
      */
-    public void AbstractEquationBlock.genReinitWritebacks_C(CodePrinter p, String indent, CodeStream str) {
+    public void AbstractEquationBlock.genReinitWritebacks_C(CodePrinter p, String indent, CodeStream str) {}
+    
+    public void SimpleEquationBlock.genReinitWritebacks_C(CodePrinter p, String indent, CodeStream str) {
         Map<String, ArrayList<FReinit>> map = new LinkedHashMap<>();
         for (FReinit r : collectReinits_C(p)) {
             String key = r.getVar().toString();
