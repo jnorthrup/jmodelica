@@ -2104,6 +2104,7 @@ aspect AnnotationAPI {
     syn SrcAnnotatable InstComponentDecl.orginalAnnotatable() = getSrcComponentDecl();
     eq InstReplacingComposite.orginalAnnotatable() = getOriginalDecl();
     eq InstReplacingPrimitive.orginalAnnotatable() = getOriginalDecl();
+    eq InstReplacingRecord.orginalAnnotatable()    = getOriginalDecl();
     
     public SrcAnnotatable InstReplacingShortClassDecl.orginalAnnotatable() {
     	SrcClassDecl clazz = getOriginalClassDecl();
