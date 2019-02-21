@@ -286,7 +286,8 @@ aspect AnnotationAPI {
             if (annotationExpMap.containsKey(exp)) {
                 return list.getChild(annotationExpMap.get(exp));
             } else {
-                throw new IllegalArgumentException();
+                return dynamicFExp(exp.instantiate());
+//                throw new IllegalArgumentException();
             }
         }
     }
@@ -2101,7 +2102,6 @@ aspect AnnotationAPI {
     syn SrcAnnotatable InstComponentDecl.orginalAnnotatable() = getSrcComponentDecl();
     eq InstReplacingComposite.orginalAnnotatable() = getOriginalDecl();
     eq InstReplacingPrimitive.orginalAnnotatable() = getOriginalDecl();
-    eq InstReplacingRecord.orginalAnnotatable()    = getOriginalDecl();
     
     public SrcAnnotatable InstReplacingShortClassDecl.orginalAnnotatable() {
     	SrcClassDecl clazz = getOriginalClassDecl();
