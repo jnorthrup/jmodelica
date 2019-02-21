@@ -327,8 +327,9 @@ aspect AnnotationAPI {
                 return fChild;
             }
         }
-        throw new IllegalArgumentException("Could not find equivalent sub-expression to '" + 
-                exp + "' in '" + this + "'.");
+        return dynamicFExp(exp.instantiate());
+//        throw new IllegalArgumentException("Could not find equivalent sub-expression to '" + 
+//                exp + "' in '" + this + "'.");
     }
 
     public FExp FAbstractFunctionCall.equivalentChildFExp(SrcExp exp) {
@@ -346,8 +347,9 @@ aspect AnnotationAPI {
         if (i < res.size()) {
             return res.get(i);
         }
-        throw new IllegalArgumentException("Could not find equivalent sub-expression to '" + 
-                exp + "' in '" + this + "'.");
+        return dynamicFExp(exp.instantiate());
+//        throw new IllegalArgumentException("Could not find equivalent sub-expression to '" + 
+//                exp + "' in '" + this + "'.");
     }
 
     syn List<InstFunctionArgument> FAbstractFunctionCall.myInstFunctionArguments() {
@@ -2102,6 +2104,7 @@ aspect AnnotationAPI {
     syn SrcAnnotatable InstComponentDecl.orginalAnnotatable() = getSrcComponentDecl();
     eq InstReplacingComposite.orginalAnnotatable() = getOriginalDecl();
     eq InstReplacingPrimitive.orginalAnnotatable() = getOriginalDecl();
+    eq InstReplacingRecord.orginalAnnotatable()    = getOriginalDecl();
     
     public SrcAnnotatable InstReplacingShortClassDecl.orginalAnnotatable() {
     	SrcClassDecl clazz = getOriginalClassDecl();
