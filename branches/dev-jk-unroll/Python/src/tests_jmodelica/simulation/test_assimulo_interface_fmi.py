@@ -647,7 +647,7 @@ class Test_DynamicStates:
 
         compile_fmu("StrippedRevoluteConstraint", file_name)
         
-    @testattr(stddist_full = True)
+    @testattr(stddist_disabled = True)
     def test_no_switch_of_states(self):
         model = load_fmu("StrippedRevoluteConstraint.fmu")
         
