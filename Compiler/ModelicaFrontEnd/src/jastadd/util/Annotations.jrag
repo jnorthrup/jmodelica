@@ -72,7 +72,13 @@ aspect AnnotationAPI {
 
     eq SrcAbstractEquation.annotation(InstContext instContext) = getSrcComment().annotation(instContext);
 
-    eq SrcComponentDecl.annotation(InstContext instContext)  = getSrcComment().annotation(instContext);
+    eq SrcComponentDecl.annotation(InstContext instContext) {
+        SrcComment comment = myComponentClause().getSrcComment();
+        if (comment.hasSrcAnnotation()) {
+            return new CombinedAnnotationNode(comment.annotation(instContext), getSrcComment().annotation(instContext));
+        }
+        return getSrcComment().annotation(instContext);
+    }
     eq InstComponentDecl.annotation(InstContext instContext) = mySrcAnnotatable().annotation(instContext);
 
     eq InstExtends.annotation(InstContext instContext)      = getSrcExtendsClause().annotation(instContext);
@@ -233,7 +239,7 @@ aspect AnnotationAPI {
     syn ArrayList<SrcExp> InstNode.annotationExps() {
         ArrayList<SrcExp> exps = new ArrayList<>();
         for (AnnotationNode annotation : annotations()) {
-            annotation.ast().collectExps(exps);
+            annotation.collectExps(exps);
         }
         return exps;
     }
@@ -1004,6 +1010,13 @@ aspect AnnotationAPI {
         }
 
         /**
+         * Collects expressions in this annotation for instantiation and evaluation.
+         */
+        public void collectExps(ArrayList<SrcExp> exps) {
+            ast().collectExps(exps);
+        }
+
+        /**
          * Iterates over the annotation nodes representing the nodes in the list.
          */
         protected static class AnnotationIterator implements Iterator<AnnotationNode> {
@@ -1220,6 +1233,10 @@ aspect AnnotationAPI {
      * support lookup of sub nodes.
      */
     public abstract class RootAnnotationNode extends AnnotationNode {
+        
+        @Override
+        public void collectExps(ArrayList<SrcExp> exps) {
+        }
     }
 
     /**
@@ -1856,6 +1873,51 @@ aspect AnnotationAPI {
             return new FAttributeAnnotationNode(attr, instContext);
         }
     }
+
+    public class CombinedAnnotationNode extends AnnotationNode {
+        
+        private final AnnotationNode first;
+        private final AnnotationNode second;
+        
+        public CombinedAnnotationNode(AnnotationNode first, AnnotationNode second) {
+            this.first  = first;
+            this.second = second;
+        }
+        
+        @Override
+        protected ASTNode ast() {
+            return first.ast();
+        }
+
+        @Override
+        public Iterator<AnnotationNode> attributeIterator() {
+            return new ChainedIterator<AnnotationNode>(first.attributeIterator(), second.attributeIterator());
+        }
+
+        @Override
+        protected AnnotationNode lookup(String path) {
+            AnnotationNode first  = this.first.lookup(path);
+            AnnotationNode second = this.second.lookup(path);
+            if (first != null && first.exists()) {
+                if (second != null && second.exists()) {
+                    return new CombinedAnnotationNode(first, second);
+                }
+                return first;
+            }
+            return second;
+        }
+
+        @Override
+        public AnnotationNode addNode(String path) {
+            return first.addNode(path);
+        }
+        
+        @Override
+        public void collectExps(ArrayList<SrcExp> exps) {
+            first.collectExps(exps);
+            second.collectExps(exps);
+        }
+    }
     
 	/**
 	 * A runtime exception that is thrown when an action fail while trying
@@ -2042,6 +2104,7 @@ aspect AnnotationAPI {
     syn SrcAnnotatable InstComponentDecl.orginalAnnotatable() = getSrcComponentDecl();
     eq InstReplacingComposite.orginalAnnotatable() = getOriginalDecl();
     eq InstReplacingPrimitive.orginalAnnotatable() = getOriginalDecl();
+    eq InstReplacingRecord.orginalAnnotatable()    = getOriginalDecl();
     
     public SrcAnnotatable InstReplacingShortClassDecl.orginalAnnotatable() {
     	SrcClassDecl clazz = getOriginalClassDecl();
