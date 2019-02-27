@@ -595,10 +595,15 @@ aspect IndexReduction {
         }
 
         @Override
-        protected void addEquation(FAbstractEquation eqn, TypePrefixVariability variability) {
+        protected void addEquation(FAbstractEquation eqn) {
             eqn.flushAllRecursiveClearFinal();
             dynamicEquation(eqn);
             newEquations.add(eqn);
+        }
+
+        @Override
+        public void inline(List<FAbstractEquation> oldEquationList, Collection<FAbstractEquation> newEquationList) {
+            throw new UnsupportedOperationException();
         }
 
         @Override

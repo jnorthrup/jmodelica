@@ -1060,7 +1060,7 @@ fclass IndexReduction.IndexReduction52
  Real b;
  Real _der_x;
  Real _der_y;
- Real _der_dx;
+ Real _der_dy;
  Real _der_a;
  Real _der_der_x;
  Real _der_der_y;
@@ -1072,29 +1072,29 @@ fclass IndexReduction.IndexReduction52
  Real _der_temp_4;
  Real _der_der_temp_4;
 initial equation
- dy = 0.0;
+ dx = 0.0;
  b = 0.0;
 equation
  sin(_der_x) = dx;
  cos(_der_y) = dy;
- _der_dx = v * x;
- der(dy) = v * y;
+ der(dx) = v * x;
+ _der_dy = v * y;
  a * b = 1;
- a = temp_1 * temp_4 + 42;
- b = temp_1 * temp_4 + y;
  temp_1 = x + 3.14;
  temp_4 = time;
+ a = temp_1 * temp_4 + 42;
+ b = temp_1 * temp_4 + y;
  a * der(b) + _der_a * b = 0;
- _der_a = temp_1 * _der_temp_4 + _der_temp_1 * temp_4;
- der(b) = temp_1 * _der_temp_4 + _der_temp_1 * temp_4 + _der_y;
  _der_temp_1 = _der_x;
  _der_temp_4 = 1.0;
- cos(_der_x) * _der_der_x = _der_dx;
- - sin(_der_y) * _der_der_y = der(dy);
+ _der_a = temp_1 * _der_temp_4 + _der_temp_1 * temp_4;
+ der(b) = temp_1 * _der_temp_4 + _der_temp_1 * temp_4 + _der_y;
+ cos(_der_x) * _der_der_x = der(dx);
+ - sin(_der_y) * _der_der_y = _der_dy;
  a * _der_der_b + _der_a * der(b) + (_der_a * der(b) + _der_der_a * b) = 0;
+ _der_der_temp_4 = 0.0;
  _der_der_a = temp_1 * _der_der_temp_4 + _der_temp_1 * _der_temp_4 + (_der_temp_1 * _der_temp_4 + _der_der_x * temp_4);
  _der_der_b = temp_1 * _der_der_temp_4 + _der_temp_1 * _der_temp_4 + (_der_temp_1 * _der_temp_4 + _der_der_x * temp_4) + _der_der_y;
- _der_der_temp_4 = 0.0;
 end IndexReduction.IndexReduction52;
 ")})));
 end IndexReduction52;
@@ -1461,6 +1461,8 @@ initial equation
 equation
  _der_x1[1] + _der_x2[1] = 2;
  _der_x1[2] + _der_x2[2] = 3;
+ temp_8 = x2[1];
+ temp_9 = x2[2];
  temp_6 = A[1,1] * temp_8 + A[1,2] * temp_9;
  temp_7 = A[2,1] * temp_8 + A[2,2] * temp_9;
  - x1[1] = temp_6;
@@ -1469,8 +1471,6 @@ equation
  der(temp_7) = A[2,1] * _der_x2[1] + A[2,2] * _der_x2[2];
  - _der_x1[1] = der(temp_6);
  - _der_x1[2] = der(temp_7);
- temp_8 = x2[1];
- temp_9 = x2[2];
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
@@ -4109,15 +4109,14 @@ fclass IndexReduction.FunctionInlining.Test5
  parameter Real p = 2 /* 2 */;
  Real _der_x;
  Real _der_b;
- parameter Real temp_2;
-initial equation 
+ Real temp_2;
+initial equation
  y = 0.0;
-parameter equation
- temp_2 = if p > 0 then p else 0;
 equation
  _der_x = der(y) * 2;
  x ^ 2 + y ^ 2 = IndexReduction.FunctionInlining.Test5.F(b, if p > 0 then p else 0);
  b = time;
+ temp_2 = if p > 0 then p else 0;
  2 * x * _der_x + 2 * y * der(y) = IndexReduction.FunctionInlining.Test5.F(_der_b, temp_2);
  _der_b = 1.0;
 
@@ -4471,25 +4470,26 @@ fclass IndexReduction.FunctionInlining.Test9
  Real _der_x;
  Real _der_vx;
  Real _der_der_y;
- parameter Real temp_1;
+ Real temp_1;
  Real temp_2;
- parameter Real temp_5;
+ Real _der_temp_1;
+ Real temp_5;
 initial equation
  y = 0.0;
  vy = 0.0;
-parameter equation
- temp_1 = p[1];
- temp_5 = temp_1;
 equation
  _der_x = vx;
  der(y) = vy;
  _der_vx = a * x;
  der(vy) = a * y;
  x + y = IndexReduction.FunctionInlining.Test9.F({p[1]}, time);
+ temp_1 = p[1];
  temp_2 = time;
  _der_x + der(y) = IndexReduction.FunctionInlining.Test9.F({temp_1}, temp_1 + temp_2 * temp_1);
  _der_der_y = der(vy);
- _der_vx + _der_der_y = IndexReduction.FunctionInlining.Test9.F({temp_5}, temp_1 * temp_5 + (temp_1 + temp_2 * temp_1) * temp_5);
+ _der_temp_1 = 0.0;
+ temp_5 = temp_1;
+  _der_vx + _der_der_y = IndexReduction.FunctionInlining.Test9.F({temp_5}, (_der_temp_1 + (temp_2 * _der_temp_1 + temp_1)) * temp_5 + (temp_1 + temp_2 * temp_1) * temp_5);
 
 public
  function IndexReduction.FunctionInlining.Test9.F

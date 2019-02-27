@@ -218,10 +218,10 @@ fclass NonFixedParameterPropagation.FunctionCall2
 initial equation 
  p1[1] = time;
  p1[2] = time * 2;
- p2[1] = temp_6 + temp_7;
- p2[2] = temp_6 * temp_7;
  temp_6 = p1[1];
  temp_7 = p1[2];
+ p2[1] = temp_6 + temp_7;
+ p2[2] = temp_6 * temp_7;
 end NonFixedParameterPropagation.FunctionCall2;
 ")})));
     end FunctionCall2;

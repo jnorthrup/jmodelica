@@ -15332,10 +15332,7 @@ $C_ode_time_events$
 $C_ode_derivatives$
 ",
             generatedCode="
-
     jmi_real_t nSamp;
-
-
 
 
 int model_ode_derivatives_base(jmi_t* jmi) {
@@ -15343,13 +15340,13 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
     _b_1 = cos(_time);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch(jmi, _b_1 - (AD_WRAP_LITERAL(0.0)), _sw(1), JMI_REL_GT);
-    }
-    _a_0 = COND_EXP_EQ(_sw(1), JMI_TRUE, _b_1, - _b_1);
-    if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, _b_1 - (AD_WRAP_LITERAL(0.0)), _sw(0), JMI_REL_GT);
     }
-    _c_2 = COND_EXP_EQ(_sw(0), JMI_TRUE, _b_1, - _b_1);
+    _a_0 = COND_EXP_EQ(_sw(0), JMI_TRUE, _b_1, - _b_1);
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch(jmi, _b_1 - (AD_WRAP_LITERAL(0.0)), _sw(1), JMI_REL_GT);
+    }
+    _c_2 = COND_EXP_EQ(_sw(1), JMI_TRUE, _b_1, - _b_1);
     JMI_DYNAMIC_FREE()
     return ef;
 }
