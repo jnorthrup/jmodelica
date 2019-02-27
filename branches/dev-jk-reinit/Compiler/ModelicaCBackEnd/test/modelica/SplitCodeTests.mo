@@ -81,12 +81,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if (LOG_EXP_AND(_temp_1_102, LOG_EXP_NOT(pre_temp_1_102))) {
             JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
             jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(1);
-            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                JMI_GLOBAL(tmp_3) = JMI_CACHED(tmp_1, func_SplitCodeTests_BlockSetupSplit1_f_exp0(tmp_2));
-                if (JMI_GLOBAL(tmp_3) != _x_0) {
-                    _x_0 = JMI_GLOBAL(tmp_3);
-                    jmi->reinit_triggered = 1;
-                }
+            JMI_GLOBAL(tmp_3) = JMI_CACHED(tmp_1, func_SplitCodeTests_BlockSetupSplit1_f_exp0(tmp_2));
+            if (JMI_GLOBAL(tmp_3) != _x_0) {
+                _x_0 = JMI_GLOBAL(tmp_3);
+                jmi->reinit_triggered = 1;
             }
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
@@ -122,12 +120,10 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if (LOG_EXP_AND(_temp_2_103, LOG_EXP_NOT(pre_temp_2_103))) {
             JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_5, 1, 1, 1)
             jmi_array_ref_1(tmp_5, 1) = AD_WRAP_LITERAL(2);
-            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                JMI_GLOBAL(tmp_6) = JMI_CACHED(tmp_4, func_SplitCodeTests_BlockSetupSplit1_f_exp0(tmp_5));
-                if (JMI_GLOBAL(tmp_6) != _y_1) {
-                    _y_1 = JMI_GLOBAL(tmp_6);
-                    jmi->reinit_triggered = 1;
-                }
+            JMI_GLOBAL(tmp_6) = JMI_CACHED(tmp_4, func_SplitCodeTests_BlockSetupSplit1_f_exp0(tmp_5));
+            if (JMI_GLOBAL(tmp_6) != _y_1) {
+                _y_1 = JMI_GLOBAL(tmp_6);
+                jmi->reinit_triggered = 1;
             }
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
@@ -207,12 +203,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if (LOG_EXP_AND(_temp_1_102, LOG_EXP_NOT(pre_temp_1_102))) {
             JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
             jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(1);
-            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                JMI_GLOBAL(tmp_3) = JMI_CACHED(tmp_1, func_SplitCodeTests_BlockSetupSplit2_f_exp0(tmp_2));
-                if (JMI_GLOBAL(tmp_3) != _x_0) {
-                    _x_0 = JMI_GLOBAL(tmp_3);
-                    jmi->reinit_triggered = 1;
-                }
+            JMI_GLOBAL(tmp_3) = JMI_CACHED(tmp_1, func_SplitCodeTests_BlockSetupSplit2_f_exp0(tmp_2));
+            if (JMI_GLOBAL(tmp_3) != _x_0) {
+                _x_0 = JMI_GLOBAL(tmp_3);
+                jmi->reinit_triggered = 1;
             }
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
@@ -248,12 +242,10 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if (LOG_EXP_AND(_temp_2_103, LOG_EXP_NOT(pre_temp_2_103))) {
             JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_5, 1, 1, 1)
             jmi_array_ref_1(tmp_5, 1) = AD_WRAP_LITERAL(2);
-            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                JMI_GLOBAL(tmp_6) = JMI_CACHED(tmp_4, func_SplitCodeTests_BlockSetupSplit2_f_exp0(tmp_5));
-                if (JMI_GLOBAL(tmp_6) != _y_1) {
-                    _y_1 = JMI_GLOBAL(tmp_6);
-                    jmi->reinit_triggered = 1;
-                }
+            JMI_GLOBAL(tmp_6) = JMI_CACHED(tmp_4, func_SplitCodeTests_BlockSetupSplit2_f_exp0(tmp_5));
+            if (JMI_GLOBAL(tmp_6) != _y_1) {
+                _y_1 = JMI_GLOBAL(tmp_6);
+                jmi->reinit_triggered = 1;
             }
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {

@@ -13594,12 +13594,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _temp_1_5 = LOG_EXP_AND(_b_4, LOG_EXP_NOT(pre_b_4));
         }
         if (LOG_EXP_AND(_temp_1_5, LOG_EXP_NOT(pre_temp_1_5))) {
-            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                JMI_GLOBAL(tmp_1) = AD_WRAP_LITERAL(1);
-                if (JMI_GLOBAL(tmp_1) != _x_0) {
-                    _x_0 = JMI_GLOBAL(tmp_1);
-                    jmi->reinit_triggered = 1;
-                }
+            JMI_GLOBAL(tmp_1) = AD_WRAP_LITERAL(1);
+            if (JMI_GLOBAL(tmp_1) != _x_0) {
+                _x_0 = JMI_GLOBAL(tmp_1);
+                jmi->reinit_triggered = 1;
             }
         }
         _zz_3 = - _y_1 + 0.1;

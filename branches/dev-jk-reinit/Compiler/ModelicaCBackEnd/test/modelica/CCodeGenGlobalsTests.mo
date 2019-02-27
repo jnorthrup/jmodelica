@@ -98,12 +98,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _temp_1_1 = _sw(0);
         }
         if (LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1))) {
-            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                JMI_GLOBAL(tmp_1) = AD_WRAP_LITERAL(1);
-                if (JMI_GLOBAL(tmp_1) != _x_0) {
-                    _x_0 = JMI_GLOBAL(tmp_1);
-                    jmi->reinit_triggered = 1;
-                }
+            JMI_GLOBAL(tmp_1) = AD_WRAP_LITERAL(1);
+            if (JMI_GLOBAL(tmp_1) != _x_0) {
+                _x_0 = JMI_GLOBAL(tmp_1);
+                jmi->reinit_triggered = 1;
             }
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
@@ -215,12 +213,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _temp_1_2 = _sw(0);
         }
         if (LOG_EXP_AND(_temp_1_2, LOG_EXP_NOT(pre_temp_1_2))) {
-            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                JMI_GLOBAL(tmp_1) = AD_WRAP_LITERAL(1);
-                if (JMI_GLOBAL(tmp_1) != _x_0) {
-                    _x_0 = JMI_GLOBAL(tmp_1);
-                    jmi->reinit_triggered = 1;
-                }
+            JMI_GLOBAL(tmp_1) = AD_WRAP_LITERAL(1);
+            if (JMI_GLOBAL(tmp_1) != _x_0) {
+                _x_0 = JMI_GLOBAL(tmp_1);
+                jmi->reinit_triggered = 1;
             }
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
@@ -249,12 +245,10 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _temp_2_3 = _sw(1);
         }
         if (LOG_EXP_AND(_temp_2_3, LOG_EXP_NOT(pre_temp_2_3))) {
-            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                JMI_GLOBAL(tmp_2) = AD_WRAP_LITERAL(1);
-                if (JMI_GLOBAL(tmp_2) != _y_1) {
-                    _y_1 = JMI_GLOBAL(tmp_2);
-                    jmi->reinit_triggered = 1;
-                }
+            JMI_GLOBAL(tmp_2) = AD_WRAP_LITERAL(1);
+            if (JMI_GLOBAL(tmp_2) != _y_1) {
+                _y_1 = JMI_GLOBAL(tmp_2);
+                jmi->reinit_triggered = 1;
             }
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
@@ -372,21 +366,17 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _temp_1_2 = _sw(0);
         }
         if (LOG_EXP_AND(_temp_1_2, LOG_EXP_NOT(pre_temp_1_2))) {
-            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                JMI_GLOBAL(tmp_1) = AD_WRAP_LITERAL(1);
-                if (JMI_GLOBAL(tmp_1) != _x_0) {
-                    _x_0 = JMI_GLOBAL(tmp_1);
-                    jmi->reinit_triggered = 1;
-                }
+            JMI_GLOBAL(tmp_1) = AD_WRAP_LITERAL(1);
+            if (JMI_GLOBAL(tmp_1) != _x_0) {
+                _x_0 = JMI_GLOBAL(tmp_1);
+                jmi->reinit_triggered = 1;
             }
         } else {
             if (LOG_EXP_AND(_temp_2_3, LOG_EXP_NOT(pre_temp_2_3))) {
-                if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                    JMI_GLOBAL(tmp_2) = AD_WRAP_LITERAL(1);
-                    if (JMI_GLOBAL(tmp_2) != _y_1) {
-                        _y_1 = JMI_GLOBAL(tmp_2);
-                        jmi->reinit_triggered = 1;
-                    }
+                JMI_GLOBAL(tmp_2) = AD_WRAP_LITERAL(1);
+                if (JMI_GLOBAL(tmp_2) != _y_1) {
+                    _y_1 = JMI_GLOBAL(tmp_2);
+                    jmi->reinit_triggered = 1;
                 }
             }
         }
@@ -504,12 +494,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if (LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1))) {
             JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_4, 1, 1, 1)
             jmi_array_ref_1(tmp_4, 1) = AD_WRAP_LITERAL(1);
-            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                JMI_GLOBAL(tmp_1) = JMI_CACHED(tmp_2, func_CCodeGenGlobalsTests_Reinit_ReinitCTest4_f_exp0(tmp_4));
-                if (JMI_GLOBAL(tmp_1) != _x_0) {
-                    _x_0 = JMI_GLOBAL(tmp_1);
-                    jmi->reinit_triggered = 1;
-                }
+            JMI_GLOBAL(tmp_1) = JMI_CACHED(tmp_2, func_CCodeGenGlobalsTests_Reinit_ReinitCTest4_f_exp0(tmp_4));
+            if (JMI_GLOBAL(tmp_1) != _x_0) {
+                _x_0 = JMI_GLOBAL(tmp_1);
+                jmi->reinit_triggered = 1;
             }
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
@@ -679,12 +667,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _temp_1_1 = _sw(0);
         }
         if (LOG_EXP_OR(_atInitial, LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1)))) {
-            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                JMI_GLOBAL(tmp_2) = AD_WRAP_LITERAL(1);
-                if (JMI_GLOBAL(tmp_2) != _x_0) {
-                    _x_0 = JMI_GLOBAL(tmp_2);
-                    jmi->reinit_triggered = 1;
-                }
+            JMI_GLOBAL(tmp_2) = AD_WRAP_LITERAL(1);
+            if (JMI_GLOBAL(tmp_2) != _x_0) {
+                _x_0 = JMI_GLOBAL(tmp_2);
+                jmi->reinit_triggered = 1;
             }
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
@@ -772,21 +758,17 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _temp_1_1 = _sw(0);
         }
         if (LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1))) {
-            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                JMI_GLOBAL(tmp_1) = 0.8;
-                if (JMI_GLOBAL(tmp_1) != _x_0) {
-                    _x_0 = JMI_GLOBAL(tmp_1);
-                    jmi->reinit_triggered = 1;
-                }
+            JMI_GLOBAL(tmp_1) = 0.8;
+            if (JMI_GLOBAL(tmp_1) != _x_0) {
+                _x_0 = JMI_GLOBAL(tmp_1);
+                jmi->reinit_triggered = 1;
             }
         } else {
             if (LOG_EXP_AND(_temp_2_2, LOG_EXP_NOT(pre_temp_2_2))) {
-                if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                    JMI_GLOBAL(tmp_2) = 0.4;
-                    if (JMI_GLOBAL(tmp_2) != _x_0) {
-                        _x_0 = JMI_GLOBAL(tmp_2);
-                        jmi->reinit_triggered = 1;
-                    }
+                JMI_GLOBAL(tmp_2) = 0.4;
+                if (JMI_GLOBAL(tmp_2) != _x_0) {
+                    _x_0 = JMI_GLOBAL(tmp_2);
+                    jmi->reinit_triggered = 1;
                 }
             }
         }
@@ -905,58 +887,44 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _temp_1_3 = _sw(0);
         }
         if (LOG_EXP_AND(_temp_1_3, LOG_EXP_NOT(pre_temp_1_3))) {
-            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                JMI_GLOBAL(tmp_1) = 0.8;
-                if (JMI_GLOBAL(tmp_1) != _x_0) {
-                    _x_0 = JMI_GLOBAL(tmp_1);
-                    jmi->reinit_triggered = 1;
-                }
+            JMI_GLOBAL(tmp_1) = 0.8;
+            if (JMI_GLOBAL(tmp_1) != _x_0) {
+                _x_0 = JMI_GLOBAL(tmp_1);
+                jmi->reinit_triggered = 1;
             }
-            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                JMI_GLOBAL(tmp_2) = 1.8;
-                if (JMI_GLOBAL(tmp_2) != _y_1) {
-                    _y_1 = JMI_GLOBAL(tmp_2);
-                    jmi->reinit_triggered = 1;
-                }
+            JMI_GLOBAL(tmp_2) = 1.8;
+            if (JMI_GLOBAL(tmp_2) != _y_1) {
+                _y_1 = JMI_GLOBAL(tmp_2);
+                jmi->reinit_triggered = 1;
             }
         } else {
             if (LOG_EXP_AND(_temp_2_4, LOG_EXP_NOT(pre_temp_2_4))) {
-                if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                    JMI_GLOBAL(tmp_3) = 2.4;
-                    if (JMI_GLOBAL(tmp_3) != _z_2) {
-                        _z_2 = JMI_GLOBAL(tmp_3);
-                        jmi->reinit_triggered = 1;
-                    }
+                JMI_GLOBAL(tmp_3) = 2.4;
+                if (JMI_GLOBAL(tmp_3) != _z_2) {
+                    _z_2 = JMI_GLOBAL(tmp_3);
+                    jmi->reinit_triggered = 1;
                 }
-                if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                    JMI_GLOBAL(tmp_4) = 0.4;
-                    if (JMI_GLOBAL(tmp_4) != _x_0) {
-                        _x_0 = JMI_GLOBAL(tmp_4);
-                        jmi->reinit_triggered = 1;
-                    }
+                JMI_GLOBAL(tmp_4) = 0.4;
+                if (JMI_GLOBAL(tmp_4) != _x_0) {
+                    _x_0 = JMI_GLOBAL(tmp_4);
+                    jmi->reinit_triggered = 1;
                 }
             } else {
                 if (LOG_EXP_AND(_temp_3_5, LOG_EXP_NOT(pre_temp_3_5))) {
-                    if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                        JMI_GLOBAL(tmp_5) = 2.1;
-                        if (JMI_GLOBAL(tmp_5) != _z_2) {
-                            _z_2 = JMI_GLOBAL(tmp_5);
-                            jmi->reinit_triggered = 1;
-                        }
+                    JMI_GLOBAL(tmp_5) = 2.1;
+                    if (JMI_GLOBAL(tmp_5) != _z_2) {
+                        _z_2 = JMI_GLOBAL(tmp_5);
+                        jmi->reinit_triggered = 1;
                     }
-                    if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                        JMI_GLOBAL(tmp_6) = 0.1;
-                        if (JMI_GLOBAL(tmp_6) != _x_0) {
-                            _x_0 = JMI_GLOBAL(tmp_6);
-                            jmi->reinit_triggered = 1;
-                        }
+                    JMI_GLOBAL(tmp_6) = 0.1;
+                    if (JMI_GLOBAL(tmp_6) != _x_0) {
+                        _x_0 = JMI_GLOBAL(tmp_6);
+                        jmi->reinit_triggered = 1;
                     }
-                    if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                        JMI_GLOBAL(tmp_7) = 1.1;
-                        if (JMI_GLOBAL(tmp_7) != _y_1) {
-                            _y_1 = JMI_GLOBAL(tmp_7);
-                            jmi->reinit_triggered = 1;
-                        }
+                    JMI_GLOBAL(tmp_7) = 1.1;
+                    if (JMI_GLOBAL(tmp_7) != _y_1) {
+                        _y_1 = JMI_GLOBAL(tmp_7);
+                        jmi->reinit_triggered = 1;
                     }
                 }
             }
@@ -1061,12 +1029,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         }
         if (_z_2) {
             if (LOG_EXP_AND(_z_2, LOG_EXP_NOT(pre_z_2))) {
-                if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                    JMI_GLOBAL(tmp_1) = AD_WRAP_LITERAL(1);
-                    if (JMI_GLOBAL(tmp_1) != _x_0) {
-                        _x_0 = JMI_GLOBAL(tmp_1);
-                        jmi->reinit_triggered = 1;
-                    }
+                JMI_GLOBAL(tmp_1) = AD_WRAP_LITERAL(1);
+                if (JMI_GLOBAL(tmp_1) != _x_0) {
+                    _x_0 = JMI_GLOBAL(tmp_1);
+                    jmi->reinit_triggered = 1;
                 }
             }
         }
