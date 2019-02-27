@@ -2127,7 +2127,7 @@ aspect AnnotationAPI {
     }
 
     /**
-     * Obtain the SrcAnnotationProvider respecting the inheritance if this class is located inside a component.
+     * Obtain the SrcAnnotationProvider respecting the inheritance if this class is not a function.
      */
     public SrcAnnotationProvider InstClassDecl.myAnnotation() {
         return getSrcClassDecl().srcAnnotationProvider();
