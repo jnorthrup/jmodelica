@@ -66,6 +66,7 @@ aspect AnnotationAPI {
 
     eq SrcFullClassDecl.annotation(InstContext instContext)           = annotationOfChild(getSrcAnnotationOpt(), instContext);
     eq InstClassDecl.annotation(InstContext instContext)              = getSrcClassDecl().annotation(instContext);
+    eq InstAbstractShortClassDecl.annotation(InstContext instContext) = !isFunction() ? mySrcAnnotatable().annotation(instContext) : getSrcClassDecl().annotation(instContext);
     eq SrcShortClassDecl.annotation(InstContext instContext)          = getSrcExtendsClauseShortClass().annotation(instContext);
     eq SrcLibNode.annotation(InstContext instContext)                 = myClass().annotation(instContext);
     eq SrcExtendsClauseShortClass.annotation(InstContext instContext) = getSrcComment().annotation(instContext);
@@ -2125,7 +2126,17 @@ aspect AnnotationAPI {
         return getSrcClassDecl();
     }
 
-
+    /**
+     * Obtain the SrcAnnotationProvider respecting the inheritance if this class is located inside a component.
+     */
+    public SrcAnnotationProvider InstClassDecl.myAnnotation() {
+        return getSrcClassDecl().srcAnnotationProvider();
+    }
+    
+    public SrcAnnotationProvider InstAbstractShortClassDecl.myAnnotation() {
+        return !isFunction() ? mySrcAnnotatable().srcAnnotationProvider() : getSrcClassDecl().srcAnnotationProvider();
+	}
+	
     public SrcAnnotatable InstComponentDecl.mySrcAnnotatable() {
         boolean hasAnnotations = getSrcComponentDecl().srcAnnotationProvider().hasAnnotation();
         if (!hasAnnotations) {
@@ -2141,6 +2152,29 @@ aspect AnnotationAPI {
         return getSrcComponentDecl();
     }
     
+    /**
+     * Obtain the source node which is responsable for providing the annotation.
+     * A match against this with the same qualifiedName and same fullyQualifiedName is made in the 
+     * Enviroment. 
+     */
+    public SrcAnnotatable InstAbstractShortClassDecl.mySrcAnnotatable() {
+        boolean hasAnnotations = getSrcClassDecl().srcAnnotationProvider().hasAnnotation();
+        if (!hasAnnotations) {
+            SrcAnnotatable annotatable = srcannotatableFromEnviroment();
+            if (annotatable != null) {
+                return annotatable;
+            }
+            return orginalAnnotatable(); 
+        }
+        return getSrcClassDecl();
+    }
+    
+    /**
+     * Obtain the source node which is responsable for providing the annotation.
+     */
+    public SrcAnnotatable InstClassDecl.mySrcAnnotatable() {
+        return getSrcClassDecl();
+    }
 
     /**
      *  Test method which obtains the string representation of the 
