@@ -220,7 +220,7 @@ aspect FunctionScalarization {
             if (thenClauses.getNumChild() > 0 || elseClauses.getNumChild() > 0) {
                 List<FIfWhenClause> cl = new List<FIfWhenClause>();
                 cl.add(new FIfClause(getIfExp().scalarize(s), thenClauses));
-                ((Scalarizer.Algorithm)s).add(new FIfStmt(cl, elseClauses));
+                ((Scalarizer.Algorithm)s).add(new FIfStmtTemp(cl, elseClauses));
             }
         } else {
             createArrayTemporariesIfBranch(null, s);
@@ -236,7 +236,7 @@ aspect FunctionScalarization {
             if (inFAlgorithm()) {
                 List<FIfWhenClause> cl = new List<FIfWhenClause>();
                 cl.add(new FIfClause(ifExp, thenClauses));
-                s.add(new FIfStmt(cl, elseClauses));
+                s.add(new FIfStmtTemp(cl, elseClauses));
             } else {
                 for (FAbstractVariable fv : thenVars) {
                     elseClauses.add(new FEquation(fv.createAccessExp(), fv.type().zeroLiteral()));

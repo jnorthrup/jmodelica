@@ -1775,6 +1775,53 @@ end FunctionInlining.IfStatementInline6;
 ")})));
     end IfStatementInline6;
     
+    model IfExpressionInline1
+        function g
+            input Real[:] x;
+            output Real y = sum(x);
+        algorithm
+            annotation(Inline=false);
+        end g;
+        function f
+            input Real x;
+            output Real y;
+        algorithm
+            y := if x > x + 1 then g({x}) else g({x} .+ 1); 
+        end f;
+
+        Real z = f(if time > 3 then time else 3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfExpressionInline1",
+            description="Inlining of temporary if statement generated in scalarization",
+            inline_functions="all",
+            flatModel="
+fclass FunctionInlining.IfExpressionInline1
+ Real z;
+ Real temp_3;
+equation
+ z = noEvent(if temp_3 > temp_3 + 1 then FunctionInlining.IfExpressionInline1.g({temp_3}) else FunctionInlining.IfExpressionInline1.g({temp_3 .+ 1}));
+ temp_3 = if time > 3 then time else 3;
+
+public
+ function FunctionInlining.IfExpressionInline1.g
+  input Real[:] x;
+  output Real y;
+  Real temp_1;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(x, 1) loop
+   temp_1 := temp_1 + x[i1];
+  end for;
+  y := temp_1;
+  return;
+ annotation(Inline = false);
+ end FunctionInlining.IfExpressionInline1.g;
+
+end FunctionInlining.IfExpressionInline1;
+")})));
+    end IfExpressionInline1;
     
     model ForStatementInline1
         function f

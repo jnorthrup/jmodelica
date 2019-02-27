@@ -1448,7 +1448,22 @@ aspect FunctionInlining {
             stmts.add(stmt);
         setElseStmtList(oldElse);
     }
-
+    
+    public void FIfStmtTemp.inlinePrepare(AbstractFunctionInliner fi, List<FStatement> stmts) {
+        /* We know that this if statement only assigns temporaries,
+           each is only assigned in one branch,
+           and the location they are used are already guarded by the same if condition. */
+           
+        for (FIfWhenClause clause : getFIfWhenClauses()) {
+            for (FStatement stmt : clause.getFStatements()) {
+                stmt.inlinePrepare(fi, stmts);
+            }
+        }
+        for (FStatement stmt : getElseStmts()) {
+            stmt.inlinePrepare(fi, stmts);
+        }
+    }
+    
     public void FForStmt.inlinePrepare(AbstractFunctionInliner fi, List<FStatement> stmts) {
         List<FStatement> oldStmts = getForStmts();
         FForIndex oldIndex = getIndex();
