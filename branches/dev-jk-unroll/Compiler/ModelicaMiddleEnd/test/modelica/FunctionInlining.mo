@@ -1789,8 +1789,8 @@ fclass FunctionInlining.IfExpressionInline1
  Real z;
  Real temp_3;
 equation
- z = noEvent(if temp_3 > temp_3 + 1 then FunctionInlining.IfExpressionInline1.g({temp_3}) else FunctionInlining.IfExpressionInline1.g({temp_3 .+ 1}));
  temp_3 = if time > 3 then time else 3;
+ z = noEvent(if temp_3 > temp_3 + 1 then FunctionInlining.IfExpressionInline1.g({temp_3}) else FunctionInlining.IfExpressionInline1.g({temp_3 .+ 1}));
 
 public
  function FunctionInlining.IfExpressionInline1.g
