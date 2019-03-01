@@ -2224,6 +2224,44 @@ aspect ConstantEvaluation {
     eq FUnaryExp.cevalCalc(VariableEvaluator evaluator) = evaluator.evalUnOp(this, getFExp().ceval(evaluator));
     
     syn CValue FUnaryExp.cevalEval(CValue val) { throw new ConstantEvaluationException(null, "Unimplemented attribute"); }
+
+    eq InstPreExp.cevalCalc(VariableEvaluator evaluator) {
+        CValue value = super.cevalCalc(evaluator);
+        if (!value.isUnknown() || !getFExp().isAccess()) {
+            return value;
+        }
+        InstAccess access = getFExp().asInstAccess();
+        try {
+            if (access.getLastInstAccess() == access && !access.hasFArraySubscripts()) {
+                return evaluator.ceval("pre("+ access.qualifiedName() + ")");
+            } else {
+                 throw new ConstantEvaluationException(null, 
+                 "Only support evaluation of simple scalar component for operator \"pre\"." + System.lineSeparator() +
+                 "Replace expression with a variable and provide the value.");
+            }
+        } catch(ConstantEvaluationException e) {
+            if (evaluator == defaultVariableEvaluator()) {
+                return value;
+            } else {
+                throw e;
+            }
+        }
+    }
+    eq InstDerExp.cevalCalc(VariableEvaluator evaluator) {
+        if (!getFExp().isAccess()) {
+           return super.cevalCalc(evaluator);
+        }
+        InstAccess access = getFExp().asInstAccess();
+        if (access.getLastInstAccess() == access && !access.hasFArraySubscripts()) {
+            return evaluator.ceval("der("+ access.qualifiedName() + ")");
+        }
+        throw new ConstantEvaluationException(null, 
+            evaluator == defaultVariableEvaluator() ? "Evaluation of derivatives is not supported." : 
+            "Evaluation of derivatives is not supported." + System.lineSeparator() + 
+            "Replace expression with a variable and provide the value.");
+    }
+    
+    
     eq FNegExp.cevalEval(CValue val) = type().neg(val);
     eq FNotExp.cevalEval(CValue val) = type().not(val);
 
@@ -4593,6 +4631,9 @@ aspect AritmeticTransformations {
 }
 
 aspect SourceCeval {
+    /** 
+     * Source Constant evaluations only implemented for the most basic expressions.
+     */ 
     syn CValue SrcExp.ceval()        = CValue.UNKNOWN;
     eq SrcStringLitExp.ceval()       = new CValueString(unEscape());
     eq SrcAccessExp.ceval()          = new CValueUnknownAccess(getSrcAccess().name());
@@ -4632,7 +4673,7 @@ aspect SourceCeval {
      * arguments.
      */
     syn CValue SrcExp.ceval(VariableEvaluator evaluator) = ceval();
-
+    
     syn int SrcExp.ndimsCeval() {
         List<? extends SrcExp> exps = arrayChildrenForCeval();
         if (exps == null) {
@@ -4704,6 +4745,13 @@ aspect VariableEvaluator {
         
         public CValue ceval(CommonVariableDecl variable) {
             return variable.ceval(this);
+        }
+        
+        /**
+         * Works only for supporting evaluators.
+         */
+        public CValue ceval(String name) {
+            throw new ConstantEvaluationException(null, "This evaluator doesn't support this type of value lookup");
         }
         
         public CValue ceval(CommonVariableDecl variable, Index i) {
