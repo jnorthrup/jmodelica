@@ -155,7 +155,6 @@ aspect FunctionInlining {
         private Map<String,FExp> replMap;
         private FlatVariableMap lookupMap;
         private Map<String,FType> typeMap;
-        private Queue<FAbstractEquation> outerMostWorklist = null;
         public TypePrefixVariability contextVariability = Variability.CONTINUOUS;
         
         private Scalarizer scalarizer = new Scalarizer.Algorithm(null, null, null, false, Variability.CONTINUOUS);
@@ -163,8 +162,8 @@ aspect FunctionInlining {
         /**
          * Inline all function calls that we can from a specific list of equations.
          */
-        public List<FAbstractEquation> inline(List<FAbstractEquation> oldEquationList) {
-            List<FAbstractEquation> newEquationList = new List();
+        public Collection<FAbstractEquation> inline(List<FAbstractEquation> oldEquationList) {
+            Collection<FAbstractEquation> newEquationList = new ArrayList<>();
             inline(oldEquationList, newEquationList);
             return newEquationList;
         }
@@ -172,39 +171,21 @@ aspect FunctionInlining {
         /**
          * Inline all function calls that we can from a specific list of equations.
          */
-        public void inline(List<FAbstractEquation> oldEquationList, List<FAbstractEquation> newEquationList) {
-            Queue<FAbstractEquation> worklist = new ArrayDeque<FAbstractEquation>(oldEquationList.getNumChild());
-            if (outerMostWorklist == null) {
-                outerMostWorklist = worklist;
-            }
-            for (FAbstractEquation eqn : oldEquationList) {
-                worklist.add(eqn);
-            }
-            while (!worklist.isEmpty()) {
-                inline(worklist.poll(), newEquationList);
-            }
-            if (outerMostWorklist == worklist) {
-                outerMostWorklist = null;
-            }
-        }
-
-        private void inline(FAbstractEquation eqn, List newEquationList) {
-            if (eqn.hasInlinableFunctions(this)) {
-                Collection<FAbstractEquation> res = eqn.inlineFunctions(this);
-                for (FAbstractEquation inlinedEqn : res) {
-                    inline(inlinedEqn, newEquationList);
-                }
-            } else {
-                newEquationList.add(eqn);
-            }
-        }
+        public abstract void inline(List<FAbstractEquation> oldEquationList, Collection<FAbstractEquation> newEquationList);
         
         public void setContextVariability(TypePrefixVariability v) {
             contextVariability = v;
         }
         
         public TypePrefixVariability contextVariability(FExp e) {
-            return contextVariability.combineDown(e.variability());
+            TypePrefixVariability res = e.variability();
+            if (!res.knownParameterOrLess()) {
+                res = contextVariability;
+                if (res.continuousVariability() && e.variability().discreteVariability()) {
+                    res = e.variability();
+                }
+            }
+            return res;
         }
 
         /**
@@ -300,7 +281,7 @@ aspect FunctionInlining {
                 value = value.preventEvents();
             value.resetOriginalReferences();
             FEquation eqn = new FEquation(var.createAccessExp(), value);
-            addEquation(eqn, variability);
+            addEquation(eqn);
         }
 
         /**
@@ -345,13 +326,11 @@ aspect FunctionInlining {
                         left.setFExp(exp);
                     eqn.addLeft(left);
                 }
-                addEquation(eqn, variability);
+                addEquation(eqn);
             }
         }
-
-        protected void addEquation(FAbstractEquation eqn, TypePrefixVariability variability) {
-            outerMostWorklist.add(eqn);
-        }
+        
+        protected abstract void addEquation(FAbstractEquation eqn);
         
         protected abstract String nextTempVarName();
         
@@ -391,10 +370,12 @@ aspect FunctionInlining {
         
         private FClass fc;
         private List<FVariable> vars;
-        private List<FAbstractEquation> initialEqns = new List<FAbstractEquation>();
-        private List<FAbstractEquation> normalEqns  = new List<FAbstractEquation>();
-        private List<FAbstractEquation> paramEqns   = new List<FAbstractEquation>();
-
+        
+        Stack<Collection<FAbstractEquation>> worklistStack = new Stack<Collection<FAbstractEquation>>();
+        
+        private List<FAbstractEquation> currentOldList = null;
+        private Collection<FAbstractEquation> currentNewList = null;
+        
         public FunctionInliner(FClass fc, String level, boolean late) {
             this.fc = fc;
             this.level = level;
@@ -419,15 +400,58 @@ aspect FunctionInlining {
             return false;
         }
 
-        @Override
-        protected void addEquation(FAbstractEquation eqn, TypePrefixVariability variability) {
-            List<FAbstractEquation> toList = variability.selectEquations(initialEqns, paramEqns, normalEqns);
-            if (currentNewList == toList) {
-                currentOldList.add(eqn);
-                super.addEquation(eqn, variability);
-            } else {
-                toList.add(eqn);
+        public void pushWorklist() {
+            worklistStack.push(new ArrayDeque<FAbstractEquation>());
+        }
+
+        public void pushWorklist(List<FAbstractEquation> eqs) {
+            Collection<FAbstractEquation> worklist = new ArrayList<FAbstractEquation>(eqs.getNumChild());
+            for (FAbstractEquation eqn : eqs) {
+                worklist.add(eqn);
             }
+            worklistStack.push(worklist);
+        }
+
+        public void addToWorklist(Collection<FAbstractEquation> eqs) {
+            worklistStack.peek().addAll(eqs);
+        }
+
+        public void addToWorklist(FAbstractEquation equation) {
+            worklistStack.peek().add(equation);
+        }
+
+        /**
+         * Inline all function calls that we can from a specific list of equations.
+         */
+        public void inline(List<FAbstractEquation> oldEquationList, Collection<FAbstractEquation> newEquationList) {
+            pushWorklist(oldEquationList);
+            popWorklist(newEquationList);
+        }
+
+        public void popWorklist(Collection<FAbstractEquation> newEquationList) {
+            Collection<FAbstractEquation> worklist = worklistStack.pop();
+            for (FAbstractEquation equation : worklist) {
+                inline(equation, newEquationList);
+            }
+        }
+
+        private void inline(FAbstractEquation eqn, Collection<FAbstractEquation> newEquationList) {
+            if (eqn.hasInlinableFunctions(this)) {
+                pushWorklist();
+                Collection<FAbstractEquation> res = eqn.inlineFunctions(this);
+                popWorklist(currentNewList);
+                pushWorklist();
+                addToWorklist(res);
+                popWorklist(newEquationList);
+            } else {
+                newEquationList.add(eqn);
+            }
+        }
+
+        @Override
+        protected void addEquation(FAbstractEquation eqn) {
+            currentOldList.add(eqn); /* Providing context for the equation */
+            addToWorklist(eqn);
         }
         
         @Override
@@ -446,6 +470,10 @@ aspect FunctionInlining {
          * Inline all function calls that we can.
          */
         public void inline() {
+            ArrayList<FAbstractEquation> initialEqns = new ArrayList<>();
+            ArrayList<FAbstractEquation> normalEqns = new ArrayList<>();
+            ArrayList<FAbstractEquation> paramEqns = new ArrayList<>();
+            
             setContextVariability(Variability.INITIALPARAMETER);
             inlineFCList(fc.getFInitialEquations(), initialEqns);
             
@@ -455,15 +483,12 @@ aspect FunctionInlining {
             setContextVariability(Variability.FIXEDPARAMETER);
             inlineFCList(fc.getParameterEquations(), paramEqns);
             
-            fc.setFInitialEquationList(initialEqns);
-            fc.setFAbstractEquationList(normalEqns);
-            fc.setParameterEquationList(paramEqns);
+            fc.setFInitialEquationList(new List<>(initialEqns));
+            fc.setFAbstractEquationList(new List<>(normalEqns));
+            fc.setParameterEquationList(new List<>(paramEqns));
         }
         
-        private List<FAbstractEquation> currentOldList = null;
-        private List<FAbstractEquation> currentNewList = null;
-        
-        public void inlineFCList(List<FAbstractEquation> oldEquationList, List<FAbstractEquation> newEquationList) {
+        public void inlineFCList(List<FAbstractEquation> oldEquationList, Collection<FAbstractEquation> newEquationList) {
             currentOldList = oldEquationList;
             currentNewList = newEquationList;
             inline(oldEquationList, newEquationList);
@@ -505,7 +530,7 @@ aspect FunctionInlining {
             FExp exp = type().addInliningVarsAndEqns(fi, oldName, noEvent, this, tempName);
             List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
             l.add(new FFunctionCallLeft(new Opt<FExp>(exp)));
-            fi.addEquation(new FFunctionCallEquation(l, fullCopy()), v);
+            fi.addEquation(new FFunctionCallEquation(l, treeCopy()));
         } else {
             super.addInliningVarsAndEqns(fi, oldName, noEvent);
         }
@@ -832,7 +857,7 @@ aspect FunctionInlining {
 
     @Override
     public Collection<FAbstractEquation> FIfWhenElseEquation.inlineFunctions(AbstractFunctionInliner fi) {
-        setFAbstractEquationList(fi.inline(getFAbstractEquations()));
+        setFAbstractEquationList(new List<>(fi.inline(getFAbstractEquations())));
         return Collections.singletonList((FAbstractEquation)this);
     }
 

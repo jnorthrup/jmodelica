@@ -426,7 +426,7 @@ aspect DynamicStateSelect{
         
         boolean skipDynamicStates = false;
         for (DSSet set : dsSets) {
-            if (set.eqns.size() > 8 || set.vars.size() > 8) {
+            if (set.eqns.size() > 9 || set.vars.size() > 9) {
                 ASTNode.log.verbose("Too big dynamic state set, %d equations and %d variables!", set.eqns.size(), set.vars.size());
                 ASTNode.log.verbose(set);
                 skipDynamicStates = true;
