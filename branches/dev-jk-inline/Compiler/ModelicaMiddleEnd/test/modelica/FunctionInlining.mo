@@ -254,14 +254,10 @@ end FunctionInlining.BasicInline6;
 fclass FunctionInlining.BasicInline7
  Real x;
  Real y;
- Real temp_1;
- Real temp_4;
  Real temp_7;
 equation
- temp_1 = y;
- temp_4 = temp_1;
- temp_7 = temp_1 * 2;
- x = temp_4 + temp_4 * 2 + (temp_7 + temp_7 * 2);
+ temp_7 = y * 2;
+ x = y + y * 2 + (temp_7 + temp_7 * 2);
  y = 1;
 end FunctionInlining.BasicInline7;
 ")})));
@@ -601,11 +597,9 @@ end FunctionInlining.BasicInline14;
             flatModel="
 fclass FunctionInlining.BasicInline15
  parameter String x = \"string\" /* \"string\" */;
- parameter String temp_1;
  parameter String y;
 parameter equation
- temp_1 = x;
- y = temp_1 + temp_1;
+ y = x + x;
 end FunctionInlining.BasicInline15;
 ")})));
     end BasicInline15;
@@ -1613,11 +1607,9 @@ end FunctionInlining.IfStatementInline1;
 fclass FunctionInlining.IfStatementInline2
  Real v;
  Real z;
- Real temp_1;
 equation
  v = 2;
- temp_1 = v;
- z = noEvent(if temp_1 > 2 then temp_1 else 1) + 2;
+ z = noEvent(if v > 2 then v else 1) + 2;
 end FunctionInlining.IfStatementInline2;
 ")})));
     end IfStatementInline2;
@@ -1661,13 +1653,11 @@ fclass FunctionInlining.IfStatementInline3
  Real v2;
  Real v3;
  Real z;
- Real temp_1;
 equation
  v1 = 1;
  v2 = 2;
  v3 = 3;
- temp_1 = v1;
- z = noEvent(if temp_1 > 2 then temp_1 else v2) + noEvent(if temp_1 > 2 then v3 else temp_1);
+ z = noEvent(if v1 > 2 then v1 else v2) + noEvent(if v1 > 2 then v3 else v1);
 end FunctionInlining.IfStatementInline3;
 ")})));
     end IfStatementInline3;
@@ -1699,11 +1689,9 @@ end FunctionInlining.IfStatementInline3;
 fclass FunctionInlining.IfStatementInline4
  Real v;
  Real z;
- Real temp_1;
 equation
  v = 1;
- temp_1 = v;
- z = noEvent(if temp_1 > 2 then noEvent(if temp_1 > 2 then temp_1 else 0.0) else temp_1 + 1);
+ z = noEvent(if v > 2 then noEvent(if v > 2 then v else 0.0) else v + 1);
 end FunctionInlining.IfStatementInline4;
 ")})));
     end IfStatementInline4;
@@ -1802,18 +1790,16 @@ end FunctionInlining.IfStatementInline6;
 fclass FunctionInlining.ForStatementInline1
  Real v;
  Real z;
- Real temp_2;
  Real temp_4;
  Real temp_5;
  Real temp_6;
  Real temp_7;
 equation
  v = 3;
- temp_2 = v;
- temp_4 = 1 + (1 - 1) * ((temp_2 - 1) / (4 - 1));
- temp_5 = 1 + (2 - 1) * ((temp_2 - 1) / (4 - 1));
- temp_6 = 1 + (3 - 1) * ((temp_2 - 1) / (4 - 1));
- temp_7 = 1 + (4 - 1) * ((temp_2 - 1) / (4 - 1));
+ temp_4 = 1 + (1 - 1) * ((v - 1) / (4 - 1));
+ temp_5 = 1 + (2 - 1) * ((v - 1) / (4 - 1));
+ temp_6 = 1 + (3 - 1) * ((v - 1) / (4 - 1));
+ temp_7 = 1 + (4 - 1) * ((v - 1) / (4 - 1));
  z = temp_4 * temp_4 + temp_5 * temp_5 + temp_6 * temp_6 + temp_7 * temp_7;
 end FunctionInlining.ForStatementInline1;
 ")})));
@@ -3750,13 +3736,10 @@ equation
             description="Check that function call with LateInline=true in start value is propagated correctly",
             flatModel="
 fclass FunctionInlining.InlineAnnotation11
- Real x[1](start = temp_1[1],fixed = true);
+ Real x[1](start = p,fixed = true);
  parameter Real p = 2 /* 2 */;
- parameter Real temp_1[1];
 initial equation
- x[1] = temp_1[1];
-parameter equation
- temp_1[1] = p;
+ x[1] = p;
 equation
  der(x[1]) = time * 2;
 end FunctionInlining.InlineAnnotation11;
@@ -3791,17 +3774,15 @@ fclass FunctionInlining.InlineInitialTemp1
  initial parameter Real p(fixed = false);
  Real x[1](start = 1);
  Real x[2](start = 2);
- Real temp_2;
  Real temp_3;
 initial equation
  x[1] = p - 2;
  x[1] = 1;
  x[2] = 2;
 equation
- temp_2 = p;
  temp_3 = time;
- der(x[1]) = temp_2 - temp_3;
- der(x[2]) = (temp_2 - temp_3) * 2;
+ der(x[1]) = p - temp_3;
+ der(x[2]) = (p - temp_3) * 2;
 end FunctionInlining.InlineInitialTemp1;
 ")})));
 end InlineInitialTemp1;
@@ -3838,14 +3819,12 @@ fclass FunctionInlining.InlineInitialTemp2
  initial parameter Real p(fixed = false);
  Real x.a;
  Real x.b;
- Real temp_2;
  Real temp_3;
 initial equation
  x.a = p - 2;
 equation
- temp_2 = p;
  temp_3 = time;
- x.a = temp_2 - temp_3;
+ x.a = p - temp_3;
  x.b = x.a + 2 * temp_3;
 end FunctionInlining.InlineInitialTemp2;
 ")})));
@@ -4126,14 +4105,14 @@ initial equation
             flatModel="
 fclass FunctionInlining.InitialSystemInlining2
  initial parameter Real x(fixed = false);
- initial parameter Real temp_2;
- initial parameter Real temp_3;
  initial parameter Real temp_5;
+ initial parameter Real temp_6;
+ initial parameter Real temp_7;
 initial equation
- temp_2 = temp_5 - 3.14;
- temp_3 = temp_5 + 3.14;
  temp_5 = time + 1;
- x = sin(temp_2) * cos(temp_3) + cos(temp_2) * sin(temp_3);
+ temp_6 = temp_5 - 3.14;
+ temp_7 = temp_5 + 3.14;
+ x = sin(temp_6) * cos(temp_7) + cos(temp_6) * sin(temp_7);
 end FunctionInlining.InitialSystemInlining2;
 ")})));
 end InitialSystemInlining2;
@@ -4438,12 +4417,12 @@ model ChainedCallInlining6
             flatModel="
 fclass FunctionInlining.ChainedCallInlining6
  Real y;
- Real temp_11;
+ Real temp_49;
  Real temp_50;
 equation
  temp_50 = time;
- temp_11 = (temp_50 + 4) / (temp_50 + 5);
- y = (temp_11 + 4) / (temp_11 + 5);
+ temp_49 = (temp_50 + 4) / (temp_50 + 5);
+ y = (temp_49 + 4) / (temp_49 + 5);
 end FunctionInlining.ChainedCallInlining6;
 ")})));
 end ChainedCallInlining6;
@@ -4489,12 +4468,12 @@ model ChainedCallInlining7
             flatModel="
 fclass FunctionInlining.ChainedCallInlining7
  Real y;
- Real temp_13;
+ Real temp_51;
  Real temp_52;
 equation
  temp_52 = time;
- temp_13 = (temp_52 + 4) / (temp_52 + 5);
- y = (temp_13 + 4) / (temp_13 + 5);
+ temp_51 = (temp_52 + 4) / (temp_52 + 5);
+ y = (temp_51 + 4) / (temp_51 + 5);
 end FunctionInlining.ChainedCallInlining7;
 ")})));
 end ChainedCallInlining7;

@@ -11851,10 +11851,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _y_0 = x[0];
         }
         func_CCodeGenTests_BlockTest20_f_b_def0(_time + _y_0, tmp_1);
-        _temp_2_1 = (tmp_1->x);
+        _temp_1_x_1 = (tmp_1->x);
         _temp_1_b_2 = (tmp_1->b);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = (COND_EXP_EQ(_temp_1_b_2, JMI_TRUE, _temp_2_1 * _temp_2_1, _temp_2_1)) - (_y_0);
+            (*res)[0] = (COND_EXP_EQ(_temp_1_b_2, JMI_TRUE, _temp_1_x_1 * _temp_1_x_1, _temp_1_x_1)) - (_y_0);
         }
     }
     JMI_DYNAMIC_FREE()

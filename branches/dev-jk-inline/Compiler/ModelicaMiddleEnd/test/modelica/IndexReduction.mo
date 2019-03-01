@@ -1068,7 +1068,6 @@ fclass IndexReduction.IndexReduction52
  Real _der_der_b;
  Real temp_1;
  Real temp_4;
- Real _der_temp_1;
  Real _der_temp_4;
  Real _der_der_temp_4;
 initial equation
@@ -1085,16 +1084,15 @@ equation
  a = temp_1 * temp_4 + 42;
  b = temp_1 * temp_4 + y;
  a * der(b) + _der_a * b = 0;
- _der_temp_1 = _der_x;
  _der_temp_4 = 1.0;
- _der_a = temp_1 * _der_temp_4 + _der_temp_1 * temp_4;
- der(b) = temp_1 * _der_temp_4 + _der_temp_1 * temp_4 + _der_y;
+ _der_a = temp_1 * _der_temp_4 + _der_x * temp_4;
+ der(b) = temp_1 * _der_temp_4 + _der_x * temp_4 + _der_y;
  cos(_der_x) * _der_der_x = der(dx);
  - sin(_der_y) * _der_der_y = _der_dy;
  a * _der_der_b + _der_a * der(b) + (_der_a * der(b) + _der_der_a * b) = 0;
  _der_der_temp_4 = 0.0;
- _der_der_a = temp_1 * _der_der_temp_4 + _der_temp_1 * _der_temp_4 + (_der_temp_1 * _der_temp_4 + _der_der_x * temp_4);
- _der_der_b = temp_1 * _der_der_temp_4 + _der_temp_1 * _der_temp_4 + (_der_temp_1 * _der_temp_4 + _der_der_x * temp_4) + _der_der_y;
+ _der_der_a = temp_1 * _der_der_temp_4 + _der_x * _der_temp_4 + (_der_x * _der_temp_4 + _der_der_x * temp_4);
+ _der_der_b = temp_1 * _der_der_temp_4 + _der_x * _der_temp_4 + (_der_x * _der_temp_4 + _der_der_x * temp_4) + _der_der_y;
 end IndexReduction.IndexReduction52;
 ")})));
 end IndexReduction52;
@@ -1453,18 +1451,14 @@ fclass IndexReduction.TemporaryVarStates1
  Real _der_x2[2];
  Real temp_6;
  Real temp_7;
- Real temp_8;
- Real temp_9;
 initial equation
  temp_6 = 0.0;
  temp_7 = 0.0;
 equation
  _der_x1[1] + _der_x2[1] = 2;
  _der_x1[2] + _der_x2[2] = 3;
- temp_8 = x2[1];
- temp_9 = x2[2];
- temp_6 = A[1,1] * temp_8 + A[1,2] * temp_9;
- temp_7 = A[2,1] * temp_8 + A[2,2] * temp_9;
+ temp_6 = A[1,1] * x2[1] + A[1,2] * x2[2];
+ temp_7 = A[2,1] * x2[1] + A[2,2] * x2[2];
  - x1[1] = temp_6;
  - x1[2] = temp_7;
  der(temp_6) = A[1,1] * _der_x2[1] + A[1,2] * _der_x2[2];
@@ -2222,7 +2216,6 @@ fclass IndexReduction.NonDiffArgs.Test3
  Real y;
  Real z;
  Real _der_y;
- Real temp_12;
  Real temp_13;
  Real temp_14;
 initial equation 
@@ -2231,8 +2224,7 @@ equation
  _der_y * der(x) = 1;
  z = IndexReduction.NonDiffArgs.Test3.F3(time);
  y = x * temp_13 + x * temp_14;
- temp_12 = der(x);
- _der_y = (temp_12 * temp_13 + temp_12 * temp_14) * temp_12;
+ _der_y = (der(x) * temp_13 + der(x) * temp_14) * der(x);
  (IndexReduction.NonDiffArgs.Test3.R(temp_13, temp_14)) = IndexReduction.NonDiffArgs.Test3.F2(z);
 
 public
@@ -2395,9 +2387,7 @@ fclass IndexReduction.NonDiffArgs.ExtraIncidences.Test1
  Real _der_s2;
  Real _der_w;
  Real temp_4;
- Real temp_7;
  Real temp_14;
- Real temp_17;
 equation
  v1 = _der_s1;
  v2 = _der_s2;
@@ -2405,15 +2395,13 @@ equation
  s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(cos(time), w, T);
  w = _der_s2 + sin(time);
  T = sin(s2);
- temp_7 = w;
  temp_4 = cos(time);
- _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(temp_4 * temp_7, temp_7, T);
+ _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(temp_4 * w, w, T);
  _der_w = a2 + cos(time);
- a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1((temp_4 * _der_w + (- sin(time)) * temp_7) * temp_7, temp_7, T);
- temp_17 = w;
+ a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1((temp_4 * _der_w + (- sin(time)) * w) * w, w, T);
  temp_14 = - sin(time);
- _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(temp_14 * temp_17, temp_17, T);
- a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1((temp_14 * _der_w + (- cos(time)) * temp_17) * temp_17, temp_17, T);
+ _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(temp_14 * w, w, T);
+ a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1((temp_14 * _der_w + (- cos(time)) * w) * w, w, T);
 
 public
  function IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1
@@ -2491,9 +2479,8 @@ fclass IndexReduction.NonDiffArgs.ExtraIncidences.Test2
  Real _der_s3;
  Real _der_w;
  Real temp_4;
- Real temp_7;
+ Real temp_12;
  Real temp_14;
- Real temp_17;
 equation
  v1 = _der_s1;
  v2 = _der_s2;
@@ -2503,15 +2490,14 @@ equation
  s1 + s2 + s3 = 0;
  w = _der_s2 + sin(time);
  T = sin(s2);
- temp_7 = w;
  temp_4 = cos(time);
- _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1(temp_4 * temp_7, temp_7, T);
+ _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1(temp_4 * w, w, T);
  _der_w = a2 + cos(time);
- a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1((temp_4 * _der_w + (- sin(time)) * temp_7) * temp_7, temp_7, T);
- temp_17 = sin(time);
+ a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1((temp_4 * _der_w + (- sin(time)) * w) * w, w, T);
+ temp_12 = sin(time);
  temp_14 = - sin(time);
- _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1(temp_14 * temp_17, temp_17, T);
- a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1((temp_14 * cos(time) + (- cos(time)) * temp_17) * temp_17, temp_17, T);
+ _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1(temp_14 * temp_12, temp_12, T);
+ a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1((temp_14 * cos(time) + (- cos(time)) * temp_12) * temp_12, temp_12, T);
  _der_s1 + _der_s2 + _der_s3 = 0;
  a1 + a2 + a3 = 0;
 
@@ -2598,11 +2584,10 @@ fclass IndexReduction.NonDiffArgs.ExtraIncidences.Test3
  Real _der_s3;
  Real _der_w;
  Real temp_4;
- Real temp_7;
+ Real temp_12;
  Real temp_14;
- Real temp_17;
+ Real temp_22;
  Real temp_24;
- Real temp_27;
 equation
  v1a = _der_s1a;
  v1b = _der_s1b;
@@ -2614,19 +2599,18 @@ equation
  s1a + s1b + s2 + s3 = 0;
  w = _der_s2 + sin(time);
  T = sin(s2);
- temp_7 = w;
  temp_4 = cos(time);
- _der_s1a + _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_4 * temp_7, temp_7, T);
+ _der_s1a + _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_4 * w, w, T);
  _der_w = a2 + cos(time);
- a1a + a1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_4 * _der_w + (- sin(time)) * temp_7) * temp_7, temp_7, T);
- temp_17 = cos(time);
+ a1a + a1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_4 * _der_w + (- sin(time)) * w) * w, w, T);
+ temp_12 = cos(time);
  temp_14 = cos(time);
- _der_s1a - _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_14 * temp_17, temp_17, T);
- a1a - a1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_14 * (- sin(time)) + (- sin(time)) * temp_17) * temp_17, temp_17, T);
- temp_27 = sin(time);
+ _der_s1a - _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_14 * temp_12, temp_12, T);
+ a1a - a1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_14 * (- sin(time)) + (- sin(time)) * temp_12) * temp_12, temp_12, T);
+ temp_22 = sin(time);
  temp_24 = - sin(time);
- _der_s1a + _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_24 * temp_27, temp_27, T);
- a1a + a1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_24 * cos(time) + (- cos(time)) * temp_27) * temp_27, temp_27, T);
+ _der_s1a + _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_24 * temp_22, temp_22, T);
+ a1a + a1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_24 * cos(time) + (- cos(time)) * temp_22) * temp_22, temp_22, T);
  _der_s1a + _der_s1b + _der_s2 + _der_s3 = 0;
  a1a + a1b + a2 + a3 = 0;
 
@@ -4470,10 +4454,8 @@ fclass IndexReduction.FunctionInlining.Test9
  Real _der_x;
  Real _der_vx;
  Real _der_der_y;
- Real temp_1;
  Real temp_2;
  Real _der_temp_1;
- Real temp_5;
 initial equation
  y = 0.0;
  vy = 0.0;
@@ -4483,13 +4465,11 @@ equation
  _der_vx = a * x;
  der(vy) = a * y;
  x + y = IndexReduction.FunctionInlining.Test9.F({p[1]}, time);
- temp_1 = p[1];
  temp_2 = time;
- _der_x + der(y) = IndexReduction.FunctionInlining.Test9.F({temp_1}, temp_1 + temp_2 * temp_1);
+ _der_x + der(y) = IndexReduction.FunctionInlining.Test9.F({p[1]}, p[1] + temp_2 * p[1]);
  _der_der_y = der(vy);
  _der_temp_1 = 0.0;
- temp_5 = temp_1;
-  _der_vx + _der_der_y = IndexReduction.FunctionInlining.Test9.F({temp_5}, (_der_temp_1 + (temp_2 * _der_temp_1 + temp_1)) * temp_5 + (temp_1 + temp_2 * temp_1) * temp_5);
+  _der_vx + _der_der_y = IndexReduction.FunctionInlining.Test9.F({p[1]}, (_der_temp_1 + (temp_2 * _der_temp_1 + p[1])) * p[1] + (p[1] + temp_2 * p[1]) * p[1]);
 
 public
  function IndexReduction.FunctionInlining.Test9.F
@@ -4660,7 +4640,6 @@ fclass IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback
  Real x;
  Real y;
  Real _der_y;
- Real temp_12;
  Real temp_13;
  Real temp_14;
 initial equation 
@@ -4668,8 +4647,7 @@ initial equation
 equation
  _der_y * der(x) = 1;
  y = x * temp_13 + x * temp_14;
- temp_12 = der(x);
- _der_y = (temp_12 * temp_13 + temp_12 * temp_14) * temp_12;
+ _der_y = (der(x) * temp_13 + der(x) * temp_14) * der(x);
  (IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback.R(temp_13, temp_14)) = IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback.F2(x);
 
 public
