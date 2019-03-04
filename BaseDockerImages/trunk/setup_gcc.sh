@@ -21,7 +21,21 @@ echo "GCC_INSTALLATION_TYPE="${GCC_INSTALLATION_TYPE}
 if [ ${GCC_INSTALLATION_TYPE} = "CENTOS_DEFAULT" ]
 then
     yum install -y gcc-c++ gcc-gfortran
-elif [ ${GCC_INSTALLATION_TYPE} = "CENTOS_GCCv482" ]
+elif [ ${GCC_INSTALLATION_TYPE} = "CENTOS7_GCC6" ]
+then
+    
+    yum install -y centos-release-scl-rh
+    yum install -y devtoolset-6
+    
+    # Enable the environment
+    echo 'source /opt/rh/devtoolset-6/enable' >> ~/.bashrc
+    source ~/.bashrc
+    
+    echo 'source /opt/rh/devtoolset-6/enable' >> /home/baseuser/.bashrc
+    source ~/.bashrc
+    
+    
+elif [ ${GCC_INSTALLATION_TYPE} = "CENTOS6" ]
 then
     yum install -y wget
 
@@ -36,8 +50,6 @@ then
     # Enable the environment
     echo 'source /opt/rh/devtoolset-2/enable' >> ~/.bashrc
     source ~/.bashrc
-    echo 'source /opt/rh/devtoolset-2/enable' >> /home/baseuser/.bashrc
-    source /home/baseuser/.bashrc
 
 elif [ ${GCC_INSTALLATION_TYPE} = "UBUNTU_DEFAULT" ]
 then
