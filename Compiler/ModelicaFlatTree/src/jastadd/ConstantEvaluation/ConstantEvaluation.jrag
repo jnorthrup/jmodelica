@@ -2225,6 +2225,10 @@ aspect ConstantEvaluation {
     
     syn CValue FUnaryExp.cevalEval(CValue val) { throw new ConstantEvaluationException(null, "Unimplemented attribute"); }
 
+    /**
+     * Supports only a simple component access without any array index. 
+     * Refers to using the fix of storing unsupported values in variable.  
+     */
     eq InstPreExp.cevalCalc(VariableEvaluator evaluator) {
         CValue value = super.cevalCalc(evaluator);
         if (!value.isUnknown() || !getFExp().isAccess()) {
@@ -2247,6 +2251,11 @@ aspect ConstantEvaluation {
             }
         }
     }
+
+    /**
+     * Supports only a simple component access without any array index.
+     * Refers to using the fix of storing unsupported values in variable.
+     */
     eq InstDerExp.cevalCalc(VariableEvaluator evaluator) {
         if (!getFExp().isAccess()) {
            return super.cevalCalc(evaluator);
