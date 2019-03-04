@@ -65,15 +65,21 @@ aspect AnnotationAPI {
     eq InstExternal.annotation(InstContext instContext)      = getSrcExternalClause().annotation(instContext);
 
     eq SrcFullClassDecl.annotation(InstContext instContext)           = annotationOfChild(getSrcAnnotationOpt(), instContext);
-    eq InstClassDecl.annotation(InstContext instContext)              = mySrcAnnotatable().annotation(instContext);
-    eq InstAbstractShortClassDecl.annotation(InstContext instContext) = mySrcAnnotatable().annotation(instContext);
+    eq InstClassDecl.annotation(InstContext instContext)              = getSrcClassDecl().annotation(instContext);
+    eq InstAbstractShortClassDecl.annotation(InstContext instContext) = !isFunction() ? mySrcAnnotatable().annotation(instContext) : getSrcClassDecl().annotation(instContext);
     eq SrcShortClassDecl.annotation(InstContext instContext)          = getSrcExtendsClauseShortClass().annotation(instContext);
     eq SrcLibNode.annotation(InstContext instContext)                 = myClass().annotation(instContext);
     eq SrcExtendsClauseShortClass.annotation(InstContext instContext) = getSrcComment().annotation(instContext);
 
     eq SrcAbstractEquation.annotation(InstContext instContext) = getSrcComment().annotation(instContext);
 
-    eq SrcComponentDecl.annotation(InstContext instContext)  = getSrcComment().annotation(instContext);
+    eq SrcComponentDecl.annotation(InstContext instContext) {
+        SrcComment comment = myComponentClause().getSrcComment();
+        if (comment.hasSrcAnnotation()) {
+            return new CombinedAnnotationNode(comment.annotation(instContext), getSrcComment().annotation(instContext));
+        }
+        return getSrcComment().annotation(instContext);
+    }
     eq InstComponentDecl.annotation(InstContext instContext) = mySrcAnnotatable().annotation(instContext);
 
     eq InstExtends.annotation(InstContext instContext)      = getSrcExtendsClause().annotation(instContext);
@@ -234,7 +240,7 @@ aspect AnnotationAPI {
     syn ArrayList<SrcExp> InstNode.annotationExps() {
         ArrayList<SrcExp> exps = new ArrayList<>();
         for (AnnotationNode annotation : annotations()) {
-            annotation.ast().collectExps(exps);
+            annotation.collectExps(exps);
         }
         return exps;
     }
@@ -1002,6 +1008,13 @@ aspect AnnotationAPI {
         }
 
         /**
+         * Collects expressions in this annotation for instantiation and evaluation.
+         */
+        public void collectExps(ArrayList<SrcExp> exps) {
+            ast().collectExps(exps);
+        }
+
+        /**
          * Iterates over the annotation nodes representing the nodes in the list.
          */
         protected static class AnnotationIterator implements Iterator<AnnotationNode> {
@@ -1218,6 +1231,10 @@ aspect AnnotationAPI {
      * support lookup of sub nodes.
      */
     public abstract class RootAnnotationNode extends AnnotationNode {
+        
+        @Override
+        public void collectExps(ArrayList<SrcExp> exps) {
+        }
     }
 
     /**
@@ -1854,6 +1871,51 @@ aspect AnnotationAPI {
             return new FAttributeAnnotationNode(attr, instContext);
         }
     }
+
+    public class CombinedAnnotationNode extends AnnotationNode {
+        
+        private final AnnotationNode first;
+        private final AnnotationNode second;
+        
+        public CombinedAnnotationNode(AnnotationNode first, AnnotationNode second) {
+            this.first  = first;
+            this.second = second;
+        }
+        
+        @Override
+        protected ASTNode ast() {
+            return first.ast();
+        }
+
+        @Override
+        public Iterator<AnnotationNode> attributeIterator() {
+            return new ChainedIterator<AnnotationNode>(first.attributeIterator(), second.attributeIterator());
+        }
+
+        @Override
+        protected AnnotationNode lookup(String path) {
+            AnnotationNode first  = this.first.lookup(path);
+            AnnotationNode second = this.second.lookup(path);
+            if (first != null && first.exists()) {
+                if (second != null && second.exists()) {
+                    return new CombinedAnnotationNode(first, second);
+                }
+                return first;
+            }
+            return second;
+        }
+
+        @Override
+        public AnnotationNode addNode(String path) {
+            return first.addNode(path);
+        }
+        
+        @Override
+        public void collectExps(ArrayList<SrcExp> exps) {
+            first.collectExps(exps);
+            second.collectExps(exps);
+        }
+    }
     
 	/**
 	 * A runtime exception that is thrown when an action fail while trying
@@ -2010,7 +2072,8 @@ aspect AnnotationAPI {
     
     /** 
      * Search for the applicable annotation from the enviroment. FilteredEnviroment 
-     * is not used since it peeling which is undesireable 
+     * is not used since it is peeling which is undesired. Retrives latest live annotation
+     * from the chain of redeclares.
      */
     public SrcAnnotatable InstNode.srcannotatableFromEnviroment() {
         Environment enviroment = myEnvironment();
@@ -2032,13 +2095,14 @@ aspect AnnotationAPI {
 
     /**
      * Obtaines the orginal annotatable for a class or component.
-     *   
+     * Gives the orginal class or component for every replacing type.  
      */
     syn SrcAnnotatable InstClassDecl.orginalAnnotatable() = getSrcClassDecl();
     eq InstReplacingFullClassDecl.orginalAnnotatable() = getOriginalClassDecl();
     syn SrcAnnotatable InstComponentDecl.orginalAnnotatable() = getSrcComponentDecl();
     eq InstReplacingComposite.orginalAnnotatable() = getOriginalDecl();
     eq InstReplacingPrimitive.orginalAnnotatable() = getOriginalDecl();
+    eq InstReplacingRecord.orginalAnnotatable()    = getOriginalDecl();
     
     public SrcAnnotatable InstReplacingShortClassDecl.orginalAnnotatable() {
     	SrcClassDecl clazz = getOriginalClassDecl();
@@ -2063,12 +2127,16 @@ aspect AnnotationAPI {
     }
 
     /**
-     * Obtain the SrcAnnotationProvider respecting the inheritance.
+     * Obtain the SrcAnnotationProvider respecting the inheritance if this class is not a function.
      */
     public SrcAnnotationProvider InstClassDecl.myAnnotation() {
-        return mySrcAnnotatable().srcAnnotationProvider();
+        return getSrcClassDecl().srcAnnotationProvider();
     }
-
+    
+    public SrcAnnotationProvider InstAbstractShortClassDecl.myAnnotation() {
+        return !isFunction() ? mySrcAnnotatable().srcAnnotationProvider() : getSrcClassDecl().srcAnnotationProvider();
+	}
+	
     public SrcAnnotatable InstComponentDecl.mySrcAnnotatable() {
         boolean hasAnnotations = getSrcComponentDecl().srcAnnotationProvider().hasAnnotation();
         if (!hasAnnotations) {
@@ -2100,7 +2168,7 @@ aspect AnnotationAPI {
         }
         return getSrcClassDecl();
     }
-
+    
     /**
      * Obtain the source node which is responsable for providing the annotation.
      */
@@ -2108,58 +2176,33 @@ aspect AnnotationAPI {
         return getSrcClassDecl();
     }
 
-    /** 
-     * Test method which obtains the string representation of the 
-     * annotation for the inner class with the given name. 
-     * This method is only intended for testing. 
-     * A QualifiedName can be provider for lookup of the class to test. 
-     * Trigger a null pointer if not found.
+    /**
+     *  Test method which obtains the string representation of the 
+     *  annotation for the inner class or component with the given name.  
+     *  A QualifiedName can be provider for lookup of the class or component to test. 
+     *  Supports relative dot lookup of component or class to test. 
+     *  Trigger a null pointer exception if the element is not found.
+     *  
+     *  This method is only intended for testing. 
      */
-    public String InstClassDecl.testClassAnnotations(String name) {
-        InstClassDecl iclass = this;
-        Iterable<InstClassDecl> it = allInstClassDecls();
+    public String InstClassDecl.testElementAnnotations(String name) {
+    	InstNode iNode = this;
+        Iterable<? extends InstNode> it = null;
+        boolean found = false;
         QualifiedName qn = new QualifiedName(name);
         do {
             String namePart = qn.next();
-            it = iclass.allInstClassDecls();
-            iclass = null;
-            for (InstClassDecl icd :  it) {
+            it = new ChainedIterable<> (iNode.allInstComponentDecls(), iNode.allInstClassDecls());
+            iNode = null;
+            for (InstNode icd :  it) {
                 if (icd.matches(namePart)) {
-                    iclass = icd;
+                    iNode = icd;
                     break;
                 }
             }
         } while (qn.hasNext());
-        Iterator<AnnotationNode> iter = iclass.annotation().iterator();
+        Iterator<AnnotationNode> iter = iNode.annotation().iterator();
         return iter.hasNext() ? iter.next().toString() : "";
-    }
-
-    /**
-     *  Test method which can obtain either a inner class or inner component of a given name from a
-     *  component in the current class. 
-     *  Requires there to only be one component with a inner class or inner component with the given name.
-     *  This method is only intended for testing. 
-     */
-    public String InstClassDecl.testComponentAnnotations(boolean clazz, String name) {
-        StringBuilder sb = new StringBuilder();
-        for (InstComponentDecl icd : getInstComponentDecls()) {
-            InstNode annotable = null;
-            if (clazz) {
-                annotable = icd.genericLookupInstClass(name).targetOrNull();
-            } else {
-                for (InstComponentDecl inner : icd.allInstComponentDecls()) {
-                    if (inner.matches(name)) {
-                        annotable = inner;
-                    }
-                }
-            }
-            if (annotable != null) {
-                Iterator<AnnotationNode> iter = annotable.annotation().iterator();
-                sb.append(iter.hasNext() ? iter.next().toString() : "");
-                sb.append(System.lineSeparator());
-            }
-        }
-        return sb.toString();
     }
 
 }
