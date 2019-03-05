@@ -16,7 +16,7 @@ set -e
 
 # find Java location containing jni.h, variable JCC_JDK needs to be set to install jcc
 # also grep for the installed java jdk package
-if [ -f /etc/centos-release ];
+if [ -f /etc/centos-release ] || [ -f /etc/fedora-release ];
 then
     export JCC_JDK=$(find /usr -type f -name "jni.h" | cut -d '/' -f-5 | grep "1.8.0")
 else
@@ -34,7 +34,7 @@ fi
 
 pip install jcc==2.23
 
-JCC_INSTALL_DIR=$(find /usr -type d -name jcc)
+JCC_INSTALL_DIR=$(find /usr -type d -name jcc | sed -n 1p)
 cp ${USR_PATH}/Docker/build/jcc.patch ${JCC_INSTALL_DIR}
 cd ${JCC_INSTALL_DIR}
 patch < jcc.patch

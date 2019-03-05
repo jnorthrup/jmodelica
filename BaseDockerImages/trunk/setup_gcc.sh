@@ -18,11 +18,9 @@ set -e
 
 echo "GCC_INSTALLATION_TYPE="${GCC_INSTALLATION_TYPE}
 
-if [ ${GCC_INSTALLATION_TYPE} = "CENTOS_DEFAULT" ]
-then
-    yum install -y gcc-c++ gcc-gfortran
-elif [ ${GCC_INSTALLATION_TYPE} = "CENTOS7_GCC6" ]
-then
+if [ ${GCC_INSTALLATION_TYPE} = "CENTOS_DEFAULT" ] || [ ${GCC_INSTALLATION_TYPE} = "FEDORA_DEFAULT" ]; then
+    yum install -y gcc gcc-c++ gcc-gfortran
+elif [ ${GCC_INSTALLATION_TYPE} = "CENTOS7_GCC6" ]; then
     
     yum install -y centos-release-scl-rh
     yum install -y devtoolset-6
@@ -35,8 +33,7 @@ then
     source ~/.bashrc
     
     
-elif [ ${GCC_INSTALLATION_TYPE} = "CENTOS6" ]
-then
+elif [ ${GCC_INSTALLATION_TYPE} = "CENTOS6" ]; then
     yum install -y wget
 
     # Install gcc 4.8.2
@@ -51,8 +48,7 @@ then
     echo 'source /opt/rh/devtoolset-2/enable' >> ~/.bashrc
     source ~/.bashrc
 
-elif [ ${GCC_INSTALLATION_TYPE} = "UBUNTU_DEFAULT" ]
-then
+elif [ ${GCC_INSTALLATION_TYPE} = "UBUNTU_DEFAULT" ]; then
     apt-get -y install g++ gfortran
 else
     echo "NO VALID GCC INSTALLATION TYPE SPECIFIED, GOT INSTALL_TYPE="$INSTALL_TYPE

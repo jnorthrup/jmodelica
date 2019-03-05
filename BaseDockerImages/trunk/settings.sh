@@ -16,6 +16,8 @@
 
 if [ -f /etc/centos-release ]; then
 	export LINUX_DISTRIBUTION=CENTOS
+elif [ -f /etc/fedora-release ]; then 
+	export LINUX_DISTRIBUTION=FEDORA
 elif [ -f /etc/redhat-release ]; then 
 	export LINUX_DISTRIBUTION=REDHAT
 elif [ -f /etc/debian_version ]; then 
