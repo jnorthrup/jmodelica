@@ -391,7 +391,7 @@ aspect Scalarization {
     
     @Override
     public void FRecordVariable.doScalarize(Scalarizer.Variable s) {
-        scalarRecordFVariables(s, new ScalarizingVariableInstance(s, this));
+        scalarRecordFVariables(s, new ScalarizingVariableInstance(s, this), getVisibilityType());
     }
     
     public void FVariable.createArrayTemporaries(Scalarizer.Variable s) {
@@ -556,10 +556,10 @@ aspect Scalarization {
      * @param s Scalarization visitor
      * @param bes        Instance representation of this variable
      */
-    public void FVariable.scalarRecordFVariables(Scalarizer.Variable s, ScalarizingVariableInstance bes) {
+    public void FVariable.scalarRecordFVariables(Scalarizer.Variable s, ScalarizingVariableInstance bes, VisibilityType visibility) {
         try {
             for (Index i : bes.indices(this)) {
-                scalarRecordCellFVariables(s, bes.create(s, i));
+                scalarRecordCellFVariables(s, bes.create(s, i), visibility);
             }
         } catch (ModelicaException e) {
             throw e;
@@ -579,13 +579,13 @@ aspect Scalarization {
      * @param bes        Instance representation of this variable
      * @param i          the index of this scalar variable in an array, or Index.NULL for scalar components
      */
-    public void FVariable.scalarRecordCellFVariables(Scalarizer.Variable s, ScalarizingVariableInstance bes) {
-        bes.createScalarized(s, this);
+    public void FVariable.scalarRecordCellFVariables(Scalarizer.Variable s, ScalarizingVariableInstance bes, VisibilityType visibility) {
+        bes.createScalarized(s, this, visibility);
     }
     
-    public void FRecordVariable.scalarRecordCellFVariables(Scalarizer.Variable s, ScalarizingVariableInstance bes) {
+    public void FRecordVariable.scalarRecordCellFVariables(Scalarizer.Variable s, ScalarizingVariableInstance bes, VisibilityType visibility) {
         for (FVariable comp : myFRecordDecl().getFVariables()) {
-            comp.scalarRecordFVariables(s, bes.create(s, comp));
+            comp.scalarRecordFVariables(s, bes.create(s, comp), visibility);
         }
     }
     
@@ -704,10 +704,11 @@ aspect Scalarization {
             return new ScalarizingVariableInstance(name + "." + cName, attrs, nbexp, nv, inputOutput, index);
         }
         
-        public void createScalarized(Scalarizer.Variable s, FVariable comp) {
+        public void createScalarized(Scalarizer.Variable s, FVariable comp, VisibilityType visibility) {
             Scalarizer.Equation se = s.select(variability);
             Index cell = index.subIndex(index.ndims() - comp.ndims());
             FVariable fv = comp.copyForName(s, name, cell);
+            fv.setVisibilityType(VisibilityType.mostRestrictive(fv.getVisibilityType(), visibility));
             if (bExp != null) {
                 bExp.resetOriginalReferences(); /* Workaround for test RecordArray12 */
                 if (comp.keepBExp(variability, bExp)) {
