@@ -23,8 +23,12 @@ ARG GCC_INSTALL_TYPE=UBUNTU_DEFAULT
 ENV USR_PATH=${DOCKER_USR_PATH}
 ENV GCC_INSTALLATION_TYPE=${GCC_INSTALL_TYPE}
 RUN useradd -ms /bin/bash baseuser && groupadd docker && usermod -aG docker baseuser
+# switch user back and forth to create bashrc
+USER baseuser
+USER root
 
 COPY *.sh ${USR_PATH}/Docker/build/
+COPY jcc.patch ${USR_PATH}/Docker/build/
 RUN chmod +x ${USR_PATH}/Docker/build/*.sh
 
 RUN ${USR_PATH}/Docker/build/setup.sh
