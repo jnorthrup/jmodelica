@@ -50,6 +50,12 @@ fi
 pckinstall $BUILD_PKGS_JM_COMMON
 pckinstall $BUILD_PKGS_JM
 
+if [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then
+    # to avoid installing gcc 7 as well for ubuntu we do this
+	apt-get install -y --no-install-recommends python-pip
+    pip install setuptools
+fi
+
 # Install GCC, input argument is defined in Dockerfile
 echo "--------------- INSTALLING GCC ---------------"
 . ${USR_PATH}/Docker/build/setup_gcc.sh ${GCC_INSTALLATION_TYPE}

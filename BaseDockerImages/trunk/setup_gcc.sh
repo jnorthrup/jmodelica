@@ -50,6 +50,8 @@ elif [ ${GCC_INSTALLATION_TYPE} = "CENTOS6" ]; then
 
 elif [ ${GCC_INSTALLATION_TYPE} = "UBUNTU_DEFAULT" ]; then
     apt-get -y install g++ gfortran
+elif [ ${GCC_INSTALLATION_TYPE} = "UBUNTU_GCC6" ]; then
+    apt-get -y gcc-6 gfortran-6 g++-6
 else
     echo "NO VALID GCC INSTALLATION TYPE SPECIFIED, GOT INSTALL_TYPE="$INSTALL_TYPE
     false
