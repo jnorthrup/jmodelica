@@ -147,7 +147,7 @@ endif
 
 $(MC_LIB): $(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar $(OC_CASADI_BUILD)/bin/OptimicaCompiler.jar $(MC_CASADI_BUILD)/bin/util.jar ifcasadi
 if COMPILE_WITH_IPOPT
-    rm -rf $(MC_LIB)
+	rm -rf $(MC_LIB)
 	mkdir -p $(MC_LIB)
 	cp $(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar $(MC_LIB)
 	cp $(OC_CASADI_BUILD)/bin/OptimicaCompiler.jar $(MC_LIB)
