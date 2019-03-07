@@ -2134,26 +2134,7 @@ aspect ConstantEvaluation {
     
     @Override
     public void InstDot.collectAccessNames(Set<String> collectedNames) {
-        ArrayList<String> joinedNames = new ArrayList<>();
-        joinedNames.add("");
-
-        for (InstAccess access : getInstAccesss()) {
-            final Set<String> names = new HashSet<>();
-            access.collectAccessNames(names);
-            
-            final ArrayList<String> result = new ArrayList<>();
-            
-            for (String prefix : joinedNames) {
-                for (String name : names) {
-                    final String joinedName = prefix.isEmpty() ? name : prefix + "." + name;
-                    result.add(joinedName);
-                }
-            }
-            
-            joinedNames = result;
-        }
-
-        collectedNames.addAll(joinedNames);
+        getFirstInstAccess().collectAccessNames(collectedNames);
     }
 
     @Override
@@ -2163,9 +2144,7 @@ aspect ConstantEvaluation {
 
     @Override
     public void InstArrayAccess.collectAccessNames(Set<String> collectedNames) {
-        for (Index index : Indices.create(declarationSize())) {
-            collectedNames.add(name() + index);
-        }
+        myInstComponentDecl().collectScalarPrimitives(collectedNames);
     }
 
     @Override
@@ -2174,15 +2153,26 @@ aspect ConstantEvaluation {
 
     @Override
     public void InstScalarAccess.collectAccessNames(Set<String> collectedNames) {
-        if (isArray()) {
-            for (Index index : Indices.create(declarationSize())) {
-                collectedNames.add(name() + index);
-            }
-        } else if (!isForIndex()) {
-            collectedNames.add(name());
+        myInstComponentDecl().collectScalarPrimitives(collectedNames);
+    }
+
+    public void InstComponentDecl.collectScalarPrimitives(Set<String> collectedNames) {
+        for (InstComponentDecl instComponentDecl : getInstComponentDecls()) {
+            instComponentDecl.collectScalarPrimitives(collectedNames);
         }
     }
 
+    @Override
+    public void InstPrimitive.collectScalarPrimitives(Set<String> collectedNames) {
+        String qualifiedName = qualifiedName();
+        if (isArray()) {
+            for (Index index : Indices.create(size())) {
+                collectedNames.add(qualifiedName + index);
+            }
+        } else if (!isForIndex()) {
+            collectedNames.add(qualifiedName);
+        }
+    }
 
     public void FArraySubscripts.collectAccessNames(Set<String> collectedNames) {
     }
