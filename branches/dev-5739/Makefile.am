@@ -191,7 +191,7 @@ $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py: modelicacasad
 
 modelicacasadi_wrapper: $(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar $(OC_CASADI_BUILD)/bin/OptimicaCompiler.jar $(MC_CASADI_BUILD)/bin/util.jar ifcasadi # $(MC_LIB)
 if COMPILE_WITH_IPOPT
-    mkdir -p $(MC_BUILD)/modelicacasadi_wrapper; \
+	mkdir -p $(MC_BUILD)/modelicacasadi_wrapper; \
 	cd $(MC_BUILD)/modelicacasadi_wrapper; \
 	case $(build) in \
 	*-cygwin*|*-mingw*) \
@@ -228,7 +228,7 @@ endif
  
  install_modelicacasadi_wrapper: $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py
 if COMPILE_WITH_IPOPT
-    mkdir -p $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper
+	mkdir -p $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper
 	cp $(MC_BUILD)/modelicacasadi_wrapper/swig/*modelicacasadi_wrapper* $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper 
 	rm -f $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
 	touch $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
@@ -248,7 +248,7 @@ endif
 
  install_modelicacasadi_transfer: $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py 
 if COMPILE_WITH_IPOPT
-    mkdir -p $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
+	mkdir -p $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
 	rm -f $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
 	touch $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
 	echo "from modelica_casadi_transfer_wrapper import *" >> $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
