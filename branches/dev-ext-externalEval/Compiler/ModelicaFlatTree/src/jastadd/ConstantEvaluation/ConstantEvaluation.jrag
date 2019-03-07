@@ -1078,6 +1078,14 @@ aspect ConstantEvaluation {
         	values[i.internal(indices)] = val;
         }
         
+       /**
+         * Is this array is sufficiently large to to represent the given index. 
+         */
+        public boolean hasCell(Index i) {
+            int j = i.internal(indices);
+            return 0 <= j && j < values.length;
+        }
+        
         /**
          * Set the value of the next free cell of an array constant value.
          * 
@@ -2269,7 +2277,6 @@ aspect ConstantEvaluation {
           }
     }
     
-    
     /**
      * Constant evaluation for arrays.
      * 
@@ -2306,8 +2313,11 @@ aspect ConstantEvaluation {
      * 
      * This needs to be overridden for subclasses of FExp.
      */
-    syn CValue FExp.cevalCalc(VariableEvaluator evaluator) = CValue.UNSUPPORTED;
-    
+    syn CValue FExp.cevalCalc(VariableEvaluator evaluator);
+    eq FUnsupportedExp.cevalCalc(VariableEvaluator evaluator) = CValue.UNSUPPORTED;
+    eq FAbstractArrayExp.cevalCalc(VariableEvaluator evaluator) { throw new ConstantEvaluationException(null, "Can not evaluate scalar array expression ");}
+    eq FNoExp.cevalCalc(VariableEvaluator evaluator) = CValue.UNSUPPORTED;
+
     eq FTimeExp.cevalCalc(VariableEvaluator evaluator) = evaluator.timeValue();
     
     eq FInStreamEpsExp.cevalCalc(VariableEvaluator evaluator) = evaluator.inStreamEpsilon();
@@ -2346,7 +2356,7 @@ aspect ConstantEvaluation {
         return sum;
     }
 
-    syn CValue FBinExp.cevalEval(CValue left, CValue right) { throw new ConstantEvaluationException(null, "Unimplemented attribute"); }
+    syn CValue FBinExp.cevalEval(CValue left, CValue right);
     eq FDotAddExp.cevalEval(CValue left, CValue right) = type().add(left, right);
     eq FDotSubExp.cevalEval(CValue left, CValue right) = type().sub(left, right);
     eq FDotMulExp.cevalEval(CValue left, CValue right) = type().mul(left, right);
@@ -2367,54 +2377,23 @@ aspect ConstantEvaluation {
     
     eq FUnaryExp.cevalCalc(VariableEvaluator evaluator) = evaluator.evalUnOp(this, getFExp().ceval(evaluator));
     
-    syn CValue FUnaryExp.cevalEval(CValue val) { throw new ConstantEvaluationException(null, "Unimplemented attribute"); }
-
-    /**
-     * Supports only a simple component access without any array index. 
-     * Refers to using the fix of storing unsupported values in variable.  
-     */
-    eq InstPreExp.cevalCalc(VariableEvaluator evaluator) {
-        CValue value = super.cevalCalc(evaluator);
-        if (!value.isUnknown() || !getFExp().isAccess()) {
-            return value;
-        }
-        InstAccess access = getFExp().asInstAccess();
-        try {
-            if (access.getLastInstAccess() == access && !access.hasFArraySubscripts()) {
-                return evaluator.ceval("pre("+ access.qualifiedName() + ")");
-            } else {
-                 throw new ConstantEvaluationException(null, 
-                 "Only support evaluation of simple scalar component for operator \"pre\"." + System.lineSeparator() +
-                 "Replace expression with a variable and provide the value.");
-            }
-        } catch(ConstantEvaluationException e) {
-            if (evaluator == defaultVariableEvaluator()) {
-                return value;
-            } else {
-                throw e;
-            }
-        }
+    syn CValue FUnaryExp.cevalEval(CValue val);
+    eq InstDerExp.cevalEval(CValue val) { 
+        throw new ConstantEvaluationException(null, 
+                 "Doesn't support evaluation of derivatives." + System.lineSeparator() +
+                 "Replace expression with a variable and provide the value."); 
     }
-
+    
     /**
-     * Supports only a simple component access without any array index.
-     * Refers to using the fix of storing unsupported values in variable.
+     * Doesn't support evaluation of derivatives due to potential problems with
+     * use of the Differentiation framework in the instance tree before the transformation steps.
      */
     eq InstDerExp.cevalCalc(VariableEvaluator evaluator) {
-        if (!getFExp().isAccess()) {
-           return super.cevalCalc(evaluator);
-        }
-        InstAccess access = getFExp().asInstAccess();
-        if (access.getLastInstAccess() == access && !access.hasFArraySubscripts()) {
-            return evaluator.ceval("der("+ access.qualifiedName() + ")");
-        }
         throw new ConstantEvaluationException(null, 
-            evaluator == defaultVariableEvaluator() ? "Evaluation of derivatives is not supported." : 
-            "Evaluation of derivatives is not supported." + System.lineSeparator() + 
-            "Replace expression with a variable and provide the value.");
+                 "Doesn't support evaluation of derivatives." + System.lineSeparator() +
+                 "Replace expression with a variable and provide the value.");
     }
-    
-    
+
     eq FNegExp.cevalEval(CValue val) = type().neg(val);
     eq FNotExp.cevalEval(CValue val) = type().not(val);
 
@@ -2465,7 +2444,7 @@ aspect ConstantEvaluation {
     eq FNdimsExp.cevalCalc(VariableEvaluator evaluator) = new CValueInteger(getFExp().ndims());
     
     eq FSubscriptedExp.cevalCalc(VariableEvaluator evaluator) {
-        Index i = getFArraySubscripts().createIndex();
+        Index i = getFArraySubscripts().createIndex(evaluator);
         return getFExp().ceval(evaluator, i).array().getCell(i);
     }
 
@@ -2626,7 +2605,7 @@ aspect ConstantEvaluation {
         if (var != null && !var.isUnknown()) {
             Index i = Index.NULL;
             if (var.ndims() > 0 && hasFArraySubscripts()) {
-                i = getFArraySubscripts().createIndex();
+                i = getFArraySubscripts().createIndex(evaluator);
             }
             if (i != Index.NULL) {
                 if(var.inRecord()) {
@@ -2660,7 +2639,7 @@ aspect ConstantEvaluation {
         CValue res = var.inRecord() ? cevalRecordMember(evaluator, prefix) : evaluator.ceval(var);
         if (res.isUnknown()) return CValue.UNKNOWN;
         if (prefix.hasFArraySubscripts())
-          res = res.array().getCell(prefix.getFArraySubscripts().createIndex());
+          res = res.array().getCell(prefix.getFArraySubscripts().createIndex(evaluator));
         if (res.isUnknown()) return CValue.UNKNOWN;
         return res.record().getMember(last);
     }
@@ -2694,7 +2673,7 @@ aspect ConstantEvaluation {
           
           if (isSlice()) {
               FArraySubscripts fas = getFArraySubscripts();
-              iHere = fas.createIndex();
+              iHere = fas.createIndex(evaluator);
               i = iHere.expand(i);
           }
           
@@ -2873,6 +2852,10 @@ aspect ConstantEvaluation {
 	syn int FSubscript.value()   = ceval(defaultVariableEvaluator()).intValue();
 	eq FIntegerSubscript.value() = getValue();
 	
+    public int Subscript.value(VariableEvaluator evaluator);
+    public int FSubscript.value(VariableEvaluator evaluator) { return ceval(evaluator).intValue();}
+    public int IntegerSubscript.value(VariableEvaluator evaluator) { return value();}
+
     syn CValue InstComponentDecl.ceval() = ceval(defaultVariableEvaluator());
 	syn CValue InstComponentDecl.ceval(VariableEvaluator evaluator) = 
 		(evaluationValue == null) ? CValue.UNKNOWN : evaluationValue;
