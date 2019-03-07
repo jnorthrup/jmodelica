@@ -2316,6 +2316,7 @@ aspect ConstantEvaluation {
     syn CValue FExp.cevalCalc(VariableEvaluator evaluator);
     eq FUnsupportedExp.cevalCalc(VariableEvaluator evaluator) = CValue.UNSUPPORTED;
     eq FAbstractArrayExp.cevalCalc(VariableEvaluator evaluator) { throw new ConstantEvaluationException(null, "Can not evaluate scalar array expression ");}
+    eq InstPreExp.cevalCalc(VariableEvaluator evaluator) = CValue.UNSUPPORTED;
     eq FNoExp.cevalCalc(VariableEvaluator evaluator) = CValue.UNSUPPORTED;
 
     eq FTimeExp.cevalCalc(VariableEvaluator evaluator) = evaluator.timeValue();
@@ -2393,6 +2394,7 @@ aspect ConstantEvaluation {
                  "Doesn't support evaluation of derivatives." + System.lineSeparator() +
                  "Replace expression with a variable and provide the value.");
     }
+    
 
     eq FNegExp.cevalEval(CValue val) = type().neg(val);
     eq FNotExp.cevalEval(CValue val) = type().not(val);
