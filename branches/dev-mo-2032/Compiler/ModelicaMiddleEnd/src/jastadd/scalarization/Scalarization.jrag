@@ -391,7 +391,7 @@ aspect Scalarization {
     
     @Override
     public void FRecordVariable.doScalarize(Scalarizer.Variable s) {
-        scalarRecordFVariables(s, new ScalarizingVariableInstance(s, this), getVisibilityType());
+        scalarRecordFVariables(s, new ScalarizingVariableInstance(s, this));
     }
     
     public void FVariable.createArrayTemporaries(Scalarizer.Variable s) {
@@ -556,10 +556,10 @@ aspect Scalarization {
      * @param s Scalarization visitor
      * @param bes        Instance representation of this variable
      */
-    public void FVariable.scalarRecordFVariables(Scalarizer.Variable s, ScalarizingVariableInstance bes, VisibilityType visibility) {
+    public void FVariable.scalarRecordFVariables(Scalarizer.Variable s, ScalarizingVariableInstance bes) {
         try {
             for (Index i : bes.indices(this)) {
-                scalarRecordCellFVariables(s, bes.create(s, i), visibility);
+                scalarRecordCellFVariables(s, bes.create(s, i));
             }
         } catch (ModelicaException e) {
             throw e;
@@ -579,13 +579,13 @@ aspect Scalarization {
      * @param bes        Instance representation of this variable
      * @param i          the index of this scalar variable in an array, or Index.NULL for scalar components
      */
-    public void FVariable.scalarRecordCellFVariables(Scalarizer.Variable s, ScalarizingVariableInstance bes, VisibilityType visibility) {
-        bes.createScalarized(s, this, visibility);
+    public void FVariable.scalarRecordCellFVariables(Scalarizer.Variable s, ScalarizingVariableInstance bes) {
+        bes.createScalarized(s, this);
     }
     
-    public void FRecordVariable.scalarRecordCellFVariables(Scalarizer.Variable s, ScalarizingVariableInstance bes, VisibilityType visibility) {
+    public void FRecordVariable.scalarRecordCellFVariables(Scalarizer.Variable s, ScalarizingVariableInstance bes) {
         for (FVariable comp : myFRecordDecl().getFVariables()) {
-            comp.scalarRecordFVariables(s, bes.create(s, comp), visibility);
+            comp.scalarRecordFVariables(s, bes.create(s, comp));
         }
     }
     
@@ -610,6 +610,8 @@ aspect Scalarization {
         
         private TypePrefixVariability variability; 
         
+        private VisibilityType visibility;
+        
         // Binding expression
         private FExp bExp;
         
@@ -625,24 +627,25 @@ aspect Scalarization {
         private Index index;
         
         private ScalarizingVariableInstance(String name, Map<String, FAttribute> mattrs, FExp be,
-                TypePrefixVariability variability, TypePrefixInputOutput inputOutput, Index i)  {
+                TypePrefixVariability variability, VisibilityType visibility, TypePrefixInputOutput inputOutput, Index i)  {
             bExp = be;
             this.name = name;
             index = i;
             this.mattrs = mattrs;
             this.variability = variability;
+            this.visibility = visibility;
             this.inputOutput = inputOutput;
         }
         
         private ScalarizingVariableInstance(String name, List<FAttribute> attrs, FExp be,
-                TypePrefixVariability variability, TypePrefixInputOutput inputOutput, Index i)  {
-            this(name, ScalarizingVariableInstance.mapped(attrs), be, variability, inputOutput, i);
+                TypePrefixVariability variability, VisibilityType visibility, TypePrefixInputOutput inputOutput, Index i)  {
+            this(name, ScalarizingVariableInstance.mapped(attrs), be, variability, visibility, inputOutput, i);
         }
         
         public ScalarizingVariableInstance(Scalarizer.Variable s, FVariable fv) {
             this(fv.name(), fv.getFAttributes(),
                     fv.hasBindingExp() ? fv.getBindingExp().dynamicFExp(fv.getBindingExp().scalarize(s.select(fv.variability()))) : null,
-                    fv.variability(), fv.getTypePrefixInputOutput(), Index.NULL);
+                    fv.variability(), fv.getVisibilityType(), fv.getTypePrefixInputOutput(), Index.NULL);
         }
         
         private static Map<String, FAttribute> mapped(List<FAttribute> as) {
@@ -675,7 +678,7 @@ aspect Scalarization {
                 nbexp = nbexp.fArrayCell(ni, 0);
             }
             return new ScalarizingVariableInstance(i.ndims() > 0 ? name + i : name, mattrs, nbexp, variability,
-                    inputOutput, ti);
+                    visibility, inputOutput, ti);
         }
         
         public ScalarizingVariableInstance create(Scalarizer.Variable s, FVariable comp) {
@@ -701,10 +704,10 @@ aspect Scalarization {
                 nbexp = nbexp.component(cName);
             }
             
-            return new ScalarizingVariableInstance(name + "." + cName, attrs, nbexp, nv, inputOutput, index);
+            return new ScalarizingVariableInstance(name + "." + cName, attrs, nbexp, nv, visibility, inputOutput, index);
         }
         
-        public void createScalarized(Scalarizer.Variable s, FVariable comp, VisibilityType visibility) {
+        public void createScalarized(Scalarizer.Variable s, FVariable comp) {
             Scalarizer.Equation se = s.select(variability);
             Index cell = index.subIndex(index.ndims() - comp.ndims());
             FVariable fv = comp.copyForName(s, name, cell);
