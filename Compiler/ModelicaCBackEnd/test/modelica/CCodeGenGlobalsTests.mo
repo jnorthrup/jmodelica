@@ -562,11 +562,17 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_GLOBAL(tmp_2) = _x_0;
     _der_x_1 = _time;
     if (_atInitial) {
-        JMI_GLOBAL(tmp_2) = AD_WRAP_LITERAL(1);
-        if (JMI_GLOBAL(tmp_2) != _x_0) {
-            _x_0 = JMI_GLOBAL(tmp_2);
-            jmi->reinit_triggered = 1;
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            JMI_GLOBAL(tmp_2) = AD_WRAP_LITERAL(1);
+            if (JMI_GLOBAL(tmp_2) != _x_0) {
+                _x_0 = JMI_GLOBAL(tmp_2);
+                jmi->reinit_triggered = 1;
+            }
         }
+    }
+    if (JMI_GLOBAL(tmp_2) != _x_0) {
+        _x_0 = JMI_GLOBAL(tmp_2);
+        jmi->reinit_triggered = 1;
     }
     JMI_DYNAMIC_FREE()
     return ef;
@@ -580,7 +586,13 @@ int model_ode_initialize_base(jmi_t* jmi) {
     JMI_GLOBAL(tmp_1) = _x_0;
     _der_x_1 = _time;
     _x_0 = 0.0;
-    JMI_GLOBAL(tmp_1) = AD_WRAP_LITERAL(1);
+    if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+        JMI_GLOBAL(tmp_1) = AD_WRAP_LITERAL(1);
+        if (JMI_GLOBAL(tmp_1) != _x_0) {
+            _x_0 = JMI_GLOBAL(tmp_1);
+            jmi->reinit_triggered = 1;
+        }
+    }
     if (JMI_GLOBAL(tmp_1) != _x_0) {
         _x_0 = JMI_GLOBAL(tmp_1);
         jmi->reinit_triggered = 1;
@@ -649,12 +661,18 @@ int model_ode_initialize_base(jmi_t* jmi) {
     }
     _temp_1_1 = _sw(0);
     _x_0 = 0.0;
-    JMI_GLOBAL(tmp_1) = AD_WRAP_LITERAL(1);
+    if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+        JMI_GLOBAL(tmp_1) = AD_WRAP_LITERAL(1);
+        if (JMI_GLOBAL(tmp_1) != _x_0) {
+            _x_0 = JMI_GLOBAL(tmp_1);
+            jmi->reinit_triggered = 1;
+        }
+    }
+    pre_temp_1_1 = JMI_FALSE;
     if (JMI_GLOBAL(tmp_1) != _x_0) {
         _x_0 = JMI_GLOBAL(tmp_1);
         jmi->reinit_triggered = 1;
     }
-    pre_temp_1_1 = JMI_FALSE;
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -1081,42 +1099,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 -----
 ")})));
 end ReinitCTest9;
-
-model ReinitCTest10
-    Boolean b = true;
-    Real x;
-equation
-    der(x) = 2;
-    when b then
-        reinit(x, 1);
-    end when;
-
-annotation(__JModelica(UnitTesting(tests={
-    CCodeGenTestCase(
-        name="Reinit_ReinitCTest10",
-        description="",
-        template="
-$C_ode_derivatives$
-",
-        generatedCode="
-int model_ode_derivatives_base(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    JMI_GLOBAL(tmp_1) = _x_1;
-    _der_x_2 = 2;
-    if (JMI_FALSE) {
-        JMI_GLOBAL(tmp_1) = AD_WRAP_LITERAL(1);
-        if (JMI_GLOBAL(tmp_1) != _x_1) {
-            _x_1 = JMI_GLOBAL(tmp_1);
-            jmi->reinit_triggered = 1;
-        }
-    }
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-")})));
-end ReinitCTest10;
-
 
 end Reinit;
 
