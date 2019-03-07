@@ -2130,8 +2130,7 @@ aspect ConstantEvaluation {
     }
 
 
-    public void InstAccess.collectAccessNames(Set<String> collectedNames) {
-    }
+    public abstract void InstAccess.collectAccessNames(Set<String> collectedNames);
     
     @Override
     public void InstDot.collectAccessNames(Set<String> collectedNames) {
@@ -2175,7 +2174,13 @@ aspect ConstantEvaluation {
 
     @Override
     public void InstScalarAccess.collectAccessNames(Set<String> collectedNames) {
-        collectedNames.add(name());
+        if (isArray()) {
+            for (Index index : Indices.create(declarationSize())) {
+                collectedNames.add(name() + index);
+            }
+        } else if (!isForIndex()) {
+            collectedNames.add(name());
+        }
     }
 
 
@@ -2198,6 +2203,30 @@ aspect ConstantEvaluation {
         getFExp().collectAccessNames(collectedNames);
     }
 
+    @Override
+    public void FIterExp.collectAccessNames(Set<String> collectedNames) {
+        for (CommonForIndex cfi : getForIndexs()) {
+            cfi.collectAccessNames(collectedNames);
+        }
+        
+        getFExp().collectAccessNames(collectedNames);
+    }
+
+    public abstract void CommonForIndex.collectAccessNames(Set<String> collectedNames);
+
+    @Override
+    public void FForIndex.collectAccessNames(Set<String> collectedNames) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void InstForIndexWithExp.collectAccessNames(Set<String> collectedNames) {
+        getFExp().collectAccessNames(collectedNames);
+    }
+
+    @Override
+    public void InstForIndexNoExp.collectAccessNames(Set<String> collectedNames) {
+    }
 
     public void InstAccess.collectAccessNamesInArraySubscripts(Set<String> collectedNames) {
     }
