@@ -905,6 +905,7 @@ aspect Names {
     eq SrcShortClassDecl.getSrcExtendsClauseShortClass().enclosingClassDecl() = this;
     
     inh Set<SrcClassDecl> SrcClassDecl.enclosingClassDecls();
+    inh Set<SrcClassDecl> SrcComponentDecl.enclosingClassDecls();
     eq Root.getChild().enclosingClassDecls() = Collections.emptySet();
     eq SrcClassDecl.getChild().enclosingClassDecls() {
         Set<SrcClassDecl> enclosingClassDecls = new HashSet<>(enclosingClassDecls());
@@ -1184,7 +1185,7 @@ aspect DebugHelpers {
 
 aspect Visibility {
 
-    inh boolean SrcClassDecl.isPublic();
+    inh boolean SrcElement.isPublic();
     inh boolean SrcComponentDecl.isPublic();
     eq SrcPublicElementList.getSrcElement().isPublic()    = true;
     eq SrcProtectedElementList.getSrcElement().isPublic() = false;
@@ -1194,8 +1195,8 @@ aspect Visibility {
     syn boolean InstClassDecl.isPublic()     = getSrcClassDecl().isPublic();
     syn boolean InstComponentDecl.isPublic() = getSrcComponentDecl().isPublic();
 
-    syn boolean SrcClassDecl.isProtected()         = !isPublic();
-    syn boolean SrcComponentDecl.isProtected()     = !isPublic();
+    syn boolean SrcElement.isProtected()        = !isPublic();
+    syn boolean SrcComponentDecl.isProtected()  = !isPublic();
     syn boolean InstClassDecl.isProtected()     = getSrcClassDecl().isProtected();
     syn boolean InstComponentDecl.isProtected() = getSrcComponentDecl().isProtected();
 
