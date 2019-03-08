@@ -1082,8 +1082,7 @@ aspect ConstantEvaluation {
          * Is this array is sufficiently large to to represent the given index. 
          */
         public boolean hasCell(Index i) {
-            int j = i.internal(indices);
-            return 0 <= j && j < values.length;
+            return indices.isValid(i);
         }
         
         /**
@@ -1108,7 +1107,7 @@ aspect ConstantEvaluation {
          * Get the value of a specific cell of an array constant value.
          */
         public CValue getCell(Index i) {
-        	if (!indices.isValid(i))
+        	if (!hasCell(i))
         		return UNKNOWN;
         	return values[i.internal(indices)];
         }

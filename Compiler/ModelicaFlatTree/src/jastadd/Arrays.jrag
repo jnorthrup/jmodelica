@@ -51,14 +51,7 @@ aspect Arrays {
 	 *                                      constant Integer values.
 	 */
 	public Index FArraySubscripts.createIndex() {
-        if (numSubscript() == 0) {
-            return Index.NULL;
-        }
-		int[] i = new int[numSubscript()];
-		int j = 0;
-		for (Subscript s : subscripts()) 
-			i[j++] = s.value();
-		return new Index(i);
+		return createIndex(defaultVariableEvaluator());
 	}
 
     /**
