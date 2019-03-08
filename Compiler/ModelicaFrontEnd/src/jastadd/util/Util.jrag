@@ -882,6 +882,9 @@ aspect Names {
         return URIResolver.DEFAULT.resolveURIChecked(this, str);
     }
 
+    inh InstNode InstNode.enclosingInstNode();
+    eq InstNode.getChild().enclosingInstNode() = this;
+    
     inh InstClassDecl ASTNode.enclosingInstClassDecl();
     eq SourceRoot.getProgram().enclosingInstClassDecl()      = null;
     eq FlatRoot.getChild().enclosingInstClassDecl()          = null;
@@ -1187,13 +1190,17 @@ aspect Visibility {
 
     inh boolean SrcElement.isPublic();
     inh boolean SrcComponentDecl.isPublic();
+    inh boolean SrcExtendsClause.isPublic();
     eq SrcPublicElementList.getSrcElement().isPublic()    = true;
     eq SrcProtectedElementList.getSrcElement().isPublic() = false;
     eq SourceRoot.getProgram().isPublic()           = true; 
     eq Root.getChild().isPublic()                   = true; 
 
-    syn boolean InstClassDecl.isPublic()     = getSrcClassDecl().isPublic();
-    syn boolean InstComponentDecl.isPublic() = getSrcComponentDecl().isPublic();
+    syn boolean InstNode.isPublic();
+    eq InstRoot.isPublic()          = true;
+    eq InstClassDecl.isPublic()     = getSrcClassDecl().isPublic();
+    eq InstComponentDecl.isPublic() = getSrcComponentDecl().isPublic();
+    eq InstExtends.isPublic()       = getSrcExtendsClause().isPublic();
 
     syn boolean SrcElement.isProtected()        = !isPublic();
     syn boolean SrcComponentDecl.isProtected()  = !isPublic();
