@@ -61,26 +61,6 @@ aspect Arrays {
 		return new Index(i);
 	}
 
-    /**
-     * Return an Index with these array subscripts.
-     * 
-     * This version is not cached, to allow indices to be re-evaluated at each use 
-     * during function evaluation.
-     * 
-     * @throws ConstantEvaluationException  if the subscripts can't be evaluated to 
-     *                                      constant Integer values.
-     */
-    public Index FArraySubscripts.createIndex(VariableEvaluator evaluator) {
-        if (numSubscript() == 0) {
-            return Index.NULL;
-        }
-        int[] i = new int[numSubscript()];
-        int j = 0;
-        for (Subscript s : subscripts()) 
-            i[j++] = s.value(evaluator);
-        return new Index(i);
-    }
-
     public interface Subscript {
         public int ndims();
         public Size size();
