@@ -2142,7 +2142,27 @@ aspect ConstantEvaluation {
     
     @Override
     public void InstDot.collectAccessNames(Set<String> collectedNames) {
-        getFirstInstAccess().collectAccessNames(collectedNames);
+        String prefix = "";
+
+        boolean done = false;
+        final Iterator<InstAccess> iterator = getInstAccesss().iterator();
+        while (iterator.hasNext() && !done) {
+            final InstAccess access = iterator.next();
+
+            if (access.isClassAccess()) {
+                prefix += access.name() + ".";
+            } else {
+                final Set<String> names = new HashSet<>();
+                access.collectAccessNames(names);
+
+                for (String name : names) {
+                    collectedNames.add(prefix + name);
+                }
+
+                // Break the loop.
+                done = true;
+            }
+        }
     }
 
     @Override
