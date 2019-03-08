@@ -1,0 +1,35 @@
+aspect StepLogging {
+    
+    FClass implements StepLogger;
+    public void FClass.logVerbose(Object obj) {
+        log.verbose(obj);
+    }
+
+    public void FClass.logVerbose(String format, Object... args) {
+        log.verbose(format, args);
+    }
+
+    public void FClass.logInfo(Object obj) {
+        log.info(obj);
+    }
+
+    public void FClass.logInfo(String format, Object... args) {
+        log.info(format, args);
+    }
+
+    interface StepLogger {
+        public void logVerbose(Object obj);
+        public void logVerbose(String format, Object... args);
+        public void logInfo(Object obj);
+        public void logInfo(String format, Object... args);
+    }
+
+    protected StepLogger AbstractBiPGraph.stepLogger = null;
+    public void AbstractBiPGraph.setStepLogger(StepLogger stepLogger) {
+        this.stepLogger = stepLogger;
+    }
+    public StepLogger AbstractBiPGraph.getStepLogger() {
+        return stepLogger;
+    }
+
+}
