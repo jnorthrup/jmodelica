@@ -882,6 +882,17 @@ aspect Names {
         return URIResolver.DEFAULT.resolveURIChecked(this, str);
     }
 
+	syn boolean InstNode.isLibNode() = false;
+    eq InstLibNode.isLibNode()       = true; 
+
+	/**
+	 * Any closest ancestor instClass but not stopping at InstComponents and returning it's class
+	 * as opposed to enclosingInstClassDecl().
+	 */ 
+    inh InstClassDecl InstNode.containingInstClass();
+    eq InstClassDecl.getChild().containingInstClass() = this;
+    eq InstRoot.getChild().containingInstClass()      = null;
+
     inh InstNode InstNode.enclosingInstNode();
     eq InstNode.getChild().enclosingInstNode() = this;
     
