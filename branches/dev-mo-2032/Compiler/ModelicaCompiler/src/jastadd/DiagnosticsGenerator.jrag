@@ -522,7 +522,7 @@ public class DiagnosticsGenerator {
                         out.println("}");
                     }
                     out.println("</p>");
-                    if (EquationBlockFactory.canTear(fc.myOptions())) {
+                    if (EquationBlockFactory.canTear(fc.myStepUtil())) {
                         unsolvedDAEInitBlockSizes = fc.getDAEInitBLT().unsolvedBlockIterationSizes();
                         out.print("<p>Number of unsolved equation blocks in DAE initialization system after tearing: " + 
                                   unsolvedDAEInitBlockSizes.size() + ": {");   

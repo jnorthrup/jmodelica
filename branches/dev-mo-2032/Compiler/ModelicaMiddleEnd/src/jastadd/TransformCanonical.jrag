@@ -500,8 +500,8 @@ aspect TransformCanonical {
     }
     
     public void FClass.complianceCheckBLT() {
-        getDAEBLT().complianceCheck(ErrorCheckType.COMPILE, myOptions());
-        getDAEInitBLT().complianceCheck(ErrorCheckType.COMPILE, myOptions());
+        getDAEBLT().complianceCheck(ErrorCheckType.COMPILE, myStepUtil());
+        getDAEInitBLT().complianceCheck(ErrorCheckType.COMPILE, myStepUtil());
     }
     
     private static final EnumSet<BiPGraph.VarType> FClass.VAR_TYPES_NORMAL = 
@@ -584,6 +584,7 @@ aspect TransformCanonical {
     private void FClass.computeMatchingsAndBLT() {
         // Make sure that we don't do this if any errors have been reported
         breakOnErrors();
+        StepUtil stepUtil = myStepUtil();
 
         log.verbose("Flat tree before matching and BLT:");
         log.verbose(this);
@@ -614,9 +615,9 @@ aspect TransformCanonical {
                 g.isComplete()) {
             BLT daeBLT;
             try {
-                daeBLT = g.computeDAEBLT(myOptions());
+                daeBLT = g.computeDAEBLT(stepUtil);
                 if (blockFunctionExtraction(daeBLT, g)) {
-                    daeBLT = g.computeDAEBLT(myOptions());
+                    daeBLT = g.computeDAEBLT(stepUtil);
                 }
             } catch (BLTException e) {
                 error(e.getMessage());
@@ -755,9 +756,9 @@ aspect TransformCanonical {
             g.tarjanReset();
             BLT daeInitBLT;
             try {
-                daeInitBLT = g.computeInitDAEBLT(myOptions());
+                daeInitBLT = g.computeInitDAEBLT(stepUtil);
                 if (blockFunctionExtraction(daeInitBLT, g)) {
-                    daeInitBLT = g.computeInitDAEBLT(myOptions());
+                    daeInitBLT = g.computeInitDAEBLT(stepUtil);
                 }
             } catch (BLTException e) {
                 error(e.getMessage());
