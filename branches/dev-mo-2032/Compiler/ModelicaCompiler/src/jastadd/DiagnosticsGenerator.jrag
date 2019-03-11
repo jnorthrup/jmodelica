@@ -24,6 +24,27 @@ import java.util.Iterator;
 
 aspect DiagnosticsGeneration {
 
+    /**
+     *  Write index.html.
+     */
+    public void DiagnosticsGenerator.writeDiagnostics(FClass fc) {
+        
+        writeIndexFile(fc);
+        
+        // Create BLT diagnostics file (if equation_sorting is true)
+        writeBLTFile(fc);
+        
+        // Create BLT table diagnostics file (if equation_sorting is true)
+        writeBLTTableFile(fc);
+        
+        // Create connection set information file
+        writeConnectionsFile(fc);
+        
+        // Create a file for alias information
+        writeAliasFile(fc);
+    }
+
+
 /**
  * A class for generating 
  */
@@ -440,26 +461,6 @@ public class DiagnosticsGenerator {
 
     public void setModelDiagnosticsBeforeTransform(String s) {
         modelDiagnosticsBeforeTransform = s;
-    }
-
-    /**
-     *  Write index.html.
-     */
-    public void writeDiagnostics(FClass fc) {
-        
-        writeIndexFile(fc);
-        
-        // Create BLT diagnostics file (if equation_sorting is true)
-        writeBLTFile(fc);
-        
-        // Create BLT table diagnostics file (if equation_sorting is true)
-        writeBLTTableFile(fc);
-        
-        // Create connection set information file
-        writeConnectionsFile(fc);
-        
-        // Create a file for alias information
-        writeAliasFile(fc);
     }
 
     public class IndexFile extends FClassDiagnosticsFile {
