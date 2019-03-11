@@ -586,22 +586,23 @@ aspect TransformCanonical {
         breakOnErrors();
         StepUtil stepUtil = myStepUtil();
 
-        log.verbose("Flat tree before matching and BLT:");
-        log.verbose(this);
+        logVerbose("Flat tree before matching and BLT:");
+        logVerbose(this);
 
         BiPGraph g;
         if (DAEBiPGraph == null) {
             g = computeMatchedDAEBiPGraph();
-            log.verbose("DAE BiPGraph");
-            log.verbose(g);
-            log.verbose("DAE BiPGraph matching");
-            log.verbose(g.printMatchingObj());
+            logVerbose("DAE BiPGraph");
+            logVerbose(g);
+            logVerbose("DAE BiPGraph matching");
+            logVerbose(g.printMatchingObj());
         } else {
             g = DAEBiPGraph;
             DAEBiPGraph = null;
         }
 		
-        log.verbose(g);
+        g.setStepLogger(stepUtil.getStepLogger()); //TODO refactor to setStepUtil
+        logVerbose(g);
         
         // If no complete matching found, then fail
         if (!g.isComplete()) {
@@ -624,8 +625,8 @@ aspect TransformCanonical {
                 return;
             }
             setDAEBLT(daeBLT);
-            log.verbose(getDAEStructuredBLT());
-            log.verbose(getDAEBLT());
+            logVerbose(getDAEStructuredBLT());
+            logVerbose(getDAEBLT());
         } else {
             setDAEBLT(BLT.EMPTY_BLT);
         }
@@ -701,15 +702,15 @@ aspect TransformCanonical {
                 g.addEquations(newEquations_, VAR_TYPES_ALL, eq_list.get(0).getName() + "_init_", new Enumerator(1));
         }
         
-        log.verbose(g);
+        logVerbose(g);
         
         g.addEquations(initialEquations(), VAR_TYPES_ALL);
         
         g.maximumMatching(false, prePropagationEquations.keySet());
-        log.verbose("Init DAE BiPGraph");
-        log.verbose(g);
-        log.verbose("Init BiPGraph matching");
-        log.verbose(g.printMatchingObj());
+        logVerbose("Init DAE BiPGraph");
+        logVerbose(g);
+        logVerbose("Init BiPGraph matching");
+        logVerbose(g.printMatchingObj());
         
         g = overdeterminedInitialSystem(g);
         
@@ -732,10 +733,10 @@ aspect TransformCanonical {
             root().flushAllRecursive();
             
             g.maximumMatching(false);
-            log.verbose("Init DAE BiPGraph after addition of initial equations");
-            log.verbose(g);
-            log.verbose("Init BiPGraph matching after addition of initial equations");
-            log.verbose(g.printMatchingObj());
+            logVerbose("Init DAE BiPGraph after addition of initial equations");
+            logVerbose(g);
+            logVerbose("Init BiPGraph matching after addition of initial equations");
+            logVerbose(g.printMatchingObj());
         }
         
         numIgnoredPrePropagationEquations = prePropagationEquations.size() 
@@ -765,7 +766,7 @@ aspect TransformCanonical {
                 return;
             }
             setDAEInitBLT(daeInitBLT);
-            log.verbose(daeInitBLT);
+            logVerbose(daeInitBLT);
         } else {
             setDAEInitBLT(BLT.EMPTY_BLT);
         }

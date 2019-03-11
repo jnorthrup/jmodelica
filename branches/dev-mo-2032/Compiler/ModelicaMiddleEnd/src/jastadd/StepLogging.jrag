@@ -25,6 +25,8 @@ aspect StepLogging {
     }
 
     interface StepLogger {
+        public void logDebug(Object obj);
+        public void logDebug(String format, Object... args);
         public void logVerbose(Object obj);
         public void logVerbose(String format, Object... args);
         public void logInfo(Object obj);
