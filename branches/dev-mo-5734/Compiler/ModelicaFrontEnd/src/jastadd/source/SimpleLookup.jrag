@@ -283,7 +283,8 @@ aspect SimpleClassLookup {
     eq SrcExtendsClause.getSuper().simpleLookupHelper(String name)            = simpleLookupFromExtends(name);
     eq SrcFullClassDecl.getChild().simpleLookupHelper(String name)            = simpleLookupDefaultScope(name);
     eq Program.getChild().simpleLookupHelper(String name)                     = simpleLookupDefaultScope(name);
-    eq SrcForStmt.getChild().simpleLookupHelper(String name)                  = simpleLookupFromForStmt(name);
+    eq SrcForStmt.getChild().simpleLookupHelper(String name)                  = simpleLookupForStmt(name);
+    eq SrcComponentDecl.getSrcModification().simpleLookupHelper(String name)  = simpleLookupFromModification(name);
 
     /**
     * Lookup helper method for SrcExtendsClause. Obtain the SrcClassDecl
@@ -319,6 +320,18 @@ aspect SimpleClassLookup {
         }
 
         return simpleLookupInLibNodeList(getSrcLibNodes(), name);
+    }
+
+    /**
+     * Lookup in contained elements, extended classes, imports and surrounding classes.
+     *  Has to be an unqualified classname.
+     */
+    syn lazy ResolvedAccess SrcFullClassDecl.simpleLookupDefaultScope(String name) {
+        ResolvedAccess res = simpleLookupIncludeImports(name);
+        if (res.isUnknown()) {
+            return isEncapsulated() ? simpleLookupPredefined(name) : simpleLookupHelper(name);
+        }
+        return res;
     }
 
     /**
@@ -358,18 +371,6 @@ aspect SimpleClassLookup {
     }
 
     /**
-     * Lookup in contained classes, extended classes, imports and surrounding classes.
-     *  Has to be an unqualified classname.
-     */
-    syn lazy ResolvedAccess SrcFullClassDecl.simpleLookupDefaultScope(String name) {
-        ResolvedAccess res = simpleLookupIncludeImports(name);
-        if (res.isUnknown()) {
-            return isEncapsulated() ? simpleLookupPredefined(name) : simpleLookupHelper(name);
-        }
-        return res;
-    }
-
-    /**
      * Lookup in contained classes, imports and surrounding classes. Has to be an unqualified classname.
      */
     syn lazy ResolvedAccess SrcFullClassDecl.simpleLookupLocalScope(String name) {
@@ -396,7 +397,9 @@ aspect SimpleClassLookup {
     /**
      * Lookup in contained classes and extended classes. Has to be an unqualified classname.
      */
-    syn ResolvedAccess SrcClassDecl.simpleLookupMemberScope(String name) = unknownAccess();
+    syn ResolvedAccess SrcClassDecl.simpleLookupMemberScope(String name);
+    eq SrcBadClassDecl.simpleLookupMemberScope(String name)      = unknownAccess();
+    eq SrcBuiltInClassDecl.simpleLookupMemberScope(String name)  = unknownAccess();
     eq SrcUnknownClassDecl.simpleLookupMemberScope(String name)  = unknownAccess();
 
     /**
@@ -443,7 +446,7 @@ aspect SimpleClassLookup {
     eq SrcLibNode.simpleLookupMemberScope(String name)        = 
         myClass().simpleLookupMemberScope(name);
 
-    syn ResolvedAccess SrcForStmt.simpleLookupFromForStmt(String name) {
+    syn ResolvedAccess SrcForStmt.simpleLookupForStmt(String name) {
         for (SrcForIndex index : getSrcForIndexs()) {
             SrcForIndexDecl indexDecl = index.getSrcForIndexDecl();
             if (indexDecl.name().equals(name)) {
@@ -508,6 +511,14 @@ aspect SimpleClassLookup {
         }
         
         return unknownAccess();
+    }
+
+    protected ResolvedAccess SrcComponentDecl.simpleLookupFromModification(String name) {
+        ResolvedAccess res = findClassDecl().simpleLookupMemberScope(name);
+        if (!res.isUnknown()) {
+            return res.fromContext(enclosingClassDecl().qualifiedName() + "." + name(), isProtected());
+        }
+        return simpleLookupHelper(name);
     }
 
     /**
