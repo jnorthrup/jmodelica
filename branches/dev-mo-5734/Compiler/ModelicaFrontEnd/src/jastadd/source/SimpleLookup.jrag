@@ -285,6 +285,15 @@ aspect SimpleClassLookup {
     eq Program.getChild().simpleLookupHelper(String name)                     = simpleLookupDefaultScope(name);
     eq SrcForStmt.getChild().simpleLookupHelper(String name)                  = simpleLookupForStmt(name);
     eq SrcComponentDecl.getSrcModification().simpleLookupHelper(String name)  = simpleLookupFromModification(name);
+    eq SrcValueModification.getSrcExp().simpleLookupHelper(String name)       = simpleLookupFromValue(name);
+    eq SrcComponentRedeclare.getSrcComponentClause().simpleLookupHelper(String name) = simpleLookupFromValue(name);
+    eq SrcClassRedeclare.getSrcBaseClassDecl().simpleLookupHelper(String name)       = simpleLookupFromValue(name);
+    
+    inh ResolvedAccess SrcModification.simpleLookupFromValue(String name);
+    eq SrcComponentDecl.getChild().simpleLookupFromValue(String name)         = simpleLookupHelper(name);
+    eq SrcExtendsClause.getChild().simpleLookupFromValue(String name)         = simpleLookupHelper(name);
+    eq SrcConstrainingClause.getChild().simpleLookupFromValue(String name)    = simpleLookupHelper(name);
+    eq SrcFullClassDecl.getChild().simpleLookupFromValue(String name)         = simpleLookupDefaultScope(name);
 
     /**
     * Lookup helper method for SrcExtendsClause. Obtain the SrcClassDecl
