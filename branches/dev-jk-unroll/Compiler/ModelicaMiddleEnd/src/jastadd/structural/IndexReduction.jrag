@@ -92,8 +92,11 @@ aspect IndexReduction {
                             + "Limit, compiler option 'diagnostics_limit', is set to %d and model size is %d. ",
                             myOptions().getIntegerOption("diagnostics_limit"), g.getEquations().size());
                 }
+                int dynamicStatesLimit = myOptions().getBooleanOption("dynamic_states") ?
+                        myOptions().getIntegerOption("dynamic_states_limit") :
+                        0;
                 result = g.reduceIndex(new IndexReductionFunctionInliner(this),
-                        myOptions().getBooleanOption("dynamic_states"),
+                        dynamicStatesLimit,
                         myOptions().getIntegerOption("munkres_max_incidences"),
                         printPantelidesSteps);
                 break;
@@ -941,7 +944,7 @@ aspect IndexReduction {
     }
     
     public IndexReductionResult IndexReductionBiPGraph.reduceIndex(IndexReductionFunctionInliner inliner,
-            boolean computeDynamicStates, int maximumNbrOfMunkresIncidences, boolean printPantelidesSteps) {
+            int dynamicStateLimit, int maximumNbrOfMunkresIncidences, boolean printPantelidesSteps) {
         IndexReductionResult result = new IndexReductionResult();
         FClass fclass = null;
         Stack<IndexReductionEq> eqToMatchStack = new Stack<IndexReductionEq>();
@@ -1156,8 +1159,9 @@ aspect IndexReduction {
             }
             ASTNode.log.verbose(printMatchingObj());
             Set<IndexReductionVar> dsVars = Collections.emptySet();
-            if (computeDynamicStates)
-                dsVars = computeDynamicStateSets(coefficientsMatrix, result);
+            if (dynamicStateLimit != 0) {
+                dsVars = computeDynamicStateSets(dynamicStateLimit, coefficientsMatrix, result);
+            }
             ASTNode.log.verbose(printMatchingObj());
             
             // Step 5: prepare for next iteration
