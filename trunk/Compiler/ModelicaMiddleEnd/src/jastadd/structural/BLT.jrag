@@ -100,16 +100,16 @@ aspect BLT{
          * only one Eq, a SimpleEquationBlock is created, if possible. Otherwise
          * a real or mixed equation block is created.
          */
-        public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> AbstractEquationBlock createEquationBlock(SCCBlock<E, V> component, BlockProducer producer, OptionRegistry options, boolean isInitial) {
+        public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> AbstractEquationBlock createEquationBlock(SCCBlock<E, V> component, BlockProducer producer, StepUtil stepUtil, boolean isInitial) {
             if (component.containsDynamicStates())
-                return computeDynamicStateBlock(component, producer, options);
+                return computeDynamicStateBlock(component, producer, stepUtil);
             
             SimpleEquationBlock seb = createSimpleEquationBlock(component, producer, true);
             if (seb != null && seb.isSolvable())
                 return seb;
             
             BiPGraph g = new BiPGraph(component.getMembers(), isInitial);
-            Collection<SCCBlock<Eq, Var>> subBlocks = g.tarjan(options, false);
+            Collection<SCCBlock<Eq, Var>> subBlocks = g.tarjan(stepUtil, false);
             
             errorCheckWhenEquations(subBlocks);
             
@@ -132,7 +132,7 @@ aspect BLT{
             EquationBlock eqnBlock = null;
             boolean torn = false;
             if (producer.useTearing() && realEquations.size() > 1) {
-                eqnBlock = tear(component, producer, options, isInitial);
+                eqnBlock = tear(component, producer, stepUtil, isInitial);
                 if (eqnBlock != null && !eqnBlock.solvedBlocks().isEmpty()) {
                     block = eqnBlock;
                     torn = true;
@@ -174,7 +174,7 @@ aspect BLT{
                     block = seb;
                 } else {
                     BiPGraph nonRealG = new BiPGraph(nonRealEquations, isInitial);
-                    Collection<SimpleEquationBlock> nonRealBlocks = nonRealG.computeNonRealBlocks(producer, options);
+                    Collection<SimpleEquationBlock> nonRealBlocks = nonRealG.computeNonRealBlocks(producer, stepUtil);
                     eqnBlock = new EquationBlock(producer, component.computeBlockDependency(), nonRealBlocks, createSimpleBlocks(groupComponent(realEquations), producer));
                     block = eqnBlock;
                 }
@@ -286,24 +286,24 @@ aspect BLT{
         }
         
         public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, T extends BLT>
-        T computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer, T blt, boolean inInitial,
+        T computeBLT(StepUtil stepUtil, EquationBlockFactory.BlockProducer producer, T blt, boolean inInitial,
                 boolean handleHomotopy, boolean mergePre, Collection<? extends SCCBlock<E, V>> components) {
-            blt = computeInnerBLT(options, producer, blt, inInitial, handleHomotopy, mergePre, components);
+            blt = computeInnerBLT(stepUtil, producer, blt, inInitial, handleHomotopy, mergePre, components);
             blt.setLabels();
             return blt;
         }
     
         public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, T extends BLT>
-        T computeInnerBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer, T blt, boolean inInitial,
+        T computeInnerBLT(StepUtil stepUtil, EquationBlockFactory.BlockProducer producer, T blt, boolean inInitial,
                 boolean handleHomotopy, boolean mergePre, Collection<? extends SCCBlock<E, V>> components) {
             Set<SCCBlock<E,V>> homotopyComponents = Collections.emptySet();
             if (inInitial && handleHomotopy) {
-                ASTNode.log.verbose("Initial system contains homotopy, computing homotopy block components...");
+                stepUtil.getStepLogger().logVerbose("Initial system contains homotopy, computing homotopy block components...");
                 homotopyComponents = computeHomotopyComponents(components);
-                ASTNode.log.verbose("... block components computed: %s", homotopyComponents);
+                stepUtil.getStepLogger().logVerbose("... block components computed: %s", homotopyComponents);
             }
             if (!inInitial && mergePre) {
-                blt = computeBLTWithPreMerge(options, producer, blt, components);
+                blt = computeBLTWithPreMerge(stepUtil, producer, blt, components);
             } else {
                 int homotopyCounter = 0;
                 for (SCCBlock<E,V> component : components) {
@@ -311,9 +311,9 @@ aspect BLT{
                         if (++homotopyCounter < homotopyComponents.size()) {
                             continue;
                         }
-                        blt.add(computeHomotopyBlock(homotopyComponents, producer, options));
+                        blt.add(computeHomotopyBlock(homotopyComponents, producer, stepUtil));
                     } else {
-                        blt.add(component.createEquationBlock(producer, options, inInitial));
+                        blt.add(component.createEquationBlock(producer, stepUtil, inInitial));
                     }
                 }
             }
@@ -427,35 +427,35 @@ aspect BLT{
         return new MetaEquationBlock(producer, blockDependency, this);
     }
 
-    public <T extends BLT> T AbstractBiPGraph.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer,
+    public <T extends BLT> T AbstractBiPGraph.computeBLT(StepUtil stepUtil, EquationBlockFactory.BlockProducer producer,
             T blt, boolean handleHomotopy, boolean mergePre, Collection<SCCContributor> extraContributors) {
         ASTNode.beginStep("computeBLT()");
         try {
-            Collection<C> components = tarjan(options, extraContributors, true);
-            ASTNode.log.debug("BLT Components:");
+            Collection<C> components = tarjan(stepUtil, extraContributors, true);
+            stepUtil.getStepLogger().logDebug("BLT Components:");
             for (C component : components) {
-                ASTNode.log.debug(component);
+                stepUtil.getStepLogger().logDebug(component);
             }
-            return EquationBlockFactory.computeBLT(options, producer, blt, isInitialSystem(), handleHomotopy, mergePre, components);
+            return EquationBlockFactory.computeBLT(stepUtil, producer, blt, isInitialSystem(), handleHomotopy, mergePre, components);
         } finally {
             ASTNode.endStep("computeBLT()");
         }
     }
 
-    public BLT AbstractBiPGraph.computeDAEBLT(OptionRegistry options) {
-        return computeBLT(options, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, new BLT(), true, true, Collections.<AbstractBiPGraph.SCCContributor>emptyList());
+    public BLT AbstractBiPGraph.computeDAEBLT(StepUtil stepUtil) {
+        return computeBLT(stepUtil, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, new BLT(), true, true, Collections.<AbstractBiPGraph.SCCContributor>emptyList());
     }
 
-    public BLT AbstractBiPGraph.computeInitDAEBLT(OptionRegistry options) {
-        return computeBLT(options, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, new BLT(), true, false, Collections.<AbstractBiPGraph.SCCContributor>emptyList());
+    public BLT AbstractBiPGraph.computeInitDAEBLT(StepUtil stepUtil) {
+        return computeBLT(stepUtil, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, new BLT(), true, false, Collections.<AbstractBiPGraph.SCCContributor>emptyList());
     }
     
-    public <T extends BLT> T AbstractBiPGraph.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer, T blt, boolean handleHomotopy) {
-        return computeBLT(options, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, blt, handleHomotopy, false, Collections.<AbstractBiPGraph.SCCContributor>emptyList());
+    public <T extends BLT> T AbstractBiPGraph.computeBLT(StepUtil stepUtil, EquationBlockFactory.BlockProducer producer, T blt, boolean handleHomotopy) {
+        return computeBLT(stepUtil, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, blt, handleHomotopy, false, Collections.<AbstractBiPGraph.SCCContributor>emptyList());
     }
 
-    public Collection<SimpleEquationBlock> AbstractBiPGraph.computeNonRealBlocks(EquationBlockFactory.BlockProducer producer, OptionRegistry options) {
-        Collection<C> components = tarjan(options, false);
+    public Collection<SimpleEquationBlock> AbstractBiPGraph.computeNonRealBlocks(EquationBlockFactory.BlockProducer producer, StepUtil stepUtil) {
+        Collection<C> components = tarjan(stepUtil, false);
         Collection<SimpleEquationBlock> blocks = new ArrayList<SimpleEquationBlock>();
         for (C component : components) {
             SimpleEquationBlock block = EquationBlockFactory.createSimpleEquationBlock(component, producer, true);
@@ -481,7 +481,7 @@ aspect BLT{
 
     public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>>
         AbstractEquationBlock EquationBlockFactory.computeHomotopyBlock(Collection<SCCBlock<E, V>> components,
-        BlockProducer producer, OptionRegistry options) {
+        BlockProducer producer, StepUtil stepUtil) {
         SCCBlock<E, V> mergedComponent = new SCCBlock<E, V>();
         for (SCCBlock<E, V> component : components) {
             for (E eqn : component) {
@@ -490,17 +490,17 @@ aspect BLT{
             mergedComponent.addPredecessors(component.getPredecessors());
         }
         
-        BLT homotopyBLT = computeBLT(options, producer, new BLT(), true, false, false, components);
+        BLT homotopyBLT = computeBLT(stepUtil, producer, new BLT(), true, false, false, components);
         HomotopySubBlock homotopySubBlock = new HomotopySubBlock(producer, mergedComponent.computeBlockDependency(), homotopyBLT);
-        ASTNode.log.debug("Homotopy sub block:");
-        ASTNode.log.debug(homotopySubBlock);
+        stepUtil.getStepLogger().logDebug("Homotopy sub block:");
+        stepUtil.getStepLogger().logDebug(homotopySubBlock);
         
         BiPGraph graph = new BiPGraph(mergedComponent.getMembers(), true);
         graph.setAsHomotopySimplified();
         graph.maximumMatching(true);
-        BLT simplifiedBLT = graph.computeBLT(options, producer, new BLT(), false);
-        ASTNode.log.debug("Simplified BLT:");
-        ASTNode.log.debug(simplifiedBLT);
+        BLT simplifiedBLT = graph.computeBLT(stepUtil, producer, new BLT(), false);
+        stepUtil.getStepLogger().logDebug("Simplified BLT:");
+        stepUtil.getStepLogger().logDebug(simplifiedBLT);
         
         return new HomotopyBlock(producer, mergedComponent.computeBlockDependency(), homotopySubBlock, simplifiedBLT);
     }
@@ -577,7 +577,7 @@ aspect BLT{
             return numLabledBlocks;
         }
 
-        public void complianceCheck(ErrorCheckType checkType, OptionRegistry options) {
+        public void complianceCheck(ErrorCheckType checkType, StepUtil stepUtil) {
         }
 
         public void errorCheck(FClass fclass) {
@@ -3325,34 +3325,34 @@ aspect Tearing {
                 this.option = option;
             }
 
-            public boolean active(OptionRegistry options) {
-                return options.getBooleanOption(option);
+            public boolean active(StepUtil stepUtil) {
+                return stepUtil.getOptionRegistry().getBooleanOption(option);
             }
 
             public final int compareTo(TearingAlgorithm other) {
                 return other.priority - priority;
             }
 
-            public abstract <E extends AbstractEq<E,V>, V extends AbstractVar<E,V>> TornEquationBlock tear(SCCBlock<E, V> block, BlockProducer producer, OptionRegistry options, boolean isInitial);
+            public abstract <E extends AbstractEq<E,V>, V extends AbstractVar<E,V>> TornEquationBlock tear(SCCBlock<E, V> block, BlockProducer producer, StepUtil stepUtil, boolean isInitial);
         }
         
-        public static <E extends AbstractEq<E,V>, V extends AbstractVar<E,V>> TornEquationBlock tear(SCCBlock<E, V> block, BlockProducer producer, OptionRegistry options, boolean isInitial) {
-            TearingAlgorithm algorithm = getActiveAlgorithm(options);
+        public static <E extends AbstractEq<E,V>, V extends AbstractVar<E,V>> TornEquationBlock tear(SCCBlock<E, V> block, BlockProducer producer, StepUtil stepUtil, boolean isInitial) {
+            TearingAlgorithm algorithm = getActiveAlgorithm(stepUtil);
             if (algorithm == null)
                 return null;
             else
-                return algorithm.tear(block, producer, options, isInitial);
+                return algorithm.tear(block, producer, stepUtil, isInitial);
         }
         
-        public static TearingAlgorithm getActiveAlgorithm(OptionRegistry options) {
+        public static TearingAlgorithm getActiveAlgorithm(StepUtil stepUtil) {
             for (TearingAlgorithm algorithm : tearingAlgorithms)
-                if (algorithm.active(options))
+                if (algorithm.active(stepUtil))
                     return algorithm;
             return null;
         }
         
-        public static boolean canTear(OptionRegistry options) {
-            return getActiveAlgorithm(options) != null;
+        public static boolean canTear(StepUtil stepUtil) {
+            return getActiveAlgorithm(stepUtil) != null;
         }
     }
 }
@@ -3388,21 +3388,21 @@ aspect AutomaticTearing {
             }
 
             @Override
-            public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> TornEquationBlock tear(SCCBlock<E, V> block, BlockProducer producer, OptionRegistry options, boolean isInitial) {
+            public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> TornEquationBlock tear(SCCBlock<E, V> block, BlockProducer producer, StepUtil stepUtil, boolean isInitial) {
                 TornEquationBlock teb = new TornEquationBlock(producer, block.computeBlockDependency());
-                tear(block, teb, isInitial);
+                tear(block, teb, stepUtil, isInitial);
                 return teb;
             }
             
-            private <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> void tear(SCCBlock<E, V> block, TornEquationBlock eb, boolean isInitial) {
+            private <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> void tear(SCCBlock<E, V> block, TornEquationBlock eb, StepUtil stepUtil, boolean isInitial) {
                 SolvingBiPGraph g = new SolvingBiPGraph(block.getMembers(), isInitial);
                 if (isInitial)
                     g.setAsInitialSystem();
                 
-                ASTNode.log.verbose("Starting automatic tearing");
-                ASTNode.log.verbose(g);
-                ASTNode.log.verbose("Initial matching");
-                ASTNode.log.verbose(g.printMatchingObj());
+                stepUtil.getStepLogger().logVerbose("Starting automatic tearing");
+                stepUtil.getStepLogger().logVerbose(g);
+                stepUtil.getStepLogger().logVerbose("Initial matching");
+                stepUtil.getStepLogger().logVerbose(g.printMatchingObj());
                 
                 // Obtain Maximum Solvable Matching in two steps (greedy and augmenting paths)
                 g.greedyMatching();
@@ -3418,8 +3418,8 @@ aspect AutomaticTearing {
                     SUME.add(eqn);
                 }
 
-                ASTNode.log.verbose("Matching after initial manipulation");
-                ASTNode.log.verbose(g.printMatchingObj());
+                stepUtil.getStepLogger().logVerbose("Matching after initial manipulation");
+                stepUtil.getStepLogger().logVerbose(g.printMatchingObj());
                 // Now we have a Maximum Solvable Matching
 
                 if (SUME.isEmpty()) { // If: there exist a Pefect Solvable Matching
@@ -3428,7 +3428,7 @@ aspect AutomaticTearing {
                     if (tearBlock != null && tearBlock.isSolvable()) {
                         eb.addSolvedBlock(tearBlock);
                     } else {
-                        tearInner(g, eb);
+                        tearInner(stepUtil, g, eb);
                     }
                 } else {
                     // Else: Start out by trying to insert residuals that contain
@@ -3529,15 +3529,15 @@ aspect AutomaticTearing {
                                         if (tearBlock != null && tearBlock.isSolvable()) {
                                             eb.addSolvedBlock(tearBlock);
                                         } else {
-                                            tearInner(new SolvingBiPGraph(bInnerInner.getMembers(), isInitial), eb);
+                                            tearInner(stepUtil, new SolvingBiPGraph(bInnerInner.getMembers(), isInitial), eb);
                                         }
                                     }
                                 } else {
-                                    tearInner(new SolvingBiPGraph(bInner.getMembers(), isInitial), eb);
+                                    tearInner(stepUtil, new SolvingBiPGraph(bInner.getMembers(), isInitial), eb);
                                 }
                             } else {
                                 // Reuse the already constructed graph
-                                tearInner(gInner, eb);
+                                tearInner(stepUtil, gInner, eb);
                             }
                         }
                     }
@@ -3547,13 +3547,13 @@ aspect AutomaticTearing {
                         tearings.add(v);
                     }
                     for (int i = 0; i < tearings.size(); i++) {
-                        ASTNode.log.verbose("Automatic tearing pair, equation: %s, tearing with variable: %s", residuals.get(i).getEquation(), tearings.get(i).getName());
+                        stepUtil.getStepLogger().logVerbose("Automatic tearing pair, equation: %s, tearing with variable: %s", residuals.get(i).getEquation(), tearings.get(i).getName());
                         eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(residuals.get(i), tearings.get(i), AUTOMATIC_TEARING_BLOCK_PRODUCER));
                     }
                 }
             }
             
-            private static void tearInner(SolvingBiPGraph g, TornEquationBlock eb){
+            private static void tearInner(StepUtil stepUtil, SolvingBiPGraph g, TornEquationBlock eb){
                 SolvingVar bestIter = null;
                 for (SolvingEq e : g.getEquations()) {
                     if (e.isMeta()) {
@@ -3566,7 +3566,7 @@ aspect AutomaticTearing {
                 SolvingEq res = bestIter.getMatching();
                 bestIter.isIter(true);
                 res.isRes(true);
-                ASTNode.log.verbose("Automatic tearing pair, equation: %s, tearing with variable: %s", res.getEquation(), bestIter.getVariable().displayName());
+                stepUtil.getStepLogger().logVerbose("Automatic tearing pair, equation: %s, tearing with variable: %s", res.getEquation(), bestIter.getVariable().displayName());
                 eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(res, bestIter, AUTOMATIC_TEARING_BLOCK_PRODUCER));
                 Collection<SCCBlock<SolvingEq, SolvingVar>> blt = g.tarjan(false);
                 for (SCCBlock<SolvingEq, SolvingVar> block : blt) {
@@ -3574,7 +3574,7 @@ aspect AutomaticTearing {
                     if (tearBlock != null && tearBlock.isSolvable()) {
                         eb.addSolvedBlock(tearBlock);
                     } else {
-                        tearInner(new SolvingBiPGraph(block.getMembers(), g.isInitialSystem()), eb);
+                        tearInner(stepUtil, new SolvingBiPGraph(block.getMembers(), g.isInitialSystem()), eb);
                     }
                 }
             }
