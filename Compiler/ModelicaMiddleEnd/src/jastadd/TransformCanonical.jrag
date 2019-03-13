@@ -500,8 +500,8 @@ aspect TransformCanonical {
     }
     
     public void FClass.complianceCheckBLT() {
-        getDAEBLT().complianceCheck(ErrorCheckType.COMPILE, myStepUtil());
-        getDAEInitBLT().complianceCheck(ErrorCheckType.COMPILE, myStepUtil());
+        getDAEBLT().complianceCheck(ErrorCheckType.COMPILE, myOptions());
+        getDAEInitBLT().complianceCheck(ErrorCheckType.COMPILE, myOptions());
     }
     
     private static final EnumSet<BiPGraph.VarType> FClass.VAR_TYPES_NORMAL = 
@@ -584,25 +584,23 @@ aspect TransformCanonical {
     private void FClass.computeMatchingsAndBLT() {
         // Make sure that we don't do this if any errors have been reported
         breakOnErrors();
-        StepUtil stepUtil = myStepUtil();
 
-        logVerbose("Flat tree before matching and BLT:");
-        logVerbose(this);
+        log.verbose("Flat tree before matching and BLT:");
+        log.verbose(this);
 
         BiPGraph g;
         if (DAEBiPGraph == null) {
             g = computeMatchedDAEBiPGraph();
-            logVerbose("DAE BiPGraph");
-            logVerbose(g);
-            logVerbose("DAE BiPGraph matching");
-            logVerbose(g.printMatchingObj());
+            log.verbose("DAE BiPGraph");
+            log.verbose(g);
+            log.verbose("DAE BiPGraph matching");
+            log.verbose(g.printMatchingObj());
         } else {
             g = DAEBiPGraph;
             DAEBiPGraph = null;
         }
 		
-        g.setStepLogger(stepUtil.getStepLogger()); //TODO refactor to setStepUtil
-        logVerbose(g);
+        log.verbose(g);
         
         // If no complete matching found, then fail
         if (!g.isComplete()) {
@@ -616,17 +614,17 @@ aspect TransformCanonical {
                 g.isComplete()) {
             BLT daeBLT;
             try {
-                daeBLT = g.computeDAEBLT(stepUtil);
+                daeBLT = g.computeDAEBLT(myOptions());
                 if (blockFunctionExtraction(daeBLT, g)) {
-                    daeBLT = g.computeDAEBLT(stepUtil);
+                    daeBLT = g.computeDAEBLT(myOptions());
                 }
             } catch (BLTException e) {
                 error(e.getMessage());
                 return;
             }
             setDAEBLT(daeBLT);
-            logVerbose(getDAEStructuredBLT());
-            logVerbose(getDAEBLT());
+            log.verbose(getDAEStructuredBLT());
+            log.verbose(getDAEBLT());
         } else {
             setDAEBLT(BLT.EMPTY_BLT);
         }
@@ -702,15 +700,15 @@ aspect TransformCanonical {
                 g.addEquations(newEquations_, VAR_TYPES_ALL, eq_list.get(0).getName() + "_init_", new Enumerator(1));
         }
         
-        logVerbose(g);
+        log.verbose(g);
         
         g.addEquations(initialEquations(), VAR_TYPES_ALL);
         
         g.maximumMatching(false, prePropagationEquations.keySet());
-        logVerbose("Init DAE BiPGraph");
-        logVerbose(g);
-        logVerbose("Init BiPGraph matching");
-        logVerbose(g.printMatchingObj());
+        log.verbose("Init DAE BiPGraph");
+        log.verbose(g);
+        log.verbose("Init BiPGraph matching");
+        log.verbose(g.printMatchingObj());
         
         g = overdeterminedInitialSystem(g);
         
@@ -733,10 +731,10 @@ aspect TransformCanonical {
             root().flushAllRecursive();
             
             g.maximumMatching(false);
-            logVerbose("Init DAE BiPGraph after addition of initial equations");
-            logVerbose(g);
-            logVerbose("Init BiPGraph matching after addition of initial equations");
-            logVerbose(g.printMatchingObj());
+            log.verbose("Init DAE BiPGraph after addition of initial equations");
+            log.verbose(g);
+            log.verbose("Init BiPGraph matching after addition of initial equations");
+            log.verbose(g.printMatchingObj());
         }
         
         numIgnoredPrePropagationEquations = prePropagationEquations.size() 
@@ -757,16 +755,16 @@ aspect TransformCanonical {
             g.tarjanReset();
             BLT daeInitBLT;
             try {
-                daeInitBLT = g.computeInitDAEBLT(stepUtil);
+                daeInitBLT = g.computeInitDAEBLT(myOptions());
                 if (blockFunctionExtraction(daeInitBLT, g)) {
-                    daeInitBLT = g.computeInitDAEBLT(stepUtil);
+                    daeInitBLT = g.computeInitDAEBLT(myOptions());
                 }
             } catch (BLTException e) {
                 error(e.getMessage());
                 return;
             }
             setDAEInitBLT(daeInitBLT);
-            logVerbose(daeInitBLT);
+            log.verbose(daeInitBLT);
         } else {
             setDAEInitBLT(BLT.EMPTY_BLT);
         }
