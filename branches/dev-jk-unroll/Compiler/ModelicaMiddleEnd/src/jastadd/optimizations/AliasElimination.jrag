@@ -549,7 +549,14 @@ aspect AliasElimination {
         !isDifferentiatedVariable() && !isDerivativeVariable();
 
     syn boolean FAbstractEquation.isCopyAssignment() = false;
-    eq FEquation.isCopyAssignment() = getRight().isAccess();
+    eq FEquation.isCopyAssignment() = getRight().isCopyAssignment();
+    
+    syn boolean FExp.isCopyAssignment() = false;
+    eq FAccessExp.isCopyAssignment() = true;
+    eq FDotMulExp.isCopyAssignment() = getLeft().isTempAccess() && getRight().isTempAccess();
+    
+    syn boolean FExp.isTempAccess() = false;
+    eq FAccessExp.isTempAccess() = myFV().isTemporary();
 
 	/**
 	 * Inline all non-defining uses of variable, and remove equation defining it.
