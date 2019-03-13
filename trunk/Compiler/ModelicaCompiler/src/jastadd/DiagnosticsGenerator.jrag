@@ -24,27 +24,6 @@ import java.util.Iterator;
 
 aspect DiagnosticsGeneration {
 
-    /**
-     *  Write index.html.
-     */
-    public void DiagnosticsGenerator.writeDiagnostics(FClass fc) {
-        
-        writeIndexFile(fc);
-        
-        // Create BLT diagnostics file (if equation_sorting is true)
-        writeBLTFile(fc);
-        
-        // Create BLT table diagnostics file (if equation_sorting is true)
-        writeBLTTableFile(fc);
-        
-        // Create connection set information file
-        writeConnectionsFile(fc);
-        
-        // Create a file for alias information
-        writeAliasFile(fc);
-    }
-
-
 /**
  * A class for generating 
  */
@@ -463,6 +442,26 @@ public class DiagnosticsGenerator {
         modelDiagnosticsBeforeTransform = s;
     }
 
+    /**
+     *  Write index.html.
+     */
+    public void writeDiagnostics(FClass fc) {
+        
+        writeIndexFile(fc);
+        
+        // Create BLT diagnostics file (if equation_sorting is true)
+        writeBLTFile(fc);
+        
+        // Create BLT table diagnostics file (if equation_sorting is true)
+        writeBLTTableFile(fc);
+        
+        // Create connection set information file
+        writeConnectionsFile(fc);
+        
+        // Create a file for alias information
+        writeAliasFile(fc);
+    }
+
     public class IndexFile extends FClassDiagnosticsFile {
         
         public IndexFile() {
@@ -523,7 +522,7 @@ public class DiagnosticsGenerator {
                         out.println("}");
                     }
                     out.println("</p>");
-                    if (EquationBlockFactory.canTear(fc.myStepUtil())) {
+                    if (EquationBlockFactory.canTear(fc.myOptions())) {
                         unsolvedDAEInitBlockSizes = fc.getDAEInitBLT().unsolvedBlockIterationSizes();
                         out.print("<p>Number of unsolved equation blocks in DAE initialization system after tearing: " + 
                                   unsolvedDAEInitBlockSizes.size() + ": {");   
