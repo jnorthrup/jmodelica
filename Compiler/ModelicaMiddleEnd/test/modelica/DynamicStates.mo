@@ -1978,20 +1978,16 @@ b := time
 --- Solved equation ---
 _der_b := 1.0
 
---- Solved equation ---
-temp_3 := _der_b
-
 --- Dynamic state block ---
   --- States: _der_y, y ---
     --- Solved equation ---
     dynDer(y) := ds(1, _der_y)
 
-    --- Torn system (Block 1(_der_y, y).1) of 2 iteration variables and 4 solved variables ---
+    --- Torn system (Block 1(_der_y, y).1) of 2 iteration variables and 3 solved variables ---
     Torn variables:
       c
-      t
-      temp_6
       dynDer(t)
+      t
 
     Iteration variables:
       _der_x ()
@@ -1999,9 +1995,8 @@ temp_3 := _der_b
 
     Torn equations:
       c := cos(_der_x)
+      dynDer(t) := DynamicStates.Special.NoDerivative1.F(_der_b * c, c)
       t := DynamicStates.Special.NoDerivative1.F(b, c)
-      temp_6 := c
-      dynDer(t) := DynamicStates.Special.NoDerivative1.F(temp_3 * temp_6, temp_6)
 
     Residual equations:
       x * ds(2, y) * ds(2, t) = 0
@@ -2018,10 +2013,7 @@ temp_3 := _der_b
       Computed variables: c
 
     --- Solved equation ---
-    temp_6 := c
-
-    --- Solved equation ---
-    dynDer(t) := DynamicStates.Special.NoDerivative1.F(temp_3 * temp_6, temp_6)
+    dynDer(t) := DynamicStates.Special.NoDerivative1.F(_der_b * c, c)
 
     --- Solved equation ---
     _der_t := dynDer(t)
@@ -2049,11 +2041,8 @@ temp_3 := _der_b
     dynDer(t) := ds(1, _der_t)
 
     --- Unsolved equation (Block 1(_der_t, y).1) ---
-    dynDer(t) = DynamicStates.Special.NoDerivative1.F(temp_3 * temp_6, temp_6)
-      Computed variables: temp_6
-
-    --- Solved equation ---
-    c := temp_6
+    dynDer(t) = DynamicStates.Special.NoDerivative1.F(_der_b * c, c)
+      Computed variables: c
 
     --- Solved equation ---
     t := DynamicStates.Special.NoDerivative1.F(b, c)
@@ -2100,7 +2089,7 @@ Torn equations:
   dynDer(_der_y) := _der_vy
   _der_vx := a * x
   _der_c := - sin(_der_x) * _der_vx
-  dynDer(_der_t) := DynamicStates.Special.NoDerivative1.F((temp_3 * _der_c + _der_der_b * temp_6) * temp_6, temp_6)
+  dynDer(_der_t) := DynamicStates.Special.NoDerivative1.F((_der_b * _der_c + _der_der_b * c) * c, c)
 
 Residual equations:
   x * ds(2, y) * dynDer(_der_t) + (x * dynDer(y) + _der_x * ds(2, y)) * dynDer(t) + ((x * dynDer(y) + _der_x * ds(2, y)) * dynDer(t) + (x * dynDer(_der_y) + _der_x * dynDer(y) + (_der_x * dynDer(y) + _der_vx * ds(2, y))) * ds(2, t)) = 0
