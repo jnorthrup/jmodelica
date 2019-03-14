@@ -444,56 +444,61 @@ aspect InstLookupClasses {
         // TODO: Why do we do this? Seems to be needed, as tests fail without it
         if (myInstClass().isRedeclaredNonSimple())
             return myInstClass().lookupInstClassInInstClassRedeclare(name);
-        
+
         for (InstImport ii : getInstImports()) {
             InstLookupResult<InstClassDecl> res = ii.lookupInstClassInImport(name);
             if (res.successful())
                 return res;
         }
-        
+
         for (InstClassDecl icd : getInstClassDecls()) 
             if (icd.matches(name)) 
                 return InstLookupResult.found(icd);
-    
+
         return myInstClass().superLookupInstClass(name);
     }
 
-
     syn lazy InstLookupResult<InstClassDecl> InstExtends.genericLookupInstClassInExtends(String name) {
-        for (InstClassDecl icd : getInstClassDecls()) 
-            if (icd.matches(name)) 
+        for (InstClassDecl icd : getInstClassDecls()) {
+            if (icd.matches(name)) {
                 return InstLookupResult.found(icd);
-        
+            }
+        }
+
         for (InstExtends ie : getInstExtendss()) {
             InstLookupResult<InstClassDecl> res = ie.memberInstClass(name);
-            if (res.successful())
+            if (res.successful()) {
                 return res;
+            }
         }
-        
-        return myInstClass().genericLookupInstClass(name);
+
+        InstLookupResult<InstClassDecl> res = myInstClass().genericLookupInstClass(name);
+        if (res.successful()) {
+            return res;
+        }
+        return surroundingInstClass().lookupInstClass(name);
     }
 
     syn InstLookupResult<InstClassDecl> InstExtends.superLookupInstClassInExtends(String name) {
         for (InstClassDecl icd : getInstClassDecls()) 
             if (icd.matches(name)) 
                 return InstLookupResult.found(icd);
-        
+
         return myInstClass().superLookupInstClass(name);
     }
-
 
     syn InstLookupResult<InstClassDecl> InstNode.memberInstClass(String name) = InstLookupResult.notFound();
     eq InstFullClassDecl.memberInstClass(String name) {
         for (InstClassDecl icd : getInstClassDecls()) 
             if (icd.matches(name)) 
                 return InstLookupResult.found(findInnerClassIfAny(icd));
-        
+
         for (InstExtends ie : getInstExtendss()) {
             InstLookupResult<InstClassDecl> res = ie.memberInstClass(name);
             if (res.successful())
                 return res;
         }
-        
+
         return InstLookupResult.notFound();
     }
 
