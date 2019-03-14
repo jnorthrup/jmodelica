@@ -3432,7 +3432,8 @@ aspect ConstantEvaluation {
         public String qualifiedName();
         public Size size();
         public boolean isInstClassConstant();
-        public String instClassRelativePath(InstNode instNode);
+        public boolean isInstPackageConstant();
+        public boolean inSameInstClass(InstNode instNode);
         public TypePrefixVariability variability();
 
         // Added for codegeneration when evaluating external functions
@@ -3451,27 +3452,20 @@ aspect ConstantEvaluation {
     public boolean FAbstractVariable.isInstClassConstant() { return false;}
     public boolean InstComponentDecl.isInstClassConstant() { return isConstant() && enclosingInstComponentDecl() == null;}
     
-    public String FAbstractVariable.instClassRelativePath(InstNode instNode) { return "";}
-    public String InstComponentDecl.instClassRelativePath(InstNode instNode) {
+    public boolean FAbstractVariable.isInstPackageConstant() { return false;}
+    public boolean InstComponentDecl.isInstPackageConstant() { return isInstClassConstant() && enclosingInstClassDecl().isPackage();}
+    
+    public boolean FAbstractVariable.inSameInstClass(InstNode instNode) { return false;}
+    public boolean InstComponentDecl.inSameInstClass(InstNode instNode) {
     	InstNode classDecl = instNode;
     	if (!classDecl.isClassDecl()) {
     		classDecl = classDecl.containingInstClass();
     	}
     	InstNode node = containingEntity();
     	if (node.equals(classDecl)) {
-    		return "";
+    		return true;
     	}
-    	String path = node.name();
-    	while (node.containingEntity() != null) {
-    		node = node.containingEntity();
-    		if (node.equals(classDecl)) {
-        		return path + ".";
-        	}
-        	if (!node.isLibNode()) {
-    			path = node.name() + "." + path;
-    		}
-    	}
-    	return path + ".";
+    	return false;
     }
     
     
