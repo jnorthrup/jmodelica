@@ -771,7 +771,16 @@ aspect CCodeGenExpressions {
     @Override
     public void FReinit.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
         super.genTempVars_C(p, str, indent);
-        p.printAssign(type(), str, indent, this, getFExp());
+        String next = indent;
+        if (p.inBlock()) {
+            str.format("%sif (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {\n", indent);
+            next = p.indent(indent);
+        }
+        p.printAssign(type(), str, next, this, getFExp());
+        genReinitWritebacks_C(p, str, next, true, true);
+        if (p.inBlock()) {
+            str.format("%s}\n", indent);
+        }
     }
 
     /*=========================================================================
