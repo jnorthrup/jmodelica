@@ -2149,6 +2149,10 @@ aspect ConstantEvaluation {
     
     @Override
     public void InstDot.collectAccessNames(Set<String> collectedNames) {
+        if (myInstComponentDecl().isConstant()) {
+            return;
+        }
+
         final ArrayList<String> prefixes = new ArrayList<>();
         for (InstAccess instAccess : getInstAccesss()) {
             if (instAccess.isClassAccess()) {
@@ -2191,7 +2195,8 @@ aspect ConstantEvaluation {
 
     @Override
     public void InstPrimitive.collectScalarPrimitives(Set<String> collectedNames) {
-        String qualifiedName = qualifiedName();
+        final String qualifiedName = qualifiedName();
+
         if (isArray()) {
             for (Index index : Indices.create(size())) {
                 collectedNames.add(qualifiedName + index);
