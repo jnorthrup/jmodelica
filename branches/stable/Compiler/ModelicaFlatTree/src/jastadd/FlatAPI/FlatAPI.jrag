@@ -3768,7 +3768,7 @@ aspect FlatDiagnostics {
         
         str.append("\n");  
         
-        str.append(getConnectionSetManager().printConnectionSets());
+        str.append(connectionSetDiagnostics());
         
         return str.toString();
     }
@@ -4101,6 +4101,10 @@ aspect FlatDiagnostics {
         return res;
     }
 
+    public String FClass.connectionSetDiagnostics() {
+        return getConnectionSetManager().printConnectionSets();
+    }
+    
     public String FClass.incidence() {
         return incidence(false);
     }
