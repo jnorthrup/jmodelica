@@ -1089,10 +1089,8 @@ aspect FunctionInlining {
             return isInlinable(late, call);
         if (!late && call.derivativeAnnotation().exists())
             return false;
-        for (FFunctionVariable ffv : myProtected()) {
-            if (!ffv.name().startsWith("temp_")) {
-                return false;
-            }
+        if (myProtected().size() > 0) {
+            return false;
         }
         if (!hasInlinableIO())
             return false;

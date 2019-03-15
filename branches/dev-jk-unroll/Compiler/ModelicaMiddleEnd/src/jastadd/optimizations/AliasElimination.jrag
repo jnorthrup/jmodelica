@@ -543,17 +543,19 @@ aspect AliasElimination {
     syn boolean FVariable.shouldEliminateTemporary() = 
         isTemporary() && 
         definingUses().size() <= 1 && 
-        (nonDefiningUses().size() <= 1 || (definingUses().size() == 1 && definingUses().iterator().next().myFEquation().isCopyAssignment())) && 
+        (nonDefiningUses().size() <= 1 || (definingUses().size() == 1 && definingUses().iterator().next().myFEquation().isOkInlineTemporaries())) && 
         !isPreVariable() && myPreVariable().isUnknown() && 
         (definingUses().isEmpty() || !definingUses().iterator().next().myFEquation().generatesEvents()) && 
         !isDifferentiatedVariable() && !isDerivativeVariable();
 
-    syn boolean FAbstractEquation.isCopyAssignment() = false;
-    eq FEquation.isCopyAssignment() = getRight().isCopyAssignment();
+    syn boolean FAbstractEquation.isOkInlineTemporaries() = false;
+    eq FEquation.isOkInlineTemporaries() = getRight().isOkInlineTemporaries();
     
-    syn boolean FExp.isCopyAssignment() = false;
-    eq FAccessExp.isCopyAssignment() = true;
-    eq FDotMulExp.isCopyAssignment() = getLeft().isTempAccess() && getRight().isTempAccess();
+    syn boolean FExp.isOkInlineTemporaries() = false;
+    eq FAccessExp.isOkInlineTemporaries() = true;
+    /* This rule is needed to sort out dynamic state selection in equations inlined from resolve 
+       function in Modelica.Mechanics.MultiBody.Examples.Constraints.RevoluteConstraint */
+    eq FDotMulExp.isOkInlineTemporaries() = getLeft().isTempAccess() && getRight().isTempAccess();
     
     syn boolean FExp.isTempAccess() = false;
     eq FAccessExp.isTempAccess() = myFV().isTemporary();
