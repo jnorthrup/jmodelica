@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jmodelica.util.BinaryOperation;
+import org.jmodelica.util.StringUtil;
 import org.jmodelica.util.collections.ConstArrayIterator;
 import org.jmodelica.util.collections.SingleIterator;
 import org.jmodelica.util.values.ConstValue;
@@ -2125,8 +2126,14 @@ aspect ConstantEvaluation {
 
     @Override
     public void InstAccessExp.collectAccessNames(Set<String> collectedNames) {
-        getInstAccess().collectAccessNames(collectedNames);
-        getInstAccess().collectAccessNamesInArraySubscripts(collectedNames);
+        if (isArray()) {
+            for (FExp fexp: getArray().iterable()) {
+                fexp.collectAccessNames(collectedNames);
+            }
+        } else {
+            getInstAccess().collectAccessNames(collectedNames);
+            getInstAccess().collectAccessNamesInArraySubscripts(collectedNames);
+        }
     }
 
     @Override
@@ -2141,7 +2148,19 @@ aspect ConstantEvaluation {
     
     @Override
     public void InstDot.collectAccessNames(Set<String> collectedNames) {
-        getFirstInstAccess().collectAccessNames(collectedNames);
+        final ArrayList<String> prefixes = new ArrayList<>();
+        for (InstAccess instAccess : getInstAccesss()) {
+            if (instAccess.isClassAccess()) {
+                prefixes.add(instAccess.name());
+            }
+        }
+        final String prefix = StringUtil.join(".", prefixes);
+
+        final Set<String> names = new HashSet<>();
+        getLastInstAccess().collectAccessNames(names);
+        for (String name : names) {
+            collectedNames.add(prefix.isEmpty() ? name : prefix +"." + name);
+        }
     }
 
     @Override
@@ -2151,7 +2170,7 @@ aspect ConstantEvaluation {
 
     @Override
     public void InstArrayAccess.collectAccessNames(Set<String> collectedNames) {
-        myInstComponentDecl().collectScalarPrimitives(collectedNames);
+        myInstComponentElement().collectScalarPrimitives(collectedNames);
     }
 
     @Override
@@ -2242,7 +2261,9 @@ aspect ConstantEvaluation {
 
     @Override
     public void InstArrayAccess.collectAccessNamesInArraySubscripts(Set<String> collectedNames) {
-        getFArraySubscripts().collectAccessNames(collectedNames);
+        if (myInstComponentDecl().isPrimitive()) {
+            getFArraySubscripts().collectAccessNames(collectedNames);
+        }
     }
 
 
