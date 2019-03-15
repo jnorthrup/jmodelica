@@ -707,7 +707,7 @@ public class CGenerator extends GenericGenerator {
                 }
                 @Override
                 public void genPost(AbstractEquationBlock element) {
-                    element.genReinitWritebacks_C(p, indent, str);
+                    //element.genReinitWritebacks_C(p, indent, str);
                 }
             };
             
@@ -765,7 +765,7 @@ public class CGenerator extends GenericGenerator {
                 }
                 @Override
                 public void genPost(AbstractEquationBlock element) {
-                    element.genReinitWritebacks_C(p, indent, str);
+                    //element.genReinitWritebacks_C(p, indent, str);
                 }
             };
             

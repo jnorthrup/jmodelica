@@ -11851,10 +11851,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _y_0 = x[0];
         }
         func_CCodeGenTests_BlockTest20_f_b_def0(_time + _y_0, tmp_1);
-        _temp_2_1 = (tmp_1->x);
+        _temp_1_x_1 = (tmp_1->x);
         _temp_1_b_2 = (tmp_1->b);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = (COND_EXP_EQ(_temp_1_b_2, JMI_TRUE, _temp_2_1 * _temp_2_1, _temp_2_1)) - (_y_0);
+            (*res)[0] = (COND_EXP_EQ(_temp_1_b_2, JMI_TRUE, _temp_1_x_1 * _temp_1_x_1, _temp_1_x_1)) - (_y_0);
         }
     }
     JMI_DYNAMIC_FREE()
@@ -13594,7 +13594,13 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _temp_1_5 = LOG_EXP_AND(_b_4, LOG_EXP_NOT(pre_b_4));
         }
         if (LOG_EXP_AND(_temp_1_5, LOG_EXP_NOT(pre_temp_1_5))) {
-            JMI_GLOBAL(tmp_1) = AD_WRAP_LITERAL(1);
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                JMI_GLOBAL(tmp_1) = AD_WRAP_LITERAL(1);
+                if (JMI_GLOBAL(tmp_1) != _x_0) {
+                    _x_0 = JMI_GLOBAL(tmp_1);
+                    jmi->reinit_triggered = 1;
+                }
+            }
         }
         _zz_3 = - _y_1 + 0.1;
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
@@ -15326,10 +15332,7 @@ $C_ode_time_events$
 $C_ode_derivatives$
 ",
             generatedCode="
-
     jmi_real_t nSamp;
-
-
 
 
 int model_ode_derivatives_base(jmi_t* jmi) {
@@ -15337,13 +15340,13 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
     _b_1 = cos(_time);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch(jmi, _b_1 - (AD_WRAP_LITERAL(0.0)), _sw(1), JMI_REL_GT);
-    }
-    _a_0 = COND_EXP_EQ(_sw(1), JMI_TRUE, _b_1, - _b_1);
-    if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, _b_1 - (AD_WRAP_LITERAL(0.0)), _sw(0), JMI_REL_GT);
     }
-    _c_2 = COND_EXP_EQ(_sw(0), JMI_TRUE, _b_1, - _b_1);
+    _a_0 = COND_EXP_EQ(_sw(0), JMI_TRUE, _b_1, - _b_1);
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch(jmi, _b_1 - (AD_WRAP_LITERAL(0.0)), _sw(1), JMI_REL_GT);
+    }
+    _c_2 = COND_EXP_EQ(_sw(1), JMI_TRUE, _b_1, - _b_1);
     JMI_DYNAMIC_FREE()
     return ef;
 }

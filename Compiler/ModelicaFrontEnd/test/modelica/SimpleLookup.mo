@@ -216,4 +216,144 @@ Unknown
 ")})));
 end RelativeLookup; 
 
+
+package FindConstant
+    
+    constant Real C = 1;
+    
+    package Constants
+        constant Real[2] array = 1:2;
+    end Constants;
+    
+    model TestFindConstant1
+        Real a = C;
+        annotation(__JModelica(UnitTesting(tests={
+        InstClassMethodTestCase(
+            name="TestFindConstant1",
+            description="Tests the method SrcAccess.findConstant",
+            methodName="testFindConstant",
+            methodResult="C=SimpleLookup.FindConstant.C"
+        )})));
+    end TestFindConstant1;
+    
+    model TestFindConstant2
+        constant Real C = 1;
+        Real a = C;
+        annotation(__JModelica(UnitTesting(tests={
+        InstClassMethodTestCase(
+            name="TestFindConstant2",
+            description="Tests the method SrcAccess.findConstant",
+            methodName="testFindConstant",
+            methodResult="C=SimpleLookup.FindConstant.TestFindConstant2.C"
+        )})));
+    end TestFindConstant2;
+    
+    model TestFindConstant3
+        extends TestFindConstant2;
+        Real b = C;
+        annotation(__JModelica(UnitTesting(tests={
+        InstClassMethodTestCase(
+            name="TestFindConstant3",
+            description="Tests the method SrcAccess.findConstant, inherited constant",
+            methodName="testFindConstant",
+            methodResult="C=SimpleLookup.FindConstant.TestFindConstant3.C"
+        )})));
+    end TestFindConstant3;
+    
+    model TestFindConstant4
+        Real a;
+    algorithm
+        for C in 1:2 loop
+            a := C;
+        end for;
+        annotation(__JModelica(UnitTesting(tests={
+        InstClassMethodTestCase(
+            name="TestFindConstant4",
+            description="Tests the method SrcAccess.findConstant, constant shadowed by loop variable",
+            methodName="testFindConstant",
+            methodResult="
+                a=Unknown
+                C=Unknown"
+        )})));
+    end TestFindConstant4;
+    
+    model TestFindConstant5
+        constant Integer a = 1;
+        Real b = Constants.array[a];
+        annotation(__JModelica(UnitTesting(tests={
+        InstClassMethodTestCase(
+            name="TestFindConstant5",
+            description="Tests the method SrcAccess.findConstant, dot access with access in array subscripts",
+            methodName="testFindConstant",
+            methodResult="
+                array=SimpleLookup.FindConstant.Constants.array
+                a=SimpleLookup.FindConstant.TestFindConstant5.a"
+        )})));
+    end TestFindConstant5;
+    
+    model TestFindConstant6
+        Real a = .SimpleLookup.FindConstant.C;
+        annotation(__JModelica(UnitTesting(tests={
+        InstClassMethodTestCase(
+            name="TestFindConstant6",
+            description="Tests the method SrcAccess.findConstant, global access",
+            methodName="testFindConstant",
+            methodResult="C=SimpleLookup.FindConstant.C"
+        )})));
+    end TestFindConstant6;
+    
+    model TestFindConstant7
+        extends TestFindConstant2(C = 2);
+        annotation(__JModelica(UnitTesting(tests={
+        InstClassMethodTestCase(
+            name="TestFindConstant7",
+            description="Tests the method SrcAccess.findConstant, from extends",
+            methodName="testFindConstant",
+            methodResult="C=SimpleLookup.FindConstant.TestFindConstant7.C"
+        )})));
+    end TestFindConstant7;
+    
+    encapsulated package EncapulatedPackage
+        
+        model TestFindConstantEncapsulated
+            Real a = C;
+            annotation(__JModelica(UnitTesting(tests={
+            InstClassMethodTestCase(
+                name="TestFindConstantEncapsulated",
+                description="Tests the method SrcAccess.findConstant, constant outside encapsulation",
+                methodName="testFindConstant",
+                methodResult="C=Unknown"
+            )})));
+        end TestFindConstantEncapsulated;
+        
+        model TestFindConstantQualifiedImport
+            import .SimpleLookup.FindConstant.C;
+            Real a = C;
+            annotation(__JModelica(UnitTesting(tests={
+            InstClassMethodTestCase(
+                name="TestFindConstantQualifiedImport",
+                description="Tests the method SrcAccess.findConstant, imported constant",
+                methodName="testFindConstant",
+                methodResult="
+                    C=SimpleLookup.FindConstant.C
+                    C=SimpleLookup.FindConstant.C
+                ")})));
+        end TestFindConstantQualifiedImport;
+        
+        model TestFindConstantUnqualifiedImport
+            import .SimpleLookup.FindConstant.*;
+            Real a = C;
+            annotation(__JModelica(UnitTesting(tests={
+            InstClassMethodTestCase(
+                name="TestFindConstantUnqualifiedImport",
+                description="Tests the method SrcAccess.findConstant, imported constant",
+                methodName="testFindConstant",
+                methodResult="C=SimpleLookup.FindConstant.C"
+            )})));
+        end TestFindConstantUnqualifiedImport;
+        
+    end EncapulatedPackage;
+    
+end FindConstant;
+
 end SimpleLookup;
