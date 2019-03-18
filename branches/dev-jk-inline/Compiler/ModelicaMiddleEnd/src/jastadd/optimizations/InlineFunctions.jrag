@@ -371,7 +371,7 @@ aspect FunctionInlining {
         private FClass fc;
         private List<FVariable> vars;
         
-        Stack<Collection<FAbstractEquation>> worklistStack = new Stack<Collection<FAbstractEquation>>();
+        Deque<Collection<FAbstractEquation>> worklistStack = new ArrayDeque<>();
         
         private List<FAbstractEquation> currentOldList = null;
         private Collection<FAbstractEquation> currentNewList = null;
@@ -405,10 +405,8 @@ aspect FunctionInlining {
         }
 
         public void pushWorklist(List<FAbstractEquation> eqs) {
-            Collection<FAbstractEquation> worklist = new ArrayList<FAbstractEquation>(eqs.getNumChild());
-            for (FAbstractEquation eqn : eqs) {
-                worklist.add(eqn);
-            }
+            Collection<FAbstractEquation> worklist = new ArrayList<>();
+            eqs.addAllTo(worklist);
             worklistStack.push(worklist);
         }
 
