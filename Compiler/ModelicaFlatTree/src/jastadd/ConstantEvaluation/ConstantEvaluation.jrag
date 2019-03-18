@@ -2131,8 +2131,11 @@ aspect ConstantEvaluation {
                 fexp.collectAccessNames(collectedNames);
             }
         } else {
-            getInstAccess().collectAccessNames(collectedNames);
-            getInstAccess().collectAccessNamesInArraySubscripts(collectedNames);
+            final InstAccess access = getInstAccess();
+            if (!access.isPackageConstantAccess()) {
+                access.collectAccessNames(collectedNames);
+                access.collectAccessNamesInArraySubscripts(collectedNames);
+            }
         }
     }
 
@@ -2143,16 +2146,13 @@ aspect ConstantEvaluation {
       }
     }
 
+    public boolean InstAccess.isPackageConstantAccess() { return myInstComponentDecl().isInstPackageConstant(); }
 
     public abstract void InstAccess.collectAccessNames(Set<String> collectedNames);
-    
+
     @Override
     public void InstDot.collectAccessNames(Set<String> collectedNames) {
         final String qualifiedName = qualifiedName();
-        if (myInstComponentDecl().isInstPackageConstant()) {
-            // System.err.println("InstDot: " + qualifiedName + " is a package constant and should not be collected.");
-            return;
-        }
 
         final ArrayList<String> prefixes = new ArrayList<>();
         for (InstAccess instAccess : getInstAccesss()) {
@@ -2197,10 +2197,6 @@ aspect ConstantEvaluation {
     @Override
     public void InstPrimitive.collectScalarPrimitives(Set<String> collectedNames) {
         final String qualifiedName = qualifiedName();
-        if (isInstPackageConstant()) {
-            // System.err.println("InstPrimitive: " + qualifiedName + " is a package constant and should not be collected.");
-            return;
-        }
 
         if (isArray()) {
             for (Index index : Indices.create(size())) {
