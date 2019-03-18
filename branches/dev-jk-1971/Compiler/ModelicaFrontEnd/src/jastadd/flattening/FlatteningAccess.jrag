@@ -116,23 +116,23 @@ aspect FlatteningAccess {
     /**
      * Flatten this access.
      */
-    public FAccess InstAccess.flatten(Flattener flattener) {
-        return getFAccess().copyAndAddFas(flattenFAS(flattener));
+    public FAccess InstAccess.flatten(Flattener f) {
+        return getFAccess().copyAndAddFas(flattenFAS(f));
     }
 
-    public FAccess InstDot.flatten(Flattener flattener) {
+    public FAccess InstDot.flatten(Flattener f) {
         FAccess res = null;
         boolean assignable = false;
         for (InstAccess cur : getInstAccessList()) {
             if (assignable) {
-                res = res.append(cur.name(), cur.flattenFAS(flattener));
+                res = res.append(cur.name(), cur.flattenFAS(f));
             } else if (cur.myInstComponentDecl().isAssignable()) {
-                res = cur.flatten(flattener);
+                res = cur.flatten(f);
                 assignable = true;
             }
         }
         if (res == null) {
-           res = getLastInstAccess().flatten(flattener);
+           res = getLastInstAccess().flatten(f);
         }
         return res;
     }
