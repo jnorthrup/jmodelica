@@ -20,8 +20,12 @@ echo "GCC_INSTALLATION_TYPE="${GCC_INSTALLATION_TYPE}
 
 if [ ${GCC_INSTALLATION_TYPE} = "CENTOS_DEFAULT" ] || [ ${GCC_INSTALLATION_TYPE} = "FEDORA_DEFAULT" ]; then
     yum install -y gcc gcc-c++ gcc-gfortran
+
+elif [ ${GCC_INSTALLATION_TYPE} = "GCC_SOURCE" ]; then
+    echo "finished"
+    . ${USR_PATH}/Docker/build/build_gcc.sh
+
 elif [ ${GCC_INSTALLATION_TYPE} = "CENTOS7_GCC6" ]; then
-    
     yum install -y centos-release-scl-rh
     yum install -y devtoolset-6
     
@@ -31,7 +35,6 @@ elif [ ${GCC_INSTALLATION_TYPE} = "CENTOS7_GCC6" ]; then
     
     echo 'source /opt/rh/devtoolset-6/enable' >> /home/baseuser/.bashrc
     source ~/.bashrc
-    
     
 elif [ ${GCC_INSTALLATION_TYPE} = "CENTOS6" ]; then
     yum install -y wget
@@ -50,8 +53,10 @@ elif [ ${GCC_INSTALLATION_TYPE} = "CENTOS6" ]; then
 
 elif [ ${GCC_INSTALLATION_TYPE} = "UBUNTU_DEFAULT" ]; then
     apt-get -y install g++ gfortran
+
 elif [ ${GCC_INSTALLATION_TYPE} = "UBUNTU_GCC6" ]; then
     apt-get -y gcc-6 gfortran-6 g++-6
+
 else
     echo "NO VALID GCC INSTALLATION TYPE SPECIFIED, GOT INSTALL_TYPE="$INSTALL_TYPE
     false
