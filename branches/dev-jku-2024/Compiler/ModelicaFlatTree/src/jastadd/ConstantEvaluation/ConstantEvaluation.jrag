@@ -2148,6 +2148,12 @@ aspect ConstantEvaluation {
     
     @Override
     public void InstDot.collectAccessNames(Set<String> collectedNames) {
+        final String qualifiedName = qualifiedName();
+        if (myInstComponentDecl().isInstPackageConstant()) {
+            // System.err.println("InstDot: " + qualifiedName + " is a package constant and should not be collected.");
+            return;
+        }
+
         final ArrayList<String> prefixes = new ArrayList<>();
         for (InstAccess instAccess : getInstAccesss()) {
             if (instAccess.isClassAccess()) {
@@ -2190,7 +2196,12 @@ aspect ConstantEvaluation {
 
     @Override
     public void InstPrimitive.collectScalarPrimitives(Set<String> collectedNames) {
-        String qualifiedName = qualifiedName();
+        final String qualifiedName = qualifiedName();
+        if (isInstPackageConstant()) {
+            // System.err.println("InstPrimitive: " + qualifiedName + " is a package constant and should not be collected.");
+            return;
+        }
+
         if (isArray()) {
             for (Index index : Indices.create(size())) {
                 collectedNames.add(qualifiedName + index);
@@ -3471,10 +3482,10 @@ aspect ConstantEvaluation {
     }
     
     public boolean FAbstractVariable.isInstClassConstant() { return false;}
-    public boolean InstComponentDecl.isInstClassConstant() { return isConstant() && enclosingInstComponentDecl() == null;}
+    public boolean InstComponentDecl.isInstClassConstant() { return isConstant();}
     
     public boolean FAbstractVariable.isInstPackageConstant() { return false;}
-    public boolean InstComponentDecl.isInstPackageConstant() { return isInstClassConstant() && enclosingInstClassDecl().isPackage();}
+    public boolean InstComponentDecl.isInstPackageConstant() { return isInstClassConstant() && containingInstClass().isPackage();}
     
     public boolean FAbstractVariable.inSameInstClass(InstNode instNode) { return false;}
     public boolean InstComponentDecl.inSameInstClass(InstNode instNode) {
