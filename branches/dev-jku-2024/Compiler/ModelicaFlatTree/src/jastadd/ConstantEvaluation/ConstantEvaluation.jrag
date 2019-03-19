@@ -2146,7 +2146,7 @@ aspect ConstantEvaluation {
       }
     }
 
-    public boolean InstAccess.isPackageConstantAccess() { return myInstComponentDecl().isInstPackageConstant(); }
+    public boolean InstAccess.isPackageConstantAccess() { return myInstComponentDecl().isPackageConstant(); }
 
     public abstract void InstAccess.collectAccessNames(Set<String> collectedNames);
 
@@ -3459,8 +3459,8 @@ aspect ConstantEvaluation {
         public String name();
         public String qualifiedName();
         public Size size();
-        public boolean isInstClassConstant();
-        public boolean isInstPackageConstant();
+        public boolean isConstant();
+        public boolean isPackageConstant();
         public boolean inSameInstClass(InstNode instNode);
         public TypePrefixVariability variability();
 
@@ -3478,10 +3478,9 @@ aspect ConstantEvaluation {
     }
     
     public boolean FAbstractVariable.isInstClassConstant() { return false;}
-    public boolean InstComponentDecl.isInstClassConstant() { return isConstant();}
-    
-    public boolean FAbstractVariable.isInstPackageConstant() { return false;}
-    public boolean InstComponentDecl.isInstPackageConstant() { return isInstClassConstant() && containingInstClass().isPackage();}
+
+    public boolean FAbstractVariable.isPackageConstant() { return false;}
+    public boolean InstComponentDecl.isPackageConstant() { return isConstant() && containingInstClass().isPackage();}
     
     public boolean FAbstractVariable.inSameInstClass(InstNode instNode) { return false;}
     public boolean InstComponentDecl.inSameInstClass(InstNode instNode) {
