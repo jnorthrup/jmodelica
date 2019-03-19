@@ -80,7 +80,7 @@ aspect FunctionScalarization {
             (isComposite() || isForIndexExp()));
     eq FSpatialDistExp.extractTemp()        = isFunctionCallClause() || super.extractTemp();
     eq FVectorFunctionCall.extractTemp()    = true;
-    eq FArray.extractTemp()                 = extractTempArrayCon();
+    eq FArray.extractTemp()                 = extractTempArrayCon() && !keepSimple();
     eq FSizeExp.extractTemp()               = (inFunction() && myFClass().noUnrollingInFunctions() && isArray()) || isForIndexExp();
     eq FAbstractCat.extractTemp()           = extractTempArrayCon();
     eq FAbstractDiagonal.extractTemp()      = extractTempArrayCon();
@@ -95,6 +95,9 @@ aspect FunctionScalarization {
     
     syn boolean FExp.extractForIndexTemp() = isForIndexExp();
     eq FRangeExp.extractForIndexTemp()     = false;
+    
+    syn boolean FArray.keepSimple() = isFunctionCallIO() && !isFVectorFunctionCallArg()
+                && ndims() == 1 && !isIterArray() && type().isPrimitive();
     
     syn boolean FExp.extractTempArrayCon() =
             (inFunction() && myFClass().noUnrollingInFunctions() && isArray()) || isForIndexExp()
@@ -217,7 +220,7 @@ aspect FunctionScalarization {
             if (thenClauses.getNumChild() > 0 || elseClauses.getNumChild() > 0) {
                 List<FIfWhenClause> cl = new List<FIfWhenClause>();
                 cl.add(new FIfClause(getIfExp().scalarize(s), thenClauses));
-                ((Scalarizer.Algorithm)s).add(new FIfStmt(cl, elseClauses));
+                ((Scalarizer.Algorithm)s).add(new FIfStmtTemp(cl, elseClauses));
             }
         } else {
             createArrayTemporariesIfBranch(null, s);
@@ -233,7 +236,7 @@ aspect FunctionScalarization {
             if (inFAlgorithm()) {
                 List<FIfWhenClause> cl = new List<FIfWhenClause>();
                 cl.add(new FIfClause(ifExp, thenClauses));
-                s.add(new FIfStmt(cl, elseClauses));
+                s.add(new FIfStmtTemp(cl, elseClauses));
             } else {
                 for (FAbstractVariable fv : thenVars) {
                     elseClauses.add(new FEquation(fv.createAccessExp(), fv.type().zeroLiteral()));
@@ -678,7 +681,11 @@ aspect FunctionScalarization {
                 ind = u1;
             }
         }
-        ind = new FAddExp(ind, new FIntegerLitExp(1));
+        if (ind == null) {
+            ind = new FIntegerLitExp(1);
+        } else {
+            ind = new FAddExp(ind, new FIntegerLitExp(1));
+        }
         
         FArrayExpSubscripts fas = new FArrayExpSubscripts();
         fas.addFSubscript(new FExpSubscript(ind));
