@@ -659,6 +659,12 @@ abstract FIfWhenStmt : FStatement ::= FIfWhenClause*;
 FIfStmt : FIfWhenStmt ::= ElseStmt:FStatement*;
 
 /**
+ * If statement used for assigning temporaries that 
+ * need to be guarded by if conditions.
+ */
+FIfStmtTemp : FIfStmt;
+
+/**
  * Flattened when statement.
  */
 FWhenStmt : FIfWhenStmt;
