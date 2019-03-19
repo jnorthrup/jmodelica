@@ -405,9 +405,7 @@ aspect FunctionInlining {
         }
 
         public void pushWorklist(List<FAbstractEquation> eqs) {
-            Collection<FAbstractEquation> worklist = new ArrayList<>();
-            eqs.addAllTo(worklist);
-            worklistStack.push(worklist);
+            worklistStack.push(eqs.createArrayList());
         }
 
         public void addToWorklist(Collection<FAbstractEquation> eqs) {

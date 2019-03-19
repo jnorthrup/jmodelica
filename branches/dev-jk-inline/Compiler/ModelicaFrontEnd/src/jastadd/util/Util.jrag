@@ -1898,14 +1898,24 @@ aspect GeneralHelpers {
 		}
 		
 	}
-		
-	/**
-	 * Adds all children to a Collection.
-	 */
-	public void ASTNode.addAllTo(Collection<? super T> col) {
-		for (T n : this)
-			col.add(n);
-	}
+
+    /**
+     * Adds all children to a Collection.
+     */
+    public void ASTNode.addAllTo(Collection<? super T> col) {
+        for (T n : this) {
+            col.add(n);
+        }
+    }
+
+    /**
+     * Create an array list with all children.
+     */
+     public ArrayList<T> ASTNode.createArrayList() {
+        ArrayList<T> res = new ArrayList<>(getNumChild());
+        addAllTo(res);
+        return res;
+     }
 
 	/**
      * Check if this when equation is the else part of another when equation.
