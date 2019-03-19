@@ -1,5 +1,8 @@
 ================= Unreleased ==================
 # Feature ; Minor ; Compiler ; #5735
+Turned off loop unrolling in functions to increase performance.
+
+# Feature ; Minor ; Compiler ; #5735
 Added option for controlling maximum allowed size of dynamic state
 sets. Changed default from 8 to 10.
 
