@@ -5883,7 +5883,6 @@ model RecordScalarize52
         TransformCanonicalTestCase(
             name="RecordScalarize52",
             description="",
-            inline_functions="none",
             flatModel="
 fclass RecordTests.RecordScalarize52
  Real r.x[1];
@@ -6665,7 +6664,6 @@ model RecordFunc11
             name="RecordFunc11",
             description="Scalarization of records in functions: array of records with array of reals.",
             variability_propagation=false,
-            inline_functions="none",
             flatModel="
 fclass RecordTests.RecordFunc11
  Real a1[1].x[1];

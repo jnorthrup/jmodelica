@@ -213,11 +213,15 @@ fclass NonFixedParameterPropagation.FunctionCall2
  initial parameter Real p1[2](fixed = false);
  initial parameter Real p2[1];
  initial parameter Real p2[2];
-initial equation
+ initial parameter Real temp_6;
+ initial parameter Real temp_7;
+initial equation 
  p1[1] = time;
  p1[2] = time * 2;
- p2[1] = p1[1] + p1[2];
- p2[2] = p1[1] * p1[2];
+ p2[1] = temp_6 + temp_7;
+ p2[2] = temp_6 * temp_7;
+ temp_6 = p1[1];
+ temp_7 = p1[2];
 end NonFixedParameterPropagation.FunctionCall2;
 ")})));
     end FunctionCall2;

@@ -117,11 +117,11 @@ initial equation
  pre(temp_1) = 0;
  pre(temp_2) = 0.0;
 equation
- temp_2 = temp_1 * 3.14;
  x = temp_2 - noEvent(floor(temp_2 / 2)) * 2;
  temp_1 = if 0.9 + time / 10 < pre(temp_1) or 0.9 + time / 10 >= pre(temp_1) + 1 or initial() then integer(0.9 + time / 10) else pre(temp_1);
  _eventIndicator_1 = 0.9 + time / 10 - pre(temp_1);
  _eventIndicator_2 = 0.9 + time / 10 - (pre(temp_1) + 1);
+ temp_2 = temp_1 * 3.14;
 end EventGeneration.InFunctionCall;
 ")})));
 end InFunctionCall;

@@ -283,8 +283,7 @@ aspect DynamicStateSelect{
         
     }
 
-    public Set<IndexReductionVar> IndexReductionBiPGraph.computeDynamicStateSets(int dynamicStateLimit, 
-            Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix, IndexReductionResult result) {
+    public Set<IndexReductionVar> IndexReductionBiPGraph.computeDynamicStateSets(Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix, IndexReductionResult result) {
         if (result.hasDSFailed())
             return Collections.emptySet();
         Map<IndexReductionVar, IndexReductionEq> initialMatching = new HashMap<IndexReductionVar, IndexReductionEq>();
@@ -427,7 +426,7 @@ aspect DynamicStateSelect{
         
         boolean skipDynamicStates = false;
         for (DSSet set : dsSets) {
-            if (dynamicStateLimit >= 0 && (set.eqns.size() > dynamicStateLimit || set.vars.size() > dynamicStateLimit)) {
+            if (set.eqns.size() > 8 || set.vars.size() > 8) {
                 ASTNode.log.verbose("Too big dynamic state set, %d equations and %d variables!", set.eqns.size(), set.vars.size());
                 ASTNode.log.verbose(set);
                 skipDynamicStates = true;
@@ -738,7 +737,7 @@ aspect DynamicStateSelect{
     }
     
     public class EquationBlockFactory {
-        private static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> DynamicStateBlock computeDynamicStateBlock(SCCBlock<E, V> component, BlockProducer producer, StepUtil stepUtil) {
+        private static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> DynamicStateBlock computeDynamicStateBlock(SCCBlock<E, V> component, BlockProducer producer, OptionRegistry options) {
             Map<DynamicStateSet, FDynamicAlgebraicVariable[]> setVarMap = new LinkedHashMap<DynamicStateSet, FDynamicAlgebraicVariable[]>();
             Collection<V> otherVars = new ArrayList<V>();
             for (E eqn : component.getMembers()) {
@@ -830,7 +829,7 @@ aspect DynamicStateSelect{
                         states.add(var);
                 DynamicStateBLT blt = new DynamicStateBLT(setVarMap.keySet(), states, algebraics);
                 if (graph.isComplete()) {
-                    blt = graph.computeBLT(stepUtil, producer, blt, false);
+                    blt = graph.computeBLT(options, producer, blt, false);
                 } else {
                     ASTNode.log.verbose("  This combination does not have a valid solution!");
                     ASTNode.log.debug(graph.printMatchingObj());

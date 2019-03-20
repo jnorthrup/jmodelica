@@ -3532,31 +3532,27 @@ annotation(__JModelica(UnitTesting(tests={
 void func_CCodeGenTests_FuncWithArray_F_def0(jmi_real_t x_v, jmi_array_t* y_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(DYNA, jmi_real_t, jmi_array_t, y_an, -1, 1)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, temp_1_a, 1, 1)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, temp_1_a, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, temp_2_a, 1, 1)
     jmi_real_t i1_0i;
     jmi_int_t i1_0ie;
     jmi_int_t i1_0in;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_1_a, 2, 1, 2)
+    jmi_array_ref_1(temp_1_a, 1) = x_v;
+    jmi_array_ref_1(temp_1_a, 2) = x_v;
     if (y_a == NULL) {
-        JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
-        jmi_array_ref_1(tmp_1, 1) = x_v;
-        jmi_array_ref_1(tmp_1, 2) = x_v;
-        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, y_an, func_CCodeGenTests_FuncWithArray_g_exp1(tmp_1), 1, func_CCodeGenTests_FuncWithArray_g_exp1(tmp_1))
+        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, y_an, func_CCodeGenTests_FuncWithArray_g_exp1(temp_1_a), 1, func_CCodeGenTests_FuncWithArray_g_exp1(temp_1_a))
         y_a = y_an;
     }
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
-    jmi_array_ref_1(tmp_2, 1) = x_v;
-    jmi_array_ref_1(tmp_2, 2) = x_v;
-    if (COND_EXP_EQ(func_CCodeGenTests_FuncWithArray_g_exp1(tmp_2), AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+    if (COND_EXP_EQ(func_CCodeGenTests_FuncWithArray_g_exp1(temp_1_a), AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
         jmi_assert_failed(\"Mismatching sizes in CCodeGenTests.FuncWithArray.F\", JMI_ASSERT_ERROR);
     }
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_1_a, 1, 1, 1)
-    jmi_array_ref_1(temp_1_a, 1) = x_v;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_2_a, 1, 1, 1)
+    jmi_array_ref_1(temp_2_a, 1) = x_v;
     i1_0in = 0;
     i1_0ie = floor((1) - (1));
     for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
-        jmi_array_ref_1(y_a, i1_0i) = jmi_array_val_1(temp_1_a, i1_0i);
+        jmi_array_ref_1(y_a, i1_0i) = jmi_array_val_1(temp_2_a, i1_0i);
     }
     JMI_DYNAMIC_FREE()
     return;
@@ -11855,10 +11851,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _y_0 = x[0];
         }
         func_CCodeGenTests_BlockTest20_f_b_def0(_time + _y_0, tmp_1);
-        _temp_1_x_1 = (tmp_1->x);
+        _temp_2_1 = (tmp_1->x);
         _temp_1_b_2 = (tmp_1->b);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = (COND_EXP_EQ(_temp_1_b_2, JMI_TRUE, _temp_1_x_1 * _temp_1_x_1, _temp_1_x_1)) - (_y_0);
+            (*res)[0] = (COND_EXP_EQ(_temp_1_b_2, JMI_TRUE, _temp_2_1 * _temp_2_1, _temp_2_1)) - (_y_0);
         }
     }
     JMI_DYNAMIC_FREE()
@@ -15336,7 +15332,10 @@ $C_ode_time_events$
 $C_ode_derivatives$
 ",
             generatedCode="
+
     jmi_real_t nSamp;
+
+
 
 
 int model_ode_derivatives_base(jmi_t* jmi) {
@@ -15344,13 +15343,13 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
     _b_1 = cos(_time);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(jmi, _b_1 - (AD_WRAP_LITERAL(0.0)), _sw(0), JMI_REL_GT);
-    }
-    _a_0 = COND_EXP_EQ(_sw(0), JMI_TRUE, _b_1, - _b_1);
-    if (jmi->atInitial || jmi->atEvent) {
         _sw(1) = jmi_turn_switch(jmi, _b_1 - (AD_WRAP_LITERAL(0.0)), _sw(1), JMI_REL_GT);
     }
-    _c_2 = COND_EXP_EQ(_sw(1), JMI_TRUE, _b_1, - _b_1);
+    _a_0 = COND_EXP_EQ(_sw(1), JMI_TRUE, _b_1, - _b_1);
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, _b_1 - (AD_WRAP_LITERAL(0.0)), _sw(0), JMI_REL_GT);
+    }
+    _c_2 = COND_EXP_EQ(_sw(0), JMI_TRUE, _b_1, - _b_1);
     JMI_DYNAMIC_FREE()
     return ef;
 }

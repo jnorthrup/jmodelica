@@ -66,28 +66,28 @@ aspect OverdeterminedInitialSystem {
          * returned if all unmatched equations are found to be redundent.
          */
         public OISResult overdeterminedInitialSystem() {
-            getStepLogger().logVerbose("Analysing initial system for redundant equations to remove.");
-            OISVariableEvaluator evaluator = new OISVariableEvaluator(getStepLogger());
+            ASTNode.log.verbose("Analysing initial system for redundant equations to remove.");
+            OISVariableEvaluator evaluator = new OISVariableEvaluator();
             boolean allIsGood = true;
             for (E eqn : unmatchedEquationsIterable()) {
-                getStepLogger().logVerbose("Checking unmatched equation %s", eqn);
+                ASTNode.log.verbose("Checking unmatched equation %s", eqn);
                 FAbstractEquation equation = eqn.getEquation();
                 if (!equation.isInitial()) {
-                    getStepLogger().logVerbose("  Not an initial equation");
+                    ASTNode.log.verbose("  Not an initial equation");
                     allIsGood = false;
-                } else if (equation.OIS_consistencyCheck(evaluator,stepLogger)) {
-                    getStepLogger().logVerbose("  Consistent");
+                } else if (equation.OIS_consistencyCheck(evaluator)) {
+                    ASTNode.log.verbose("  Consistent");
                 } else {
                     allIsGood = false;
-                    getStepLogger().logVerbose("  Unable to verify or different values were calculated");
+                    ASTNode.log.verbose("  Unable to verify or different values were calculated");
                 }
             }
             if (!allIsGood) {
-                getStepLogger().logVerbose("Unable to verify all unmatched initial equations");
+                ASTNode.log.verbose("Unable to verify all unmatched initial equations");
                 return null;
             }
             Collection<E> results = new ArrayList<E>();
-            getStepLogger().logVerbose("All seems to be ok!");
+            ASTNode.log.verbose("All seems to be ok!");
             return new OISResult(getUnmatchedEquations(), evaluator.visitedParameters);
         }
         
@@ -111,20 +111,13 @@ aspect OverdeterminedInitialSystem {
             private Map<CommonVariableDecl, CValue> evaluationCache = new LinkedHashMap<CommonVariableDecl, CValue>();
             private Set<FVariable> visitedParameters = new LinkedHashSet<FVariable>();
             
-            private StepLogger stepLogger;
-            
-            public OISVariableEvaluator(StepLogger stepLogger) {
+            public OISVariableEvaluator() {
                 super(true);
-                this.stepLogger = stepLogger;
-            }
-            
-            public StepLogger getStepLogger() {
-                return stepLogger;
             }
             
             @Override
             public CValue ceval(CommonVariableDecl variable) {
-                getStepLogger().logVerbose("    %s", variable.name());
+                ASTNode.log.verbose("    %s", variable.name());
                 CValue val = evaluationCache.get(variable);
                 if (val != null)
                     return val;
@@ -185,15 +178,15 @@ aspect OverdeterminedInitialSystem {
      * Tries to validate the equation and ensuring that the left hand side is
      * equal to the right hand side.
      */
-    syn boolean FAbstractEquation.OIS_consistencyCheck(VariableEvaluator evaluator, StepLogger stepLogger) = false;
-    eq FEquation.OIS_consistencyCheck(VariableEvaluator evaluator, StepLogger stepLogger) {
+    syn boolean FAbstractEquation.OIS_consistencyCheck(VariableEvaluator evaluator) = false;
+    eq FEquation.OIS_consistencyCheck(VariableEvaluator evaluator) {
         try {
-            stepLogger.logVerbose("  Right:");
+            log.verbose("  Right:");
             CValue right = getRight().ceval(evaluator);
-            stepLogger.logVerbose("    Calculated value: %s", right);
-            stepLogger.logVerbose("  Left:");
+            log.verbose("    Calculated value: %s", right);
+            log.verbose("  Left:");
             CValue left = getLeft().ceval(evaluator);
-            stepLogger.logVerbose("    Calculated value: %s", left);
+            log.verbose("    Calculated value: %s", left);
             CValue equ = type().equ(left, right);
             return equ.hasBooleanValue() && equ.booleanValue();
         } catch (ConstantEvaluationException e) {
