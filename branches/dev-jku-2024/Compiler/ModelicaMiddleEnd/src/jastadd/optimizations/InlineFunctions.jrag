@@ -383,6 +383,7 @@ aspect FunctionInlining {
             vars = fc.getFVariables();
             // Make sure maps are calculated
             fc.variablesMap();
+            fc.parameterEquationsMap();
         }
 
         @Override
