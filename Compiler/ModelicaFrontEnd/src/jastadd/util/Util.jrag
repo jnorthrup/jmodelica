@@ -891,7 +891,7 @@ aspect Names {
 	 */ 
     inh InstClassDecl InstNode.containingInstClass();
     eq InstClassDecl.getChild().containingInstClass() = this;
-    eq InstRoot.getChild().containingInstClass()      = null;
+    eq InstRoot.getChild().containingInstClass()      = unknownInstClassDecl();
 
     inh InstNode InstNode.enclosingInstNode();
     eq InstNode.getChild().enclosingInstNode() = this;
