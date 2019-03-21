@@ -380,7 +380,7 @@ aspect SimpleLookup {
     }
 
     /**
-     * Lookup in contained classes, imports and surrounding classes. Has to be an unqualified classname.
+     * Lookup in contained classes, components, imports and surrounding classes. Has to be an unqualified classname.
      */
     syn lazy ResolvedAccess SrcFullClassDecl.simpleLookupLocalScope(String name) {
         if (duringFindClassDeclRevisits > MAX_FIND_CLASS_DECL_REVISITS) {
@@ -412,7 +412,7 @@ aspect SimpleLookup {
     eq SrcUnknownClassDecl.simpleLookupMemberScope(String name)  = unknownAccess();
 
     /**
-     * Lookup in contained classes and extended classes.
+     * Lookup in contained classes, components and extended classes.
      * Has to be an unqualified classname.
      * This method returns the unknown class when the class isn't found.
      */
@@ -657,6 +657,11 @@ aspect TestSimpleLookup {
         return sb.toString();
     }
 
+    /** 
+     * Returns the result of performing name lookup for all named accesses in the source tree with IDs contained in {@code arguments}.
+     * @param sb accumulates the result
+     * @param arguments the set of IDs of accesses we are looking for
+     */
     protected void ASTNode.testSimpleLookup(StringBuilder sb, Set<String> arguments) {
         for (ASTNode child : this) {
             child.testSimpleLookup(sb, arguments);
