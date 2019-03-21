@@ -460,7 +460,7 @@ package TestLookupInModifications
         methodName="testSimpleLookup",
         arguments={"T"},
         methodResult="
-            T=SimpleLookup.TestLookupInModifications.Test5.T
+            T=SimpleLookup.TestLookupInModifications.Test5.A.T
             T=SimpleLookup.TestLookupInModifications.Test5.T
         "
     )})));
