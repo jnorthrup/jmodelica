@@ -963,13 +963,13 @@ aspect TransformCanonical {
 		return createFFunctionVariable(TypePrefixInputOutput.INPUT);
 	}
 
-    /**
-     * Create an function variable representing this variable in a generated algorithm function.
-     */
-    public FFunctionVariable FVariable.createFFunctionVariable(TypePrefixInputOutput io) {
-        FType type = (FType) type().treeCopy();
-        return new FFunctionVariable(io.functionVisibility(), io, type, new Opt<FExp>(), getFAccess().treeCopy());
-    }
+	/**
+	 * Create an function variable representing this variable in a generated algorithm function.
+	 */
+	public FFunctionVariable FVariable.createFFunctionVariable(TypePrefixInputOutput io) {
+		FType type = (FType) type().fullCopy();
+		return new FFunctionVariable(io, type, new Opt(), getFAccess().fullCopy());
+	}
 
     public static final SimpleProblemProducer ASTNode.DIFFERENTIATED_DISCRETE_VARIABLE =
             new SimpleErrorProducer("DIFFERENTIATED_DISCRETE_VARIABLE", ProblemKind.SEMANTIC,

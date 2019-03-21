@@ -85,13 +85,17 @@ abstract FAbstractVariable : BaseNode;
 /**
  * A flat variable in a function.
  */
-FFunctionVariable : FAbstractVariable ::= <VisibilityType:VisibilityType>
-                                          <TypePrefixInputOutput:TypePrefixInputOutput>
+FFunctionVariable : FAbstractVariable ::= <TypePrefixInputOutput:TypePrefixInputOutput>
                                           FAttribute*
                                           Type:FType
                                           [BindingExp:FExp]
                                           FAccess
                                           <Order:int>;
+
+/**
+ * An array variable in a function. 
+ */
+FFunctionArray : FFunctionVariable;
 
 /**
  * A flat variable corresponding to an unknown declaration.

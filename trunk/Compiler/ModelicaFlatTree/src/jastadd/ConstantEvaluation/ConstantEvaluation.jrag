@@ -4677,7 +4677,7 @@ aspect CircularExpressions {
 	eq InstAccess.isUnknownSizeVarUse() = myInstComponentDecl().isUnknownSizeVar();
 	
 	syn boolean FAbstractVariable.isUnknownSizeVar() = false;
-    eq FFunctionVariable.isUnknownSizeVar()          = getType().size().isUnknown();
+	eq FFunctionArray.isUnknownSizeVar()             = getType().size().isUnknown();
 	syn boolean InstComponentDecl.isUnknownSizeVar() = type().size().isUnknown();
 	
 	public boolean Size.isCircular() {

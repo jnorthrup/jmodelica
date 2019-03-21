@@ -204,7 +204,10 @@ aspect Scalarization {
                 if (func) {
                     if (addVar) {
                         type = type.treeCopy();
-                        add(new FFunctionVariable(VisibilityType.TEMPORARY, type, name));
+                        FFunctionVariable v = type.isArray() ?
+                                new FFunctionArray(type, name) :
+                                new FFunctionVariable(type, name);
+                        add(v);
                     }
                     if (type.isArray()) {
                         FInitArrayStmt stmt = new FInitArrayStmt(new FAccessExp(name));
