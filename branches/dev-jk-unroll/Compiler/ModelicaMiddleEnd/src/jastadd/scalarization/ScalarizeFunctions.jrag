@@ -20,11 +20,11 @@ aspect FunctionScalarization {
      * Scalarize the function, replacing all array assignments with separate scalar 
      *        assignments and scalarize all expressions.
      */
-    public void FFunctionDecl.scalarize() {
+    public void FFunctionDecl.scalarize(boolean unroll) {
         List<FStatement> stmts = new List<FStatement>();
         List<FAttribute> attrs = new List<FAttribute>();
         try {
-            FStatement.scalarizeStmtList(Scalarizer.function(getFFunctionVariables(), stmts), getFAlgorithm().getFStatements());
+            FStatement.scalarizeStmtList(Scalarizer.function(getFFunctionVariables(), stmts, unroll), getFAlgorithm().getFStatements());
         } catch (ModelicaException e) {
             throw e;
         } catch (Exception e) {
@@ -473,7 +473,7 @@ aspect FunctionScalarization {
                     FExp right = arg.tempExp(names.createFArraySubscripts(0, dimDiff + 1));
                     List<FStatement> inner = new List<FStatement>();
                     inner.add(new FAssignStmt(left, right));
-                    names.createForLoops(s, firstLoop, inner, arg, 1, dimDiff + 1);
+                    names.createForLoops(s, firstLoop, inner, arg.size(), 1, dimDiff + 1);
                     names.removeLayer();
                 } else {
                     newArgs.add(arg.scalarize(s));
@@ -486,7 +486,7 @@ aspect FunctionScalarization {
         FFunctionCall funcRight = new FFunctionCall(getName().fullCopy(), newArgs, getFType().scalarType());
         firstLoop.add(new FAssignStmt(funcLeft, funcRight));
 
-        names.createForLoops(s, outer, firstLoop, this, 0, 1);
+        names.createForLoops(s, outer, firstLoop, size(), 0, 1);
         names.removeLayer();
     }
     
@@ -841,8 +841,8 @@ aspect FunctionScalarization {
         mid.add(new FAssignStmt(reducerTempExp(s), scalarReduceStartValue().buildLiteral()));
         inner.add(new FAssignStmt(reducerTempExp(s), scalarReduceExp(reducerTempExp(s), exp.scalarize(s))));
 
-        names.createForLoops(s, mid, inner, exp, ndims(), exp.ndims());
-        names.createForLoops(s, clauses, mid, exp, 0, ndims());
+        names.createForLoops(s, mid, inner, exp.size(), ndims(), exp.ndims());
+        names.createForLoops(s, clauses, mid, exp.size(), 0, ndims());
         names.removeLayer();
     }
     
@@ -1203,10 +1203,10 @@ aspect FunctionScalarizationHelpers {
          * @param d1     dimensions to start in
          * @param d2     dimensions to end in
          */
-        public void createForLoops(Scalarizer s, List<FStatement> outer, List<FStatement> inner, FExp exp, int d1, int d2) {
+        public void createForLoops(Scalarizer s, List<FStatement> outer, List<FStatement> inner, Size size, int d1, int d2) {
             FExp[] sizes = new FExp[d2];
             for (int i = d1; i < d2; i++) {
-                sizes[i] = exp.size().scalarize(s, i);
+                sizes[i] = size.scalarize(s, i);
             }
             createForLoops(outer, inner, sizes, d1);
         }
@@ -1220,8 +1220,8 @@ aspect FunctionScalarizationHelpers {
          * @param inner  list of statements put inside the loop
          * @param exp    expression to loop over
          */
-        public void createForLoops(Scalarizer s, List<FStatement> outer, List<FStatement> inner, FExp exp) {
-            createForLoops(s, outer, inner, exp, 0, exp.ndims());
+        public void createForLoops(Scalarizer s, List<FStatement> outer, List<FStatement> inner, Size size) {
+            createForLoops(s, outer, inner, size, 0, size.ndims());
         }
 
         /**

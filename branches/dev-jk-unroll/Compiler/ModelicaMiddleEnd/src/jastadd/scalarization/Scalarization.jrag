@@ -60,13 +60,17 @@ aspect Scalarization {
         }
         
         public void createForLoops(List<FStatement> inner, FExp exp) {
-            forNames.createForLoops(this, clauses, inner, exp);
+            createForLoops(inner, exp.size());
+        }
+        
+        public void createForLoops(List<FStatement> inner, Size size) {
+            forNames.createForLoops(this, clauses, inner, size);
         }
         
         public void createForLoops(FAssignableExp left, FExp right, FExp exp) {
             List<FStatement> l = new List<FStatement>();
             l.add(new FAssignStmt(left, right));
-            createForLoops(l, exp);
+            createForLoops(l, exp.size());
         }
         
         public FExp scalarizeAccessExp(FAccessExp accessExp) {
@@ -167,19 +171,21 @@ aspect Scalarization {
         }
         
         public Scalarizer.Algorithm algorithm(List<FStatement> stmts) {
-            return new Algorithm(getVars(), stmts, getNames(), false, variability);
+            return new Algorithm(getVars(), stmts, getNames(), false, true, variability);
         }
         
-        public static Scalarizer.Algorithm function(List<FFunctionVariable> vars, List<FStatement> stmts) {
-            return new Algorithm(vars, stmts, new ForNames(), true, Variability.DISCRETE);
+        public static Scalarizer.Algorithm function(List<FFunctionVariable> vars, List<FStatement> stmts, boolean unroll) {
+            return new Algorithm(vars, stmts, new ForNames(), true, unroll, Variability.DISCRETE);
         }
         
         public static class Algorithm extends Scalarizer {
             private boolean func;
+            private boolean unroll;
             
-            public Algorithm(List vars, List clauses, ForNames forNames, boolean func, TypePrefixVariability variability) {
+            public Algorithm(List vars, List clauses, ForNames forNames, boolean func, boolean unroll, TypePrefixVariability variability) {
                 super(vars, clauses, forNames, variability);
                 this.func = func;
+                this.unroll = !func || unroll;
             }
             
             public Scalarizer.Algorithm block(List clauses) {
@@ -187,7 +193,7 @@ aspect Scalarization {
             }
             
             public Scalarizer.Algorithm block(List vars, List clauses) {
-                return new Algorithm(vars, clauses, getNames(), func, getVariability());
+                return new Algorithm(vars, clauses, getNames(), func, unroll, getVariability());
             }
             
             public void add(FExp left, FExp right) {
@@ -226,6 +232,10 @@ aspect Scalarization {
             
             public boolean inFunction() {
                 return func;
+            }
+            
+            public boolean unroll(FType type) {
+                return unroll && type.isArray() && !type.size().isUnknown();
             }
         }
     }
@@ -293,11 +303,13 @@ aspect Scalarization {
         setParameterEquationList(sv.sp.getClauses());
     }
     
-	protected void FClass.scalarizeFuncs() {
-		for (FFunctionDecl f : getFFunctionDecls()) 
-			f.scalarize();
-	}
-	
+    protected void FClass.scalarizeFuncs() {
+        boolean unroll = !myOptions().getBooleanOption("no_loop_unrolling_in_functions");
+        for (FFunctionDecl f : getFFunctionDecls()) {
+            f.scalarize(unroll);
+        }
+    }
+    
     /**
      * Handles scalarization of the FAttributes that are declared in the FClass
      */
@@ -1026,13 +1038,8 @@ aspect Scalarization {
     @Override
     public void FRecordType.scalarRecordClauses(Scalarizer s, FAccess suffix, FExp left, FExp right) {
         for (FRecordComponentType comp : getComponents()) {
-            if (!isArray() && left.inFunction() && suffix.isEmpty() && left.myFClass().noUnrollingInFunctions()) {
-                String name = comp.getName();
-                comp.getFType().scalarizeAssignment((Scalarizer.Algorithm) s, left.component(name).asCommonAccessExp(), right.component(name));
-            } else {
-                FAccess next = suffix.copyAndAppend(comp.getName()).asFAccessFull();
-                comp.getFType().scalarRecordComponentClauses(s, next, left, right);
-            }
+            FAccess next = suffix.copyAndAppend(comp.getName()).asFAccessFull();
+            comp.getFType().scalarRecordComponentClauses(s, next, left, right);
         }
     }
     
@@ -2002,7 +2009,7 @@ aspect Scalarization {
             private FExp indexValue;
             
             public UnrollingScalarizer(List<FStatement> stmts, FAbstractVariable indexVariable, FExp indexValue) {
-                super(new List<FFunctionVariable>(), stmts, new ForNames(), true, Variability.DISCRETE);
+                super(new List<FFunctionVariable>(), stmts, new ForNames(), true, true, Variability.DISCRETE);
                 this.indexVariable = indexVariable;
                 this.indexValue = indexValue;
             }

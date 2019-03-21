@@ -157,7 +157,7 @@ aspect FunctionInlining {
         private Map<String,FType> typeMap;
         public TypePrefixVariability contextVariability = Variability.CONTINUOUS;
         
-        private Scalarizer scalarizer = new Scalarizer.Algorithm(null, null, null, false, Variability.CONTINUOUS);
+        private Scalarizer scalarizer = new Scalarizer.Algorithm(null, null, null, false, false, Variability.CONTINUOUS);
         
         /**
          * Inline all function calls that we can from a specific list of equations.
