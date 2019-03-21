@@ -230,7 +230,7 @@ package FindConstant
         annotation(__JModelica(UnitTesting(tests={
         InstClassMethodTestCase(
             name="TestFindConstant1",
-            description="Tests the method SrcAccess.SrcAccess.resolveLookup",
+            description="Tests the method SrcAccess.resolveLookup",
             methodName="testSimpleLookup",
             arguments={"C"},
             methodResult="C=SimpleLookup.FindConstant.C"
