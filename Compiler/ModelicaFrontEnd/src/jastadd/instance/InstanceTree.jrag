@@ -166,6 +166,15 @@ aspect Environment {
             return env;
         }
 
+        public MergedModificationNode merged() {
+            MergedModificationNode modifications = new MergedModificationNode();
+            ListIterator<InstModification> listIterator = listIterator(size());
+            while (listIterator.hasPrevious()) {
+                listIterator.previous().collectModifications(modifications);
+            }
+            return modifications;
+        }
+
         /**
          * TODO: implement!
          */
@@ -323,7 +332,74 @@ aspect InstModifications{
     }
     eq SrcComponentRedeclare.componentRedeclareDecl() = getSrcComponentDecl();
     syn SrcComponentDecl SrcComponentDecl.componentRedeclareDecl()  = this;
+}
 
+aspect MergedModifications {
+    public class MergedModificationNode {
+        private String name;
+        private InstValueModification modification;
+        private Map<String, MergedModificationNode> subNodes = new LinkedHashMap<>();
+        
+        public MergedModificationNode() {
+            name = "";
+        }
+        
+        protected MergedModificationNode(String name) {
+            this.name = name;
+        }
+        
+        public void setModification(InstValueModification modification) {
+            this.modification = modification;
+        }
+        
+        public MergedModificationNode subNode(String name) {
+            if (!subNodes.containsKey(name)) {
+                subNodes.put(name, new MergedModificationNode(name));
+            }
+            return subNodes.get(name);
+        }
+        
+        public void print(FormatPrinter printer, CodeStream printStream) {
+            printStream.print(name);
+            Iterator<MergedModificationNode> iter = subNodes.values().iterator();
+            if (iter.hasNext()) {
+                printStream.print('(');
+                iter.next().print(printer, printStream);
+                while (iter.hasNext()) {
+                    printStream.print(',');
+                    iter.next().print(printer, printStream);
+                }
+                printStream.print(')');
+            }
+            
+            if (modification != null) {
+                printStream.print(modification);
+            }
+        }
+    }
+
+    public abstract void InstModification.collectModifications(MergedModificationNode results);
+    public void  InstCompleteModification.collectModifications(MergedModificationNode results) {
+        getInstClassModification().collectModifications(results);
+        if (hasInstValueModification()) {
+            getInstValueModification().collectModifications(results);
+        }
+    }
+    public void InstValueModification.collectModifications(MergedModificationNode results) {
+        results.setModification(this);
+    }
+    public void InstClassModification.collectModifications(MergedModificationNode results) {
+        for (InstArgument argument : getInstArguments()) {
+            argument.collectModifications(results);
+        }
+    }
+    public void InstComponentModification.collectModifications(MergedModificationNode results) {
+        if (hasInstModification()) {
+            getInstModification().collectModifications(results.subNode(name()));
+        }
+    }
+    public void InstElementRedeclare.collectModifications(MergedModificationNode results) {
+    }
 }
 
 aspect Environments {
