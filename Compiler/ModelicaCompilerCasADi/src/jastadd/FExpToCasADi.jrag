@@ -485,6 +485,7 @@ aspect FExpToCasADi {
      */
     syn lazy MX FAbstractVariable.asMXVariable();
     eq UnknownFVariable .asMXVariable() { throw new UnsupportedOperationException("Cannot convert unknown variable to MX"); }
+    eq FEnumLiteral     .asMXVariable() { throw new UnsupportedOperationException("Cannot convert enum literal to MX"); }
     eq FVariable        .asMXVariable() = ifcasadi.msym(name());
     eq FFunctionVariable.asMXVariable() {
         if (isArray()) {
