@@ -1041,9 +1041,10 @@ aspect AlgorithmDifferentiation{
         diffed.add(new FWhileStmt(getTest().fullCopy(), statements));
     }
     
-    syn FFunctionVariable FFunctionVariable.createDerivative() = new FFunctionVariable(
-            getVisibilityType(), getTypePrefixInputOutput(), new List<FAttribute>(), getType().treeCopy(), 
-            new Opt<FExp>(), getFAccess().createDerPrefixedName(1), order() + 1);
+    syn FFunctionVariable FFunctionVariable.createDerivative() {
+        return createNode(getTypePrefixInputOutput(), getType().fullCopy(), new Opt<FExp>(), 
+                getFAccess().createDerPrefixedName(1), order() + 1);
+    }
     
     rewrite FDerExp {
         when (inFunction()) to CommonAccessExp 

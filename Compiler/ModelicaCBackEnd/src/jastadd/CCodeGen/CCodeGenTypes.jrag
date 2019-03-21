@@ -19,7 +19,9 @@ aspect CCodeGenTypes {
     syn String FFunctionCallLeft.type_C(CodePrinter p) = type().type_C(p);
 
 
-    syn String FFunctionVariable.typeReturn_C(CodePrinter p) = isComposite() ? type_C(p) : (type_C(p) + "*");
+    syn String FFunctionVariable.typeReturn_C(CodePrinter p) = isRecord() ? type_C(p) : (type_C(p) + "*");
+    eq FFunctionArray.typeReturn_C(CodePrinter p)            = type_C(p);
+
 
     syn String FExp.typeReturn_C(CodePrinter p) {
         String type = isArray() ? type().nameArray_C(p) : type().nameScalar_C(p);

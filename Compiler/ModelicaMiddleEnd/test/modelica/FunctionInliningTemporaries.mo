@@ -49,28 +49,4 @@ end FunctionInliningTemporaries.BasicInlineTemp1;
 ")})));
     end BasicInlineTemp1;
        
-    model BasicInlineTempTrivial1
-        function f
-            input Real[:] a;
-            output Real[:] d = {i^2 for i in 1:size(a,1)} .* a;
-        algorithm
-        end f;
-        
-        Real[:] y1 = f({time + 1, time + 2});
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="BasicInlineTempTrivial1",
-            description="Inline functions with temporaries",
-            inline_functions="trivial",
-            flatModel="
-fclass FunctionInliningTemporaries.BasicInlineTempTrivial1
- Real y1[1];
- Real y1[2];
-equation
- y1[1] = time + 1;
- y1[2] = 4.0 .* (time + 2);
-end FunctionInliningTemporaries.BasicInlineTempTrivial1;
-")})));
-    end BasicInlineTempTrivial1;
 end FunctionInliningTemporaries;

@@ -734,26 +734,41 @@ aspect Constructors {
     public FAttribute.FAttribute(String typeName, String name, FExp value, boolean isSet, int level) {
         this(new FAccessString(typeName), new FIdDecl(name), value, isSet, level);
     }
-    
-    /**
-     * Create an FFunctionVariable with the given name and type. 
-     */
-    public FFunctionVariable.FFunctionVariable(VisibilityType vt, FType type, String name) {
-        this(vt, TypePrefixInputOutput.NONE, new List<FAttribute>(), type, new Opt(), new FAccessString(name), 0);
-    }
-    
+	
+	/**
+	 * Create an FFunctionArray with the given name and type. 
+	 *        Extracts array subscripts from type.
+	 */
+	public FFunctionArray.FFunctionArray(FType type, String name) {
+        this(TypePrefixInputOutput.NONE, type, new Opt(), new FAccessFull(name));
+	}
+	
+	/**
+	 * Create an FFunctionVariable with the given name and type. 
+	 */
+	public FFunctionVariable.FFunctionVariable(FType type, String name) {
+		this(TypePrefixInputOutput.NONE, new List<FAttribute>(), type, new Opt(), new FAccessString(name), 0);
+	}
+	
     /**
      * Create an FFunctionVariable with the given name, type and input/output prefix. 
      */
-    public FFunctionVariable.FFunctionVariable(VisibilityType vt, FType type, String name, TypePrefixInputOutput inputOutput) {
-        this(vt, inputOutput, new List<FAttribute>(), type, new Opt<FExp>(), new FAccessString(name), 0);
+    public FFunctionVariable.FFunctionVariable(FType type, String name, TypePrefixInputOutput inputOutput) {
+        this(inputOutput, new List<FAttribute>(), type, new Opt<FExp>(), new FAccessString(name), 0);
     }
     
     /**
      * Create an FFunctionVariable with everything but order and attributes given.
      */
-    public FFunctionVariable.FFunctionVariable(VisibilityType vt, TypePrefixInputOutput inputOutput, FType type, Opt<FExp> bindingExp, FAccess name) {
-        this(vt, inputOutput, new List<FAttribute>(), type, bindingExp, name, 0);
+    public FFunctionVariable.FFunctionVariable(TypePrefixInputOutput inputOutput, FType type, Opt<FExp> bindingExp, FAccess name) {
+        this(inputOutput, new List<FAttribute>(), type, bindingExp, name, 0);
+    }
+    
+    /**
+     * Create an FFunctionArray with everything but order and attributes given.
+     */
+    public FFunctionArray.FFunctionArray(TypePrefixInputOutput inputOutput, FType type, Opt<FExp> bindingExp, FAccess name) {
+        this(inputOutput, new List<FAttribute>(), type, bindingExp, name, 0);
     }
     
 	/**
@@ -1305,6 +1320,23 @@ aspect InheritedFactoryMethods {
 	public FAttribute           FAttribute.createEmptyNode()         { return new FAttribute(); }
 	public FInternalAttribute   FInternalAttribute.createEmptyNode() { return new FInternalAttribute(); }
     public FAnnotationAttribute FAnnotationAttribute.createEmptyNode() { return new FAnnotationAttribute(); }
+	
+	
+    /**
+     * Create new node of same class as this, with the specified children.
+     */
+    public FFunctionVariable FFunctionVariable.createNode(TypePrefixInputOutput prefix, FType type, Opt<FExp> bindingExp, FAccess name, int order) {
+        FFunctionVariable node = createEmptyNode();
+        node.setTypePrefixInputOutput(prefix);
+        node.setType(type);
+        node.setBindingExpOpt(bindingExp);
+        node.setFAccess(name);
+        node.setOrder(order);
+        return node;
+    }
+    
+    public FFunctionVariable FFunctionVariable.createEmptyNode() { return new FFunctionVariable(); }
+    public FFunctionArray    FFunctionArray.createEmptyNode()    { return new FFunctionArray(); }
 
 	/**
 	 * Create new node of same class as this, with the specified 
