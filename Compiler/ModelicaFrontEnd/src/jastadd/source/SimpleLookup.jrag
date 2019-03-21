@@ -670,8 +670,8 @@ aspect TestSimpleLookup {
 
     @Override
     protected void SrcNamedAccess.testSimpleLookup(StringBuilder sb, Set<String> arguments) {
-        ResolvedAccess access = resolveAccess();
         if (arguments.contains(getID())) {
+            ResolvedAccess access = resolveAccess();
             sb.append(getID());
             sb.append("=");
             sb.append(access);
