@@ -845,16 +845,12 @@ aspect Flattening {
         if (!flattenAsGlobalVariableFromFunction()) {
             if (hasInstValueMod())
                 getBindingFExp().flattenUsedFuncsAndEnums(f);
-            Opt eo = new Opt();
             FAccess access = getFAccess().treeCopy().removeFArraySubscripts();
-            FFunctionVariable ffv = createFFunctionVariable(f, eo, access);
-            if (isInput())
-                ffv.setTypePrefixInputOutput(TypePrefixInputOutput.INPUT);
-            else if (isOutput())
-                ffv.setTypePrefixInputOutput(TypePrefixInputOutput.OUTPUT);
-            else
-                ffv.setTypePrefixInputOutput(TypePrefixInputOutput.NONE);
-            vars.addChild(ffv);
+            FType type = type().flatten(f, this, !isInput());
+            TypePrefixInputOutput io = createTypePrefixInputOutput();
+            
+            vars.addChild(new FFunctionVariable(io.functionVisibility(), io, type, new Opt<FExp>(), access));
+            
             if (isComposite()) {
                 addFInitArrayStmt(f, stmts, isInput(), expandedFAccessCalc(), new ForNames());
             }
@@ -969,17 +965,6 @@ aspect Flattening {
         public boolean foundOther(T t) {
             return successful() && target() != t;
         }
-    }
-
-    public FFunctionVariable InstAssignable.createFFunctionVariable(Flattener f, Opt eo, FAccess access) {
-        // TODO: if we need separate variable class for records, override this
-        FType type = type().flatten(f, this, !isInput());
-        FFunctionVariable ffv;
-        if (isArray())
-            ffv = new FFunctionArray(TypePrefixInputOutput.NONE, type, eo, access);
-        else
-            ffv = new FFunctionVariable(TypePrefixInputOutput.NONE, type, eo, access);
-        return ffv;
     }
     
     public FType FType.flatten(Flattener f, InstAssignable ia, boolean keepSizeExpressions) {
@@ -1728,6 +1713,16 @@ aspect Flattening {
         contribute(fv);
         
         return fv;
+    }
+
+    public TypePrefixInputOutput InstAssignable.createTypePrefixInputOutput() {
+        if (isInput()) {
+            return TypePrefixInputOutput.INPUT;
+        } else if (isOutput()) {
+            return TypePrefixInputOutput.OUTPUT;
+        } else {
+            return TypePrefixInputOutput.NONE;
+        }
     }
 
     public VisibilityType InstAssignable.createVisibilityType() {

@@ -28,4 +28,9 @@ public enum TypePrefixInputOutput {
     public String toString() {
         return toString;
     }
+    
+    public VisibilityType functionVisibility() {
+        return isNone() ? VisibilityType.PROTECTED : VisibilityType.PUBLIC;
+    }
+    
 }
