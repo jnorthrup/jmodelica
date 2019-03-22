@@ -43,7 +43,7 @@ aspect SizeAsserts {
         to FStatement.sizeAssertsColl() for myFStatement();
     FRecordConstructor contributes getRecord().myFRecordDecl().sizeAsserts(this)
         to FStatement.sizeAssertsColl() for myFStatement();
-    FAbstractCat contributes sizeAsserts() when extractTemp()
+    FAbstractCat contributes sizeAsserts()
         to FStatement.sizeAssertsColl() for myFStatement();
     FDimensionConvert contributes sizeAsserts() when getFExp().size().isUnknown() && getFExp().ndims() > ndims()
         to FStatement.sizeAssertsColl() for myFStatement();

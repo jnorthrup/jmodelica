@@ -62,14 +62,18 @@ aspect FunctionScalarization {
     /**
      * Should this expression be extracted into its own statement?
      */
-    syn boolean FExp.extractTemp()          = 
-        (inFunction() && myFClass().noUnrollingInFunctions() && extractTempArray() && extractTempContext()) || extractForIndexTemp();
-    eq FAccessExp.extractTemp()             = super.extractTemp() && isSlice() && !isFunctionCallLeft();
-    eq FFunctionCall.extractTemp()          = isFunctionCallClause() || 
-        ((isFVectorFunctionCallArg() || !isFunctionCallIO()) &&
-            (isComposite() || isForIndexExp()));
-    eq FSpatialDistExp.extractTemp()        = isFunctionCallClause() || super.extractTemp();
-    eq FVectorFunctionCall.extractTemp()    = true;
+    syn boolean FExp.extractTemp(Scalarizer s);
+    eq FExp               .extractTemp(Scalarizer s) =
+            (!s.unroll() && extractTempArray() && extractTempContext()) || extractForIndexTemp();
+    
+    eq FAccessExp         .extractTemp(Scalarizer s) = super.extractTemp(s) && isSlice() && !isFunctionCallLeft();
+    eq FFunctionCall      .extractTemp(Scalarizer s) = isFunctionCallClause() || 
+            ((isFVectorFunctionCallArg() || !isFunctionCallIO()) &&
+                (isComposite() || isForIndexExp()));
+        
+    eq FSpatialDistExp    .extractTemp(Scalarizer s) = isFunctionCallClause() || super.extractTemp(s);
+    eq FVectorFunctionCall.extractTemp(Scalarizer s) = true;
+    
     
     syn boolean FExp .extractTempArray();
     eq FExp          .extractTempArray() = isArray();
@@ -101,13 +105,6 @@ aspect FunctionScalarization {
     syn boolean FArray.keepSimple() = isFunctionCallIO() && !isFVectorFunctionCallArg()
                 && ndims() == 1 && !isIterArray() && type().isPrimitive();
     
-    syn boolean FExp.extractAsUnknown() = size().isUnknown();
-    eq FReductionExp.extractAsUnknown() = getFExp().size().isUnknown();
-    eq FMinMaxExp.extractAsUnknown()    = getX().size().isUnknown();
-    eq FMulExp.extractAsUnknown()       = getLeft().size().isUnknown() || getRight().size().isUnknown();
-    eq FAbstractDiagonal.extractAsUnknown() = size().isUnknown();
-    eq FVectorExp.extractAsUnknown()    = getFExp().size().isUnknown();
-    eq FMatrixExp.extractAsUnknown()    = getFExp().size().isUnknown();
     
     inh boolean FExp.isFunctionCallIO();
     eq BaseNode.getChild().isFunctionCallIO()         = false;
@@ -123,10 +120,10 @@ aspect FunctionScalarization {
     eq BaseNode.getChild().isFVectorFunctionCallArg()          = false;
     eq FVectorFunctionCall.getArg().isFVectorFunctionCallArg() = true;
     
-    syn boolean FAssignStmt.extractTemp() {
+    syn boolean FAssignStmt.extractTemp(Scalarizer.Algorithm s) {
         if (type().isArray()) {
-            Set<FAbstractVariable> left = getLeft().usesInScalarizedExp();
-            Set<FAbstractVariable> right = getRight().usesInScalarizedExp();
+            Set<FAbstractVariable> left = getLeft().usesInScalarizedExp(s);
+            Set<FAbstractVariable> right = getRight().usesInScalarizedExp(s);
             for (FAbstractVariable fv : left) {
                 if (right.contains(fv)) {
                     return true;
@@ -136,28 +133,28 @@ aspect FunctionScalarization {
         return false;
     }
     
-    syn Set<FAbstractVariable> FExp.usesInScalarizedExp() {
+    syn Set<FAbstractVariable> FExp.usesInScalarizedExp(Scalarizer.Algorithm s) {
         Set<FAbstractVariable> res = new HashSet<FAbstractVariable>();
-        usesInScalarizedExp(res);
+        usesInScalarizedExp(s, res);
         return res;
     }
     
-    public void ASTNode.usesInScalarizedExp(Set<FAbstractVariable> res) {
+    public void ASTNode.usesInScalarizedExp(Scalarizer.Algorithm s, Set<FAbstractVariable> res) {
         for (ASTNode n : this)
-            n.usesInScalarizedExp(res);
+            n.usesInScalarizedExp(s, res);
     }
     
-    public void FExp.usesInScalarizedExp(Set<FAbstractVariable> res) {
-        if (!extractTemp()) {
-            super.usesInScalarizedExp(res);
+    public void FExp.usesInScalarizedExp(Scalarizer.Algorithm s, Set<FAbstractVariable> res) {
+        if (!extractTemp(s)) {
+            super.usesInScalarizedExp(s, res);
         }
     }
     
-    public void FAccessExp.usesInScalarizedExp(Set<FAbstractVariable> res) {
+    public void FAccessExp.usesInScalarizedExp(Scalarizer.Algorithm s, Set<FAbstractVariable> res) {
         res.add(myFV());
     }
     
-    public void FSizeExp.usesInScalarizedExp(Set<FAbstractVariable> res) {
+    public void FSizeExp.usesInScalarizedExp(Scalarizer.Algorithm s, Set<FAbstractVariable> res) {
         
     }
     
@@ -179,8 +176,8 @@ aspect FunctionScalarization {
      * Finds, extracts, and replaces expressions with temporaries
      */
     public void FExp.createArrayTemporaries(Scalarizer s) {
-        if (extractTemp()) {
-            if (inFunction() && myFClass().noUnrollingInFunctions() || extractAsUnknown()) {
+        if (extractTemp(s)) {
+            if (!s.unroll()) {
                 unknownFunctionArrayTemporaries(s);
                 useTempVar = true;
             } else {
@@ -261,7 +258,7 @@ aspect FunctionScalarization {
     
     public void FFunctionCall.createArrayTemporaries(Scalarizer s) {
         // No names available as a function call arg.
-        boolean b = !extractTemp();
+        boolean b = !extractTemp(s);
         if (b)
             s.getNames().addLayer(0);
         super.createArrayTemporaries(s);
@@ -271,7 +268,7 @@ aspect FunctionScalarization {
     
     public void FRecordConstructor.createArrayTemporaries(Scalarizer s) {
         // No names available as record con arg.
-        boolean b = !extractTemp();
+        boolean b = !extractTemp(s);
         if (b)
             s.getNames().addLayer(0);
         super.createArrayTemporaries(s);
@@ -280,11 +277,11 @@ aspect FunctionScalarization {
     }
     
     public void FSizeExp.createArrayTemporaries(Scalarizer s) {
-        boolean b = !extractTemp();
+        boolean b = !extractTemp(s);
         if (b) {
             s.getNames().addLayer(0);
         }
-        if (extractTemp()) {
+        if (extractTemp(s)) {
             knownArrayTemporaries(s);
         } else {
             createArrayTemporariesInChildren(s);
@@ -374,7 +371,7 @@ aspect FunctionScalarization {
         }
         
         FExp exp = this;
-        if (isSlice() && (s.inFunction() && myFClass().noUnrollingInFunctions() || extractAsUnknown())) {
+        if (isSlice() && !s.unroll()) {
             s.addTempVar(exp);
             exp = exp.tempExp();
             exp = exp.scalarizeExp(s);
@@ -390,7 +387,7 @@ aspect FunctionScalarization {
     public void FFunctionCallLeft.createArrayTemporaries(Scalarizer s) {
         if (hasFExp()) {
             getFExp().createArrayTemporaries(s);
-            if (getFExp().isSlice() && (getFExp().inFunction() && myFClass().noUnrollingInFunctions() || getFExp().extractAsUnknown())) {
+            if (getFExp().isSlice() && !s.unroll()) {
                 type().scalarizeAssignment((Scalarizer.Algorithm)s, (FAssignableExp)getFExp(), getFExp().tempExp());
             }
         }
@@ -881,106 +878,106 @@ aspect FunctionScalarization {
     }
 
     /**
-     * Wrapper for {@link ASTNode#addArrayUsesToIndexMap(FExp[] names)}.
+     * Wrapper for {@link ASTNode#addArrayUsesToIndexMap(Scalarizer s, FExp[] names)}.
      */
     public void ASTNode.addArrayUsesToIndexMap(Scalarizer s) {
         if (s.getNames().size() > 0) {
-            addArrayUsesToIndexMap(s.getNames().createFExpArray());
+            addArrayUsesToIndexMap(s, s.getNames().createFExpArray());
         }
     }
     
     /**
      * Traverser for {@link FExp#addArrayUsesToIndexMap(FExp[] names)}.
      */
-    public void ASTNode.addArrayUsesToIndexMap(FExp[] names) {
+    public void ASTNode.addArrayUsesToIndexMap(Scalarizer s, FExp[] names) {
         for (ASTNode n : this)
-            n.addArrayUsesToIndexMap(names);
+            n.addArrayUsesToIndexMap(s, names);
     }
     
     /**
      * Copies top layer in <code>names</code> to id uses and creates entries
      * in <code>indexNames</code> for expressions replaced with temps.
      */
-    public void FExp.addArrayUsesToIndexMap(FExp[] names) {
+    public void FExp.addArrayUsesToIndexMap(Scalarizer s, FExp[] names) {
         if (useTempVar) {
             if (isArray()) {
                 indexNames = names;
             }
         } else {
-            super.addArrayUsesToIndexMap(names);
+            super.addArrayUsesToIndexMap(s, names);
         }
     }
     
-    public void FSizeExp.addArrayUsesToIndexMap(FExp[] names) {
+    public void FSizeExp.addArrayUsesToIndexMap(Scalarizer s, FExp[] names) {
         if (useTempVar() && isArray()) {
             indexNames = names;
         }
     }
     
-    public void FAccessExp.addArrayUsesToIndexMap(FExp[] names) {
+    public void FAccessExp.addArrayUsesToIndexMap(Scalarizer s, FExp[] names) {
         if (!hasFArraySubscripts() && isArray())
             indexNames = names;
-        super.addArrayUsesToIndexMap(names);
+        super.addArrayUsesToIndexMap(s, names);
     }
     
-    public void CommonAccess.addArrayUsesToIndexMap(FExp[] names) {
+    public void CommonAccess.addArrayUsesToIndexMap(Scalarizer s, FExp[] names) {
         if (isArray()) {
             int i = 0;
             for (FArraySubscripts fas : allFArraySubscripts()) {
-                i = fas.addArrayUsesToIndexMap(names, i);
+                i = fas.addArrayUsesToIndexMap(s, names, i);
             }
         }
     }
 
-    public int FArraySubscripts.addArrayUsesToIndexMap(FExp[] names, int i) { return i; }
-    public int FArrayExpSubscripts.addArrayUsesToIndexMap(FExp[] names, int i) {
+    public int FArraySubscripts.addArrayUsesToIndexMap(Scalarizer s, FExp[] names, int i) { return i; }
+    public int FArrayExpSubscripts.addArrayUsesToIndexMap(Scalarizer s, FExp[] names, int i) {
         for (FSubscript fs : getFSubscripts()) {
             if (fs.ndims() > 0) {
                 FExp[] indexNames = new FExp[1];
                 indexNames[0] = names[i];
-                fs.addArrayUsesToIndexMap(indexNames);
+                fs.addArrayUsesToIndexMap(s, indexNames);
                 i++;
             }
         }
         return i;
     }
 
-    public void FTempAccessExp.addArrayUsesToIndexMap(FExp[] names) {
+    public void FTempAccessExp.addArrayUsesToIndexMap(Scalarizer s, FExp[] names) {
         indexNames = names;
     }
 
-    public void FRangeExp.addArrayUsesToIndexMap(FExp[] names) {
+    public void FRangeExp.addArrayUsesToIndexMap(Scalarizer s, FExp[] names) {
         indexNames = names;
-        super.addArrayUsesToIndexMap(names);
+        super.addArrayUsesToIndexMap(s, names);
     }
 
-    public void FLinspace.addArrayUsesToIndexMap(FExp[] names) {
+    public void FLinspace.addArrayUsesToIndexMap(Scalarizer s, FExp[] names) {
         indexNames = names;
-        super.addArrayUsesToIndexMap(names);
+        super.addArrayUsesToIndexMap(s,names);
     }
 
-    public void FColonSubscript.addArrayUsesToIndexMap(FExp[] names) {
+    public void FColonSubscript.addArrayUsesToIndexMap(Scalarizer s, FExp[] names) {
         indexName = names[0];
     }
 
-    public void FTranspose.addArrayUsesToIndexMap(FExp[] names) {
+    public void FTranspose.addArrayUsesToIndexMap(Scalarizer s, FExp[] names) {
         FExp[] local = names.clone();
         local[0] = names[1];
         local[1] = names[0];
-        super.addArrayUsesToIndexMap(local);
+        super.addArrayUsesToIndexMap(s, local);
     }
 
-    public void FFunctionCall.addArrayUsesToIndexMap(FExp[] names) {
+    public void FFunctionCall.addArrayUsesToIndexMap(Scalarizer s, FExp[] names) {
         // No names available as a function call arg.
-        if (extractTemp()) {
-            super.addArrayUsesToIndexMap(names);
+        if (extractTemp(s)) {
+            super.addArrayUsesToIndexMap(s, names);
         }
     }
 
-    public void FRecordConstructor.addArrayUsesToIndexMap(FExp[] names) {
+    public void FRecordConstructor.addArrayUsesToIndexMap(Scalarizer s, FExp[] names) {
         // No names available as record con arg.
-        if (extractTemp()) {
-            super.addArrayUsesToIndexMap(names);
+        if (extractTemp(s)) {
+            super.addArrayUsesToIndexMap(s, names);
         }
     }
 

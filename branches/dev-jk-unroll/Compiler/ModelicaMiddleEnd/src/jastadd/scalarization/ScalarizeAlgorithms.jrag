@@ -38,7 +38,7 @@ aspect AlgorithmScalarization {
         right.createArrayTemporaries(s);
         
         FType t = left.size().isUnknown() ? left.type() : right.type();
-        if (extractTemp()) {
+        if (extractTemp(s)) {
             s.addTempVar(this);
             CommonAccessExp temp = getRight().tempExp(tempVarName());
             t.scalarizeAssignment(s, temp, right);

@@ -108,6 +108,10 @@ aspect Scalarization {
             return false;
         }
         
+        public boolean unroll() {
+            return true;
+        }
+        
         public static class Variable {
             
             public List vars;
@@ -227,12 +231,18 @@ aspect Scalarization {
                 addTempVar(type, source.tempVarName(), true);
             }
             
+            @Override
             public boolean inFunction() {
                 return func;
             }
             
+            @Override
+            public boolean unroll() {
+                return unroll;
+            }
+            
             public boolean unroll(FType type) {
-                return unroll && type.isArray() && !type.size().isUnknown();
+                return unroll() && type.isArray() && !type.size().isUnknown();
             }
         }
     }
@@ -243,10 +253,6 @@ aspect Scalarization {
             List<FAbstractEquation> pEqus, List<FAbstractEquation> equs) { return pEqus; }
     public List<FAbstractEquation> InitialParameter.selectEquations(List<FAbstractEquation> iEqus,
             List<FAbstractEquation> pEqus, List<FAbstractEquation> equs) { return iEqus; }
-    
-    public boolean FClass.noUnrollingInFunctions() {
-        return myOptions().getBooleanOption("no_loop_unrolling_in_functions");
-    }
     
 	/**
 	 * Flag indicating if a variable is scalarized.
@@ -1189,7 +1195,7 @@ aspect Scalarization {
     }
 
     public FExp FExp.extractArrayCell(Scalarizer s, FExp... subs) {
-        addArrayUsesToIndexMap(subs);
+        addArrayUsesToIndexMap(s, subs);
         return dynamicFExp(scalarize(s));
     }
 
@@ -1448,7 +1454,7 @@ aspect Scalarization {
 	 */
     public FExp FExp.scalarize(Scalarizer s) {
         FExp exp = useTempVar ? tempExp() : this;
-        if (scalarizeExpanded()) {
+        if (scalarizeExpanded(s)) {
             return type().createRecordConstructor(s, exp);
         } else {
             return exp.scalarizeExp(s);
@@ -1461,13 +1467,11 @@ aspect Scalarization {
         return exp;
     }
 
-    syn boolean FExp.scalarizeExpanded()       = 
-        isComposite() && indexNames == null
-        && !(inFunction() && myFClass().noUnrollingInFunctions() || size().isUnknown())
-        && !(useTempVar && isForIndexExp());
-    eq CommonAccessExp.scalarizeExpanded()     = (!inFunction() || isSlice()) && super.scalarizeExpanded();
-    eq FFunctionCall.scalarizeExpanded()       = ((useTempVar && !inFunction()) || isVectorized()) && super.scalarizeExpanded();
-    eq FIfExp.scalarizeExpanded()              = super.scalarizeExpanded() && !isFunctionCallIO()
+    syn boolean FExp.scalarizeExpanded(Scalarizer s);
+    eq FExp           .scalarizeExpanded(Scalarizer s) = isComposite() && indexNames == null && s.unroll() && !(useTempVar && isForIndexExp());
+    eq CommonAccessExp.scalarizeExpanded(Scalarizer s) = super.scalarizeExpanded(s) && (!inFunction() || isSlice());
+    eq FFunctionCall  .scalarizeExpanded(Scalarizer s) = super.scalarizeExpanded(s) && ((useTempVar && !inFunction()) || isVectorized());
+    eq FIfExp         .scalarizeExpanded(Scalarizer s) = super.scalarizeExpanded(s) && !isFunctionCallIO()
             && !type().isRecord(); /* Workaround for test RecordScalarize52 */
     
     syn boolean FFunctionCall.isVectorized() = false;
