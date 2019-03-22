@@ -166,8 +166,8 @@ aspect Environment {
             return env;
         }
 
-        public MergedModificationNode merged() {
-            MergedModificationNode modifications = new MergedModificationNode();
+        public ModificationNode merged() {
+            ModificationNode modifications = ModificationNode.newRootNode();
             ListIterator<InstModification> listIterator = listIterator(size());
             while (listIterator.hasPrevious()) {
                 listIterator.previous().collectModifications(modifications);
@@ -334,71 +334,79 @@ aspect InstModifications{
     syn SrcComponentDecl SrcComponentDecl.componentRedeclareDecl()  = this;
 }
 
-aspect MergedModifications {
-    public class MergedModificationNode {
-        private String name;
-        private InstValueModification modification;
-        private Map<String, MergedModificationNode> subNodes = new LinkedHashMap<>();
+aspect MergedEnvironment {
+    public abstract class ModificationNode {
+        protected String name;
+        protected Map<String, ModificationNode> subNodes = new LinkedHashMap<>();
         
-        public MergedModificationNode() {
-            name = "";
-        }
-        
-        protected MergedModificationNode(String name) {
+        protected ModificationNode(String name) {
             this.name = name;
         }
         
         public void setModification(InstValueModification modification) {
-            this.modification = modification;
         }
         
-        public MergedModificationNode subNode(String name) {
+        public ModificationNode subNode(String name) {
             if (!subNodes.containsKey(name)) {
-                subNodes.put(name, new MergedModificationNode(name));
+                subNodes.put(name, new ValueModificationNode(name));
             }
             return subNodes.get(name);
         }
         
-        public void print(FormatPrinter printer, CodeStream printStream) {
-            printStream.print(name);
-            Iterator<MergedModificationNode> iter = subNodes.values().iterator();
-            if (iter.hasNext()) {
-                printStream.print('(');
-                iter.next().print(printer, printStream);
-                while (iter.hasNext()) {
-                    printStream.print(',');
-                    iter.next().print(printer, printStream);
-                }
-                printStream.print(')');
-            }
-            
-            if (modification != null) {
-                printStream.print(modification);
-            }
+        public ModificationNode redeclareSubNode(String name, InstElementRedeclare redeclare) {
+            subNodes.put(name, new RedeclareModificationNode(name, redeclare));
+            return subNodes.get(name);
+        }
+        
+        public static ModificationNode newRootNode() {
+            return new ValueModificationNode("");
+        }
+    }
+    
+    public class ValueModificationNode extends ModificationNode {
+        private InstValueModification modification;
+
+        public ValueModificationNode(String name) {
+            super(name);
+        }
+        
+        @Override
+        public void setModification(InstValueModification modification) {
+            this.modification = modification;
+        }
+    }
+    
+    public class RedeclareModificationNode extends ModificationNode {
+        private InstElementRedeclare redeclare;
+        
+        public RedeclareModificationNode(String name, InstElementRedeclare redeclare) {
+            super(name);
+            this.redeclare = redeclare;
         }
     }
 
-    public abstract void InstModification.collectModifications(MergedModificationNode results);
-    public void  InstCompleteModification.collectModifications(MergedModificationNode results) {
+    public abstract void InstModification.collectModifications(ModificationNode results);
+    public void  InstCompleteModification.collectModifications(ModificationNode results) {
         getInstClassModification().collectModifications(results);
         if (hasInstValueModification()) {
             getInstValueModification().collectModifications(results);
         }
     }
-    public void InstValueModification.collectModifications(MergedModificationNode results) {
+    public void InstValueModification.collectModifications(ModificationNode results) {
         results.setModification(this);
     }
-    public void InstClassModification.collectModifications(MergedModificationNode results) {
+    public void InstClassModification.collectModifications(ModificationNode results) {
         for (InstArgument argument : getInstArguments()) {
             argument.collectModifications(results);
         }
     }
-    public void InstComponentModification.collectModifications(MergedModificationNode results) {
+    public void InstComponentModification.collectModifications(ModificationNode results) {
         if (hasInstModification()) {
             getInstModification().collectModifications(results.subNode(name()));
         }
     }
-    public void InstElementRedeclare.collectModifications(MergedModificationNode results) {
+    public void InstElementRedeclare.collectModifications(ModificationNode results) {
+        results.redeclareSubNode(name(), this);
     }
 }
 
