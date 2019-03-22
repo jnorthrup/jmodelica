@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+# Fixed ; Minor ; Compiler ; #5748
+Fixed NullPointerException from flattening global access used as subscript
+
 # Feature ; Minor ; Compiler ; #5735
 Turned off loop unrolling in functions to increase performance.
 

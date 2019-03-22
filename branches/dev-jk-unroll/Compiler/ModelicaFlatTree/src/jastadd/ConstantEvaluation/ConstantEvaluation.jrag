@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jmodelica.util.BinaryOperation;
+import org.jmodelica.util.StringUtil;
 import org.jmodelica.util.collections.ConstArrayIterator;
 import org.jmodelica.util.collections.SingleIterator;
 import org.jmodelica.util.values.ConstValue;
@@ -2125,8 +2126,17 @@ aspect ConstantEvaluation {
 
     @Override
     public void InstAccessExp.collectAccessNames(Set<String> collectedNames) {
-        getInstAccess().collectAccessNames(collectedNames);
-        getInstAccess().collectAccessNamesInArraySubscripts(collectedNames);
+        if (isArray()) {
+            for (FExp fexp: getArray().iterable()) {
+                fexp.collectAccessNames(collectedNames);
+            }
+        } else {
+            final InstAccess access = getInstAccess();
+            if (!access.isPackageConstantAccess()) {
+                access.collectAccessNames(collectedNames);
+                access.collectAccessNamesInArraySubscripts(collectedNames);
+            }
+        }
     }
 
     @Override
@@ -2136,12 +2146,27 @@ aspect ConstantEvaluation {
       }
     }
 
+    public boolean InstAccess.isPackageConstantAccess() { return myInstComponentDecl().isPackageConstant(); }
 
     public abstract void InstAccess.collectAccessNames(Set<String> collectedNames);
-    
+
     @Override
     public void InstDot.collectAccessNames(Set<String> collectedNames) {
-        getFirstInstAccess().collectAccessNames(collectedNames);
+        final String qualifiedName = qualifiedName();
+
+        final ArrayList<String> prefixes = new ArrayList<>();
+        for (InstAccess instAccess : getInstAccesss()) {
+            if (instAccess.isClassAccess()) {
+                prefixes.add(instAccess.name());
+            }
+        }
+        final String prefix = StringUtil.join(".", prefixes);
+
+        final Set<String> names = new HashSet<>();
+        getLastInstAccess().collectAccessNames(names);
+        for (String name : names) {
+            collectedNames.add(prefix.isEmpty() ? name : prefix +"." + name);
+        }
     }
 
     @Override
@@ -2151,7 +2176,7 @@ aspect ConstantEvaluation {
 
     @Override
     public void InstArrayAccess.collectAccessNames(Set<String> collectedNames) {
-        myInstComponentDecl().collectScalarPrimitives(collectedNames);
+        myInstComponentElement().collectScalarPrimitives(collectedNames);
     }
 
     @Override
@@ -2171,7 +2196,8 @@ aspect ConstantEvaluation {
 
     @Override
     public void InstPrimitive.collectScalarPrimitives(Set<String> collectedNames) {
-        String qualifiedName = qualifiedName();
+        final String qualifiedName = qualifiedName();
+
         if (isArray()) {
             for (Index index : Indices.create(size())) {
                 collectedNames.add(qualifiedName + index);
@@ -2242,7 +2268,9 @@ aspect ConstantEvaluation {
 
     @Override
     public void InstArrayAccess.collectAccessNamesInArraySubscripts(Set<String> collectedNames) {
-        getFArraySubscripts().collectAccessNames(collectedNames);
+        if (myInstComponentDecl().isPrimitive()) {
+            getFArraySubscripts().collectAccessNames(collectedNames);
+        }
     }
 
 
@@ -3431,8 +3459,9 @@ aspect ConstantEvaluation {
         public String name();
         public String qualifiedName();
         public Size size();
-        public boolean isInstClassConstant();
-        public String instClassRelativePath(InstNode instNode);
+        public boolean isConstant();
+        public boolean isPackageConstant();
+        public boolean inSameInstClass(InstNode instNode);
         public TypePrefixVariability variability();
 
         // Added for codegeneration when evaluating external functions
@@ -3449,29 +3478,21 @@ aspect ConstantEvaluation {
     }
     
     public boolean FAbstractVariable.isInstClassConstant() { return false;}
-    public boolean InstComponentDecl.isInstClassConstant() { return isConstant() && enclosingInstComponentDecl() == null;}
+
+    public boolean FAbstractVariable.isPackageConstant() { return false;}
+    public boolean InstComponentDecl.isPackageConstant() { return isConstant() && containingInstClass().isPackage();}
     
-    public String FAbstractVariable.instClassRelativePath(InstNode instNode) { return "";}
-    public String InstComponentDecl.instClassRelativePath(InstNode instNode) {
+    public boolean FAbstractVariable.inSameInstClass(InstNode instNode) { return false;}
+    public boolean InstComponentDecl.inSameInstClass(InstNode instNode) {
     	InstNode classDecl = instNode;
     	if (!classDecl.isClassDecl()) {
     		classDecl = classDecl.containingInstClass();
     	}
     	InstNode node = containingEntity();
     	if (node.equals(classDecl)) {
-    		return "";
+    		return true;
     	}
-    	String path = node.name();
-    	while (node.containingEntity() != null) {
-    		node = node.containingEntity();
-    		if (node.equals(classDecl)) {
-        		return path + ".";
-        	}
-        	if (!node.isLibNode()) {
-    			path = node.name() + "." + path;
-    		}
-    	}
-    	return path + ".";
+    	return false;
     }
     
     
