@@ -426,45 +426,6 @@ package TestLookupInModifications
     )})));
     end Test3;
 
-    model Test4
-        model A
-            replaceable type T = Integer;
-            replaceable type S = Integer;
-            T x = 0;
-        end A;
-        
-        A a(redeclare type T = Real, redeclare type S = T);
-    annotation(__JModelica(UnitTesting(tests={InstClassMethodTestCase(
-        name="TestLookupInModifications.Test4",
-        description="TODO",
-        methodName="testSimpleLookup",
-        arguments={"T"},
-        methodResult="
-            T=SimpleLookup.TestLookupInModifications.Test4.A.T
-            T=SimpleLookup.TestLookupInModifications.Test4.a.T
-            T=SimpleLookup.TestLookupInModifications.Test4.a.T
-        "
-    )})));
-    end Test4;
-
-    model Test5
-        model A
-            replaceable type T = Integer;
-        end A;
-        
-        extends A(redeclare type T = Real);
-        T x = 0;
-    annotation(__JModelica(UnitTesting(tests={InstClassMethodTestCase(
-        name="TestLookupInModifications.Test5",
-        description="TODO",
-        methodName="testSimpleLookup",
-        arguments={"T"},
-        methodResult="
-            T=SimpleLookup.TestLookupInModifications.Test5.A.T
-            T=SimpleLookup.TestLookupInModifications.Test5.T
-        "
-    )})));
-    end Test5;
 end TestLookupInModifications;
 
 end SimpleLookup;
