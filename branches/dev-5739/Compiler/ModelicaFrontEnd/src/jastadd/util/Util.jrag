@@ -882,6 +882,20 @@ aspect Names {
         return URIResolver.DEFAULT.resolveURIChecked(this, str);
     }
 
+	syn boolean InstNode.isLibNode() = false;
+    eq InstLibNode.isLibNode()       = true; 
+
+	/**
+	 * Any closest ancestor instClass but not stopping at InstComponents and returning it's class
+	 * as opposed to enclosingInstClassDecl().
+	 */ 
+    inh InstClassDecl InstNode.containingInstClass();
+    eq InstClassDecl.getChild().containingInstClass() = this;
+    eq InstRoot.getChild().containingInstClass()      = unknownInstClassDecl();
+
+    inh InstNode InstNode.enclosingInstNode();
+    eq InstNode.getChild().enclosingInstNode() = this;
+    
     inh InstClassDecl ASTNode.enclosingInstClassDecl();
     eq SourceRoot.getProgram().enclosingInstClassDecl()      = null;
     eq FlatRoot.getChild().enclosingInstClassDecl()          = null;
@@ -905,6 +919,7 @@ aspect Names {
     eq SrcShortClassDecl.getSrcExtendsClauseShortClass().enclosingClassDecl() = this;
     
     inh Set<SrcClassDecl> SrcClassDecl.enclosingClassDecls();
+    inh Set<SrcClassDecl> SrcComponentDecl.enclosingClassDecls();
     eq Root.getChild().enclosingClassDecls() = Collections.emptySet();
     eq SrcClassDecl.getChild().enclosingClassDecls() {
         Set<SrcClassDecl> enclosingClassDecls = new HashSet<>(enclosingClassDecls());
@@ -1184,18 +1199,22 @@ aspect DebugHelpers {
 
 aspect Visibility {
 
-    inh boolean SrcClassDecl.isPublic();
+    inh boolean SrcElement.isPublic();
     inh boolean SrcComponentDecl.isPublic();
+    inh boolean SrcExtendsClause.isPublic();
     eq SrcPublicElementList.getSrcElement().isPublic()    = true;
     eq SrcProtectedElementList.getSrcElement().isPublic() = false;
     eq SourceRoot.getProgram().isPublic()           = true; 
     eq Root.getChild().isPublic()                   = true; 
 
-    syn boolean InstClassDecl.isPublic()     = getSrcClassDecl().isPublic();
-    syn boolean InstComponentDecl.isPublic() = getSrcComponentDecl().isPublic();
+    syn boolean InstNode.isPublic();
+    eq InstRoot.isPublic()          = true;
+    eq InstClassDecl.isPublic()     = getSrcClassDecl().isPublic();
+    eq InstComponentDecl.isPublic() = getSrcComponentDecl().isPublic();
+    eq InstExtends.isPublic()       = getSrcExtendsClause().isPublic();
 
-    syn boolean SrcClassDecl.isProtected()         = !isPublic();
-    syn boolean SrcComponentDecl.isProtected()     = !isPublic();
+    syn boolean SrcElement.isProtected()        = !isPublic();
+    syn boolean SrcComponentDecl.isProtected()  = !isPublic();
     syn boolean InstClassDecl.isProtected()     = getSrcClassDecl().isProtected();
     syn boolean InstComponentDecl.isProtected() = getSrcComponentDecl().isProtected();
 
@@ -1898,14 +1917,24 @@ aspect GeneralHelpers {
 		}
 		
 	}
-		
-	/**
-	 * Adds all children to a Collection.
-	 */
-	public void ASTNode.addAllTo(Collection<? super T> col) {
-		for (T n : this)
-			col.add(n);
-	}
+
+    /**
+     * Adds all children to a Collection.
+     */
+    public void ASTNode.addAllTo(Collection<? super T> col) {
+        for (T n : this) {
+            col.add(n);
+        }
+    }
+
+    /**
+     * Create an array list with all children.
+     */
+     public ArrayList<T> ASTNode.createArrayList() {
+        ArrayList<T> res = new ArrayList<>(getNumChild());
+        addAllTo(res);
+        return res;
+     }
 
 	/**
      * Check if this when equation is the else part of another when equation.

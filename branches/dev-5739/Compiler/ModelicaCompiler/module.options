@@ -447,11 +447,6 @@ functions and files for performance reasons. This option controls how many
 functions can be generated in a file. Value less than 1 indicates no split."
 
 ********************************************************************************
-BOOLEAN dynamic_states compiler uncommon true
-
-"If enabled, dynamic states will be calculated and generated."
-
-********************************************************************************
 STRING MODELICAPATH compiler internal ""
 
 "The MODELICAPATH to use during compilation."

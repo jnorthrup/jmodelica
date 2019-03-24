@@ -16,6 +16,12 @@
 
 aspect PredefinedTypes {
 
+    inh boolean SrcClassDecl.isBuiltInClass();
+    eq SourceRoot.getChild().isBuiltInClass()        = false;
+    eq Program.getPredefinedType().isBuiltInClass()  = true;
+    eq Program.getBuiltInType().isBuiltInClass()     = true;
+    eq Program.getBuiltInFunction().isBuiltInClass() = true;
+
     public List SourceRoot.computePredefinedType() {
         return getProgram().getPredefinedTypeList();
     }

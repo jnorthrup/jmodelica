@@ -51,15 +51,28 @@ aspect Arrays {
 	 *                                      constant Integer values.
 	 */
 	public Index FArraySubscripts.createIndex() {
+		return createIndex(defaultVariableEvaluator());
+	}
+
+    /**
+     * Return an Index with these array subscripts.
+     * 
+     * This version is not cached, to allow indices to be re-evaluated at each use 
+     * during function evaluation.
+     * 
+     * @throws ConstantEvaluationException  if the subscripts can't be evaluated to 
+     *                                      constant Integer values.
+     */
+    public Index FArraySubscripts.createIndex(VariableEvaluator evaluator) {
         if (numSubscript() == 0) {
             return Index.NULL;
         }
-		int[] i = new int[numSubscript()];
-		int j = 0;
-		for (Subscript s : subscripts()) 
-			i[j++] = s.value();
-		return new Index(i);
-	}
+        int[] i = new int[numSubscript()];
+        int j = 0;
+        for (Subscript s : subscripts()) 
+            i[j++] = s.value(evaluator);
+        return new Index(i);
+    }
 
     public interface Subscript {
         public int ndims();
@@ -522,8 +535,7 @@ aspect Arrays {
 	syn int FAbstractVariable.ndims() = -1;
 	
 	eq FVariable.ndims()         = isScalarized()? 0 : getFAccess().declarationNDims();
-	eq FFunctionArray.ndims()    = getType().ndims();
-	eq FFunctionVariable.ndims() = 0;
+    eq FFunctionVariable.ndims() = getType().ndims();
 
     syn int CommonForIndex.ndims() = 1;
 
@@ -1143,7 +1155,7 @@ aspect Arrays {
 	 */	
 	syn lazy Size FAbstractVariable.size() = Size.SCALAR;
 	eq FVariable.size()      = isScalarized()? Size.SCALAR: getFAccess().declarationSize();
-	eq FFunctionArray.size() = type().size();
+    eq FFunctionVariable.size() = type().size();
 
     /**
      * Get the array size of the loop index expression. 
@@ -2959,18 +2971,6 @@ aspect ArrayHelpers {
                 exp.addFExp(createFExp(i));
             return exp;
         }
-
-		public FFunctionVariable createFunctionVariable(String name, FType type) {
-		    return createFunctionVariable(name, type, TypePrefixInputOutput.NONE);
-		}
-		
-		public FFunctionVariable createFunctionVariable(String name, FType type, TypePrefixInputOutput inputOutput) {
-		    if (this == Size.SCALAR)
-		        return new FFunctionVariable(inputOutput, type.scalarType(), new Opt<FExp>(), new FAccessString(name));
-		    else
-		        return new FFunctionArray(inputOutput, type.arrayType(this), new Opt<FExp>(), new FAccessString(name));
-		}
-		
 	}
 	
 	/**
