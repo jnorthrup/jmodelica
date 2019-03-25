@@ -1,5 +1,6 @@
 // This loads the Jenkins pipeline library found in the ci folder.
 def url = scm.getLocations()[0].remote
+env.SDK_HOME = 'C:\\JModelica.org-SDK-1.13\\' // Hard-coded since new SDK release 1.4
 library identifier: 'JModelica@ci', retriever: modernSCM([$class: 'SubversionSCMSource', remoteBase: url, credentialsId: ''])
 
 // Extract branch info from url variable (this assumes that this Jenkinsfile
