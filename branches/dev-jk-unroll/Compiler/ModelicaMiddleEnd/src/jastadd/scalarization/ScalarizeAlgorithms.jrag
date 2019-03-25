@@ -167,8 +167,7 @@ aspect AssignmentScalarization {
      * Scalarize an assignment and put the resulting statements in the list of statements. 
      */
     public void FType.scalarizeAssignment(Scalarizer.Algorithm s, FAssignableExp left, FExp right) {
-        
-        if (!s.unroll(this)) {
+        if (isArray() && !s.unroll()) {
             ForNames names = s.getNames();
             names.addLayer(ndims());
             names.fillLayer(left);
@@ -188,12 +187,12 @@ aspect AssignmentScalarization {
     }
     
     public void FType.scalarizeAssignment_sub(Scalarizer.Algorithm s, FAssignableExp left, FExp right) {
-        if (!s.unroll(this)) {
-            scalarizeScalarAssignment(s, left, right);
-        } else {
+        if (isArray() && s.unroll()) {
             for (Index i : indices()) {
                 scalarizeScalarAssignment(s, (FAssignableExp) left.extractArrayCell(s, i), right.extractArrayCell(s, i));
             }
+        } else {
+            scalarizeScalarAssignment(s, left, right);
         }
     }
     
@@ -207,7 +206,7 @@ aspect AssignmentScalarization {
     }
     
     protected void FRecordType.scalarizeScalarAssignment(Scalarizer.Algorithm s, FAssignableExp left, FExp right) {
-        if (!s.unroll(this)) {
+        if (!s.unroll()) {
             for (FRecordComponentType comp : getComponents()) {
                 String name = comp.getName();
                 comp.getFType().scalarizeAssignment((Scalarizer.Algorithm) s, 

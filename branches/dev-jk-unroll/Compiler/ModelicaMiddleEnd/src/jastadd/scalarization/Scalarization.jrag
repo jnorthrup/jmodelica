@@ -240,10 +240,6 @@ aspect Scalarization {
             public boolean unroll() {
                 return unroll;
             }
-            
-            public boolean unroll(FType type) {
-                return unroll() && type.isArray() && !type.size().isUnknown();
-            }
         }
     }
     
@@ -1469,8 +1465,8 @@ aspect Scalarization {
 
     syn boolean FExp.scalarizeExpanded(Scalarizer s);
     eq FExp           .scalarizeExpanded(Scalarizer s) = isComposite() && indexNames == null && s.unroll() && !(useTempVar && isForIndexExp());
-    eq CommonAccessExp.scalarizeExpanded(Scalarizer s) = super.scalarizeExpanded(s) && (!inFunction() || isSlice());
-    eq FFunctionCall  .scalarizeExpanded(Scalarizer s) = super.scalarizeExpanded(s) && ((useTempVar && !inFunction()) || isVectorized());
+    eq CommonAccessExp.scalarizeExpanded(Scalarizer s) = super.scalarizeExpanded(s) && (!s.inFunction() || isSlice());
+    eq FFunctionCall  .scalarizeExpanded(Scalarizer s) = super.scalarizeExpanded(s) && ((useTempVar && !s.inFunction()) || isVectorized());
     eq FIfExp         .scalarizeExpanded(Scalarizer s) = super.scalarizeExpanded(s) && !isFunctionCallIO()
             && !type().isRecord(); /* Workaround for test RecordScalarize52 */
     
