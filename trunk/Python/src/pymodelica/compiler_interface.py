@@ -33,11 +33,11 @@ if not jpype.isJVMStarted():
     _jvm_class_path = pym.environ['COMPILER_JARS']
     _jvm_ext_dirs = pym.environ['BEAVER_PATH']
     jpype.startJVM(pym.environ['JPYPE_JVM'], 
-        '-Djava.class.path=%s' % _jvm_class_path, 
-        '-Djava.ext.dirs=%s' % _jvm_ext_dirs,
+        '-Djava.class.path=%s' % os.pathsep.join([_jvm_class_path,os.path.join(_jvm_ext_dirs, 'beaver-rt.jar')]),
         *_jvm_args)
     org = jpype.JPackage('org')
     print "JVM started."
+
 
 # Compilers
 ModelicaCompilerInterface = None
