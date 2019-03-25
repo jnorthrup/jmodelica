@@ -48,7 +48,7 @@ make install
 if [ "\${BUILD_CASADI:-1}" == "1" ]; then
     make casadi_interface
 fi
-""")
+""", false, 32)
     }
     stage("Archive") {
         archive 'install/**'
@@ -62,7 +62,7 @@ fi
             runMSYSWithEnv("""\
 rm -f *.zip
 zip -r -q "${zipName}" install README.TXT
-""")
+""", false, 32)
             stash includes: '*.zip', name: 'installZip'
         }
     }
