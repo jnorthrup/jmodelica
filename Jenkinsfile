@@ -48,7 +48,7 @@ make install
 if [ "\${BUILD_CASADI:-1}" == "1" ]; then
     make casadi_interface
 fi
-""", false, 32)
+""", "", false, 32)
     }
     stage("Archive") {
         archive 'install/**'
@@ -62,7 +62,7 @@ fi
             runMSYSWithEnv("""\
 rm -f *.zip
 zip -r -q "${zipName}" install README.TXT
-""", false, 32)
+""", "", false, 32)
             stash includes: '*.zip', name: 'installZip'
         }
     }
@@ -73,7 +73,7 @@ zip -r -q "${zipName}" install README.TXT
 TEST_RES_DIR=\${WORKSPACE}/testRes
 mkdir -p "\${TEST_RES_DIR}"
 install/jm_tests -ie -x "\${TEST_RES_DIR}"
-""")
+""", "", false, 32)
         } finally {
             junit testResults: 'testRes/*.xml', allowEmptyResults: true
         }
