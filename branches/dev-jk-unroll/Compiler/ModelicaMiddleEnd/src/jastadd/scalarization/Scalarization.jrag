@@ -303,7 +303,7 @@ aspect Scalarization {
     }
     
     protected void FClass.scalarizeFuncs() {
-        boolean unroll = !myOptions().getBooleanOption("no_loop_unrolling_in_functions");
+        boolean unroll = myOptions().getBooleanOption("unroll_functions");
         for (FFunctionDecl f : getFFunctionDecls()) {
             f.scalarize(unroll);
         }
