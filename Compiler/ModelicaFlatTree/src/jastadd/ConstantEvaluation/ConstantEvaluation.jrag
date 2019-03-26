@@ -2131,8 +2131,11 @@ aspect ConstantEvaluation {
                 fexp.collectAccessNames(collectedNames);
             }
         } else {
-            getInstAccess().collectAccessNames(collectedNames);
-            getInstAccess().collectAccessNamesInArraySubscripts(collectedNames);
+            final InstAccess access = getInstAccess();
+            if (!access.isPackageConstantAccess()) {
+                access.collectAccessNames(collectedNames);
+                access.collectAccessNamesInArraySubscripts(collectedNames);
+            }
         }
     }
 
@@ -2143,11 +2146,14 @@ aspect ConstantEvaluation {
       }
     }
 
+    public boolean InstAccess.isPackageConstantAccess() { return myInstComponentDecl().isPackageConstant(); }
 
     public abstract void InstAccess.collectAccessNames(Set<String> collectedNames);
-    
+
     @Override
     public void InstDot.collectAccessNames(Set<String> collectedNames) {
+        final String qualifiedName = qualifiedName();
+
         final ArrayList<String> prefixes = new ArrayList<>();
         for (InstAccess instAccess : getInstAccesss()) {
             if (instAccess.isClassAccess()) {
@@ -2190,7 +2196,8 @@ aspect ConstantEvaluation {
 
     @Override
     public void InstPrimitive.collectScalarPrimitives(Set<String> collectedNames) {
-        String qualifiedName = qualifiedName();
+        final String qualifiedName = qualifiedName();
+
         if (isArray()) {
             for (Index index : Indices.create(size())) {
                 collectedNames.add(qualifiedName + index);
@@ -3452,8 +3459,8 @@ aspect ConstantEvaluation {
         public String name();
         public String qualifiedName();
         public Size size();
-        public boolean isInstClassConstant();
-        public boolean isInstPackageConstant();
+        public boolean isConstant();
+        public boolean isPackageConstant();
         public boolean inSameInstClass(InstNode instNode);
         public TypePrefixVariability variability();
 
@@ -3471,10 +3478,9 @@ aspect ConstantEvaluation {
     }
     
     public boolean FAbstractVariable.isInstClassConstant() { return false;}
-    public boolean InstComponentDecl.isInstClassConstant() { return isConstant() && enclosingInstComponentDecl() == null;}
-    
-    public boolean FAbstractVariable.isInstPackageConstant() { return false;}
-    public boolean InstComponentDecl.isInstPackageConstant() { return isInstClassConstant() && enclosingInstClassDecl().isPackage();}
+
+    public boolean FAbstractVariable.isPackageConstant() { return false;}
+    public boolean InstComponentDecl.isPackageConstant() { return isConstant() && containingInstClass().isPackage();}
     
     public boolean FAbstractVariable.inSameInstClass(InstNode instNode) { return false;}
     public boolean InstComponentDecl.inSameInstClass(InstNode instNode) {
@@ -4671,7 +4677,7 @@ aspect CircularExpressions {
 	eq InstAccess.isUnknownSizeVarUse() = myInstComponentDecl().isUnknownSizeVar();
 	
 	syn boolean FAbstractVariable.isUnknownSizeVar() = false;
-	eq FFunctionArray.isUnknownSizeVar()             = getType().size().isUnknown();
+    eq FFunctionVariable.isUnknownSizeVar()          = getType().size().isUnknown();
 	syn boolean InstComponentDecl.isUnknownSizeVar() = type().size().isUnknown();
 	
 	public boolean Size.isCircular() {
