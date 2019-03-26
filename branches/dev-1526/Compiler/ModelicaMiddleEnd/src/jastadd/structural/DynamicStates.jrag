@@ -283,7 +283,8 @@ aspect DynamicStateSelect{
         
     }
 
-    public Set<IndexReductionVar> IndexReductionBiPGraph.computeDynamicStateSets(Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix, IndexReductionResult result) {
+    public Set<IndexReductionVar> IndexReductionBiPGraph.computeDynamicStateSets(int dynamicStateLimit, 
+            Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix, IndexReductionResult result) {
         if (result.hasDSFailed())
             return Collections.emptySet();
         Map<IndexReductionVar, IndexReductionEq> initialMatching = new HashMap<IndexReductionVar, IndexReductionEq>();
@@ -426,7 +427,7 @@ aspect DynamicStateSelect{
         
         boolean skipDynamicStates = false;
         for (DSSet set : dsSets) {
-            if (set.eqns.size() > 8 || set.vars.size() > 8) {
+            if (dynamicStateLimit >= 0 && (set.eqns.size() > dynamicStateLimit || set.vars.size() > dynamicStateLimit)) {
                 ASTNode.log.verbose("Too big dynamic state set, %d equations and %d variables!", set.eqns.size(), set.vars.size());
                 ASTNode.log.verbose(set);
                 skipDynamicStates = true;

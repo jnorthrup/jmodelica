@@ -291,6 +291,10 @@ aspect AnnotationAPI {
             }
         }
     }
+    
+    public FExp InstExternal.annotationExp(SrcExp exp) {
+        return new FNoExp();
+    }
 
     /**
      * Is this expression a sub-expression of another expression?
@@ -450,6 +454,7 @@ aspect AnnotationAPI {
     public interface InstContext {
         CValue ceval(SrcExp exp);
         CValue ceval(SrcExp exp, VariableEvaluator evaluator);
+        FExp annotationExp(SrcExp exp);
         InstLookupResult<InstClassDecl>     lookupInstClass(SrcExp exp);
         InstLookupResult<InstComponentDecl> lookupInstComponent(SrcExp exp);
     }
@@ -491,6 +496,10 @@ aspect AnnotationAPI {
 
             public InstLookupResult<InstClassDecl> lookupInstClass(SrcExp exp) {
                 return null;
+            }
+
+            public FExp annotationExp(SrcExp exp) {
+                return new FNoExp();
             }
 
             public InstLookupResult<InstComponentDecl> lookupInstComponent(SrcExp exp) {

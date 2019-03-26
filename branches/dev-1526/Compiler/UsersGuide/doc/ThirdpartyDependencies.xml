@@ -52,8 +52,7 @@ opc = open_client()</programlisting>
 
               <listitem>
                 <para><link
-                xlink:href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Java
-                1.7</link> (JRE)</para>
+                xlink:href="https://jdk.java.net/11/">JDK 11.0.2</link> </para>
               </listitem>
 
               <listitem>
