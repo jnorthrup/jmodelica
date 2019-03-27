@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+# Feature ; Minor ; Compiler ; #5735
+Loop unrolling is now an internal option.
+
 # Fixed ; Minor ; Compiler ; #5748
 Fixed NullPointerException from flattening global access used as subscript
 

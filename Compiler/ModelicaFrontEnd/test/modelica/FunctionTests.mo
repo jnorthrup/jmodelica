@@ -9104,10 +9104,12 @@ public
    assert(2 == size(i[i1].y, 1), \"Mismatching sizes in function 'FunctionTests.ArrayOutputScalarization25.f', component 'i[i1].y', dimension '1'\");
   end for;
   for i1 in 1:2 loop
-   o[i1].x[1] := i[i1].x[1];
-   o[i1].x[2] := i[i1].x[2];
-   o[i1].y[1] := i[i1].y[1];
-   o[i1].y[2] := i[i1].y[2];
+   for i2 in 1:2 loop
+    o[i1].x[i2] := i[i1].x[i2];
+   end for;
+   for i2 in 1:2 loop
+    o[i1].y[i2] := i[i1].y[i2];
+   end for;
   end for;
   return;
  end FunctionTests.ArrayOutputScalarization25.f;
@@ -11345,20 +11347,24 @@ public
    assert(2 == size(i[i1].y, 1), \"Mismatching sizes in function 'FunctionTests.UnknownArray40.f', component 'i[i1].y', dimension '1'\");
   end for;
   for i1 in 1:size(i, 1) loop
-   o[i1].y[1] := i[i1].y[1];
-   o[i1].y[2] := i[i1].y[2];
+   for i2 in 1:2 loop
+    o[i1].y[i2] := i[i1].y[i2];
+   end for;
   end for;
   for i1 in 1:size(i, 1) loop
-   o[i1].y[1] := i[i1].y[1];
-   o[i1].y[2] := i[i1].y[2];
+   for i2 in 1:2 loop
+    o[i1].y[i2] := i[i1].y[i2];
+   end for;
   end for;
   for i1 in 1:size(i, 1) loop
-   o[i1].y[1] := i[i1].y[1];
-   o[i1].y[2] := i[i1].y[2];
+   for i2 in 1:2 loop
+    o[i1].y[i2] := i[i1].y[i2];
+   end for;
   end for;
   for i1 in 1:size(i, 1) loop
-   o[i1].y[1] := i[i1].y[1];
-   o[i1].y[2] := i[i1].y[2];
+   for i2 in 1:2 loop
+    o[i1].y[i2] := i[i1].y[i2];
+   end for;
   end for;
   return;
  end FunctionTests.UnknownArray40.f;
@@ -11416,13 +11422,15 @@ public
     temp_2[1] := i;
     temp_2[2] := i1;
     temp_1[i1].x := i * i1;
-    temp_1[i1].y[1] := temp_2[1];
-    temp_1[i1].y[2] := temp_2[2];
+    for i2 in 1:2 loop
+     temp_1[i1].y[i2] := temp_2[i2];
+    end for;
    end for;
    for i1 in 1:max(m, 0) loop
     o[i,i1].x := temp_1[i1].x;
-    o[i,i1].y[1] := temp_1[i1].y[1];
-    o[i,i1].y[2] := temp_1[i1].y[2];
+    for i2 in 1:2 loop
+     o[i,i1].y[i2] := temp_1[i1].y[i2];
+    end for;
    end for;
   end for;
   return;
@@ -11489,18 +11497,32 @@ public
   for i1 in 1:max(m, 0) loop
    init temp_2 as FunctionTests.UnknownArray42.R2[1];
    (temp_3) := FunctionTests.UnknownArray42.f2(i1);
-   temp_2[1].p1[1] := temp_3.p1[1];
+   for i2 in 1:1 loop
+    temp_2[1].p1[i2] := temp_3.p1[i2];
+   end for;
    temp_2[1].p2 := temp_3.p2;
    (temp_4) := FunctionTests.UnknownArray42.f2(i1);
-   temp_1[i1].y[1].p1[1] := temp_2[1].p1[1];
-   temp_1[i1].y[1].p2 := temp_2[1].p2;
-   temp_1[i1].z.p1[1] := temp_4.p1[1];
+   for i2 in 1:1 loop
+    for i3 in 1:1 loop
+     temp_1[i1].y[i2].p1[i3] := temp_2[i2].p1[i3];
+    end for;
+    temp_1[i1].y[i2].p2 := temp_2[i2].p2;
+   end for;
+   for i2 in 1:1 loop
+    temp_1[i1].z.p1[i2] := temp_4.p1[i2];
+   end for;
    temp_1[i1].z.p2 := temp_4.p2;
   end for;
   for i1 in 1:max(m, 0) loop
-   o[i1].y[1].p1[1] := temp_1[i1].y[1].p1[1];
-   o[i1].y[1].p2 := temp_1[i1].y[1].p2;
-   o[i1].z.p1[1] := temp_1[i1].z.p1[1];
+   for i2 in 1:1 loop
+    for i3 in 1:1 loop
+     o[i1].y[i2].p1[i3] := temp_1[i1].y[i2].p1[i3];
+    end for;
+    o[i1].y[i2].p2 := temp_1[i1].y[i2].p2;
+   end for;
+   for i2 in 1:1 loop
+    o[i1].z.p1[i2] := temp_1[i1].z.p1[i2];
+   end for;
    o[i1].z.p2 := temp_1[i1].z.p2;
   end for;
   return;
@@ -11613,7 +11635,9 @@ public
   end for;
   assert(size(r1, 1) == 1, \"Mismatching sizes in FunctionTests.UnknownArray44.f\");
   for i1 in 1:size(r1, 1) loop
-   r2.y[i1].x[1] := r1[i1].x[1];
+   for i2 in 1:1 loop
+    r2.y[i1].x[i2] := r1[i1].x[i2];
+   end for;
   end for;
   return;
  end FunctionTests.UnknownArray44.f;
