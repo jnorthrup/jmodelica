@@ -1,4 +1,4 @@
-def call(command, extraBat="", returnStdout = false, bitness = 32) {
+def call(command, extraBat="", returnStdout = false, bitness = 64) {
     writeFile file:'run.sh', text:"""\
 #!/bin/bash
 cd "${unixpath(pwd())}"

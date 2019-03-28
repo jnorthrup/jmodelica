@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 import org.jmodelica.util.QualifiedName;
-aspect SimpleClassLookup {
+aspect SimpleLookup {
     /**
       * Warning: This is only a prototype and is currently not well tested.
       *          Use with care.
@@ -283,7 +283,7 @@ aspect SimpleClassLookup {
     eq SrcExtendsClause.getSuper().simpleLookupHelper(String name)            = simpleLookupFromExtends(name);
     eq SrcFullClassDecl.getChild().simpleLookupHelper(String name)            = simpleLookupDefaultScope(name);
     eq Program.getChild().simpleLookupHelper(String name)                     = simpleLookupDefaultScope(name);
-    eq SrcForStmt.getChild().simpleLookupHelper(String name)                  = simpleLookupForStmt(name);
+    eq SrcForStmt.getChild().simpleLookupHelper(String name)                  = simpleLookupInForStmt(name);
     eq SrcComponentDecl.getSrcModification().simpleLookupHelper(String name)  = simpleLookupFromModification(name);
     eq SrcValueModification.getSrcExp().simpleLookupHelper(String name)       = simpleLookupFromValue(name);
     eq SrcComponentRedeclare.getSrcComponentClause().simpleLookupHelper(String name) = simpleLookupFromValue(name);
@@ -380,7 +380,7 @@ aspect SimpleClassLookup {
     }
 
     /**
-     * Lookup in contained classes, imports and surrounding classes. Has to be an unqualified classname.
+     * Lookup in contained classes, components, imports and surrounding classes. Has to be an unqualified classname.
      */
     syn lazy ResolvedAccess SrcFullClassDecl.simpleLookupLocalScope(String name) {
         if (duringFindClassDeclRevisits > MAX_FIND_CLASS_DECL_REVISITS) {
@@ -412,7 +412,7 @@ aspect SimpleClassLookup {
     eq SrcUnknownClassDecl.simpleLookupMemberScope(String name)  = unknownAccess();
 
     /**
-     * Lookup in contained classes and extended classes.
+     * Lookup in contained classes, components and extended classes.
      * Has to be an unqualified classname.
      * This method returns the unknown class when the class isn't found.
      */
@@ -455,7 +455,7 @@ aspect SimpleClassLookup {
     eq SrcLibNode.simpleLookupMemberScope(String name)        = 
         myClass().simpleLookupMemberScope(name);
 
-    syn ResolvedAccess SrcForStmt.simpleLookupForStmt(String name) {
+    syn ResolvedAccess SrcForStmt.simpleLookupInForStmt(String name) {
         for (SrcForIndex index : getSrcForIndexs()) {
             SrcForIndexDecl indexDecl = index.getSrcForIndexDecl();
             if (indexDecl.name().equals(name)) {
@@ -588,7 +588,9 @@ aspect SimpleClassLookup {
         }
         return name().equals(str);
     }
+}
 
+aspect TestSimpleLookup {
     /**
     * Test the lookup of classes for classes in a model. 
     * This method is only for use by JUnit tests testing the simpleLookupClass functionality.
@@ -636,49 +638,54 @@ aspect SimpleClassLookup {
         }
     }
 
-    /**
-     * Find the SrcComponentDecl referenced by this access, if the access references a constant.
-     */
-    syn SrcComponentDecl SrcAccess.findConstantDecl() = findConstant().getComponentDecl();
-    
-    syn ResolvedAccess SrcAccess.findConstant() {
-        ResolvedAccess access = resolveAccess();
-        if (access.getComponentDecl().isConstant()) {
-            return access;
-        }
-        return unknownAccess();
-    }
-    
 
-
-    public String InstClassDecl.testFindConstant() {
+    public String InstClassDecl.testSimpleLookup() {
         SrcClassDecl sourceClass = getSrcClassDecl();
         StringBuilder sb = new StringBuilder();
-        sourceClass.testFindConstant(sb);
+        sourceClass.testSimpleLookup(sb, new HashSet<String>() {
+            public boolean contains(Object key) {
+                return true;
+            }
+        });
         return sb.toString();
     }
 
-    public void ASTNode.testFindConstant(StringBuilder sb) {
+    public String InstClassDecl.testSimpleLookup(String args) {
+        SrcClassDecl sourceClass = getSrcClassDecl();
+        StringBuilder sb = new StringBuilder();
+        sourceClass.testSimpleLookup(sb, new HashSet<>(Arrays.asList(args.split(", "))));
+        return sb.toString();
+    }
+
+    /** 
+     * Returns the result of performing name lookup for all named accesses in the source tree with IDs contained in {@code arguments}.
+     * @param sb accumulates the result
+     * @param arguments the set of IDs of accesses we are looking for
+     */
+    protected void ASTNode.testSimpleLookup(StringBuilder sb, Set<String> arguments) {
         for (ASTNode child : this) {
-            child.testFindConstant(sb);
+            child.testSimpleLookup(sb, arguments);
         }
     }
 
-    public void SrcNamedAccess.testFindConstant(StringBuilder sb) {
-        SrcClassDecl classDecl = findClassDecl();
-        if (classDecl.isUnknown()) {
+    @Override
+    protected void SrcNamedAccess.testSimpleLookup(StringBuilder sb, Set<String> arguments) {
+        if (arguments.contains(getID())) {
+            ResolvedAccess access = resolveAccess();
             sb.append(getID());
             sb.append("=");
-            sb.append(findConstant());
+            sb.append(access);
             sb.append('\n');
         }
     }
 
-    public void SrcArrayAccess.testFindConstant(StringBuilder sb) {
-        super.testFindConstant(sb);
-        getSrcArraySubscripts().testFindConstant(sb);
+    @Override
+    protected void SrcArrayAccess.testSimpleLookup(StringBuilder sb, Set<String> arguments) {
+        super.testSimpleLookup(sb, arguments);
+        getSrcArraySubscripts().testSimpleLookup(sb, arguments);
     }
 
-    public void SrcParseAnnotation.testFindConstant(StringBuilder sb) {
+    @Override
+    protected void SrcParseAnnotation.testSimpleLookup(StringBuilder sb, Set<String> arguments) {
     }
 }

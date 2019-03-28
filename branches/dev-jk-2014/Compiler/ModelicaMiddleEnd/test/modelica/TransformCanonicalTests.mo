@@ -8188,7 +8188,6 @@ model ScalarizeSliceInFunctionCallLeftInFunction
             eliminate_alias_variables=false,
             variability_propagation=false,
             inline_functions=none,
-            no_loop_unrolling_in_functions=false,
             flatModel="
 fclass TransformCanonicalTests.ScalarizeSliceInFunctionCallLeftInFunction
  Real a[1];
@@ -8207,9 +8206,14 @@ public
  function TransformCanonicalTests.ScalarizeSliceInFunctionCallLeftInFunction.f
   input Real[:] x;
   output Real[:,:] y;
+  Real[:] temp_1;
  algorithm
   init y as Real[1, 3];
-  ({y[1,1], y[1,2], y[1,3]}) := TransformCanonicalTests.ScalarizeSliceInFunctionCallLeftInFunction.g(x);
+  init temp_1 as Real[3];
+  (temp_1) := TransformCanonicalTests.ScalarizeSliceInFunctionCallLeftInFunction.g(x);
+  for i1 in 1:3 loop
+   y[1,i1] := temp_1[i1];
+  end for;
   return;
  end TransformCanonicalTests.ScalarizeSliceInFunctionCallLeftInFunction.f;
 
