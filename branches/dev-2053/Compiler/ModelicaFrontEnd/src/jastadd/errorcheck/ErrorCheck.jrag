@@ -1017,6 +1017,18 @@ aspect InstanceErrorCheck {
 		}
 	}
 	
+    public static final SimpleProblemProducer ASTNode.UNSPECIFIED_ENUM_COMPONENT =
+            new SimpleErrorProducer("UNSPECIFIED_ENUM_COMPONENT", ProblemKind.SEMANTIC,
+                    "Unspecified enum component %s");
+
+	public void InstEnum.collectErrors(ErrorCheckType checkType) {
+        if (isUnspecifiedEnum()) {
+            ASTNode.UNSPECIFIED_ENUM_COMPONENT.invoke(this, qualifiedName());
+        }
+	}
+
+	syn boolean InstEnum.isUnspecifiedEnum() = myInstClass().enumLiterals().isEmpty();
+
 	public void InstExtends.collectErrors(ErrorCheckType checkType) {
 	    if (!errorChecked) {
 	    	if (checkType.checkForRecursiveStructure() && isRecursed()) {

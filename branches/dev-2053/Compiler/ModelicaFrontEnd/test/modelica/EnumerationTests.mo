@@ -508,6 +508,16 @@ end UnspecifiedEnum2;
 model UnspecifiedEnum3
     replaceable type E = enumeration(:);
     E e;
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="UnspecifiedEnum3",
+        description="model with an unspecified enumeration component",
+        errorMessage="
+
+
+Error at line 3, column 5, in file '...', UNSPECIFIED_ENUM_COMPONENT:
+  Unspecified enum component e
+")})));
 end UnspecifiedEnum3;
 
 
