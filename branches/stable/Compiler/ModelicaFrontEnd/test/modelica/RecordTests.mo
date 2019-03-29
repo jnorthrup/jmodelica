@@ -5883,6 +5883,7 @@ model RecordScalarize52
         TransformCanonicalTestCase(
             name="RecordScalarize52",
             description="",
+            inline_functions="none",
             flatModel="
 fclass RecordTests.RecordScalarize52
  Real r.x[1];
@@ -6629,8 +6630,9 @@ public
    assert(2 == size(x[i1].x, 1), \"Mismatching sizes in function 'RecordTests.RecordFunc10.f', component 'x[i1].x', dimension '1'\");
   end for;
   for i1 in 1:1 loop
-   x[i1].x[1] := y[i1].x[1];
-   x[i1].x[2] := y[i1].x[2];
+   for i2 in 1:2 loop
+    x[i1].x[i2] := y[i1].x[i2];
+   end for;
   end for;
   return;
  end RecordTests.RecordFunc10.f;
@@ -6664,6 +6666,7 @@ model RecordFunc11
             name="RecordFunc11",
             description="Scalarization of records in functions: array of records with array of reals.",
             variability_propagation=false,
+            inline_functions="none",
             flatModel="
 fclass RecordTests.RecordFunc11
  Real a1[1].x[1];

@@ -1,4 +1,17 @@
 ================= Unreleased ==================
+# Feature ; Minor ; Compiler ; #5735
+Loop unrolling is now an internal option.
+
+# Fixed ; Minor ; Compiler ; #5748
+Fixed NullPointerException from flattening global access used as subscript
+
+# Feature ; Minor ; Compiler ; #5735
+Turned off loop unrolling in functions to increase performance.
+
+# Feature ; Minor ; Compiler ; #5735
+Added option for controlling maximum allowed size of dynamic state
+sets. Changed default from 8 to 10.
+
 # Feature ; Minor ; Compiler ; #5726
 Orginal annotations should be preserved when components are redeclared
  unless new annotations are added in the redeclaring declaration.
