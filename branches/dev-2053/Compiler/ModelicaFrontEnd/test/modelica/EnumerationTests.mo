@@ -451,5 +451,169 @@ end EnumerationTests.ShortEnumDecl;
   end ShortEnumDecl;
 
 
+model Temp
+    model A
+        replaceable type E = Real;
+        E e;
+    end A;
+    
+    model B
+        type E1 = Real(start=1);
+        extends A(redeclare type E = E1(min = 0));
+    equation
+        der(e) = time;
+    end B;
+    
+    B b;
+end Temp;
+
+
+model UnspecifiedEnum1
+    model A
+        replaceable type E = enumeration(:);
+        E e;
+    end A;
+    
+    model B
+        type E1 = enumeration(a, b);
+        extends A(redeclare type E = E1);
+    equation
+        e = E1.a;
+    end B;
+    
+    B b;
+end UnspecifiedEnum1;
+
+
+model UnspecifiedEnum2
+    model A
+        replaceable type E = enumeration(:);
+        E e;
+    end A;
+    
+    model B
+        type E1 = enumeration(a, b);
+        type E2 = enumeration(c, d, e);
+        A a1(redeclare type E = E1);
+        A a2(redeclare type E = E2);
+    equation
+        a1.e = E1.a;
+        a2.e = E2.d;
+    end B;
+    
+    B b;
+end UnspecifiedEnum2;
+
+
+model UnspecifiedEnum3
+    replaceable type E = enumeration(:);
+    E e;
+end UnspecifiedEnum3;
+
+
+model UnspecifiedEnum4
+    replaceable type E = enumeration(:);
+    
+    record R
+        E e;
+    end R;
+end UnspecifiedEnum4;
+
+
+model UnspecifiedEnum5
+    replaceable type E = enumeration(:);
+    
+    record R
+        E e;
+    end R;
+    
+    R r;
+end UnspecifiedEnum5;
+
+
+model UnspecifiedEnum6
+    replaceable type E = enumeration(:);
+    
+    function f
+        input E e;
+        output Integer i;
+    algorithm
+        i := Integer(e);
+    end f;
+end UnspecifiedEnum6;
+
+
+model UnspecifiedEnum7
+    replaceable type E = enumeration(:);
+    
+    function f
+        input E e;
+        output Integer i;
+    algorithm
+        i := Integer(e);
+    end f;
+    
+    E e;
+    Integer i = f(e);
+end UnspecifiedEnum7;
+
+
+model UnspecifiedEnum8
+    replaceable type E = enumeration(:);
+    
+    Real x[size(E)];
+    
+equation
+    for i in E loop
+        x[Integer(i)] = time;
+    end for;
+end UnspecifiedEnum8;
+
+
+model UnspecifiedEnum9
+    replaceable type E = enumeration(:);
+    
+    Real x[E] = fill(time, size(x, 1));
+end UnspecifiedEnum9;
+
+
+model UnspecifiedEnum10
+    model A
+        replaceable type E = enumeration(:);
+        E e;
+    end A;
+    
+    model B
+        type E1 = enumeration(a, b);
+        type E2 = enumeration(c, d, e);
+        A a1(redeclare type E = E1);
+        A a2(redeclare type E = E2);
+    equation
+        a1.e = a2.e;
+        a2.e = E2.d;
+    end B;
+    
+    B b;
+end UnspecifiedEnum10;
+
+
+model UnspecifiedEnum11
+    type UE = enumeration(:);
+    
+    model A
+        replaceable type E = UE;
+        E e;
+    end A;
+    
+    model B
+        type E1 = enumeration(a, b);
+        extends A(redeclare type E = E1);
+    equation
+        e = E1.a;
+    end B;
+    
+    B b;
+end UnspecifiedEnum11;
+
 
 end EnumerationTests;
