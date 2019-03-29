@@ -37,7 +37,7 @@ aspect AlgorithmScalarization {
         left.createArrayTemporaries(s);
         right.createArrayTemporaries(s);
         
-        FType t = left.size().isUnknown() ? left.type() : right.type();
+        FType t = left.type();
         if (extractTemp(s)) {
             s.addTempVar(this);
             CommonAccessExp temp = getRight().tempExp(tempVarName());
@@ -177,7 +177,8 @@ aspect AssignmentScalarization {
 
             List<FStatement> stmts = new List<FStatement>();
             scalarizeAssignment_sub(s.block(stmts), left, right);
-            FType t = right.type().isUnknown() ? (left.type().isUnknown() ? this : left.type()) : right.type();
+            /* Either of left or right can be a FTempAccessExp which does not know its type */
+            FType t = left.type().isUnknown() ? (right.type().isUnknown() ? this : right.type()) : left.type();
             s.createForLoops(stmts, t.size());
 
             names.removeLayer();
