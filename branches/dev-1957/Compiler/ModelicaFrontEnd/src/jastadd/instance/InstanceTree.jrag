@@ -346,6 +346,10 @@ aspect MergedEnvironment {
         public void setModification(InstValueModification modification) {
         }
         
+        public boolean isEmpty() {
+            return name.isEmpty() && subNodes.isEmpty();
+        }
+        
         public ModificationNode subNode(String name) {
             if (!subNodes.containsKey(name)) {
                 subNodes.put(name, new ValueModificationNode(name));
