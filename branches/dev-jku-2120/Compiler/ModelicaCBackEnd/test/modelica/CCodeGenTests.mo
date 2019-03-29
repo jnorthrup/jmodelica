@@ -3535,6 +3535,7 @@ void func_CCodeGenTests_FuncWithArray_F_def0(jmi_real_t x_v, jmi_array_t* y_a) {
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, temp_1_a, 1, 1)
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_3, 2, 1)
     jmi_real_t i1_0i;
     jmi_int_t i1_0ie;
     jmi_int_t i1_0in;
@@ -3553,8 +3554,11 @@ void func_CCodeGenTests_FuncWithArray_F_def0(jmi_real_t x_v, jmi_array_t* y_a) {
     }
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_1_a, 1, 1, 1)
     jmi_array_ref_1(temp_1_a, 1) = x_v;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 2, 1, 2)
+    jmi_array_ref_1(tmp_3, 1) = x_v;
+    jmi_array_ref_1(tmp_3, 2) = x_v;
     i1_0in = 0;
-    i1_0ie = floor((1) - (1));
+    i1_0ie = floor((func_CCodeGenTests_FuncWithArray_g_exp1(tmp_3)) - (1));
     for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
         jmi_array_ref_1(y_a, i1_0i) = jmi_array_val_1(temp_1_a, i1_0i);
     }
@@ -5573,7 +5577,7 @@ void func_CCodeGenTests_CUnknownArray5_f_def0(jmi_array_t* i1_a, jmi_array_t* i2
         }
     }
     i3_4in = 0;
-    i3_4ie = floor((jmi_array_size(i2_a, 0)) - (1));
+    i3_4ie = floor((jmi_array_size(i1_a, 0)) - (1));
     for (i3_4i = 1; i3_4in <= i3_4ie; i3_4i = 1 + (++i3_4in)) {
         i4_5in = 0;
         i4_5ie = floor((jmi_array_size(i1_a, 0)) - (1));
@@ -5656,7 +5660,7 @@ void func_CCodeGenTests_CUnknownArray6_f_def0(jmi_array_t* i1_a, jmi_array_t* i2
         }
     }
     i3_4in = 0;
-    i3_4ie = floor((jmi_array_size(i2_a, 0)) - (1));
+    i3_4ie = floor((jmi_array_size(i1_a, 0) * 2 - 2) - (1));
     for (i3_4i = 1; i3_4in <= i3_4ie; i3_4i = 1 + (++i3_4in)) {
         i4_5in = 0;
         i4_5ie = floor((jmi_array_size(i1_a, 0)) - (1));
@@ -5784,7 +5788,7 @@ void func_CCodeGenTests_CUnknownArray7_f_def0(jmi_real_t m_v, R1_1_ra* o_a) {
             }
         }
         i1_5in = 0;
-        i1_5ie = floor((jmi_max(m_v, AD_WRAP_LITERAL(0))) - (1));
+        i1_5ie = floor((m_v) - (1));
         for (i1_5i = 1; i1_5in <= i1_5ie; i1_5i = 1 + (++i1_5in)) {
             i2_6in = 0;
             i2_6ie = floor((1) - (1));
@@ -5925,7 +5929,7 @@ void func_CCodeGenTests_CUnknownArray9_f_def0(jmi_real_t n_v, jmi_array_t* ab_a,
         jmi_array_ref_1(ba_a, i1_0i) = 1;
     }
     i1_1in = 0;
-    i1_1ie = floor((n_v) - (1));
+    i1_1ie = floor((jmi_array_size(ba_a, 0)) - (1));
     for (i1_1i = 1; i1_1in <= i1_1ie; i1_1i = 1 + (++i1_1in)) {
         jmi_array_ref_1(ab_a, i1_1i) = jmi_array_val_1(ba_a, i1_1i);
     }
@@ -6087,7 +6091,7 @@ void func_CCodeGenTests_CUnknownArray13_f_def0(jmi_array_t* x_a, jmi_array_t* y_
             jmi_array_ref_1(temp_1_a, i1_2i + jmi_array_size(x_a, 0)) = i1_2i;
         }
         i1_3in = 0;
-        i1_3ie = floor((jmi_array_size(x_a, 0) + jmi_max(i_0i, AD_WRAP_LITERAL(0))) - (1));
+        i1_3ie = floor((jmi_array_size(x_a, 0) * 2) - (1));
         for (i1_3i = 1; i1_3in <= i1_3ie; i1_3i = 1 + (++i1_3in)) {
             jmi_array_ref_1(y_a, i1_3i) = jmi_array_val_1(temp_1_a, i1_3i);
         }
@@ -13769,7 +13773,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def1(jmi_array_t* A_a, jmi_arr
         x_a = x_an;
     }
     i1_0in = 0;
-    i1_0ie = floor((jmi_array_size(b_a, 0)) - (1));
+    i1_0ie = floor((jmi_array_size(A_a, 0)) - (1));
     for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
         jmi_array_ref_1(x_a, i1_0i) = jmi_array_val_1(b_a, i1_0i);
     }
@@ -13778,7 +13782,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def1(jmi_array_t* A_a, jmi_arr
     i1_1ie = floor((jmi_array_size(A_a, 0)) - (1));
     for (i1_1i = 1; i1_1in <= i1_1ie; i1_1i = 1 + (++i1_1in)) {
         i2_2in = 0;
-        i2_2ie = floor((jmi_array_size(A_a, 1)) - (1));
+        i2_2ie = floor((jmi_array_size(A_a, 0)) - (1));
         for (i2_2i = 1; i2_2in <= i2_2ie; i2_2i = 1 + (++i2_2in)) {
             jmi_array_ref_2(Awork_a, i1_1i, i2_2i) = jmi_array_val_2(A_a, i1_1i, i2_2i);
         }
@@ -13874,7 +13878,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def1(jmi_array_t* A_a, jmi_array_t
         X_a = X_an;
     }
     i1_0in = 0;
-    i1_0ie = floor((jmi_array_size(B_a, 0)) - (1));
+    i1_0ie = floor((jmi_array_size(A_a, 0)) - (1));
     for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
         i2_1in = 0;
         i2_1ie = floor((jmi_array_size(B_a, 1)) - (1));
@@ -13887,7 +13891,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def1(jmi_array_t* A_a, jmi_array_t
     i1_2ie = floor((jmi_array_size(A_a, 0)) - (1));
     for (i1_2i = 1; i1_2in <= i1_2ie; i1_2i = 1 + (++i1_2in)) {
         i2_3in = 0;
-        i2_3ie = floor((jmi_array_size(A_a, 1)) - (1));
+        i2_3ie = floor((jmi_array_size(A_a, 0)) - (1));
         for (i2_3i = 1; i2_3in <= i2_3ie; i2_3i = 1 + (++i2_3in)) {
             jmi_array_ref_2(Awork_a, i1_2i, i2_3i) = jmi_array_val_2(A_a, i1_2i, i2_3i);
         }
@@ -16299,7 +16303,7 @@ void func_CCodeGenTests_StringOperations11_f2_def0(jmi_real_t x_v, jmi_real_t n_
         JMI_ASG(STR, jmi_array_ref_1(temp_1_a, i1_0i), \"str\")
     }
     i1_1in = 0;
-    i1_1ie = floor((jmi_max(n_v, AD_WRAP_LITERAL(0))) - (1));
+    i1_1ie = floor((n_v) - (1));
     for (i1_1i = 1; i1_1in <= i1_1ie; i1_1i = 1 + (++i1_1in)) {
         JMI_ASG(STR, jmi_array_ref_1(s_a, i1_1i), jmi_array_val_1(temp_1_a, i1_1i))
     }
@@ -18014,7 +18018,7 @@ void func_CCodeGenTests_FuncInitOrder_f_def1(jmi_array_t* x_a, jmi_array_t* y_a)
         jmi_assert_failed(\"Mismatching sizes in CCodeGenTests.FuncInitOrder.f\", JMI_ASSERT_ERROR);
     }
     i1_4in = 0;
-    i1_4ie = floor((0) - (1));
+    i1_4ie = floor((func_CCodeGenTests_FuncInitOrder_g_exp2(x_a)) - (1));
     for (i1_4i = 1; i1_4in <= i1_4ie; i1_4i = 1 + (++i1_4in)) {
         jmi_array_ref_1(y_a, i1_4i) = 0;
     }
