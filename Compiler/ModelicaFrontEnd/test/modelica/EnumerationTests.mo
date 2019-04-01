@@ -451,7 +451,7 @@ end EnumerationTests.ShortEnumDecl;
   end ShortEnumDecl;
 
 
-model Temp
+model RedeclareEnum1
     model A
         replaceable type E = Real;
         E e;
@@ -465,7 +465,22 @@ model Temp
     end B;
     
     B b;
-end Temp;
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="RedeclareEnum1",
+        description="Test redeclaring an enumeration",
+        flatModel="
+fclass EnumerationTests.RedeclareEnum1
+ EnumerationTests.RedeclareEnum1.b.E b.e;
+equation
+ der(b.e) = time;
+
+public
+ type EnumerationTests.RedeclareEnum1.b.E = Real(min = 0,start = 1);
+end EnumerationTests.RedeclareEnum1;
+")})));
+end RedeclareEnum1;
 
 
 model UnspecifiedEnum1
