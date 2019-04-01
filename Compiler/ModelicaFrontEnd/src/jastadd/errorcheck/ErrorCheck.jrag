@@ -1016,16 +1016,17 @@ aspect InstanceErrorCheck {
 			}
 		}
 	}
+
 	
     public static final SimpleProblemProducer ASTNode.UNSPECIFIED_ENUM_COMPONENT =
             new SimpleErrorProducer("UNSPECIFIED_ENUM_COMPONENT", ProblemKind.SEMANTIC,
-                    "Unspecified enum component %s");
+                    "Components of unspecified enumerations are not allowed in simulation models:\n %s");
 
     @Override
 	public void InstEnum.collectErrors(ErrorCheckType checkType) {
         super.collectErrors(checkType);
         if (isUnspecifiedEnum()) {
-            ASTNode.UNSPECIFIED_ENUM_COMPONENT.invoke(this, qualifiedName());
+            ASTNode.UNSPECIFIED_ENUM_COMPONENT.invoke(this, this);
         }
 	}
 
