@@ -676,5 +676,17 @@ model UnspecifiedEnum11
     B b;
 end UnspecifiedEnum11;
 
+model UnspecifiedEnum12
+
+type UE = enumeration(:);
+type E = enumeration(a,b);
+model A
+  replaceable UE e;
+end A;
+
+A a(redeclare E e);
+
+// suggested description="Redeclaring an unspecified enum component to a specified enum component",
+end UnspecifiedEnum12;
 
 end EnumerationTests;
