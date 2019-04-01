@@ -1254,10 +1254,6 @@ aspect FlatPrettyPrint {
     }
 
     public abstract void FEnumSpecification.prettyPrint(Printer p, CodeStream str, String indent);
-    
-    public void FEnumUnspecified.prettyPrint(Printer p, CodeStream str, String indent) {
-    	str.print(":");
-    }
 
     public void FEnumLiteralList.prettyPrint(Printer p, CodeStream str, String indent) {
     	getFEnumLiterals().prettyPrintWithSep(p, str, indent, ", ");

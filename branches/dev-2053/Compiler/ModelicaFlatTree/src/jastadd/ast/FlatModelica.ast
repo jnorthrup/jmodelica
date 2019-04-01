@@ -74,7 +74,6 @@ FRecordDecl : BaseNode ::= FAccess FVariable*;
 FEnumDecl : BaseNode ::= Name:FIdDecl FEnumSpecification [FStringComment];
 abstract FEnumSpecification : BaseNode;
 FEnumLiteralList : FEnumSpecification ::= FEnumLiteral*;
-FEnumUnspecified : FEnumSpecification;
 FEnumLiteral : FAbstractVariable ::= Name:CommonAccess [FStringComment];
 
 /**
