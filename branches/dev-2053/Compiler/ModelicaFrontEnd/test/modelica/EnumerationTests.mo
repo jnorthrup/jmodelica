@@ -497,6 +497,22 @@ model UnspecifiedEnum1
     end B;
     
     B b;
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="UnspecifiedEnum1",
+        description="Basic test of unspecified enumerations",
+        flatModel="
+fclass EnumerationTests.UnspecifiedEnum1
+ discrete EnumerationTests.UnspecifiedEnum1.b.E1 b.e;
+equation
+ b.e = EnumerationTests.UnspecifiedEnum1.b.E1.a;
+
+public
+ type EnumerationTests.UnspecifiedEnum1.b.E1 = enumeration(a, b);
+
+end EnumerationTests.UnspecifiedEnum1;
+")})));
 end UnspecifiedEnum1;
 
 
@@ -517,6 +533,26 @@ model UnspecifiedEnum2
     end B;
     
     B b;
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="UnspecifiedEnum2",
+        description="Redeclaring the same unspecified enumeration differently for different components",
+        flatModel="
+fclass EnumerationTests.UnspecifiedEnum2
+ discrete EnumerationTests.UnspecifiedEnum2.b.E1 b.a1.e;
+ discrete EnumerationTests.UnspecifiedEnum2.b.E2 b.a2.e;
+equation
+ b.a1.e = EnumerationTests.UnspecifiedEnum2.b.E1.a;
+ b.a2.e = EnumerationTests.UnspecifiedEnum2.b.E2.d;
+
+public
+ type EnumerationTests.UnspecifiedEnum2.b.E1 = enumeration(a, b);
+
+ type EnumerationTests.UnspecifiedEnum2.b.E2 = enumeration(c, d, e);
+
+end EnumerationTests.UnspecifiedEnum2;
+")})));
 end UnspecifiedEnum2;
 
 
