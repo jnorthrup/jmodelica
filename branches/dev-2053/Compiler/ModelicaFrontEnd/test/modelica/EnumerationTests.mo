@@ -567,7 +567,8 @@ annotation(__JModelica(UnitTesting(tests={
 
 
 Error at line 3, column 5, in file '...', UNSPECIFIED_ENUM_COMPONENT:
-  Unspecified enum component e
+  Components of unspecified enumerations are not allowed in simulation models:
+ E e
 ")})));
 end UnspecifiedEnum3;
 
@@ -678,6 +679,7 @@ end UnspecifiedEnum11;
 
 model UnspecifiedEnum12
 
+
 type UE = enumeration(:);
 type E = enumeration(a,b);
 model A
@@ -688,5 +690,18 @@ A a(redeclare E e);
 
 // suggested description="Redeclaring an unspecified enum component to a specified enum component",
 end UnspecifiedEnum12;
+
+
+model UnspecifiedEnum13
+    replaceable type E = enumeration(:);
+    E e;
+
+annotation(__JModelica(UnitTesting(tests={
+    NoWarningsTestCase(
+        name="UnspecifiedEnum13",
+        description="",
+        checkType="check"
+)})));
+end UnspecifiedEnum13;
 
 end EnumerationTests;
