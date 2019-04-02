@@ -1022,14 +1022,6 @@ aspect InstanceErrorCheck {
             new SimpleErrorProducer("UNSPECIFIED_ENUM_COMPONENT", ProblemKind.SEMANTIC,
                     "Components of unspecified enumerations are not allowed in simulation models:\n %s");
 
-    @Override
-	public void InstEnum.collectErrors(ErrorCheckType checkType) {
-        super.collectErrors(checkType);
-        if (isUnspecifiedEnum()) {
-            ASTNode.UNSPECIFIED_ENUM_COMPONENT.invoke(this, this);
-        }
-	}
-
 	syn boolean InstEnum.isUnspecifiedEnum() = myInstClass().enumLiterals().isEmpty();
 
 	public void InstExtends.collectErrors(ErrorCheckType checkType) {

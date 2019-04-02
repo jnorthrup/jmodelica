@@ -579,6 +579,12 @@ model UnspecifiedEnum4
     record R
         E e;
     end R;
+
+annotation(__JModelica(UnitTesting(tests={
+    NoWarningsTestCase(
+        name="UnspecifiedEnum4",
+        description="Unused record with unspecified enumeration"
+)})));
 end UnspecifiedEnum4;
 
 
@@ -590,6 +596,18 @@ model UnspecifiedEnum5
     end R;
     
     R r;
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="UnspecifiedEnum5",
+        description="Used record with unspecified enumeration",
+        errorMessage="
+
+
+Error at line 5, column 9, in file '...', UNSPECIFIED_ENUM_COMPONENT:
+  Components of unspecified enumerations are not allowed in simulation models:
+ E e
+")})));
 end UnspecifiedEnum5;
 
 
@@ -602,6 +620,12 @@ model UnspecifiedEnum6
     algorithm
         i := Integer(e);
     end f;
+
+annotation(__JModelica(UnitTesting(tests={
+    NoWarningsTestCase(
+        name="UnspecifiedEnum6",
+        description="Unused function with unspecified enumeration"
+)})));
 end UnspecifiedEnum6;
 
 
@@ -617,13 +641,29 @@ model UnspecifiedEnum7
     
     E e;
     Integer i = f(e);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="UnspecifiedEnum7",
+        description="Used function with unspecified enumeration",
+        errorMessage="
+
+
+Error at line 5, column 9, in file '...', UNSPECIFIED_ENUM_COMPONENT:
+  Components of unspecified enumerations are not allowed in simulation models:
+ input E e
+
+Error at line 11, column 5, in file '...', UNSPECIFIED_ENUM_COMPONENT:
+  Components of unspecified enumerations are not allowed in simulation models:
+ E e
+")})));
 end UnspecifiedEnum7;
 
 
 model UnspecifiedEnum8
     replaceable type E = enumeration(:);
     
-    Real x[size(E)];
+    Real x[size(E, 1)];
     
 equation
     for i in E loop
@@ -656,6 +696,18 @@ model UnspecifiedEnum10
     end B;
     
     B b;
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="UnspecifiedEnum10",
+        description="Unspecified enum declared to different enums, then used as if same type",
+        errorMessage="
+
+
+Error at line 13, column 9, in file '...', TYPE_MISMATCH_IN_EQUATION,
+In component b:
+  The right and left expression types of equation are not compatible, type of left-hand side is EnumerationTests.UnspecifiedEnum10.b.a1.E, and type of right-hand side is EnumerationTests.UnspecifiedEnum10.b.a2.E
+")})));
 end UnspecifiedEnum10;
 
 
@@ -675,18 +727,34 @@ model UnspecifiedEnum11
     end B;
     
     B b;
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="UnspecifiedEnum11",
+        description="Using non-replaceable unspecified enum type as default type for replaceable type",
+        flatModel="
+fclass EnumerationTests.UnspecifiedEnum11
+ discrete EnumerationTests.UnspecifiedEnum11.b.E1 b.e;
+equation
+ b.e = EnumerationTests.UnspecifiedEnum11.b.E1.a;
+
+public
+ type EnumerationTests.UnspecifiedEnum11.b.E1 = enumeration(a, b);
+
+end EnumerationTests.UnspecifiedEnum11;
+")})));
 end UnspecifiedEnum11;
 
+
 model UnspecifiedEnum12
+    type UE = enumeration(:);
+    type E = enumeration(a,b);
+    
+    model A
+        replaceable input UE e;
+    end A;
 
-
-type UE = enumeration(:);
-type E = enumeration(a,b);
-model A
-  replaceable UE e;
-end A;
-
-A a(redeclare E e);
+    A a(redeclare E e = E.a);
 
 // suggested description="Redeclaring an unspecified enum component to a specified enum component",
 end UnspecifiedEnum12;
