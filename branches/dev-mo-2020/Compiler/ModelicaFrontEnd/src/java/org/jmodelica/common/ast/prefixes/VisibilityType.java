@@ -41,4 +41,8 @@ public enum VisibilityType {
         return this == HIDDEN;
     }
 
+    public static VisibilityType mostRestrictive(VisibilityType v1, VisibilityType v2) {
+        return values()[Math.min(v1.ordinal(), v2.ordinal())];
+    }
+
 }

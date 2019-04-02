@@ -1774,9 +1774,7 @@ public class ModelicaCompiler implements LogContainer {
                                     options.setBooleanOption("generate_xml_equations", true);
                                     break;
                                 case NOCODEGEN:
-                                    options.setBooleanOption("generate_runtime_option_parameters", false);
-                                    options.setBooleanOption("equation_sorting", false);
-                                    options.setBooleanOption("automatic_tearing", false);
+                                    options.setBooleanOption("unroll_functions", true);
                                     break;
                                 default:
                                     break;

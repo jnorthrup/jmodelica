@@ -37,8 +37,8 @@ aspect AlgorithmScalarization {
         left.createArrayTemporaries(s);
         right.createArrayTemporaries(s);
         
-        FType t = left.size().isUnknown() ? left.type() : right.type();
-        if (extractTemp()) {
+        FType t = left.type();
+        if (extractTemp(s)) {
             s.addTempVar(this);
             CommonAccessExp temp = getRight().tempExp(tempVarName());
             t.scalarizeAssignment(s, temp, right);
@@ -167,20 +167,19 @@ aspect AssignmentScalarization {
      * Scalarize an assignment and put the resulting statements in the list of statements. 
      */
     public void FType.scalarizeAssignment(Scalarizer.Algorithm s, FAssignableExp left, FExp right) {
-        
-        FExp expInAst = right.type().isUnknown() ? left : right;
-        
-        if (left.inFunction() && left.myFClass().noUnrollingInFunctions() && isArray() || size().isUnknown()) {
+        if (isArray() && !s.unroll()) {
             ForNames names = s.getNames();
             names.addLayer(ndims());
-            names.fillLayer(expInAst);
+            names.fillLayer(left);
 
             left.addArrayUsesToIndexMap(s);
             right.addArrayUsesToIndexMap(s);
 
             List<FStatement> stmts = new List<FStatement>();
             scalarizeAssignment_sub(s.block(stmts), left, right);
-            s.createForLoops(stmts, expInAst);
+            /* Either of left or right can be a FTempAccessExp which does not know its type */
+            FType t = left.type().isUnknown() ? (right.type().isUnknown() ? this : right.type()) : left.type();
+            s.createForLoops(stmts, t.size());
 
             names.removeLayer();
         } else {
@@ -189,13 +188,12 @@ aspect AssignmentScalarization {
     }
     
     public void FType.scalarizeAssignment_sub(Scalarizer.Algorithm s, FAssignableExp left, FExp right) {
-        if ((left.inFunction() && left.myFClass().noUnrollingInFunctions()) || !isArray() || size().isUnknown()) {
-            scalarizeScalarAssignment(s, left, right);
-        } else {
-            Indices ind = size().isUnknown() ? right.indices() : indices();
+        if (isArray() && s.unroll()) {
             for (Index i : indices()) {
                 scalarizeScalarAssignment(s, (FAssignableExp) left.extractArrayCell(s, i), right.extractArrayCell(s, i));
             }
+        } else {
+            scalarizeScalarAssignment(s, left, right);
         }
     }
     
@@ -209,6 +207,23 @@ aspect AssignmentScalarization {
     }
     
     protected void FRecordType.scalarizeScalarAssignment(Scalarizer.Algorithm s, FAssignableExp left, FExp right) {
-        scalarRecordClauses(s, new FAccessEmpty(), left, right);
+        if (!s.unroll()) {
+            for (FRecordComponentType comp : getComponents()) {
+                String name = comp.getName();
+                comp.getFType().scalarizeAssignment((Scalarizer.Algorithm) s, 
+                    left.componentDuringScalarization(s, name).asCommonAccessExp(),
+                    right.componentDuringScalarization(s, name));
+            }
+        } else {
+            scalarRecordClauses(s, new FAccessEmpty(), left, right);
+        }
+    }
+    
+    public FExp FExp.componentDuringScalarization(Scalarizer s, String name) {
+        if (isArray() || indexNames != null) {
+            return dynamicFExp(scalarRecordFExp(s, name));
+        } else {
+            return component(name);
+        }
     }
 }

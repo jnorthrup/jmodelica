@@ -287,9 +287,10 @@ aspect CCodeGen {
 	eq FPreStringVariable.name_C()  = preName_C();
 	eq FPreEnumVariable.name_C()    = preName_C();
 
-	eq FFunctionVariable.name_C()   = name_C(null, C_SUFFIX_VARIABLE);
-	eq FFunctionArray.name_C()      = name_C(null, C_SUFFIX_ARRAY);
-	
+    eq FFunctionVariable.name_C()   = isArray() ? 
+                                       name_C(null, C_SUFFIX_ARRAY) : 
+                                       name_C(null, C_SUFFIX_VARIABLE);
+
 	syn String FAbstractVariable.preName_C() = null; 
 	eq FVariable.preName_C() = name_C("pre");
 
@@ -313,10 +314,13 @@ aspect CCodeGen {
 		return buf.toString();
 	}
 	
-	syn String FFunctionVariable.nameReturn_C() = 
-		isRecord() ? name_C() : name_C(null, C_SUFFIX_RETURN);
-    syn String FFunctionArray.nameReturn_C() =
-        isString() ? name_C(null, C_SUFFIX_RETURN) : name_C();
+    syn String FFunctionVariable.nameReturn_C() {
+        if (isArray()) {
+            return isString() ? name_C(null, C_SUFFIX_RETURN) : name_C();
+        } else {
+            return isRecord() ? name_C() : name_C(null, C_SUFFIX_RETURN);
+        }
+    }
 
     public static void ASTNode.genFunctionStart(CodeStream str, String indent) {
         str.print(indent);

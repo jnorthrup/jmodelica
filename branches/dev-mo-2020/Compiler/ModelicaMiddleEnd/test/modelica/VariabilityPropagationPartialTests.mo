@@ -407,7 +407,7 @@ public
    init temp_1 as Integer[2];
    temp_1[1] := 1;
    temp_1[2] := 2;
-   for i1 in 1:2 loop
+   for i1 in 1:n loop
     y[i1] := temp_1[i1];
    end for;
   end if;
@@ -425,7 +425,7 @@ public
   init temp_1 as Real[2];
   temp_1[1] := x1;
   temp_1[2] := x1;
-  for i1 in 1:2 loop
+  for i1 in 1:n loop
    y[i1] := temp_1[i1];
   end for;
   assert(x1 == 1, \"nope\");
