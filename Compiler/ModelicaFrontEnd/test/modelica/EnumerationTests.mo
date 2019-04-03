@@ -756,7 +756,19 @@ model UnspecifiedEnum12
 
     A a(redeclare E e = E.a);
 
-// suggested description="Redeclaring an unspecified enum component to a specified enum component",
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="UnspecifiedEnum12",
+        description="Redeclaring an unspecified enum component to a specified enum component",
+        flatModel="
+fclass EnumerationTests.UnspecifiedEnum12
+ discrete EnumerationTests.UnspecifiedEnum12.E a.e = EnumerationTests.UnspecifiedEnum12.E.a;
+
+public
+ type EnumerationTests.UnspecifiedEnum12.E = enumeration(a, b);
+
+end EnumerationTests.UnspecifiedEnum12;
+")})));
 end UnspecifiedEnum12;
 
 
