@@ -5268,7 +5268,7 @@ public
  algorithm
   init y as Real[size(is1, 1), size(is1, 1)];
   for i1 in 1:size(is1, 1) loop
-   for i2 in 1:size(is2, 1) loop
+   for i2 in 1:size(is1, 1) loop
     y[i1,i2] := x[is1[i1],is2[i2]];
    end for;
   end for;
@@ -5383,8 +5383,8 @@ public
   init temp_1 as Integer[2];
   temp_1[1] := 1;
   temp_1[2] := 2;
-  for i1 in 1:2 loop
-   for i2 in 1:size(is2, 1) loop
+  for i1 in 1:size(is2, 1) loop
+   for i2 in 1:2 loop
     y[i1,i2] := x[is1[temp_1[i1]],is2[i2]];
    end for;
   end for;
@@ -5438,7 +5438,7 @@ public
   output Real[:,:] y;
  algorithm
   init y as Real[n, size(x, 2)];
-  for i1 in 1:max(integer(is2 - is1) + 1, 0) loop
+  for i1 in 1:n loop
    y[i1] := x[is1 + (i1 - 1)];
   end for;
   return;
@@ -5679,7 +5679,7 @@ public
    end for;
   end for;
   for i1 in 1:2 loop
-   for i2 in 1:size(x1, 1) + 1 + 1 loop
+   for i2 in 1:size(x1, 1) + 2 loop
     o[i1,i2] := temp_1[i1,i2];
    end for;
   end for;
@@ -5817,8 +5817,8 @@ public
     temp_1[i1 + (size(x1, 1) + size(x2, 1)),i2] := temp_4[i1,i2];
    end for;
   end for;
-  for i1 in 1:size(x1, 1) + size(x2, 1) + size(x3, 1) loop
-   for i2 in 1:1 + size(x2, 2) loop
+  for i1 in 1:size(x1, 1) * 2 + size(x3, 1) loop
+   for i2 in 1:size(x2, 2) + 1 loop
     y[i1,i2] := temp_1[i1,i2];
    end for;
   end for;
@@ -5899,7 +5899,7 @@ public
     temp_3[i1,i2] := temp_4[i1,i2];
    end for;
   end for;
-  for i1 in 1:size(b, 1) loop
+  for i1 in 1:size(a, 1) loop
    for i2 in 1:size(a, 1) loop
     y[i1,i2] := temp_3[i2,i1];
    end for;
@@ -6119,8 +6119,8 @@ public
     temp_1[i1,i2] := temp_2;
    end for;
   end for;
-  for i1 in 1:size(b, 2) loop
-   for i2 in 1:size(a, 1) loop
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(b, 2) loop
     o[i1,i2] := temp_1[i2,i1] + a[i2,i1];
    end for;
   end for;
@@ -6247,8 +6247,8 @@ public
     end for;
    end for;
   end for;
-  for i1 in 1:size(b, 2) loop
-   for i2 in 1:size(a, 1) loop
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(b, 2) loop
     o[i1,i2] := temp_1[i1,i2];
    end for;
   end for;
@@ -6303,7 +6303,7 @@ public
    end for;
   end for;
   for i1 in 1:size(a, 1) + size(b, 1) loop
-   for i2 in 1:size(a, 2) loop
+   for i2 in 1:size(b, 2) loop
     o[i1,i2] := temp_1[i1,i2];
    end for;
   end for;
@@ -9374,7 +9374,7 @@ public
  algorithm
   init y as Real[n];
   assert(x > 2, \"Too low!\");
-  for i1 in 1:size(z, 1) loop
+  for i1 in 1:n loop
    y[i1] := x * z[i1];
   end for;
   return;
@@ -10884,11 +10884,11 @@ public
   temp_1[1] := 1;
   temp_1[2] := 2;
   temp_1[3] := 3;
-  for i1 in 1:3 loop
+  for i1 in 1:n loop
    d[i1] := temp_1[i1];
   end for;
   assert(n == 3, \"Mismatching sizes in FunctionTests.UnknownArray34.f\");
-  for i1 in 1:n loop
+  for i1 in 1:3 loop
    c[i1] := d[i1];
   end for;
   b := 1;
@@ -10946,8 +10946,8 @@ public
   for i1 in 1:size(d, 1) loop
    temp_1[3,i1] := d[i1];
   end for;
-  for i1 in 1:3 loop
-   for i2 in 1:size(d, 1) loop
+  for i1 in 1:n loop
+   for i2 in 1:3 loop
     e[i1,i2] := temp_1[i1,i2];
    end for;
   end for;
@@ -11012,7 +11012,7 @@ public
    d[i1] := temp_1[i1];
   end for;
   assert(n == 2, \"Mismatching sizes in FunctionTests.UnknownArray36.f1\");
-  for i1 in 1:n loop
+  for i1 in 1:2 loop
    c[i1] := d[i1];
   end for;
   assert(n == 2, \"Mismatching sizes in FunctionTests.UnknownArray36.f1\");
@@ -11029,12 +11029,12 @@ public
  algorithm
   init xout as Real[size(xin, 1)];
   assert(size(xin, 1) == 2, \"Mismatching sizes in FunctionTests.UnknownArray36.f2\");
-  for i1 in 1:2 loop
+  for i1 in 1:size(xin, 1) loop
    xout[i1] := yin[i1];
   end for;
   init yout as Real[2];
   assert(size(xin, 1) == 2, \"Mismatching sizes in FunctionTests.UnknownArray36.f2\");
-  for i1 in 1:size(xin, 1) loop
+  for i1 in 1:2 loop
    yout[i1] := xin[i1];
   end for;
   return;
@@ -11088,8 +11088,8 @@ public
  algorithm
   init c as Real[2, n];
   assert(size(d, 1) == 2, \"Mismatching sizes in FunctionTests.UnknownArray37.f1\");
-  for i1 in 1:size(d, 1) loop
-   for i2 in 1:size(d, 2) loop
+  for i1 in 1:2 loop
+   for i2 in 1:n loop
     c[i1,i2] := d[i1,i2];
    end for;
   end for;
@@ -11108,16 +11108,16 @@ public
  algorithm
   init xout as Real[size(xin, 1), size(xin, 2)];
   assert(size(xin, 1) == 2, \"Mismatching sizes in FunctionTests.UnknownArray37.f2\");
-  for i1 in 1:2 loop
-   for i2 in 1:size(yin, 2) loop
+  for i1 in 1:size(xin, 1) loop
+   for i2 in 1:size(xin, 2) loop
     xout[i1,i2] := yin[i1,i2];
    end for;
   end for;
   init yout as Real[2, 2];
   assert(size(xin, 1) == 2, \"Mismatching sizes in FunctionTests.UnknownArray37.f2\");
   assert(size(xin, 2) == 2, \"Mismatching sizes in FunctionTests.UnknownArray37.f2\");
-  for i1 in 1:size(xin, 1) loop
-   for i2 in 1:size(xin, 2) loop
+  for i1 in 1:2 loop
+   for i2 in 1:2 loop
     yout[i1,i2] := xin[i1,i2];
    end for;
   end for;
@@ -11188,8 +11188,8 @@ public
   for i1 in 1:size(d, 1) loop
    temp_1[3,i1] := d[i1];
   end for;
-  for i1 in 1:3 loop
-   for i2 in 1:size(d, 1) loop
+  for i1 in 1:n loop
+   for i2 in 1:3 loop
     e[i1,i2] := temp_1[i1,i2];
    end for;
   end for;
@@ -11241,7 +11241,7 @@ public
     temp_2[i1,i2] := temp_3[i1,i2];
    end for;
   end for;
-  for i1 in 1:n loop
+  for i1 in 1:1 loop
    for i2 in 1:1 loop
     c[i1,i2] := temp_2[i1,i2];
    end for;
@@ -11293,7 +11293,7 @@ public
    for i1 in 1:max(m, 0) loop
     temp_1[i1].x := i * i1;
    end for;
-   for i1 in 1:max(m, 0) loop
+   for i1 in 1:m loop
     o[i,i1].x := temp_1[i1].x;
    end for;
   end for;
@@ -11426,7 +11426,7 @@ public
      temp_1[i1].y[i2] := temp_2[i2];
     end for;
    end for;
-   for i1 in 1:max(m, 0) loop
+   for i1 in 1:m loop
     o[i,i1].x := temp_1[i1].x;
     for i2 in 1:2 loop
      o[i,i1].y[i2] := temp_1[i1].y[i2];
@@ -11513,7 +11513,7 @@ public
    end for;
    temp_1[i1].z.p2 := temp_4.p2;
   end for;
-  for i1 in 1:max(m, 0) loop
+   for i1 in 1:m loop
    for i2 in 1:1 loop
     for i3 in 1:1 loop
      o[i1].y[i2].p1[i3] := temp_1[i1].y[i2].p1[i3];
@@ -11584,7 +11584,7 @@ public
   output FunctionTests.UnknownArray43.R1 r;
  algorithm
   assert(size(x, 1) == 2, \"Mismatching sizes in FunctionTests.UnknownArray43.f\");
-  for i1 in 1:size(x, 1) loop
+  for i1 in 1:2 loop
    r.x[i1] := x[i1];
   end for;
   return;
@@ -11634,7 +11634,7 @@ public
    assert(1 == size(r1[i1].x, 1), \"Mismatching sizes in function 'FunctionTests.UnknownArray44.f', component 'r1[i1].x', dimension '1'\");
   end for;
   assert(size(r1, 1) == 1, \"Mismatching sizes in FunctionTests.UnknownArray44.f\");
-  for i1 in 1:size(r1, 1) loop
+  for i1 in 1:1 loop
    for i2 in 1:1 loop
     r2.y[i1].x[i2] := r1[i1].x[i2];
    end for;
@@ -11697,7 +11697,7 @@ public
     temp_1[2] := 2;
    end if;
   end if;
-  for i1 in 1:size(x, 1) loop
+  for i1 in 1:2 loop
    r.x[i1] := if size(x, 1) == 2 then x[i1] elseif not size(y, 1) == 2 then temp_1[i1] else y[i1];
   end for;
   return;
@@ -12071,7 +12071,7 @@ public
   for i1 in 1:1 loop
    temp_1[i1 + size(X, 1)] := temp_2[i1];
   end for;
-  for i1 in 1:size(X, 1) + 1 loop
+  for i1 in 1:2 loop
    r.a[i1] := temp_1[i1];
   end for;
   return;
@@ -12931,7 +12931,7 @@ public
   output Real[:] x;
  algorithm
   init x as Real[n];
-  for i1 in 1:size(x, 1) loop
+  for i1 in 1:n loop
    x[i1] := i1;
   end for;
   return;
@@ -12974,7 +12974,7 @@ public
   output Real[:] x;
  algorithm
   init x as Real[n];
-  for i1 in 1:size(x, 1) loop
+  for i1 in 1:n loop
    x[i1] := i1;
   end for;
   return;
@@ -13017,7 +13017,7 @@ public
   output Real[:] x;
  algorithm
   init x as Real[n];
-  for i1 in 1:size(x, 1) loop
+  for i1 in 1:n loop
    x[i1] := i1;
   end for;
   return;
@@ -13058,7 +13058,7 @@ public
   output Real[:] x;
  algorithm
   init x as Real[n];
-  for i1 in 1:size(x, 1) loop
+  for i1 in 1:n loop
    x[i1] := i1;
   end for;
   return;
@@ -13572,7 +13572,7 @@ public
   output Real[:] y;
  algorithm
   init y as Real[FunctionTests.FuncColonSubscript.g(x)];
-  for i1 in 1:size(y, 1) loop
+  for i1 in 1:FunctionTests.FuncColonSubscript.g(x) loop
    y[i1] := 0;
   end for;
   return;
@@ -13716,12 +13716,12 @@ This is not allowed when calling Modelica.Matrices.QR(A).\");
    (Q, tau, p) := Modelica.Math.Matrices.LAPACK.dgeqpf(A);
   else
    (Q, tau) := Modelica.Math.Matrices.LAPACK.dgeqrf(A);
-   for i1 in 1:max(ncol, 0) loop
+   for i1 in 1:size(A, 2) loop
     p[i1] := i1;
    end for;
   end if;
-  for i1 in 1:ncol loop
-   for i2 in 1:ncol loop
+  for i1 in 1:size(A, 2) loop
+   for i2 in 1:size(A, 2) loop
     R[i1,i2] := 0;
    end for;
   end for;
@@ -14365,7 +14365,7 @@ public
   output Real[:] y;
  algorithm
   init y as Real[FunctionTests.UnknownSize.FuncCallInSize.P.f2(n)];
-  for i1 in 1:max(n, 0) loop
+  for i1 in 1:FunctionTests.UnknownSize.FuncCallInSize.P.f2(n) loop
    y[i1] := i1;
   end for;
   return;
@@ -14475,7 +14475,7 @@ public
   end for;
   temp_1 := temp_2;
   init y as Real[temp_1];
-  for i1 in 1:size(x, 1) loop
+  for i1 in 1:temp_1 loop
    y[i1] := x[i1];
   end for;
   return;
@@ -14635,7 +14635,7 @@ public
     temp_1[(i1 - 1) * size(a, 2) + (i2 - 1) + 1] := a[i1,i2];
    end for;
   end for;
-  for i1 in 1:2 * size(a, 2) loop
+  for i1 in 1:2 loop
    c[i1] := 2 * temp_1[i1];
   end for;
   return;
