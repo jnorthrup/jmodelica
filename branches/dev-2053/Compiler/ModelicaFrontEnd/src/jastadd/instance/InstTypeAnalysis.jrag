@@ -210,6 +210,7 @@ aspect InstTypeAnalysis {
     eq InstPrimitive.isInteger()        = myInstClass().isInteger();
     eq InstPrimitive.isBoolean()        = myInstClass().isBoolean();
     eq InstPrimitive.isString()         = myInstClass().isString();
+    eq InstPrimitive.isEnum()           = myInstClass().isEnum();
     eq InstEnum.isEnum()                = true;
     eq InstExternalObject.isExternalObject() = true;
     eq InstPartialFunction.isPartialFunction() = true;

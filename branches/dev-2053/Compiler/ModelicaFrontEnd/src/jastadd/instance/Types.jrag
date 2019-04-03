@@ -92,6 +92,8 @@ aspect Types {
             InstNode superType, InstNode subType, String name, boolean top) {
         if (subType == superType) {
             return null;
+        } else if (subType.isEnum() && superType.isEnum()) {
+            return compareEnumTypes(superType, subType, name, top);
         } else if (!subType.baseClassName().equals(superType.baseClassName())) {
             return subTypeMessage(name, "are of different primitive types");
         } else if (subType.ndims() == superType.ndims() || 
@@ -102,6 +104,65 @@ aspect Types {
             return subTypeMessage(name, "have incompatible number of dimensions");
         }
     }
+
+    public static String InstNode.compareEnumTypes(
+            InstNode superType, InstNode subType, String name, boolean top) {
+        //Uses double dispatch: subType.compareEnumType() calls superType.compareEnumType2()
+        return subType.compareEnumType(superType, name, top);
+    }
+
+    /**
+     * This method should only be called by {@link #compareEnumTypes(InstNode, InstNode, String, boolean)} , because it is part of a double dispatch.
+     */
+    public String InstNode.compareEnumType(InstNode superType, String name, boolean top) {
+        return null;
+    }
+    /**
+     * This method should only be called by {@link #compareEnumType(InstNode, String, boolean)}, because it is part of a double dispatch.
+     */
+    public String InstNode.compareEnumType2(InstNode subType, String name, boolean top) {
+        return null;
+    }
+
+    public String InstEnum.compareEnumType(InstNode superType, String name, boolean top) {
+            return superType.compareEnumType2(this, name, top);
+    }
+    public String InstEnum.compareEnumType2(InstEnum subType, String name, boolean top) {
+            return compareEnumTypes(this.myInstClass(), subType.myInstClass(), name, top);
+    }
+    public String InstClassDecl.compareEnumType(InstNode superType, String name, boolean top) {
+            return superType.compareEnumType2(this, name, top);
+    }
+    public String InstClassDecl.compareEnumType2(InstClassDecl subType, String name, boolean top) {
+        return compareEnumLiterals(this, subType, name, top);
+    }
+    
+    public String InstClassDecl.compareEnumLiterals(InstClassDecl superType, InstClassDecl subType, String name, boolean top) {
+        if (subType.enumLiteralsSet().equals(superType.enumLiteralsSet())) {
+            return null;
+        } else {
+            return subTypeMessage(name, "are of different enumeration types");
+        }
+    }
+
+    syn SortedSet<InstEnumLiteral> InstClassDecl.enumLiteralsSet() {
+        SortedSet<InstEnumLiteral> s = new TreeSet<InstEnumLiteral>(InstEnumLiteral.ENUM_LITERAL_COMPARATOR);
+        s.addAll(enumLiterals());
+        return s;
+    }
+
+    public static final Comparator<InstEnumLiteral> InstEnumLiteral.ENUM_LITERAL_COMPARATOR =
+        new Comparator<InstEnumLiteral>() {
+        public int compare(InstEnumLiteral o1, InstEnumLiteral o2) {
+            int res;
+            res = CHILD_ORDER_COMPARATOR.compare(o1,o2);
+            if(res != 0) {
+                return res;
+            }
+            res = NAME_COMPARATOR.compare(o1,o2);
+            return res;
+        }
+    };
 
     public static String InstNode.compareCompositeTypes(
             InstNode superType, InstNode subType, String name, boolean top) {
