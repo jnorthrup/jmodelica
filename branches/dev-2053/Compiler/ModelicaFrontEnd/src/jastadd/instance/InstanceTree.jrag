@@ -2731,6 +2731,10 @@ aspect InstanceToString {
     public String InstComponentDecl.toString() {
     	return getSrcComponentDecl().myComponentClause().toString();
     }
+
+    public String InstEnumLiteral.toString() {
+    	return prettyPrint("");
+    }
     
     public String InstExtends.toString() {
     	return getSrcExtendsClause().toString();
