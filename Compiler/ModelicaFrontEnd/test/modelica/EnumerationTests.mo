@@ -482,6 +482,32 @@ end EnumerationTests.RedeclareEnum1;
 ")})));
 end RedeclareEnum1;
 
+model RedeclareEnum2
+    type EA = enumeration(a,b);
+    type EB = enumeration(c,d);
+
+    model A
+        replaceable input EA e;
+    end A;
+
+    A a(redeclare EB e = EB.c);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="RedeclareEnum2",
+        description="Redeclaring an enum component to an unrelated enum component",
+        errorMessage="
+
+
+Error at line 9, column 9, in file '...', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+  In the declaration 'redeclare EB e = EB.c', the replacing class is not a subtype of the constraining class from the declaration 'replaceable input EA e',
+    because the enumeration 'EB' should have the same literals in the same order as the enumeration 'EA'.
+'EB' has literals: c, d
+'EA' has literals: a, b
+
+")})));
+end RedeclareEnum2;
+
 
 model UnspecifiedEnum1
     model A
