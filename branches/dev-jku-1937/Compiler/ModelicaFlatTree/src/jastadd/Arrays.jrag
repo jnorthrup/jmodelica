@@ -535,8 +535,7 @@ aspect Arrays {
 	syn int FAbstractVariable.ndims() = -1;
 	
 	eq FVariable.ndims()         = isScalarized()? 0 : getFAccess().declarationNDims();
-	eq FFunctionArray.ndims()    = getType().ndims();
-	eq FFunctionVariable.ndims() = 0;
+    eq FFunctionVariable.ndims() = getType().ndims();
 
     syn int CommonForIndex.ndims() = 1;
 
@@ -1065,7 +1064,25 @@ aspect Arrays {
 	eq InstFunctionCall.size() = hasOutputs() ? sizeOfOutput(0) : Size.SCALAR;
     eq InstPartialFunctionCall.size() = Size.SCALAR;
 
-    eq FIfExp.size() = getThenExp().size();
+    eq FIfExp.size() {
+        if (ndims() > 0) {
+            MutableSize res = new MutableSize(ndims());
+            for (FExp exp : getSizeExps()) {
+                res.append(exp);
+            }
+            return res;
+        } else {
+            return getThenExp().size();
+        }
+    }
+
+    syn nta List<FExp> FIfExp.getSizeExps() {
+        List<FExp> res = new List<>();
+        for (int i = 0; i < ndims(); i++) {
+            res.add(new FIfExp(getIfExp().treeCopy(), getThenExp().size().createFExp(i), getElseExp().size().createFExp(i)));
+        }
+        return res;
+    }
 
     eq InstIfExp.size() {
         if (isParameterIf()) {
@@ -1156,7 +1173,7 @@ aspect Arrays {
 	 */	
 	syn lazy Size FAbstractVariable.size() = Size.SCALAR;
 	eq FVariable.size()      = isScalarized()? Size.SCALAR: getFAccess().declarationSize();
-	eq FFunctionArray.size() = type().size();
+    eq FFunctionVariable.size() = type().size();
 
     /**
      * Get the array size of the loop index expression. 
@@ -2972,18 +2989,6 @@ aspect ArrayHelpers {
                 exp.addFExp(createFExp(i));
             return exp;
         }
-
-		public FFunctionVariable createFunctionVariable(String name, FType type) {
-		    return createFunctionVariable(name, type, TypePrefixInputOutput.NONE);
-		}
-		
-		public FFunctionVariable createFunctionVariable(String name, FType type, TypePrefixInputOutput inputOutput) {
-		    if (this == Size.SCALAR)
-		        return new FFunctionVariable(inputOutput, type.scalarType(), new Opt<FExp>(), new FAccessString(name));
-		    else
-		        return new FFunctionArray(inputOutput, type.arrayType(this), new Opt<FExp>(), new FAccessString(name));
-		}
-		
 	}
 	
 	/**
