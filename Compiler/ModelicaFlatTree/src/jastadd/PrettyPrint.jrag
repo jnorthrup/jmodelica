@@ -539,6 +539,9 @@ aspect PrettyPrint {
 				(getStructured() ? "S" : "Uns"), name(), getFileName());
 	}
 
+	syn boolean SrcComponentClause.isEnumComponentClause() = false;
+	eq SrcEnumComponentClause.isEnumComponentClause() = true;
+
     public void SrcComponentClause.prettyPrint(Printer p, CodeStream str, String indent) {
         if (getRedeclare()) {
             str.print("redeclare ");
@@ -569,7 +572,17 @@ aspect PrettyPrint {
         p.print(getTypeArraySubscriptsOpt(), str, indent);
         
         str.print(" ");
-        getSrcComponentDecls().prettyPrintWithSep(p, str, indent, ", ");
+        if (isEnumComponentClause()) {
+            str.print("(");
+            if (hasSrcComponentDecl()) {
+                getSrcComponentDecls().prettyPrintWithSep(p, str, indent, ", ");
+            } else {
+                str.print(":");
+            }
+            str.print(")");
+        } else {
+            getSrcComponentDecls().prettyPrintWithSep(p, str, indent, ", ");
+        }
         
         p.print(getSrcConstrainingClauseOpt(), str, indent);
     }
