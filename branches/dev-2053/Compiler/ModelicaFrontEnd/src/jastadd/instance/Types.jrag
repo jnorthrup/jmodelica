@@ -108,7 +108,7 @@ aspect Types {
     public static String InstNode.compareEnumTypes(InstClassDecl superType, InstClassDecl subType, String name, boolean top) {
         SortedSet<InstEnumLiteral> subTypeLiteralsSet = subType.enumLiteralsSet();
         SortedSet<InstEnumLiteral> superTypeLiteralsSet = superType.enumLiteralsSet();
-        if (subTypeLiteralsSet.equals(superTypeLiteralsSet)) {
+        if (superType.isUnspecifiedEnum() || subTypeLiteralsSet.equals(superTypeLiteralsSet)) {
             return null;
         } else {
             ArrayList<InstEnumLiteral> subTypeLiterals = subType.enumLiterals();
