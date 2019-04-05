@@ -59,7 +59,7 @@ aspect Components {
         if (!isComposite() || fc == null) {
             return super.component(name);
         }
-        return dynamicFExp(dynamicFExp(new FAccessExp(tempVarName())).component(name));
+        return tempExp().component(name);
     }
     
     /**
