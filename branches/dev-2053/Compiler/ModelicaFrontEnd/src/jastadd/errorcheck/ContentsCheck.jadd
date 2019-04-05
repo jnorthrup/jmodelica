@@ -380,7 +380,19 @@ aspect ContentCheck {
 	public void FUnknownExternalLanguage.contentCheck(ErrorCheckType checkType) {
 		error("The external language specification \"" + getLanguage() + "\" is not supported");
 	}
-	
+    
+    public static final SimpleErrorProducer ASTNode.NON_PARAMETER_SAMPLE_ARGUMENTS =
+            new SimpleErrorProducer("NON_PARAMETER_SAMPLE_ARGUMENTS", ProblemKind.SEMANTIC, 
+                    "Sample arguments need to be parameter expressions");
+    
+    public void FSampleExp.contentCheck(ErrorCheckType checkType) {
+        for (FExp ch : childFExps()) {
+            if (!ch.variability().parameterOrLess()) {
+                NON_PARAMETER_SAMPLE_ARGUMENTS.invoke(ch);
+            }
+        }
+    }
+
 	inh boolean FIterExp.iterExpUseOK();
 	eq FExp.getChild().iterExpUseOK()          = false;
 	eq Root.getChild().iterExpUseOK()          = false;

@@ -780,6 +780,7 @@ aspect Names {
   }
 
     syn String SrcClassDecl.qualifiedName() = combineName(classNamePrefix(), name());
+    syn String SrcComponentDecl.qualifiedName() = combineName(classNamePrefix(), name());
     inh String SrcClassDecl.classNamePrefix();
     inh String SrcComponentDecl.classNamePrefix();
     eq SrcFullClassDecl.getChild().classNamePrefix() = combineName(classNamePrefix(), name());

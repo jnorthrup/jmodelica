@@ -29,6 +29,7 @@ from subprocess import Popen, PIPE
 from compiler_logging import CompilerLogHandler
 from compiler_exceptions import JError
 from compiler_exceptions import IllegalCompilerArgumentError
+from compiler_exceptions import IllegalLogStringError
 
 import pymodelica as pym
 from pymodelica.common import xmlparser

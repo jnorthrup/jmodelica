@@ -385,7 +385,6 @@ model TempAssign1
         TransformCanonicalTestCase(
             name="TempAssign1",
             description="Scalarizing assignment temp generation",
-            no_loop_unrolling_in_functions=false,
             flatModel="
 fclass AlgorithmTests.TempAssign1
  Real x[1,1];
@@ -621,8 +620,9 @@ public
  algorithm
   init y as AlgorithmTests.TempAssign3.R[size(x, 1)];
   for i1 in 1:size(x, 1) loop
-   y[i1].a[1] := x[i1].a[1];
-   y[i1].a[2] := x[i1].a[2];
+   for i2 in 1:2 loop
+    y[i1].a[i2] := x[i1].a[i2];
+   end for;
   end for;
   t := size(x, 1);
   for i1 in 1:size(x, 1) loop
@@ -634,12 +634,14 @@ public
   end for;
   init temp_2 as AlgorithmTests.TempAssign3.R[max(t, 0)];
   for i1 in 1:max(t, 0) loop
-   temp_2[i1].a[1] := y[temp_1[i1]].a[1];
-   temp_2[i1].a[2] := y[temp_1[i1]].a[2];
+   for i2 in 1:2 loop
+    temp_2[i1].a[i2] := y[temp_1[i1]].a[i2];
+   end for;
   end for;
   for i1 in 1:max(t, 0) loop
-   y[i1].a[1] := temp_2[i1].a[1];
-   y[i1].a[2] := temp_2[i1].a[2];
+   for i2 in 1:2 loop
+    y[i1].a[i2] := temp_2[i1].a[i2];
+   end for;
   end for;
   return;
  end AlgorithmTests.TempAssign3.f;

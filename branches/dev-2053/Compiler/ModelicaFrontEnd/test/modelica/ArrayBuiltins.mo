@@ -1501,7 +1501,7 @@ public
     temp_1[i1,i2] := temp_2;
    end for;
   end for;
-  for i1 in 1:size(a, 1) loop
+  for i1 in 1:size(a, 2) loop
    for i2 in 1:size(a, 1) loop
     b[i1,i2] := temp_1[i1,i2];
    end for;

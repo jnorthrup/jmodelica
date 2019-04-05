@@ -2275,7 +2275,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
     i1_0ie = floor((jmi_array_size(A_a, 0)) - (1));
     for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
         i2_1in = 0;
-        i2_1ie = floor((jmi_array_size(A_a, 1)) - (1));
+        i2_1ie = floor((jmi_array_size(A_a, 0)) - (1));
         for (i2_1i = 1; i2_1in <= i2_1ie; i2_1i = 1 + (++i2_1in)) {
             jmi_array_ref_2(Awork_a, i1_0i, i2_1i) = jmi_array_val_2(A_a, i1_0i, i2_1i);
         }
