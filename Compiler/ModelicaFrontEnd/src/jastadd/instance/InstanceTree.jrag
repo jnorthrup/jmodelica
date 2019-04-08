@@ -166,11 +166,11 @@ aspect Environment {
             return env;
         }
 
-        public ModificationNode merged(Criteria<InstModification> filter) {
+        public ModificationNode merged() {
             ModificationNode modifications = ModificationNode.newRootNode();
-            Iterable<InstModification> iterable = new FilteredIterable(new ReverseListIterable(this), filter);
-            for (InstModification element : iterable) {
-                element.collectModifications(modifications);
+            ListIterator<InstModification> listIterator = listIterator(size());
+            while (listIterator.hasPrevious()) {
+                listIterator.previous().collectModifications(modifications);
             }
             return modifications;
         }
@@ -344,10 +344,6 @@ aspect MergedEnvironment {
         }
         
         public void setModification(InstValueModification modification) {
-        }
-        
-        public boolean isEmpty() {
-            return name.isEmpty() && subNodes.isEmpty();
         }
         
         public ModificationNode subNode(String name) {
