@@ -427,7 +427,7 @@ SrcBaseClassDecl base_class_decl
     :}
     | error 
     {: 
-      return new SrcBadClassDecl();
+        return new SrcBadClassDecl();
     :};
 
 SrcExtendsClauseShortClass extends_clause_short_class
