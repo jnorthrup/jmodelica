@@ -850,7 +850,15 @@ aspect ContentCheck {
      syn boolean SrcClassDecl.hasOperatorRecord() = getSrcRestriction().isOperatorRecord() ? true : (isPackage() ? hasOperatorRecord() : false);
     inh boolean SrcClassDecl.hasOperatorRecordHelper();
     eq SrcLibNode.getChild().hasOperatorRecordHelper()    = hasOperatorRecordHelper();
-    eq SrcClassDecl.getChild().hasOperatorRecordHelper()  = getSrcRestriction().isOperatorRecord() ? true : (isPackage() ? hasOperatorRecordHelper() : false);
+    eq SrcClassDecl.getChild().hasOperatorRecordHelper()  {
+        if (hasSrcRestriction()) {
+            if (getSrcRestriction().isOperatorRecord()) {
+                return true;
+            }
+            return isPackage() ? hasOperatorRecordHelper() : false;
+        }
+        return false;
+    }
     eq Root.getChild().hasOperatorRecordHelper()          = false;
 
     syn boolean SrcRestriction.isOperatorRecord() = false;
