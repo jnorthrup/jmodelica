@@ -92,6 +92,8 @@ aspect Types {
             InstNode superType, InstNode subType, String name, boolean top) {
         if (subType == superType) {
             return null;
+        } else if (subType.isEnum() && superType.isEnum()) {
+            return InstNode.compareEnumTypes(superType.myInstClass(), subType.myInstClass(), name, top);
         } else if (!subType.baseClassName().equals(superType.baseClassName())) {
             return subTypeMessage(name, "are of different primitive types");
         } else if (subType.ndims() == superType.ndims() || 
@@ -102,6 +104,39 @@ aspect Types {
             return subTypeMessage(name, "have incompatible number of dimensions");
         }
     }
+
+    public static String InstNode.compareEnumTypes(InstClassDecl superType, InstClassDecl subType, String name, boolean top) {
+        SortedSet<InstEnumLiteral> subTypeLiteralsSet = subType.enumLiteralsSet();
+        SortedSet<InstEnumLiteral> superTypeLiteralsSet = superType.enumLiteralsSet();
+        if (superType.isUnspecifiedEnum() || subTypeLiteralsSet.equals(superTypeLiteralsSet)) {
+            return null;
+        } else {
+            ArrayList<InstEnumLiteral> subTypeLiterals = subType.enumLiterals();
+            ArrayList<InstEnumLiteral> superTypeLiterals = superType.enumLiterals();
+            return "the enumeration '"+subType.name()+"' should have the same literals in the same order as the enumeration '"+superType.name()+"'.\n"+
+                            "'"+subType.name()+"' has literals: "+prettyPrintWithSep(subTypeLiterals, ", ")+"\n"+
+                            "'"+superType.name()+"' has literals: "+prettyPrintWithSep(superTypeLiterals, ", ")+"\n";
+        }
+    }
+
+    syn SortedSet<InstEnumLiteral> InstClassDecl.enumLiteralsSet() {
+        SortedSet<InstEnumLiteral> s = new TreeSet<InstEnumLiteral>(InstEnumLiteral.ENUM_LITERAL_COMPARATOR);
+        s.addAll(enumLiterals());
+        return s;
+    }
+
+    public static final Comparator<InstEnumLiteral> InstEnumLiteral.ENUM_LITERAL_COMPARATOR =
+        new Comparator<InstEnumLiteral>() {
+        public int compare(InstEnumLiteral o1, InstEnumLiteral o2) {
+            int res;
+            res = CHILD_ORDER_COMPARATOR.compare(o1,o2);
+            if(res != 0) {
+                return res;
+            }
+            res = NAME_COMPARATOR.compare(o1,o2);
+            return res;
+        }
+    };
 
     public static String InstNode.compareCompositeTypes(
             InstNode superType, InstNode subType, String name, boolean top) {
