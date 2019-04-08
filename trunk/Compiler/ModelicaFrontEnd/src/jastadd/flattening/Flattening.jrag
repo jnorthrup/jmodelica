@@ -1514,23 +1514,23 @@ aspect Flattening {
     public abstract FVariable InstAssignable.createEmptyFVariable();
     
     public FVariable InstPrimitive.createEmptyFVariable() {
-        if (isReal()) 
+        if (isReal()) {
             return new FRealVariable();
-        if (isInteger()) 
+        } else if (isInteger()) {
             return new FIntegerVariable();
-        if (isBoolean()) 
+        } else if (isBoolean()) {
             return new FBooleanVariable();
-        if (isString()) 
+        } else if (isString()) {
             return new FStringVariable();
-        throw new UnsupportedOperationException("InstPrimitive without type");
-    }   
+        } else if (isEnum()) {
+            FEnumVariable fv = new FEnumVariable();
+            fv.setEnum(new FAccessString(myInstClass().actualInstClass().qualifiedName()));
+            return fv;
+        } else {
+            throw new UnsupportedOperationException("InstPrimitive without type");
+        }
+    }
 
-    public FEnumVariable InstEnum.createEmptyFVariable() {
-        FEnumVariable fv = new FEnumVariable();
-        fv.setEnum(new FAccessString(myInstClass().actualInstClass().qualifiedName()));
-        return fv;
-    }   
-    
     public FVariable InstRecord.createEmptyFVariable() {
         FRecordVariable rec = new FRecordVariable();
         rec.setRecord(new FRecordAccess(qualifiedTypeName()));

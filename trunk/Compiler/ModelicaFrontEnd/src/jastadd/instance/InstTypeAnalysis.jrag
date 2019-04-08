@@ -59,10 +59,11 @@ aspect InstTypeAnalysis {
         return fUnknownType();
     }
 
-    eq InstEnum.primitiveScalarType()              = myInstClass().enumType();
-    eq InstClassDecl.primitiveScalarType()         = isEnum() ? enumType() : super.primitiveScalarType();
-    eq InstExternalObject.primitiveScalarType()    = myInstClass().enumType();
-    eq InstForIndexPrimitive.primitiveScalarType() = myInstForIndexType();
+    eq InstClassDecl.primitiveScalarType()          = isEnum() ? enumType() : super.primitiveScalarType();
+    eq InstEnum.primitiveScalarType()               = myInstClass().primitiveScalarType();
+    eq InstReplacingPrimitive.primitiveScalarType() = myInstClass().primitiveScalarType();
+    eq InstExternalObject.primitiveScalarType()     = myInstClass().enumType();
+    eq InstForIndexPrimitive.primitiveScalarType()  = myInstForIndexType();
 
     inh FType InstForIndexPrimitive.myInstForIndexType();
     eq InstForIndexWithExp.getInstPrimitive().myInstForIndexType() = getFExp().type().scalarType();
@@ -209,6 +210,7 @@ aspect InstTypeAnalysis {
     eq InstPrimitive.isInteger()        = myInstClass().isInteger();
     eq InstPrimitive.isBoolean()        = myInstClass().isBoolean();
     eq InstPrimitive.isString()         = myInstClass().isString();
+    eq InstPrimitive.isEnum()           = myInstClass().isEnum();
     eq InstEnum.isEnum()                = true;
     eq InstExternalObject.isExternalObject() = true;
     eq InstPartialFunction.isPartialFunction() = true;
