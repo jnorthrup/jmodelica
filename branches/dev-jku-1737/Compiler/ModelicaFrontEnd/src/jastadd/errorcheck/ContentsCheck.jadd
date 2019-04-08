@@ -856,6 +856,25 @@ aspect ContentCheck {
     eq InstRoot.getChild().myOperatorRecord()          = null;
     eq Root.getChild().myOperatorRecord()              = null;
 
+    /**
+     * If this class is in an operator record or in a package in an operator record.
+     */
+     syn boolean SrcClassDecl.hasOperatorRecord() = getSrcRestriction().isOperatorRecord() ? true : (isPackage() ? hasOperatorRecord() : false);
+    inh boolean SrcClassDecl.hasOperatorRecordHelper();
+    eq SrcLibNode.getChild().hasOperatorRecordHelper()    = hasOperatorRecordHelper();
+    eq SrcClassDecl.getChild().hasOperatorRecordHelper()  {
+        if (hasSrcRestriction()) {
+            if (getSrcRestriction().isOperatorRecord()) {
+                return true;
+            }
+            return isPackage() ? hasOperatorRecordHelper() : false;
+        }
+        return false;
+    }
+    eq Root.getChild().hasOperatorRecordHelper()          = false;
+
+    syn boolean SrcRestriction.isOperatorRecord() = false;
+    eq SrcOperatorRecord.isOperatorRecord() = true;
 }
 
 aspect ForceVariability {
