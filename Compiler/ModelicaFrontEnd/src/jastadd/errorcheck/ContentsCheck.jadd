@@ -155,6 +155,14 @@ aspect ContentCheck {
             contentCheckExtendsOperatorRecord(checkType);
     }
 
+    @Override
+    public void InstEnum.contentCheck(ErrorCheckType checkType) {
+        super.collectErrors(checkType);
+        if (isUnspecifiedEnum() && !checkType.allowUnspecifiedEnums()) {
+            ASTNode.UNSPECIFIED_ENUM_COMPONENT.invoke(this, this);
+        }
+    }
+
     /**
      * Check if this is a valid extends of an operator record.
      */
