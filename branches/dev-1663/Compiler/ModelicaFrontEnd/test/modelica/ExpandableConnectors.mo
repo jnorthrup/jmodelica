@@ -2020,6 +2020,7 @@ Error at line 19, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/Exp
 ")})));
 end ExpandableErr22;
 
+
 end Error;
 
 
@@ -3038,6 +3039,7 @@ equation
 end ExpandableConnectors.ConnectorArrays.ConnectorArray9;
 ")})));
 end ConnectorArray9;
+
 
 end ConnectorArrays;
 
