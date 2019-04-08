@@ -780,7 +780,7 @@ model UnspecifiedEnum12
         replaceable input UE e;
     end A;
 
-    A a(redeclare E e = E.a);
+    A a(redeclare E e = E.b);
 
 annotation(__JModelica(UnitTesting(tests={
     FlatteningTestCase(
@@ -788,7 +788,7 @@ annotation(__JModelica(UnitTesting(tests={
         description="Redeclaring an unspecified enum component to a specified enum component",
         flatModel="
 fclass EnumerationTests.UnspecifiedEnum12
- discrete EnumerationTests.UnspecifiedEnum12.E a.e = EnumerationTests.UnspecifiedEnum12.E.a;
+ discrete EnumerationTests.UnspecifiedEnum12.E a.e = EnumerationTests.UnspecifiedEnum12.E.b;
 
 public
  type EnumerationTests.UnspecifiedEnum12.E = enumeration(a, b);
@@ -796,6 +796,33 @@ public
 end EnumerationTests.UnspecifiedEnum12;
 ")})));
 end UnspecifiedEnum12;
+
+model UnspecifiedEnum12b
+    type UE = enumeration(:);
+    type E = enumeration(a,b);
+    
+    model A
+        replaceable input UE e;
+        Integer numEnumComponents = Integer(e);
+    end A;
+
+    A a(redeclare E e = E.b);
+
+annotation(__JModelica(UnitTesting(tests={
+    TransformCanonicalTestCase(
+        name="UnspecifiedEnum12b",
+        description="Redeclaring an unspecified enum component to a specified enum component, assert number of enum components",
+        flatModel="
+fclass EnumerationTests.UnspecifiedEnum12b
+ constant EnumerationTests.UnspecifiedEnum12b.E a.e = EnumerationTests.UnspecifiedEnum12b.E.b;
+ constant Integer a.numEnumComponents = 2;
+
+public
+ type EnumerationTests.UnspecifiedEnum12b.E = enumeration(a, b);
+
+end EnumerationTests.UnspecifiedEnum12b;
+")})));
+end UnspecifiedEnum12b;
 
 
 model UnspecifiedEnum13
