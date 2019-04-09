@@ -583,6 +583,7 @@
                 <mkdir dir="${javadoc_output}" />
                 <javadoc 
                     access="public" 
+                    verbose="true"
                     sourcepath="${java_output_final}:${java_dirs}" 
                     destdir="${javadoc_output}" 
                     packagenames="${javadoc.packages}" 
