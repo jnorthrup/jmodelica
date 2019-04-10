@@ -157,7 +157,6 @@ aspect ContentCheck {
 
     @Override
     public void InstEnum.contentCheck(ErrorCheckType checkType) {
-        super.collectErrors(checkType);
         if (isUnspecifiedEnum() && !checkType.allowUnspecifiedEnums()) {
             ASTNode.UNSPECIFIED_ENUM_COMPONENT.invoke(this, this);
         }
