@@ -631,7 +631,11 @@ abstract public class TestAnnotationizerHelper {
                 out.println(",");
             } else {
                 // Get last char of value part (i.e. before the ")
-                char last = line.charAt(line.length() - 2);
+                int lastIndex = line.length() - 2;
+                if(lastIndex < 0) {
+                    throw new IllegalArgumentException("the line '"+line+"' is too short");
+                }
+                char last = line.charAt(lastIndex);
                 if (last != '\n' && last != '\r') {
                     out.println();
                 }
