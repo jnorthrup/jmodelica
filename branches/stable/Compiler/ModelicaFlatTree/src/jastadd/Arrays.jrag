@@ -1064,7 +1064,25 @@ aspect Arrays {
 	eq InstFunctionCall.size() = hasOutputs() ? sizeOfOutput(0) : Size.SCALAR;
     eq InstPartialFunctionCall.size() = Size.SCALAR;
 
-    eq FIfExp.size() = getThenExp().size();
+    eq FIfExp.size() {
+        if (ndims() > 0) {
+            MutableSize res = new MutableSize(ndims());
+            for (FExp exp : getSizeExps()) {
+                res.append(exp);
+            }
+            return res;
+        } else {
+            return getThenExp().size();
+        }
+    }
+
+    syn nta List<FExp> FIfExp.getSizeExps() {
+        List<FExp> res = new List<>();
+        for (int i = 0; i < ndims(); i++) {
+            res.add(new FIfExp(getIfExp().treeCopy(), getThenExp().size().createFExp(i), getElseExp().size().createFExp(i)));
+        }
+        return res;
+    }
 
     eq InstIfExp.size() {
         if (isParameterIf()) {

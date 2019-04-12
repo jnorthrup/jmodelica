@@ -166,11 +166,11 @@ aspect Environment {
             return env;
         }
 
-        public ModificationNode merged() {
+        public ModificationNode merged(Criteria<InstModification> filter) {
             ModificationNode modifications = ModificationNode.newRootNode();
-            ListIterator<InstModification> listIterator = listIterator(size());
-            while (listIterator.hasPrevious()) {
-                listIterator.previous().collectModifications(modifications);
+            Iterable<InstModification> iterable = new FilteredIterable(new ReverseListIterable(this), filter);
+            for (InstModification element : iterable) {
+                element.collectModifications(modifications);
             }
             return modifications;
         }
@@ -344,6 +344,10 @@ aspect MergedEnvironment {
         }
         
         public void setModification(InstValueModification modification) {
+        }
+        
+        public boolean isEmpty() {
+            return name.isEmpty() && subNodes.isEmpty();
         }
         
         public ModificationNode subNode(String name) {
@@ -1525,13 +1529,6 @@ aspect InstanceTreeConstruction {
     public InstClassDecl SrcClassDecl.newInstReplacingClass(
             SrcClassDecl replacingClass, InstRedeclareClassNode icr, InstRedeclareClassNode cicr) {
         return replacingClass.createInstReplacingClass(this, icr, cicr);
-    }
-
-    public InstClassDecl SrcPrimitiveClassDecl.newInstReplacingClass(
-            SrcClassDecl replacingClass, InstRedeclareClassNode icr, InstRedeclareClassNode cicr) {
-        InstRestriction ir = newInstRestriction();
-        Opt<InstExternal> exto = newInstExternalOpt();  // TODO: shouldn't ir & exto come from replacing class
-        return new InstReplacingPrimitiveClassDecl(replacingClass, new Opt(), ir, exto, this, icr);
     }
 
     public InstClassDecl SrcClassDecl.createInstReplacingClass(
@@ -2821,6 +2818,10 @@ aspect InstanceToString {
     
     public String InstComponentDecl.toString() {
     	return getSrcComponentDecl().myComponentClause().toString();
+    }
+
+    public String InstEnumLiteral.toString() {
+    	return prettyPrint("");
     }
     
     public String InstExtends.toString() {
