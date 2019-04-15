@@ -2132,7 +2132,7 @@ aspect ConstantEvaluation {
             }
         } else {
             final InstAccess access = getInstAccess();
-            if (!access.isPackageConstantAccess()) {
+            if (!access.isPackageConstantAccess() && !access.isEnumLiteralAccess()) {
                 access.collectAccessNames(collectedNames);
                 access.collectAccessNamesInArraySubscripts(collectedNames);
             }
@@ -2147,6 +2147,7 @@ aspect ConstantEvaluation {
     }
 
     public boolean InstAccess.isPackageConstantAccess() { return myInstComponentDecl().isPackageConstant(); }
+    public boolean InstAccess.isEnumLiteralAccess()     { return myInstComponentDecl().isEnumLiteral(); }
 
     public abstract void InstAccess.collectAccessNames(Set<String> collectedNames);
 
