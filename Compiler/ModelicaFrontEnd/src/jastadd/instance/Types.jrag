@@ -112,11 +112,10 @@ aspect Types {
         int subTypeLiteralsSize = subTypeLiterals.size();
         int superTypeLiteralsSize = superTypeLiterals.size();
         boolean enumLiteralsEqual = subTypeLiteralsSize == superTypeLiteralsSize;
-        for (int i = 0; enumLiteralsEqual && i < Math.min(subTypeLiteralsSize, superTypeLiteralsSize); i++) {
+        for (int i = 0; enumLiteralsEqual && i < subTypeLiteralsSize; i++) {
             InstEnumLiteral subTypeLiteral = subTypeLiterals.get(i);
             InstEnumLiteral superTypeLiteral = superTypeLiterals.get(i);
-            boolean enumLiteralNameEqual = InstComponentDecl.NAME_COMPARATOR.compare(subTypeLiteral, superTypeLiteral) == 0;
-            enumLiteralsEqual &= enumLiteralNameEqual;
+            enumLiteralsEqual &= InstComponentDecl.NAME_COMPARATOR.compare(subTypeLiteral, superTypeLiteral) == 0;
         }
 
         if (superType.isUnspecifiedEnum() || enumLiteralsEqual) {

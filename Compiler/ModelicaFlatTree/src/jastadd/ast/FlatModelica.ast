@@ -24,7 +24,7 @@ FlatRoot : Root ::= FClass;
  * DAE equations and functions.
  *
  * FClass corresponds to a flattened Modelica model and contains essentially
- * a list of variables and variables, a list of functions and a list of equations, 
+ * a list of variables, a list of functions and a list of equations, 
  * of which some are initial equations.
  */ 
 FClass : BaseNode ::= FAccess 
