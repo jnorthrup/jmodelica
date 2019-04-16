@@ -144,7 +144,7 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
         raise IllegalCompilerArgumentError("Unknown target '" + target + "'. Use 'me', 'cs' or 'me+cs' to compile an FMU.")
     return _compile_unit(class_name, file_name, compiler, target, version,
                 platform, compiler_options, compile_to, compiler_log_level,
-                separate_process, jvm_args)       
+                separate_process, jvm_args)
 
 def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={}, 
                  compile_to='.', compiler_log_level='warning', separate_process=True,
@@ -235,25 +235,23 @@ def _compile_unit(class_name, file_name, compiler, target, version,
         
     if platform == 'auto':
         platform = _get_platform()
-        
+    compiler_options['platforms'] = platform
+
     if not separate_process:
         # get a compiler based on 'compiler' argument or files listed in file_name
         comp = _get_compiler(files=file_name, selected_compiler=compiler)
         # set compiler options
         comp.set_options(compiler_options)
-        
+
         # set log level
         comp.set_compiler_logger(compiler_log_level)
-        
-        # set platform
-        comp.set_target_platforms(platform)
-        
+
         # compile unit in java
         return comp.compile_Unit(class_name, file_name, target, version, compile_to)
 
     else:
-        return compile_separate_process(class_name, file_name, compiler, target, version, platform, 
-                                        compiler_options, compile_to, compiler_log_level, jvm_args)
+        return compile_separate_process(class_name, file_name, compiler, target, version, compiler_options,
+                                        compile_to, compiler_log_level, jvm_args)
 
 def compile_separate_process(class_name, file_name=[], compiler='auto', target='me', version='1.0', 
                              platform='auto', compiler_options={}, compile_to='.', 
@@ -344,16 +342,13 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
     cmd.append('-log=' + _gen_log_level(compiler_log_level))
     
     if compiler_options:
-        cmd.append('-opt=' + _gen_compiler_options(compiler_options))
-    
+        cmd.append('-opt=' + _gen_compiler_options(compiler_options, platform))
+
     cmd.append("-target=" + target)
     
     cmd.append("-version=" + str(version))  # str() in case it is None
     
     
-    if platform == 'auto':
-        platform = _get_platform()
-    cmd.append("-platform=" + platform)
     
     cmd.append("-out=" + compile_to)
     
@@ -378,6 +373,11 @@ def _gen_compiler_options(compiler_options):
     """
     # Save in opts in the form: opt1:val1,opt2:val2
     opts = ','.join(['%s:%s' %(k, v) for k, v in compiler_options.iteritems()])
+
+    if platform == 'auto':
+        platform = _get_platform()
+    cmd.append(", " + platform)
+
     # Convert all Python True/False to Java true/false
     opts = opts.replace('True', 'true')
     opts = opts.replace('False', 'false')
