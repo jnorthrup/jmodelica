@@ -12,11 +12,15 @@ public final class EnvironmentUtils {
 
     private static String javaExecutablePlatform_cache = null;
 
-    private static String systemPlatform_cahce = null;
+    private static String systemPlatform_cache = null;
 
     private static File jmodelicaHome_cache = null;
 
     private static void calcPlatform() {
+        if (systemPlatform_cache != null) {
+            return;
+        }
+
         String platform;
 
         String sunPltform = System.getProperty("os.name");
@@ -35,7 +39,7 @@ public final class EnvironmentUtils {
         boolean sysIs64 = exeIs64 || (wow6432Arch != null && wow6432Arch.endsWith("64"));
 
         javaExecutablePlatform_cache = platform + (exeIs64 ? "64" : "32");
-        systemPlatform_cahce = platform + (sysIs64 ? "64" : "32");
+        systemPlatform_cache = platform + (sysIs64 ? "64" : "32");
     }
 
     /**
@@ -46,14 +50,25 @@ public final class EnvironmentUtils {
      * {@link #getJavaPlatform()}.
      */
     public static String[] getExecutablePlatforms() {
-        if (systemPlatform_cahce == null) {
-            calcPlatform();
-        }
-        if (systemPlatform_cahce.equals("win64")) {
+        calcPlatform();
+
+        if (systemPlatform_cache.equals("win64")) {
             return new String[] { "win64", "win32" };
         } else {
-            return new String[] { systemPlatform_cahce };
+            return new String[] { systemPlatform_cache };
         }
+    }
+
+    /**
+     * @return the default target platform to be used for the current system.
+     */
+    public static String[] getDefaultTargetPlatform() {
+        if (systemPlatform_cache.contains("darwin")) {
+            throw new IllegalArgumentException("Can not use default platform target for platform " +
+                    systemPlatform_cache + ". Set the compiler option 'platforms' to a valid value.");
+        }
+
+        return new String[] { systemPlatform_cache.replaceAll("32", "64") };
     }
 
     /**
@@ -64,10 +79,8 @@ public final class EnvironmentUtils {
      * {@link #getJavaPlatform()}.
      */
     public static String getSystemPlatform() {
-        if (systemPlatform_cahce == null) {
-            calcPlatform();
-        }
-        return systemPlatform_cahce;
+        calcPlatform();
+        return systemPlatform_cache;
     }
 
     /**
@@ -85,11 +98,9 @@ public final class EnvironmentUtils {
      * <li>linux64</li>
      * </ul>
      */
-    // TODO: If this no return a finite set of values, shouldn't this be an enum?
+    // TODO: If this not a return an infinite set of values, shouldn't this be an enum?
     public static String getJavaPlatform() {
-        if (javaExecutablePlatform_cache == null) {
-            calcPlatform();
-        }
+        calcPlatform();
         return javaExecutablePlatform_cache;
     }
 
@@ -106,7 +117,7 @@ public final class EnvironmentUtils {
             }
             jmodelicaHome_cache = new File(env);
         }
-        
+
         if (!jmodelicaHome_cache.exists()) {
             throw new JModelicaHomeNotFoundException(String.format("JMODELICA_HOME does not exist: '%s'", jmodelicaHome_cache));
         }

@@ -296,7 +296,7 @@ class Test_Compile_Load:
         try:
             import subprocess
             os.chdir(os.path.join(get_files_path(), "Programs", "Load_and_initialize"))
-            name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", compile_to="CC.fmu", compiler_options={"c_compiler":"gcc"}, platform="win64")
+            name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", compile_to="CC.fmu", compiler_options={"c_compiler":"gcc", "platform":"win64"})
             
             #Basically just verify that the process terminates
             return_code = subprocess.call("LoadAndInitialize.exe CC.fmu .", shell=True)
@@ -479,26 +479,26 @@ class Test_Compiler_functions:
 #        """Test that it is possible to compile an FMU-ME 1.0 64bit FMU on Windows"""
 #        cl = Test_Compiler_functions.cpath_mc 
 #        path = Test_Compiler_functions.fpath_mc
-#        pym.compile_fmu(cl, path, platform='win64')
+#        pym.compile_fmu(cl, path, compiler_options={"platform":"win64"})
 #
 #    @testattr(windows_base = True)
 #    def test_compile_fmu_me_2_64bit(self):
 #        """Test that it is possible to compile an FMU-ME 2.0 64bit FMU on Windows"""
 #        cl = Test_Compiler_functions.cpath_mc 
 #        path = Test_Compiler_functions.fpath_mc
-#        pym.compile_fmu(cl, path, version='2.0', platform='win64')
+#        pym.compile_fmu(cl, path, version='2.0', compiler_options={"platform":"win64"})
 #
 #    @testattr(windows_base = True)
 #    def test_compile_fmu_cs_1_64bit(self):
 #        """Test that it is possible to compile an FMU-CS 1.0 64bit FMU on Windows"""
 #        cl = Test_Compiler_functions.cpath_mc 
 #        path = Test_Compiler_functions.fpath_mc
-#        pym.compile_fmu(cl, path, target='cs', platform='win64')
+#        pym.compile_fmu(cl, path, target='cs', compiler_options={"platform":"win64"})
 #
 #    @testattr(windows_base = True)
 #    def test_compile_fmu_cs_2_64bit(self):
 #        """Test that it is possible to compile an FMU-CS 2.0 64bit FMU on Windows"""
 #        cl = Test_Compiler_functions.cpath_mc 
 #        path = Test_Compiler_functions.fpath_mc
-#        pym.compile_fmu(cl, path, target='cs', version='2.0', platform='win64')
+#        pym.compile_fmu(cl, path, target='cs', version='2.0', compiler_options={"platform":"win64"})
 

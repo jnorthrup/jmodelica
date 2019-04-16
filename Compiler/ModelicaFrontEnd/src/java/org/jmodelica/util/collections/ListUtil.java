@@ -1,5 +1,6 @@
 package org.jmodelica.util.collections;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -45,7 +46,7 @@ public final class ListUtil {
         }
         return strings;
     }
-    
+
     /**
      * Converts an {@link Iterable} to a {@link List}.
      * 
@@ -63,7 +64,7 @@ public final class ListUtil {
         }
         return list;
     }
-    
+
     /**
      * Short-hand method for creating a list with predefined contents.
      * 
@@ -77,6 +78,20 @@ public final class ListUtil {
     @SafeVarargs
     public final static <T> List<T> list(T... ts) {
         return Arrays.asList(ts);
+    }
+
+    /**
+     * Converts string paths to files.
+     * 
+     * @param paths The paths to convert.
+     * @return      {@code paths} as {@link File}s.
+     */
+    public static File[] toFiles(String[] paths) {
+        File[] files = new File[paths.length];
+        for (int i = 0; i < paths.length; ++i) {
+            files[i] = new File(paths[i]);
+        }
+        return files;
     }
 
 }

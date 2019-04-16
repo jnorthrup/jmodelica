@@ -337,8 +337,8 @@ public final class FileUtil {
      * @param paths the string paths.
      * @return a list of {@link File} objects.
      */
-    public static Collection<File> toFile(List<String> paths) {
-        java.util.List<File> files = new ArrayList<File>();
+    public static List<File> toFile(List<String> paths) {
+        List<File> files = new ArrayList<File>();
         for (String name : paths) {
             files.add(new File(name));
         }
@@ -364,4 +364,52 @@ public final class FileUtil {
         return file;
     }
 
+    /**
+     * @return  the current working directory.
+     */
+    public static String currentWorkingDirecory() {
+        try {
+            return new File(".").getCanonicalPath();
+        } catch (IOException e) {
+            return "< could not get current working directory >";
+        }
+    }
+
+    /**
+     * Split the string containing the list of files into an array of filenames.
+     * <p>
+     * This presupposes a comma-separated list of files, where whitespace is ignored.
+     * 
+     * @param string    The input string.
+     * @return          a {@link List} of files that were specified by {@code string}.
+     */
+    public static String[] splitFiles(String string) {
+        ArrayList<String> res = new ArrayList<String>();
+        for (String part : string.split(",")) {
+            if (!part.equals("")) {
+                res.add(part);
+            }
+        }
+        return res.toArray(new String[res.size()]);
+    }
+
+    /**
+     * Converts an array of file ({@code String}) paths to {@link File} objects.
+     * 
+     * @param paths The paths to convert.
+     * @return      the file objects.
+     */
+    public static List<File> asFiles(String[] paths) {
+        return asFiles(Arrays.asList(paths));
+    }
+
+    /**
+     * Converts an array of file ({@code String}) paths to {@link File} objects.
+     * 
+     * @param paths The paths to convert.
+     * @return      the file objects.
+     */
+    public static List<File> asFiles(List<String> paths) {
+        return toFile(paths);
+    }
 }

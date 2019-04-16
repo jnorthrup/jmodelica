@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009-2017 Modelon AB
+    Copyright (C) 2009-2019 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -502,7 +502,7 @@ public class ModelicaCompiler implements LogContainer {
     public String getModelicapath() {
         return options.getStringOption("MODELICAPATH");
     }
-    
+
     /**
      * Set the modelicapath attribute.
      * 
@@ -695,7 +695,7 @@ public class ModelicaCompiler implements LogContainer {
     public CompiledUnit compileFMU(String className, String fileName[], String target, String compileTo) 
             throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 
-        return compileUnit(className, fileName, target, "1.0" , compileTo);
+        return compileUnit(className, fileName, target, DEFAULT_VERSION, compileTo);
     }
 
     /**
@@ -730,7 +730,9 @@ public class ModelicaCompiler implements LogContainer {
      *                  this name during the compilation. If directory, the  model will keep its original name.
      * @return          a {@link CompiledUnit} result object.
      */
-    public CompiledUnit compileUnit(String className, String fileName[], String target, String version, String compileTo) 
+    public CompiledUnit compileUnit(String className, String fileName[], String target,
+            String version, String compileTo) 
+
             throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 
         TargetObject targetObject = TargetObject.getTarget(target, version);
@@ -780,6 +782,7 @@ public class ModelicaCompiler implements LogContainer {
         throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 
         CompiledUnit unit = null;
+
         try {
             StepInfo.GC_BEFORE_MEM = options.getBooleanOption("debug_invoke_gc");
 
@@ -792,7 +795,6 @@ public class ModelicaCompiler implements LogContainer {
                 CCompilerDelegator ccompiler = getCCompiler();
                 ccompiler.setTargetPlatforms(targetPlatforms);
 
-                // Get loadable module settings.
                 ModulesSettings modulesSettings = createModulesSettings(options);
                 ccompiler.setModuleLibraryNames(modulesSettings.getLibraryNames());
             }
@@ -805,8 +807,9 @@ public class ModelicaCompiler implements LogContainer {
             if (!compileToPath.isDirectory()) {
                 flatName = compileToPath.getName();
                 int i = flatName.lastIndexOf('.');
-                if (i > 0)
+                if (i > 0) {
                     flatName = flatName.substring(0, i);
+                }
             }
             FClass fc = compileModel(fileName, className, target, flatName, compileTo);
 
@@ -841,21 +844,18 @@ public class ModelicaCompiler implements LogContainer {
         return unit;
     }
 
-    protected void parseFiles(String[] paths) {
+    protected void parseFiles(java.util.List<File> files) {
         StepInfo.TimeItem time = new StepInfo.TimeItem();
         time.begin();
-        File[] files = new File[paths.length];
-        for (int i = 0; i < paths.length; i++)
-            files[i] = new File(paths[i]);
         parseFiles(files, true);
         time.end();
         log.info("Total time: " + time);
     }
 
-    private void parseFiles(File[] files, boolean all) {
+    private void parseFiles(java.util.List<File> files, boolean all) {
         for (File file : files) {
             if (file.isDirectory()) {
-                parseFiles(file.listFiles(), false);
+                parseFiles(Arrays.asList(file.listFiles()), false);
             } else {
                 String path = file.getPath();
                 try {
@@ -1378,46 +1378,59 @@ public class ModelicaCompiler implements LogContainer {
         log.close();
     }
 
-    private void setOptions(Arguments programarguments) {
-        // Create option registry
+    private void setOptions(Arguments programArguments) {
         options = createOptions();
-        String opts = programarguments.get("opt");
-        if (opts != null) {
-            for (String opt : opts.split(",")) {
+
+        if (options != null) {
+            for (String opt : programArguments.get("opt").split(",")) {
                 String[] parts = opt.split(":", 2);
-                if (parts.length == 1)
+
+                if (parts.length == 1) {
                     options.setBooleanOption(parts[0], true);
-                else
+                } else {
                     options.setOption(parts[0], parts[1]);
+                }
             }
         }
-        
-        //add modelicapath to optionregistry
-        String modelicapath = programarguments.get("modelicapath");
-        if (modelicapath == null) {
-            //modelicapath was not set in program arguments -> check envir variable or via JMODELICA_HOME
-            if (System.getenv("MODELICAPATH") != null) 
-                modelicapath = System.getenv("MODELICAPATH");
-            else
-                modelicapath = EnvironmentUtils.getThirdPartyMSL().toString();
-        }
-        options.setStringOption("MODELICAPATH", modelicapath);
+
+        options.setStringOption("MODELICAPATH", getModelicaPath(programArguments));
     }
-    
+
+    /**
+     * Finds the modelicapath variable in arguments or system environment.
+     * Defaults to MSL if none found.
+     */
+    private String getModelicaPath(Arguments programArguments) {
+        String modelicaPath = programArguments.get("modelicapath");
+
+        if (modelicaPath != null) {
+            return modelicaPath;
+        }
+
+        modelicaPath = System.getenv("MODELICAPATH");
+        if (modelicaPath != null) {
+            return modelicaPath;
+        }
+
+        return EnvironmentUtils.getThirdPartyMSL().toString();
+    }
+
     public OptionRegistry getOptions() {
         return options;
     }
 
     public static final String COMPILER_VERSION = Version.parseVersion();
 
-    protected void setArguments(Arguments programarguments) {
-        
+    public static final String DEFAULT_VERSION = "1.0";
+
+    protected void setArguments(Arguments programArguments) {
+
         int arg = 0;
         String modelicapath = null;
-        
+
         //log option
         try {
-            String logString = programarguments.get("log");
+            String logString = programArguments.get("log");
             setLogger(logString);
         } catch (IllegalLogStringException e) {
             setLogger(e.getLogger());
@@ -1425,25 +1438,31 @@ public class ModelicaCompiler implements LogContainer {
             closeLogger();
             System.exit(1);
         }
-        
-        setDumpMemoryUse(programarguments.containsKey("dumpmemuse"), programarguments.get("dumpmemuse"));
-        setFindFlatToInstanceLinks(programarguments.containsKey("findflatinst"));
-        
-        if (programarguments.containsKey("debugSrcIsHome")) 
+
+        setDumpMemoryUse(programArguments.containsKey("dumpmemuse"), programArguments.get("dumpmemuse"));
+        setFindFlatToInstanceLinks(programArguments.containsKey("findflatinst"));
+
+        if (programArguments.containsKey("debugSrcIsHome")) { 
             setDebugSrcIsHome(true);
-        
-        // platform argument
-        String platforms = programarguments.get("platform");
-        if (platforms != null) {
-            setTargetPlatforms(platforms.split(","));
         }
-        
-        // set options
-        this.setOptions(programarguments);
-        
-        // Log compilation command
-        log.info("Compiler arguments:\n  "        + programarguments.line());
-        log.info("Current working directory:\n  " + currentWorkingDirecory());
+
+        setOptions(programArguments);
+        logCompilationCommand(programArguments);
+    }
+
+    /**
+     * Write environment variables to logger.
+     */
+    protected void logEnvironment(String... names) {
+        for (String name : names) {
+            String val = System.getenv(name);
+            log.info("%-15s = %s", name, (val == null) ? "" : val);
+        }
+    }
+
+    public void logCompilationCommand(Arguments programArguments) {
+        log.info("Compiler arguments:\n  "        + programArguments.line());
+        log.info("Current working directory:\n  " + FileUtil.currentWorkingDirecory());
         log.info("Compiler version: "             + COMPILER_VERSION);
         log.info("Java version: "                 + System.getProperty("java.version"));
         log.info("OS name: "                      + System.getProperty("os.name"));
@@ -1451,15 +1470,14 @@ public class ModelicaCompiler implements LogContainer {
         logEnvironment("MODELICAPATH", "JAVA_HOME", "JMODELICA_HOME");
     }
 
+
     public static void main(String[] args) {
-        // create an empty compiler
-        ModelicaCompiler mc = new ModelicaCompiler();
+        ModelicaCompiler compiler = new ModelicaCompiler();
+
         try {
-            // set arguments
             Arguments arguments = new Arguments("ModelicaCompiler", args);
-            mc.setArguments(arguments);
-            // Compile model
-            mc.compileModelFromCommandLine(args, arguments);
+            compiler.compileModelFromCommandLine(args, arguments);
+
         } catch(Throwable e) {
             log.error(e);
             log.close();
@@ -1470,28 +1488,30 @@ public class ModelicaCompiler implements LogContainer {
     /**
      * Compile model given on command line options and print any error messages.
      */
-    protected void compileModelFromCommandLine(String[] args, Arguments programarguments) {
-        // Get files and class
-        // TODO: move this into arguments class
-        String[] files = splitFiles(programarguments.libraryPath());
-        String className = programarguments.className();
-        String compileTo = programarguments.out();
-        
-        // Compile model
+    protected void compileModelFromCommandLine(String[] args, Arguments programArguments) {
+        setArguments(programArguments);
+
+        // TODO: Move this into arguments class.
+        String[] files = FileUtil.splitFiles(programArguments.libraryPath());
+        String className = programArguments.className();
+        String compileTo = programArguments.out();
+
         try {
-            String targetType = programarguments.get("target");
+            String targetType = programArguments.get("target");
             if (targetType == null || targetType.equals("fmume")) {
                 targetType = "me";
             } else if (targetType.equals("fmucs")) {
                 targetType = "cs";
             }
-            
+
             //Compile
-            compileUnit(className, files, targetType, programarguments.get("version"), compileTo);
+            compileUnit(className, files, targetType, programArguments.get("version"), compileTo);
             
         } catch (CompilerException ce) {
-            if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator() != null) 
+            if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator() != null) {
                 getDiagnosticsGenerator().writeProblems(ce.getProblems());
+            }
+
             log.logCompilerException(ce);
             closeLogger();
             System.exit(1);
@@ -1501,38 +1521,6 @@ public class ModelicaCompiler implements LogContainer {
             System.exit(1);
         } finally {
             closeLogger();
-        }
-    }
-
-    /**
-     * Split the argument containing the list of files into an array of filenames.
-     */
-    protected String[] splitFiles(String arg) {
-        ArrayList<String> res = new ArrayList<String>();
-        for (String part : arg.split(","))
-            if (!part.equals(""))
-                res.add(part);
-        return res.toArray(new String[res.size()]);
-    }
-
-    /**
-     * Get the current working directory.
-     */
-    protected String currentWorkingDirecory() {
-        try {
-            return new File(".").getCanonicalPath();
-        } catch (IOException e) {
-            return "< could not get current working directory >";
-        }
-    }
-
-    /**
-     * Write environment variables to logger.
-     */
-    protected void logEnvironment(String... names) {
-        for (String name : names) {
-            String val = System.getenv(name);
-            log.info("%-15s = %s", name, (val == null) ? "" : val);
         }
     }
 
@@ -1839,25 +1827,21 @@ public class ModelicaCompiler implements LogContainer {
         }
 
     }
-
 }
 
     /**
-     * Retrieves the target platforms.
-     * 
-     * @return  the target platforms.
+     * @return  the target platforms. Defaults to win64 on windows, linux64 on linux.
      */
     public String[] ModelicaCompiler.getTargetPlatforms() {
-        return targetPlatforms;
-    }
 
-    /**
-     * Sets the target platforms.
-     * 
-     * @param platforms the platforms to set as compilation targets.
-     */
-    public void ModelicaCompiler.setTargetPlatforms(String... platforms) {
-        this.targetPlatforms = platforms;
+        if (targetPlatforms == null) {
+            targetPlatforms = options.getStringOption("target_platforms").split(",");
+
+            if (targetPlatforms[0].equals("")) {
+                targetPlatforms = EnvironmentUtils.getDefaultTargetPlatform();
+            }
+        }
+        return targetPlatforms;
     }
 
     /**
@@ -1938,8 +1922,10 @@ public class ModelicaCompiler implements LogContainer {
      *             found.
      * 
      */
-    public FClass ModelicaCompiler.compileModel(String name[], String cl, TargetObject target, String flatName, String compileTo)
+    public FClass ModelicaCompiler.compileModel(String name[], String cl, TargetObject target,
+            String flatName, String compileTo)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+
         boolean doTearDown = true;
         try {
             doTearDown = trySetUp();
@@ -1948,11 +1934,13 @@ public class ModelicaCompiler implements LogContainer {
             tryTearDown(doTearDown);
         }
     }
-    
-    public FClass ModelicaCompiler.doCompileModel(String name[], String cl, TargetObject target, String flatName, String compileTo)
+
+    public FClass ModelicaCompiler.doCompileModel(String name[], String cl, TargetObject target,
+            String flatName, String compileTo)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+
         if (target.equals(TargetObject.PARSE)) {
-            parseFiles(name);
+            parseFiles(FileUtil.asFiles(name));
             return null;
         } else if (target.equals(TargetObject.CHECK)) {
             try {
@@ -1964,50 +1952,46 @@ public class ModelicaCompiler implements LogContainer {
             }
             return null;
         }
-        
+
         log.info("======= Compiling model =======");
         resetCompilationInfo();
-        
+
         FClass fc = null;
         try {
-            // compute instance tree
             InstClassDecl icl = instantiateModel(name, cl, target);
-            
+
             if (compileTo != null) {
                 File unitFile = makePackagingDirs(cl, new File(compileTo), target);
                 icl.root().getUtilInterface().setCompilationOutputPath(unitFile);
             }
-            
-            // flattening
-            // Throw away source and instance trees when they are not needed any more
+
             PassAndForget<InstClassDecl> buf = new PassAndForget<InstClassDecl>(icl);
             icl = null;
             fc = flattenModel(buf.pass(), target, flatName);
-            
-            // Generate code 
+
             if (target.getCodeGenFlag()) {
                 generateCode(fc, target);
                 dumpMemoryUseFile(fc, "generated", false);
             }
-            
+
             fc.loadResources(new File(outDir, "resources"));
-            
+
         } finally {
+            /*
+             * Do nothing.
+             */
         }
-        
-        if (options.getBooleanOption("generate_html_diagnostics"))
+
+        if (options.getBooleanOption("generate_html_diagnostics")) {
             setDiagnosticsGenerator(null);
-        
+        }
+
         log.info("====== Model compiled successfully =======");
-        
         return fc;
     }
-    
-    /**
-     * If true, the compiler has been set up.
-     */
+
     protected boolean ModelicaCompiler.isSetUp = false;
-    
+
     /**
      * If the compiler has not been set up yet, do so and return true. If it
      * has been return false. It is the callers responsibility to call 

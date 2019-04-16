@@ -17,13 +17,12 @@
 package org.jmodelica.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
-import org.jmodelica.util.StringUtil;
+import org.jmodelica.util.collections.ListUtil;
 
 /**
  * Class representing command line arguments.
@@ -49,27 +48,6 @@ public class Arguments {
         setDefaultArgs();
         extractProgramArguments();
         checkArgs();
-    }
-
-    private List<String> commandLineOptions() {
-        return Arrays.asList(new String[] {
-            "log",
-            "modelicapath",
-            "opt",
-            "optfile",
-            "target",
-            "version",
-            "dumpmemuse",
-            "findflatinst",
-            "platform",
-            "out",
-            "debugSrcIsHome",
-        });
-    }
-    
-    private void setDefaultArgs() {
-        namedArgs.put("target", "jmu");
-        namedArgs.put("out", ".");
     }
 
     private void extractProgramArguments() throws InvalidArgumentException {
@@ -198,17 +176,42 @@ public class Arguments {
         }
     }
 
+    /* ========== *
+     *  Listings. *
+     * ========== */
+
+    private List<String> commandLineOptions() {
+        return ListUtil.list(
+            "log",
+            "modelicapath",
+            "opt",
+            "optfile",
+            "target",
+            "version",
+            "dumpmemuse",
+            "findflatinst",
+            "platform",
+            "out",
+            "debugSrcIsHome"
+        );
+    }
+    
+    private void setDefaultArgs() {
+        namedArgs.put("target", "jmu");
+        namedArgs.put("out", ".");
+    }
+    
     private String tooltip() {
         return compilerName + " expects the command line arguments: \n" +
                 "[<options>] <file name> <class name> [<target>] [<version>]\n" +
                 " where options could be: \n" +
-                "  -log=<i or w or e> \n" +
-                "  -modelicapath=<path to modelica libraries> \n" +
-                "  -optfile=<path to XML options file> -opt=opt1:val1,opt2:val2\n" + 
-                "  -target=<fmume, me ,fmucs, cs, jmu, fmux, parse or check>\n" +
-                "  -version=<1.0 or 2.0>\n" +
-                "  -dumpmemuse[=<resolution>] -findflatinst \n" + 
-                "  -platform=<win32 or win64 or linux32 or linux64 or darwin32 or darwin64>" +
+                "    -log=<i or w or e> \n" +
+                "    -modelicapath=<path to modelica libraries> \n" +
+                "    -opt=opt1:val1,opt2:val2" +
+                "    -optfile=<path to XML options file>\n" + 
+                "    -target=<fmume, me ,fmucs, cs, jmu, fmux, parse or check>\n" +
+                "    -version=<1.0 or 2.0>\n" +
+                "    -dumpmemuse[=<resolution>] -findflatinst \n" + 
                 " If no target is given, -jmu is assumed." +
                 " If no version is given in case of targets 'me' or 'cs', -1.0 is assumed";
     }
@@ -220,5 +223,6 @@ public class Arguments {
             super(msg);
         }
     }
+
 
 }
