@@ -117,13 +117,17 @@ end ExpandableConnectorArrays.SingleCells;
 
         connector C = Real;
 
-        EC ec1[1], ec2[1];
-        C c1, c2;
+        EC ec1[2], ec2[2];
+        C c1, c2, c3, c4;
     equation
         connect(c1, ec1[1].a);
+        connect(c2, ec2[2].b);
         connect(ec1[1], ec2[1]);
-        connect(ec2[1].a, c2);
+        connect(ec1[2], ec2[2]);
+        connect(ec2[2].a, c3);
+        connect(ec2[2].a, c4);
         c1 = time;
+        c2 = time;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
@@ -131,6 +135,57 @@ end ExpandableConnectorArrays.SingleCells;
             description="Arrays of expandable connectors, several cells each.",
             flatModel="
 fclass ExpandableConnectorArrays.IntegerSized
+ Real ec1[1].a;
+ Real ec1[2].a;
+ Real ec1[2].b;
+ Real ec2[1].a;
+ Real ec2[2].a;
+ Real ec2[2].b;
+ Real c1;
+ Real c2;
+ Real c3;
+ Real c4;
+equation
+ c1 = time;
+ c2 = time;
+ c1 = ec1[1].a;
+ ec1[1].a = ec2[1].a;
+ c2 = ec1[2].b;
+ ec1[2].b = ec2[2].b;
+ c3 = c4;
+ c4 = ec1[2].a;
+ ec1[2].a = ec2[2].a;
+end ExpandableConnectorArrays.IntegerSized;
+")})));
+    end IntegerSized;
+
+
+    model BooleanSized
+        expandable connector EC
+        end EC;
+
+        connector C = Real;
+
+        EC ec1[Boolean], ec2[Boolean], ec3[Boolean];
+        C c1, c2, c3, c4;
+    equation
+        connect(c1, ec1[false].a);
+        connect(c2, ec1[true].b);
+        connect(c3, ec2[false].b);
+        connect(c4, ec2[true].a);
+        connect(ec1, ec2);
+        connect(ec2[false], ec3[true]);
+        c1 = time;
+        c2 = time;
+        c3 = time;
+        c4 = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="BooleanSized",
+            description="Arrays of expandable connectors, boolean sized.",
+            flatModel="
+fclass ExpandableConnectorArrays.BooleanSized
  Real ec1[1].a;
  Real ec2[1].a;
  Real c1;
@@ -140,9 +195,51 @@ equation
  c1 = c2;
  c2 = ec1[1].a;
  ec1[1].a = ec2[1].a;
-end ExpandableConnectorArrays.IntegerSized;
+end ExpandableConnectorArrays.BooleanSized;
 ")})));
-    end IntegerSized;
+    end BooleanSized;
+
+
+    model EnumerationSized
+        expandable connector EC
+        end EC;
+
+        type T = enumeration(A, B, C, D); 
+
+        connector C = Real;
+
+        EC ec1[T], ec2[T], ec3[T];
+        C c1, c2, c3, c4;
+    equation
+        connect(c1, ec1[T.A].a);
+        connect(c2, ec1[T.B].b);
+        connect(c3, ec2[T.C].b);
+        connect(c4, ec2[T.D].a);
+        connect(ec1, ec2);
+        connect(ec2[T.B], ec3[T.C]);
+        c1 = time;
+        c2 = time;
+        c3 = time;
+        c4 = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="EnumerationSized",
+            description="Arrays of expandable connectors, enumeration sized.",
+            flatModel="
+fclass ExpandableConnectorArrays.EnumerationSized
+ Real ec1[1].a;
+ Real ec2[1].a;
+ Real c1;
+ Real c2;
+equation
+ c1 = time;
+ c1 = c2;
+ c2 = ec1[1].a;
+ ec1[1].a = ec2[1].a;
+end ExpandableConnectorArrays.EnumerationSized;
+")})));
+    end EnumerationSized;
 
 
     model ParameterSized
@@ -259,24 +356,32 @@ end ExpandableConnectors.CompositeConnectors;
 
 
     model Redeclare
-        expandable connector EC
-        end EC;
+        expandable connector EC1
+        end EC1;
+
+        expandable connector EC2
+            C a;
+        end EC2;
+
+        expandable connector EC3
+            C b;
+        end EC3;
 
         model A
-            replaceable EC ec[3];
+            replaceable EC1 ec[3];
         end A;
 
         connector C = Real;
 
-        A a1(redeclare EC ec);
-        A a2(redeclare EC ec);
-        A a3(redeclare EC ec);
+        A a1(redeclare EC2 ec);
+        A a2(redeclare EC3 ec);
         C c1, c2;
     equation
-        connect(c1, a1.ec.b);
-        connect(a1.ec[1], a2.ec[2]);
-        connect(a2.ec[2], a3.ec[3]);
-        connect(a3.ec[3].b, c2);
+        connect(c1, a1.ec[1].a);
+        connect(c2, a2.ec[2].b);
+        connect(a1.ec, a2.ec);
+        c1 = time;
+        c2 = time;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
@@ -482,6 +587,44 @@ end ExpandableConnectors.SliceToSlice;
     end SliceToSlice;
 
 
+    model SliceWithComponent
+        expandable connector EC
+        end EC;
+
+        connector C = Real;
+
+        EC ec1[2], ec2[3], ec3[4];
+        C c[3];
+    equation
+        connect(c[1:2], ec1[1].a);
+        connect(ec1, ec2[2:3].a);
+        connect(ec2, ec3.a);
+        c[1] = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="SliceWithComponent",
+            description="Expandable connectors: connect  of arrays.",
+            flatModel="
+fclass ExpandableConnectors.SliceWithComponent
+ Real ec1.a[2];
+ Real ec2.a[2];
+ Real ec3.a[2];
+ Real c[4];
+equation
+ c[1] = c[3];
+ c[3] = ec1.a[1];
+ ec1.a[1] = ec2.a[1];
+ ec2.a[1] = ec3.a[1];
+ c[2] = c[4];
+ c[4] = ec1.a[2];
+ ec1.a[2] = ec2.a[2];
+ ec2.a[2] = ec3.a[2];
+end ExpandableConnectors.SliceWithComponent;
+")})));
+    end SliceWithComponent;
+
+
     model MatrixSlices
         expandable connector EC
         end EC;
@@ -529,76 +672,18 @@ end ExpandableConnectorArrays.MatrixSlices;
 
         connector C = Real;
 
-        C c1, c2, c3;
+        C c1, c2, c3, c4;
         EC ec[3];
-        Real x, y, z;
+        Real q, x, y, z;
     equation
         connect(c1, ec[1].a);
         connect(c2, ec[2].b);
         connect(c3, ec[3].c);
-        connect(ec[1], ec[2]);      // TODO: Change this if Github issue ModelicaSpecification#2345
-        connect(ec[2], ec[3]);      //       resolves to EC arrays being implicitly connected.
-
-        x = ec[1].a;
-        y = ec[2].b;
-        z = ec[3].c;
-
-        c1 = time;
-        c2 = time;
-        c3 = time;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="MemberAccess",
-            description="Using members of expandable connector array.",
-            flatModel="
-fclass ExpandableConnectorArrays.MemberAccess
- Real ec[1].a;
- Real ec[2].b;
- Real ec[3].c;
- Real c1;
- Real c2;
- Real c3;
- Real x;
- Real y;
- Real z;
-equation
- c[1] = ec[1].a;
- c[2] = ec[2].b;
- c[3] = ec[3].c;
- x = ec[1].a;
- y = ec[2].b;
- z = ec[3].c;
- ec[1].a = c1;
- ec[2].b = c2;
- ec[3].c = c3;
- c1 = time;
- c2 = time;
- c3 = time;
-end ExpandableConnectorArrays.MemberAccess;
-")})));
-    end MemberAccess;
-
-
-    // TODO: Remove this if Github issue ModelicaSpecification#2345 resolves
-    //       to EC arrays *not* being implicitly corrected.
-    model MemberAccessImplicit
-        expandable connector EC
-            Real x;
-        end EC;
-
-        connector C = Real;
-
-        C c1, c2, c3;
-        EC ec[3];
-        Real x, y, z;
-    equation
-        connect(c1, ec[1].a);
-        connect(c2, ec[2].b);
-        connect(c3, ec[3].c);
+        connect(c4, ec[1].x);
         connect(ec[1], ec[2]);
         connect(ec[2], ec[3]);
 
+        q = ec[1].x;
         x = ec[1].b;
         y = ec[2].c;
         z = ec[3].a;
@@ -606,13 +691,14 @@ end ExpandableConnectorArrays.MemberAccess;
         c1 = time;
         c2 = time;
         c3 = time;
+        c4 = time;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="MemberAccessImplicit",
+            name="MemberAccess",
             description="Using members of expandable connector array.",
             flatModel="
-fclass ExpandableConnectorArrays.MemberAccessImplicit
+fclass ExpandableConnectorArrays.MemberAccess
  Real ec[1].a;
  Real ec[2].b;
  Real ec[3].c;
@@ -635,9 +721,9 @@ equation
  c1 = time;
  c2 = time;
  c3 = time;
-end ExpandableConnectorArrays.MemberAccessImplicit;
+end ExpandableConnectorArrays.MemberAccess;
 ")})));
-    end MemberAccessImplicit;
+    end MemberAccess;
 
 
     model NestedAccess
@@ -720,7 +806,7 @@ end ExpandableConnectorArrays.NestedDisconnected;
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
             name="NestedAccesses",
-            description="Nested declared expandable connectors: adding members to both levels",
+            description="Nested accesses to expandable connectors.",
             flatModel="
 fclass ExpandableConnectors.NestedAccesses
  Real ec1.b;
@@ -733,6 +819,92 @@ equation
 end ExpandableConnectors.NestedAccesses;
 ")})));
     end NestedAccesses;
+
+
+    model NestedConnections
+        expandable connector EC1
+            EC2 ec2[3];
+        end EC1;
+
+        expandable connector EC2
+        end EC2;
+
+        connector C = Real;
+
+        constant Integer n = 3;
+
+        EC1 ec1[n];
+        EC2 ec3[n];
+        EC1 ec4[n];
+
+        C c1, c2, c3;
+    equation
+        connect(c1, ec1.ec2[1].a);
+        connect(ec1.ec2, ec3);
+        connect(ec4[1], ec1[2].ec2[2]);
+        connect(ec1, ec4);
+        connect(ec4[1].ec2[2].b, c2);
+        c1 = time;
+        c2 = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NestedConnections",
+            description="Nested expandable connectors, different connection levels.",
+            flatModel="
+fclass ExpandableConnectors.NestedConnections
+ Real ec1.b;
+ Real ec1.ec2.a;
+ Real c1;
+ Real c2;
+equation
+ c1 = ec1.ec2.a;
+ c2 = ec1.b;
+end ExpandableConnectors.NestedConnections;
+")})));
+    end NestedConnections;
+
+
+    model NestedConnectionSizes
+        expandable connector EC1
+            EC2 ec2[3];
+        end EC1;
+
+        expandable connector EC2
+        end EC2;
+
+        connector C = Real;
+
+        constant Integer n = 3;
+
+        EC1 ec1[n];
+        EC2 ec3[n];
+        EC1 ec4[n];
+
+        C c1, c2, c3;
+    equation
+        connect(c1, ec1.ec2[1].a);
+        connect(ec1.ec2, ec3);
+        connect(ec3, ec1);
+        c1 = time;
+        c2 = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NestedConnectionSizes",
+            description="Nested expandable connectors, different connection levels.",
+            flatModel="
+fclass ExpandableConnectors.NestedConnectionSizes
+ Real ec1.b;
+ Real ec1.ec2.a;
+ Real c1;
+ Real c2;
+equation
+ c1 = ec1.ec2.a;
+ c2 = ec1.b;
+end ExpandableConnectors.NestedConnectionSizes;
+")})));
+    end NestedConnectionSizes;
 
 
     model LoopedConnection
