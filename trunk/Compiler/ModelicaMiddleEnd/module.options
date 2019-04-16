@@ -45,7 +45,7 @@ for normal compilation."
 
 *******************************************************************************
 
-BOOLEAN unroll_functions compiler internal false false
+BOOLEAN unroll_functions compiler experimental false false
 
 "Internal option used for casadi transfer. If true, loops in functions are 
 unrolled. All sizes in functions are assumed to be known. Will cause 
