@@ -2934,7 +2934,7 @@ initial equation
  pre(temp_2) = false;
 algorithm
  _eventIndicator_1 := time - (1 + t);
- temp_2 := time > 1 + t;
+ temp_2 := _eventIndicator_1 > 0.0;
  if initial() or temp_2 and not pre(temp_2) then
   t := time + 1;
  end if;

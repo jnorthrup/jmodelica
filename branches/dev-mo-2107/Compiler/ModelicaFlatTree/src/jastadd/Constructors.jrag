@@ -912,6 +912,7 @@ aspect InheritedFactoryMethods {
 	public FStringAddExp FStringAddExp.createEmptyNode() { return new FStringAddExp(); }
 	
 	// Logical operators
+	public abstract FRelExp FRelExp.createEmptyNode();
 	public FLtExp  FLtExp.createEmptyNode()  { return new FLtExp();  }
 	public FLeqExp FLeqExp.createEmptyNode() { return new FLeqExp(); }
 	public FGtExp  FGtExp.createEmptyNode()  { return new FGtExp();  }
@@ -921,7 +922,15 @@ aspect InheritedFactoryMethods {
 	public FNotExp FNotExp.createEmptyNode() { return new FNotExp(); }
 	public FOrExp  FOrExp.createEmptyNode()  { return new FOrExp();  }
 	public FAndExp FAndExp.createEmptyNode() { return new FAndExp(); }
-	
+
+    public FRelExp FRelExp.createNode(FExp left, FExp right) {
+        FRelExp exp = createEmptyNode();
+        exp.setLeft(left);
+        exp.setRight(right);
+        exp.setIndicatorOpt(new Opt<FExp>());
+        return exp;
+    }
+
 	// Literal expressions (all have different children, so mostly here for completeness)
 	public FRealLitExp         FRealLitExp.createEmptyNode()         { return new FRealLitExp();         }
 	public FIntegerLitExp      FIntegerLitExp.createEmptyNode()      { return new FIntegerLitExp();      }

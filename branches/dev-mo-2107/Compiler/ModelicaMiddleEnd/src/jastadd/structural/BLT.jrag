@@ -1056,6 +1056,7 @@ aspect BLT{
 				s.addAll(e.inputs());
 				s.addAll(e.differentiatedRealVariables());
                 s.addAll(e.discretePreVariables());
+                s.addAll(e.eventIndicators());
                 //Add all independent parameters the block depends on
                 for (FVariable vv: e.parameters())
                     s.addAll(vv.myParameterDependencies());
@@ -1083,15 +1084,15 @@ aspect BLT{
             return blockDependency.immediateSuccessors();
         }
 
-        private Set<FVariable> dependsOnVariables_cashe = null;
+        private Set<FVariable> dependsOnVariables_cache = null;
 
         public Set<FVariable> dependsOn() {
-            if (dependsOnVariables_cashe != null)
-                return dependsOnVariables_cashe;
-            dependsOnVariables_cashe = new LinkedHashSet<FVariable>(independentVariables());
+            if (dependsOnVariables_cache != null)
+                return dependsOnVariables_cache;
+            dependsOnVariables_cache = new LinkedHashSet<FVariable>(independentVariables());
             for (AbstractEquationBlock eb : blockDependency.immediatePredecessors())
-                dependsOnVariables_cashe.addAll(eb.dependsOn());
-            return dependsOnVariables_cashe;
+                dependsOnVariables_cache.addAll(eb.dependsOn());
+            return dependsOnVariables_cache;
         }
 
         public boolean isSimple() {

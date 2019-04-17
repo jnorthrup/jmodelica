@@ -3574,6 +3574,18 @@ aspect FVariableUses {
     }
 
     /**
+     * Collection attribute returning all event indicators (FVariables)
+     * referenced in an equation.
+     */
+    coll LinkedHashSet<FVariable> FAbstractEquation.eventIndicators()
+        [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
+
+    FAccessExp contributes (FVariable) myFV() when myFV().isEventIndicator() && inAccessLocation() to
+        FAbstractEquation.eventIndicators() for each enclosingEquationsIterator();
+
+    syn boolean FAbstractVariable.isEventIndicator() = name().startsWith("_eventIndicator_");
+
+    /**
      * Returns all variables known to this equation that are part of the
      * equation system, e.g. variables in the attributes isn't included in this
      * list.
