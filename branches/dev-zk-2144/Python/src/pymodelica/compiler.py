@@ -342,7 +342,7 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
     cmd.append('-log=' + _gen_log_level(compiler_log_level))
     
     if compiler_options:
-        cmd.append('-opt=' + _gen_compiler_options(compiler_options, platform))
+        cmd.append('-opt=' + _gen_compiler_options(compiler_options))
 
     cmd.append("-target=" + target)
     
@@ -373,10 +373,6 @@ def _gen_compiler_options(compiler_options):
     """
     # Save in opts in the form: opt1:val1,opt2:val2
     opts = ','.join(['%s:%s' %(k, v) for k, v in compiler_options.iteritems()])
-
-    if platform == 'auto':
-        platform = _get_platform()
-    cmd.append(", " + platform)
 
     # Convert all Python True/False to Java true/false
     opts = opts.replace('True', 'true')
