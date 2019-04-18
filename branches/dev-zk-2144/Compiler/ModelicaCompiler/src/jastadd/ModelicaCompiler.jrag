@@ -1381,8 +1381,10 @@ public class ModelicaCompiler implements LogContainer {
     private void setOptions(Arguments programArguments) {
         options = createOptions();
 
-        if (options != null) {
-            for (String opt : programArguments.get("opt").split(",")) {
+        String opts = programArguments.get("opt");
+        if (opts != null) {
+
+            for (String opt : opts.split(",")) {
                 String[] parts = opt.split(":", 2);
 
                 if (parts.length == 1) {
