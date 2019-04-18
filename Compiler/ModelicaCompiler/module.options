@@ -458,10 +458,10 @@ STRING compiler_version compiler internal "compiler_version_file_not_read"
 
 ********************************************************************************
 STRING platforms compiler user ""
-"windows32" "windows64" "linux64" ""
+"win32" "win64" "linux64"
 
 "The platform string list for the compiler. Uses the system platform with 64-bit
-if not set."
+(linux or windows) if not set.
 
 ********************************************************************************
 

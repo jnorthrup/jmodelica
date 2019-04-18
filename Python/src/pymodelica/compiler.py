@@ -232,9 +232,10 @@ def _compile_unit(class_name, file_name, compiler, target, version,
     
     if isinstance(file_name, basestring):
         file_name = [file_name]
-        
+
     if platform == 'auto':
         platform = _get_platform()
+
     compiler_options['platforms'] = platform
 
     if not separate_process:
@@ -251,11 +252,10 @@ def _compile_unit(class_name, file_name, compiler, target, version,
 
     else:
         return compile_separate_process(class_name, file_name, compiler, target, version, compiler_options,
-                                        compile_to, compiler_log_level, jvm_args)
+                compile_to, compiler_log_level, jvm_args)
 
 def compile_separate_process(class_name, file_name=[], compiler='auto', target='me', version='1.0', 
-                             platform='auto', compiler_options={}, compile_to='.', 
-                             compiler_log_level='warning', jvm_args=''):
+                             compiler_options={}, compile_to='.', compiler_log_level='warning', jvm_args=''):
     """
     Compile model in separate process.
     Requires environment variable SEPARATE_PROCESS_JVM to be set, otherwise defaults
@@ -347,8 +347,6 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
     cmd.append("-target=" + target)
     
     cmd.append("-version=" + str(version))  # str() in case it is None
-    
-    
     
     cmd.append("-out=" + compile_to)
     
