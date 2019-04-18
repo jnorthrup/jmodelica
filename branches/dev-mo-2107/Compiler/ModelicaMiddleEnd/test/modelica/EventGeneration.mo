@@ -324,7 +324,7 @@ initial equation
  pre(temp_1) = false;
 algorithm
  _eventIndicator_1 := time - t;
- temp_1 := _eventIndicator_1 > 0.0;
+ temp_1 := time > t;
  if temp_1 and not pre(temp_1) then
   t := 1;
  end if;
@@ -355,7 +355,7 @@ initial equation
  pre(t) = 0.0;
  pre(temp_1) = false;
 equation
- temp_1 = _eventIndicator_1 > 0.0;
+ temp_1 = sin(i) > 1;
 algorithm
  if temp_1 and not pre(temp_1) then
   t := 1;
@@ -391,7 +391,7 @@ initial equation
  pre(temp_1) = false;
 algorithm
  _eventIndicator_1 := sin(i) - t;
- temp_1 := _eventIndicator_1 > 0.0;
+ temp_1 := sin(i) > t;
  if temp_1 and not pre(temp_1) then
   t := 1;
  end if;

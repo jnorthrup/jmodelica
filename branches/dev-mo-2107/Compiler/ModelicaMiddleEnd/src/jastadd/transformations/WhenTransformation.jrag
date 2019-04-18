@@ -158,27 +158,6 @@ aspect WhenClauses{
                 new FAccessFull(tempVarName()), variability().combine(Variability.DISCRETE)));
         return new FAndExp(tempUseExp(), new FNotExp(tempPreExp()));
     }
-
-    // Would be better to replace original equation when generating indicator
-    @Override
-    public FExp FRelExp.asGuard(Collection<FAbstractEquation> outerEqnList, Collection<FStatement> stmtList, FClass fclass) {
-        if (!hasIndicator()) {
-            return super.asGuard(outerEqnList, stmtList, fclass);
-        }
-        // We need to extract to temporary equation
-        FRelExp tempExp = createNode(getIndicator().treeCopy(), getIndicator().type().createLiteral(0));
-        tempExp.setIndicator(getIndicator().treeCopy());
-        tempExp.setIndicatorVarName(getIndicatorVarName());
-        if (stmtList == null || !dependsOn(myFAlgorithm().referencedFVariablesInLHS())) {
-            outerEqnList.add(new FEquation(tempUseExp(), tempExp));
-        } else {
-            stmtList.add(new FAssignStmt(tempUseExp(), tempExp));
-        }
-        
-        fclass.addFVariable(type().createFVariable(VisibilityType.PUBLIC,
-                new FAccessFull(tempVarName()), variability().combine(Variability.DISCRETE)));
-        return new FAndExp(tempUseExp(), new FNotExp(tempPreExp()));
-    }
     
     @Override
     public FExp FInitialExp.asGuard(Collection<FAbstractEquation> outerEqnList, Collection<FStatement> stmtList, FClass fclass) {

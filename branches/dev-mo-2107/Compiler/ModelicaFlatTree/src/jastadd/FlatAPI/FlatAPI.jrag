@@ -2866,7 +2866,7 @@ aspect ReferencedVariables {
 
     @Override
     public <T extends CommonAccessExp> void FRelExp.findCommonAccessExpsInTree(Set<T> set, CommonAccessExpLookupVisitor<T> visitor) {
-        Opt<FExp> indicator = getIndicatorOpt();
+        Opt<FAccessExp> indicator = getIndicatorOpt();
 
         if (indicator == null) {
             super.findCommonAccessExpsInTree(set, visitor);
@@ -3580,10 +3580,10 @@ aspect FVariableUses {
     coll LinkedHashSet<FVariable> FAbstractEquation.eventIndicators()
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-    FAccessExp contributes (FVariable) myFV() when myFV().isEventIndicator() && inAccessLocation() to
-        FAbstractEquation.eventIndicators() for each enclosingEquationsIterator();
-
-    syn boolean FAbstractVariable.isEventIndicator() = name().startsWith("_eventIndicator_");
+    FRelExp contributes (FVariable) getIndicator().myFV() 
+        when hasIndicator() 
+        to FAbstractEquation.eventIndicators() 
+        for each enclosingEquationsIterator();
 
     /**
      * Returns all variables known to this equation that are part of the
