@@ -62,6 +62,10 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
         if (tree == null) {
             name = testFile.getName();
             tree = spec.createTestSuite(testFile).getTree();
+            if (tree == null) {
+                throw new InitializationError("Test file '" + name
+                        + "' does not contain any tests. Note: The declared package name must match the file name");
+            }
         } else {
             name = tree.getName();
         }
