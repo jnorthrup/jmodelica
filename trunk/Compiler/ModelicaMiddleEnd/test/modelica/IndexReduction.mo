@@ -3520,7 +3520,7 @@ Error in flattened model:
   Index reduction failed: Maximum number of expressions in a single equation has been reached
 
 Error in flattened model:
-  The system is structurally singular. The following varible(s) could not be matched to any equation:
+  The system is structurally singular. The following variable(s) could not be matched to any equation:
      der(x2)
 
   The following equation(s) could not be matched to any variable:
@@ -3584,7 +3584,7 @@ Error in flattened model:
   Index reduction failed: Munkres algorithm was unable to find a matching; Unable to find any uncovered incidence
 
 Error in flattened model:
-  The system is structurally singular. The following varible(s) could not be matched to any equation:
+  The system is structurally singular. The following variable(s) could not be matched to any equation:
      a1
      a2
 
