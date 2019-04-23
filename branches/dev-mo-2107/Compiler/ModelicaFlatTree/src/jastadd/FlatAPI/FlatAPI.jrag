@@ -3474,6 +3474,7 @@ aspect FVariableUses {
     eq SourceRoot.getChild().inAccessLocation()             = false;
     eq FAbstractEquation.getFAttribute().inAccessLocation() = false;
     eq FAbstractEquation.getChild().inAccessLocation()      = true;
+    eq FRelExp.getIndicator().inAccessLocation()            = false;
 
     syn lazy LinkedHashSet<FVariable> FAbstractEquation.algebraicContinousRealVariables() = 
         FClass.intersectFVSet(algebraicVariables(), myFClass().normalAlgebraicContinousRealVariables());
