@@ -581,7 +581,8 @@ abstract public class TestCase implements GenericTestCase {
                 names[i] = new File(parent, modelicaLibraries[i]).getAbsolutePath();
             }
             names[modelicaLibraries.length] = getSourceFileName();
-            sr = getParserHandler().parseModel(uif, names);
+            //TODO: fix it
+            sr = getParserHandler().parseModel(uif, names, LoadInfo.EMPTY);
         } else {
             sr = getParserHandler().parseFile(uif, getSourceFileName());
         }

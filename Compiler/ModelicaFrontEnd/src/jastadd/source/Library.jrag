@@ -452,66 +452,72 @@ aspect Library {
             return res;
         }
         
-        public static class LibraryDef implements Comparable<LibraryDef> {
-            
-            public final String name;
-            public final String version;
-            public final File path;
-            public final boolean structured;
-            public final SrcLibNode.LoadReason reason;
-            
-            public static LibraryDef create(File path, SrcLibNode.LoadReason reason) {
-                if (SrcLibNode.isStructuredLib(path))
-                    return new LibraryDef(path, true, reason);
-                else if (SrcLibNode.isUnstructuredLib(path))
-                    return new LibraryDef(path, false, reason);
-                else
-                    return null;
-            }
-            
-            public SrcLibNode createLibNode() {
-                return new SrcLibNode(path, name, structured, reason);
-            }
-            
-            public int hashCode() {
-                return path.hashCode();
-            }
-            
-            public boolean equals(Object o) {
-                return o instanceof LibraryDef && path.equals(((LibraryDef) o).path);
-            }
-            
-            public int compareTo(LibraryDef def) {
-                int res = name.compareTo(def.name);
-                return res == 0 ? path.compareTo(def.path) : res;
-            }
-            
-            public String toString() {
-                return name;
-            }
-            
-            private LibraryDef(File path, boolean structured, SrcLibNode.LoadReason reason) {
-                String name = path.getName();
-                if (!structured) {
-                    name = name.substring(0, name.lastIndexOf('.'));
-                }
-                String[] parts = name.split(" ", 2);
-                if (parts.length > 1) {
-                    name = parts[0];
-                    version = parts[1];
-                } else {
-                    version = null;
-                }
-                this.name = name;
-                this.path = path;
-                this.structured = structured;
-                this.reason = reason;
-            }
-            
-        }
         
     }
-    
+
+    public class LoadInfo {
+        public static final LoadInfo EMPTY = new LoadInfo();
+
+        private LoadInfo() {
+        }
+    }
+
+    public class LibraryDef implements Comparable<LibraryDef> {
+        public final String name;
+        public final String version;
+        public final File path;
+        public final boolean structured;
+        public final SrcLibNode.LoadReason reason;
+        
+        public static LibraryDef create(File path, SrcLibNode.LoadReason reason) {
+            if (SrcLibNode.isStructuredLib(path))
+                return new LibraryDef(path, true, reason);
+            else if (SrcLibNode.isUnstructuredLib(path))
+                return new LibraryDef(path, false, reason);
+            else
+                return null;
+        }
+        
+        public SrcLibNode createLibNode() {
+            return new SrcLibNode(path, name, structured, reason);
+        }
+        
+        public int hashCode() {
+            return path.hashCode();
+        }
+        
+        public boolean equals(Object o) {
+            return o instanceof LibraryDef && path.equals(((LibraryDef) o).path);
+        }
+        
+        public int compareTo(LibraryDef def) {
+            int res = name.compareTo(def.name);
+            return res == 0 ? path.compareTo(def.path) : res;
+        }
+        
+        public String toString() {
+            return name;
+        }
+        
+            private LibraryDef(File path, boolean structured, SrcLibNode.LoadReason reason) {
+            String name = path.getName();
+            if (!structured) {
+                name = name.substring(0, name.lastIndexOf('.'));
+            }
+            String[] parts = name.split(" ", 2);
+            if (parts.length > 1) {
+                name = parts[0];
+                version = parts[1];
+            } else {
+                version = null;
+            }
+            this.name = name;
+            this.path = path;
+            this.structured = structured;
+            this.reason = reason;
+        }
+    }
+
     public class DefaultLibraryList extends LibraryList {
         
         protected OptionRegistry options;

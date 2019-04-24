@@ -73,7 +73,7 @@ aspect Parsers {
         return sr;
     }
     
-    public SourceRoot ParserHandler.parseModel(UtilInterface uif, String[] names) 
+    public SourceRoot ParserHandler.parseModel(UtilInterface uif, String[] names, LoadInfo loadInfo) 
             throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
         SourceRoot sr = new SourceRoot(new Program());
         uif.transferRoot(sr);
