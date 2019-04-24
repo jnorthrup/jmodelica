@@ -3575,16 +3575,17 @@ aspect FVariableUses {
     }
 
     /**
-     * Collection attribute returning all event indicators (FVariables)
-     * referenced in an equation.
+     * Returns the event indicators for the expressions that are found by {@link #relExpInEquation}.
      */
-    coll LinkedHashSet<FVariable> FAbstractEquation.eventIndicators()
-        [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
-
-    FRelExp contributes (FVariable) getIndicator().myFV() 
-        when hasIndicator() 
-        to FAbstractEquation.eventIndicators() 
-        for each enclosingEquationsIterator();
+    syn Set<FVariable> FAbstractEquation.eventIndicators() {
+        Set<FVariable> res = new HashSet<>();
+        for (FRelExp exp : relExpInEquation()) {
+            if (exp.hasIndicator()) {
+                res.add((FVariable) exp.getIndicator().myFV());
+            }
+        }
+        return res;
+    }
 
     /**
      * Returns all variables known to this equation that are part of the
