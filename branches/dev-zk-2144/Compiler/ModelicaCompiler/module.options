@@ -461,7 +461,7 @@ STRING platforms compiler user ""
 "win32" "win64" "linux64"
 
 "The platform string list for the compiler. Uses the system platform with 64-bit
-(linux or windows) if not set.
+(linux or windows) if not set."
 
 ********************************************************************************
 
