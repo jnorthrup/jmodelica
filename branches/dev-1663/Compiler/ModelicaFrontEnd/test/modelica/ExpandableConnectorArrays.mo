@@ -906,6 +906,48 @@ end ExpandableConnectors.NestedConnectionSizes;
 ")})));
     end NestedConnectionSizes;
 
+    model NestedAndSlices
+        expandable connector EC1
+            EC2 ec2[3];
+        end EC1;
+
+        expandable connector EC2
+        end EC2;
+
+        connector C = Real;
+
+        EC1 ec1a[2], ec1b[3];
+        EC2 ec2[4];
+        C c[3];
+    equation
+        connect(c[1:2], ec1a[1:2].a);
+        connect(ec1b[2:3].b, ec2[2:3].b);
+        connect(ec1a[1:2].c, ec1b[2:3].ec2[1].a);
+        connect(ec2[2:3].d, ec1b[2:3].ec2[2:3].d);
+        c[1:3] = {time, time, time};
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NestedAndSlices",
+            description="Expandable connectors: connect  of arrays.",
+            flatModel="
+fclass ExpandableConnectors.NestedAndSlices
+ Real ec1.a[2];
+ Real ec2.a[2];
+ Real ec3.a[2];
+ Real c[4];
+equation
+ c[1] = c[3];
+ c[3] = ec1.a[1];
+ ec1.a[1] = ec2.a[1];
+ ec2.a[1] = ec3.a[1];
+ c[2] = c[4];
+ c[4] = ec1.a[2];
+ ec1.a[2] = ec2.a[2];
+ ec2.a[2] = ec3.a[2];
+end ExpandableConnectors.NestedAndSlices;
+")})));
+    end NestedAndSlices;
 
     model LoopedConnection
         expandable connector EC
