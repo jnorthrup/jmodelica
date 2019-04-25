@@ -7256,7 +7256,7 @@ model IllegalWhen3_Err
 1 errors found:
 
 Error in flattened model:
-  The system is structurally singular. The following varible(s) could not be matched to any equation:
+  The system is structurally singular. The following variable(s) could not be matched to any equation:
      z
 
   The following equation(s) could not be matched to any variable:
@@ -7279,7 +7279,7 @@ equation
 1 errors found:
 
 Error in flattened model:
-  The system is structurally singular. The following varible(s) could not be matched to any equation:
+  The system is structurally singular. The following variable(s) could not be matched to any equation:
      i
 
   The following equation(s) could not be matched to any variable:
@@ -7323,7 +7323,7 @@ equation
 1 errors found:
 
 Error in flattened model:
-  The system is structurally singular. The following varible(s) could not be matched to any equation:
+  The system is structurally singular. The following variable(s) could not be matched to any equation:
      i
 
   The following equation(s) could not be matched to any variable:

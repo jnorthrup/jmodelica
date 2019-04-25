@@ -795,7 +795,7 @@ aspect TransformCanonical {
 	public static boolean FClass.writeUnmatchedElements(StringBuffer str, Collection<FVariable> unmatchedVariables, Collection<FAbstractEquation> unmatchedEquations) {
 		boolean unbalanced = false;
 		if (!unmatchedVariables.isEmpty()) {
-			str.append("The following varible(s) could not be matched to any equation:\n");
+			str.append("The following variable(s) could not be matched to any equation:\n");
 			for (FVariable fv : unmatchedVariables) {
 				str.append("     " + fv.name());
 				str.append("\n");
