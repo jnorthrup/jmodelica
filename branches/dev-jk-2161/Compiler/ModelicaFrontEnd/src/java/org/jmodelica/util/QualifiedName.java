@@ -52,6 +52,27 @@ public class QualifiedName {
         return i < names.size();
     }
 
+    public int numberOfParts() {
+        return names.size();
+    }
+
+    /**
+     * Only parse if the name is not simple, don't store the actual parts.
+     * Skips some work.
+     * @return if the name has only a single part.
+     */
+    public static int numberOfParts(String name) {
+        boolean isGlobal = name.startsWith(".");
+        if (isGlobal) {
+            int start = isGlobal ? 1 : 0;
+            name = name.substring(start, name.length());
+        }
+        Matcher m = p.matcher(name);
+        ArrayList<Integer> nameSeparations = new ArrayList<Integer>();
+        findNameSeparations(m, nameSeparations);
+        return nameSeparations.size() + 1;
+    }
+
     public String next() {
         return names.get(i++);
     }
