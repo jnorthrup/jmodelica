@@ -104,7 +104,8 @@ SrcLibClassDecl : SrcFullClassDecl ::= SrcLibNode*;
 SrcLibNode : SrcClassDecl ::= <FileName:String>
                         <Structured:boolean> 
                         <Version:String> 
-                        <Reason:SrcLibNode.LoadReason> 
+                        <Reason:SrcLibNode.LoadReason>
+                        <LoadInfo:LoadInfo> 
                         /SrcStoredDefinition/;
 
 SrcShortClassDecl : SrcBaseClassDecl ::= SrcExtendsClauseShortClass;
