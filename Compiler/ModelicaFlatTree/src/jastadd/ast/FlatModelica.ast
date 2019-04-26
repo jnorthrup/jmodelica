@@ -635,7 +635,7 @@ FBreakStmt : FStatement;
 FReturnStmt : FStatement;
 
 /**
- * Class for array initalization statements.
+ * Class for array initialization statements.
  */
 FInitArrayStmt : FStatement ::= FAccessExp /Type:FType/;
 /**
