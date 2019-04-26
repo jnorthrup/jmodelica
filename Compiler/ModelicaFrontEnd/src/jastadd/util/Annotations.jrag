@@ -287,7 +287,7 @@ aspect AnnotationAPI {
             if (annotationExpMap.containsKey(exp)) {
                 return list.getChild(annotationExpMap.get(exp));
             } else {
-                throw new IllegalArgumentException();
+                return dynamicFExp(exp.instantiate());
             }
         }
     }
@@ -331,8 +331,7 @@ aspect AnnotationAPI {
                 return fChild;
             }
         }
-        throw new IllegalArgumentException("Could not find equivalent sub-expression to '" + 
-                exp + "' in '" + this + "'.");
+        return dynamicFExp(exp.instantiate());
     }
 
     public FExp FAbstractFunctionCall.equivalentChildFExp(SrcExp exp) {
@@ -350,8 +349,7 @@ aspect AnnotationAPI {
         if (i < res.size()) {
             return res.get(i);
         }
-        throw new IllegalArgumentException("Could not find equivalent sub-expression to '" + 
-                exp + "' in '" + this + "'.");
+        return dynamicFExp(exp.instantiate());
     }
 
     syn List<InstFunctionArgument> FAbstractFunctionCall.myInstFunctionArguments() {
