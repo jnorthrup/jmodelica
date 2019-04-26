@@ -832,16 +832,30 @@ annotation(__JModelica(UnitTesting(tests={
         template="$C_model_init_eval_independent_globals$",
         generatedCode="
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 4, 1)
-    static jmi_real_t tmp_1_var[4] = {AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),AD_WRAP_LITERAL(4),};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, 4, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
+    jmi_array_val_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_val_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_val_1(tmp_1, 3) = AD_WRAP_LITERAL(3);
+    jmi_array_val_1(tmp_1, 4) = AD_WRAP_LITERAL(4);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
     return tmp_1;
 }
 
 jmi_array_t* jmi_global_tmp_2(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_2, 4, 1)
-    static jmi_real_t tmp_2_var[4] = {AD_WRAP_LITERAL(5),AD_WRAP_LITERAL(6),AD_WRAP_LITERAL(7),AD_WRAP_LITERAL(8),};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 4, 1, 4)
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_2, 4, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_2, 4, 1, 4)
+    jmi_array_val_1(tmp_2, 1) = AD_WRAP_LITERAL(5);
+    jmi_array_val_1(tmp_2, 2) = AD_WRAP_LITERAL(6);
+    jmi_array_val_1(tmp_2, 3) = AD_WRAP_LITERAL(7);
+    jmi_array_val_1(tmp_2, 4) = AD_WRAP_LITERAL(8);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
     return tmp_2;
 }
 
@@ -914,10 +928,38 @@ annotation(__JModelica(UnitTesting(tests={
         cc_split_element_limit=2,
         template="$C_model_init_eval_independent_globals$",
         generatedCode="
+int jmi_global_tmp_1_0(jmi_t* jmi, jmi_array_t* tmp_1) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    jmi_array_val_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_val_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int jmi_global_tmp_1_1(jmi_t* jmi, jmi_array_t* tmp_1) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    jmi_array_val_1(tmp_1, 3) = AD_WRAP_LITERAL(3);
+    jmi_array_val_1(tmp_1, 4) = AD_WRAP_LITERAL(4);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+/*** SPLIT FILE ***/
+
+int jmi_global_tmp_1_0(jmi_t* jmi, jmi_array_t* tmp_1);
+int jmi_global_tmp_1_1(jmi_t* jmi, jmi_array_t* tmp_1);
+
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 4, 1)
-    static jmi_real_t tmp_1_var[4] = {AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),AD_WRAP_LITERAL(4),};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, 4, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
+    jmi_global_tmp_1_0(jmi, tmp_1);
+    jmi_global_tmp_1_1(jmi, tmp_1);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
     return tmp_1;
 }
 
@@ -979,13 +1021,46 @@ annotation(__JModelica(UnitTesting(tests={
         cc_split_element_limit=1,
         template="$C_model_init_eval_independent_globals$",
         generatedCode="
-jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 4, 1)
-    static jmi_real_t tmp_1_var[4] = {0,1,2,3,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
-    return tmp_1;
+int jmi_global_tmp_1_0(jmi_t* jmi, jmi_array_t* tmp_1) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    jmi_array_val_1(tmp_1, 2) = 1;
+    JMI_DYNAMIC_FREE()
+    return ef;
 }
 
+int jmi_global_tmp_1_1(jmi_t* jmi, jmi_array_t* tmp_1) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    jmi_array_val_1(tmp_1, 3) = 2;
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int jmi_global_tmp_1_2(jmi_t* jmi, jmi_array_t* tmp_1) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    jmi_array_val_1(tmp_1, 4) = 3;
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int jmi_global_tmp_1_0(jmi_t* jmi, jmi_array_t* tmp_1);
+int jmi_global_tmp_1_1(jmi_t* jmi, jmi_array_t* tmp_1);
+int jmi_global_tmp_1_2(jmi_t* jmi, jmi_array_t* tmp_1);
+
+jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, 4, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
+    jmi_global_tmp_1_0(jmi, tmp_1);
+    jmi_global_tmp_1_1(jmi, tmp_1);
+    jmi_global_tmp_1_2(jmi, tmp_1);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_1;
+}
 int model_init_eval_independent_globals_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()

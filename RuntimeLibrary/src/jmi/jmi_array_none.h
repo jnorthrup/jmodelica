@@ -73,12 +73,6 @@ JMI_ARRAY_TYPE(jmi_extobj_t, jmi_extobj_array_t)
     arr  name##_obj = { 0, (int) (nd), (int) (ne), 0 };\
     arr* name = &name##_obj;
 
-/* Static array declaration macro */
-#define JMI_ARRAY_DECL_STATIC(type, arr, name, ne, nd) \
-    static int  name##_size[nd];\
-    static arr  name##_obj = { 0, (int) (nd), (int) (ne), 0 };\
-    static arr* name = &name##_obj;
-
 /* Dynamic array declaration macro */
 #define JMI_ARRAY_DECL_DYNA(type, arr, name, ne, nd) \
     arr* name = NULL;

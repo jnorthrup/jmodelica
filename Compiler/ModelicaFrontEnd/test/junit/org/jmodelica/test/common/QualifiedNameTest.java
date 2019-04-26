@@ -50,21 +50,6 @@ public class QualifiedNameTest {
     }
 
     @Test
-    public void countNumberOfParts() {
-        assertEquals(4, new QualifiedName(("A.'B'.C.D")).numberOfParts());
-    }
-
-    @Test
-    public void nonSimpleNameParts() {
-        assertEquals(4, QualifiedName.numberOfParts(".A.'B'.C.D"));
-    }
-    
-    @Test
-    public void globalSimpleNameParts() {
-        assertEquals(1, QualifiedName.numberOfParts(".'A'"));
-    }
-    
-    @Test
     public void nameFromUnqualifiedImport() {
         assertEquals("[A, B, C]", new QualifiedName("A.B.C.*").toString());
     }

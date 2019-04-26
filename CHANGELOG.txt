@@ -1,7 +1,4 @@
 ================= Unreleased ==================
-# Fixed ; Minor ; Compiler ; #5756
-Improved array initialization for primitive arrays in global constants.
-
 # Fixed ; Minor ; Compiler ; #5753
 Added error check for variability of sample arguments.
 

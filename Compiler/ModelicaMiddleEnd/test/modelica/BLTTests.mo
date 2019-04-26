@@ -31,7 +31,7 @@ model UnbalancedTest1_Err
 1 errors found:
 
 Error in flattened model:
-  The system is structurally singular. The following variable(s) could not be matched to any equation:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
      y
      z
 
@@ -54,7 +54,7 @@ equation
 1 errors found:
 
 Error in flattened model:
-  The system is structurally singular. The following variable(s) could not be matched to any equation:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
      y
 
   The following equation(s) could not be matched to any variable:
@@ -93,7 +93,7 @@ equation
 1 errors found:
 
 Error in flattened model:
-  The system is structurally singular. The following variable(s) could not be matched to any equation:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
      x
 ")})));
 end UnbalancedTest4_Err;
@@ -131,7 +131,7 @@ initial equation
 			description="Test error messages for unbalanced initial systems.",
 			errorMessage="
 Error in flattened model:
-  The initialization system is structurally singular. The following variable(s) could not be matched to any equation:
+  The initialization system is structurally singular. The following varible(s) could not be matched to any equation:
      y
 
   The following equation(s) could not be matched to any variable:

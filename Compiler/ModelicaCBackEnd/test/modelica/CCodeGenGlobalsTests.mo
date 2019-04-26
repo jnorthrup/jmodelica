@@ -1598,16 +1598,24 @@ $C_functions$
     jmi_array_t* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_d;
 
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
-    static jmi_real_t tmp_1_var[1] = {3,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
+    jmi_array_val_1(tmp_1, 1) = 3;
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
     return tmp_1;
 }
 
 jmi_array_t* jmi_global_tmp_2(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
-    static jmi_real_t tmp_2_var[1] = {3,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
+    jmi_array_val_1(tmp_2, 1) = 3;
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
     return tmp_2;
 }
 
@@ -1698,9 +1706,14 @@ $C_functions$
     jmi_array_t* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantArray1_c;
 
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 3, 1)
-    static jmi_real_t tmp_1_var[3] = {4,0,5,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 3, 1, 3)
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, 3, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 3, 1, 3)
+    jmi_array_val_1(tmp_1, 1) = 4;
+    jmi_array_val_1(tmp_1, 3) = 5;
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
     return tmp_1;
 }
 
@@ -1789,9 +1802,14 @@ JMI_ARRAY_TYPE(R2_1_r, R2_1_ra)
     R2_1_r* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordScalar1_f_r2;
 
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
-    static jmi_real_t tmp_1_var[2] = {AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(2),};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    jmi_array_val_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_val_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
     return tmp_1;
 }
 
@@ -1882,16 +1900,26 @@ $C_functions$
     R_0_ra* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordArray1_f_c;
 
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
-    static jmi_real_t tmp_1_var[2] = {1.0,2.0,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    jmi_array_val_1(tmp_1, 1) = 1.0;
+    jmi_array_val_1(tmp_1, 2) = 2.0;
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
     return tmp_1;
 }
 
 jmi_array_t* jmi_global_tmp_2(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
-    static jmi_real_t tmp_2_var[2] = {3.0,4.0,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+    jmi_array_val_1(tmp_2, 1) = 3.0;
+    jmi_array_val_1(tmp_2, 2) = 4.0;
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
     return tmp_2;
 }
 
@@ -1979,9 +2007,14 @@ $C_functions$
     R3_2_ra* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordArray2_f_c;
 
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
-    static jmi_real_t tmp_1_var[2] = {1.0,2.0,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    jmi_array_val_1(tmp_1, 1) = 1.0;
+    jmi_array_val_1(tmp_1, 2) = 2.0;
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
     return tmp_1;
 }
 
@@ -2008,9 +2041,14 @@ R2_1_r* jmi_global_tmp_3(jmi_t* jmi) {
 }
 
 jmi_array_t* jmi_global_tmp_4(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_4, 2, 1)
-    static jmi_real_t tmp_4_var[2] = {3.0,4.0,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_4, 2, 1, 2)
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_4, 2, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_4, 2, 1, 2)
+    jmi_array_val_1(tmp_4, 1) = 3.0;
+    jmi_array_val_1(tmp_4, 2) = 4.0;
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
     return tmp_4;
 }
 
@@ -2177,9 +2215,14 @@ $C_functions$
     R1_0_r* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef1_P_r2;
 
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
-    static jmi_real_t tmp_1_var[2] = {AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(2),};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    jmi_array_val_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_val_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
     return tmp_1;
 }
 
@@ -2271,9 +2314,14 @@ $C_functions$
     R1_0_r* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef2_P_r2;
 
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
-    static jmi_real_t tmp_1_var[2] = {AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(2),};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    jmi_array_val_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_val_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
     return tmp_1;
 }
 
