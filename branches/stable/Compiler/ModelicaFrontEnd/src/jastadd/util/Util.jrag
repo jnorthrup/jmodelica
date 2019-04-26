@@ -902,13 +902,25 @@ aspect Names {
     eq FlatRoot.getChild().enclosingInstClassDecl()          = null;
     eq InstBaseClassDecl.getChild().enclosingInstClassDecl() = this;
     eq InstComponentDecl.getChild().enclosingInstClassDecl() = myInstClass();
-    
+
+    /**
+     * Any closest ancestor InstanceComponent which is a parent to this one.
+     * This method doesn't stop at classes which enclosingInstComponent does.
+     */
+
+    inh InstComponentDecl InstComponentDecl.parentInstComponent();
+    eq InstRoot.getChild().parentInstComponent()          = null;
+    eq InstComponentDecl.getChild().parentInstComponent() = this;
+
+    /**
+     * The closest ancestor instComponentDecl if there is one before the closest class.
+     * This method stops at classes.
+     */
     inh InstComponentDecl InstComponentDecl.enclosingInstComponentDecl();
     inh InstComponentDecl InstExtends.enclosingInstComponentDecl();
     eq BaseNode.getChild().enclosingInstComponentDecl()          = null;
     eq InstExtends.getChild().enclosingInstComponentDecl()       = enclosingInstComponentDecl();
     eq InstComponentDecl.getChild().enclosingInstComponentDecl() = this;
-    
 
     inh SrcBaseClassDecl ASTNode.enclosingClassDecl();
     eq Root.getChild().enclosingClassDecl() = null;
@@ -1399,7 +1411,7 @@ aspect ComponentDeclMethods {
     eq Root.getChild().inheritsInputOutputFrom()              = null;
     
     /**
-     * Check if this component is or is part of a component that is declared input or output on the top level.
+     * Check if this component is part of a component that is declared input or output on the top level.
      */
     syn boolean InstComponentDecl.isTopLevelInputOutput() = false;
     eq InstAssignable.isTopLevelInputOutput() = isTopLevel() && !inExpandableConnector() && 
