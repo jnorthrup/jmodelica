@@ -161,23 +161,17 @@ aspect InstFunctionBinding {
     /**
      * List of arguments that could not be bound to inputs.
      */
-    private java.util.List<InstFunctionArgument> InstFunctionCall.unbindableArgs      = Collections.emptyList();
-    private java.util.List<InstFunctionArgument> InstRecordConstructor.unbindableArgs = Collections.emptyList();
-    private java.util.List<InstFunctionArgument> FInfArgsFunctionCall.unbindableArgs  = Collections.emptyList();
+    private java.util.List<InstFunctionArgument> InstFunctionCall.unbindableArgs     = Collections.emptyList();
+    private java.util.List<InstFunctionArgument> FInfArgsFunctionCall.unbindableArgs = Collections.emptyList();
 
-    public void FAbstractFunctionCall.setUnbindableArgsList(ArrayList<InstFunctionArgument> list) {
-    }
-    public void InstFunctionCall.setUnbindableArgsList(ArrayList<InstFunctionArgument> list) {
-        unbindableArgs = list;
-    }
-    public void InstRecordConstructor.setUnbindableArgsList(ArrayList<InstFunctionArgument> list) {
-        unbindableArgs = list;
-    }
-    public void FInfArgsFunctionCall.setUnbindableArgsList(ArrayList<InstFunctionArgument> list) {
-        unbindableArgs = list;
-    }
-    public void FUnsupportedBuiltIn.setUnbindableArgsList(ArrayList<InstFunctionArgument> list) {
-    }
+	public void FAbstractFunctionCall.setUnbindableArgsList(ArrayList<InstFunctionArgument> list) {
+		throw new UnsupportedOperationException();
+	}
+	public void FInfArgsFunctionCall.setUnbindableArgsList(ArrayList<InstFunctionArgument> list) {
+		unbindableArgs = list;
+	}
+	public void FUnsupportedBuiltIn.setUnbindableArgsList(ArrayList<InstFunctionArgument> list) {
+	}
 
     /**
      * Called for inputs that no argument was bound to. Creates an InstDefaultArgument 
@@ -793,13 +787,15 @@ aspect InstFunctionBinding {
                     InstFunctionCall ifc = createEmptyNode();
                     ifc.setName(accessName);
                     ifc.generated = generated;
+                    ifc.unbindableArgs = binding.unbindable();
                     ifc.bound = true;
                     n = ifc;
                 }
                 for (InstFunctionArgument arg : binding.bound())
                     n.addArgument(arg);
+            } else if (infArgs) {
+                n.setUnbindableArgsList(binding.unbindable());
             }
-            n.setUnbindableArgsList(binding.unbindable());
             n.setLocation(this);
 
             return n;
