@@ -353,7 +353,7 @@ aspect AnnotationAPI {
         throw new UnsupportedOperationException();
     }
     eq InstFunctionCall     .myInstFunctionArguments() = new ChainedIterable<>(getArgs(), unbindableArgs);
-    eq InstRecordConstructor.myInstFunctionArguments() = new ChainedIterable<>(getArgs(), unbindableArgs);
+    eq InstRecordConstructor.myInstFunctionArguments() = getArgs();
     eq FBuiltInFunctionCall .myInstFunctionArguments() = getOriginalArgs();
 
     public void InstFunctionArgument.findFExpFor(Object id, SrcExp exp, ArrayList<FExp> res) {
