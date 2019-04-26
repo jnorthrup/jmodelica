@@ -64,8 +64,7 @@ public class QualifiedName {
     public static int numberOfParts(String name) {
         boolean isGlobal = name.startsWith(".");
         if (isGlobal) {
-            int start = isGlobal ? 1 : 0;
-            name = name.substring(start, name.length());
+            name = name.substring(1, name.length());
         }
         Matcher m = p.matcher(name);
         ArrayList<Integer> nameSeparations = new ArrayList<Integer>();
