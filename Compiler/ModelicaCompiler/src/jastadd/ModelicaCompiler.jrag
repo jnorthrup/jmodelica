@@ -985,8 +985,11 @@ public class ModelicaCompiler implements LogContainer {
         boolean doTearDown = true;
         try {
             doTearDown = trySetUp();
-            //TODO: fix it
-            return doParseModel(names, LoadInfo.EMPTY);
+            Collection<LoadInfo> loadInfos = new ArrayList<>();
+            for (String path : names) {
+                loadInfos.add(LoadInfo.create(path));
+            }
+            return doParseModel(loadInfos);
         } finally {
             tryTearDown(doTearDown);
         }
@@ -1017,12 +1020,12 @@ public class ModelicaCompiler implements LogContainer {
         return parserHandler.parseString(createUtilInterface(), code, name);
     }
 
-    public SourceRoot doParseModel(String names[], LoadInfo loadInfo) 
+    public SourceRoot doParseModel(Collection<LoadInfo> loadInfos) 
       throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
         checkSetUp();
         ASTNode.getStepInfo().reset();
         ASTNode.beginStep("parseModel()");
-        SourceRoot sr = parserHandler.parseModel(createUtilInterface(), names, loadInfo);
+        SourceRoot sr = parserHandler.parseModel(createUtilInterface(), loadInfos);
         hookFilesParsed(sr);
         ASTNode.endStep("parseModel()");
         

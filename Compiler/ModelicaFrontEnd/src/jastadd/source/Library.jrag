@@ -96,7 +96,7 @@ aspect Library {
             if (isStructured) {
                 SrcFullClassDecl fcd = (SrcFullClassDecl) cd;
                 LibraryList ll = new LibraryList();
-                ll.addLibraryDirectory(dirName, getReason(), getLoadInfo());
+                ll.addLibraryDirectory(getLoadInfo().withPath(dirName), getReason());
 
                 SrcLibClassDecl lcd = new SrcLibClassDecl(fcd, ll.createLibNodeList());
                 lcd.readOrderFile(baseDir, util);
@@ -359,8 +359,8 @@ aspect Library {
          * @param reason  reason this library are added
          * @return <code>true</code> if a library was added 
          */
-        public boolean addLibrary(String path, SrcLibNode.LoadReason reason, LoadInfo loadInfo) {
-            return add(path, false, reason, loadInfo);
+        public boolean addLibrary(LoadInfo loadInfo, SrcLibNode.LoadReason reason) {
+            return add(loadInfo, false, reason);
         }
         
         /**
@@ -370,8 +370,8 @@ aspect Library {
          * @param reason  reason these libraries are added
          * @return <code>true</code> if any libraries were added 
          */
-        public boolean addLibraryDirectory(String path, SrcLibNode.LoadReason reason, LoadInfo loadInfo) {
-            return add(path, true, reason, loadInfo);
+        public boolean addLibraryDirectory(LoadInfo loadInfo, SrcLibNode.LoadReason reason) {
+            return add(loadInfo, true, reason);
         }
         
         /**
@@ -381,8 +381,8 @@ aspect Library {
          * @param reason  reason these libraries are added
          * @return <code>true</code> if any libraries were added 
          */
-        public boolean addLibraries(String[] paths, SrcLibNode.LoadReason reason, LoadInfo loadInfo) {
-            return addAll(paths, false, reason, loadInfo);
+        public boolean addLibraries(Collection<LoadInfo> loadInfos, SrcLibNode.LoadReason reason) {
+            return addAll(loadInfos, false, reason);
         }
         
         /**
@@ -393,14 +393,14 @@ aspect Library {
          * @param reason  reason these libraries are added
          * @return <code>true</code> if any libraries were added 
          */
-        public boolean addLibraryDirectories(String[] paths, SrcLibNode.LoadReason reason, LoadInfo loadInfo) {
-            return addAll(paths, true, reason, loadInfo);
+        public boolean addLibraryDirectories(Collection<LoadInfo> loadInfos, SrcLibNode.LoadReason reason) {
+            return addAll(loadInfos, true, reason);
         }
         
-        protected boolean addAll(String[] paths, boolean directories, SrcLibNode.LoadReason reason, LoadInfo loadInfo) {
+        protected boolean addAll(Collection<LoadInfo> loadInfos, boolean directories, SrcLibNode.LoadReason reason) {
             boolean res = false;
-            for (String path : paths)
-                if (add(path, directories, reason, loadInfo))
+            for (LoadInfo loadInfo : loadInfos)
+                if (add(loadInfo, directories, reason))
                     res = true;
             return res;
         }
@@ -414,8 +414,8 @@ aspect Library {
          * @param reason     reason for loading this library
          * @return <code>true</code> if any libraries were added 
          */
-        protected boolean add(String path, boolean directory, SrcLibNode.LoadReason reason, LoadInfo loadInfo) {
-            File base = new File(path);
+        protected boolean add(LoadInfo loadInfo, boolean directory, SrcLibNode.LoadReason reason) {
+            File base = new File(loadInfo.getPath());
             if (directory) {
                 boolean res = false;
                 try {
@@ -456,10 +456,24 @@ aspect Library {
     }
 
     public class LoadInfo {
-        public static final LoadInfo EMPTY = new LoadInfo();
 
-        private LoadInfo() {
+        private final String path;
+
+        public String getPath() {
+            return path;
         }
+        
+        public static LoadInfo create(String path) {
+            return new LoadInfo(path);
+        }
+    }
+
+    private LoadInfo.LoadInfo(String path) {
+        this.path = path;
+    }
+
+    public LoadInfo LoadInfo.withPath(String path) {
+        return new LoadInfo(path);
     }
 
     public class LibraryDef implements Comparable<LibraryDef> {
@@ -555,7 +569,11 @@ aspect Library {
             try {
                 String paths = options.getStringOption(name);
                 ASTNode.log.info(name + " = " + paths);
-                addLibraryDirectories(paths.split(File.pathSeparator), SrcLibNode.LoadReason.MODELICAPATH, LoadInfo.EMPTY);
+                Collection<LoadInfo> loadInfos = new ArrayList<>();
+                for (String path : paths.split(File.pathSeparator)) {
+                    loadInfos.add(LoadInfo.create(path));
+                }
+                addLibraryDirectories(loadInfos, SrcLibNode.LoadReason.MODELICAPATH);
             } catch (OptionRegistry.UnknownOptionException e) {}
         }
 

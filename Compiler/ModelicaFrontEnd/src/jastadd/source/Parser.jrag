@@ -73,13 +73,13 @@ aspect Parsers {
         return sr;
     }
     
-    public SourceRoot ParserHandler.parseModel(UtilInterface uif, String[] names, LoadInfo loadInfo) 
+    public SourceRoot ParserHandler.parseModel(UtilInterface uif, Collection<LoadInfo> loadInfos) 
             throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
         SourceRoot sr = new SourceRoot(new Program());
         uif.transferRoot(sr);
-        for (String name : names) {
-            File f = new File(name);
-            String name_tmp = name;
+        for (LoadInfo loadInfo : loadInfos) {
+            String name_tmp = loadInfo.getPath();
+            File f = new File(name_tmp);
             if (f.isDirectory()) 
                 name_tmp = SrcLibNode.packageFile(f);
             SourceRoot sr_tmp = (name_tmp != null) ? parseModel(uif, name_tmp) : null;
@@ -91,14 +91,14 @@ aspect Parsers {
                     lib = f.getParent();
                 if (lib != null) {
                     String type = f.isDirectory() ? "Directory" : "File";
-                    ModelicaCompiler.log.warning("%s '%s' is part of library at '%s', using library instead.", type, name, lib);
-                    name = lib;
-                    f = new File(name);
+                    ModelicaCompiler.log.warning("%s '%s' is part of library at '%s', using library instead.", type, loadInfo.getPath(), lib);
+                    loadInfo = loadInfo.withPath(lib);
+                    f = new File(lib);
                 }
             }
             if (f.isDirectory()) {
-                if (!sr.getProgram().getLibraryList().addLibrary(name, SrcLibNode.LoadReason.COMMANDLINE, loadInfo)) 
-                    ModelicaCompiler.log.error(String.format("Error: The directory '%s' is not a Modelica library.", name));
+                if (!sr.getProgram().getLibraryList().addLibrary(loadInfo, SrcLibNode.LoadReason.COMMANDLINE)) 
+                    ModelicaCompiler.log.error(String.format("Error: The directory '%s' is not a Modelica library.", loadInfo.getPath()));
             } else {
                 for (SrcStoredDefinition sd : sr_tmp.getProgram().getUnstructuredEntitys()) 
                     sr.getProgram().addUnstructuredEntity(sd);

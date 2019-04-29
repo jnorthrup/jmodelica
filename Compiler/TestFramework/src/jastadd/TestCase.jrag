@@ -575,14 +575,14 @@ abstract public class TestCase implements GenericTestCase {
         // Parse
         SourceRoot sr;
         if (modelicaLibraries.length > 0) {
-            String[] names = new String[modelicaLibraries.length + 1];
+            Collection<LoadInfo> loadInfos = new ArrayList<>();
             File parent = new File(getSourceFileName()).getParentFile();
             for (int i = 0; i < modelicaLibraries.length; i++) {
-                names[i] = new File(parent, modelicaLibraries[i]).getAbsolutePath();
+                String path = new File(parent, modelicaLibraries[i]).getAbsolutePath();
+                loadInfos.add(LoadInfo.create(path));
             }
-            names[modelicaLibraries.length] = getSourceFileName();
-            //TODO: fix it
-            sr = getParserHandler().parseModel(uif, names, LoadInfo.EMPTY);
+            loadInfos.add(LoadInfo.create(getSourceFileName()));
+            sr = getParserHandler().parseModel(uif, loadInfos);
         } else {
             sr = getParserHandler().parseFile(uif, getSourceFileName());
         }
