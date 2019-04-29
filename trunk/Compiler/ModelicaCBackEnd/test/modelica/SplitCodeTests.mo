@@ -834,14 +834,14 @@ annotation(__JModelica(UnitTesting(tests={
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
     JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 4, 1)
     static jmi_real_t tmp_1_var[4] = {1.0,2.0,3.0,4.0,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
+    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
     return tmp_1;
 }
 
 jmi_array_t* jmi_global_tmp_2(jmi_t* jmi) {
     JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_2, 4, 1)
     static jmi_real_t tmp_2_var[4] = {5.0,6.0,7.0,8.0,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 4, 1, 4)
+    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_2, 4, 1, 4)
     return tmp_2;
 }
 
@@ -917,7 +917,7 @@ annotation(__JModelica(UnitTesting(tests={
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
     JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 4, 1)
     static jmi_real_t tmp_1_var[4] = {1.0,2.0,3.0,4.0,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
+    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
     return tmp_1;
 }
 
@@ -982,7 +982,7 @@ annotation(__JModelica(UnitTesting(tests={
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
     JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 4, 1)
     static jmi_real_t tmp_1_var[4] = {0,1,2,3,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
+    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
     return tmp_1;
 }
 

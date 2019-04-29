@@ -132,12 +132,7 @@ aspect CCodeGenAlgorithms {
             if (size().isUnknown() || external) {
                 printDecl_C(p, str, indent, name, src, external);
             } else {
-                str.format("%sJMI_ARR(STAT, %s, %s, %s, ", indent,
-                        nameScalar_C(p, external), nameArray_C(p, external), name);
-                size().printNumElements_C(p, str, indent, src);
-                str.print(", ");
-                str.print(ndims());
-                str.println(")");
+                printDecl_C(p, str, indent, Dynamicity.STACK, name, external);
             }
         } else {
             printScalarDecl_C(p, str, indent, external, name);
