@@ -62,12 +62,17 @@ aspect CCodeGenAlgorithms {
 
     public class CodePrinter {
         public abstract void printInit(FAbstractVariable v, CodeStream str, String indent, FType type);
+        public abstract void printInit(FInitArrayStmt v, CodeStream str, String indent);
     }
 
     public class CPrettyPrinter {
         @Override
         public void printInit(FAbstractVariable v, CodeStream str, String indent, FType type) {
             v.printInit(ExecStep, str, indent, type);
+        }
+        @Override
+        public void printInit(FInitArrayStmt v, CodeStream str, String indent) {
+            v.printInit(ExecStep, str, indent);
         }
     }
 
@@ -88,6 +93,33 @@ aspect CCodeGenAlgorithms {
             tp.reset(name, this, type.size(), false, indent);
             type.print(tp);
         }
+    }
+    
+    public void FInitArrayStmt.printInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        if (getFAccessExp().getFAccess().myTopFV() != getFAccessExp().myFV()) {
+            throw new UnsupportedOperationException();
+        }
+        getFAccessExp().myFV().printInit(p, str, indent, type());
+    }
+    
+    public void FInitArrayShallowStmt.printInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        FType type = type();
+        boolean sub = getFAccessExp().getFAccess().myTopFV() != getFAccessExp().myFV();
+        boolean dyn = sub || type.size().isUnknown();
+        
+        str.print(indent, "JMI_ARRAY_INIT_", type.ndims(), "(", 
+                dyn ? "DYNA" : "STAT", ", ",
+                type.nameScalar_C(p.codePrinter(), false), ", ",
+                type.nameArray_C(p.codePrinter(), false), ", ");
+        p.print(getFAccessExp(), str, indent);
+        str.print(", ");
+        
+        type.size().printNumElements_C(p.codePrinter(), str, indent, getFAccessExp());
+        str.print(", ");
+        str.print(type.ndims());
+        str.print(", ");
+        type.size().printDimensions_C(p.codePrinter(), str, indent, getFAccessExp());
+        str.println(")");
     }
 
     /*
@@ -194,7 +226,7 @@ aspect CCodeGenAlgorithms {
 
     @Override
     public void FInitArrayStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        p.printInit(getFAccessExp().getFAccess().myTopFV(), str, indent, type());
+        p.printInit(this, str, indent);
     }
 
     @Override

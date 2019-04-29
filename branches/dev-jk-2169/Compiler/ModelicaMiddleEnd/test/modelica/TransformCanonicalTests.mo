@@ -8500,6 +8500,8 @@ end ForOfUnknownSize5;
 
 package RangeBugTests
 model RangeInSumInSum
+    // Wrong result
+
 	function F
 		input Integer p_i;
 		input Integer nrows_p[:];
@@ -8535,31 +8537,21 @@ public
   Real[:] temp_2;
   Integer temp_3;
   Integer temp_4;
-  Integer temp_5;
-  Integer temp_6;
  algorithm
-  init temp_2 as Real[max(integer(temp_3 - (temp_4 + 1)) + 1, 0)];
-  temp_3 := 0;
-  for i2 in 1:max(p_i, 0) loop
-   temp_3 := temp_3 + nrows_p[i2];
-  end for;
-  temp_4 := 0;
-  for i2 in 1:max(p_i - 1, 0) loop
-   temp_4 := temp_4 + nrows_p[i2];
-  end for;
-  for i2 in 1:max(integer(temp_3 - (temp_4 + 1)) + 1, 0) loop
-   temp_5 := 0;
+  init temp_2 as Real[0];
+  for i2 in 1:max(integer(-1) + 1, 0) loop
+   temp_3 := 0;
    for i3 in 1:max(p_i - 1, 0) loop
-    temp_5 := temp_5 + nrows_p[i3];
+    temp_3 := temp_3 + nrows_p[i3];
    end for;
-   temp_6 := 0;
+   temp_4 := 0;
    for i3 in 1:max(p_i, 0) loop
-    temp_6 := temp_6 + nrows_p[i3];
+    temp_4 := temp_4 + nrows_p[i3];
    end for;
-   temp_2[i2] := vf[temp_5 + 1 + (i2 - 1)] * nrow[temp_5 + 1 + (i2 - 1)];
+   temp_2[i2] := vf[temp_3 + 1 + (i2 - 1)] * nrow[temp_3 + 1 + (i2 - 1)];
   end for;
   temp_1 := 0.0;
-  for i1 in 1:max(integer(temp_3 - (temp_4 + 1)) + 1, 0) loop
+  for i1 in 1:max(integer(-1) + 1, 0) loop
    temp_1 := temp_1 + temp_2[i1];
   end for;
   n := temp_1;

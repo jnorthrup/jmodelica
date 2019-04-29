@@ -1139,10 +1139,10 @@ void func_CCodeGenAlgorithmTests_Algorithm10_fw_def0(jmi_array_t* o_a, jmi_real_
     for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
         jmi_array_ref_1(o_a, jmi_array_ref_1(temp_1_a, i1_0i)) = jmi_array_val_1(temp_2_a, i1_0i);
     }
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_3_a, 2, 1, 2)
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_4_a, 2, 1, 2)
     jmi_array_ref_1(temp_4_a, 1) = 3;
     jmi_array_ref_1(temp_4_a, 2) = 5;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_3_a, 2, 1, 2)
     i1_1in = 0;
     i1_1ie = floor((2) - (1));
     for (i1_1i = 1; i1_1in <= i1_1ie; i1_1i = 1 + (++i1_1in)) {

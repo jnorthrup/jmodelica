@@ -268,7 +268,15 @@ aspect FlatTypeAnalysis {
     eq FFunctionCallStmt.type()      = getCall().type();
     eq FInitArrayStmt.type()         = getType();
     
-    syn FType FInitArrayStmt.getType() = getFAccessExp().myFV().type().treeCopy();    
+    syn FType FInitArrayStmt.getType() = getFAccessExp().myFV().type().treeCopy();
+    syn FType FInitArrayShallowStmt.getType() {
+        MutableSize ms = new MutableSize(getNumSize());
+        for (FExp size : getSizes()) {
+            ms.append(size);
+        }
+        return getFAccessExp().myFV().type().arrayType(ms);
+    }
+    
     /**
      * True if this equation exclusively equates real types.
      */

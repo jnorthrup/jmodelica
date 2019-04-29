@@ -754,10 +754,6 @@ void func_CCodeGenArrayTests_RecordArray10_g_def0(jmi_real_t x_v, jmi_string_t s
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, y_v)
     JMI_ARR(STAT, R_0_r, R_0_ra, temp_1_a, 2, 1)
-    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, -1, 1)
-    JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, tmp_2, -1, 1)
-    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_3, -1, 1)
-    JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, tmp_4, -1, 1)
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, temp_2_a, 2, 1)
     JMI_ARR(STAT, jmi_string_t, jmi_string_array_t, temp_3_a, 1, 1)
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, temp_4_a, 1, 1)
@@ -768,8 +764,8 @@ void func_CCodeGenArrayTests_RecordArray10_g_def0(jmi_real_t x_v, jmi_string_t s
     jmi_real_t i1_1i;
     jmi_int_t i1_1ie;
     jmi_int_t i1_1in;
-    JMI_DEF_STR_DYNA(tmp_5)
-    JMI_DEF_STR_DYNA(tmp_6)
+    JMI_DEF_STR_DYNA(tmp_1)
+    JMI_DEF_STR_DYNA(tmp_2)
     jmi_real_t i1_2i;
     jmi_int_t i1_2ie;
     jmi_int_t i1_2in;
@@ -777,24 +773,18 @@ void func_CCodeGenArrayTests_RecordArray10_g_def0(jmi_real_t x_v, jmi_string_t s
     jmi_int_t i1_3ie;
     jmi_int_t i1_3in;
     JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, temp_1_a, 2, 1, 2)
-    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 0, 1, :)
-    jmi_array_rec_1(temp_1_a, 1)->x = tmp_1;
-    JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, tmp_2, 0, 1, :)
-    jmi_array_rec_1(temp_1_a, 1)->s = tmp_2;
-    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_3, 0, 1, :)
-    jmi_array_rec_1(temp_1_a, 2)->x = tmp_3;
-    JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, tmp_4, 0, 1, :)
-    jmi_array_rec_1(temp_1_a, 2)->s = tmp_4;
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_2_a, 2, 1, 2)
     jmi_array_ref_1(temp_2_a, 1) = 1;
     jmi_array_ref_1(temp_2_a, 2) = 2;
     JMI_ARRAY_INIT_1(STAT, jmi_string_t, jmi_string_array_t, temp_3_a, 1, 1, 1)
     JMI_ASG(STR, jmi_array_ref_1(temp_3_a, 1), s_v)
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, jmi_array_rec_1(temp_1_a, 1)->x, 2, 1, 2)
     i1_0in = 0;
     i1_0ie = floor((2) - (1));
     for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
         jmi_array_ref_1(jmi_array_rec_1(temp_1_a, 1)->x, i1_0i) = jmi_array_val_1(temp_2_a, i1_0i);
     }
+    JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, jmi_array_rec_1(temp_1_a, 1)->s, 1, 1, 1)
     i1_1in = 0;
     i1_1ie = floor((1) - (1));
     for (i1_1i = 1; i1_1in <= i1_1ie; i1_1i = 1 + (++i1_1in)) {
@@ -803,19 +793,21 @@ void func_CCodeGenArrayTests_RecordArray10_g_def0(jmi_real_t x_v, jmi_string_t s
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_4_a, 1, 1, 1)
     jmi_array_ref_1(temp_4_a, 1) = _time;
     JMI_ARRAY_INIT_1(STAT, jmi_string_t, jmi_string_array_t, temp_5_a, 2, 1, 2)
-    JMI_INI_STR_DYNA(tmp_5, JMI_LEN(s_v) + 2)
-    snprintf(JMI_STR_END(tmp_5), JMI_STR_LEFT(tmp_5), \"%s\", s_v);
-    snprintf(JMI_STR_END(tmp_5), JMI_STR_LEFT(tmp_5), \"%s\", \"s2\");
-    JMI_ASG(STR, jmi_array_ref_1(temp_5_a, 1), tmp_5)
-    JMI_INI_STR_DYNA(tmp_6, JMI_LEN(s_v) + 2)
-    snprintf(JMI_STR_END(tmp_6), JMI_STR_LEFT(tmp_6), \"%s\", s_v);
-    snprintf(JMI_STR_END(tmp_6), JMI_STR_LEFT(tmp_6), \"%s\", \"s3\");
-    JMI_ASG(STR, jmi_array_ref_1(temp_5_a, 2), tmp_6)
+    JMI_INI_STR_DYNA(tmp_1, JMI_LEN(s_v) + 2)
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", s_v);
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", \"s2\");
+    JMI_ASG(STR, jmi_array_ref_1(temp_5_a, 1), tmp_1)
+    JMI_INI_STR_DYNA(tmp_2, JMI_LEN(s_v) + 2)
+    snprintf(JMI_STR_END(tmp_2), JMI_STR_LEFT(tmp_2), \"%s\", s_v);
+    snprintf(JMI_STR_END(tmp_2), JMI_STR_LEFT(tmp_2), \"%s\", \"s3\");
+    JMI_ASG(STR, jmi_array_ref_1(temp_5_a, 2), tmp_2)
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, jmi_array_rec_1(temp_1_a, 2)->x, 1, 1, 1)
     i1_2in = 0;
     i1_2ie = floor((1) - (1));
     for (i1_2i = 1; i1_2in <= i1_2ie; i1_2i = 1 + (++i1_2in)) {
         jmi_array_ref_1(jmi_array_rec_1(temp_1_a, 2)->x, i1_2i) = jmi_array_val_1(temp_4_a, i1_2i);
     }
+    JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, jmi_array_rec_1(temp_1_a, 2)->s, 2, 1, 2)
     i1_3in = 0;
     i1_3ie = floor((2) - (1));
     for (i1_3i = 1; i1_3in <= i1_3ie; i1_3i = 1 + (++i1_3in)) {

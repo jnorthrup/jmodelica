@@ -47,6 +47,11 @@ aspect CCodeGenExpressions {
     public void FInitArrayStmt.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         p.printVarDecls(type(), str, indent);
     }
+    
+    @Override
+    public void FInitArrayShallowStmt.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        p.printVarDecls(getSizes(), str, indent);
+    }
 
     @Override
     public void FAssert.genTempVars_C(CodePrinter p, CodeStream str, String indent) {

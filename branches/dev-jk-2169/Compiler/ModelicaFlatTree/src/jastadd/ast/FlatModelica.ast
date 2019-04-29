@@ -638,6 +638,9 @@ FReturnStmt : FStatement;
  * Class for array initialization statements.
  */
 FInitArrayStmt : FStatement ::= FAccessExp /Type:FType/;
+
+FInitArrayShallowStmt : FInitArrayStmt ::= Size:FExp*;
+
 /**
  * Class for derivated array initalization statements.
  */
