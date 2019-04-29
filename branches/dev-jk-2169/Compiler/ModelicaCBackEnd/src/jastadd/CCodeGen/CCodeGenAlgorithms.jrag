@@ -105,21 +105,8 @@ aspect CCodeGenAlgorithms {
     public void FInitArrayShallowStmt.printInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
         FType type = type();
         boolean sub = getFAccessExp().getFAccess().myTopFV() != getFAccessExp().myFV();
-        boolean dyn = sub || type.size().isUnknown();
-        
-        str.print(indent, "JMI_ARRAY_INIT_", type.ndims(), "(", 
-                dyn ? "DYNA" : "STAT", ", ",
-                type.nameScalar_C(p.codePrinter(), false), ", ",
-                type.nameArray_C(p.codePrinter(), false), ", ");
-        p.print(getFAccessExp(), str, indent);
-        str.print(", ");
-        
-        type.size().printNumElements_C(p.codePrinter(), str, indent, getFAccessExp());
-        str.print(", ");
-        str.print(type.ndims());
-        str.print(", ");
-        type.size().printDimensions_C(p.codePrinter(), str, indent, getFAccessExp());
-        str.println(")");
+        Dynamicity dyn = sub || type.size().isUnknown() ? Dynamicity.HEAP : Dynamicity.STACK;
+        type.printInit_C(p.codePrinter(), str, indent, dyn, p.name(getFAccessExp()), false);
     }
 
     /*

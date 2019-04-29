@@ -852,7 +852,7 @@ jmi_array_t* jmi_global_tmp_2(jmi_t* jmi);
 
 R_0_ra* jmi_global_tmp_3(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(DYNA, R_0_r, R_0_ra, tmp_3, 2, 1)
+    JMI_ARR(DYNA, R_0_r, R_0_ra, tmp_3, -1, 1)
     JMI_GLOBALS_INIT()
     JMI_ARRAY_INIT_1(DYNA, R_0_r, R_0_ra, tmp_3, 2, 1, 2)
     jmi_array_rec_1(tmp_3, 1)->a = jmi_global_tmp_1(jmi);
@@ -923,7 +923,7 @@ jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
 
 R_0_ra* jmi_global_tmp_2(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(DYNA, R_0_r, R_0_ra, tmp_2, 1, 1)
+    JMI_ARR(DYNA, R_0_r, R_0_ra, tmp_2, -1, 1)
     JMI_GLOBALS_INIT()
     JMI_ARRAY_INIT_1(DYNA, R_0_r, R_0_ra, tmp_2, 1, 1, 1)
     jmi_array_rec_1(tmp_2, 1)->a = jmi_global_tmp_1(jmi);

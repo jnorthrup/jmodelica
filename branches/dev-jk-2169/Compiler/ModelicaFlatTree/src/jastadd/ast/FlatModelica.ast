@@ -635,10 +635,15 @@ FBreakStmt : FStatement;
 FReturnStmt : FStatement;
 
 /**
- * Class for array initialization statements.
+ * Class for array initialization statements. 
+ * Expands subcomponent initialization during code generation.
  */
 FInitArrayStmt : FStatement ::= FAccessExp /Type:FType/;
 
+/**
+ * Class for array initialization statements.
+ * Expands subcomponent initialization during scalarization.
+ */
 FInitArrayShallowStmt : FInitArrayStmt ::= Size:FExp*;
 
 /**

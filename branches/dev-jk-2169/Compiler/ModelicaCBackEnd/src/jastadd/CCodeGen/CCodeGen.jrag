@@ -356,23 +356,8 @@ aspect CCodeGen {
 	public void FFunctionVariable.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         if (!isInput()) {
             if (getVisibilityType().isTemporary() && isComposite()) {
-                FType type = type();
-                String name = name_C();
-                boolean dyn = type.size().isUnknown();
-                
-                str.print(indent, "JMI_ARR", "(", 
-                        dyn ? "DYNA" : "STAT", ", ",
-                        type.nameScalar_C(p, false), ", ",
-                        type.nameArray_C(p, false), ", ",
-                        name, ", ");
-                if (dyn) {
-                    str.print("-1");
-                } else {
-                    type.size().printNumElements_C(p, str, indent, this);
-                }
-                str.print(", ");
-                str.print(type.ndims());
-                str.println(")");
+                Dynamicity dyn = size().isUnknown() ? Dynamicity.HEAP : Dynamicity.STACK;
+                type().printDecl_C(p, str, indent, dyn, name_C(), false);
             } else {
                 String suffix = (isOutput() && isComposite() && !isString()) ? C_SUFFIX_NULL : "";
                 print(p.createDeclPrinter(str), name_C() + suffix, indent);

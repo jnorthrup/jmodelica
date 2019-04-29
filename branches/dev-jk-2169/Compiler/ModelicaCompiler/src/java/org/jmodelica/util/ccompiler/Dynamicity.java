@@ -20,4 +20,7 @@ public enum Dynamicity {
         return dyn;
     }
     
+    public boolean isHeap() {
+        return this == HEAP;
+    }
 }
