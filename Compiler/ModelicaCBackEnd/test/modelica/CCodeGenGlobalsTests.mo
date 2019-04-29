@@ -1600,14 +1600,14 @@ $C_functions$
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
     JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
     static jmi_real_t tmp_1_var[1] = {3,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
+    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
     return tmp_1;
 }
 
 jmi_array_t* jmi_global_tmp_2(jmi_t* jmi) {
     JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
     static jmi_real_t tmp_2_var[1] = {3,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
+    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
     return tmp_2;
 }
 
@@ -1700,7 +1700,7 @@ $C_functions$
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
     JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 3, 1)
     static jmi_real_t tmp_1_var[3] = {4,0,5,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 3, 1, 3)
+    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_1, 3, 1, 3)
     return tmp_1;
 }
 
@@ -1791,7 +1791,7 @@ JMI_ARRAY_TYPE(R2_1_r, R2_1_ra)
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
     JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
     static jmi_real_t tmp_1_var[2] = {1.0,2.0,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
     return tmp_1;
 }
 
@@ -1884,14 +1884,14 @@ $C_functions$
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
     JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
     static jmi_real_t tmp_1_var[2] = {1.0,2.0,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
     return tmp_1;
 }
 
 jmi_array_t* jmi_global_tmp_2(jmi_t* jmi) {
     JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
     static jmi_real_t tmp_2_var[2] = {3.0,4.0,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
     return tmp_2;
 }
 
@@ -1981,7 +1981,7 @@ $C_functions$
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
     JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
     static jmi_real_t tmp_1_var[2] = {1.0,2.0,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
     return tmp_1;
 }
 
@@ -2010,7 +2010,7 @@ R2_1_r* jmi_global_tmp_3(jmi_t* jmi) {
 jmi_array_t* jmi_global_tmp_4(jmi_t* jmi) {
     JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_4, 2, 1)
     static jmi_real_t tmp_4_var[2] = {3.0,4.0,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_4, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_4, 2, 1, 2)
     return tmp_4;
 }
 
@@ -2179,7 +2179,7 @@ $C_functions$
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
     JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
     static jmi_real_t tmp_1_var[2] = {1.0,2.0,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
     return tmp_1;
 }
 
@@ -2273,7 +2273,7 @@ $C_functions$
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
     JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
     static jmi_real_t tmp_1_var[2] = {1.0,2.0,};
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
     return tmp_1;
 }
 

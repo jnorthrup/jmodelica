@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2009-2017 Modelon AB
+Copyright (C) 2009-2019 Modelon AB
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3 of the License.
@@ -12,6 +12,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+import org.jmodelica.util.ccompiler.Dynamicity;
 
 aspect CCodeGenTypes {
 
@@ -641,4 +643,45 @@ aspect CCodeGenTypes {
         }
     }
 
+    public void FType.printDecl_C(CodePrinter p, CodeStream str, String indent, 
+            Dynamicity dyn, String name, boolean external) {
+        str.print(indent, "JMI_ARR(",
+                dyn, ", ", 
+                nameScalar_C(p, external), ", ",
+                nameArray_C(p, external), ", ",
+                name, ", ");
+        size().printNumElements_C(p, str, indent, (TypePrintable_C)null);
+        str.print(", ");
+        str.print(ndims());
+        str.println(")");
+    }
+
+    public void FType.printScalarDecl_C(CodePrinter p, CodeStream str, String indent, boolean external, String name) {
+        str.print(indent);
+        str.print("JMI_DEF(");
+        str.print(macroTypeDecl(external));
+        str.print(", ");
+        str.print(name);
+        str.print(")\n");
+    }
+
+    @Override
+    public void FRecordType.printScalarDecl_C(CodePrinter p, CodeStream str, String indent, boolean external, String name) {
+        str.formatln("%sJMI_RECORD_STATIC(%s, %s)", indent, nameScalar_C(p, external), name);
+    }
+    
+    public void FType.printInit_C(CodePrinter p, CodeStream str, String indent, 
+            Dynamicity dyn, String name, boolean external) {
+        str.print(indent, "JMI_ARRAY_INIT_", ndims(), "(",
+                dyn, ", ", 
+                nameScalar_C(p, external), ", ",
+                nameArray_C(p, external), ", ",
+                name, ", ");
+        size().printNumElements_C(p, str, indent, (TypePrintable_C)null);
+        str.print(", ");
+        str.print(ndims());
+        str.print(", ");
+        size().printDimensions_C(p, str, indent, (TypePrintable_C)null);
+        str.print(")\n");
+    }
 }
