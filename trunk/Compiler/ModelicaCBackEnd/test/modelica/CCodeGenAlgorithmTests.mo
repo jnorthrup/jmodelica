@@ -522,9 +522,9 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _x_0 = 0.5;
-    while ((COND_EXP_LT(_x_0, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE))) {
-        while ((COND_EXP_LT(_x_0, AD_WRAP_LITERAL(2), JMI_TRUE, JMI_FALSE))) {
-            while ((COND_EXP_LT(_x_0, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE))) {
+    while ((COND_EXP_LT(_x_0, 1.0, JMI_TRUE, JMI_FALSE))) {
+        while ((COND_EXP_LT(_x_0, 2.0, JMI_TRUE, JMI_FALSE))) {
+            while ((COND_EXP_LT(_x_0, 3.0, JMI_TRUE, JMI_FALSE))) {
                 _x_0 = _x_0 + 1;
             }
         }
@@ -631,20 +631,20 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_5, 3, 1)
     _x_0 = 0.5;
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 3, 1, 3)
-    func_CCodeGenAlgorithmTests_Algorithm6b_k_def2(_time, AD_WRAP_LITERAL(3), tmp_1);
+    func_CCodeGenAlgorithmTests_Algorithm6b_k_def2(_time, 3.0, tmp_1);
     memcpy(&_temp_1_1_1, &jmi_array_val_1(tmp_1, 1), 3 * sizeof(jmi_real_t));
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 3, 1, 3)
-    func_CCodeGenAlgorithmTests_Algorithm6b_k_def2(_time, AD_WRAP_LITERAL(3), tmp_2);
+    func_CCodeGenAlgorithmTests_Algorithm6b_k_def2(_time, 3.0, tmp_2);
     memcpy(&_temp_2_1_4, &jmi_array_val_1(tmp_2, 1), 3 * sizeof(jmi_real_t));
     JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_3, (floor(_temp_2_1_4 + _temp_2_2_5 + _temp_2_3_6)), 1, (floor(_temp_2_1_4 + _temp_2_2_5 + _temp_2_3_6)))
     func_CCodeGenAlgorithmTests_Algorithm6b_g_def1(_x_0, _temp_1_1_1 + _temp_1_2_2 + _temp_1_3_3, tmp_3);
     while (func_CCodeGenAlgorithmTests_Algorithm6b_f_exp0(tmp_3)) {
         _x_0 = _x_0 + 1;
         JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_4, 3, 1, 3)
-        func_CCodeGenAlgorithmTests_Algorithm6b_k_def2(_time, AD_WRAP_LITERAL(3), tmp_4);
+        func_CCodeGenAlgorithmTests_Algorithm6b_k_def2(_time, 3.0, tmp_4);
         memcpy(&_temp_1_1_1, &jmi_array_val_1(tmp_4, 1), 3 * sizeof(jmi_real_t));
         JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_5, 3, 1, 3)
-        func_CCodeGenAlgorithmTests_Algorithm6b_k_def2(_time, AD_WRAP_LITERAL(3), tmp_5);
+        func_CCodeGenAlgorithmTests_Algorithm6b_k_def2(_time, 3.0, tmp_5);
         memcpy(&_temp_2_1_4, &jmi_array_val_1(tmp_5, 1), 3 * sizeof(jmi_real_t));
         JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_3, (floor(_temp_2_1_4 + _temp_2_2_5 + _temp_2_3_6)), 1, (floor(_temp_2_1_4 + _temp_2_2_5 + _temp_2_3_6)))
         func_CCodeGenAlgorithmTests_Algorithm6b_g_def1(_x_0, _temp_1_1_1 + _temp_1_2_2 + _temp_1_3_3, tmp_3);
@@ -857,7 +857,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             }
             _temp_1_4 = _sw(0);
         }
-        _x_0 = COND_EXP_EQ(LOG_EXP_AND(_temp_1_4, LOG_EXP_NOT(pre_temp_1_4)), JMI_TRUE, AD_WRAP_LITERAL(2), pre_x_0);
+        _x_0 = COND_EXP_EQ(LOG_EXP_AND(_temp_1_4, LOG_EXP_NOT(pre_temp_1_4)), JMI_TRUE, 2.0, pre_x_0);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
         }
     }
@@ -1196,8 +1196,8 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_4, 5, 1)
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
-    jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(1);
-    jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_2, 1) = 1.0;
+    jmi_array_ref_1(tmp_2, 2) = 1.0;
     func_CCodeGenAlgorithmTests_Algorithm10_f_def1(tmp_2, tmp_1, NULL);
     _a_2_1 = (jmi_array_val_1(tmp_1, 1));
     _a_4_3 = (jmi_array_val_1(tmp_1, 2));
@@ -1373,7 +1373,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     (*res)[0] = __eventIndicator_1_3;
-    (*res)[1] = COND_EXP_EQ(LOG_EXP_NOT(_sw(0)), JMI_TRUE, __eventIndicator_2_4, AD_WRAP_LITERAL(1));
+    (*res)[1] = COND_EXP_EQ(LOG_EXP_NOT(_sw(0)), JMI_TRUE, __eventIndicator_2_4, 1.0);
     JMI_DYNAMIC_FREE()
     return ef;
 ")})));
@@ -1677,7 +1677,7 @@ $C_dae_blocks_residual_functions$
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _x_0 = sin(_time * AD_WRAP_LITERAL(10));
+    _x_0 = sin(_time * 10.0);
     if (jmi->atInitial || jmi->atEvent) {
         _sw(1) = jmi_turn_switch(jmi, _x_0 - (0.7), _sw(1), JMI_REL_LT);
     }
@@ -1699,7 +1699,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 int model_ode_initialize_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _x_0 = sin(_time * AD_WRAP_LITERAL(10));
+    _x_0 = sin(_time * 10.0);
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, _x_0 - (0.7), _sw(0), JMI_REL_GEQ);
     }
