@@ -623,7 +623,7 @@ aspect CCodeGen {
         }
         
         if (guard && hb) {
-            sp.print(str, ", 1.0)");
+            sp.print(str, ", " + FLitExp.macro_C + "(1))");
         }
     }
     

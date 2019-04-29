@@ -80,7 +80,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         }
         if (LOG_EXP_AND(_temp_1_102, LOG_EXP_NOT(pre_temp_1_102))) {
             JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
-            jmi_array_ref_1(tmp_2, 1) = 1.0;
+            jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(1);
             if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
                 JMI_GLOBAL(tmp_3) = JMI_CACHED(tmp_1, func_SplitCodeTests_BlockSetupSplit1_f_exp0(tmp_2));
                 if (JMI_GLOBAL(tmp_3) != _x_0) {
@@ -121,7 +121,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         }
         if (LOG_EXP_AND(_temp_2_103, LOG_EXP_NOT(pre_temp_2_103))) {
             JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_5, 1, 1, 1)
-            jmi_array_ref_1(tmp_5, 1) = 2.0;
+            jmi_array_ref_1(tmp_5, 1) = AD_WRAP_LITERAL(2);
             if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
                 JMI_GLOBAL(tmp_6) = JMI_CACHED(tmp_4, func_SplitCodeTests_BlockSetupSplit1_f_exp0(tmp_5));
                 if (JMI_GLOBAL(tmp_6) != _y_1) {
@@ -206,7 +206,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         }
         if (LOG_EXP_AND(_temp_1_102, LOG_EXP_NOT(pre_temp_1_102))) {
             JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
-            jmi_array_ref_1(tmp_2, 1) = 1.0;
+            jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(1);
             if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
                 JMI_GLOBAL(tmp_3) = JMI_CACHED(tmp_1, func_SplitCodeTests_BlockSetupSplit2_f_exp0(tmp_2));
                 if (JMI_GLOBAL(tmp_3) != _x_0) {
@@ -247,7 +247,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         }
         if (LOG_EXP_AND(_temp_2_103, LOG_EXP_NOT(pre_temp_2_103))) {
             JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_5, 1, 1, 1)
-            jmi_array_ref_1(tmp_5, 1) = 2.0;
+            jmi_array_ref_1(tmp_5, 1) = AD_WRAP_LITERAL(2);
             if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
                 JMI_GLOBAL(tmp_6) = JMI_CACHED(tmp_4, func_SplitCodeTests_BlockSetupSplit2_f_exp0(tmp_5));
                 if (JMI_GLOBAL(tmp_6) != _y_1) {
@@ -715,7 +715,7 @@ int model_ode_derivatives_0(jmi_t* jmi) {
         _sw(0) = jmi_turn_switch_time(jmi, _time - (pre_i_0), _sw(0), JMI_REL_LT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch_time(jmi, _time - (pre_i_0 + 1.0), _sw(1), JMI_REL_GEQ);
+        _sw(1) = jmi_turn_switch_time(jmi, _time - (pre_i_0 + AD_WRAP_LITERAL(1)), _sw(1), JMI_REL_GEQ);
     }
     _i_0 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, floor(_time), pre_i_0);
     pre_i_0 = _i_0;
@@ -833,14 +833,14 @@ annotation(__JModelica(UnitTesting(tests={
         generatedCode="
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
     JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 4, 1)
-    static jmi_real_t tmp_1_var[4] = {1.0,2.0,3.0,4.0,};
+    static jmi_real_t tmp_1_var[4] = {AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),AD_WRAP_LITERAL(4),};
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
     return tmp_1;
 }
 
 jmi_array_t* jmi_global_tmp_2(jmi_t* jmi) {
     JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_2, 4, 1)
-    static jmi_real_t tmp_2_var[4] = {5.0,6.0,7.0,8.0,};
+    static jmi_real_t tmp_2_var[4] = {AD_WRAP_LITERAL(5),AD_WRAP_LITERAL(6),AD_WRAP_LITERAL(7),AD_WRAP_LITERAL(8),};
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 4, 1, 4)
     return tmp_2;
 }
@@ -916,7 +916,7 @@ annotation(__JModelica(UnitTesting(tests={
         generatedCode="
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
     JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 4, 1)
-    static jmi_real_t tmp_1_var[4] = {1.0,2.0,3.0,4.0,};
+    static jmi_real_t tmp_1_var[4] = {AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),AD_WRAP_LITERAL(4),};
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
     return tmp_1;
 }
