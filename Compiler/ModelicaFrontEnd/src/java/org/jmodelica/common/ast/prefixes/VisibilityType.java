@@ -5,8 +5,8 @@ public enum VisibilityType {
      * ordinal() is used for alias elimination so the order
      * here is important.
      */
-    HIDDEN,
     TEMPORARY,
+    HIDDEN,
     EXPANDABLE,
     PROTECTED,
     PUBLIC,
