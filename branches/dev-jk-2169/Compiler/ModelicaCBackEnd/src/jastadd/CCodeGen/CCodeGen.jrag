@@ -439,20 +439,6 @@ aspect CCodeGen {
         str.println(indent, dst, " = ", src, ";");
     }
 
-    public void FType.printScalarDecl_C(CodePrinter p, CodeStream str, String indent, boolean external, String name) {
-        str.print(indent);
-        str.print("JMI_DEF(");
-        str.print(macroTypeDecl(external));
-        str.print(", ");
-        str.print(name);
-        str.print(")\n");
-    }
-
-    @Override
-    public void FRecordType.printScalarDecl_C(CodePrinter p, CodeStream str, String indent, boolean external, String name) {
-        str.formatln("%sJMI_RECORD_STATIC(%s, %s)", indent, nameScalar_C(p, external), name);
-    }
-
     /**
      * Helper for printing if equations
      */
@@ -643,7 +629,7 @@ aspect CCodeGen {
         }
         
         if (guard && hb) {
-            sp.print(str, ", " + FLitExp.macro_C + "(1))");
+            sp.print(str, ", 1.0)");
         }
     }
     

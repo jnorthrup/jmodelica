@@ -66,29 +66,33 @@ JMI_ARRAY_TYPE(jmi_extobj_t, jmi_extobj_array_t)
 #define JMI_ARRAY_INIT(dyn, type, arr, name, ne, nd) \
     JMI_ARRAY_INIT_##dyn(type, arr, name, ne, nd)
 
-/* Static array declaration macro */
+/* Stack array declaration macro */
 #define JMI_ARRAY_DECL_STAT(type, arr, name, ne, nd) \
     int  name##_size[nd];\
     type name##_var[(ne == 0) ? 1 : ne] = {0};\
     arr  name##_obj = { 0, (int) (nd), (int) (ne), 0 };\
     arr* name = &name##_obj;
 
-/* Static array declaration macro */
+/* Data section array declaration macro */
 #define JMI_ARRAY_DECL_STATIC(type, arr, name, ne, nd) \
     static int  name##_size[nd];\
     static arr  name##_obj = { 0, (int) (nd), (int) (ne), 0 };\
     static arr* name = &name##_obj;
 
-/* Dynamic array declaration macro */
+/* Heap array declaration macro */
 #define JMI_ARRAY_DECL_DYNA(type, arr, name, ne, nd) \
     arr* name = NULL;
 
-/* Static array initialization macros */
+/* Stack array initialization macros */
 #define JMI_ARRAY_INIT_STAT(type, arr, name, ne, nd) \
     name->size = name##_size; \
     name->var  = name##_var;
 
-/* Dynamic array initialization macros.
+/* Data section array initialization macros */
+#define JMI_ARRAY_INIT_STATIC(type, arr, name, ne, nd) \
+    JMI_ARRAY_INIT_STAT(type, arr, name, ne, nd)
+
+/* Heap array initialization macros.
  * Might be called several times for the same name. */
 #define JMI_ARRAY_INIT_DYNA(type, arr, name, ne, nd) \
     if (name == NULL) {\
