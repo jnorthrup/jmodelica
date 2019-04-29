@@ -880,8 +880,8 @@ aspect SrcAnnotations {
         public SrcClassDecl enclosingClassDecl() {
             /*
              * Currently (2019-04-25) there are two uses of SrcAnnotationsIteratorProvider.
-             * In both cases all of the providers will have the same enclosing class and
-             * there is never zero providers.
+             * It is ok to use get(0) in both cases since there are at least one provider
+             * and all providers have the same enclosing class.
              */
             return providers.get(0).enclosingClassDecl();
         }
