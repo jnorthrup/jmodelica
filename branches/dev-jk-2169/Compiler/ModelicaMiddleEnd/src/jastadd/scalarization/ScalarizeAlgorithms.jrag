@@ -172,7 +172,7 @@ aspect AssignmentScalarization {
             /* Either of left or right can be a FTempAccessExp which does not know its type */
             FType t = left.type().isUnknown() ? (right.type().isUnknown() ? this : right.type()) : left.type();
             
-            if (left.isTempAccess()) {
+            if (left.isTempAccessExp()) {
                 List<FExp> sizes = new List<FExp>();
                 for (int i = 0; i < ndims(); i++) {
                     sizes.add(t.size().scalarize(s, i));
@@ -198,6 +198,9 @@ aspect AssignmentScalarization {
             scalarizeAssignment_sub(s, left, right);
         }
     }
+    
+    syn boolean FExp.isTempAccessExp() = false;
+    eq FTempAccessExp.isTempAccessExp() = true;
     
     public void FType.scalarizeAssignment_sub(Scalarizer.Algorithm s, FAssignableExp left, FExp right) {
         if (isArray() && s.unroll()) {
