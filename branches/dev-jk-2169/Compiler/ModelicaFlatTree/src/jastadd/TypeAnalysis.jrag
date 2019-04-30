@@ -268,13 +268,16 @@ aspect FlatTypeAnalysis {
     eq FFunctionCallStmt.type()      = getCall().type();
     eq FInitArrayStmt.type()         = getType();
     
-    syn FType FInitArrayStmt.getType() = getFAccessExp().myFV().type().treeCopy();
-    syn FType FInitArrayShallowStmt.getType() {
-        MutableSize ms = new MutableSize(getNumSize());
-        for (FExp size : getSizes()) {
-            ms.append(size);
+    syn FType FInitArrayStmt.getType() {
+        if (getShallow()) {
+            MutableSize ms = new MutableSize(getNumSize());
+            for (FExp size : getSizes()) {
+                ms.append(size);
+            }
+            return getFAccessExp().myFV().type().arrayType(ms);
+        } else {
+            return getFAccessExp().myFV().type().treeCopy();
         }
-        return getFAccessExp().myFV().type().arrayType(ms);
     }
     
     /**

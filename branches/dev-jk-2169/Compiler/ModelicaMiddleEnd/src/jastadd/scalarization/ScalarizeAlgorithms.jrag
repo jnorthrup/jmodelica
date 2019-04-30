@@ -177,7 +177,7 @@ aspect AssignmentScalarization {
                 for (int i = 0; i < ndims(); i++) {
                     sizes.add(t.size().scalarize(s, i));
                 }
-                FInitArrayStmt stmt = new FInitArrayShallowStmt((FAccessExp)left.treeCopy(), sizes);
+                FInitArrayStmt stmt = new FInitArrayStmt((FAccessExp)left.treeCopy(), true, sizes);
                 s.add(stmt);
             }
             

@@ -96,17 +96,18 @@ aspect CCodeGenAlgorithms {
     }
     
     public void FInitArrayStmt.printInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-        if (getFAccessExp().getFAccess().myTopFV() != getFAccessExp().myFV()) {
-            throw new UnsupportedOperationException();
+        if (getShallow()) {
+            FType type = type();
+            boolean sub = getFAccessExp().getFAccess().myTopFV() != getFAccessExp().myFV();
+            Dynamicity dyn = sub || type.size().isUnknown() ? Dynamicity.HEAP : Dynamicity.STACK;
+            type.printInit_C(p.codePrinter(), str, indent, dyn, p.name(getFAccessExp()), false);
+        } else {
+            if (getFAccessExp().getFAccess().myTopFV() != getFAccessExp().myFV()) {
+                throw new UnsupportedOperationException();
+            }
+            getFAccessExp().myFV().printInit(p, str, indent, type());
         }
-        getFAccessExp().myFV().printInit(p, str, indent, type());
-    }
-    
-    public void FInitArrayShallowStmt.printInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-        FType type = type();
-        boolean sub = getFAccessExp().getFAccess().myTopFV() != getFAccessExp().myFV();
-        Dynamicity dyn = sub || type.size().isUnknown() ? Dynamicity.HEAP : Dynamicity.STACK;
-        type.printInit_C(p.codePrinter(), str, indent, dyn, p.name(getFAccessExp()), false);
+        
     }
 
     /*
