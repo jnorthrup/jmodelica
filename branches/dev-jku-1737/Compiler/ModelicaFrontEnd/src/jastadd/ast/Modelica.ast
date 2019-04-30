@@ -76,7 +76,10 @@ Program : SrcBaseNode ::=
             /AnonymousClass:SrcBaseClassDecl*/
             /InstProgramRoot/;
 
-SrcStoredDefinition : SrcBaseNode ::= [SrcWithin] SrcClassDecl*;
+SrcStoredDefinition : SrcBaseNode ::= 
+            [SrcWithin]
+            SrcClassDecl*
+            <LoadInfo:LoadInfo>;
 
 SrcWithin : SrcBaseNode ::= [PackageName:SrcAccess];
 
