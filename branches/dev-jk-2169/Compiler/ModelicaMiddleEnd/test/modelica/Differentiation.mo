@@ -3109,12 +3109,12 @@ end Differentiation.AlgorithmDifferentiation.InitArray;
                 generatedCode="
 void func_Differentiation_AlgorithmDifferentiation_RecordArray_F_def0(R_0_ra* x_a, R_0_ra* y_a) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, R_0_r, R_0_ra, y_an, 1, 1)
+    JMI_ARR(STACK, R_0_r, R_0_ra, y_an, 1, 1)
     jmi_real_t i1_0i;
     jmi_int_t i1_0ie;
     jmi_int_t i1_0in;
     if (y_a == NULL) {
-        JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, y_an, 1, 1, 1)
+        JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, y_an, 1, 1, 1)
         y_a = y_an;
     }
     i1_0in = 0;
@@ -3128,14 +3128,14 @@ void func_Differentiation_AlgorithmDifferentiation_RecordArray_F_def0(R_0_ra* x_
 
 void func_Differentiation_AlgorithmDifferentiation_RecordArray__der_F_def1(R_0_ra* x_a, R_0_ra* _der_x_a, R_0_ra* _der_y_a) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, R_0_r, R_0_ra, _der_y_an, 1, 1)
-    JMI_ARR(STAT, R_0_r, R_0_ra, y_a, 1, 1)
+    JMI_ARR(STACK, R_0_r, R_0_ra, _der_y_an, 1, 1)
+    JMI_ARR(STACK, R_0_r, R_0_ra, y_a, 1, 1)
     jmi_real_t i1_1i;
     jmi_int_t i1_1ie;
     jmi_int_t i1_1in;
-    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, y_a, 1, 1, 1)
+    JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, y_a, 1, 1, 1)
     if (_der_y_a == NULL) {
-        JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, _der_y_an, 1, 1, 1)
+        JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, _der_y_an, 1, 1, 1)
         _der_y_a = _der_y_an;
     }
     i1_1in = 0;
@@ -3186,10 +3186,10 @@ void func_Differentiation_AlgorithmDifferentiation_RecordArray__der_F_def1(R_0_r
                 generatedCode="
 void func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1_e_def0(R_0_ra* r_a, jmi_real_t* y_o) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, R_0_r, R_0_ra, rt_a, 1, 1)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
+    JMI_ARR(STACK, R_0_r, R_0_ra, rt_a, 1, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
     JMI_DEF(REA, y_v)
-    JMI_ARR(STAT, R_0_r, R_0_ra, temp_1_a, 1, 1)
+    JMI_ARR(STACK, R_0_r, R_0_ra, temp_1_a, 1, 1)
     jmi_real_t i1_0i;
     jmi_int_t i1_0ie;
     jmi_int_t i1_0in;
@@ -3202,11 +3202,11 @@ void func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1_e_def0(R_0_r
     jmi_real_t i1_3i;
     jmi_int_t i1_3ie;
     jmi_int_t i1_3in;
-    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, rt_a, 1, 1, 1)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
+    JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, rt_a, 1, 1, 1)
+    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
     jmi_array_rec_1(rt_a, 1)->x = tmp_1;
-    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, temp_1_a, 1, 1, 1)
-    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, jmi_array_rec_1(temp_1_a, 1)->x, 1, 1, 1)
+    JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, temp_1_a, 1, 1, 1)
+    JMI_ARRAY_INIT_1(HEAP, jmi_real_t, jmi_array_t, jmi_array_rec_1(temp_1_a, 1)->x, 1, 1, 1)
     i1_0in = 0;
     i1_0ie = floor((1) - (1));
     for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
@@ -3242,8 +3242,8 @@ jmi_real_t func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1_e_exp0
 
 void func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1_F_def1(R_0_ra* x_a, R_0_ra* y_a) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, R_0_r, R_0_ra, y_an, 1, 1)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
+    JMI_ARR(STACK, R_0_r, R_0_ra, y_an, 1, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
     jmi_real_t i1_4i;
     jmi_int_t i1_4ie;
     jmi_int_t i1_4in;
@@ -3254,8 +3254,8 @@ void func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1_F_def1(R_0_r
     jmi_int_t i2_6ie;
     jmi_int_t i2_6in;
     if (y_a == NULL) {
-        JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, y_an, 1, 1, 1)
-        JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
+        JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, y_an, 1, 1, 1)
+        JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
         jmi_array_rec_1(y_an, 1)->x = tmp_1;
         y_a = y_an;
     }
@@ -3282,13 +3282,13 @@ void func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1_F_def1(R_0_r
 void func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1__der_e_def2(R_0_ra* r_a, R_0_ra* _der_r_a, jmi_real_t* _der_y_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, _der_y_v)
-    JMI_ARR(STAT, R_0_r, R_0_ra, rt_a, 1, 1)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
-    JMI_ARR(STAT, R_0_r, R_0_ra, _der_rt_a, 1, 1)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
+    JMI_ARR(STACK, R_0_r, R_0_ra, rt_a, 1, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
+    JMI_ARR(STACK, R_0_r, R_0_ra, _der_rt_a, 1, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
     JMI_DEF(REA, y_v)
-    JMI_ARR(STAT, R_0_r, R_0_ra, temp_1_a, 1, 1)
-    JMI_ARR(STAT, R_0_r, R_0_ra, _der_temp_1_a, 1, 1)
+    JMI_ARR(STACK, R_0_r, R_0_ra, temp_1_a, 1, 1)
+    JMI_ARR(STACK, R_0_r, R_0_ra, _der_temp_1_a, 1, 1)
     jmi_real_t i1_7i;
     jmi_int_t i1_7ie;
     jmi_int_t i1_7in;
@@ -3301,16 +3301,16 @@ void func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1__der_e_def2(
     jmi_real_t i1_10i;
     jmi_int_t i1_10ie;
     jmi_int_t i1_10in;
-    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, rt_a, 1, 1, 1)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
+    JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, rt_a, 1, 1, 1)
+    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
     jmi_array_rec_1(rt_a, 1)->x = tmp_1;
-    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, _der_rt_a, 1, 1, 1)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
+    JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, _der_rt_a, 1, 1, 1)
+    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
     jmi_array_rec_1(_der_rt_a, 1)->x = tmp_2;
-    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, temp_1_a, 1, 1, 1)
-    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, _der_temp_1_a, 1, 1, 1)
-    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, jmi_array_rec_1(temp_1_a, 1)->x, 1, 1, 1)
-    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, jmi_array_rec_1(_der_temp_1_a, 1)->x, 1, 1, 1)
+    JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, temp_1_a, 1, 1, 1)
+    JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, _der_temp_1_a, 1, 1, 1)
+    JMI_ARRAY_INIT_1(HEAP, jmi_real_t, jmi_array_t, jmi_array_rec_1(temp_1_a, 1)->x, 1, 1, 1)
+    JMI_ARRAY_INIT_1(HEAP, jmi_real_t, jmi_array_t, jmi_array_rec_1(_der_temp_1_a, 1)->x, 1, 1, 1)
     i1_7in = 0;
     i1_7ie = floor((1) - (1));
     for (i1_7i = 1; i1_7in <= i1_7ie; i1_7i = 1 + (++i1_7in)) {
@@ -3349,10 +3349,10 @@ jmi_real_t func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1__der_e
 
 void func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1__der_F_def3(R_0_ra* x_a, R_0_ra* _der_x_a, R_0_ra* _der_y_a) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, R_0_r, R_0_ra, _der_y_an, 1, 1)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
-    JMI_ARR(STAT, R_0_r, R_0_ra, y_a, 1, 1)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
+    JMI_ARR(STACK, R_0_r, R_0_ra, _der_y_an, 1, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
+    JMI_ARR(STACK, R_0_r, R_0_ra, y_a, 1, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
     jmi_real_t i1_11i;
     jmi_int_t i1_11ie;
     jmi_int_t i1_11in;
@@ -3362,12 +3362,12 @@ void func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1__der_F_def3(
     jmi_real_t i2_13i;
     jmi_int_t i2_13ie;
     jmi_int_t i2_13in;
-    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, y_a, 1, 1, 1)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
+    JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, y_a, 1, 1, 1)
+    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
     jmi_array_rec_1(y_a, 1)->x = tmp_2;
     if (_der_y_a == NULL) {
-        JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, _der_y_an, 1, 1, 1)
-        JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
+        JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, _der_y_an, 1, 1, 1)
+        JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
         jmi_array_rec_1(_der_y_an, 1)->x = tmp_1;
         _der_y_a = _der_y_an;
     }
