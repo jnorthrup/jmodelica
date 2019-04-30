@@ -289,7 +289,7 @@ Program program
 SrcStoredDefinition stored_definition
     = within? base_class_decl_list 
     {:
-        SrcStoredDefinition def = new SrcStoredDefinition(within, base_class_decl_list);
+        SrcStoredDefinition def = new SrcStoredDefinition(within, base_class_decl_list, LoadInfo.empty());
         def.setLineBreakMap(lineBreakMap);
         formattingRecorder.postParsing(def);
         return def; 

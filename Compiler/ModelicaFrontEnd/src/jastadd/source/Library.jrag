@@ -93,6 +93,7 @@ aspect Library {
                 return createErrorStoredDefinition();
             }
             entity.setFileName(fileName);
+            entity.setLoadInfo(getLoadInfo().withPath(getFileName()));
             if (isStructured) {
                 SrcFullClassDecl fcd = (SrcFullClassDecl) cd;
                 LibraryList ll = new LibraryList();
@@ -295,7 +296,7 @@ aspect Library {
     }
 
     private SrcStoredDefinition SrcLibNode.createErrorStoredDefinition() {
-        return new SrcStoredDefinition(new Opt(), new List(createErrorClass()));
+        return new SrcStoredDefinition(new Opt(), new List(createErrorClass()), getLoadInfo());
     }
 
     private SrcBadClassDecl SrcLibNode.createErrorClass() {
@@ -457,6 +458,8 @@ aspect Library {
 
     public class LoadInfo {
 
+        private static final LoadInfo EMPTY = create("");
+
         private final String path;
 
         public String getPath() {
@@ -465,6 +468,10 @@ aspect Library {
         
         public static LoadInfo create(String path) {
             return new LoadInfo(path);
+        }
+        
+        public static LoadInfo empty() {
+            return EMPTY;
         }
     }
 
