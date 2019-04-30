@@ -83,7 +83,7 @@ aspect Library {
         try {
             log.info("Reading file: " + fileName);
             UtilInterface util = root().getUtilInterface();
-            SourceRoot sr = util.getParserHandler().parseFile(util, fileName);
+            SourceRoot sr = util.getParserHandler().parseFile(util, getLoadInfo().withPath(fileName));
             SrcStoredDefinition entity = sr.getProgram().getUnstructuredEntity(0);
             SrcClassDecl cd = extractClassDecl(entity, name);
             if (shouldProduceProblem(entity, name)) {
@@ -93,7 +93,6 @@ aspect Library {
                 return createErrorStoredDefinition();
             }
             entity.setFileName(fileName);
-            entity.setLoadInfo(getLoadInfo().withPath(getFileName()));
             if (isStructured) {
                 SrcFullClassDecl fcd = (SrcFullClassDecl) cd;
                 LibraryList ll = new LibraryList();
