@@ -47,7 +47,7 @@ public class QualifiedName {
     public QualifiedName(String name, boolean isGlobal) {
         isUnQualifiedImport = name.endsWith(".*");
         splitQualifiedClassName(name); 
-        this.isGlobal = isGlobal; // Note: must be setter after splitting
+        this.isGlobal = isGlobal; // Note: must be set after splitting
         iterator = names.iterator();
     }
 
@@ -113,16 +113,13 @@ public class QualifiedName {
         }
         ModelicaScanner ms = new ModelicaScanner(new StringReader(name));
         try {
-            Symbol sym = ms.nextToken();
-            if (sym.getId() != Terminals.ID)
-                throw new NameFormatException("The qualified name is not valid");
-            names.add((String)sym.value);
-            while ((sym = ms.nextToken()).getId() == Terminals.DOT) {
+            Symbol sym;
+            do {
                 sym = ms.nextToken();
                 if (sym.getId() != Terminals.ID)
                     throw new NameFormatException("The qualified name is not valid");
                 names.add((String)sym.value);
-            }
+            } while ((sym = ms.nextToken()).getId() == Terminals.DOT);
             if (sym.getId() != Terminals.EOF)
                 throw new NameFormatException("Invalid name: " + name);
         } catch (IOException e) {
