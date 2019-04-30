@@ -79,4 +79,19 @@ public final class ListUtil {
         return Arrays.asList(ts);
     }
 
+    /**
+     * Combines several lists into one.
+     * 
+     * @param lists The lists to join.
+     * @return      one list containing all the elements in {@code lists}.
+     */
+    @SafeVarargs
+    public static <T> List<T> join(List<T>... lists) {
+        List<T> result = new ArrayList<T>();
+        for (List<T> list : lists) {
+            result.addAll(list);
+        }
+        return result;
+    }
+
 }
