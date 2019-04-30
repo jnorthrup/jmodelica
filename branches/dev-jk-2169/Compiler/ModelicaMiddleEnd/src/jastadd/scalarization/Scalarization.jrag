@@ -217,11 +217,7 @@ aspect Scalarization {
                         add(new FFunctionVariable(VisibilityType.TEMPORARY, type, name));
                     }
                     if (init && type.isArray()) {
-                        List<FExp> sizes = new List<FExp>();
-                        for (int i = 0; i < type.ndims(); i++) {
-                            sizes.add(type.size().scalarize(this, i));
-                        }
-                        FInitArrayStmt stmt = new FInitArrayStmt(new FAccessExp(name), true, sizes);
+                        FInitArrayStmt stmt = new FInitArrayStmt(new FAccessExp(name), true, type.size().scalarizedSizeExpressions(this));
                         add(stmt);
                     }
                 } else {
@@ -1903,6 +1899,19 @@ aspect Scalarization {
         } else {
             return super.scalarize(s, i);
         }
+    }
+    
+    /**
+     * Create a scalarized list of size expressions.
+     * Also performs createArrayTemporaries.
+     */
+    public List<FExp> Size.scalarizedSizeExpressions(Scalarizer s) {
+        List<FExp> sizes = new List<FExp>();
+        for (int i = 0; i < ndims(); i++) {
+            createArrayTemporaries(s, i);
+            sizes.add(scalarize(s, i));
+        }
+        return sizes;
     }
     
     protected FFunctionCall FFunctionCall.createScalarized(FAccess name, List<FExp> args, FType type) {
