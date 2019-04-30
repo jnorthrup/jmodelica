@@ -15,135 +15,122 @@
 */
 package org.jmodelica.util;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Iterator;
 
+import org.jmodelica.modelica.parser.ModelicaParser.Terminals;
+import org.jmodelica.modelica.parser.ModelicaScanner;
 import org.jmodelica.util.exceptions.NameFormatException;
+
+import beaver.Scanner.Exception;
+import beaver.Symbol;
 
 /**
  * Handle splitting strings into different parts of a qualified name.
  */
 public class QualifiedName {
-    private boolean isGlobal;
-    private int i = 0;
-    ArrayList<String> names;
-    private boolean isUnQualifiedImport;
+    private final boolean isGlobal;
+    private final ArrayList<String> names = new ArrayList<>();
+    private final boolean isUnQualifiedImport;
+    private final Iterator<String> iterator;
 
     public QualifiedName(String name) {
-        if (name.length() == 0) {
-            throw new NameFormatException("A name must have atleast one caracter"); 
-        }
         isUnQualifiedImport = name.endsWith(".*");
         isGlobal = name.startsWith(".");
-        names = splitQualifiedClassName(name);
+        splitQualifiedClassName(name);
+        iterator = names.iterator();
     }
 
-    // Interpret name as global or not regardless or dot form or not.
+    // Interpret name as global or not regardless of dot form or not.
     public QualifiedName(String name, boolean isGlobal) {
-        if (name.length() == 0) {
-            throw new NameFormatException("A name must have atleast one caracter");
-        }
-        names = splitQualifiedClassName(name); 
-        this.isGlobal = isGlobal;
-    }
-
-    public boolean hasNext() {
-        return i < names.size();
+        isUnQualifiedImport = name.endsWith(".*");
+        splitQualifiedClassName(name); 
+        this.isGlobal = isGlobal; // Note: must be setter after splitting
+        iterator = names.iterator();
     }
 
     public int numberOfParts() {
         return names.size();
     }
+    
+    public boolean hasNext() {
+        return iterator.hasNext();
+    }
+    
+    public String next() {
+        return iterator.next();
+    }
 
     /**
-     * Only parse if the name is not simple, don't store the actual parts.
-     * Skips some work.
-     * @return if the name has only a single part.
+     * Checks if the name is a valid and simple (unqualified) identifier.
+     * @param name The name.
+     * @param allowGlobal If <code>true</code>, then takes 'global' notation with a leading dot into account by 
+     * ignoring such a character. 
+     * @return Whether or not <code>name</code> is a valid identifier. 
      */
-    public static int numberOfParts(String name) {
-        boolean isGlobal = name.startsWith(".");
-        if (isGlobal) {
+    public static boolean isValidSimpleIdentifier(String name, boolean allowGlobal) {
+        if (allowGlobal && name.startsWith(".")) {
             name = name.substring(1, name.length());
         }
-        Matcher m = p.matcher(name);
-        ArrayList<Integer> nameSeparations = new ArrayList<Integer>();
-        findNameSeparations(m, nameSeparations);
-        return nameSeparations.size() + 1;
-    }
-
-    public String next() {
-        return names.get(i++);
-    }
-
-    public ArrayList<String> getNames() {
-        return names;
+        ModelicaScanner ms = new ModelicaScanner(new StringReader(name));
+        try {
+           if (ms.nextToken().getId() != Terminals.ID)
+               return false;
+           if (ms.nextToken().getId() != Terminals.EOF)
+               return false;
+           return true;
+        } catch (IOException e) {
+            // This shouldn't happen when using a StringReader.
+            throw new RuntimeException("Unhandled internal error", e);
+        } catch (Exception e) {
+            // Scanner cannot handle this, so this is not a valid identifier.
+            return false;
+        }
     }
 
     @Override
     public String toString() {
-        return names.toString();
+        return (isGlobal ? "(global) " : "") + (isUnQualifiedImport ? ".* " : "") + names.toString();
     }
 
     public boolean isGlobal() {
         return isGlobal;
     }
 
-    static final Pattern p = Pattern.compile("(?<![\\\\])['.]");
-
-    private static void checkNameLength(int start,int end) {
-        if (end - start < 2)
-            throw new NameFormatException("Names must have a length greater than zero");
-    }
-
-    private static void findNameSeparations(Matcher m, ArrayList<Integer> list) {
-        boolean inquoted = false;
-        int prev = -1;
-        while (m.find()) {
-            String token = m.group();
-            if (token.equals("'")) {
-                if (inquoted) {
-                    checkNameLength(prev, m.start());
-                } else {
-                    if (m.start() - prev > 2) {
-                        throw new NameFormatException("Quotes not allowed inside unqouted name");
-                    }
-                }
-                prev = inquoted ? prev : m.start();
-                inquoted = !inquoted;
-            } else if (!inquoted) {
-                checkNameLength(prev, m.start());
-                prev = m.start();
-                list.add(m.start() + 1);
-            }
-        }
-        if (inquoted) {
-            throw new NameFormatException("Qualified Name couldn't be interpreted due to unmatched quotes");
-        }
-    }
-
     /**
-     * Splits a composite class name into all the partial access
-     * 
-     * @param name
-     * @return array with the names of all accessed classes.
+     * Splits a composite class name into all its partial accesses
      */
-    private final ArrayList<String> splitQualifiedClassName(String name) {
+    private final void splitQualifiedClassName(String name) {
+        if (name.length() == 0) {
+            throw new NameFormatException("A name must have at least one caracter");
+        }
         if (isGlobal || isUnQualifiedImport) {
             int start = isGlobal ? 1 : 0;
             int end = isUnQualifiedImport ? name.length() -2 : name.length(); 
             name = name.substring(start, end);
         }
-        Matcher m = p.matcher(name);
-        ArrayList<Integer> nameSeparations = new ArrayList<Integer>();
-        findNameSeparations(m, nameSeparations);
-        nameSeparations.add(name.length() + 1);
-        ArrayList<String> parts = new ArrayList<String>();
-        int partEnd = 0;
-        for (int namePart = 0; namePart < nameSeparations.size() ; namePart++) {
-            parts.add(name.substring(partEnd, nameSeparations.get(namePart) - 1));
-            partEnd = nameSeparations.get(namePart);
+        ModelicaScanner ms = new ModelicaScanner(new StringReader(name));
+        try {
+            Symbol sym = ms.nextToken();
+            if (sym.getId() != Terminals.ID)
+                throw new NameFormatException("The qualified name is not valid");
+            names.add((String)sym.value);
+            while ((sym = ms.nextToken()).getId() == Terminals.DOT) {
+                sym = ms.nextToken();
+                if (sym.getId() != Terminals.ID)
+                    throw new NameFormatException("The qualified name is not valid");
+                names.add((String)sym.value);
+            }
+            if (sym.getId() != Terminals.EOF)
+                throw new NameFormatException("Invalid name: " + name);
+        } catch (IOException e) {
+            // This shouldn't happen when using a StringReader.
+            throw new RuntimeException("Unhandled internal error", e);
+        } catch (Exception e) {
+            // Identifier not valid.
+            throw new NameFormatException("Invalid name: " + name);
         }
-        return parts;
     }
 }
