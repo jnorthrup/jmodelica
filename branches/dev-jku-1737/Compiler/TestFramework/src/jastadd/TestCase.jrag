@@ -584,7 +584,7 @@ abstract public class TestCase implements GenericTestCase {
             loadInfos.add(LoadInfo.create(getSourceFileName()));
             sr = getParserHandler().parseModel(uif, loadInfos);
         } else {
-            sr = getParserHandler().parseFile(uif, getSourceFileName());
+            sr = getParserHandler().parseFile(uif, LoadInfo.create(getSourceFileName()));
         }
 
         if (testOptions(options)) {
