@@ -74,7 +74,7 @@ aspect AbsoluteValue {
                 super("AbsoluteValueContributer");
             }
             
-            protected void contribute(InstAssignable src, FVariable dest) {
+            protected void contribute(Flattener f, InstAssignable src, FVariable dest) {
                 if (!src.isAbsoluteValue()) {
                     dest.annotation("absoluteValue").setValue(new FBooleanLitExpFalse());
                 }

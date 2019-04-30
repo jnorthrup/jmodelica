@@ -629,7 +629,7 @@ aspect Arrays {
     eq FlatRoot.getChild().parentExpandedSubscripts() = new List<FSubscript>();
 
     public FSubscript InstForIndex.createFSubscript() {
-        return getFExp().flatten(Flattener.expressionFlattener()).createFSubscript();
+        return getFExp().flatten(null).createFSubscript();
     }
     @Override
     public FSubscript InstForIndexNoExp.createFSubscript() {
