@@ -71,15 +71,8 @@ aspect Library {
         */
         
         String fileName = fileName();
-        String dirName = null;
-        File baseDir = null;
         String name = name();
-        boolean isStructured = getStructured();
         // TODO: Error if more than one class in file
-        if (isStructured) {
-            dirName = getFileName();
-            baseDir = new File(dirName);
-        }
         try {
             log.info("Reading file: " + fileName);
             UtilInterface util = root().getUtilInterface();
@@ -92,8 +85,9 @@ aspect Library {
             if (cd == null) {
                 return createErrorStoredDefinition();
             }
-            entity.setFileName(fileName);
-            if (isStructured) {
+            if (getStructured()) {
+                String dirName = dirName();
+                File baseDir = new File(dirName);
                 SrcFullClassDecl fcd = (SrcFullClassDecl) cd;
                 LibraryList ll = new LibraryList();
                 ll.addLibraryDirectory(getLoadInfo().withPath(dirName), getReason());
@@ -264,7 +258,7 @@ aspect Library {
     }
 
     private File SrcLibNode.myPackageFile() {
-        return new File(getFileName(), myPackageFileName());
+        return new File(dirName(), myPackageFileName());
     }
     
     private String SrcLibNode.myPackageFileName() {
