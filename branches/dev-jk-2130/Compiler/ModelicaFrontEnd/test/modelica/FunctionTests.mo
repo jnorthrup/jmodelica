@@ -11422,9 +11422,7 @@ public
     temp_2[1] := i;
     temp_2[2] := i1;
     temp_1[i1].x := i * i1;
-    for i2 in 1:2 loop
-     temp_1[i1].y[i2] := temp_2[i2];
-    end for;
+    temp_1[i1].y := temp_2;
    end for;
    for i1 in 1:m loop
     o[i,i1].x := temp_1[i1].x;
@@ -11497,21 +11495,10 @@ public
   for i1 in 1:max(m, 0) loop
    init temp_2 as FunctionTests.UnknownArray42.R2[1];
    (temp_3) := FunctionTests.UnknownArray42.f2(i1);
-   for i2 in 1:1 loop
-    temp_2[1].p1[i2] := temp_3.p1[i2];
-   end for;
-   temp_2[1].p2 := temp_3.p2;
+   temp_2[1] := temp_3;
    (temp_4) := FunctionTests.UnknownArray42.f2(i1);
-   for i2 in 1:1 loop
-    for i3 in 1:1 loop
-     temp_1[i1].y[i2].p1[i3] := temp_2[i2].p1[i3];
-    end for;
-    temp_1[i1].y[i2].p2 := temp_2[i2].p2;
-   end for;
-   for i2 in 1:1 loop
-    temp_1[i1].z.p1[i2] := temp_4.p1[i2];
-   end for;
-   temp_1[i1].z.p2 := temp_4.p2;
+   temp_1[i1].y := temp_2;
+   temp_1[i1].z := temp_4;
   end for;
    for i1 in 1:m loop
    for i2 in 1:1 loop
