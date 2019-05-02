@@ -104,7 +104,7 @@ SrcFullClassDecl : SrcBaseClassDecl ::= [SrcStringComment]
                                   SrcEndDecl;
 
 SrcLibClassDecl : SrcFullClassDecl ::= SrcLibNode*;
-SrcLibNode : SrcClassDecl ::= <FileName:String>
+SrcLibNode : SrcClassDecl ::= 
                         <Structured:boolean> 
                         <Version:String> 
                         <Reason:SrcLibNode.LoadReason>
