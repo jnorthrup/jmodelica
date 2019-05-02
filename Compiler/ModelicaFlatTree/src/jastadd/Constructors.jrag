@@ -921,7 +921,7 @@ aspect InheritedFactoryMethods {
 	public FNotExp FNotExp.createEmptyNode() { return new FNotExp(); }
 	public FOrExp  FOrExp.createEmptyNode()  { return new FOrExp();  }
 	public FAndExp FAndExp.createEmptyNode() { return new FAndExp(); }
-	
+
 	// Literal expressions (all have different children, so mostly here for completeness)
 	public FRealLitExp         FRealLitExp.createEmptyNode()         { return new FRealLitExp();         }
 	public FIntegerLitExp      FIntegerLitExp.createEmptyNode()      { return new FIntegerLitExp();      }
@@ -1389,11 +1389,11 @@ aspect InheritedFactoryMethods {
     }
     public FExInStream.FExInStream(FExp a1, FExp a2, List<FExp> a3) { this(emptyArgs(), a1, a2, a3); }
     
-    public FLtExp.FLtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FExp>(), (String) null); }
-    public FLeqExp.FLeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FExp>(), (String) null); }
-    public FGtExp.FGtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FExp>(), (String) null); }
-    public FGeqExp.FGeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FExp>(), (String) null); }
-    public FEqExp.FEqExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FExp>(), (String) null); }
-    public FNeqExp.FNeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FExp>(), (String) null); }
+    public FLtExp.FLtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FAccessExp>(), (String) null); }
+    public FLeqExp.FLeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FAccessExp>(), (String) null); }
+    public FGtExp.FGtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FAccessExp>(), (String) null); }
+    public FGeqExp.FGeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FAccessExp>(), (String) null); }
+    public FEqExp.FEqExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FAccessExp>(), (String) null); }
+    public FNeqExp.FNeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FAccessExp>(), (String) null); }
 
 }
