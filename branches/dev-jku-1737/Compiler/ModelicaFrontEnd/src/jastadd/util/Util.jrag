@@ -672,7 +672,7 @@ aspect FileNames {
     	
     }
     public String SrcLibNode.fileName() {
-        return getStructured() ? myPackageFile().getPath() : getFileName();
+        return getStructured() ? myPackageFile().getPath() : getLoadInfo().getPath();
     }
     public String InstLibNode.fileName() {
         return actualInstClass().fileName();
@@ -680,7 +680,7 @@ aspect FileNames {
     
     syn String ASTNode.dirName() = 
     	fileName().replaceFirst("^[^\\\\/]*$", ".").replaceFirst("[\\\\/][^\\\\/]*$", "");
-    eq SrcLibNode.dirName() = getStructured() ? getFileName() : super.dirName();
+    eq SrcLibNode.dirName() = getStructured() ? getLoadInfo().getPath() : super.dirName();
 
     inh String ASTNode.retrieveFileName();
     eq BaseNode.getChild().retrieveFileName()         = fileName();

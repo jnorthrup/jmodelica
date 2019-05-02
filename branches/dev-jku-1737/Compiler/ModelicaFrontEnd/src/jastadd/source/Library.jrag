@@ -296,10 +296,6 @@ aspect Library {
         return new SrcBadClassDecl(name());
     }
 
-    public SrcLibNode.SrcLibNode(File file, String name, boolean structured, LoadReason reason, LoadInfo loadInfo) {
-        this(new SrcIdDecl(name), file.getPath(), structured, "", reason, loadInfo);
-    }
-
     public SrcLibClassDecl.SrcLibClassDecl(SrcFullClassDecl fcd, List<SrcLibNode> lib) {
         super(fcd);
         setSrcLibNodeList(lib);
@@ -479,59 +475,66 @@ aspect Library {
     public class LibraryDef implements Comparable<LibraryDef> {
         public final String name;
         public final String version;
-        public final File path;
         public final boolean structured;
         public final SrcLibNode.LoadReason reason;
         public final LoadInfo loadInfo;
         
-        public static LibraryDef create(File path, SrcLibNode.LoadReason reason, LoadInfo loadInfo) {
-            if (SrcLibNode.isStructuredLib(path))
-                return new LibraryDef(path, true, reason, loadInfo);
-            else if (SrcLibNode.isUnstructuredLib(path))
-                return new LibraryDef(path, false, reason, loadInfo);
-            else
-                return null;
-        }
-        
         public SrcLibNode createLibNode() {
-            return new SrcLibNode(path, name, structured, reason, loadInfo);
+            return new SrcLibNode(new SrcIdDecl(name), structured, "", reason, loadInfo);
         }
         
         public int hashCode() {
-            return path.hashCode();
+            return path().hashCode();
         }
         
         public boolean equals(Object o) {
-            return o instanceof LibraryDef && path.equals(((LibraryDef) o).path);
+            return o instanceof LibraryDef && path().equals(((LibraryDef) o).path());
         }
         
         public int compareTo(LibraryDef def) {
             int res = name.compareTo(def.name);
-            return res == 0 ? path.compareTo(def.path) : res;
+            return res == 0 ? path().compareTo(def.path()) : res;
+        }
+        
+        public String path() {
+            return loadInfo.getPath();
         }
         
         public String toString() {
             return name;
         }
         
-            private LibraryDef(File path, boolean structured, SrcLibNode.LoadReason reason, LoadInfo loadInfo) {
-            String name = path.getName();
-            if (!structured) {
-                name = name.substring(0, name.lastIndexOf('.'));
-            }
-            String[] parts = name.split(" ", 2);
-            if (parts.length > 1) {
-                name = parts[0];
-                version = parts[1];
-            } else {
-                version = null;
-            }
+        private LibraryDef(String name, String version, boolean structured, SrcLibNode.LoadReason reason, LoadInfo loadInfo) {
             this.name = name;
-            this.path = path;
+            this.version = version;
             this.structured = structured;
             this.reason = reason;
             this.loadInfo = loadInfo;
         }
+    }
+
+    public static LibraryDef LibraryDef.create(File path, SrcLibNode.LoadReason reason, LoadInfo loadInfo) {
+        boolean structured;
+        if (SrcLibNode.isStructuredLib(path)) {
+            structured = true;
+        } else if (SrcLibNode.isUnstructuredLib(path)) {
+            structured = false;
+        } else {
+            return null;
+        }
+        String name = path.getName();
+        String version;
+        if (!structured) {
+            name = name.substring(0, name.lastIndexOf('.'));
+        }
+        String[] parts = name.split(" ", 2);
+        if (parts.length > 1) {
+            name = parts[0];
+            version = parts[1];
+        } else {
+            version = null;
+        }
+        return new LibraryDef(name, version, structured, reason, loadInfo.withPath(path.getPath()));
     }
 
     public class DefaultLibraryList extends LibraryList {
