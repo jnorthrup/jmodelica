@@ -16,14 +16,15 @@
 package org.jmodelica.util;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.jmodelica.modelica.parser.ModelicaParser.Terminals;
-import org.jmodelica.modelica.parser.ModelicaScanner;
 import org.jmodelica.util.exceptions.NameFormatException;
 
+import beaver.Scanner;
 import beaver.Scanner.Exception;
 import beaver.Symbol;
 
@@ -31,6 +32,36 @@ import beaver.Symbol;
  * Handle splitting strings into different parts of a qualified name.
  */
 public class QualifiedName {
+    private static Constructor<? extends Scanner> scannerConstructor;
+    private static int ID_TOKEN_VALUE;
+    private static int EOF_TOKEN_VALUE;
+    private static int DOT_TOKEN_VALUE;
+    
+    @SuppressWarnings("unchecked")
+    private static void initInternal() {
+        try {
+            scannerConstructor = ((Class<? extends Scanner>)Class.forName("org.jmodelica.modelica.parser.ModelicaScanner")).getConstructor(Reader.class);
+            Class<?> clazz = Class.forName("org.jmodelica.modelica.parser.ModelicaParser$Terminals");
+            ID_TOKEN_VALUE = clazz.getField("ID").getInt(null);
+            EOF_TOKEN_VALUE = clazz.getField("EOF").getInt(null);
+            DOT_TOKEN_VALUE = clazz.getField("DOT").getInt(null);
+        } catch (Throwable e) {
+            try {
+                scannerConstructor = ((Class<? extends Scanner>)Class.forName("org.jmodelica.optimica.parser.ModelicaScanner")).getConstructor(Reader.class);
+                Class<?> clazz = Class.forName("org.jmodelica.optimica.parser.ModelicaParser$Terminals");
+                ID_TOKEN_VALUE = clazz.getField("ID").getInt(null);
+                EOF_TOKEN_VALUE = clazz.getField("EOF").getInt(null);
+                DOT_TOKEN_VALUE = clazz.getField("DOT").getInt(null);
+            } catch (Throwable e2) {
+                // This should never happen; simply throw a RuntimeException.
+                throw new RuntimeException("Scanner class not found");
+            }
+        }
+    }
+    static {
+        initInternal();
+    }
+    
     private final boolean isGlobal;
     private final ArrayList<String> names = new ArrayList<>();
     private final boolean isUnQualifiedImport;
@@ -63,6 +94,14 @@ public class QualifiedName {
         return iterator.next();
     }
 
+    private static Scanner newScanner(String name) {
+        try {
+            return scannerConstructor.newInstance(new StringReader(name));
+        } catch (Throwable e) {
+            throw new RuntimeException("Unhandled internal error", e);
+        }
+    }
+    
     /**
      * Checks if the name is a valid and simple (unqualified) identifier.
      * @param name The name.
@@ -74,11 +113,12 @@ public class QualifiedName {
         if (allowGlobal && name.startsWith(".")) {
             name = name.substring(1, name.length());
         }
-        ModelicaScanner ms = new ModelicaScanner(new StringReader(name));
+        Scanner ms = newScanner(name);
+
         try {
-           if (ms.nextToken().getId() != Terminals.ID)
+           if (ms.nextToken().getId() != ID_TOKEN_VALUE)
                return false;
-           if (ms.nextToken().getId() != Terminals.EOF)
+           if (ms.nextToken().getId() != EOF_TOKEN_VALUE)
                return false;
            return true;
         } catch (IOException e) {
@@ -111,16 +151,16 @@ public class QualifiedName {
             int end = isUnQualifiedImport ? name.length() -2 : name.length(); 
             name = name.substring(start, end);
         }
-        ModelicaScanner ms = new ModelicaScanner(new StringReader(name));
+        Scanner ms = newScanner(name);
         try {
             Symbol sym;
             do {
                 sym = ms.nextToken();
-                if (sym.getId() != Terminals.ID)
+                if (sym.getId() != ID_TOKEN_VALUE)
                     throw new NameFormatException("The qualified name is not valid");
                 names.add((String)sym.value);
-            } while ((sym = ms.nextToken()).getId() == Terminals.DOT);
-            if (sym.getId() != Terminals.EOF)
+            } while ((sym = ms.nextToken()).getId() == DOT_TOKEN_VALUE);
+            if (sym.getId() != EOF_TOKEN_VALUE)
                 throw new NameFormatException("Invalid name: " + name);
         } catch (IOException e) {
             // This shouldn't happen when using a StringReader.
