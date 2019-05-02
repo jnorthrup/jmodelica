@@ -347,7 +347,7 @@ aspect Library {
         }
         
         /**
-         * Add <code>path</code> to list of libraries.
+         * Add the library found in {@link LoadInfo#getPath()} to the list of libraries. 
          * 
          * @param loadInfo  a LoadInfo object
          * @param reason    reason this library are added
@@ -357,8 +357,9 @@ aspect Library {
             return add(loadInfo, false, reason);
         }
         
+        
         /**
-         * Add each library found in the directory <code>path</code> to list of libraries.
+         * Add each library found in {@link LoadInfo#getPath()} to the list of libraries. 
          * 
          * @param loadInfo  a LoadInfo object
          * @param reason    reason these libraries are added
@@ -369,7 +370,7 @@ aspect Library {
         }
         
         /**
-         * Add each of <code>paths</code> to list of libraries.
+         * Add each library found in the collection of loadInfos to the list of libraries. 
          * 
          * @param loadInfo  a collection of LoadInfo objects
          * @param reason    reason these libraries are added
@@ -380,8 +381,7 @@ aspect Library {
         }
         
         /**
-         * Add each library found in each of the directories in <code>paths</code> 
-         * to list of libraries.
+         * Add each library found in each of the {@link LoadInfo#getPath()} directories to the list of libraries. 
          * 
          * @param loadInfo  a collection of LoadInfo objects
          * @param reason    reason these libraries are added
@@ -400,7 +400,7 @@ aspect Library {
         }
 
         /**
-         * Add a path to list of libraries.
+         * Add the path found in {@link LoadInfo#getPath()} to the list of libraries. 
          * 
          * @param loadInfo   a LoadInfo object
          * @param directory  if <code>true</code>, add all libraries found in the directory 
