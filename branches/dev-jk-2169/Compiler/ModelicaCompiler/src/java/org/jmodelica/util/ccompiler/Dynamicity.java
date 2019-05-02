@@ -8,7 +8,7 @@ package org.jmodelica.util.ccompiler;
  */
 public enum Dynamicity {
     /**
-     * With static keywords.
+     * In the data section, using static keyword.
      */
     DATA,
     /**
