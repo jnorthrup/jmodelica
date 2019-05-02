@@ -680,13 +680,7 @@ aspect FileNames {
     
     syn String ASTNode.dirName() = 
     	fileName().replaceFirst("^[^\\\\/]*$", ".").replaceFirst("[\\\\/][^\\\\/]*$", "");
-//    syn String ASTNode.dirName() {
-//    	String res = fileName();
-//    	if (res == null)
-//    		return res;
-//    	res = res.replaceFirst("^[^\\\\/]*$", ".");
-//    	return res.replaceFirst("[\\\\/][^\\\\/]*$", "");
-//    }
+    eq SrcLibNode.dirName() = getStructured() ? getFileName() : super.dirName();
 
     inh String ASTNode.retrieveFileName();
     eq BaseNode.getChild().retrieveFileName()         = fileName();
