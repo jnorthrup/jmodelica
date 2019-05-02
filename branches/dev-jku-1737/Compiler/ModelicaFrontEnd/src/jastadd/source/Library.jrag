@@ -355,8 +355,8 @@ aspect Library {
         /**
          * Add <code>path</code> to list of libraries.
          * 
-         * @param path    path of the library to add
-         * @param reason  reason this library are added
+         * @param loadInfo  a LoadInfo object
+         * @param reason    reason this library are added
          * @return <code>true</code> if a library was added 
          */
         public boolean addLibrary(LoadInfo loadInfo, SrcLibNode.LoadReason reason) {
@@ -366,8 +366,8 @@ aspect Library {
         /**
          * Add each library found in the directory <code>path</code> to list of libraries.
          * 
-         * @param path    path of the directory containing libraries to add
-         * @param reason  reason these libraries are added
+         * @param loadInfo  a LoadInfo object
+         * @param reason    reason these libraries are added
          * @return <code>true</code> if any libraries were added 
          */
         public boolean addLibraryDirectory(LoadInfo loadInfo, SrcLibNode.LoadReason reason) {
@@ -377,8 +377,8 @@ aspect Library {
         /**
          * Add each of <code>paths</code> to list of libraries.
          * 
-         * @param paths   paths of the libraries to add
-         * @param reason  reason these libraries are added
+         * @param loadInfo  a collection of LoadInfo objects
+         * @param reason    reason these libraries are added
          * @return <code>true</code> if any libraries were added 
          */
         public boolean addLibraries(Collection<LoadInfo> loadInfos, SrcLibNode.LoadReason reason) {
@@ -389,8 +389,8 @@ aspect Library {
          * Add each library found in each of the directories in <code>paths</code> 
          * to list of libraries.
          * 
-         * @param paths   paths of the directories containing libraries to add
-         * @param reason  reason these libraries are added
+         * @param loadInfo  a collection of LoadInfo objects
+         * @param reason    reason these libraries are added
          * @return <code>true</code> if any libraries were added 
          */
         public boolean addLibraryDirectories(Collection<LoadInfo> loadInfos, SrcLibNode.LoadReason reason) {
@@ -408,7 +408,7 @@ aspect Library {
         /**
          * Add a path to list of libraries.
          * 
-         * @param path       the library or directory containing libraries to add
+         * @param loadInfo   a LoadInfo object
          * @param directory  if <code>true</code>, add all libraries found in the directory 
          *                   <code>path</code>, else add <code>path</code>
          * @param reason     reason for loading this library
