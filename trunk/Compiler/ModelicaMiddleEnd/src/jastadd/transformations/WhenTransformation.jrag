@@ -159,10 +159,12 @@ aspect WhenClauses{
         return new FAndExp(tempUseExp(), new FNotExp(tempPreExp()));
     }
     
+    @Override
     public FExp FInitialExp.asGuard(Collection<FAbstractEquation> outerEqnList, Collection<FStatement> stmtList, FClass fclass) {
         return fullCopy();
     }
     
+    @Override
     public FExp FAccessExp.asGuard(Collection<FAbstractEquation> outerEqnList, Collection<FStatement> stmtList, FClass fclass) {
         if (shouldExtractGuard())
             return super.asGuard(outerEqnList, stmtList, fclass);
