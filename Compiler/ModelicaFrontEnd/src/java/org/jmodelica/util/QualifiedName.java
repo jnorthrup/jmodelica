@@ -116,14 +116,16 @@ public class QualifiedName {
         Scanner ms = newScanner(name);
 
         try {
-           if (ms.nextToken().getId() != ID_TOKEN_VALUE)
+           if (ms.nextToken().getId() != ID_TOKEN_VALUE) {
                return false;
-           if (ms.nextToken().getId() != EOF_TOKEN_VALUE)
+           }
+           if (ms.nextToken().getId() != EOF_TOKEN_VALUE) {
                return false;
+           }
            return true;
         } catch (IOException e) {
             // This shouldn't happen when using a StringReader.
-            throw new RuntimeException("Unhandled internal error", e);
+            throw nameFormatException(name);
         } catch (Exception e) {
             // Scanner cannot handle this, so this is not a valid identifier.
             return false;
@@ -137,6 +139,10 @@ public class QualifiedName {
 
     public boolean isGlobal() {
         return isGlobal;
+    }
+    
+    private static NameFormatException nameFormatException(String name) {
+        return new NameFormatException(name + " is not a valid qualified name");
     }
 
     /**
@@ -156,18 +162,17 @@ public class QualifiedName {
             Symbol sym;
             do {
                 sym = ms.nextToken();
-                if (sym.getId() != ID_TOKEN_VALUE)
-                    throw new NameFormatException("The qualified name is not valid");
+                if (sym.getId() != ID_TOKEN_VALUE) {
+                    throw nameFormatException(name);
+                }
                 names.add((String)sym.value);
             } while ((sym = ms.nextToken()).getId() == DOT_TOKEN_VALUE);
-            if (sym.getId() != EOF_TOKEN_VALUE)
-                throw new NameFormatException("Invalid name: " + name);
-        } catch (IOException e) {
-            // This shouldn't happen when using a StringReader.
-            throw new RuntimeException("Unhandled internal error", e);
-        } catch (Exception e) {
-            // Identifier not valid.
-            throw new NameFormatException("Invalid name: " + name);
+            if (sym.getId() != EOF_TOKEN_VALUE) {
+                throw nameFormatException(name);
+            }
+        } catch (Exception | IOException e) {
+            // beaver.Scanner.Exception means invalid name, whereas IOException should never happen with a StringReader.
+            throw nameFormatException(name);
         }
     }
 }
