@@ -841,7 +841,7 @@ abstract FBoolBinExp : FBinExp;
 /**
  * Base class for relational expressions.
  */
-abstract FRelExp : FBoolBinExp ::= [Indicator:FExp] <IndicatorVarName:String>;
+abstract FRelExp : FBoolBinExp ::= [Indicator:FAccessExp] <IndicatorVarName:String>;
 
 /**
  * Less than expression.
