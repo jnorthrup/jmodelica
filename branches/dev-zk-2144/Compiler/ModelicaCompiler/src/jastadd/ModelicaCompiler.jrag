@@ -793,7 +793,7 @@ public class ModelicaCompiler implements LogContainer {
             if (target.getMakeFileFlag() != null) {
                 // Might be used by constant evaluation.
                 CCompilerDelegator ccompiler = getCCompiler();
-                ccompiler.setTargetPlatforms(targetPlatforms);
+                ccompiler.setTargetPlatforms(getTargetPlatforms());
 
                 ModulesSettings modulesSettings = createModulesSettings(options);
                 ccompiler.setModuleLibraryNames(modulesSettings.getLibraryNames());
@@ -1836,13 +1836,22 @@ public class ModelicaCompiler implements LogContainer {
      */
     public String[] ModelicaCompiler.getTargetPlatforms() {
 
-        if (targetPlatforms == null) {
-            targetPlatforms = options.getStringOption("target_platforms").split(",");
-
-            if (targetPlatforms[0].equals("")) {
-                targetPlatforms = EnvironmentUtils.getDefaultTargetPlatform();
-            }
+        if (targetPlatforms != null) {
+        	return targetPlatforms;
         }
+
+        String argument = options.hasOption("target_platforms") ? options.getStringOption("target_platforms") : "";
+        String[] platforms = argument.split("\\s*,\\s*");
+        
+        if (platforms[0].equals("")) {        	
+        	platforms = EnvironmentUtils.getDefaultTargetPlatform();
+        	log.debug("Defaulted to target platforms " + Arrays.toString(platforms) + ".");
+        } else {
+        	platforms = StringUtil.nonEmpty(platforms);
+        	log.debug("Target platforms were set to " + Arrays.toString(platforms) + ".");
+        }
+
+        this.targetPlatforms = platforms;
         return targetPlatforms;
     }
 
