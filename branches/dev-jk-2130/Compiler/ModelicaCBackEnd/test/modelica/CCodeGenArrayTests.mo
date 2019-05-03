@@ -778,7 +778,7 @@ void func_CCodeGenArrayTests_RecordArray10_g_def0(jmi_real_t x_v, jmi_string_t s
     jmi_array_ref_1(temp_2_a, 2) = 2;
     JMI_ARRAY_INIT_1(STAT, jmi_string_t, jmi_string_array_t, temp_3_a, 1, 1, 1)
     JMI_ASG(STR, jmi_array_ref_1(temp_3_a, 1), s_v)
-    jmi_array_rec_1(temp_1_a, 1)->x = temp_2_a;
+    *jmi_array_rec_1(temp_1_a, 1)->x = *temp_2_a;
     JMI_ASG(STR_ARR, jmi_array_rec_1(temp_1_a, 1)->s, temp_3_a)
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_4_a, 1, 1, 1)
     jmi_array_ref_1(temp_4_a, 1) = _time;
@@ -791,7 +791,7 @@ void func_CCodeGenArrayTests_RecordArray10_g_def0(jmi_real_t x_v, jmi_string_t s
     snprintf(JMI_STR_END(tmp_6), JMI_STR_LEFT(tmp_6), \"%s\", s_v);
     snprintf(JMI_STR_END(tmp_6), JMI_STR_LEFT(tmp_6), \"%s\", \"s3\");
     JMI_ASG(STR, jmi_array_ref_1(temp_5_a, 2), tmp_6)
-    jmi_array_rec_1(temp_1_a, 2)->x = temp_4_a;
+    *jmi_array_rec_1(temp_1_a, 2)->x = *temp_4_a;
     JMI_ASG(STR_ARR, jmi_array_rec_1(temp_1_a, 2)->s, temp_5_a)
     y_v = func_CCodeGenArrayTests_RecordArray10_f_exp1(temp_1_a);
     JMI_RET(GEN, y_o, y_v)

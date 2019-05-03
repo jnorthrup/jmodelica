@@ -33,8 +33,14 @@ aspect CCodeGenAlgorithms {
     public void FType.printAssign(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent,
             ASTNode dst, ASTNode src) {
         str.print(indent);
+        if (isComposite()) {
+            str.print("*");
+        }
         p.print(dst, str, indent);
         str.print(" = ");
+        if (isComposite()) {
+            str.print("*");
+        }
         p.print(src, str, indent);
         str.print(";\n");
     }

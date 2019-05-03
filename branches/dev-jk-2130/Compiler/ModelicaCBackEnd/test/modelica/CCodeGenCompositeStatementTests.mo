@@ -51,8 +51,8 @@ void func_CCodeGenCompositeStatementTests_RecordStmt1_f_def0(R_0_r* r_v, R_0_ra*
         y_a = y_an;
     }
     JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, temp_1_a, 2, 1, 2)
-    jmi_array_rec_1(temp_1_a, 1) = JMI_GLOBAL(CCodeGenCompositeStatementTests_RecordStmt1_f_c);
-    jmi_array_rec_1(temp_1_a, 2) = r_v;
+    *jmi_array_rec_1(temp_1_a, 1) = *JMI_GLOBAL(CCodeGenCompositeStatementTests_RecordStmt1_f_c);
+    *jmi_array_rec_1(temp_1_a, 2) = *r_v;
     i1_0in = 0;
     i1_0ie = floor((2) - (1));
     for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
