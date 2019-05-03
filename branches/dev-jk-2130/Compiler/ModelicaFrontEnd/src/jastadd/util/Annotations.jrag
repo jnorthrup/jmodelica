@@ -287,7 +287,7 @@ aspect AnnotationAPI {
             if (annotationExpMap.containsKey(exp)) {
                 return list.getChild(annotationExpMap.get(exp));
             } else {
-                throw new IllegalArgumentException();
+                return dynamicFExp(exp.instantiate());
             }
         }
     }
@@ -331,51 +331,45 @@ aspect AnnotationAPI {
                 return fChild;
             }
         }
-        throw new IllegalArgumentException("Could not find equivalent sub-expression to '" + 
-                exp + "' in '" + this + "'.");
+        return dynamicFExp(exp.instantiate());
     }
 
     public FExp FAbstractFunctionCall.equivalentChildFExp(SrcExp exp) {
-        // If the function name isn't found, then there can be multiple 
-        // named InstFunctionArguments for the same name. 
         ArrayList<FExp> res = new ArrayList<>();
         Object id = exp.myFunctionArgumentIdentifier();
         for (InstFunctionArgument arg : myInstFunctionArguments()) {
-            FExp found = arg.findFExpFor(id, exp);
-            if (found != null) {
-                res.add(found);
-            }
+            arg.findFExpFor(id, exp, res);
         }
+        // If the function name isn't found, then there can be multiple 
+        // named InstFunctionArguments for the same name. 
         int i = (res.size() <= 1) ? 0 : exp.myIdenticalFunctionArgumentIdentifierIndex(id);
         if (i < res.size()) {
             return res.get(i);
         }
-        throw new IllegalArgumentException("Could not find equivalent sub-expression to '" + 
-                exp + "' in '" + this + "'.");
+        return dynamicFExp(exp.instantiate());
     }
 
-    syn List<InstFunctionArgument> FAbstractFunctionCall.myInstFunctionArguments() {
+    syn Iterable<InstFunctionArgument> FAbstractFunctionCall.myInstFunctionArguments() {
         throw new UnsupportedOperationException();
     }
-    eq InstFunctionCall     .myInstFunctionArguments() = getArgs();
+    eq InstFunctionCall     .myInstFunctionArguments() = new ChainedIterable<>(getArgs(), unbindableArgs);
     eq InstRecordConstructor.myInstFunctionArguments() = getArgs();
     eq FBuiltInFunctionCall .myInstFunctionArguments() = getOriginalArgs();
 
-    public FExp InstFunctionArgument.findFExpFor(Object id, SrcExp exp) {
-        return matchesId(id) ? getFExp() : null;
+    public void InstFunctionArgument.findFExpFor(Object id, SrcExp exp, ArrayList<FExp> res) {
+        if (matchesId(id)) {
+            res.add(getFExp());
+        }
     }
 
-    public FExp InstMultipleBoundArgument.findFExpFor(Object id, SrcExp exp) {
+    public void InstMultipleBoundArgument.findFExpFor(Object id, SrcExp exp, ArrayList<FExp> res) {
         // If the function name was found, then this can have multiple 
         // named InstFunctionArguments for the same name. 
-        ArrayList<FExp> res = new ArrayList<>();
         for (InstFunctionArgument arg : getArgs()) {
             if (arg.matchesId(id)) {
                 res.add(arg.getFExp());
             }
         }
-        int i = (res.size() <= 1) ? 0 : exp.myIdenticalFunctionArgumentIdentifierIndex(id);
-        return (i >= res.size()) ? null : res.get(i);
     }
 
     syn boolean InstFunctionArgument  .matchesId(Object id) = false;
