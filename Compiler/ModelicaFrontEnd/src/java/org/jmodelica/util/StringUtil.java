@@ -6,8 +6,10 @@ import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -222,5 +224,19 @@ public final class StringUtil {
             return quoted;
         }
     }
+
+    /**
+     * @param strings	The strings to iterate through.
+     * @return			all non-empty strings in {@code strings}.
+     */
+	public static String[] nonEmpty(String[] strings) {
+		List<String> result = new ArrayList<String>();
+		for (String str : strings) {
+			if (!str.equals("")) {
+				result.add(str);
+			}
+		}
+		return result.toArray(strings);
+	}
 
 }
