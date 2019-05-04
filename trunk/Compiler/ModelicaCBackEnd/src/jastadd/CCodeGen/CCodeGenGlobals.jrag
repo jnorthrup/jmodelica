@@ -464,8 +464,6 @@ aspect CCodeGenGlobalVariables {
     public void FArray.genGlobalVariableInitFuncDecl_C(CodePrinter p, CodeStream str, String indent) {
         if (type().isPrimitive()) {
             
-            type().printDecl_C(p, str, indent, Dynamicity.STATIC, tempName_C(), false);
-            
             /* C89 Macro parsing won't let us add the array literal as an argument. 
              * With C99 we could use varargs and give it directly to JMI_ARR. */
             String name = tempName_C();
@@ -480,7 +478,9 @@ aspect CCodeGenGlobalVariables {
                 str.print(",");
             }
             str.print("};\n");
-            return;
+            
+            type().printDecl_C(p, str, indent, Dynamicity.DATA, tempName_C(), false);
+            
         } else {
             type().printDecl_C(p, str, indent, Dynamicity.HEAP, tempName_C(), false);
         }
@@ -488,7 +488,7 @@ aspect CCodeGenGlobalVariables {
 
     @Override
     public void FArray.genGlobalVariableInitFuncInit_C(CodePrinter p, CodeStream str, String indent) {
-        Dynamicity dyn = (type().isPrimitive()) ? Dynamicity.STATIC : Dynamicity.HEAP;
+        Dynamicity dyn = (type().isPrimitive()) ? Dynamicity.DATA : Dynamicity.HEAP;
         type().printInit_C(p, str, indent, dyn, tempName_C(), false);
     }
 

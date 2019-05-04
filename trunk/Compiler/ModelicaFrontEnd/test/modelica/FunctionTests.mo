@@ -5272,7 +5272,7 @@ public
     y[i1,i2] := x[is1[i1],is2[i2]];
    end for;
   end for;
-  init temp_1 as Real[size(is1, 1), size(is1, 1)];
+  init temp_1 as Real[size(is2, 1), size(is1, 1)];
   for i1 in 1:size(is2, 1) loop
    for i2 in 1:size(is1, 1) loop
     temp_1[i1,i2] := x[is2[i1],is1[i2]] + y[i1,i2];
@@ -11422,6 +11422,7 @@ public
     temp_2[1] := i;
     temp_2[2] := i1;
     temp_1[i1].x := i * i1;
+    init temp_1[i1].y as Real[2];
     for i2 in 1:2 loop
      temp_1[i1].y[i2] := temp_2[i2];
     end for;
@@ -11497,23 +11498,27 @@ public
   for i1 in 1:max(m, 0) loop
    init temp_2 as FunctionTests.UnknownArray42.R2[1];
    (temp_3) := FunctionTests.UnknownArray42.f2(i1);
+   init temp_2[1].p1 as Real[1];
    for i2 in 1:1 loop
     temp_2[1].p1[i2] := temp_3.p1[i2];
    end for;
    temp_2[1].p2 := temp_3.p2;
    (temp_4) := FunctionTests.UnknownArray42.f2(i1);
+   init temp_1[i1].y as FunctionTests.UnknownArray42.R2[1];
    for i2 in 1:1 loop
+    init temp_1[i1].y[i2].p1 as Real[1];
     for i3 in 1:1 loop
      temp_1[i1].y[i2].p1[i3] := temp_2[i2].p1[i3];
     end for;
     temp_1[i1].y[i2].p2 := temp_2[i2].p2;
    end for;
+   init temp_1[i1].z.p1 as Real[1];
    for i2 in 1:1 loop
     temp_1[i1].z.p1[i2] := temp_4.p1[i2];
    end for;
    temp_1[i1].z.p2 := temp_4.p2;
   end for;
-   for i1 in 1:m loop
+  for i1 in 1:m loop
    for i2 in 1:1 loop
     for i3 in 1:1 loop
      o[i1].y[i2].p1[i3] := temp_1[i1].y[i2].p1[i3];

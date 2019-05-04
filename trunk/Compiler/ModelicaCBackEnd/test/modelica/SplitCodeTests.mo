@@ -64,7 +64,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
     if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
         x[0] = 536871118;
     } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
@@ -79,7 +79,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _temp_1_102 = _sw(0);
         }
         if (LOG_EXP_AND(_temp_1_102, LOG_EXP_NOT(pre_temp_1_102))) {
-            JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
+            JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
             jmi_array_ref_1(tmp_2, 1) = 1.0;
             if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
                 JMI_GLOBAL(tmp_3) = JMI_CACHED(tmp_1, func_SplitCodeTests_BlockSetupSplit1_f_exp0(tmp_2));
@@ -105,7 +105,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_5, 1, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_5, 1, 1)
     if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
         x[0] = 536871119;
     } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
@@ -120,7 +120,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _temp_2_103 = _sw(1);
         }
         if (LOG_EXP_AND(_temp_2_103, LOG_EXP_NOT(pre_temp_2_103))) {
-            JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_5, 1, 1, 1)
+            JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_5, 1, 1, 1)
             jmi_array_ref_1(tmp_5, 1) = 2.0;
             if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
                 JMI_GLOBAL(tmp_6) = JMI_CACHED(tmp_4, func_SplitCodeTests_BlockSetupSplit1_f_exp0(tmp_5));
@@ -190,7 +190,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
     if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
         x[0] = 536871118;
     } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
@@ -205,7 +205,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _temp_1_102 = _sw(0);
         }
         if (LOG_EXP_AND(_temp_1_102, LOG_EXP_NOT(pre_temp_1_102))) {
-            JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
+            JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
             jmi_array_ref_1(tmp_2, 1) = 1.0;
             if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
                 JMI_GLOBAL(tmp_3) = JMI_CACHED(tmp_1, func_SplitCodeTests_BlockSetupSplit2_f_exp0(tmp_2));
@@ -231,7 +231,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_5, 1, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_5, 1, 1)
     if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
         x[0] = 536871119;
     } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
@@ -246,7 +246,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _temp_2_103 = _sw(1);
         }
         if (LOG_EXP_AND(_temp_2_103, LOG_EXP_NOT(pre_temp_2_103))) {
-            JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_5, 1, 1, 1)
+            JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_5, 1, 1, 1)
             jmi_array_ref_1(tmp_5, 1) = 2.0;
             if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
                 JMI_GLOBAL(tmp_6) = JMI_CACHED(tmp_4, func_SplitCodeTests_BlockSetupSplit2_f_exp0(tmp_5));
@@ -595,8 +595,8 @@ model SplitCodeTestFunctionCallInput1
 int model_ode_derivatives_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
     jmi_array_ref_1(tmp_1, 1) = _time;
     jmi_array_ref_1(tmp_1, 2) = _time;
     _y1_0 = func_SplitCodeTests_SplitCodeTestFunctionCallInput1_f_exp0(tmp_1);
@@ -607,8 +607,8 @@ int model_ode_derivatives_0(jmi_t* jmi) {
 int model_ode_derivatives_1(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
     jmi_array_ref_1(tmp_2, 1) = _time;
     jmi_array_ref_1(tmp_2, 2) = _time;
     _y2_1 = func_SplitCodeTests_SplitCodeTestFunctionCallInput1_f_exp0(tmp_2);
@@ -652,10 +652,10 @@ model SplitCodeTestFunctionCallLeft1
 int model_ode_derivatives_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
     jmi_array_ref_1(tmp_2, 1) = _time;
     jmi_array_ref_1(tmp_2, 2) = _time;
     func_SplitCodeTests_SplitCodeTestFunctionCallLeft1_f_def0(tmp_2, tmp_1);
@@ -667,10 +667,10 @@ int model_ode_derivatives_0(jmi_t* jmi) {
 int model_ode_derivatives_1(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_3, 2, 1)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_4, 2, 1)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 2, 1, 2)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_4, 2, 1, 2)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_3, 2, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_4, 2, 1)
+    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_3, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_4, 2, 1, 2)
     jmi_array_ref_1(tmp_4, 1) = _time;
     jmi_array_ref_1(tmp_4, 2) = _time;
     func_SplitCodeTests_SplitCodeTestFunctionCallLeft1_f_def0(tmp_4, tmp_3);
@@ -726,8 +726,8 @@ int model_ode_derivatives_0(jmi_t* jmi) {
 int model_ode_derivatives_1(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
     jmi_array_ref_1(tmp_1, 1) = 1.0;
     jmi_array_ref_1(tmp_1, 2) = 2.0;
     _y1_3 = jmi_array_val_1(tmp_1, _i_0);
@@ -738,8 +738,8 @@ int model_ode_derivatives_1(jmi_t* jmi) {
 int model_ode_derivatives_2(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
     jmi_array_ref_1(tmp_2, 1) = 1.0;
     jmi_array_ref_1(tmp_2, 2) = 2.0;
     _y2_4 = jmi_array_val_1(tmp_2, _i_0);
@@ -832,16 +832,16 @@ annotation(__JModelica(UnitTesting(tests={
         template="$C_model_init_eval_independent_globals$",
         generatedCode="
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 4, 1)
     static jmi_real_t tmp_1_var[4] = {1.0,2.0,3.0,4.0,};
-    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
+    JMI_ARR(DATA, jmi_real_t, jmi_array_t, tmp_1, 4, 1)
+    JMI_ARRAY_INIT_1(DATA, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
     return tmp_1;
 }
 
 jmi_array_t* jmi_global_tmp_2(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_2, 4, 1)
     static jmi_real_t tmp_2_var[4] = {5.0,6.0,7.0,8.0,};
-    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_2, 4, 1, 4)
+    JMI_ARR(DATA, jmi_real_t, jmi_array_t, tmp_2, 4, 1)
+    JMI_ARRAY_INIT_1(DATA, jmi_real_t, jmi_array_t, tmp_2, 4, 1, 4)
     return tmp_2;
 }
 
@@ -852,9 +852,9 @@ jmi_array_t* jmi_global_tmp_2(jmi_t* jmi);
 
 R_0_ra* jmi_global_tmp_3(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(DYNA, R_0_r, R_0_ra, tmp_3, 2, 1)
+    JMI_ARR(HEAP, R_0_r, R_0_ra, tmp_3, -1, 1)
     JMI_GLOBALS_INIT()
-    JMI_ARRAY_INIT_1(DYNA, R_0_r, R_0_ra, tmp_3, 2, 1, 2)
+    JMI_ARRAY_INIT_1(HEAP, R_0_r, R_0_ra, tmp_3, 2, 1, 2)
     jmi_array_rec_1(tmp_3, 1)->a = jmi_global_tmp_1(jmi);
     jmi_array_rec_1(tmp_3, 2)->a = jmi_global_tmp_2(jmi);
     JMI_GLOBALS_FREE()
@@ -915,17 +915,17 @@ annotation(__JModelica(UnitTesting(tests={
         template="$C_model_init_eval_independent_globals$",
         generatedCode="
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 4, 1)
     static jmi_real_t tmp_1_var[4] = {1.0,2.0,3.0,4.0,};
-    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
+    JMI_ARR(DATA, jmi_real_t, jmi_array_t, tmp_1, 4, 1)
+    JMI_ARRAY_INIT_1(DATA, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
     return tmp_1;
 }
 
 R_0_ra* jmi_global_tmp_2(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(DYNA, R_0_r, R_0_ra, tmp_2, 1, 1)
+    JMI_ARR(HEAP, R_0_r, R_0_ra, tmp_2, -1, 1)
     JMI_GLOBALS_INIT()
-    JMI_ARRAY_INIT_1(DYNA, R_0_r, R_0_ra, tmp_2, 1, 1, 1)
+    JMI_ARRAY_INIT_1(HEAP, R_0_r, R_0_ra, tmp_2, 1, 1, 1)
     jmi_array_rec_1(tmp_2, 1)->a = jmi_global_tmp_1(jmi);
     JMI_GLOBALS_FREE()
     JMI_DYNAMIC_FREE()
@@ -980,9 +980,9 @@ annotation(__JModelica(UnitTesting(tests={
         template="$C_model_init_eval_independent_globals$",
         generatedCode="
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 4, 1)
     static jmi_real_t tmp_1_var[4] = {0,1,2,3,};
-    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
+    JMI_ARR(DATA, jmi_real_t, jmi_array_t, tmp_1, 4, 1)
+    JMI_ARRAY_INIT_1(DATA, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
     return tmp_1;
 }
 
