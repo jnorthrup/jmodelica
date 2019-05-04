@@ -444,9 +444,9 @@ $C_dae_init_blocks_residual_functions$
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_3, 1, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_3, 1, 1)
     JMI_GLOBAL(tmp_1) = _x_0;
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 1, 1, 1)
+    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_3, 1, 1, 1)
     jmi_array_ref_1(tmp_3, 1) = _time;
     _der_x_3 = func_CCodeGenGlobalsTests_Reinit_ReinitCTest4_f_exp0(tmp_3);
     if (jmi->atInitial || jmi->atEvent) {
@@ -463,8 +463,8 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 int model_ode_initialize_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_3, 1, 1)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 1, 1, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_3, 1, 1)
+    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_3, 1, 1, 1)
     jmi_array_ref_1(tmp_3, 1) = _time;
     _der_x_3 = func_CCodeGenGlobalsTests_Reinit_ReinitCTest4_f_exp0(tmp_3);
     if (jmi->atInitial || jmi->atEvent) {
@@ -487,7 +487,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_4, 1, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_4, 1, 1)
     if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
         x[0] = 536870916;
     } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
@@ -502,7 +502,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _temp_1_1 = _sw(0);
         }
         if (LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1))) {
-            JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_4, 1, 1, 1)
+            JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_4, 1, 1, 1)
             jmi_array_ref_1(tmp_4, 1) = 1.0;
             if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
                 JMI_GLOBAL(tmp_1) = JMI_CACHED(tmp_2, func_CCodeGenGlobalsTests_Reinit_ReinitCTest4_f_exp0(tmp_4));
@@ -1598,16 +1598,16 @@ $C_functions$
     jmi_array_t* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_d;
 
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
     static jmi_real_t tmp_1_var[1] = {3,};
-    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
+    JMI_ARR(DATA, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
+    JMI_ARRAY_INIT_1(DATA, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
     return tmp_1;
 }
 
 jmi_array_t* jmi_global_tmp_2(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
     static jmi_real_t tmp_2_var[1] = {3,};
-    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
+    JMI_ARR(DATA, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
+    JMI_ARRAY_INIT_1(DATA, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
     return tmp_2;
 }
 
@@ -1698,9 +1698,9 @@ $C_functions$
     jmi_array_t* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantArray1_c;
 
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 3, 1)
     static jmi_real_t tmp_1_var[3] = {4,0,5,};
-    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_1, 3, 1, 3)
+    JMI_ARR(DATA, jmi_real_t, jmi_array_t, tmp_1, 3, 1)
+    JMI_ARRAY_INIT_1(DATA, jmi_real_t, jmi_array_t, tmp_1, 3, 1, 3)
     return tmp_1;
 }
 
@@ -1789,9 +1789,9 @@ JMI_ARRAY_TYPE(R2_1_r, R2_1_ra)
     R2_1_r* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordScalar1_f_r2;
 
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
     static jmi_real_t tmp_1_var[2] = {1.0,2.0,};
-    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    JMI_ARR(DATA, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARRAY_INIT_1(DATA, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
     return tmp_1;
 }
 
@@ -1882,24 +1882,24 @@ $C_functions$
     R_0_ra* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordArray1_f_c;
 
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
     static jmi_real_t tmp_1_var[2] = {1.0,2.0,};
-    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    JMI_ARR(DATA, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARRAY_INIT_1(DATA, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
     return tmp_1;
 }
 
 jmi_array_t* jmi_global_tmp_2(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
     static jmi_real_t tmp_2_var[2] = {3.0,4.0,};
-    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+    JMI_ARR(DATA, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_ARRAY_INIT_1(DATA, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
     return tmp_2;
 }
 
 R_0_ra* jmi_global_tmp_3(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(DYNA, R_0_r, R_0_ra, tmp_3, 2, 1)
+    JMI_ARR(HEAP, R_0_r, R_0_ra, tmp_3, -1, 1)
     JMI_GLOBALS_INIT()
-    JMI_ARRAY_INIT_1(DYNA, R_0_r, R_0_ra, tmp_3, 2, 1, 2)
+    JMI_ARRAY_INIT_1(HEAP, R_0_r, R_0_ra, tmp_3, 2, 1, 2)
     jmi_array_rec_1(tmp_3, 1)->a = jmi_global_tmp_1(jmi);
     jmi_array_rec_1(tmp_3, 2)->a = jmi_global_tmp_2(jmi);
     JMI_GLOBALS_FREE()
@@ -1979,9 +1979,9 @@ $C_functions$
     R3_2_ra* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordArray2_f_c;
 
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
     static jmi_real_t tmp_1_var[2] = {1.0,2.0,};
-    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    JMI_ARR(DATA, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARRAY_INIT_1(DATA, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
     return tmp_1;
 }
 
@@ -2008,9 +2008,9 @@ R2_1_r* jmi_global_tmp_3(jmi_t* jmi) {
 }
 
 jmi_array_t* jmi_global_tmp_4(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_4, 2, 1)
     static jmi_real_t tmp_4_var[2] = {3.0,4.0,};
-    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_4, 2, 1, 2)
+    JMI_ARR(DATA, jmi_real_t, jmi_array_t, tmp_4, 2, 1)
+    JMI_ARRAY_INIT_1(DATA, jmi_real_t, jmi_array_t, tmp_4, 2, 1, 2)
     return tmp_4;
 }
 
@@ -2038,9 +2038,9 @@ R2_1_r* jmi_global_tmp_6(jmi_t* jmi) {
 
 R3_2_ra* jmi_global_tmp_7(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(DYNA, R3_2_r, R3_2_ra, tmp_7, 2, 1)
+    JMI_ARR(HEAP, R3_2_r, R3_2_ra, tmp_7, -1, 1)
     JMI_GLOBALS_INIT()
-    JMI_ARRAY_INIT_1(DYNA, R3_2_r, R3_2_ra, tmp_7, 2, 1, 2)
+    JMI_ARRAY_INIT_1(HEAP, R3_2_r, R3_2_ra, tmp_7, 2, 1, 2)
     jmi_array_rec_1(tmp_7, 1)->r2 = jmi_global_tmp_3(jmi);
     jmi_array_rec_1(tmp_7, 2)->r2 = jmi_global_tmp_6(jmi);
     JMI_GLOBALS_FREE()
@@ -2177,9 +2177,9 @@ $C_functions$
     R1_0_r* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef1_P_r2;
 
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
     static jmi_real_t tmp_1_var[2] = {1.0,2.0,};
-    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    JMI_ARR(DATA, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARRAY_INIT_1(DATA, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
     return tmp_1;
 }
 
@@ -2271,9 +2271,9 @@ $C_functions$
     R1_0_r* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef2_P_r2;
 
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
-    JMI_ARR(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
     static jmi_real_t tmp_1_var[2] = {1.0,2.0,};
-    JMI_ARRAY_INIT_1(STATIC, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    JMI_ARR(DATA, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARRAY_INIT_1(DATA, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
     return tmp_1;
 }
 
@@ -2352,9 +2352,9 @@ $C_ode_derivatives$
 
 R1_0_ra* jmi_global_tmp_1(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(DYNA, R1_0_r, R1_0_ra, tmp_1, 1, 1)
+    JMI_ARR(HEAP, R1_0_r, R1_0_ra, tmp_1, -1, 1)
     JMI_GLOBALS_INIT()
-    JMI_ARRAY_INIT_1(DYNA, R1_0_r, R1_0_ra, tmp_1, 1, 1, 1)
+    JMI_ARRAY_INIT_1(HEAP, R1_0_r, R1_0_ra, tmp_1, 1, 1, 1)
     jmi_array_rec_1(tmp_1, 1)->x = 2.0;
     JMI_GLOBALS_FREE()
     JMI_DYNAMIC_FREE()
@@ -2450,9 +2450,9 @@ $C_destruct_external_object$
 jmi_extobj_t jmi_global_tmp_1(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
     jmi_extobj_t tmp_1;
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
     JMI_GLOBALS_INIT()
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
+    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
     jmi_array_ref_1(tmp_2, 1) = 1.0;
     tmp_1 = func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_EO_constructor_exp2(tmp_2);
     JMI_GLOBALS_FREE()
