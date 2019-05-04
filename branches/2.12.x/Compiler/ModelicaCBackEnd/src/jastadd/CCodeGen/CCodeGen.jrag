@@ -354,10 +354,15 @@ aspect CCodeGen {
 
     @Override
 	public void FFunctionVariable.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-		if (!isInput()) {
-			String suffix = (isOutput() && isComposite() && !isString()) ? C_SUFFIX_NULL : "";
-			print(p.createDeclPrinter(str), name_C() + suffix, indent);
-		}
+        if (!isInput()) {
+            if (getVisibilityType().isTemporary() && isComposite()) {
+                Dynamicity dyn = size().isUnknown() ? Dynamicity.HEAP : Dynamicity.STACK;
+                type().printDecl_C(p, str, indent, dyn, name_C(), false);
+            } else {
+                String suffix = (isOutput() && isComposite() && !isString()) ? C_SUFFIX_NULL : "";
+                print(p.createDeclPrinter(str), name_C() + suffix, indent);
+            }
+        }
 	}
 
     @Override
@@ -417,20 +422,6 @@ aspect CCodeGen {
 
     public static void FStatement.printAssignStmt_C(CodeStream str, String indent, String dst, String src) {
         str.println(indent, dst, " = ", src, ";");
-    }
-
-    public void FType.printScalarDecl_C(CodePrinter p, CodeStream str, String indent, boolean external, String name) {
-        str.print(indent);
-        str.print("JMI_DEF(");
-        str.print(macroTypeDecl(external));
-        str.print(", ");
-        str.print(name);
-        str.print(")\n");
-    }
-
-    @Override
-    public void FRecordType.printScalarDecl_C(CodePrinter p, CodeStream str, String indent, boolean external, String name) {
-        str.formatln("%sJMI_RECORD_STATIC(%s, %s)", indent, nameScalar_C(p, external), name);
     }
 
     /**
@@ -623,7 +614,7 @@ aspect CCodeGen {
         }
         
         if (guard && hb) {
-            sp.print(str, ", " + FLitExp.macro_C + "(1))");
+            sp.print(str, ", 1.0)");
         }
     }
     
