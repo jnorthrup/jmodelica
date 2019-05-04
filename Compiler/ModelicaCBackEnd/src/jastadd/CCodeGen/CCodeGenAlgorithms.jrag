@@ -62,12 +62,17 @@ aspect CCodeGenAlgorithms {
 
     public class CodePrinter {
         public abstract void printInit(FAbstractVariable v, CodeStream str, String indent, FType type);
+        public abstract void printInit(FInitArrayStmt v, CodeStream str, String indent);
     }
 
     public class CPrettyPrinter {
         @Override
         public void printInit(FAbstractVariable v, CodeStream str, String indent, FType type) {
             v.printInit(ExecStep, str, indent, type);
+        }
+        @Override
+        public void printInit(FInitArrayStmt v, CodeStream str, String indent) {
+            v.printInit(ExecStep, str, indent);
         }
     }
 
@@ -88,6 +93,21 @@ aspect CCodeGenAlgorithms {
             tp.reset(name, this, type.size(), false, indent);
             type.print(tp);
         }
+    }
+    
+    public void FInitArrayStmt.printInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        if (getShallow()) {
+            FType type = type();
+            boolean sub = getFAccessExp().getFAccess().myTopFV() != getFAccessExp().myFV();
+            Dynamicity dyn = sub || type.size().isUnknown() ? Dynamicity.HEAP : Dynamicity.STACK;
+            type.printInit_C(p.codePrinter(), str, indent, dyn, p.name(getFAccessExp()), false);
+        } else {
+            if (getFAccessExp().getFAccess().myTopFV() != getFAccessExp().myFV()) {
+                throw new UnsupportedOperationException();
+            }
+            getFAccessExp().myFV().printInit(p, str, indent, type());
+        }
+        
     }
 
     /*
@@ -132,12 +152,7 @@ aspect CCodeGenAlgorithms {
             if (size().isUnknown() || external) {
                 printDecl_C(p, str, indent, name, src, external);
             } else {
-                str.format("%sJMI_ARR(STAT, %s, %s, %s, ", indent,
-                        nameScalar_C(p, external), nameArray_C(p, external), name);
-                size().printNumElements_C(p, str, indent, src);
-                str.print(", ");
-                str.print(ndims());
-                str.println(")");
+                printDecl_C(p, str, indent, Dynamicity.STACK, name, external);
             }
         } else {
             printScalarDecl_C(p, str, indent, external, name);
@@ -194,7 +209,7 @@ aspect CCodeGenAlgorithms {
 
     @Override
     public void FInitArrayStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        p.printInit(getFAccessExp().getFAccess().myTopFV(), str, indent, type());
+        p.printInit(this, str, indent);
     }
 
     @Override
