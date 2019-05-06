@@ -1158,7 +1158,7 @@ ${test_class_extra_defs}
 
     <!-- cleans all generated junit files -->
     <target name="clean-test" depends="clean-test-report">
-        <delete dir="${junit_output}" />
+        <delete><fileset dir="${junit_output}"/></delete>
     </target>
 
     <!-- cleans all generated test report -->
