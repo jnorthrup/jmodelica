@@ -388,9 +388,9 @@ BOOLEAN relational_time_events compiler user true
 "If enabled, then relational operators are allowed to generate time events."
 
 ********************************************************************************
-BOOLEAN only_state_events compiler user false
+BOOLEAN time_events compiler user true
 
-"If enabled, no operators are allowed to generate time events."
+"If enabled, operators are allowed to generate time events."
 
 ********************************************************************************
 BOOLEAN event_output_vars compiler user false

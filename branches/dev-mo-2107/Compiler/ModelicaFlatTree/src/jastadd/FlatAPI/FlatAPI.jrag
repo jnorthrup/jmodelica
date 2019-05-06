@@ -1959,9 +1959,9 @@ aspect FlatAPI {
     
     
     
-    syn boolean FRelExp.isTimeEventGenerating() =  !myOptions().getBooleanOption("only_state_events") && myOptions().getBooleanOption("relational_time_events") && solutionForTime().isValidExp();
+    syn boolean FRelExp.isTimeEventGenerating() =  myOptions().getBooleanOption("time_events") && myOptions().getBooleanOption("relational_time_events") && solutionForTime().isValidExp();
     eq FEqRelExp.isTimeEventGenerating() = false;
-    syn boolean FDelayExp.isTimeEventGenerating() = !myOptions().getBooleanOption("only_state_events") && getDelay().variability().parameterOrLess();
+    syn boolean FDelayExp.isTimeEventGenerating() = myOptions().getBooleanOption("time_events") && getDelay().variability().parameterOrLess();
     
     protected int FExp.checkIndex(int i) {
         if (i < 0) {

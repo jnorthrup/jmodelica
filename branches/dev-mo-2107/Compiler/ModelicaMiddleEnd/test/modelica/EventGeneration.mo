@@ -406,15 +406,16 @@ model OnlyStateEvents1
         t := 1;
     end when;
 
-  annotation(__JModelica(UnitTesting(tests={
-      TransformCanonicalTestCase(
-          name="EventGeneration_OnlyStateEvents1",
-          event_output_vars=true,
-          only_state_events=false,
-          description="Time event generating expressions should generate event indicator equations when using the only_state_events option",
-          flatModel="
+annotation(__JModelica(UnitTesting(tests={
+    TransformCanonicalTestCase(
+        name="OnlyStateEvents1",
+        description="Time event generating expressions should generate event indicator equations when the option time_events=false",
+        event_output_vars=true,
+        time_events=false,
+        flatModel="
 fclass EventGeneration.OnlyStateEvents1
  discrete Real t;
+ output Real _eventIndicator_1;
  discrete Boolean temp_1;
 initial equation
  pre(t) = 0.0;
@@ -425,6 +426,8 @@ algorithm
  if temp_1 and not pre(temp_1) then
   t := 1;
  end if;
+equation
+ _eventIndicator_1 = time - 1;
 end EventGeneration.OnlyStateEvents1;
 ")})));
 end OnlyStateEvents1;

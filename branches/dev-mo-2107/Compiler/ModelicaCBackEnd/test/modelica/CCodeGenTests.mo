@@ -19716,8 +19716,8 @@ model DelayOnlyStateEvents
 annotation(__JModelica(UnitTesting(tests={
     CCodeGenTestCase(
         name="DelayOnlyStateEvents",
-        description="similar to Delay1, but should generate only state events when the option only_state_events option=true",
-        only_state_events=true,
+        description="similar to Delay1, but should generate only state events when the option time_events=false",
+        time_events=false,
         generate_ode=true,
         equation_sorting=true,
         template="
@@ -19734,11 +19734,11 @@ $C_DAE_initial_event_indicator_residuals$
 ",
         generatedCode="
 N_delays = 2;
-static const int N_relations = 0;
-static const int DAE_relations[] = { -1 };
+static const int N_relations = 2;
+static const int DAE_relations[] = { JMI_REL_GEQ, JMI_REL_GEQ };
 
-    jmi_delay_init(jmi, 0, JMI_TRUE, JMI_FALSE, AD_WRAP_LITERAL(1), _time);
-    jmi_delay_init(jmi, 1, JMI_TRUE, JMI_TRUE, AD_WRAP_LITERAL(1), _time);
+    jmi_delay_init(jmi, 0, JMI_FALSE, JMI_FALSE, AD_WRAP_LITERAL(1), _time);
+    jmi_delay_init(jmi, 1, JMI_FALSE, JMI_TRUE, AD_WRAP_LITERAL(1), _time);
 
     jmi_delay_record_sample(jmi, 0, _time);
     jmi_delay_record_sample(jmi, 1, _time);
@@ -19766,11 +19766,15 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 
     int ef = 0;
     JMI_DYNAMIC_INIT()
+    jmi_delay_first_event_indicator(jmi, 0, AD_WRAP_LITERAL(1), &(*res)[0]);
+    jmi_delay_second_event_indicator(jmi, 0, AD_WRAP_LITERAL(1), &(*res)[1]);
     JMI_DYNAMIC_FREE()
     return ef;
 
     int ef = 0;
     JMI_DYNAMIC_INIT()
+    (*res)[0] = JMI_DELAY_INITIAL_EVENT_RES;
+    (*res)[1] = JMI_DELAY_INITIAL_EVENT_RES;
     JMI_DYNAMIC_FREE()
     return ef;
 ")})));
