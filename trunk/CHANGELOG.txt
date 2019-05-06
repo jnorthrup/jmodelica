@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+# Fixed ; Minor ; Compiler ; #5763
+Improved scalarization of record arrays.
+
 # Fixed ; Minor ; Compiler ; #5756
 Improved array initialization for primitive arrays in global constants.
 
