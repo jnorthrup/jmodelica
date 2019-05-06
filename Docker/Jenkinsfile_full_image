@@ -41,6 +41,8 @@ node('docker') {
                     sh 'cp /home/baseuser/test_results/* test_results/'
                     archiveArtifacts artifacts: '**/*.xml', fingerprint: false
                     junit testResults: 'test_results/*.xml', allowEmptyResults: false
+                    sh 'mkdir jm_install && cp -r /home/baseuser/jm_install/* jm_install/'
+                    archiveArtifacts artifacts: 'jm_install/**', fingerprint: false
                 }
             }
         }
