@@ -2166,6 +2166,11 @@ aspect FlatAPI {
         [new ArrayList<FDelayExp>()] with add root FAbstractEquation;
     FDelayExp contributes this when generatesEventInDAE()
     to FAbstractEquation.delayExpInEquation() for myFEquation();
+
+    coll ArrayList<FDelayExp> FStatement.delayExpInStmt() 
+        [new ArrayList<FDelayExp>()] with add root FStatement;
+    FDelayExp contributes this when generatesEventInDAE()
+    to FStatement.delayExpInStmt() for myFStatement();
     
     inh FStatement FExp.myFStatement();
     inh FStatement FStatement.myFStatement();
@@ -3578,10 +3583,14 @@ aspect FVariableUses {
      * Returns the event indicators for the expressions that are found by {@link #relExpInEquation}.
      */
     syn Set<FVariable> FAbstractEquation.eventIndicators() {
+        Set<EventGeneratingExp> exps = new HashSet<>();
+        exps.addAll(relExpInEquation());
+        exps.addAll(delayExpInEquation());
+        
         Set<FVariable> res = new HashSet<>();
-        for (FRelExp exp : relExpInEquation()) {
+        for (EventGeneratingExp exp : exps) {
             if (exp.hasIndicator()) {
-                res.add((FVariable) exp.getIndicator().myFV());
+                res.add(exp.myIndicatorVariable());
             }
         }
         return res;

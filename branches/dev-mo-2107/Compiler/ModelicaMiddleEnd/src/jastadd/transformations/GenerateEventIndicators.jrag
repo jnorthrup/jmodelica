@@ -441,6 +441,12 @@ aspect GenerateEventIndicators {
 
     }
 
+    public interface EventGeneratingExp {
+        boolean hasIndicator();
+    }
+    FRelExp implements EventGeneratingExp;
+    FDelayExp implements EventGeneratingExp;
+
     /**
      * Generates initial statements and indicator statements for relational expressions.
      * <p>
@@ -479,20 +485,26 @@ aspect GenerateEventIndicators {
          */
         @Override
         public boolean transform(FAlgorithm alg) {
-
             for (FRelExp exp : alg.relExpInEquation()) {
-
-                if (exp.dependsOn(alg.referencedFVariablesInLHS())) {
-                    exp.genIndicator(eventOutputVars);
-
-                    if (exp.needsIndicatorInit()) {
-                        addStatement(exp.indicatorInitStmt());
-                    }
-                } else if (exp.shouldGenerateIndicator() && eventOutputVars) {
-                    exp.genIndicator(eventOutputVars);
-                }
+                genIndicatorFromAlgorithm(exp, alg);
+            }
+            for (FDelayExp exp : alg.delayExpInEquation()) {
+                genIndicatorFromAlgorithm(exp, alg);
             }
             return true;
+        }
+        
+        private <Exp extends FExp & EventGeneratingExp> 
+        void genIndicatorFromAlgorithm(Exp exp, FAlgorithm alg) {
+            if (exp.dependsOn(alg.referencedFVariablesInLHS())) {
+                exp.genIndicator(eventOutputVars);
+
+                if (exp.needsIndicatorInit()) {
+                    addStatement(exp.createIndicatorInitStmt());
+                }
+            } else if (exp.shouldGenerateIndicator() && eventOutputVars) {
+                exp.genIndicator(eventOutputVars);
+            }
         }
 
         /**
@@ -503,15 +515,22 @@ aspect GenerateEventIndicators {
          */
         @Override
         public void transform(FStatement stmt) {
-
             for (FRelExp exp : stmt.relExpInStmt()) {
-                if (exp.dependsOn(stmt.myFAlgorithm().referencedFVariablesInLHS())) {
-                    addStatement(exp.indicatorStmt());
-                } else if (exp.shouldGenerateIndicator() && eventOutputVars) {
-                    generateEquation(exp.indicatorEquation());
-                }
+                genIndicatorFromStatement(exp, stmt);
+            }
+            for (FDelayExp exp : stmt.delayExpInStmt()) {
+                genIndicatorFromStatement(exp, stmt);
             }
             addStatement(stmt);
+        }
+        
+        private <Exp extends FExp & EventGeneratingExp> 
+        void genIndicatorFromStatement(Exp exp, FStatement stmt) {
+            if (exp.dependsOn(stmt.myFAlgorithm().referencedFVariablesInLHS())) {
+                addStatement(exp.createIndicatorStmt());
+            } else if (exp.shouldGenerateIndicator() && eventOutputVars) {
+                generateEquation(exp.createIndicatorEquation());
+            }
         }
 
     }
@@ -548,28 +567,59 @@ aspect GenerateEventIndicators {
         @Override
         public void transform(FAbstractEquation eqn) {
             for (FRelExp exp : eqn.relExpInEquation()) {
-                if (exp.shouldGenerateIndicator() && eventOutputVars) {
-                    exp.genIndicator(eventOutputVars);
-                    generateEquation(exp.indicatorEquation());
-                }
+                genIndicator(exp);
+            }
+            for (FDelayExp exp : eqn.delayExpInEquation()) {
+                genIndicator(exp);
             }
             addEquation(eqn);
         }
+        
+        private <Exp extends FExp & EventGeneratingExp> 
+        void genIndicator(Exp exp) {
+            if (exp.shouldGenerateIndicator() && eventOutputVars) {
+                exp.genIndicator(eventOutputVars);
+                generateEquation(exp.createIndicatorEquation());
+            }
+        }
     }
 
-    syn boolean FRelExp.shouldGenerateIndicator() = generatesEvent() && !isTimeEventGenerating() &&
-            !inFunctionCall() && !containsCommonFunctionCallExp();
+    public boolean EventGeneratingExp.shouldGenerateIndicator();
+    @Override
+    public boolean FRelExp.shouldGenerateIndicator() {
+        return generatesEvent() && !isTimeEventGenerating() && !inFunctionCall() && !containsCommonFunctionCallExp();
+    }
+    @Override
+    public boolean FDelayExp.shouldGenerateIndicator() {
+        return generatesEvent() && !isTimeEventGenerating() && !inFunctionCall() && !containsCommonFunctionCallExp();
+    }
 
     /**
      * Checks whether or not this relational expression requires an initialization statement.
      */
-    inh boolean FRelExp.needsIndicatorInit();
-    eq Root.getChild().needsIndicatorInit()                = false;
-    eq FAlgorithm.getChild().needsIndicatorInit()          = false;
-    eq FForStmt.getForStmt().needsIndicatorInit()          = true;
-    eq FIfStmt.getElseStmt().needsIndicatorInit()          = true;
-    eq FIfWhenClause.getFStatement().needsIndicatorInit()  = true;
-    eq FWhileStmt.getWhileStmt().needsIndicatorInit()      = true;
+    public boolean EventGeneratingExp.needsIndicatorInit();
+    /* 
+     * Implementation that is not JastAdd attribute necessary because of JastAdd bug #282.
+     * https://bitbucket.org/jastadd/jastadd2/issues/282/abstract-interface-methods-are-added-to
+     * This issue is fixed in JastAdd 2.3.1.
+     * TODO Remove these two workaround implementations when JastAdd has been updated.
+     */
+    public boolean FRelExp.needsIndicatorInit() {
+        return needsIndicatorInitHelper();
+    }
+    public boolean FDelayExp.needsIndicatorInit() {
+        return needsIndicatorInitHelper();
+    }
+    
+    
+    inh boolean FRelExp.needsIndicatorInitHelper();
+    inh boolean FDelayExp.needsIndicatorInitHelper();
+    eq Root.getChild().needsIndicatorInitHelper()                = false;
+    eq FAlgorithm.getChild().needsIndicatorInitHelper()          = false;
+    eq FForStmt.getForStmt().needsIndicatorInitHelper()          = true;
+    eq FIfStmt.getElseStmt().needsIndicatorInitHelper()          = true;
+    eq FIfWhenClause.getFStatement().needsIndicatorInitHelper()  = true;
+    eq FWhileStmt.getWhileStmt().needsIndicatorInitHelper()      = true;
 
     inh boolean FAccessExp.isIndicator();
     eq FClass.getChild().isIndicator() = false;
@@ -587,17 +637,37 @@ aspect GenerateEventIndicators {
     /**
      * Creates an assign equation for the indicator.
      */
-    syn FAbstractEquation FRelExp.indicatorEquation() = new FEquation(getIndicator().fullCopy(), indicatorExp());
+    public FAbstractEquation EventGeneratingExp.createIndicatorEquation();
+    public FAbstractEquation FRelExp.createIndicatorEquation() {
+        return new FEquation(getIndicator().treeCopy(), indicatorExp());
+    }
+    public FAbstractEquation FDelayExp.createIndicatorEquation() {
+        return new FEquation(new FAccessExp(getIndicator().treeCopy()), indicatorExp());
+    }
 
     /**
      * Creates an assign statement for the indicator.
      */
-    syn FStatement FRelExp.indicatorStmt() = new FAssignStmt(getIndicator().asFAccessExp().fullCopy(), indicatorExp());
+    public FStatement EventGeneratingExp.createIndicatorStmt();
+    public FStatement FRelExp.createIndicatorStmt() {
+        return new FAssignStmt(getIndicator().treeCopy(), indicatorExp());
+    }
+    public FStatement FDelayExp.createIndicatorStmt() {
+        return new FAssignStmt(new FAccessExp(getIndicator().treeCopy()), indicatorExp());
+    }
 
     /**
      * Creates an initialization statement for the indicator.
      */
-    syn FStatement FRelExp.indicatorInitStmt() = new FAssignStmt(getIndicator().asFAccessExp().fullCopy(), new FIntegerLitExp(1));
+    public FStatement EventGeneratingExp.createIndicatorInitStmt();
+    @Override
+    public FStatement FRelExp.createIndicatorInitStmt() {
+        return new FAssignStmt(getIndicator().treeCopy(), new FIntegerLitExp(1));
+    }
+    @Override
+    public FStatement FDelayExp.createIndicatorInitStmt() {
+        return new FAssignStmt(new FAccessExp(getIndicator().treeCopy()), new FIntegerLitExp(1));
+    }
 
     /**
      * Checks whether or not an expression depends on any variable in a collection of them.
@@ -613,6 +683,8 @@ aspect GenerateEventIndicators {
         }
         return false;
     }
+
+    public void EventGeneratingExp.genIndicator(boolean output);
 
     /**
      * Creates an indicator for this FRelExp.
@@ -630,6 +702,19 @@ aspect GenerateEventIndicators {
         setIndicator(v.createAccessExp());
         setIndicatorVarName(variableName);
     }
+    public void FDelayExp.genIndicator(boolean output) {
+        String variableName = calcIndicatorVarName();
+        FVariable v = new FRealVariable(VisibilityType.PUBLIC, Variability.CONTINUOUS,
+                new FAccessFull(variableName));
+
+        if (output) {
+            v.setTypePrefixInputOutput(TypePrefixInputOutput.OUTPUT);
+        }
+
+        myFClass().addFVariable(v);
+        setIndicator(v.createAccessExp().getFAccess());
+        setIndicatorVarName(variableName);
+    }
 
     /**
      * Creates an expression for the event indicator.
@@ -641,6 +726,17 @@ aspect GenerateEventIndicators {
             res = new FDivExp(res, nominal());
         }
         return res;
+    }
+    public FExp FDelayExp.indicatorExp() {
+        return new FDelayIndicator(getFExp(), getDelay(), getMaxOpt());
+    }
+
+    public FVariable EventGeneratingExp.myIndicatorVariable();
+    public FVariable FRelExp.myIndicatorVariable() {
+        return getIndicator().myFV().asFVariable();
+    }
+    public FVariable FDelayExp.myIndicatorVariable() {
+        return getIndicator().myFV().asFVariable();
     }
 
     /* ====================== *

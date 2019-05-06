@@ -469,4 +469,93 @@ end EventGeneration.AliasIndicator;
 ")})));
 end AliasIndicator;
 
+model DelayStateEvents1
+    discrete Real x(start=0.0, fixed=true);
+    output Real y;
+equation
+    when (time >= 0.5) then
+        x = 2;
+    end when;
+    y = delay(x, 1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+//        CCodeGenTestCase(
+            name="EventGeneration_DelayStateEvents1",
+            time_events=false,
+            event_output_vars=true,
+            description="Tests extraction of nested event generating expressions
+            into when equations.",
+//            template="
+//$C_DAE_event_indicator_residuals$
+//$C_DAE_initial_event_indicator_residuals$
+//",
+//            generatedCode=
+            flatModel=
+"
+fclass EventGeneration.DelayStateEvents1
+ discrete Real x(start = 0.0,fixed = true);
+ output Real y;
+ output Real _eventIndicator_1;
+ output Real _eventIndicator_2;
+ discrete Boolean temp_1;
+initial equation
+ pre(x) = 0.0;
+ pre(temp_1) = false;
+equation
+ temp_1 = time >= 0.5;
+ x = if temp_1 and not pre(temp_1) then 2 else pre(x);
+ y = delay(x, 1);
+ _eventIndicator_1 = time - 0.5;
+ _eventIndicator_2 = delayIndicator(x, 1);
+end EventGeneration.DelayStateEvents1;
+")})));
+end DelayStateEvents1;
+
+model DelayStateEvents2
+    discrete Real x(start=0.0, fixed=true);
+    output Real y;
+    Real tmp;
+equation
+    tmp = sin(time * 100);
+    when (time >= 0.5) then
+        x = 2;
+    end when;
+    y = delay(x, tmp, 1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+//          CCodeGenTestCase(
+            name="EventGeneration_DelayStateEvents2",
+            relational_time_events=false,
+            event_output_vars=true,
+            description="Tests extraction of nested event generating expressions
+            into when equations.",
+//            template="
+//$C_DAE_event_indicator_residuals$
+//$C_DAE_initial_event_indicator_residuals$
+//",
+//            generatedCode=
+            flatModel=
+"fclass EventGeneration.DelayStateEvents2
+ discrete Real x(start = 0.0,fixed = true);
+ output Real y;
+ Real tmp;
+ output Real _eventIndicator_1;
+ output Real _eventIndicator_2;
+ discrete Boolean temp_1;
+initial equation
+ pre(x) = 0.0;
+ pre(temp_1) = false;
+equation
+ tmp = sin(time * 100);
+ temp_1 = time >= 0.5;
+ x = if temp_1 and not pre(temp_1) then 2 else pre(x);
+ y = delay(x, tmp, 1);
+ _eventIndicator_1 = time - 0.5;
+ _eventIndicator_2 = delayIndicator(x, tmp, 1);
+end EventGeneration.DelayStateEvents2;
+")})));
+end DelayStateEvents2;
+
 end EventGeneration;
