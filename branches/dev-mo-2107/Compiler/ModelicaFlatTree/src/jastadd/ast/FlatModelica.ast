@@ -1312,7 +1312,7 @@ FReinit : FBuiltInFunctionCall ::= Var:FExp FExp;
 /**
  * The delay() operator.
  */
-FDelayExp : FBuiltInFunctionCall ::= FExp Delay:FExp [Max:FExp] [Indicator:FAccess] <IndicatorVarName:String>;
+FDelayExp : FBuiltInFunctionCall ::= FExp Delay:FExp [Max:FExp] [Indicator:FAccessExp] <IndicatorVarName:String>;
 
 /**
  * Used for generating event indicators for the delay() operator.

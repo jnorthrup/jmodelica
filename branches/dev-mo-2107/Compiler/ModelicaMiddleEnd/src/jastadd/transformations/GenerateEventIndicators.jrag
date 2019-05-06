@@ -642,7 +642,7 @@ aspect GenerateEventIndicators {
         return new FEquation(getIndicator().treeCopy(), indicatorExp());
     }
     public FAbstractEquation FDelayExp.createIndicatorEquation() {
-        return new FEquation(new FAccessExp(getIndicator().treeCopy()), indicatorExp());
+        return new FEquation(getIndicator().treeCopy(), indicatorExp());
     }
 
     /**
@@ -653,7 +653,7 @@ aspect GenerateEventIndicators {
         return new FAssignStmt(getIndicator().treeCopy(), indicatorExp());
     }
     public FStatement FDelayExp.createIndicatorStmt() {
-        return new FAssignStmt(new FAccessExp(getIndicator().treeCopy()), indicatorExp());
+        return new FAssignStmt(getIndicator().treeCopy(), indicatorExp());
     }
 
     /**
@@ -666,7 +666,7 @@ aspect GenerateEventIndicators {
     }
     @Override
     public FStatement FDelayExp.createIndicatorInitStmt() {
-        return new FAssignStmt(new FAccessExp(getIndicator().treeCopy()), new FIntegerLitExp(1));
+        return new FAssignStmt(getIndicator().treeCopy(), new FIntegerLitExp(1));
     }
 
     /**
@@ -712,7 +712,7 @@ aspect GenerateEventIndicators {
         }
 
         myFClass().addFVariable(v);
-        setIndicator(v.createAccessExp().getFAccess());
+        setIndicator(v.createAccessExp());
         setIndicatorVarName(variableName);
     }
 
