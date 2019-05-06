@@ -192,7 +192,7 @@ aspect TransformCanonical {
             /**
              * Create a transformation with specific settings.
              * 
-             * @param option  boolean option the transformation depends on (null for none)
+             * @param option  boolean option the transfomation depends on (null for none)
              */
             public Transformation(String option) {
                 this.option = option;

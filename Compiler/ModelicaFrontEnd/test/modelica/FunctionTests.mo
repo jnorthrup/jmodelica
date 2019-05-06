@@ -17629,55 +17629,6 @@ end FunctionTests.ConstantInFunction5;
 ")})));
 end ConstantInFunction5;
 
-model ConstantInRecordFunctionArgument
-    record R
-        constant Integer n = 1;
-        Real[n] x = 1:n;
-    end R;
-        
-    function f
-        input R r;
-        output Real y;
-    algorithm
-        y := 0;
-        for i in 1:r.n loop
-            y := y + r.x[i];
-        end for;
-    end f;
-        
-    R r(n=2);
-    Real y = f(r);
-	
-	annotation(__JModelica(UnitTesting(tests={
-	    FlatteningTestCase(
-		    name="ConstantInRecordFunctionArgument",
-			description="",
-			flatModel="
-fclass FunctionTests.ConstantInRecordFunctionArgument
- FunctionTests.ConstantInRecordFunctionArgument.R r(n = 2,x(size() = {2}) = 1:2);
- Real y = FunctionTests.ConstantInRecordFunctionArgument.f(r);
-
-public
- function FunctionTests.ConstantInRecordFunctionArgument.f
-  input FunctionTests.ConstantInRecordFunctionArgument.R r;
-  output Real y;
- algorithm
-  assert(r.n == size(r.x, 1), \"Mismatching sizes in function 'FunctionTests.ConstantInRecordFunctionArgument.f', component 'r.x', dimension '1'\");
-  y := 0;
-  for i in 1:r.n loop
-   y := y + r.x[i];
-  end for;
-  return;
- end FunctionTests.ConstantInRecordFunctionArgument.f;
-
- record FunctionTests.ConstantInRecordFunctionArgument.R
-  constant Integer n;
-  Real x[1];
- end FunctionTests.ConstantInRecordFunctionArgument.R;
-
-end FunctionTests.ConstantInRecordFunctionArgument;
-")})));
-end ConstantInRecordFunctionArgument;
 
 model ArrayWithIfInput
     function g
