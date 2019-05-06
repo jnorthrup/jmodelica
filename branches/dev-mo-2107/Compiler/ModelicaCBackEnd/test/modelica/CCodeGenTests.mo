@@ -19706,6 +19706,76 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end Delay6;
 
+
+model DelayOnlyStateEvents
+    Real x1,x2;
+  equation
+    x1 = delay(time, 1);
+    x2 = noEvent(delay(time, 1));
+
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="DelayOnlyStateEvents",
+        description="similar to Delay1, but should generate only state events when the option only_state_events option=true",
+        only_state_events=true,
+        generate_ode=true,
+        equation_sorting=true,
+        template="
+N_delays = $n_delays$;
+$C_DAE_relations$
+
+$C_delay_init$
+$C_delay_sample$
+$C_ode_initialization$
+$C_ode_derivatives$
+
+$C_DAE_event_indicator_residuals$
+$C_DAE_initial_event_indicator_residuals$
+",
+        generatedCode="
+N_delays = 2;
+static const int N_relations = 0;
+static const int DAE_relations[] = { -1 };
+
+    jmi_delay_init(jmi, 0, JMI_TRUE, JMI_FALSE, AD_WRAP_LITERAL(1), _time);
+    jmi_delay_init(jmi, 1, JMI_TRUE, JMI_TRUE, AD_WRAP_LITERAL(1), _time);
+
+    jmi_delay_record_sample(jmi, 0, _time);
+    jmi_delay_record_sample(jmi, 1, _time);
+
+
+int model_ode_initialize_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    _x1_0 = _time;
+    _x2_1 = (_time);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    _x1_0 = jmi_delay_evaluate(jmi, 0, _time, AD_WRAP_LITERAL(1));
+    _x2_1 = (jmi_delay_evaluate(jmi, 1, _time, AD_WRAP_LITERAL(1)));
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_DYNAMIC_FREE()
+    return ef;
+
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_DYNAMIC_FREE()
+    return ef;
+")})));
+end DelayOnlyStateEvents;
+
 model SpatialDist1
     Real x1,x2,x3,x4;
   equation

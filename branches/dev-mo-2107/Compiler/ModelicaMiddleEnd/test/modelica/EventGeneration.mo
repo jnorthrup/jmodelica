@@ -399,6 +399,36 @@ end EventGeneration.OutputVarsState2;
 ")})));
 end OutputVarsState2;
 
+model OnlyStateEvents1
+    Real t;
+  algorithm
+    when time > 1 then
+        t := 1;
+    end when;
+
+  annotation(__JModelica(UnitTesting(tests={
+      TransformCanonicalTestCase(
+          name="EventGeneration_OnlyStateEvents1",
+          event_output_vars=true,
+          only_state_events=false,
+          description="Time event generating expressions should generate event indicator equations when using the only_state_events option",
+          flatModel="
+fclass EventGeneration.OnlyStateEvents1
+ discrete Real t;
+ discrete Boolean temp_1;
+initial equation
+ pre(t) = 0.0;
+ pre(temp_1) = false;
+equation
+ temp_1 = time > 1;
+algorithm
+ if temp_1 and not pre(temp_1) then
+  t := 1;
+ end if;
+end EventGeneration.OnlyStateEvents1;
+")})));
+end OnlyStateEvents1;
+
 model AliasIndicator
   Real a;
   Real b;
