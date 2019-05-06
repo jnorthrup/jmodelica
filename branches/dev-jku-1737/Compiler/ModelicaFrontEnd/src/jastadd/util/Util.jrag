@@ -863,7 +863,7 @@ aspect Names {
   inh String ASTNode.topPackagePath();
   eq Root.getChild().topPackagePath() = null;
   eq InstClassDecl.getChild().topPackagePath() {
-	  String path = topPackagePath();
+      String path = topPackagePath();
 	  return (path == null) ? dirName() : path;
   }
   eq SrcFullClassDecl.getChild().topPackagePath() {
@@ -896,13 +896,25 @@ aspect Names {
     eq FlatRoot.getChild().enclosingInstClassDecl()          = null;
     eq InstBaseClassDecl.getChild().enclosingInstClassDecl() = this;
     eq InstComponentDecl.getChild().enclosingInstClassDecl() = myInstClass();
-    
+
+    /**
+     * Any closest ancestor InstanceComponent which is a parent to this one.
+     * This method doesn't stop at classes which enclosingInstComponent does.
+     */
+
+    inh InstComponentDecl InstComponentDecl.parentInstComponent();
+    eq InstRoot.getChild().parentInstComponent()          = null;
+    eq InstComponentDecl.getChild().parentInstComponent() = this;
+
+    /**
+     * The closest ancestor instComponentDecl if there is one before the closest class.
+     * This method stops at classes.
+     */
     inh InstComponentDecl InstComponentDecl.enclosingInstComponentDecl();
     inh InstComponentDecl InstExtends.enclosingInstComponentDecl();
     eq BaseNode.getChild().enclosingInstComponentDecl()          = null;
     eq InstExtends.getChild().enclosingInstComponentDecl()       = enclosingInstComponentDecl();
     eq InstComponentDecl.getChild().enclosingInstComponentDecl() = this;
-    
 
     inh SrcBaseClassDecl ASTNode.enclosingClassDecl();
     eq Root.getChild().enclosingClassDecl() = null;
