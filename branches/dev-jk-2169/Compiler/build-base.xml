@@ -31,7 +31,7 @@
     <property name="java_version" value="1.7"/>
     <property name="java_compiler" value="javac${java_version}"/>
 
-    <property name="target" value="${user.dir}/../.."/>
+    <property name="target" value="${user.dir}/../../antbuild"/>
 
     <property name="compiler_build" value="${target}/src/build" />
     <property name="java_output_intermediate" value="${compiler_build}/${sub_package}/java-generated-intermediate" />
@@ -1137,9 +1137,9 @@ ${test_class_extra_defs}
     <!-- cleans all generated java files in the compiler -->
     <target name="clean-ast">
         <delete dir="${java_output_intermediate}" />
-    	<delete dir="${java_output_intermediate_common}" />
-        <delete dir="${java_output_final}" />
-    	<delete dir="${java_output_final_common}" />
+        <delete dir="${java_output_intermediate_common}" />
+        <delete><fileset dir="${java_output_final}"/></delete>
+        <delete><fileset dir="${java_output_final_common}"/></delete>
     </target>
 
     <!-- cleans all extra generated java files -->
