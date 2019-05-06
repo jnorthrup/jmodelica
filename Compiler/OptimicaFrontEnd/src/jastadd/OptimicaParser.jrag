@@ -69,6 +69,7 @@ aspect OptimicaParsers {
         parser.setLineBreakMap(scanner.getLineBreakMap());
         parser.setFormattingRecorder(scanner.getFormattingRecorder());
         parser.setFileName(loadInfo.getPath());
+        parser.setLoadInfo(loadInfo);
         return parser;
     }
 
