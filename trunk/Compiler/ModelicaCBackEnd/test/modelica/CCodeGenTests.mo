@@ -21152,4 +21152,67 @@ $C_dae_add_blocks_residual_functions$
 ")})));
 end NonlinearSolverChoice3;
 
+model RecordScalarTemp1
+    operator record R
+        Real x;
+        
+        encapsulated operator '*'
+            function mul
+                input R a;
+                input R b;
+                output R c;
+            algorithm
+                c := R(a.x*b.x);
+            end mul;
+        end '*';
+    end R;
+    
+    function f
+        input Real x;
+        output R r;
+    algorithm
+        r := R(x)*R(x);
+        annotation(Inline=false);
+    end f;
+    
+    R r = f(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="RecordScalarTemp1",
+            description="",
+            template="
+$C_functions$
+",
+            generatedCode="
+void func_CCodeGenTests_RecordScalarTemp1_f_def0(jmi_real_t x_v, R_0_r* r_v) {
+    JMI_DYNAMIC_INIT()
+    JMI_RECORD_STATIC(R_0_r, r_vn)
+    JMI_RECORD_STATIC(R_0_r, temp_1_v)
+    JMI_RECORD_STATIC(R_0_r, tmp_1)
+    JMI_RECORD_STATIC(R_0_r, tmp_2)
+    if (r_v == NULL) {
+        r_v = r_vn;
+    }
+    tmp_1->x = x_v;
+    tmp_2->x = x_v;
+    func_CCodeGenTests_RecordScalarTemp1_R_____mul_def1(tmp_1, tmp_2, temp_1_v);
+    r_v->x = temp_1_v->x;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void func_CCodeGenTests_RecordScalarTemp1_R_____mul_def1(R_0_r* a_v, R_0_r* b_v, R_0_r* c_v) {
+    JMI_DYNAMIC_INIT()
+    JMI_RECORD_STATIC(R_0_r, c_vn)
+    if (c_v == NULL) {
+        c_v = c_vn;
+    }
+    c_v->x = a_v->x * b_v->x;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+")})));
+end RecordScalarTemp1;
+
 end CCodeGenTests;
