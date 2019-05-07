@@ -102,7 +102,7 @@ aspect CCodeGenAlgorithms {
     }
     
     public void FInitArrayStmt.printInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-        if (getShallow()) {
+        if (getShallow() && !p.isDer()) {
             FType type = type();
             boolean sub = getFAccessExp().getFAccess().myTopFV() != getFAccessExp().myFV();
             Dynamicity dyn = sub || type.size().isUnknown() ? Dynamicity.HEAP : Dynamicity.STACK;
