@@ -335,7 +335,6 @@ aspect EquationSolve {
 
     eq FEquation.nbrUses(String name) = getLeft().nbrUses(name) + getRight().nbrUses(name);
     eq CommonAccessExp.nbrUses(String name) = name.equals(name())? 1: 0;
-    eq FDelayIndicator.nbrUses(String name) = 0;
 
     syn FExp FRelExp.solutionForTime() {
         if (getLeft() instanceof FTimeExp && getRight().variability().discreteOrLess()) {
