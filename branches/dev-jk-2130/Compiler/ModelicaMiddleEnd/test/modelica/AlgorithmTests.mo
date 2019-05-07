@@ -436,7 +436,7 @@ public
     y[i1,i2] := x[i2,i1];
    end for;
   end for;
-  init temp_1 as Real[size(x, 2), size(x, 1)];
+  init temp_1 as Real[size(x, 1), size(x, 2)];
   for i1 in 1:size(x, 1) loop
    for i2 in 1:size(x, 2) loop
     temp_1[i1,i2] := y[i2,i1];
@@ -634,6 +634,7 @@ public
   end for;
   init temp_2 as AlgorithmTests.TempAssign3.R[max(t, 0)];
   for i1 in 1:max(t, 0) loop
+   init temp_2[i1].a as Real[2];
    for i2 in 1:2 loop
     temp_2[i1].a[i2] := y[temp_1[i1]].a[i2];
    end for;

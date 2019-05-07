@@ -7750,10 +7750,10 @@ public
   for i1 in 1:3 loop
    o[temp_1[i1]] := temp_2[i1];
   end for;
-  init temp_3 as Real[2];
   init temp_4 as Integer[2];
   temp_4[1] := 3;
   temp_4[2] := 5;
+  init temp_3 as Real[2];
   for i1 in 1:2 loop
    temp_3[i1] := o[temp_4[i1]];
   end for;

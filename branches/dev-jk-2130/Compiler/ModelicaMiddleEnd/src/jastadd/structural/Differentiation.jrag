@@ -1037,9 +1037,9 @@ aspect AlgorithmDifferentiation{
     
     @Override
     public void FInitArrayStmt.diff(List<FStatement> diffed) {
-        diffed.add(fullCopy());
+        diffed.add(treeCopy());
         if (order() == myFAlgorithm().order() && shouldBeDifferentiated()) {
-            diffed.add(new FDerivatedInitArrayStmt(getFAccessExp().createDerExp(1).asFAccessExp(), order() + 1));
+            diffed.add(new FDerivatedInitArrayStmt(getFAccessExp().createDerExp(1).asFAccessExp(), getShallow(), getSizes().treeCopy(), order() + 1));
         }
     }
     

@@ -41,16 +41,16 @@ $C_functions$
         generatedCode="
 void func_CCodeGenCompositeStatementTests_RecordStmt1_f_def0(R_0_r* r_v, R_0_ra* y_a) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, R_0_r, R_0_ra, y_an, 2, 1)
-    JMI_ARR(STAT, R_0_r, R_0_ra, temp_1_a, 2, 1)
+    JMI_ARR(STACK, R_0_r, R_0_ra, y_an, 2, 1)
+    JMI_ARR(STACK, R_0_r, R_0_ra, temp_1_a, 2, 1)
     jmi_real_t i1_0i;
     jmi_int_t i1_0ie;
     jmi_int_t i1_0in;
     if (y_a == NULL) {
-        JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, y_an, 2, 1, 2)
+        JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, y_an, 2, 1, 2)
         y_a = y_an;
     }
-    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, temp_1_a, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, temp_1_a, 2, 1, 2)
     *jmi_array_rec_1(temp_1_a, 1) = *JMI_GLOBAL(CCodeGenCompositeStatementTests_RecordStmt1_f_c);
     *jmi_array_rec_1(temp_1_a, 2) = *r_v;
     i1_0in = 0;
@@ -88,12 +88,10 @@ $C_functions$
         generatedCode="
 void func_CCodeGenCompositeStatementTests_RecordStmt2_f_def0(R_0_r* r_v, R_0_ra* y_a) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, R_0_r, R_0_ra, y_an, 2, 1)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
-    JMI_ARR(STAT, R_0_r, R_0_ra, temp_1_a, 2, 1)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_3, 1, 1)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_4, 1, 1)
+    JMI_ARR(STACK, R_0_r, R_0_ra, y_an, 2, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
+    JMI_ARR(STACK, R_0_r, R_0_ra, temp_1_a, 2, 1)
     jmi_real_t i1_0i;
     jmi_int_t i1_0ie;
     jmi_int_t i1_0in;
@@ -101,18 +99,14 @@ void func_CCodeGenCompositeStatementTests_RecordStmt2_f_def0(R_0_r* r_v, R_0_ra*
     jmi_int_t i2_1ie;
     jmi_int_t i2_1in;
     if (y_a == NULL) {
-        JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, y_an, 2, 1, 2)
-        JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
+        JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, y_an, 2, 1, 2)
+        JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
         jmi_array_rec_1(y_an, 1)->x = tmp_1;
-        JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
+        JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
         jmi_array_rec_1(y_an, 2)->x = tmp_2;
         y_a = y_an;
     }
-    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, temp_1_a, 2, 1, 2)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 1, 1, 1)
-    jmi_array_rec_1(temp_1_a, 1)->x = tmp_3;
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_4, 1, 1, 1)
-    jmi_array_rec_1(temp_1_a, 2)->x = tmp_4;
+    JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, temp_1_a, 2, 1, 2)
     *jmi_array_rec_1(temp_1_a, 1) = *JMI_GLOBAL(CCodeGenCompositeStatementTests_RecordStmt2_f_c);
     *jmi_array_rec_1(temp_1_a, 2) = *r_v;
     i1_0in = 0;

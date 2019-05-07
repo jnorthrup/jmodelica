@@ -39,7 +39,7 @@ aspect AlgorithmScalarization {
         
         FType t = left.type();
         if (extractTemp(s)) {
-            s.addTempVar(this);
+            s.addTempVar(this, false);
             CommonAccessExp temp = getRight().tempExp(tempVarName());
             t.scalarizeAssignment(s, temp, right);
             right = temp;
@@ -175,6 +175,15 @@ aspect AssignmentScalarization {
      */
     public void FType.scalarizeAssignment(Scalarizer.Algorithm s, FAssignableExp left, FExp right) {
         if (isArray() && !s.unroll() && !keepCompositeAssign(left, right)) {
+            
+            /* Either of left or right can be a FTempAccessExp which does not know its type */
+            FType t = left.type().isUnknown() ? (right.type().isUnknown() ? this : right.type()) : left.type();
+            
+            if (left.isTempAccessExp()) {
+                FInitArrayStmt stmt = new FInitArrayStmt((FAccessExp)left.treeCopy(), true, t.size().scalarizedSizeExpressions(s));
+                s.add(stmt);
+            }
+            
             ForNames names = s.getNames();
             names.addLayer(ndims());
             names.fillLayer(left);
@@ -184,8 +193,7 @@ aspect AssignmentScalarization {
 
             List<FStatement> stmts = new List<FStatement>();
             scalarizeAssignment_sub(s.block(stmts), left, right);
-            /* Either of left or right can be a FTempAccessExp which does not know its type */
-            FType t = left.type().isUnknown() ? (right.type().isUnknown() ? this : right.type()) : left.type();
+            
             s.createForLoops(stmts, t.size());
 
             names.removeLayer();
@@ -193,6 +201,9 @@ aspect AssignmentScalarization {
             scalarizeAssignment_sub(s, left, right);
         }
     }
+    
+    syn boolean FExp.isTempAccessExp() = false;
+    eq FTempAccessExp.isTempAccessExp() = true;
     
     public void FType.scalarizeAssignment_sub(Scalarizer.Algorithm s, FAssignableExp left, FExp right) {
         if (!s.unroll() && keepCompositeAssign(left, right)) {

@@ -5272,7 +5272,7 @@ public
     y[i1,i2] := x[is1[i1],is2[i2]];
    end for;
   end for;
-  init temp_1 as Real[size(is1, 1), size(is1, 1)];
+  init temp_1 as Real[size(is2, 1), size(is1, 1)];
   for i1 in 1:size(is2, 1) loop
    for i2 in 1:size(is1, 1) loop
     temp_1[i1,i2] := x[is2[i1],is1[i2]] + y[i1,i2];
@@ -11500,7 +11500,7 @@ public
    temp_1[i1].y := temp_2;
    temp_1[i1].z := temp_4;
   end for;
-   for i1 in 1:m loop
+  for i1 in 1:m loop
    for i2 in 1:1 loop
     for i3 in 1:1 loop
      o[i1].y[i2].p1[i3] := temp_1[i1].y[i2].p1[i3];

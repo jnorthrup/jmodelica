@@ -866,7 +866,7 @@ aspect Flattening {
             if (input) {
                 size().addSizeCheck(f, l, this, access);
             } else {
-                FInitArrayStmt stmt = new FInitArrayStmt(new FAccessExp(access));
+                FInitArrayStmt stmt = new FInitArrayStmt(new FAccessExp(access), false, new List<FExp>());
                 stmt.shouldBeSorted = true;
                 l.add(stmt);
             }
