@@ -1381,7 +1381,7 @@ aspect InheritedFactoryMethods {
     public FSemiLinearExp.FSemiLinearExp(FExp a1, FExp a2, FExp a3) { this(emptyArgs(), a1, a2, a3); }
     public FLinspace.FLinspace(FExp a1, FExp a2, FExp a3)           { this(emptyArgs(), a1, a2, a3); }
     
-    public FDelayExp.FDelayExp(FExp a1, FExp a2, Opt<FExp> a3) { this(emptyArgs(), a1, a2, a3, Opt.EMPTY, (String) null); }
+    public FDelayExp.FDelayExp(FExp a1, FExp a2, Opt<FExp> a3) { this(emptyArgs(), a1, a2, a3, List.EMPTY, (String) null); }
     public FDelayIndicator.FDelayIndicator(FExp a1, FExp a2, Opt<FExp> a3) { this(emptyArgs(), a1, a2, a3); }
     public FAssert.FAssert(FExp a1, FExp a2, Opt<FExp> a3)     { this(emptyArgs(), a1, a2, a3); }
     

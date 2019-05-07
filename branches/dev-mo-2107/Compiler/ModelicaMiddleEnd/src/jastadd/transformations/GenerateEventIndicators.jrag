@@ -642,7 +642,7 @@ aspect GenerateEventIndicators {
         return new FEquation(getIndicator().treeCopy(), indicatorExp());
     }
     public FAbstractEquation FDelayExp.createIndicatorEquation() {
-        return new FEquation(getIndicator().treeCopy(), indicatorExp());
+        return new FEquation(getIndicator(0).treeCopy(), indicatorExp());
     }
 
     /**
@@ -653,7 +653,7 @@ aspect GenerateEventIndicators {
         return new FAssignStmt(getIndicator().treeCopy(), indicatorExp());
     }
     public FStatement FDelayExp.createIndicatorStmt() {
-        return new FAssignStmt(getIndicator().treeCopy(), indicatorExp());
+        return new FAssignStmt(getIndicator(0).treeCopy(), indicatorExp());
     }
 
     /**
@@ -666,7 +666,7 @@ aspect GenerateEventIndicators {
     }
     @Override
     public FStatement FDelayExp.createIndicatorInitStmt() {
-        return new FAssignStmt(getIndicator().treeCopy(), new FIntegerLitExp(1));
+        return new FAssignStmt(getIndicator(0).treeCopy(), new FIntegerLitExp(1));
     }
 
     /**
@@ -712,7 +712,7 @@ aspect GenerateEventIndicators {
         }
 
         myFClass().addFVariable(v);
-        setIndicator(v.createAccessExp());
+        setIndicator(v.createAccessExp(), 0);
         setIndicatorVarName(variableName);
     }
 
@@ -736,7 +736,7 @@ aspect GenerateEventIndicators {
         return getIndicator().myFV().asFVariable();
     }
     public FVariable FDelayExp.myIndicatorVariable() {
-        return getIndicator().myFV().asFVariable();
+        return getIndicator(0).myFV().asFVariable();
     }
 
     /* ====================== *

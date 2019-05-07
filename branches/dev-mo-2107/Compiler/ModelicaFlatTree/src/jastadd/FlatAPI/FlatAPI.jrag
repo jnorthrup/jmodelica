@@ -2871,13 +2871,11 @@ aspect ReferencedVariables {
 
     @Override
     public <T extends CommonAccessExp> void FRelExp.findCommonAccessExpsInTree(Set<T> set, CommonAccessExpLookupVisitor<T> visitor) {
-        Opt<FAccessExp> indicator = getIndicatorOpt();
-
-        if (indicator == null) {
+        if (!hasIndicator()) {
             super.findCommonAccessExpsInTree(set, visitor);
         } else {
             for (ASTNode<?> n : this) {
-                if (indicator != n) {
+                if (n != getIndicatorOpt()) {
                     n.findCommonAccessExpsInTree(set, visitor);
                 }
             }
