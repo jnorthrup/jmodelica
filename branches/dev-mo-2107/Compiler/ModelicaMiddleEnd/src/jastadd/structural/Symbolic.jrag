@@ -325,10 +325,6 @@ aspect EquationSolve {
 	syn boolean FExp.isNegTerm(String name) = false;
 	eq FNegExp.isNegTerm(String name) = getFExp().isIdentifier(name);
 	
-	syn int FEquation.nbrUses(String name) {
-		return getLeft().nbrUses(name) + getRight().nbrUses(name);
-	}
-	
 	syn int ASTNode.nbrUses(String name) {
 		int n = 0;
 		for (int i=0;i<getNumChild();i++) {
@@ -336,11 +332,11 @@ aspect EquationSolve {
 		}
 		return n;
 	}
-	
-	eq CommonAccessExp.nbrUses(String name) = name.equals(name())? 1: 0;
-	eq FDerExp.nbrUses(String name) = name.equals(name())? 1: 0;
-	eq FPreExp.nbrUses(String name) = name.equals(name())? 1: 0;
-	
+
+    eq FEquation.nbrUses(String name) = getLeft().nbrUses(name) + getRight().nbrUses(name);
+    eq CommonAccessExp.nbrUses(String name) = name.equals(name())? 1: 0;
+    eq FDelayIndicator.nbrUses(String name) = 0;
+
     syn FExp FRelExp.solutionForTime() {
         if (getLeft() instanceof FTimeExp && getRight().variability().discreteOrLess()) {
             return getRight();

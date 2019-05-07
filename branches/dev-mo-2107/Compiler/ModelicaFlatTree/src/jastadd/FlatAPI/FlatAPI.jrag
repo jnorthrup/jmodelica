@@ -1553,7 +1553,18 @@ aspect FlatAPI {
         [new ArrayList<FDelayExp>()] with add root FClass;
     FDelayExp contributes this to FClass.myDelayExps() for myFClass();
     
-    syn lazy int FDelayExp.myDelayIndex() = myFClass().myDelayExps().indexOf(originalFExp());
+    syn lazy int FDelayExp.myDelayIndex()  = myFClass().myDelayExps().indexOf(originalFExp());
+    syn int FDelayIndicator.myDelayIndex() = myDelayExp().myDelayIndex();
+    syn FDelayExp FDelayIndicator.myDelayExp()   = myFClass().findDelayExp(getIndicator().myFV().asFVariable());
+    
+    syn lazy FDelayExp FClass.findDelayExp(FVariable indicator) {
+        for (FDelayExp delayExp : myDelayExps()) {
+            if (delayExp.hasIndicator(indicator)) {
+                return delayExp;
+            }
+        }
+        return null;
+    }
     
     coll ArrayList<FSpatialDistExp> FClass.mySpatialDistExps()
         [new ArrayList<FSpatialDistExp>()] with add root FClass;

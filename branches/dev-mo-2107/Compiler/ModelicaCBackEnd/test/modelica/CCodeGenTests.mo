@@ -19780,6 +19780,184 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end DelayOnlyStateEvents;
 
+model DelayStateEvents1
+    discrete Real x(start=0.0, fixed=true);
+    output Real y;
+equation
+    when (time >= 0.5) then
+        x = 2;
+    end when;
+    y = delay(x, 1);
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="DelayStateEvents1",
+        description="",
+        time_events=false,
+        event_output_vars=true,
+        template="
+N_delays = $n_delays$;
+$C_DAE_relations$
+
+$C_delay_init$
+$C_delay_sample$
+$C_ode_initialization$
+$C_ode_derivatives$
+
+$C_DAE_event_indicator_residuals$
+$C_DAE_initial_event_indicator_residuals$
+",
+        generatedCode="
+N_delays = 1;
+static const int N_relations = 3;
+static const int DAE_relations[] = { JMI_REL_GEQ, JMI_REL_GEQ, JMI_REL_GEQ };
+
+    jmi_delay_init(jmi, 0, JMI_FALSE, JMI_FALSE, AD_WRAP_LITERAL(1), _x_0);
+
+    jmi_delay_record_sample(jmi, 0, _x_0);
+
+
+int model_ode_initialize_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, __eventIndicator_1_2, _sw(0), JMI_REL_GEQ);
+    }
+    _temp_1_4 = _sw(0);
+    __eventIndicator_1_2 = _time + -0.5;
+    pre_x_0 = 0.0;
+    _x_0 = pre_x_0;
+    __eventIndicator_2_3 = JMI_DELAY_INITIAL_EVENT_RES;
+    _y_1 = _x_0;
+    pre_temp_1_4 = JMI_FALSE;
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, __eventIndicator_1_2, _sw(0), JMI_REL_GEQ);
+    }
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+    __eventIndicator_2_3 = jmi_delay_first_event_indicator_wrapper(jmi, 0, AD_WRAP_LITERAL(1));
+    _y_1 = jmi_delay_evaluate(jmi, 0, _x_0, AD_WRAP_LITERAL(1));
+    __eventIndicator_1_2 = _time + -0.5;
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    (*res)[0] = __eventIndicator_1_2;
+    (*res)[1] = __eventIndicator_2_3;
+    JMI_DYNAMIC_FREE()
+    return ef;
+
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    (*res)[0] = __eventIndicator_1_2;
+    (*res)[1] = __eventIndicator_2_3;
+    JMI_DYNAMIC_FREE()
+    return ef;
+")})));
+end DelayStateEvents1;
+
+model DelayStateEvents2
+    discrete Real x(start=0.0, fixed=true);
+    output Real y;
+    Real tmp;
+equation
+    tmp = sin(time * 100);
+    when (time >= 0.5) then
+        x = 2;
+    end when;
+    y = delay(x, tmp, 1);
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="DelayStateEvents2",
+        description="",
+        time_events=false,
+        event_output_vars=true,
+        template="
+N_delays = $n_delays$;
+$C_DAE_relations$
+
+$C_delay_init$
+$C_delay_sample$
+$C_ode_initialization$
+$C_ode_derivatives$
+
+$C_DAE_event_indicator_residuals$
+$C_DAE_initial_event_indicator_residuals$
+",
+        generatedCode="
+N_delays = 1;
+static const int N_relations = 3;
+static const int DAE_relations[] = { JMI_REL_GEQ, JMI_REL_GEQ, JMI_REL_GEQ };
+
+    jmi_delay_init(jmi, 0, JMI_FALSE, JMI_FALSE, AD_WRAP_LITERAL(1), _x_0);
+
+    jmi_delay_record_sample(jmi, 0, _x_0);
+
+
+int model_ode_initialize_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    _tmp_2 = sin(_time * AD_WRAP_LITERAL(100));
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, __eventIndicator_1_3, _sw(0), JMI_REL_GEQ);
+    }
+    _temp_1_5 = _sw(0);
+    __eventIndicator_1_3 = _time + -0.5;
+    __eventIndicator_2_4 = jmi_delay_first_event_indicator_wrapper(jmi, 0, _tmp_2);
+    __eventIndicator_3_5 = jmi_delay_second_event_indicator_wrapper(jmi, 0, _tmp_2);
+    pre_x_0 = 0.0;
+    _x_0 = pre_x_0;
+    _y_1 = _x_0;
+    pre_temp_1_5 = JMI_FALSE;
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, __eventIndicator_1_3, _sw(0), JMI_REL_GEQ);
+    }
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+    _tmp_2 = sin(_time * AD_WRAP_LITERAL(100));
+    __eventIndicator_2_4 = jmi_delay_first_event_indicator_wrapper(jmi, 0, _tmp_2);
+    __eventIndicator_3_5 = jmi_delay_second_event_indicator_wrapper(jmi, 0, _tmp_2);
+    _y_1 = jmi_delay_evaluate(jmi, 0, _x_0, _tmp_2);
+    __eventIndicator_1_3 = _time + -0.5;
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    (*res)[0] = __eventIndicator_1_3;
+    (*res)[1] = __eventIndicator_2_4;
+    (*res)[2] = __eventIndicator_3_5;
+    JMI_DYNAMIC_FREE()
+    return ef;
+
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    (*res)[0] = __eventIndicator_1_3;
+    (*res)[1] = __eventIndicator_2_4;
+    (*res)[2] = __eventIndicator_3_5;
+    JMI_DYNAMIC_FREE()
+    return ef;
+")})));
+end DelayStateEvents2;
+
 model SpatialDist1
     Real x1,x2,x3,x4;
   equation

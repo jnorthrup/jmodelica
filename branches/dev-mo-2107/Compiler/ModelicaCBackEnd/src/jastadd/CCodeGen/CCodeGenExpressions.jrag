@@ -1407,6 +1407,13 @@ aspect CCodeGenExpressions {
         str.print(")");
     }
 
+    @Override
+    public void FDelayIndicator.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        str.format("jmi_delay_first_event_indicator_wrapper(jmi, %d, ", myDelayIndex());
+        p.print(myDelayExp().getDelay(), str, indent);
+        str.print(")");
+    }
+
     /**
      * Generate temp declarations for the initialization of spatialDistribution blocks.
      */

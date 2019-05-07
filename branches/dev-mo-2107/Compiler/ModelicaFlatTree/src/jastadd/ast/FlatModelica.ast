@@ -838,7 +838,7 @@ abstract FBoolBinExp : FBinExp;
 /**
  * Base class for relational expressions.
  */
-abstract FRelExp : FBoolBinExp ::= [Indicator:FAccessExp] <IndicatorVarName:String>;
+abstract FRelExp : FBoolBinExp ::= [Indicator:FAccessExp];
 
 /**
  * Less than expression.
@@ -1312,12 +1312,12 @@ FReinit : FBuiltInFunctionCall ::= Var:FExp FExp;
 /**
  * The delay() operator.
  */
-FDelayExp : FBuiltInFunctionCall ::= FExp Delay:FExp [Max:FExp] Indicator:FAccessExp* <IndicatorVarName:String>;
+FDelayExp : FBuiltInFunctionCall ::= FExp Delay:FExp [Max:FExp] Indicator:FAccessExp*;
 
 /**
  * Used for generating event indicators for the delay() operator.
  */
-FDelayIndicator : FBuiltInFunctionCall ::= FExp Delay:FExp [Max:FExp];
+FDelayIndicator : FBuiltInFunctionCall ::= [Indicator:FAccessExp];
 
 /**
  * The spatialDistribution() operator.

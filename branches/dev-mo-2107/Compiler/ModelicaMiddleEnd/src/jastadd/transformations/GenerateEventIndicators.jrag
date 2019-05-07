@@ -584,6 +584,9 @@ aspect GenerateEventIndicators {
         }
     }
 
+    syn lazy String FRelExp.myIndicatorVarName() = calcIndicatorVarName();
+    syn lazy String FDelayExp.myIndicatorVarName() = calcIndicatorVarName();
+
     public boolean EventGeneratingExp.shouldGenerateIndicator();
     @Override
     public boolean FRelExp.shouldGenerateIndicator() {
@@ -690,9 +693,8 @@ aspect GenerateEventIndicators {
      * Creates an indicator for this FRelExp.
      */
     public void FRelExp.genIndicator(boolean output) {
-        String variableName = calcIndicatorVarName();
         FVariable v = new FRealVariable(VisibilityType.PUBLIC, Variability.CONTINUOUS,
-                new FAccessFull(variableName));
+                new FAccessFull(myIndicatorVarName()));
 
         if (output) {
             v.setTypePrefixInputOutput(TypePrefixInputOutput.OUTPUT);
@@ -700,12 +702,10 @@ aspect GenerateEventIndicators {
 
         myFClass().addFVariable(v);
         setIndicator(v.createAccessExp());
-        setIndicatorVarName(variableName);
     }
     public void FDelayExp.genIndicator(boolean output) {
-        String variableName = calcIndicatorVarName();
         FVariable v = new FRealVariable(VisibilityType.PUBLIC, Variability.CONTINUOUS,
-                new FAccessFull(variableName));
+                new FAccessFull(myIndicatorVarName()));
 
         if (output) {
             v.setTypePrefixInputOutput(TypePrefixInputOutput.OUTPUT);
@@ -713,7 +713,6 @@ aspect GenerateEventIndicators {
 
         myFClass().addFVariable(v);
         setIndicator(v.createAccessExp(), 0);
-        setIndicatorVarName(variableName);
     }
 
     /**
@@ -728,7 +727,7 @@ aspect GenerateEventIndicators {
         return res;
     }
     public FExp FDelayExp.indicatorExp() {
-        return new FDelayIndicator(getFExp(), getDelay(), getMaxOpt());
+        return new FDelayIndicator(new FAccessFull(myIndicatorVarName()));
     }
 
     public FVariable EventGeneratingExp.myIndicatorVariable();
@@ -737,6 +736,10 @@ aspect GenerateEventIndicators {
     }
     public FVariable FDelayExp.myIndicatorVariable() {
         return getIndicator(0).myFV().asFVariable();
+    }
+
+    public boolean FDelayExp.hasIndicator(FVariable indicator) {
+        return myIndicatorVariable() == indicator;
     }
 
     /* ====================== *

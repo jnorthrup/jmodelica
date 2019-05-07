@@ -478,21 +478,13 @@ equation
     end when;
     y = delay(x, 1);
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-//        CCodeGenTestCase(
-            name="EventGeneration_DelayStateEvents1",
-            time_events=false,
-            event_output_vars=true,
-            description="Tests extraction of nested event generating expressions
-            into when equations.",
-//            template="
-//$C_DAE_event_indicator_residuals$
-//$C_DAE_initial_event_indicator_residuals$
-//",
-//            generatedCode=
-            flatModel=
-"
+annotation(__JModelica(UnitTesting(tests={
+    TransformCanonicalTestCase(
+        name="EventGeneration_DelayStateEvents1",
+        time_events=false,
+        event_output_vars=true,
+        description="",
+        flatModel="
 fclass EventGeneration.DelayStateEvents1
  discrete Real x(start = 0.0,fixed = true);
  output Real y;
@@ -525,19 +517,13 @@ equation
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-//          CCodeGenTestCase(
             name="EventGeneration_DelayStateEvents2",
             relational_time_events=false,
             event_output_vars=true,
             description="Tests extraction of nested event generating expressions
             into when equations.",
-//            template="
-//$C_DAE_event_indicator_residuals$
-//$C_DAE_initial_event_indicator_residuals$
-//",
-//            generatedCode=
-            flatModel=
-"fclass EventGeneration.DelayStateEvents2
+            flatModel="
+fclass EventGeneration.DelayStateEvents2
  discrete Real x(start = 0.0,fixed = true);
  output Real y;
  Real tmp;
