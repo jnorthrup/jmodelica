@@ -31,7 +31,8 @@
     <property name="java_version" value="1.7"/>
     <property name="java_compiler" value="javac${java_version}"/>
 
-    <property name="target" value="${user.dir}/../../antbuild"/>
+    <fail unless="target"   message="Property 'target' not set. Should point to ant build directory."/>
+    <echo>build-base.xml: running in ${target}</echo>
 
     <property name="compiler_build" value="${target}/src/build" />
     <property name="java_output_intermediate" value="${compiler_build}/${sub_package}/java-generated-intermediate" />
