@@ -3599,7 +3599,7 @@ aspect FVariableUses {
         Set<FVariable> res = new HashSet<>();
         for (EventGeneratingExp exp : exps) {
             if (exp.hasIndicator()) {
-                res.add(exp.myIndicatorVariable());
+                res.addAll(exp.myIndicatorVariables());
             }
         }
         return res;

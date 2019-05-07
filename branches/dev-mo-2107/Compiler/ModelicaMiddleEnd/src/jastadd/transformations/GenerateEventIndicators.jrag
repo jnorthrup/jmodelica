@@ -730,16 +730,24 @@ aspect GenerateEventIndicators {
         return new FDelayIndicator(new FAccessFull(myIndicatorVarName()));
     }
 
-    public FVariable EventGeneratingExp.myIndicatorVariable();
-    public FVariable FRelExp.myIndicatorVariable() {
-        return getIndicator().myFV().asFVariable();
+    public ArrayList<FVariable> EventGeneratingExp.myIndicatorVariables();
+    @Override
+    public ArrayList<FVariable> FRelExp.myIndicatorVariables() {
+        ArrayList<FVariable> res = new ArrayList<>();
+        res.add(getIndicator().myFV().asFVariable());
+        return res;
     }
-    public FVariable FDelayExp.myIndicatorVariable() {
-        return getIndicator(0).myFV().asFVariable();
+    @Override
+    public ArrayList<FVariable> FDelayExp.myIndicatorVariables() {
+        ArrayList<FVariable> res = new ArrayList<>();
+        for(FAccessExp indicator: getIndicators()) {
+            res.add(indicator.myFV().asFVariable());
+        }
+        return res;
     }
 
     public boolean FDelayExp.hasIndicator(FVariable indicator) {
-        return myIndicatorVariable() == indicator;
+        return myIndicatorVariables().contains(indicator);
     }
 
     /* ====================== *
