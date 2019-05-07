@@ -1838,6 +1838,16 @@ aspect FlatPrettyPrint {
         }
     }
 
+    protected void FDelayExp.prettyPrintArguments(Printer p, CodeStream str, String indent) {
+        p.print(getFExp(), str, indent);
+        str.print(SEP);
+        p.print(getDelay(), str, indent);
+        if (hasMax()) {
+            str.print(SEP);
+            p.print(getMax(), str, indent);
+        }
+    }
+
 	syn String FBuiltInFunctionCall.builtInName();
 	eq FRecordConstructor.builtInName()  = getRecord().name();
 	eq FUnsupportedBuiltIn.builtInName() = getName();
