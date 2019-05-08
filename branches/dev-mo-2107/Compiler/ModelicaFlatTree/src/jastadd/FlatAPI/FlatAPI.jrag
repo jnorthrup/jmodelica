@@ -1974,10 +1974,12 @@ aspect FlatAPI {
     }
     
     
-    
-    syn boolean FRelExp.isTimeEventGenerating() =  myOptions().getBooleanOption("time_events") && myOptions().getBooleanOption("relational_time_events") && solutionForTime().isValidExp();
+    syn boolean FExp.isTimeEventGenerating() {
+        throw new UnsupportedOperationException();
+    }
+    eq FRelExp.isTimeEventGenerating() =  myOptions().getBooleanOption("time_events") && myOptions().getBooleanOption("relational_time_events") && solutionForTime().isValidExp();
     eq FEqRelExp.isTimeEventGenerating() = false;
-    syn boolean FDelayExp.isTimeEventGenerating() = myOptions().getBooleanOption("time_events") && getDelay().variability().parameterOrLess();
+    eq FDelayExp.isTimeEventGenerating() = myOptions().getBooleanOption("time_events") && getDelay().variability().parameterOrLess();
     
     protected int FExp.checkIndex(int i) {
         if (i < 0) {

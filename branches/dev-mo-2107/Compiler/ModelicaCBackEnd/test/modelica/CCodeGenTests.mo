@@ -19725,34 +19725,6 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end Delay6;
 
-model Delay7
-    discrete Real x(start=0.0, fixed=true);
-    Real tmp;
-algorithm
-    tmp := 1 + sin(time);
-    x := delay(x, tmp, 2);
-annotation(__JModelica(UnitTesting(tests={
-    CCodeGenTestCase(
-        name="Delay7",
-        description="",
-//        time_events=false,
-//        event_output_vars=true,
-        template="
-N_delays = $n_delays$;
-$C_DAE_relations$
-
-$C_delay_init$
-$C_delay_sample$
-$C_ode_initialization$
-$C_ode_derivatives$
-
-$C_DAE_event_indicator_residuals$
-$C_DAE_initial_event_indicator_residuals$
-",
-        generatedCode="
-")})));
-end Delay7;
-
 
 model DelayOnlyStateEvents
     Real x1,x2;

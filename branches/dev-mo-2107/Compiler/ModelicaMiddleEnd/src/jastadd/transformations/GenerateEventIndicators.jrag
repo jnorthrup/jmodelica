@@ -587,14 +587,7 @@ aspect GenerateEventIndicators {
     syn lazy String FRelExp.myIndicatorVarName() = calcIndicatorVarName();
     syn lazy String FDelayExp.myIndicatorVarName() = calcIndicatorVarName();
 
-    public boolean EventGeneratingExp.shouldGenerateIndicator();
-    @Override
-    public boolean FRelExp.shouldGenerateIndicator() {
-        // TODO Remove containsCommonFunctionCallExp()
-        return generatesEvent() && !isTimeEventGenerating() && !inFunctionCall() && !containsCommonFunctionCallExp();
-    }
-    @Override
-    public boolean FDelayExp.shouldGenerateIndicator() {
+    public boolean FExp.shouldGenerateIndicator() {
         return generatesEvent() && !isTimeEventGenerating() && !inFunctionCall();
     }
 
