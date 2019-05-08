@@ -1408,10 +1408,35 @@ aspect CCodeGenExpressions {
     }
 
     @Override
+    public void FDelayIndicator.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        if (!p.inInitialSystem()) {
+            p.printVarDecls(myDelayExp().getDelay(), str, indent);
+        }
+    }
+
+    @Override
+    public void FDelayIndicator.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        if (!p.inInitialSystem()) {
+            p.printPreSteps(myDelayExp().getDelay(), str, indent);
+        }
+    }
+
+    @Override
     public void FDelayIndicator.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        str.format("jmi_delay_first_event_indicator_wrapper(jmi, %d, ", myDelayIndex());
-        p.print(myDelayExp().getDelay(), str, indent);
-        str.print(")");
+        if (p.inInitialSystem()) {
+            str.format("JMI_DELAY_INITIAL_EVENT_RES");
+        } else {
+            str.format("jmi_delay_first_event_indicator_exp(jmi, %d, ", myDelayIndex());
+            p.print(myDelayExp().getDelay(), str, indent);
+            str.print(")");
+        }
+    }
+
+    @Override
+    public void FDelayIndicator.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
+        if (!p.inInitialSystem()) {
+            p.printPostSteps(myDelayExp().getDelay(), str, indent);
+        }
     }
 
     /**

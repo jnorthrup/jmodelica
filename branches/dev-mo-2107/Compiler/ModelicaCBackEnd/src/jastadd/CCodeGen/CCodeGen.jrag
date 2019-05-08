@@ -518,9 +518,6 @@ aspect CCodeGen {
 
     @Override
     public void FDelayExp.genEventResidualVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        if (!p.inInitialSystem()) {
-            p.printVarDecls(getDelay(), str, indent);
-        }
     }
 
     @Override
@@ -546,19 +543,10 @@ aspect CCodeGen {
 
     @Override
     public void FDelayExp.genEventResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
-        if (p.inInitialSystem()) {
-            str.formatln("%s(*res)[%d] = JMI_DELAY_INITIAL_EVENT_RES;", indent, enumerator.next());
-            str.formatln("%s(*res)[%d] = JMI_DELAY_INITIAL_EVENT_RES;", indent, enumerator.next());
-        } else {
-            p.printPreSteps(getDelay(), str, indent);
-            int index = myDelayIndex();
-            str.format("%sjmi_delay_first_event_indicator(jmi, %d, ", indent, index);
-            p.print(getDelay(), str, indent);
-            str.print(", &(*res)[" + enumerator.next() + "]);\n");
-            str.format("%sjmi_delay_second_event_indicator(jmi, %d, ", indent, index);
-            p.print(getDelay(), str, indent);
-            str.print(", &(*res)[" + enumerator.next() + "]);\n");
-            p.printPostSteps(getDelay(), str, indent);
+        for (FExp indicator : getIndicators()) {
+            str.format("%s(*res)[%d] = ", indent, enumerator.next());
+            p.print(indicator, str, indent);
+            str.println(";");
         }
     }
 

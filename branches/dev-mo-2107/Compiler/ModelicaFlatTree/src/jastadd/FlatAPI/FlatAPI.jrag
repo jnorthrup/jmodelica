@@ -1555,7 +1555,12 @@ aspect FlatAPI {
     
     syn lazy int FDelayExp.myDelayIndex()  = myFClass().myDelayExps().indexOf(originalFExp());
     syn int FDelayIndicator.myDelayIndex() = myDelayExp().myDelayIndex();
-    syn FDelayExp FDelayIndicator.myDelayExp()   = myFClass().findDelayExp(getIndicator().myFV().asFVariable());
+    
+    syn FDelayExp FDelayIndicator.myDelayExp() = myFClass().findDelayExp(myIndicatorVariable());
+    
+    inh FVariable FDelayIndicator.myIndicatorVariable();
+    eq FEquation.getChild().myIndicatorVariable()   = getLeft().asFAccessExp().myFV().asFVariable();
+    eq FAssignStmt.getChild().myIndicatorVariable() = getLeft().asFAccessExp().myFV().asFVariable();
     
     syn lazy FDelayExp FClass.findDelayExp(FVariable indicator) {
         for (FDelayExp delayExp : myDelayExps()) {
