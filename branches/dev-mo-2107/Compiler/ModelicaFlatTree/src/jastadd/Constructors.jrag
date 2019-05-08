@@ -884,6 +884,7 @@ aspect InheritedFactoryMethods {
 	public abstract FUnaryBuiltIn             FUnaryBuiltIn.createEmptyNode();
 	public abstract FEventGenExp              FEventGenExp.createEmptyNode();
 	public abstract FBinEventGenExp           FBinEventGenExp.createEmptyNode();
+    public abstract FDelayIndicator           FDelayIndicator.createEmptyNode();
 	public abstract FMathematicalFunctionCall FMathematicalFunctionCall.createEmptyNode();
 	public abstract FInfArgsFunctionCall      FInfArgsFunctionCall.createEmptyNode();
 	public abstract FMinMaxExp      		  FMinMaxExp.createEmptyNode();
@@ -941,7 +942,8 @@ aspect InheritedFactoryMethods {
     public FLoadResource   FLoadResource.createEmptyNode()   { return new FLoadResource();   }
     public FReinit         FReinit.createEmptyNode()         { return new FReinit();         }
     public FDelayExp       FDelayExp.createEmptyNode()       { return new FDelayExp();       }
-    public FDelayIndicator FDelayIndicator.createEmptyNode() { return new FDelayIndicator(); }
+    public FFirstDelayIndicator FFirstDelayIndicator.createEmptyNode() { return new FFirstDelayIndicator(); }
+    public FSecondDelayIndicator FSecondDelayIndicator.createEmptyNode() { return new FSecondDelayIndicator(); }
     public FSpatialDistExp FSpatialDistExp.createEmptyNode() { return new FSpatialDistExp(); }
 	public FSampleExp      FSampleExp.createEmptyNode()      { return new FSampleExp();      }
 	public FInitialExp     FInitialExp.createEmptyNode()     { return new FInitialExp();     }

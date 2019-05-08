@@ -1426,11 +1426,15 @@ aspect CCodeGenExpressions {
         if (p.inInitialSystem()) {
             str.format("JMI_DELAY_INITIAL_EVENT_RES");
         } else {
-            str.format("jmi_delay_first_event_indicator_exp(jmi, %d, ", myDelayIndex());
+            str.format("%s(jmi, %d, ", jmiDelayFunction_C(), myDelayIndex());
             p.print(myDelayExp().getDelay(), str, indent);
             str.print(")");
         }
     }
+    
+    syn String FDelayIndicator.jmiDelayFunction_C();
+    eq FFirstDelayIndicator.jmiDelayFunction_C() = "jmi_delay_first_event_indicator_exp";
+    eq FSecondDelayIndicator.jmiDelayFunction_C() = "jmi_delay_second_event_indicator_exp";
 
     @Override
     public void FDelayIndicator.genTempFree_C(CodePrinter p, CodeStream str, String indent) {

@@ -19325,8 +19325,8 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    (*res)[0]) = __eventIndicator_1_4;
-    (*res)[1]) = __eventIndicator_2_5;
+    (*res)[0] = __eventIndicator_1_4;
+    (*res)[1] = __eventIndicator_2_5;
     JMI_DYNAMIC_FREE()
     return ef;
 
@@ -19845,14 +19845,14 @@ int model_ode_initialize_base(jmi_t* jmi) {
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, __eventIndicator_1_2, _sw(0), JMI_REL_GEQ);
     }
-    _temp_1_4 = _sw(0);
+    _temp_1_5 = _sw(0);
     __eventIndicator_1_2 = _time + -0.5;
     __eventIndicator_2_3 = JMI_DELAY_INITIAL_EVENT_RES;
-    __eventIndicator_4_3 = JMI_DELAY_INITIAL_EVENT_RES;
+    __eventIndicator_3_4 = JMI_DELAY_INITIAL_EVENT_RES;
     pre_x_0 = 0.0;
     _x_0 = pre_x_0;
     _y_1 = _x_0;
-    pre_temp_1_4 = JMI_FALSE;
+    pre_temp_1_5 = JMI_FALSE;
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -19937,14 +19937,14 @@ int model_ode_initialize_base(jmi_t* jmi) {
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, __eventIndicator_1_3, _sw(0), JMI_REL_GEQ);
     }
-    _temp_1_5 = _sw(0);
+    _temp_1_6 = _sw(0);
     __eventIndicator_1_3 = _time + -0.5;
     __eventIndicator_2_4 = JMI_DELAY_INITIAL_EVENT_RES;
     __eventIndicator_3_5 = JMI_DELAY_INITIAL_EVENT_RES;
     pre_x_0 = 0.0;
     _x_0 = pre_x_0;
     _y_1 = _x_0;
-    pre_temp_1_5 = JMI_FALSE;
+    pre_temp_1_6 = JMI_FALSE;
     JMI_DYNAMIC_FREE()
     return ef;
 }

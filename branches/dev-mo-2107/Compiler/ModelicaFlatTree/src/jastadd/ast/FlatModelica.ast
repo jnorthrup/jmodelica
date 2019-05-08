@@ -1317,7 +1317,9 @@ FDelayExp : FBuiltInFunctionCall ::= FExp Delay:FExp [Max:FExp] Indicator:FAcces
 /**
  * Used for generating event indicators for the delay() operator.
  */
-FDelayIndicator : FBuiltInFunctionCall ::= ;
+abstract FDelayIndicator : FBuiltInFunctionCall ::= ;
+FFirstDelayIndicator : FDelayIndicator;
+FSecondDelayIndicator : FDelayIndicator;
 
 /**
  * The spatialDistribution() operator.

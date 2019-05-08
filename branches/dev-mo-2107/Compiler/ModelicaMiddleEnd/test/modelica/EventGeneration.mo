@@ -480,16 +480,17 @@ equation
 
 annotation(__JModelica(UnitTesting(tests={
     TransformCanonicalTestCase(
-        name="EventGeneration_DelayStateEvents1",
+        name="DelayStateEvents1",
+        description="",
         time_events=false,
         event_output_vars=true,
-        description="",
         flatModel="
 fclass EventGeneration.DelayStateEvents1
  discrete Real x(start = 0.0,fixed = true);
  output Real y;
  output Real _eventIndicator_1;
  output Real _eventIndicator_2;
+ output Real _eventIndicator_3;
  discrete Boolean temp_1;
 initial equation
  pre(x) = 0.0;
@@ -500,6 +501,7 @@ equation
  y = delay(x, 1);
  _eventIndicator_1 = time - 0.5;
  _eventIndicator_2 = delayIndicator(x, 1);
+ _eventIndicator_3 = delayIndicator(x, 1);
 end EventGeneration.DelayStateEvents1;
 ")})));
 end DelayStateEvents1;
@@ -515,20 +517,23 @@ equation
     end when;
     y = delay(x, tmp, 1);
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="EventGeneration_DelayStateEvents2",
-            relational_time_events=false,
-            event_output_vars=true,
-            description="Tests extraction of nested event generating expressions
-            into when equations.",
-            flatModel="
+annotation(__JModelica(UnitTesting(tests={
+    TransformCanonicalTestCase(
+        name="DelayStateEvents2",
+        description="
+Tests extraction of nested event generating expressions
+            into when equations.
+",
+        relational_time_events=false,
+        event_output_vars=true,
+        flatModel="
 fclass EventGeneration.DelayStateEvents2
  discrete Real x(start = 0.0,fixed = true);
  output Real y;
  Real tmp;
  output Real _eventIndicator_1;
  output Real _eventIndicator_2;
+ output Real _eventIndicator_3;
  discrete Boolean temp_1;
 initial equation
  pre(x) = 0.0;
@@ -540,6 +545,7 @@ equation
  y = delay(x, tmp, 1);
  _eventIndicator_1 = time - 0.5;
  _eventIndicator_2 = delayIndicator(x, tmp, 1);
+ _eventIndicator_3 = delayIndicator(x, tmp, 1);
 end EventGeneration.DelayStateEvents2;
 ")})));
 end DelayStateEvents2;
