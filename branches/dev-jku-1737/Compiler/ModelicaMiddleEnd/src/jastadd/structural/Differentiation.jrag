@@ -430,6 +430,20 @@ aspect Derivatives {
     }
 
     @Override
+    protected FExp FGlobalAccessExp.diffExp(String name) {
+        if (isArray()) {
+            return getArray().buildDiff(name);
+        } else if (type().isRecord()) {
+            List<FExp> args = new List<>();
+            for (FRecordComponentType frct : ((FRecordType)type()).getComponents()) {
+                args.add(component(frct.getName()).diff(name));
+            }
+            return new FRecordConstructor(new FRecordAccess(((FRecordType)type()).getName()), args);
+        }
+        return diffZero();
+    }
+
+    @Override
     protected FExp FPreExp.diffExp(String name) {
         if (name.equals(name())) {
             return type().createSizedLiteral(1);
@@ -536,7 +550,7 @@ aspect Derivatives {
             if (variability().continuousVariability() || inFunction() && type().containsReal()) {
                 return createDerExp(1);
             } else {
-                return type().sizedZeroLiteral();
+                return diffZero();
             }
         } else if (name.equals(myName)) {
             FExp exp = type().createSizedLiteral(1);
@@ -545,7 +559,7 @@ aspect Derivatives {
             }
             return exp;
         } else {
-            return type().sizedZeroLiteral();
+            return diffZero();
         }
     }
 
@@ -574,10 +588,11 @@ aspect Derivatives {
     
     @Override
     protected FExp FRecordConstructor.diffExp(String name) {
-        FRecordConstructor res = new FRecordConstructor(getRecord().fullCopy(), new List());
-        for (FExp arg : getArgs())
-            res.addArg(arg.diff(name));
-        return res;
+        List<FExp> args = new List<>();
+        for (FExp arg : getArgs()) {
+            args.add(arg.diff(name));
+        }
+        return new FRecordConstructor(getRecord().treeCopy(), args);
     }
     
     @Override

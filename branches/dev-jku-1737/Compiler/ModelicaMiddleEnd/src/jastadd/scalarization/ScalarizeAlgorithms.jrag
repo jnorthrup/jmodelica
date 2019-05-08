@@ -163,11 +163,18 @@ aspect AlgorithmScalarization {
 }
 
 aspect AssignmentScalarization {
+    syn boolean FType.keepCompositeAssign(FExp left, FExp right) = isComposite() && left.keepCompositeAssign() && right.keepCompositeAssign();
+    
+    syn boolean FExp.keepCompositeAssign() = useTempVar;
+    eq FAccessExp.keepCompositeAssign() = !isSlice() && (getFAccess().myTopFV().isInput() || getFAccess().myTopFV().isConstant());
+    eq FTempAccessExp.keepCompositeAssign() = true;
+    
+    
     /**
      * Scalarize an assignment and put the resulting statements in the list of statements. 
      */
     public void FType.scalarizeAssignment(Scalarizer.Algorithm s, FAssignableExp left, FExp right) {
-        if (isArray() && !s.unroll()) {
+        if (isArray() && !s.unroll() && !keepCompositeAssign(left, right)) {
             
             /* Either of left or right can be a FTempAccessExp which does not know its type */
             FType t = left.type().isUnknown() ? (right.type().isUnknown() ? this : right.type()) : left.type();
@@ -199,6 +206,10 @@ aspect AssignmentScalarization {
     eq FTempAccessExp.isTempAccessExp() = true;
     
     public void FType.scalarizeAssignment_sub(Scalarizer.Algorithm s, FAssignableExp left, FExp right) {
+        if (!s.unroll() && keepCompositeAssign(left, right)) {
+            s.add(new FAssignStmt((FAssignableExp)left.scalarize(s), right.scalarize(s)));
+            return;
+        }
         if (isArray() && s.unroll()) {
             for (Index i : indices()) {
                 scalarizeScalarAssignment(s, (FAssignableExp) left.extractArrayCell(s, i), right.extractArrayCell(s, i));
