@@ -188,6 +188,10 @@ aspect ConstantEvaluation {
         	throw new ConstantEvaluationException(this, "use this as array: ");
         }
         
+        public CValue getCell(Index i) {
+            return UNKNOWN;
+        }
+        
         public CValueUnknownUse unknownUse() {
             throw new ConstantEvaluationException(this, "use this as unknown value use: ");
         }
@@ -2475,7 +2479,7 @@ aspect ConstantEvaluation {
     
     eq FSubscriptedExp.cevalCalc(VariableEvaluator evaluator) {
         Index i = getFArraySubscripts().createIndex(evaluator);
-        return getFExp().ceval(evaluator, i).array().getCell(i);
+        return getFExp().ceval(evaluator, i).getCell(i);
     }
 
     eq FCardinality.cevalCalc(VariableEvaluator evaluator) {
@@ -2643,7 +2647,7 @@ aspect ConstantEvaluation {
                     if (cevalRecordMember.isUnknown()) {
                         return CValue.UNKNOWN; 
                     } else {
-                        return cevalRecordMember.array().getCell(i);
+                        return cevalRecordMember.getCell(i);
                     }
                 } else {
                     return evaluator.ceval(var, i);
@@ -2669,7 +2673,7 @@ aspect ConstantEvaluation {
         CValue res = var.inRecord() ? cevalRecordMember(evaluator, prefix) : evaluator.ceval(var);
         if (res.isUnknown()) return CValue.UNKNOWN;
         if (prefix.hasFArraySubscripts())
-          res = res.array().getCell(prefix.getFArraySubscripts().createIndex(evaluator));
+          res = res.getCell(prefix.getFArraySubscripts().createIndex(evaluator));
         if (res.isUnknown()) return CValue.UNKNOWN;
         return res.record().getMember(last);
     }
@@ -2710,13 +2714,13 @@ aspect ConstantEvaluation {
           if (shouldCevalThroughParent(var)) {
               res = cevalRecordMember(evaluator, this);
               if (i != Index.NULL)
-                  res = res.array().getCell(i);
+                  res = res.getCell(i);
               return res;
           } else {
               res = evaluator.ceval(var, i);
           }
           if (iHere != Index.NULL)
-              res = res.array().getCell(iHere);
+              res = res.getCell(iHere);
         } else if (myInstClassDecl().isEnum()) {
             res = new CValueInteger(myInstClassDecl().enumLiterals().size());
         } else if (myInstClassDecl().isBoolean()) {
@@ -2767,7 +2771,7 @@ aspect ConstantEvaluation {
         hasParentRecordWithBindingExp() ? cevalParentRecord(evaluator).record().getMember(name()) : ceval(evaluator);
     eq InstArrayComponentDecl.getChild().cevalParentRecord(VariableEvaluator evaluator) {
         CValue v = cevalParentRecord(evaluator);
-        return isArray() ? v : v.array().getCell(myIndex());
+        return isArray() ? v : v.getCell(myIndex());
     }
 
     // TODO: if caching, use cevalFunction() instead
@@ -2959,15 +2963,15 @@ aspect ConstantEvaluation {
     syn CValue InstAssignable.cevalNoBExp(VariableEvaluator evaluator, Index i) {
         CValue val = startAttributeCValue(evaluator);
         if (i != Index.NULL) 
-            val = val.array().getCell(i);
+            val = val.getCell(i);
         if ((isInteger() || isReal() || isEnum()) && !val.isUnknown()) {
             try {
                 CValue min = minAttributeCValue(evaluator);
                 if (i != Index.NULL) 
-                    min = min.array().getCell(i);
+                    min = min.getCell(i);
                 CValue max = maxAttributeCValue(evaluator);
                 if (i != Index.NULL) 
-                    max = max.array().getCell(i);
+                    max = max.getCell(i);
                 val =  val.constrainWithin(min, max);
             } catch (ConstantEvaluationException e) {}
         }
@@ -3240,7 +3244,7 @@ aspect ConstantEvaluation {
 	 *  @return The constant value.
 	 */
 	syn CValue FAbstractVariable.ceval(VariableEvaluator evaluator, Index i) = CValue.UNKNOWN;
-	eq FFunctionVariable.ceval(VariableEvaluator evaluator, Index i)         = evaluationValue(evaluator).array().getCell(i);
+	eq FFunctionVariable.ceval(VariableEvaluator evaluator, Index i)         = evaluationValue(evaluator).getCell(i);
 	eq FVariable.ceval(VariableEvaluator evaluator, Index i) {
         CValue val;
         if (isForIndex())
@@ -3251,7 +3255,7 @@ aspect ConstantEvaluation {
             val = getBindingExp().ceval(evaluator, i);
         else
             val = startAttributeCValue();
-        val = val.array().getCell(i);
+        val = val.getCell(i);
         if (isReal())
             val = val.convertReal();
         return val;
