@@ -70,7 +70,7 @@ JMI_ARRAY_TYPE(jmi_extobj_t, jmi_extobj_array_t)
 #define JMI_ARRAY_DECL_STACK(type, arr, name, ne, nd) \
     int  name##_size[nd];\
     type name##_var[(ne == 0) ? 1 : ne] = {0};\
-    arr  name##_obj = { name##_size, (int) (nd), (int) (ne), 0, name##_var };\
+    arr  name##_obj = { 0, (int) (nd), (int) (ne), 0, 0 };\
     arr* name = &name##_obj;
 
 /* Data section array declaration macro */
@@ -85,7 +85,8 @@ JMI_ARRAY_TYPE(jmi_extobj_t, jmi_extobj_array_t)
 
 /* Stack array initialization macros */
 #define JMI_ARRAY_INIT_STACK(type, arr, name, ne, nd) \
-    ;
+    name->size = name##_size; \
+    name->var = name##_var;
 
 /* Data section initialization */
 #define JMI_ARRAY_INIT_DATA(type, arr, name, ne, nd) \

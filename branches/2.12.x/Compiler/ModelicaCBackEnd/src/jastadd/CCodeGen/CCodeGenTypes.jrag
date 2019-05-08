@@ -645,6 +645,15 @@ aspect CCodeGenTypes {
 
     public void FType.printDecl_C(CodePrinter p, CodeStream str, String indent, 
             Dynamicity dyn, String name, boolean external) {
+        if (isArray()) {
+            printArrayDecl_C(p, str, indent, dyn, name, external);
+        } else {
+            printScalarDecl_C(p, str, indent, external, name);
+        }
+    }
+
+    public void FType.printArrayDecl_C(CodePrinter p, CodeStream str, String indent, 
+            Dynamicity dyn, String name, boolean external) {
         str.print(indent, "JMI_ARR(",
                 dyn, ", ", 
                 nameScalar_C(p, external), ", ",
