@@ -269,7 +269,7 @@ aspect FlatTypeAnalysis {
     eq FInitArrayStmt.type()         = getType();
     
     syn FType FInitArrayStmt.getType() {
-        if (getShallow()) {
+        if (getShallow() && getNumSize() > 0) {
             MutableSize ms = new MutableSize(getNumSize());
             for (FExp size : getSizes()) {
                 ms.append(size);
