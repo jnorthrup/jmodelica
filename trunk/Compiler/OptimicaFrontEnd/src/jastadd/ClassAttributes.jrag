@@ -32,7 +32,7 @@ aspect ClassAttributes {
         SrcPrimitiveClassDecl pcd = null;
         try {
             UtilInterface util = root().getUtilInterface();
-            SourceRoot sr = util.getParserHandler().parseString(util, builtInDef, "");
+            SourceRoot sr = util.getParserHandler().parseString(util, builtInDef, LoadInfo.empty());
             Program p = sr.getProgram();
             SrcFullClassDecl cd = p.getUnstructuredEntity(0).getSrcClassDecl(0).asFullClassDecl();
             for (SrcComponentClause comp : cd.componentClauses()) {
