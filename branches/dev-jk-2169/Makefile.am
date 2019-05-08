@@ -171,12 +171,12 @@ if COMPILE_WITH_IPOPT64
 endif
 
 mc_modelica: ifcasadi
-	cd $(MC_CASADI_BUILD); $(ANT_OPTS) $(ANT) -f "$(JAVA_MC_CASADI_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=."
+	cd $(MC_CASADI_BUILD); $(ANT_OPTS) $(ANT) -f "$(JAVA_MC_CASADI_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(MC_CASADI_BUILD)"
 
 mc_optimica: ifcasadi
 	mkdir -p $(OC_CASADI_BUILD)/src/java-generated
 	cp -pr $(MC_CASADI_BUILD)/src/java-generated/ifcasadi $(OC_CASADI_BUILD)/src/java-generated
-	cd $(OC_CASADI_BUILD); $(ANT_OPTS) $(ANT) -f "$(JAVA_OC_CASADI_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=."
+	cd $(OC_CASADI_BUILD); $(ANT_OPTS) $(ANT) -f "$(JAVA_OC_CASADI_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(OC_CASADI_BUILD)"
 
 $(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar: mc_modelica
 $(MC_CASADI_BUILD)/bin/util.jar:             mc_modelica
@@ -502,9 +502,9 @@ build-compiler:
 if HAVE_ANT
 	mkdir -p $(JAVA_BUILD_DIR)
 	cd $(JAVA_BUILD_DIR); \
-	$(ANT_OPTS) $(ANT) -f "$(JAVA_MC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=."
+	$(ANT_OPTS) $(ANT) -f "$(JAVA_MC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
 	cd $(JAVA_BUILD_DIR); \
-	$(ANT_OPTS) $(ANT) -f "$(JAVA_OC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=."
+	$(ANT_OPTS) $(ANT) -f "$(JAVA_OC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
 	java -cp "$(JAVA_EXEC_CP)" org.jmodelica.modelica.compiler.ModelicaCompiler\$$OptionExporter -x "$(abs_builddir)/DefaultOptions.xml"
 endif
 
