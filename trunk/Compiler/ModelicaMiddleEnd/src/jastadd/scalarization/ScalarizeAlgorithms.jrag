@@ -174,15 +174,15 @@ aspect AssignmentScalarization {
      * Scalarize an assignment and put the resulting statements in the list of statements. 
      */
     public void FType.scalarizeAssignment(Scalarizer.Algorithm s, FAssignableExp left, FExp right) {
+        /* Either of left or right can be a FTempAccessExp which does not know its type */
+        FType t = left.type().isUnknown() ? (right.type().isUnknown() ? this : right.type()) : left.type();
+        
+        if (isComposite() && !s.unroll() && !keepCompositeAssign(left, right) && left.isTempAccessExp()) {
+            FInitArrayStmt stmt = new FInitArrayStmt((FAccessExp)left.treeCopy(), true, t.size().scalarizedSizeExpressions(s));
+            s.add(stmt);
+        }
+        
         if (isArray() && !s.unroll() && !keepCompositeAssign(left, right)) {
-            
-            /* Either of left or right can be a FTempAccessExp which does not know its type */
-            FType t = left.type().isUnknown() ? (right.type().isUnknown() ? this : right.type()) : left.type();
-            
-            if (left.isTempAccessExp()) {
-                FInitArrayStmt stmt = new FInitArrayStmt((FAccessExp)left.treeCopy(), true, t.size().scalarizedSizeExpressions(s));
-                s.add(stmt);
-            }
             
             ForNames names = s.getNames();
             names.addLayer(ndims());
