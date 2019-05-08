@@ -1542,7 +1542,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             double beta = 1;
             int n1 = 1;
             int n2 = 1;
-            Q1[0] = - COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1.0), AD_WRAP_LITERAL(-1.0));
+            Q1[0] = - COND_EXP_EQ(_sw(0), JMI_TRUE, 1.0, -1.0);
             for (i = 0; i < 1; i += 1) {
                 Q1[i + 0] = (Q1[i + 0]) / (1.0);
             }
@@ -1557,7 +1557,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _der_x_3 = x[0];
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-            _sw(0) = jmi_turn_switch(jmi, _x_1 - (AD_WRAP_LITERAL(0.0)), _sw(0), JMI_REL_GEQ);
+            _sw(0) = jmi_turn_switch(jmi, _x_1 - (0.0), _sw(0), JMI_REL_GEQ);
         }
         _der_y_2 = COND_EXP_EQ(_sw(0), JMI_TRUE, _der_x_3, - _der_x_3);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
@@ -3520,7 +3520,7 @@ Error in flattened model:
   Index reduction failed: Maximum number of expressions in a single equation has been reached
 
 Error in flattened model:
-  The system is structurally singular. The following varible(s) could not be matched to any equation:
+  The system is structurally singular. The following variable(s) could not be matched to any equation:
      der(x2)
 
   The following equation(s) could not be matched to any variable:
@@ -3584,7 +3584,7 @@ Error in flattened model:
   Index reduction failed: Munkres algorithm was unable to find a matching; Unable to find any uncovered incidence
 
 Error in flattened model:
-  The system is structurally singular. The following varible(s) could not be matched to any equation:
+  The system is structurally singular. The following variable(s) could not be matched to any equation:
      a1
      a2
 
