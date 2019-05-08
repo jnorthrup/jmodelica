@@ -413,7 +413,7 @@ aspect CCodeGenGlobalVariables {
     }
     
     public void FArray.collectArrayElementsForGenGlobalVariableInitFunc_C(ArrayList<GlobalVariableArrayElement> list) {
-        if (type().isPrimitive() && isArray()) {
+        if (type().isPrimitive()) {
             return;
         }
         String name = tempName_C();
@@ -462,26 +462,15 @@ aspect CCodeGenGlobalVariables {
 
     @Override
     public void FArray.genGlobalVariableInitFuncDecl_C(CodePrinter p, CodeStream str, String indent) {
-        if (type().isPrimitive() && isArray()) {
+        if (type().isPrimitive()) {
             
+            /* C89 Macro parsing won't let us add the array literal as an argument. 
+             * With C99 we could use varargs and give it directly to JMI_ARR. */
             String name = tempName_C();
             String type = type().nameScalar_C(p, false);
             String arr = type().nameArray_C(p, false);
             String ne = "" + size().numElements();
             String nd = "" + size().ndims();
-            
-            str.print(indent, "JMI_ARR(",
-                    "STATIC", ", ", 
-                    type().nameScalar_C(p, false), ", ",
-                    type().nameArray_C(p, false), ", ",
-                    tempName_C(), ", ");
-            type().size().printNumElements_C(p, str, indent, this);
-            str.print(", ");
-            str.print(type().ndims());
-            str.print(")\n");
-            
-            /* C89 Macro parsing won't let us add the array literal as an argument. 
-             * With C99 we could use varargs and give it directly to JMI_ARR. */
             str.print(indent, "static ", type, " ", name, "_var[", size().numElements() == 0 ? 1 : ne, "] = ");
             str.print("{");
             for (Index i : indices()) {
@@ -489,33 +478,18 @@ aspect CCodeGenGlobalVariables {
                 str.print(",");
             }
             str.print("};\n");
-            return;
+            
+            type().printDecl_C(p, str, indent, Dynamicity.DATA, tempName_C(), false);
+            
+        } else {
+            type().printDecl_C(p, str, indent, Dynamicity.HEAP, tempName_C(), false);
         }
-        str.print(indent, "JMI_ARR(",
-                "DYNA", ", ", 
-                type().nameScalar_C(p, false), ", ",
-                type().nameArray_C(p, false), ", ",
-                tempName_C(), ", ");
-        type().size().printNumElements_C(p, str, indent, this);
-        str.print(", ");
-        str.print(type().ndims());
-        str.print(")\n");
     }
 
     @Override
     public void FArray.genGlobalVariableInitFuncInit_C(CodePrinter p, CodeStream str, String indent) {
-        String dyn = (type().isPrimitive() && isArray()) ? "STAT" : "DYNA";
-        str.print(indent, "JMI_ARRAY_INIT_", ndims(), "(",
-                dyn, ", ", 
-                type().nameScalar_C(p, false), ", ",
-                type().nameArray_C(p, false), ", ",
-                tempName_C(), ", ");
-        type().size().printNumElements_C(p, str, indent, this);
-        str.print(", ");
-        str.print(type().ndims());
-        str.print(", ");
-        type().size().printDimensions_C(p, str, indent, this);
-        str.print(")\n");
+        Dynamicity dyn = (type().isPrimitive()) ? Dynamicity.DATA : Dynamicity.HEAP;
+        type().printInit_C(p, str, indent, dyn, tempName_C(), false);
     }
 
     public void FExp.genGlobalVariableInitCall_C(CodePrinter p, CodeStream str, String indent, String name, boolean expand) {
