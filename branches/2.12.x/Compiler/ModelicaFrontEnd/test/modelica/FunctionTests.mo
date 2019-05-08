@@ -11512,6 +11512,7 @@ public
     end for;
     temp_1[i1].y[i2].p2 := temp_2[i2].p2;
    end for;
+   init temp_1[i1].z as FunctionTests.UnknownArray42.R2;
    init temp_1[i1].z.p1 as Real[1];
    for i2 in 1:1 loop
     temp_1[i1].z.p1[i2] := temp_4.p1[i2];
