@@ -363,7 +363,7 @@ aspect CCodeGenExpressions {
     @Override
     public void FLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         str.print(toString());
-        if (shouldWrap(p)) {
+        if (convertToDouble(p)) {
             str.print(".0");
         }
     }
@@ -371,13 +371,13 @@ aspect CCodeGenExpressions {
     @Override
     public void FEnumLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         str.print(ceval().intValue());
-        if (shouldWrap(p)) {
+        if (convertToDouble(p)) {
             str.print(".0");
         }
     }
 
-    syn boolean FLitExp.shouldWrap(CodePrinter p) = inIfCondition() || inFunctionArg() || p.inGeneratedFunctionCall(this);
-    eq FRealLitExp.shouldWrap(CodePrinter p) = false;
+    syn boolean FLitExp.convertToDouble(CodePrinter p) = inIfCondition() || inFunctionArg() || p.inGeneratedFunctionCall(this);
+    eq FRealLitExp.convertToDouble(CodePrinter p) = false;
 
     public abstract boolean CodePrinter.inGeneratedFunctionCall(FExp exp);
     public boolean CPrettyPrinter.inGeneratedFunctionCall(FExp exp) {
@@ -712,7 +712,7 @@ aspect CCodeGenExpressions {
      * Helper, generates an regular variable use
      */
     public String FAbstractVariable.genUse_C(CodePrinter.ExecuteCodePrinter p, FArraySubscripts fas, String type) {
-        if (fas == null || fas.ndims() == 0) {
+        if (fas == null || !fas.isSlice() ) {
             return p.name(this);
         } else {
             return fas.genFunctionArrayUse_C(p.codePrinter(), p.name(this), type);
