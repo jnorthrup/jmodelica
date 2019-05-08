@@ -11422,7 +11422,10 @@ public
     temp_2[1] := i;
     temp_2[2] := i1;
     temp_1[i1].x := i * i1;
-    temp_1[i1].y := temp_2;
+    init temp_1[i1].y as Real[2];
+    for i2 in 1:2 loop
+     temp_1[i1].y[i2] := temp_2[i2];
+    end for;
    end for;
    for i1 in 1:m loop
     o[i,i1].x := temp_1[i1].x;
@@ -11495,10 +11498,26 @@ public
   for i1 in 1:max(m, 0) loop
    init temp_2 as FunctionTests.UnknownArray42.R2[1];
    (temp_3) := FunctionTests.UnknownArray42.f2(i1);
-   temp_2[1] := temp_3;
+   init temp_2[1].p1 as Real[1];
+   for i2 in 1:1 loop
+    temp_2[1].p1[i2] := temp_3.p1[i2];
+   end for;
+   temp_2[1].p2 := temp_3.p2;
    (temp_4) := FunctionTests.UnknownArray42.f2(i1);
-   temp_1[i1].y := temp_2;
-   temp_1[i1].z := temp_4;
+   init temp_1[i1].y as FunctionTests.UnknownArray42.R2[1];
+   for i2 in 1:1 loop
+    init temp_1[i1].y[i2].p1 as Real[1];
+    for i3 in 1:1 loop
+     temp_1[i1].y[i2].p1[i3] := temp_2[i2].p1[i3];
+    end for;
+    temp_1[i1].y[i2].p2 := temp_2[i2].p2;
+   end for;
+   init temp_1[i1].z as FunctionTests.UnknownArray42.R2;
+   init temp_1[i1].z.p1 as Real[1];
+   for i2 in 1:1 loop
+    temp_1[i1].z.p1[i2] := temp_4.p1[i2];
+   end for;
+   temp_1[i1].z.p2 := temp_4.p2;
   end for;
   for i1 in 1:m loop
    for i2 in 1:1 loop
@@ -17611,55 +17630,6 @@ end FunctionTests.ConstantInFunction5;
 ")})));
 end ConstantInFunction5;
 
-model ConstantInRecordFunctionArgument
-    record R
-        constant Integer n = 1;
-        Real[n] x = 1:n;
-    end R;
-        
-    function f
-        input R r;
-        output Real y;
-    algorithm
-        y := 0;
-        for i in 1:r.n loop
-            y := y + r.x[i];
-        end for;
-    end f;
-        
-    R r(n=2);
-    Real y = f(r);
-	
-	annotation(__JModelica(UnitTesting(tests={
-	    FlatteningTestCase(
-		    name="ConstantInRecordFunctionArgument",
-			description="",
-			flatModel="
-fclass FunctionTests.ConstantInRecordFunctionArgument
- FunctionTests.ConstantInRecordFunctionArgument.R r(n = 2,x(size() = {2}) = 1:2);
- Real y = FunctionTests.ConstantInRecordFunctionArgument.f(r);
-
-public
- function FunctionTests.ConstantInRecordFunctionArgument.f
-  input FunctionTests.ConstantInRecordFunctionArgument.R r;
-  output Real y;
- algorithm
-  assert(r.n == size(r.x, 1), \"Mismatching sizes in function 'FunctionTests.ConstantInRecordFunctionArgument.f', component 'r.x', dimension '1'\");
-  y := 0;
-  for i in 1:r.n loop
-   y := y + r.x[i];
-  end for;
-  return;
- end FunctionTests.ConstantInRecordFunctionArgument.f;
-
- record FunctionTests.ConstantInRecordFunctionArgument.R
-  constant Integer n;
-  Real x[1];
- end FunctionTests.ConstantInRecordFunctionArgument.R;
-
-end FunctionTests.ConstantInRecordFunctionArgument;
-")})));
-end ConstantInRecordFunctionArgument;
 
 model ArrayWithIfInput
     function g

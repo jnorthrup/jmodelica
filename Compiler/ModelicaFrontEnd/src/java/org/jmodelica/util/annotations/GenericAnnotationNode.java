@@ -299,9 +299,9 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     }
 
     /**
-     * Provides all sub nodes for this node that {@link #nodeExists()}.
+     * Provides all sub nodes for this node that {@link #exists()}.
      * 
-     * @return all sub nodes that {@link #nodeExists()}
+     * @return all sub nodes that {@link #exists()}
      */
     public Iterable<T> subNodes() {
         computeSubNodesCache();

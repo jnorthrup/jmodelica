@@ -2866,7 +2866,7 @@ aspect ReferencedVariables {
 
     @Override
     public <T extends CommonAccessExp> void FRelExp.findCommonAccessExpsInTree(Set<T> set, CommonAccessExpLookupVisitor<T> visitor) {
-        Opt<FAccessExp> indicator = getIndicatorOpt();
+        Opt<FExp> indicator = getIndicatorOpt();
 
         if (indicator == null) {
             super.findCommonAccessExpsInTree(set, visitor);
@@ -3474,7 +3474,6 @@ aspect FVariableUses {
     eq SourceRoot.getChild().inAccessLocation()             = false;
     eq FAbstractEquation.getFAttribute().inAccessLocation() = false;
     eq FAbstractEquation.getChild().inAccessLocation()      = true;
-    eq FRelExp.getIndicator().inAccessLocation()            = false;
 
     syn lazy LinkedHashSet<FVariable> FAbstractEquation.algebraicContinousRealVariables() = 
         FClass.intersectFVSet(algebraicVariables(), myFClass().normalAlgebraicContinousRealVariables());
@@ -3572,19 +3571,6 @@ aspect FVariableUses {
         l.addAll(algebraicVariables());
         l.addAll(discreteVariables());
         return l;
-    }
-
-    /**
-     * Returns the event indicators for the expressions that are found by {@link #relExpInEquation}.
-     */
-    syn Set<FVariable> FAbstractEquation.eventIndicators() {
-        Set<FVariable> res = new HashSet<>();
-        for (FRelExp exp : relExpInEquation()) {
-            if (exp.hasIndicator()) {
-                res.add((FVariable) exp.getIndicator().myFV());
-            }
-        }
-        return res;
     }
 
     /**

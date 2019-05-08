@@ -33,14 +33,8 @@ aspect CCodeGenAlgorithms {
     public void FType.printAssign(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent,
             ASTNode dst, ASTNode src) {
         str.print(indent);
-        if (isComposite()) {
-            str.print("*");
-        }
         p.print(dst, str, indent);
         str.print(" = ");
-        if (isComposite()) {
-            str.print("*");
-        }
         p.print(src, str, indent);
         str.print(";\n");
     }
@@ -102,7 +96,7 @@ aspect CCodeGenAlgorithms {
     }
     
     public void FInitArrayStmt.printInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-        if (getShallow() && !p.isDer()) {
+        if (getShallow()) {
             FType type = type();
             boolean sub = getFAccessExp().getFAccess().myTopFV() != getFAccessExp().myFV();
             Dynamicity dyn = sub || type.size().isUnknown() ? Dynamicity.HEAP : Dynamicity.STACK;
