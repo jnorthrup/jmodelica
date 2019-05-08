@@ -181,7 +181,9 @@ aspect SrcAnnotations {
      * AnnotationProvider for modifications and annotations in the SourceTree.
      * See overview on AnnotationProvider for more info.
      */ 
-    public interface SrcAnnotationProvider extends AnnotationProvider<SrcAnnotationProvider, SrcExp> {}
+    public interface SrcAnnotationProvider extends AnnotationProvider<SrcAnnotationProvider, SrcExp> {
+        public SrcClassDecl enclosingClassDecl();
+    }
     
     /**
      * immutable AnnotationProvider used to obtain the annotations from elements which can have annotations. 
@@ -454,6 +456,11 @@ aspect SrcAnnotations {
 
         public RootAnnotationProviderProxy(T owningNode) {
             this.owningNode = owningNode;
+        }
+
+        @Override
+        public SrcClassDecl enclosingClassDecl() {
+            return owningNode.enclosingClassDecl();
         }
 
         @Override
@@ -803,6 +810,11 @@ aspect SrcAnnotations {
         }
 
         @Override
+        public SrcClassDecl enclosingClassDecl() {
+            return provider.enclosingClassDecl();
+        }
+
+        @Override
         public SrcExp annotationValue() {
             return null;
         }
@@ -865,6 +877,16 @@ aspect SrcAnnotations {
         }
 
         @Override
+        public SrcClassDecl enclosingClassDecl() {
+            /*
+             * Currently (2019-04-25) there are two uses of SrcAnnotationsIteratorProvider.
+             * It is ok to use get(0) in both cases since there is at least one provider
+             * and all providers have the same enclosing class.
+             */
+            return providers.get(0).enclosingClassDecl();
+        }
+
+        @Override
         public SrcExp annotationValue() {
             return null;
         }
@@ -912,6 +934,11 @@ aspect SrcAnnotations {
 
         public ExpValueProvider(SrcExp exp) {
             this.exp = exp;
+        }
+
+        @Override
+        public SrcClassDecl enclosingClassDecl() {
+            return exp.enclosingClassDecl();
         }
 
         @Override
