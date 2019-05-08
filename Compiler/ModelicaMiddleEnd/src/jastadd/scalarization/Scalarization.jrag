@@ -87,14 +87,14 @@ aspect Scalarization {
             vars.addAll(v);
         }
         
-        public void addTempVar(FType type, String name, boolean addVar) {
+        public void addTempVar(FType type, String name, boolean addVar, boolean init) {
             if (addVar) {
                 type.createTempFVariables(getVars(), new FAccessString(name), variability);
             }
         }
         
-        public void addTempVar(FExp source) {
-            addTempVar(source.type(), source.tempVarName(), !source.useTempVar);
+        public void addTempVar(FExp source, boolean init) {
+            addTempVar(source.type(), source.tempVarName(), !source.useTempVar, init);
         }
         
         public abstract<T extends Scalarizer> T block(List clauses);
@@ -166,9 +166,9 @@ aspect Scalarization {
             }
             
             @Override
-            public void addTempVar(FExp source) {
+            public void addTempVar(FExp source, boolean init) {
                 if (!source.useTempVar) {
-                    super.addTempVar(source);
+                    super.addTempVar(source, init);
                     source.notifyIfWhenEquationsOfTemporaryVar();
                 }
             }
@@ -210,25 +210,24 @@ aspect Scalarization {
             }
             
             @Override
-            public void addTempVar(FType type, String name, boolean addVar) {
+            public void addTempVar(FType type, String name, boolean addVar, boolean init) {
                 if (func) {
                     if (addVar) {
                         type = type.treeCopy();
                         add(new FFunctionVariable(VisibilityType.TEMPORARY, type, name));
                     }
-                    if (type.isArray()) {
-                        FInitArrayStmt stmt = new FInitArrayStmt(new FAccessExp(name));
+                    if (init && type.isArray()) {
+                        FInitArrayStmt stmt = new FInitArrayStmt(new FAccessExp(name), true, type.size().scalarizedSizeExpressions(this));
                         add(stmt);
-                        type.scalarizeInitArray(this, stmt);
                     }
                 } else {
-                    super.addTempVar(type, name, addVar);
+                    super.addTempVar(type, name, addVar, init);
                 }
             }
             
-            public void addTempVar(FAssignStmt source) {
+            public void addTempVar(FAssignStmt source, boolean init) {
                 FType type = source.getLeft().size().isUnknown() ? source.getLeft().type() : source.getRight().type();
-                addTempVar(type, source.tempVarName(), true);
+                addTempVar(type, source.tempVarName(), true, init);
             }
             
             @Override
@@ -1900,6 +1899,19 @@ aspect Scalarization {
         } else {
             return super.scalarize(s, i);
         }
+    }
+    
+    /**
+     * Create a scalarized list of size expressions.
+     * Also performs createArrayTemporaries.
+     */
+    public List<FExp> Size.scalarizedSizeExpressions(Scalarizer s) {
+        List<FExp> sizes = new List<FExp>();
+        for (int i = 0; i < ndims(); i++) {
+            createArrayTemporaries(s, i);
+            sizes.add(scalarize(s, i));
+        }
+        return sizes;
     }
     
     protected FFunctionCall FFunctionCall.createScalarized(FAccess name, List<FExp> args, FType type) {

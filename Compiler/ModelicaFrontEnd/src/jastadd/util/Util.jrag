@@ -869,7 +869,7 @@ aspect Names {
   inh String ASTNode.topPackagePath();
   eq Root.getChild().topPackagePath() = null;
   eq InstClassDecl.getChild().topPackagePath() {
-	  String path = topPackagePath();
+      String path = topPackagePath();
 	  return (path == null) ? dirName() : path;
   }
   eq SrcFullClassDecl.getChild().topPackagePath() {
