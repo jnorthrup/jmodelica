@@ -213,13 +213,13 @@ int jmi_delay_second_event_indicator(jmi_t *jmi, int index, jmi_real_t delay_tim
 jmi_real_t jmi_delay_first_event_indicator_exp(jmi_t *jmi, int index, jmi_real_t delay_time)
 {
     jmi_real_t event_indicator;
-    jmi_delay_first_event_indicator(jmi, index, index, delay_time, &event_indicator);
+    jmi_delay_first_event_indicator(jmi, index, delay_time, &event_indicator);
     return event_indicator;
 }
 jmi_real_t jmi_delay_second_event_indicator_exp(jmi_t *jmi, int index, jmi_real_t delay_time)
 {
     jmi_real_t event_indicator;
-    jmi_delay_first_second_indicator(jmi, index, index, delay_time, &event_indicator);
+    jmi_delay_second_event_indicator(jmi, index, delay_time, &event_indicator);
     return event_indicator;
 }
 
