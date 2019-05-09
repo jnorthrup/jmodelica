@@ -73,4 +73,65 @@ equation
 end FunctionInliningTemporaries.BasicInlineTempTrivial1;
 ")})));
     end BasicInlineTempTrivial1;
+    
+    model InlineNestedRecords1
+        record R1
+            Real[1] x;
+        end R1;
+        
+        record R2
+            R1 r;
+            Real x;
+        end R2;
+        
+        record R3
+            R2 r;
+        end R3;
+        
+        function g
+            input R3 x;
+            output R3 y = x;
+        algorithm
+        end g;
+        
+        function f
+            input R3 r;
+            R3 c(r(r(x={1})));
+            output R3[:] y = {c, r};
+            output R3 y2 = g(r);
+        algorithm
+            annotation(Inline=true);
+        end f;
+        
+        R3[2] r;
+        R3 y2;
+    equation
+        (r,y2) = f(R3(R2(R1({time}),0)));
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InlineNestedRecords1",
+            description="Tricky cases with nested records",
+            variability_propagation=false,
+            eliminate_alias_variables=false,
+            flatModel="
+fclass FunctionInliningTemporaries.InlineNestedRecords1
+ Real r[1].r.r.x[1];
+ Real r[1].r.x;
+ Real r[2].r.r.x[1];
+ Real r[2].r.x;
+ Real y2.r.r.x[1];
+ Real y2.r.x;
+ Real temp_3;
+equation
+ temp_3 = time;
+ r[1].r.r.x[1] = 1;
+ r[1].r.x = 0.0;
+ r[2].r.r.x[1] = temp_3;
+ r[2].r.x = 0;
+ y2.r.r.x[1] = temp_3;
+ y2.r.x = 0;
+end FunctionInliningTemporaries.InlineNestedRecords1;
+")})));
+    end InlineNestedRecords1;
 end FunctionInliningTemporaries;
