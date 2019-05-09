@@ -376,6 +376,13 @@ int jmi_spatialdist_event_indicator(jmi_t *jmi, int index, jmi_real_t x, jmi_boo
     return 0;
 }
 
+jmi_real_t jmi_spatialdist_event_indicator_exp(jmi_t *jmi, int index, jmi_real_t x, jmi_boolean positiveVelocity)
+{
+    jmi_real_t event_indicator;
+    jmi_spatialdist_event_indicator(jmi, index, x, positiveVelocity, &event_indicator);
+    return event_indicator;
+}
+
 
 
  /* Implementation of jmi_delaybuffer_t functions */
