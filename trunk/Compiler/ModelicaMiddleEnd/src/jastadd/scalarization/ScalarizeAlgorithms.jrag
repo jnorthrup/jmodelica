@@ -163,12 +163,24 @@ aspect AlgorithmScalarization {
 }
 
 aspect AssignmentScalarization {
-    syn boolean FType.keepCompositeAssign(FExp left, FExp right) = isComposite() && left.keepCompositeAssign() && right.keepCompositeAssign();
+
+    /** 
+     * Check if we can keep this statement as a composite assignment.
+     * The loop limitation is due to stack allocations performed in 
+     * scopes which the pointer copy will outlive.
+     */
+    syn boolean FType.keepCompositeAssign(FExp left, FExp right) = 
+        isComposite() && left.keepCompositeAssign() && right.keepCompositeAssign() && !left.inLoop();
     
     syn boolean FExp.keepCompositeAssign() = useTempVar;
     eq FAccessExp.keepCompositeAssign() = !isSlice() && (getFAccess().myTopFV().isInput() || getFAccess().myTopFV().isConstant());
     eq FTempAccessExp.keepCompositeAssign() = true;
     
+    inh boolean FExp.inLoop();
+    eq Root      .getChild()    .inLoop() = false;
+    eq FAlgorithm.getChild()    .inLoop() = false;
+    eq FForStmt  .getForStmt()  .inLoop() = true;
+    eq FWhileStmt.getWhileStmt().inLoop() = true;
     
     /**
      * Scalarize an assignment and put the resulting statements in the list of statements. 

@@ -5717,15 +5717,24 @@ void func_CCodeGenTests_CUnknownArray7_f_def0(jmi_real_t m_v, R1_1_ra* o_a) {
     jmi_real_t i1_1i;
     jmi_int_t i1_1ie;
     jmi_int_t i1_1in;
-    jmi_real_t i1_2i;
-    jmi_int_t i1_2ie;
-    jmi_int_t i1_2in;
+    jmi_real_t i2_2i;
+    jmi_int_t i2_2ie;
+    jmi_int_t i2_2in;
     jmi_real_t i2_3i;
     jmi_int_t i2_3ie;
     jmi_int_t i2_3in;
     jmi_real_t i3_4i;
     jmi_int_t i3_4ie;
     jmi_int_t i3_4in;
+    jmi_real_t i1_5i;
+    jmi_int_t i1_5ie;
+    jmi_int_t i1_5in;
+    jmi_real_t i2_6i;
+    jmi_int_t i2_6ie;
+    jmi_int_t i2_6in;
+    jmi_real_t i3_7i;
+    jmi_int_t i3_7ie;
+    jmi_int_t i3_7in;
     if (o_a == NULL) {
         JMI_ARRAY_INIT_2(HEAP, R1_1_r, R1_1_ra, o_an, m_v * m_v, 2, m_v, m_v)
         tmp_1_max = m_v * m_v + 1;
@@ -5748,19 +5757,34 @@ void func_CCodeGenTests_CUnknownArray7_f_def0(jmi_real_t m_v, R1_1_ra* o_a) {
             JMI_ARRAY_INIT_1(STACK, R2_0_r, R2_0_ra, temp_2_a, 1, 1, 1)
             JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, temp_3_a, 1, 1, 1)
             jmi_array_ref_1(temp_3_a, 1) = i_0i * i1_1i;
-            *jmi_array_rec_1(temp_2_a, 1)->y = *temp_3_a;
-            *jmi_array_rec_1(temp_1_a, i1_1i)->x = *temp_2_a;
-        }
-        i1_2in = 0;
-        i1_2ie = floor((m_v) - (1));
-        for (i1_2i = 1; i1_2in <= i1_2ie; i1_2i = 1 + (++i1_2in)) {
+            JMI_ARRAY_INIT_1(HEAP, jmi_real_t, jmi_array_t, jmi_array_rec_1(temp_2_a, 1)->y, 1, 1, 1)
+            i2_2in = 0;
+            i2_2ie = floor((1) - (1));
+            for (i2_2i = 1; i2_2in <= i2_2ie; i2_2i = 1 + (++i2_2in)) {
+                jmi_array_ref_1(jmi_array_rec_1(temp_2_a, 1)->y, i2_2i) = jmi_array_val_1(temp_3_a, i2_2i);
+            }
+            JMI_ARRAY_INIT_1(HEAP, R2_0_r, R2_0_ra, jmi_array_rec_1(temp_1_a, i1_1i)->x, 1, 1, 1)
             i2_3in = 0;
             i2_3ie = floor((1) - (1));
             for (i2_3i = 1; i2_3in <= i2_3ie; i2_3i = 1 + (++i2_3in)) {
+                JMI_ARRAY_INIT_1(HEAP, jmi_real_t, jmi_array_t, jmi_array_rec_1(jmi_array_rec_1(temp_1_a, i1_1i)->x, i2_3i)->y, 1, 1, 1)
                 i3_4in = 0;
                 i3_4ie = floor((1) - (1));
                 for (i3_4i = 1; i3_4in <= i3_4ie; i3_4i = 1 + (++i3_4in)) {
-                    jmi_array_ref_1(jmi_array_rec_1(jmi_array_rec_2(o_a, i_0i, i1_2i)->x, i2_3i)->y, i3_4i) = jmi_array_val_1(jmi_array_rec_1(jmi_array_rec_1(temp_1_a, i1_2i)->x, i2_3i)->y, i3_4i);
+                    jmi_array_ref_1(jmi_array_rec_1(jmi_array_rec_1(temp_1_a, i1_1i)->x, i2_3i)->y, i3_4i) = jmi_array_val_1(jmi_array_rec_1(temp_2_a, i2_3i)->y, i3_4i);
+                }
+            }
+        }
+        i1_5in = 0;
+        i1_5ie = floor((m_v) - (1));
+        for (i1_5i = 1; i1_5in <= i1_5ie; i1_5i = 1 + (++i1_5in)) {
+            i2_6in = 0;
+            i2_6ie = floor((1) - (1));
+            for (i2_6i = 1; i2_6in <= i2_6ie; i2_6i = 1 + (++i2_6in)) {
+                i3_7in = 0;
+                i3_7ie = floor((1) - (1));
+                for (i3_7i = 1; i3_7in <= i3_7ie; i3_7i = 1 + (++i3_7in)) {
+                    jmi_array_ref_1(jmi_array_rec_1(jmi_array_rec_2(o_a, i_0i, i1_5i)->x, i2_6i)->y, i3_7i) = jmi_array_val_1(jmi_array_rec_1(jmi_array_rec_1(temp_1_a, i1_5i)->x, i2_6i)->y, i3_7i);
                 }
             }
         }
