@@ -11422,7 +11422,10 @@ public
     temp_2[1] := i;
     temp_2[2] := i1;
     temp_1[i1].x := i * i1;
-    temp_1[i1].y := temp_2;
+    init temp_1[i1].y as Real[2];
+    for i2 in 1:2 loop
+     temp_1[i1].y[i2] := temp_2[i2];
+    end for;
    end for;
    for i1 in 1:m loop
     o[i,i1].x := temp_1[i1].x;
