@@ -1408,19 +1408,42 @@ aspect CCodeGenExpressions {
     }
 
     @Override
+    public void FDelayIndicator.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        if (!p.inInitialSystem()) {
+            p.printVarDecls(getDelay(), str, indent);
+        }
+    }
+
+    @Override
+    public void FDelayIndicator.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        if (!p.inInitialSystem()) {
+            p.printPreSteps(getDelay(), str, indent);
+        }
+    }
+
+    @Override
+    public void FDelayIndicator.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
+        if (!p.inInitialSystem()) {
+            p.printPostSteps(getDelay(), str, indent);
+        }
+    }
+
+    @Override
     public void FDelayIndicator.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         if (p.inInitialSystem()) {
             str.format("JMI_DELAY_INITIAL_EVENT_RES");
         } else {
             str.format("%s(jmi, %d, ", jmiDelayFunction_C(), myDelayIndex());
-            p.print(myDelayExp().getDelay(), str, indent);
+            p.print(getDelay(), str, indent);
             str.print(")");
         }
     }
-    
+
     syn String FDelayIndicator.jmiDelayFunction_C();
     eq FFirstDelayIndicator.jmiDelayFunction_C()  = "jmi_delay_first_event_indicator_exp";
     eq FSecondDelayIndicator.jmiDelayFunction_C() = "jmi_delay_second_event_indicator_exp";
+
+    syn nta FExp FDelayIndicator.getDelay() = myDelayExp().getDelay().copySymbolic();
 
     /**
      * Generate temp declarations for the initialization of spatialDistribution blocks.
@@ -1555,17 +1578,44 @@ aspect CCodeGenExpressions {
     }
 
     @Override
+    public void FSpatialDistIndicator.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        if (!p.inInitialSystem()) {
+            p.printVarDecls(getX(), str, indent);
+            p.printVarDecls(getPositiveVelocity(), str, indent);
+        }
+    }
+
+    @Override
+    public void FSpatialDistIndicator.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        if (!p.inInitialSystem()) {
+            p.printPreSteps(getX(), str, indent);
+            p.printPreSteps(getPositiveVelocity(), str, indent);
+        }
+    }
+
+    @Override
+    public void FSpatialDistIndicator.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
+        if (!p.inInitialSystem()) {
+            p.printPostSteps(getX(), str, indent);
+            p.printPostSteps(getPositiveVelocity(), str, indent);
+        }
+    }
+
+
+    @Override
     public void FSpatialDistIndicator.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         if (p.inInitialSystem()) {
             str.format("JMI_DELAY_INITIAL_EVENT_RES");
         } else {
             str.format("jmi_spatialdist_event_indicator_exp(jmi, %d, ", mySpatialDistIndex());
-            p.print(mySpatialDistExp().getX(), str, indent);
+            p.print(getX(), str, indent);
             str.print(", ");
-            p.print(mySpatialDistExp().getPositiveVelocity(), str, indent);
+            p.print(getPositiveVelocity(), str, indent);
             str.print(")");
         }
     }
+    syn nta FExp FSpatialDistIndicator.getX()                = mySpatialDistExp().getX().copySymbolic();
+    syn nta FExp FSpatialDistIndicator.getPositiveVelocity() = mySpatialDistExp().getPositiveVelocity().copySymbolic();
 
     /*=========================================================================
      * Subscripted Expression

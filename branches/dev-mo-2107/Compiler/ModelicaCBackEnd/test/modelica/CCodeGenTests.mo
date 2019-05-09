@@ -19443,8 +19443,7 @@ model Delay4
     x1 = delay(f({t,t}), f({p,p}));
     x2 = delay(f({t,t}), f({t,t}), f({p,p}));
 
-    // TODO Enable test when fixing temporaries for the indicator.
-    annotation(_DISABLED_JModelica(UnitTesting(tests={
+    annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
             name="Delay4",
             description="Delay operator code gen: Array temp generation",
@@ -19528,6 +19527,8 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_9, 2, 1)
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_10, 2, 1)
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_11, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_12, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_13, 2, 1)
     _t_2 = _time;
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_7, 2, 1, 2)
     jmi_array_ref_1(tmp_7, 1) = _t_2;
@@ -19540,14 +19541,20 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     jmi_array_ref_1(tmp_9, 1) = _t_2;
     jmi_array_ref_1(tmp_9, 2) = _t_2;
     __eventIndicator_1_4 = jmi_delay_first_event_indicator_exp(jmi, 1, func_CCodeGenTests_Delay4_f_exp0(tmp_9));
-    __eventIndicator_2_5 = jmi_delay_second_event_indicator_exp(jmi, 1, func_CCodeGenTests_Delay4_f_exp0(tmp_9));
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_10, 2, 1, 2)
     jmi_array_ref_1(tmp_10, 1) = _t_2;
     jmi_array_ref_1(tmp_10, 2) = _t_2;
+    __eventIndicator_2_5 = jmi_delay_second_event_indicator_exp(jmi, 1, func_CCodeGenTests_Delay4_f_exp0(tmp_10));
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_11, 2, 1, 2)
-    jmi_array_ref_1(tmp_11, 1) = _p_3;
-    jmi_array_ref_1(tmp_11, 2) = _p_3;
-    _x2_1 = jmi_delay_evaluate(jmi, 1, func_CCodeGenTests_Delay4_f_exp0(tmp_9), func_CCodeGenTests_Delay4_f_exp0(tmp_10));
+    jmi_array_ref_1(tmp_11, 1) = _t_2;
+    jmi_array_ref_1(tmp_11, 2) = _t_2;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_12, 2, 1, 2)
+    jmi_array_ref_1(tmp_12, 1) = _t_2;
+    jmi_array_ref_1(tmp_12, 2) = _t_2;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_13, 2, 1, 2)
+    jmi_array_ref_1(tmp_13, 1) = _p_3;
+    jmi_array_ref_1(tmp_13, 2) = _p_3;
+    _x2_1 = jmi_delay_evaluate(jmi, 1, func_CCodeGenTests_Delay4_f_exp0(tmp_11), func_CCodeGenTests_Delay4_f_exp0(tmp_12));
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -19718,6 +19725,137 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     return ef;
 ")})));
 end Delay6;
+
+model Delay7
+    function f
+        input Real[:] x;
+        output Real y = sum(x);
+      algorithm
+      annotation(Inline=false);
+    end f;
+
+    Real x, t;
+    parameter Real p = 3;
+  equation
+    t = time;
+    x = delay(time, delay(time, delay(time, f({t,t}), 1), 10), 100);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="Delay7",
+            description="Delay operator code gen: Nested delays",
+            generate_ode=true,
+            equation_sorting=true,
+            common_subexp_elim=false,
+            template="
+N_delays = $n_delays$;
+$C_DAE_relations$
+
+$C_delay_init$
+$C_delay_sample$
+$C_ode_initialization$
+$C_ode_derivatives$
+
+$C_DAE_event_indicator_residuals$
+$C_DAE_initial_event_indicator_residuals$
+",
+            generatedCode="
+N_delays = 3;
+static const int N_relations = 6;
+static const int DAE_relations[] = { JMI_REL_GEQ, JMI_REL_GEQ, JMI_REL_GEQ, JMI_REL_GEQ, JMI_REL_GEQ, JMI_REL_GEQ };
+
+    jmi_delay_init(jmi, 0, JMI_FALSE, JMI_FALSE, AD_WRAP_LITERAL(100), _time);
+    jmi_delay_init(jmi, 1, JMI_FALSE, JMI_FALSE, AD_WRAP_LITERAL(10), _time);
+    jmi_delay_init(jmi, 2, JMI_FALSE, JMI_FALSE, AD_WRAP_LITERAL(1), _time);
+
+    jmi_delay_record_sample(jmi, 0, _time);
+    jmi_delay_record_sample(jmi, 1, _time);
+    jmi_delay_record_sample(jmi, 2, _time);
+
+
+int model_ode_initialize_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    _t_1 = _time;
+    __eventIndicator_1_3 = JMI_DELAY_INITIAL_EVENT_RES;
+    __eventIndicator_2_4 = JMI_DELAY_INITIAL_EVENT_RES;
+    __eventIndicator_3_5 = JMI_DELAY_INITIAL_EVENT_RES;
+    __eventIndicator_4_6 = JMI_DELAY_INITIAL_EVENT_RES;
+    __eventIndicator_5_7 = JMI_DELAY_INITIAL_EVENT_RES;
+    __eventIndicator_6_8 = JMI_DELAY_INITIAL_EVENT_RES;
+    _x_0 = _time;
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_3, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_4, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_5, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_6, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_7, 2, 1)
+    _t_1 = _time;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    jmi_array_ref_1(tmp_1, 1) = _t_1;
+    jmi_array_ref_1(tmp_1, 2) = _t_1;
+    __eventIndicator_5_7 = jmi_delay_first_event_indicator_exp(jmi, 2, func_CCodeGenTests_Delay7_f_exp0(tmp_1));
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+    jmi_array_ref_1(tmp_2, 1) = _t_1;
+    jmi_array_ref_1(tmp_2, 2) = _t_1;
+    __eventIndicator_6_8 = jmi_delay_second_event_indicator_exp(jmi, 2, func_CCodeGenTests_Delay7_f_exp0(tmp_2));
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 2, 1, 2)
+    jmi_array_ref_1(tmp_3, 1) = _t_1;
+    jmi_array_ref_1(tmp_3, 2) = _t_1;
+    __eventIndicator_3_5 = jmi_delay_first_event_indicator_exp(jmi, 1, jmi_delay_evaluate(jmi, 2, _time, func_CCodeGenTests_Delay7_f_exp0(tmp_3)));
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_4, 2, 1, 2)
+    jmi_array_ref_1(tmp_4, 1) = _t_1;
+    jmi_array_ref_1(tmp_4, 2) = _t_1;
+    __eventIndicator_4_6 = jmi_delay_second_event_indicator_exp(jmi, 1, jmi_delay_evaluate(jmi, 2, _time, func_CCodeGenTests_Delay7_f_exp0(tmp_4)));
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_5, 2, 1, 2)
+    jmi_array_ref_1(tmp_5, 1) = _t_1;
+    jmi_array_ref_1(tmp_5, 2) = _t_1;
+    __eventIndicator_1_3 = jmi_delay_first_event_indicator_exp(jmi, 0, jmi_delay_evaluate(jmi, 1, _time, jmi_delay_evaluate(jmi, 2, _time, func_CCodeGenTests_Delay7_f_exp0(tmp_5))));
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_6, 2, 1, 2)
+    jmi_array_ref_1(tmp_6, 1) = _t_1;
+    jmi_array_ref_1(tmp_6, 2) = _t_1;
+    __eventIndicator_2_4 = jmi_delay_second_event_indicator_exp(jmi, 0, jmi_delay_evaluate(jmi, 1, _time, jmi_delay_evaluate(jmi, 2, _time, func_CCodeGenTests_Delay7_f_exp0(tmp_6))));
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_7, 2, 1, 2)
+    jmi_array_ref_1(tmp_7, 1) = _t_1;
+    jmi_array_ref_1(tmp_7, 2) = _t_1;
+    _x_0 = jmi_delay_evaluate(jmi, 0, _time, jmi_delay_evaluate(jmi, 1, _time, jmi_delay_evaluate(jmi, 2, _time, func_CCodeGenTests_Delay7_f_exp0(tmp_7))));
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    (*res)[0] = __eventIndicator_1_3;
+    (*res)[1] = __eventIndicator_2_4;
+    (*res)[2] = __eventIndicator_3_5;
+    (*res)[3] = __eventIndicator_4_6;
+    (*res)[4] = __eventIndicator_5_7;
+    (*res)[5] = __eventIndicator_6_8;
+    JMI_DYNAMIC_FREE()
+    return ef;
+
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    (*res)[0] = __eventIndicator_1_3;
+    (*res)[1] = __eventIndicator_2_4;
+    (*res)[2] = __eventIndicator_3_5;
+    (*res)[3] = __eventIndicator_4_6;
+    (*res)[4] = __eventIndicator_5_7;
+    (*res)[5] = __eventIndicator_6_8;
+    JMI_DYNAMIC_FREE()
+    return ef;
+")})));
+end Delay7;
 
 
 model DelayOnlyStateEvents
@@ -20139,6 +20277,72 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 
 ")})));
 end SpatialDist2;
+
+model SpatialDist3
+    function f
+        input Real[:] x;
+        output Real y = sum(x);
+      algorithm
+      annotation(Inline=false);
+    end f;
+    function g
+        input Real[2] x;
+        output Boolean y = sum(x) > 1;
+      algorithm
+      annotation(Inline=false);
+    end g;
+
+    Real x1,x2;
+  equation
+    (x1,x2) = spatialDistribution(f({time,1}), f({time,2}), f({time,3}), g({time,time}), initialPoints={1,2}, initialValues={3,4});
+
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="SpatialDist3",
+        description="SpatialDistribution operator code gen: Temporaries",
+        generate_ode=true,
+        equation_sorting=true,
+        common_subexp_elim=false,
+        template="$C_ode_derivatives$",
+        generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_DEF(REA, tmp_3)
+    JMI_DEF(REA, tmp_4)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_5, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_6, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_7, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_8, 2, 1)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    jmi_array_ref_1(tmp_1, 1) = _time;
+    jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(3);
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+    jmi_array_ref_1(tmp_2, 1) = _time;
+    jmi_array_ref_1(tmp_2, 2) = _time;
+    __eventIndicator_1_2 = jmi_spatialdist_event_indicator_exp(jmi, 0, func_CCodeGenTests_SpatialDist3_f_exp0(tmp_1), func_CCodeGenTests_SpatialDist3_g_exp1(tmp_2));
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_5, 2, 1, 2)
+    jmi_array_ref_1(tmp_5, 1) = _time;
+    jmi_array_ref_1(tmp_5, 2) = AD_WRAP_LITERAL(1);
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_6, 2, 1, 2)
+    jmi_array_ref_1(tmp_6, 1) = _time;
+    jmi_array_ref_1(tmp_6, 2) = AD_WRAP_LITERAL(2);
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_7, 2, 1, 2)
+    jmi_array_ref_1(tmp_7, 1) = _time;
+    jmi_array_ref_1(tmp_7, 2) = AD_WRAP_LITERAL(3);
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_8, 2, 1, 2)
+    jmi_array_ref_1(tmp_8, 1) = _time;
+    jmi_array_ref_1(tmp_8, 2) = _time;
+    jmi_spatialdist_evaluate(jmi, 0, &tmp_3, &tmp_4, func_CCodeGenTests_SpatialDist3_f_exp0(tmp_5), func_CCodeGenTests_SpatialDist3_f_exp0(tmp_6), func_CCodeGenTests_SpatialDist3_f_exp0(tmp_7), func_CCodeGenTests_SpatialDist3_g_exp1(tmp_8));
+    _x1_0 = (tmp_3);
+    _x2_1 = (tmp_4);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end SpatialDist3;
 
 model DiscreteInput
         input Boolean b;
