@@ -174,8 +174,8 @@ mc_modelica: ifcasadi
 	cd $(MC_CASADI_BUILD); $(ANT_OPTS) $(ANT) -f "$(JAVA_MC_CASADI_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(MC_CASADI_BUILD)"
 
 mc_optimica: ifcasadi
-	mkdir -p $(OC_CASADI_BUILD)/src/java-generated
-	cp -pr $(MC_CASADI_BUILD)/src/java-generated/ifcasadi $(OC_CASADI_BUILD)/src/java-generated
+	mkdir -p $(OC_CASADI_BUILD)/src/generated/optimica/java
+	cp -pr $(MC_CASADI_BUILD)/src/generated/modelica/java/ifcasadi $(OC_CASADI_BUILD)/src/generated/optimica/java
 	cd $(OC_CASADI_BUILD); $(ANT_OPTS) $(ANT) -f "$(JAVA_OC_CASADI_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(OC_CASADI_BUILD)"
 
 $(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar: mc_modelica
@@ -631,9 +631,9 @@ clean-casadi-interface:
 #	rm -rf $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
 if HAVE_ANT
 	cd $(JAVA_CASADI_BUILD_DIR)/ModelicaCompilerCasADi; \
-	$(ANT_OPTS) $(ANT) clean ; rm -rf $(MC_CASADI_BUILD)/src/cpp-generated $(MC_CASADI_BUILD)/src/java-generated/ifcasadi 
+	$(ANT_OPTS) $(ANT) clean ; rm -rf $(MC_CASADI_BUILD)/src/cpp-generated $(MC_CASADI_BUILD)/src/generated/modelica/java/ifcasadi 
 	cd $(JAVA_CASADI_BUILD_DIR)/OptimicaCompilerCasADi; \
-	$(ANT_OPTS) $(ANT) clean ; rm -rf $(OC_CASADI_BUILD)/src/cpp-generated $(OC_CASADI_BUILD)/src/java-generated/ifcasadi 
+	$(ANT_OPTS) $(ANT) clean ; rm -rf $(OC_CASADI_BUILD)/src/cpp-generated $(OC_CASADI_BUILD)/src/generated/optimica/java/ifcasadi 
 endif
 	
 clean-python-packages:
