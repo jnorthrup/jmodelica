@@ -1315,16 +1315,24 @@ FReinit : FBuiltInFunctionCall ::= Var:FExp FExp;
 FDelayExp : FBuiltInFunctionCall ::= FExp Delay:FExp [Max:FExp] Indicator:FAccessExp*;
 
 /**
- * Used for generating event indicators for the delay() operator.
- */
-abstract FDelayIndicator : FBuiltInFunctionCall ::= ;
-FFirstDelayIndicator : FDelayIndicator;
-FSecondDelayIndicator : FDelayIndicator;
-
-/**
  * The spatialDistribution() operator.
  */
-FSpatialDistExp : FBuiltInFunctionCall ::= In0:FExp In1:FExp X:FExp PositiveVelocity:FExp InitialPoints:FExp InitialValues:FExp;
+FSpatialDistExp : FBuiltInFunctionCall ::= In0:FExp
+                                           In1:FExp
+                                           X:FExp
+                                           PositiveVelocity:FExp
+                                           InitialPoints:FExp
+                                           InitialValues:FExp
+                                           [Indicator:FAccessExp];
+
+/**
+ * Used for generating event indicators for the delay() operator.
+ */
+abstract FIndicatorExp   : FBuiltInFunctionCall;
+abstract FDelayIndicator : FIndicatorExp;
+FFirstDelayIndicator     : FDelayIndicator;
+FSecondDelayIndicator    : FDelayIndicator;
+FSpatialDistIndicator    : FIndicatorExp;
 
 /**
  * Sample built-in function.

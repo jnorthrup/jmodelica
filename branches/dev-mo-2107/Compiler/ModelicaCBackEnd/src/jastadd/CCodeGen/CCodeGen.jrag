@@ -522,10 +522,6 @@ aspect CCodeGen {
 
     @Override
     public void FSpatialDistExp.genEventResidualVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        if (!p.inInitialSystem()) {
-            p.printVarDecls(getX(), str, indent);
-            p.printVarDecls(getPositiveVelocity(), str, indent);
-        }
     }
 
     public void FExp.genEventResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
@@ -552,20 +548,10 @@ aspect CCodeGen {
 
     @Override
     public void FSpatialDistExp.genEventResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
-        if (p.inInitialSystem()) {
-            str.formatln("%s(*res)[%d] = JMI_DELAY_INITIAL_EVENT_RES;", indent, enumerator.next());
-        } else {
-            p.printPreSteps(getX(), str, indent);
-            p.printPreSteps(getPositiveVelocity(), str, indent);
-            int index = mySpatialDistIndex();
-            str.format("%sef = jmi_spatialdist_event_indicator(jmi, %d, ", indent, index);
-            p.print(getX(), str, indent);
-            str.print(", ");
-            p.print(getPositiveVelocity(), str, indent);
-            str.print(", &(*res)[" + enumerator.next() + "]);\n");
-            p.printPostSteps(getX(), str, indent);
-            p.printPostSteps(getPositiveVelocity(), str, indent);
-        }
+        FExp indicator = getIndicator();
+        str.format("%s(*res)[%d] = ", indent, enumerator.next());
+        p.print(indicator, str, indent);
+        str.println(";");
     }
     
     syn nta FExp FRelExp.getIndicatorNominal() = FExp.nominalMax(getLeft(), getRight());

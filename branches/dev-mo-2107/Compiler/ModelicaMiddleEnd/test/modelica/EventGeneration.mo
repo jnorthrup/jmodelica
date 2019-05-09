@@ -500,8 +500,8 @@ equation
  x = if temp_1 and not pre(temp_1) then 2 else pre(x);
  y = delay(x, 1);
  _eventIndicator_1 = time - 0.5;
- _eventIndicator_2 = delayIndicator(x, 1);
- _eventIndicator_3 = delayIndicator(x, 1);
+ _eventIndicator_2 = delayIndicatorFirst(x, 1);
+ _eventIndicator_3 = delayIndicatorSecond(x, 1);
 end EventGeneration.DelayStateEvents1;
 ")})));
 end DelayStateEvents1;
@@ -544,10 +544,41 @@ equation
  x = if temp_1 and not pre(temp_1) then 2 else pre(x);
  y = delay(x, tmp, 1);
  _eventIndicator_1 = time - 0.5;
- _eventIndicator_2 = delayIndicator(x, tmp, 1);
- _eventIndicator_3 = delayIndicator(x, tmp, 1);
+ _eventIndicator_2 = delayIndicatorFirst(x, tmp, 1);
+ _eventIndicator_3 = delayIndicatorSecond(x, tmp, 1);
 end EventGeneration.DelayStateEvents2;
 ")})));
 end DelayStateEvents2;
+
+model SpatialDist1
+    Real x1,x2,x3,x4;
+  equation
+    (x1,x2) = spatialDistribution(time+1, time+2, time+3, true, initialPoints={1,2}, initialValues={3,4});
+    (,x3) = spatialDistribution(time+1, time+2, time+3, false, initialPoints={1,2}, initialValues={3,4});
+    x4 = noEvent(spatialDistribution(time+1, time+2, time+3, true));
+
+annotation(__JModelica(UnitTesting(tests={
+    TransformCanonicalTestCase(
+        name="SpatialDist1",
+        description="SpatialDistribution event indicator in flat model",
+        generate_ode=true,
+        equation_sorting=true,
+        flatModel="
+fclass EventGeneration.SpatialDist1
+ Real x1;
+ Real x2;
+ Real x3;
+ Real x4;
+ Real _eventIndicator_1;
+ Real _eventIndicator_2;
+equation
+ (x1, x2) = spatialDistribution(time + 1, time + 2, time + 3, true,  {1, 2}, {3, 4});
+ (, x3) = spatialDistribution(time + 1, time + 2, time + 3, false, {1, 2}, {3, 4});
+ x4 = noEvent(spatialDistribution(time + 1, time + 2, time + 3, true, {0.0, 1.0}, {0.0, 0.0}));
+ _eventIndicator_1 = spatialDistIndicator(time + 1, time + 2, time + 3, true, {1, 2}, {3, 4});
+ _eventIndicator_2 = spatialDistIndicator(time + 1, time + 2, time + 3, false, {1, 2}, {3, 4});
+end EventGeneration.SpatialDist1;
+")})));
+end SpatialDist1;
 
 end EventGeneration;

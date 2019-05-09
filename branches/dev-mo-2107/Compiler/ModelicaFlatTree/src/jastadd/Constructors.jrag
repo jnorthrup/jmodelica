@@ -942,8 +942,6 @@ aspect InheritedFactoryMethods {
     public FLoadResource   FLoadResource.createEmptyNode()   { return new FLoadResource();   }
     public FReinit         FReinit.createEmptyNode()         { return new FReinit();         }
     public FDelayExp       FDelayExp.createEmptyNode()       { return new FDelayExp();       }
-    public FFirstDelayIndicator FFirstDelayIndicator.createEmptyNode() { return new FFirstDelayIndicator(); }
-    public FSecondDelayIndicator FSecondDelayIndicator.createEmptyNode() { return new FSecondDelayIndicator(); }
     public FSpatialDistExp FSpatialDistExp.createEmptyNode() { return new FSpatialDistExp(); }
 	public FSampleExp      FSampleExp.createEmptyNode()      { return new FSampleExp();      }
 	public FInitialExp     FInitialExp.createEmptyNode()     { return new FInitialExp();     }
@@ -953,6 +951,11 @@ aspect InheritedFactoryMethods {
 	public FNoExp          FNoExp.createEmptyNode()          { return new FNoExp();          }
     public FColonSizeExp   FColonSizeExp.createEmptyNode()   { return new FColonSizeExp();   }
     public FInStreamEpsExp FInStreamEpsExp.createEmptyNode() { return new FInStreamEpsExp(); }
+    
+    // Event indicator expressions
+    public FFirstDelayIndicator  FFirstDelayIndicator.createEmptyNode()  { return new FFirstDelayIndicator(); }
+    public FSecondDelayIndicator FSecondDelayIndicator.createEmptyNode() { return new FSecondDelayIndicator(); }
+    public FSpatialDistIndicator FSpatialDistIndicator.createEmptyNode() { return new FSpatialDistIndicator(); }
 
     // Identifier expressions
     public abstract CommonAccessExp CommonAccessExp.createEmptyNode();
@@ -1388,7 +1391,7 @@ aspect InheritedFactoryMethods {
     
     public FFillExp.FFillExp(List<FExp> dims, FExp exp)              { this(emptyArgs(), dims, exp); }
     public FSpatialDistExp.FSpatialDistExp(FExp a1, FExp a2, FExp a3, FExp a4, FExp a5, FExp a6) { 
-        this(emptyArgs(), a1, a2, a3, a4, a5, a6);
+        this(emptyArgs(), a1, a2, a3, a4, a5, a6, Opt.EMPTY);
     }
     public FExInStream.FExInStream(FExp a1, FExp a2, List<FExp> a3) { this(emptyArgs(), a1, a2, a3); }
     
