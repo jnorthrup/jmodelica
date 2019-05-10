@@ -10,6 +10,20 @@
           xmlns:db="http://docbook.org/ns/docbook">
   <title>Release Notes</title>
 
+  <section>
+    <title>Release notes for JModelica.org version 2.12</title>    
+    <section><title>Compiler Changes</title>
+    <para>A major change in this release is the update of Java version used into OpenJDK 11.</para>
+    <para>Important changes to the compiler:</para>
+    <itemizedlist>
+        <listitem>Added support for unspecified enumerations.</listitem>
+        <listitem>Turned off loop unrolling in functions to increase performance.</listitem>
+        <listitem>Improved array initialization for primitive arrays in global constants.</listitem>
+        <listitem>Added option for controlling maximum allowed size of dynamic state sets. Changed default from 8 to 10.</listitem>
+    </itemizedlist>
+    </section>
+  </section>
+  
     <section>
     <title>Release notes for JModelica.org version 2.10</title>    
     <section><title>Compiler Changes</title>

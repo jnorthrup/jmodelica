@@ -66,31 +66,35 @@ JMI_ARRAY_TYPE(jmi_extobj_t, jmi_extobj_array_t)
 #define JMI_ARRAY_INIT(dyn, type, arr, name, ne, nd) \
     JMI_ARRAY_INIT_##dyn(type, arr, name, ne, nd)
 
-/* Static array declaration macro */
-#define JMI_ARRAY_DECL_STAT(type, arr, name, ne, nd) \
+/* Stack array declaration macro */
+#define JMI_ARRAY_DECL_STACK(type, arr, name, ne, nd) \
     int  name##_size[nd];\
     type name##_var[(ne == 0) ? 1 : ne] = {0};\
-    arr  name##_obj = { 0, (int) (nd), (int) (ne), 0 };\
+    arr  name##_obj = { NULL, (int) (nd), (int) (ne), 0, NULL };\
     arr* name = &name##_obj;
 
-/* Static array declaration macro */
-#define JMI_ARRAY_DECL_STATIC(type, arr, name, ne, nd) \
+/* Data section array declaration macro */
+#define JMI_ARRAY_DECL_DATA(type, arr, name, ne, nd) \
     static int  name##_size[nd];\
-    static arr  name##_obj = { 0, (int) (nd), (int) (ne), 0 };\
+    static arr  name##_obj = { name##_size, (int) (nd), (int) (ne), 0, name##_var};\
     static arr* name = &name##_obj;
 
-/* Dynamic array declaration macro */
-#define JMI_ARRAY_DECL_DYNA(type, arr, name, ne, nd) \
+/* Heap array declaration macro */
+#define JMI_ARRAY_DECL_HEAP(type, arr, name, ne, nd) \
     arr* name = NULL;
 
-/* Static array initialization macros */
-#define JMI_ARRAY_INIT_STAT(type, arr, name, ne, nd) \
+/* Stack array initialization macros */
+#define JMI_ARRAY_INIT_STACK(type, arr, name, ne, nd) \
     name->size = name##_size; \
-    name->var  = name##_var;
+    name->var = name##_var;
 
-/* Dynamic array initialization macros.
+/* Data section initialization */
+#define JMI_ARRAY_INIT_DATA(type, arr, name, ne, nd) \
+    ;
+
+/* Heap array initialization macros.
  * Might be called several times for the same name. */
-#define JMI_ARRAY_INIT_DYNA(type, arr, name, ne, nd) \
+#define JMI_ARRAY_INIT_HEAP(type, arr, name, ne, nd) \
     if (name == NULL) {\
         char *tmp_ptr = jmi_dynamic_function_pool_alloc(&dyn_mem, 1*sizeof(arr)+nd*sizeof(int)+ne*sizeof(type), TRUE);\
         name            = (arr*) tmp_ptr;\

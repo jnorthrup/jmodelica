@@ -57,5 +57,82 @@ end FlatteningAccessGlobal.InSubscripts1;
 ")})));
 end InSubscripts1;
 
+model CompositeAccessArray1
+    package P
+        constant Integer[:] is = {1,2,3};
+    end P;
+    
+    function f
+        output Real[:] y = P.is;
+    algorithm
+    end f;
+
+    Real[:] y = f();
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="CompositeAccessArray1",
+            description="Composite constants in functions should be flattened as global variables and uses not folded",
+            flatModel="
+fclass FlatteningAccessGlobal.CompositeAccessArray1
+ Real y[3] = FlatteningAccessGlobal.CompositeAccessArray1.f();
+global variables
+ constant Integer FlatteningAccessGlobal.CompositeAccessArray1.P.is[3] = {1, 2, 3};
+
+public
+ function FlatteningAccessGlobal.CompositeAccessArray1.f
+  output Real[:] y;
+ algorithm
+  init y as Real[3];
+  y := global(FlatteningAccessGlobal.CompositeAccessArray1.P.is[1:3]);
+  return;
+ end FlatteningAccessGlobal.CompositeAccessArray1.f;
+
+end FlatteningAccessGlobal.CompositeAccessArray1;
+")})));
+end CompositeAccessArray1;
+
+model CompositeAccessRecord1
+    record R
+        Real x;
+    end R;
+
+    package P
+        constant R r(x=1);
+    end P;
+    
+    function f
+        output R r = P.r;
+    algorithm
+    end f;
+
+    R y = f();
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="CompositeAccessRecord1",
+            description="Composite constants in functions should be flattened as global variables and uses not folded",
+            flatModel="
+fclass FlatteningAccessGlobal.CompositeAccessRecord1
+ FlatteningAccessGlobal.CompositeAccessRecord1.R y = FlatteningAccessGlobal.CompositeAccessRecord1.f();
+global variables
+ constant FlatteningAccessGlobal.CompositeAccessRecord1.R FlatteningAccessGlobal.CompositeAccessRecord1.P.r = FlatteningAccessGlobal.CompositeAccessRecord1.R(1);
+
+public
+ function FlatteningAccessGlobal.CompositeAccessRecord1.f
+  output FlatteningAccessGlobal.CompositeAccessRecord1.R r;
+ algorithm
+  r := global(FlatteningAccessGlobal.CompositeAccessRecord1.P.r);
+  return;
+ end FlatteningAccessGlobal.CompositeAccessRecord1.f;
+
+ record FlatteningAccessGlobal.CompositeAccessRecord1.R
+  Real x;
+ end FlatteningAccessGlobal.CompositeAccessRecord1.R;
+
+end FlatteningAccessGlobal.CompositeAccessRecord1;
+")})));
+end CompositeAccessRecord1;
+
 
 end FlatteningAccessGlobal;
