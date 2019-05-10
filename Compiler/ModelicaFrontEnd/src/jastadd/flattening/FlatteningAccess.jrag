@@ -255,7 +255,7 @@ aspect FlatteningFunctionConstant {
                     return cval.buildLiteral();
                 }
             } catch (ConstantEvaluationException e) {
-                // TODO: Error
+                // TODO: Error. See method documentation.
             }
         }
         
