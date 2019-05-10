@@ -1,6 +1,13 @@
 // This loads the Jenkins pipeline library found in the ci folder.
 def url = scm.getLocations()[0].remote
-env.SDK_HOME = 'C:\\JModelica.org-SDK-1.13\\' // Hard-coded since new SDK release 1.4
+if ("${JOBNAME}".toLowerCase().contains("chicago")) {
+    env.SDK_HOME = 'C:\\JModelica.org-SDK-1.13\\' // Hard-coded since new SDK release 1.4
+    bitness = 32
+} else {
+    env.SDK_HOME = resolveSDK()
+    bitness = 64
+}
+
 library identifier: 'JModelica@ci', retriever: modernSCM([$class: 'SubversionSCMSource', remoteBase: url, credentialsId: ''])
 
 // Extract branch info from url variable (this assumes that this Jenkinsfile
@@ -48,7 +55,9 @@ make install
 if [ "\${BUILD_CASADI:-1}" == "1" ]; then
     make casadi_interface
 fi
-""", "", false, 32)
+""", """\
+set BUILD_MODE=1
+""", false, bitness)
     }
     stage("Archive") {
         archive 'install/**'
@@ -62,7 +71,9 @@ fi
             runMSYSWithEnv("""\
 rm -f *.zip
 zip -r -q "${zipName}" install README.TXT
-""", "", false, 32)
+""", """\
+set BUILD_MODE=1
+""", false, bitness)
             stash includes: '*.zip', name: 'installZip'
         }
     }
@@ -73,7 +84,9 @@ zip -r -q "${zipName}" install README.TXT
 TEST_RES_DIR=\${WORKSPACE}/testRes
 mkdir -p "\${TEST_RES_DIR}"
 install/jm_tests -ie -x "\${TEST_RES_DIR}"
-""", "", false, 32)
+""", """\
+set BUILD_MODE=1
+""", false, bitness)
         } finally {
             junit testResults: 'testRes/*.xml', allowEmptyResults: true
         }
