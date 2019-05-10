@@ -1378,10 +1378,14 @@ fclass VectorizedFunctionTests.PredefinedFunctions.SpatialDistribution
  Real y[1];
  Real y[2];
  Real x[2];
+ Real _eventIndicator_1;
+ Real _eventIndicator_2;
 equation
  y[1] = spatialDistribution(x[2], 1, 1, true, {0, 0.5, 1.0}, {1, 2, 3});
  y[2] = spatialDistribution(x[2], 2, 1, true, {0, 0.6, 1.0}, {1, 2, 3});
  x[2] = time;
+ _eventIndicator_1 = spatialDistIndicator(x[2], 1, 1, true, {0, 0.5, 1.0}, {1, 2, 3});
+ _eventIndicator_2 = spatialDistIndicator(x[2], 2, 1, true, {0, 0.6, 1.0}, {1, 2, 3});
 end VectorizedFunctionTests.PredefinedFunctions.SpatialDistribution;
 ")})));
 end SpatialDistribution;
