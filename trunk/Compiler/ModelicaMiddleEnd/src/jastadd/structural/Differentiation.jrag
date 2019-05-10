@@ -431,16 +431,27 @@ aspect Derivatives {
 
     @Override
     protected FExp FGlobalAccessExp.diffExp(String name) {
+        return type().diffExpanded(this, name);
+    }
+
+    protected FExp FType.diffExpanded(FExp exp, String name) {
         if (isArray()) {
-            return getArray().buildDiff(name);
-        } else if (type().isRecord()) {
-            List<FExp> args = new List<>();
-            for (FRecordComponentType frct : ((FRecordType)type()).getComponents()) {
-                args.add(component(frct.getName()).diff(name));
-            }
-            return new FRecordConstructor(new FRecordAccess(((FRecordType)type()).getName()), args);
+            return exp.getArray().buildDiff(name);
+        } else {
+            return diffScalarExpanded(exp, name);
         }
-        return diffZero();
+    }
+
+    protected FExp FType.diffScalarExpanded(FExp exp, String name) {
+        return exp.diffZero();
+    }
+
+    protected FExp FRecordType.diffScalarExpanded(FExp exp, String name) {
+        List<FExp> args = new List<>();
+        for (FRecordComponentType frct : getComponents()) {
+            args.add(exp.component(frct.getName()).diff(name));
+        }
+        return new FRecordConstructor(new FRecordAccess(getName()), args);
     }
 
     @Override
