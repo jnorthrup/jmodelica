@@ -1,6 +1,6 @@
 // This loads the Jenkins pipeline library found in the ci folder.
 def url = scm.getLocations()[0].remote
-if ("${JOBNAME}".toLowerCase().contains("chicago")) {
+if ("${JOB_NAME}".toLowerCase().contains("chicago")) {
     env.SDK_HOME = 'C:\\JModelica.org-SDK-1.13\\' // Hard-coded since new SDK release 1.4
     bitness = 32
 } else {
