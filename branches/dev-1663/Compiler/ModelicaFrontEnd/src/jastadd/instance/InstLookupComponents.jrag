@@ -603,22 +603,26 @@ aspect InstLookupComponents {
     eq InstSimpleShortClassDecl.arrayMemberInstComponent(String name, int ndims) = actualInstClass().arrayMemberInstComponent(name, ndims);
     eq InstLibNode.arrayMemberInstComponent(String name, int ndims)              = actualInstClass().arrayMemberInstComponent(name, ndims);
 
-    syn lazy InstLookupResult<InstComponentDecl> InstNode.memberInstComponent(String name)  {
+    syn InstLookupResult<InstComponentDecl> InstNode.memberInstComponent(String name) { 
         if (isArray()) {
             return arrayMemberInstComponent(name, ndims());
         } else {    
-            for (InstComponentDecl ic : getInstComponentDecls()) 
-                if (ic.matches(name))
-                    return findInnerComponentIfAny(ic.duplicateOriginal());
-
-            for (InstExtends ie : getInstExtendss()) {
-                InstLookupResult<InstComponentDecl> res = ie.memberInstComponent(name);
-                if (res.successful())
-                    return res;
-            }
-            
-            return InstLookupResult.notFound();
+            return memberInstComponentCached(name);
         }
+    }
+    
+    syn lazy InstLookupResult<InstComponentDecl> InstNode.memberInstComponentCached(String name)  {
+        for (InstComponentDecl ic : getInstComponentDecls()) 
+            if (ic.matches(name))
+                return findInnerComponentIfAny(ic.duplicateOriginal());
+
+        for (InstExtends ie : getInstExtendss()) {
+            InstLookupResult<InstComponentDecl> res = ie.memberInstComponent(name);
+            if (res.successful())
+                return res;
+        }
+        
+        return InstLookupResult.notFound();
     }
     eq InstSimpleShortClassDecl.memberInstComponent(String name) = actualInstClass().memberInstComponent(name);
     eq InstLibNode.memberInstComponent(String name)              = actualInstClass().memberInstComponent(name);

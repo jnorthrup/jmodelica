@@ -28,6 +28,7 @@ import java.util.PriorityQueue;
 
 import org.jmodelica.util.Enumerator;
 import org.jmodelica.util.collections.GrowableSetIterable;
+import org.jmodelica.util.collections.ParallelIterable;
 
 aspect Connections {
 
@@ -1120,38 +1121,70 @@ aspect Connections {
      */
     public void InstAccess.connectTo(InstAccess right, FAccess prefix, ConnectionSetManager csm, ConnectionEdge source) {
         
-        boolean leftOutside  = isOutsideConnector();
-        boolean rightOutside = right.isOutsideConnector();
-        InstComponentDecl leftComp  = lookupEvaluatingIndices();
-        InstComponentDecl rightComp = right.lookupEvaluatingIndices();
-        
-        boolean handleExpandable = !csm.isExpandableConnectorsDone();
-        if (handleExpandable && (isExpandableConnectorPart() || right.isExpandableConnectorPart())) {
-            if (isExpandableConnectorPart())
+        if (!csm.isExpandableConnectorsDone() && 
+                (isExpandableConnectorPart() || right.isExpandableConnectorPart())) {
+            /* We currently allow connecting two declared members of expandable connectors
+             * directly, and in that case we need to call addIntroducingConnection both ways.
+             * It is not entirely clear if that is allowed by the spec.
+             */
+            if (isExpandableConnectorPart()) {
                 csm.getExpandable().addIntroducingConnection(this, right, prefix, source);
-            if (right.isExpandableConnectorPart())
+            }
+            if (right.isExpandableConnectorPart()) {
                 csm.getExpandable().addIntroducingConnection(right, this, prefix, source);
-        } else if (handleExpandable && leftComp.isExpandableConnector()) {
-            csm.getExpandable().addSpanningConnection(leftComp, rightComp, prefix, source);
-        } else if (isArray() && !leftComp.isOverconstrainedConnection(rightComp)) {
-            Indices leftInd = indices();
-            Indices rightInd = right.indices();
-            Iterator<Index> leftIter = leftInd.iterator();
-            Iterator<Index> rightIter = rightInd.iterator();
-            while (leftIter.hasNext() && rightIter.hasNext()) {
-                Index leftI = leftInd.translate(leftIter.next());
-                Index rightI = rightInd.translate(rightIter.next());
-                InstComponentDecl leftCompCell = leftComp.findCell(leftI, leftI.ndims() - leftComp.ndims());
-                InstComponentDecl rightCompCell = rightComp.findCell(rightI, rightI.ndims() - rightComp.ndims());
-                FAccess leftCellName  = leftCompCell.getFAccess(leftI);
-                FAccess rightCellName = rightCompCell.getFAccess(rightI);
-                ConnectionSetEntry leftEntry = ConnectionSetEntry.create(leftCompCell, leftOutside, leftCellName);
-                ConnectionSetEntry rightEntry = ConnectionSetEntry.create(rightCompCell, rightOutside, rightCellName);
-                leftCompCell.connectTo(leftEntry, rightEntry, prefix, csm, source, true);
             }
         } else {
-            FAccess leftName  = leftComp.getFAccess(index());
-            FAccess rightName = rightComp.getFAccess(right.index());
+            boolean leftOutside  = isOutsideConnector();
+            boolean rightOutside = right.isOutsideConnector();
+            /* TODO: This can fail for expandable connector array, where the first child might 
+                     not have all elements. Need to merge lookupEvaluatingIndices && findCell 
+                     into one operation that is performed on the access for each index. This 
+                     also means that we need to move isOverconstrainedConnection to the access. */
+            InstComponentDecl leftComp  = lookupEvaluatingIndices();
+            InstComponentDecl rightComp = right.lookupEvaluatingIndices();
+            
+            if (isArray() && !leftComp.isOverconstrainedConnection(rightComp)) {
+                Indices leftInd = indices();
+                Indices rightInd = right.indices();
+                for (Index[] i : new ParallelIterable<Index>(new Index[2], leftInd, rightInd)) {
+                    Index leftI = leftInd.translate(i[0]);
+                    Index rightI = rightInd.translate(i[1]);
+                    InstComponentDecl leftCompCell = 
+                            leftComp.findCell(leftI, leftI.ndims() - leftComp.ndims());
+                    InstComponentDecl rightCompCell = 
+                            rightComp.findCell(rightI, rightI.ndims() - rightComp.ndims());
+                    FAccess leftCellName  = leftCompCell.getFAccess(leftI);
+                    FAccess rightCellName = rightCompCell.getFAccess(rightI);
+                    connectCells(csm, source, prefix, 
+                                 leftCompCell,  leftOutside,  leftCellName, 
+                                 rightCompCell, rightOutside, rightCellName);
+                }
+            } else {
+                FAccess leftName  = leftComp.getFAccess(index());
+                FAccess rightName = rightComp.getFAccess(right.index());
+                connectCells(csm, source, prefix, 
+                             leftComp,  leftOutside,  leftName, 
+                             rightComp, rightOutside, rightName);
+            }
+        }
+    }
+
+    /**
+     * Connect the variables referenced in a connect or branch statement in the connection set manager, 
+     * for a specific cell of the accesses.
+     * 
+     * @param right   the other access
+     * @param prefix  the prefix to use when flattening names
+     * @param csm     the connection set manager to add variables to
+     * @param source  the originating connect or branch statement
+     */
+    public static void InstAccess.connectCells(
+            ConnectionSetManager csm, ConnectionEdge source, FAccess prefix, 
+            InstComponentDecl leftComp,  boolean leftOutside,  FAccess leftName, 
+            InstComponentDecl rightComp, boolean rightOutside, FAccess rightName) {
+        if (!csm.isExpandableConnectorsDone() && leftComp.isExpandableConnector()) {
+            csm.getExpandable().addSpanningConnection(leftComp, rightComp, prefix, source);
+        } else {
             ConnectionSetEntry leftEntry = ConnectionSetEntry.create(leftComp, leftOutside, leftName);
             ConnectionSetEntry rightEntry = ConnectionSetEntry.create(rightComp, rightOutside, rightName);
             leftComp.connectTo(leftEntry, rightEntry, prefix, csm, source, true);
@@ -1159,7 +1192,7 @@ aspect Connections {
     }
 
     /**
-     * Helper method for constructing FAccesss for connection sets
+     * Helper method for constructing FAccesses for connection sets
      */
     public FAccess InstComponentDecl.getFAccess(Index i) {
         FAccess res = getFAccess();
