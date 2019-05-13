@@ -956,7 +956,7 @@ public class ModelicaCompiler implements LogContainer {
      */
     private SourceRoot parseModel(String name) 
       throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
-        return parserHandler.parseModel(createUtilInterface(), name);
+        return parserHandler.parseModel(createUtilInterface(), LoadInfo.create(name));
     }
 
     /**
@@ -985,7 +985,11 @@ public class ModelicaCompiler implements LogContainer {
         boolean doTearDown = true;
         try {
             doTearDown = trySetUp();
-            return doParseModel(names);
+            Collection<LoadInfo> loadInfos = new ArrayList<>();
+            for (String path : names) {
+                loadInfos.add(LoadInfo.create(path));
+            }
+            return doParseModel(loadInfos);
         } finally {
             tryTearDown(doTearDown);
         }
@@ -1013,15 +1017,15 @@ public class ModelicaCompiler implements LogContainer {
     public SourceRoot parseString(String code, String name) 
       throws IOException, beaver.Parser.Exception, CompilerException {
         checkSetUp();
-        return parserHandler.parseString(createUtilInterface(), code, name);
+        return parserHandler.parseString(createUtilInterface(), code, LoadInfo.create(name));
     }
 
-    public SourceRoot doParseModel(String names[]) 
+    public SourceRoot doParseModel(Collection<LoadInfo> loadInfos) 
       throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
         checkSetUp();
         ASTNode.getStepInfo().reset();
         ASTNode.beginStep("parseModel()");
-        SourceRoot sr = parserHandler.parseModel(createUtilInterface(), names);
+        SourceRoot sr = parserHandler.parseModel(createUtilInterface(), loadInfos);
         hookFilesParsed(sr);
         ASTNode.endStep("parseModel()");
         

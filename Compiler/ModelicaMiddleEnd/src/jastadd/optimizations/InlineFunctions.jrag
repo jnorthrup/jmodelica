@@ -1386,12 +1386,20 @@ aspect FunctionInlining {
     }
 
     public void FInitArrayStmt.inline(AbstractFunctionInliner fi) {
-        FAbstractVariable fv = getFAccessExp().myFV();
-        FType t = type().copyAndReplaceReferences(fi);
-        t.setParent(getFAccessExp());
-        fi.setTypeOf(fv.name(), t);
-        fv.cacheFunctionInliner(fi);
-        fv.flushCache();
+        if (getShallow() && !isTopLevel()) {
+            FAccessExp access = (FAccessExp)getFAccessExp().dynamicFExp(getFAccessExp().treeCopy());
+            access.replaceReferencesInSubscripts(fi);
+            FType t = type().copyAndReplaceReferences(fi);
+            t.setParent(getFAccessExp());
+            fi.setTypeOf(access.name(), t);
+        } else {
+            FAbstractVariable fv = getFAccessExp().myFV();
+            FType t = type().copyAndReplaceReferences(fi);
+            t.setParent(getFAccessExp());
+            fi.setTypeOf(fv.name(), t);
+            fv.cacheFunctionInliner(fi);
+            fv.flushCache();
+        }
     }
 
     public void FIfStmt.inline(AbstractFunctionInliner fi) {

@@ -543,7 +543,7 @@ aspect PrettyPrint {
 	// For debugging
 	public void SrcLibNode.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.formatln("%s%structured library '%s' at '%s'", indent, 
-				(getStructured() ? "S" : "Uns"), name(), getFileName());
+				(getStructured() ? "S" : "Uns"), name(), dirName());
 	}
 
 	syn boolean SrcComponentClause.isEnumComponentClause() = false;
