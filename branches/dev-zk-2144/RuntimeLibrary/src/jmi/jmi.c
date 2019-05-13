@@ -351,7 +351,7 @@ int jmi_delete(jmi_t* jmi){
         free(jmi->dz_active_variables_buf[i]);
     }
     free(jmi->variable_scaling_factors);
-    jmi_destruct_external_objs(jmi);
+    jmi_destruct_external_objects(jmi);
     free(jmi->ext_objs);
     jmi_log_delete(jmi->log);
 

@@ -11498,25 +11498,10 @@ public
   for i1 in 1:max(m, 0) loop
    init temp_2 as FunctionTests.UnknownArray42.R2[1];
    (temp_3) := FunctionTests.UnknownArray42.f2(i1);
-   init temp_2[1].p1 as Real[1];
-   for i2 in 1:1 loop
-    temp_2[1].p1[i2] := temp_3.p1[i2];
-   end for;
-   temp_2[1].p2 := temp_3.p2;
+   temp_2[1] := temp_3;
    (temp_4) := FunctionTests.UnknownArray42.f2(i1);
-   init temp_1[i1].y as FunctionTests.UnknownArray42.R2[1];
-   for i2 in 1:1 loop
-    init temp_1[i1].y[i2].p1 as Real[1];
-    for i3 in 1:1 loop
-     temp_1[i1].y[i2].p1[i3] := temp_2[i2].p1[i3];
-    end for;
-    temp_1[i1].y[i2].p2 := temp_2[i2].p2;
-   end for;
-   init temp_1[i1].z.p1 as Real[1];
-   for i2 in 1:1 loop
-    temp_1[i1].z.p1[i2] := temp_4.p1[i2];
-   end for;
-   temp_1[i1].z.p2 := temp_4.p2;
+   temp_1[i1].y := temp_2;
+   temp_1[i1].z := temp_4;
   end for;
   for i1 in 1:m loop
    for i2 in 1:1 loop

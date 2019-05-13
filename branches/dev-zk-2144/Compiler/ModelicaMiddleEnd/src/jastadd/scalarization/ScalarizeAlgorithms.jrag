@@ -163,19 +163,38 @@ aspect AlgorithmScalarization {
 }
 
 aspect AssignmentScalarization {
+
+    /** 
+     * Check if we can keep this statement as a composite assignment.
+     * The loop limitation is due to stack allocations performed in 
+     * scopes which the pointer copy will outlive.
+     */
+    syn boolean FType.keepCompositeAssign(FExp left, FExp right) = 
+        isComposite() && left.keepCompositeAssign() && right.keepCompositeAssign() && !left.inLoop();
+    
+    syn boolean FExp.keepCompositeAssign() = useTempVar;
+    eq FAccessExp.keepCompositeAssign() = !isSlice() && (getFAccess().myTopFV().isInput() || getFAccess().myTopFV().isConstant());
+    eq FTempAccessExp.keepCompositeAssign() = true;
+    
+    inh boolean FExp.inLoop();
+    eq Root      .getChild()    .inLoop() = false;
+    eq FAlgorithm.getChild()    .inLoop() = false;
+    eq FForStmt  .getForStmt()  .inLoop() = true;
+    eq FWhileStmt.getWhileStmt().inLoop() = true;
+    
     /**
      * Scalarize an assignment and put the resulting statements in the list of statements. 
      */
     public void FType.scalarizeAssignment(Scalarizer.Algorithm s, FAssignableExp left, FExp right) {
-        if (isArray() && !s.unroll()) {
-            
-            /* Either of left or right can be a FTempAccessExp which does not know its type */
-            FType t = left.type().isUnknown() ? (right.type().isUnknown() ? this : right.type()) : left.type();
-            
-            if (left.isTempAccessExp()) {
-                FInitArrayStmt stmt = new FInitArrayStmt((FAccessExp)left.treeCopy(), true, t.size().scalarizedSizeExpressions(s));
-                s.add(stmt);
-            }
+        /* Either of left or right can be a FTempAccessExp which does not know its type */
+        FType t = left.type().isUnknown() ? (right.type().isUnknown() ? this : right.type()) : left.type();
+        
+        if (isComposite() && !s.unroll() && !keepCompositeAssign(left, right) && left.isTempAccessExp()) {
+            FInitArrayStmt stmt = new FInitArrayStmt((FAccessExp)left.treeCopy(), true, t.size().scalarizedSizeExpressions(s));
+            s.add(stmt);
+        }
+        
+        if (isArray() && !s.unroll() && !keepCompositeAssign(left, right)) {
             
             ForNames names = s.getNames();
             names.addLayer(ndims());
@@ -199,6 +218,10 @@ aspect AssignmentScalarization {
     eq FTempAccessExp.isTempAccessExp() = true;
     
     public void FType.scalarizeAssignment_sub(Scalarizer.Algorithm s, FAssignableExp left, FExp right) {
+        if (!s.unroll() && keepCompositeAssign(left, right)) {
+            s.add(new FAssignStmt((FAssignableExp)left.scalarize(s), right.scalarize(s)));
+            return;
+        }
         if (isArray() && s.unroll()) {
             for (Index i : indices()) {
                 scalarizeScalarAssignment(s, (FAssignableExp) left.extractArrayCell(s, i), right.extractArrayCell(s, i));
