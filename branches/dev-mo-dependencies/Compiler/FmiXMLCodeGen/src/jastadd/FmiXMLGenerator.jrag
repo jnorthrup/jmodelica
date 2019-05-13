@@ -63,7 +63,11 @@ aspect FmiXML {
     }
 
     public void FVariable.generateXMLDependencyIndex(Set<Integer> dependencyIndex) {
-        dependencyIndex.add(fmiXMLVariableIndex());
+        try {
+            dependencyIndex.add(fmiXMLVariableIndex());
+        } catch (InternalCompilerError e) {
+            // If we fail to get index do not add to list
+        }
     }
 
     syn String FVariable.generateXMLName() = name();
