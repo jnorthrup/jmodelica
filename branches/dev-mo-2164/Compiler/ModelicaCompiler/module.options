@@ -383,9 +383,10 @@ BOOLEAN generate_event_switches compiler experimental true
 Setting this option to false can give unexpected results."
 
 ********************************************************************************
-BOOLEAN relational_time_events compiler user true
+BOOLEAN relational_time_events compiler deprecated true
 
-"If enabled, then relational operators are allowed to generate time events."
+"Deprecated, use option time_events instead. If enabled, then relational 
+operators are allowed to generate time events."
 
 ********************************************************************************
 BOOLEAN time_events compiler user true
@@ -395,7 +396,8 @@ BOOLEAN time_events compiler user true
 ********************************************************************************
 BOOLEAN event_output_vars compiler user false
 
-"If enabled, output variables are generated for each generated event."
+"If enabled, output variables are added to model description for each generated 
+state event indicator."
 
 ********************************************************************************
 BOOLEAN disable_smooth_events compiler experimental false
