@@ -101,7 +101,7 @@ aspect BLTCompute {
         return daeBLT;
     }
     
-    public void FClass.setDAEBLT(BLT newBLT) {
+    public void FClass.setDAEBLT(BLT newBLT, BLTInput input) {
         daeBLT = newBLT;
         daeFVariableEquationBlockMap = new HashMap<FVariable, AbstractEquationBlock>();
         daeEquationEquationBlockMap = new HashMap<FAbstractEquation, AbstractEquationBlock>();
@@ -119,7 +119,7 @@ aspect BLTCompute {
         if (newBLT == BLT.EMPTY_BLT)
             daeStructuredBLT = BLT.EMPTY_BLT;
         else
-            daeStructuredBLT = new StructuredBLT(this, daeBLT);
+            daeStructuredBLT = new StructuredBLT(input, daeBLT);
     }
 
     private StructuredBLT FClass.daeStructuredBLT = BLT.EMPTY_BLT;
@@ -173,7 +173,7 @@ aspect BLTCompute {
 
             @Override
             public void perform() {
-                computeMatchingsAndBLT();
+                computeMatchingsAndBLT(FClass.this);
                 complianceCheckBLT();
                 breakOnErrors();
             }
@@ -205,10 +205,33 @@ aspect BLTCompute {
                     BiPGraph.VarType.DISCRETE_PRE_VARIABLES, 
                     BiPGraph.VarType.NON_FIXED_PARAMETERS);
     
-    private BiPGraph FClass.computeMatchedDAEBiPGraph() {
+    public interface BLTVariables {
+        public Collection<FDerivativeVariable> derivativeVariables();
+        public Collection<FVariable> allDifferentiatedRealVariables();
+        public Collection<FVariable> normalAlgebraicVariables();
+        public Collection<FVariable> normalAlgebraicContinousRealVariables();
+        public Collection<FVariable> discreteVariables();
+        public Collection<FVariable> discretePreVariables();
+        public Collection<FVariable> initialParameters();
+        
+        public Collection<FVariable> realOutputs();
+        public Collection<FVariable> outputs();
+        public Collection<FVariable> variables();
+    }
+    public interface BLTEquations {
+        public Collection<FAbstractEquation> normalEquations();
+        public Collection<FAbstractEquation> initialEquations();
+    }
+    public interface BLTInput extends BLTVariables, BLTEquations {
+    
+    }
+    
+    FClass implements BLTInput;
+    
+    private BiPGraph FClass.computeMatchedDAEBiPGraph(BLTInput input) {
         BiPGraph g = new BiPGraph();
-        g.addVariables(this, VAR_TYPES_NORMAL);
-        g.addEquations(equations(), VAR_TYPES_NORMAL);
+        g.addVariables(input, VAR_TYPES_NORMAL);
+        g.addEquations(input.normalEquations(), VAR_TYPES_NORMAL);
         g.maximumMatching(true);
         daeUnmatchedVariables.clear();
         for (Var var : g.getUnmatchedVariables())
@@ -260,9 +283,9 @@ aspect BLTCompute {
      *   equations such as pre(x) = x.start are added.
      *
      *  - Finally, the BLT algorithm is applied to the resulting perfect
-     *    matchibng for the DAE initialization system.
+     *    matching for the DAE initialization system.
      */
-    private void FClass.computeMatchingsAndBLT() {
+    private void FClass.computeMatchingsAndBLT(BLTInput input) {
         // Make sure that we don't do this if any errors have been reported
         breakOnErrors();
         StepUtil stepUtil = myStepUtil();
@@ -272,7 +295,7 @@ aspect BLTCompute {
 
         BiPGraph g;
         if (DAEBiPGraph == null) {
-            g = computeMatchedDAEBiPGraph();
+            g = computeMatchedDAEBiPGraph(input);
             logVerbose("DAE BiPGraph");
             logVerbose(g);
             logVerbose("DAE BiPGraph matching");
@@ -305,30 +328,30 @@ aspect BLTCompute {
                 error(e.getMessage());
                 return;
             }
-            setDAEBLT(daeBLT);
+            setDAEBLT(daeBLT, input);
             logVerbose(getDAEStructuredBLT());
             logVerbose(getDAEBLT());
         } else {
-            setDAEBLT(BLT.EMPTY_BLT);
+            setDAEBLT(BLT.EMPTY_BLT, input);
         }
         
         g.removeVariables(dynamicAlgebraicVariables());
         
         // Find matching for the initialization system
-        g.addVariables(this, VAR_TYPES_INIT);
-        g.addEquations(equations(), VAR_TYPES_INIT);
+        g.addVariables(input, VAR_TYPES_INIT);
+        g.addEquations(input.normalEquations(), VAR_TYPES_INIT);
         g.setAsInitialSystem();
         
         // Replace when equations
         java.util.List<FAbstractEquation> equationsToReplace = new ArrayList<FAbstractEquation>();
-        for (FAbstractEquation e : equations()) {
+        for (FAbstractEquation e : input.normalEquations()) {
             if (e.replacedAtInitialization()) {
                 equationsToReplace.add(e);
             }
         }
         
         Set<FAbstractVariable> existingPrePropagationLikeInitialEquations = new HashSet<FAbstractVariable>();
-        for (FAbstractEquation eqn : initialEquations()) {
+        for (FAbstractEquation eqn : input.initialEquations()) {
             FAbstractVariable var = eqn.isPrePropagationEquation();
             if (var != null)
                 existingPrePropagationLikeInitialEquations.add(var);
@@ -385,7 +408,7 @@ aspect BLTCompute {
         
         logVerbose(g);
         
-        g.addEquations(initialEquations(), VAR_TYPES_ALL);
+        g.addEquations(input.initialEquations(), VAR_TYPES_ALL);
         
         g.maximumMatching(false, prePropagationEquations.keySet());
         logVerbose("Init DAE BiPGraph");

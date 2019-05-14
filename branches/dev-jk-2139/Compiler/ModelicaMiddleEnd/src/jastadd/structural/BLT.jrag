@@ -617,7 +617,7 @@ aspect BLT{
 		protected StructuredBLT() {
 		}
 		
-        public StructuredBLT(FClass fclass, BLT blt) {
+        public StructuredBLT(BLTVariables variables, BLT blt) {
             blt.computeDependencies();
             
             for (AbstractEquationBlock eb : blt) {
@@ -629,7 +629,7 @@ aspect BLT{
             Set<AbstractEquationBlock> visitedMap = new HashSet<AbstractEquationBlock>();
             
             // Loop over all derivatives
-            for (FVariable fv : fclass.derivativeVariables()) {
+            for (FVariable fv : variables.derivativeVariables()) {
                 // Get the block where the variable is solved for
                 AbstractEquationBlock eb = fv.myDAEEquationBlock();
                 if (!visitedMap.contains(eb)) {
@@ -645,7 +645,7 @@ aspect BLT{
             }
             
             // Loop over all real outputs
-            for (FVariable fv : fclass.realOutputs()) {
+            for (FVariable fv : variables.realOutputs()) {
                 // Get the block where the variable is solved for
                 AbstractEquationBlock eb = fv.myDAEEquationBlock();
                 //States and inputs can be outputs in which case they don't have equation blocks associated with them
@@ -662,7 +662,7 @@ aspect BLT{
             }
             
             // Loop over integer and boolean outputs
-            for (FVariable fv : fclass.outputs()) {
+            for (FVariable fv : variables.outputs()) {
                 // Get the block where the variable is solved for
                 AbstractEquationBlock eb = fv.myDAEEquationBlock();
                 if (eb != null && !visitedMap.contains(eb)) {
@@ -678,7 +678,7 @@ aspect BLT{
             }
             
             // Loop over all others
-            for (FVariable fv : fclass.variables()) {
+            for (FVariable fv : variables.variables()) {
                 // Get the block where the variable is solved for
                 AbstractEquationBlock eb = fv.myDAEEquationBlock();
                 if (eb != null && !visitedMap.contains(eb)) {

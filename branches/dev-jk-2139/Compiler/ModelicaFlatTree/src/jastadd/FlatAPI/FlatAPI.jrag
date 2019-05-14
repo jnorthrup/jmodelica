@@ -2189,6 +2189,8 @@ aspect FlatAPI {
         return l;
     }
 
+    syn ArrayList<FAbstractEquation> FClass.normalEquations() = equations();
+
     syn int FClass.numInitialGuessEquations() {
         int n_eq = 0;
         for (FRealVariable fv : realVariables()) {
@@ -4174,7 +4176,7 @@ aspect FlatDiagnostics {
     }
     
     public String FClass.printMatchedDAE() {
-        return computeMatchedDAEBiPGraph().toString();
+        return computeMatchedDAEBiPGraph(FClass.this).toString();
     }
 
 

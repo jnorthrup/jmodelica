@@ -43,7 +43,7 @@ aspect IndexReduction {
                     // Make sure that we don't do this if any errors have been reported previously
                     breakOnErrors();
                     
-                    DAEBiPGraph = computeMatchedDAEBiPGraph();
+                    DAEBiPGraph = computeMatchedDAEBiPGraph(FClass.this);
                     if (shouldReduceIndex(DAEBiPGraph))
                         reduceIndex();
                 } catch (IndexReductionException e) {
@@ -213,7 +213,7 @@ aspect IndexReduction {
 
         logInfo(stateDiagnosticsObj());
         
-        DAEBiPGraph = computeMatchedDAEBiPGraph();
+        DAEBiPGraph = computeMatchedDAEBiPGraph(this);
         logVerbose("BiPGraph after index reduction");
         logVerbose(DAEBiPGraph);
         logVerbose("BiPGraph matching after index reduction");
