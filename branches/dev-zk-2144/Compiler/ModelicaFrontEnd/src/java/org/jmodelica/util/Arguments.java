@@ -190,7 +190,6 @@ public class Arguments {
             "version",
             "dumpmemuse",
             "findflatinst",
-            "platform",
             "out",
             "debugSrcIsHome"
         );

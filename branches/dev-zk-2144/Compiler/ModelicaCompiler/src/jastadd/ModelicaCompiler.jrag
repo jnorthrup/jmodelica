@@ -1837,6 +1837,7 @@ public class ModelicaCompiler implements LogContainer {
 
     /**
      * @return  the target platforms. Defaults to win64 on windows, linux64 on linux.
+	 * @see		The option target_platforms in Compiler/ModelicaCompiler/module.options.
      */
     public String[] ModelicaCompiler.getTargetPlatforms() {
 
@@ -1846,13 +1847,13 @@ public class ModelicaCompiler implements LogContainer {
 
         String argument = options.hasOption("target_platforms") ? options.getStringOption("target_platforms") : "";
         String[] platforms = argument.split("\\s*,\\s*");
-        
-        if (platforms[0].equals("")) {        	
+
+        if (platforms[0].equals("")) {
         	platforms = EnvironmentUtils.getDefaultTargetPlatform();
         	log.debug("Defaulted to target platforms " + Arrays.toString(platforms) + ".");
         } else {
         	platforms = StringUtil.nonEmpty(platforms);
-        	log.debug("Target platforms were set to " + Arrays.toString(platforms) + ".");
+        	log.debug("Target platforms set by option to " + Arrays.toString(platforms) + ".");
         }
 
         this.targetPlatforms = platforms;

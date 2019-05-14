@@ -236,7 +236,7 @@ def _compile_unit(class_name, file_name, compiler, target, version,
     if platform == 'auto':
         platform = _get_platform()
 
-    compiler_options['platforms'] = platform
+    compiler_options['target_platforms'] = platform
 
     if not separate_process:
         # get a compiler based on 'compiler' argument or files listed in file_name
