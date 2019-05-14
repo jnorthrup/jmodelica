@@ -457,8 +457,8 @@ STRING compiler_version compiler internal "compiler_version_file_not_read"
 "The version string for the compiler. Uses default value during unit testing."
 
 ********************************************************************************
-STRING platforms compiler user ""
-"win32" "win64" "win32, win64" "linux64"
+STRING target_platforms compiler user ""
+"win32" "win64" "linux64"
 
 "The platform string list for the compiler. Uses the system platform with 64-bit
 (linux or windows) if not set."
