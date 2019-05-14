@@ -92,7 +92,7 @@ aspect SimpleLookup {
         SrcClassDecl cd = this;
         if (qName.isGlobal()) {
             cd = simpleLookupGlobalScope(qName.next()).getClassDecl();
-        } else {
+        }else {
             cd = simpleLookupIncludeImports(qName.next()).getClassDecl();
         }
 
@@ -113,6 +113,9 @@ aspect SimpleLookup {
     public SrcClassDecl Program.simpleLookupClass(String name) {
         QualifiedName qName = new QualifiedName(name);
         SrcClassDecl cd = simpleLookupDefaultScope(qName.next()).getClassDecl();
+        if (!qName.hasNext()) {
+            return cd;
+        }
         while (cd != null && qName.hasNext()) {
             cd = cd.simpleLookupMemberScope(qName.next()).getClassDecl();
             if (cd == null) {
