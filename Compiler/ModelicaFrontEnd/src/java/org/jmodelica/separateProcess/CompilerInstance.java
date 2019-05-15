@@ -41,7 +41,6 @@ public class CompilerInstance {
     private Collection<String> modelicaPath = new ArrayList<String>();
     private Collection<String> log = new ArrayList<String>();
     private Map<String, String> compilerOptions = new HashMap<String, String>();
-    private String platform;
     private String outputPath;
     private String jmodelicaHome;
 
@@ -189,14 +188,6 @@ public class CompilerInstance {
         compilerOptions.put(option, value);
     }
 
-    public void setPlatform(String platform) {
-        this.platform = platform;
-    }
-
-    public String getPlatform() {
-        return platform;
-    }
-
     public void setOutputPath(String outputPath) {
         this.outputPath = outputPath;
     }
@@ -232,9 +223,6 @@ public class CompilerInstance {
         }
         if (compilerOptions.size() > 0) {
             args.add("-opt=" + join(",", ":", compilerOptions));
-        }
-        if (platform != null) {
-            args.add("-platform=" + platform);
         }
         if (outputPath != null) {
             args.add("-out=" + StringUtil.quote(outputPath));
