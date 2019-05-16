@@ -220,41 +220,33 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     public enum VarType {
         DERIVATIVE_VARIABLES { 
             public Collection<? extends FVariable> variables(BLTVariables c)            { return c.derivativeVariables(); }
-            public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.derivativeVariables(); }
             public boolean isOk(TypePrefixVariability variability)               { return variability.continuousVariability(); }
         },
         DIFFERENTIATED_VARIABLES { 
             public Collection<? extends FVariable> variables(BLTVariables c)            { return c.allDifferentiatedRealVariables(); }
-            public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.differentiatedRealVariables(); }
             public boolean isOk(TypePrefixVariability variability)               { return variability.continuousVariability(); }
         }, 
         ALGEBRAIC_VARIABLES { 
             public Collection<? extends FVariable> variables(BLTVariables c)            { return c.normalAlgebraicVariables(); }
-            public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.algebraicVariables(); }
         }, 
         CONTINUOUS_ALGEBRAIC_VARIABLES { 
             public Collection<? extends FVariable> variables(BLTVariables c)            { return c.normalAlgebraicContinousRealVariables(); }
-            public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.algebraicContinousRealVariables(); }
             public boolean isOk(TypePrefixVariability variability)               { return variability.continuousVariability(); }
         }, 
         DISCRETE_ALGEBRAIC_VARIABLES { 
             public Collection<? extends FVariable> variables(BLTVariables c)            { return c.discreteVariables(); }
-            public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.discreteVariables(); }
             public boolean isOk(TypePrefixVariability variability)               { return variability.discreteVariability(); }
         }, 
         DISCRETE_PRE_VARIABLES { 
             public Collection<? extends FVariable> variables(BLTVariables c)            { return c.discretePreVariables(); }
-            public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.discretePreVariables(); }
             public boolean isOk(TypePrefixVariability variability)               { return variability.discreteVariability(); }
         },
         NON_FIXED_PARAMETERS {
             public Collection<? extends FVariable> variables(BLTVariables c)            { return c.initialParameters(); }
-            public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.initialParameters(); }
             public boolean isOk(TypePrefixVariability variability)               { return variability.parameterVariability(); }
         };
 
         public abstract Collection<? extends FVariable> variables(BLTVariables c);
-        public abstract Collection<? extends FVariable> variables(FAbstractEquation e);
         public boolean isOk(TypePrefixVariability e) { return true; }
     }
 
@@ -263,6 +255,9 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             for (FVariable fv : t.variables(variables)) {
                 addVariable(fv.name(), fv);
             }
+        }
+        for (FVariable fv : variables.extraVariables()) {
+            addVariable(fv.name(), fv);
         }
     }
 

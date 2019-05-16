@@ -173,7 +173,7 @@ aspect BLTCompute {
 
             @Override
             public void perform() {
-                computeMatchingsAndBLT(FClass.this);
+                computeMatchingsAndBLT(createBLTInput());
                 complianceCheckBLT();
                 breakOnErrors();
             }
@@ -217,6 +217,7 @@ aspect BLTCompute {
         public Collection<FVariable> realOutputs();
         public Collection<FVariable> outputs();
         public Collection<FVariable> variables();
+        public Collection<FVariable> extraVariables();
     }
     public interface BLTEquations {
         public Collection<FAbstractEquation> normalEquations();
@@ -226,7 +227,71 @@ aspect BLTCompute {
     
     }
     
-    FClass implements BLTInput;
+    public class FClassBLTInput implements BLTInput {
+        protected FClass fClass;
+
+        public FClassBLTInput(FClass fClass) {
+            this.fClass = fClass;
+        }
+        @Override
+        public Collection<FDerivativeVariable> derivativeVariables() {
+            return fClass.derivativeVariables();
+        }
+        @Override
+        public Collection<FVariable> allDifferentiatedRealVariables() {
+            return fClass.allDifferentiatedRealVariables();
+        }
+        @Override
+        public Collection<FVariable> normalAlgebraicVariables() {
+            return fClass.normalAlgebraicVariables();
+        }
+        @Override
+        public Collection<FVariable> normalAlgebraicContinousRealVariables() {
+            return fClass.normalAlgebraicContinousRealVariables();
+        }
+        @Override
+        public Collection<FVariable> discreteVariables() {
+            return fClass.discreteVariables();
+        }
+        @Override
+        public Collection<FVariable> discretePreVariables() {
+            return fClass.discretePreVariables();
+        }
+        @Override
+        public Collection<FVariable> initialParameters() {
+            return fClass.initialParameters();
+        }
+
+        @Override
+        public Collection<FVariable> realOutputs() {
+            return fClass.realOutputs();
+        }
+        @Override
+        public Collection<FVariable> outputs() {
+            return fClass.outputs();
+        }
+        @Override
+        public Collection<FVariable> variables() {
+            return fClass.variables();
+        }
+        @Override
+        public Collection<FVariable> extraVariables() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public Collection<FAbstractEquation> normalEquations() {
+            return fClass.normalEquations();
+        }
+        @Override
+        public Collection<FAbstractEquation> initialEquations() {
+            return fClass.initialEquations();
+        }
+    }
+    
+    public BLTInput FClass.createBLTInput() {
+        return new FClassBLTInput(this);
+    }
     
     private BiPGraph FClass.computeMatchedDAEBiPGraph(BLTInput input) {
         BiPGraph g = new BiPGraph();

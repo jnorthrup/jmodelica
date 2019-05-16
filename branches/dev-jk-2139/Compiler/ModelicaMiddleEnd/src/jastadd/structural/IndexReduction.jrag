@@ -43,7 +43,7 @@ aspect IndexReduction {
                     // Make sure that we don't do this if any errors have been reported previously
                     breakOnErrors();
                     
-                    DAEBiPGraph = computeMatchedDAEBiPGraph(FClass.this);
+                    DAEBiPGraph = computeMatchedDAEBiPGraph(createBLTInput());
                     if (shouldReduceIndex(DAEBiPGraph))
                         reduceIndex();
                 } catch (IndexReductionException e) {
@@ -79,7 +79,7 @@ aspect IndexReduction {
             IndexReductionBiPGraph g = new IndexReductionBiPGraph();
             g.setStepLogger(this);
             // Only do index reduction based on real variables and equations
-            g.addVariables(this, VAR_TYPES_REAL);
+            g.addVariables(createBLTInput(), VAR_TYPES_REAL);
             g.addEquations(continuousNonMetaEquations(), VAR_TYPES_REAL);
             logVerbose(g);
             g.maximumMatching(true);
@@ -213,7 +213,7 @@ aspect IndexReduction {
 
         logInfo(stateDiagnosticsObj());
         
-        DAEBiPGraph = computeMatchedDAEBiPGraph(this);
+        DAEBiPGraph = computeMatchedDAEBiPGraph(createBLTInput());
         logVerbose("BiPGraph after index reduction");
         logVerbose(DAEBiPGraph);
         logVerbose("BiPGraph matching after index reduction");

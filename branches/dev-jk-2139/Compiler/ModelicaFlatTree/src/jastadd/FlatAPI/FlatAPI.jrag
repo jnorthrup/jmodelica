@@ -4176,7 +4176,7 @@ aspect FlatDiagnostics {
     }
     
     public String FClass.printMatchedDAE() {
-        return computeMatchedDAEBiPGraph(FClass.this).toString();
+        return computeMatchedDAEBiPGraph(createBLTInput()).toString();
     }
 
 
