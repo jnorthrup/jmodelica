@@ -1136,10 +1136,6 @@ aspect Connections {
         } else {
             boolean leftOutside  = isOutsideConnector();
             boolean rightOutside = right.isOutsideConnector();
-            /* TODO: This can fail for expandable connector array, where the first child might 
-                     not have all elements. Need to merge lookupEvaluatingIndices && findCell 
-                     into one operation that is performed on the access for each index. This 
-                     also means that we need to move isOverconstrainedConnection to the access. */
             InstComponentDecl leftComp  = lookupEvaluatingIndices();
             InstComponentDecl rightComp = right.lookupEvaluatingIndices();
             
