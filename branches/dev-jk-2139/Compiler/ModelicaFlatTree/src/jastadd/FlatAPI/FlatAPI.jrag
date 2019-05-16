@@ -3478,24 +3478,6 @@ aspect FVariableUses {
     eq FAbstractEquation.getChild().inAccessLocation()      = true;
     eq FRelExp.getIndicator().inAccessLocation()            = false;
 
-    syn lazy LinkedHashSet<FVariable> FAbstractEquation.algebraicContinousRealVariables() = 
-        FClass.intersectFVSet(algebraicVariables(), myFClass().normalAlgebraicContinousRealVariables());
-
-    syn lazy LinkedHashSet<FVariable> FAbstractEquation.discreteRealVariables() = 
-        FClass.intersectFVSet(algebraicVariables(), myFClass().discreteRealVariables());
-
-    syn lazy LinkedHashSet<FVariable> FAbstractEquation.discreteIntegerVariables() = 
-        FClass.intersectFVSet(algebraicVariables(), myFClass().discreteIntegerVariables());
-
-    syn lazy LinkedHashSet<FVariable> FAbstractEquation.discreteBooleanVariables() = 
-        FClass.intersectFVSet(algebraicVariables(), myFClass().discreteBooleanVariables());
-
-    syn lazy LinkedHashSet<FVariable> FAbstractEquation.discreteStringVariables() = 
-        FClass.intersectFVSet(algebraicVariables(), myFClass().discreteStringVariables());
-
-    syn lazy LinkedHashSet<FVariable> FAbstractEquation.discreteEnumVariables() = 
-        FClass.intersectFVSet(algebraicVariables(), myFClass().discreteStringVariables());
-
 
     /**
      * Collection attribute returning all derivative variables (FDerivativeVariables)
@@ -3517,16 +3499,6 @@ aspect FVariableUses {
     FAccessExp contributes (FVariable) myFV() when myFV().isDifferentiatedVariable() && inAccessLocation() to 
         FAbstractEquation.differentiatedRealVariables() for each enclosingEquationsIterator();
 
-    /**
-     * Collection attribute returning all independent parameter variables (FVariables)
-     * referenced in an equation.
-     */
-    coll LinkedHashSet<FVariable> FAbstractEquation.dependentParameters() 
-        [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
-
-    FAccessExp contributes (FVariable) myFV() when myFV().isDependentParameter() && inAccessLocation() to 
-        FAbstractEquation.dependentParameters() for each enclosingEquationsIterator();
-        
     /**
      * Collection attribute returning all dependent parameter variables (FVariables)
      * referenced in an equation.
