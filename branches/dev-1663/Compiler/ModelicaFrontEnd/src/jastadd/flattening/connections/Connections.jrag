@@ -1013,7 +1013,7 @@ aspect Connections {
          * Assumes that the variable is an array and that <code>i</code> is suitable.
          */
         public ConnectionSetEntry specifyCell(Index i) {
-            InstComponentDecl cell = cd.findCell(i, 0);
+            InstComponentDecl cell = cd.specify(i);
             return ConnectionSetEntry.create(cell, outside, cell.getFAccess(i));
         }
 
@@ -1285,34 +1285,6 @@ aspect Connections {
 
     syn boolean InstComponentDecl.isOverconstrainedConnection(InstComponentDecl right) =
             isOverconstrainedType() && right.isOverconstrainedType();
-
-    /**
-     * Retrieve the specific cell for a given index from an array component.
-     * 
-     * What dimension of i that refers to the children of this component is given by j.
-     */
-    syn InstComponentDecl InstComponentDecl.findCell(Index i, int j) =
-         ((j > 0) ? findCellUp(i, j, this) : this).findCellDown(i, j);
-
-    inh InstComponentDecl InstComponentDecl.findCellUp(Index i, int j, InstComponentDecl src);
-    eq InstComponentDecl.getChild().findCellUp(Index i, int j, InstComponentDecl src) {
-        if (j > 0) {
-            if (isArray()) {
-                return findCellUp(i, j - 1, this).getInstComponentDecl(i.get(j - 1) - 1);
-            } else {
-                return findCellUp(i, j, this).memberInstComponent(src.name()).target();
-            }
-        }
-        return src;
-    }
-    eq InstClassDecl.getChild().findCellUp(Index i, int j, InstComponentDecl src) = src;
-    eq Root.getChild().findCellUp(Index i, int j, InstComponentDecl src) {
-        throw new UnsupportedOperationException();
-    }
-
-    syn InstComponentDecl InstComponentDecl.findCellDown(Index i, int j) = 
-        (j < i.ndims()) ? getInstComponentDecl(i.get(j) - 1).findCellDown(i, j + 1) : this;
-    eq InstPrimitive.findCellDown(Index i, int j)                        = this;
 
 	syn boolean InstAccess.isOutsideConnector() = getFirstInstAccess().myInstComponentDecl().isConnector();
 	

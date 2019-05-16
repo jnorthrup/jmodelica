@@ -1117,20 +1117,43 @@ aspect Arrays {
     /**
      * Get the array sizes. 
      */
-    eq InstAccess.size() = isArray() ? arraySize() : Size.SCALAR;
-    
-    syn Size InstAccess.arraySize() = Size.SCALAR;
-    eq InstGlobalAccess.arraySize() = getInstAccess().arraySize();
-    eq InstScalarAccess.arraySize() = getExpandedSubscripts().accessSize();
-    eq InstArrayAccess.arraySize()  = getFArraySubscripts().accessSize();
-    eq InstDot.arraySize() {
-        MutableSize s = new MutableSize(ndims());
-        for (InstAccess ia : getInstAccesss()) {
-            s.append(ia.size());
+    eq InstAccess.size() = Size.SCALAR;
+    eq InstGlobalAccess.size() = getInstAccess().size();
+    eq InstScalarAccess.size() = getExpandedSubscripts().accessSize();
+    eq InstArrayAccess.size()  = getFArraySubscripts().accessSize();
+    eq InstDot.size() {
+        if (isArray()) {
+            MutableSize s = new MutableSize(ndims());
+            for (InstAccess ia : getInstAccesss()) {
+                s.append(ia.size());
+            }
+            return s;
+        } else {
+            return Size.SCALAR;
         }
-        return s;
     }
-    
+
+    /**
+     * Get the size of all parts of an InstDot up to this part.
+     */
+    inh Size InstAccess.partSize();
+    eq BaseNode.getChild().partSize() = null;
+    eq InstDot.getInstAccess(int i).partSize() {
+        int ndims = 0;
+        for (int j = 0; j <= i; j++) {
+            ndims += getInstAccess(j).ndims();
+        }
+        if (ndims == 0) {
+            return Size.SCALAR;
+        } else {
+            MutableSize s = new MutableSize(ndims);
+            for (int j = 0; j <= i; j++) {
+                s.append(getInstAccess(j).size());
+            }
+            return s;
+        }
+    }
+
     /**
      * Get the array sizes. 
      */
@@ -2150,7 +2173,20 @@ aspect Arrays {
 			return treeCopy();
 		}
 	}
-	
+
+    /**
+     * Get a specific cell of this array component decl.
+     * 
+     * Only valid if this is an array and <code>i</code> refers to an element of it. 
+     */
+    syn InstComponentDecl InstComponentDecl.specify(Index i) = specifyHelper(i, 0);
+
+    syn InstComponentDecl InstComponentDecl.specifyHelper(Index i, int d) = 
+        (d >= i.ndims() || !isArray()) 
+            ? this 
+            : getInstComponentDecl(i.get(d) - 1).specifyHelper(i, d + 1);
+    eq InstPrimitive.specifyHelper(Index i, int d) = this;
+
 	syn InstArrayAccess InstScalarAccess.getArrayCopy(FArraySubscripts fas);
 	eq InstParseAccess.getArrayCopy(FArraySubscripts fas) = new InstParseArrayAccess(getID(), fas);
 	eq InstAmbiguousAccess.getArrayCopy(FArraySubscripts fas) = new InstAmbiguousArrayAccess(getID(), fas);

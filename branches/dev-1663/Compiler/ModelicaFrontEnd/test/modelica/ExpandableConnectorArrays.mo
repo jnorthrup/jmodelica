@@ -1381,24 +1381,6 @@ package Error
 
 /* TODO: Add test with connection where both sides are introducing members, and improve error message for that. */
 
-    model NoConnectionUnknownSize
-        expandable connector EC
-        end EC;
-
-        EC ec1[:], ec2[:];
-    equation
-        connect(ec1, ec2);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="NoConnectionUnknownSize",
-            description="Expandable to expandable.",
-            errorMessage="
-Error at line 7, column 9, in file '...', ARRAY_SIZE_MISMATCH_IN_CONNECT:
-  Sizes do not match in connection, size of 'ec1' is [:] and size of 'ec2' is [:]
-")})));
-    end NoConnectionUnknownSize;
-
     model MismatchingSize
         expandable connector EC
         end EC;
@@ -1492,8 +1474,14 @@ Error at line 12, column 9, in file '...', ARRAY_SIZE_MISMATCH_IN_CONNECT:
             name="Error_WrongSizeSlice",
             description="Mismatching sizes.",
             errorMessage="
-Error at line 12, column 9, in file '...', ARRAY_SIZE_MISMATCH_IN_CONNECT:
-  Sizes do not match in connection, size of 'c[1:2]' is [2] and size of 'ec1' is [3]
+Error at line 11, column 9, in file '...', ARRAY_SIZE_MISMATCH_IN_CONNECT:
+  Sizes do not match in connection, size of the part of 'ec1.a' referring to the expandable connector is [3] and size of 'c[1:2]' is [2]
+
+Error at line 14, column 9, in file '...', ARRAY_SIZE_MISMATCH_IN_CONNECT:
+  Sizes do not match in connection, size of the part of 'ec3.a' referring to the expandable connector is [3] and size of 'c[3:4]' is [2]
+
+Error at line 15, column 9, in file '...', ARRAY_SIZE_MISMATCH_IN_CONNECT:
+  Sizes do not match in connection, size of the part of 'ec1.b' referring to the expandable connector is [3] and size of 'c2' is [2, 3]
 ")})));
     end WrongSizeSlice;
     
@@ -1524,8 +1512,11 @@ Error at line 12, column 9, in file '...', ARRAY_SIZE_MISMATCH_IN_CONNECT:
             name="Error_WrongNdimsInSlice",
             description="Mismatching sizes.",
             errorMessage="
-Error at line 12, column 9, in file '...', ARRAY_SIZE_MISMATCH_IN_CONNECT:
-  Sizes do not match in connection, size of 'c[1:2]' is [2] and size of 'ec1' is [3]
+Error at line 18, column 9, in file '...', ARRAY_SIZE_MISMATCH_IN_CONNECT:
+  Sizes do not match in connection, size of the part of 'ec1.ec2[1].a' referring to the expandable connector is [3] and size of 'c1' is scalar
+
+Error at line 19, column 9, in file '...', ARRAY_SIZE_MISMATCH_IN_CONNECT:
+  Sizes do not match in connection, size of 'ec1.ec2' is [3, 3] and size of 'ec3' is [3]
 ")})));
     end WrongNdimsInSlice;
 
