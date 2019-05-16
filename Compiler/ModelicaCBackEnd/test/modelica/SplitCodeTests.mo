@@ -828,7 +828,7 @@ annotation(__JModelica(UnitTesting(tests={
     CCodeGenTestCase(
         name="SplitCodeTestGlobals1",
         description="Test code splitting of globals, splitting files between functions",
-        cc_split_function_limit=2,
+        cc_split_function_limit_globals=2,
         template="$C_model_init_eval_independent_globals$",
         generatedCode="
 jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
@@ -910,7 +910,7 @@ annotation(__JModelica(UnitTesting(tests={
     CCodeGenTestCase(
         name="SplitCodeTestGlobals2",
         description="Test code splitting of globals, splitting arrays into multiple functions",
-        cc_split_function_limit=2,
+        cc_split_function_limit_globals=2,
         cc_split_element_limit=2,
         template="$C_model_init_eval_independent_globals$",
         generatedCode="
