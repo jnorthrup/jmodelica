@@ -411,22 +411,13 @@ aspect Arrays {
     eq InstDot         .allFArraySubscripts() = allFArraySubscriptsTo(getNumInstAccess());
     eq InstGlobalAccess.allFArraySubscripts() = getInstAccess().allFArraySubscripts();
 
-	/**
-	 * Get the expanded FArraySubscripts of each part of the fully qualified version of this access.
-	 */
-	syn java.util.List<FArraySubscripts> InstAccess.qualifiedAllFArraySubscripts() = 
-		concatenation(surroundingFArraySubscripts(), allFArraySubscripts());
-	eq InstGlobalAccess.qualifiedAllFArraySubscripts() = allFArraySubscripts();
-/* TODO: A non-global access to a package constant will get the subscripts from any surrounding */
-
     /**
      * Get the expanded FArraySubscripts of each part up to this for a part of a dotted access. 
      * For an access that is not part of a dotted access, this is equivalent to 
-     * qualifiedAllFArraySubscripts().
+     * allFArraySubscripts().
      */
     syn java.util.List<FArraySubscripts> InstAccess.combinedFArraySubscripts() = 
-        concatenation(surroundingFArraySubscripts(), 
-                      collectCombinedFArraySubscripts(), 
+        concatenation(collectCombinedFArraySubscripts(), 
                       allFArraySubscripts());
 
     inh java.util.List<FArraySubscripts> InstAccess.collectCombinedFArraySubscripts();
@@ -440,29 +431,6 @@ aspect Arrays {
         return concatenation(lists);
     }
 
-	/**
-	 * Get the expanded FArraySubscripts for any surrounding components.
-	 */
-	inh ArrayList<FArraySubscripts> InstAccess.surroundingFArraySubscripts();
-	inh lazy ArrayList<FArraySubscripts> InstArrayComponentDecl.surroundingFArraySubscripts();
-	eq Root.getChild().surroundingFArraySubscripts()          = new ArrayList<FArraySubscripts>(0);
-	eq InstClassDecl.getChild().surroundingFArraySubscripts() = new ArrayList<FArraySubscripts>(0);
-	eq InstArrayComponentDecl.getChild().surroundingFArraySubscripts() {
-		FArraySubscripts fas;
-		ArrayList<FArraySubscripts> res;
-		if (isTopDimension()) {
-			fas = new FArrayLitSubscripts();
-			res = concatenation(surroundingFArraySubscripts(), Collections.singletonList(fas));
-		} else {
-			res = (ArrayList<FArraySubscripts>) surroundingFArraySubscripts().clone();
-			int i = res.size() - 1;
-			fas = res.get(i).fullCopy();
-			res.set(i, fas);
-		}
-		fas.addFSubscript(getIndex());
-		return res;
-	}
-	
 	public class ASTNode {
         public static <T> ArrayList<T> concatenation(java.util.List<T>... lists) {
 			int size = 0;
@@ -2310,7 +2278,7 @@ aspect Arrays {
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	syn Indices InstAccess.indices() = Indices.createFromFas(qualifiedAllFArraySubscripts());
+	syn Indices InstAccess.indices() = Indices.createFromFas(allFArraySubscripts());
 
     /**
      * Get the set of array indices up to this part for a part of a dotted access. For 

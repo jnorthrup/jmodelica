@@ -855,19 +855,27 @@ end ExpandableConnectorArrays.SliceToSlice;
             description="Expandable connectors: connect  of arrays.",
             flatModel="
 fclass ExpandableConnectorArrays.SliceWithComponent
- Real ec1.a[2];
- Real ec2.a[2];
- Real ec3.a[2];
- Real c[4];
+ Real ec1[1].a[2];
+ Real ec1[2].a[2];
+ Real ec2[1].a[2];
+ Real ec2[2].a[2];
+ Real ec2[3].a[2];
+ Real c[3];
+ Real c2[3,2];
 equation
- c[1] = c[3];
- c[3] = ec1.a[1];
- ec1.a[1] = ec2.a[1];
- ec2.a[1] = ec3.a[1];
- c[2] = c[4];
- c[4] = ec1.a[2];
- ec1.a[2] = ec2.a[2];
- ec2.a[2] = ec3.a[2];
+ c[1] = time;
+ c2[2,1] = c[1];
+ c[1] = ec1[1].a[1];
+ ec1[1].a[1] = ec2[2].a[1];
+ c2[2,2] = c[2];
+ c[2] = ec1[1].a[2];
+ ec1[1].a[2] = ec2[2].a[2];
+ c2[3,1] = ec1[2].a[1];
+ ec1[2].a[1] = ec2[3].a[1];
+ c2[3,2] = ec1[2].a[2];
+ ec1[2].a[2] = ec2[3].a[2];
+ c2[1,1] = ec2[1].a[1];
+ c2[1,2] = ec2[1].a[2];
 end ExpandableConnectorArrays.SliceWithComponent;
 ")})));
     end SliceWithComponent;
@@ -1091,14 +1099,14 @@ end ExpandableConnectorArrays.NestedAccesses;
         EC2 ec3[n];
         EC1 ec4[n];
 
-        C c1, c2, c3;
+        C c1[n], c2;
     equation
         connect(c1, ec1.ec2[1].a);
-        connect(ec1.ec2, ec3);
+        connect(ec1[2].ec2, ec3);
         connect(ec4[1], ec1[2].ec2[2]);
         connect(ec1, ec4);
         connect(ec4[1].ec2[2].b, c2);
-        c1 = time;
+        c1 = (1:n) * time;
         c2 = time;
 
     annotation(__JModelica(UnitTesting(tests={
@@ -1107,13 +1115,28 @@ end ExpandableConnectorArrays.NestedAccesses;
             description="Nested expandable connectors, different connection levels.",
             flatModel="
 fclass ExpandableConnectorArrays.NestedConnections
- Real ec1.b;
- Real ec1.ec2.a;
- Real c1;
+ constant Integer n = 3;
+ Real ec1[1].ec2[1].a;
+ Real ec1[2].ec2[1].a;
+ Real ec1[3].ec2[1].a;
+ Real ec3[1].a;
+ Real ec4[1].ec2[1].a;
+ Real ec4[1].ec2[2].b;
+ Real ec4[2].ec2[1].a;
+ Real ec4[3].ec2[1].a;
+ Real c1[3];
  Real c2;
 equation
- c1 = ec1.ec2.a;
- c2 = ec1.b;
+ c1[1:3] = (1:3) * time;
+ c2 = time;
+ c1[1] = ec1[1].ec2[1].a;
+ ec1[1].ec2[1].a = ec4[1].ec2[1].a;
+ c1[2] = ec1[2].ec2[1].a;
+ ec1[2].ec2[1].a = ec3[1].a;
+ ec3[1].a = ec4[2].ec2[1].a;
+ c1[3] = ec1[3].ec2[1].a;
+ ec1[3].ec2[1].a = ec4[3].ec2[1].a;
+ c2 = ec4[1].ec2[2].b;
 end ExpandableConnectorArrays.NestedConnections;
 ")})));
     end NestedConnections;
@@ -1129,17 +1152,18 @@ end ExpandableConnectorArrays.NestedConnections;
 
         connector C = Real;
 
-        constant Integer n = 3;
+        constant Integer n = 2;
 
         EC1 ec1[n];
         EC2 ec3[n,n];
-        EC1 ec4[n];
 
-        C c[n];
+        C c1[n,n,n], c2[n,n];
     equation
-        connect(c1, ec1.ec2[1].a);
+        connect(c1, ec1.ec2.a);
+        connect(c2, ec1.ec2.b);
         connect(ec1.ec2, ec3);
-        c = (1:n) * time;
+        c1 = fill(time, n, n, n);
+        c2 = fill(time, n, n);
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
@@ -1147,13 +1171,56 @@ end ExpandableConnectorArrays.NestedConnections;
             description="Nested expandable connectors, different connection levels.",
             flatModel="
 fclass ExpandableConnectorArrays.NestedConnectionSizes
- Real ec1.b;
- Real ec1.ec2.a;
- Real c1;
- Real c2;
+ constant Integer n = 2;
+ Real ec1[1].ec2[1].a[2];
+ Real ec1[1].ec2[1].b;
+ Real ec1[1].ec2[2].a[2];
+ Real ec1[1].ec2[2].b;
+ Real ec1[2].ec2[1].a[2];
+ Real ec1[2].ec2[1].b;
+ Real ec1[2].ec2[2].a[2];
+ Real ec1[2].ec2[2].b;
+ Real ec3[1,1].a[2];
+ Real ec3[1,1].b;
+ Real ec3[1,2].a[2];
+ Real ec3[1,2].b;
+ Real ec3[2,1].a[2];
+ Real ec3[2,1].b;
+ Real ec3[2,2].a[2];
+ Real ec3[2,2].b;
+ Real c1[2,2,2];
+ Real c2[2,2];
 equation
- c1 = ec1.ec2.a;
- c2 = ec1.b;
+ c1[1:2,1:2,1:2] = fill(time, 2, 2, 2);
+ c2[1:2,1:2] = fill(time, 2, 2);
+ c1[1,1,1] = ec1[1].ec2[1].a[1];
+ ec1[1].ec2[1].a[1] = ec3[1,1].a[1];
+ c1[1,1,2] = ec1[1].ec2[1].a[2];
+ ec1[1].ec2[1].a[2] = ec3[1,1].a[2];
+ c1[1,2,1] = ec1[1].ec2[2].a[1];
+ ec1[1].ec2[2].a[1] = ec3[1,2].a[1];
+ c1[1,2,2] = ec1[1].ec2[2].a[2];
+ ec1[1].ec2[2].a[2] = ec3[1,2].a[2];
+ c1[2,1,1] = ec1[2].ec2[1].a[1];
+ ec1[2].ec2[1].a[1] = ec3[2,1].a[1];
+ c1[2,1,2] = ec1[2].ec2[1].a[2];
+ ec1[2].ec2[1].a[2] = ec3[2,1].a[2];
+ c1[2,2,1] = ec1[2].ec2[2].a[1];
+ ec1[2].ec2[2].a[1] = ec3[2,2].a[1];
+ c1[2,2,2] = ec1[2].ec2[2].a[2];
+ ec1[2].ec2[2].a[2] = ec3[2,2].a[2];
+ c2[1,1] = ec1[1].ec2[1].b;
+ ec1[1].ec2[1].b = ec3[1,1].b;
+ c2[1,2] = ec1[1].ec2[2].b;
+ ec1[1].ec2[2].b = ec3[1,2].b;
+ c2[2,1] = ec1[2].ec2[1].b;
+ ec1[2].ec2[1].b = ec3[2,1].b;
+ c2[2,2] = ec1[2].ec2[2].b;
+ ec1[2].ec2[2].b = ec3[2,2].b;
+ ec1[1].ec2[1].a[1:2] = zeros(2);
+ ec1[1].ec2[2].a[1:2] = zeros(2);
+ ec1[2].ec2[1].a[1:2] = zeros(2);
+ ec1[2].ec2[2].a[1:2] = zeros(2);
 end ExpandableConnectorArrays.NestedConnectionSizes;
 ")})));
     end NestedConnectionSizes;
@@ -1178,7 +1245,7 @@ end ExpandableConnectorArrays.NestedConnectionSizes;
         connect(c, ec1b.ec2.b);
         connect(c, ec2[2:end].d);
         connect(c[2:3,2:3], ec1b[2:3].ec2[2:3].e);
-        c[1:3] = [1:3; 4:6; 7:9] .* time;
+        c = {1:3, 4:6, 7:9} .* time;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
@@ -1186,19 +1253,76 @@ end ExpandableConnectorArrays.NestedConnectionSizes;
             description="Expandable connectors: connect of arrays.",
             flatModel="
 fclass ExpandableConnectorArrays.NestedAndSlices
- Real ec1.a[2];
- Real ec2.a[2];
- Real ec3.a[2];
- Real c[4];
+ Real ec1a[1].a;
+ Real ec1a[1].ec2[1].b;
+ Real ec1a[1].ec2[1].d[3];
+ Real ec1a[2].a;
+ Real ec1a[2].ec2[1].b;
+ Real ec1a[2].ec2[1].d[3];
+ Real ec1b[1].ec2[1].b;
+ Real ec1b[1].ec2[2].b;
+ Real ec1b[1].ec2[3].b;
+ Real ec1b[2].ec2[1].b;
+ Real ec1b[2].ec2[1].d[3];
+ Real ec1b[2].ec2[2].b;
+ Real ec1b[2].ec2[2].e;
+ Real ec1b[2].ec2[3].b;
+ Real ec1b[2].ec2[3].e;
+ Real ec1b[3].ec2[1].b;
+ Real ec1b[3].ec2[1].d[3];
+ Real ec1b[3].ec2[2].b;
+ Real ec1b[3].ec2[2].e;
+ Real ec1b[3].ec2[3].b;
+ Real ec1b[3].ec2[3].e;
+ Real ec2[2].b;
+ Real ec2[2].d[3];
+ Real ec2[3].b;
+ Real ec2[3].d[3];
+ Real ec2[4].d[3];
+ Real c[3,3];
 equation
- c[1] = c[3];
- c[3] = ec1.a[1];
- ec1.a[1] = ec2.a[1];
- ec2.a[1] = ec3.a[1];
- c[2] = c[4];
- c[4] = ec1.a[2];
- ec1.a[2] = ec2.a[2];
- ec2.a[2] = ec3.a[2];
+ c[1:3,1:3] = {1:3, 4:6, 7:9} .* time;
+ c[1,1] = ec1a[1].a;
+ ec1a[1].a = ec1a[1].ec2[1].d[2];
+ ec1a[1].ec2[1].d[2] = ec1b[1].ec2[1].b;
+ ec1b[1].ec2[1].b = ec1b[2].ec2[1].d[2];
+ ec1b[2].ec2[1].d[2] = ec2[2].d[2];
+ c[2,1] = ec1a[1].ec2[1].b;
+ ec1a[1].ec2[1].b = ec1a[2].a;
+ ec1a[2].a = ec1b[2].ec2[1].b;
+ ec1b[2].ec2[1].b = ec2[2].b;
+ ec1a[1].ec2[1].d[1] = ec1b[2].ec2[1].d[1];
+ ec1b[2].ec2[1].d[1] = ec2[2].d[1];
+ ec1a[1].ec2[1].d[3] = ec1b[2].ec2[1].d[3];
+ ec1b[2].ec2[1].d[3] = ec2[2].d[3];
+ c[3,1] = ec1a[2].ec2[1].b;
+ ec1a[2].ec2[1].b = ec1b[3].ec2[1].b;
+ ec1b[3].ec2[1].b = ec2[3].b;
+ ec1a[2].ec2[1].d[1] = ec1b[3].ec2[1].d[1];
+ ec1b[3].ec2[1].d[1] = ec2[3].d[1];
+ ec1a[2].ec2[1].d[2] = ec1b[3].ec2[1].d[2];
+ ec1b[3].ec2[1].d[2] = ec2[3].d[2];
+ c[1,2] = ec1a[2].ec2[1].d[3];
+ ec1a[2].ec2[1].d[3] = ec1b[1].ec2[2].b;
+ ec1b[1].ec2[2].b = ec1b[3].ec2[1].d[3];
+ ec1b[3].ec2[1].d[3] = ec2[3].d[3];
+ c[1,3] = ec1b[1].ec2[3].b;
+ ec1b[1].ec2[3].b = ec2[4].d[4];
+ c[2,2] = ec1b[2].ec2[2].b;
+ ec1b[2].ec2[2].b = ec1b[2].ec2[2].e;
+ c[2,3] = ec1b[2].ec2[3].b;
+ ec1b[2].ec2[3].b = ec1b[2].ec2[3].e;
+ c[3,2] = ec1b[3].ec2[2].b;
+ ec1b[3].ec2[2].b = ec1b[3].ec2[2].e;
+ c[3,3] = ec1b[3].ec2[3].b;
+ ec1b[3].ec2[3].b = ec1b[3].ec2[3].e;
+ ec1a[1].ec2[1].d[1:3] = zeros(3);
+ ec1a[2].ec2[1].d[1:3] = zeros(3);
+ ec2[4].d[1] = 0.0;
+ ec2[4].d[2] = 0.0;
+ ec2[4].d[3] = 0.0;
+ ec1b[2].ec2[1].d[1:3] = zeros(3);
+ ec1b[3].ec2[1].d[1:3] = zeros(3);
 end ExpandableConnectorArrays.NestedAndSlices;
 ")})));
     end NestedAndSlices;
@@ -1365,13 +1489,45 @@ Error at line 12, column 9, in file '...', ARRAY_SIZE_MISMATCH_IN_CONNECT:
 
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
-            name="Error_ExpandableToExpandableArrayCellElement",
+            name="Error_WrongSizeSlice",
             description="Mismatching sizes.",
             errorMessage="
 Error at line 12, column 9, in file '...', ARRAY_SIZE_MISMATCH_IN_CONNECT:
   Sizes do not match in connection, size of 'c[1:2]' is [2] and size of 'ec1' is [3]
 ")})));
     end WrongSizeSlice;
+    
+    
+    model WrongNdimsInSlice
+        expandable connector EC1
+            EC2 ec2[3];
+        end EC1;
+
+        expandable connector EC2
+        end EC2;
+
+        connector C = Real;
+
+        constant Integer n = 3;
+
+        EC1 ec1[n];
+        EC2 ec3[n];
+
+        C c1;
+    equation
+        connect(c1, ec1.ec2[1].a);        /* Error */
+        connect(ec1.ec2, ec3);            /* Error */
+        c1 = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Error_WrongNdimsInSlice",
+            description="Mismatching sizes.",
+            errorMessage="
+Error at line 12, column 9, in file '...', ARRAY_SIZE_MISMATCH_IN_CONNECT:
+  Sizes do not match in connection, size of 'c[1:2]' is [2] and size of 'ec1' is [3]
+")})));
+    end WrongNdimsInSlice;
 
 
 end Error;

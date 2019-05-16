@@ -67,21 +67,19 @@ aspect ExpandableConnectors {
                 FAccess prefix, ConnectionEdge source) {
             InstAccess expPart = unknown.findExpandableConnectorPart();
             InstAccess unknownPart = expPart.getNextInstAccess();
-            InstComponentDecl expandable = expPart.findReferencedExpandableConnector();
             if (expPart.combinedNdims() > 0) {
                 Indices knownInd = known.indices();
                 Indices expInd = expPart.combinedIndices();
+                Size size = known.size().contract(expInd.ndims(), 0);
                 for (Index i : expInd) {
                     Index iKnown = knownInd.translate(i);
                     Index iExp = expInd.translate(i);
-                    InstComponentDecl knownComp = known.lookupEvaluatingIndices();
-                    InstComponentDecl cellKnown = 
-                            knownComp.findCell(iKnown, iKnown.ndims() - knownComp.ndims());
-                    InstComponentDecl cellExp = 
-                            expandable.findCell(iExp, iExp.ndims() - expandable.ndims());
-                    addIntroducingConnectionForCell(unknown, unknownPart, known, cellExp, Size.SCALAR);
+                    InstComponentDecl cellKnown = known.lookupWithIndex(iKnown);
+                    InstComponentDecl cellExp   = expPart.lookupAsPartWithIndex(iExp);
+                    addIntroducingConnectionForCell(unknown, unknownPart, known, cellExp, size);
                 }
             } else {
+                InstComponentDecl expandable = expPart.findReferencedExpandableConnector();
                 addIntroducingConnectionForCell(unknown, unknownPart, known, expandable, null);
             }
             connections.add(new Connection(prefix, source));
@@ -111,9 +109,11 @@ aspect ExpandableConnectors {
         }
         
         private void connectExpandableConnectors(InstComponentDecl leftComp, InstComponentDecl rightComp) {
-            ExpandableSet left = setFor(leftComp);
-            ExpandableSet right = setFor(rightComp);
-            left.merge(right);
+            if (!leftComp.isArray()) {
+                ExpandableSet left = setFor(leftComp);
+                ExpandableSet right = setFor(rightComp);
+                left.merge(right);
+            }
             
             SortedSet<InstComponentDecl> rightChildren = rightComp.containedInstComponents();
             for (InstComponentDecl leftChild : leftComp.containedInstComponents()) {
@@ -153,12 +153,12 @@ aspect ExpandableConnectors {
             
             public final FAccess prefix;
             public final FConnectClause source;
-            private EvaluataionValueCache values;
+            private EvaluationValueCache values;
             
             public Connection(FAccess prefix, ConnectionEdge source) {
                 this.prefix = prefix;
                 this.source = (FConnectClause) source;
-                values = new EvaluataionValueCache(this.source);
+                values = new EvaluationValueCache(this.source);
             }
             
             public void connect(ConnectionSetManager csm) {
@@ -305,16 +305,16 @@ aspect ExpandableConnectors {
              * Add a member to the connectors of the set, possibly as expandable connector members 
              * that members are recursively added to.
              */
-            public void addMember(InstAccess source, InstAccess unknown, InstAccess unknownPart, Size sourceSize) {
+            public void addMember(InstAccess known, InstAccess unknown, InstAccess unknownPart, Size sourceSize) {
                 String name = unknownPart.name();
                 ConnectorMember member = members.get(name);
                 if (unknownPart == unknown.getLastInstAccess()) {
                     FArraySubscripts fas = unknownPart.hasFArraySubscripts() ? unknownPart.getFArraySubscripts() : null;
                     if (member == null) {
-                        member = new ConnectorMember(name, source, fas, sourceSize);
+                        member = new ConnectorMember(name, known, fas, sourceSize);
                         members.put(name, member);
                     } else {
-                        member.addConnection(source, fas, sourceSize);
+                        member.addConnection(known, fas, sourceSize);
                     }
                 } else {
                     // TODO: probably need more to support arrays in this case
@@ -322,7 +322,7 @@ aspect ExpandableConnectors {
                         member = new ConnectorMember(name, unknown);
                         members.put(name, member);
                     }
-                    member.set().addMember(source, unknown, unknownPart.getNextInstAccess(), null);
+                    member.set().addMember(known, unknown, unknownPart.getNextInstAccess(), null);
                 }
                 member.addParentSet(actual());
             }
@@ -567,7 +567,10 @@ aspect ExpandableConnectors {
                     }
                     if (tmpl.isExpandableConnector()) {
                         if (isArray()) {
+                            // Allow use of myInstClass() foc calculating array size
+                            res.parent = tmpl;
                             connectExpandableArray(res, tmpl);
+                            res.parent = null;
                         } else {
                             ExpandableSet set2 = setFor(tmpl);
                             set2.addConnector(res);

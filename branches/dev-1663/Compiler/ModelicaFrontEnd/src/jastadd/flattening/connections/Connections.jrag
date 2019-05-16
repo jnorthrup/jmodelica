@@ -1149,10 +1149,8 @@ aspect Connections {
                 for (Index[] i : new ParallelIterable<Index>(new Index[2], leftInd, rightInd)) {
                     Index leftI = leftInd.translate(i[0]);
                     Index rightI = rightInd.translate(i[1]);
-                    InstComponentDecl leftCompCell = 
-                            leftComp.findCell(leftI, leftI.ndims() - leftComp.ndims());
-                    InstComponentDecl rightCompCell = 
-                            rightComp.findCell(rightI, rightI.ndims() - rightComp.ndims());
+                    InstComponentDecl leftCompCell = lookupWithIndex(leftI);
+                    InstComponentDecl rightCompCell = right.lookupWithIndex(rightI);
                     FAccess leftCellName  = leftCompCell.getFAccess(leftI);
                     FAccess rightCellName = rightCompCell.getFAccess(rightI);
                     connectCells(csm, source, prefix, 

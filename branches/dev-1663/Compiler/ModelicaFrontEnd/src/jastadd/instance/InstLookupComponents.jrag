@@ -493,7 +493,44 @@ aspect InstLookupComponents {
     }
 
     /**
-     * Lookup component, re-evaluating any array accesses except in last component.
+     * Lookup component, selecting array indices based on i, where i covers this access.
+     */
+    syn InstComponentDecl InstAccess.lookupWithIndex(Index i) = lookupWithIndexImpl(i, null);
+
+    /**
+     * Lookup component, selecting array indices based on i, where i covers an InstDot that 
+     * this access is part of.
+     */
+    inh InstComponentDecl InstAccess.lookupAsPartWithIndex(Index i);
+    eq InstDot .getInstAccess(int j).lookupAsPartWithIndex(Index i) = 
+        lookupWithIndexImpl(i, (j < getNumInstAccess() - 1) ? getInstAccess(j + 1) : null);
+    eq BaseNode.getChild()          .lookupAsPartWithIndex(Index i) = 
+        unknownInstComponentDecl();
+
+    protected InstComponentDecl InstAccess.lookupWithIndexImpl(Index i, InstAccess stopAt) {
+        InstAccess first = getFirstInstAccess();
+        InstAccess cur = first;
+        InstComponentDecl icd = cur.myInstComponentDecl();
+        int d = 0, n = i.ndims();
+        
+        while (cur != stopAt && icd != null && !icd.isUnknown()) {
+            if (cur != first) {
+                icd = icd.memberInstComponent(cur.name()).targetOrNull();
+            }
+            
+            while (d < n && !icd.isUnknown() && icd.isArray() && !icd.isPrimitive()) {
+                icd = icd.getInstComponentDecl(i.get(d) - 1);
+                d++;
+            }
+            
+            cur = cur.getNextInstAccess();
+        }
+        
+        return (icd == null) ? unknownInstComponentDecl() : icd;
+    }
+
+    /**
+     * Lookup component, re-evaluating any array indexes except in last component.
      */
     public InstComponentDecl InstAccess.lookupEvaluatingIndices() {
         InstAccess cur = getFirstInstAccess();

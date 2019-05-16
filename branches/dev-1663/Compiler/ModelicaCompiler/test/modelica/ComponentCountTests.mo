@@ -204,40 +204,6 @@ package ComponentCountTests
     )})));
     end ExpandableConnector;
 
-    model ExpandableConnectorArrays
-        expandable connector EC
-        end EC;
-
-        connector C = Real;
-        parameter Integer n = 3;
-
-        EC ec1[1], ec2[n], ec3[:], ec4[2], ec5[2];
-        C c1, c2, c3;
-    equation
-        connect(ec1[1].a, c1);          // EC (size 1) cell element to C.
-        connect(ec4[1].a, c3);          // EC (size 2) cell element to C.
-        connect(ec2[1].a, c2);          // EC (size n) cell element to C.
-        connect(ec3[3].a, c2);          // EC (size :) cell element to C.
-        connect(ec1[1].a, ec2[2].c);    // EC (size 1) cell to EC (size n) cell element.
-        connect(ec4[1].c, ec2[1].a);    // EC (size 2) cell to EC (size n) cell element.
-        connect(ec2[2].c, ec3[1]);      // EC (size n) cell element to EC (size :) cell.
-        connect(ec1[1], ec3[3]);        // EC (size n) to EC (size :).
-        connect(ec4, ec5);              // EC (size 2) to EC (size 2).
-
-        c1 = time;
-        c2 = time;
-        c3 = time;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="ExpandableConnectorArrays",
-            methodName="numberOfComponents",
-            description="Test the component count feature with nested expandable connector arrays.",
-            methodResult="0"
-    )})));
-    end ExpandableConnectorArrays;
-
-
     model InnerOuter1
         model A
             Real x;
