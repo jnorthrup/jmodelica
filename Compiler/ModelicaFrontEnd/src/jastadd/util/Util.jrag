@@ -1041,6 +1041,9 @@ aspect Names {
     eq SrcDot.getChild().retrieveTopAccess(SrcAccess pre)          = retrieveTopAccess(this);
     eq SrcGlobalAccess.getChild().retrieveTopAccess(SrcAccess pre) = retrieveTopAccess(this);
     
+    syn boolean SrcAccess.isGlobal() = false;
+    eq SrcGlobalAccess.isGlobal()    = true;
+    
     syn boolean InstAccess.isTopInstAccess() = this == getTopInstAccess();
     
     /**
