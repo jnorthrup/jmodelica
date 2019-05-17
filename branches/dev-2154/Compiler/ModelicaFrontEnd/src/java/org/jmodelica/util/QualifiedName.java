@@ -93,6 +93,10 @@ public class QualifiedName {
     public String next() {
         return iterator.next();
     }
+    
+    public String getName(int i) {
+        return names.get(i);
+    }
 
     private static Scanner newScanner(String name) {
         try {
