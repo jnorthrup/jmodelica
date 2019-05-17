@@ -541,6 +541,20 @@ aspect ClassRestriction {
     syn boolean SrcRestriction.isPackage() = false;
     eq SrcPackage.isPackage()             = true;
 
+    /**
+     * Is this class a connector?
+     */
+    syn boolean SrcClassDecl.isConnector() = false;
+    eq SrcBaseClassDecl.isConnector()      = getSrcRestriction().isConnector();
+    eq SrcUnknownClassDecl.isConnector()   = false;
+    eq SrcLibNode.isConnector()            = myClass().isConnector();
+
+    /**
+     * Is this restriction "connector"?
+     */
+    syn boolean SrcRestriction.isConnector() = false;
+    eq SrcConnector.isConnector()             = true;
+
 }
 
 
