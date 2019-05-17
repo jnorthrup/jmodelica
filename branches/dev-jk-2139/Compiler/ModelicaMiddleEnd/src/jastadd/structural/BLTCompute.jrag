@@ -217,7 +217,7 @@ aspect BLTCompute {
         public Collection<FVariable> realOutputs();
         public Collection<FVariable> outputs();
         public Collection<FVariable> variables();
-        public Collection<FVariable> extraVariables();
+        public Iterable<FVariable> extraVariables();
     }
     public interface BLTEquations {
         public Collection<FAbstractEquation> normalEquations();
@@ -275,7 +275,7 @@ aspect BLTCompute {
             return fClass.variables();
         }
         @Override
-        public Collection<FVariable> extraVariables() {
+        public Iterable<FVariable> extraVariables() {
             return Collections.emptyList();
         }
 
