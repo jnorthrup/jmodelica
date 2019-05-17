@@ -543,7 +543,7 @@ aspect PrettyPrint {
 	// For debugging
 	public void SrcLibNode.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.formatln("%s%structured library '%s' at '%s'", indent, 
-				(getStructured() ? "S" : "Uns"), name(), dirName());
+				(getStructured() ? "S" : "Uns"), name(), getFileName());
 	}
 
 	syn boolean SrcComponentClause.isEnumComponentClause() = false;
@@ -1807,7 +1807,7 @@ aspect FlatPrettyPrint {
 	 */
 	protected void FBuiltInFunctionCall.prettyPrintArguments(Printer p, CodeStream str, String indent) {
 		String pre = "";
-		for (FExp exp : myArgs()) {
+		for (FExp exp : childFExps()) {
 			str.print(pre);
 			p.print(exp, str, indent);
 			pre = SEP;
@@ -1836,16 +1836,6 @@ aspect FlatPrettyPrint {
             str.print(SEP, "priority=");
             p.print(getPriority(), str, indent);
         }
-    }
-
-    @Override
-    protected void FDelayIndicator.prettyPrintArguments(Printer p, CodeStream str, String indent) {
-        myDelayExp().prettyPrintArguments(p, str, indent);
-    }
-
-    @Override
-    protected void FSpatialDistIndicator.prettyPrintArguments(Printer p, CodeStream str, String indent) {
-        mySpatialDistExp().prettyPrintArguments(p, str, indent);
     }
 
 	syn String FBuiltInFunctionCall.builtInName();
@@ -1898,9 +1888,6 @@ aspect FlatPrettyPrint {
     eq FReinit.builtInName()             = "reinit";
     eq FDelayExp.builtInName()           = "delay";
     eq FSpatialDistExp.builtInName()     = "spatialDistribution";
-    eq FFirstDelayIndicator.builtInName()= "delayIndicatorFirst";
-    eq FSecondDelayIndicator.builtInName()= "delayIndicatorSecond";
-    eq FSpatialDistIndicator.builtInName()= "spatialDistIndicator";
 	eq FAssert.builtInName()             = "assert";
 	eq FIdentity.builtInName()           = "identity";
 	eq FDiagonal.builtInName()           = "diagonal";
@@ -1919,7 +1906,7 @@ aspect FlatPrettyPrint {
     eq FDecouple.builtInName()           = "Subtask.decouple";
 	eq FSemiLinearExp.builtInName()      = "semiLinear";
 	eq FInStream.builtInName()           = "inStream";
-	eq FDerStream.builtInName()          = "derStream";
+	eq FDerStream.builtInName()         = "derStream";
     eq FExInStream.builtInName()         = "inStreamExpansion";
 	eq FActualStream.builtInName()       = "actualStream";
 	eq FGetInstanceName.builtInName()    = "getInstanceName";

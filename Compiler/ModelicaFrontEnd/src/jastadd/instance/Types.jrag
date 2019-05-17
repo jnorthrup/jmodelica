@@ -319,7 +319,6 @@ aspect DerivativeFunctions {
     eq FStatement.shouldBeDifferentiated()        = type().shouldBeDifferentiated();
     eq FAbstractEquation.shouldBeDifferentiated() = variability().continuousVariability();
     eq FFunctionCallLeft.shouldBeDifferentiated() = hasFExp() && myOutput().shouldBeDifferentiated();
-    eq FIndicatorExp.shouldBeDifferentiated()     = false;
 
 
     /**

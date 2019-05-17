@@ -224,13 +224,6 @@ aspect FlatteningFAccesss {
 
 aspect FlatteningFunctionConstant {
 
-    /**
-     * Flatten an access to a constant. If it could not be folded or 
-     * flattened as a global variable null is returned. This should not 
-     * be possible! When we have moved flattening of records from scalarization
-     * to flattening we should be able to replace return null with a hard error.
-     * (I think the flattening contain the last record variability+evaluation related bugs.)
-     */
     public FExp InstAssignable.flattenAccessToConst(Flattener f, CommonAccessExp access) {
         FType t = access.type();
         if (t.isEmpty()) {
@@ -238,13 +231,6 @@ aspect FlatteningFunctionConstant {
         }
         
         InstAccess ia = access.asInstAccess();
-        
-        /* Primitives can be inlined. Records and arrays could be used in patterns
-         * where it is more efficient to keep them as global variables. */
-        if (isComposite() && ia.inFunction() && ia.flattenAsGlobalAccess()) {
-            return flattenGlobalAccess(f, ia);
-        }
-        
         if (access.canInlineConstant() && !ia.hasUnknownIndices()) {
             try {
                 CValue cval = access.ceval();
@@ -255,28 +241,21 @@ aspect FlatteningFunctionConstant {
                     return cval.buildLiteral();
                 }
             } catch (ConstantEvaluationException e) {
-                // TODO: Error. See method documentation.
+                // TODO: Error
             }
         }
         
-        /* The access should have been folded 
-         * or flattened as global by this point. */
         if (ia.flattenAsGlobalAccess()) {
-            return flattenGlobalAccess(f, ia);
+            InstAssignable top = ia.topInstAssignable();
+            
+            if (f != null && !f.isFlattenedGlobalVariable(top)) {
+                top.flatten(f, FlattenBindingExp.ALL, 0, true);
+            }
+            
+            return new FGlobalAccessExp(ia.flatten(f).copyAndPrepend(top.surroundingInstClass().qualifiedName()),
+                                        (String) null);
         }
-        
         return null;
-    }
-
-    public FExp InstAssignable.flattenGlobalAccess(Flattener f, InstAccess ia) {
-        InstAssignable top = ia.topInstAssignable();
-        
-        if (f != null && !f.isFlattenedGlobalVariable(top)) {
-            top.flatten(f, FlattenBindingExp.ALL, 0, true);
-        }
-        
-        return new FGlobalAccessExp(ia.flatten(f).copyAndPrepend(top.surroundingInstClass().qualifiedName()),
-                                    (String) null);
     }
 
     syn boolean InstAccess.flattenAsGlobalAccess() =

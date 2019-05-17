@@ -394,13 +394,8 @@ abstract public class TestAnnotationizerHelper {
         opts.setStringOption("MODELICAPATH", modelicapath.getPath());
         SourceRoot root;
         
-        Collection<LoadInfo> loadInfos = new ArrayList<>();
-        for (String file : files) {
-            loadInfos.add(LoadInfo.create(file));
-        }
-        
         try {
-            root = TestCase.PARSER_HANDLER.parseModel(UtilInterface.create(opts), loadInfos);
+            root = TestCase.PARSER_HANDLER.parseModel(UtilInterface.create(opts), files);
         } catch (ParserException e) {
             CompilerException ce = new CompilerException();
             ce.addProblem(e.getProblem());
