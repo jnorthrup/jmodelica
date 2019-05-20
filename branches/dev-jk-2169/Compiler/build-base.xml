@@ -35,11 +35,22 @@
     <echo>build-base.xml: running in ${target}</echo>
 
     <property name="compiler_build" value="${target}/src/build" />
+    
+    <!-- Temporary work directory with generated java files for either Modelica or Optimica configuration -->
     <property name="java_output_intermediate" value="${compiler_build}/${sub_package}/java-generated-intermediate" />
+    
+    <!-- Temporary work directory with generated java files common for both Modelica and Optimica configuration -->
     <property name="java_output_intermediate_common" value="${compiler_build}/src/${sub_package}/java-generated-intermediate-common" />
+    
+    <!-- Final output directory with generated java files for either Modelica or Optimica configuration -->
     <property name="java_output_final" value="${target}/src/generated/${sub_package}/java" />
+    
+    <!-- Final output directory with generated java files common for both Modelica and Optimica configuration -->
     <property name="java_output_final_common" value="${target}/src/generated/java" />
+    
+    <!-- Temporary work directory for updating static java files -->
     <property name="java_temp" value="${target}/src/java-generated-temporary" />
+    
     <property name="resources_temp" value="${target}/src/resources-temporary" />
     <property name="junit_output" value="${target}/src/generated/${sub_package}/junit" />
     <property name="test_output" value="${target}/doc/junit-reports" />
