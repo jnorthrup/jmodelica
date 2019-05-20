@@ -1,10 +1,14 @@
 package org.jmodelica.common.ast.prefixes;
 
+// TODO Rename class
 public enum TypePrefixInputOutput {
 
     NONE(""),
     INPUT("input"),
-    OUTPUT("output");
+    OUTPUT("output"),
+    POTENTIAL("potential"),
+    FLOW("flow"),
+    STREAM("stream");
     
     private String toString;
     
@@ -17,11 +21,11 @@ public enum TypePrefixInputOutput {
     }
     
     public boolean inputCausality() {
-        return this == INPUT;
+        return this == INPUT || this == FLOW || this == STREAM;
     }
     
     public boolean outputCausality() {
-        return this == OUTPUT;
+        return this == OUTPUT || this == POTENTIAL;
     }
     
     @Override
