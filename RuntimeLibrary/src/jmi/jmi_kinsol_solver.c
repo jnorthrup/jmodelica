@@ -1755,7 +1755,10 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
 
     if(ret != 0 ) return ret; /* There was an error in calculation of Jacobian */
     
-    if(solver->use_steepest_descent_flag) return ret; /* No further processing when using steepest descent */
+	if(solver->use_steepest_descent_flag) {
+		solver->force_new_J_flag = 0;
+		return ret; /* No further processing when using steepest descent */
+	}
     
     ret = jmi_kin_factorize_jacobian(block);
 
@@ -2821,8 +2824,36 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
                         "guess. Attempting using the nominal values in <block:%s>",
                         block->label);
                     flag = jmi_kinsol_invoke_kinsol(block, KIN_LINESEARCH);
+				} else {
+					solver->use_steepest_descent_flag = 1;
+				}
+
+				
+				if(solver->use_steepest_descent_flag) {
+					/* block->options->jacobian_calculation_mode = jmi_central_diffs_jacobian_calculation_mode;*/
+					jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%s><message:%s>",
+								 "jmi_kinsol_solver", block->label, "Attempting steepest descent iterations"); 
+					flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, block->f_scale);
+					
+					/* block->options->jacobian_calculation_mode = jmi_onesided_diffs_jacobian_calculation_mode; */
+					solver->use_steepest_descent_flag = 0;
+					if(flag == KIN_INITIAL_GUESS_OK) {
+						/* this is just to capture value of flag during debugging*/
+						flag = KIN_SUCCESS;
+						jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%s><message:%s>",
+									 "jmi_kinsol_solver", block->label, "Succesful steepest descent iteration"); 
+						solver->use_steepest_descent_flag = 0;
+					}
+					if(flag == KIN_SUCCESS) {
+						/* this is just to capture value of flag during debugging*/
+						solver->use_steepest_descent_flag = 0;
+					}
+					if (flag != KIN_SUCCESS) {
+                    jmi_log_node(log, logError, "Error", "Could not converge attempting steepest descent in <block: %s>",
+                                 block->label);
                 }
-                
+				}
+
                 if (flag != KIN_SUCCESS) {
                     jmi_log_node(log, logError, "Error", "Could not converge after re-scaling equations in <block: %s>",
                                  block->label);
