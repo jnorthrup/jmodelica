@@ -6316,16 +6316,20 @@ public
  function ArrayTests.Constructors.Iterators.ArrayIterTest9.f2
   input Real[:] x;
   output ArrayTests.Constructors.Iterators.ArrayIterTest9.R[:] y;
-  ArrayTests.Constructors.Iterators.ArrayIterTest9.R temp_1; 
+  ArrayTests.Constructors.Iterators.ArrayIterTest9.R[:] temp_1;
   ArrayTests.Constructors.Iterators.ArrayIterTest9.R temp_2;
+  ArrayTests.Constructors.Iterators.ArrayIterTest9.R temp_3;
  algorithm
   init y as ArrayTests.Constructors.Iterators.ArrayIterTest9.R[2];
-  (temp_1) := ArrayTests.Constructors.Iterators.ArrayIterTest9.f1(x[1]); 
-  (temp_2) := ArrayTests.Constructors.Iterators.ArrayIterTest9.f1(x[2]); 
-  y[1].a := temp_1.a; 
-  y[1].b := temp_1.b; 
-  y[2].a := temp_2.a; 
-  y[2].b := temp_2.b; 
+  init temp_1 as ArrayTests.Constructors.Iterators.ArrayIterTest9.R[2];
+  (temp_2) := ArrayTests.Constructors.Iterators.ArrayIterTest9.f1(x[1]);
+  temp_1[1] := temp_2;
+  (temp_3) := ArrayTests.Constructors.Iterators.ArrayIterTest9.f1(x[2]);
+  temp_1[2] := temp_3;
+  for i1 in 1:2 loop
+   y[i1].a := temp_1[i1].a;
+   y[i1].b := temp_1[i1].b;
+  end for;
   return;
  end ArrayTests.Constructors.Iterators.ArrayIterTest9.f2;
 
@@ -6610,6 +6614,7 @@ model ArrayIterTestUnknown1
 		input Integer a;
 		output Real x[:] = { i^2 for i in 1:a/2 };
     algorithm
+        annotation(Inline=false);
     end f;
     
 	Real x[3] = f(6);
@@ -6633,20 +6638,83 @@ public
   output Real[:] x;
   Real[:] temp_1;
  algorithm
-  init x as Real[max(a / 2, 0)];
-  init temp_1 as Real[max(a / 2, 0)];
-  for i1 in 1:max(a / 2, 0) loop
+  init x as Real[max(integer(a / 2), 0)];
+  init temp_1 as Real[max(integer(a / 2), 0)];
+  for i1 in 1:max(integer(a / 2), 0) loop
    temp_1[i1] := i1 ^ 2;
   end for;
-  for i1 in 1:max(a / 2, 0) loop
+  for i1 in 1:max(integer(a / 2), 0) loop
    x[i1] := temp_1[i1];
   end for;
   return;
+ annotation(Inline = false);
  end ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1.f;
 
 end ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1;
 ")})));
 end ArrayIterTestUnknown1;
+
+model ArrayIterTestUnknown2
+    function f
+        input Integer a;
+        output Real x1[:] = { i^2 for i in 2:0.5:a/2 };
+        output Real x2[:] = { i for i in 2:0.5:a/2 };
+        output Real x3[:] = 2:0.5:a/2;
+    algorithm
+        annotation(Inline=false);
+    end f;
+    
+    Real x[3] = f(6);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Constructors_Iterators_ArrayIterTestUnknown2",
+            description="",
+            variability_propagation=false,
+            flatModel="
+fclass ArrayTests.Constructors.Iterators.ArrayIterTestUnknown2
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ ({x[1], x[2], x[3]}) = ArrayTests.Constructors.Iterators.ArrayIterTestUnknown2.f(6);
+
+public
+ function ArrayTests.Constructors.Iterators.ArrayIterTestUnknown2.f
+  input Integer a;
+  output Real[:] x1;
+  output Real[:] x2;
+  output Real[:] x3;
+  Real[:] temp_1;
+  Integer[:] temp_2;
+ algorithm
+  init x1 as Real[max(integer((a / 2 - 2) / 0.5) + 1, 0)];
+  init temp_1 as Real[max(integer((a / 2 - 2) / 0.5) + 1, 0)];
+  for i1 in 1:max(integer((a / 2 - 2) / 0.5) + 1, 0) loop
+   temp_1[i1] := (2 + (i1 - 1) * 0.5) ^ 2;
+  end for;
+  for i1 in 1:max(integer((a / 2 - 2) / 0.5) + 1, 0) loop
+   x1[i1] := temp_1[i1];
+  end for;
+  init x2 as Real[max(integer((a / 2 - 2) / 0.5) + 1, 0)];
+  init temp_2 as Integer[max(integer((a / 2 - 2) / 0.5) + 1, 0)];
+  for i1 in 1:max(integer((a / 2 - 2) / 0.5) + 1, 0) loop
+   temp_2[i1] := 2 + (i1 - 1) * 0.5;
+  end for;
+  for i1 in 1:max(integer((a / 2 - 2) / 0.5) + 1, 0) loop
+   x2[i1] := temp_2[i1];
+  end for;
+  init x3 as Real[max(integer((a / 2 - 2) / 0.5) + 1, 0)];
+  for i1 in 1:max(integer((a / 2 - 2) / 0.5) + 1, 0) loop
+   x3[i1] := 2 + (i1 - 1) * 0.5;
+  end for;
+  return;
+ annotation(Inline = false);
+ end ArrayTests.Constructors.Iterators.ArrayIterTestUnknown2.f;
+
+end ArrayTests.Constructors.Iterators.ArrayIterTestUnknown2;
+")})));
+end ArrayIterTestUnknown2;
 
 end Iterators;
 
@@ -7639,6 +7707,7 @@ equation
             name="Slices_SliceTest4",
             description="Slice operations: test with vector indices",
             eliminate_alias_variables=false,
+            variability_propagation=false,
             flatModel="
 fclass ArrayTests.Slices.SliceTest4
  Real a[1];
@@ -7646,12 +7715,12 @@ fclass ArrayTests.Slices.SliceTest4
  Real a[3];
  Real a[4];
  Real a[5];
- parameter Real ae[5];
- parameter Real ae[4];
- parameter Real ae[3];
- parameter Real ae[2];
- parameter Real ae[1];
-parameter equation
+ Real ae[1];
+ Real ae[2];
+ Real ae[3];
+ Real ae[4];
+ Real ae[5];
+equation
  ({ae[5], ae[4], ae[3], ae[2], ae[1]}, ) = ArrayTests.Slices.SliceTest4.fw();
 algorithm
  ({a[2], a[4]}, ) := ArrayTests.Slices.SliceTest4.f({1, 1});
@@ -7661,13 +7730,41 @@ public
  function ArrayTests.Slices.SliceTest4.fw
   output Real[:] o;
   output Real dummy;
+  Integer[:] temp_1;
+  Integer[:] temp_2;
+  Real[:] temp_3;
+  Integer[:] temp_4;
+  Real[:] temp_5;
+  Integer[:] temp_6;
  algorithm
   init o as Real[5];
   dummy := 1;
-  o[1] := 1;
-  o[3] := 1;
-  o[5] := 1;
-  ({o[2], o[4]}, ) := ArrayTests.Slices.SliceTest4.f({o[3], o[5]});
+  init temp_1 as Integer[3];
+  temp_1[1] := 1;
+  temp_1[2] := 3;
+  temp_1[3] := 5;
+  init temp_2 as Integer[3];
+  temp_2[1] := 1;
+  temp_2[2] := 1;
+  temp_2[3] := 1;
+  for i1 in 1:3 loop
+   o[temp_1[i1]] := temp_2[i1];
+  end for;
+  init temp_4 as Integer[2];
+  temp_4[1] := 3;
+  temp_4[2] := 5;
+  init temp_3 as Real[2];
+  for i1 in 1:2 loop
+   temp_3[i1] := o[temp_4[i1]];
+  end for;
+  init temp_5 as Real[2];
+  (temp_5, ) := ArrayTests.Slices.SliceTest4.f(temp_3);
+  init temp_6 as Integer[2];
+  temp_6[1] := 2;
+  temp_6[2] := 4;
+  for i1 in 1:2 loop
+   o[temp_6[i1]] := temp_5[i1];
+  end for;
   return;
  end ArrayTests.Slices.SliceTest4.fw;
 
@@ -7678,8 +7775,9 @@ public
  algorithm
   init o as Real[2];
   dummy := 1;
-  o[1] := i[1];
-  o[2] := i[2];
+  for i1 in 1:2 loop
+   o[i1] := i[i1];
+  end for;
   return;
  end ArrayTests.Slices.SliceTest4.f;
 
@@ -8803,10 +8901,15 @@ public
  function ArrayTests.VariableIndex.Slice6.F
   input Real x;
   output Real[:] y;
+  Real[:] temp_1;
  algorithm
   init y as Real[2];
-  y[1] := x;
-  y[2] := x;
+  init temp_1 as Real[2];
+  temp_1[1] := x;
+  temp_1[2] := x;
+  for i1 in 1:2 loop
+   y[i1] := temp_1[i1];
+  end for;
   return;
  annotation(Inline = false);
  end ArrayTests.VariableIndex.Slice6.F;
@@ -9563,10 +9666,15 @@ public
  function ArrayTests.IfExprTemp1.f
   input Real x;
   output Real[:] y;
+  Real[:] temp_1;
  algorithm
   init y as Real[2];
-  y[1] := x;
-  y[2] := x + 1;
+  init temp_1 as Real[2];
+  temp_1[1] := x;
+  temp_1[2] := x + 1;
+  for i1 in 1:2 loop
+   y[i1] := temp_1[i1];
+  end for;
   return;
  end ArrayTests.IfExprTemp1.f;
 
@@ -9616,10 +9724,15 @@ public
  function ArrayTests.IfExprTemp2.f
   input Real x;
   output Real[:] y;
+  Real[:] temp_1;
  algorithm
   init y as Real[2];
-  y[1] := x;
-  y[2] := x + 1;
+  init temp_1 as Real[2];
+  temp_1[1] := x;
+  temp_1[2] := x + 1;
+  for i1 in 1:2 loop
+   y[i1] := temp_1[i1];
+  end for;
   return;
  end ArrayTests.IfExprTemp2.f;
 
@@ -9667,10 +9780,15 @@ public
  function ArrayTests.IfExprTemp3.f
   input Real x;
   output Real[:] y;
+  Real[:] temp_1;
  algorithm
   init y as Real[2];
-  y[1] := x;
-  y[2] := x + 1;
+  init temp_1 as Real[2];
+  temp_1[1] := x;
+  temp_1[2] := x + 1;
+  for i1 in 1:2 loop
+   y[i1] := temp_1[i1];
+  end for;
   return;
  end ArrayTests.IfExprTemp3.f;
 

@@ -45,7 +45,15 @@ aspect OverdeterminedInitialSystem {
         for (FVariable var : res.visitedParameters) {
             if (!var.isParameter())
                 continue;
-            var.setTypePrefixVariability(Variability.STRUCTPARAMETER);
+            
+            AliasManager.AliasSet aliasSet = var.aliasSet();
+            if (aliasSet != null) {
+                for (AliasManager.AliasVariable alias : aliasSet) {
+                    alias.getFVariable().setTypePrefixVariability(Variability.STRUCTPARAMETER);
+                }
+            } else {
+                var.setTypePrefixVariability(Variability.STRUCTPARAMETER);
+            }
         }
         
         return g;
@@ -58,28 +66,28 @@ aspect OverdeterminedInitialSystem {
          * returned if all unmatched equations are found to be redundent.
          */
         public OISResult overdeterminedInitialSystem() {
-            ASTNode.log.verbose("Analysing initial system for redundant equations to remove.");
-            OISVariableEvaluator evaluator = new OISVariableEvaluator();
+            getStepLogger().logVerbose("Analysing initial system for redundant equations to remove.");
+            OISVariableEvaluator evaluator = new OISVariableEvaluator(getStepLogger());
             boolean allIsGood = true;
             for (E eqn : unmatchedEquationsIterable()) {
-                ASTNode.log.verbose("Checking unmatched equation %s", eqn);
+                getStepLogger().logVerbose("Checking unmatched equation %s", eqn);
                 FAbstractEquation equation = eqn.getEquation();
                 if (!equation.isInitial()) {
-                    ASTNode.log.verbose("  Not an initial equation");
+                    getStepLogger().logVerbose("  Not an initial equation");
                     allIsGood = false;
-                } else if (equation.OIS_consistencyCheck(evaluator)) {
-                    ASTNode.log.verbose("  Consistent");
+                } else if (equation.OIS_consistencyCheck(evaluator,stepLogger)) {
+                    getStepLogger().logVerbose("  Consistent");
                 } else {
                     allIsGood = false;
-                    ASTNode.log.verbose("  Unable to verify or different values were calculated");
+                    getStepLogger().logVerbose("  Unable to verify or different values were calculated");
                 }
             }
             if (!allIsGood) {
-                ASTNode.log.verbose("Unable to verify all unmatched initial equations");
+                getStepLogger().logVerbose("Unable to verify all unmatched initial equations");
                 return null;
             }
             Collection<E> results = new ArrayList<E>();
-            ASTNode.log.verbose("All seems to be ok!");
+            getStepLogger().logVerbose("All seems to be ok!");
             return new OISResult(getUnmatchedEquations(), evaluator.visitedParameters);
         }
         
@@ -103,13 +111,20 @@ aspect OverdeterminedInitialSystem {
             private Map<CommonVariableDecl, CValue> evaluationCache = new LinkedHashMap<CommonVariableDecl, CValue>();
             private Set<FVariable> visitedParameters = new LinkedHashSet<FVariable>();
             
-            public OISVariableEvaluator() {
+            private StepLogger stepLogger;
+            
+            public OISVariableEvaluator(StepLogger stepLogger) {
                 super(true);
+                this.stepLogger = stepLogger;
+            }
+            
+            public StepLogger getStepLogger() {
+                return stepLogger;
             }
             
             @Override
             public CValue ceval(CommonVariableDecl variable) {
-                ASTNode.log.verbose("    %s", variable.name());
+                getStepLogger().logVerbose("    %s", variable.name());
                 CValue val = evaluationCache.get(variable);
                 if (val != null)
                     return val;
@@ -170,15 +185,15 @@ aspect OverdeterminedInitialSystem {
      * Tries to validate the equation and ensuring that the left hand side is
      * equal to the right hand side.
      */
-    syn boolean FAbstractEquation.OIS_consistencyCheck(VariableEvaluator evaluator) = false;
-    eq FEquation.OIS_consistencyCheck(VariableEvaluator evaluator) {
+    syn boolean FAbstractEquation.OIS_consistencyCheck(VariableEvaluator evaluator, StepLogger stepLogger) = false;
+    eq FEquation.OIS_consistencyCheck(VariableEvaluator evaluator, StepLogger stepLogger) {
         try {
-            log.verbose("  Right:");
+            stepLogger.logVerbose("  Right:");
             CValue right = getRight().ceval(evaluator);
-            log.verbose("    Calculated value: %s", right);
-            log.verbose("  Left:");
+            stepLogger.logVerbose("    Calculated value: %s", right);
+            stepLogger.logVerbose("  Left:");
             CValue left = getLeft().ceval(evaluator);
-            log.verbose("    Calculated value: %s", left);
+            stepLogger.logVerbose("    Calculated value: %s", left);
             CValue equ = type().equ(left, right);
             return equ.hasBooleanValue() && equ.booleanValue();
         } catch (ConstantEvaluationException e) {

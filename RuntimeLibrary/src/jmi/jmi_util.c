@@ -30,7 +30,7 @@
 void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, jmi_real_t time) {
     if (JMI_TRUE == LOG_EXP_OR(
                         LOG_EXP_OR(
-                            LOG_EXP_NOT(AD_WRAP_LITERAL(event->defined)), 
+                            LOG_EXP_NOT(((jmi_real_t)(event->defined))),
                             SURELY_GT_ZERO(event->time - time)), 
                         LOG_EXP_AND(
                             ALMOST_ZERO(event->time - time), 
@@ -561,7 +561,7 @@ int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_c
     jmi_real_t* output_nominal = work_array + 3*n_input;
     jmi_real_t* output_temp = work_array + 3*n_input+n_output;
     jmi_int_t* error_indicator = jmi_get_int_work_array(jmi->int_work, JMI_MAX(n_output, n_input));
-    jmi_log_node_t log_node;
+    jmi_log_node_t log_node={0};
     int log_level_limit = 5;
 
     /* Setup max/min/nominal values for the inputs */

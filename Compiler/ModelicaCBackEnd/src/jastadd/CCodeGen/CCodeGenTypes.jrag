@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2009-2017 Modelon AB
+Copyright (C) 2009-2019 Modelon AB
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3 of the License.
@@ -13,15 +13,23 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import org.jmodelica.util.ccompiler.Dynamicity;
+
 aspect CCodeGenTypes {
 
     syn String FAbstractVariable.type_C(CodePrinter p) = type().type_C(p);
     syn String FFunctionCallLeft.type_C(CodePrinter p) = type().type_C(p);
 
 
-    syn String FFunctionVariable.typeReturn_C(CodePrinter p) = isRecord() ? type_C(p) : (type_C(p) + "*");
-    eq FFunctionArray.typeReturn_C(CodePrinter p)            = type_C(p);
+    syn String FFunctionVariable.typeReturn_C(CodePrinter p) = isComposite() ? type_C(p) : (type_C(p) + "*");
 
+    syn String FExp.typeReturn_C(CodePrinter p) {
+        String type = isArray() ? type().nameArray_C(p) : type().nameScalar_C(p);
+        if (!type().isExternalObject()) {
+            type = type + "*";
+        }
+        return type;
+    }
 
     syn String FType.type_C(CodePrinter p) = isArray() ? arrayType_C(p) : scalarType_C(p);
 
@@ -253,8 +261,8 @@ aspect CCodeGenTypes {
         }
         
         
-        protected String dynStr(FType type) {
-            return (dynamic() ? "DYNA" : "STAT");
+        protected Dynamicity dynamicity(FType type) {
+            return (dynamic() ? Dynamicity.HEAP : Dynamicity.STACK);
         }
         
         public void print(FType type) {
@@ -422,7 +430,7 @@ aspect CCodeGenTypes {
         protected void printArray(FType type) {
             if (print) {
                 str.print(indent(), "JMI_ARR(",
-                        dynStr(type), ", ", 
+                        dynamicity(type), ", ", 
                         type.nameScalar_C(p, external), ", ",
                         type.nameArray_C(p, external), ", ",
                         name(), ", ");
@@ -476,7 +484,7 @@ aspect CCodeGenTypes {
         @Override
         protected void printArray(FType type) {
             str.print(indent(), "JMI_ARRAY_INIT_", type.ndims(), "(", 
-                    dynStr(type), ", ",
+                    dynamicity(type), ", ",
                     type.nameScalar_C(p, external), ", ",
                     type.nameArray_C(p, external), ", ",
                     name(), ", ");
@@ -635,4 +643,72 @@ aspect CCodeGenTypes {
         }
     }
 
+    public void FType.printDecl_C(CodePrinter p, CodeStream str, String indent, 
+            Dynamicity dyn, String name, boolean external) {
+        if (isArray()) {
+            printArrayDecl_C(p, str, indent, dyn, name, external);
+        } else {
+            printScalarDecl_C(p, str, indent, external, name);
+        }
+    }
+
+    public void FType.printArrayDecl_C(CodePrinter p, CodeStream str, String indent, 
+            Dynamicity dyn, String name, boolean external) {
+        str.print(indent, "JMI_ARR(",
+                dyn, ", ", 
+                nameScalar_C(p, external), ", ",
+                nameArray_C(p, external), ", ",
+                name, ", ");
+        if (dyn.isHeap()) {
+            str.print("-1");
+        } else {
+            size().printNumElements_C(p, str, indent, (TypePrintable_C)null);
+        }
+        str.print(", ");
+        str.print(ndims());
+        str.println(")");
+    }
+
+    public void FType.printScalarDecl_C(CodePrinter p, CodeStream str, String indent, boolean external, String name) {
+        str.print(indent);
+        str.print("JMI_DEF(");
+        str.print(macroTypeDecl(external));
+        str.print(", ");
+        str.print(name);
+        str.print(")\n");
+    }
+
+    @Override
+    public void FRecordType.printScalarDecl_C(CodePrinter p, CodeStream str, String indent, boolean external, String name) {
+        str.formatln("%sJMI_RECORD_STATIC(%s, %s)", indent, nameScalar_C(p, external), name);
+    }
+    
+    public void FType.printInit_C(CodePrinter p, CodeStream str, String indent, 
+            Dynamicity dyn, String name, boolean external) {
+        if (isArray()) {
+            printInitArray_C(p, str, indent, dyn, name, external);
+        } else {
+            printInitScalar_C(p, str, indent, dyn, name, external);
+        }
+    }
+    
+    public void FType.printInitArray_C(CodePrinter p, CodeStream str, String indent, 
+            Dynamicity dyn, String name, boolean external) {
+        str.print(indent, "JMI_ARRAY_INIT_", ndims(), "(",
+                dyn, ", ", 
+                nameScalar_C(p, external), ", ",
+                nameArray_C(p, external), ", ",
+                name, ", ");
+        size().printNumElements_C(p, str, indent, (TypePrintable_C)null);
+        str.print(", ");
+        str.print(ndims());
+        str.print(", ");
+        size().printDimensions_C(p, str, indent, (TypePrintable_C)null);
+        str.print(")\n");
+    }
+    
+    public void FType.printInitScalar_C(CodePrinter p, CodeStream str, String indent, 
+            Dynamicity dyn, String name, boolean external) {
+        str.print(indent, name, " = jmi_dynamic_function_pool_alloc(&dyn_mem, 1*sizeof(", nameScalar_C(p), "), TRUE);\n");
+    }
 }

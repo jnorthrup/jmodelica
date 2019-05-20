@@ -51,15 +51,28 @@ aspect Arrays {
 	 *                                      constant Integer values.
 	 */
 	public Index FArraySubscripts.createIndex() {
+		return createIndex(defaultVariableEvaluator());
+	}
+
+    /**
+     * Return an Index with these array subscripts.
+     * 
+     * This version is not cached, to allow indices to be re-evaluated at each use 
+     * during function evaluation.
+     * 
+     * @throws ConstantEvaluationException  if the subscripts can't be evaluated to 
+     *                                      constant Integer values.
+     */
+    public Index FArraySubscripts.createIndex(VariableEvaluator evaluator) {
         if (numSubscript() == 0) {
             return Index.NULL;
         }
-		int[] i = new int[numSubscript()];
-		int j = 0;
-		for (Subscript s : subscripts()) 
-			i[j++] = s.value();
-		return new Index(i);
-	}
+        int[] i = new int[numSubscript()];
+        int j = 0;
+        for (Subscript s : subscripts()) 
+            i[j++] = s.value(evaluator);
+        return new Index(i);
+    }
 
     public interface Subscript {
         public int ndims();
@@ -522,8 +535,7 @@ aspect Arrays {
 	syn int FAbstractVariable.ndims() = -1;
 	
 	eq FVariable.ndims()         = isScalarized()? 0 : getFAccess().declarationNDims();
-	eq FFunctionArray.ndims()    = getType().ndims();
-	eq FFunctionVariable.ndims() = 0;
+    eq FFunctionVariable.ndims() = getType().ndims();
 
     syn int CommonForIndex.ndims() = 1;
 
@@ -617,7 +629,7 @@ aspect Arrays {
     eq FlatRoot.getChild().parentExpandedSubscripts() = new List<FSubscript>();
 
     public FSubscript InstForIndex.createFSubscript() {
-        return getFExp().flatten(Flattener.expressionFlattener()).createFSubscript();
+        return getFExp().flatten(null).createFSubscript();
     }
     @Override
     public FSubscript InstForIndexNoExp.createFSubscript() {
@@ -758,9 +770,12 @@ aspect Arrays {
             if (hasStep())
                 exp = new FDivExp(exp, getFExp(1).treeCopy());
             exp = new FAddExp(new FIntegerFuncExp(exp), new FIntegerLitExp(1));
+        } else if (promoteTypeForFExpList(getFExps()).isReal()) {
+            exp = new FIntegerFuncExp(exp);
         }
-        if (!(exp instanceof FSizeExp))
+        if (!(exp instanceof FSizeExp)) {
             exp = new FMaxExp(exp, new Opt(new FIntegerLitExp(0)));
+        }
         s.append(dynamicFExp(exp));
         return s;
     }
@@ -1025,6 +1040,11 @@ aspect Arrays {
      * Default implementation is simply an alias for childFExps().
      */
     syn Iterable<FExp> FBuiltInFunctionCall.myArgs() = childFExps();
+    eq FDelayExp.myArgs() = hasMax()
+            ? Arrays.asList(getFExp(), getDelay(), getMax())
+            : Arrays.asList(getFExp(), getDelay());
+    eq FSpatialDistExp.myArgs() = Arrays.asList(getIn0(), getIn1(), getX(),
+            getPositiveVelocity(), getInitialPoints(), getInitialValues());
 
 	eq FArrayDimAsArgsExp.size() {
 		if (!isArray())
@@ -1049,7 +1069,25 @@ aspect Arrays {
 	eq InstFunctionCall.size() = hasOutputs() ? sizeOfOutput(0) : Size.SCALAR;
     eq InstPartialFunctionCall.size() = Size.SCALAR;
 
-    eq FIfExp.size() = getThenExp().size();
+    eq FIfExp.size() {
+        if (ndims() > 0) {
+            MutableSize res = new MutableSize(ndims());
+            for (FExp exp : getSizeExps()) {
+                res.append(exp);
+            }
+            return res;
+        } else {
+            return getThenExp().size();
+        }
+    }
+
+    syn nta List<FExp> FIfExp.getSizeExps() {
+        List<FExp> res = new List<>();
+        for (int i = 0; i < ndims(); i++) {
+            res.add(new FIfExp(getIfExp().treeCopy(), getThenExp().size().createFExp(i), getElseExp().size().createFExp(i)));
+        }
+        return res;
+    }
 
     eq InstIfExp.size() {
         if (isParameterIf()) {
@@ -1140,7 +1178,7 @@ aspect Arrays {
 	 */	
 	syn lazy Size FAbstractVariable.size() = Size.SCALAR;
 	eq FVariable.size()      = isScalarized()? Size.SCALAR: getFAccess().declarationSize();
-	eq FFunctionArray.size() = type().size();
+    eq FFunctionVariable.size() = type().size();
 
     /**
      * Get the array size of the loop index expression. 
@@ -1855,14 +1893,19 @@ aspect Arrays {
 
     eq InstFunctionCall.getArrayExp() {
         if (variability().knownParameterOrLess()) {
-            ArrayExp arr = new ArrayExp(indices());
-            CValue val = cevalArray(Index.NULL);
-            if (val.isArray()) {
-                CValueArray carr = val.array();
-                for (Index i : arr.indices()) {
-                    arr.set(i, carr.getCell(i).buildInstLiteral());
+            try {
+                ArrayExp arr = new ArrayExp(indices());
+                CValue val = cevalArray(Index.NULL);
+                if (val.isArray()) {
+                    CValueArray carr = val.array();
+                    for (Index i : arr.indices()) {
+                        arr.set(i, carr.getCell(i).buildInstLiteral());
+                    }
+                    return arr;
                 }
-                return arr;
+            } catch (ConstantEvaluationException r) {
+                // Constant evaluation may fail even if variability is known parameter or less.
+                // If so we want to do the same thing we would do if variability was higher.
             }
         }
         return super.getArrayExp();
@@ -2951,18 +2994,6 @@ aspect ArrayHelpers {
                 exp.addFExp(createFExp(i));
             return exp;
         }
-
-		public FFunctionVariable createFunctionVariable(String name, FType type) {
-		    return createFunctionVariable(name, type, TypePrefixInputOutput.NONE);
-		}
-		
-		public FFunctionVariable createFunctionVariable(String name, FType type, TypePrefixInputOutput inputOutput) {
-		    if (this == Size.SCALAR)
-		        return new FFunctionVariable(inputOutput, type.scalarType(), new Opt<FExp>(), new FAccessString(name));
-		    else
-		        return new FFunctionArray(inputOutput, type.arrayType(this), new Opt<FExp>(), new FAccessString(name));
-		}
-		
 	}
 	
 	/**

@@ -922,25 +922,21 @@ aspect AliasVariables {
      */
     syn long FVariable.aliasHeuristicScore() {
         long score = 0;
-
-        if (!getVisibilityType().isHidden()) {
-            score += 1;
-        }
-
-        // Temporary variables added during transformations or in expandable connectors.
+        
+        // Annotations
         score *= 10;
-        if (isFromExpandableConnector()) {
+        if (containsActiveAnnotations()) {
             score += 1;
-        } else if (!isTemporary()) {
-            score += 2;
         }
-
-        // Input
+        
         score *= 10;
-        if (isInput()) {
-            score += 1;
+        VisibilityType t = getVisibilityType();
+        if (t.isProtected()) {
+            // Some models fail to simulate without this
+            t = VisibilityType.PUBLIC;
         }
-
+        score += t.ordinal();
+        
         // Parameter
         score *= 10;
         if (variability().parameterOrLess()) {
@@ -951,12 +947,6 @@ aspect AliasVariables {
             } else {
                 score += 1;
             }
-        }
-
-        // Annotations
-        score *= 10;
-        if (containsActiveAnnotations()) {
-            score += 1;
         }
 
         // Stateselect level
