@@ -287,9 +287,10 @@ aspect CCodeGen {
 	eq FPreStringVariable.name_C()  = preName_C();
 	eq FPreEnumVariable.name_C()    = preName_C();
 
-	eq FFunctionVariable.name_C()   = name_C(null, C_SUFFIX_VARIABLE);
-	eq FFunctionArray.name_C()      = name_C(null, C_SUFFIX_ARRAY);
-	
+    eq FFunctionVariable.name_C()   = isArray() ? 
+                                       name_C(null, C_SUFFIX_ARRAY) : 
+                                       name_C(null, C_SUFFIX_VARIABLE);
+
 	syn String FAbstractVariable.preName_C() = null; 
 	eq FVariable.preName_C() = name_C("pre");
 
@@ -313,10 +314,13 @@ aspect CCodeGen {
 		return buf.toString();
 	}
 	
-	syn String FFunctionVariable.nameReturn_C() = 
-		isRecord() ? name_C() : name_C(null, C_SUFFIX_RETURN);
-    syn String FFunctionArray.nameReturn_C() =
-        isString() ? name_C(null, C_SUFFIX_RETURN) : name_C();
+    syn String FFunctionVariable.nameReturn_C() {
+        if (isArray()) {
+            return isString() ? name_C(null, C_SUFFIX_RETURN) : name_C();
+        } else {
+            return isRecord() ? name_C() : name_C(null, C_SUFFIX_RETURN);
+        }
+    }
 
     public static void ASTNode.genFunctionStart(CodeStream str, String indent) {
         str.print(indent);
@@ -350,10 +354,15 @@ aspect CCodeGen {
 
     @Override
 	public void FFunctionVariable.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-		if (!isInput()) {
-			String suffix = (isOutput() && isComposite() && !isString()) ? C_SUFFIX_NULL : "";
-			print(p.createDeclPrinter(str), name_C() + suffix, indent);
-		}
+        if (!isInput()) {
+            if (getVisibilityType().isTemporary() && isComposite()) {
+                Dynamicity dyn = size().isUnknown() ? Dynamicity.HEAP : Dynamicity.STACK;
+                type().printDecl_C(p, str, indent, dyn, name_C(), false);
+            } else {
+                String suffix = (isOutput() && isComposite() && !isString()) ? C_SUFFIX_NULL : "";
+                print(p.createDeclPrinter(str), name_C() + suffix, indent);
+            }
+        }
 	}
 
     @Override
@@ -413,20 +422,6 @@ aspect CCodeGen {
 
     public static void FStatement.printAssignStmt_C(CodeStream str, String indent, String dst, String src) {
         str.println(indent, dst, " = ", src, ";");
-    }
-
-    public void FType.printScalarDecl_C(CodePrinter p, CodeStream str, String indent, boolean external, String name) {
-        str.print(indent);
-        str.print("JMI_DEF(");
-        str.print(macroTypeDecl(external));
-        str.print(", ");
-        str.print(name);
-        str.print(")\n");
-    }
-
-    @Override
-    public void FRecordType.printScalarDecl_C(CodePrinter p, CodeStream str, String indent, boolean external, String name) {
-        str.formatln("%sJMI_RECORD_STATIC(%s, %s)", indent, nameScalar_C(p, external), name);
     }
 
     /**
@@ -514,17 +509,10 @@ aspect CCodeGen {
 
     @Override
     public void FDelayExp.genEventResidualVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        if (!p.inInitialSystem()) {
-            p.printVarDecls(getDelay(), str, indent);
-        }
     }
 
     @Override
     public void FSpatialDistExp.genEventResidualVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        if (!p.inInitialSystem()) {
-            p.printVarDecls(getX(), str, indent);
-            p.printVarDecls(getPositiveVelocity(), str, indent);
-        }
     }
 
     public void FExp.genEventResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
@@ -542,38 +530,19 @@ aspect CCodeGen {
 
     @Override
     public void FDelayExp.genEventResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
-        if (p.inInitialSystem()) {
-            str.formatln("%s(*res)[%d] = JMI_DELAY_INITIAL_EVENT_RES;", indent, enumerator.next());
-            str.formatln("%s(*res)[%d] = JMI_DELAY_INITIAL_EVENT_RES;", indent, enumerator.next());
-        } else {
-            p.printPreSteps(getDelay(), str, indent);
-            int index = myDelayIndex();
-            str.format("%sjmi_delay_first_event_indicator(jmi, %d, ", indent, index);
-            p.print(getDelay(), str, indent);
-            str.print(", &(*res)[" + enumerator.next() + "]);\n");
-            str.format("%sjmi_delay_second_event_indicator(jmi, %d, ", indent, index);
-            p.print(getDelay(), str, indent);
-            str.print(", &(*res)[" + enumerator.next() + "]);\n");
-            p.printPostSteps(getDelay(), str, indent);
+        for (FExp indicator : getIndicators()) {
+            str.format("%s(*res)[%d] = ", indent, enumerator.next());
+            p.print(indicator, str, indent);
+            str.println(";");
         }
     }
 
     @Override
     public void FSpatialDistExp.genEventResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
-        if (p.inInitialSystem()) {
-            str.formatln("%s(*res)[%d] = JMI_DELAY_INITIAL_EVENT_RES;", indent, enumerator.next());
-        } else {
-            p.printPreSteps(getX(), str, indent);
-            p.printPreSteps(getPositiveVelocity(), str, indent);
-            int index = mySpatialDistIndex();
-            str.format("%sef = jmi_spatialdist_event_indicator(jmi, %d, ", indent, index);
-            p.print(getX(), str, indent);
-            str.print(", ");
-            p.print(getPositiveVelocity(), str, indent);
-            str.print(", &(*res)[" + enumerator.next() + "]);\n");
-            p.printPostSteps(getX(), str, indent);
-            p.printPostSteps(getPositiveVelocity(), str, indent);
-        }
+        FExp indicator = getIndicator();
+        str.format("%s(*res)[%d] = ", indent, enumerator.next());
+        p.print(indicator, str, indent);
+        str.println(";");
     }
     
     syn nta FExp FRelExp.getIndicatorNominal() = FExp.nominalMax(getLeft(), getRight());
@@ -619,7 +588,7 @@ aspect CCodeGen {
         }
         
         if (guard && hb) {
-            sp.print(str, ", " + FLitExp.macro_C + "(1))");
+            sp.print(str, ", 1.0)");
         }
     }
     

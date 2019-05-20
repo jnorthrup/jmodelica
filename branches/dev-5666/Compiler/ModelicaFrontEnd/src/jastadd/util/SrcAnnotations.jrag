@@ -25,6 +25,14 @@ import org.jmodelica.util.values.Evaluator;
 
 aspect SrcAnnotations {
 
+    public SrcAnnotationNode InstComponentDecl.srcClassAnnotation(String ... path) {
+        return myInstClass().getSrcClassDecl().srcAnnotation(new SrcAnnotationNode.InstEvaluator(this), path);
+    }
+
+    public SrcAnnotationNode InstExtends.srcClassAnnotation(String ... path) {
+        return myInstClass().getSrcClassDecl().srcAnnotation(new SrcAnnotationNode.InstEvaluator(this), path);
+    }
+
     public SrcAnnotationNode SrcClassDecl.srcAnnotation(String ... path) { 
         return srcAnnotation(SrcAnnotationNode.defaultEvaluator(), path);
     }
@@ -36,7 +44,7 @@ aspect SrcAnnotations {
         return srcAnnotation(SrcAnnotationNode.defaultEvaluator(), path);
     }
     public SrcAnnotationNode InstComponentDecl.srcAnnotation(String ... path) {
-        return SrcAnnotationNode.createFor(srcAnnotationProvider(), new SrcAnnotationNode.InstEvaluator(this), path);
+        return SrcAnnotationNode.createFor(srcAnnotationProvider(), new SrcAnnotationNode.InstEvaluator(containingInstNode()), path);
     }
 
     public SrcAnnotationNode SrcExtendsClause.srcAnnotation(String ... path) {
@@ -87,18 +95,14 @@ aspect SrcAnnotations {
     }
 
 
-
-    class InstClassDecl     implements SrcAnnotationNode.InstEvaluator.Context {}
-    class InstComponentDecl implements SrcAnnotationNode.InstEvaluator.Context {}
-    class InstExtends       implements SrcAnnotationNode.InstEvaluator.Context {}
-    class InstExternal      implements SrcAnnotationNode.InstEvaluator.Context {}
-
-
-
     /*******************
      *    Java Stuff    
      ******************/
 
+    /**
+     * Represent an Annotation in the Source tree. Wrapps an 
+     * SrcAnnotationProvider which corresponds to the actual annotation/s in the AST.
+     */
     public class SrcAnnotationNode extends GenericAnnotationNode<SrcAnnotationNode, SrcAnnotationProvider, SrcExp> {
         
         public static final SrcAnnotationNode AMBIGUOUS_ANNOTATION =  new SrcAnnotationNode(null, null, null,
@@ -159,25 +163,32 @@ aspect SrcAnnotations {
 
         public static class InstEvaluator implements Evaluator<SrcExp> {
             
-            private Context context;
+            private InstContext context;
             
-            public InstEvaluator(Context context) {
+            public InstEvaluator(InstContext context) {
                 this.context = context;
             }
             
             @Override
             public ConstValue evaluate(SrcExp evaluable) {
-                FExp fexp = context.dynamicFExp(evaluable.instantiate());
-                return fexp.evaluateValue();
+                return context.ceval(evaluable);
             }
             
-            public interface Context {
-                public FExp dynamicFExp(FExp exp);
-            }
         }
     }
 
-    public interface SrcAnnotationProvider extends AnnotationProvider<SrcAnnotationProvider, SrcExp> {}
+    /**
+     * AnnotationProvider for modifications and annotations in the SourceTree.
+     * See overview on AnnotationProvider for more info.
+     */ 
+    public interface SrcAnnotationProvider extends AnnotationProvider<SrcAnnotationProvider, SrcExp> {
+        public SrcClassDecl enclosingClassDecl();
+    }
+    
+    /**
+     * immutable AnnotationProvider used to obtain the annotations from elements which can have annotations. 
+     * See overview on AnnotationProvider for more info.
+     */
     public interface SrcIterableAnnotationProvider extends
             IterableAnnotationProvider<SrcAnnotationProvider, SrcExp>, SrcAnnotationProvider {}
 
@@ -434,11 +445,22 @@ aspect SrcAnnotations {
     SrcExtendsClause implements ASTNodeWithAnnotation;
     SrcComment implements ASTNodeWithAnnotation;
 
+    /**
+     * Bridge provider for elements which aren't annotations & modifications
+     * themselves but can have annotations/modifications.
+     * Methods are delegated to the actual annotation. Implemented typically as an anonymous inner class.
+     *  See overview on AnnotationProvider for more info.
+     */
     public abstract class RootAnnotationProviderProxy<T extends ASTNode, S extends ASTNode & SrcAnnotationProvider> implements SrcAnnotationProvider {
         protected final T owningNode;
 
         public RootAnnotationProviderProxy(T owningNode) {
             this.owningNode = owningNode;
+        }
+
+        @Override
+        public SrcClassDecl enclosingClassDecl() {
+            return owningNode.enclosingClassDecl();
         }
 
         @Override
@@ -574,7 +596,11 @@ aspect SrcAnnotations {
         }
     };
 }
-
+    /**
+     *     Bridge provider for elements (classes & components and extendsClauses)
+     *     which aren't annotations themselves but can have annotations.
+     *     See overview on AnnotationProvider for more info.
+     */
     class ASTAnnotationAnnotationProvider<T extends ASTNode & ASTNodeWithAnnotation> extends RootAnnotationProviderProxy<T, SrcAnnotation> {
 
         public ASTAnnotationAnnotationProvider(T owningNode) {
@@ -764,6 +790,15 @@ aspect SrcAnnotations {
     /*******************
      *     Helpers      
      ******************/
+    
+    /**
+     * A immutable provider which wrapps another potentially mutable provider.
+     * Makes the provider immutable if not already.
+     * 
+     * Is used for among other things when it inconvienient for the value to 
+     * a provider itself.
+     * See overview on AnnotationProvider for more info.
+     */
     public class SrcSingeltonProvider implements SrcAnnotationProvider {
 
         private final SrcAnnotationProvider provider;
@@ -772,6 +807,11 @@ aspect SrcAnnotations {
         public SrcSingeltonProvider(String name, SrcAnnotationProvider provider) {
             this.provider = provider;
             this.name = name;
+        }
+
+        @Override
+        public SrcClassDecl enclosingClassDecl() {
+            return provider.enclosingClassDecl();
         }
 
         @Override
@@ -810,6 +850,11 @@ aspect SrcAnnotations {
         }
     }
 
+    /**
+     * Represents an fixed array of annotations which can be iterated. 
+     * The array is not mutable.
+     * See overview on AnnotationProvider for more info.
+     */
     public class SrcAnnotationsIteratorProvider implements SrcIterableAnnotationProvider {
 
         private java.util.List<SrcAnnotationProvider> providers;
@@ -829,6 +874,16 @@ aspect SrcAnnotations {
                 iterables[i] = providers.get(i).annotationSubNodes();
             }
             return new ChainedIterable<SubNodePair<SrcAnnotationProvider>>(iterables);
+        }
+
+        @Override
+        public SrcClassDecl enclosingClassDecl() {
+            /*
+             * Currently (2019-04-25) there are two uses of SrcAnnotationsIteratorProvider.
+             * It is ok to use get(0) in both cases since there is at least one provider
+             * and all providers have the same enclosing class.
+             */
+            return providers.get(0).enclosingClassDecl();
         }
 
         @Override
@@ -868,13 +923,22 @@ aspect SrcAnnotations {
 
     }
 
-
+    /**
+     * For navigating expressions (SrcExp). 
+     * Avoiding having expressions beeing providers themselves which is inconvienient.
+     * See overview on AnnotationProvider for more info.
+     */
     public class ExpValueProvider implements SrcAnnotationProvider {
 
         private final SrcExp exp;
 
         public ExpValueProvider(SrcExp exp) {
             this.exp = exp;
+        }
+
+        @Override
+        public SrcClassDecl enclosingClassDecl() {
+            return exp.enclosingClassDecl();
         }
 
         @Override

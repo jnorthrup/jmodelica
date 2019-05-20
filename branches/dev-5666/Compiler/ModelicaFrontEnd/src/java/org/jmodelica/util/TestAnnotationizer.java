@@ -36,7 +36,7 @@ import java.util.Scanner;
  * parsing the arguments and choosing between Modelica and Optimica versions 
  * of TestAnnotationizerHelper.
  * 
- * Usage: java TestAnnotationizer java TestAnnotationizer <.mo file path> [options...] [description]
+ * Usage: java TestAnnotationizer <.mo file path> [options...] [description]
  *   Options:
  *     -w           write result to file instead of stdout
  *     -m/-o        create annotation for Modelica/Optimica (default is infer from file path)
@@ -80,6 +80,7 @@ public class TestAnnotationizer {
         boolean repeat = false;
         Lang inputlang = Lang.none;
         Lang lang = Lang.none;
+        String platform = null;
         String opts = null;
         String checkType = null;
         String libs = null;
@@ -93,6 +94,8 @@ public class TestAnnotationizer {
                 modelName = value;
             } else if (arg.startsWith("-d=")) {
                 data = value;
+            } else if (arg.startsWith("-P=")) {
+                platform = value;
             } else if (arg.startsWith("-p=")) {
                 opts = value;
             } else if (arg.startsWith("-k=")) {
@@ -197,7 +200,7 @@ public class TestAnnotationizer {
                     testType = in.readLine().trim();
                 }
                 
-                doAnnotation(optimica, filePath, testType, modelName, description, opts, data, checkType, libs, write);
+                doAnnotation(optimica, filePath, testType, modelName, description, platform, opts, data, checkType, libs, write);
             }
             
             if (repeat) {
@@ -265,14 +268,14 @@ public class TestAnnotationizer {
     }
 
     private static void doAnnotation(boolean optimica, String filePath,
-            String testType, String modelName, String description, String optStr, 
+            String testType, String modelName, String description, String platform, String optStr, 
             String data, String checkType, String libStr, boolean write) throws Exception {
         String[] opts = (optStr == null) ? new String[0] : optStr.split(",");
         String[] libs = (libStr == null) ? new String[0] : libStr.split(",");
         Method m = getHelperClass(optimica ? OPTIMICA : MODELICA).getMethod("doAnnotation", 
-                String.class, String.class, String.class, String.class, String[].class, String.class, 
+                String.class, String.class, String.class, String.class, String.class, String[].class, String.class, 
                 String.class, String[].class, boolean.class);
-        m.invoke(null, filePath, testType, modelName, description, opts, data, checkType, libs, write);
+        m.invoke(null, filePath, testType, modelName, description, platform, opts, data, checkType, libs, write);
     }
 
     private static void usageError() throws Exception {

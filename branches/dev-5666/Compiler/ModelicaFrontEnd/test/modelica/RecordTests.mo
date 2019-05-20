@@ -804,8 +804,13 @@ public
  function RecordTests.EquivalentRecords6.f
   input RecordTests.EquivalentRecords6.A[:] a;
   output Real x;
+  Real temp_1;
  algorithm
-  x := a[1].x + a[2].x;
+  temp_1 := 0.0;
+  for i1 in 1:2 loop
+   temp_1 := temp_1 + a[i1].x;
+  end for;
+  x := temp_1;
   x := x + 1;
   return;
  end RecordTests.EquivalentRecords6.f;
@@ -2395,6 +2400,265 @@ end RecordTests.RecordArray8;
 end RecordArray8;
 
 
+model RecordArray9
+    record R
+        parameter Integer n;
+        parameter S x[n];
+    end R;
+    
+    record S
+        parameter Real a;
+        parameter Real b;
+    end S;
+    
+    model M
+        R r;
+    end M;
+    
+    S s[5] = { S(i, i+1) for i in 1:2:9 };
+    R r1 = R(2, {s[1], s[2]});
+    R r2 = R(3, {s[3], s[4], s[5]});
+    M m1[2](r = {r1, r2});
+    M m2[2](r = m1.r);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordArray9",
+            description="Tests type checking of an array of records where the elements in the array have different sizes",
+            flatModel="
+fclass RecordTests.RecordArray9
+ parameter RecordTests.RecordArray9.S s[5] = {RecordTests.RecordArray9.S(1, 1 + 1), RecordTests.RecordArray9.S(3, 3 + 1), RecordTests.RecordArray9.S(5, 5 + 1), RecordTests.RecordArray9.S(7, 7 + 1), RecordTests.RecordArray9.S(9, 9 + 1)} /* { RecordTests.RecordArray9.S(1, 2), RecordTests.RecordArray9.S(3, 4), RecordTests.RecordArray9.S(5, 6), RecordTests.RecordArray9.S(7, 8), RecordTests.RecordArray9.S(9, 10) } */;
+ parameter RecordTests.RecordArray9.R r1(x(size() = {2})) = RecordTests.RecordArray9.R(2, {s[1], s[2]});
+ parameter RecordTests.RecordArray9.R r2(x(size() = {3})) = RecordTests.RecordArray9.R(3, {s[3], s[4], s[5]});
+ parameter RecordTests.RecordArray9.R m1[1].r(x(size() = {2})) = r1;
+ parameter RecordTests.RecordArray9.R m1[2].r(x(size() = {3})) = r2;
+ parameter RecordTests.RecordArray9.R m2[1].r(x(size() = {2})) = m1[1].r;
+ parameter RecordTests.RecordArray9.R m2[2].r(x(size() = {3})) = m1[2].r;
+
+public
+ record RecordTests.RecordArray9.S
+  parameter Real a;
+  parameter Real b;
+ end RecordTests.RecordArray9.S;
+
+ record RecordTests.RecordArray9.R
+  parameter Integer n;
+  parameter RecordTests.RecordArray9.S x[n];
+ end RecordTests.RecordArray9.R;
+
+end RecordTests.RecordArray9;
+")})));
+end RecordArray9;
+
+
+model RecordArray10
+    record R
+        parameter Integer n;
+        parameter S x[n];
+    end R;
+    
+    record S
+        parameter Real a;
+        parameter Real b;
+    end S;
+    
+    model M
+        R[2] r;
+    end M;
+    
+    S s[:] = { S(i, i+1) for i in 1:10 };
+    R r1 = R(1, {s[1]});
+    R r2 = R(2, {s[2], s[3]});
+    R r3 = R(3, {s[4], s[5], s[6]});
+    R r4 = R(4, {s[7], s[8], s[9], s[10]});
+    M m1[2](r = {{r1, r2}, {r3, r4}});
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordArray10",
+            description="Tests type checking of an array of arrays of records where the elements have different sizes",
+            flatModel="
+fclass RecordTests.RecordArray10
+ parameter RecordTests.RecordArray10.S s[10] = {RecordTests.RecordArray10.S(1, 1 + 1), RecordTests.RecordArray10.S(2, 2 + 1), RecordTests.RecordArray10.S(3, 3 + 1), RecordTests.RecordArray10.S(4, 4 + 1), RecordTests.RecordArray10.S(5, 5 + 1), RecordTests.RecordArray10.S(6, 6 + 1), RecordTests.RecordArray10.S(7, 7 + 1), RecordTests.RecordArray10.S(8, 8 + 1), RecordTests.RecordArray10.S(9, 9 + 1), RecordTests.RecordArray10.S(10, 10 + 1)} /* { RecordTests.RecordArray10.S(1, 2), RecordTests.RecordArray10.S(2, 3), RecordTests.RecordArray10.S(3, 4), RecordTests.RecordArray10.S(4, 5), RecordTests.RecordArray10.S(5, 6), RecordTests.RecordArray10.S(6, 7), RecordTests.RecordArray10.S(7, 8), RecordTests.RecordArray10.S(8, 9), RecordTests.RecordArray10.S(9, 10), RecordTests.RecordArray10.S(10, 11) } */;
+ parameter RecordTests.RecordArray10.R r1(x(size() = {1})) = RecordTests.RecordArray10.R(1, {s[1]});
+ parameter RecordTests.RecordArray10.R r2(x(size() = {2})) = RecordTests.RecordArray10.R(2, {s[2], s[3]});
+ parameter RecordTests.RecordArray10.R r3(x(size() = {3})) = RecordTests.RecordArray10.R(3, {s[4], s[5], s[6]});
+ parameter RecordTests.RecordArray10.R r4(x(size() = {4})) = RecordTests.RecordArray10.R(4, {s[7], s[8], s[9], s[10]});
+ parameter RecordTests.RecordArray10.R m1[1].r[2](x(size() = {{1}, {2}})) = {r1, r2};
+ parameter RecordTests.RecordArray10.R m1[2].r[2](x(size() = {{3}, {4}})) = {r3, r4};
+
+public
+ record RecordTests.RecordArray10.S
+  parameter Real a;
+  parameter Real b;
+ end RecordTests.RecordArray10.S;
+
+ record RecordTests.RecordArray10.R
+  parameter Integer n;
+  parameter RecordTests.RecordArray10.S x[n];
+ end RecordTests.RecordArray10.R;
+
+end RecordTests.RecordArray10;
+")})));
+end RecordArray10;
+
+
+model RecordArray11
+    record A
+        parameter Integer n;
+        parameter Real x[1];
+    end A;
+
+    record B
+        parameter Integer n;
+        parameter Real x[n];
+    end B;
+ 
+    A a = A(1, {0.0});
+    B b = B(2, {0.5, 1.0});
+    A[2] r1 = {a, b};
+    B[2] r2 = {a, b};
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RecordArray11",
+            description="Array with incompatible record at index [2]",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Error at line 14, column 15, in file '...', BINDING_EXPRESSION_TYPE_MISMATCH:
+  The binding expression of the variable r1 does not match the declared type of the variable
+")})));
+end RecordArray11;
+
+
+model RecordArray12
+    
+    record R
+        parameter Real[:] z = {1, 2, 3};
+    end R;
+    
+    R[2] array = {R(z={1}), R(z={1, 2})};
+    R scalar = array[2];
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordArray12",
+            description="Tests type checking of subscripted access in array of records.",
+            flatModel="
+fclass RecordTests.RecordArray12
+ parameter RecordTests.RecordArray12.R array[2](z(size() = {{1}, {2}})) = {RecordTests.RecordArray12.R({1}), RecordTests.RecordArray12.R({1, 2})} /* { RecordTests.RecordArray12.R({ 1 }), RecordTests.RecordArray12.R({ 1, 2 }) } */;
+ parameter RecordTests.RecordArray12.R scalar(z(size() = {2})) = array[2];
+
+public
+ record RecordTests.RecordArray12.R
+  parameter Real z[:];
+ end RecordTests.RecordArray12.R;
+
+end RecordTests.RecordArray12;
+")})));
+end RecordArray12;
+
+model RecordArray13
+    record R
+        Real[:] x = {1};
+    end R;
+    
+    record R2
+        Integer i = 0;
+    end R2;
+    
+    function f
+        input Integer x;
+        output R[2] y;
+    protected
+        R[:] array = fill(R2(), x);
+    algorithm
+        y := array;
+    end f;
+    
+    R[2] z = f(2);
+    annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="RecordArray13",
+        description="Array of unknown size and with incompatible records",
+        variability_propagation=false,
+        errorMessage="
+1 errors found:
+
+Error at line 14, column 22, in file '...', BINDING_EXPRESSION_TYPE_MISMATCH:
+  The binding expression of the variable array does not match the declared type of the variable
+")})));
+end RecordArray13;
+
+
+model RecordArray14
+    record R1
+        Real[1] z = {1};
+    end R1;
+    
+    record R2
+        Real[2] z = {1, 2};
+    end R2;
+    
+    record R
+        R1 x;
+    end R;
+    
+    R[2] r(each x = {R1(), R2()});
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RecordArray14",
+            description="Array with incorrect each and incompatible record at index [2]",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Error at line 14, column 21, in file '...', BINDING_EXPRESSION_TYPE_MISMATCH:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
+end RecordArray14;
+
+
+model RecordArray15
+    record R1
+    end R1;
+    
+    record R2
+        R1 r;
+    end R2;
+    
+    R1[3] a;
+    R2[3] b;
+equation
+    a = b.r;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordArray15",
+            description="Tests type checking of component access in array of records.",
+            flatModel="
+fclass RecordTests.RecordArray15
+ constant RecordTests.RecordArray15.R1 a[3] = {RecordTests.RecordArray15.R1(), RecordTests.RecordArray15.R1(), RecordTests.RecordArray15.R1()};
+ constant RecordTests.RecordArray15.R2 b[3] = {RecordTests.RecordArray15.R2(RecordTests.RecordArray15.R1()), RecordTests.RecordArray15.R2(RecordTests.RecordArray15.R1()), RecordTests.RecordArray15.R2(RecordTests.RecordArray15.R1())};
+equation
+ {RecordTests.RecordArray15.R1(), RecordTests.RecordArray15.R1(), RecordTests.RecordArray15.R1()} = {RecordTests.RecordArray15.R1(), RecordTests.RecordArray15.R1(), RecordTests.RecordArray15.R1()};
+
+public
+ record RecordTests.RecordArray15.R1
+ end RecordTests.RecordArray15.R1;
+
+ record RecordTests.RecordArray15.R2
+  constant RecordTests.RecordArray15.R1 r;
+ end RecordTests.RecordArray15.R2;
+
+end RecordTests.RecordArray15;
+")})));
+end RecordArray15;
+
+
 
 model RecordConstructor1
  record A
@@ -3406,14 +3670,15 @@ In component c:
 end RecordConstructor30;
 
 model RecordConstructor31
-// Should give two errors #4908
+// Should give two errors #4908, one for each constructor call.
+// Should not give the error about 'binding expression of the variable r' since it is a secondary fault.
 record R
     Real[size(x,1)] y = 1:5;
     Real[:] x = {1,2,3};
 end R;
 
 model M
-    R[:] r = R();
+    R[:] r = {R()};
 end M;
 
 M m(r={R(x={1},y=1:2),R(x={2,3})});
@@ -3425,7 +3690,10 @@ M m(r={R(x={1},y=1:2),R(x={2,3})});
             errorMessage="
 1 errors found:
 
-Error at line 12, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
+Error at line 13, column 7, in file '...', BINDING_EXPRESSION_TYPE_MISMATCH:
+  The binding expression of the variable r does not match the declared type of the variable
+
+Error at line 13, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Record constructor for R: types of named argument y and input y are not compatible
     type of '1:2' is Integer[2]
     expected type is Real[1]
@@ -4444,10 +4712,15 @@ public
  function RecordTests.RecordScalarize22.f2
   input Real o;
   output RecordTests.RecordScalarize22.A x;
+  RecordTests.RecordScalarize22.B[:] temp_1;
  algorithm
+  init temp_1 as RecordTests.RecordScalarize22.B[2];
+  temp_1[1].c := o + 1;
+  temp_1[2].c := o + 2;
   x.a := o;
-  x.b[1].c := o + 1;
-  x.b[2].c := o + 2;
+  for i1 in 1:2 loop
+   x.b[i1].c := temp_1[i1].c;
+  end for;
   return;
  end RecordTests.RecordScalarize22.f2;
 
@@ -4673,8 +4946,9 @@ public
  function RecordTests.RecordScalarize29.f
   output RecordTests.RecordScalarize29.R r;
  algorithm
-  r.x[1] := 1;
-  r.x[2] := 2;
+  for i1 in 1:2 loop
+   r.x[i1] := i1;
+  end for;
   return;
  end RecordTests.RecordScalarize29.f;
 
@@ -5609,13 +5883,12 @@ model RecordScalarize52
         TransformCanonicalTestCase(
             name="RecordScalarize52",
             description="",
+            inline_functions="none",
             flatModel="
 fclass RecordTests.RecordScalarize52
  Real r.x[1];
- Real temp_1.x[1];
 equation
- temp_1.x[1] = if not time > 1 then 2 else 0.0;
- r.x[1] = if time > 1 then 1 else temp_1.x[1];
+ r.x[1] = if time > 1 then 1 else 2.0;
 end RecordTests.RecordScalarize52;
 ")})));
 end RecordScalarize52;
@@ -6066,8 +6339,9 @@ public
  algorithm
   z.x[1] := ix;
   z.x[2] := iy;
-  w.x[1] := z.x[1];
-  w.x[2] := z.x[2];
+  for i1 in 1:2 loop
+   w.x[i1] := z.x[i1];
+  end for;
   o := w.x[1] * w.x[2];
   return;
  end RecordTests.RecordFunc5.f;
@@ -6115,9 +6389,14 @@ public
   input Real iy;
   output Real o;
   RecordTests.RecordFunc6.A z;
+  Real[:] temp_1;
  algorithm
-  z.x[1] := ix;
-  z.x[2] := iy;
+  init temp_1 as Real[2];
+  temp_1[1] := ix;
+  temp_1[2] := iy;
+  for i1 in 1:2 loop
+   z.x[i1] := temp_1[i1];
+  end for;
   o := z.x[1] * z.x[2];
   return;
  end RecordTests.RecordFunc6.f;
@@ -6231,10 +6510,10 @@ public
   z[1].y := iy;
   z[2].x := ix;
   z[2].y := iy;
-  w[1].x := z[1].x;
-  w[1].y := z[1].y;
-  w[2].x := z[2].x;
-  w[2].y := z[2].y;
+  for i1 in 1:2 loop
+   w[i1].x := z[i1].x;
+   w[i1].y := z[i1].y;
+  end for;
   o := w[1].x * w[2].x;
   return;
  end RecordTests.RecordFunc8.f;
@@ -6284,12 +6563,18 @@ public
   input Real iy;
   output Real o;
   RecordTests.RecordFunc9.A[:] z;
+  RecordTests.RecordFunc9.A[:] temp_1;
  algorithm
   init z as RecordTests.RecordFunc9.A[2];
-  z[1].x := ix;
-  z[1].y := iy;
-  z[2].x := ix + 2;
-  z[2].y := iy + 2;
+  init temp_1 as RecordTests.RecordFunc9.A[2];
+  temp_1[1].x := ix;
+  temp_1[1].y := iy;
+  temp_1[2].x := ix + 2;
+  temp_1[2].y := iy + 2;
+  for i1 in 1:2 loop
+   z[i1].x := temp_1[i1].x;
+   z[i1].y := temp_1[i1].y;
+  end for;
   o := z[1].x * z[2].x;
   return;
  end RecordTests.RecordFunc9.f;
@@ -6302,6 +6587,118 @@ public
 end RecordTests.RecordFunc9;
 ")})));
 end RecordFunc9;
+
+
+model RecordFunc10
+ record A
+  Real[2] x;
+ end A;
+ 
+ function f
+  input A[1] x;
+  output A[1] y;
+ algorithm
+  x := y;
+ end f;
+ 
+ A[1] a1 = {A(1:2)};
+ A[1] a2 = f(a1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordFunc10",
+            description="Scalarization of records in functions: array of records with array of reals.",
+            variability_propagation=false,
+            flatModel="
+fclass RecordTests.RecordFunc10
+ Real a1[1].x[1];
+ Real a1[1].x[2];
+ Real a2[1].x[1];
+ Real a2[1].x[2];
+equation
+ a1[1].x[1] = 1;
+ a1[1].x[2] = 2;
+ ({RecordTests.RecordFunc10.A({a2[1].x[1], a2[1].x[2]})}) = RecordTests.RecordFunc10.f({RecordTests.RecordFunc10.A({a1[1].x[1], a1[1].x[2]})});
+
+public
+ function RecordTests.RecordFunc10.f
+  input RecordTests.RecordFunc10.A[:] x;
+  output RecordTests.RecordFunc10.A[:] y;
+ algorithm
+  init y as RecordTests.RecordFunc10.A[1];
+  for i1 in 1:1 loop
+   assert(2 == size(x[i1].x, 1), \"Mismatching sizes in function 'RecordTests.RecordFunc10.f', component 'x[i1].x', dimension '1'\");
+  end for;
+  for i1 in 1:1 loop
+   for i2 in 1:2 loop
+    x[i1].x[i2] := y[i1].x[i2];
+   end for;
+  end for;
+  return;
+ end RecordTests.RecordFunc10.f;
+
+ record RecordTests.RecordFunc10.A
+  Real x[2];
+ end RecordTests.RecordFunc10.A;
+
+end RecordTests.RecordFunc10;
+")})));
+end RecordFunc10;
+
+
+model RecordFunc11
+ record A
+  Real[2] x;
+ end A;
+ 
+ function f
+  input A[1] x;
+  output A y;
+ algorithm
+  y := x[1];
+ end f;
+ 
+ A[1] a1 = {A(1:2)};
+ A a2 = f(a1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordFunc11",
+            description="Scalarization of records in functions: array of records with array of reals.",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass RecordTests.RecordFunc11
+ Real a1[1].x[1];
+ Real a1[1].x[2];
+ Real a2.x[1];
+ Real a2.x[2];
+equation
+ a1[1].x[1] = 1;
+ a1[1].x[2] = 2;
+ (RecordTests.RecordFunc11.A({a2.x[1], a2.x[2]})) = RecordTests.RecordFunc11.f({RecordTests.RecordFunc11.A({a1[1].x[1], a1[1].x[2]})});
+
+public
+ function RecordTests.RecordFunc11.f
+  input RecordTests.RecordFunc11.A[:] x;
+  output RecordTests.RecordFunc11.A y;
+ algorithm
+  for i1 in 1:1 loop
+   assert(2 == size(x[i1].x, 1), \"Mismatching sizes in function 'RecordTests.RecordFunc11.f', component 'x[i1].x', dimension '1'\");
+  end for;
+  for i1 in 1:2 loop
+   y.x[i1] := x[1].x[i1];
+  end for;
+  return;
+ end RecordTests.RecordFunc11.f;
+
+ record RecordTests.RecordFunc11.A
+  Real x[2];
+ end RecordTests.RecordFunc11.A;
+
+end RecordTests.RecordFunc11;
+")})));
+end RecordFunc11;
 
 
 
@@ -6381,12 +6778,18 @@ equation
 public
  function RecordTests.RecordOutput2.f
   output RecordTests.RecordOutput2.A[:] o;
+  RecordTests.RecordOutput2.A[:] temp_1;
  algorithm
   init o as RecordTests.RecordOutput2.A[2];
-  o[1].x := 1;
-  o[1].y := 2;
-  o[2].x := 3;
-  o[2].y := 4;
+  init temp_1 as RecordTests.RecordOutput2.A[2];
+  temp_1[1].x := 1;
+  temp_1[1].y := 2;
+  temp_1[2].x := 3;
+  temp_1[2].y := 4;
+  for i1 in 1:2 loop
+   o[i1].x := temp_1[i1].x;
+   o[i1].y := temp_1[i1].y;
+  end for;
   return;
  end RecordTests.RecordOutput2.f;
 
@@ -6432,12 +6835,22 @@ equation
 public
  function RecordTests.RecordOutput3.f
   output RecordTests.RecordOutput3.A o;
+  Integer[:] temp_1;
+  Integer[:] temp_2;
  algorithm
-  o.x[1] := 1;
-  o.x[2] := 2;
-  o.y[1] := 3;
-  o.y[2] := 4;
-  o.y[3] := 5;
+  init temp_1 as Integer[2];
+  temp_1[1] := 1;
+  temp_1[2] := 2;
+  init temp_2 as Integer[3];
+  temp_2[1] := 3;
+  temp_2[2] := 4;
+  temp_2[3] := 5;
+  for i1 in 1:2 loop
+   o.x[i1] := temp_1[i1];
+  end for;
+  for i1 in 1:3 loop
+   o.y[i1] := temp_2[i1];
+  end for;
   return;
  end RecordTests.RecordOutput3.f;
 
@@ -7206,20 +7619,9 @@ fclass RecordTests.RecordWithColonArray4
  Real r.x[2];
  Real r.x[3];
 equation
- (RecordTests.RecordWithColonArray4.R({r.x[1], r.x[2], r.x[3]})) = RecordTests.RecordWithColonArray4.f(3);
-
-public
- function RecordTests.RecordWithColonArray4.f
-  input Integer n;
-  output RecordTests.RecordWithColonArray4.R r;
- algorithm
-  return;
- end RecordTests.RecordWithColonArray4.f;
-
- record RecordTests.RecordWithColonArray4.R
-  Real x[:];
- end RecordTests.RecordWithColonArray4.R;
-
+ r.x[1] = 1; // TODO Investigate function inlining
+ r.x[2] = 2;
+ r.x[3] = 3;
 end RecordTests.RecordWithColonArray4;
 ")})));
 end RecordWithColonArray4;
@@ -7432,10 +7834,15 @@ public
  function RecordTests.RecordParam3.f
   input Real i;
   output Real[:] o;
+  Real[:] temp_1;
  algorithm
   init o as Real[2];
-  o[1] := i;
-  o[2] := - i;
+  init temp_1 as Real[2];
+  temp_1[1] := i;
+  temp_1[2] := - i;
+  for i1 in 1:2 loop
+   o[i1] := temp_1[i1];
+  end for;
   return;
  end RecordTests.RecordParam3.f;
 
@@ -7541,10 +7948,15 @@ parameter equation
 public
  function RecordTests.RecordParam6.f
   output Real[:] o;
+  Integer[:] temp_1;
  algorithm
   init o as Real[2];
-  o[1] := 1;
-  o[2] := 2;
+  init temp_1 as Integer[2];
+  temp_1[1] := 1;
+  temp_1[2] := 2;
+  for i1 in 1:2 loop
+   o[i1] := temp_1[i1];
+  end for;
   return;
  end RecordTests.RecordParam6.f;
 

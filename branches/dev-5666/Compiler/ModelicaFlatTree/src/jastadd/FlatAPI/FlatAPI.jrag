@@ -32,6 +32,7 @@ import java.security.MessageDigest;
 import java.security.DigestOutputStream;
 import java.security.NoSuchAlgorithmException;
 
+import org.jmodelica.common.GUIDManager;
 import org.jmodelica.util.streams.StreamGobbler;
 
 aspect FlatAPI {
@@ -1548,17 +1549,45 @@ aspect FlatAPI {
         [new LinkedHashSet<FFunctionDecl>()] with add root FClass;
     FPartialFunctionCall contributes myFCallable().actualFFunctionDecl() to FClass.myFFunctionDeclsPartialCalled() for myFClass();
 
+    inh FVariable FIndicatorExp.myIndicatorVariable();
+    eq FEquation.getChild().myIndicatorVariable()   = getLeft().asFAccessExp().myFV().asFVariable();
+    eq FAssignStmt.getChild().myIndicatorVariable() = getLeft().asFAccessExp().myFV().asFVariable();
+
     coll ArrayList<FDelayExp> FClass.myDelayExps()
         [new ArrayList<FDelayExp>()] with add root FClass;
     FDelayExp contributes this to FClass.myDelayExps() for myFClass();
     
-    syn lazy int FDelayExp.myDelayIndex() = myFClass().myDelayExps().indexOf(originalFExp());
+    syn lazy int FDelayExp.myDelayIndex()  = myFClass().myDelayExps().indexOf(originalFExp());
+    syn int FDelayIndicator.myDelayIndex() = myDelayExp().myDelayIndex();
+    
+    syn FDelayExp FDelayIndicator.myDelayExp() = myFClass().findDelayExp(myIndicatorVariable());
+    
+    syn lazy FDelayExp FClass.findDelayExp(FVariable indicator) {
+        for (FDelayExp delayExp : myDelayExps()) {
+            if (delayExp.hasIndicator(indicator)) {
+                return delayExp;
+            }
+        }
+        return null;
+    }
     
     coll ArrayList<FSpatialDistExp> FClass.mySpatialDistExps()
         [new ArrayList<FSpatialDistExp>()] with add root FClass;
     FSpatialDistExp contributes this to FClass.mySpatialDistExps() for myFClass();
     
-    syn lazy int FSpatialDistExp.mySpatialDistIndex() = myFClass().mySpatialDistExps().indexOf(originalFExp());
+    syn lazy int FSpatialDistExp.mySpatialDistIndex()  = myFClass().mySpatialDistExps().indexOf(originalFExp());
+    syn int FSpatialDistIndicator.mySpatialDistIndex() = mySpatialDistExp().mySpatialDistIndex();
+    
+    syn FSpatialDistExp FSpatialDistIndicator.mySpatialDistExp() = myFClass().findSpatialDistExp(myIndicatorVariable());
+    
+    syn lazy FSpatialDistExp FClass.findSpatialDistExp(FVariable indicator) {
+        for (FSpatialDistExp spatialDistExp : mySpatialDistExps()) {
+            if (spatialDistExp.hasIndicator(indicator)) {
+                return spatialDistExp;
+            }
+        }
+        return null;
+    }
     
     
     inh boolean FExp.inDeadIfBranch();
@@ -1957,10 +1986,13 @@ aspect FlatAPI {
     }
     
     
-    
-    syn boolean FRelExp.isTimeEventGenerating() = myOptions().getBooleanOption("relational_time_events") && solutionForTime().isValidExp();
+    syn boolean FExp.isTimeEventGenerating() {
+        throw new UnsupportedOperationException();
+    }
+    eq FRelExp.isTimeEventGenerating() =  myOptions().getBooleanOption("time_events") && myOptions().getBooleanOption("relational_time_events") && solutionForTime().isValidExp();
     eq FEqRelExp.isTimeEventGenerating() = false;
-    syn boolean FDelayExp.isTimeEventGenerating() = getDelay().variability().parameterOrLess();
+    eq FDelayExp.isTimeEventGenerating() = myOptions().getBooleanOption("time_events") && getDelay().variability().parameterOrLess();
+    eq FSpatialDistExp.isTimeEventGenerating() = false;
     
     protected int FExp.checkIndex(int i) {
         if (i < 0) {
@@ -2165,6 +2197,21 @@ aspect FlatAPI {
         [new ArrayList<FDelayExp>()] with add root FAbstractEquation;
     FDelayExp contributes this when generatesEventInDAE()
     to FAbstractEquation.delayExpInEquation() for myFEquation();
+
+    coll ArrayList<FDelayExp> FStatement.delayExpInStmt() 
+        [new ArrayList<FDelayExp>()] with add root FStatement;
+    FDelayExp contributes this when generatesEventInDAE()
+    to FStatement.delayExpInStmt() for myFStatement();
+            
+    coll ArrayList<FSpatialDistExp> FAbstractEquation.spatialDistExpInEquation() 
+        with add root FAbstractEquation;
+    FSpatialDistExp contributes this when generatesEventInDAE()
+    to FAbstractEquation.spatialDistExpInEquation() for myFEquation();
+
+    coll ArrayList<FSpatialDistExp> FStatement.spatialDistExpInStmt() 
+        with add root FStatement;
+    FSpatialDistExp contributes this when generatesEventInDAE()
+    to FStatement.spatialDistExpInStmt() for myFStatement();
     
     inh FStatement FExp.myFStatement();
     inh FStatement FStatement.myFStatement();
@@ -2320,6 +2367,7 @@ aspect FlatAPI {
     inh FClass FAlgorithm.myFClass();
     inh FClass FAbstractEquation.myFClass();
     inh FClass FStatement.myFClass();
+    inh FClass FFunctionCallLeft.myFClass();
     inh lazy FClass FExternalStmt.myFClass();
     eq FClass.getChild().myFClass() = this;
     eq Root.getChild().myFClass() = null; 
@@ -2709,28 +2757,7 @@ aspect FlatAPI {
     syn boolean FAbstractVariable.isAlgebraicContinousRealVariable() = false;
     syn boolean FVariable.isAlgebraicContinousRealVariable()    = zCategory() == FClass.ZOrdinaryCategory.CONTINUOUS;
 
-    private String FClass.guid = null;
-    public String FClass.guid() {
-        if (guid == null) {
-            try {
-                PipedInputStream in = new PipedInputStream();
-                PipedOutputStream out = new PipedOutputStream(in);
-
-                MessageDigest md5 = MessageDigest.getInstance("MD5");
-                new StreamGobbler(in).start();
-                prettyPrint(new CodeStream(new DigestOutputStream(out, md5)), "");
-                out.close();
-
-                guid = new BigInteger(1,md5.digest()).toString(16);
-
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return guid;
-    }
+    syn GUIDManager FClass.guidManager() = root().getUtilInterface().getGuidManager();
 
     // TODO: This should be handled with a local map when needed, e.g. during
     // index reduction!
@@ -2885,13 +2912,11 @@ aspect ReferencedVariables {
 
     @Override
     public <T extends CommonAccessExp> void FRelExp.findCommonAccessExpsInTree(Set<T> set, CommonAccessExpLookupVisitor<T> visitor) {
-        Opt<FExp> indicator = getIndicatorOpt();
-
-        if (indicator == null) {
+        if (!hasIndicator()) {
             super.findCommonAccessExpsInTree(set, visitor);
         } else {
             for (ASTNode<?> n : this) {
-                if (indicator != n) {
+                if (n != getIndicatorOpt()) {
                     n.findCommonAccessExpsInTree(set, visitor);
                 }
             }
@@ -3322,16 +3347,6 @@ aspect FVariableUses {
         }
     }
     
-    /**
-     * Check if this variable is used on the left hand side of a function call equation or statement.
-     */
-    syn lazy boolean FAbstractVariable.usedAsFunctionCallLeft() {
-        for (FExp e : definingUses()) 
-            if (e.inFunctionCallLeft())
-                return true;
-        return false;
-    }
-    
     inh boolean FExp.inFunctionCallLeft();
     eq FFunctionCallLeft.getChild().inFunctionCallLeft() = true;
     eq FClass.getChild().inFunctionCallLeft()            = false;
@@ -3503,6 +3518,7 @@ aspect FVariableUses {
     eq SourceRoot.getChild().inAccessLocation()             = false;
     eq FAbstractEquation.getFAttribute().inAccessLocation() = false;
     eq FAbstractEquation.getChild().inAccessLocation()      = true;
+    eq FRelExp.getIndicator().inAccessLocation()            = false;
 
     syn lazy LinkedHashSet<FVariable> FAbstractEquation.algebraicContinousRealVariables() = 
         FClass.intersectFVSet(algebraicVariables(), myFClass().normalAlgebraicContinousRealVariables());
@@ -3600,6 +3616,24 @@ aspect FVariableUses {
         l.addAll(algebraicVariables());
         l.addAll(discreteVariables());
         return l;
+    }
+
+    /**
+     * Returns the event indicators for the expressions that are found by {@link #relExpInEquation}.
+     */
+    syn Set<FVariable> FAbstractEquation.eventIndicators() {
+        Set<EventGeneratingExp> exps = new HashSet<>();
+        exps.addAll(relExpInEquation());
+        exps.addAll(delayExpInEquation());
+        exps.addAll(spatialDistExpInEquation());
+        
+        Set<FVariable> res = new HashSet<>();
+        for (EventGeneratingExp exp : exps) {
+            if (exp.hasIndicator()) {
+                res.addAll(exp.myIndicatorVariables());
+            }
+        }
+        return res;
     }
 
     /**
@@ -3797,7 +3831,7 @@ aspect FlatDiagnostics {
         
         str.append("\n");  
         
-        str.append(getConnectionSetManager().printConnectionSets());
+        str.append(connectionSetDiagnostics());
         
         return str.toString();
     }
@@ -4130,6 +4164,10 @@ aspect FlatDiagnostics {
         return res;
     }
 
+    public String FClass.connectionSetDiagnostics() {
+        return getConnectionSetManager().printConnectionSets();
+    }
+    
     public String FClass.incidence() {
         return incidence(false);
     }
