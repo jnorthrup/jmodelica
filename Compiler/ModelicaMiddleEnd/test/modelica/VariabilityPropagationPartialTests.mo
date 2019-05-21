@@ -407,7 +407,7 @@ public
    init temp_1 as Integer[2];
    temp_1[1] := 1;
    temp_1[2] := 2;
-   for i1 in 1:2 loop
+   for i1 in 1:n loop
     y[i1] := temp_1[i1];
    end for;
   end if;
@@ -425,7 +425,7 @@ public
   init temp_1 as Real[2];
   temp_1[1] := x1;
   temp_1[2] := x1;
-  for i1 in 1:2 loop
+  for i1 in 1:n loop
    y[i1] := temp_1[i1];
   end for;
   assert(x1 == 1, \"nope\");
@@ -766,11 +766,11 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
     JMI_RECORD_STATIC(R1_1_r, tmp_1)
     JMI_RECORD_STATIC(R2_0_r, tmp_2)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_3, 2, 1)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 2, 1, 2)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_3, 2, 1)
+    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_3, 2, 1, 2)
     tmp_2->y1 = tmp_3;
     tmp_1->r2 = tmp_2;
-    func_VariabilityPropagationPartialTests_PartiallyKnownComposite8_f_def0(AD_WRAP_LITERAL(1), _time, tmp_1);
+    func_VariabilityPropagationPartialTests_PartiallyKnownComposite8_f_def0(1.0, _time, tmp_1);
     _r_y2_2 = (tmp_1->y2);
     JMI_DYNAMIC_FREE()
     return ef;
@@ -864,8 +864,8 @@ end VariabilityPropagationPartialTests.PartiallyKnownComposite9;
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 4, 2)
-    JMI_ARRAY_INIT_2(STAT, jmi_real_t, jmi_array_t, tmp_1, 4, 2, 2, 2)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_1, 4, 2)
+    JMI_ARRAY_INIT_2(STACK, jmi_real_t, jmi_array_t, tmp_1, 4, 2, 2, 2)
     func_VariabilityPropagationPartialTests_PartiallyKnownComposite10_f1_def0(_time, tmp_1);
     memcpy(&_x_1_0, &jmi_array_val_2(tmp_1, 1,1), 2 * sizeof(jmi_real_t));
     JMI_DYNAMIC_FREE()
@@ -903,10 +903,10 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_RECORD_STATIC(R_0_r, tmp_1)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
+    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
     tmp_1->z = tmp_2;
-    func_VariabilityPropagationPartialTests_PartiallyKnownComposite11_f_def0(_time, AD_WRAP_LITERAL(3), tmp_1);
+    func_VariabilityPropagationPartialTests_PartiallyKnownComposite11_f_def0(_time, 3.0, tmp_1);
     _r_x_0 = (tmp_1->x);
     JMI_DYNAMIC_FREE()
     return ef;
@@ -971,5 +971,46 @@ public
 end VariabilityPropagationPartialTests.PartiallyKnownComposite12;
 ")})));
     end PartiallyKnownComposite12;
+
+    model PartiallyKnownDiscrete1
+       function f
+           input Real x1,x2,x3;
+           output Real y1,y2;
+       algorithm
+           y1 := x1;
+           y2 := x2;
+           annotation(Inline=false);
+       end f;
+    
+        Real y1,y2,y4;
+        Integer y3;
+    equation
+        (y1,y2) = f(1,y3,y4);
+        when time > 1 then
+            y4 = time;
+        end when;
+        y3 = 2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="PartiallyKnownDiscrete1",
+            description="Partial evaluation of discrete function call",
+            flatModel="
+fclass VariabilityPropagationPartialTests.PartiallyKnownDiscrete1
+ constant Real y1 = 1;
+ constant Real y2 = 2;
+ discrete Real y4;
+ constant Integer y3 = 2;
+ discrete Boolean temp_1;
+initial equation
+ pre(y4) = 0.0;
+ pre(temp_1) = false;
+equation
+ temp_1 = time > 1;
+ y4 = if temp_1 and not pre(temp_1) then time else pre(y4);
+end VariabilityPropagationPartialTests.PartiallyKnownDiscrete1;
+")})));
+    end PartiallyKnownDiscrete1;
+
 
 end VariabilityPropagationPartialTests;

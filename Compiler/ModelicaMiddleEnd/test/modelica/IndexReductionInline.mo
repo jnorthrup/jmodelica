@@ -57,15 +57,13 @@ fclass IndexReductionInline.InlineInitialTemp1
  Real x1;
  Real x2;
  Real _der_x1;
- initial parameter Real temp_1;
 initial equation
- temp_1 = p;
  x2 = 0.0;
- temp_1 = 0.0;
+ p = 0.0;
 equation
  _der_x1 + der(x2) = IndexReductionInline.InlineInitialTemp1.f(p, time);
  x1 + IndexReductionInline.InlineInitialTemp1.f(p, x2) = 1;
- - _der_x1 = (temp_1 - x2) * temp_1;
+ - _der_x1 = (p - x2) * p;
 
 public
  function IndexReductionInline.InlineInitialTemp1.f
@@ -148,16 +146,14 @@ fclass IndexReductionInline.InlineInitialTemp2
  Real x1;
  Real x2;
  Real _der_x1;
- initial parameter IndexReductionInline.InlineInitialTemp2.EO temp_1;
 initial equation
  x = 1;
  eo = IndexReductionInline.InlineInitialTemp2.EO.constructor(x);
- temp_1 = eo;
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = IndexReductionInline.InlineInitialTemp2.f(eo, time);
  x1 + IndexReductionInline.InlineInitialTemp2.f(eo, x2) = 1;
- - _der_x1 = (IndexReductionInline.InlineInitialTemp2.g(temp_1) - x2) * IndexReductionInline.InlineInitialTemp2.g(temp_1);
+ - _der_x1 = (IndexReductionInline.InlineInitialTemp2.g(eo) - x2) * IndexReductionInline.InlineInitialTemp2.g(eo);
 
 public
  function IndexReductionInline.InlineInitialTemp2.EO.destructor

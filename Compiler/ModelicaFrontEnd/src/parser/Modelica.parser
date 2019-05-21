@@ -20,6 +20,7 @@
 %goal element;
 %goal abstract_equation;
 %goal argument;
+%goal access_scalar;
 
 %header {:
  package $PARSER_PACKAGE$;
@@ -189,6 +190,16 @@
             ((Report) report).setFileName(fn);
     }
     
+    private LoadInfo loadInfo;
+    
+    public void setLoadInfo(LoadInfo loadInfo) {
+        this.loadInfo = loadInfo;
+    }
+    
+    public LoadInfo getLoadInfo() {
+        return loadInfo;
+    }
+    
     Symbol annotationTok = null;
     
     private void adjustStart(Symbol... syms) {
@@ -288,7 +299,7 @@ Program program
 SrcStoredDefinition stored_definition
     = within? base_class_decl_list 
     {:
-        SrcStoredDefinition def = new SrcStoredDefinition(within, base_class_decl_list);
+        SrcStoredDefinition def = new SrcStoredDefinition(within, base_class_decl_list, getLoadInfo());
         def.setLineBreakMap(lineBreakMap);
         formattingRecorder.postParsing(def);
         return def; 
@@ -426,7 +437,7 @@ SrcBaseClassDecl base_class_decl
     :}
     | error 
     {: 
-      return new SrcBadClassDecl();
+        return new SrcBadClassDecl();
     :};
 
 SrcExtendsClauseShortClass extends_clause_short_class

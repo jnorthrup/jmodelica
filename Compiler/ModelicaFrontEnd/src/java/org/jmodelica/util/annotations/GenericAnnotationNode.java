@@ -218,7 +218,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
 
     /**
      * Navigate downwards in the annotation tree. The first element in the path
-     * list is resolved relative this node. Then the resolved node is used to
+     * list is resolved relative to this node. Then the resolved node is used to
      * resolve the next one and so on.
      * @param path List of path elements to resolve
      * @return the resolved node
@@ -299,9 +299,9 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     }
 
     /**
-     * Provides all sub nodes for this node that {@link #exists()}.
+     * Provides all sub nodes for this node that {@link #nodeExists()}.
      * 
-     * @return all sub nodes that {@link #exists()}
+     * @return all sub nodes that {@link #nodeExists()}
      */
     public Iterable<T> subNodes() {
         computeSubNodesCache();
@@ -744,6 +744,22 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     public String[] valueAsStringVector() throws ConstantEvaluationException {
         return getAndCheckConstValue(ValueType.STRING, ValueSize.VECTOR, true).stringVector();
     }
+    
+    public boolean isUnknownAccess() {
+        return getAndCheckConstValue(ValueType.UNKNOWN_ACCESS, ValueSize.SCALAR) != null;
+    }
+    
+    public boolean isUnknownAccessVector() {
+        return getAndCheckConstValue(ValueType.UNKNOWN_ACCESS, ValueSize.VECTOR) != null;
+    }
+    
+    public String unknownAccessAsString() {
+        return getAndCheckConstValue(ValueType.UNKNOWN_ACCESS, ValueSize.SCALAR).access();
+    }
+    
+    public String[] unknownAccessVectorAsStringVector() {
+        return getAndCheckConstValue(ValueType.UNKNOWN_ACCESS, ValueSize.VECTOR).accessVector();
+    }
 
     /*****************************************
      * Value checkers and retrieves helpers
@@ -766,6 +782,12 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             public boolean check(ConstValue value) {
                 return value.isString() || value.isEnum();
             }
+        },
+        UNKNOWN_ACCESS {
+          @Override
+        public boolean check(ConstValue value) {
+            return value.isUnknownAccess();
+        }  
         },
         REAL {
             @Override

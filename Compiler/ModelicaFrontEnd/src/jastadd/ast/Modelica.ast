@@ -76,7 +76,10 @@ Program : SrcBaseNode ::=
             /AnonymousClass:SrcBaseClassDecl*/
             /InstProgramRoot/;
 
-SrcStoredDefinition : SrcBaseNode ::= [SrcWithin] SrcClassDecl*;
+SrcStoredDefinition : SrcBaseNode ::= 
+            [SrcWithin]
+            SrcClassDecl*
+            <LoadInfo:LoadInfo>;
 
 SrcWithin : SrcBaseNode ::= [PackageName:SrcAccess];
 
@@ -101,10 +104,11 @@ SrcFullClassDecl : SrcBaseClassDecl ::= [SrcStringComment]
                                   SrcEndDecl;
 
 SrcLibClassDecl : SrcFullClassDecl ::= SrcLibNode*;
-SrcLibNode : SrcClassDecl ::= <FileName:String>
+SrcLibNode : SrcClassDecl ::= 
                         <Structured:boolean> 
                         <Version:String> 
-                        <Reason:SrcLibNode.LoadReason> 
+                        <Reason:SrcLibNode.LoadReason>
+                        <LoadInfo:LoadInfo> 
                         /SrcStoredDefinition/;
 
 SrcShortClassDecl : SrcBaseClassDecl ::= SrcExtendsClauseShortClass;
@@ -133,11 +137,11 @@ SrcConstrainingClause : SrcBaseNode ::= SrcAccess [SrcClassModification];
 abstract SrcRestriction : SrcBaseNode;
 SrcModel               : SrcRestriction;
 SrcBlock               : SrcRestriction;
-SrcClass              : SrcRestriction;
+SrcClass               : SrcRestriction;
 SrcConnector           : SrcRestriction;
 SrcExpandableConnector : SrcConnector;
-SrcType               : SrcRestriction;
-SrcPackage            : SrcRestriction;
+SrcType                : SrcRestriction;
+SrcPackage             : SrcRestriction;
 SrcFunction            : SrcRestriction;
 SrcRecord              : SrcRestriction;
 SrcOperatorRecord      : SrcRecord;

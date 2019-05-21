@@ -53,8 +53,11 @@ public class TreeJModelicaRunner extends ParentRunner<TreeModuleRunner> {
                     if (testDir.isDirectory() && testDir.listFiles(MODELICA_FILES).length > 0) 
                         children.add(new TreeModuleRunner(spec, nc, f, testClass.getCanonicalName()));
                 }
+            } catch (InitializationError e) {
+                // rethrow, already an InitializationError.
+                throw e; 
             } catch (Exception e) {
-                throw new InitializationError(Collections.<Throwable>singletonList(e));
+                throw new InitializationError(e);
             }
         } else {
             throw new InitializationError("Test class must inherit org.jmodelica.ModelicaTestSpecification.");
