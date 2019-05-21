@@ -221,7 +221,7 @@ aspect FlatTypeCheck {
             CommonType actualBT = actualBindingType();
             
             boolean reportedError = false;
-            if (!expectedBT.size().equals(actualBT.size())) {
+            if (!expectedBT.size().equivalent(actualBT.size(), unknownAllowed)) {
                 InstValueModification ivm = myInstValueMod();
                 InstModification needsEach = ivm.findModificationLackingEach(actualBT.size());
                 if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
@@ -1504,19 +1504,16 @@ aspect FlatTypeCheck {
             }
         }
         if (!typeOk) {
-            if (getBoundInput() == null) {
-                error(nonBoundArgumentTypeError());
+            String msg = argumentTypeError();
+            if (msg != null) {
+                error(msg);
             } else {
-                String msg = argumentTypeError();
-                if (msg != null)
-                    error(msg);
-                else
-                    error("%s: types of %s and input %s are not compatible\n" + 
-                          "    type of '%s' is %s\n" + 
-                          "    expected type is %s", 
-                          functionCallDecription(), argumentDesc(), getBoundInput().name(), 
-                          getFExp(), getFExp().type(),
-                          argumentDefinedTypeValid() ? getBoundInput().type().toString() : expectedArgumentType());
+                error("%s: types of %s and input %s are not compatible\n" + 
+                      "    type of '%s' is %s\n" + 
+                      "    expected type is %s", 
+                      functionCallDecription(), argumentDesc(), getBoundInput().name(), 
+                      getFExp(), getFExp().type(),
+                      argumentDefinedTypeValid() ? getBoundInput().type().toString() : expectedArgumentType());
             }
         }
     }
@@ -1542,13 +1539,6 @@ aspect FlatTypeCheck {
 
     public void InstDefaultArgument.typeCheck(ErrorCheckType checkType) {}
 
-    inh String InstFunctionArgument.nonBoundArgumentTypeError();
-    eq FExp.getChild().nonBoundArgumentTypeError() {
-        throw new UnsupportedOperationException("Method nonBoundArgumentTypeError() not implemented for type " + getClass().getSimpleName());
-    }
-    eq FArrayDimAsArgsExp.getOriginalArg(int i).nonBoundArgumentTypeError() = 
-        functionCallDecription() + ": type of positional argument " + i + " is not compatible with Integer";
-  
   inh String InstFunctionArgument.argumentTypeError();
   eq FExp.getChild().argumentTypeError()         = null;
   eq FCardinality.getChild().argumentTypeError() = "The argument of cardinality() must be a scalar reference to a connector";

@@ -464,7 +464,7 @@ equation
             description="Don't eliminate strings",
             errorMessage="
 Error in flattened model:
-  The system is structurally singular. The following varible(s) could not be matched to any equation:
+  The system is structurally singular. The following variable(s) could not be matched to any equation:
      s1
 
   The following equation(s) could not be matched to any variable:

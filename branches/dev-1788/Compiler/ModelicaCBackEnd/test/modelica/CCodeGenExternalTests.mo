@@ -1296,10 +1296,10 @@ void func_CCodeGenExternalTests_ExternalArray4_f_def0(jmi_array_t* a_a, jmi_arra
 
 void func_CCodeGenExternalTests_ExternalArray4_f_def0(jmi_array_t* a_a, jmi_array_t* b_a) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, b_an, 2, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, b_an, 2, 1)
     extern void f(double*, size_t, double*, size_t);
     if (b_a == NULL) {
-        JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, b_an, 2, 1, 2)
+        JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, b_an, 2, 1, 2)
         b_a = b_an;
     }
     f(a_a->var, jmi_array_size(a_a, 0), b_a->var, jmi_array_size(b_a, 0));
@@ -1337,10 +1337,10 @@ void func_CCodeGenExternalTests_ExternalArray5_f_def0(jmi_array_t* a_a, jmi_arra
 
 void func_CCodeGenExternalTests_ExternalArray5_f_def0(jmi_array_t* a_a, jmi_array_t* b_a) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, b_an, 4, 2)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, b_an, 4, 2)
     extern void f(double*, size_t, size_t, double*, size_t, size_t);
     if (b_a == NULL) {
-        JMI_ARRAY_INIT_2(STAT, jmi_real_t, jmi_array_t, b_an, 4, 2, 2, 2)
+        JMI_ARRAY_INIT_2(STACK, jmi_real_t, jmi_array_t, b_an, 4, 2, 2, 2)
         b_a = b_an;
     }
     f(a_a->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1), b_a->var, jmi_array_size(b_a, 0), jmi_array_size(b_a, 1));
@@ -1378,10 +1378,10 @@ void func_CCodeGenExternalTests_ExternalArray6_f_def0(jmi_array_t* a_a, jmi_arra
 
 void func_CCodeGenExternalTests_ExternalArray6_f_def0(jmi_array_t* a_a, jmi_array_t* b_a) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, b_an, -1, 2)
+    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, b_an, -1, 2)
     extern void f(double*, size_t, size_t, double*, size_t, size_t);
     if (b_a == NULL) {
-        JMI_ARRAY_INIT_2(DYNA, jmi_real_t, jmi_array_t, b_an, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
+        JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, b_an, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
         b_a = b_an;
     }
     f(a_a->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1), b_a->var, jmi_array_size(b_a, 0), jmi_array_size(b_a, 1));
@@ -1420,9 +1420,9 @@ jmi_real_t func_CCodeGenExternalTests_IntegerExternalArray1_f_exp0(jmi_array_t* 
 void func_CCodeGenExternalTests_IntegerExternalArray1_f_def0(jmi_array_t* a_a, jmi_real_t* b_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, b_v)
-    JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, -1, 1)
+    JMI_ARR(HEAP, jmi_int_t, jmi_int_array_t, tmp_1, -1, 1)
     extern double f(int*, size_t);
-    JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(a_a, 0), 1, jmi_array_size(a_a, 0))
+    JMI_ARRAY_INIT_1(HEAP, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(a_a, 0), 1, jmi_array_size(a_a, 0))
     jmi_copy_matrix_to_int(a_a, a_a->var, tmp_1->var);
     b_v = f(tmp_1->var, jmi_array_size(a_a, 0));
     JMI_RET(GEN, b_o, b_v)
@@ -1467,9 +1467,9 @@ jmi_real_t func_CCodeGenExternalTests_IntegerExternalArray2_f_exp0(jmi_array_t* 
 void func_CCodeGenExternalTests_IntegerExternalArray2_f_def0(jmi_array_t* a_a, jmi_real_t* b_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, b_v)
-    JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, -1, 2)
+    JMI_ARR(HEAP, jmi_int_t, jmi_int_array_t, tmp_1, -1, 2)
     extern double f(int*, size_t, size_t);
-    JMI_ARRAY_INIT_2(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
+    JMI_ARRAY_INIT_2(HEAP, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
     jmi_copy_matrix_to_int(a_a, a_a->var, tmp_1->var);
     b_v = f(tmp_1->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1));
     JMI_RET(GEN, b_o, b_v)
@@ -1512,14 +1512,14 @@ void func_CCodeGenExternalTests_IntegerExternalArray3_f_def0(jmi_real_t a_v, jmi
 
 void func_CCodeGenExternalTests_IntegerExternalArray3_f_def0(jmi_real_t a_v, jmi_array_t* b_a) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, b_an, 2, 1)
-    JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, -1, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, b_an, 2, 1)
+    JMI_ARR(HEAP, jmi_int_t, jmi_int_array_t, tmp_1, -1, 1)
     extern void f(double, int*, size_t);
     if (b_a == NULL) {
-        JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, b_an, 2, 1, 2)
+        JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, b_an, 2, 1, 2)
         b_a = b_an;
     }
-    JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(b_a, 0), 1, jmi_array_size(b_a, 0))
+    JMI_ARRAY_INIT_1(HEAP, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(b_a, 0), 1, jmi_array_size(b_a, 0))
     jmi_copy_matrix_to_int(b_a, b_a->var, tmp_1->var);
     f(a_v, tmp_1->var, jmi_array_size(b_a, 0));
     jmi_copy_matrix_from_int(b_a, tmp_1->var, b_a->var);
@@ -1557,17 +1557,17 @@ void func_CCodeGenExternalTests_IntegerExternalArray4_f_def0(jmi_array_t* a_a, j
 
 void func_CCodeGenExternalTests_IntegerExternalArray4_f_def0(jmi_array_t* a_a, jmi_array_t* b_a) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, b_an, 4, 2)
-    JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, -1, 2)
-    JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_2, -1, 2)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, b_an, 4, 2)
+    JMI_ARR(HEAP, jmi_int_t, jmi_int_array_t, tmp_1, -1, 2)
+    JMI_ARR(HEAP, jmi_int_t, jmi_int_array_t, tmp_2, -1, 2)
     extern void f(int*, size_t, size_t, int*, size_t, size_t);
     if (b_a == NULL) {
-        JMI_ARRAY_INIT_2(STAT, jmi_real_t, jmi_array_t, b_an, 4, 2, 2, 2)
+        JMI_ARRAY_INIT_2(STACK, jmi_real_t, jmi_array_t, b_an, 4, 2, 2, 2)
         b_a = b_an;
     }
-    JMI_ARRAY_INIT_2(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
+    JMI_ARRAY_INIT_2(HEAP, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
     jmi_copy_matrix_to_int(a_a, a_a->var, tmp_1->var);
-    JMI_ARRAY_INIT_2(DYNA, jmi_int_t, jmi_int_array_t, tmp_2, jmi_array_size(b_a, 0) * jmi_array_size(b_a, 1), 2, jmi_array_size(b_a, 0), jmi_array_size(b_a, 1))
+    JMI_ARRAY_INIT_2(HEAP, jmi_int_t, jmi_int_array_t, tmp_2, jmi_array_size(b_a, 0) * jmi_array_size(b_a, 1), 2, jmi_array_size(b_a, 0), jmi_array_size(b_a, 1))
     jmi_copy_matrix_to_int(b_a, b_a->var, tmp_2->var);
     f(tmp_1->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1), tmp_2->var, jmi_array_size(b_a, 0), jmi_array_size(b_a, 1));
     jmi_copy_matrix_from_int(b_a, tmp_2->var, b_a->var);
@@ -2229,15 +2229,15 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
 
 void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t* eigenReal_a, jmi_array_t* eigenImag_a, jmi_array_t* eigenVectors_a, jmi_real_t* info_o) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, eigenReal_an, -1, 1)
-    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, eigenImag_an, -1, 1)
-    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, eigenVectors_an, -1, 2)
+    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, eigenReal_an, -1, 1)
+    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, eigenImag_an, -1, 1)
+    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, eigenVectors_an, -1, 2)
     JMI_DEF(INT, info_v)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, dummy_a, 1, 2)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, dummy_a, 1, 2)
     JMI_DEF(INT, n_v)
     JMI_DEF(INT, lwork_v)
-    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, Awork_a, -1, 2)
-    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, work_a, -1, 1)
+    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, Awork_a, -1, 2)
+    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, work_a, -1, 1)
     jmi_real_t i1_0i;
     jmi_int_t i1_0ie;
     jmi_int_t i1_0in;
@@ -2247,50 +2247,50 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
     JMI_DEF(STR_EXT, tmp_1)
     JMI_DEF(STR_EXT, tmp_2)
     JMI_DEF(INT_EXT, tmp_3)
-    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_4, -1, 2)
+    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, tmp_4, -1, 2)
     JMI_DEF(INT_EXT, tmp_5)
-    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_6, -1, 2)
+    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, tmp_6, -1, 2)
     JMI_DEF(INT_EXT, tmp_7)
-    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_8, -1, 2)
+    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, tmp_8, -1, 2)
     JMI_DEF(INT_EXT, tmp_9)
     JMI_DEF(INT_EXT, tmp_10)
     extern void dgeev_(const char*, const char*, int*, double*, int*, double*, double*, double*, int*, double*, int*, double*, int*, int*);
     if (eigenReal_a == NULL) {
-        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, eigenReal_an, jmi_array_size(A_a, 0), 1, jmi_array_size(A_a, 0))
+        JMI_ARRAY_INIT_1(HEAP, jmi_real_t, jmi_array_t, eigenReal_an, jmi_array_size(A_a, 0), 1, jmi_array_size(A_a, 0))
         eigenReal_a = eigenReal_an;
     }
     if (eigenImag_a == NULL) {
-        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, eigenImag_an, jmi_array_size(A_a, 0), 1, jmi_array_size(A_a, 0))
+        JMI_ARRAY_INIT_1(HEAP, jmi_real_t, jmi_array_t, eigenImag_an, jmi_array_size(A_a, 0), 1, jmi_array_size(A_a, 0))
         eigenImag_a = eigenImag_an;
     }
     if (eigenVectors_a == NULL) {
-        JMI_ARRAY_INIT_2(DYNA, jmi_real_t, jmi_array_t, eigenVectors_an, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), 2, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
+        JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, eigenVectors_an, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), 2, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
         eigenVectors_a = eigenVectors_an;
     }
-    JMI_ARRAY_INIT_2(STAT, jmi_real_t, jmi_array_t, dummy_a, 1, 2, 1, 1)
+    JMI_ARRAY_INIT_2(STACK, jmi_real_t, jmi_array_t, dummy_a, 1, 2, 1, 1)
     n_v = jmi_array_size(A_a, 0);
     lwork_v = 12 * n_v;
-    JMI_ARRAY_INIT_2(DYNA, jmi_real_t, jmi_array_t, Awork_a, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), 2, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
+    JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, Awork_a, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), 2, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     i1_0in = 0;
     i1_0ie = floor((jmi_array_size(A_a, 0)) - (1));
     for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
         i2_1in = 0;
-        i2_1ie = floor((jmi_array_size(A_a, 1)) - (1));
+        i2_1ie = floor((jmi_array_size(A_a, 0)) - (1));
         for (i2_1i = 1; i2_1in <= i2_1ie; i2_1i = 1 + (++i2_1in)) {
             jmi_array_ref_2(Awork_a, i1_0i, i2_1i) = jmi_array_val_2(A_a, i1_0i, i2_1i);
         }
     }
-    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, work_a, 12 * jmi_array_size(A_a, 0), 1, 12 * jmi_array_size(A_a, 0))
+    JMI_ARRAY_INIT_1(HEAP, jmi_real_t, jmi_array_t, work_a, 12 * jmi_array_size(A_a, 0), 1, 12 * jmi_array_size(A_a, 0))
     JMI_ASG(STR, tmp_1, \"N\")
     JMI_ASG(STR, tmp_2, \"V\")
     tmp_3 = (int)n_v;
-    JMI_ARRAY_INIT_2(DYNA, jmi_real_t, jmi_array_t, tmp_4, jmi_array_size(Awork_a, 0) * jmi_array_size(Awork_a, 1), 2, jmi_array_size(Awork_a, 0), jmi_array_size(Awork_a, 1))
+    JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, tmp_4, jmi_array_size(Awork_a, 0) * jmi_array_size(Awork_a, 1), 2, jmi_array_size(Awork_a, 0), jmi_array_size(Awork_a, 1))
     jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_4->var);
     tmp_5 = (int)n_v;
-    JMI_ARRAY_INIT_2(DYNA, jmi_real_t, jmi_array_t, tmp_6, jmi_array_size(dummy_a, 0) * jmi_array_size(dummy_a, 1), 2, jmi_array_size(dummy_a, 0), jmi_array_size(dummy_a, 1))
+    JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, tmp_6, jmi_array_size(dummy_a, 0) * jmi_array_size(dummy_a, 1), 2, jmi_array_size(dummy_a, 0), jmi_array_size(dummy_a, 1))
     jmi_matrix_to_fortran_real(dummy_a, dummy_a->var, tmp_6->var);
     tmp_7 = (int)1;
-    JMI_ARRAY_INIT_2(DYNA, jmi_real_t, jmi_array_t, tmp_8, jmi_array_size(eigenVectors_a, 0) * jmi_array_size(eigenVectors_a, 1), 2, jmi_array_size(eigenVectors_a, 0), jmi_array_size(eigenVectors_a, 1))
+    JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, tmp_8, jmi_array_size(eigenVectors_a, 0) * jmi_array_size(eigenVectors_a, 1), 2, jmi_array_size(eigenVectors_a, 0), jmi_array_size(eigenVectors_a, 1))
     jmi_matrix_to_fortran_real(eigenVectors_a, eigenVectors_a->var, tmp_8->var);
     tmp_9 = (int)n_v;
     tmp_10 = (int)info_v;
@@ -2377,9 +2377,9 @@ jmi_real_t func_CCodeGenExternalTests_ExternalArrayFortran2_f_exp0(jmi_array_t* 
 void func_CCodeGenExternalTests_ExternalArrayFortran2_f_def0(jmi_array_t* a_a, jmi_real_t* b_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, b_v)
-    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, -1, 2)
+    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, tmp_1, -1, 2)
     extern double f_(double*, int*, int*);
-    JMI_ARRAY_INIT_2(DYNA, jmi_real_t, jmi_array_t, tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
+    JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
     jmi_matrix_to_fortran_real(a_a, a_a->var, tmp_1->var);
     b_v = f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1));
     JMI_RET(GEN, b_o, b_v)
@@ -2425,9 +2425,9 @@ jmi_real_t func_CCodeGenExternalTests_ExternalArrayFortran3_f_exp0(jmi_array_t* 
 void func_CCodeGenExternalTests_ExternalArrayFortran3_f_def0(jmi_array_t* a_a, jmi_real_t* b_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, b_v)
-    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, -1, 2)
+    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, tmp_1, -1, 2)
     extern double f_(double*, int*, int*);
-    JMI_ARRAY_INIT_2(DYNA, jmi_real_t, jmi_array_t, tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
+    JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
     jmi_matrix_to_fortran_real(a_a, a_a->var, tmp_1->var);
     b_v = f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1));
     JMI_RET(GEN, b_o, b_v)
@@ -2472,10 +2472,10 @@ void func_CCodeGenExternalTests_ExternalArrayFortran4_f_def0(jmi_array_t* a_a, j
 
 void func_CCodeGenExternalTests_ExternalArrayFortran4_f_def0(jmi_array_t* a_a, jmi_array_t* b_a) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, b_an, 2, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, b_an, 2, 1)
     extern void f_(double*, int*, double*, int*);
     if (b_a == NULL) {
-        JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, b_an, 2, 1, 2)
+        JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, b_an, 2, 1, 2)
         b_a = b_an;
     }
     f_(a_a->var, &jmi_array_size(a_a, 0), b_a->var, &jmi_array_size(b_a, 0));
@@ -2513,17 +2513,17 @@ void func_CCodeGenExternalTests_ExternalArrayFortran5_f_def0(jmi_array_t* a_a, j
 
 void func_CCodeGenExternalTests_ExternalArrayFortran5_f_def0(jmi_array_t* a_a, jmi_array_t* b_a) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, b_an, 4, 2)
-    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, -1, 2)
-    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_2, -1, 2)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, b_an, 4, 2)
+    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, tmp_1, -1, 2)
+    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, tmp_2, -1, 2)
     extern void f_(double*, int*, int*, double*, int*, int*);
     if (b_a == NULL) {
-        JMI_ARRAY_INIT_2(STAT, jmi_real_t, jmi_array_t, b_an, 4, 2, 2, 2)
+        JMI_ARRAY_INIT_2(STACK, jmi_real_t, jmi_array_t, b_an, 4, 2, 2, 2)
         b_a = b_an;
     }
-    JMI_ARRAY_INIT_2(DYNA, jmi_real_t, jmi_array_t, tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
+    JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
     jmi_matrix_to_fortran_real(a_a, a_a->var, tmp_1->var);
-    JMI_ARRAY_INIT_2(DYNA, jmi_real_t, jmi_array_t, tmp_2, jmi_array_size(b_a, 0) * jmi_array_size(b_a, 1), 2, jmi_array_size(b_a, 0), jmi_array_size(b_a, 1))
+    JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, tmp_2, jmi_array_size(b_a, 0) * jmi_array_size(b_a, 1), 2, jmi_array_size(b_a, 0), jmi_array_size(b_a, 1))
     jmi_matrix_to_fortran_real(b_a, b_a->var, tmp_2->var);
     f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1), tmp_2->var, &jmi_array_size(b_a, 0), &jmi_array_size(b_a, 1));
     jmi_matrix_from_fortran_real(b_a, tmp_2->var, b_a->var);
@@ -2561,17 +2561,17 @@ void func_CCodeGenExternalTests_ExternalArrayFortran6_f_def0(jmi_array_t* a_a, j
 
 void func_CCodeGenExternalTests_ExternalArrayFortran6_f_def0(jmi_array_t* a_a, jmi_array_t* b_a) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, b_an, -1, 2)
-    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, -1, 2)
-    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_2, -1, 2)
+    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, b_an, -1, 2)
+    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, tmp_1, -1, 2)
+    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, tmp_2, -1, 2)
     extern void f_(double*, int*, int*, double*, int*, int*);
     if (b_a == NULL) {
-        JMI_ARRAY_INIT_2(DYNA, jmi_real_t, jmi_array_t, b_an, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
+        JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, b_an, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
         b_a = b_an;
     }
-    JMI_ARRAY_INIT_2(DYNA, jmi_real_t, jmi_array_t, tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
+    JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
     jmi_matrix_to_fortran_real(a_a, a_a->var, tmp_1->var);
-    JMI_ARRAY_INIT_2(DYNA, jmi_real_t, jmi_array_t, tmp_2, jmi_array_size(b_a, 0) * jmi_array_size(b_a, 1), 2, jmi_array_size(b_a, 0), jmi_array_size(b_a, 1))
+    JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, tmp_2, jmi_array_size(b_a, 0) * jmi_array_size(b_a, 1), 2, jmi_array_size(b_a, 0), jmi_array_size(b_a, 1))
     jmi_matrix_to_fortran_real(b_a, b_a->var, tmp_2->var);
     f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1), tmp_2->var, &jmi_array_size(b_a, 0), &jmi_array_size(b_a, 1));
     jmi_matrix_from_fortran_real(b_a, tmp_2->var, b_a->var);
@@ -2609,9 +2609,9 @@ jmi_real_t func_CCodeGenExternalTests_IntegerExternalArrayFortran1_f_exp0(jmi_ar
 void func_CCodeGenExternalTests_IntegerExternalArrayFortran1_f_def0(jmi_array_t* a_a, jmi_real_t* b_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, b_v)
-    JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, -1, 1)
+    JMI_ARR(HEAP, jmi_int_t, jmi_int_array_t, tmp_1, -1, 1)
     extern double f_(int*, int*);
-    JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(a_a, 0), 1, jmi_array_size(a_a, 0))
+    JMI_ARRAY_INIT_1(HEAP, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(a_a, 0), 1, jmi_array_size(a_a, 0))
     jmi_matrix_to_fortran_int(a_a, a_a->var, tmp_1->var);
     b_v = f_(tmp_1->var, &jmi_array_size(a_a, 0));
     JMI_RET(GEN, b_o, b_v)
@@ -2655,9 +2655,9 @@ jmi_real_t func_CCodeGenExternalTests_IntegerExternalArrayFortran2_f_exp0(jmi_ar
 void func_CCodeGenExternalTests_IntegerExternalArrayFortran2_f_def0(jmi_array_t* a_a, jmi_real_t* b_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, b_v)
-    JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, -1, 2)
+    JMI_ARR(HEAP, jmi_int_t, jmi_int_array_t, tmp_1, -1, 2)
     extern double f_(int*, int*, int*);
-    JMI_ARRAY_INIT_2(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
+    JMI_ARRAY_INIT_2(HEAP, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
     jmi_matrix_to_fortran_int(a_a, a_a->var, tmp_1->var);
     b_v = f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1));
     JMI_RET(GEN, b_o, b_v)
@@ -2699,14 +2699,14 @@ void func_CCodeGenExternalTests_IntegerExternalArrayFortran3_f_def0(jmi_real_t a
 
 void func_CCodeGenExternalTests_IntegerExternalArrayFortran3_f_def0(jmi_real_t a_v, jmi_array_t* b_a) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, b_an, 2, 1)
-    JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, -1, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, b_an, 2, 1)
+    JMI_ARR(HEAP, jmi_int_t, jmi_int_array_t, tmp_1, -1, 1)
     extern void f_(double*, int*, int*);
     if (b_a == NULL) {
-        JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, b_an, 2, 1, 2)
+        JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, b_an, 2, 1, 2)
         b_a = b_an;
     }
-    JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(b_a, 0), 1, jmi_array_size(b_a, 0))
+    JMI_ARRAY_INIT_1(HEAP, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(b_a, 0), 1, jmi_array_size(b_a, 0))
     jmi_matrix_to_fortran_int(b_a, b_a->var, tmp_1->var);
     f_(&a_v, tmp_1->var, &jmi_array_size(b_a, 0));
     jmi_matrix_from_fortran_int(b_a, tmp_1->var, b_a->var);
@@ -2743,17 +2743,17 @@ void func_CCodeGenExternalTests_IntegerExternalArrayFortran4_f_def0(jmi_array_t*
 
 void func_CCodeGenExternalTests_IntegerExternalArrayFortran4_f_def0(jmi_array_t* a_a, jmi_array_t* b_a) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, b_an, 4, 2)
-    JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, -1, 2)
-    JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_2, -1, 2)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, b_an, 4, 2)
+    JMI_ARR(HEAP, jmi_int_t, jmi_int_array_t, tmp_1, -1, 2)
+    JMI_ARR(HEAP, jmi_int_t, jmi_int_array_t, tmp_2, -1, 2)
     extern void f_(int*, int*, int*, int*, int*, int*);
     if (b_a == NULL) {
-        JMI_ARRAY_INIT_2(STAT, jmi_real_t, jmi_array_t, b_an, 4, 2, 2, 2)
+        JMI_ARRAY_INIT_2(STACK, jmi_real_t, jmi_array_t, b_an, 4, 2, 2, 2)
         b_a = b_an;
     }
-    JMI_ARRAY_INIT_2(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
+    JMI_ARRAY_INIT_2(HEAP, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
     jmi_matrix_to_fortran_int(a_a, a_a->var, tmp_1->var);
-    JMI_ARRAY_INIT_2(DYNA, jmi_int_t, jmi_int_array_t, tmp_2, jmi_array_size(b_a, 0) * jmi_array_size(b_a, 1), 2, jmi_array_size(b_a, 0), jmi_array_size(b_a, 1))
+    JMI_ARRAY_INIT_2(HEAP, jmi_int_t, jmi_int_array_t, tmp_2, jmi_array_size(b_a, 0) * jmi_array_size(b_a, 1), 2, jmi_array_size(b_a, 0), jmi_array_size(b_a, 1))
     jmi_matrix_to_fortran_int(b_a, b_a->var, tmp_2->var);
     f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1), tmp_2->var, &jmi_array_size(b_a, 0), &jmi_array_size(b_a, 1));
     jmi_matrix_from_fortran_int(b_a, tmp_2->var, b_a->var);
@@ -3324,8 +3324,8 @@ $C_functions$
 int model_init_eval_dependent_parameters(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_extobj_t, jmi_extobj_array_t, tmp_1, 2, 1)
-    JMI_ARRAY_INIT_1(STAT, jmi_extobj_t, jmi_extobj_array_t, tmp_1, 2, 1, 2)
+    JMI_ARR(STACK, jmi_extobj_t, jmi_extobj_array_t, tmp_1, 2, 1)
+    JMI_ARRAY_INIT_1(STACK, jmi_extobj_t, jmi_extobj_array_t, tmp_1, 2, 1, 2)
     memcpy(&jmi_array_ref_1(tmp_1, 1), &_myEOs_1_0, 2 * sizeof(jmi_extobj_t));
     _z_2 = (func_CCodeGenExternalTests_TestExtObjectArray1_get_y_exp2(tmp_1));
     JMI_DYNAMIC_FREE()

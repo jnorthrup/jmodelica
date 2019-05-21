@@ -187,6 +187,13 @@ aspect PrettyPrint {
 		return os.toString();
 	}
 	
+	public static String ASTNode.prettyPrintWithSep(java.util.List<? extends ASTNode> l, String sep) {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		CodeStream str = new NotNullCodeStream(os);
+		prettyPrintWithSep(l, prettyPrinter, str, "", sep);
+		return os.toString();
+	}
+
 	/**
 	 * Prints an ArrayList of any type of ASTNode, adding <code>sep</code> between nodes.
 	 * 
@@ -536,8 +543,11 @@ aspect PrettyPrint {
 	// For debugging
 	public void SrcLibNode.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.formatln("%s%structured library '%s' at '%s'", indent, 
-				(getStructured() ? "S" : "Uns"), name(), getFileName());
+				(getStructured() ? "S" : "Uns"), name(), dirName());
 	}
+
+	syn boolean SrcComponentClause.isEnumComponentClause() = false;
+	eq SrcEnumComponentClause.isEnumComponentClause() = true;
 
     public void SrcComponentClause.prettyPrint(Printer p, CodeStream str, String indent) {
         if (getRedeclare()) {
@@ -569,7 +579,17 @@ aspect PrettyPrint {
         p.print(getTypeArraySubscriptsOpt(), str, indent);
         
         str.print(" ");
-        getSrcComponentDecls().prettyPrintWithSep(p, str, indent, ", ");
+        if (isEnumComponentClause()) {
+            str.print("(");
+            if (hasSrcComponentDecl()) {
+                getSrcComponentDecls().prettyPrintWithSep(p, str, indent, ", ");
+            } else {
+                str.print(":");
+            }
+            str.print(")");
+        } else {
+            getSrcComponentDecls().prettyPrintWithSep(p, str, indent, ", ");
+        }
         
         p.print(getSrcConstrainingClauseOpt(), str, indent);
     }
@@ -1254,10 +1274,6 @@ aspect FlatPrettyPrint {
     }
 
     public abstract void FEnumSpecification.prettyPrint(Printer p, CodeStream str, String indent);
-    
-    public void FEnumUnspecified.prettyPrint(Printer p, CodeStream str, String indent) {
-    	str.print(":");
-    }
 
     public void FEnumLiteralList.prettyPrint(Printer p, CodeStream str, String indent) {
     	getFEnumLiterals().prettyPrintWithSep(p, str, indent, ", ");
@@ -1266,6 +1282,14 @@ aspect FlatPrettyPrint {
     public void FEnumLiteral.prettyPrint(Printer p, CodeStream str, String indent) {
 		p.print(getName(), str, indent);
 		p.print(getFStringCommentOpt(), str, indent);
+    }
+
+    public void InstEnumLiteral.prettyPrint(Printer p, CodeStream str, String indent) {
+		str.print(indent, name());
+        SrcStringComment comment = myStringComment();
+        if (comment != null) {
+            comment.prettyPrint(p, str, indent);
+        }
     }
 
     public void FStringComment.prettyPrint(Printer p, CodeStream str, String indent) {
@@ -1783,7 +1807,7 @@ aspect FlatPrettyPrint {
 	 */
 	protected void FBuiltInFunctionCall.prettyPrintArguments(Printer p, CodeStream str, String indent) {
 		String pre = "";
-		for (FExp exp : childFExps()) {
+		for (FExp exp : myArgs()) {
 			str.print(pre);
 			p.print(exp, str, indent);
 			pre = SEP;
@@ -1812,6 +1836,16 @@ aspect FlatPrettyPrint {
             str.print(SEP, "priority=");
             p.print(getPriority(), str, indent);
         }
+    }
+
+    @Override
+    protected void FDelayIndicator.prettyPrintArguments(Printer p, CodeStream str, String indent) {
+        myDelayExp().prettyPrintArguments(p, str, indent);
+    }
+
+    @Override
+    protected void FSpatialDistIndicator.prettyPrintArguments(Printer p, CodeStream str, String indent) {
+        mySpatialDistExp().prettyPrintArguments(p, str, indent);
     }
 
 	syn String FBuiltInFunctionCall.builtInName();
@@ -1864,6 +1898,9 @@ aspect FlatPrettyPrint {
     eq FReinit.builtInName()             = "reinit";
     eq FDelayExp.builtInName()           = "delay";
     eq FSpatialDistExp.builtInName()     = "spatialDistribution";
+    eq FFirstDelayIndicator.builtInName()= "delayIndicatorFirst";
+    eq FSecondDelayIndicator.builtInName()= "delayIndicatorSecond";
+    eq FSpatialDistIndicator.builtInName()= "spatialDistIndicator";
 	eq FAssert.builtInName()             = "assert";
 	eq FIdentity.builtInName()           = "identity";
 	eq FDiagonal.builtInName()           = "diagonal";
@@ -1882,7 +1919,7 @@ aspect FlatPrettyPrint {
     eq FDecouple.builtInName()           = "Subtask.decouple";
 	eq FSemiLinearExp.builtInName()      = "semiLinear";
 	eq FInStream.builtInName()           = "inStream";
-	eq FDerStream.builtInName()         = "derStream";
+	eq FDerStream.builtInName()          = "derStream";
     eq FExInStream.builtInName()         = "inStreamExpansion";
 	eq FActualStream.builtInName()       = "actualStream";
 	eq FGetInstanceName.builtInName()    = "getInstanceName";

@@ -25,6 +25,14 @@ import org.jmodelica.util.values.Evaluator;
 
 aspect SrcAnnotations {
 
+    public SrcAnnotationNode InstComponentDecl.srcClassAnnotation(String ... path) {
+        return myInstClass().getSrcClassDecl().srcAnnotation(new SrcAnnotationNode.InstEvaluator(this), path);
+    }
+
+    public SrcAnnotationNode InstExtends.srcClassAnnotation(String ... path) {
+        return myInstClass().getSrcClassDecl().srcAnnotation(new SrcAnnotationNode.InstEvaluator(this), path);
+    }
+
     public SrcAnnotationNode SrcClassDecl.srcAnnotation(String ... path) { 
         return srcAnnotation(SrcAnnotationNode.defaultEvaluator(), path);
     }
@@ -36,7 +44,7 @@ aspect SrcAnnotations {
         return srcAnnotation(SrcAnnotationNode.defaultEvaluator(), path);
     }
     public SrcAnnotationNode InstComponentDecl.srcAnnotation(String ... path) {
-        return SrcAnnotationNode.createFor(srcAnnotationProvider(), new SrcAnnotationNode.InstEvaluator(this), path);
+        return SrcAnnotationNode.createFor(srcAnnotationProvider(), new SrcAnnotationNode.InstEvaluator(containingInstNode()), path);
     }
 
     public SrcAnnotationNode SrcExtendsClause.srcAnnotation(String ... path) {
@@ -85,14 +93,6 @@ aspect SrcAnnotations {
     public SrcAnnotationNode SrcComment.srcAnnotation(Evaluator<SrcExp> evaluator, String ... path) {
         return SrcAnnotationNode.createFor(this, evaluator, path);
     }
-
-
-
-    class InstClassDecl     implements SrcAnnotationNode.InstEvaluator.Context {}
-    class InstComponentDecl implements SrcAnnotationNode.InstEvaluator.Context {}
-    class InstExtends       implements SrcAnnotationNode.InstEvaluator.Context {}
-    class InstExternal      implements SrcAnnotationNode.InstEvaluator.Context {}
-
 
 
     /*******************
@@ -163,21 +163,17 @@ aspect SrcAnnotations {
 
         public static class InstEvaluator implements Evaluator<SrcExp> {
             
-            private Context context;
+            private InstContext context;
             
-            public InstEvaluator(Context context) {
+            public InstEvaluator(InstContext context) {
                 this.context = context;
             }
             
             @Override
             public ConstValue evaluate(SrcExp evaluable) {
-                FExp fexp = context.dynamicFExp(evaluable.instantiate());
-                return fexp.evaluateValue();
+                return context.ceval(evaluable);
             }
             
-            public interface Context {
-                public FExp dynamicFExp(FExp exp);
-            }
         }
     }
 
@@ -185,7 +181,9 @@ aspect SrcAnnotations {
      * AnnotationProvider for modifications and annotations in the SourceTree.
      * See overview on AnnotationProvider for more info.
      */ 
-    public interface SrcAnnotationProvider extends AnnotationProvider<SrcAnnotationProvider, SrcExp> {}
+    public interface SrcAnnotationProvider extends AnnotationProvider<SrcAnnotationProvider, SrcExp> {
+        public SrcClassDecl enclosingClassDecl();
+    }
     
     /**
      * immutable AnnotationProvider used to obtain the annotations from elements which can have annotations. 
@@ -458,6 +456,11 @@ aspect SrcAnnotations {
 
         public RootAnnotationProviderProxy(T owningNode) {
             this.owningNode = owningNode;
+        }
+
+        @Override
+        public SrcClassDecl enclosingClassDecl() {
+            return owningNode.enclosingClassDecl();
         }
 
         @Override
@@ -807,6 +810,11 @@ aspect SrcAnnotations {
         }
 
         @Override
+        public SrcClassDecl enclosingClassDecl() {
+            return provider.enclosingClassDecl();
+        }
+
+        @Override
         public SrcExp annotationValue() {
             return null;
         }
@@ -869,6 +877,16 @@ aspect SrcAnnotations {
         }
 
         @Override
+        public SrcClassDecl enclosingClassDecl() {
+            /*
+             * Currently (2019-04-25) there are two uses of SrcAnnotationsIteratorProvider.
+             * It is ok to use get(0) in both cases since there is at least one provider
+             * and all providers have the same enclosing class.
+             */
+            return providers.get(0).enclosingClassDecl();
+        }
+
+        @Override
         public SrcExp annotationValue() {
             return null;
         }
@@ -916,6 +934,11 @@ aspect SrcAnnotations {
 
         public ExpValueProvider(SrcExp exp) {
             this.exp = exp;
+        }
+
+        @Override
+        public SrcClassDecl enclosingClassDecl() {
+            return exp.enclosingClassDecl();
         }
 
         @Override

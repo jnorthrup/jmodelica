@@ -164,7 +164,8 @@ aspect AliasElimination {
     syn boolean FAbstractVariable.canBeAlias() = false;
     eq FVariable.canBeAlias() = !getFAccess().myDerFV(order() + 1).isDummyDerivativeVariable() 
             && !isPreVariable() && !isNonDummyDerivativeVariable()
-            && !isInput() && !isOutput() && !isIndependentParameter();
+            && !isInput() && !isOutput() && !isIndependentParameter()
+            && !isInterface();
 
     syn int FExp.aliasSign() = 1;
     eq FNegExp.aliasSign()   = -getFExp().aliasSign();
@@ -541,11 +542,23 @@ aspect AliasElimination {
      */
     syn boolean FVariable.shouldEliminateTemporary() = 
         isTemporary() && 
-        nonDefiningUses().size() <= 1 && 
         definingUses().size() <= 1 && 
+        (nonDefiningUses().size() <= 1 || (definingUses().size() == 1 && definingUses().iterator().next().myFEquation().isOkInlineTemporaries())) && 
         !isPreVariable() && myPreVariable().isUnknown() && 
         (definingUses().isEmpty() || !definingUses().iterator().next().myFEquation().generatesEvents()) && 
         !isDifferentiatedVariable() && !isDerivativeVariable();
+
+    syn boolean FAbstractEquation.isOkInlineTemporaries() = false;
+    eq FEquation.isOkInlineTemporaries() = getRight().isOkInlineTemporaries();
+    
+    syn boolean FExp.isOkInlineTemporaries() = false;
+    eq FAccessExp.isOkInlineTemporaries() = true;
+    /* This rule is needed to sort out dynamic state selection in equations inlined from resolve 
+       function in Modelica.Mechanics.MultiBody.Examples.Constraints.RevoluteConstraint */
+    eq FDotMulExp.isOkInlineTemporaries() = getLeft().isTempAccess() && getRight().isTempAccess();
+    
+    syn boolean FExp.isTempAccess() = false;
+    eq FAccessExp.isTempAccess() = myFV().isTemporary();
 
 	/**
 	 * Inline all non-defining uses of variable, and remove equation defining it.
@@ -571,14 +584,25 @@ aspect AliasElimination {
             } else {
                 return false;
             }
-		}
-		
-		if (nonDefiningUses().isEmpty())
-			value.removeFromUses();
-		value.parent = null;
-		
-		for (FAccessExp use : nonDefiningUses())
-			use.replaceMe(value.unboundCopy());
+        }
+        
+        if (value.isAccess()) {
+            for (FAccessExp use : nonDefiningUses()) {
+                FExp copy = value.treeCopy();
+                value.asFAccessExp().myFV().nonDefiningUses().add(copy.asFAccessExp());
+                value.asFAccessExp().myFV().uses().add(copy.asFAccessExp());
+                use.replaceMe(copy);
+            }
+            value.removeFromUses();
+        } else {
+            if (nonDefiningUses().isEmpty()) {
+                value.removeFromUses();
+            }
+            value.parent = null;
+            for (FAccessExp use : nonDefiningUses()) {
+                use.replaceMe(value.unboundCopy());
+            }
+        }
         return true;
 	}
 	

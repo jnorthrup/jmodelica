@@ -383,14 +383,21 @@ BOOLEAN generate_event_switches compiler experimental true
 Setting this option to false can give unexpected results."
 
 ********************************************************************************
-BOOLEAN relational_time_events compiler user true
+BOOLEAN relational_time_events compiler deprecated true
 
-"If enabled, then relational operators are allowed to generate time events."
+"Deprecated, use option time_events instead. If enabled, then relational 
+operators are allowed to generate time events."
+
+********************************************************************************
+BOOLEAN time_events compiler user true
+
+"If enabled, operators are allowed to generate time events."
 
 ********************************************************************************
 BOOLEAN event_output_vars compiler user false
 
-"If enabled, output variables are generated for each generated event."
+"If enabled, output variables are added to model description for each generated 
+state event indicator."
 
 ********************************************************************************
 BOOLEAN disable_smooth_events compiler experimental false
@@ -430,26 +437,6 @@ STRING cc_extra_flags compiler uncommon ":O1"
 ":O1" ":O2"
 
 "Optimization level for c-code compilation"
-
-********************************************************************************
-INTEGER cc_split_element_limit compiler uncommon 1000
-
-"When generating code for large systems, the code is split into multiple 
-functions and files for performance reasons. This option controls how many 
-scalar elements can be evaluated by a function. Value less than 1 indicates 
-no split."
-
-********************************************************************************
-INTEGER cc_split_function_limit compiler uncommon 20
-
-"When generating code for large systems, the code is split into multiple 
-functions and files for performance reasons. This option controls how many 
-functions can be generated in a file. Value less than 1 indicates no split."
-
-********************************************************************************
-BOOLEAN dynamic_states compiler uncommon true
-
-"If enabled, dynamic states will be calculated and generated."
 
 ********************************************************************************
 STRING MODELICAPATH compiler internal ""
