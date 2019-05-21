@@ -93,7 +93,7 @@ aspect SimpleLookup {
         if (qName.isGlobal()) {
             cd = simpleLookupGlobalScope(qName.next()).getClassDecl();
         } else {
-            cd = simpleLookupIncludeImports(qName.next()).getClassDecl();
+            cd = simpleLookupDefaultScope(qName.next()).getClassDecl();
         }
 
         while (cd != null && qName.hasNext()) {
@@ -339,6 +339,7 @@ aspect SimpleLookup {
         }
         return res;
     }
+    syn ResolvedAccess SrcClassDecl.simpleLookupDefaultScope(String name) = simpleLookupIncludeImports(name);
 
     /**
      * Lookup a predefined type, function or operator in global scope. Has to be an unqualified classname.
@@ -411,6 +412,7 @@ aspect SimpleLookup {
     /**
      * Lookup in contained classes, components and extended classes.
      * Has to be an unqualified classname.
+     * Method doesn't lookup in surrounding classes.
      * This method returns the unknown class when the class isn't found.
      */
     syn lazy ResolvedAccess SrcFullClassDecl.simpleLookupMemberScope(String name) {
