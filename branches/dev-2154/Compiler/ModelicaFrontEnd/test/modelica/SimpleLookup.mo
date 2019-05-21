@@ -143,7 +143,7 @@ model ClassLookup
             methodResult="
 SimpleLookup.ClassLookup
 ->
-Unknown
+SimpleLookup.ClassLookup
 
 SimpleLookup.ClassLookup
 ->
@@ -175,11 +175,53 @@ SimpleLookup.ClassLookup.WithComponent.'!quoted!'.'#//symbol%'
 
 SimpleLookup.ClassLookup.Imported.NoneImported
 ->
-Unknown
+SimpleLookup.ClassLookup.WithComponent.'!quoted!'
 
 
 ")})));
 end ClassLookup;
+
+model SurroundingLookup 
+    model A
+        model SurroundingTest
+            annotation(__JModelica(UnitTesting(tests={
+            SourceMethodTestCase(
+                name="Relative",
+                description="External functions: simple func, all default",
+                methodName="testSimpleClassLookup",
+                argumentTypes={"[Ljava.lang.String;"},
+                arguments={{"SimpleLookup.SurroundingLookup.A.SurroundingTest", "SimpleLookup.RelativeLookup", 
+                            "SimpleLookup.SurroundingLookup.A.SurroundingTest", "A",
+                            "SimpleLookup.SurroundingLookup.A.SurroundingTest", "SimpleLookup.SurroundingLookup",
+                            "SimpleLookup.SurroundingLookup.A.SurroundingTest", "SurroundingLookup",
+                            "SimpleLookup.SurroundingLookup.A.SurroundingTest", "ClassLookup"}
+                },
+                methodResult="
+SimpleLookup.SurroundingLookup.A.SurroundingTest
+->
+SimpleLookup.RelativeLookup
+
+SimpleLookup.SurroundingLookup.A.SurroundingTest
+->
+SimpleLookup.SurroundingLookup.A
+
+SimpleLookup.SurroundingLookup.A.SurroundingTest
+->
+SimpleLookup.SurroundingLookup
+
+SimpleLookup.SurroundingLookup.A.SurroundingTest
+->
+SimpleLookup.SurroundingLookup
+
+SimpleLookup.SurroundingLookup.A.SurroundingTest
+->
+SimpleLookup.ClassLookup
+        
+        ")})));
+        end SurroundingTest;
+    end A;
+
+end SurroundingLookup;
 
 model RelativeLookup
     model A 
@@ -207,11 +249,11 @@ SimpleLookup.RelativeLookup.A
 
 SimpleLookup.RelativeLookup.A
 ->
-Unknown
+SimpleLookup.RelativeLookup.C
 
 SimpleLookup.RelativeLookup.A
 ->
-Unknown
+SimpleLookup.RelativeLookup.C
 
 ")})));
 end RelativeLookup; 
