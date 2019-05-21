@@ -1193,7 +1193,6 @@ aspect DebugHelpers {
 
     public String FRealLitExp.toString()         { return Double.toString(getValue()); }
     public String FIntegerLitExp.toString()      { return Integer.toString(getValue()); }
-    public String FOverflowIntLitExp.toString()  { return getString(); }
     public String FBooleanLitExpTrue.toString()  { return "true"; }
     public String FBooleanLitExpFalse.toString() { return "false"; }
     public String FStringLitExp.toString()       { return "\"" + getString() + "\""; }
