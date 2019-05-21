@@ -1534,7 +1534,7 @@ aspect Scalarization {
     }
 
     public FAccess FAccessFull.scalarize(Scalarizer s) {
-        if (!inFunction()) {
+        if (!inFunction() && !isGlobalAccess()) {
             StringBuilder name = new StringBuilder();
             getFAccessPart(0).scalarizeAsString(name);
             for (int i = 1; i < getNumFAccessPart(); i++) {
@@ -1584,8 +1584,9 @@ aspect Scalarization {
     }
     
     public FSubscript FColonSubscript.scalarize(Scalarizer s) {
-        if (indexName == null)
-            throw new UnsupportedOperationException("Colon subscript without index name");
+        if (indexName == null) {
+            return treeCopy();
+        }
         return indexName.treeCopy().createFSubscript();
     }
     
@@ -1615,6 +1616,9 @@ aspect Scalarization {
 	}
 	
 	public FExp FRangeExp.scalarizeExp(Scalarizer s) {
+        if (indexNames == null) {
+            return treeCopy();
+        }
         return scalarizeWithIndex(s, indexNames[0].treeCopy());
 	}
 	

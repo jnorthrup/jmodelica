@@ -672,7 +672,7 @@ aspect FileNames {
     	
     }
     public String SrcLibNode.fileName() {
-        return getStructured() ? myPackageFile().getPath() : getFileName();
+        return getStructured() ? myPackageFile().getPath() : getLoadInfo().getPath();
     }
     public String InstLibNode.fileName() {
         return actualInstClass().fileName();
@@ -680,19 +680,13 @@ aspect FileNames {
     
     syn String ASTNode.dirName() = 
     	fileName().replaceFirst("^[^\\\\/]*$", ".").replaceFirst("[\\\\/][^\\\\/]*$", "");
-//    syn String ASTNode.dirName() {
-//    	String res = fileName();
-//    	if (res == null)
-//    		return res;
-//    	res = res.replaceFirst("^[^\\\\/]*$", ".");
-//    	return res.replaceFirst("[\\\\/][^\\\\/]*$", "");
-//    }
+    eq SrcLibNode.dirName() = getStructured() ? getLoadInfo().getPath() : super.dirName();
 
     inh String ASTNode.retrieveFileName();
     eq BaseNode.getChild().retrieveFileName()         = fileName();
-    eq SrcLibNode.getChild().retrieveFileName()          = fileName();
+    eq SrcLibNode.getChild().retrieveFileName()       = fileName();
     eq InstLibNode.getChild().retrieveFileName()      = getSrcClassDecl().fileName();
-    eq Program.getAnonymousClass().retrieveFileName() = ParserHandler.ANONYMOUS_CLASS_FILENAME;
+    eq Program.getAnonymousClass().retrieveFileName() = ParserHandler.ANONYMOUS_CLASS_FILENAME.getPath();
     
     public void Root.setFileName(String fName)             { this.fName = fName; }
     public void SrcStoredDefinition.setFileName(String fName) { this.fName = fName; }
@@ -1202,7 +1196,6 @@ aspect DebugHelpers {
 
     public String FRealLitExp.toString()         { return Double.toString(getValue()); }
     public String FIntegerLitExp.toString()      { return Integer.toString(getValue()); }
-    public String FOverflowIntLitExp.toString()  { return getString(); }
     public String FBooleanLitExpTrue.toString()  { return "true"; }
     public String FBooleanLitExpFalse.toString() { return "false"; }
     public String FStringLitExp.toString()       { return "\"" + getString() + "\""; }

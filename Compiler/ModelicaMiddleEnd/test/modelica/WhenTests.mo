@@ -30,8 +30,8 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 5, column 2, in file 'Compiler/ModelicaMiddleEnd/test/modelica/WhenTests.mo':
-  The reinit() operator is only allowed in when equations
+Error at line 5, column 2, in file '...':
+  The reinit() operator is only allowed in when clauses that are within an equation section.
 ")})));
 end ReinitErr1;
 
@@ -249,8 +249,8 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 7, column 9, in file 'Compiler/ModelicaMiddleEnd/test/modelica/WhenTests.mo':
-  The reinit() operator is only allowed in when equations
+Error at line 7, column 9, in file '...':
+  The reinit() operator is only allowed in when clauses that are within an equation section.
 ")})));
 end ReinitErr11;
 
