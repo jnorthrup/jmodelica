@@ -31,7 +31,7 @@ import beaver.Symbol;
 /**
  * Handle splitting strings into different parts of a qualified name.
  */
-public class QualifiedName {
+public class QualifiedName implements Iterator<String> {
     private static Constructor<? extends Scanner> scannerConstructor;
     private static int ID_TOKEN_VALUE;
     private static int EOF_TOKEN_VALUE;
