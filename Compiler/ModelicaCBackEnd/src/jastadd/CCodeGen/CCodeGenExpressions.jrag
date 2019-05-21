@@ -369,6 +369,17 @@ aspect CCodeGenExpressions {
     }
 
     @Override
+    public void FIntegerLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        if (getValue() == Integer.MAX_VALUE) {
+            str.print("INT_MAX");
+        } else if (getValue() == Integer.MIN_VALUE) {
+            str.print("INT_MIN");
+        } else {
+            super.prettyPrint_C(p, str, indent);
+        }
+    }
+
+    @Override
     public void FEnumLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         str.print(ceval().intValue());
         if (convertToDouble(p)) {
