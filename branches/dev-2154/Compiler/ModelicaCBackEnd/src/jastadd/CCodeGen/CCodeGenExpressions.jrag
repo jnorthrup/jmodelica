@@ -363,21 +363,32 @@ aspect CCodeGenExpressions {
     @Override
     public void FLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         str.print(toString());
-        if (shouldWrap(p)) {
+        if (convertToDouble(p)) {
             str.print(".0");
+        }
+    }
+
+    @Override
+    public void FIntegerLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        if (getValue() == Integer.MAX_VALUE) {
+            str.print("INT_MAX");
+        } else if (getValue() == Integer.MIN_VALUE) {
+            str.print("INT_MIN");
+        } else {
+            super.prettyPrint_C(p, str, indent);
         }
     }
 
     @Override
     public void FEnumLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         str.print(ceval().intValue());
-        if (shouldWrap(p)) {
+        if (convertToDouble(p)) {
             str.print(".0");
         }
     }
 
-    syn boolean FLitExp.shouldWrap(CodePrinter p) = inIfCondition() || inFunctionArg() || p.inGeneratedFunctionCall(this);
-    eq FRealLitExp.shouldWrap(CodePrinter p) = false;
+    syn boolean FLitExp.convertToDouble(CodePrinter p) = inIfCondition() || inFunctionArg() || p.inGeneratedFunctionCall(this);
+    eq FRealLitExp.convertToDouble(CodePrinter p) = false;
 
     public abstract boolean CodePrinter.inGeneratedFunctionCall(FExp exp);
     public boolean CPrettyPrinter.inGeneratedFunctionCall(FExp exp) {
@@ -712,7 +723,7 @@ aspect CCodeGenExpressions {
      * Helper, generates an regular variable use
      */
     public String FAbstractVariable.genUse_C(CodePrinter.ExecuteCodePrinter p, FArraySubscripts fas, String type) {
-        if (fas == null || fas.ndims() == 0) {
+        if (fas == null || !fas.isSlice() ) {
             return p.name(this);
         } else {
             return fas.genFunctionArrayUse_C(p.codePrinter(), p.name(this), type);
@@ -1392,6 +1403,44 @@ aspect CCodeGenExpressions {
         str.print(")");
     }
 
+    @Override
+    public void FDelayIndicator.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        if (!p.inInitialSystem()) {
+            p.printVarDecls(getDelay(), str, indent);
+        }
+    }
+
+    @Override
+    public void FDelayIndicator.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        if (!p.inInitialSystem()) {
+            p.printPreSteps(getDelay(), str, indent);
+        }
+    }
+
+    @Override
+    public void FDelayIndicator.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
+        if (!p.inInitialSystem()) {
+            p.printPostSteps(getDelay(), str, indent);
+        }
+    }
+
+    @Override
+    public void FDelayIndicator.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        if (p.inInitialSystem()) {
+            str.format("JMI_DELAY_INITIAL_EVENT_RES");
+        } else {
+            str.format("%s(jmi, %d, ", jmiDelayFunction_C(), myDelayIndex());
+            p.print(getDelay(), str, indent);
+            str.print(")");
+        }
+    }
+
+    syn String FDelayIndicator.jmiDelayFunction_C();
+    eq FFirstDelayIndicator.jmiDelayFunction_C()  = "jmi_delay_first_event_indicator_exp";
+    eq FSecondDelayIndicator.jmiDelayFunction_C() = "jmi_delay_second_event_indicator_exp";
+
+    syn nta FExp FDelayIndicator.getDelay() = myDelayExp().getDelay().copySymbolic();
+
     /**
      * Generate temp declarations for the initialization of spatialDistribution blocks.
      */
@@ -1523,6 +1572,46 @@ aspect CCodeGenExpressions {
         p.printPostSteps(getX(), str, indent);
         p.printPostSteps(getPositiveVelocity(), str, indent);
     }
+
+    @Override
+    public void FSpatialDistIndicator.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        if (!p.inInitialSystem()) {
+            p.printVarDecls(getX(), str, indent);
+            p.printVarDecls(getPositiveVelocity(), str, indent);
+        }
+    }
+
+    @Override
+    public void FSpatialDistIndicator.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        if (!p.inInitialSystem()) {
+            p.printPreSteps(getX(), str, indent);
+            p.printPreSteps(getPositiveVelocity(), str, indent);
+        }
+    }
+
+    @Override
+    public void FSpatialDistIndicator.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
+        if (!p.inInitialSystem()) {
+            p.printPostSteps(getX(), str, indent);
+            p.printPostSteps(getPositiveVelocity(), str, indent);
+        }
+    }
+
+
+    @Override
+    public void FSpatialDistIndicator.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        if (p.inInitialSystem()) {
+            str.format("JMI_DELAY_INITIAL_EVENT_RES");
+        } else {
+            str.format("jmi_spatialdist_event_indicator_exp(jmi, %d, ", mySpatialDistIndex());
+            p.print(getX(), str, indent);
+            str.print(", ");
+            p.print(getPositiveVelocity(), str, indent);
+            str.print(")");
+        }
+    }
+    syn nta FExp FSpatialDistIndicator.getX()                = mySpatialDistExp().getX().copySymbolic();
+    syn nta FExp FSpatialDistIndicator.getPositiveVelocity() = mySpatialDistExp().getPositiveVelocity().copySymbolic();
 
     /*=========================================================================
      * Subscripted Expression

@@ -41,13 +41,18 @@ aspect CodeSplitter {
         
         public CodeSplitter(CodePrinter p, CodeStream str, String indent,
                 boolean allowDirect, String funcName, OptionRegistry or, ArrayList<T> elements) {
+            this(p, str, indent, allowDirect, funcName, or, or.getIntegerOption("cc_split_function_limit"), elements);
+        }
+
+        public CodeSplitter(CodePrinter p, CodeStream str, String indent,
+                boolean allowDirect, String funcName, OptionRegistry or, int chunkLimit, ArrayList<T> elements) {
             this.funcName = funcName;
             this.str = str;
             this.p = p;
             this.indent = indent;
             this.allowDirect = allowDirect;
             this.itemLimit  = cap(or.getIntegerOption("cc_split_element_limit"));
-            this.chunkLimit = cap(or.getIntegerOption("cc_split_function_limit"));
+            this.chunkLimit = cap(chunkLimit);
             add(elements);
         }
         

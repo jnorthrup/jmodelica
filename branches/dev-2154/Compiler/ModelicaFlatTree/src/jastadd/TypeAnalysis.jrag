@@ -269,7 +269,7 @@ aspect FlatTypeAnalysis {
     eq FInitArrayStmt.type()         = getType();
     
     syn FType FInitArrayStmt.getType() {
-        if (getShallow()) {
+        if (getShallow() && getNumSize() > 0) {
             MutableSize ms = new MutableSize(getNumSize());
             for (FExp size : getSizes()) {
                 ms.append(size);
@@ -631,6 +631,8 @@ aspect FlatTypeAnalysis {
 
     eq FDelayExp.type() = getFExp().type();
     eq FSpatialDistExp.type() = getIn0().type();
+
+    eq FIndicatorExp.type() = FRealType.SCALAR;
 
     /**
      * The scalar type of the expression.

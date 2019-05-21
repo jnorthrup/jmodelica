@@ -2017,39 +2017,29 @@ aspect AnnotationAPI {
         public boolean hasAnnotation();
     }
 
-    public class SrcSingeltonProvider {
-        @Override
-        public boolean hasAnnotation() {
-            return provider.hasAnnotation();
-        }
+    @Override
+    public boolean SrcSingeltonProvider.hasAnnotation() {
+        return provider.hasAnnotation();
     }
 
-    public class ExpValueProvider {
-        @Override
-        public boolean hasAnnotation() {
-            return annotationSubNodes().iterator().hasNext();
-        }
+    @Override
+    public boolean ExpValueProvider.hasAnnotation() {
+        return annotationSubNodes().iterator().hasNext();
     }
 
-    public class SrcAnnotationsIteratorProvider {
-        @Override
-        public boolean hasAnnotation() {
-            return providers.size()>0 && annotationSubNodes().iterator().hasNext();
-        }
+    @Override
+    public boolean SrcAnnotationsIteratorProvider.hasAnnotation() {
+        return providers.size()>0 && annotationSubNodes().iterator().hasNext();
     }
 
-    public class SrcModification {
-        @Override
-        public boolean hasAnnotation() {
-            return annotationSubNodes().iterator().hasNext();
-        }
+    @Override
+    public boolean SrcModification.hasAnnotation() {
+        return annotationSubNodes().iterator().hasNext();
     }
 
-    public abstract class RootAnnotationProviderProxy {
-    	@Override
-        public boolean hasAnnotation() {
-            return hasProvider();
-        }
+    @Override
+    public boolean RootAnnotationProviderProxy.hasAnnotation() {
+        return hasProvider();
     }
 
     @Override

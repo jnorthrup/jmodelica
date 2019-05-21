@@ -6323,11 +6323,9 @@ public
   init y as ArrayTests.Constructors.Iterators.ArrayIterTest9.R[2];
   init temp_1 as ArrayTests.Constructors.Iterators.ArrayIterTest9.R[2];
   (temp_2) := ArrayTests.Constructors.Iterators.ArrayIterTest9.f1(x[1]);
-  temp_1[1].a := temp_2.a;
-  temp_1[1].b := temp_2.b;
+  temp_1[1] := temp_2;
   (temp_3) := ArrayTests.Constructors.Iterators.ArrayIterTest9.f1(x[2]);
-  temp_1[2].a := temp_3.a;
-  temp_1[2].b := temp_3.b;
+  temp_1[2] := temp_3;
   for i1 in 1:2 loop
    y[i1].a := temp_1[i1].a;
    y[i1].b := temp_1[i1].b;
