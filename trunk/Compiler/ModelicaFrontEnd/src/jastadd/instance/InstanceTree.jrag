@@ -859,6 +859,7 @@ aspect Environments {
     eq InstArrayExpandableConnector.getInstComponentDecl(int i).myInstNode()         = 
         template(i).myInstNode();
 
+    inh InstNode InstModification.myParentInstNode();
     inh InstNode InstNode.myParentInstNode();
     eq Root.getChild().myParentInstNode()     = null;
     eq InstNode.getChild().myParentInstNode() = this;
