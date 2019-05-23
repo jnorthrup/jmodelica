@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+# Fixed ; Minor ; Compiler ; #5772
+Fixed exception from negated alias in assign statement left hand side.
+
 # Fixed ; Minor ; Compiler ; #5756
 Fixed c-code generation bug for some array assignments which led to segfaults.
 
