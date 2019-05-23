@@ -2830,12 +2830,9 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
 
 				
 				if(solver->use_steepest_descent_flag) {
-					block->options->jacobian_calculation_mode = jmi_central_diffs_jacobian_calculation_mode;
 					jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%s><message:%s>",
 								 "jmi_kinsol_solver", block->label, "Attempting steepest descent iterations"); 
 					flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, block->f_scale);
-					
-					block->options->jacobian_calculation_mode = jmi_onesided_diffs_jacobian_calculation_mode;
 					solver->use_steepest_descent_flag = 0;
 					if(flag == KIN_INITIAL_GUESS_OK) {
 						/* this is just to capture value of flag during debugging*/
@@ -2849,9 +2846,9 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
 						solver->use_steepest_descent_flag = 0;
 					}
 					if (flag != KIN_SUCCESS) {
-                    jmi_log_node(log, logError, "Error", "Could not converge attempting steepest descent in <block: %s>",
-                                 block->label);
-                }
+						jmi_log_node(log, logError, "Error", "Could not converge attempting steepest descent in <block: %s>",
+									 block->label);
+					}
 				}
 
                 if (flag != KIN_SUCCESS) {
