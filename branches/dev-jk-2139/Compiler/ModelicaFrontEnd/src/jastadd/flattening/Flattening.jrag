@@ -1714,14 +1714,14 @@ aspect Flattening {
 
     public TypePrefixInputOutput InstAssignable.createTypePrefixInputOutput() {
         if (isConnectorVariable()) {
-            if (isFlow()) {
-                return TypePrefixInputOutput.FLOW;
-            } else if (isStream()) {
-                return TypePrefixInputOutput.STREAM;
-            } else if (isInput()) {
+            if (isInput()) {
                 return TypePrefixInputOutput.INPUT;
             } else if (isOutput()) {
                 return TypePrefixInputOutput.OUTPUT;
+            } else if (isFlow()) {
+                return TypePrefixInputOutput.FLOW;
+            } else if (isStream()) {
+                return TypePrefixInputOutput.STREAM;
             } else {
                 return TypePrefixInputOutput.POTENTIAL;
             }

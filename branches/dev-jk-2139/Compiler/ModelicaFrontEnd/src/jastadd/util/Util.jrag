@@ -1417,7 +1417,7 @@ aspect ComponentDeclMethods {
             (isInput() || isOutput() || isConnectorVariable()) && !isProtected() && isPublicVar();
 
     inh boolean InstComponentDecl.isTopLevel();
-    eq InstComponentDecl.getChild().isTopLevel() = (isAssignable() || isConnector() || isConnectorVariable()) && isTopLevel();
+    eq InstComponentDecl.getChild().isTopLevel() = (isAssignable() || isConnector()) && isTopLevel();
     eq InstClassDecl.getChild().isTopLevel()     = true;
     eq Root.getChild().isTopLevel()              = false;
 

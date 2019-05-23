@@ -21,11 +21,11 @@ public enum TypePrefixInputOutput {
     }
     
     public boolean inputCausality() {
-        return this == INPUT || this == FLOW || this == STREAM;
+        return this == INPUT || this == FLOW;
     }
     
     public boolean outputCausality() {
-        return this == OUTPUT || this == POTENTIAL;
+        return this == OUTPUT || this == POTENTIAL || this == STREAM;
     }
     
     @Override
