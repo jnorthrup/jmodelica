@@ -234,4 +234,62 @@ void func_CCodeGenCompositeStatementTests_RecordStmt3_f_def0(R3_2_r* r_v, R3_2_r
 ")})));
     end RecordStmt3;
 
+    model RecordStmt4
+        
+        record R1
+            Real[1] x;
+        end R1;
+        
+        function f
+            input Real x;
+            constant Real[:] c = {1};
+            output R1[:] y = {R1(c)};
+        algorithm
+            annotation(Inline=false);
+        end f;
+        
+        R1[:] y = f(time);
+
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="RecordStmt4",
+        description="Primitive array in record array initialization",
+        template="
+$C_functions$
+",
+        generatedCode="
+void func_CCodeGenCompositeStatementTests_RecordStmt4_f_def0(jmi_real_t x_v, R1_0_ra* y_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STACK, R1_0_r, R1_0_ra, y_an, 1, 1)
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
+    JMI_ARR(STACK, R1_0_r, R1_0_ra, temp_1_a, 1, 1)
+    jmi_real_t i1_0i;
+    jmi_int_t i1_0ie;
+    jmi_int_t i1_0in;
+    jmi_real_t i2_1i;
+    jmi_int_t i2_1ie;
+    jmi_int_t i2_1in;
+    if (y_a == NULL) {
+        JMI_ARRAY_INIT_1(STACK, R1_0_r, R1_0_ra, y_an, 1, 1, 1)
+        JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
+        jmi_array_rec_1(y_an, 1)->x = tmp_1;
+        y_a = y_an;
+    }
+    JMI_ARRAY_INIT_1(STACK, R1_0_r, R1_0_ra, temp_1_a, 1, 1, 1)
+    jmi_array_rec_1(temp_1_a, 1)->x = JMI_GLOBAL(CCodeGenCompositeStatementTests_RecordStmt4_f_c);
+    i1_0in = 0;
+    i1_0ie = floor((1) - (1));
+    for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
+        i2_1in = 0;
+        i2_1ie = floor((1) - (1));
+        for (i2_1i = 1; i2_1in <= i2_1ie; i2_1i = 1 + (++i2_1in)) {
+            jmi_array_ref_1(jmi_array_rec_1(y_a, i1_0i)->x, i2_1i) = jmi_array_val_1(jmi_array_rec_1(temp_1_a, i1_0i)->x, i2_1i);
+        }
+    }
+    JMI_DYNAMIC_FREE()
+    return;
+}
+")})));
+    end RecordStmt4;
+
 end CCodeGenCompositeStatementTests;
