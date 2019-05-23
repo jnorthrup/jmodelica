@@ -328,13 +328,17 @@ aspect AliasElimination {
 		for (ASTNode n : this)
 			n.enableAliasRewrite();
 	}
-	
-	public void FAccessExp.enableAliasRewrite() {
-		super.enableAliasRewrite();
-		rewriteAlias = true;
-		is$Final = false;
-	}
-	
+
+    public void FAccessExp.enableAliasRewrite() {
+        super.enableAliasRewrite();
+        rewriteAlias = !isLHSAssignStmt();
+        is$Final = false;
+    }
+
+    inh boolean FAccessExp.isLHSAssignStmt();
+    eq BaseNode.getChild().isLHSAssignStmt() = false;
+    eq FAssignStmt.getLeft().isLHSAssignStmt() = true;
+
 	public void FAssignStmt.enableAliasRewrite() {
 		super.enableAliasRewrite();
 		rewriteAlias = true;
