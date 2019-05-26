@@ -698,7 +698,7 @@ abstract public class TestAnnotationizerHelper {
 			problems = e.getProblems();
 		}
 		handleCompilerProblems(problems);
-		return ipr.lookupInstClassQualified(className).target();
+        return ipr.instantiateModel(className);
 	}
 
     /**

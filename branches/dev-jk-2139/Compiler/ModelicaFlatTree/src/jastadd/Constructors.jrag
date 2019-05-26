@@ -330,21 +330,28 @@ aspect Constructors {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), eqns, guard, elseClause);
     }
 
-	/**
-	 * Create an access from a class name.
-	 */
-	public static InstAccess InstAccess.fromName(String name) {
-		String[] parts = name.split("\\.");
-		if (parts.length == 1) {
-			return new InstParseAccess(parts[0]);
-		} else {
-			List<InstAccess> l = new List<InstAccess>();
-			for (String part : parts)
-				l.add(new InstParseAccess(part));
-			return new InstDot(l);
-		}
-	}
-	
+    /**
+     * Create an access from a class name.
+     */
+    public static InstAccess InstAccess.fromName(String... names) {
+        ArrayList<InstAccess> l = new ArrayList<>();
+        for (String name : names) {
+            String[] parts = name.split("\\.");
+            if (parts.length == 1) {
+                l.add(new InstParseAccess(parts[0]));
+            } else {
+                for (String part : parts) {
+                    l.add(new InstParseAccess(part));
+                }
+            }
+        }
+        if (l.size() == 1) {
+            return l.get(0);
+        } else {
+            return new InstDot(new List<InstAccess>(l));
+        }
+    }
+
 	/**
 	 * Constructs an FForIndex with a temporary index variable and a 
 	 *        range expression starting at 1 as the in expression.
