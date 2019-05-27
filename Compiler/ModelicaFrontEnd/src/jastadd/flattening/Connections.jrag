@@ -540,8 +540,8 @@ aspect Connections {
             }
             FExp e = null;
             for (ConnectionSetEntry cse : this) 
-                e = cse.buildFlow(f, e);
-            FExp zero = fst.createZeroExp(f);
+                e = cse.buildFlow(e);
+            FExp zero = fst.createZeroExp();
             f.addNormalEquation(new FEquation(e, zero));
         }
 
@@ -566,7 +566,7 @@ aspect Connections {
             for (ConnectionSetEntry e : this) {
                 if (e.isOutside()) {
                     FExp left = e.createFAccessExp();
-                    FExp right = expandInStreamExp(e, null, e.createZeroExp(f));
+                    FExp right = expandInStreamExp(e, null, e.createZeroExp());
                     f.addNormalEquation(new FEquation(left, right));
                 }
             }
@@ -650,7 +650,7 @@ aspect Connections {
         public void generateEquations(Flattener f) {
             if (size() == 1) {
                 // Cell that is not connected to in array in expandable connector
-                f.addNormalEquation(first().createZeroEquation(f));
+                f.addNormalEquation(first().createZeroEquation());
             } else {
                 FExp e1 = null;
                 for (ConnectionSetEntry cse : this) {
@@ -974,19 +974,19 @@ aspect Connections {
         /**
          * Create a zero expression suitable for this entry.
          */
-        public FExp createZeroExp(Flattener f) {
+        public FExp createZeroExp() {
             FType t = cd.type();
             if (access.hasFArraySubscripts() && access.getFArraySubscripts().accessNdims() == 0) {
                 t = t.scalarType();
             }
-            return t.flattenZeroLiteral(f);
+            return t.flattenZeroLiteral();
         }
 
         /**
          * Create an equation setting the variable of this entry to zero.
          */
-        public FAbstractEquation createZeroEquation(Flattener f) {
-            return new FEquation(createFAccessExp(), createZeroExp(f));
+        public FAbstractEquation createZeroEquation() {
+            return new FEquation(createFAccessExp(), createZeroExp());
         }
 
         /**
@@ -994,8 +994,8 @@ aspect Connections {
          * 
          * Used to build up flow equations.
          */
-        public FExp buildFlow(Flattener f, FExp e) {
-            return createFAccessExp().appendSum(f, e, outside, cd.type());
+        public FExp buildFlow(FExp e) {
+            return createFAccessExp().appendSum(e, outside, cd.type());
         }
 
         public int hashCode() {
@@ -1452,7 +1452,7 @@ aspect OverconstrainedConnections {
 			right.setName(new FAccessString(func.qualifiedName()));
             right.addArg(cse1.createFAccessExp());
             right.addArg(cse2.createFAccessExp());
-            right.setFType(func.functionType().flatten(f, null, true));
+            right.setFType(func.functionType().flatten(Flattener.expressionFlattener(), null, true));
 			FAbstractEquation eqn;
 			if (!s.isUnknown() && s.numElements() == 0) 
 				eqn = new FFunctionCallEquation(new List<FFunctionCallLeft>(), right);

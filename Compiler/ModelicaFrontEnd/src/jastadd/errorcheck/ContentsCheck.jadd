@@ -73,7 +73,7 @@ aspect ContentCheck {
     
     public void FReinit.contentCheck(ErrorCheckType checkType) {
         if (!inWhen() || inAlgorithm()) 
-            error("The reinit() operator is only allowed in when clauses that are within an equation section.");
+            error("The reinit() operator is only allowed in when equations");
     }
 	
 	public void InstExternal.contentCheck(ErrorCheckType checkType) {

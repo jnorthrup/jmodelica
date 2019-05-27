@@ -1970,7 +1970,6 @@ annotation(__JModelica(UnitTesting(tests={
         name="GlobalConstantRecordArray2",
         description="",
         variability_propagation=false,
-        cc_split_function_limit_globals=2,
         template="
 $C_global_temps$
 $C_model_init_eval_independent_globals$
@@ -1997,11 +1996,6 @@ R1_0_r* jmi_global_tmp_2(jmi_t* jmi) {
     return tmp_2;
 }
 
-/*** SPLIT FILE ***/
-
-jmi_array_t* jmi_global_tmp_1(jmi_t* jmi);
-R1_0_r* jmi_global_tmp_2(jmi_t* jmi);
-
 R2_1_r* jmi_global_tmp_3(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
     R2_1_r* tmp_3;
@@ -2019,13 +2013,6 @@ jmi_array_t* jmi_global_tmp_4(jmi_t* jmi) {
     JMI_ARRAY_INIT_1(DATA, jmi_real_t, jmi_array_t, tmp_4, 2, 1, 2)
     return tmp_4;
 }
-
-/*** SPLIT FILE ***/
-
-jmi_array_t* jmi_global_tmp_1(jmi_t* jmi);
-R1_0_r* jmi_global_tmp_2(jmi_t* jmi);
-R2_1_r* jmi_global_tmp_3(jmi_t* jmi);
-jmi_array_t* jmi_global_tmp_4(jmi_t* jmi);
 
 R1_0_r* jmi_global_tmp_5(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
@@ -2049,15 +2036,6 @@ R2_1_r* jmi_global_tmp_6(jmi_t* jmi) {
     return tmp_6;
 }
 
-/*** SPLIT FILE ***/
-
-jmi_array_t* jmi_global_tmp_1(jmi_t* jmi);
-R1_0_r* jmi_global_tmp_2(jmi_t* jmi);
-R2_1_r* jmi_global_tmp_3(jmi_t* jmi);
-jmi_array_t* jmi_global_tmp_4(jmi_t* jmi);
-R1_0_r* jmi_global_tmp_5(jmi_t* jmi);
-R2_1_r* jmi_global_tmp_6(jmi_t* jmi);
-
 R3_2_ra* jmi_global_tmp_7(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(HEAP, R3_2_r, R3_2_ra, tmp_7, -1, 1)
@@ -2077,16 +2055,6 @@ int model_init_eval_independent_globals_0(jmi_t* jmi) {
     JMI_DYNAMIC_FREE()
     return ef;
 }
-
-/*** SPLIT FILE ***/
-
-jmi_array_t* jmi_global_tmp_1(jmi_t* jmi);
-R1_0_r* jmi_global_tmp_2(jmi_t* jmi);
-R2_1_r* jmi_global_tmp_3(jmi_t* jmi);
-jmi_array_t* jmi_global_tmp_4(jmi_t* jmi);
-R1_0_r* jmi_global_tmp_5(jmi_t* jmi);
-R2_1_r* jmi_global_tmp_6(jmi_t* jmi);
-R3_2_ra* jmi_global_tmp_7(jmi_t* jmi);
 
 int model_init_eval_independent_globals_0(jmi_t* jmi);
 

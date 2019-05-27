@@ -151,6 +151,10 @@ aspect Flattening {
             return fc; // TODO: Remove this method
         }
         
+        public static Flattener expressionFlattener() {
+            return new Flattener(null); // TODO: Provide proper context
+        }
+        
         public boolean isFlattened(InstNode n) {
             return flattenedNodes.contains(n.qualifiedTypeName());
         }
@@ -252,7 +256,7 @@ aspect Flattening {
         }
         
         public void contribute(InstNode n) {
-            n.contribute(this, fc);
+            n.contribute(fc);
         }
     }
     
@@ -485,7 +489,7 @@ aspect Flattening {
             flattenUsedFuncsAndEnums(f);
             ffd.updateRecordArraySizes();
             
-            contribute(f, ffd);
+            contribute(ffd);
         }
     }
 
@@ -1706,7 +1710,7 @@ aspect Flattening {
         fv.setFAccess(name);
         fv.setLocation(this);
         
-        contribute(f, fv);
+        contribute(fv);
         
         return fv;
     }
@@ -3372,19 +3376,19 @@ aspect AttributeContributer {
          * This method is called during flattening of components. All
          * expressions that are added must be flattened.
          */
-        protected void contribute(Flattener f, InstAssignable src, FVariable dest) {}
+        protected void contribute(InstAssignable src, FVariable dest) {}
 
         /**
          * This method is called during flattening of functions. All
          * expressions that are added must be flattened.
          */
-        protected void contribute(Flattener f, InstBaseClassDecl src, FFunctionDecl dest) {}
+        protected void contribute(InstBaseClassDecl src, FFunctionDecl dest) {}
 
         /**
          * This method is called during flattening of the model. All
          * expressions that are added must be flattened.
          */
-        protected void contribute(Flattener f, InstNode src, FClass dest) {}
+        protected void contribute(InstNode src, FClass dest) {}
 
         /**
          * This method is called in order to determine if an attribute should
@@ -3454,25 +3458,25 @@ aspect AttributeContributer {
     }
     
     public class InstAssignable {
-        public <N extends FVariable> N contribute(Flattener f, N variable) {
+        public <N extends FVariable> N contribute(N variable) {
             for (AttributeContributer contributer : attributeContributers())
-                contributer.contribute(f, this, variable);
+                contributer.contribute(this, variable);
             return variable;
         }
     }
     
     public class InstBaseClassDecl {
-        public <N extends FFunctionDecl> N contribute(Flattener f, N function) {
+        public <N extends FFunctionDecl> N contribute(N function) {
             for (AttributeContributer contributer : attributeContributers())
-                contributer.contribute(f, this, function);
+                contributer.contribute(this, function);
             return function;
         }
     }
     
     public class InstNode {
-        public FClass contribute(Flattener f, FClass fClass) {
+        public FClass contribute(FClass fClass) {
             for (AttributeContributer contributer : attributeContributers())
-                contributer.contribute(f, this, fClass);
+                contributer.contribute(this, fClass);
             return fClass;
         }
     }

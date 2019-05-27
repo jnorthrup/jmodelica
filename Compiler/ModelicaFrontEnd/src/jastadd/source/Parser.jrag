@@ -55,12 +55,12 @@ aspect Parsers {
         }
     }
 
-    public SourceRoot ParserHandler.parseModel(UtilInterface uif, LoadInfo loadInfo) 
+    public SourceRoot ParserHandler.parseModel(UtilInterface uif, String name) 
       throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
-        ModelicaCompiler.log.info("Parsing " + loadInfo.getPath() + "...");
+        ModelicaCompiler.log.info("Parsing " + name + "...");
         SourceRoot sr;
         try {
-            sr = parseFile(uif, loadInfo);
+            sr = parseFile(uif, name);
         } catch (ParserException e) {
             CompilerException ce = new CompilerException();
             ce.addProblem(e.getProblem());
@@ -68,21 +68,21 @@ aspect Parsers {
         }
         //loadOptions(sr);
         for (SrcStoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
-            sd.setFileName(loadInfo.getPath());
+            sd.setFileName(name);
         }
         return sr;
     }
     
-    public SourceRoot ParserHandler.parseModel(UtilInterface uif, Collection<LoadInfo> loadInfos) 
+    public SourceRoot ParserHandler.parseModel(UtilInterface uif, String[] names) 
             throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
         SourceRoot sr = new SourceRoot(new Program());
         uif.transferRoot(sr);
-        for (LoadInfo loadInfo : loadInfos) {
-            File f = new File(loadInfo.getPath());
-            LoadInfo tmpInfo = loadInfo;
+        for (String name : names) {
+            File f = new File(name);
+            String name_tmp = name;
             if (f.isDirectory()) 
-                tmpInfo = loadInfo.withPath(SrcLibNode.packageFile(f));
-            SourceRoot sr_tmp = (tmpInfo.getPath() != null) ? parseModel(uif, tmpInfo) : null;
+                name_tmp = SrcLibNode.packageFile(f);
+            SourceRoot sr_tmp = (name_tmp != null) ? parseModel(uif, name_tmp) : null;
             if (!uif.getOptionRegistry().getBooleanOption("ignore_within")) {
                 String lib = null;
                 if (sr_tmp != null && sr_tmp.isFileInLibrary()) 
@@ -91,14 +91,14 @@ aspect Parsers {
                     lib = f.getParent();
                 if (lib != null) {
                     String type = f.isDirectory() ? "Directory" : "File";
-                    ModelicaCompiler.log.warning("%s '%s' is part of library at '%s', using library instead.", type, loadInfo.getPath(), lib);
-                    loadInfo = loadInfo.withPath(lib);
-                    f = new File(lib);
+                    ModelicaCompiler.log.warning("%s '%s' is part of library at '%s', using library instead.", type, name, lib);
+                    name = lib;
+                    f = new File(name);
                 }
             }
             if (f.isDirectory()) {
-                if (!sr.getProgram().getLibraryList().addLibrary(loadInfo, SrcLibNode.LoadReason.COMMANDLINE)) 
-                    ModelicaCompiler.log.error(String.format("Error: The directory '%s' is not a Modelica library.", loadInfo.getPath()));
+                if (!sr.getProgram().getLibraryList().addLibrary(name, SrcLibNode.LoadReason.COMMANDLINE)) 
+                    ModelicaCompiler.log.error(String.format("Error: The directory '%s' is not a Modelica library.", name));
             } else {
                 for (SrcStoredDefinition sd : sr_tmp.getProgram().getUnstructuredEntitys()) 
                     sr.getProgram().addUnstructuredEntity(sd);
@@ -112,13 +112,12 @@ aspect Parsers {
      * These five methods are the only with references to the package containing 
      * the parser. Refine when needed.
      */
-    public beaver.Parser ParserHandler.createModelicaParser(AbstractModelicaScanner<ASTNode<?>> scanner, LoadInfo loadInfo) {
+    public beaver.Parser ParserHandler.createModelicaParser(AbstractModelicaScanner<ASTNode<?>> scanner, String fileName) {
         org.jmodelica.modelica.parser.ModelicaParser parser = 
             new org.jmodelica.modelica.parser.ModelicaParser();
         parser.setLineBreakMap(scanner.getLineBreakMap());
         parser.setFormattingRecorder(scanner.getFormattingRecorder());
-        parser.setFileName(loadInfo.getPath());
-        parser.setLoadInfo(loadInfo);
+        parser.setFileName(fileName);
         return parser;
     }
 
@@ -156,15 +155,15 @@ aspect Parsers {
         return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.access_scalar;
     }
 
-    public SourceRoot ParserHandler.parseFile(UtilInterface uif, LoadInfo loadInfo) 
+    public SourceRoot ParserHandler.parseFile(UtilInterface uif, String fileName) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
-        return parseModelicaFile(uif, loadInfo);
+        return parseModelicaFile(uif, fileName);
     }
 
-    public SourceRoot ParserHandler.parseString(UtilInterface uif, String str, LoadInfo loadInfo) 
+    public SourceRoot ParserHandler.parseString(UtilInterface uif, String str, String fileName) 
             throws CompilerException, beaver.Parser.Exception, IOException {
         try {
-            return parseStringNoCatch(uif, str, loadInfo);
+            return parseStringNoCatch(uif, str, fileName);
         } catch (ParserException e) {
             CompilerException ce = new CompilerException();
             ce.addProblem(e.getProblem());
@@ -172,9 +171,9 @@ aspect Parsers {
         }
     }
 
-    public SourceRoot ParserHandler.parseStringNoCatch(UtilInterface uif, String str, LoadInfo loadInfo) 
+    public SourceRoot ParserHandler.parseStringNoCatch(UtilInterface uif, String str, String fileName) 
             throws CompilerException, beaver.Parser.Exception, IOException {
-        return parseModelicaString(uif, str, loadInfo);
+        return parseModelicaString(uif, str, fileName);
     }
 
     public SrcExp ParserHandler.parseExpString(String str)
@@ -187,32 +186,32 @@ aspect Parsers {
         return parseModelicaAnonymousClassString(code, restriction, targetName);
     }
 
-    public SourceRoot ParserHandler.parseModelicaFile(UtilInterface uif, LoadInfo loadInfo) 
+    public SourceRoot ParserHandler.parseModelicaFile(UtilInterface uif, String fileName) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
-        Reader reader = fileReader(uif, loadInfo.getPath());
+        Reader reader = fileReader(uif, fileName);
         try {
-            return parseModelicaResource(uif, reader, loadInfo);
+            return parseModelicaResource(uif, reader, fileName);
         } finally {
             reader.close();
         }
     }
 
-    public SourceRoot ParserHandler.parseModelicaString(UtilInterface uif, String str, LoadInfo loadInfo) 
+    public SourceRoot ParserHandler.parseModelicaString(UtilInterface uif, String str, String fileName) 
             throws ParserException, beaver.Parser.Exception, IOException {
-        return parseModelicaResource(uif, new StringReader(str), loadInfo);
+        return parseModelicaResource(uif, new StringReader(str), fileName);
     }
 
-    public SourceRoot ParserHandler.parseModelicaResource(UtilInterface uif, Reader resource, LoadInfo loadInfo) 
+    public SourceRoot ParserHandler.parseModelicaResource(UtilInterface uif, Reader resource, String fileName) 
             throws ParserException, beaver.Parser.Exception, IOException {
         AbstractModelicaScanner<ASTNode<?>> scanner = createModelicaScanner(resource);
-        beaver.Parser parser = createModelicaParser(scanner, loadInfo);
+        beaver.Parser parser = createModelicaParser(scanner, fileName);
         SourceRoot sr = (SourceRoot) parser.parse(scanner);
         sr.setUtilInterface(uif);
-        sr.setFileName(loadInfo.getPath());
+        sr.setFileName(fileName);
         return sr;
     }
     
-    public static final LoadInfo ParserHandler.EXP_FILENAME = LoadInfo.create("<predefined string>");
+    public static final String ParserHandler.EXP_FILENAME = "<predefined string>";
 
     public SrcExp ParserHandler.parseModelicaExpString(String str)
             throws ParserException, beaver.Parser.Exception, IOException {
@@ -230,7 +229,7 @@ aspect Parsers {
         return exp;
     }
 
-    public static final LoadInfo ParserHandler.ANONYMOUS_CLASS_FILENAME = LoadInfo.create("<command line argument>");
+    public static final String ParserHandler.ANONYMOUS_CLASS_FILENAME = "<command line argument>";
 
     public SrcBaseClassDecl ParserHandler.parseModelicaAnonymousClassString(String code, SrcRestriction restriction, String targetName)
             throws ParserException, beaver.Parser.Exception, IOException {
@@ -242,15 +241,15 @@ aspect Parsers {
         return cl;
     }
 
-    public SrcElement ParserHandler.parseElement(String code, LoadInfo parentLoadInfo)
+    public SrcElement ParserHandler.parseElement(String code, String parentSourceFile)
             throws ParserException, beaver.Parser.Exception, IOException {
-        return parseElement(code, parentLoadInfo, false);
+        return parseElement(code, parentSourceFile, false);
     }
 
-    public SrcElement ParserHandler.parseElement(String code, LoadInfo parentLoadInfo, boolean preserveFormatting)
+    public SrcElement ParserHandler.parseElement(String code, String parentSourceFile, boolean preserveFormatting)
             throws ParserException, beaver.Parser.Exception, IOException {
         AbstractModelicaScanner<ASTNode<?>> scanner = createModelicaScanner(new StringReader(code));
-        beaver.Parser parser = createModelicaParser(scanner, parentLoadInfo);
+        beaver.Parser parser = createModelicaParser(scanner, parentSourceFile);
         SrcElement elem = (SrcElement) parser.parse(scanner, elementGoal());
         if (preserveFormatting) {
             scanner.getFormattingRecorder().postParsing(elem);
@@ -258,14 +257,14 @@ aspect Parsers {
         return elem;
     }
 
-    public SrcAbstractEquation ParserHandler.parseAbstractEquation(String code, LoadInfo parentLoadInfo)
+    public SrcAbstractEquation ParserHandler.parseAbstractEquation(String code, String parentSourceFile)
             throws ParserException, beaver.Parser.Exception, IOException {
-        return parseAbstractEquation(code, parentLoadInfo, false);
+        return parseAbstractEquation(code, parentSourceFile, false);
     }
-    public SrcAbstractEquation ParserHandler.parseAbstractEquation(String code, LoadInfo parentLoadInfo,
+    public SrcAbstractEquation ParserHandler.parseAbstractEquation(String code, String parentSourceFile,
             boolean preserveFormatting) throws ParserException, beaver.Parser.Exception, IOException {
         AbstractModelicaScanner scanner = createModelicaScanner(new StringReader(code));
-        beaver.Parser parser = createModelicaParser(scanner, parentLoadInfo);
+        beaver.Parser parser = createModelicaParser(scanner, parentSourceFile);
         SrcAbstractEquation eqn = (SrcAbstractEquation) parser.parse(scanner, abstractEquationGoal());
         if (preserveFormatting) {
             scanner.getFormattingRecorder().postParsing(eqn);
@@ -273,14 +272,14 @@ aspect Parsers {
         return eqn;
     }
 
-    public SrcArgument ParserHandler.parseModifier(String code, LoadInfo parentLoadInfo)
+    public SrcArgument ParserHandler.parseModifier(String code, String parentSourceFile)
             throws ParserException, beaver.Parser.Exception, IOException {
-        return parseModifier(code, parentLoadInfo, false);
+        return parseModifier(code, parentSourceFile, false);
     }
-    public SrcArgument ParserHandler.parseModifier(String code, LoadInfo parentLoadInfo,
+    public SrcArgument ParserHandler.parseModifier(String code, String parentSourceFile,
             boolean preserveFormatting) throws ParserException, beaver.Parser.Exception, IOException {
         AbstractModelicaScanner scanner = createModelicaScanner(new StringReader(code));
-        beaver.Parser parser = createModelicaParser(scanner, parentLoadInfo);
+        beaver.Parser parser = createModelicaParser(scanner, parentSourceFile);
         SrcArgument eqn = (SrcArgument) parser.parse(scanner, modifierGoal());
         if (preserveFormatting) {
             scanner.getFormattingRecorder().postParsing(eqn);
@@ -288,15 +287,15 @@ aspect Parsers {
         return eqn;
     }
 
-    public SrcAccess ParserHandler.parseAccessScalar(String code, LoadInfo parentLoadInfo) 
+    public SrcAccess ParserHandler.parseAccessScalar(String code, String parentSourceFile) 
             throws ParserException, beaver.Parser.Exception, IOException {
-        return parseAccessScalar(code, parentLoadInfo, false);
+        return parseAccessScalar(code, parentSourceFile, false);
     }
 
-    public SrcAccess ParserHandler.parseAccessScalar(String code, LoadInfo parentLoadInfo, boolean preserveFormatting) 
+    public SrcAccess ParserHandler.parseAccessScalar(String code, String parentSourceFile, boolean preserveFormatting) 
             throws ParserException, beaver.Parser.Exception, IOException {
         final AbstractModelicaScanner<ASTNode<?>> scanner = createModelicaScanner(new StringReader(code));
-        final beaver.Parser parser = createModelicaParser(scanner, parentLoadInfo);
+        final beaver.Parser parser = createModelicaParser(scanner, parentSourceFile);
         final SrcAccess srcAccess = (SrcAccess) parser.parse(scanner, accessScalarGoal());
 
         if (preserveFormatting) {

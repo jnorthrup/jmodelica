@@ -300,8 +300,7 @@ aspect CCodeGenGlobalVariables {
                 }
                 
                 CodeSplitter<FGlobalVariable> splitter = new CodeSplitter<FGlobalVariable>(p, str, next, false,
-                        "model_init_eval_independent_globals", fclass.myOptions(), 
-                        fclass.myOptions().getIntegerOption("cc_split_function_limit_globals"), globals) {
+                        "model_init_eval_independent_globals", fclass.myOptions(), globals) {
                     @Override
                     public void genDecl(FGlobalVariable element) {
                         
@@ -362,11 +361,9 @@ aspect CCodeGenGlobalVariables {
         ArrayList<GlobalVariableArrayElement> elements = new ArrayList<>();
         collectArrayElementsForGenGlobalVariableInitFunc_C(elements);
         
-        OptionRegistry opts = myOptions();
-        
         final CodeSplitter<GlobalVariableArrayElement> splitter = 
                 new CodeSplitter<GlobalVariableArrayElement>(p, str, next, true, "jmi_global_" + tempName_C(),
-                opts, opts.getIntegerOption("cc_split_function_limit_globals"), elements) {
+                myFClass().myOptions(), elements) {
             @Override
             protected void printFunctionHeader(int split) {
                 str.print("int ", funcName, "_", split, "(jmi_t* jmi, ", returnType, " ", tempName_C(), ")");

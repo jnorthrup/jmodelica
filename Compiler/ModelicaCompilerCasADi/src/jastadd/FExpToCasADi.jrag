@@ -383,10 +383,6 @@ aspect FExpToCasADi {
         }
     }
     
-    eq FGlobalAccessExp.toMX() {
-        return ceval().buildLiteral().toMX();
-    }
-    
     /**
      * Connects the use of a variable in an expression with
      * the symbolic and lazy MX for that variable. 
@@ -403,10 +399,6 @@ aspect FExpToCasADi {
             MXVec.add(toMX());
             return MXVec;
         }
-    }
-    
-    eq FGlobalAccessExp.toMXVector() {
-        return ceval().buildLiteral().toMXVector();
     }
     
     /**
