@@ -223,6 +223,53 @@ SimpleLookup.ClassLookup
 
 end SurroundingLookup;
 
+model EncapsulatedLookup 
+    encapsulated model A
+        model B
+            model encapsulatedLookup
+            annotation(__JModelica(UnitTesting(tests={
+            SourceMethodTestCase(
+                name="Relative",
+                description="External functions: simple func, all default",
+                methodName="testSimpleClassLookup",
+                argumentTypes={"[Ljava.lang.String;"},
+                arguments={{"SimpleLookup.EncapsulatedLookup.A.B.encapsulatedLookup", "EncapsulatedLookup",
+                            "SimpleLookup.EncapsulatedLookup.A.B.encapsulatedLookup", "A",
+                            "SimpleLookup.EncapsulatedLookup.A.B.encapsulatedLookup", "B",
+                            "SimpleLookup.EncapsulatedLookup.A.B.encapsulatedLookup", "SimpleLookup.EncapsulatedLookup.A.B",
+                            "SimpleLookup.EncapsulatedLookup.A.B.encapsulatedLookup", ".SimpleLookup.EncapsulatedLookup.A.B"
+                            }
+                },
+                methodResult="
+SimpleLookup.EncapsulatedLookup.A.B.encapsulatedLookup
+->
+Unknown
+
+SimpleLookup.EncapsulatedLookup.A.B.encapsulatedLookup
+->
+Unknown
+
+SimpleLookup.EncapsulatedLookup.A.B.encapsulatedLookup
+->
+SimpleLookup.EncapsulatedLookup.A.B
+
+SimpleLookup.EncapsulatedLookup.A.B.encapsulatedLookup
+->
+Unknown
+
+SimpleLookup.EncapsulatedLookup.A.B.encapsulatedLookup
+->
+SimpleLookup.EncapsulatedLookup.A.B
+
+
+        
+            ")})));
+            end encapsulatedLookup;
+        end B;
+    end A;
+
+end EncapsulatedLookup;
+
 model RelativeLookup
     model A 
         model B
