@@ -63,20 +63,33 @@ public class QualifiedName implements Iterator<String> {
     }
     
     private final boolean isGlobal;
-    private final ArrayList<String> names = new ArrayList<>();
+    private final ArrayList<String> names;
     private final boolean isUnQualifiedImport;
     private final Iterator<String> iterator;
 
     public QualifiedName(String name) {
         isUnQualifiedImport = name.endsWith(".*");
         isGlobal = name.startsWith(".");
+        names = new ArrayList<>();
         splitQualifiedClassName(name);
         iterator = names.iterator();
+    }
+    
+    private QualifiedName(QualifiedName orginal) {
+        isUnQualifiedImport = orginal.isUnQualifiedImport;
+        isGlobal = orginal.isGlobal;
+        names = orginal.names;
+        iterator =names.iterator();
+    }
+    
+    public QualifiedName resetedCopy() {
+        return new QualifiedName(this);
     }
 
     // Interpret name as global or not regardless of dot form or not.
     public QualifiedName(String name, boolean isGlobal) {
         isUnQualifiedImport = name.endsWith(".*");
+        names = new ArrayList<>();
         splitQualifiedClassName(name); 
         this.isGlobal = isGlobal; // Note: must be set after splitting
         iterator = names.iterator();
