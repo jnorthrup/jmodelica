@@ -189,7 +189,7 @@ aspect BLT{
                 } else {
                     BiPGraph nonRealG = new BiPGraph(nonRealEquations, isInitial);
                     Collection<SimpleEquationBlock> nonRealBlocks = nonRealG.computeNonRealBlocks(producer, stepUtil);
-                    eqnBlock = new EquationBlock(producer, component.computeBlockDependency(), nonRealBlocks, createSimpleBlocks(groupComponent(realEquations), producer));
+                    eqnBlock = producer.createEquationBlock(component.computeBlockDependency(), nonRealBlocks, createSimpleBlocks(groupComponent(realEquations), producer));
                     block = eqnBlock;
                 }
             }
@@ -280,6 +280,12 @@ aspect BLT{
             public abstract boolean useTearing();
             public abstract boolean duringTearing();
             public abstract String symbol();
+            public EquationBlock createEquationBlock(BlockDependency blockDependency, Collection<SimpleEquationBlock> nonRealBlocks, Collection<SimpleEquationBlock> realBlocks) {
+                return new EquationBlock(this, blockDependency, nonRealBlocks, realBlocks);
+            }
+            public TornEquationBlock createTornEquationBlock(BlockDependency blockDependency) {
+                return new TornEquationBlock(this, blockDependency);
+            }
         }
         public static final BlockProducer DEFAULT_BLOCK_PRODUCER = new DefaultBlockProducer();
         private final static class DefaultBlockProducer extends BlockProducer {
@@ -456,12 +462,12 @@ aspect BLT{
         }
     }
 
-    public BLT AbstractBiPGraph.computeDAEBLT(StepUtil stepUtil) {
-        return computeBLT(stepUtil, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, new BLT(), true, true, Collections.<AbstractBiPGraph.SCCContributor>emptyList());
+    public BLT AbstractBiPGraph.computeDAEBLT(StepUtil stepUtil, BLTInput bltInput) {
+        return computeBLT(stepUtil, bltInput.defaultBlockProducer(), new BLT(), true, true, Collections.<AbstractBiPGraph.SCCContributor>emptyList());
     }
 
-    public BLT AbstractBiPGraph.computeInitDAEBLT(StepUtil stepUtil) {
-        return computeBLT(stepUtil, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, new BLT(), true, false, Collections.<AbstractBiPGraph.SCCContributor>emptyList());
+    public BLT AbstractBiPGraph.computeInitDAEBLT(StepUtil stepUtil, BLTInput bltInput) {
+        return computeBLT(stepUtil, bltInput.defaultBlockProducer(), new BLT(), true, false, Collections.<AbstractBiPGraph.SCCContributor>emptyList());
     }
     
     public <T extends BLT> T AbstractBiPGraph.computeBLT(StepUtil stepUtil, EquationBlockFactory.BlockProducer producer, T blt, boolean handleHomotopy) {
@@ -3404,7 +3410,7 @@ aspect AutomaticTearing {
 
             @Override
             public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> TornEquationBlock tear(SCCBlock<E, V> block, BlockProducer producer, StepUtil stepUtil, boolean isInitial) {
-                TornEquationBlock teb = new TornEquationBlock(producer, block.computeBlockDependency());
+                TornEquationBlock teb = producer.createTornEquationBlock(block.computeBlockDependency());
                 tear(block, teb, stepUtil, isInitial);
                 return teb;
             }
