@@ -1014,7 +1014,7 @@ aspect Scalarization {
         if (left.inferType().isRecord()) {
             left.inferType().scalarRecordClauses(s, new FAccessEmpty(), left, right);
         } else {
-            s.add(this.setLocationOf(new FEquation(attrs, left.scalarize(s), right.scalarize(s))));
+            s.add(this.setLocationOf(createNode(attrs, left.scalarize(s), right.scalarize(s))));
         }
 	}
 	

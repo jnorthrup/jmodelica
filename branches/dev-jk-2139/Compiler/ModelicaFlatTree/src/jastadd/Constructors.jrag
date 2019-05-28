@@ -1297,7 +1297,11 @@ aspect InheritedFactoryMethods {
 	public FIfEquation   FIfEquation.createEmptyNode()   { return new FIfEquation(); }
 	public FWhenEquation FWhenEquation.createEmptyNode() { return new FWhenEquation(); }
 	public FElseEquation FElseEquation.createEmptyNode() { return new FElseEquation(); }
-	
+
+    public FEquation FEquation.createNode(List<FAttribute> attrs, FExp left, FExp right) {
+        return new FEquation(attrs, left, right);
+    }
+
 	public abstract FIfWhenStmt FIfWhenStmt.createEmptyNode();
 	public FIfStmt   FIfStmt.createEmptyNode()   { return new FIfStmt(); }
 	public FWhenStmt FWhenStmt.createEmptyNode() { return new FWhenStmt(); }
