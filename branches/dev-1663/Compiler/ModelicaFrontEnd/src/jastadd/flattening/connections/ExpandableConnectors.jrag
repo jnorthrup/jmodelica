@@ -567,8 +567,9 @@ aspect ExpandableConnectors {
                     }
                     if (tmpl.isExpandableConnector()) {
                         if (isArray()) {
-                            // Allow use of myInstClass() foc calculating array size
-                            res.parent = tmpl;
+                            // Allow use of myInstClass() for calculating array size
+                            res.parent = parent;
+                            // TODO: loop over sources and connect instead
                             connectExpandableArray(res, tmpl);
                             res.parent = null;
                         } else {
@@ -744,8 +745,8 @@ aspect ExpandableConnectors {
                     }
                     
                     private void calculateSize(Size ts) {
-                        // Calculate local size
                         if (ts == null) {
+                            // Local size not given, calculate it
                             ts = target.size();
                         }
                         if (fas != null) {
@@ -828,6 +829,8 @@ aspect ExpandableConnectors {
                     }
                     
                     public InstComponentDecl template() {
+                        // TODO: if connected via slice, we can't find the right component here, 
+                        //       need to send in when creating
                         return target.myInstComponentElement();
                     }
                     
