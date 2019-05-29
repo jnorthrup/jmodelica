@@ -72,8 +72,8 @@ aspect InstTypeAnalysis {
     eq InstNode.getChild().myInstForIndexType()                  = fUnknownType();
 
     syn nta FType InstExternalObject.getType() {
-        InstAccess con = InstAccess.fromName(myConstructor().qualifiedName());
-        InstAccess de  = InstAccess.fromName(myDestructor().qualifiedName());
+        InstAccess con = new InstGlobalAccess(InstAccess.fromName(myConstructor().qualifiedName()));
+        InstAccess de  = new InstGlobalAccess(InstAccess.fromName(myDestructor().qualifiedName()));
         return new FExternalObjectType(size(), getClassName().myInstClassDecl().qualifiedName(), con, de);
     }
 
