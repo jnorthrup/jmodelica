@@ -1552,7 +1552,7 @@ public class SCCBlock<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> e
         return containsHomotopy;
     }
     
-    public AbstractEquationBlock createEquationBlock(EquationBlockFactory.BlockProducer producer, StepUtil stepUtil, boolean isInitial) {
+    public AbstractEquationBlock createEquationBlock(BlockProducer producer, StepUtil stepUtil, boolean isInitial) {
         return EquationBlockFactory.createEquationBlock(this, producer, stepUtil, isInitial);
     }
 }

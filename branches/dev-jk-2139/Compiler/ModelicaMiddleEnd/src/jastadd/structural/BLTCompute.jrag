@@ -224,7 +224,7 @@ aspect BLTCompute {
         public Collection<FAbstractEquation> initialEquations();
     }
     public interface BLTInput extends BLTVariables, BLTEquations {
-        public EquationBlockFactory.BlockProducer defaultBlockProducer();
+        public BlockProducer defaultBlockProducer();
     }
     
     public class FClassBLTInput implements BLTInput {
@@ -289,8 +289,8 @@ aspect BLTCompute {
         }
         
         @Override
-        public EquationBlockFactory.BlockProducer defaultBlockProducer() {
-            return EquationBlockFactory.DEFAULT_BLOCK_PRODUCER;
+        public BlockProducer defaultBlockProducer() {
+            return BlockProducer.DEFAULT_BLOCK_PRODUCER;
         }
     }
     
