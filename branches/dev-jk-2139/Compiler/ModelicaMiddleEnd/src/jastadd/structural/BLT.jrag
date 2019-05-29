@@ -29,11 +29,11 @@ aspect BLT{
         public abstract boolean useTearing();
         public abstract boolean duringTearing();
         public abstract String symbol();
-        public EquationBlock createEquationBlock(BlockDependency blockDependency, Collection<SimpleEquationBlock> nonRealBlocks, Collection<SimpleEquationBlock> realBlocks) {
-            return new EquationBlock(this, blockDependency, nonRealBlocks, realBlocks);
+        public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> EquationBlock createEquationBlock(SCCBlock<E, V> block, Collection<SimpleEquationBlock> nonRealBlocks, Collection<SimpleEquationBlock> realBlocks) {
+            return new EquationBlock(this, block.computeBlockDependency(), nonRealBlocks, realBlocks);
         }
-        public TornEquationBlock createTornEquationBlock(BlockDependency blockDependency) {
-            return new TornEquationBlock(this, blockDependency);
+        public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> TornEquationBlock createTornEquationBlock(SCCBlock<E, V> block) {
+            return new TornEquationBlock(this, block.computeBlockDependency());
         }
         
         public static final BlockProducer DEFAULT_BLOCK_PRODUCER = new DefaultBlockProducer();
@@ -242,7 +242,7 @@ aspect BLT{
                 } else {
                     BiPGraph nonRealG = new BiPGraph(nonRealEquations, isInitial);
                     Collection<SimpleEquationBlock> nonRealBlocks = nonRealG.computeNonRealBlocks(producer, stepUtil);
-                    eqnBlock = producer.createEquationBlock(component.computeBlockDependency(), nonRealBlocks, createSimpleBlocks(groupComponent(realEquations), producer));
+                    eqnBlock = producer.createEquationBlock(component, nonRealBlocks, createSimpleBlocks(groupComponent(realEquations), producer));
                     block = eqnBlock;
                 }
             }
@@ -3416,7 +3416,7 @@ aspect AutomaticTearing {
 
             @Override
             public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> TornEquationBlock tear(SCCBlock<E, V> block, BlockProducer producer, StepUtil stepUtil, boolean isInitial) {
-                TornEquationBlock teb = producer.createTornEquationBlock(block.computeBlockDependency());
+                TornEquationBlock teb = producer.createTornEquationBlock(block);
                 tear(block, producer, teb, stepUtil, isInitial);
                 return teb;
             }
