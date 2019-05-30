@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+# Fixed ; Minor ; Compiler ; #5735
+Fixed exception during code generation caused by bug in temporary removal after function inlining.
+
 # Fixed ; Minor ; Compiler ; #5772
 Fixed exception from negated alias in assign statement left hand side.
 
