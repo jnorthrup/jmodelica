@@ -3787,8 +3787,6 @@ fclass NameTests.InheritFlowTest1
 equation
  - b1.af.x - b2.af.x = 0.0;
  b1.ap.x = b2.ap.x;
- b1.af.x = 0.0;
- b2.af.x = 0.0;
 end NameTests.InheritFlowTest1;
 ")})));
 end InheritFlowTest1;

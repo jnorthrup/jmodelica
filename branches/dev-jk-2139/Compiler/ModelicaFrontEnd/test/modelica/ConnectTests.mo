@@ -2627,21 +2627,31 @@ fclass ConnectTests.StreamTest6
  structural parameter Integer n = 2 /* 2 */;
  Real x[1];
  Real x[2];
- Real a[1].a;
- input Real a[1].b;
- Real a[1].c;
- input Real a[2].b;
- Real a[2].c;
+ potential Real a[1].a;
+ flow Real a[1].b;
+ stream Real a[1].c;
+ potential Real a[2].a;
+ flow Real a[2].b;
+ stream Real a[2].c;
+ Real b[1].a.a;
  Real b[1].a.b;
+ Real b[1].a.c;
+ Real b[2].a.a;
  Real b[2].a.b;
+ Real b[2].a.c;
 equation
  a[1].a = time;
- a[1].c = 2 * a[1].a;
- a[2].c = a[1].c * 2;
-  x[1] = a[2].c * time;
+ a[2].a = 2 * a[1].a;
+ a[1].c = a[2].a;
+ a[2].c = a[2].a * 2;
+ x[1] = a[2].c * time;
  x[2] = a[2].c + time;
+ a[1].a = b[1].a.a;
  - a[1].b + b[1].a.b = 0.0;
+ a[1].c = b[1].a.c;
+ a[2].a = b[2].a.a;
  - a[2].b + b[2].a.b = 0.0;
+ a[2].c = b[2].a.c;
 end ConnectTests.StreamTest6;
 ")})));
 end StreamTest6;
@@ -2706,9 +2716,18 @@ annotation(__JModelica(UnitTesting(tests={
         flatModel="
 fclass ConnectTests.Cardinality2
  potential Real x.a;
- constant Real x.b = 1;
+ potential Real x.b;
+ potential Real y.a;
+ potential Real y.b;
+ potential Real z.a;
+ potential Real z.b;
 equation
- x.a = 2 * time;
+ y.a = 2 * time;
+ x.b = 1;
+ x.a = y.a;
+ y.a = z.a;
+ x.b = y.b;
+ y.b = z.b;
 end ConnectTests.Cardinality2;
 ")})));
 end Cardinality2;
