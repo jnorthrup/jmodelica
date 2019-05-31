@@ -28,6 +28,10 @@ public enum TypePrefixInputOutput {
         return this == OUTPUT || this == POTENTIAL || this == STREAM;
     }
     
+    public boolean isConnectorPrefix() {
+        return this == POTENTIAL || this == FLOW || this == STREAM;
+    }
+    
     @Override
     public String toString() {
         return toString;

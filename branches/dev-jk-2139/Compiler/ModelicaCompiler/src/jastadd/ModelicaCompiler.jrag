@@ -1335,11 +1335,11 @@ public class ModelicaCompiler implements LogContainer {
     
         templates.generateCFiles(this, fc, createCGenerator(fc), sourceDir, name);
         templates.generateXMLFiles(this, fc, target.getXMLGenerator(fc), outDir, "modelDescription");
+        hookCodeGenerated(fc, outDir);
         
         fc.guidManager().setSourceFile(new File(outDir, "modelDescription.xml"));
         fc.guidManager().processDependentFiles();
         
-        hookCodeGenerated(fc, outDir);
         log.debug("... code generated.");
         ASTNode.endStep("generateCode()");
     }
