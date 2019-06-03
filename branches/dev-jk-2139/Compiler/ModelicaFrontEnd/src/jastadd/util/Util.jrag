@@ -1414,7 +1414,9 @@ aspect ComponentDeclMethods {
      */
     syn boolean InstComponentDecl.isTopLevelInputOutput() = false;
     eq InstAssignable.isTopLevelInputOutput() = isTopLevel() && !inExpandableConnector() && 
-            (isInput() || isOutput() || isConnectorVariable()) && !isProtected() && isPublicVar();
+            (isUnboundInput() || isOutput() || isConnectorVariable()) && !isProtected() && isPublicVar();
+
+    syn boolean InstAssignable.isUnboundInput() = isInput() && (!hasBindingExp() || inFunction());
 
     inh boolean InstComponentDecl.isTopLevel();
     eq InstComponentDecl.getChild().isTopLevel() = (isAssignable() || isConnector()) && isTopLevel();
