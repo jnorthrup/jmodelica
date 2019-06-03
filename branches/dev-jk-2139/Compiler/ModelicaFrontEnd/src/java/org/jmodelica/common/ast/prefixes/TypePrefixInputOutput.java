@@ -8,7 +8,8 @@ public enum TypePrefixInputOutput {
     OUTPUT("output"),
     POTENTIAL("potential"),
     FLOW("flow"),
-    STREAM("stream");
+    STREAM("stream"),
+    INSTREAM("inStream");
     
     private String toString;
     
@@ -21,7 +22,7 @@ public enum TypePrefixInputOutput {
     }
     
     public boolean inputCausality() {
-        return this == INPUT || this == FLOW;
+        return this == INPUT || this == FLOW || this == INSTREAM;
     }
     
     public boolean outputCausality() {
@@ -29,7 +30,7 @@ public enum TypePrefixInputOutput {
     }
     
     public boolean isConnectorPrefix() {
-        return this == POTENTIAL || this == FLOW || this == STREAM;
+        return this == POTENTIAL || this == FLOW || this == STREAM || this == INSTREAM;
     }
     
     @Override
