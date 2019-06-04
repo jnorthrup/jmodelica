@@ -323,6 +323,7 @@ aspect SimpleLookup {
     * with the given name. Has to be an unqualified classname.
     */
     inh ResolvedAccess SrcExtendsClause.simpleLookupFromExtends(String name);
+    eq SrcInlineExtendsClause.getChild().simpleLookupHelper(String name) = enclosingClassDecl().enclosingClassDecl().getParent().simpleLookupHelper(name);
     eq SrcFullClassDecl.getChild().simpleLookupFromExtends(String name) = simpleLookupLocalScope(name);
     eq Program.getChild().simpleLookupFromExtends(String name)       = simpleLookupDefaultScope(name);
 
@@ -540,7 +541,7 @@ aspect SimpleLookup {
 
     /**
      * Internal helper method which looks for the class with the given name among this class's super classes.
-     * Has to be an simpe (unqualified) classname.
+     * Has to be an simple (unqualified) classname.
      * This method returns the unknown class when the class isn't found.
      * Result is Cached.
      */
