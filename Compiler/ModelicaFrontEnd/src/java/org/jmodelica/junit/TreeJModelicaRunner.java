@@ -18,7 +18,6 @@ package org.jmodelica.junit;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.jmodelica.util.test.TestSpecification;

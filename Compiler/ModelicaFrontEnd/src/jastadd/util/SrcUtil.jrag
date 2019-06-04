@@ -84,17 +84,17 @@ aspect SrcUtil {
 //    syn boolean SrcClause.isElementList() = false;
 //    eq SrcElementList    .isElementList() = true;
 //    /**
-//     * Is this clause an public element list?
+//     * Is this clause a public element list?
 //     */
 //    syn boolean SrcClause  .isPublicElementList() = false;
 //    eq SrcPublicElementList.isPublicElementList() = true;
 //    /**
-//     * Is this clause an default element list?
+//     * Is this clause a default element list?
 //     */
 //    syn boolean SrcClause   .isDefaultElementList() = false;
 //    eq SrcDefaultElementList.isDefaultElementList() = true;
 //    /**
-//     * Is this clause an protected element list?
+//     * Is this clause a protected element list?
 //     */
 //    syn boolean SrcClause     .isProtectedElementList() = false;
 //    eq SrcProtectedElementList.isProtectedElementList() = true;
@@ -162,7 +162,7 @@ aspect SrcUtil {
 //    syn SrcComponentClause SrcElement.asComponentClause() = (SrcComponentClause) this;
 //
 //    /**
-//     * Is this element an extends caluse declaration?
+//     * Is this element an extends clause declaration?
 //     */
 //    syn boolean SrcElement.isExtendsClause() = false;
 //    eq SrcExtendsClause   .isExtendsClause() = true;
@@ -173,7 +173,7 @@ aspect SrcUtil {
 //    syn SrcExtendsClause SrcElement.asExtendsClause() = (SrcExtendsClause) this;
 //
 //    /**
-//     * Is this element an import caluse declaration?
+//     * Is this element an import clause declaration?
 //     */
 //    syn boolean SrcElement.isImportClause() = false;
 //    eq SrcImportClause    .isImportClause() = true;
@@ -208,17 +208,17 @@ aspect SrcUtil {
     syn boolean SrcClause.isElementList() = false;
     eq SrcElementList    .isElementList() = true;
     /**
-     * Is this clause an public element list?
+     * Is this clause a public element list?
      */
     syn boolean SrcClause  .isPublicElementList() = false;
     eq SrcPublicElementList.isPublicElementList() = true;
     /**
-     * Is this clause an default element list?
+     * Is this clause a default element list?
      */
     syn boolean SrcClause   .isDefaultElementList() = false;
     eq SrcDefaultElementList.isDefaultElementList() = true;
     /**
-     * Is this clause an protected element list?
+     * Is this clause a protected element list?
      */
     syn boolean SrcClause     .isProtectedElementList() = false;
     eq SrcProtectedElementList.isProtectedElementList() = true;
@@ -286,7 +286,7 @@ aspect SrcUtil {
     syn SrcComponentClause SrcElement.asComponentClause() = (SrcComponentClause) this;
 
     /**
-     * Is this element an extends caluse declaration?
+     * Is this element an extends clause declaration?
      */
     syn boolean SrcElement.isExtendsClause() = false;
     eq SrcExtendsClause   .isExtendsClause() = true;
@@ -297,7 +297,7 @@ aspect SrcUtil {
     syn SrcExtendsClause SrcElement.asExtendsClause() = (SrcExtendsClause) this;
 
     /**
-     * Is this element an import caluse declaration?
+     * Is this element an import clause declaration?
      */
     syn boolean SrcElement.isImportClause() = false;
     eq SrcImportClause    .isImportClause() = true;
