@@ -82,6 +82,11 @@ public class QualifiedName implements Iterator<String> {
         iterator = names.iterator();
     }
     
+    /**
+     * Copy this QualifiedName with the iterator reseted.
+     * This method does not reparse the name. 
+     * @return A copy of this QualifiedName with a new iterator
+     */
     public QualifiedName resetedCopy() {
         return new QualifiedName(this);
     }

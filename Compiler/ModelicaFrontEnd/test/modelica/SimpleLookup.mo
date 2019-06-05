@@ -186,8 +186,8 @@ model SurroundingLookup
         model SurroundingTest
             annotation(__JModelica(UnitTesting(tests={
             SourceMethodTestCase(
-                name="Relative",
-                description="External functions: simple func, all default",
+                name="SurroundingTest",
+                description="Check that lookup correctly looks in surrounding scopes",
                 methodName="testSimpleClassLookup",
                 argumentTypes={"[Ljava.lang.String;"},
                 arguments={{"SimpleLookup.SurroundingLookup.A.SurroundingTest", "SimpleLookup.RelativeLookup", 
@@ -229,15 +229,16 @@ model EncapsulatedLookup
             model encapsulatedLookup
             annotation(__JModelica(UnitTesting(tests={
             SourceMethodTestCase(
-                name="Relative",
-                description="External functions: simple func, all default",
+                name="Encapsulated",
+                description="Check that the lookup respects encapsulation",
                 methodName="testSimpleClassLookup",
                 argumentTypes={"[Ljava.lang.String;"},
                 arguments={{"SimpleLookup.EncapsulatedLookup.A.B.encapsulatedLookup", "EncapsulatedLookup",
                             "SimpleLookup.EncapsulatedLookup.A.B.encapsulatedLookup", "A",
                             "SimpleLookup.EncapsulatedLookup.A.B.encapsulatedLookup", "B",
                             "SimpleLookup.EncapsulatedLookup.A.B.encapsulatedLookup", "SimpleLookup.EncapsulatedLookup.A.B",
-                            "SimpleLookup.EncapsulatedLookup.A.B.encapsulatedLookup", ".SimpleLookup.EncapsulatedLookup.A.B"
+                            "SimpleLookup.EncapsulatedLookup.A.B.encapsulatedLookup", ".SimpleLookup.EncapsulatedLookup.A.B",
+                            "SimpleLookup.EncapsulatedLookup.A.B.encapsulatedLookup", "Real"
                             }
                 },
                 methodResult="
@@ -261,6 +262,9 @@ SimpleLookup.EncapsulatedLookup.A.B.encapsulatedLookup
 ->
 SimpleLookup.EncapsulatedLookup.A.B
 
+SimpleLookup.EncapsulatedLookup.A.B.encapsulatedLookup
+->
+Real
 
         
             ")})));
