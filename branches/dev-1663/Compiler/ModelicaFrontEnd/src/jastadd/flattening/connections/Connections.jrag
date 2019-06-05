@@ -742,6 +742,8 @@ aspect Connections {
         }
 
         public void addExpandableArrayMember(InstComponentDecl var, FAccess name) {
+            // TODO: this does not seem to handle when the expandable connector is connected in turn, 
+            //       i.e. no connection to outside an expandable connector
             // If var is present as inner, don't add it as outer
             if (getConnectionSet(ConnectionSetEntry.create(var, false, name)) == null)
                 addVar(ConnectionSetEntry.create(var, true, name));

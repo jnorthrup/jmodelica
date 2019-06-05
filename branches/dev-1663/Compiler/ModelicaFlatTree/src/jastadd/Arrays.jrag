@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import org.jmodelica.util.collections.ListUtil;
+import org.jmodelica.util.collections.IntIterator;
 
 aspect Arrays {
 
@@ -3969,7 +3970,20 @@ aspect ArrayHelpers {
 		public int last() {
 			return index.length > 0 ? index[index.length - 1] : -1;
 		}
-		
+        
+        /**
+         * Returns an iterator over the indices for each dimension.
+         */
+        public IntIterator iterator() {
+            return new IntIterator() {
+                int d = 0;
+                
+                public boolean hasNext() { return d < index.length; }
+                
+                public int next() { return index[d++]; }
+            };
+        }
+        
 		/**
 		 * Returns the index for the <code>i</code>th dimension (zero-based).
 		 */

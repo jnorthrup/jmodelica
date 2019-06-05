@@ -605,84 +605,6 @@ end ExpandableConnectorArrays.ConnectorArray;
     end ConnectorArray;
 
 
-model Test
-    connector C
-        Real p;
-        flow Real f;
-    end C;
-
-    model A
-        C c[2];
-    end A;
-    
-    model B
-        A[2] a1, a2;
-    equation
-        connect(a1.c, a2.c);
-    end B;
-    
-    B[2] b;
-
-annotation(__JModelica(UnitTesting(tests={
-    FlatteningTestCase(
-        name="Test",
-        description="",
-        flatModel="
-fclass ExpandableConnectorArrays.Test
- Real b[1].a1[1].c[1].p;
- Real b[1].a1[1].c[1].f;
- Real b[1].a1[1].c[2].p;
- Real b[1].a1[1].c[2].f;
- Real b[1].a1[2].c[1].p;
- Real b[1].a1[2].c[1].f;
- Real b[1].a1[2].c[2].p;
- Real b[1].a1[2].c[2].f;
- Real b[1].a2[1].c[1].p;
- Real b[1].a2[1].c[1].f;
- Real b[1].a2[1].c[2].p;
- Real b[1].a2[1].c[2].f;
- Real b[1].a2[2].c[1].p;
- Real b[1].a2[2].c[1].f;
- Real b[1].a2[2].c[2].p;
- Real b[1].a2[2].c[2].f;
- Real b[2].a1[1].c[1].p;
- Real b[2].a1[1].c[1].f;
- Real b[2].a1[1].c[2].p;
- Real b[2].a1[1].c[2].f;
- Real b[2].a1[2].c[1].p;
- Real b[2].a1[2].c[1].f;
- Real b[2].a1[2].c[2].p;
- Real b[2].a1[2].c[2].f;
- Real b[2].a2[1].c[1].p;
- Real b[2].a2[1].c[1].f;
- Real b[2].a2[1].c[2].p;
- Real b[2].a2[1].c[2].f;
- Real b[2].a2[2].c[1].p;
- Real b[2].a2[2].c[1].f;
- Real b[2].a2[2].c[2].p;
- Real b[2].a2[2].c[2].f;
-equation
- b[1].a1[1].c[1].f + b[1].a2[1].c[1].f = 0.0;
- b[1].a1[1].c[1].p = b[1].a2[1].c[1].p;
- b[1].a1[1].c[2].f + b[1].a2[1].c[2].f = 0.0;
- b[1].a1[1].c[2].p = b[1].a2[1].c[2].p;
- b[1].a1[2].c[1].f + b[1].a2[2].c[1].f = 0.0;
- b[1].a1[2].c[1].p = b[1].a2[2].c[1].p;
- b[1].a1[2].c[2].f + b[1].a2[2].c[2].f = 0.0;
- b[1].a1[2].c[2].p = b[1].a2[2].c[2].p;
- b[2].a1[1].c[1].f + b[2].a2[1].c[1].f = 0.0;
- b[2].a1[1].c[1].p = b[2].a2[1].c[1].p;
- b[2].a1[1].c[2].f + b[2].a2[1].c[2].f = 0.0;
- b[2].a1[1].c[2].p = b[2].a2[1].c[2].p;
- b[2].a1[2].c[1].f + b[2].a2[2].c[1].f = 0.0;
- b[2].a1[2].c[1].p = b[2].a2[2].c[1].p;
- b[2].a1[2].c[2].f + b[2].a2[2].c[2].f = 0.0;
- b[2].a1[2].c[2].p = b[2].a2[2].c[2].p;
-end ExpandableConnectorArrays.Test;
-")})));
-end Test;
-
-
 
     model ConnectorSlice
         expandable connector EC
@@ -1217,10 +1139,6 @@ equation
  ec1[2].ec2[1].b = ec3[2,1].b;
  c2[2,2] = ec1[2].ec2[2].b;
  ec1[2].ec2[2].b = ec3[2,2].b;
- ec1[1].ec2[1].a[1:2] = zeros(2);
- ec1[1].ec2[2].a[1:2] = zeros(2);
- ec1[2].ec2[1].a[1:2] = zeros(2);
- ec1[2].ec2[2].a[1:2] = zeros(2);
 end ExpandableConnectorArrays.NestedConnectionSizes;
 ")})));
     end NestedConnectionSizes;
@@ -1243,7 +1161,8 @@ end ExpandableConnectorArrays.NestedConnectionSizes;
         connect(ec1a.ec2[1], ec2[2:3]);
         connect(ec1b[2:3].ec2[1], ec2[2:3]);
         connect(c, ec1b.ec2.b);
-        connect(c, ec2[2:end].d);
+        connect(c, ec2[2:end].d); // TODO: Looks like the indices are wrong when adding this connect 
+                                  //       to ConnectionSetManager after elaboration
         connect(c[2:3,2:3], ec1b[2:3].ec2[2:3].e);
         c = {1:3, 4:6, 7:9} .* time;
 
@@ -1316,13 +1235,9 @@ equation
  ec1b[3].ec2[2].b = ec1b[3].ec2[2].e;
  c[3,3] = ec1b[3].ec2[3].b;
  ec1b[3].ec2[3].b = ec1b[3].ec2[3].e;
- ec1a[1].ec2[1].d[1:3] = zeros(3);
- ec1a[2].ec2[1].d[1:3] = zeros(3);
  ec2[4].d[1] = 0.0;
  ec2[4].d[2] = 0.0;
  ec2[4].d[3] = 0.0;
- ec1b[2].ec2[1].d[1:3] = zeros(3);
- ec1b[3].ec2[1].d[1:3] = zeros(3);
 end ExpandableConnectorArrays.NestedAndSlices;
 ")})));
     end NestedAndSlices;
@@ -1374,8 +1289,219 @@ equation
 end ExpandableConnectorArrays.LoopedConnection;
 ")})));
     end LoopedConnection;
+    
+    model LoopedNested1
+        expandable connector EC
+        end EC;
+        
+        connector C = Real;
+        
+        parameter Integer n = 2;
+        
+        EC ec1, ec2[n];
+        C c;
+    equation
+        for i in 1:n loop
+            connect(ec1.a[i], ec2[i]);
+            connect(ec1.a[i].b[i], c);
+        end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="LoopedNested1",
+            description="Introducing connections in a loop, index used on two levels, non-declared nested, outer first",
+            flatModel="
+fclass ExpandableConnectorArrays.LoopedNested1
+ structural parameter Integer n = 2 /* 2 */;
+ Real ec1.a[1].b[1];
+ Real ec1.a[2].b[2];
+ Real ec2[1].b[1];
+ Real ec2[2].b[2];
+ Real c;
+equation
+ c = ec1.a[1].b[1];
+ ec1.a[1].b[1] = ec1.a[2].b[2];
+ ec1.a[2].b[2] = ec2[1].b[1];
+ ec2[1].b[1] = ec2[2].b[2];
+ ec1.a[2].b[1] = ec2[2].b[1];
+end ExpandableConnectorArrays.LoopedNested1;
+")})));
+    end LoopedNested1;
+    
+    model LoopedNested2
+        expandable connector EC
+        end EC;
+        
+        connector C = Real;
+        
+        parameter Integer n = 2;
+        
+        EC ec1[n], ec2;
+        C c;
+    equation
+        for i in 1:n loop
+            connect(ec2.a[i].b[i], c);
+            connect(ec2.a[i], ec1[i]);
+        end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="LoopedNested2",
+            description="Introducing connections in a loop, index used on two levels, non-declared nested, inner first",
+            flatModel="
+fclass ExpandableConnectorArrays.LoopedNested2
+ structural parameter Integer n = 2 /* 2 */;
+ Real ec1[1].b[1];
+ Real ec1[2].b[2];
+ Real ec2.a[1].b[1];
+ Real ec2.a[2].b[2];
+ Real c;
+equation
+ c = ec1[1].b[1];
+ ec1[1].b[1] = ec1[2].b[2];
+ ec1[2].b[2] = ec2.a[1].b[1];
+ ec2.a[1].b[1] = ec2.a[2].b[2];
+ ec1[2].b[1] = ec2.a[2].b[1];
+end ExpandableConnectorArrays.LoopedNested2;
+")})));
+    end LoopedNested2;
+    
+    // TODO: these should not give an error - see call to checkNonExisting at ExpandableConnectors.jrag:699
+    model LoopedNested3
+        expandable connector EC
+        end EC;
+        
+        connector C = Real;
+        
+        parameter Integer n = 2;
+        
+        EC ec1[n], ec2[n];
+        C c;
+    equation
+        for i in 1:n loop
+            connect(ec1[i].a, ec2[i]);
+            connect(ec1[i].a.b[i], c);
+        end for;
+    end LoopedNested3;
+    
+    model LoopedNested4
+        expandable connector EC
+        end EC;
+        
+        connector C = Real;
+        
+        parameter Integer n = 2;
+        
+        EC ec1[n], ec2[n];
+        C c;
+    equation
+        for i in 1:n loop
+            connect(ec2[i].a.b[i], c);
+            connect(ec2[i].a, ec1[i]);
+        end for;
+    end LoopedNested4;
+    
+    // TODO: These cause crash, see TODO about slices in ExpandableSet.addMember (line 334) & ConnectorMember.addConnection (line 504)
+    model SliceNested1
+        expandable connector EC
+        end EC;
+        
+        connector C = Real;
+        
+        EC ec1, ec2[3];
+        C c[3];
+    equation
+        connect(ec1.a[2:3], ec2[3:-1:2]);
+        connect(ec2.b, c);
+    end SliceNested1;
+    
+    model SliceNested2
+        expandable connector EC
+        end EC;
+        
+        connector C = Real;
+        
+        EC ec1, ec2[2,2];
+        C c[2,2];
+    equation
+        connect(ec1.a, ec2[1,:]);
+        connect(ec2.b, c);
+    end SliceNested2;
+    
+    model SliceNested3
+        expandable connector EC
+        end EC;
+        
+        connector C = Real;
+        
+        EC ec1[2], ec2[2,2];
+        C c[2,2];
+    equation
+        connect(ec1.a, ec2);
+        connect(ec2.b, c);
+    end SliceNested3;
+    
+    model ThroughScalar
+        expandable connector EC
+        end EC;
+        
+        connector C = Real;
+        
+        EC ec1, ec2, ec3;
+        
+        C c1, c2;
+    equation
+        connect(ec2.b, c1);
+        connect(ec3.d, c2);
+        connect(ec1.a, ec2);
+        connect(ec1.a, ec3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ThroughScalar",
+            description="Connecting expandable connectors through a scalar non-declared nested expandable connector",
+            flatModel="
+fclass ExpandableConnectorArrays.ThroughScalar
+ Real ec1.a.b;
+ Real ec1.a.d;
+ Real ec2.b;
+ Real ec2.d;
+ Real ec3.b;
+ Real ec3.d;
+ Real c1;
+ Real c2;
+equation
+ c1 = ec1.a.b;
+ ec1.a.b = ec2.b;
+ ec2.b = ec3.b;
+ c2 = ec1.a.d;
+ ec1.a.d = ec2.d;
+ ec2.d = ec3.d;
+end ExpandableConnectorArrays.ThroughScalar;
+")})));
+    end ThroughScalar;
+    
+    // TODO: here too many are connected, a[1] should only contain b and a[2] should only contain d
+    model ThroughArray
+        expandable connector EC
+        end EC;
+        
+        connector C = Real;
+        
+        EC ec1, ec2, ec3, ec4;
+        
+        C c1, c2;
+    equation
+        connect(ec2.b, c1);
+        connect(ec4.d, c2);
+        connect(ec1.a[1], ec2);
+        connect(ec1.a[1], ec3);
+        connect(ec1.a[2], ec4);
+    end ThroughArray;
 
 /* TODO: Array of expandable sub-connector declared with [:]??? */
+
+/* TODO: Template that is of a type containing an array size. */
 
 package Error
 
@@ -1520,6 +1646,7 @@ Error at line 19, column 9, in file '...', ARRAY_SIZE_MISMATCH_IN_CONNECT:
 ")})));
     end WrongNdimsInSlice;
 
+// TODO: Add test of recursion error through array - see Source.checkRecursion (ExpandableConnectors.jrag:803)
 
 end Error;
 

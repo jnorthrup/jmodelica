@@ -14,6 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import org.jmodelica.util.collections.IntIterator;
 
 aspect InstLookupComponents {
     
@@ -511,22 +512,34 @@ aspect InstLookupComponents {
         InstAccess first = getFirstInstAccess();
         InstAccess cur = first;
         InstComponentDecl icd = cur.myInstComponentDecl();
-        int d = 0, n = i.ndims();
+        IntIterator index = i.iterator();
         
         while (cur != stopAt && icd != null && !icd.isUnknown()) {
-            if (cur != first) {
-                icd = icd.memberInstComponent(cur.name()).targetOrNull();
+            if (cur == first) {
+                icd = icd.arrayCell(index);
+            } else {
+                icd = icd.memberArrayCell(cur.name(), index);
             }
-            
-            while (d < n && !icd.isUnknown() && icd.isArray() && !icd.isPrimitive()) {
-                icd = icd.getInstComponentDecl(i.get(d) - 1);
-                d++;
-            }
-            
             cur = cur.getNextInstAccess();
         }
         
         return (icd == null) ? unknownInstComponentDecl() : icd;
+    }
+
+    syn InstComponentDecl InstComponentDecl.memberArrayCell(String name, IntIterator index) {
+        InstComponentDecl res = memberInstComponent(name).targetOrNull();
+        if (res != null) {
+            res = res.arrayCell(index);
+        }
+        return res;
+    }
+
+    syn InstComponentDecl InstComponentDecl.arrayCell(IntIterator index) {
+        if (index.hasNext() && !isUnknown() && isArray() && !isPrimitive()) {
+            return getInstComponentDecl(index.next() - 1).arrayCell(index);
+        } else {
+            return this;
+        }
     }
 
     /**
