@@ -107,6 +107,10 @@ public class QualifiedName implements Iterator<String> {
         return iterator.next();
     }
     
+    public void remove() {
+        throw new UnsupportedOperationException("remove");
+    }
+    
     public String getName(int i) {
         return names.get(i);
     }
