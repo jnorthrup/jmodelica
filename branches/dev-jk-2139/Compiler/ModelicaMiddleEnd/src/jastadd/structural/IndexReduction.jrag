@@ -79,7 +79,7 @@ aspect IndexReduction {
             IndexReductionBiPGraph g = new IndexReductionBiPGraph();
             g.setStepLogger(this);
             // Only do index reduction based on real variables and equations
-            g.addVariables(createBLTInput(), VAR_TYPES_REAL);
+            g.addVariables(new FClassBLTInput(this), VAR_TYPES_REAL);
             g.addEquations(continuousNonMetaEquations(), VAR_TYPES_REAL);
             logVerbose(g);
             g.maximumMatching(true);
