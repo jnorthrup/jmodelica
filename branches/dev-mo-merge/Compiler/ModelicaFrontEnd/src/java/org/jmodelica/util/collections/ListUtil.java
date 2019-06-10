@@ -2,6 +2,7 @@ package org.jmodelica.util.collections;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -92,7 +93,20 @@ public final class ListUtil {
         return Arrays.asList(ts);
     }
 
-    /**
+    
+    @SafeVarargs
+    public static <T> ArrayList<T> concatenate(Collection<? extends T>... lists) {
+        int size = 0;
+        for (Collection<? extends T> list : lists) {
+            size += list.size();
+        }
+
+        ArrayList<T> res = new ArrayList<>(size);
+        for (Collection<? extends T> list : lists) {
+            res.addAll(list);
+        }
+        return res;
+    }    /**
      * Combines several lists into one.
      * 
      * @param lists The lists to join.
@@ -104,6 +118,7 @@ public final class ListUtil {
         for (List<T> list : lists) {
             result.addAll(list);
         }
+
         return result;
     }
 

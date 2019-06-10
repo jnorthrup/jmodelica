@@ -245,7 +245,7 @@ aspect TransformCanonical {
              * Call this method at the end of perform() if it changed the tree.
              */
             void change() {
-                setDAEBLT(BLT.EMPTY_BLT);
+                setDAEBLT(BLT.EMPTY_BLT, createBLTInput());
                 setDAEInitBLT(BLT.EMPTY_BLT);
                 DAEBiPGraph = null;
                 root().flushAllRecursiveClearFinal();
