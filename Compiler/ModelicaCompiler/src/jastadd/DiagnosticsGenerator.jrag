@@ -76,7 +76,7 @@ public class DiagnosticsGenerator {
      * The diagnostics generator generates a number of HTML files containing
      * diagnostics for the compilation of a model.
      */
-    public DiagnosticsGenerator(String modelName) {
+    public DiagnosticsGenerator(String modelName, OptionRegistry options) {
         this.modelName = modelName;
         this.modelNameUnderscore = modelName;
         int pos = modelNameUnderscore.indexOf('(');
@@ -85,10 +85,9 @@ public class DiagnosticsGenerator {
         this.modelNameUnderscore = this.modelNameUnderscore.replace('.', '_');
         
         // Create directory containing the diagnostics files
-        File currDir = new File(".");
-        String currDirString = currDir.getAbsolutePath().substring(0,currDir.getAbsolutePath().length()-2);
-        File diagnosticsDir = new File(currDirString,this.modelNameUnderscore + "_html_diagnostics");
-        diagnosticsDir.mkdir();
+        File outDir = new File(options.getStringOption("generate_html_diagnostics_output_directory"));
+        File diagnosticsDir = new File(outDir, this.modelNameUnderscore + "_html_diagnostics");
+        diagnosticsDir.mkdirs();
         diagnosticsDirString = diagnosticsDir.getAbsolutePath();
         
         indexFile = new IndexFile();
