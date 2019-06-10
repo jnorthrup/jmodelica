@@ -310,6 +310,7 @@ aspect SimpleLookup {
     eq SrcValueModification.getSrcExp().simpleLookupHelper(String name)       = simpleLookupFromValue(name);
     eq SrcComponentRedeclare.getSrcComponentClause().simpleLookupHelper(String name) = simpleLookupFromValue(name);
     eq SrcClassRedeclare.getSrcBaseClassDecl().simpleLookupHelper(String name)       = simpleLookupFromValue(name);
+    eq SrcInlineExtendsClause.getChild().simpleLookupHelper(String name)       = enclosingClassDecl().asFullClassDecl().simpleLookupInExtends(name);
     
     inh ResolvedAccess SrcModification.simpleLookupFromValue(String name);
     eq SrcComponentDecl.getChild().simpleLookupFromValue(String name)         = simpleLookupHelper(name);
@@ -322,7 +323,6 @@ aspect SimpleLookup {
     * with the given name. Has to be an unqualified classname.
     */
     inh ResolvedAccess SrcExtendsClause.simpleLookupFromExtends(String name);
-    eq SrcInlineExtendsClause.getChild().simpleLookupHelper(String name) = enclosingClassDecl().enclosingClassDecl().getParent().simpleLookupHelper(name);
     eq SrcFullClassDecl.getChild().simpleLookupFromExtends(String name) = simpleLookupLocalScope(name);
     eq Program.getChild().simpleLookupFromExtends(String name)       = simpleLookupDefaultScope(name);
 
