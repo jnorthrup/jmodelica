@@ -301,7 +301,7 @@ fmi2Status fmi2_exit_initialization_mode(fmi2Component c) {
     if (((fmi2_me_t *)c)->fmu_type == fmi2ModelExchange) {
         ((fmi2_me_t *)c)->fmu_mode = eventMode;
     } else if (((fmi2_me_t *)c)->fmu_type == fmi2CoSimulation) {
-        ((fmi2_me_t *)c)->fmu_mode = slaveInitialized;
+        ((fmi2_me_t *)c)->fmu_mode = continuousTimeMode;
         /* Start event iteration after initialization: */
         jmi_ode_solver_external_event(((fmi2_cs_t *)c)->ode_problem->ode_solver);
     }
@@ -632,6 +632,8 @@ fmi2Status fmi2_get_directional_derivative(fmi2Component c,
 }
 
 fmi2Status fmi2_enter_event_mode(fmi2Component c) {
+    fmi2Integer retval;
+    
     if (c == NULL) {
         return fmi2Fatal;
     }
@@ -639,6 +641,11 @@ fmi2Status fmi2_enter_event_mode(fmi2Component c) {
     if (((fmi2_me_t *)c)->fmu_mode != continuousTimeMode) {
         jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "FMIState",
             "Can only enter event mode from continuous time mode.");
+        return fmi2Error;
+    }
+    
+    retval = jmi_enter_event_mode(&((fmi2_me_t *)c)->jmi);
+    if (retval != 0) {
         return fmi2Error;
     }
     
