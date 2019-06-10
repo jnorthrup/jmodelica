@@ -84,17 +84,13 @@ aspect SimpleLookup {
     syn SrcClassDecl Program.simpleLookupClassDotted(String name) = simpleLookupClass(name);
 
     /**
-     * Lookup the class referenced by the QualifiedName. The QualifiedName
-     * determines if the lookup is in relative or global scope.
-     *
+     * Lookup the class referenced by the QualifiedName. 
+     * Lookup is both uncached and only among the class members and imported.
+     * This method is intended as a entry point
      */
-    public SrcClassDecl SrcClassDecl.simpleLookupClass(QualifiedName qName) {
+     public SrcClassDecl SrcClassDecl.LookupMyMembers(QualifiedName qName) {
         SrcClassDecl cd = this;
-        if (qName.isGlobal()) {
-            cd = simpleLookupGlobalScope(qName.next()).getClassDecl();
-        }else {
-            cd = simpleLookupIncludeImports(qName.next()).getClassDecl();
-        }
+        cd = simpleLookupMemberScope(qName.next()).getClassDecl();
 
         while (cd != null && qName.hasNext()) {
             cd = cd.simpleLookupMemberScope(qName.next()).getClassDecl();
@@ -105,17 +101,43 @@ aspect SimpleLookup {
         return cd;
     }
 
+    /**
+     * Lookup the class referenced by the QualifiedName. The QualifiedName
+     * determines if the lookup is in relative or global scope.
+     * This method is intended as a entry point
+     *
+     */
+    public SrcClassDecl SrcClassDecl.simpleLookupClass(QualifiedName qName) {
+        SrcClassDecl cd = this;
+        if (qName.isGlobal()) {
+            cd = simpleLookupGlobalScope(qName.next()).getClassDecl();
+        } else {
+            cd = simpleLookupDefaultScope(qName.next()).getClassDecl();
+        }
+
+        while (cd != null && qName.hasNext()) {
+            cd = cd.simpleLookupMemberScope(qName.next()).getClassDecl();
+            if (cd == null) {
+                return null;
+            }
+        }
+
+        if (cd.isUnknown() && !qName.isGlobal() &&
+                enclosingClassDecl() != null && !isEncapsulated()) {
+            return enclosingClassDecl().simpleLookupClass(qName.resetedCopy());
+        }
+        return cd;
+    }
+
    /**
     * Lookup SrcClassDecl indicated by the provided name.
     * Support lookup of both global and relative qualified names.
     * Returns null when the class isn't found.
+    * This method is intended as entry point.
     */
     public SrcClassDecl Program.simpleLookupClass(String name) {
         QualifiedName qName = new QualifiedName(name);
         SrcClassDecl cd = simpleLookupDefaultScope(qName.next()).getClassDecl();
-        if (!qName.hasNext()) {
-            return cd;
-        }
         while (cd != null && qName.hasNext()) {
             cd = cd.simpleLookupMemberScope(qName.next()).getClassDecl();
             if (cd == null) {
@@ -288,6 +310,7 @@ aspect SimpleLookup {
     eq SrcValueModification.getSrcExp().simpleLookupHelper(String name)       = simpleLookupFromValue(name);
     eq SrcComponentRedeclare.getSrcComponentClause().simpleLookupHelper(String name) = simpleLookupFromValue(name);
     eq SrcClassRedeclare.getSrcBaseClassDecl().simpleLookupHelper(String name)       = simpleLookupFromValue(name);
+    eq SrcInlineExtendsClause.getChild().simpleLookupHelper(String name)       = enclosingClassDecl().asFullClassDecl().simpleLookupInExtends(name);
     
     inh ResolvedAccess SrcModification.simpleLookupFromValue(String name);
     eq SrcComponentDecl.getChild().simpleLookupFromValue(String name)         = simpleLookupHelper(name);
@@ -312,7 +335,7 @@ aspect SimpleLookup {
     eq Program.getChild().simpleLookupGlobalScope(String name) = simpleLookupDefaultScope(name);
 
     /**
-    * Lookup simple name in global scope. Has to be an unqualified classname.
+    * Lookup simple name in global scope. Has to be an simple (unqualified) classname.
     */
     syn lazy ResolvedAccess Program.simpleLookupDefaultScope(String name) {
         for (SrcStoredDefinition sd : getUnstructuredEntitys()) {
@@ -333,7 +356,8 @@ aspect SimpleLookup {
 
     /**
      * Lookup in contained elements, extended classes, imports and surrounding classes.
-     *  Has to be an unqualified classname.
+     * Has to be an simple (unqualified) classname.
+     * Result is Cached.
      */
     syn lazy ResolvedAccess SrcFullClassDecl.simpleLookupDefaultScope(String name) {
         ResolvedAccess res = simpleLookupIncludeImports(name);
@@ -342,15 +366,16 @@ aspect SimpleLookup {
         }
         return res;
     }
+    syn ResolvedAccess SrcClassDecl.simpleLookupDefaultScope(String name) = simpleLookupIncludeImports(name);
 
     /**
-     * Lookup a predefined type, function or operator in global scope. Has to be an unqualified classname.
+     * Lookup a predefined type, function or operator in global scope. Has to be an simple (unqualified) classname.
      */
     inh ResolvedAccess SrcClassDecl.simpleLookupPredefined(String name);
     eq Program.getChild().simpleLookupPredefined(String name) = simpleLookupPredefined(name);
 
     /**
-     * Lookup a predefined type, function or operator in global scope. Has to be an unqualified classname.
+     * Lookup a predefined type, function or operator in global scope. Has to be an simple (unqualified) classname.
      */
     syn ResolvedAccess Program.simpleLookupPredefined(String name) {
         ResolvedAccess res = simpleLookupInClassList(getPredefinedTypes(), name, null);
@@ -368,7 +393,8 @@ aspect SimpleLookup {
 
     /**
      * Lookup simple name in contained classes, extends and imports but not in surrounding classes.
-     * Has to be an unqualified classname.
+     * Has to be an simple (unqualified) classname.
+     * Result is Cached.
      */
     syn ResolvedAccess SrcClassDecl.simpleLookupIncludeImports(String name) = simpleLookupMemberScope(name);
     eq SrcFullClassDecl.simpleLookupIncludeImports(String name) {
@@ -380,7 +406,9 @@ aspect SimpleLookup {
     }
 
     /**
-     * Lookup in contained classes, components, imports and surrounding classes. Has to be an unqualified classname.
+     * Lookup in contained classes, components, imports and surrounding classes. 
+     * Has to be an simple (unqualified) name.
+     * Result is cached.
      */
     syn lazy ResolvedAccess SrcFullClassDecl.simpleLookupLocalScope(String name) {
         if (duringFindClassDeclRevisits > MAX_FIND_CLASS_DECL_REVISITS) {
@@ -405,6 +433,7 @@ aspect SimpleLookup {
 
     /**
      * Lookup in contained classes and extended classes. Has to be an unqualified classname.
+     * Internal helper method resolving a simple (unqualified) name. Result is Cached.
      */
     syn ResolvedAccess SrcClassDecl.simpleLookupMemberScope(String name);
     eq SrcBadClassDecl.simpleLookupMemberScope(String name)      = unknownAccess();
@@ -413,8 +442,10 @@ aspect SimpleLookup {
 
     /**
      * Lookup in contained classes, components and extended classes.
-     * Has to be an unqualified classname.
+     * Has to be an simple (unqualified) name.
+     * Method doesn't lookup in surrounding classes.
      * This method returns the unknown class when the class isn't found.
+     * Result is Cached.
      */
     syn lazy ResolvedAccess SrcFullClassDecl.simpleLookupMemberScope(String name) {
         if (duringFindClassDeclRevisits > MAX_FIND_CLASS_DECL_REVISITS) { 
@@ -479,8 +510,9 @@ aspect SimpleLookup {
 
 
     /**
-    * Helper method which search for the class in the imported class. 
-    * Has to be an unqualified classname.
+    * Internal helper method which search for the class in the imported class. 
+    * Has to be an simple (unqualified) classname.
+    * Result is Cached.
     */
     syn ResolvedAccess SrcImportClause.simpleLookupInImport(String name) = 
         matches(name) ? getPackageName().resolveAccess() : unknownAccess();
@@ -489,9 +521,10 @@ aspect SimpleLookup {
 
 
     /**
-     * Helper method which looks for the class with the given name among this class's imported classes.
-     * Has to be an unqualified classname.
+     * Internal helper method which looks for the class with the given name among this class's imported classes.
+     * Has to be an simple (unqualified) classname.
      * This method returns the unknown class when the class isn't found.
+     * Result is Cached.
      */
     protected ResolvedAccess SrcFullClassDecl.simpleLookupInImports(String name) {
         ResolvedAccess res;
@@ -506,9 +539,10 @@ aspect SimpleLookup {
     }
 
     /**
-     * Helper method which looks for the class with the given name among this class's super classes.
-     * Has to be an unqualified classname.
+     * Internal helper method which looks for the class with the given name among this class's super classes.
+     * Has to be an simple (unqualified) classname.
      * This method returns the unknown class when the class isn't found.
+     * Result is Cached.
      */
     protected ResolvedAccess SrcFullClassDecl.simpleLookupInExtends(String name) {
         ResolvedAccess res;
@@ -521,7 +555,10 @@ aspect SimpleLookup {
         
         return unknownAccess();
     }
-
+    
+   /** 
+    *  Internal helper method resolving a simple (unqualified) name. Result is Cached.
+    */
     protected ResolvedAccess SrcComponentDecl.simpleLookupFromModification(String name) {
         ResolvedAccess res = findClassDecl().simpleLookupMemberScope(name);
         if (!res.isUnknown()) {
@@ -532,7 +569,7 @@ aspect SimpleLookup {
 
     /**
      * Convenience method for looking up a class in a list of SrcClassDecls.
-     * Has to be an unqualified classname.
+     * Has to be an simple (unqualified) classname.
      * This method returns null when the class isn't found.
      */
     public ResolvedAccess ASTNode.simpleLookupInClassList(Iterable<? extends SrcClassDecl> list, String name, String enclosingClass) {
@@ -546,7 +583,7 @@ aspect SimpleLookup {
 
     /**
      * Convenience method for looking up a component in a list of SrcComponentDecls.
-     * Has to be an unqualified name.
+     * Has to be an simple (unqualified) name.
      * This method returns null when the component isn't found.
      */
     public ResolvedAccess ASTNode.simpleLookupInComponentList(Iterable<? extends SrcComponentDecl> list,
@@ -561,7 +598,7 @@ aspect SimpleLookup {
 
     /**
      * Convenience method for looking up a class in the given list of SrcLibNodes.
-     * Has to be an unqualified classname.
+     * Has to be an simple (unqualified) classname.
      * This method returns null when the class isn't found.
      */
     public ResolvedAccess ASTNode.simpleLookupInLibNodeList(List<SrcLibNode> list, String name) {

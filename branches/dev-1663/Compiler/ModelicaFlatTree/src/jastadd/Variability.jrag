@@ -538,6 +538,7 @@ aspect Variability {
     eq FAssert.expVariability() = getTest().variability().combine(getMsg().variability());
 
     eq FDelayExp.expVariability() = getFExp().variability();
+    eq FIndicatorExp.expVariability() = Variability.CONTINUOUS;
 
     eq CommonAccessExp.expVariability() = getAccess().variability();
     eq FAbstractDerExp.expVariability() = 

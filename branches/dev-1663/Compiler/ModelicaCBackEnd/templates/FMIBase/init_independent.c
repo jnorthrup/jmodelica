@@ -13,8 +13,6 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 */
 
-$C_enum_strings$
-
 $C_model_init_eval_independent_globals$
 
 $C_model_init_eval_independent_start$

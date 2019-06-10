@@ -624,7 +624,7 @@ aspect Arrays {
     eq FlatRoot.getChild().parentExpandedSubscripts() = new List<FSubscript>();
 
     public FSubscript InstForIndex.createFSubscript() {
-        return getFExp().flatten(Flattener.expressionFlattener()).createFSubscript();
+        return getFExp().flatten(null).createFSubscript();
     }
     @Override
     public FSubscript InstForIndexNoExp.createFSubscript() {
@@ -1035,6 +1035,11 @@ aspect Arrays {
      * Default implementation is simply an alias for childFExps().
      */
     syn Iterable<FExp> FBuiltInFunctionCall.myArgs() = childFExps();
+    eq FDelayExp.myArgs() = hasMax()
+            ? Arrays.asList(getFExp(), getDelay(), getMax())
+            : Arrays.asList(getFExp(), getDelay());
+    eq FSpatialDistExp.myArgs() = Arrays.asList(getIn0(), getIn1(), getX(),
+            getPositiveVelocity(), getInitialPoints(), getInitialValues());
 
 	eq FArrayDimAsArgsExp.size() {
 		if (!isArray())

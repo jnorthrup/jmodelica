@@ -1542,7 +1542,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             double beta = 1;
             int n1 = 1;
             int n2 = 1;
-            Q1[0] = - COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1.0), AD_WRAP_LITERAL(-1.0));
+            Q1[0] = - COND_EXP_EQ(_sw(0), JMI_TRUE, 1.0, -1.0);
             for (i = 0; i < 1; i += 1) {
                 Q1[i + 0] = (Q1[i + 0]) / (1.0);
             }
@@ -1557,7 +1557,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _der_x_3 = x[0];
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-            _sw(0) = jmi_turn_switch(jmi, _x_1 - (AD_WRAP_LITERAL(0.0)), _sw(0), JMI_REL_GEQ);
+            _sw(0) = jmi_turn_switch(jmi, _x_1 - (0.0), _sw(0), JMI_REL_GEQ);
         }
         _der_y_2 = COND_EXP_EQ(_sw(0), JMI_TRUE, _der_x_3, - _der_x_3);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
@@ -3520,7 +3520,7 @@ Error in flattened model:
   Index reduction failed: Maximum number of expressions in a single equation has been reached
 
 Error in flattened model:
-  The system is structurally singular. The following varible(s) could not be matched to any equation:
+  The system is structurally singular. The following variable(s) could not be matched to any equation:
      der(x2)
 
   The following equation(s) could not be matched to any variable:
@@ -3584,7 +3584,7 @@ Error in flattened model:
   Index reduction failed: Munkres algorithm was unable to find a matching; Unable to find any uncovered incidence
 
 Error in flattened model:
-  The system is structurally singular. The following varible(s) could not be matched to any equation:
+  The system is structurally singular. The following variable(s) could not be matched to any equation:
      a1
      a2
 
@@ -4674,6 +4674,112 @@ end IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback;
         end AllIncidencesFallback;
         
     end IncidencesThroughFunctions;
+
+model DiffGlobalAccess1
+    record R
+        Real[1] x;
+    end R;
+
+    function g
+        input Real x;
+        input R[:] rs;
+        output Real y = x + rs[1].x[1];
+    algorithm
+    end g;
+
+    function f
+        input Real x;
+        output Real y = g(x,rs);
+        constant R[:] rs = {R({1})};
+    algorithm
+        annotation(Inline=false, smoothOrder=1);
+    end f;
+
+    Real x;
+    Real y(stateSelect=StateSelect.always);
+equation
+    der(x) = -x;
+    y=100*f(x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="DiffGlobalAccess1",
+            description="Test of system with non differentiated variable with StateSelect always and prefer",
+            flatModel="
+fclass IndexReduction.DiffGlobalAccess1
+ Real x;
+ Real y(stateSelect = StateSelect.always);
+ Real _der_x;
+global variables
+ constant IndexReduction.DiffGlobalAccess1.R IndexReduction.DiffGlobalAccess1.f.rs[1] = {IndexReduction.DiffGlobalAccess1.R({1})};
+initial equation
+ y = 0.0;
+equation
+ _der_x = - x;
+ y = 100 * IndexReduction.DiffGlobalAccess1.f(x);
+ der(y) = 100 * IndexReduction.DiffGlobalAccess1._der_f(x, _der_x);
+
+public
+ function IndexReduction.DiffGlobalAccess1.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := IndexReduction.DiffGlobalAccess1.g(x, global(IndexReduction.DiffGlobalAccess1.f.rs));
+  return;
+ annotation(Inline = false,smoothOrder = 1,derivative(order = 1) = IndexReduction.DiffGlobalAccess1._der_f);
+ end IndexReduction.DiffGlobalAccess1.f;
+
+ function IndexReduction.DiffGlobalAccess1.g
+  input Real x;
+  input IndexReduction.DiffGlobalAccess1.R[:] rs;
+  output Real y;
+ algorithm
+  y := x + rs[1].x[1];
+  for i1 in 1:size(rs, 1) loop
+   assert(1 == size(rs[i1].x, 1), \"Mismatching sizes in function 'IndexReduction.DiffGlobalAccess1.g', component 'rs[i1].x', dimension '1'\");
+  end for;
+  return;
+ annotation(derivative(order = 1) = IndexReduction.DiffGlobalAccess1._der_g);
+ end IndexReduction.DiffGlobalAccess1.g;
+
+ function IndexReduction.DiffGlobalAccess1._der_f
+  input Real x;
+  input Real _der_x;
+  output Real _der_y;
+  Real y;
+ algorithm
+  _der_y := IndexReduction.DiffGlobalAccess1._der_g(x, global(IndexReduction.DiffGlobalAccess1.f.rs), _der_x, {IndexReduction.DiffGlobalAccess1.R({0.0})});
+  y := IndexReduction.DiffGlobalAccess1.g(x, global(IndexReduction.DiffGlobalAccess1.f.rs));
+  return;
+ annotation(smoothOrder = 0);
+ end IndexReduction.DiffGlobalAccess1._der_f;
+
+ function IndexReduction.DiffGlobalAccess1._der_g
+  input Real x;
+  input IndexReduction.DiffGlobalAccess1.R[:] rs;
+  input Real _der_x;
+  input IndexReduction.DiffGlobalAccess1.R[:] _der_rs;
+  output Real _der_y;
+  Real y;
+ algorithm
+  _der_y := _der_x + _der_rs[1].x[1];
+  y := x + rs[1].x[1];
+  for i1 in 1:size(rs, 1) loop
+   assert(1 == size(rs[i1].x, 1), \"Mismatching sizes in function 'IndexReduction.DiffGlobalAccess1.g', component 'rs[i1].x', dimension '1'\");
+  end for;
+  return;
+ annotation(smoothOrder = 0);
+ end IndexReduction.DiffGlobalAccess1._der_g;
+
+ record IndexReduction.DiffGlobalAccess1.R
+  Real x[1];
+ end IndexReduction.DiffGlobalAccess1.R;
+
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+
+end IndexReduction.DiffGlobalAccess1;
+")})));
+end DiffGlobalAccess1;
 
 end IndexReduction;
 

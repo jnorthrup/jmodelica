@@ -1750,5 +1750,31 @@ end VariabilityPropagationTests.ExternalObjectConstant2;
 ")})));
 end ExternalObjectConstant2;
 
+    model CompositeStmt1
+        record R
+            Real x;
+        end R;
+        
+        function f
+            input R r;
+            constant R c(x=1);
+            output R[:] y = {c, r};
+        algorithm
+            annotation(Inline=false);
+        end f;
+        
+        R[:] r = f(R(2));
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="CompositeStmt1",
+            description="",
+            flatModel="
+fclass VariabilityPropagationTests.CompositeStmt1
+ constant Real r[1].x = 1;
+ constant Real r[2].x = 2;
+end VariabilityPropagationTests.CompositeStmt1;
+")})));
+    end CompositeStmt1;
 
 end VariabilityPropagationTests;

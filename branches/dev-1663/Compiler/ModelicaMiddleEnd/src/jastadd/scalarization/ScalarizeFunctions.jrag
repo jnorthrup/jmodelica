@@ -323,7 +323,7 @@ aspect FunctionScalarization {
      * @param s Scalarization visitor
      */
     public void FExp.knownArrayTemporaries(Scalarizer s) {
-        s.addTempVar(this);
+        s.addTempVar(this, true);
         Array arr = getArray();
         for (Index i : indices()) {
             arr.get(i).createArrayTemporaries(s);
@@ -343,7 +343,7 @@ aspect FunctionScalarization {
                 }
                 useTempVar = true;
             } else {
-                s.addTempVar(this);
+                s.addTempVar(this, true);
                 useTempVar = true;
                 lefts.add(new FFunctionCallLeft(new Opt<FExp>(scalarize(s))));
             }
@@ -372,7 +372,7 @@ aspect FunctionScalarization {
         
         FExp exp = this;
         if (isSlice() && !s.unroll()) {
-            s.addTempVar(exp);
+            s.addTempVar(exp, true);
             exp = exp.tempExp();
             exp = exp.scalarizeExp(s);
         } else if (!s.inFunction() || isSlice()) {
@@ -403,7 +403,7 @@ aspect FunctionScalarization {
      * @param s Scalarization visitor
      */
     public void FExp.unknownFunctionArrayTemporaries(Scalarizer s) {
-        s.addTempVar(this);
+        s.addTempVar(this, false);
         createArrayTemporariesInChildren(s);
         useTempVar = false;
         type().scalarizeAssignment((Scalarizer.Algorithm)s, tempExp(), this);
@@ -419,7 +419,7 @@ aspect FunctionScalarization {
     }
     
     public void FVectorFunctionCall.unknownFunctionArrayTemporaries(Scalarizer s) {
-        s.addTempVar(this);
+        s.addTempVar(this, true);
         List<FExp> newArgs = new List<FExp>();
         List<FStatement> result = new List<FStatement>();
         List<FStatement> outer = s.getClauses();
@@ -449,7 +449,7 @@ aspect FunctionScalarization {
                     FAccessExp tempExp = new FAccessExp(new FAccessString(tempName));
 
                     FType tempType = arg.type().arrayType(arg.size().contract(1));
-                    s.block(firstLoop).addTempVar(tempType, tempName, true);
+                    s.block(firstLoop).addTempVar(tempType, tempName, true, true);
 
                     newArgs.add(tempExp(tempName, names.createFArraySubscripts(0, dimDiff - 1)));
 
@@ -475,7 +475,7 @@ aspect FunctionScalarization {
     }
     
     public void FArray.unknownFunctionArrayTemporaries(Scalarizer s) {
-        s.addTempVar(this);
+        s.addTempVar(this, true);
         ForNames names = s.getNames();
         boolean iter = isIterArray();
         names.addLayer(ndims()- (iter ? 0 : 1));
@@ -509,7 +509,7 @@ aspect FunctionScalarization {
     }
     
     public void FMulExp.unknownFunctionArrayTemporaries(Scalarizer s) {
-        s.addTempVar(this);
+        s.addTempVar(this, true);
         if (isElementWise()) {
             unknownFunctionArrayTemporariesElementWise(s);
         } else {
@@ -520,7 +520,7 @@ aspect FunctionScalarization {
     public void FMulExp.unknownFunctionArrayTemporariesMatrix(Scalarizer s) {
         ForNames names = s.getNames();
         FAccessExp sum = new FAccessExp(calcTempVarName());
-        s.addTempVar(type().scalarType(), sum.name(), true);
+        s.addTempVar(type().scalarType(), sum.name(), true, true);
         
         names.addLayer(ndims());
         names.fillLayer(this);
@@ -572,7 +572,7 @@ aspect FunctionScalarization {
     public void FMulExp.unknownFunctionArrayTemporariesElementWise(Scalarizer s) {
         ForNames names = s.getNames();
         FAccessExp sum = new FAccessExp(calcTempVarName());
-        s.addTempVar(type().scalarType(), sum.name(), true);
+        s.addTempVar(type().scalarType(), sum.name(), true, true);
         
         names.addLayer(ndims());
         names.fillLayer(this);
@@ -597,7 +597,7 @@ aspect FunctionScalarization {
     }
     
     public void FAbstractCat.unknownFunctionArrayTemporaries(Scalarizer s) {
-        s.addTempVar(this);
+        s.addTempVar(this, true);
         ForNames names = s.getNames();
         int catDim  = dimension();
         FExp offset = new FIntegerLitExp(0);
@@ -624,7 +624,7 @@ aspect FunctionScalarization {
     }
     
     public void FAbstractDiagonal.unknownFunctionArrayTemporaries(Scalarizer s) {
-        s.addTempVar(this);
+        s.addTempVar(this, true);
         ForNames names = s.getNames();
         names.addLayer(ndims());
         names.fillLayer(this);
@@ -646,7 +646,7 @@ aspect FunctionScalarization {
     eq FDiagonal.scalarizeDiagonalElement(Scalarizer s) = getFExp().scalarize(s);
     
     public void FVectorExp.unknownFunctionArrayTemporaries(Scalarizer s) {
-        s.addTempVar(this);
+        s.addTempVar(this, true);
         ForNames names = s.getNames();
         names.addLayer(getFExp().ndims());
         names.fillLayer(getFExp());
@@ -681,7 +681,7 @@ aspect FunctionScalarization {
     }
     
     public void FMatrixExp.unknownFunctionArrayTemporaries(Scalarizer s) {
-        s.addTempVar(this);
+        s.addTempVar(this, true);
         ForNames names = s.getNames();
         names.addLayer(getFExp().ndims());
         names.fillLayer(getFExp());
@@ -694,17 +694,17 @@ aspect FunctionScalarization {
     }
 
     public void FReductionExp.unknownFunctionArrayTemporaries(Scalarizer s) {
-        s.addTempVar(this);
+        s.addTempVar(this, true);
         unknownReductionSub(s, getFExp());
     }
 
     public void FMinMaxExp.unknownFunctionArrayTemporaries(Scalarizer s) {
-        s.addTempVar(this);
+        s.addTempVar(this, true);
         unknownReductionSub(s, getX());
     }
 
     public void FCross.unknownFunctionArrayTemporaries(Scalarizer s) {
-        s.addTempVar(this);
+        s.addTempVar(this, true);
         createArrayTemporariesInChildren(s);
         FExp x = getX();
         FExp y = getY();
@@ -718,7 +718,7 @@ aspect FunctionScalarization {
     }
 
     public void FSkew.unknownFunctionArrayTemporaries(Scalarizer s) {
-        s.addTempVar(this);
+        s.addTempVar(this, true);
         createArrayTemporariesInChildren(s);
         
         FExp inner = getFExp();
@@ -747,7 +747,7 @@ aspect FunctionScalarization {
     }
 
     public void FSymmetric.unknownFunctionArrayTemporaries(Scalarizer s) {
-        s.addTempVar(this);
+        s.addTempVar(this, true);
         createArrayTemporariesInChildren(s);
         FExp exp = getFExp();
         
@@ -771,7 +771,7 @@ aspect FunctionScalarization {
     }
 
     public void FOuterProduct.unknownFunctionArrayTemporaries(Scalarizer s) {
-        s.addTempVar(this);
+        s.addTempVar(this, true);
         createArrayTemporariesInChildren(s);
         
         ForNames names = s.getNames();

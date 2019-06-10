@@ -15,6 +15,7 @@
 */
 package org.jmodelica.api.problemHandling;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -491,6 +492,24 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
         return p;
     }
 
+    /**
+     * Creates a {@code Problem} object. Internal, do not use!
+     * 
+     * @param filePath
+     *      Path to the file which reported the problem (the problem source).
+     * @param severity
+     *      The severity level of the problem (error, warning).
+     * @param kind
+     *      The type of the problem (syntactical, semantical, et.c.).
+     * @param message
+     *      The message to present when the error is reported.
+     * @return
+     *      a {@code Problem} instance.
+     */
+    public static Problem createProblem(Path filePath, ProblemSeverity severity, ProblemKind kind, String message) {
+        return new Problem(filePath.toString(), message, severity, kind, 0, 0, 0, 0);
+    }
+    
     private static String capitalize(Object o) {
         String name = o.toString();
         return Character.toUpperCase(name.charAt(0)) + name.substring(1).toLowerCase();

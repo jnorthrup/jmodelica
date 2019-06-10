@@ -218,7 +218,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
 
     /**
      * Navigate downwards in the annotation tree. The first element in the path
-     * list is resolved relative this node. Then the resolved node is used to
+     * list is resolved relative to this node. Then the resolved node is used to
      * resolve the next one and so on.
      * @param path List of path elements to resolve
      * @return the resolved node
@@ -299,9 +299,9 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     }
 
     /**
-     * Provides all sub nodes for this node that {@link #exists()}.
+     * Provides all sub nodes for this node that {@link #nodeExists()}.
      * 
-     * @return all sub nodes that {@link #exists()}
+     * @return all sub nodes that {@link #nodeExists()}
      */
     public Iterable<T> subNodes() {
         computeSubNodesCache();

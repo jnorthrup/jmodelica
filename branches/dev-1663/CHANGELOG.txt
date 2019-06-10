@@ -1,4 +1,30 @@
 ================= Unreleased ==================
+# Fixed ; Minor ; Compiler ; #5771
+Fixed a bug regarding searching in sourrounding classes
+in one of the simple (source) class lookup methods.
+
+# Fixed ; Minor ; Compiler ; #5735
+Fixed exception during code generation caused by bug in temporary removal after function inlining.
+
+# Fixed ; Minor ; Compiler ; #5772
+Fixed exception from negated alias in assign statement left hand side.
+
+# Fixed ; Minor ; Compiler ; #5756
+Fixed c-code generation bug for some array assignments which led to segfaults.
+
+# Feature ; Minor ; Compiler ; #5758
+Added new option time_events, allows time events to be generated, enabled by default.
+Deprecated option relational_time_events.
+
+# Fixed ; Minor ; Compiler ; #5763
+Improved scalarization of record arrays.
+
+# Fixed ; Minor ; Compiler ; #5756
+Improved array initialization for primitive arrays in global constants.
+
+# Fixed ; Minor ; Compiler ; #5753
+Added error check for variability of sample arguments.
+
 # Feature ; Minor ; Compiler ; #5735
 Loop unrolling is now an internal option.
 

@@ -672,7 +672,7 @@ aspect FileNames {
     	
     }
     public String SrcLibNode.fileName() {
-        return getStructured() ? myPackageFile().getPath() : getFileName();
+        return getStructured() ? myPackageFile().getPath() : getLoadInfo().getPath();
     }
     public String InstLibNode.fileName() {
         return actualInstClass().fileName();
@@ -680,19 +680,13 @@ aspect FileNames {
     
     syn String ASTNode.dirName() = 
     	fileName().replaceFirst("^[^\\\\/]*$", ".").replaceFirst("[\\\\/][^\\\\/]*$", "");
-//    syn String ASTNode.dirName() {
-//    	String res = fileName();
-//    	if (res == null)
-//    		return res;
-//    	res = res.replaceFirst("^[^\\\\/]*$", ".");
-//    	return res.replaceFirst("[\\\\/][^\\\\/]*$", "");
-//    }
+    eq SrcLibNode.dirName() = getStructured() ? getLoadInfo().getPath() : super.dirName();
 
     inh String ASTNode.retrieveFileName();
     eq BaseNode.getChild().retrieveFileName()         = fileName();
-    eq SrcLibNode.getChild().retrieveFileName()          = fileName();
+    eq SrcLibNode.getChild().retrieveFileName()       = fileName();
     eq InstLibNode.getChild().retrieveFileName()      = getSrcClassDecl().fileName();
-    eq Program.getAnonymousClass().retrieveFileName() = ParserHandler.ANONYMOUS_CLASS_FILENAME;
+    eq Program.getAnonymousClass().retrieveFileName() = ParserHandler.ANONYMOUS_CLASS_FILENAME.getPath();
     
     public void Root.setFileName(String fName)             { this.fName = fName; }
     public void SrcStoredDefinition.setFileName(String fName) { this.fName = fName; }
@@ -869,7 +863,7 @@ aspect Names {
   inh String ASTNode.topPackagePath();
   eq Root.getChild().topPackagePath() = null;
   eq InstClassDecl.getChild().topPackagePath() {
-	  String path = topPackagePath();
+      String path = topPackagePath();
 	  return (path == null) ? dirName() : path;
   }
   eq SrcFullClassDecl.getChild().topPackagePath() {
@@ -902,13 +896,25 @@ aspect Names {
     eq FlatRoot.getChild().enclosingInstClassDecl()          = null;
     eq InstBaseClassDecl.getChild().enclosingInstClassDecl() = this;
     eq InstComponentDecl.getChild().enclosingInstClassDecl() = myInstClass();
-    
+
+    /**
+     * Any closest ancestor InstanceComponent which is a parent to this one.
+     * This method doesn't stop at classes which enclosingInstComponent does.
+     */
+
+    inh InstComponentDecl InstComponentDecl.parentInstComponent();
+    eq InstRoot.getChild().parentInstComponent()          = null;
+    eq InstComponentDecl.getChild().parentInstComponent() = this;
+
+    /**
+     * The closest ancestor instComponentDecl if there is one before the closest class.
+     * This method stops at classes.
+     */
     inh InstComponentDecl InstComponentDecl.enclosingInstComponentDecl();
     inh InstComponentDecl InstExtends.enclosingInstComponentDecl();
     eq BaseNode.getChild().enclosingInstComponentDecl()          = null;
     eq InstExtends.getChild().enclosingInstComponentDecl()       = enclosingInstComponentDecl();
     eq InstComponentDecl.getChild().enclosingInstComponentDecl() = this;
-    
 
     inh SrcBaseClassDecl ASTNode.enclosingClassDecl();
     eq Root.getChild().enclosingClassDecl() = null;
@@ -1028,6 +1034,9 @@ aspect Names {
     eq ASTNode.getChild().retrieveTopAccess(SrcAccess pre)      = pre;
     eq SrcDot.getChild().retrieveTopAccess(SrcAccess pre)          = retrieveTopAccess(this);
     eq SrcGlobalAccess.getChild().retrieveTopAccess(SrcAccess pre) = retrieveTopAccess(this);
+    
+    syn boolean SrcAccess.isGlobal() = false;
+    eq SrcGlobalAccess.isGlobal()    = true;
     
     syn boolean InstAccess.isTopInstAccess() = this == getTopInstAccess();
     
@@ -1187,7 +1196,6 @@ aspect DebugHelpers {
 
     public String FRealLitExp.toString()         { return Double.toString(getValue()); }
     public String FIntegerLitExp.toString()      { return Integer.toString(getValue()); }
-    public String FOverflowIntLitExp.toString()  { return getString(); }
     public String FBooleanLitExpTrue.toString()  { return "true"; }
     public String FBooleanLitExpFalse.toString() { return "false"; }
     public String FStringLitExp.toString()       { return "\"" + getString() + "\""; }
@@ -1399,7 +1407,7 @@ aspect ComponentDeclMethods {
     eq Root.getChild().inheritsInputOutputFrom()              = null;
     
     /**
-     * Check if this component is or is part of a component that is declared input or output on the top level.
+     * Check if this component is part of a component that is declared input or output on the top level.
      */
     syn boolean InstComponentDecl.isTopLevelInputOutput() = false;
     eq InstAssignable.isTopLevelInputOutput() = isTopLevel() && !inExpandableConnector() && 

@@ -14,22 +14,70 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-public class NoWarningsTestCase extends TestCase {
+aspect NoWarningsTestCase {
+
+public class NoWarningsTestCase extends ErrorTestCase {
 
     /**
      * Perform tests on a set of semantic problems.
      * 
      * Tests that no warnings or errors are reported.
      * 
-     * @return  <code>true</code> if test case shoule stop after this method
+     * @return  <code>true</code> if test case should stop after this method
      */
+    @Override
     protected boolean testProblems(Collection<Problem> problems) {
-        if (problems.size() == 0) {
-            return false;
-        }
-        
-        fail("Warnings or errors reported.");
+        checkProblems(problems);
+        return false;
+    }
+
+    /**
+     * Perform tests on the set of semantic problems found after transform canonical step.
+     * 
+     * @return  <code>true</code> if test case should stop after this method
+     */
+    protected boolean testTransformedProblems(Collection<Problem> problems) {
+        checkProblems(problems);
         return true;
     }
+
+    private void checkProblems(Collection<Problem> problems) {
+        if (problems.size() > 0) {
+            fail("Warnings or errors reported:\n" + formatErrorMessage(problems));
+        }
+    }
+}
+
+abstract public class TestAnnotationizerHelper {
+
+    /**
+     * A test checking that no errors or warnings are created.
+     */
+    public static class NoWarningsTestCase extends ErrorTestCaseHelper {
+
+        public NoWarningsTestCase(String filePath, String className, String description,
+                String platform, String[] opts, Object[] data) throws Exception {
+
+            super(filePath, className, description, platform, opts, data);
+        }
+
+        public NoWarningsTestCase(SrcClassDecl cd, String filePath, String className) throws Exception {
+            super(cd, filePath, className);
+        }
+
+        @Override
+        protected void printSpecific() {}
+
+        @Override
+        protected void noException() {}
+
+        @Override
+        protected void gotException(CompilerException e) {
+            throw e;
+        }
+
+    }
+
+}
 
 }

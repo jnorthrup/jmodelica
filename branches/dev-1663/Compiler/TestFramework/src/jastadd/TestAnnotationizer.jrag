@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.regex.Pattern;
 
 aspect TestAnnotationizer {
@@ -393,8 +394,13 @@ abstract public class TestAnnotationizerHelper {
         opts.setStringOption("MODELICAPATH", modelicapath.getPath());
         SourceRoot root;
         
+        Collection<LoadInfo> loadInfos = new ArrayList<>();
+        for (String file : files) {
+            loadInfos.add(LoadInfo.create(file));
+        }
+        
         try {
-            root = TestCase.PARSER_HANDLER.parseModel(UtilInterface.create(opts), files);
+            root = TestCase.PARSER_HANDLER.parseModel(UtilInterface.create(opts), loadInfos);
         } catch (ParserException e) {
             CompilerException ce = new CompilerException();
             ce.addProblem(e.getProblem());
@@ -481,33 +487,34 @@ abstract public class TestAnnotationizerHelper {
 			return false;
 		}
 	}
-	
-	protected void printSpecificLine(
-			PrintStream out, String indent, String name, String value, boolean last) {
-        int nl = Math.max(value.lastIndexOf('\n'), value.lastIndexOf('\r'));
-        boolean multi = nl >= 0;
-        if (multi) 
-            value = "\n" + value + (nl < value.length() - 1 ? "\n" : "");
-		doPrintSpecificLine(out, indent, name, '"' + value + '"', last, multi);
-	}
-	
-	protected void printSpecificLine(
-			PrintStream out, String indent, String name, double value, boolean last) {
-		doPrintSpecificLine(out, indent, name, Double.toString(value), last, false);
-	}
-	
-	protected void printSpecificLine(
-			PrintStream out, String indent, String name, int value, boolean last) {
-		doPrintSpecificLine(out, indent, name, Integer.toString(value), last, false);
-	}
-	
-	protected void printSpecificLine(
-			PrintStream out, String indent, String name, boolean value, boolean last) {
-		doPrintSpecificLine(out, indent, name, Boolean.toString(value), last, false);
-	}
 
-    protected void printSpecificLine(PrintStream out, String indent, String name, Object[] value, boolean last) {
-        doPrintSpecificLine(out, indent, name, arrayString(value), last, false);
+    protected ArrayList<String> lines = new ArrayList<>();
+
+    protected void printLine(String line) {
+        lines.add(line);
+    }
+
+    protected void printLine(String name, String value) {
+        int nl = Math.max(value.lastIndexOf('\n'), value.lastIndexOf('\r'));
+        if (nl >= 0) 
+            value = "\n" + value + (nl < value.length() - 1 ? "\n" : "");
+        doPrintLine(name, '"' + value + '"');
+    }
+
+    protected void printLine(String name, double value) {
+        doPrintLine(name, Double.toString(value));
+    }
+
+    protected void printLine(String name, int value) {
+        doPrintLine(name, Integer.toString(value));
+    }
+
+    protected void printLine(String name, boolean value) {
+        doPrintLine(name, Boolean.toString(value));
+    }
+
+    protected void printLine(String name, Object[] value) {
+        doPrintLine(name, arrayString(value));
     }
 
     private <T> String arrayString(T[] array) {
@@ -515,14 +522,9 @@ abstract public class TestAnnotationizerHelper {
         return "{ " + arrayString.substring(1, arrayString.length() - 2) + " }";
     }
 
-	protected void doPrintSpecificLine(
-			PrintStream out, String indent, String name, String value, boolean last, boolean multi) {
-		out.print(indent + name + "=" + value);
-		if (!last)
-			out.print(",\n");
-		else if (!multi) 
-			out.print("\n ");
-	}
+    protected void doPrintLine(String name, String value) {
+        lines.add(name + "=" + value);
+    }
 
     private static final String DEFAULT_INDENT = "    ";
 
@@ -606,18 +608,44 @@ abstract public class TestAnnotationizerHelper {
         }
         out.println(HEADER);
         out.println(indent + "    " + testClassName() + "(");
-        out.println(indent + "        name=\"" + testName + "\",");
-        out.println(indent + "        description=\"" + description + "\",");
+        printLine("name", testName);
+        printLine("description", description);
         if (platform != null)             
-            out.println(indent + "        platform=\"" + platform + "\",");
+        printLine("platform", platform);
         if (hasModelicaLibraries())
-            out.println(indent + "        modelicaLibraries=\"" + getModelicaLibrariesString() + "\",");
+        printLine("modelicaLibraries", getModelicaLibrariesString());
         for (String opt : opts) 
-            out.println(indent + "        " + opt + ",");
+            printLine(opt);
         if (checkType != null)
-            out.println(indent + "        checkType=" + checkType.toString().toLowerCase() + ",");
-        printSpecific(out, indent + "        ");
+            printLine("checkType", checkType.toString().toLowerCase());
+        printSpecific();
+        processLines(out, indent + "        ");
         out.println(")})));");
+    }
+
+    /**
+     * Prints out all registered annotation lines and clears the list.
+     */
+    protected void processLines(PrintStream out, String indent) {
+        Iterator<String> it = lines.iterator();
+        while (it.hasNext()) {
+            String line = it.next();
+            out.print(indent);
+            out.print(line);
+            if (it.hasNext()) {
+                out.println(",");
+            } else {
+                // Get last char of value part (i.e. before the ")
+                int lastIndex = line.length() - 2;
+                if(lastIndex < 0) {
+                    throw new IllegalArgumentException("the line '"+line+"' is too short");
+                }
+                char last = line.charAt(lastIndex);
+                if (last != '\n' && last != '\r') {
+                    out.println();
+                }
+            }
+        }
     }
 
     /**
@@ -741,7 +769,7 @@ abstract public class TestAnnotationizerHelper {
 	 * Generate and print the part of the annotation that is specific to 
 	 *        the test case type.
 	 */
-	abstract protected void printSpecific(PrintStream out, String indent) throws Exception;
+	abstract protected void printSpecific() throws Exception;
 
 	/**
 	 * Base class for code generation tests.
@@ -807,9 +835,9 @@ abstract public class TestAnnotationizerHelper {
 	     *        this test case type.
 		 */
 		@Override
-		protected void printSpecific(PrintStream out, String indent) throws Exception {
-			printSpecificLine(out, indent, "template", template, false);
-			printSpecificLine(out, indent, "generatedCode", code, true);
+		protected void printSpecific() throws Exception {
+			printLine("template", template);
+			printLine("generatedCode", code);
 		}
 		
 	}
@@ -896,17 +924,15 @@ abstract public class TestAnnotationizerHelper {
 			fc = flatten(instantiate());
 		}
 
-		/**
-		 * Generate and print the part of the annotation that is specific to 
-	     *        this test case type.
-		 */
-		@Override
-		protected void printSpecific(PrintStream out, String indent) throws Exception {
-			out.println(indent + "flatModel=\"");
-			out.print(prepare(fc.prettyPrint("")));
-			out.print("\"");
-		}
-		
+        /**
+         * Generate and print the part of the annotation that is specific to 
+         *        this test case type.
+         */
+        @Override
+        protected void printSpecific() throws Exception {
+            printLine("flatModel", prepare(fc.prettyPrint("")));
+        }
+
 	}
 
 	/**
@@ -981,9 +1007,9 @@ abstract public class TestAnnotationizerHelper {
             super.process();
             try {
                 compile();
-                throw new ModelicaException(noExceptionMessage());
+                noException();
             } catch (CompilerException e) {
-                message = prepareErrorMsg(e.getMessage(true));
+                gotException(e);
             }
         }
 
@@ -999,6 +1025,20 @@ abstract public class TestAnnotationizerHelper {
             return prepare(str);
         }
 
+        /**
+         * Handle case where a CompilerException is raised.
+         */
+        protected void gotException(CompilerException e) throws ModelicaException {
+            message = prepareErrorMsg(e.getMessage(true));
+        }
+
+        /**
+         * Handle case where no CompilerException is raised.
+         */
+        protected void noException() throws ModelicaException {
+            throw new ModelicaException(noExceptionMessage());
+        }
+
 		/**
 		 * Returns an error message for when no errors were detected in test model.
 		 */
@@ -1011,8 +1051,8 @@ abstract public class TestAnnotationizerHelper {
 	     *        this test case type.
 		 */
 		@Override
-		protected void printSpecific(PrintStream out, String indent) throws Exception {
-			printSpecificLine(out, indent, "errorMessage", message, true);
+		protected void printSpecific() throws Exception {
+			printLine("errorMessage", message);
 		}
 
 	}
@@ -1151,12 +1191,12 @@ abstract public class TestAnnotationizerHelper {
          *        this test case type.
          */
         @Override
-        protected void printSpecific(PrintStream out, String indent) throws Exception {
-            printSpecificLine(out, indent, "methodName", methodName, false);
+        protected void printSpecific() throws Exception {
+            printLine("methodName", methodName);
             if (arguments.length > 0) {
-                printSpecificLine(out, indent, "arguments", arguments, false);
+                printLine("arguments", arguments);
             }
-            printSpecificLine(out, indent, "methodResult", prepare(methodResult), true);
+            printLine("methodResult", prepare(methodResult));
         }
         
         /**
@@ -1368,9 +1408,9 @@ abstract public class TestAnnotationizerHelper {
 	     *        this test case type.
 		 */
 		@Override
-		protected void printSpecific(PrintStream out, String indent) throws Exception {
-			printSpecificLine(out, indent, "variables", variables, false);
-			printSpecificLine(out, indent, "values", values, true);
+		protected void printSpecific() throws Exception {
+			printLine("variables", variables);
+			printLine("values", values);
 		}
 		
 		/**
@@ -1421,8 +1461,8 @@ abstract public class TestAnnotationizerHelper {
 	     *        this test case type.
 		 */
 		@Override
-		protected void printSpecific(PrintStream out, String indent) throws Exception {
-			printSpecificLine(out, indent, "maxTime", time, true);
+		protected void printSpecific() throws Exception {
+			printLine("maxTime", time);
 		}
 		
 		/**
@@ -1476,9 +1516,9 @@ abstract public class TestAnnotationizerHelper {
         }
 
         @Override
-        protected void printSpecific(PrintStream out, String indent) throws Exception {
-            printSpecificLine(out, indent, "names",  names, false);
-            printSpecificLine(out, indent, "defaults", defaults, true);
+        protected void printSpecific() throws Exception {
+            printLine("names",  names);
+            printLine("defaults", defaults);
         }
 
         @Override

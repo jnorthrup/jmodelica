@@ -432,44 +432,47 @@ aspect Constructors {
      *              the assumption that <code>exp</code> is of the same type. When one is 
      *              Integer and the other Real, this assumption gives the correct result.
      */
-    public FExp FExp.appendSum(FExp exp, boolean neg, FType type) {
+    public FExp FExp.appendSum(Flattener f, FExp exp, boolean neg, FType type) {
         if (exp == null)
-            return neg ? type.createFNegExp(this) : this;
+            return neg ? type.createFNegExp(f, this) : this;
         else
-            return neg ? type.createFSubExp(exp, this) : type.createFAddExp(exp, this);
+            return neg ? type.createFSubExp(f, exp, this) : type.createFAddExp(f, exp, this);
     }
 
     /**
      * Create a negation expression for the flat tree for an expression of this type.
      */
-    public FExp FType.createFNegExp(FExp a) {
+    public FExp FType.createFNegExp(Flattener f, FExp a) {
         return new FNegExp(a);
     }
 
-    public FExp FOperatorRecordType.createFNegExp(FExp a) {
-        return matchOverloadedOperator(null, FExp.OP_NEG).flattenOverloadedFunctionCall(Flattener.expressionFlattener(), arr(a), arr(this));
+    @Override
+    public FExp FOperatorRecordType.createFNegExp(Flattener f, FExp a) {
+        return matchOverloadedOperator(null, FExp.OP_NEG).flattenOverloadedFunctionCall(f, arr(a), arr(this));
     }
 
     /**
      * Create a subtraction expression for the flat tree for two expressions of this type.
      */
-    public FExp FType.createFSubExp(FExp a, FExp b) {
+    public FExp FType.createFSubExp(Flattener f, FExp a, FExp b) {
         return new FSubExp(a, b);
     }
 
-    public FExp FOperatorRecordType.createFSubExp(FExp a, FExp b) {
-        return matchOverloadedOperator(this, FExp.OP_SUB).flattenOverloadedFunctionCall(Flattener.expressionFlattener(), arr(a, b), arr(this, this));
+    @Override
+    public FExp FOperatorRecordType.createFSubExp(Flattener f, FExp a, FExp b) {
+        return matchOverloadedOperator(this, FExp.OP_SUB).flattenOverloadedFunctionCall(f, arr(a, b), arr(this, this));
     }
 
     /**
      * Create an addition expression for the flat tree for two expressions of this type.
      */
-    public FExp FType.createFAddExp(FExp a, FExp b) {
+    public FExp FType.createFAddExp(Flattener f, FExp a, FExp b) {
         return new FAddExp(a, b);
     }
 
-    public FExp FOperatorRecordType.createFAddExp(FExp a, FExp b) {
-        return matchOverloadedOperator(this, FExp.OP_ADD).flattenOverloadedFunctionCall(Flattener.expressionFlattener(), arr(a, b), arr(this, this));
+    @Override
+    public FExp FOperatorRecordType.createFAddExp(Flattener f, FExp a, FExp b) {
+        return matchOverloadedOperator(this, FExp.OP_ADD).flattenOverloadedFunctionCall(f, arr(a, b), arr(this, this));
     }
 
     public class ASTNode {
@@ -884,6 +887,7 @@ aspect InheritedFactoryMethods {
 	public abstract FUnaryBuiltIn             FUnaryBuiltIn.createEmptyNode();
 	public abstract FEventGenExp              FEventGenExp.createEmptyNode();
 	public abstract FBinEventGenExp           FBinEventGenExp.createEmptyNode();
+    public abstract FDelayIndicator           FDelayIndicator.createEmptyNode();
 	public abstract FMathematicalFunctionCall FMathematicalFunctionCall.createEmptyNode();
 	public abstract FInfArgsFunctionCall      FInfArgsFunctionCall.createEmptyNode();
 	public abstract FMinMaxExp      		  FMinMaxExp.createEmptyNode();
@@ -921,7 +925,7 @@ aspect InheritedFactoryMethods {
 	public FNotExp FNotExp.createEmptyNode() { return new FNotExp(); }
 	public FOrExp  FOrExp.createEmptyNode()  { return new FOrExp();  }
 	public FAndExp FAndExp.createEmptyNode() { return new FAndExp(); }
-	
+
 	// Literal expressions (all have different children, so mostly here for completeness)
 	public FRealLitExp         FRealLitExp.createEmptyNode()         { return new FRealLitExp();         }
 	public FIntegerLitExp      FIntegerLitExp.createEmptyNode()      { return new FIntegerLitExp();      }
@@ -950,6 +954,11 @@ aspect InheritedFactoryMethods {
 	public FNoExp          FNoExp.createEmptyNode()          { return new FNoExp();          }
     public FColonSizeExp   FColonSizeExp.createEmptyNode()   { return new FColonSizeExp();   }
     public FInStreamEpsExp FInStreamEpsExp.createEmptyNode() { return new FInStreamEpsExp(); }
+    
+    // Event indicator expressions
+    public FFirstDelayIndicator  FFirstDelayIndicator.createEmptyNode()  { return new FFirstDelayIndicator(); }
+    public FSecondDelayIndicator FSecondDelayIndicator.createEmptyNode() { return new FSecondDelayIndicator(); }
+    public FSpatialDistIndicator FSpatialDistIndicator.createEmptyNode() { return new FSpatialDistIndicator(); }
 
     // Identifier expressions
     public abstract CommonAccessExp CommonAccessExp.createEmptyNode();
@@ -1380,20 +1389,20 @@ aspect InheritedFactoryMethods {
     public FSemiLinearExp.FSemiLinearExp(FExp a1, FExp a2, FExp a3) { this(emptyArgs(), a1, a2, a3); }
     public FLinspace.FLinspace(FExp a1, FExp a2, FExp a3)           { this(emptyArgs(), a1, a2, a3); }
     
-    public FDelayExp.FDelayExp(FExp a1, FExp a2, Opt<FExp> a3) { this(emptyArgs(), a1, a2, a3); }
+    public FDelayExp.FDelayExp(FExp a1, FExp a2, Opt<FExp> a3) { this(emptyArgs(), a1, a2, a3, List.EMPTY); }
     public FAssert.FAssert(FExp a1, FExp a2, Opt<FExp> a3)     { this(emptyArgs(), a1, a2, a3); }
     
     public FFillExp.FFillExp(List<FExp> dims, FExp exp)              { this(emptyArgs(), dims, exp); }
     public FSpatialDistExp.FSpatialDistExp(FExp a1, FExp a2, FExp a3, FExp a4, FExp a5, FExp a6) { 
-        this(emptyArgs(), a1, a2, a3, a4, a5, a6);
+        this(emptyArgs(), a1, a2, a3, a4, a5, a6, Opt.EMPTY);
     }
     public FExInStream.FExInStream(FExp a1, FExp a2, List<FExp> a3) { this(emptyArgs(), a1, a2, a3); }
     
-    public FLtExp.FLtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FExp>(), (String) null); }
-    public FLeqExp.FLeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FExp>(), (String) null); }
-    public FGtExp.FGtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FExp>(), (String) null); }
-    public FGeqExp.FGeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FExp>(), (String) null); }
-    public FEqExp.FEqExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FExp>(), (String) null); }
-    public FNeqExp.FNeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FExp>(), (String) null); }
+    public FLtExp.FLtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FAccessExp>()); }
+    public FLeqExp.FLeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FAccessExp>()); }
+    public FGtExp.FGtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FAccessExp>()); }
+    public FGeqExp.FGeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FAccessExp>()); }
+    public FEqExp.FEqExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FAccessExp>()); }
+    public FNeqExp.FNeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FAccessExp>()); }
 
 }
