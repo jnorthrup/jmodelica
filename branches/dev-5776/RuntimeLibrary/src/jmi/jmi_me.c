@@ -795,6 +795,13 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
                 return -1;
             }
             
+            ret = jmi_enter_event_mode(jmi);
+            if(ret != 0) {
+                jmi_log_comment(jmi->log, logError, "Failed to re-enter the event mode at the second time event.");
+                jmi_log_unwind(jmi->log, top_node);
+                return -1;
+            }
+            
             ret = jmi_event_iteration(jmi, intermediate_results, event_info);
             
             /* If there was a previous state value changed, restore the flag */
