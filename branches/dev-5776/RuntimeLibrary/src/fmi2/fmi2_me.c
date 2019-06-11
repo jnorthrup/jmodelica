@@ -649,6 +649,11 @@ fmi2Status fmi2_enter_event_mode(fmi2Component c) {
         return fmi2Error;
     }
     
+    retval = jmi_enter_event_mode(&((fmi2_me_t *)c)->jmi);
+    if (retval != 0) {
+        return fmi2Error;
+    }
+    
     ((fmi2_me_t *)c) -> fmu_mode = eventMode;
     return fmi2OK;
 }
