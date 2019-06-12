@@ -318,7 +318,7 @@ class TestInitOptions20:
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
         print solves
-        nose.tools.assert_equals(len(solves), 1)
+        nose.tools.assert_equals(len(solves), 2)
     
     @testattr(stddist_full = True)
     def test_debug_solution(self):
