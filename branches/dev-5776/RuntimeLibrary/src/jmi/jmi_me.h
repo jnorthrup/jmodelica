@@ -105,6 +105,8 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results, jmi_event_
 
 int jmi_enter_event_mode(jmi_t* jmi);
 
+int jmi_exit_event_mode(jmi_t* jmi, jmi_event_info_t* event_info);
+
 int jmi_next_time_event(jmi_t* jmi);
 
 int jmi_completed_integrator_step(jmi_t* jmi, jmi_real_t* triggered_event);
