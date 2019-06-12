@@ -7325,7 +7325,7 @@ model ForNoRange12
 2 errors found:
 
 Error at line 6, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo':
-  Duplicate component in same class: Real y[:] = {x[i]+y[i]i}
+  Duplicate component in same class: Real y[:] = {x[i]+y[i] for i}
 
 Error at line 6, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', IMPLICIT_FOR_RANGE_INCONSISTENT:
   For index with implicit iteration range used for inconsistent sizes, here used for size [3] and earlier for size [2]
