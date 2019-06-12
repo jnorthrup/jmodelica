@@ -860,12 +860,27 @@ aspect PrettyPrint {
 		str.print(")");
 	}
 
+    public void SrcIterExp.prettyPrint(Printer p, CodeStream str, String ident) {
+        getSrcExp().prettyPrint(p,str,ident);
+        str.print(" for ");
+        for (int i = 1; i < getNumChild(); i++) {
+            getChild(i).prettyPrint(p, str, ident);
+        }
+    }
+
 	public void SrcFunctionArguments.prettyPrint(Printer p, CodeStream str, String indent) {
-		for (int i=0; i<getNumSrcExp(); i++) {
-			p.print(getSrcExp(i),str,indent);
-			if (i<getNumSrcExp()-1)
+		for (int i = 0; i < getNumSrcExp(); i++) {
+			p.print(getSrcExp(i), str, indent);
+			if (i < getNumSrcExp() - 1) {
 				str.print(",");
+		    }
 		}
+	}
+	
+	public void SrcNamedArgument.prettyPrint(Printer p, CodeStream str, String indent) {
+	    p.print(getName(), str, indent);
+	    str.print("=");
+	    getSrcExp().prettyPrint(p, str, indent);
 	}
 
     public void SrcIdDecl.prettyPrint(Printer p, CodeStream str, String indent) {
