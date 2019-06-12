@@ -310,7 +310,7 @@ class TestInitOptions20:
         self.model.initialize()
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        nose.tools.assert_equals(len(solves), 1)
+        nose.tools.assert_equals(len(solves), 2)
         
         self.setUp('test_KINsolver_options_log_ll6.txt')
         self.model.set('_log_level',6)
