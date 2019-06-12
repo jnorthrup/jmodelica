@@ -1059,7 +1059,7 @@ public class ModelicaCompiler implements LogContainer {
         dumpMemoryUseFile(sr, "source", false);
 
         if (options.getBooleanOption("generate_html_diagnostics")) {
-            setDiagnosticsGenerator(new DiagnosticsGenerator(cl));
+            setDiagnosticsGenerator(new DiagnosticsGenerator(cl, options));
         }
 
         // compute instance tree

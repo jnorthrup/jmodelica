@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014 Modelon AB
+    Copyright (C) 2019 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -2349,13 +2349,14 @@ end OperatorRecordTests.OperatorLimitations15;
         type T = Real(max=5, nominal=2);
         operator record Cplx2 = Cplx(redeclare T re, redeclare T im);
         Cplx c1 = Cplx(1, 2);
-        Cplx2 c2 = Cplx2(3, 4);
+        Cplx2 c2 = Cplx2(3, 4); // Short class declaration of Cplx2.
         Cplx c3 = c1 + c2;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
             name="OperatorLimitations15b",
-            description="Short class decl of operator record may modify attributes of record members through redeclare on primitive",
+            description="Short class declaration of operator record may modify attributes of record members
+                         through redeclare on primitive",
             flatModel="
 fclass OperatorRecordTests.OperatorLimitations15b
  OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
