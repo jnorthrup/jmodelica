@@ -486,7 +486,7 @@ aspect FlushFClass {
 			n.flushAllRecursive();
 		}
 	}
-	
+
 	/**
 	 * Flush model AST and enable rewrites of FAccessExps and FDerExps
 	 * after alias elimination.

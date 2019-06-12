@@ -33,17 +33,21 @@ aspect CCodeGenAlgorithms {
     public void FType.printAssign(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent,
             ASTNode dst, ASTNode src) {
         str.print(indent);
-        if (isComposite()) {
+        boolean deref = dst.deref_C();
+        if (deref) {
             str.print("*");
         }
         p.print(dst, str, indent);
         str.print(" = ");
-        if (isComposite()) {
+        if (deref) {
             str.print("*");
         }
         p.print(src, str, indent);
         str.print(";\n");
     }
+
+    syn boolean ASTNode.deref_C() = false;
+    eq FAccessExp.deref_C() = type().isRecord() && hasFArraySubscripts();
 
     @Override
     public void FStringType.printAssign(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent,

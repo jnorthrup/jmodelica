@@ -14,6 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import org.jmodelica.util.collections.IntIterator;
 
 aspect InstLookupComponents {
     
@@ -493,7 +494,56 @@ aspect InstLookupComponents {
     }
 
     /**
-     * Lookup component, re-evaluating any array accesses except in last component.
+     * Lookup component, selecting array indices based on i, where i covers this access.
+     */
+    syn InstComponentDecl InstAccess.lookupWithIndex(Index i) = lookupWithIndexImpl(i, null);
+
+    /**
+     * Lookup component, selecting array indices based on i, where i covers an InstDot that 
+     * this access is part of.
+     */
+    inh InstComponentDecl InstAccess.lookupAsPartWithIndex(Index i);
+    eq InstDot .getInstAccess(int j).lookupAsPartWithIndex(Index i) = 
+        lookupWithIndexImpl(i, (j < getNumInstAccess() - 1) ? getInstAccess(j + 1) : null);
+    eq BaseNode.getChild()          .lookupAsPartWithIndex(Index i) = 
+        unknownInstComponentDecl();
+
+    protected InstComponentDecl InstAccess.lookupWithIndexImpl(Index i, InstAccess stopAt) {
+        InstAccess first = getFirstInstAccess();
+        InstAccess cur = first;
+        InstComponentDecl icd = cur.myInstComponentDecl();
+        IntIterator index = i.iterator();
+        
+        while (cur != stopAt && icd != null && !icd.isUnknown()) {
+            if (cur == first) {
+                icd = icd.arrayCell(index);
+            } else {
+                icd = icd.memberArrayCell(cur.name(), index);
+            }
+            cur = cur.getNextInstAccess();
+        }
+        
+        return (icd == null) ? unknownInstComponentDecl() : icd;
+    }
+
+    syn InstComponentDecl InstComponentDecl.memberArrayCell(String name, IntIterator index) {
+        InstComponentDecl res = memberInstComponent(name).targetOrNull();
+        if (res != null) {
+            res = res.arrayCell(index);
+        }
+        return res;
+    }
+
+    syn InstComponentDecl InstComponentDecl.arrayCell(IntIterator index) {
+        if (index.hasNext() && !isUnknown() && isArray() && !isPrimitive()) {
+            return getInstComponentDecl(index.next() - 1).arrayCell(index);
+        } else {
+            return this;
+        }
+    }
+
+    /**
+     * Lookup component, re-evaluating any array indexes except in last component.
      */
     public InstComponentDecl InstAccess.lookupEvaluatingIndices() {
         InstAccess cur = getFirstInstAccess();
@@ -603,22 +653,29 @@ aspect InstLookupComponents {
     eq InstSimpleShortClassDecl.arrayMemberInstComponent(String name, int ndims) = actualInstClass().arrayMemberInstComponent(name, ndims);
     eq InstLibNode.arrayMemberInstComponent(String name, int ndims)              = actualInstClass().arrayMemberInstComponent(name, ndims);
 
-    syn lazy InstLookupResult<InstComponentDecl> InstNode.memberInstComponent(String name)  {
+    syn InstLookupResult<InstComponentDecl> InstNode.memberInstComponent(String name) { 
         if (isArray()) {
             return arrayMemberInstComponent(name, ndims());
         } else {    
-            for (InstComponentDecl ic : getInstComponentDecls()) 
-                if (ic.matches(name))
-                    return findInnerComponentIfAny(ic.duplicateOriginal());
-
-            for (InstExtends ie : getInstExtendss()) {
-                InstLookupResult<InstComponentDecl> res = ie.memberInstComponent(name);
-                if (res.successful())
-                    return res;
-            }
-            
-            return InstLookupResult.notFound();
+            return memberInstComponentCached(name);
         }
+    }
+    
+    syn lazy InstLookupResult<InstComponentDecl> InstNode.memberInstComponentCached(String name)  {
+        for (InstComponentDecl ic : getInstComponentDecls()) {
+            if (ic.matches(name)) {
+                return findInnerComponentIfAny(ic.duplicateOriginal());
+            }
+        }
+
+        for (InstExtends ie : getInstExtendss()) {
+            InstLookupResult<InstComponentDecl> res = ie.memberInstComponent(name);
+            if (res.successful()) {
+                return res;
+            }
+        }
+        
+        return InstLookupResult.notFound();
     }
     eq InstSimpleShortClassDecl.memberInstComponent(String name) = actualInstClass().memberInstComponent(name);
     eq InstLibNode.memberInstComponent(String name)              = actualInstClass().memberInstComponent(name);

@@ -6489,17 +6489,17 @@ void func_CCodeGenTests_CRecordDecl8_f_def0(jmi_real_t* o_o) {
     jmi_array_rec_1(temp_2_a, 1)->c = 2;
     jmi_array_rec_1(temp_2_a, 2)->c = 3;
     jmi_array_rec_1(temp_1_a, 1)->a = 1;
-    *jmi_array_rec_1(temp_1_a, 1)->b = *temp_2_a;
+    jmi_array_rec_1(temp_1_a, 1)->b = temp_2_a;
     JMI_ARRAY_INIT_1(STACK, B_0_r, B_0_ra, temp_3_a, 2, 1, 2)
     jmi_array_rec_1(temp_3_a, 1)->c = 5;
     jmi_array_rec_1(temp_3_a, 2)->c = 6;
     jmi_array_rec_1(temp_1_a, 2)->a = 4;
-    *jmi_array_rec_1(temp_1_a, 2)->b = *temp_3_a;
+    jmi_array_rec_1(temp_1_a, 2)->b = temp_3_a;
     JMI_ARRAY_INIT_1(STACK, B_0_r, B_0_ra, temp_4_a, 2, 1, 2)
     jmi_array_rec_1(temp_4_a, 1)->c = 8;
     jmi_array_rec_1(temp_4_a, 2)->c = 9;
     jmi_array_rec_1(temp_1_a, 3)->a = 7;
-    *jmi_array_rec_1(temp_1_a, 3)->b = *temp_4_a;
+    jmi_array_rec_1(temp_1_a, 3)->b = temp_4_a;
     i1_0in = 0;
     i1_0ie = floor((3) - (1));
     for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
@@ -6763,17 +6763,17 @@ void func_CCodeGenTests_CRecordDecl12_f_def0(A_1_ra* x_a) {
     jmi_array_rec_1(temp_2_a, 1)->c = 2;
     jmi_array_rec_1(temp_2_a, 2)->c = 3;
     jmi_array_rec_1(temp_1_a, 1)->a = 1;
-    *jmi_array_rec_1(temp_1_a, 1)->b = *temp_2_a;
+    jmi_array_rec_1(temp_1_a, 1)->b = temp_2_a;
     JMI_ARRAY_INIT_1(STACK, B_0_r, B_0_ra, temp_3_a, 2, 1, 2)
     jmi_array_rec_1(temp_3_a, 1)->c = 5;
     jmi_array_rec_1(temp_3_a, 2)->c = 6;
     jmi_array_rec_1(temp_1_a, 2)->a = 4;
-    *jmi_array_rec_1(temp_1_a, 2)->b = *temp_3_a;
+    jmi_array_rec_1(temp_1_a, 2)->b = temp_3_a;
     JMI_ARRAY_INIT_1(STACK, B_0_r, B_0_ra, temp_4_a, 2, 1, 2)
     jmi_array_rec_1(temp_4_a, 1)->c = 8;
     jmi_array_rec_1(temp_4_a, 2)->c = 9;
     jmi_array_rec_1(temp_1_a, 3)->a = 7;
-    *jmi_array_rec_1(temp_1_a, 3)->b = *temp_4_a;
+    jmi_array_rec_1(temp_1_a, 3)->b = temp_4_a;
     i1_0in = 0;
     i1_0ie = floor((3) - (1));
     for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
