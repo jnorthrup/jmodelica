@@ -2692,10 +2692,9 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     int flag;
     jmi_kinsol_solver_t* solver = block->solver;
     realtype curtime = block->cur_time;
-	realtype fnorm, stepl, cond;
+	realtype fnorm, cond;
 	realtype* step_spike;
 	jmi_real_t abs_step_i, tol_nom_i;
-	jmi_real_t max_nominal = -1.0;
 	long int i;
     long int nniters = 0;
     int flagNonscaled;
