@@ -765,7 +765,7 @@ class Test_FMUModelME2:
     def test_model_bool_input_pre_operator_with_edge(self):
         """Test boolean inputs used in a pre operator and using edge"""
         model_name = 'DiscreteInputTestModels.myTestModelEdge'
-        results_with_edge = self._discrete_inputs_get_reference_data(model_name)
+        results_with_edge = self._get_discrete_inputs_results(model_name)
 
         path_to_reference_data = os.path.join(get_files_path(), 'Modelica', 'DiscreteInputTestValues.txt')
         ref_values = self._discrete_inputs_get_reference_data(path_to_reference_data)
