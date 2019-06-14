@@ -34,6 +34,7 @@ public class OptionsAggregator {
             }
         }
 
+        @Override
         public String toString() {
             return sb.toString();
         }
@@ -97,7 +98,7 @@ public class OptionsAggregator {
 
     private class OptionModificationRemove extends OptionModification {
 
-        public OptionModificationRemove(String filePath, String kind, String name) throws OptionsAggregationException {
+        public OptionModificationRemove(String filePath, String kind, String name) {
             super(filePath, kind, name, null);
         }
 
@@ -109,7 +110,7 @@ public class OptionsAggregator {
 
     private class OptionModificationInvert extends OptionModification {
 
-        public OptionModificationInvert(String filePath, String kind, String name, String defaultValue) throws OptionsAggregationException {
+        public OptionModificationInvert(String filePath, String kind, String name, String defaultValue) {
             super(filePath, kind, name, defaultValue);
         }
 
@@ -244,16 +245,16 @@ public class OptionsAggregator {
     public String nextLine(BufferedReader reader) throws IOException {
         String line;
         while ((line = reader.readLine()) != null && isEmpty(line)) {
-
+            // do nothing - just skip to next non-empty line
         }
         return line;
     }
 
-    private boolean isEmpty(String line) {
+    private static boolean isEmpty(String line) {
         return line == null || line.isEmpty() || line.startsWith("***");
     }
 
-    private String parseKind(String kind) throws OptionsAggregationException {
+    private static String parseKind(String kind) {
         return kind.substring(0, 1).toUpperCase() + kind.substring(1).toLowerCase();
     }
 
@@ -273,7 +274,7 @@ public class OptionsAggregator {
      * INVERT opt1 opt2
      * 
      */
-    private boolean parseModification(String optionsFile, String[] parts) throws OptionsAggregationException {
+    private boolean parseModification(String optionsFile, String[] parts) {
         if (parts[0].equals("DEFAULT")) {
             String name = parts[1];
             String defaultValue = parts[2];
@@ -309,7 +310,7 @@ public class OptionsAggregator {
      * or 
      * INTEGER opt1 compiler user 1 0 100
      */
-    private OptionDeclaration parseDeclaration(String optionsFile, String[] parts) throws OptionsAggregationException {
+    private static OptionDeclaration parseDeclaration(String optionsFile, String[] parts) {
         String kind = parseKind(parts[0]);
         String name = parts[1];
         String category = parts[2];
@@ -331,7 +332,7 @@ public class OptionsAggregator {
      * or
      * 0 1 2 5 7
      */
-    private void parsePossibleValues(OptionDeclaration res, BufferedReader reader) throws IOException {
+    private static void parsePossibleValues(OptionDeclaration res, BufferedReader reader) throws IOException {
         String line = reader.readLine();
         if (!isEmpty(line)) {
             res.setPossibleValues(line.split(" "));
@@ -407,14 +408,15 @@ public class OptionsAggregator {
 
     public void parseFile(String file, BufferedReader reader) throws IOException, OptionsAggregationException {
         while (parseNextOption(file, reader)) {
-            
+            // all program logic is contained in while-condition.
         }
     }
     
     public void parseFile(File optionsFile) throws IOException, OptionsAggregationException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(optionsFile), "UTF8"));
-        parseFile(optionsFile.getAbsolutePath(), reader);
-        reader.close();
+        try(BufferedReader reader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(optionsFile), "UTF8"))) {
+            parseFile(optionsFile.getAbsolutePath(), reader);
+        }
     }
 
     public void parseFiles(String modules) throws IOException, OptionsAggregationException {
@@ -454,9 +456,9 @@ public class OptionsAggregator {
 
         OptionsAggregator op = new OptionsAggregator(modules);
         File outFile = new File(outDir, "OptionsAggregated.java");
-        OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(outFile));
-        op.generate(out, pack);
-        out.close();
+        try(OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(outFile))) {
+            op.generate(out, pack);
+        }
         System.out.println("Generated " + outFile.getAbsolutePath() + "...");
     }
 

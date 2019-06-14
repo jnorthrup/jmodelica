@@ -171,6 +171,7 @@ public abstract class ModelicaLogger {
      * @return                      an object representing the successful compilation.
      * @deprecated                  use {@link #logCompiledUnit(File, Collection, int)} instead.
      */
+    @Deprecated
     public CompiledUnit logCompiledUnit(File unitFile, int numberOfComponents) {
         CompiledUnit unit = new CompiledUnit(unitFile, numberOfComponents);
         logCompiledUnit(unit);
@@ -283,6 +284,7 @@ public abstract class ModelicaLogger {
             buf = new byte[2048];
         }
 
+        @Override
         public void write(int b) throws IOException {
             buf[n++] = (byte) b;
             if (lastR || b == N)
@@ -290,6 +292,7 @@ public abstract class ModelicaLogger {
             lastR = (b == R);
         }
 
+        @Override
         public void write(byte[] b, int off, int len) throws IOException {
             while (n + len > buf.length) {
                 int part = buf.length - n;
@@ -304,6 +307,7 @@ public abstract class ModelicaLogger {
             logBuffer();
         }
 
+        @Override
         public void close() throws IOException {
             log(level, new String(buf, 0, n));
         }
@@ -466,28 +470,34 @@ public abstract class ModelicaLogger {
 
         private static enum LoggerTarget {
             STREAM {
+                @Override
                 public PipeLogger createLogger(Level level, OutputStream stream) throws IOException {
                     return new StreamingLogger(level, stream);
                 }
                 
+                @Override
                 public PipeLogger createLogger(Level level, String filename) throws IOException {
                     return new StreamingLogger(level, filename);
                 }
             },
             OBJECT_STREAM {
+                @Override
                 public PipeLogger createLogger(Level level, OutputStream stream) throws IOException {
                     return new ObjectStreamLogger(level, stream);
                 }
                 
+                @Override
                 public PipeLogger createLogger(Level level, String filename) throws IOException {
                     return new ObjectStreamLogger(level, filename);
                 }
             },
             XML {
+                @Override
                 public PipeLogger createLogger(Level level, OutputStream stream) throws IOException {
                     return new XMLLogger(level, stream);
                 }
                 
+                @Override
                 public PipeLogger createLogger(Level level, String filename) throws IOException {
                     return new XMLLogger(level, filename);
                 }

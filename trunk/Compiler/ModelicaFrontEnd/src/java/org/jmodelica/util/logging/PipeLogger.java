@@ -60,7 +60,9 @@ public abstract class PipeLogger extends ModelicaLogger {
         state = State.CLOSED;
         try {
             do_close();
-        } catch (IOException e) {}
+        } catch (IOException e) {
+            // ignore
+        }
     }
     
     protected void do_close() throws IOException {
