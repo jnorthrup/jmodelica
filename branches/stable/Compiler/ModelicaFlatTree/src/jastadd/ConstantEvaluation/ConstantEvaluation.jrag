@@ -4073,12 +4073,12 @@ aspect ConstantEvaluation {
     }
   
 
-    public class EvaluationValueCache {
+    public class EvaluataionValueCache {
 
         private Map<CommonVariableDecl,CValue> values;
         private Map<CommonVariableDecl,CValue> old;
 
-        public EvaluationValueCache(ASTNode source) {
+        public EvaluataionValueCache(ASTNode source) {
             values = source.collectEvaluationValues(null);
         }
         
