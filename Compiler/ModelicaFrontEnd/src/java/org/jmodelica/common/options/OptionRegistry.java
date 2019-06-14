@@ -189,7 +189,7 @@ public class OptionRegistry {
         "unchecked", "rawtypes"
     })
     private List<Option> sortedOptions() {
-        List<Option> opts = new ArrayList<>(optionsMap.values());
+        List<Option> opts = new ArrayList<Option>(optionsMap.values());
         Collections.<Option> sort(opts);
         return opts;
     }
