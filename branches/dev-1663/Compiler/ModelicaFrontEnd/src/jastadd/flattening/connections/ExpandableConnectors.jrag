@@ -186,7 +186,7 @@ aspect ExpandableConnectors {
             private ExpandableSet replacement = null;
             private boolean expanded;
             private boolean nestedDone;
-            private boolean isok;
+            private boolean isOk;
             
             public ExpandableSet() {
                 connectors = new LinkedHashSet<>();
@@ -195,7 +195,7 @@ aspect ExpandableConnectors {
                 owningMembers = new HashMap<>();
                 expanded = false;
                 nestedDone = false;
-                isok = true;
+                isOk = true;
             }
             
             public ExpandableSet(InstComponentDecl connector) {
@@ -223,15 +223,15 @@ aspect ExpandableConnectors {
                     ConnectorMember[] sorted = members.values().toArray(new ConnectorMember[members.size()]);
                     Arrays.sort(sorted);
                     for (ConnectorMember member : sorted) {
-                        isok = member.check() && isok;
+                        isOk = member.check() && isOk;
                     }
-                    if (isok) { 
+                    if (isOk) { 
                         for (InstComponentDecl conn : connectors()) {
                             expandConnector(conn, sorted);
                         }
                     }
                 }
-                return isok;
+                return isOk;
             }
 
             private Iterable<InstComponentDecl> connectors() {
@@ -323,7 +323,6 @@ aspect ExpandableConnectors {
                         member.addConnection(knownComp, known, fas, sourceSize);
                     }
                 } else {
-                    // TODO: probably need more to support arrays in this case
                     if (member == null) {
                         // TODO: isn't size/fas/etc needed here?
                         member = new ConnectorMember(name, unknown);
@@ -379,6 +378,7 @@ aspect ExpandableConnectors {
              * updated for replacements.
              */
             private Set<ExpandableSet> parentSets() {
+                // TODO: Cluncy, update existing set instead
                 boolean replace = false;
                 for (ExpandableSet parent : parentSets) {
                     replace |= parent.replacement != null;
@@ -651,6 +651,7 @@ aspect ExpandableConnectors {
                     ASTNode templateErrorNode = null;
                     if (sources.isEmpty() && declared.isEmpty()) {
                         error = true;
+                        // TODO: This is no longer compliance error, spec has changed.
                         for (InstAccess nestledAccess : nestledAccesses)
                             nestledAccess.compliance("Nested expandable connectors where some of the intermediate expandable connectors are neither connected to or declared are not supported");
                     } else if (declared.isEmpty()) {
