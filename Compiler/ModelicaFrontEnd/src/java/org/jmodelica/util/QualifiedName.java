@@ -104,14 +104,17 @@ public class QualifiedName implements Iterator<String> {
         return names.size();
     }
     
+    @Override
     public boolean hasNext() {
         return iterator.hasNext();
     }
     
+    @Override
     public String next() {
         return iterator.next();
     }
     
+    @Override
     public void remove() {
         throw new UnsupportedOperationException("remove");
     }
