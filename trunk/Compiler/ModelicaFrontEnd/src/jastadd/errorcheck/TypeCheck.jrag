@@ -444,54 +444,32 @@ aspect FlatTypeCheck {
     public static final ErrorProducerUnlessDisabled ASTNode.ARRAY_SIZE_MISMATCH_IN_CONNECT =
             new ErrorProducerUnlessDisabled("ARRAY_SIZE_MISMATCH_IN_CONNECT", ProblemKind.SEMANTIC,
                     "Sizes do not match in connection, size of '%s' is %s and size of '%s' is %s");
-    public static final ErrorProducerUnlessDisabled ASTNode.EXPANDABLE_ARRAY_SIZE_MISMATCH_IN_CONNECT =
-            new ErrorProducerUnlessDisabled("ARRAY_SIZE_MISMATCH_IN_CONNECT", ProblemKind.SEMANTIC,
-                    "Sizes do not match in connection, size of the part of '%s' referring to " + 
-                    "the expandable connector is %s and size of '%s' is %s");
 
     public void FConnectClause.typeCheck(ErrorCheckType checkType) {
         InstAccess left  = getConnector1();
         InstAccess right = getConnector2();
         boolean checkTypes = !isDisabled();
-        boolean isExpandable = false;
         boolean expandableSame = true;
         for (InstAccess access = left; access != null; access = (access == left) ? right : null) {
-            if (access.isExpandableConnectorPart()) {
-                isExpandable = true;
-            } else if (!access.isUnknown() && !access.myInstComponentDecl().myInstClass().isUnknown()) {
+            if (!access.isExpandableConnectorPart() && !access.isUnknown() && !access.myInstComponentDecl().myInstClass().isUnknown()) {
                 if (!access.myInstComponentDecl().isConnector())
                     CONNECT_WITH_INVALID_TYPE.invoke(access);
             } else {
                 checkTypes = false;
             }
-            if (access.myInstComponentDecl().isExpandableConnector()) {
+            if (access.myInstComponentDecl().isExpandableConnector())
                 expandableSame = !expandableSame;
-            }
         }
-        if (!expandableSame && !left.isUnknown() && !right.isUnknown()) {
+        if (!expandableSame && !left.isUnknown() && !right.isUnknown())
             CONNECT_EXPANDABLE_AND_NON_EXPANDABLE_TYPE.invoke(this);
-        }
         if (checkTypes) { 
-            if (isExpandable) {
-                boolean leftUnknown = left.isExpandableConnectorPart();
-                InstAccess known   = leftUnknown ? right : left;
-                InstAccess unknown = leftUnknown ? left  : right;
-                Size knownSize   = known.size();
-                Size unknownSize = unknown.findExpandableConnectorPart().partSize();
-                if (knownSize.ndims() < unknownSize.ndims() || 
-                        !unknownSize.equivalent(knownSize.contractRight(unknownSize.ndims()), false)) {
-                    EXPANDABLE_ARRAY_SIZE_MISMATCH_IN_CONNECT.invoke(
-                            this, unknown, unknownSize, known, knownSize);
-                }
-            } else {
-                InstComponentDecl leftComp  = left.lookupEvaluatingIndices();
-                InstComponentDecl rightComp = right.lookupEvaluatingIndices();
-                if (!leftComp.connectableTo(rightComp)) {
-                    TYPE_MISMATCH_IN_CONNECT.invoke(this);
-                } else if (!left.size().equivalent(right.size(), false)) {
-                    ARRAY_SIZE_MISMATCH_IN_CONNECT.invokeWithCondition(this, left.ndims() == right.ndims(), 
-                            left, left.size(), right, right.size());
-                }
+            InstComponentDecl leftComp  = left.lookupEvaluatingIndices();
+            InstComponentDecl rightComp = right.lookupEvaluatingIndices();
+            if (!leftComp.connectableTo(rightComp)) {
+                TYPE_MISMATCH_IN_CONNECT.invoke(this);
+            } else if (!left.size().equivalent(right.size(), false)) {
+                ARRAY_SIZE_MISMATCH_IN_CONNECT.invokeWithCondition(this, left.ndims() == right.ndims(), 
+                        left, left.size(), right, right.size());
             }
         }
     }

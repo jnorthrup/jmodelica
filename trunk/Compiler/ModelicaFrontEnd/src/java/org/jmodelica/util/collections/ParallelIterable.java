@@ -40,7 +40,6 @@ public class ParallelIterable<T> implements Iterable<T[]> {
 	}
 
     public Iterator<T[]> iterator() {
-        @SuppressWarnings("unchecked")
         Iterator<? extends T>[] iterators = new Iterator[iters.length];
         for (int i = 0; i < iters.length; i++)
             iterators[i] = iters[i].iterator();
