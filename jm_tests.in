@@ -396,9 +396,9 @@ function nose_test() {
 
 function ant_test() {
   if [[ "$1" == "Modelica" ]]; then
-    ant -f ${MC_ANT_ARGS} ${CLEAN_JUNIT} clean-test test
+    ant -f ${MC_ANT_ARGS} -Dtarget=. ${CLEAN_JUNIT} clean-test test
   else
-    ant -f ${OC_ANT_ARGS} ${CLEAN_JUNIT} clean-test test
+    ant -f ${OC_ANT_ARGS} -Dtarget=. ${CLEAN_JUNIT} clean-test test
   fi
 }
 
