@@ -23,9 +23,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import org.jmodelica.util.collections.ListUtil;
-import org.jmodelica.util.collections.IntIterator;
-
 aspect Arrays {
 
 	/**
@@ -385,56 +382,64 @@ aspect Arrays {
         return n;
     }
     eq InstGlobalAccess.ndims() = getInstAccess().ndims();
-
-    /**
-     * Get array dimensions up to this part for a part of a dotted access. For 
-     * an access that is not part of a dotted access, this is equivalent to ndims().
-     * 
-     * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
-     * an error in computation of the array dimensions.
-     */
-    syn int InstAccess.combinedNdims() = collectCombinedNdims() + ndims();
-
-    inh int InstAccess.collectCombinedNdims();
-    eq BaseNode.getChild()          .collectCombinedNdims() = 0;
-    eq InstDot .getInstAccess(int i).collectCombinedNdims() {
-        int n = 0;
-        for (int j = 0; j < i; j++) {
-            n += getInstAccess(j).ndims();
-        }
-        return n;
-    }
-
-    /**
-     * Get the expanded FArraySubscripts of each part of this access.
-     */
-    eq InstAccess      .allFArraySubscripts() = Arrays.<FArraySubscripts>asList(new FArrayLitSubscripts());
-    eq InstArrayAccess .allFArraySubscripts() = Arrays.asList(getFArraySubscripts());
-    eq InstScalarAccess.allFArraySubscripts() = Arrays.asList(getExpandedSubscripts());
-    eq InstDot         .allFArraySubscripts() = allFArraySubscriptsTo(getNumInstAccess());
-    eq InstGlobalAccess.allFArraySubscripts() = getInstAccess().allFArraySubscripts();
-
-    /**
-     * Get the expanded FArraySubscripts of each part up to this for a part of a dotted access. 
-     * For an access that is not part of a dotted access, this is equivalent to 
-     * {@link InstAccess#qualifiedAllFArraySubscripts()}.
-     */
-    syn java.util.List<FArraySubscripts> InstAccess.combinedFArraySubscripts() = 
-        ListUtil.concatenate(collectCombinedFArraySubscripts(), 
-                             allFArraySubscripts());
-
-    inh java.util.List<FArraySubscripts> InstAccess.collectCombinedFArraySubscripts();
-    eq BaseNode.getChild()          .collectCombinedFArraySubscripts() = Collections.emptyList();
-    eq InstDot .getInstAccess(int i).collectCombinedFArraySubscripts() = allFArraySubscriptsTo(i);
-
-    private java.util.List<FArraySubscripts> InstDot.allFArraySubscriptsTo(int n) {
-        java.util.List<FArraySubscripts>[] lists = new java.util.List[n];
-        for (int i = 0; i < n; i++) {
-            lists[i] = getInstAccess(i).allFArraySubscripts();
-        }
-        return ListUtil.concatenate(lists);
-    }
-
+	
+	/**
+	 * Get the expanded FArraySubscripts of each part of this access.
+	 */
+	eq InstAccess.allFArraySubscripts() = Arrays.<FArraySubscripts>asList(new FArrayLitSubscripts());
+	eq InstArrayAccess.allFArraySubscripts() = Arrays.asList(getFArraySubscripts());
+	eq InstScalarAccess.allFArraySubscripts() = Arrays.asList(getExpandedSubscripts());
+	eq InstDot.allFArraySubscripts() {
+		int n = getNumInstAccess();
+		java.util.List<FArraySubscripts>[] lists = new java.util.List[n];
+		for (int i = 0; i < n; i++)
+			lists[i] = getInstAccess(i).allFArraySubscripts();
+		return concatenation(lists);
+	}
+	eq InstGlobalAccess.allFArraySubscripts() = getInstAccess().allFArraySubscripts();
+	
+	/**
+	 * Get the expanded FArraySubscripts of each part of the fully qualified version of this access.
+	 */
+	syn java.util.List<FArraySubscripts> InstAccess.qualifiedAllFArraySubscripts() = 
+		concatenation(surroundingFArraySubscripts(), allFArraySubscripts());
+	eq InstGlobalAccess.qualifiedAllFArraySubscripts() = allFArraySubscripts();
+	
+	/**
+	 * Get the expanded FArraySubscripts for any surrounding components.
+	 */
+	inh ArrayList<FArraySubscripts> InstAccess.surroundingFArraySubscripts();
+	inh lazy ArrayList<FArraySubscripts> InstArrayComponentDecl.surroundingFArraySubscripts();
+	eq Root.getChild().surroundingFArraySubscripts()          = new ArrayList<FArraySubscripts>(0);
+	eq InstClassDecl.getChild().surroundingFArraySubscripts() = new ArrayList<FArraySubscripts>(0);
+	eq InstArrayComponentDecl.getChild().surroundingFArraySubscripts() {
+		FArraySubscripts fas;
+		ArrayList<FArraySubscripts> res;
+		if (isTopDimension()) {
+			fas = new FArrayLitSubscripts();
+			res = concatenation(surroundingFArraySubscripts(), Collections.singletonList(fas));
+		} else {
+			res = (ArrayList<FArraySubscripts>) surroundingFArraySubscripts().clone();
+			int i = res.size() - 1;
+			fas = res.get(i).fullCopy();
+			res.set(i, fas);
+		}
+		fas.addFSubscript(getIndex());
+		return res;
+	}
+	
+	public class ASTNode {
+        public static <T> ArrayList<T> concatenation(java.util.List<T>... lists) {
+			int size = 0;
+			for (java.util.List<T> list : lists)
+				size += list.size();
+			ArrayList<T> res = new ArrayList<T>(size);
+			for (java.util.List<T> list : lists)
+				res.addAll(list);
+			return res;
+		}
+	}
+	
 	/**
 	 * Get the expanded FArraySubscripts of each part of this access.
 	 */
@@ -1114,43 +1119,20 @@ aspect Arrays {
     /**
      * Get the array sizes. 
      */
-    eq InstAccess.size() = Size.SCALAR;
-    eq InstGlobalAccess.size() = getInstAccess().size();
-    eq InstScalarAccess.size() = getExpandedSubscripts().accessSize();
-    eq InstArrayAccess.size()  = getFArraySubscripts().accessSize();
-    eq InstDot.size() {
-        if (isArray()) {
-            MutableSize s = new MutableSize(ndims());
-            for (InstAccess ia : getInstAccesss()) {
-                s.append(ia.size());
-            }
-            return s;
-        } else {
-            return Size.SCALAR;
+    eq InstAccess.size() = isArray() ? arraySize() : Size.SCALAR;
+    
+    syn Size InstAccess.arraySize() = Size.SCALAR;
+    eq InstGlobalAccess.arraySize() = getInstAccess().arraySize();
+    eq InstScalarAccess.arraySize() = getExpandedSubscripts().accessSize();
+    eq InstArrayAccess.arraySize()  = getFArraySubscripts().accessSize();
+    eq InstDot.arraySize() {
+        MutableSize s = new MutableSize(ndims());
+        for (InstAccess ia : getInstAccesss()) {
+            s.append(ia.size());
         }
+        return s;
     }
-
-    /**
-     * Get the size of all parts of an InstDot up to this part.
-     */
-    inh Size InstAccess.partSize();
-    eq BaseNode.getChild().partSize() = null;
-    eq InstDot.getInstAccess(int i).partSize() {
-        int ndims = 0;
-        for (int j = 0; j <= i; j++) {
-            ndims += getInstAccess(j).ndims();
-        }
-        if (ndims == 0) {
-            return Size.SCALAR;
-        } else {
-            MutableSize s = new MutableSize(ndims);
-            for (int j = 0; j <= i; j++) {
-                s.append(getInstAccess(j).size());
-            }
-            return s;
-        }
-    }
-
+    
     /**
      * Get the array sizes. 
      */
@@ -2170,20 +2152,7 @@ aspect Arrays {
 			return treeCopy();
 		}
 	}
-
-    /**
-     * Get a specific cell of this array component decl.
-     * 
-     * Only valid if this is an array and <code>i</code> refers to an element of it. 
-     */
-    syn InstComponentDecl InstComponentDecl.specify(Index i) = specifyHelper(i, 0);
-
-    syn InstComponentDecl InstComponentDecl.specifyHelper(Index i, int d) = 
-        (d >= i.ndims() || !isArray()) 
-            ? this 
-            : getInstComponentDecl(i.get(d) - 1).specifyHelper(i, d + 1);
-    eq InstPrimitive.specifyHelper(Index i, int d) = this;
-
+	
 	syn InstArrayAccess InstScalarAccess.getArrayCopy(FArraySubscripts fas);
 	eq InstParseAccess.getArrayCopy(FArraySubscripts fas) = new InstParseArrayAccess(getID(), fas);
 	eq InstAmbiguousAccess.getArrayCopy(FArraySubscripts fas) = new InstAmbiguousArrayAccess(getID(), fas);
@@ -2311,13 +2280,7 @@ aspect Arrays {
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	syn Indices InstAccess.indices() = Indices.createFromFas(allFArraySubscripts());
-
-    /**
-     * Get the set of array indices up to this part for a part of a dotted access. For 
-     * an access that is not part of a dotted access, this is equivalent to indices().
-     */
-    syn Indices InstAccess.combinedIndices() = Indices.createFromFas(combinedFArraySubscripts());
+	syn Indices InstAccess.indices() = Indices.createFromFas(qualifiedAllFArraySubscripts());
 
 	/**
 	 * Get the set of all array indices of an instance primitive component. 
@@ -2658,10 +2621,10 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * Return a Size that have the same lengths as this size where they are known, 
+		 * Return a Size that has the same lengths as this size where they are known, 
 		 *        and any that are unknown copied from the size of <code>exp</code>. 
 		 * 
-		 * If the size of <code>exp</code> have more dimensions, the last part is assumed to match this size.
+		 * If the size of <code>exp</code> has more dimensions, the last part is assumed to match this size.
 		 */
 		public Size createKnown(FExp exp) {
 			Size known;
@@ -3054,7 +3017,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * Constructs the size descrived by a vector expression.
+		 * Constructs the size described by a vector expression.
 		 */
 		public MutableSize(FExp exp) {
 			this(exp.ndims() == 1 ? exp.size().get(0) : 0);
@@ -3369,7 +3332,7 @@ aspect ArrayHelpers {
         }
 
         /**
-         * Delegate method for expand(Size) and expandRight(Size). Creates a new size tyhat is the concatenation of a and b.
+         * Delegate method for expand(Size) and expandRight(Size). Creates a new size that is the concatenation of a and b.
          */
         protected Size createExpanded(Size a, Size b) {
             int ndims = a.size.length + b.size.length;
@@ -3443,9 +3406,12 @@ aspect ArrayHelpers {
          */
         public Size evaluated() {
             boolean copy = false;
-            for (FExp e : exps)
-                if (e != null)
+            for (FExp e : exps) {
+                if (e != null) {
                     copy = true;
+                    break;
+                }
+            }
             if (copy) {
                 MutableSize res = new MutableSize(size.length);
                 System.arraycopy(size, 0, res.size, 0, size.length);
@@ -3975,20 +3941,7 @@ aspect ArrayHelpers {
 		public int last() {
 			return index.length > 0 ? index[index.length - 1] : -1;
 		}
-        
-        /**
-         * Returns an iterator over the indices for each dimension.
-         */
-        public IntIterator iterator() {
-            return new IntIterator() {
-                int d = 0;
-                
-                public boolean hasNext() { return d < index.length; }
-                
-                public int next() { return index[d++]; }
-            };
-        }
-        
+		
 		/**
 		 * Returns the index for the <code>i</code>th dimension (zero-based).
 		 */
@@ -4282,20 +4235,17 @@ aspect ArrayHelpers {
 		public Size size() {
 			return size;
 		}
-
-        /**
-         * Translates an Index to the corresponding Index in the underlying expression. 
-         * If i has fewer dimensions than this, than it should correspond to the outermost ones.
-         * 
-         * Note that for some implementations, the returned index may be changed by subsequent 
-         * calls to this method.
-         * 
-         * Default implementation always returns <code>i</code>.
-         */
-        public Index translate(Index i) {
-            return i;
-        }
-
+		
+		/**
+		 * Translates an Index to the corresponding Index in the underlying 
+		 *        expression.
+		 * 
+		 * Default implementation always returns <code>i</code>.
+		 */
+		public Index translate(Index i) {
+			return i;
+		}
+		
 		/**
 		 * Add values to an index map for a given index from this set and a given set of for indices.
 		 * 
@@ -4505,54 +4455,39 @@ aspect ArrayHelpers {
             return new NonConsecutiveIndices(ind, trims, extra);
         }
 
-        /**
-         * Internal constructor to create a NonConsecutiveIndices object based on a 
-         * list of int arrays containing the used indexes on the underlying array.
-         * 
-         * @param trim   the dimensions to remove
-         * @param extra  number of extra dimensions of length 1 to add
-         */
-        protected NonConsecutiveIndices(ArrayList<int[]> ind, boolean[] trim, int extra) {
-            super(getSize(ind, trim, extra));
-            this.trim = trim;
-            indices = ind;
-            trans = intializeTranslated(ind.size());
-        }
+		/**
+		 * Translates an Index to the corresponding Index in the underlying 
+		 * expression.
+		 */
+		public Index translate(Index i) {
+			int[] ii = i.index();
+			int[] ti = trans.index();
+			for (int ji = 0, jt = 0; ji < ndims && jt < ti.length; ji++, jt++) {
+				while (trim[jt]) 
+					jt++;
+				ti[jt] = indices.get(jt)[ii[ji] - 1];
+			}
+			return trans;
+		}
 
-        /**
-         * Translates an Index to the corresponding Index in the underlying expression. 
-         * If i has fewer dimensions than this, than it should correspond to the outermost ones.
-         * 
-         * Note that the returned index may be changed by subsequent calls to this method.
-         */
-        public Index translate(Index i) {
-            int[] ii = i.index();
-            if (ii.length != trans.ndims() - trim.length + ndims) {
-                trans = intializeTranslated(ii.length + trim.length - ndims);
-            }
-            int[] ti = trans.index();
-            for (int ji = 0, jt = 0; ji < ndims && jt < ti.length; ji++, jt++) {
-                while (trim[jt]) {
-                    jt++;
-                }
-                ti[jt] = indices.get(jt)[ii[ji] - 1];
-            }
-            return trans;
-        }
-
-        /**
-         * Prepare a new Index for returning from the translate method.
-         */
-        protected Index intializeTranslated(int n) {
-            Index trans = new Index(n);
-            for (int i = 0; i < n; i++) {
-                if (indices.get(i).length > 0) {
-                    trans.index()[i] = indices.get(i)[0];
-                }
-            }
-            return trans;
-        }
-
+		
+		/**
+		 * Internal constructor to create a NonConsecutiveIndices object based on a 
+		 * list of int arrays containing the used indexes on the underlying array.
+		 * 
+		 * @param trim   the dimensions to remove
+		 * @param extra  number of extra dimensions of length 1 to add
+		 */
+		protected NonConsecutiveIndices(ArrayList<int[]> ind, boolean[] trim, int extra) {
+			super(getSize(ind, trim, extra));
+			this.trim = trim;
+			indices = ind;
+			trans = new Index(ind.size());
+			for (int i = 0; i < ind.size(); i++)
+				if (indices.get(i).length > 0)
+					trans.index()[i] = indices.get(i)[0];
+		}
+		
 		/**
 		 * Calculate size for this indices from a list of int arrays containing the 
 		 * used indexes on the underlying array.
@@ -4562,7 +4497,7 @@ aspect ArrayHelpers {
 			for (boolean tr : trim)
 				if (!tr)
 					n++;
-            if (n + extra == 0) {
+            if (n == 0) {
                 return Size.SCALAR;
             }
 			MutableSize size = new MutableSize(n + extra);

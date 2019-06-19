@@ -280,29 +280,21 @@ aspect TransformCanonical {
             File file = new File(TRANSFORMATION_STEP_DIR, fileName);
             File htmlFile = new File(TRANSFORMATION_STEP_HTML_DIR, htmlFileName);
             log.debug("Writing flat tree after step " + lastCompletedTransformationStep + " to " + fileName);
-            try {
-                CodeStream out = new CodeStream(file);
-                CodeStream htmlOut = new CodeStream(htmlFile);
-                sourcePrettyPrint(out, "");
-                htmlSourcePrettyPrint(htmlOut, "");
-                out.close();
-                htmlOut.close();
-            } catch (IOException e) {
-                log.warning("Failed to write step info to file " + file);
-            }
+            CodeStream out = new CodeStream(file);
+            CodeStream htmlOut = new CodeStream(htmlFile);
+            sourcePrettyPrint(out, "");
+            htmlSourcePrettyPrint(htmlOut, "");
+            out.close();
+            htmlOut.close();
         }
         if ("full".equals(value) || "diag".equals(value)) {
             TRANSFORMATION_STEP_DIR.mkdir();
             String fileName = String.format("%02d_%s.txt", completedTransformationSteps, lastCompletedTransformationStep);
             File file = new File(TRANSFORMATION_STEP_DIR, fileName);
             log.debug("Writing diag after step " + lastCompletedTransformationStep + " to " + fileName);
-            try {
-                CodeStream out = new CodeStream(file);
-                out.print(modelDiagnostics());
-                out.close();
-            } catch (IOException e) {
-                log.warning("Failed to write step info to file " + file);
-            }
+            CodeStream out = new CodeStream(file);
+            out.print(modelDiagnostics());
+            out.close();
         }
     }
     

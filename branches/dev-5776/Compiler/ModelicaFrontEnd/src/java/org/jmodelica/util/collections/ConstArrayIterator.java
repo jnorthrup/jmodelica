@@ -31,15 +31,18 @@ public class ConstArrayIterator<T> implements Iterator<T> {
 		i = 0;
 	}
 	
-	public boolean hasNext() {
+	@Override
+    public boolean hasNext() {
 		return i < elems.length;
 	}
 	
-	public T next() {
+	@Override
+    public T next() {
 		return elems[i++];
 	}
 	
-	public void remove() {
+	@Override
+    public void remove() {
 		throw new UnsupportedOperationException();
 	}
 	
