@@ -1,4 +1,11 @@
 ================= Unreleased ==================
+# Fixed ; Minor ; Runtime; #5776
+Fixed bug with boolean inputs where the input was used in a pre() operator.
+
+# Fixed ; Minor ; Compiler ; #5771
+Fixed a bug regarding searching in sourrounding classes
+in one of the simple (source) class lookup methods.
+
 # Fixed ; Minor ; Compiler ; #5735
 Fixed exception during code generation caused by bug in temporary removal after function inlining.
 

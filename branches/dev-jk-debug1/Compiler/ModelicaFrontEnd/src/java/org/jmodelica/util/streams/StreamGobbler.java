@@ -32,6 +32,7 @@ public class StreamGobbler extends Thread {
         this.os = redirect;
     }
     
+    @Override
     public void run() {
         try {
         	try {
@@ -50,6 +51,7 @@ public class StreamGobbler extends Thread {
 	        	is.close();
 	        }
         } catch (IOException ioe) {
+            // TODO need to take action here?
         }
     }
 }

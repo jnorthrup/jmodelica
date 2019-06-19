@@ -615,32 +615,16 @@ aspect GenerateEventIndicators {
      * Checks whether or not this relational expression requires an initialization statement.
      */
     public boolean EventGeneratingExp.needsIndicatorInit();
-    /* 
-     * Implementation that is not JastAdd attribute necessary because of JastAdd bug #282.
-     * https://bitbucket.org/jastadd/jastadd2/issues/282/abstract-interface-methods-are-added-to
-     * This issue is fixed in JastAdd 2.3.1.
-     * TODO Remove these two workaround implementations when JastAdd has been updated.
-     */
-    public boolean FRelExp.needsIndicatorInit() {
-        return needsIndicatorInitHelper();
-    }
-    public boolean FDelayExp.needsIndicatorInit() {
-        return needsIndicatorInitHelper();
-    }
-    public boolean FSpatialDistExp.needsIndicatorInit() {
-        return needsIndicatorInitHelper();
-    }
     
-    
-    inh boolean FRelExp.needsIndicatorInitHelper();
-    inh boolean FDelayExp.needsIndicatorInitHelper();
-    inh boolean FSpatialDistExp.needsIndicatorInitHelper();
-    eq Root.getChild().needsIndicatorInitHelper()                = false;
-    eq FAlgorithm.getChild().needsIndicatorInitHelper()          = false;
-    eq FForStmt.getForStmt().needsIndicatorInitHelper()          = true;
-    eq FIfStmt.getElseStmt().needsIndicatorInitHelper()          = true;
-    eq FIfWhenClause.getFStatement().needsIndicatorInitHelper()  = true;
-    eq FWhileStmt.getWhileStmt().needsIndicatorInitHelper()      = true;
+    inh boolean FRelExp.needsIndicatorInit();
+    inh boolean FDelayExp.needsIndicatorInit();
+    inh boolean FSpatialDistExp.needsIndicatorInit();
+    eq Root.getChild().needsIndicatorInit()                = false;
+    eq FAlgorithm.getChild().needsIndicatorInit()          = false;
+    eq FForStmt.getForStmt().needsIndicatorInit()          = true;
+    eq FIfStmt.getElseStmt().needsIndicatorInit()          = true;
+    eq FIfWhenClause.getFStatement().needsIndicatorInit()  = true;
+    eq FWhileStmt.getWhileStmt().needsIndicatorInit()      = true;
 
     inh boolean FAccessExp.isIndicator();
     eq FClass.getChild().isIndicator() = false;

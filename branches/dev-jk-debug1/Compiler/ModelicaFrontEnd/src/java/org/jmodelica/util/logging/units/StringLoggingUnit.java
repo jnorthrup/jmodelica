@@ -53,13 +53,4 @@ public class StringLoggingUnit implements LoggingUnit {
         return XMLUtil.escape(string);
     }
 
-    /**
-     * This must be done since there might be objects in the args field that
-     * can't be serialized! An empty Object[] is serializable though.
-     */
-    @Override
-    public void prepareForSerialization() {
-        computeString();
-    }
-
 }

@@ -75,6 +75,7 @@ public class DummyEvaluator implements Evaluator<DummyEvaluator>, Cloneable, Eva
         }
     }
 
+    @Override
     public String toString() {
         return myValue.stringValue();
     }

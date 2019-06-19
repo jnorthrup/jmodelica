@@ -252,6 +252,7 @@ public abstract class CCompilerDelegator {
     protected interface StringOperation {
         
         public static final StringOperation NULL_OP = new StringOperation() {
+            @Override
             public String op(String str) { return str; }
         };
         
@@ -267,6 +268,7 @@ public abstract class CCompilerDelegator {
             this.ops = ops;
         }
         
+        @Override
         public String op(String path) {
             for (StringOperation op : ops)
                 path = op.op(path);
@@ -287,6 +289,7 @@ public abstract class CCompilerDelegator {
             this.prefix = prefix;
         }
         
+        @Override
         public String op(String path) {
             if (getBuildPlatform().startsWith("win")) {
                 return String.format("%s\\\"%s\\\"", prefix, path);
@@ -304,6 +307,7 @@ public abstract class CCompilerDelegator {
             this.platform = platform;
         }
         
+        @Override
         public String op(String path) {
             File f = new File(path, platform);
             return f.isDirectory() ? f.getPath() : path;
@@ -323,6 +327,7 @@ public abstract class CCompilerDelegator {
                 format = "lib%s.so";
         }
         
+        @Override
         public String op(String library) {
             return String.format(format, library);
         }
