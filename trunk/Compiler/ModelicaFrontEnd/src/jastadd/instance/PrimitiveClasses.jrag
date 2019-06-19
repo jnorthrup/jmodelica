@@ -103,7 +103,7 @@ aspect UnknownDeclarations {
     eq UnknownInstClassDecl.isUnknown()     = true;
     eq UnknownInstComponentDecl.isUnknown() = true;
 
-	syn boolean InstNode.isPrimitive()      = false;
+	syn boolean InstNode.isPrimitive()      = extendsPrimitive() && !isExternalObject();
 	eq InstPrimitiveClassDecl.isPrimitive() = true;
 	eq InstBuiltInClassDecl.isPrimitive()   = true;
 	eq InstPrimitive.isPrimitive()          = true;

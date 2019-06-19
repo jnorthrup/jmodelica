@@ -768,7 +768,7 @@ aspect FlatTypeCheck {
     protected void InstComponentAccess.typeError(InstAccess top) {
         InstComponentDecl icd = myInstComponentDecl();
         if (!icd.isUnknown() && !icd.myInstClass().isUnknown() && !inCardinality()) {
-            if (!icd.isOrExtendsPrimitive() && !icd.isRecord()) {
+            if (!icd.isPrimitive() && !icd.isRecord()) {
                 top.error("Accesses to composite components other than records are not allowed: " + top.name());
             }
         }
@@ -777,7 +777,7 @@ aspect FlatTypeCheck {
     protected void InstComponentArrayAccess.typeError(InstAccess top) {
         InstComponentDecl icd = myInstComponentDecl();
         if (!icd.isUnknown() && !icd.myInstClass().isUnknown() && !inCardinality()) {
-            if (!icd.isOrExtendsPrimitive() && !icd.isRecord()) {
+            if (!icd.isPrimitive() && !icd.isRecord()) {
                 top.error("Accesses to composite components other than records are not allowed: " + top.name());
             }
         }
