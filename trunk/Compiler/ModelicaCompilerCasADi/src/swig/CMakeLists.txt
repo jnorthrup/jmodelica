@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.6)
 project(ModelicaCompilerCasADi CXX)
 
-#	swig -outdir $(MC_SRC)/src/generated/modelica/java/casadi \
+#	swig -outdir $(MC_SRC)/src/java-generated/casadi \
 #             -o $(MC_SRC)/src/cpp-generated/java_casadi_wrap.cxx \
 #	     -java -package casadi -c++ -I$(CASADI_HOME) $(MC_SRC)/src/swig/java_casadi.i
 
@@ -41,7 +41,7 @@ include_directories(${CASADI_HOME})
 include_directories(${CASADI_HOME}/swig)
 include_directories(${CASADI_BUILD_DIR})
 
-set(CMAKE_SWIG_OUTDIR "${IFCASADI_OUTDIR}/src/generated/modelica/java/ifcasadi")
+set(CMAKE_SWIG_OUTDIR "${IFCASADI_OUTDIR}/src/java-generated/ifcasadi")
 
 find_package(SWIG REQUIRED)
 include(UseSWIG)
