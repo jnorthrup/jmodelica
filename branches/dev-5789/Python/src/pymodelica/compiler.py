@@ -26,6 +26,7 @@ import sys
 import platform as plt
 import logging
 from subprocess import Popen, PIPE
+import subprocess
 from compiler_logging import CompilerLogHandler
 from compiler_exceptions import JError
 from compiler_exceptions import IllegalCompilerArgumentError
@@ -363,7 +364,9 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
     
     cmd.append(class_name)
     
-    process = Popen(cmd, stderr=PIPE)
+    si = subprocess.STARTUPINFO()
+    si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    process = Popen(cmd, stderr=PIPE, startupinfo=si)
     log = CompilerLogHandler()
     log.start(process.stderr);
     try:
