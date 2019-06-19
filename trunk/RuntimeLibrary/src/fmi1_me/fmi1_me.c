@@ -385,6 +385,11 @@ fmiStatus fmi1_me_event_update(fmiComponent c, fmiBoolean intermediateResults, f
         return fmiFatal;
     }
     
+    retval = jmi_enter_event_mode(&((fmi1_me_t *)c)->jmi);
+    if (retval != 0) {
+        return fmiError;
+    }
+    
     event_info = (jmi_event_info_t*)calloc(1, sizeof(jmi_event_info_t));
     
     retval = jmi_event_iteration(&((fmi1_me_t *)c)->jmi, intermediateResults, event_info);
