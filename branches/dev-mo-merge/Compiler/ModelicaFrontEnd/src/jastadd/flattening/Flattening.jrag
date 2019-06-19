@@ -1722,8 +1722,10 @@ aspect Flattening {
                 return TypePrefixInputOutput.FLOW;
             } else if (isStream()) {
                 return TypePrefixInputOutput.STREAM;
-            } else {
+            } else if (!variability().parameterOrLess()) {
                 return TypePrefixInputOutput.POTENTIAL;
+            } else {
+                return TypePrefixInputOutput.NONE;
             }
         } else {
             if (isInput()) {

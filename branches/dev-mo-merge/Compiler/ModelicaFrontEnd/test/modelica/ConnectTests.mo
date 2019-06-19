@@ -225,9 +225,9 @@ annotation(__JModelica(UnitTesting(tests={
         description="Test of generation of connection equations.",
         flatModel="
 fclass ConnectTests.ConnectTest5
- structural parameter potential Integer c1.n = 2 /* 2 */;
+ structural parameter Integer c1.n = 2 /* 2 */;
  potential Real c1.x[2];
- structural parameter potential Integer c2.n = 2 /* 2 */;
+ structural parameter Integer c2.n = 2 /* 2 */;
  potential Real c2.x[2];
 equation
  c1.x[1:2] = {1, 2};
@@ -3074,9 +3074,9 @@ annotation(__JModelica(UnitTesting(tests={
         description="Check that inactive conditional components in connnectors are handled properly",
         flatModel="
 fclass ConnectTests.ConditionalCompInConnector1
- parameter potential Boolean c1.b = false /* false */;
+ parameter Boolean c1.b = false /* false */;
  potential Real c1.y;
- parameter potential Boolean c2.b = false /* false */;
+ parameter Boolean c2.b = false /* false */;
  potential Real c2.y;
 equation
  c1.y = c2.y;
@@ -3102,10 +3102,10 @@ annotation(__JModelica(UnitTesting(tests={
         description="Check that active conditional components in connnectors are handled properly",
         flatModel="
 fclass ConnectTests.ConditionalCompInConnector2
- structural parameter potential Boolean c1.b = true /* true */;
+ structural parameter Boolean c1.b = true /* true */;
  potential Real c1.x;
  potential Real c1.y;
- structural parameter potential Boolean c2.b = true /* true */;
+ structural parameter Boolean c2.b = true /* true */;
  potential Real c2.x;
  potential Real c2.y;
 equation

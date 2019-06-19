@@ -2997,10 +2997,10 @@ annotation(__JModelica(UnitTesting(tests={
         description="Structural parameters in connector",
         flatModel="
 fclass ExpandableConnectors.ConnectorArray5
- structural parameter potential Integer c[1].n = 2 /* 2 */;
+ structural parameter Integer c[1].n = 2 /* 2 */;
  flow Real c[1].a[2];
  potential Real c[1].b[2];
- structural parameter potential Integer c[2].n = 3 /* 3 */;
+ structural parameter Integer c[2].n = 3 /* 3 */;
  flow Real c[2].a[3];
  potential Real c[2].b[3];
  structural parameter Integer ec.x[1].n = 2 /* 2 */;
