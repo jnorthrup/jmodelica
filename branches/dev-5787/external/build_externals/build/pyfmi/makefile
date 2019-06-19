@@ -9,13 +9,9 @@ test:
 
 test_wheel: $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)
 	@pip install $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)/*.whl
-	echo "Installing dependency Assimulo for testing..."
-	pip install Assimulo
 	nosetests $(WHEEL_INSTALL_DIR)/tests/*.py
 
 test_folder: $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)
-	echo "Installing dependency Assimulo for testing..."
-	pip install Assimulo
 	nosetests $(PYFMI_FOLDER_INSTALL_DIR)/tests/*.pyc
 
 folder: $(INSTALL_DIR_FOLDER)/folder
