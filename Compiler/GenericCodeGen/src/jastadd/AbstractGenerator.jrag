@@ -153,7 +153,7 @@ public abstract class AbstractGenerator {
 		if (set != null) {
 			set.remove(tag);
 			if (set.isEmpty())
-				hookTagMap.remove(set);
+				hookTagMap.remove(name);
 		}
 	}
 

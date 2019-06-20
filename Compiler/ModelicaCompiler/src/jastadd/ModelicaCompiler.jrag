@@ -2496,7 +2496,7 @@ public class ModulesSettings {
     public void addLibrary(Module module, String name) {
         HashSet<String> names;
         
-        if (libraryNames.contains(module)) {
+        if (libraryNames.containsKey(module)) {
             names = libraryNames.get(module);
         } else {
             names = new HashSet<String>();
