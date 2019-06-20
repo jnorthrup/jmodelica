@@ -1650,7 +1650,7 @@ aspect Flattening {
     }
     
     public void InstClassDecl.addFDerivedType(Flattener f) {
-        if (!f.isFlattened(this) && extendsPrimitive()) {
+        if (!f.isFlattened(this) && (extendsPrimitive() || isExternalObject())) {
             List<FAttribute> attr = new List<FAttribute>();
             addAttributes(f, attr, totalMergedEnvironment());
             FType baseType = primitiveScalarType().fullCopy();
