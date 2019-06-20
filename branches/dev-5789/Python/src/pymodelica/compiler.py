@@ -364,8 +364,11 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
     
     cmd.append(class_name)
     
-    si = subprocess.STARTUPINFO()
-    si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    if plt.system() == "Windows":
+        si = subprocess.STARTUPINFO()
+        si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    else:
+        si = None
     process = Popen(cmd, stderr=PIPE, startupinfo=si)
     log = CompilerLogHandler()
     log.start(process.stderr);
