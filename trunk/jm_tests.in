@@ -346,7 +346,7 @@ function junit_test() {
     n) junit_test_n $1 || res=1 ;;
   esac
   if [ -n "${XML_RES_PATH:-}" ]; then
-    cp "doc/junit-reports/TESTS-TestSuites.xml" "${XML_RES_PATH}"
+    cp "${BUILD}/doc/junit-reports/TESTS-TestSuites.xml" "${XML_RES_PATH}"
   fi
   return $res
 }
