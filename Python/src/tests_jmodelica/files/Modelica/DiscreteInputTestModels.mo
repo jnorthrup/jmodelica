@@ -1,6 +1,6 @@
 package DiscreteInputTestModels
   
-    model myTestModel
+    model boolInputInPreOperatorWithoutEdge
 	
       input Boolean Bool_A;
       input Boolean Bool_B;
@@ -21,9 +21,9 @@ package DiscreteInputTestModels
       end when;
 
   
-	end myTestModel; 
+	end boolInputInPreOperatorWithoutEdge; 
 
-    model myTestModelEdge
+    model boolInputInPreOperatorWithEdge
 	
       input Boolean Bool_A;
       input Boolean Bool_B;
@@ -44,7 +44,7 @@ package DiscreteInputTestModels
       end when;
 
   
-	end myTestModelEdge;  	
+	end boolInputInPreOperatorWithEdge;  	
   
 
 end DiscreteInputTest;

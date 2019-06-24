@@ -753,7 +753,7 @@ class Test_FMUModelME2:
     @testattr(stddist_full = True)
     def test_model_bool_input_pre_operator_without_edge(self):
         """Test boolean inputs used in a pre operator and without using edge"""
-        model_name = 'DiscreteInputTestModels.myTestModel'
+        model_name = 'DiscreteInputTestModels.boolInputInPreOperatorWithoutEdge'
         results_no_edge = self._get_discrete_inputs_results(model_name)
 
         path_to_reference_data = os.path.join(get_files_path(), 'Modelica', 'DiscreteInputTestValues.txt')
@@ -764,7 +764,7 @@ class Test_FMUModelME2:
     @testattr(stddist_full = True)
     def test_model_bool_input_pre_operator_with_edge(self):
         """Test boolean inputs used in a pre operator and using edge"""
-        model_name = 'DiscreteInputTestModels.myTestModelEdge'
+        model_name = 'DiscreteInputTestModels.boolInputInPreOperatorWithEdge'
         results_with_edge = self._get_discrete_inputs_results(model_name)
 
         path_to_reference_data = os.path.join(get_files_path(), 'Modelica', 'DiscreteInputTestValues.txt')
