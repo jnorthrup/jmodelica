@@ -433,9 +433,9 @@ public abstract class ModelicaLogger {
                 }
                 loggers.add(logger);
             } catch (FileNotFoundException e) {
-                problems.add("Unable to open log file '" + destination + "' for writing!" + e.getMessage() != null ? " " + e.getMessage() : "");
+                problems.add("Unable to open log file '" + destination + "' for writing!" + (e.getMessage() != null ? " " + e.getMessage() : ""));
             } catch (IOException e) {
-                problems.add("Unable to open log stream '" + logPair.getKey() + "'!" + e.getMessage() != null ? " " + e.getMessage() : "");
+                problems.add("Unable to open log stream '" + logPair.getKey() + "'!" + (e.getMessage() != null ? " " + e.getMessage() : ""));
             }
         }
         if (loggers.size() == 0)

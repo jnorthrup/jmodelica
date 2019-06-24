@@ -98,7 +98,7 @@ public abstract class PipeLogger extends ModelicaLogger {
      */
     private void exceptionOnWrite(Exception e) {
         state = State.EXCEPTION;
-        System.err.println("Compiler logger failed to write." + e.getMessage() != null ? " " + e.getMessage() : "");
+        System.err.println("Compiler logger failed to write." + (e.getMessage() != null ? " " + e.getMessage() : ""));
     }
 
     @Override
