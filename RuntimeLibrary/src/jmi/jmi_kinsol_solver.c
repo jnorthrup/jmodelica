@@ -2827,7 +2827,6 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
                     flag = jmi_kinsol_invoke_kinsol(block, KIN_LINESEARCH);
                 }
 				if (flag != KIN_SUCCESS) {
-					struct KINMemRec* kin_mem = (struct KINMemRec*) solver->kin_mem;
 					/* calculate scaled max norm */
 					N_VProd(block->f_scale, solver->last_residual, solver->work_vector);
 					fnorm = N_VMaxNorm(solver->work_vector);
@@ -2835,7 +2834,10 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
 					/* calculate step and store in work_vector*/
 					memcpy(N_VGetArrayPointer(solver->work_vector), N_VGetArrayPointer(solver->last_residual), block->n*sizeof(realtype));
 					ret_tmp = jmi_LU_solve(block, solver->J_LU, N_VGetArrayPointer(solver->work_vector));
-
+					
+					/* We print just for this spike ret_tmp just becauses the compiler complains about unused variables and fails building */
+					jmi_log_node(log, logError, "Error", "got value ret_tmp <i: %d>", ret_tmp);
+					
 					/* Calculate condition number to write to logfile */
 					cond = jmi_calculate_jacobian_condition_number(block);
 					jmi_log_node(log, logError, "Error", "Got jacobian condition number <JacCond: %f>", (double)cond);
