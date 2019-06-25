@@ -2693,8 +2693,8 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     jmi_kinsol_solver_t* solver = block->solver;
     realtype curtime = block->cur_time;
 	realtype fnorm, cond;
-	realtype* step_spike;
 	jmi_real_t abs_step_i, tol_nom_i;
+	int ret_tmp;
 	long int i;
     long int nniters = 0;
     int flagNonscaled;
@@ -2828,24 +2828,24 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
                 }
 				if (flag != KIN_SUCCESS) {
 					struct KINMemRec* kin_mem = (struct KINMemRec*) solver->kin_mem;
-					fnorm = N_VWL2Norm(kin_mem->kin_fval, block->f_scale);
-					step_spike = N_VGetArrayPointer(kin_mem->kin_pp);
+					/* calculate scaled max norm */
+					N_VProd(block->f_scale, solver->last_residual, solver->work_vector);
+					fnorm = N_VMaxNorm(solver->work_vector);
+
+					/* calculate step and store in work_vector*/
+					memcpy(N_VGetArrayPointer(solver->work_vector), N_VGetArrayPointer(solver->last_residual), block->n*sizeof(realtype));
+					ret_tmp = jmi_LU_solve(block, solver->J_LU, N_VGetArrayPointer(solver->work_vector));
+
 					/* Calculate condition number to write to logfile */
 					cond = jmi_calculate_jacobian_condition_number(block);
 					jmi_log_node(log, logError, "Error", "Got jacobian condition number <JacCond: %f>", (double)cond);
 					if (fnorm < 1e-6 && fnorm < block->options->res_tol * 1e2) {
-						/* Find largest nominal, however currently not used in spike experiment */
-						/*for (i = 0; i < block->n; i++) {
-							if (JMI_ABS(block->nominal[i]) > max_nominal) {
-								max_nominal = block->nominal[i];
-							}
-						}*/
 						for (i = 0; i < block->n; i++) {
-							abs_step_i = JMI_ABS(step_spike[i]);
+							abs_step_i = JMI_ABS(N_VGetArrayPointer(solver->work_vector)[i]);
 							tol_nom_i = block->options->res_tol * block->nominal[i];
-							jmi_log_node(log, logError, "Error", "Step size for index <i: %d>, <block: %f>", i, step_spike);
+							jmi_log_node(log, logError, "Error", "Step size for index <i: %d>, <block: %f>", i, solver->work_vector[i]);
  							if (abs_step_i > tol_nom_i) {
-								jmi_log_node(log, logError, "Error", "Spike test evaluated to false <block: %s>", block->label);
+								jmi_log_node(log, logError, "Error", "Spike test evaluated to false in <block: %s> and for index <i: %d>", block->label, i);
 								break;
 							} else if (i == block->n-1) {
 								/* if we got to last iteration it means all others are true */
