@@ -1328,6 +1328,7 @@ end ExpandableConnectorArrays.LoopedNested1;
 ")})));
     end LoopedNested1;
     
+    
     model LoopedNested2
         expandable connector EC
         end EC;
@@ -1366,7 +1367,7 @@ end ExpandableConnectorArrays.LoopedNested2;
 ")})));
     end LoopedNested2;
     
-    // TODO: these should not give an error - see call to checkNonExisting at ExpandableConnectors.jrag:699
+    
     model LoopedNested3
         expandable connector EC
         end EC;
@@ -1382,7 +1383,28 @@ end ExpandableConnectorArrays.LoopedNested2;
             connect(ec1[i].a, ec2[i]);
             connect(ec1[i].a.b[i], c);
         end for;
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="LoopedNested3",
+            description="Introducing connections in a loop, index used on two levels, non-declared nested, outer first",
+            flatModel="
+fclass ExpandableConnectorArrays.LoopedNested3
+ structural parameter Integer n = 2 /* 2 */;
+ Real ec1[1].a.b[1];
+ Real ec1[2].a.b[2];
+ Real ec2[1].b[1];
+ Real ec2[2].b[2];
+ Real c;
+equation
+ c = ec1[1].a.b[1];
+ ec1[1].a.b[1] = ec1[2].a.b[2];
+ ec1[2].a.b[2] = ec2[1].b[1];
+ ec2[1].b[1] = ec2[2].b[2];
+ ec1[2].a.b[1] = ec2[2].b[1];
+end ExpandableConnectorArrays.LoopedNested3;
+")})));
     end LoopedNested3;
+    
     
     model LoopedNested4
         expandable connector EC
@@ -1399,7 +1421,28 @@ end ExpandableConnectorArrays.LoopedNested2;
             connect(ec2[i].a.b[i], c);
             connect(ec2[i].a, ec1[i]);
         end for;
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="LoopedNested4",
+            description="Introducing connections in a loop, index used on two levels, non-declared nested, inner first",
+            flatModel="
+fclass ExpandableConnectorArrays.LoopedNested4
+ structural parameter Integer n = 2 /* 2 */;
+ Real ec1[1].b[1];
+ Real ec1[2].b[2];
+ Real ec2[1].a.b[1];
+ Real ec2[2].a.b[2];
+ Real c;
+equation
+ c = ec1[1].b[1];
+ ec1[1].b[1] = ec1[2].b[2];
+ ec1[2].b[2] = ec2[1].a.b[1];
+ ec2[1].a.b[1] = ec2[2].a.b[2];
+ ec1[2].b[1] = ec2[2].a.b[1];
+end ExpandableConnectorArrays.LoopedNested4;
+")})));
     end LoopedNested4;
+    
     
     // TODO: These cause crash, see TODO about slices in ExpandableSet.addMember (line 334) & ConnectorMember.addConnection (line 504)
     model SliceNested1

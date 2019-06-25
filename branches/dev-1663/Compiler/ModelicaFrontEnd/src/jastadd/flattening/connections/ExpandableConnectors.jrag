@@ -317,10 +317,10 @@ aspect ExpandableConnectors {
                 if (unknownPart == unknown.getLastInstAccess()) {
                     FArraySubscripts fas = unknownPart.hasFArraySubscripts() ? unknownPart.getFArraySubscripts() : null;
                     if (member == null) {
-                        member = new ConnectorMember(name, knownComp, known, fas, sourceSize);
+                        member = new ConnectorMember(name, knownComp, known, fas, sourceSize, unknownPart);
                         members.put(name, member);
                     } else {
-                        member.addConnection(knownComp, known, fas, sourceSize);
+                        member.addConnection(knownComp, known, fas, sourceSize, unknownPart);
                     }
                 } else {
                     if (member == null) {
@@ -477,9 +477,9 @@ aspect ExpandableConnectors {
                 }
                 
                 public ConnectorMember(String name, InstComponentDecl targetComp, 
-                        InstAccess target, FArraySubscripts fas, Size targetSize) {
+                        InstAccess target, FArraySubscripts fas, Size targetSize, InstAccess unknownPart) {
                     this(name);
-                    addConnection(targetComp, target, fas, targetSize);
+                    addConnection(targetComp, target, fas, targetSize, unknownPart);
                 }
                 
                 public ConnectorMember(String name, InstAccess unknown) {
@@ -498,12 +498,12 @@ aspect ExpandableConnectors {
                 }
                 
                 public void addConnection(InstComponentDecl targetComp, 
-                        InstAccess target, FArraySubscripts fas, Size targetSize) {
+                        InstAccess target, FArraySubscripts fas, Size targetSize, InstAccess unknownPart) {
                     sources.add(new Source(targetComp, target, fas, targetSize));
                     if (targetComp.isExpandableConnector()) {
                         // TODO: handle case where this connection is not scalar
                         ExpandableSet otherSet = map.get(targetComp);
-                        Index i = target.index();
+                        Index i = unknownPart.index();
                         if (otherSet == null) {
                             set(i).addConnector(targetComp);
                         } else {
