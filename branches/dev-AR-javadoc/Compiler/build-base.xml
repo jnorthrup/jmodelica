@@ -580,14 +580,14 @@
         <if>
             <isset property="javadoc.packages"/>
             <then>
-                <mkdir dir="${javadoc_output}" />
                 <javadoc 
                     access="public" 
                     sourcepath="${java_output_final}:${java_dirs}" 
                     destdir="${javadoc_output}" 
                     packagenames="${javadoc.packages}" 
                     excludepackagenames="${test_helper_packages}" 
-                    classpath="${beaver-rt_jar}" />
+                    classpath="${beaver-rt_jar}" 
+                    failonerror="true"/>
             </then>
         </if>
     </target>
