@@ -35,6 +35,11 @@ public class DummyAnnotationNode extends GenericAnnotationNode<DummyAnnotationNo
     protected DummyAnnotationNode createNode(String name, DummyAnnotProvider node) {
         return new DummyAnnotationNode(name, node, this);
     }
+    
+    @Override
+    protected DummyAnnotationNode createNode(DummyAnnotProvider node) {
+        return createNode(null, node);
+    }
 
     @Override
     protected DummyAnnotProvider valueAsProvider() {

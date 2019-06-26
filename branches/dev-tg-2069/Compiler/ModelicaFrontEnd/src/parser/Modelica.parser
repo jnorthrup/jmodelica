@@ -976,7 +976,7 @@ SrcValueModification value_modification
 /*  
 // Assign modification for binding equations in functions - enable after figuring out 
 // a good way to make it an error outside of functions. Preferably parse error, but that 
-// likely requires much more code duplication then we want to accept.
+// likely requires much more code duplication than we want to accept.
 AssignModification assign_modification
     = COLON EQUALS exp    {: return new AssignModification(exp); :}
     ;
