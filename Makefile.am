@@ -500,7 +500,7 @@ all-local: build-python-packages build-compiler
 
 build-compiler:
 if HAVE_ANT
-	mkdir -p $(JAVA_BUILD_DIR)
+	mkdir -p $(JAVA_BUILD_DIR)/doc/javadoc
 	cd $(JAVA_BUILD_DIR); \
 	$(ANT_OPTS) $(ANT) -f "$(JAVA_MC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)"
 	cd $(JAVA_BUILD_DIR); \
