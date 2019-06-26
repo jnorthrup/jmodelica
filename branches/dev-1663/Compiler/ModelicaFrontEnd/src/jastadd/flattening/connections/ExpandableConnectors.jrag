@@ -113,9 +113,7 @@ aspect ExpandableConnectors {
         
         private void connectExpandableConnectors(InstComponentDecl leftComp, InstComponentDecl rightComp) {
             if (!leftComp.isArray()) {
-                ExpandableSet left = setFor(leftComp);
-                ExpandableSet right = setFor(rightComp);
-                left.merge(right);
+                setFor(leftComp).mergeFor(rightComp);
             }
             
             SortedSet<InstComponentDecl> rightChildren = rightComp.containedInstComponents();
@@ -290,6 +288,18 @@ aspect ExpandableConnectors {
                 }
             }
             
+            /**
+             * Add <code>comp</code> as a connector and merge any set for it.
+             */
+            public void mergeFor(InstComponentDecl comp) {
+                ExpandableSet other = map.get(comp);
+                if (other == null) {
+                    addConnector(comp);
+                } else {
+                    merge(other);
+                }
+            }
+            
             private ExpandableSet actual() {
                 if (replacement == null) {
                     return this;
@@ -343,8 +353,9 @@ aspect ExpandableConnectors {
              */
             public void addDeclared(String name) {
                 ConnectorMember member = members.get(name);
-                if (member == null) 
-                    members.put(name, new ConnectorMember(name));
+                if (member == null) {
+                    members.put(name, new ConnectorMember(name, true));
+                }
             }
             
             /**
@@ -407,6 +418,8 @@ aspect ExpandableConnectors {
                     memberList.add(member.createInstComponent(parent));
                     templates[i++] = member.template(parent);
                 }
+                // TODO: If there were declared expandable members, we should probably remove 
+                //       them from their sets after merging.
                 parent.expandConnector(memberList, templates);
                 i = 0;
                 for (ConnectorMember member : members) {
@@ -464,7 +477,7 @@ aspect ExpandableConnectors {
                 private boolean calculated;
                 private boolean isExpandable;
                 
-                public ConnectorMember(String name) {
+                public ConnectorMember(String name, boolean expandable) {
                     this.name = name;
                     sources = new ArrayList<Source>(4);
                     nestledAccesses = new ArrayList<InstAccess>(2);
@@ -474,23 +487,23 @@ aspect ExpandableConnectors {
                     calculated = false;
                     error = false;
                     sets = new HashMap<>();
+                    isExpandable = expandable;
                 }
                 
                 public ConnectorMember(String name, InstComponentDecl targetComp, 
                         InstAccess target, FArraySubscripts fas, Size targetSize, InstAccess unknownPart) {
-                    this(name);
+                    this(name, false);
                     addConnection(targetComp, target, fas, targetSize, unknownPart);
                 }
                 
                 public ConnectorMember(String name, InstAccess unknown) {
-                    this(name);
+                    this(name, true);
                     nestledAccesses.add(unknown);
                 }
                 
                 public ConnectorMember(ConnectorMember other) {
-                    this(other.name);
+                    this(other.name, false);
                     merge(other);
-                    nestledAccesses = other.nestledAccesses;
                 }
                 
                 public int compareTo(ConnectorMember other) {
@@ -517,6 +530,8 @@ aspect ExpandableConnectors {
                         for (Index i : other.sets.keySet()) {
                             mergeSet(other.sets.get(i), i);
                         }
+                        nestledAccesses.addAll(other.nestledAccesses);
+                        isExpandable = true;
                     }
                     for (Source s : other.sources) {
                         sources.add(new Source(s));
@@ -534,7 +549,7 @@ aspect ExpandableConnectors {
                 public ExpandableSet set(Index i) {
                     ExpandableSet set = sets.get(i);
                     if (set == null) {
-                        i = i.clone();
+                        i = i.fix();
                         set = new ExpandableSet(this, i);
                         sets.put(i, set);
                         isExpandable = true;
@@ -593,10 +608,14 @@ aspect ExpandableConnectors {
                     // TODO: handle input/output (or is that really needed?)
                 }
                 
+                // TODO: test case for this change! also it failed - use set(Index) instead
                 public void connectExpandableMember(InstComponentDecl created) {
                     if (isExpandable) {
                         for (Source s : sources) {
                             s.connectExpandableMember(created);
+                        }
+                        for (Index i : created.indices()) {
+                            set(i).mergeFor(created.arrayCell(i));
                         }
                     }
                 }
@@ -817,14 +836,14 @@ aspect ExpandableConnectors {
                                 Index targetI = targetInd.translate(i[1]);
                                 InstComponentDecl memberCell = member.arrayCell(memberI.iterator());
                                 InstComponentDecl targetCell = targetComp.arrayCell(targetI.iterator());
-                                setFor(targetCell).merge(setFor(memberCell));
+                                setFor(targetCell).mergeFor(memberCell);
                             }
                         } else {
                             if (localIndices != null) {
                                 Index memberI = localIndices.translate(Index.NULL);
                                 member = member.arrayCell(memberI.iterator());
                             }
-                            setFor(targetComp).merge(setFor(member));
+                            setFor(targetComp).mergeFor(member);
                         }
                     }
                     

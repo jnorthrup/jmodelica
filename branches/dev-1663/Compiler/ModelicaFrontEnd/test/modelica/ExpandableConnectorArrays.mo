@@ -1039,26 +1039,40 @@ end ExpandableConnectorArrays.NestedAccesses;
 fclass ExpandableConnectorArrays.NestedConnections
  constant Integer n = 3;
  Real ec1[1].ec2[1].a;
+ Real ec1[1].ec2[2].b;
  Real ec1[2].ec2[1].a;
+ Real ec1[2].ec2[2].ec2[1].a;
+ Real ec1[2].ec2[2].ec2[2].b;
  Real ec1[3].ec2[1].a;
  Real ec3[1].a;
+ Real ec3[2].ec2[1].a;
+ Real ec3[2].ec2[2].b;
  Real ec4[1].ec2[1].a;
  Real ec4[1].ec2[2].b;
  Real ec4[2].ec2[1].a;
+ Real ec4[2].ec2[2].ec2[1].a;
+ Real ec4[2].ec2[2].ec2[2].b;
  Real ec4[3].ec2[1].a;
  Real c1[3];
  Real c2;
 equation
  c1[1:3] = (1:3) * time;
  c2 = time;
- c1[1] = ec1[1].ec2[1].a;
- ec1[1].ec2[1].a = ec4[1].ec2[1].a;
  c1[2] = ec1[2].ec2[1].a;
  ec1[2].ec2[1].a = ec3[1].a;
  ec3[1].a = ec4[2].ec2[1].a;
  c1[3] = ec1[3].ec2[1].a;
  ec1[3].ec2[1].a = ec4[3].ec2[1].a;
- c2 = ec4[1].ec2[2].b;
+ c1[1] = ec1[1].ec2[1].a;
+ ec1[1].ec2[1].a = ec1[2].ec2[2].ec2[1].a;
+ ec1[2].ec2[2].ec2[1].a = ec3[2].ec2[1].a;
+ ec3[2].ec2[1].a = ec4[1].ec2[1].a;
+ ec4[1].ec2[1].a = ec4[2].ec2[2].ec2[1].a;
+ c2 = ec1[1].ec2[2].b;
+ ec1[1].ec2[2].b = ec1[2].ec2[2].ec2[2].b;
+ ec1[2].ec2[2].ec2[2].b = ec3[2].ec2[2].b;
+ ec3[2].ec2[2].b = ec4[1].ec2[2].b;
+ ec4[1].ec2[2].b = ec4[2].ec2[2].ec2[2].b;
 end ExpandableConnectorArrays.NestedConnections;
 ")})));
     end NestedConnections;
@@ -1543,8 +1557,15 @@ end ExpandableConnectorArrays.ThroughScalar;
     end ThroughArray;
 
 /* TODO: Array of expandable sub-connector declared with [:]??? */
+/*
+expandable connector EC
+    EC2 ec[:];
+end EC;
+*/
+
 
 /* TODO: Template that is of a type containing an array size. */
+// Real[2] x; type A = Real[2](unit = "K"); A y;
 
 package Error
 

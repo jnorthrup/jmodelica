@@ -2645,6 +2645,40 @@ end ExpandableConnectors.DuplicatedExpandable2;
 end DuplicatedExpandable2;
 
 
+model AddToNestedAndConnectTopLevel
+    expandable connector EC
+    end EC;
+    
+    expandable connector EC2
+        EC ec;
+    end EC2;
+    
+    connector C = Real;
+    
+    EC ec1;
+    EC2 ec2;
+    C c;
+equation
+    connect(ec1, ec2);
+    connect(ec2.ec.c, c);
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="AddToNestedAndConnectTopLevel",
+        description="Make sure that nested connectors that are only declared to work correctly.",
+        flatModel="
+fclass ExpandableConnectors.AddToNestedAndConnectTopLevel
+ Real ec1.ec.c;
+ Real ec2.ec.c;
+ Real c;
+equation
+ c = ec1.ec.c;
+ ec1.ec.c = ec2.ec.c;
+end ExpandableConnectors.AddToNestedAndConnectTopLevel;
+")})));
+end AddToNestedAndConnectTopLevel;
+
+
 package ConnectorArrays
 
 model ConnectorArray1

@@ -4081,20 +4081,20 @@ aspect ArrayHelpers {
 		public FArraySubscripts createFArraySubscripts() {
 			return new FArrayLitSubscripts(index);
 		}
-		
-		/**
-		 * Copies this Index. Always use clone() when saving an Index.
-		 */
-		public Index clone() {
-			try {
-				Index i = (Index) super.clone();
-				i.index = index.clone();
-				return i;
-			} catch (CloneNotSupportedException e) {
-				return null;
-			}
-		}
-		
+
+        /**
+         * Returns an Index that has the same value as this one, but will not be changed by 
+         * an iterator that might have returned this Index. Usually creates a copy.
+         * Always use fix() when saving an Index.
+         */
+        public Index fix() {
+            if (this == NULL) {
+                return this;
+            } else {
+                return new Index(index.clone());
+            }
+        }
+
 		/**
 		 * Returns an Index that is the result of appending <code>i</code> to this Index.
 		 * 
@@ -4344,42 +4344,43 @@ aspect ArrayHelpers {
 			return res;
 		}
 		
-		/**
-		 * Iterates over all indices spanned by this Indices.
-		 */
-		protected class IIterator implements Iterator<Index> {
-			
-			protected IIndex index;
-			protected int max;
-			
-			public IIterator() {
-				index = new IIndex();
-				max = numElements() - 1;
-			}
-			
-			public boolean hasNext() {
-				return index.internal < max;
-			}
-			
-			public Index next() {
-				if (index.internal >= max)
-					throw new NoSuchElementException();
-				index.internal++;
-				if (ndims == 0)
-					return index;
-				int[] ind = index.index();
-				int i;
-				for (i = ndims - 1; i > 0 && ind[i] >= size.get(i); i--)
-					ind[i] = 1;
-				ind[i]++;
-				return index;
-			}
-			
-			public void remove() {
-				throw new UnsupportedOperationException();
-			}
-			
-		}
+        /**
+         * Iterates over all indices spanned by this Indices.
+         */
+        protected class IIterator implements Iterator<Index> {
+            
+            protected IIndex index;
+            protected int max;
+            
+            public IIterator() {
+                index = new IIndex();
+                max = numElements() - 1;
+            }
+            
+            public boolean hasNext() {
+                return index.internal < max;
+            }
+            
+            public Index next() {
+                if (index.internal >= max)
+                    throw new NoSuchElementException();
+                index.internal++;
+                if (ndims == 0) {
+                    return Index.NULL;
+                }
+                int[] ind = index.index();
+                int i;
+                for (i = ndims - 1; i > 0 && ind[i] >= size.get(i); i--)
+                    ind[i] = 1;
+                ind[i]++;
+                return index;
+            }
+            
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+            
+        }
 		
 		/**
 		 * Internal implementation of Index.

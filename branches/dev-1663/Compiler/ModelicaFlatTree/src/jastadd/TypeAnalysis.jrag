@@ -74,7 +74,7 @@ aspect FlatTypeInterface {
             Map<Index, T> expandedCells = new HashMap<>();
             for (Map.Entry<Index, T> entry : cells.entrySet()) {
                 for (Index index : Indices.create(size)) {
-                    expandedCells.put(index.expand(entry.getKey()).clone(), entry.getValue());
+                    expandedCells.put(index.expand(entry.getKey()).fix(), entry.getValue());
                 }
             }
             cells = expandedCells;
