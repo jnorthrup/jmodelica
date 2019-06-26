@@ -564,7 +564,7 @@ aspect SimpleLookup {
         if (!res.isUnknown()) {
             return res.fromContext(enclosingClassDecl().qualifiedName() + "." + name(), isProtected());
         }
-        return simpleLookupHelper(name);
+        return res;
     }
 
     /**

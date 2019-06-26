@@ -1,9 +1,12 @@
 ================= Unreleased ==================
+# Fixed ; Minor ; Compiler ; #5791
+Fixed source-tree lookup for modifications: don't look up in normal scope if not found in member scope.
+
 # Fixed ; Minor ; Runtime; #5776
 Fixed bug with boolean inputs where the input was used in a pre() operator.
 
 # Fixed ; Minor ; Compiler ; #5771
-Fixed a bug regarding searching in sourrounding classes
+Fixed a bug regarding searching in surrounding classes
 in one of the simple (source) class lookup methods.
 
 # Fixed ; Minor ; Compiler ; #5735
