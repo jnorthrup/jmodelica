@@ -348,22 +348,52 @@ aspect PrettyPrint {
         if (getReplaceable()) {
             str.print("replaceable ");
         }
-        
+
         str.print(getSrcRestriction(), " ");
         if (isClassExtends()) {
             str.print("extends ");
         }
         prettyPrintClassName(p, str, indent);
+
+        if (hasSrcStringComment()) {
+            p.print(getSrcStringComment(), str, indent);
+        }
+
+        if (hasSrcConstrainingClause()) {
+            str.print("constrainedby ");
+            p.print(getSrcConstrainingClause(), str, indent);
+            str.print(" ");
+            if (hasConstrainingClauseComment()) {
+                p.print(getConstrainingClauseComment(), str, indent);
+            }
+        }
+
         str.println();
 
         for (SrcClause cl : getSrcClauses()) {
             p.print(cl, str, indent);
         }
+
+        if (hasSrcExternalClause()) {
+            p.print(getSrcExternalClause(), str, indent);
+        }
+
+        if (hasSrcAnnotation()) {
+            p.print(getSrcAnnotation(), str, indent);
+        }
+
         p.print(getSrcEndDecl(), str, indent);
     }
 
     public void SrcFullClassDecl.prettyPrintClassName(Printer p, CodeStream str, String indent) {
         p.print(getName(), str, indent);
+    }
+
+    public void SrcParseAnnotation.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(indent, "annotation ");
+        p.print(getSrcClassModification(), str, indent);
+        str.print(";");
+        str.println();
     }
 
     public void SrcClause.prettyPrint(Printer p, CodeStream str, String indent) {

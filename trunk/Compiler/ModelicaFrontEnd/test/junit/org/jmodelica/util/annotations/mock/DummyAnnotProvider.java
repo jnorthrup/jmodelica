@@ -49,11 +49,11 @@ public class DummyAnnotProvider implements AnnotationProvider<DummyAnnotProvider
     }
     
     @Override
-    public Iterable<SubNodePair<DummyAnnotProvider>> annotationSubNodes() {
-        return new TransformerIterable<DummyAnnotProvider, SubNodePair<DummyAnnotProvider>>(subNodes) {
+    public Iterable<SubAnnotationPair<DummyAnnotProvider>> annotationSubNodes() {
+        return new TransformerIterable<DummyAnnotProvider, SubAnnotationPair<DummyAnnotProvider>>(subNodes) {
             @Override
-            protected SubNodePair<DummyAnnotProvider> transform(DummyAnnotProvider a) throws SkipException {
-                return new SubNodePair<>(a.name, a);
+            protected SubAnnotationPair<DummyAnnotProvider> transform(DummyAnnotProvider a) throws SkipException {
+                return new SubAnnotationPairImpl<>(a.name, a);
             }
         };
     }
