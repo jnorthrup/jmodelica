@@ -1526,7 +1526,6 @@ equation
  c[2,2] = ec2[2,2].b;
 end ExpandableConnectorArrays.SliceNested2;
 ")})));
-        
     end SliceNested2;
     
     
@@ -1556,8 +1555,38 @@ end ExpandableConnectorArrays.SliceNested2;
         C c[2, 2];
     equation
         connect(ec1.a, ec2[:]);
-        connect(ec1.a[1:2].b[:, 1:2], c);
+        connect(ec1.a[1:2].b[1:2], c);
     end SliceNested4;
+    
+    
+    // TODO: For some reason most of the variables and connections disappear.
+    model SliceNested5
+        expandable connector EC
+        end EC;
+        
+        connector C = Real;
+        
+        EC ec1, ec2[5];
+        C c;
+    equation
+        connect(ec1.a[2:3], ec2[3:4]);
+        connect(ec1.a[1:3].b, c);
+//    annotation(__JModelica(UnitTesting(tests={
+//        FlatteningTestCase(
+//            name="SliceNested5",
+//            description="",
+//            flatModel="
+//fclass ExpandableConnectorArrays.SliceNested5
+// Real ec1.a[1].b; // All these variables should be here, right?
+// Real ec1.a[2].b;
+// Real ec1.a[3].b;
+// Real ec2[3].b;
+// Real ec2[4].b;
+// Real c;
+//equation
+//end ExpandableConnectorArrays.SliceNested5;
+//")})));
+    end SliceNested5;
     
     
     model ThroughScalar
@@ -1793,6 +1822,22 @@ Error at line 19, column 9, in file '...', ARRAY_SIZE_MISMATCH_IN_CONNECT:
   Sizes do not match in connection, size of 'ec1.ec2' is [3, 3] and size of 'ec3' is [3]
 ")})));
     end WrongNdimsInSlice;
+    
+    
+    // TODO: This should give an error because the ndims in second connect does not match
+    model WrongNdimsInSlice2
+        expandable connector EC
+        end EC;
+        
+        connector C = Real;
+        
+        EC ec1;
+        EC ec2[2];
+        C c[2, 2];
+    equation
+        connect(ec1.a, ec2[:]);
+        connect(ec1.a[1:2].b[:, 1:2], c);
+    end WrongNdimsInSlice2;
 
 // TODO: Add test of recursion error through array - see Source.checkRecursion (ExpandableConnectors.jrag:803)
 

@@ -519,11 +519,16 @@ aspect ExpandableConnectors {
                     if (targetComp.isExpandableConnector()) {
                         Indices indices = unknownPart.accessIndices();
                         if (indices.ndims() == 0 && target.isArray()) {
-                            indices = target.indices();
+                            indices = target.indices(); // This is not correct if first part of unknown is an array, 
+                                                        // if so, some of the dimensions should be contracted, (use targetSize instead?)
                         }
                         for (Index i : indices) {
                             Index ti = indices.translate(i);
+                            
+                            // This is not always correct, targetComp may already be specified.
+                            // Only specify if target is slice? Or if target is array?
                             InstComponentDecl specified = targetComp.specify(ti);
+                            
                             ExpandableSet otherSet = map.get(specified);
                             if (otherSet == null) {
                                 set(i).addConnector(specified);
@@ -1079,6 +1084,10 @@ aspect ExpandableConnectors {
     }
     
     public boolean InstReplacingExpandableConnectorDecl.checkAsExpandableMemberTemplate(ASTNode errorNode) {
+        return true;
+    }
+    
+    public boolean InstArrayExpandableConnector.checkAsExpandableMemberTemplate(ASTNode errorNode) {
         return true;
     }
     
