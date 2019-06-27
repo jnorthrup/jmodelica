@@ -2844,8 +2844,8 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
 					if (fnorm < 1e-6 && fnorm < block->options->res_tol * 1e2) {
 						for (i = 0; i < block->n; i++) {
 							abs_step_i = JMI_ABS(N_VGetArrayPointer(solver->work_vector)[i]);
-							tol_nom_i = block->options->res_tol * block->nominal[i];
-							jmi_log_node(log, logError, "Error", "Step size for index <i: %d>, <block: %f>", i, solver->work_vector[i]);
+							tol_nom_i = JMI_MIN(block->options->res_tol * 1e2, 1e-8) * block->nominal[i];
+							jmi_log_node(log, logError, "Error", "Step size for index <i: %d>, <block: %f>", i, N_VGetArrayPointer(solver->work_vector)[i]);
  							if (abs_step_i > tol_nom_i) {
 								jmi_log_node(log, logError, "Error", "Spike test evaluated to false in <block: %s> and for index <i: %d>", block->label, i);
 								break;
