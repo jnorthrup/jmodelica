@@ -3932,10 +3932,10 @@ aspect ArrayHelpers {
 	 * Represents the index/indices of a single cell in an (possibly 
 	 *        multi-dimensional) array.
 	 *        
-	 * Index objects are reused to a high degree. Always use clone() when retaining 
+	 * Index objects are reused to a high degree. Always use fix() when retaining 
 	 * an Index object.
 	 */
-	public class Index implements Cloneable {
+	public class Index {
 		
 		public static final Index NULL = new Index(0);
 		
@@ -4044,7 +4044,7 @@ aspect ArrayHelpers {
             if (i == 0 && j == index.length)
                 return this;
             if (i == j)
-                return NULL;
+                return Index.NULL;
             Index copy = new Index(j - i);
             System.arraycopy(index, i, copy.index, 0, copy.index.length);
             return copy;
@@ -4088,8 +4088,8 @@ aspect ArrayHelpers {
          * Always use fix() when saving an Index.
          */
         public Index fix() {
-            if (this == NULL) {
-                return this;
+            if (index.length == 0) {
+                return Index.NULL;
             } else {
                 return new Index(index.clone());
             }

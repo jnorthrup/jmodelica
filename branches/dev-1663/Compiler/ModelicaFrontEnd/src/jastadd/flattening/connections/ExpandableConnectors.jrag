@@ -258,6 +258,8 @@ aspect ExpandableConnectors {
              * Merge two sets of expandable connectors, keeping this one.
              */
             public void merge(ExpandableSet other) {
+                // TODO: Keep a record of who has references to the set, and update references 
+                //       on merge instead of using actual(). Maybe using a redirection object?
                 if (other == null || other == this)
                     return;
                 
@@ -615,7 +617,6 @@ aspect ExpandableConnectors {
                     // TODO: handle input/output (or is that really needed?)
                 }
                 
-                // TODO: test case for this change! also it failed - use set(Index) instead
                 public void connectExpandableMember(InstComponentDecl created) {
                     if (isExpandable) {
                         for (Source s : sources) {

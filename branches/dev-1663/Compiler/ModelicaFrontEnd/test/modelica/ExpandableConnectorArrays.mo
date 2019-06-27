@@ -1616,6 +1616,28 @@ end ExpandableConnectorArrays.ThroughScalar;
         connect(ec1.a[1], ec2);
         connect(ec1.a[1], ec3);
         connect(ec1.a[2], ec4);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ThroughArray",
+            description="",
+            flatModel="
+fclass ExpandableConnectorArrays.ThroughArray
+ Real ec1.a[1].b;
+ Real ec1.a[2].d;
+ Real ec2.b;
+ Real ec3.b;
+ Real ec4.d;
+ Real c1;
+ Real c2;
+equation
+ c1 = ec1.a[1].b;
+ ec1.a[1].b = ec2.b;
+ ec2.b = ec3.b;
+ c2 = ec1.a[2].d;
+ ec1.a[2].d = ec4.d;
+end ExpandableConnectorArrays.ThroughArray;
+")})));
     end ThroughArray;
 
 /* TODO: Array of expandable sub-connector declared with [:]??? */
