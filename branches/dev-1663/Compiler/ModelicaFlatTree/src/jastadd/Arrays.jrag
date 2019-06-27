@@ -4528,13 +4528,15 @@ aspect ArrayHelpers {
          * Translates an Index to the corresponding Index in the underlying expression. 
          * If i has fewer dimensions than this, than it should correspond to the outermost ones.
          * 
-         * Note that the returned index may be changed by subsequent calls to this method.
+         * Note that the returned Index may be changed by subsequent calls to this method, 
+         * use {@link Index.fix()} if you need to save it.
          */
         @Override
         public Index translate(Index i) {
             int[] ii = i.index();
-            if (ii.length != trans.ndims() - trim.length + ndims) {
-                trans = intializeTranslated(ii.length + trim.length - ndims);
+            int transNDims = trans.ndims() - trim.length + ndims;
+            if (ii.length != transNDims) {
+                trans = intializeTranslated(transNDims);
             }
             int[] ti = trans.index();
             for (int ji = 0, jt = 0; ji < ndims && jt < ti.length; ji++, jt++) {
