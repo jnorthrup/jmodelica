@@ -21,9 +21,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.jmodelica.util.StringUtil;
 import org.jmodelica.util.files.FileUtil;
 import org.jmodelica.util.files.ModifiableFile;
-import org.jmodelica.util.StringUtil;
 import org.jmodelica.util.xml.XMLPrinter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -614,41 +614,41 @@ public final class DocumentationBuilder {
          * Parse all (<listType>=<listing>)s from the properties file.
          */
         Map<String, Set<String>> lists = new HashMap<String, Set<String>>();
-        BufferedReader reader = new BufferedReader(new FileReader(properties));
-        Pattern pattern = Pattern.compile("[\\s,;]+");
+        try(BufferedReader reader = new BufferedReader(new FileReader(properties))) {
+            Pattern pattern = Pattern.compile("[\\s,;]+");
 
-        String line = reader.readLine();
+            String line = reader.readLine();
 
-        while (line != null) {
-            if (isComment(line) || !line.contains("=")) {
-                line = reader.readLine();
-                continue;
-            }
-
-            String[] parts = line.split("=");
-            String listType = parts[0];
-            Set<String> list = new LinkedHashSet<String>();
-            if (parts.length > 1) {
-                list.addAll(Arrays.asList(pattern.split(parts[1])));
-            }
-
-            /*
-             * Continue adding to list in case of line breaks.
-             */
-            while ((line = reader.readLine()) != null) {
-                if (line.contains("=")) {
-                    break;
-                }
-                line = line.trim();
-                if (line.length() <= 0) {
+            while (line != null) {
+                if (isComment(line) || !line.contains("=")) {
+                    line = reader.readLine();
                     continue;
                 }
-                list.addAll(Arrays.asList(pattern.split(line)));
-            }
 
-            lists.put(listType, list);
+                String[] parts = line.split("=");
+                String listType = parts[0];
+                Set<String> list = new LinkedHashSet<String>();
+                if (parts.length > 1) {
+                    list.addAll(Arrays.asList(pattern.split(parts[1])));
+                }
+
+                /*
+                 * Continue adding to list in case of line breaks.
+                 */
+                while ((line = reader.readLine()) != null) {
+                    if (line.contains("=")) {
+                        break;
+                    }
+                    line = line.trim();
+                    if (line.length() <= 0) {
+                        continue;
+                    }
+                    list.addAll(Arrays.asList(pattern.split(line)));
+                }
+
+                lists.put(listType, list);
+            }
         }
-        reader.close();
 
         /*
          * Parsing checks.

@@ -208,7 +208,6 @@ aspect PredefinedTypes {
         primitives.add("Integer");
         primitives.add("Boolean");
         primitives.add("String");
-        primitives.add("ExternalObject");
         
         for (SrcClassDecl cd : p.getUnstructuredEntity(0).getSrcClassDecls()) {
             if (primitives.contains(cd.name())) {

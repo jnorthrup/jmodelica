@@ -216,6 +216,7 @@ public abstract class ConstValue {
      * 
      * @return The string.
      */
+    @Override
     public String toString() { 
         return stringValue(); 
     }

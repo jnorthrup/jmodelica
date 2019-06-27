@@ -643,7 +643,7 @@ aspect AliasElimination {
         public void update(FAbstractVariable var, FAccessExp use);
     }
 
-    public static UsesUpdater FAccessExp.USES_REMOVER = new UsesUpdater() {
+    public static final UsesUpdater FAccessExp.USES_REMOVER = new UsesUpdater() {
         @Override
         public void update(FAbstractVariable var, FAccessExp use) {
             var.uses().remove(use);
@@ -652,7 +652,7 @@ aspect AliasElimination {
         }
     };
     
-    public static UsesUpdater FAccessExp.USES_ADDER = new UsesUpdater() {
+    public static final UsesUpdater FAccessExp.USES_ADDER = new UsesUpdater() {
         @Override
         public void update(FAbstractVariable var, FAccessExp use) {
             var.uses().add(use);
@@ -660,12 +660,12 @@ aspect AliasElimination {
         }
     };
 
-	/**
-	 * Remove all uses in an expression from the uses lists of their respective variables.
-	 * 
-	 * Should only be used to allow iterative algorithms to use updated uses lists while 
-	 * removing expressions. Only valid in flat tree.
-	 */
+    /**
+     * Update uses sets of variables referenced in expressions.
+     * 
+     * Should only be used to allow iterative algorithms to use updated 
+     * uses lists while removing expressions. Only valid in flat tree.
+     */
     public void FExp.updateUses(UsesUpdater uu) {
         for (FExp e : childFExps()) {
             e.updateUses(uu);
@@ -675,15 +675,15 @@ aspect AliasElimination {
     public void FAccessExp.updateUses(UsesUpdater uu) {
         uu.update(myFV(), this);
         getFAccess().updateUses(uu);
-	}
-	
-	/**
-	 * Remove all uses in expressions in array subscripts from the uses lists of their respective variables.
-	 * 
-	 * Should only be used to allow iterative algorithms to use updated uses lists while 
-	 * removing expressions. Only valid in flat tree.
-	 */
-    public void FAccess.updateUses(UsesUpdater uu) {}
+    }
+
+    /**
+     * Update uses sets of variables referenced in expressions in array subscripts.
+     * 
+     * Should only be used to allow iterative algorithms to use updated 
+     * uses lists while removing expressions. Only valid in flat tree.
+     */
+    public abstract void FAccess.updateUses(UsesUpdater uu);
 
     public void FAccessFull.updateUses(UsesUpdater uu) {
         for (FAccessPart p : getFAccessParts()) {
@@ -691,8 +691,16 @@ aspect AliasElimination {
                 p.getFArraySubscripts().updateUses(uu);
             }
         }
-	}
-	
+    }
+
+    public void FAccessEmpty.updateUses(UsesUpdater uu) {
+        
+    }
+
+    public void FAccessString.updateUses(UsesUpdater uu) {
+        
+    }
+
     public void FArraySubscripts.updateUses(UsesUpdater uu) {}
     public void FArrayExpSubscripts.updateUses(UsesUpdater uu) {
         for (FSubscript s : getFSubscripts()) {

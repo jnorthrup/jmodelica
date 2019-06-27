@@ -10,12 +10,10 @@ aspect Modifiers {
     public boolean ExpValueProvider.isClassRedeclare() {
         return false;
     }
-    syn boolean SrcFunctionArguments.isClassRedeclare() = false;
+    syn boolean SrcFunctionCall.isClassRedeclare()      = false;
+    syn boolean SrcArrayConstructor.isClassRedeclare()  = false;
     syn boolean SrcNamedArgument.isClassRedeclare()     = false;
     syn boolean SrcAnnotation.isClassRedeclare()        = false;
-    public boolean SrcSingeltonProvider.isClassRedeclare() {
-        return provider.isClassRedeclare();
-    }
     public boolean SrcAnnotationsIteratorProvider.isClassRedeclare() {
         return false;
     }
@@ -34,12 +32,10 @@ aspect Modifiers {
     public SrcShortClassDecl ExpValueProvider.getSrcClassRedeclare() {
         return null;
     }
-    syn SrcShortClassDecl SrcFunctionArguments.getSrcClassRedeclare() = null;
+    syn SrcShortClassDecl SrcFunctionCall.getSrcClassRedeclare()      = null;
+    syn SrcShortClassDecl SrcArrayConstructor.getSrcClassRedeclare()  = null;
     syn SrcShortClassDecl SrcNamedArgument.getSrcClassRedeclare()     = null;
     syn SrcShortClassDecl SrcAnnotation.getSrcClassRedeclare()        = null;
-    public SrcShortClassDecl SrcSingeltonProvider.getSrcClassRedeclare() {
-        return provider.getSrcClassRedeclare();
-    }
     public SrcShortClassDecl SrcAnnotationsIteratorProvider.getSrcClassRedeclare() {
         return null;
     }
@@ -55,12 +51,10 @@ aspect Modifiers {
     public boolean ExpValueProvider.isComponentRedeclare() {
         return false;
     }
-    syn boolean SrcFunctionArguments.isComponentRedeclare() = false;
+    syn boolean SrcFunctionCall.isComponentRedeclare()      = false;
+    syn boolean SrcArrayConstructor.isComponentRedeclare()  = false;
     syn boolean SrcNamedArgument.isComponentRedeclare()     = false;
     syn boolean SrcAnnotation.isComponentRedeclare()        = false;
-    public boolean SrcSingeltonProvider.isComponentRedeclare() {
-        return provider.isComponentRedeclare();
-    }
     public boolean SrcAnnotationsIteratorProvider.isComponentRedeclare() {
         return false;
     }
@@ -76,12 +70,11 @@ aspect Modifiers {
     public SrcComponentDecl ExpValueProvider.getSrcComponentRedeclare() {
         return null;
     }
+    syn SrcComponentDecl SrcFunctionCall.getSrcComponentRedeclare()      = null;
+    syn SrcComponentDecl SrcArrayConstructor.getSrcComponentRedeclare()  = null;
     syn SrcComponentDecl SrcFunctionArguments.getSrcComponentRedeclare() = null;
     syn SrcComponentDecl SrcNamedArgument.getSrcComponentRedeclare()     = null;
     syn SrcComponentDecl SrcAnnotation.getSrcComponentRedeclare()        = null;
-    public SrcComponentDecl SrcSingeltonProvider.getSrcComponentRedeclare() {
-        return provider.getSrcComponentRedeclare();
-    }
     public SrcComponentDecl SrcAnnotationsIteratorProvider.getSrcComponentRedeclare() {
         return null;
     }
