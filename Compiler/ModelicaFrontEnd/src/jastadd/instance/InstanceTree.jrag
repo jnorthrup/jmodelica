@@ -859,7 +859,6 @@ aspect Environments {
     eq InstArrayExpandableConnector.getInstComponentDecl(int i).myInstNode()         = 
         template(i).myInstNode();
 
-    inh InstNode InstModification.myParentInstNode();
     inh InstNode InstNode.myParentInstNode();
     eq Root.getChild().myParentInstNode()     = null;
     eq InstNode.getChild().myParentInstNode() = this;
@@ -1429,7 +1428,7 @@ aspect InstanceTreeConstruction {
         InstAccess className = replacingDecl.newInstClassAccess();
         
         InstComponentDecl icd;
-        if (isPrimitive()) {
+        if (isOrExtendsPrimitive()) {
             icd = new InstReplacingPrimitive(name, className, fas_opt, 
                     replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
         } else if (isRecord()) {
@@ -2239,11 +2238,11 @@ aspect InstanceAST_API {
     syn boolean InstNode.extendsPrimitive()        = false;
     eq InstShortClassDecl.extendsPrimitive()       = getNumInstExtends() == 1 && getInstExtends(0).extendsPrimitive();
     eq InstFullClassDecl.extendsPrimitive()        = getNumInstExtends() == 1 && getInstExtends(0).extendsPrimitive();
-    eq InstSimpleShortClassDecl.extendsPrimitive() = actualInstClass().isPrimitive();
+    eq InstSimpleShortClassDecl.extendsPrimitive() = actualInstClass().isOrExtendsPrimitive();
     eq InstLibNode.extendsPrimitive()              = actualInstClass().extendsPrimitive();
     eq InstExtends.extendsPrimitive() {
         InstClassDecl icd = myInstClass();
-        return !isRecursive() && icd.isPrimitive();
+        return !isRecursive() && icd.isOrExtendsPrimitive();
     }
 
     /**
@@ -2281,6 +2280,11 @@ aspect InstanceAST_API {
     eq InstComponentDecl.getChild().isInComponentDecl() = true;
     eq InstBaseNode.getChild().isInComponentDecl()      = false;
     eq Root.getChild().isInComponentDecl()              = false;
+	
+	/**
+	 * Check if this node is, is of, or extends a primitive type.
+	 */
+	syn boolean InstNode.isOrExtendsPrimitive() = isPrimitive() || extendsPrimitive();
 
     /**
      * Check if this class is or extends an enumeration.

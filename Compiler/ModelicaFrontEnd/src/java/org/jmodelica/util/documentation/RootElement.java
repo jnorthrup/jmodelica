@@ -22,7 +22,7 @@ public class RootElement extends DocumentElement {
      */
     public RootElement(Node node) {
         super(node);
-        this.chapters = new LinkedHashMap<>();
+        this.chapters = new LinkedHashMap<String, ChapterElement>();
 
         for (DocumentElement child : elements) {
             if (child.isChapter()) {
@@ -54,7 +54,7 @@ public class RootElement extends DocumentElement {
      *         a listing of all chapters.
      */
     public List<ChapterElement> chapters() {
-        return new ArrayList<>(chapters.values());
+        return new ArrayList<ChapterElement>(chapters.values());
     }
 
     /**
@@ -64,7 +64,7 @@ public class RootElement extends DocumentElement {
      *         a listing of all chapter names.
      */
     public List<String> chapterNames() {
-        return new ArrayList<>(chapters.keySet());
+        return new ArrayList<String>(chapters.keySet());
     }
 
     /**

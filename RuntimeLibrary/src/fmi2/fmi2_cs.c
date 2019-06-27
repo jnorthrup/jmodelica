@@ -74,7 +74,7 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
         return fmi2Fatal;
     }
 
-    if (((fmi2_me_t*)c)->fmu_mode != continuousTimeMode) { /* slaveInitialized */
+    if (((fmi2_me_t*)c)->fmu_mode != slaveInitialized) {
         jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "FMIState",
             "Can only do a step if the model is an initialized slave.");
         return fmi2Error;
@@ -321,13 +321,7 @@ jmi_ode_status_t fmi2_cs_event_update(jmi_ode_problem_t *problem) {
     fmi2Status flag;
     fmi2Boolean tmpNominalsOfContinuousStatesChanged = fmi2False;
     fmi2Boolean tmpValuesOfContinuousStatesChanged = fmi2False;
-    
-    flag = fmi2_enter_event_mode(cs_data->fmix_me);
-    if (flag != fmi2OK) {
-        jmi_log_node(problem->log, logError, "Error", "Failed to enter the event mode.");
-        return JMI_ODE_ERROR;
-    }
-    
+
     event_info.newDiscreteStatesNeeded = fmi2True;
     while (event_info.newDiscreteStatesNeeded) {
         flag = fmi2_new_discrete_state(cs_data->fmix_me, &event_info);
@@ -364,12 +358,6 @@ jmi_ode_status_t fmi2_cs_event_update(jmi_ode_problem_t *problem) {
     } else {
         problem->event_info.exists_time_event = 0;
         problem->event_info.next_time_event = JMI_INF;
-    }
-    
-    flag = fmi2_enter_continuous_time_mode(cs_data->fmix_me);
-    if (flag != fmi2OK) {
-        jmi_log_node(problem->log, logError, "Error", "Failed to enter the continuous time mode after handling an event.");
-        return JMI_ODE_ERROR;
     }
 
     return JMI_ODE_OK;

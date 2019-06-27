@@ -47,7 +47,6 @@ public class CompiledUnit implements LoggingUnit {
      * @param numberOfComponents    the number of components in the compiled unit.
      * @deprecated                  use {@link #CompiledUnit(File, Collection, int)} instead.
      */
-    @Deprecated
     public CompiledUnit(File fmu, int numberOfComponents) {
         this(fmu, Collections.<Problem> emptyList(), numberOfComponents);
     }
@@ -113,4 +112,12 @@ public class CompiledUnit implements LoggingUnit {
     public String printXML(Level level) {
         return XMLLogger.write_node("CompilationUnit", "file", toString());
     }
+
+    @Override
+    public void prepareForSerialization() {
+        /*
+         * Do nothing.
+         */
+    }
+
 }

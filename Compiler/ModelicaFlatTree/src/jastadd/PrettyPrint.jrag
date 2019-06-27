@@ -543,7 +543,7 @@ aspect PrettyPrint {
 	// For debugging
 	public void SrcLibNode.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.formatln("%s%structured library '%s' at '%s'", indent, 
-				(getStructured() ? "S" : "Uns"), name(), dirName());
+				(getStructured() ? "S" : "Uns"), name(), getFileName());
 	}
 
 	syn boolean SrcComponentClause.isEnumComponentClause() = false;
@@ -860,33 +860,12 @@ aspect PrettyPrint {
 		str.print(")");
 	}
 
-    public void SrcIterExp.prettyPrint(Printer p, CodeStream str, String ident) {
-        getSrcExp().prettyPrint(p,str,ident);
-        str.print(" for ");
-        for (int i = 1; i < getNumChild(); i++) {
-            getChild(i).prettyPrint(p, str, ident);
-        }
-    }
-
 	public void SrcFunctionArguments.prettyPrint(Printer p, CodeStream str, String indent) {
-		for (int i = 0; i < getNumSrcExp(); i++) {
-			p.print(getSrcExp(i), str, indent);
-			if (i < getNumSrcExp() + getNumSrcNamedArgument() - 1) {
+		for (int i=0; i<getNumSrcExp(); i++) {
+			p.print(getSrcExp(i),str,indent);
+			if (i<getNumSrcExp()-1)
 				str.print(",");
-		    }
 		}
-		for (int i = 0; i < getNumSrcNamedArgument(); i++) {
-            p.print(getSrcNamedArgument(i), str, indent);
-            if (i < getNumSrcNamedArgument() - 1) {
-                str.print(",");
-            }
-        }
-	}
-	
-	public void SrcNamedArgument.prettyPrint(Printer p, CodeStream str, String indent) {
-	    p.print(getName(), str, indent);
-	    str.print("=");
-	    getSrcExp().prettyPrint(p, str, indent);
 	}
 
     public void SrcIdDecl.prettyPrint(Printer p, CodeStream str, String indent) {
@@ -1828,7 +1807,7 @@ aspect FlatPrettyPrint {
 	 */
 	protected void FBuiltInFunctionCall.prettyPrintArguments(Printer p, CodeStream str, String indent) {
 		String pre = "";
-		for (FExp exp : myArgs()) {
+		for (FExp exp : childFExps()) {
 			str.print(pre);
 			p.print(exp, str, indent);
 			pre = SEP;
@@ -1857,16 +1836,6 @@ aspect FlatPrettyPrint {
             str.print(SEP, "priority=");
             p.print(getPriority(), str, indent);
         }
-    }
-
-    @Override
-    protected void FDelayIndicator.prettyPrintArguments(Printer p, CodeStream str, String indent) {
-        myDelayExp().prettyPrintArguments(p, str, indent);
-    }
-
-    @Override
-    protected void FSpatialDistIndicator.prettyPrintArguments(Printer p, CodeStream str, String indent) {
-        mySpatialDistExp().prettyPrintArguments(p, str, indent);
     }
 
 	syn String FBuiltInFunctionCall.builtInName();
@@ -1919,9 +1888,6 @@ aspect FlatPrettyPrint {
     eq FReinit.builtInName()             = "reinit";
     eq FDelayExp.builtInName()           = "delay";
     eq FSpatialDistExp.builtInName()     = "spatialDistribution";
-    eq FFirstDelayIndicator.builtInName()= "delayIndicatorFirst";
-    eq FSecondDelayIndicator.builtInName()= "delayIndicatorSecond";
-    eq FSpatialDistIndicator.builtInName()= "spatialDistIndicator";
 	eq FAssert.builtInName()             = "assert";
 	eq FIdentity.builtInName()           = "identity";
 	eq FDiagonal.builtInName()           = "diagonal";
@@ -1940,7 +1906,7 @@ aspect FlatPrettyPrint {
     eq FDecouple.builtInName()           = "Subtask.decouple";
 	eq FSemiLinearExp.builtInName()      = "semiLinear";
 	eq FInStream.builtInName()           = "inStream";
-	eq FDerStream.builtInName()          = "derStream";
+	eq FDerStream.builtInName()         = "derStream";
     eq FExInStream.builtInName()         = "inStreamExpansion";
 	eq FActualStream.builtInName()       = "actualStream";
 	eq FGetInstanceName.builtInName()    = "getInstanceName";

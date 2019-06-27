@@ -43,22 +43,18 @@ public class TreeModuleRunner extends ParentRunner<TestTreeRunner> {
         }
     }
 
-    @Override
     public Description describeChild(TestTreeRunner mod) {
         return mod.getDescription();
     }
 
-    @Override
     public List<TestTreeRunner> getChildren() {
         return children;
     }
 
-    @Override
     public void runChild(TestTreeRunner mod, RunNotifier note) {
         mod.run(note);
     }
 
-    @Override
     public Description getDescription() {
         return desc;
     }

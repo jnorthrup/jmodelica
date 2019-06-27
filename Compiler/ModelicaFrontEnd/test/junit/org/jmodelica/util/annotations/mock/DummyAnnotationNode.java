@@ -13,7 +13,6 @@ public class DummyAnnotationNode extends GenericAnnotationNode<DummyAnnotationNo
     /**
      * Expose protected method for testing
      */
-    @Override
     public void disconnectFromNode() {
         super.disconnectFromNode();
     }
@@ -26,7 +25,6 @@ public class DummyAnnotationNode extends GenericAnnotationNode<DummyAnnotationNo
     /**
      * Expose protected method for testing
      */
-    @Override
     public void updateNode(String newName, DummyAnnotProvider node) {
         super.updateNode(newName, node);
     }

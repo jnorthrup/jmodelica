@@ -38,7 +38,7 @@ import org.jmodelica.util.xml.XMLPrinter;
  * The registry is empty by default, options have to be added by
  * calling any of the add*Option methods.
  */
-public class OptionRegistry {
+abstract public class OptionRegistry {
 
     public abstract static class Default<T> {
         public final Class<T> type;
@@ -171,7 +171,7 @@ public class OptionRegistry {
 
     public enum Category { common, user, uncommon, experimental, debug, internal, deprecated }
 
-    protected Map<String, Option<?>> optionsMap = new HashMap<>();
+    protected Map<String, Option<?>> optionsMap = new HashMap<String, Option<?>>();
 
     /**
      * Create a copy of this OptionRegistry.
@@ -180,7 +180,7 @@ public class OptionRegistry {
      *          a new {@code OptionRegistry} with the same options and settings as {@code this}.
      */
     public OptionRegistry copy() {
-        OptionRegistry res = new OptionRegistry();
+        OptionRegistry res = new OptionRegistry() {};
         res.copyAllOptions(this);
         return res;
     }
@@ -387,7 +387,7 @@ public class OptionRegistry {
     }
 
     public Collection<String> getFilteredOptionName(OptionFilter filter) {
-        List<String> res = new ArrayList<>();
+        List<String> res = new ArrayList<String>();
         for (Option<?> o : sortedOptions())
             if (filter.filter(o))
                 res.add(o.key);
@@ -429,8 +429,8 @@ public class OptionRegistry {
     public void addBooleanOption(String key, OptionType type, Category cat, boolean def,
             boolean testDefault, String description) {
 
-        addBooleanOption(key, type, cat, new DefaultValue<>(def),
-                new DefaultValue<>(testDefault), description);
+        addBooleanOption(key, type, cat, new DefaultValue<Boolean>(def),
+                new DefaultValue<Boolean>(testDefault), description);
     }
 
     public void addBooleanOption(String key, OptionType type, Category cat, Default<Boolean> def,
@@ -498,14 +498,14 @@ public class OptionRegistry {
     public void addIntegerOption(String key, OptionType type, Category cat, int def,
             int testDefault, String description) {
 
-        addIntegerOption(key, type, cat, new DefaultValue<>(def),
-                new DefaultValue<>(testDefault), description);
+        addIntegerOption(key, type, cat, new DefaultValue<Integer>(def),
+                new DefaultValue<Integer>(testDefault), description);
     }
 
     public void addIntegerOption(String key, OptionType type, Category cat, int def, int testDefault,
             String description, int min, int max) {
 
-        addIntegerOption(key, type, cat, new DefaultValue<>(def), new DefaultValue<>(testDefault),
+        addIntegerOption(key, type, cat, new DefaultValue<Integer>(def), new DefaultValue<Integer>(testDefault),
                 description, min, max);
     }
 
@@ -530,7 +530,7 @@ public class OptionRegistry {
     }
 
     public void setIntegerOptionDefault(String key, int def) {
-        findIntegerOption(key, false).setDefault(new DefaultValue<>(def));
+        findIntegerOption(key, false).setDefault(new DefaultValue<Integer>(def));
     }
 
     public void setIntegerOptionDefault(String key, Default<Integer> def) {
@@ -588,14 +588,14 @@ public class OptionRegistry {
     public void addRealOption(String key, OptionType type, Category cat, double def,
             double testDefault, String description) {
 
-        addRealOption(key, type, cat, new DefaultValue<>(def),
-                new DefaultValue<>(testDefault), description);
+        addRealOption(key, type, cat, new DefaultValue<Double>(def),
+                new DefaultValue<Double>(testDefault), description);
     }
 
     public void addRealOption(String key, OptionType type, Category cat, double def, double testDefault,
             String description, double min, double max) {
 
-        addRealOption(key, type, cat, new DefaultValue<>(def), new DefaultValue<>(testDefault), description,
+        addRealOption(key, type, cat, new DefaultValue<Double>(def), new DefaultValue<Double>(testDefault), description,
                 min, max);
     }
 
@@ -620,7 +620,7 @@ public class OptionRegistry {
     }
 
     public void setRealOptionDefault(String key, double def) {
-        findRealOption(key, false).setDefault(new DefaultValue<>(def));
+        findRealOption(key, false).setDefault(new DefaultValue<Double>(def));
     }
 
     public void setRealOptionDefault(String key, Default<Double> def) {
@@ -691,21 +691,21 @@ public class OptionRegistry {
     public void addStringOption(String key, OptionType type, Category cat, String def,
             String description, String[] allowed) {
 
-        addStringOption(key, type, cat, new DefaultValue<>(def), new DefaultValue<>(def),
+        addStringOption(key, type, cat, new DefaultValue<String>(def), new DefaultValue<String>(def),
                 description, allowed);
     }
 
     public void addStringOption(String key, OptionType type, Category cat, String def,
             String testDefault, String description) {
 
-        addStringOption(key, type, cat, new DefaultValue<>(def),
-                new DefaultValue<>(testDefault), description);
+        addStringOption(key, type, cat, new DefaultValue<String>(def),
+                new DefaultValue<String>(testDefault), description);
     }
 
     public void addStringOption(String key, OptionType type, Category cat, String def, String testDefault,
             String description, String[] allowed) {
 
-        addStringOption(key, type, cat, new DefaultValue<>(def), new DefaultValue<>(testDefault),
+        addStringOption(key, type, cat, new DefaultValue<String>(def), new DefaultValue<String>(testDefault),
                 description, allowed);
     }
 
@@ -728,7 +728,7 @@ public class OptionRegistry {
     }
 
     public void setStringOptionDefault(String key, String def) {
-        findStringOption(key, false).setDefault(new DefaultValue<>(def));
+        findStringOption(key, false).setDefault(new DefaultValue<String>(def));
     }
 
     public void setStringOptionDefault(String key, Default<String> def) {
@@ -800,7 +800,7 @@ public class OptionRegistry {
          *          A description of the option.
          * @param defaultValue
          *          The option's default value.
-         * @param testDefault
+         * @param testDefeault
          *          The option's default value when under test.
          */
         public IntegerOption(String key, OptionType type, Category category, String description,
@@ -822,7 +822,7 @@ public class OptionRegistry {
          *          A description of the option.
          * @param defaultValue
          *          The option's default value.
-         * @param testDefault
+         * @param testDefeault
          *          The option's default value when under test.
          * @param min
          *          The minimum allowed value for this option.
@@ -940,14 +940,12 @@ public class OptionRegistry {
             type = t;
         }
 
-        @Override
         public boolean filter(Option<?> o) {
             return o.isType(type);
         }
     }
 
     public static final OptionFilter NULL_OPTION_FILTER = new OptionFilter() {
-        @Override
         public boolean filter(Option<?> o) {
             return true;
         }

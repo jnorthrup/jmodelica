@@ -35,7 +35,7 @@ public abstract class Option<T> implements Comparable<Option<T>> {
      * 
      * @param key
      *          The key to (name of) the option.
-     * @param optionType
+     * @param type
      *          The type of option.
      * @param category
      *          The category of the option.

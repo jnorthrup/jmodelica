@@ -23,7 +23,6 @@ public class UnitTestCodeStream extends NotNullCodeStream {
         super(out);
     }
     
-    @Override
     public void splitFile() {
         print("/*** SPLIT FILE ***/\n\n");
     }

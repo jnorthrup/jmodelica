@@ -2,7 +2,6 @@ package org.jmodelica.util.collections;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -14,18 +13,6 @@ public final class ListUtil {
      * Hidden default constructor to prevent instantiation.
      */
     private ListUtil() {}
-
-    /**
-     * Creates a new immutable list with initial list elements.
-     * 
-     * @param <T>       the type of elements the list contains.
-     * @param elements  the elements.
-     * @return          a {@link java.util.List List} containing {@code elements}.
-     */
-    @SafeVarargs
-    public static <T> java.util.List<T> unmodifiableList(T... elements) {
-        return Collections.unmodifiableList(create(elements));
-    }
 
     /**
      * Creates a new list with initial list elements.
@@ -90,21 +77,6 @@ public final class ListUtil {
     @SafeVarargs
     public final static <T> List<T> list(T... ts) {
         return Arrays.asList(ts);
-    }
-
-    /**
-     * Combines several lists into one.
-     * 
-     * @param lists The lists to join.
-     * @return      one list containing all the elements in {@code lists}.
-     */
-    @SafeVarargs
-    public static <T> List<T> join(List<T>... lists) {
-        List<T> result = new ArrayList<T>();
-        for (List<T> list : lists) {
-            result.addAll(list);
-        }
-        return result;
     }
 
 }

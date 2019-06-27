@@ -43,23 +43,20 @@ public class ParallelIterator<T> implements Iterator<T[]> {
 			elems[i] = null;
 	}
 	
-	@Override
-    public boolean hasNext() {
+	public boolean hasNext() {
 		for (Iterator<? extends T> it : iters)
 			if (it.hasNext() == max)
 				return max;
 		return !max;
 	}
 	
-	@Override
-    public T[] next() {
+	public T[] next() {
 		for (int i = 0; i < iters.length; i++)
 			elems[i] = iters[i].hasNext() ? iters[i].next() : null;
 		return elems;
 	}
 
-	@Override
-    public void remove() {
+	public void remove() {
 		for (Iterator<? extends T> it : iters)
 			it.remove();
 	}

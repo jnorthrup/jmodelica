@@ -114,9 +114,9 @@ public abstract class Tarjan<N, C extends TarjanComponent<N>> {
      */
     public Collection<C> tarjan(Collection<N> nodes) {
         Enumerator indexer = new Enumerator();
-        HashStack<N> stack = new HashStack<>();
-        Collection<C> components = new ArrayList<>();
-        Map<N, Collection<N>> predecessorCache = new HashMap<>();
+        HashStack<N> stack = new HashStack<N>();
+        Collection<C> components = new ArrayList<C>();
+        Map<N, Collection<N>> predecessorCache = new HashMap<N, Collection<N>>();
         
         for (N n : nodes) {
             if (!visited(n) && shouldVisit(n))
@@ -130,7 +130,7 @@ public abstract class Tarjan<N, C extends TarjanComponent<N>> {
             Map<N, Collection<N>> predecessorCache) {
         int index = indexer.next();
         
-        Set<N> sameBlock = new LinkedHashSet<>();
+        Set<N> sameBlock = new LinkedHashSet<N>();
         sameBlock.add(initialNode);
         forceIntoSame(initialNode, sameBlock);
         
@@ -141,7 +141,7 @@ public abstract class Tarjan<N, C extends TarjanComponent<N>> {
             stack.push(n);
         }
     
-        Collection<N> eqToVisit = new LinkedHashSet<>();
+        Collection<N> eqToVisit = new LinkedHashSet<N>();
         
         for (N n : sameBlock) {
             addPredecessors(n, eqToVisit);

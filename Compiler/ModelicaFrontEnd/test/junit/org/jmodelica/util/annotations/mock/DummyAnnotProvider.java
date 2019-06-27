@@ -1,7 +1,6 @@
 package org.jmodelica.util.annotations.mock;
 
 import java.util.ArrayList;
-
 import org.jmodelica.common.URIResolver.URIException;
 import org.jmodelica.util.annotations.AnnotationEditException;
 import org.jmodelica.util.annotations.AnnotationProvider;
@@ -11,11 +10,10 @@ import org.jmodelica.util.values.Evaluable;
 
 public class DummyAnnotProvider implements AnnotationProvider<DummyAnnotProvider,Evaluable> {
 
-    public String name;
+    public String name = "";
     public Evaluable value = null;
     public ArrayList<DummyAnnotProvider> subNodes = new ArrayList<>();
     public DummyAnnotProvider() {
-        this.name = "";
     }
 
     public DummyAnnotProvider(String name) {
@@ -53,12 +51,11 @@ public class DummyAnnotProvider implements AnnotationProvider<DummyAnnotProvider
         return new TransformerIterable<DummyAnnotProvider, SubNodePair<DummyAnnotProvider>>(subNodes) {
             @Override
             protected SubNodePair<DummyAnnotProvider> transform(DummyAnnotProvider a) throws SkipException {
-                return new SubNodePair<>(a.name, a);
+                return new SubNodePair<DummyAnnotProvider>(a.name, a);
             }
         };
     }
 
-    @Override
     public String toString() {
         return "MockSrcAnnot:" + name;
     }
@@ -93,7 +90,7 @@ public class DummyAnnotProvider implements AnnotationProvider<DummyAnnotProvider
 
     public DummyAnnotationNode createAnnotationNode() {
         return new DummyAnnotationNode(name, this, null);
-    }
+    };
 
     @Override
     public boolean isEach() {

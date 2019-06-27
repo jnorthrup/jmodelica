@@ -394,13 +394,8 @@ abstract public class TestAnnotationizerHelper {
         opts.setStringOption("MODELICAPATH", modelicapath.getPath());
         SourceRoot root;
         
-        Collection<LoadInfo> loadInfos = new ArrayList<>();
-        for (String file : files) {
-            loadInfos.add(LoadInfo.create(file));
-        }
-        
         try {
-            root = TestCase.PARSER_HANDLER.parseModel(UtilInterface.create(opts), loadInfos);
+            root = TestCase.PARSER_HANDLER.parseModel(UtilInterface.create(opts), files);
         } catch (ParserException e) {
             CompilerException ce = new CompilerException();
             ce.addProblem(e.getProblem());
@@ -519,7 +514,7 @@ abstract public class TestAnnotationizerHelper {
 
     private <T> String arrayString(T[] array) {
         String arrayString = Arrays.toString(array);
-        return "{ " + arrayString.substring(1, arrayString.length() - 1) + " }";
+        return "{ " + arrayString.substring(1, arrayString.length() - 2) + " }";
     }
 
     protected void doPrintLine(String name, String value) {

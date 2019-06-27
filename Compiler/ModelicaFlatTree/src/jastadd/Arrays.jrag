@@ -629,7 +629,7 @@ aspect Arrays {
     eq FlatRoot.getChild().parentExpandedSubscripts() = new List<FSubscript>();
 
     public FSubscript InstForIndex.createFSubscript() {
-        return getFExp().flatten(null).createFSubscript();
+        return getFExp().flatten(Flattener.expressionFlattener()).createFSubscript();
     }
     @Override
     public FSubscript InstForIndexNoExp.createFSubscript() {
@@ -1040,11 +1040,6 @@ aspect Arrays {
      * Default implementation is simply an alias for childFExps().
      */
     syn Iterable<FExp> FBuiltInFunctionCall.myArgs() = childFExps();
-    eq FDelayExp.myArgs() = hasMax()
-            ? Arrays.asList(getFExp(), getDelay(), getMax())
-            : Arrays.asList(getFExp(), getDelay());
-    eq FSpatialDistExp.myArgs() = Arrays.asList(getIn0(), getIn1(), getX(),
-            getPositiveVelocity(), getInitialPoints(), getInitialValues());
 
 	eq FArrayDimAsArgsExp.size() {
 		if (!isArray())
@@ -2621,10 +2616,10 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * Return a Size that has the same lengths as this size where they are known, 
+		 * Return a Size that have the same lengths as this size where they are known, 
 		 *        and any that are unknown copied from the size of <code>exp</code>. 
 		 * 
-		 * If the size of <code>exp</code> has more dimensions, the last part is assumed to match this size.
+		 * If the size of <code>exp</code> have more dimensions, the last part is assumed to match this size.
 		 */
 		public Size createKnown(FExp exp) {
 			Size known;
@@ -3017,7 +3012,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * Constructs the size described by a vector expression.
+		 * Constructs the size descrived by a vector expression.
 		 */
 		public MutableSize(FExp exp) {
 			this(exp.ndims() == 1 ? exp.size().get(0) : 0);
@@ -3332,7 +3327,7 @@ aspect ArrayHelpers {
         }
 
         /**
-         * Delegate method for expand(Size) and expandRight(Size). Creates a new size that is the concatenation of a and b.
+         * Delegate method for expand(Size) and expandRight(Size). Creates a new size tyhat is the concatenation of a and b.
          */
         protected Size createExpanded(Size a, Size b) {
             int ndims = a.size.length + b.size.length;
@@ -3406,12 +3401,9 @@ aspect ArrayHelpers {
          */
         public Size evaluated() {
             boolean copy = false;
-            for (FExp e : exps) {
-                if (e != null) {
+            for (FExp e : exps)
+                if (e != null)
                     copy = true;
-                    break;
-                }
-            }
             if (copy) {
                 MutableSize res = new MutableSize(size.length);
                 System.arraycopy(size, 0, res.size, 0, size.length);

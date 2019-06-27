@@ -632,8 +632,6 @@ aspect FlatTypeAnalysis {
     eq FDelayExp.type() = getFExp().type();
     eq FSpatialDistExp.type() = getIn0().type();
 
-    eq FIndicatorExp.type() = FRealType.SCALAR;
-
     /**
      * The scalar type of the expression.
      * 
