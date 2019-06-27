@@ -2012,14 +2012,9 @@ aspect AnnotationAPI {
 
     public interface SrcAnnotationProvider {
         /**
-         * Check if there is annotations at this location.
+         * Check if there is an annotation at this location.
          */
         public boolean hasAnnotation();
-    }
-
-    @Override
-    public boolean SrcSingeltonProvider.hasAnnotation() {
-        return provider.hasAnnotation();
     }
 
     @Override
@@ -2048,7 +2043,12 @@ aspect AnnotationAPI {
     }
 
     @Override
-    public boolean SrcFunctionArguments.hasAnnotation() {
+    public boolean SrcFunctionCall.hasAnnotation() {
+        return annotationSubNodes().iterator().hasNext();
+    }
+
+    @Override
+    public boolean SrcArrayConstructor.hasAnnotation() {
         return annotationSubNodes().iterator().hasNext();
     }
 
@@ -2064,8 +2064,8 @@ aspect AnnotationAPI {
 
     
     /** 
-     * Search for the applicable annotation from the enviroment. FilteredEnviroment 
-     * is not used since it is peeling which is undesired. Retrives latest live annotation
+     * Search for the applicable annotation from the environment. FilteredEnviroment 
+     * is not used since it is peeling which is undesired. Retrieves latest live annotation
      * from the chain of redeclares.
      */
     public SrcAnnotatable InstNode.srcannotatableFromEnviroment() {
@@ -2146,9 +2146,9 @@ aspect AnnotationAPI {
     }
     
     /**
-     * Obtain the source node which is responsable for providing the annotation.
+     * Obtain the source node which is responsible for providing the annotation.
      * A match against this with the same qualifiedName and same fullyQualifiedName is made in the 
-     * Enviroment. 
+     * Environment. 
      */
     public SrcAnnotatable InstAbstractShortClassDecl.mySrcAnnotatable() {
         boolean hasAnnotations = getSrcClassDecl().srcAnnotationProvider().hasAnnotation();
@@ -2163,7 +2163,7 @@ aspect AnnotationAPI {
     }
     
     /**
-     * Obtain the source node which is responsable for providing the annotation.
+     * Obtain the source node which is responsible for providing the annotation.
      */
     public SrcAnnotatable InstClassDecl.mySrcAnnotatable() {
         return getSrcClassDecl();
