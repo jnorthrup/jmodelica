@@ -65,7 +65,8 @@ public interface AnnotationProvider<N extends AnnotationProvider<N, V>, V extend
     public Iterable<SubAnnotationPair<N>> annotationSubNodes();
     
     /**
-     * FIXME proper doc. May return values "too often". Maybe remove entirely?
+     * Returns either the binding expression, if available, otherwise the annotation interpreted as a value,
+     * if possible. Otherwise, returns <code>null</code>.
      */
     public V annotationValue();
 
