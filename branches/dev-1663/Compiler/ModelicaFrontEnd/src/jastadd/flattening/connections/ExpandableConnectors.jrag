@@ -339,12 +339,8 @@ aspect ExpandableConnectors {
                         members.put(name, member);
                     }
                     // TODO: what is sourceSize in this case? probably shouldn't just toss it
-                    Indices indices = unknownPart.indices();
-                    if (indices.ndims() == 0 && known.isArray()) {
-                        indices = known.indices();
-                    }
+                    Indices indices = unknownPart.accessIndices();
                     for (Index i : indices) {
-                        i = indices.translate(i);
                         member.set(i).addMember(knownComp, known, unknown, unknownPart.getNextInstAccess(), null);
                     }
                 }
