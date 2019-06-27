@@ -772,7 +772,7 @@ aspect FlatTypeAnalysis {
                 // Very difficult to fix here, should be fixed in CommonAccessExp.type() instead.
                 t = t.expand(size().contractRight(ndimsWithoutFAS - ip.ndims()));
                 try {
-                    t = t.cell(index()).asFType();
+                    t = t.cell(accessIndex()).asFType();
                 } catch (ConstantEvaluationException e) {
                     t = ndims() > 0 ? t.arrayType(size()) : t.scalarType();
                 }

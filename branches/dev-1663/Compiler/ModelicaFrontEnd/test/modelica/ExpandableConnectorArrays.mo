@@ -1304,6 +1304,7 @@ end ExpandableConnectorArrays.LoopedConnection;
 ")})));
     end LoopedConnection;
     
+    
     model LoopedNested1
         expandable connector EC
         end EC;
@@ -1458,7 +1459,6 @@ end ExpandableConnectorArrays.LoopedNested4;
     end LoopedNested4;
     
     
-    // TODO: These cause crash, see TODO about slices in ExpandableSet.addMember (line 334) & ConnectorMember.addConnection (line 504)
     model SliceNested1
         expandable connector EC
         end EC;
@@ -1470,7 +1470,28 @@ end ExpandableConnectorArrays.LoopedNested4;
     equation
         connect(ec1.a[2:3], ec2[3:-1:2]);
         connect(ec2.b, c);
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="SliceNested1",
+            description="",
+            flatModel="
+fclass ExpandableConnectorArrays.SliceNested1
+ Real ec1.a[2].b;
+ Real ec1.a[3].b;
+ Real ec2[1].b;
+ Real ec2[2].b;
+ Real ec2[3].b;
+ Real c[3];
+equation
+ c[3] = ec1.a[2].b;
+ ec1.a[2].b = ec2[3].b;
+ c[2] = ec1.a[3].b;
+ ec1.a[3].b = ec2[2].b;
+ c[1] = ec2[1].b;
+end ExpandableConnectorArrays.SliceNested1;
+")})));
     end SliceNested1;
+    
     
     model SliceNested2
         expandable connector EC
@@ -1483,8 +1504,33 @@ end ExpandableConnectorArrays.LoopedNested4;
     equation
         connect(ec1.a, ec2[1,:]);
         connect(ec2.b, c);
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="SliceNested2",
+            description="",
+            flatModel="
+fclass ExpandableConnectorArrays.SliceNested2
+ Real ec1.a[1].b;
+ Real ec1.a[2].b;
+ Real ec2[1,1].b;
+ Real ec2[1,2].b;
+ Real ec2[2,1].b;
+ Real ec2[2,2].b;
+ Real c[2,2];
+equation
+ c[1,1] = ec1.a[1].b;
+ ec1.a[1].b = ec2[1,1].b;
+ c[1,2] = ec1.a[2].b;
+ ec1.a[2].b = ec2[1,2].b;
+ c[2,1] = ec2[2,1].b;
+ c[2,2] = ec2[2,2].b;
+end ExpandableConnectorArrays.SliceNested2;
+")})));
+        
     end SliceNested2;
     
+    
+    // TODO: For some reason this flattens to an empty class even though the ExpandableSets look fine.
     model SliceNested3
         expandable connector EC
         end EC;
@@ -1497,6 +1543,22 @@ end ExpandableConnectorArrays.LoopedNested4;
         connect(ec1.a, ec2);
         connect(ec2.b, c);
     end SliceNested3;
+    
+    
+    // TODO: 
+    model SliceNested4
+        expandable connector EC
+        end EC;
+        
+        connector C = Real;
+        
+        EC ec1, ec2[2];
+        C c[2, 2];
+    equation
+        connect(ec1.a, ec2[:]);
+        connect(ec1.a[1:2].b[:, 1:2], c);
+    end SliceNested4;
+    
     
     model ThroughScalar
         expandable connector EC

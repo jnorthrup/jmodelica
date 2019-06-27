@@ -339,9 +339,14 @@ aspect ExpandableConnectors {
                         members.put(name, member);
                     }
                     // TODO: what is sourceSize in this case? probably shouldn't just toss it
-                    // TODO: handle case where unknownPart is a slice
-                    Index i = unknownPart.index();
-                    member.set(i).addMember(knownComp, known, unknown, unknownPart.getNextInstAccess(), null);
+                    Indices indices = unknownPart.indices();
+                    if (indices.ndims() == 0 && known.isArray()) {
+                        indices = known.indices();
+                    }
+                    for (Index i : indices) {
+                        i = indices.translate(i);
+                        member.set(i).addMember(knownComp, known, unknown, unknownPart.getNextInstAccess(), null);
+                    }
                 }
                 member.addParentSet(actual());
             }
@@ -514,13 +519,19 @@ aspect ExpandableConnectors {
                         InstAccess target, FArraySubscripts fas, Size targetSize, InstAccess unknownPart) {
                     sources.add(new Source(targetComp, target, fas, targetSize));
                     if (targetComp.isExpandableConnector()) {
-                        // TODO: handle case where this connection is not scalar
-                        ExpandableSet otherSet = map.get(targetComp);
-                        Index i = unknownPart.index();
-                        if (otherSet == null) {
-                            set(i).addConnector(targetComp);
-                        } else {
-                            mergeSet(otherSet, i);
+                        Indices indices = unknownPart.accessIndices();
+                        if (indices.ndims() == 0 && target.isArray()) {
+                            indices = target.indices();
+                        }
+                        for (Index i : indices) {
+                            Index ti = indices.translate(i);
+                            InstComponentDecl specified = targetComp.specify(ti);
+                            ExpandableSet otherSet = map.get(specified);
+                            if (otherSet == null) {
+                                set(i).addConnector(specified);
+                            } else {
+                                mergeSet(otherSet, i);
+                            }
                         }
                     }
                 }

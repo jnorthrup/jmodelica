@@ -4296,6 +4296,10 @@ aspect ArrayHelpers {
             return i;
         }
 
+        public Indices translated() {
+            return this;
+        }
+
 		/**
 		 * Add values to an index map for a given index from this set and a given set of for indices.
 		 * 
@@ -4526,6 +4530,7 @@ aspect ArrayHelpers {
          * 
          * Note that the returned index may be changed by subsequent calls to this method.
          */
+        @Override
         public Index translate(Index i) {
             int[] ii = i.index();
             if (ii.length != trans.ndims() - trim.length + ndims) {
@@ -4552,6 +4557,45 @@ aspect ArrayHelpers {
                 }
             }
             return trans;
+        }
+
+        @Override
+        public Indices translated() {
+            return new TranslatedIndices(this);
+        }
+
+        private static class TranslatedIndices extends Indices {
+            
+            private NonConsecutiveIndices indices;
+            
+            private TranslatedIndices(NonConsecutiveIndices indices) {
+                super(indices.size);
+                this.indices = indices;
+            }
+            
+            @Override
+            public Iterator<Index> iterator() {
+                return new Iter();
+            }
+            
+            private class Iter implements Iterator<Index> {
+                
+                private Iterator<Index> iterator;
+                
+                private Iter() {
+                    iterator = indices.iterator();
+                }
+                
+                public boolean hasNext() {
+                    return iterator.hasNext();
+                }
+                public Index next() {
+                    return indices.translate(iterator.next());
+                }
+                public void remove() {
+                    iterator.remove();
+                }
+            }
         }
 
 		/**
