@@ -1629,7 +1629,6 @@ end ExpandableConnectorArrays.ThroughScalar;
 ")})));
     end ThroughScalar;
     
-    // TODO: here too many are connected, a[1] should only contain b and a[2] should only contain d
     model ThroughArray
         expandable connector EC
         end EC;
@@ -1649,7 +1648,7 @@ end ExpandableConnectorArrays.ThroughScalar;
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
             name="ThroughArray",
-            description="",
+            description="Connecting expandable connectors through an array cell, and make contents is not propagated to other cells in same array",
             flatModel="
 fclass ExpandableConnectorArrays.ThroughArray
  Real ec1.a[1].b;
