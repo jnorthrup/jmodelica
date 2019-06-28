@@ -18,6 +18,7 @@ package org.jmodelica.api.problemHandling;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -330,6 +331,12 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
     public boolean equals(Object o) {
         return (o instanceof Problem) && (compareTo((Problem) o) == 0);
     }
+    
+    @Override
+    public int hashCode() {
+        // This is not expected to be used much, so no need to take all fields into consideration.
+        return Objects.hash(message, kind, identifier, fileName);
+    }
 
     @Override
     public int compareTo(Problem other) {
@@ -451,10 +458,6 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
                 "line",         beginLine(),
                 "column",       beginColumn(),
                 "message",      message());
-    }
-
-    @Override
-    public void prepareForSerialization() {
     }
 
     /**

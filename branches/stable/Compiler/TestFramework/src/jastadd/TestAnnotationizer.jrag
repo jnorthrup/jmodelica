@@ -519,7 +519,7 @@ abstract public class TestAnnotationizerHelper {
 
     private <T> String arrayString(T[] array) {
         String arrayString = Arrays.toString(array);
-        return "{ " + arrayString.substring(1, arrayString.length() - 2) + " }";
+        return "{ " + arrayString.substring(1, arrayString.length() - 1) + " }";
     }
 
     protected void doPrintLine(String name, String value) {

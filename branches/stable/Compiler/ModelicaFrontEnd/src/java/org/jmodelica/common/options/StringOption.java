@@ -125,6 +125,7 @@ class StringOption extends Option<String> {
     /**
      * Retrieves the documentation string for this option's current value.
      */
+    @Override
     public String getValueForDoc() {
         return (getValue() == null) ? "null" : String.format("'%s'", getValue());
     }

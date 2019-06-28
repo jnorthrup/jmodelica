@@ -14,15 +14,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+within;
 
 package ExpandableConnectors
 
     model Expandable1
         expandable connector EC
         end EC;
-        
+
         connector C = Real;
-        
+
         EC ec1, ec2, ec3;
         C c1, c2;
     equation
@@ -57,7 +58,7 @@ end ExpandableConnectors.Expandable1;
     model Expandable2
         expandable connector EC
         end EC;
-        
+
         connector C
             Real a;
             flow Real b;
@@ -122,15 +123,15 @@ equation
  ec3.y.b = 0.0;
 end ExpandableConnectors.Expandable2;
 ")})));
-	end Expandable2;
+    end Expandable2;
 
 
     model Expandable3
         expandable connector EC
         end EC;
-        
+
         connector C = Real[2];
-        
+
         model M
             EC ec1, ec2, ec3;
             C c1, c2;
@@ -140,7 +141,7 @@ end ExpandableConnectors.Expandable2;
             connect(ec2, ec3);
             connect(ec3.a, c2);
         end M;
-        
+
         M m[2];
 
     annotation(__JModelica(UnitTesting(tests={
@@ -187,98 +188,14 @@ end ExpandableConnectors.Expandable3;
     model Expandable4
         expandable connector EC
         end EC;
-        
-        connector C = Real;
-        
-        EC ec[3];
-        C c1, c2;
-    equation
-        connect(c1, ec[1].a);
-        connect(ec[1], ec[2]);
-        connect(ec[2], ec[3]);
-        connect(ec[3].a, c2);
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="Expandable4",
-            description="Array of expandable connectors",
-            flatModel="
-fclass ExpandableConnectors.Expandable4
- Real ec[1].a;
- Real ec[2].a;
- Real ec[3].a;
- Real c1;
- Real c2;
-equation
- c1 = c2;
- c2 = ec[1].a;
- ec[1].a = ec[2].a;
- ec[2].a = ec[3].a;
-end ExpandableConnectors.Expandable4;
-")})));
-    end Expandable4;
-	
-	
-    model Expandable5
-        expandable connector EC
-        end EC;
-        
-        connector C = Real;
-		
-		model M
-			C c;
-		end M;
-        
-        parameter Integer n = 4;
-        
-        EC ec[n];
-        M m[n];
-    equation
-        for i in 1:(n-2) loop
-            connect(ec[i], ec[i+2]);
-            connect(ec[i].a, m[i].c);
-        end for;
-        connect(ec[end-1].a, m[end-1].c);
-        connect(ec[end].a, m[end].c);
+        model A
+            replaceable EC ec;
+        end A;
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="Expandable5",
-            description="Connecting to expandable connector in for loop",
-            flatModel="
-fclass ExpandableConnectors.Expandable5
- structural parameter Integer n = 4 /* 4 */;
- Real ec[1].a;
- Real ec[2].a;
- Real ec[3].a;
- Real ec[4].a;
- Real m[1].c;
- Real m[2].c;
- Real m[3].c;
- Real m[4].c;
-equation
- ec[1].a = ec[3].a;
- ec[3].a = m[1].c;
- m[1].c = m[3].c;
- ec[2].a = ec[4].a;
- ec[4].a = m[2].c;
- m[2].c = m[4].c;
-end ExpandableConnectors.Expandable5;
-")})));
-	end Expandable5;
-	
-	
-	model Expandable7
-        expandable connector EC
-        end EC;
-        
-		model A
-			replaceable EC ec;
-		end A;
-        
         connector C = Real;
-		
-		A a1(redeclare EC ec);
+
+        A a1(redeclare EC ec);
         A a2(redeclare EC ec);
         A a3(redeclare EC ec);
         C c1, c2;
@@ -290,10 +207,10 @@ end ExpandableConnectors.Expandable5;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable7",
+            name="Expandable4",
             description="Added support for redeclaring expandable connectors",
             flatModel="
-fclass ExpandableConnectors.Expandable7
+fclass ExpandableConnectors.Expandable4
  Real a1.ec.b;
  Real a2.ec.b;
  Real a3.ec.b;
@@ -304,17 +221,17 @@ equation
  a2.ec.b = a3.ec.b;
  a3.ec.b = c1;
  c1 = c2;
-end ExpandableConnectors.Expandable7;
+end ExpandableConnectors.Expandable4;
 ")})));
-	end Expandable7;
+    end Expandable4;
 
 
-    model Expandable8
+    model Expandable5
         expandable connector EC
         end EC;
-        
+
         connector C = Real;
-        
+
         EC ec1, ec2, ec3;
         C c1 = 1;
         C c2;
@@ -326,10 +243,10 @@ end ExpandableConnectors.Expandable7;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable8",
+            name="Expandable5",
             description="Adding to expandable connectors from var with binding exp",
             flatModel="
-fclass ExpandableConnectors.Expandable8
+fclass ExpandableConnectors.Expandable5
  Real ec1.a;
  Real ec2.a;
  Real ec3.a;
@@ -340,20 +257,20 @@ equation
  c2 = ec1.a;
  ec1.a = ec2.a;
  ec2.a = ec3.a;
-end ExpandableConnectors.Expandable8;
+end ExpandableConnectors.Expandable5;
 ")})));
-	end Expandable8;
+    end Expandable5;
 
 
-    model Expandable8b
+    model Expandable5b
         expandable connector EC
         end EC;
-        
+
         connector C
-			Real x;
-			Real y;
-		end C;
-        
+            Real x;
+            Real y;
+        end C;
+
         EC ec1, ec2, ec3;
         C c1(x = 1, y = 2);
         C c2;
@@ -365,10 +282,10 @@ end ExpandableConnectors.Expandable8;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable8b",
+            name="Expandable5b",
             description="Adding to expandable connectors from composite with binding exps",
             flatModel="
-fclass ExpandableConnectors.Expandable8b
+fclass ExpandableConnectors.Expandable5b
  Real ec1.a.x;
  Real ec1.a.y;
  Real ec2.a.x;
@@ -388,15 +305,15 @@ equation
  c2.y = ec1.a.y;
  ec1.a.y = ec2.a.y;
  ec2.a.y = ec3.a.y;
-end ExpandableConnectors.Expandable8b;
+end ExpandableConnectors.Expandable5b;
 ")})));
-    end Expandable8b;
-	
-	
-    model Expandable9
+    end Expandable5b;
+
+
+    model Expandable6
         expandable connector EC
         end EC;
-        
+
         connector C = Real;
         
         EC ec1, ec2, ec3;
@@ -409,10 +326,10 @@ end ExpandableConnectors.Expandable8b;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable9",
+            name="Expandable6",
             description="Expandable connectors: connect to single element in array",
             flatModel="
-fclass ExpandableConnectors.Expandable9
+fclass ExpandableConnectors.Expandable6
  Real ec1.a;
  Real ec2.a;
  Real ec3.a;
@@ -422,17 +339,17 @@ equation
  c[2] = ec1.a;
  ec1.a = ec2.a;
  ec2.a = ec3.a;
-end ExpandableConnectors.Expandable9;
+end ExpandableConnectors.Expandable6;
 ")})));
-	end Expandable9;
-    
-    
-    model Expandable10
+    end Expandable6;
+
+
+    model Expandable7
         expandable connector EC
         end EC;
-        
+
         connector C = Real;
-        
+
         EC ec1, ec2, ec3;
         C c[4];
     equation
@@ -443,10 +360,10 @@ end ExpandableConnectors.Expandable9;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable10",
+            name="Expandable7",
             description="Expandable connectors: connect to slice",
             flatModel="
-fclass ExpandableConnectors.Expandable10
+fclass ExpandableConnectors.Expandable7
  Real ec1.a[2];
  Real ec2.a[2];
  Real ec3.a[2];
@@ -460,17 +377,17 @@ equation
  c[4] = ec1.a[2];
  ec1.a[2] = ec2.a[2];
  ec2.a[2] = ec3.a[2];
-end ExpandableConnectors.Expandable10;
+end ExpandableConnectors.Expandable7;
 ")})));
-    end Expandable10;
+    end Expandable7;
 
 
-    model Expandable11
+    model Expandable8
         expandable connector EC
         end EC;
-        
+
         connector C = Real;
-        
+
         EC ec1, ec2, ec3;
         C c1, c2, c3, c4;
     equation
@@ -483,10 +400,10 @@ end ExpandableConnectors.Expandable10;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable11",
+            name="Expandable8",
             description="Connecting to cell of array in expandable connector",
             flatModel="
-fclass ExpandableConnectors.Expandable11
+fclass ExpandableConnectors.Expandable8
  Real ec1.a[2];
  Real ec2.a[2];
  Real ec3.a[2];
@@ -503,17 +420,47 @@ equation
  c4 = ec1.a[2];
  ec1.a[2] = ec2.a[2];
  ec2.a[2] = ec3.a[2];
-end ExpandableConnectors.Expandable11;
+end ExpandableConnectors.Expandable8;
 ")})));
-	end Expandable11;
+    end Expandable8;
 
 
-    model Expandable12
+    model Expandable9
+        connector C = Real;
+
+        expandable connector EC
+            C x;
+        end EC;
+
+        EC ec1, ec2;
+        C x = time;
+    equation
+        connect(ec1.x, ec2.x);
+        connect(ec1.x, x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expandable9",
+            description="Connecting two declared members of expandable connectors",
+            flatModel="
+fclass ExpandableConnectors.Expandable9
+ Real ec1.x;
+ Real ec2.x;
+ Real x = time;
+equation
+ ec1.x = ec2.x;
+ ec2.x = x;
+end ExpandableConnectors.Expandable9;
+")})));
+    end Expandable9;
+
+
+    model Expandable10
         expandable connector EC
         end EC;
-        
+
         connector C = Real;
-        
+
         EC ec1, ec2, ec3;
         C c1[5], c2[5];
     equation
@@ -526,10 +473,10 @@ end ExpandableConnectors.Expandable11;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable12",
+            name="Expandable10",
             description="Connecting to slice of array in expandable connector",
             flatModel="
-fclass ExpandableConnectors.Expandable12
+fclass ExpandableConnectors.Expandable10
  Real ec1.a[4];
  Real ec2.a[4];
  Real ec3.a[4];
@@ -552,30 +499,30 @@ equation
  c2[4] = ec1.a[4];
  ec1.a[4] = ec2.a[4];
  ec2.a[4] = ec3.a[4];
-end ExpandableConnectors.Expandable12;
+end ExpandableConnectors.Expandable10;
 ")})));
-	end Expandable12;
+    end Expandable10;
 
 
-    model Expandable13
+    model Expandable11
         expandable connector EC
         end EC;
-        
+
         connector C = Real;
-        
+
         EC ec1, ec2;
-		C c1[2], c2[2,2];
-	equation
+        C c1[2], c2[2,2];
+    equation
         connect(ec1, ec2);
         connect(ec1.a[1,:], c1);
         connect(ec1.b[:,1:2], c2);
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable13",
+            name="Expandable11",
             description="Connecting to slice with colon of array in expandable connector",
             flatModel="
-fclass ExpandableConnectors.Expandable13
+fclass ExpandableConnectors.Expandable11
  Real ec1.a[1,2];
  Real ec1.b[2,2];
  Real ec2.a[1,2];
@@ -595,17 +542,17 @@ equation
  ec1.b[2,1] = ec2.b[2,1];
  c2[2,2] = ec1.b[2,2];
  ec1.b[2,2] = ec2.b[2,2];
-end ExpandableConnectors.Expandable13;
+end ExpandableConnectors.Expandable11;
 ")})));
-    end Expandable13;
-    
-    
-    model Expandable14
+    end Expandable11;
+
+
+    model Expandable12
         expandable connector EC
         end EC;
-        
+
         connector C = Real;
-        
+
         EC ec1;
         C c1[3], c2;
     equation
@@ -614,10 +561,10 @@ end ExpandableConnectors.Expandable13;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable14",
+            name="Expandable12",
             description="Connecting to entire array and to single element",
             flatModel="
-fclass ExpandableConnectors.Expandable14
+fclass ExpandableConnectors.Expandable12
  Real ec1.a[3];
  Real c1[3];
  Real c2;
@@ -626,46 +573,46 @@ equation
  c1[2] = ec1.a[2];
  c1[3] = c2;
  c2 = ec1.a[3];
-end ExpandableConnectors.Expandable14;
+end ExpandableConnectors.Expandable12;
 ")})));
-    end Expandable14;
-    
-    
-    model Expandable15
+    end Expandable12;
+
+
+    model Expandable13
         expandable connector EC
-			Real x;
-			Real y;
+            Real x;
+            Real y;
         end EC;
-        
+
         connector C = Real;
-		
-		EC ec;
-		C c;
-	equation
-		connect(c, ec.x);
+
+        EC ec;
+        C c;
+    equation
+        connect(c, ec.x);
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable15",
+            name="Expandable13",
             description="Expandable connector with members",
             flatModel="
-fclass ExpandableConnectors.Expandable15
+fclass ExpandableConnectors.Expandable13
  Real ec.x;
  Real c;
 equation
  c = ec.x;
-end ExpandableConnectors.Expandable15;
+end ExpandableConnectors.Expandable13;
 ")})));
-    end Expandable15;
-    
-    
-    model Expandable16
+    end Expandable13;
+
+
+    model Expandable14
         expandable connector EC
             Real a[3];
         end EC;
-        
+
         connector C = Real;
-        
+
         EC ec;
         C c[3];
     equation
@@ -673,31 +620,31 @@ end ExpandableConnectors.Expandable15;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable16",
+            name="Expandable14",
             description="Expandable connector with members: array",
             flatModel="
-fclass ExpandableConnectors.Expandable16
+fclass ExpandableConnectors.Expandable14
  Real ec.a[3];
  Real c[3];
 equation
  c[1] = ec.a[1];
  c[2] = ec.a[2];
  c[3] = ec.a[3];
-end ExpandableConnectors.Expandable16;
+end ExpandableConnectors.Expandable14;
 ")})));
-    end Expandable16;
-    
-    
-    model Expandable17
+    end Expandable14;
+
+
+    model Expandable15
         expandable connector EC
             C a;
         end EC;
-        
+
         connector C
             Real x;
             Real y;
         end C;
-        
+
         EC ec;
         C c;
     equation
@@ -705,10 +652,10 @@ end ExpandableConnectors.Expandable16;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable17",
+            name="Expandable15",
             description="Expandable connector with members: composite",
             flatModel="
-fclass ExpandableConnectors.Expandable17
+fclass ExpandableConnectors.Expandable15
  Real ec.a.x;
  Real ec.a.y;
  Real c.x;
@@ -716,43 +663,43 @@ fclass ExpandableConnectors.Expandable17
 equation
  c.x = ec.a.x;
  c.y = ec.a.y;
-end ExpandableConnectors.Expandable17;
+end ExpandableConnectors.Expandable15;
 ")})));
-    end Expandable17;
-    
-    
-    model Expandable18
+    end Expandable15;
+
+
+    model Expandable16
         expandable connector EC
             Real x;
         end EC;
-		
-		connector C = Real;
-        
-		C c;
+
+        connector C = Real;
+
+        C c;
         EC ec;
         Real y;
     equation
-		connect(c, ec.x);
+        connect(c, ec.x);
         y = ec.x;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable18",
+            name="Expandable16",
             description="Using member of expandable connector that is connected to",
             flatModel="
-fclass ExpandableConnectors.Expandable18
+fclass ExpandableConnectors.Expandable16
  Real c;
  Real ec.x;
  Real y;
 equation
  y = ec.x;
  c = ec.x;
-end ExpandableConnectors.Expandable18;
+end ExpandableConnectors.Expandable16;
 ")})));
-    end Expandable18;
-    
-    
-    model Expandable19
+    end Expandable16;
+
+
+    model Expandable17
         expandable connector EC
             Real x;
         end EC;
@@ -767,21 +714,21 @@ end ExpandableConnectors.Expandable18;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable19",
+            name="Expandable17",
             description="Using member of expandable connector that is connected to",
             flatModel="
-fclass ExpandableConnectors.Expandable19
+fclass ExpandableConnectors.Expandable17
  Real c;
  Real ec.x;
  Real y = ec.x;
 equation
  c = ec.x;
-end ExpandableConnectors.Expandable19;
+end ExpandableConnectors.Expandable17;
 ")})));
-    end Expandable19;
-    
-    
-    model Expandable20
+    end Expandable17;
+
+
+    model Expandable18
         expandable connector EC
             Real x;
         end EC;
@@ -800,30 +747,30 @@ end ExpandableConnectors.Expandable19;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable20",
+            name="Expandable18",
             description="Using member of expandable connector that is connected to",
             flatModel="
-fclass ExpandableConnectors.Expandable20
+fclass ExpandableConnectors.Expandable18
  Real c;
  Real ec.x;
  Real a.y = ec.x;
 equation
  c = ec.x;
-end ExpandableConnectors.Expandable20;
+end ExpandableConnectors.Expandable18;
 ")})));
-    end Expandable20;
-    
-    
-    model Expandable21
+    end Expandable18;
+
+
+    model Expandable19
         expandable connector EC1
             Real x;
         end EC1;
-        
+
         expandable connector EC2
         end EC2;
-        
+
         connector C = Real;
-        
+
         C c;
         EC1 ec1a, ec1b;
         EC2 ec2;
@@ -836,10 +783,10 @@ end ExpandableConnectors.Expandable20;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable21",
+            name="Expandable19",
             description="Using member of expandable connector that is connected to",
             flatModel="
-fclass ExpandableConnectors.Expandable21
+fclass ExpandableConnectors.Expandable19
  Real c;
  Real ec1a.x;
  Real ec1b.x;
@@ -850,21 +797,21 @@ equation
  c = ec1a.x;
  ec1a.x = ec1b.x;
  ec1b.x = ec2.x;
-end ExpandableConnectors.Expandable21;
+end ExpandableConnectors.Expandable19;
 ")})));
-    end Expandable21;
-    
-    
-    model Expandable22
+    end Expandable19;
+
+
+    model Expandable20
         expandable connector EC1
             Real x;
         end EC1;
-        
+
         expandable connector EC2
         end EC2;
-        
+
         connector C = Real;
-        
+
         C c;
         EC1 ec1a, ec1b;
         EC2 ec2;
@@ -876,10 +823,10 @@ end ExpandableConnectors.Expandable21;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable22",
+            name="Expandable20",
             description="Using member of expandable connector that is connected to",
             flatModel="
-fclass ExpandableConnectors.Expandable22
+fclass ExpandableConnectors.Expandable20
  Real c;
  Real ec1a.x;
  Real ec1b.x;
@@ -889,25 +836,25 @@ equation
  c = ec1a.x;
  ec1a.x = ec1b.x;
  ec1b.x = ec2.x;
-end ExpandableConnectors.Expandable22;
+end ExpandableConnectors.Expandable20;
 ")})));
-    end Expandable22;
-    
-    
-    model Expandable23
+    end Expandable20;
+
+
+    model Expandable21
         expandable connector EC1
             Real x;
         end EC1;
-		
+
         expandable connector EC2
         end EC2;
-        
+
         model A
             Real y;
         end A;
-        
+
         connector C = Real;
-        
+
         C c;
         EC1 ec1a, ec1b;
         EC2 ec2;
@@ -919,10 +866,10 @@ end ExpandableConnectors.Expandable22;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable23",
+            name="Expandable21",
             description="Using member of expandable connector that is connected to",
             flatModel="
-fclass ExpandableConnectors.Expandable23
+fclass ExpandableConnectors.Expandable21
  Real c;
  Real ec1a.x;
  Real ec1b.x;
@@ -932,17 +879,76 @@ equation
  c = ec1a.x;
  ec1a.x = ec1b.x;
  ec1b.x = ec2.x;
+end ExpandableConnectors.Expandable21;
+")})));
+    end Expandable21;
+
+
+    model Expandable22
+        expandable connector EC
+        end EC;
+
+        connector C = Real;
+
+        EC ec;
+        C c;
+    equation
+        connect(c, ec.x[2]);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expandable22",
+            description="Expandable connectors: Connecting to only some elements of array",
+            flatModel="
+fclass ExpandableConnectors.Expandable22
+ Real ec.x[2];
+ Real c;
+equation
+ c = ec.x[2];
+ ec.x[1] = 0.0;
+end ExpandableConnectors.Expandable22;
+")})));
+    end Expandable22;
+
+
+    model Expandable23
+        expandable connector EC
+            Real x[3];
+        end EC;
+
+        connector C = Real;
+
+        EC ec;
+        C c;
+    equation
+        connect(c, ec.x[2]);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expandable23",
+            description="Expandable connectors: Connecting to only some elements of array",
+            flatModel="
+fclass ExpandableConnectors.Expandable23
+ Real ec.x[3];
+ Real c;
+equation
+ c = ec.x[2];
+ ec.x[1] = 0.0;
+ ec.x[3] = 0.0;
 end ExpandableConnectors.Expandable23;
 ")})));
     end Expandable23;
     
-    
+
     model Expandable24
         expandable connector EC
         end EC;
-        
-        connector C = Real;
-        
+
+        connector C
+            Real x;
+            Real y;
+        end C;
+
         EC ec;
         C c;
     equation
@@ -954,65 +960,6 @@ end ExpandableConnectors.Expandable23;
             description="Expandable connectors: Connecting to only some elements of array",
             flatModel="
 fclass ExpandableConnectors.Expandable24
- Real ec.x[2];
- Real c;
-equation
- c = ec.x[2];
- ec.x[1] = 0.0;
-end ExpandableConnectors.Expandable24;
-")})));
-    end Expandable24;
-	
-	
-	model Expandable25
-        expandable connector EC
-            Real x[3];
-        end EC;
-		
-		connector C = Real;
-		
-		EC ec;
-		C c;
-	equation
-		connect(c, ec.x[2]);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="Expandable25",
-            description="Expandable connectors: Connecting to only some elements of array",
-            flatModel="
-fclass ExpandableConnectors.Expandable25
- Real ec.x[3];
- Real c;
-equation
- c = ec.x[2];
- ec.x[1] = 0.0;
- ec.x[3] = 0.0;
-end ExpandableConnectors.Expandable25;
-")})));
-	end Expandable25;
-    
-
-    model Expandable26
-        expandable connector EC
-        end EC;
-        
-        connector C
-            Real x;
-            Real y;
-        end C;
-	        
-        EC ec;
-        C c;
-    equation
-        connect(c, ec.x[2]);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="Expandable26",
-            description="Expandable connectors: Connecting to only some elements of array",
-            flatModel="
-fclass ExpandableConnectors.Expandable26
  Real ec.x[1].x;
  Real ec.x[1].y;
  Real ec.x[2].x;
@@ -1024,21 +971,21 @@ equation
  c.y = ec.x[2].y;
  ec.x[1].x = 0.0;
  ec.x[1].y = 0.0;
-end ExpandableConnectors.Expandable26;
+end ExpandableConnectors.Expandable24;
 ")})));
-    end Expandable26;
-    
-    
-    model Expandable27
+    end Expandable24;
+
+
+    model Expandable25
         expandable connector EC
             C x[3];
         end EC;
-        
+
         connector C
-			Real x;
-			Real y;
-		end C;
-        
+            Real x;
+            Real y;
+        end C;
+
         EC ec;
         C c;
     equation
@@ -1046,10 +993,10 @@ end ExpandableConnectors.Expandable26;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable27",
+            name="Expandable25",
             description="Expandable connectors: Connecting to only some elements of array",
             flatModel="
-fclass ExpandableConnectors.Expandable27
+fclass ExpandableConnectors.Expandable25
  Real ec.x[1].x;
  Real ec.x[1].y;
  Real ec.x[2].x;
@@ -1065,6 +1012,66 @@ equation
  ec.x[1].y = 0.0;
  ec.x[3].x = 0.0;
  ec.x[3].y = 0.0;
+end ExpandableConnectors.Expandable25;
+")})));
+    end Expandable25;
+
+
+    model Expandable26
+        expandable connector EC1
+            EC2 ec2;
+        end EC1;
+
+        expandable connector EC2
+        end EC2;
+
+        connector C = Real;
+
+        EC1 ec1;
+        C c;
+    equation
+        connect(c, ec1.ec2.a);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expandable26",
+            description="Nested declared expandable connectors: basic test",
+            flatModel="
+fclass ExpandableConnectors.Expandable26
+ Real ec1.ec2.a;
+ Real c;
+equation
+ c = ec1.ec2.a;
+end ExpandableConnectors.Expandable26;
+")})));
+    end Expandable26;
+
+
+    model Expandable27
+        expandable connector EC1
+            C1 c1;
+        end EC1;
+
+        connector C1
+            EC2 ec2;
+            Real x;
+        end C1;
+
+        expandable connector EC2
+        end EC2;
+
+        connector C2 = Real;
+
+        EC1 ec1;
+        C2 c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expandable27",
+            description="Nested declared expandable connectors: not connected to",
+            flatModel="
+fclass ExpandableConnectors.Expandable27
+ Real c2;
 end ExpandableConnectors.Expandable27;
 ")})));
     end Expandable27;
@@ -1072,78 +1079,18 @@ end ExpandableConnectors.Expandable27;
 
     model Expandable28
         expandable connector EC1
-			EC2 ec2;
-        end EC1;
-		
-        expandable connector EC2
-        end EC2;
-		
-		connector C = Real;
-		
-		EC1 ec1;
-        C c;
-	equation
-		connect(c, ec1.ec2.a);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="Expandable28",
-            description="Nested declared expandable connectors: basic test",
-            flatModel="
-fclass ExpandableConnectors.Expandable28
- Real ec1.ec2.a;
- Real c;
-equation
- c = ec1.ec2.a;
-end ExpandableConnectors.Expandable28;
-")})));
-	end Expandable28;
-
-
-    model Expandable30
-        expandable connector EC1
-            C1 c1;
-        end EC1;
-        
-        connector C1
-            EC2 ec2;
-            Real x;
-        end C1;
-        
-        expandable connector EC2
-        end EC2;
-        
-        connector C2 = Real;
-        
-        EC1 ec1;
-        C2 c2;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="Expandable30",
-            description="Nested declared expandable connectors: not connected to",
-            flatModel="
-fclass ExpandableConnectors.Expandable30
- Real c2;
-end ExpandableConnectors.Expandable30;
-")})));
-    end Expandable30;
-
-
-    model Expandable31
-        expandable connector EC1
             EC2 ec2;
         end EC1;
-        
+
         expandable connector EC2
             EC3 ec3;
         end EC2;
-        
+
         expandable connector EC3
         end EC3;
-        
+
         connector C = Real;
-        
+
         EC1 ec1;
         C c;
     equation
@@ -1151,29 +1098,29 @@ end ExpandableConnectors.Expandable30;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable31",
+            name="Expandable28",
             description="Nested declared expandable connectors: three deep",
             flatModel="
-fclass ExpandableConnectors.Expandable31
+fclass ExpandableConnectors.Expandable28
  Real ec1.ec2.ec3.a;
  Real c;
 equation
  c = ec1.ec2.ec3.a;
-end ExpandableConnectors.Expandable31;
+end ExpandableConnectors.Expandable28;
 ")})));
-    end Expandable31;
+    end Expandable28;
 
 
-    model Expandable32
+    model Expandable29
         expandable connector EC1
             EC2 ec2;
         end EC1;
-        
+
         expandable connector EC2
         end EC2;
-        
+
         connector C = Real;
-        
+
         EC1 ec1;
         C c1, c2;
     equation
@@ -1182,10 +1129,10 @@ end ExpandableConnectors.Expandable31;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable32",
+            name="Expandable29",
             description="Nested declared expandable connectors: adding members to both levels",
             flatModel="
-fclass ExpandableConnectors.Expandable32
+fclass ExpandableConnectors.Expandable29
  Real ec1.b;
  Real ec1.ec2.a;
  Real c1;
@@ -1193,21 +1140,21 @@ fclass ExpandableConnectors.Expandable32
 equation
  c1 = ec1.ec2.a;
  c2 = ec1.b;
-end ExpandableConnectors.Expandable32;
+end ExpandableConnectors.Expandable29;
 ")})));
-    end Expandable32;
-	
-	
-    model Expandable33
+    end Expandable29;
+
+
+    model Expandable30
         expandable connector EC1
             EC2 a;
         end EC1;
-        
+
         expandable connector EC2
         end EC2;
-        
+
         connector C = Real;
-        
+
         EC1 ec1_1, ec1_2;
         EC2 ec2_1, ec2_2;
         C c1, c2;
@@ -1220,10 +1167,10 @@ end ExpandableConnectors.Expandable32;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable33",
+            name="Expandable30",
             description="Connect expandable connectors containing other expandable connectors",
             flatModel="
-fclass ExpandableConnectors.Expandable33
+fclass ExpandableConnectors.Expandable30
  Real ec1_1.a.b;
  Real ec1_1.a.c;
  Real ec1_2.a.b;
@@ -1243,21 +1190,21 @@ equation
  ec1_1.a.c = ec1_2.a.c;
  ec1_2.a.c = ec2_1.c;
  ec2_1.c = ec2_2.c;
-end ExpandableConnectors.Expandable33;
+end ExpandableConnectors.Expandable30;
 ")})));
-    end Expandable33;
+    end Expandable30;
 
 
-    model Expandable34
+    model Expandable31
         expandable connector EC
         end EC;
-        
+
         connector C = Real;
-        
+
         model A
             EC ec;
         end A;
-        
+
         A a;
         EC ec;
         C c1[2], c2[2];
@@ -1268,10 +1215,10 @@ end ExpandableConnectors.Expandable33;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable34",
+            name="Expandable31",
             description="Make sure that extra equations aren't added for combinations of inner/outer connections",
             flatModel="
-fclass ExpandableConnectors.Expandable34
+fclass ExpandableConnectors.Expandable31
  Real a.ec.b1[2];
  Real a.ec.b2[2];
  Real ec.b1[2];
@@ -1287,47 +1234,16 @@ equation
  c2[1] = ec.b2[1];
  a.ec.b2[2] = c2[2];
  c2[2] = ec.b2[2];
-end ExpandableConnectors.Expandable34;
+end ExpandableConnectors.Expandable31;
 ")})));
-    end Expandable34;
+    end Expandable31;
 
-
-    model Expandable35
-        connector C = Real;
-        
-        expandable connector EC
-            C x;
-        end EC;
-        
-        EC ec1, ec2;
-        C x = time;
-    equation
-        connect(ec1.x, ec2.x);
-        connect(ec1.x, x);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="Expandable35",
-            description="Connecting two declared members of expandable connectors",
-            flatModel="
-fclass ExpandableConnectors.Expandable35
- Real ec1.x;
- Real ec2.x;
- Real x = time;
-equation
- ec1.x = ec2.x;
- ec2.x = x;
-end ExpandableConnectors.Expandable35;
-")})));
-    end Expandable35;
-
-
-    model Expandable36
+    model Expandable32
         connector C = Real[2];
-        
+
         expandable connector EC
         end EC;
-        
+
         EC ec1, ec2;
         C x = { time, 2 * time };
     equation
@@ -1336,13 +1252,13 @@ end ExpandableConnectors.Expandable35;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable36",
+            name="Expandable32",
             description="Array in nested expandable connector",
             flatModel="
-fclass ExpandableConnectors.Expandable36
- ExpandableConnectors.Expandable36.C ec1.x[2];
- ExpandableConnectors.Expandable36.C ec2.ec.x[2];
- ExpandableConnectors.Expandable36.C x[2] = {time, 2 * time};
+fclass ExpandableConnectors.Expandable32
+ ExpandableConnectors.Expandable32.C ec1.x[2];
+ ExpandableConnectors.Expandable32.C ec2.ec.x[2];
+ ExpandableConnectors.Expandable32.C x[2] = {time, 2 * time};
 equation
  ec1.x[1] = ec2.ec.x[1];
  ec2.ec.x[1] = x[1];
@@ -1350,17 +1266,19 @@ equation
  ec2.ec.x[2] = x[2];
 
 public
- type ExpandableConnectors.Expandable36.C = Real;
-end ExpandableConnectors.Expandable36;
+ type ExpandableConnectors.Expandable32.C = Real;
+end ExpandableConnectors.Expandable32;
 ")})));
-    end Expandable36;
+    end Expandable32;
 
-    model Expandable37
+
+    model Expandable33
         expandable connector EC
         end EC;
         connector C = Real;
         EC ec1;
         C c1;
+
     equation
         connect(c1, ec1.a) annotation (Line(
           points={{-22,2},{-43,2}},
@@ -1370,1807 +1288,18 @@ end ExpandableConnectors.Expandable36;
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="Expandable37",
+            name="Expandable33",
             description="Test expandable connector and connect equation with annotation, caused crash bug",
             flatModel="
-fclass ExpandableConnectors.Expandable37
+fclass ExpandableConnectors.Expandable33
  Real ec1.a;
  Real c1;
 equation
  c1 = time;
  c1 = ec1.a;
-end ExpandableConnectors.Expandable37;
+end ExpandableConnectors.Expandable33;
 ")})));
-    end Expandable37;
-
-    
-    
-    model ExpandableErr1
-        expandable connector EC
-        end EC;
-        
-        connector C = Real;
-        
-        EC ec1;
-        C c[3];
-    equation
-        connect(c, ec1.a[1:2]);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr1",
-            description="Exandable connectors: local size error in connection, length differs",
-            errorMessage="
-1 errors found:
-
-Error at line 10, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Can not match size of connector to access introducing member in external connector
-")})));
-    end ExpandableErr1;
-    
-    
-    model ExpandableErr2
-        expandable connector EC
-        end EC;
-        
-        connector C = Real;
-        
-        EC ec1;
-        C c[3];
-    equation
-        connect(c, ec1.a[:,1:2]);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr2",
-            description="Exandable connectors: local size error in connection, number of dimensions differ",
-            errorMessage="
-1 errors found:
-
-Error at line 10, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Can not match size of connector to access introducing member in external connector
-")})));
-    end ExpandableErr2;
-    
-    
-    model ExpandableErr3
-        expandable connector EC
-        end EC;
-        
-        connector C = Real;
-        
-        EC ec1;
-        C c[3,3];
-    equation
-        connect(c, ec1.a[:]);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr3",
-            description="Exandable connectors: local size error in connection, number of dimensions differ",
-            errorMessage="
-1 errors found:
-
-Error at line 10, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Can not match size of connector to access introducing member in external connector
-")})));
-    end ExpandableErr3;
-    
-    
-    model ExpandableErr3b
-        expandable connector EC
-        end EC;
-        
-        connector C = Real;
-        
-        EC ec1;
-        C c[3,3];
-    equation
-        connect(c, ec1.a[:,1]);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr3b",
-            description="Exandable connectors: local size error in connection, number of dimensions differ",
-            errorMessage="
-1 errors found:
-
-Error at line 10, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Can not match size of connector to access introducing member in external connector
-")})));
-    end ExpandableErr3b;
-    
-    
-    model ExpandableErr4
-        expandable connector EC
-        end EC;
-        
-        connector C = Real;
-        
-        EC ec1;
-        C c1[3], c2;
-    equation
-        connect(c1, ec1.a);
-        connect(c2, ec1.a[4]);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr4",
-            description="Exandable connectors: size mismatch between connections, access to specific element > fixed size",
-            errorMessage="
-1 errors found:
-
-Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Size introduced for external connector member does not match other connections to same name in connection set or component declared in connector
-")})));
-    end ExpandableErr4;
-    
-    
-    model ExpandableErr5
-        expandable connector EC
-        end EC;
-        
-        connector C = Real;
-        
-        EC ec1;
-        C c1[3], c2;
-    equation
-        connect(c2, ec1.a[4]);
-        connect(c1, ec1.a);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr5",
-            description="Exandable connectors: size mismatch between connections, access to specific element > fixed size",
-            errorMessage="
-1 errors found:
-
-Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Size introduced for external connector member does not match other connections to same name in connection set or component declared in connector
-")})));
-    end ExpandableErr5;
-    
-    
-    model ExpandableErr6
-        expandable connector EC
-        end EC;
-        
-        connector C = Real;
-        
-        EC ec1;
-        C c1[3], c2;
-    equation
-        connect(c1, ec1.a);
-        connect(c2, ec1.a[3,1]);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr6",
-            description="Exandable connectors: size mismatch between connections, number of dimensions differ",
-            errorMessage="
-1 errors found:
-
-Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Size introduced for external connector member does not match other connections to same name in connection set or component declared in connector
-")})));
-    end ExpandableErr6;
-    
-    
-    model ExpandableErr7
-        expandable connector EC
-        end EC;
-        
-        connector C = Real;
-        
-        EC ec1;
-        C c1[3], c2;
-    equation
-        connect(c2, ec1.a[3,1]);
-        connect(c1, ec1.a);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr7",
-            description="Exandable connectors: size mismatch between connections, number of dimensions differ",
-            errorMessage="
-1 errors found:
-
-Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Size introduced for external connector member does not match other connections to same name in connection set or component declared in connector
-")})));
-    end ExpandableErr7;
-    
-    
-    model ExpandableErr8
-        expandable connector EC
-        end EC;
-        
-        connector C = Real;
-        
-        EC ec1;
-        C c1[3], c2[4];
-    equation
-        connect(c1, ec1.a);
-        connect(c2, ec1.a);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr8",
-            description="Exandable connectors: size mismatch between connections, different fixed sizes",
-            errorMessage="
-1 errors found:
-
-Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Size introduced for external connector member does not match other connections to same name in connection set or component declared in connector
-")})));
-    end ExpandableErr8;
-	
-	
-	model ExpandableErr9
-        expandable connector EC
-        end EC;
-        
-        connector C1
-            Real x;
-        end C1;
-        
-        connector C2
-            Real y;
-        end C2;
-		
-        EC ec;
-        C1 c1;
-		C2 c2;
-	equation
-        connect(c1, ec.a);
-        connect(c2, ec.a);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr9",
-            description="",
-            errorMessage="
-1 errors found:
-
-Error at line 18, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Type of component introduced to external connector does not match other connections to same name in connection set or component declared in connector
-")})));
-	end ExpandableErr9;
-    
-    
-    model ExpandableErr10
-        expandable connector EC
-        end EC;
-        
-        connector C1 = Real;
-        
-        connector C2 = Boolean;
-        
-        EC ec;
-        C1 c1;
-        C2 c2;
-    equation
-        connect(c1, ec.a[1]);
-        connect(c2, ec.a[2]);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr10",
-            description="",
-            errorMessage="
-1 errors found:
-
-Error at line 14, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Type of component introduced to external connector does not match other connections to same name in connection set or component declared in connector
-")})));
-    end ExpandableErr10;
-    
-    
-    model ExpandableErr11
-        expandable connector EC
-            Real a;
-        end EC;
-        
-        connector C = Boolean;
-        
-        EC ec;
-        C c;
-    equation
-        connect(c, ec.a);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr11",
-            description="",
-            errorMessage="
-1 errors found:
-
-Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Type of component introduced to external connector does not match other connections to same name in connection set or component declared in connector
-")})));
-    end ExpandableErr11;
-    
-    
-    model ExpandableErr12
-        expandable connector EC
-            Real a[3];
-        end EC;
-        
-        connector C = Real;
-        
-        EC ec;
-        C c[3];
-    equation
-        connect(c[1:2], ec.a);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr12",
-            description="",
-            errorMessage="
-1 errors found:
-
-Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Size introduced for external connector member does not match other connections to same name in connection set or component declared in connector
-")})));
-    end ExpandableErr12;
-    
-    
-    model ExpandableErr13
-        expandable connector EC1
-            Real a;
-        end EC1;
-        
-        expandable connector EC2
-        end EC2;
-        
-        connector C = Boolean;
-        
-        EC1 ec1;
-        EC2 ec2;
-        C c;
-    equation
-        connect(ec1, ec2);
-        connect(c, ec2.a);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr13",
-            description="",
-            errorMessage="
-1 errors found:
-
-Error at line 16, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Type of component introduced to external connector does not match other connections to same name in connection set or component declared in connector
-")})));
-    end ExpandableErr13;
-    
-    
-    model ExpandableErr14
-        expandable connector EC1
-            Real a;
-        end EC1;
-        
-        expandable connector EC2
-            Boolean a;
-        end EC2;
-        
-        EC1 ec1;
-        EC2 ec2;
-    equation
-        connect(ec1, ec2);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr14",
-            description="",
-            errorMessage="
-1 errors found:
-
-Error at line 13, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo', TYPE_MISMATCH_IN_CONNECT:
-  Types of connected components do not match
-")})));
-    end ExpandableErr14;
-    
-    
-    model ExpandableErr15
-        expandable connector EC1
-            Real a[3];
-        end EC1;
-        
-        expandable connector EC2
-            Real a[4];
-        end EC2;
-        
-        EC1 ec1;
-        EC2 ec2;
-    equation
-        connect(ec1, ec2);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr15",
-            description="",
-            errorMessage="
-1 errors found:
-
-Error at line 13, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo', TYPE_MISMATCH_IN_CONNECT:
-  Types of connected components do not match
-")})));
-    end ExpandableErr15;
-    
-    
-    model ExpandableErr16
-        expandable connector EC1
-            Real a;
-        end EC1;
-        
-        expandable connector EC2
-        end EC2;
-        
-        expandable connector EC3
-            Boolean a;
-        end EC3;
-        
-        connector C = Real;
-        
-        EC1 ec1;
-        EC2 ec2;
-        EC3 ec3;
-		C c;
-    equation
-        connect(ec1, ec2);
-        connect(ec2, ec3);
-		connect(c, ec1.a);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr16",
-            description="",
-            errorMessage="
-1 errors found:
-
-Error at line 10, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Type of declared member of expandable connector does not match declarations in other expandable connectors in same connection set
-")})));
-    end ExpandableErr16;
-    
-    
-    model ExpandableErr17
-        expandable connector EC1
-            Real a[3];
-        end EC1;
-        
-        expandable connector EC2
-        end EC2;
-        
-        expandable connector EC3
-            Real a[4];
-        end EC3;
-        
-        connector C = Real;
-        
-        EC1 ec1;
-        EC2 ec2;
-        EC3 ec3;
-        C c[3];
-    equation
-        connect(ec1, ec2);
-        connect(ec2, ec3);
-        connect(c, ec1.a);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr17",
-            description="",
-            errorMessage="
-1 errors found:
-
-Error at line 10, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Size of declared member of expandable connector does not match declarations in other expandable connectors in same connection set
-")})));
-    end ExpandableErr17;
-	
-	
-	model ExpandableErr18
-		expandable connector EC
-			Real x;
-		end EC;
-		
-		connector C
-			Real x;
-		end C;
-		
-		EC ec;
-		C c;
-	equation
-		connect(ec, c);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr18",
-            description="",
-            errorMessage="
-1 errors found:
-
-Error at line 13, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo', CONNECT_EXPANDABLE_AND_NON_EXPANDABLE_TYPE:
-  Connecting an expandable connector to a non-expandable connector is not allowed
-")})));
-	end ExpandableErr18;
-    
-    
-    model ExpandableErr19
-        expandable connector EC
-            Real x;
-        end EC;
-        
-        EC ec;
-        Real y;
-    equation
-        y = ec.x;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr19",
-            description="Using member of expandable connector that is not connected to",
-            errorMessage="
-1 errors found:
-
-Error at line 9, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Using member of expandable connector is only allowed if the member is connected to in the connection set
-")})));
-    end ExpandableErr19;
-    
-    
-    model ExpandableErr20
-        expandable connector EC
-            Real x;
-        end EC;
-        
-        EC ec;
-        Real y = ec.x;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr20",
-            description="Using member of expandable connector that is not connected to",
-            errorMessage="
-1 errors found:
-
-Error at line 7, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Using member of expandable connector is only allowed if the member is connected to in the connection set
-")})));
-    end ExpandableErr20;
-    
-    
-    model ExpandableErr21
-        expandable connector EC
-            Real x;
-        end EC;
-		
-		model A
-			Real y;
-		end A;
-        
-        EC ec;
-        A a(y = ec.x);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr21",
-            description="Using member of expandable connector that is not connected to",
-            errorMessage="
-1 errors found:
-
-Error at line 11, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Using member of expandable connector is only allowed if the member is connected to in the connection set
-")})));
-    end ExpandableErr21;
-
-model ExpandableErr22
-    connector A
-        Real x;
-    end A;
-    
-    connector B
-        Real x;
-        Real y;
-    end B;
-    
-    expandable connector C
-    end C;
-    
-    C c1, c2;
-    A a;
-    B b;
-equation
-    connect(a, c1.d);
-    connect(b, c2.d);
-    connect(c1, c2);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExpandableErr22",
-            description="",
-            errorMessage="
-1 errors found:
-
-Error at line 19, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Type of component introduced to external connector does not match other connections to same name in connection set or component declared in connector
-")})));
-end ExpandableErr22;
-
-
-    model ExpandableCompliance3
-        expandable connector EC
-        end EC;
-        
-		connector C = Real;
-		
-        EC ec;
-		C c;
-	equation
-        connect(c, ec.a1.a2);
-		connect(ec.b1.b2, c);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="ExpandableCompliance3",
-            description="Nested expandable connectors: connecting with more than one unknown name",
-            errorMessage="
-2 errors found:
-
-Compliance error at line 10, column 20, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Nested expandable connectors where some of the intermediate expandable connectors are neither connected to or declared are not supported
-
-Compliance error at line 11, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Nested expandable connectors where some of the intermediate expandable connectors are neither connected to or declared are not supported
-")})));
-    end ExpandableCompliance3;
-
-
-    model ExpandableCompliance4
-        expandable connector EC
-        end EC;
-        
-        connector C
-            EC ec;
-        end C;
-        
-        EC ec;
-        C c;
-    equation
-        connect(c, ec.c);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="ExpandableCompliance4",
-            description="Adding normal connector containing expandable connector to expandable connector",
-            errorMessage="
-1 errors found:
-
-Compliance error at line 12, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Expandable connectors containing a non-expandable connector component, that in turn contains an expandable connector, is not supported
-")})));
-    end ExpandableCompliance4;
-
-
-    model NestedExpandable1
-        expandable connector EC
-        end EC;
-    
-        connector C = Real;
-    
-        EC ec1;
-        EC ec2;
-        C c;
-    equation
-        connect(ec1.sub1, ec2);
-        connect(ec1.sub1.c, c);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="NestedExpandable1",
-            description="Adding expandable connector member to expandable connector, member of parent first",
-            flatModel="
-fclass ExpandableConnectors.NestedExpandable1
- Real ec1.sub1.c;
- Real ec2.c;
- Real c;
-equation
- c = ec1.sub1.c;
- ec1.sub1.c = ec2.c;
-end ExpandableConnectors.NestedExpandable1;
-")})));
-    end NestedExpandable1;
-
-
-    model NestedExpandable2
-        expandable connector EC
-        end EC;
-    
-        connector C = Real;
-    
-        EC ec1;
-        EC ec2;
-        C c;
-    equation
-        connect(ec1.sub1.c, c);
-        connect(ec1.sub1, ec2);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="NestedExpandable2",
-            description="Adding expandable connector member to expandable connector, member of child first",
-            flatModel="
-fclass ExpandableConnectors.NestedExpandable2
- Real ec1.sub1.c;
- Real ec2.c;
- Real c;
-equation
- c = ec1.sub1.c;
- ec1.sub1.c = ec2.c;
-end ExpandableConnectors.NestedExpandable2;
-")})));
-    end NestedExpandable2;
-
-
-    model NestedExpandable3
-        expandable connector EC
-        end EC;
-        
-        connector C = Real;
-        
-        EC ec1_1, ec1_2;
-        EC ec2_1, ec2_2;
-        C c1, c2;
-    equation
-        connect(ec1_1, ec1_2);
-        connect(ec1_1.a, ec2_1);
-        connect(ec1_2.a, ec2_2);
-        connect(ec1_1.a.b, c1);
-        connect(ec1_2.a.c, c2);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="NestedExpandable3",
-            description="Adding expandable connector member to expandable connector, more complicated test",
-            flatModel="
-fclass ExpandableConnectors.NestedExpandable3
- Real ec1_1.a.b;
- Real ec1_1.a.c;
- Real ec1_2.a.b;
- Real ec1_2.a.c;
- Real ec2_1.b;
- Real ec2_1.c;
- Real ec2_2.b;
- Real ec2_2.c;
- Real c1;
- Real c2;
-equation
- c1 = ec1_1.a.b;
- ec1_1.a.b = ec1_2.a.b;
- ec1_2.a.b = ec2_1.b;
- ec2_1.b = ec2_2.b;
- c2 = ec1_1.a.c;
- ec1_1.a.c = ec1_2.a.c;
- ec1_2.a.c = ec2_1.c;
- ec2_1.c = ec2_2.c;
-end ExpandableConnectors.NestedExpandable3;
-")})));
-    end NestedExpandable3;
-
-
-    model NestedExpandable4
-        expandable connector EC
-        end EC;
-        
-        connector C = Real;
-        
-        EC ec1, ec2, ec3;
-        C c;
-    equation
-        connect(ec2, ec1.ec2);
-        connect(ec3, ec1.ec2.ec3);
-        connect(c, ec1.ec2.ec3.a);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="NestedExpandable4",
-            description="Adding expandable connector member to expandable connector, several levels",
-            flatModel="
-fclass ExpandableConnectors.NestedExpandable4
- Real ec1.ec2.ec3.a;
- Real ec2.ec3.a;
- Real ec3.a;
- Real c;
-equation
- c = ec1.ec2.ec3.a;
- ec1.ec2.ec3.a = ec2.ec3.a;
- ec2.ec3.a = ec3.a;
-end ExpandableConnectors.NestedExpandable4;
-")})));
-    end NestedExpandable4;
-
-
-    model NestedExpandable5
-        expandable connector EC
-        end EC;
-        
-        connector C = Real;
-        
-        EC ec1, ec2, ec3;
-        C c;
-    equation
-        connect(c, ec1.ec2.ec3.a);
-        connect(ec3, ec1.ec2.ec3);
-        connect(ec2, ec1.ec2);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="NestedExpandable5",
-            description="Adding expandable connector member to expandable connector, several levels, members first",
-            flatModel="
-fclass ExpandableConnectors.NestedExpandable5
- Real ec1.ec2.ec3.a;
- Real ec2.ec3.a;
- Real ec3.a;
- Real c;
-equation
- c = ec1.ec2.ec3.a;
- ec1.ec2.ec3.a = ec2.ec3.a;
- ec2.ec3.a = ec3.a;
-end ExpandableConnectors.NestedExpandable5;
-")})));
-    end NestedExpandable5;
-
-
-    model NestedExpandable6
-        expandable connector EC
-        end EC;
-        
-        connector C1
-            C2 a;
-        end C1;
-    
-        connector C2 = Real;
-    
-        EC ec;
-        C1 c1;
-        C2 c2;
-    equation
-        connect(ec.sub1, c1);
-        connect(ec.sub1.a, c2);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="NestedExpandable6",
-            description="Connecting to existing member of normal connector in expandable connector",
-            flatModel="
-fclass ExpandableConnectors.NestedExpandable6
- Real ec.sub1.a;
- Real c1.a;
- Real c2;
-equation
- c1.a = c2;
- c2 = ec.sub1.a;
-end ExpandableConnectors.NestedExpandable6;
-")})));
-    end NestedExpandable6;
-
-
-    model NestedExpandable7
-        expandable connector EC
-        end EC;
-    
-        connector C
-            Real p;
-            flow Real f;
-        end C;
-    
-        EC ec1, ec2;
-        C c1[2], c2[2];
-    equation
-        connect(ec1, ec2);
-        connect(ec1.ec.c1, c1);
-        connect(ec2.ec.c2, c2);
-        connect(ec1.ec, ec2);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="NestedExpandable7",
-            description="Check that recursive strucures are detected while elaborating expandable connectors",
-            errorMessage="
-1 errors found:
-
-Error at line 16, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Connect introduces a copy of ec2 into a connector that is (possibly indirectly) connected back to ec2. This creates an infinite recursive structure, and is not allowed:
-    connect(ec1.ec, ec2)
-")})));
-    end NestedExpandable7;
-
-
-    model NestedExpandable8
-        expandable connector EC
-        end EC;
-    
-        EC ec1, ec2, ec3;
-    equation
-        connect(ec1.ec, ec2);
-        connect(ec2.ec, ec3);
-        connect(ec1, ec3);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="NestedExpandable8",
-            description="Check that recursive strucures are detected while elaborating expandable connectors",
-            errorMessage="
-2 errors found:
-
-Error at line 7, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Connect introduces a copy of ec2 into a connector that is (possibly indirectly) connected back to ec2. This creates an infinite recursive structure, and is not allowed:
-    connect(ec1.ec, ec2)
-
-Error at line 8, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Connect introduces a copy of ec3 into a connector that is (possibly indirectly) connected back to ec3. This creates an infinite recursive structure, and is not allowed:
-    connect(ec2.ec, ec3)
-")})));
-    end NestedExpandable8;
-
-
-    model NestedExpandable9
-        expandable connector EC
-        end EC;
-        
-        connector C = Real;
-    
-        EC ec1, ec2, ec3;
-        C c1, c2, c3;
-    equation
-        connect(c1, ec1.ec.c1);
-        connect(c2, ec2.ec.c2);
-        connect(c3, ec1.c3);
-        connect(ec1.ec, ec3);
-        connect(ec2.ec, ec3);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="NestedExpandable9",
-            description="Same expandable connector added as nested connector in two separate expandable connectors",
-            flatModel="
-fclass ExpandableConnectors.NestedExpandable9
- Real ec1.c3;
- Real ec1.ec.c1;
- Real ec1.ec.c2;
- Real ec2.ec.c1;
- Real ec2.ec.c2;
- Real ec3.c1;
- Real ec3.c2;
- Real c1;
- Real c2;
- Real c3;
-equation
- c1 = ec1.ec.c1;
- ec1.ec.c1 = ec2.ec.c1;
- ec2.ec.c1 = ec3.c1;
- c2 = ec1.ec.c2;
- ec1.ec.c2 = ec2.ec.c2;
- ec2.ec.c2 = ec3.c2;
- c3 = ec1.c3;
-end ExpandableConnectors.NestedExpandable9;
-")})));
-    end NestedExpandable9;
-
-
-    model NestedExpandable10
-        expandable connector EC
-        end EC;
-        
-        connector C = Real;
-    
-        EC ec1, ec2, ec3, ec4, ec5;
-        C c1, c2, c3;
-    equation
-        connect(c1, ec1.ec.c1);
-        connect(c2, ec2.ec.c2);
-        connect(c3, ec1.c3);
-        connect(ec1.ec, ec3);
-        connect(ec2.ec, ec4);
-        connect(ec1, ec5);
-        connect(ec5, ec2);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="NestedExpandable10",
-            description="",
-            flatModel="
-fclass ExpandableConnectors.NestedExpandable10
- Real ec1.c3;
- Real ec1.ec.c1;
- Real ec1.ec.c2;
- Real ec2.c3;
- Real ec2.ec.c1;
- Real ec2.ec.c2;
- Real ec3.c1;
- Real ec3.c2;
- Real ec4.c1;
- Real ec4.c2;
- Real ec5.c3;
- Real ec5.ec.c1;
- Real ec5.ec.c2;
- Real c1;
- Real c2;
- Real c3;
-equation
- c1 = ec1.ec.c1;
- ec1.ec.c1 = ec2.ec.c1;
- ec2.ec.c1 = ec3.c1;
- ec3.c1 = ec4.c1;
- ec4.c1 = ec5.ec.c1;
- c3 = ec1.c3;
- ec1.c3 = ec2.c3;
- ec2.c3 = ec5.c3;
- c2 = ec1.ec.c2;
- ec1.ec.c2 = ec2.ec.c2;
- ec2.ec.c2 = ec3.c2;
- ec3.c2 = ec4.c2;
- ec4.c2 = ec5.ec.c2;
-end ExpandableConnectors.NestedExpandable10;
-")})));
-    end NestedExpandable10;
-
-
-    model NestedExpandable11
-        expandable connector EC1
-            EC2[1] ec2;
-        end EC1;
-        
-        expandable connector EC2
-        end EC2;
-        
-        connector C = Real;
-        
-        EC1 ec1;
-        model M
-            EC2 ec2;
-        end M;
-        C c;
-        M[1] m;
-    equation
-        connect(c, ec1.ec2[1].a);
-        for i in 1:1 loop
-            connect(ec1.ec2[i], m[i].ec2);
-        end for;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="NestedExpandable11",
-            description="Nested with for index on last part",
-            flatModel="
-fclass ExpandableConnectors.NestedExpandable11
- Real ec1.ec2[1].a;
- Real c;
- Real m[1].ec2.a;
-equation
- c = ec1.ec2[1].a;
- ec1.ec2[1].a = m[1].ec2.a;
-end ExpandableConnectors.NestedExpandable11;
-")})));
-    end NestedExpandable11;
-
-    model NestedExpandableError1
-        expandable connector EC
-        end EC;
-        
-        connector C1
-            C2 c2;
-        end C1;
-    
-        connector C2 = Real;
-    
-        EC ec;
-        C1 c1;
-        C2 c2;
-    equation
-        connect(ec.c1, c1);
-        connect(ec.c1.a, c2);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="NestedExpandableError1",
-            description="Connecting to non-existing member of non-expandable connector in expandable connector",
-            errorMessage="
-1 errors found:
-
-Error at line 16, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Can not connect to non-existing member of non-expandable connector in expandable connector
-")})));
-    end NestedExpandableError1;
-
-
-    model NestedExpandableError2
-        expandable connector EC
-        end EC;
-        
-        connector C1
-            C2 c2;
-        end C1;
-        
-        connector C2
-            C3 c3;
-        end C2;
-    
-        connector C3 = Real;
-    
-        EC ec;
-        C1 c1;
-        C3 c3;
-    equation
-        connect(ec.c1, c1);
-        connect(ec.c1.c2.a, c3);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="NestedExpandableError2",
-            description="Connecting to non-existing member of nested non-expandable connector in expandable connector",
-            errorMessage="
-1 errors found:
-
-Error at line 20, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Can not connect to non-existing member of non-expandable connector in expandable connector
-")})));
-    end NestedExpandableError2;
-
-model ArrayIndexationType1
-    type E = enumeration(a,b,c);
-
-    expandable connector EC
-        Real x[3];
-        Real y[Boolean];
-        Real z[E];
-    end EC;
-        
-    connector A = Real;
-    
-    EC ec;
-    A a[3];
-equation
-    connect(a[1], ec.x[1]);
-    connect(a[2], ec.y[true]);
-    connect(a[3], ec.z[E.a]);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ArrayIndexationType1",
-            description="Indexing with enums and bools in expandable connector, declared.",
-            flatModel="
-fclass ExpandableConnectors.ArrayIndexationType1
- Real ec.x[3];
- Real ec.y[2];
- Real ec.z[3];
- Real a[3];
-equation
- a[1] = ec.x[1];
- a[2] = ec.y[2];
- a[3] = ec.z[1];
- ec.x[2] = 0.0;
- ec.x[3] = 0.0;
- ec.y[1] = 0.0;
- ec.z[2] = 0.0;
- ec.z[3] = 0.0;
-
-public
- type ExpandableConnectors.ArrayIndexationType1.E = enumeration(a, b, c);
-
-end ExpandableConnectors.ArrayIndexationType1;
-")})));
-end ArrayIndexationType1;
-
-model ArrayIndexationType2
-    type E = enumeration(a,b,c);
-
-    expandable connector EC
-        Real x[3];
-        Real y[Boolean];
-        Real z[E];
-    end EC;
-        
-    connector A = Real;
-    
-    EC ec;
-    A a[6];
-equation
-    connect(a[1], ec.x[E.a]);
-    connect(a[2], ec.x[true]);
-    connect(a[3], ec.y[E.a]);
-    connect(a[4], ec.y[1]);
-    connect(a[5], ec.z[1]);
-    connect(a[6], ec.z[true]);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ArrayIndexationType2",
-            description="Indexing with enums and bools in expandable connector, declared.",
-            errorMessage="
-6 errors found:
-
-Error at line 15, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Expected array index of type 'Integer' found 'ExpandableConnectors.ArrayIndexationType2.E'
-
-Error at line 16, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Expected array index of type 'Integer' found 'Boolean'
-
-Error at line 17, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Expected array index of type 'Boolean' found 'ExpandableConnectors.ArrayIndexationType2.E'
-
-Error at line 18, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Expected array index of type 'Boolean' found 'Integer'
-
-Error at line 19, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Expected array index of type 'ExpandableConnectors.ArrayIndexationType2.E' found 'Integer'
-
-Error at line 20, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Expected array index of type 'ExpandableConnectors.ArrayIndexationType2.E' found 'Boolean'
-")})));
-end ArrayIndexationType2;
-
-model ArrayIndexationType3
-    type E = enumeration(a,b,c);
-
-    expandable connector EC
-    end EC;
-        
-    connector A = Real;
-    
-    EC ec;
-    A a[6];
-equation
-    connect(a[1], ec.x[1]);
-    connect(a[2], ec.y[true]);
-    connect(a[3], ec.z[E.a]);
-    connect(a[4], ec.x[3]);
-    connect(a[5], ec.y[false]);
-    connect(a[6], ec.z[E.b]);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ArrayIndexationType3",
-            description="Indexing with enums and bools in expandable connector, undeclared.",
-            flatModel="
-fclass ExpandableConnectors.ArrayIndexationType3
- Real ec.x[3];
- Real ec.y[2];
- Real ec.z[2];
- Real a[6];
-equation
- a[1] = ec.x[1];
- a[2] = ec.y[2];
- a[3] = ec.z[1];
- a[4] = ec.x[3];
- a[5] = ec.y[1];
- a[6] = ec.z[2];
- ec.x[2] = 0.0;
-
-public
- type ExpandableConnectors.ArrayIndexationType3.E = enumeration(a, b, c);
-
-end ExpandableConnectors.ArrayIndexationType3;
-")})));
-end ArrayIndexationType3;
-
-model ArrayIndexationType4
-    type E = enumeration(a,b,c);
-
-    expandable connector EC
-    end EC;
-        
-    connector A = Real;
-    
-    EC ec;
-    A a[6];
-equation
-    connect(a[1], ec.x[E.a]);
-    connect(a[2], ec.x[true]);
-    connect(a[3], ec.y[E.a]);
-    connect(a[4], ec.y[1]);
-    connect(a[5], ec.z[1]);
-    connect(a[6], ec.z[true]);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ArrayIndexationType4",
-            description="Indexing with enums and bools in expandable connector, undeclared.",
-            errorMessage="
-3 errors found:
-
-Error at line 13, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Array index type of component introduced to external connector does not match other connections to same name in connection set
-
-Error at line 15, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Array index type of component introduced to external connector does not match other connections to same name in connection set
-
-Error at line 17, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
-  Array index type of component introduced to external connector does not match other connections to same name in connection set
-")})));
-end ArrayIndexationType4;
-
-
-model DuplicatedExpandable1
-    expandable connector EC
-    end EC;
-    
-    connector C = Real;
-    
-    model A
-        extends D;
-        EC ec;
-        B b;
-    equation
-        connect(b.c, ec.c);
-    end A;
-    
-    model B
-        C c = time;
-    end B;
-    
-    model D
-        EC ec;
-    end D;
-    
-    A a;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="DuplicatedExpandable1",
-            description="Expandable connector with same name declared in both instantiated class and inherited class",
-            flatModel="
-fclass ExpandableConnectors.DuplicatedExpandable1
- Real a.b.c = time;
- Real a.ec.c;
-equation
- a.b.c = a.ec.c;
-end ExpandableConnectors.DuplicatedExpandable1;
-")})));
-end DuplicatedExpandable1;
-
-
-model DuplicatedExpandable2
-    expandable connector EC
-    end EC;
-    
-    connector C = Real;
-    
-    model A
-        extends D;
-        EC ec;
-        B b;
-    equation
-        connect(b.c, ec.c);
-    end A;
-    
-    model B
-        C c = time;
-    end B;
-    
-    model D
-        EC ec;
-        B b2;
-    equation
-        connect(b2.c, ec.c2);
-    end D;
-    
-     A a;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="DuplicatedExpandable2",
-            description="Expandable connector with same name declared in both instantiated class and inherited class",
-            flatModel="
-fclass ExpandableConnectors.DuplicatedExpandable2
- Real a.b.c = time;
- Real a.ec.c;
- Real a.ec.c2;
- Real a.b2.c = time;
-equation
- a.b.c = a.ec.c;
- a.b2.c = a.ec.c2;
-end ExpandableConnectors.DuplicatedExpandable2;
-")})));
-end DuplicatedExpandable2;
-
-
-model ConnectorArray1
-    connector C
-      flow Real a[1];
-      flow Real b;
-      Real c[2];
-    end C;
-
-    expandable connector EC
-    end EC;
-
-    C c[1];
-    EC ec;
-equation
-    connect(c[1], ec.x);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConnectorArray1",
-            description="Connecting to array of connectors",
-            flatModel="
-fclass ExpandableConnectors.ConnectorArray1
- input Real c[1].a[1];
- input Real c[1].b;
- Real c[1].c[2];
- Real ec.x.a[1];
- Real ec.x.b;
- Real ec.x.c[2];
-equation
- - c[1].a[1:1] - ec.x.a[1:1] = zeros(1);
- - c[1].b - ec.x.b = 0.0;
- c[1].c[1:2] = ec.x.c[1:2];
- ec.x.a[1:1] = zeros(1);
- ec.x.b = 0.0;
-end ExpandableConnectors.ConnectorArray1;
-")})));
-end ConnectorArray1;
-
-
-model ConnectorArray2
-    connector C
-      flow Real a[1];
-      flow Real b;
-      Real c[2];
-    end C;
-
-    expandable connector EC
-    end EC;
-
-    C c[2];
-    EC ec;
-equation
-    connect(c, ec.x);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConnectorArray2",
-            description="Connecting to array of connectors",
-            flatModel="
-fclass ExpandableConnectors.ConnectorArray2
- input Real c[1].a[1];
- input Real c[1].b;
- Real c[1].c[2];
- input Real c[2].a[1];
- input Real c[2].b;
- Real c[2].c[2];
- Real ec.x[1].a[1];
- Real ec.x[1].b;
- Real ec.x[1].c[2];
- Real ec.x[2].a[1];
- Real ec.x[2].b;
- Real ec.x[2].c[2];
-equation
- - c[1].a[1:1] - ec.x[1].a[1:1] = zeros(1);
- - c[1].b - ec.x[1].b = 0.0;
- c[1].c[1:2] = ec.x[1].c[1:2];
- - c[2].a[1:1] - ec.x[2].a[1:1] = zeros(1);
- - c[2].b - ec.x[2].b = 0.0;
- c[2].c[1:2] = ec.x[2].c[1:2];
- ec.x[1].a[1:1] = zeros(1);
- ec.x[1].b = 0.0;
- ec.x[2].a[1:1] = zeros(1);
- ec.x[2].b = 0.0;
-end ExpandableConnectors.ConnectorArray2;
-")})));
-end ConnectorArray2;
-
-
-model ConnectorArray3
-    connector C
-      flow Real a[1];
-      flow Real b;
-      Real c[2];
-    end C;
-
-    expandable connector EC
-    end EC;
-
-    C c[3];
-    EC ec;
-equation
-    connect(c[2:3], ec.x);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConnectorArray3",
-            description="Connecting to array of connectors",
-            flatModel="
-fclass ExpandableConnectors.ConnectorArray3
- input Real c[1].a[1];
- input Real c[1].b;
- Real c[1].c[2];
- input Real c[2].a[1];
- input Real c[2].b;
- Real c[2].c[2];
- input Real c[3].a[1];
- input Real c[3].b;
- Real c[3].c[2];
- Real ec.x[1].a[1];
- Real ec.x[1].b;
- Real ec.x[1].c[2];
- Real ec.x[2].a[1];
- Real ec.x[2].b;
- Real ec.x[2].c[2];
-equation
- - c[2].a[1:1] - ec.x[1].a[1:1] = zeros(1);
- - c[2].b - ec.x[1].b = 0.0;
- c[2].c[1:2] = ec.x[1].c[1:2];
- - c[3].a[1:1] - ec.x[2].a[1:1] = zeros(1);
- - c[3].b - ec.x[2].b = 0.0;
- c[3].c[1:2] = ec.x[2].c[1:2];
- ec.x[1].a[1:1] = zeros(1);
- ec.x[1].b = 0.0;
- ec.x[2].a[1:1] = zeros(1);
- ec.x[2].b = 0.0;
-end ExpandableConnectors.ConnectorArray3;
-")})));
-end ConnectorArray3;
-
-
-model ConnectorArray4
-    connector C
-      flow Real a[1];
-      flow Real b;
-      Real c[2];
-    end C;
-
-    expandable connector EC
-    end EC;
-
-    C c1, c2;
-    EC ec;
-equation
-    connect(c1, ec.x[1]);
-    connect(c2, ec.x[3]);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConnectorArray4",
-            description="Connecting to array of connectors",
-            flatModel="
-fclass ExpandableConnectors.ConnectorArray4
- input Real c1.a[1];
- input Real c1.b;
- Real c1.c[2];
- input Real c2.a[1];
- input Real c2.b;
- Real c2.c[2];
- Real ec.x[1].a[1];
- Real ec.x[1].b;
- Real ec.x[1].c[2];
- Real ec.x[2].a[1];
- Real ec.x[2].b;
- Real ec.x[2].c[2];
- Real ec.x[3].a[1];
- Real ec.x[3].b;
- Real ec.x[3].c[2];
-equation
- - c1.a[1:1] - ec.x[1].a[1:1] = zeros(1);
- - c1.b - ec.x[1].b = 0.0;
- c1.c[1:2] = ec.x[1].c[1:2];
- - c2.a[1:1] - ec.x[3].a[1:1] = zeros(1);
- - c2.b - ec.x[3].b = 0.0;
- c2.c[1:2] = ec.x[3].c[1:2];
- - ec.x[2].a[1:1] = zeros(1);
- - ec.x[2].b = 0.0;
- ec.x[2].c[1:2] = zeros(2);
- ec.x[1].a[1:1] = zeros(1);
- ec.x[1].b = 0.0;
- ec.x[2].a[1:1] = zeros(1);
- ec.x[2].b = 0.0;
- ec.x[3].a[1:1] = zeros(1);
- ec.x[3].b = 0.0;
-end ExpandableConnectors.ConnectorArray4;
-")})));
-end ConnectorArray4;
-
-
-model ConnectorArray5
-    connector C
-        parameter Integer n(min = 1);
-        flow Real a[n];
-        Real b[n];
-    end C;
-
-    expandable connector EC
-    end EC;
-
-    C c[2](n={2,3});
-    EC ec;
-equation
-    connect(ec.x, c);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConnectorArray5",
-            description="Structural parameters in connector",
-            flatModel="
-fclass ExpandableConnectors.ConnectorArray5
- structural parameter Integer c[1].n = 2 /* 2 */;
- input Real c[1].a[2];
- Real c[1].b[2];
- structural parameter Integer c[2].n = 3 /* 3 */;
- input Real c[2].a[3];
- Real c[2].b[3];
- structural parameter Integer ec.x[1].n = 2 /* 2 */;
- Real ec.x[1].a[2];
- Real ec.x[1].b[2];
- structural parameter Integer ec.x[2].n = 3 /* 3 */;
- Real ec.x[2].a[3];
- Real ec.x[2].b[3];
-equation
- - c[1].a[1:2] - ec.x[1].a[1:2] = zeros(2);
- c[1].b[1:2] = ec.x[1].b[1:2];
- - c[2].a[1:3] - ec.x[2].a[1:3] = zeros(3);
- c[2].b[1:3] = ec.x[2].b[1:3];
- ec.x[1].a[1:2] = zeros(2);
- ec.x[2].a[1:3] = zeros(3);
-end ExpandableConnectors.ConnectorArray5;
-")})));
-end ConnectorArray5;
-
-
-model ConnectorArray6
-    connector C
-      flow Real a;
-      stream Real b;
-      Real c;
-    end C;
-
-    expandable connector EC
-    end EC;
-
-    C c1, c2;
-    EC ec;
-equation
-    connect(c1, ec.x[1]);
-    connect(c2, ec.x[3]);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConnectorArray6",
-            description="Array of stream connectors, with gap",
-            flatModel="
-fclass ExpandableConnectors.ConnectorArray6
- input Real c1.a;
- Real c1.b;
- Real c1.c;
- input Real c2.a;
- Real c2.b;
- Real c2.c;
- Real ec.x[1].a;
- Real ec.x[1].b;
- Real ec.x[1].c;
- Real ec.x[2].a;
- Real ec.x[2].b;
- Real ec.x[2].c;
- Real ec.x[3].a;
- Real ec.x[3].b;
- Real ec.x[3].c;
-equation
- - c1.a - ec.x[1].a = 0.0;
- c1.b = inStream(ec.x[1].b);
- ec.x[1].b = inStream(c1.b);
- c1.c = ec.x[1].c;
- - c2.a - ec.x[3].a = 0.0;
- c2.b = inStream(ec.x[3].b);
- ec.x[3].b = inStream(c2.b);
- c2.c = ec.x[3].c;
- - ec.x[2].a = 0.0;
- ec.x[2].b = 0.0;
- ec.x[2].c = 0.0;
- ec.x[1].a = 0.0;
- ec.x[2].a = 0.0;
- ec.x[3].a = 0.0;
-end ExpandableConnectors.ConnectorArray6;
-")})));
-end ConnectorArray6;
-
-
-model ConnectorArray7
-    connector C
-      flow Real a;
-      Real b;
-    end C;
-
-    expandable connector EC
-    end EC;
-
-    model A
-        parameter Real p = 1;
-        C c(a(start=p));
-    end A;
-
-    A a;
-    EC ec;
-equation
-    connect(ec.c, a.c);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConnectorArray7",
-            description="Modicication on connected component referring to parameter outside of it",
-            flatModel="
-fclass ExpandableConnectors.ConnectorArray7
- parameter Real a.p = 1 /* 1 */;
- Real a.c.a(start = a.p);
- Real a.c.b;
- Real ec.c.a(start = a.p);
- Real ec.c.b;
-equation
- a.c.a - ec.c.a = 0.0;
- a.c.b = ec.c.b;
- ec.c.a = 0.0;
-end ExpandableConnectors.ConnectorArray7;
-")})));
-end ConnectorArray7;
-
-model ConnectorArray8
-    expandable connector EC
-    end EC;
-    
-    connector C = Real;
-    
-    EC ec1;
-    C c[2];
-equation
-    for i in 1:2 loop
-        connect(c[i], ec1.a[i]);
-    end for;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConnectorArray8",
-            description="Expandable connector with for index",
-            flatModel="
-fclass ExpandableConnectors.ConnectorArray8
- Real ec1.a[2];
- Real c[2];
-equation
- c[1] = ec1.a[1];
- c[2] = ec1.a[2];
-end ExpandableConnectors.ConnectorArray8;
-")})));
-end ConnectorArray8;
-
-model ConnectorArray9
-    expandable connector EC
-    end EC;
-    
-    connector C = Real;
-    
-    EC ec1;
-    C c[2];
-equation
-    for i in 1:1 loop
-        connect(c, ec1.a[i:i+1]);
-    end for;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConnectorArray9",
-            description="Expandable connector with for index",
-            flatModel="
-fclass ExpandableConnectors.ConnectorArray9
- Real ec1.a[2];
- Real c[2];
-equation
- c[1] = ec1.a[1];
- c[2] = ec1.a[2];
-end ExpandableConnectors.ConnectorArray9;
-")})));
-end ConnectorArray9;
+    end Expandable33;
 
 
 model ExpandableWithInputOutput1
@@ -3180,7 +1309,7 @@ model ExpandableWithInputOutput1
 
     expandable connector EC
     end EC;
-    
+
     EC ec;
     CI ci1;
     CO co1;
@@ -3225,21 +1354,21 @@ model FlowInExpandable1
         Real p;
         flow Real f;
     end C;
-    
+
     expandable connector EC
     end EC;
-    
+
     model A
         B b;
         EC ec;
     equation
         connect(b.c, ec.c);
     end A;
-    
+
     model B
         C c;
     end B;
-    
+
     A a;
     B b;
     EC ec;
@@ -3271,5 +1400,1683 @@ equation
 end ExpandableConnectors.FlowInExpandable1;
 ")})));
 end FlowInExpandable1;
+
+
+package Error
+
+    model ExpandableErr1
+        expandable connector EC
+        end EC;
+
+        connector C = Real;
+
+        EC ec1;
+        C c[3];
+    equation
+        connect(c, ec1.a[1:2]);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr1",
+            description="Exandable connectors: local size error in connection, length differs",
+            errorMessage="
+1 errors found:
+
+Error at line 10, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Can not match size of connector to access introducing member in external connector
+")})));
+    end ExpandableErr1;
+
+
+    model ExpandableErr2
+        expandable connector EC
+        end EC;
+
+        connector C = Real;
+        
+        EC ec1;
+        C c[3];
+    equation
+        connect(c, ec1.a[:,1:2]);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr2",
+            description="Exandable connectors: local size error in connection, number of dimensions differ",
+            errorMessage="
+1 errors found:
+
+Error at line 10, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Can not match size of connector to access introducing member in external connector
+")})));
+    end ExpandableErr2;
+
+
+    model ExpandableErr3
+        expandable connector EC
+        end EC;
+
+        connector C = Real;
+
+        EC ec1;
+        C c[3,3];
+    equation
+        connect(c, ec1.a[:]);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr3",
+            description="Exandable connectors: local size error in connection, number of dimensions differ",
+            errorMessage="
+1 errors found:
+
+Error at line 10, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Can not match size of connector to access introducing member in external connector
+")})));
+    end ExpandableErr3;
+
+
+    model ExpandableErr3b
+        expandable connector EC
+        end EC;
+
+        connector C = Real;
+
+        EC ec1;
+        C c[3,3];
+    equation
+        connect(c, ec1.a[:,1]);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr3b",
+            description="Exandable connectors: local size error in connection, number of dimensions differ",
+            errorMessage="
+1 errors found:
+
+Error at line 10, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Can not match size of connector to access introducing member in external connector
+")})));
+    end ExpandableErr3b;
+
+
+    model ExpandableErr4
+        expandable connector EC
+        end EC;
+
+        connector C = Real;
+
+        EC ec1;
+        C c1[3], c2;
+    equation
+        connect(c1, ec1.a);
+        connect(c2, ec1.a[4]);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr4",
+            description="Exandable connectors: size mismatch between connections, access to specific element > fixed size",
+            errorMessage="
+1 errors found:
+
+Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Size introduced for external connector member does not match other connections to same name in connection set or component declared in connector
+")})));
+    end ExpandableErr4;
+
+
+    model ExpandableErr5
+        expandable connector EC
+        end EC;
+
+        connector C = Real;
+
+        EC ec1;
+        C c1[3], c2;
+    equation
+        connect(c2, ec1.a[4]);
+        connect(c1, ec1.a);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr5",
+            description="Exandable connectors: size mismatch between connections, access to specific element > fixed size",
+            errorMessage="
+1 errors found:
+
+Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Size introduced for external connector member does not match other connections to same name in connection set or component declared in connector
+")})));
+    end ExpandableErr5;
+
+
+    model ExpandableErr6
+        expandable connector EC
+        end EC;
+
+        connector C = Real;
+
+        EC ec1;
+        C c1[3], c2;
+    equation
+        connect(c1, ec1.a);
+        connect(c2, ec1.a[3,1]);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr6",
+            description="Exandable connectors: size mismatch between connections, number of dimensions differ",
+            errorMessage="
+1 errors found:
+
+Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Size introduced for external connector member does not match other connections to same name in connection set or component declared in connector
+")})));
+    end ExpandableErr6;
+
+
+    model ExpandableErr7
+        expandable connector EC
+        end EC;
+
+        connector C = Real;
+
+        EC ec1;
+        C c1[3], c2;
+    equation
+        connect(c2, ec1.a[3,1]);
+        connect(c1, ec1.a);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr7",
+            description="Exandable connectors: size mismatch between connections, number of dimensions differ",
+            errorMessage="
+1 errors found:
+
+Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Size introduced for external connector member does not match other connections to same name in connection set or component declared in connector
+")})));
+    end ExpandableErr7;
+
+
+    model ExpandableErr8
+        expandable connector EC
+        end EC;
+
+        connector C = Real;
+
+        EC ec1;
+        C c1[3], c2[4];
+    equation
+        connect(c1, ec1.a);
+        connect(c2, ec1.a);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr8",
+            description="Exandable connectors: size mismatch between connections, different fixed sizes",
+            errorMessage="
+1 errors found:
+
+Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Size introduced for external connector member does not match other connections to same name in connection set or component declared in connector
+")})));
+    end ExpandableErr8;
+
+
+    model ExpandableErr9
+        expandable connector EC
+        end EC;
+
+        connector C1
+            Real x;
+        end C1;
+
+        connector C2
+            Real y;
+        end C2;
+        
+        EC ec;
+        C1 c1;
+        C2 c2;
+    equation
+        connect(c1, ec.a);
+        connect(c2, ec.a);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr9",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 18, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Type of component introduced to external connector does not match other connections to same name in connection set or component declared in connector
+")})));
+    end ExpandableErr9;
+
+
+    model ExpandableErr10
+        expandable connector EC
+        end EC;
+
+        connector C1 = Real;
+
+        connector C2 = Boolean;
+
+        EC ec;
+        C1 c1;
+        C2 c2;
+    equation
+        connect(c1, ec.a[1]);
+        connect(c2, ec.a[2]);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr10",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 14, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Type of component introduced to external connector does not match other connections to same name in connection set or component declared in connector
+")})));
+    end ExpandableErr10;
+
+
+    model ExpandableErr11
+        expandable connector EC
+            Real a;
+        end EC;
+
+        connector C = Boolean;
+
+        EC ec;
+        C c;
+    equation
+        connect(c, ec.a);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr11",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Type of component introduced to external connector does not match other connections to same name in connection set or component declared in connector
+")})));
+    end ExpandableErr11;
+
+
+    model ExpandableErr12
+        expandable connector EC
+            Real a[3];
+        end EC;
+
+        connector C = Real;
+
+        EC ec;
+        C c[3];
+    equation
+        connect(c[1:2], ec.a);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr12",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Size introduced for external connector member does not match other connections to same name in connection set or component declared in connector
+")})));
+    end ExpandableErr12;
+
+
+    model ExpandableErr13
+        expandable connector EC1
+            Real a;
+        end EC1;
+
+        expandable connector EC2
+        end EC2;
+
+        connector C = Boolean;
+
+        EC1 ec1;
+        EC2 ec2;
+        C c;
+    equation
+        connect(ec1, ec2);
+        connect(c, ec2.a);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr13",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 16, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Type of component introduced to external connector does not match other connections to same name in connection set or component declared in connector
+")})));
+    end ExpandableErr13;
+
+
+    model ExpandableErr14
+        expandable connector EC1
+            Real a;
+        end EC1;
+
+        expandable connector EC2
+            Boolean a;
+        end EC2;
+
+        EC1 ec1;
+        EC2 ec2;
+    equation
+        connect(ec1, ec2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr14",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 13, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo', TYPE_MISMATCH_IN_CONNECT:
+  Types of connected components do not match
+")})));
+    end ExpandableErr14;
+
+
+    model ExpandableErr15
+        expandable connector EC1
+            Real a[3];
+        end EC1;
+
+        expandable connector EC2
+            Real a[4];
+        end EC2;
+
+        EC1 ec1;
+        EC2 ec2;
+    equation
+        connect(ec1, ec2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr15",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 13, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo', TYPE_MISMATCH_IN_CONNECT:
+  Types of connected components do not match
+")})));
+    end ExpandableErr15;
+
+
+    model ExpandableErr16
+        expandable connector EC1
+            Real a;
+        end EC1;
+
+        expandable connector EC2
+        end EC2;
+
+        expandable connector EC3
+            Boolean a;
+        end EC3;
+
+        connector C = Real;
+
+        EC1 ec1;
+        EC2 ec2;
+        EC3 ec3;
+        C c;
+    equation
+        connect(ec1, ec2);
+        connect(ec2, ec3);
+        connect(c, ec1.a);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr16",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 10, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Type of declared member of expandable connector does not match declarations in other expandable connectors in same connection set
+")})));
+    end ExpandableErr16;
+
+
+    model ExpandableErr17
+        expandable connector EC1
+            Real a[3];
+        end EC1;
+
+        expandable connector EC2
+        end EC2;
+
+        expandable connector EC3
+            Real a[4];
+        end EC3;
+
+        connector C = Real;
+
+        EC1 ec1;
+        EC2 ec2;
+        EC3 ec3;
+        C c[3];
+    equation
+        connect(ec1, ec2);
+        connect(ec2, ec3);
+        connect(c, ec1.a);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr17",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 10, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Size of declared member of expandable connector does not match declarations in other expandable connectors in same connection set
+")})));
+    end ExpandableErr17;
+
+
+    model ExpandableErr18
+        expandable connector EC
+            Real x;
+        end EC;
+
+        connector C
+            Real x;
+        end C;
+
+        EC ec;
+        C c;
+    equation
+        connect(ec, c);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr18",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 13, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo', CONNECT_EXPANDABLE_AND_NON_EXPANDABLE_TYPE:
+  Connecting an expandable connector to a non-expandable connector is not allowed
+")})));
+    end ExpandableErr18;
+
+
+    model ExpandableErr19
+        expandable connector EC
+            Real x;
+        end EC;
+        
+        EC ec;
+        Real y;
+    equation
+        y = ec.x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr19",
+            description="Using member of expandable connector that is not connected to",
+            errorMessage="
+1 errors found:
+
+Error at line 9, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Using member of expandable connector is only allowed if the member is connected to in the connection set
+")})));
+    end ExpandableErr19;
+
+
+    model ExpandableErr20
+        expandable connector EC
+            Real x;
+        end EC;
+        
+        EC ec;
+        Real y = ec.x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr20",
+            description="Using member of expandable connector that is not connected to",
+            errorMessage="
+1 errors found:
+
+Error at line 7, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Using member of expandable connector is only allowed if the member is connected to in the connection set
+")})));
+    end ExpandableErr20;
+
+
+    model ExpandableErr21
+        expandable connector EC
+            Real x;
+        end EC;
+
+        model A
+            Real y;
+        end A;
+
+        EC ec;
+        A a(y = ec.x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr21",
+            description="Using member of expandable connector that is not connected to",
+            errorMessage="
+1 errors found:
+
+Error at line 11, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Using member of expandable connector is only allowed if the member is connected to in the connection set
+")})));
+    end ExpandableErr21;
+
+
+model ExpandableErr22
+    connector A
+        Real x;
+    end A;
+
+    connector B
+        Real x;
+        Real y;
+    end B;
+
+    expandable connector C
+    end C;
+    
+    C c1, c2;
+    A a;
+    B b;
+equation
+    connect(a, c1.d);
+    connect(b, c2.d);
+    connect(c1, c2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr22",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 19, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Type of component introduced to external connector does not match other connections to same name in connection set or component declared in connector
+")})));
+end ExpandableErr22;
+
+
+end Error;
+
+
+
+package Compliance
+
+    model ExpandableCompliance1
+        expandable connector EC
+        end EC;
+
+        connector C = Real;
+
+        EC ec;
+        C c;
+    equation
+        connect(c, ec.a1.a2);
+        connect(ec.b1.b2, c);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="ExpandableCompliance1",
+            description="Nested expandable connectors: connecting with more than one unknown name",
+            errorMessage="
+2 errors found:
+
+Compliance error at line 10, column 20, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Nested expandable connectors where some of the intermediate expandable connectors are neither connected to or declared are not supported
+
+Compliance error at line 11, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Nested expandable connectors where some of the intermediate expandable connectors are neither connected to or declared are not supported
+")})));
+    end ExpandableCompliance1;
+
+
+    model ExpandableCompliance2
+        expandable connector EC
+        end EC;
+
+        connector C
+            EC ec;
+        end C;
+
+        EC ec;
+        C c;
+    equation
+        connect(c, ec.c);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="ExpandableCompliance2",
+            description="Adding normal connector containing expandable connector to expandable connector",
+            errorMessage="
+1 errors found:
+
+Compliance error at line 12, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Expandable connectors containing a non-expandable connector component, that in turn contains an expandable connector, is not supported
+")})));
+    end ExpandableCompliance2;
+
+end Compliance;
+
+
+
+package Nested
+
+    model NestedExpandable1
+        expandable connector EC
+        end EC;
+
+        connector C = Real;
+
+        EC ec1;
+        EC ec2;
+        C c;
+    equation
+        connect(ec1.sub1, ec2);
+        connect(ec1.sub1.c, c);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NestedExpandable1",
+            description="Adding expandable connector member to expandable connector, member of parent first",
+            flatModel="
+fclass ExpandableConnectors.Nested.NestedExpandable1
+ Real ec1.sub1.c;
+ Real ec2.c;
+ Real c;
+equation
+ c = ec1.sub1.c;
+ ec1.sub1.c = ec2.c;
+end ExpandableConnectors.Nested.NestedExpandable1;
+")})));
+    end NestedExpandable1;
+
+
+    model NestedExpandable2
+        expandable connector EC
+        end EC;
+
+        connector C = Real;
+
+        EC ec1;
+        EC ec2;
+        C c;
+    equation
+        connect(ec1.sub1.c, c);
+        connect(ec1.sub1, ec2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NestedExpandable2",
+            description="Adding expandable connector member to expandable connector, member of child first",
+            flatModel="
+fclass ExpandableConnectors.Nested.NestedExpandable2
+ Real ec1.sub1.c;
+ Real ec2.c;
+ Real c;
+equation
+ c = ec1.sub1.c;
+ ec1.sub1.c = ec2.c;
+end ExpandableConnectors.Nested.NestedExpandable2;
+")})));
+    end NestedExpandable2;
+
+
+    model NestedExpandable3
+        expandable connector EC
+        end EC;
+
+        connector C = Real;
+
+        EC ec1_1, ec1_2;
+        EC ec2_1, ec2_2;
+        C c1, c2;
+    equation
+        connect(ec1_1, ec1_2);
+        connect(ec1_1.a, ec2_1);
+        connect(ec1_2.a, ec2_2);
+        connect(ec1_1.a.b, c1);
+        connect(ec1_2.a.c, c2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NestedExpandable3",
+            description="Adding expandable connector member to expandable connector, more complicated test",
+            flatModel="
+fclass ExpandableConnectors.Nested.NestedExpandable3
+ Real ec1_1.a.b;
+ Real ec1_1.a.c;
+ Real ec1_2.a.b;
+ Real ec1_2.a.c;
+ Real ec2_1.b;
+ Real ec2_1.c;
+ Real ec2_2.b;
+ Real ec2_2.c;
+ Real c1;
+ Real c2;
+equation
+ c1 = ec1_1.a.b;
+ ec1_1.a.b = ec1_2.a.b;
+ ec1_2.a.b = ec2_1.b;
+ ec2_1.b = ec2_2.b;
+ c2 = ec1_1.a.c;
+ ec1_1.a.c = ec1_2.a.c;
+ ec1_2.a.c = ec2_1.c;
+ ec2_1.c = ec2_2.c;
+end ExpandableConnectors.Nested.NestedExpandable3;
+")})));
+    end NestedExpandable3;
+
+
+    model NestedExpandable4
+        expandable connector EC
+        end EC;
+
+        connector C = Real;
+        
+        EC ec1, ec2, ec3;
+        C c;
+    equation
+        connect(ec2, ec1.ec2);
+        connect(ec3, ec1.ec2.ec3);
+        connect(c, ec1.ec2.ec3.a);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NestedExpandable4",
+            description="Adding expandable connector member to expandable connector, several levels",
+            flatModel="
+fclass ExpandableConnectors.Nested.NestedExpandable4
+ Real ec1.ec2.ec3.a;
+ Real ec2.ec3.a;
+ Real ec3.a;
+ Real c;
+equation
+ c = ec1.ec2.ec3.a;
+ ec1.ec2.ec3.a = ec2.ec3.a;
+ ec2.ec3.a = ec3.a;
+end ExpandableConnectors.Nested.NestedExpandable4;
+")})));
+    end NestedExpandable4;
+
+
+    model NestedExpandable5
+        expandable connector EC
+        end EC;
+
+        connector C = Real;
+
+        EC ec1, ec2, ec3;
+        C c;
+    equation
+        connect(c, ec1.ec2.ec3.a);
+        connect(ec3, ec1.ec2.ec3);
+        connect(ec2, ec1.ec2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NestedExpandable5",
+            description="Adding expandable connector member to expandable connector, several levels, members first",
+            flatModel="
+fclass ExpandableConnectors.Nested.NestedExpandable5
+ Real ec1.ec2.ec3.a;
+ Real ec2.ec3.a;
+ Real ec3.a;
+ Real c;
+equation
+ c = ec1.ec2.ec3.a;
+ ec1.ec2.ec3.a = ec2.ec3.a;
+ ec2.ec3.a = ec3.a;
+end ExpandableConnectors.Nested.NestedExpandable5;
+")})));
+    end NestedExpandable5;
+
+
+    model NestedExpandable6
+        expandable connector EC
+        end EC;
+
+        connector C1
+            C2 a;
+        end C1;
+
+        connector C2 = Real;
+
+        EC ec;
+        C1 c1;
+        C2 c2;
+    equation
+        connect(ec.sub1, c1);
+        connect(ec.sub1.a, c2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NestedExpandable6",
+            description="Connecting to existing member of normal connector in expandable connector",
+            flatModel="
+fclass ExpandableConnectors.Nested.NestedExpandable6
+ Real ec.sub1.a;
+ Real c1.a;
+ Real c2;
+equation
+ c1.a = c2;
+ c2 = ec.sub1.a;
+end ExpandableConnectors.Nested.NestedExpandable6;
+")})));
+    end NestedExpandable6;
+
+
+    model NestedExpandable7
+        expandable connector EC
+        end EC;
+
+        connector C
+            Real p;
+            flow Real f;
+        end C;
+
+        EC ec1, ec2;
+        C c1[2], c2[2];
+    equation
+        connect(ec1, ec2);
+        connect(ec1.ec.c1, c1);
+        connect(ec2.ec.c2, c2);
+        connect(ec1.ec, ec2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NestedExpandable7",
+            description="Check that recursive strucures are detected while elaborating expandable connectors",
+            errorMessage="
+1 errors found:
+
+Error at line 16, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Connect introduces a copy of ec2 into a connector that is (possibly indirectly) connected back to ec2. This creates an infinite recursive structure, and is not allowed:
+    connect(ec1.ec, ec2)
+")})));
+    end NestedExpandable7;
+
+
+    model NestedExpandable8
+        expandable connector EC
+        end EC;
+
+        EC ec1, ec2, ec3;
+    equation
+        connect(ec1.ec, ec2);
+        connect(ec2.ec, ec3);
+        connect(ec1, ec3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NestedExpandable8",
+            description="Check that recursive strucures are detected while elaborating expandable connectors",
+            errorMessage="
+2 errors found:
+
+Error at line 7, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Connect introduces a copy of ec2 into a connector that is (possibly indirectly) connected back to ec2. This creates an infinite recursive structure, and is not allowed:
+    connect(ec1.ec, ec2)
+
+Error at line 8, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Connect introduces a copy of ec3 into a connector that is (possibly indirectly) connected back to ec3. This creates an infinite recursive structure, and is not allowed:
+    connect(ec2.ec, ec3)
+")})));
+    end NestedExpandable8;
+
+
+    model NestedExpandable9
+        expandable connector EC
+        end EC;
+        
+        connector C = Real;
+    
+        EC ec1, ec2, ec3;
+        C c1, c2, c3;
+    equation
+        connect(c1, ec1.ec.c1);
+        connect(c2, ec2.ec.c2);
+        connect(c3, ec1.c3);
+        connect(ec1.ec, ec3);
+        connect(ec2.ec, ec3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NestedExpandable9",
+            description="Same expandable connector added as nested connector in two separate expandable connectors",
+            flatModel="
+fclass ExpandableConnectors.Nested.NestedExpandable9
+ Real ec1.c3;
+ Real ec1.ec.c1;
+ Real ec1.ec.c2;
+ Real ec2.ec.c1;
+ Real ec2.ec.c2;
+ Real ec3.c1;
+ Real ec3.c2;
+ Real c1;
+ Real c2;
+ Real c3;
+equation
+ c1 = ec1.ec.c1;
+ ec1.ec.c1 = ec2.ec.c1;
+ ec2.ec.c1 = ec3.c1;
+ c2 = ec1.ec.c2;
+ ec1.ec.c2 = ec2.ec.c2;
+ ec2.ec.c2 = ec3.c2;
+ c3 = ec1.c3;
+end ExpandableConnectors.Nested.NestedExpandable9;
+")})));
+    end NestedExpandable9;
+
+
+    model NestedExpandable10
+        expandable connector EC
+        end EC;
+        
+        connector C = Real;
+
+        EC ec1, ec2, ec3, ec4, ec5;
+        C c1, c2, c3;
+    equation
+        connect(c1, ec1.ec.c1);
+        connect(c2, ec2.ec.c2);
+        connect(c3, ec1.c3);
+        connect(ec1.ec, ec3);
+        connect(ec2.ec, ec4);
+        connect(ec1, ec5);
+        connect(ec5, ec2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NestedExpandable10",
+            description="",
+            flatModel="
+fclass ExpandableConnectors.Nested.NestedExpandable10
+ Real ec1.c3;
+ Real ec1.ec.c1;
+ Real ec1.ec.c2;
+ Real ec2.c3;
+ Real ec2.ec.c1;
+ Real ec2.ec.c2;
+ Real ec3.c1;
+ Real ec3.c2;
+ Real ec4.c1;
+ Real ec4.c2;
+ Real ec5.c3;
+ Real ec5.ec.c1;
+ Real ec5.ec.c2;
+ Real c1;
+ Real c2;
+ Real c3;
+equation
+ c1 = ec1.ec.c1;
+ ec1.ec.c1 = ec2.ec.c1;
+ ec2.ec.c1 = ec3.c1;
+ ec3.c1 = ec4.c1;
+ ec4.c1 = ec5.ec.c1;
+ c3 = ec1.c3;
+ ec1.c3 = ec2.c3;
+ ec2.c3 = ec5.c3;
+ c2 = ec1.ec.c2;
+ ec1.ec.c2 = ec2.ec.c2;
+ ec2.ec.c2 = ec3.c2;
+ ec3.c2 = ec4.c2;
+ ec4.c2 = ec5.ec.c2;
+end ExpandableConnectors.Nested.NestedExpandable10;
+")})));
+    end NestedExpandable10;
+
+
+    model NestedExpandable11
+        expandable connector EC1
+            EC2[1] ec2;
+        end EC1;
+
+        expandable connector EC2
+        end EC2;
+
+        connector C = Real;
+
+        EC1 ec1;
+        model M
+            EC2 ec2;
+        end M;
+        C c;
+        M[1] m;
+    equation
+        connect(c, ec1.ec2[1].a);
+        for i in 1:1 loop
+            connect(ec1.ec2[i], m[i].ec2);
+        end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NestedExpandable11",
+            description="Nested with for index on last part",
+            flatModel="
+fclass ExpandableConnectors.Nested.NestedExpandable11
+ Real ec1.ec2[1].a;
+ Real c;
+ Real m[1].ec2.a;
+equation
+ c = ec1.ec2[1].a;
+ ec1.ec2[1].a = m[1].ec2.a;
+end ExpandableConnectors.Nested.NestedExpandable11;
+")})));
+    end NestedExpandable11;
+
+
+package NestedError
+
+    model NestedExpandableError1
+        expandable connector EC
+        end EC;
+
+        connector C1
+            C2 c2;
+        end C1;
+
+        connector C2 = Real;
+
+        EC ec;
+        C1 c1;
+        C2 c2;
+    equation
+        connect(ec.c1, c1);
+        connect(ec.c1.a, c2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NestedExpandableError1",
+            description="Connecting to non-existing member of non-expandable connector in expandable connector",
+            errorMessage="
+1 errors found:
+
+Error at line 16, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Can not connect to non-existing member of non-expandable connector in expandable connector
+")})));
+    end NestedExpandableError1;
+
+
+    model NestedExpandableError2
+        expandable connector EC
+        end EC;
+
+        connector C1
+            C2 c2;
+        end C1;
+
+        connector C2
+            C3 c3;
+        end C2;
+
+        connector C3 = Real;
+
+        EC ec;
+        C1 c1;
+        C3 c3;
+    equation
+        connect(ec.c1, c1);
+        connect(ec.c1.c2.a, c3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NestedExpandableError2",
+            description="Connecting to non-existing member of nested non-expandable connector in expandable connector",
+            errorMessage="
+1 errors found:
+
+Error at line 20, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+  Can not connect to non-existing member of non-expandable connector in expandable connector
+")})));
+    end NestedExpandableError2;
+
+end NestedError;
+
+end Nested;
+
+
+
+model DuplicatedExpandable1
+    expandable connector EC
+    end EC;
+
+    connector C = Real;
+
+    model A
+        extends D;
+        EC ec;
+        B b;
+    equation
+        connect(b.c, ec.c);
+    end A;
+
+    model B
+        C c = time;
+    end B;
+
+    model D
+        EC ec;
+    end D;
+
+    A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="DuplicatedExpandable1",
+            description="Expandable connector with same name declared in both instantiated class and inherited class",
+            flatModel="
+fclass ExpandableConnectors.DuplicatedExpandable1
+ Real a.b.c = time;
+ Real a.ec.c;
+equation
+ a.b.c = a.ec.c;
+end ExpandableConnectors.DuplicatedExpandable1;
+")})));
+end DuplicatedExpandable1;
+
+
+model DuplicatedExpandable2
+    expandable connector EC
+    end EC;
+
+    connector C = Real;
+
+    model A
+        extends D;
+        EC ec;
+        B b;
+    equation
+        connect(b.c, ec.c);
+    end A;
+
+    model B
+        C c = time;
+    end B;
+
+    model D
+        EC ec;
+        B b2;
+    equation
+        connect(b2.c, ec.c2);
+    end D;
+
+     A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="DuplicatedExpandable2",
+            description="Expandable connector with same name declared in both instantiated class and inherited class",
+            flatModel="
+fclass ExpandableConnectors.DuplicatedExpandable2
+ Real a.b.c = time;
+ Real a.ec.c;
+ Real a.ec.c2;
+ Real a.b2.c = time;
+equation
+ a.b.c = a.ec.c;
+ a.b2.c = a.ec.c2;
+end ExpandableConnectors.DuplicatedExpandable2;
+")})));
+end DuplicatedExpandable2;
+
+
+model AddToNestedAndConnectTopLevel
+    expandable connector EC
+    end EC;
+    
+    expandable connector EC2
+        EC ec;
+    end EC2;
+    
+    connector C = Real;
+    
+    EC ec1;
+    EC2 ec2;
+    C c;
+equation
+    connect(ec1, ec2);
+    connect(ec2.ec.c, c);
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="AddToNestedAndConnectTopLevel",
+        description="Make sure that nested connectors that are only declared to work correctly.",
+        flatModel="
+fclass ExpandableConnectors.AddToNestedAndConnectTopLevel
+ Real ec1.ec.c;
+ Real ec2.ec.c;
+ Real c;
+equation
+ c = ec1.ec.c;
+ ec1.ec.c = ec2.ec.c;
+end ExpandableConnectors.AddToNestedAndConnectTopLevel;
+")})));
+end AddToNestedAndConnectTopLevel;
+
+
+package ConnectorArrays
+
+model ConnectorArray1
+    connector C
+      flow Real a[1];
+      flow Real b;
+      Real c[2];
+    end C;
+
+    expandable connector EC
+    end EC;
+
+    C c[1];
+    EC ec;
+equation
+    connect(c[1], ec.x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConnectorArray1",
+            description="Connecting to array of connectors",
+            flatModel="
+fclass ExpandableConnectors.ConnectorArrays.ConnectorArray1
+ input Real c[1].a[1];
+ input Real c[1].b;
+ Real c[1].c[2];
+ Real ec.x.a[1];
+ Real ec.x.b;
+ Real ec.x.c[2];
+equation
+ - c[1].a[1:1] - ec.x.a[1:1] = zeros(1);
+ - c[1].b - ec.x.b = 0.0;
+ c[1].c[1:2] = ec.x.c[1:2];
+ ec.x.a[1:1] = zeros(1);
+ ec.x.b = 0.0;
+end ExpandableConnectors.ConnectorArrays.ConnectorArray1;
+")})));
+end ConnectorArray1;
+
+
+model ConnectorArray2
+    connector C
+      flow Real a[1];
+      flow Real b;
+      Real c[2];
+    end C;
+
+    expandable connector EC
+    end EC;
+
+    C c[2];
+    EC ec;
+equation
+    connect(c, ec.x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConnectorArray2",
+            description="Connecting to array of connectors",
+            flatModel="
+fclass ExpandableConnectors.ConnectorArrays.ConnectorArray2
+ input Real c[1].a[1];
+ input Real c[1].b;
+ Real c[1].c[2];
+ input Real c[2].a[1];
+ input Real c[2].b;
+ Real c[2].c[2];
+ Real ec.x[1].a[1];
+ Real ec.x[1].b;
+ Real ec.x[1].c[2];
+ Real ec.x[2].a[1];
+ Real ec.x[2].b;
+ Real ec.x[2].c[2];
+equation
+ - c[1].a[1:1] - ec.x[1].a[1:1] = zeros(1);
+ - c[1].b - ec.x[1].b = 0.0;
+ c[1].c[1:2] = ec.x[1].c[1:2];
+ - c[2].a[1:1] - ec.x[2].a[1:1] = zeros(1);
+ - c[2].b - ec.x[2].b = 0.0;
+ c[2].c[1:2] = ec.x[2].c[1:2];
+ ec.x[1].a[1:1] = zeros(1);
+ ec.x[1].b = 0.0;
+ ec.x[2].a[1:1] = zeros(1);
+ ec.x[2].b = 0.0;
+end ExpandableConnectors.ConnectorArrays.ConnectorArray2;
+")})));
+end ConnectorArray2;
+
+
+model ConnectorArray3
+    connector C
+      flow Real a[1];
+      flow Real b;
+      Real c[2];
+    end C;
+
+    expandable connector EC
+    end EC;
+
+    C c[3];
+    EC ec;
+equation
+    connect(c[2:3], ec.x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConnectorArray3",
+            description="Connecting to array of connectors",
+            flatModel="
+fclass ExpandableConnectors.ConnectorArrays.ConnectorArray3
+ input Real c[1].a[1];
+ input Real c[1].b;
+ Real c[1].c[2];
+ input Real c[2].a[1];
+ input Real c[2].b;
+ Real c[2].c[2];
+ input Real c[3].a[1];
+ input Real c[3].b;
+ Real c[3].c[2];
+ Real ec.x[1].a[1];
+ Real ec.x[1].b;
+ Real ec.x[1].c[2];
+ Real ec.x[2].a[1];
+ Real ec.x[2].b;
+ Real ec.x[2].c[2];
+equation
+ - c[2].a[1:1] - ec.x[1].a[1:1] = zeros(1);
+ - c[2].b - ec.x[1].b = 0.0;
+ c[2].c[1:2] = ec.x[1].c[1:2];
+ - c[3].a[1:1] - ec.x[2].a[1:1] = zeros(1);
+ - c[3].b - ec.x[2].b = 0.0;
+ c[3].c[1:2] = ec.x[2].c[1:2];
+ ec.x[1].a[1:1] = zeros(1);
+ ec.x[1].b = 0.0;
+ ec.x[2].a[1:1] = zeros(1);
+ ec.x[2].b = 0.0;
+end ExpandableConnectors.ConnectorArrays.ConnectorArray3;
+")})));
+end ConnectorArray3;
+
+
+model ConnectorArray4
+    connector C
+      flow Real a[1];
+      flow Real b;
+      Real c[2];
+    end C;
+
+    expandable connector EC
+    end EC;
+
+    C c1, c2;
+    EC ec;
+equation
+    connect(c1, ec.x[1]);
+    connect(c2, ec.x[3]);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConnectorArray4",
+            description="Connecting to array of connectors",
+            flatModel="
+fclass ExpandableConnectors.ConnectorArrays.ConnectorArray4
+ input Real c1.a[1];
+ input Real c1.b;
+ Real c1.c[2];
+ input Real c2.a[1];
+ input Real c2.b;
+ Real c2.c[2];
+ Real ec.x[1].a[1];
+ Real ec.x[1].b;
+ Real ec.x[1].c[2];
+ Real ec.x[2].a[1];
+ Real ec.x[2].b;
+ Real ec.x[2].c[2];
+ Real ec.x[3].a[1];
+ Real ec.x[3].b;
+ Real ec.x[3].c[2];
+equation
+ - c1.a[1:1] - ec.x[1].a[1:1] = zeros(1);
+ - c1.b - ec.x[1].b = 0.0;
+ c1.c[1:2] = ec.x[1].c[1:2];
+ - c2.a[1:1] - ec.x[3].a[1:1] = zeros(1);
+ - c2.b - ec.x[3].b = 0.0;
+ c2.c[1:2] = ec.x[3].c[1:2];
+ - ec.x[2].a[1:1] = zeros(1);
+ - ec.x[2].b = 0.0;
+ ec.x[2].c[1:2] = zeros(2);
+ ec.x[1].a[1:1] = zeros(1);
+ ec.x[1].b = 0.0;
+ ec.x[2].a[1:1] = zeros(1);
+ ec.x[2].b = 0.0;
+ ec.x[3].a[1:1] = zeros(1);
+ ec.x[3].b = 0.0;
+end ExpandableConnectors.ConnectorArrays.ConnectorArray4;
+")})));
+end ConnectorArray4;
+
+
+model ConnectorArray5
+    connector C
+        parameter Integer n(min = 1);
+        flow Real a[n];
+        Real b[n];
+    end C;
+
+    expandable connector EC
+    end EC;
+
+    C c[2](n={2,3});
+    EC ec;
+equation
+    connect(ec.x, c);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConnectorArray5",
+            description="Structural parameters in connector",
+            flatModel="
+fclass ExpandableConnectors.ConnectorArrays.ConnectorArray5
+ structural parameter Integer c[1].n = 2 /* 2 */;
+ input Real c[1].a[2];
+ Real c[1].b[2];
+ structural parameter Integer c[2].n = 3 /* 3 */;
+ input Real c[2].a[3];
+ Real c[2].b[3];
+ structural parameter Integer ec.x[1].n = 2 /* 2 */;
+ Real ec.x[1].a[2];
+ Real ec.x[1].b[2];
+ structural parameter Integer ec.x[2].n = 3 /* 3 */;
+ Real ec.x[2].a[3];
+ Real ec.x[2].b[3];
+equation
+ - c[1].a[1:2] - ec.x[1].a[1:2] = zeros(2);
+ c[1].b[1:2] = ec.x[1].b[1:2];
+ - c[2].a[1:3] - ec.x[2].a[1:3] = zeros(3);
+ c[2].b[1:3] = ec.x[2].b[1:3];
+ ec.x[1].a[1:2] = zeros(2);
+ ec.x[2].a[1:3] = zeros(3);
+end ExpandableConnectors.ConnectorArrays.ConnectorArray5;
+")})));
+end ConnectorArray5;
+
+
+model ConnectorArray6
+    connector C
+      flow Real a;
+      stream Real b;
+      Real c;
+    end C;
+
+    expandable connector EC
+    end EC;
+
+    C c1, c2;
+    EC ec;
+equation
+    connect(c1, ec.x[1]);
+    connect(c2, ec.x[3]);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConnectorArray6",
+            description="Array of stream connectors, with gap",
+            flatModel="
+fclass ExpandableConnectors.ConnectorArrays.ConnectorArray6
+ input Real c1.a;
+ Real c1.b;
+ Real c1.c;
+ input Real c2.a;
+ Real c2.b;
+ Real c2.c;
+ Real ec.x[1].a;
+ Real ec.x[1].b;
+ Real ec.x[1].c;
+ Real ec.x[2].a;
+ Real ec.x[2].b;
+ Real ec.x[2].c;
+ Real ec.x[3].a;
+ Real ec.x[3].b;
+ Real ec.x[3].c;
+equation
+ - c1.a - ec.x[1].a = 0.0;
+ c1.b = inStream(ec.x[1].b);
+ ec.x[1].b = inStream(c1.b);
+ c1.c = ec.x[1].c;
+ - c2.a - ec.x[3].a = 0.0;
+ c2.b = inStream(ec.x[3].b);
+ ec.x[3].b = inStream(c2.b);
+ c2.c = ec.x[3].c;
+ - ec.x[2].a = 0.0;
+ ec.x[2].b = 0.0;
+ ec.x[2].c = 0.0;
+ ec.x[1].a = 0.0;
+ ec.x[2].a = 0.0;
+ ec.x[3].a = 0.0;
+end ExpandableConnectors.ConnectorArrays.ConnectorArray6;
+")})));
+end ConnectorArray6;
+
+
+model ConnectorArray7
+    connector C
+      flow Real a;
+      Real b;
+    end C;
+
+    expandable connector EC
+    end EC;
+
+    model A
+        parameter Real p = 1;
+        C c(a(start=p));
+    end A;
+
+    A a;
+    EC ec;
+equation
+    connect(ec.c, a.c);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConnectorArray7",
+            description="Modicication on connected component referring to parameter outside of it",
+            flatModel="
+fclass ExpandableConnectors.ConnectorArrays.ConnectorArray7
+ parameter Real a.p = 1 /* 1 */;
+ Real a.c.a(start = a.p);
+ Real a.c.b;
+ Real ec.c.a(start = a.p);
+ Real ec.c.b;
+equation
+ a.c.a - ec.c.a = 0.0;
+ a.c.b = ec.c.b;
+ ec.c.a = 0.0;
+end ExpandableConnectors.ConnectorArrays.ConnectorArray7;
+")})));
+end ConnectorArray7;
+
+model ConnectorArray8
+    expandable connector EC
+    end EC;
+
+    connector C = Real;
+
+    EC ec1;
+    C c[2];
+equation
+    for i in 1:2 loop
+        connect(c[i], ec1.a[i]);
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConnectorArray8",
+            description="Expandable connector with for index",
+            flatModel="
+fclass ExpandableConnectors.ConnectorArrays.ConnectorArray8
+ Real ec1.a[2];
+ Real c[2];
+equation
+ c[1] = ec1.a[1];
+ c[2] = ec1.a[2];
+end ExpandableConnectors.ConnectorArrays.ConnectorArray8;
+")})));
+end ConnectorArray8;
+
+model ConnectorArray9
+    expandable connector EC
+    end EC;
+
+    connector C = Real;
+
+    EC ec1;
+    C c[2];
+equation
+    for i in 1:1 loop
+        connect(c, ec1.a[i:i+1]);
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConnectorArray9",
+            description="Expandable connector with for index",
+            flatModel="
+fclass ExpandableConnectors.ConnectorArrays.ConnectorArray9
+ Real ec1.a[2];
+ Real c[2];
+equation
+ c[1] = ec1.a[1];
+ c[2] = ec1.a[2];
+end ExpandableConnectors.ConnectorArrays.ConnectorArray9;
+")})));
+end ConnectorArray9;
+
+
+end ConnectorArrays;
+
+
 
 end ExpandableConnectors;

@@ -26,7 +26,7 @@ aspect SimpleLookup {
     interface ClassLookupable {
         /**
          * Find the SrcClassDecl for this clause or component.
-         * A unknown class is obtained in the case the SrcClassDecl can't be found.
+         * An unknown class is obtained in the case the SrcClassDecl can't be found.
          */
         public SrcClassDecl findClassDecl();
     }
@@ -356,7 +356,7 @@ aspect SimpleLookup {
 
     /**
      * Lookup in contained elements, extended classes, imports and surrounding classes.
-     * Has to be an simple (unqualified) classname.
+     * Has to be a simple (unqualified) classname.
      * Result is Cached.
      */
     syn lazy ResolvedAccess SrcFullClassDecl.simpleLookupDefaultScope(String name) {
@@ -564,7 +564,7 @@ aspect SimpleLookup {
         if (!res.isUnknown()) {
             return res.fromContext(enclosingClassDecl().qualifiedName() + "." + name(), isProtected());
         }
-        return simpleLookupHelper(name);
+        return res;
     }
 
     /**
