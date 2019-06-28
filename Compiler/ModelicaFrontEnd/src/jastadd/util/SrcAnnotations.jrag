@@ -518,9 +518,36 @@ aspect SrcAnnotations {
 
     }
     
+        /**
+     * Obtain the enclosing StoredDefinition , keeps track on which file this node belongs.
+     */
+    inh SrcStoredDefinition SrcBaseNode.myStoredDefinition();
+    inh SrcStoredDefinition SrcExp.myStoredDefinition(); 
+    eq SrcStoredDefinition.getChild().myStoredDefinition() = this;
+    eq SourceRoot.getChild().myStoredDefinition() = null;
+
+    public interface SrcAnnotationProvider {
+        public SrcStoredDefinition myStoredDefinition();
+    }
+
+    @Override
+    public SrcStoredDefinition ExpValueProvider.myStoredDefinition() {
+        return exp.myStoredDefinition();
+    }
+
+    @Override
+    public SrcStoredDefinition SrcAnnotationsIteratorProvider.myStoredDefinition() {
+        return null;
+    }
+
      public RootAnnotationProviderProxy<SrcShortClassDecl, SrcModification> SrcShortClassDecl.createModifierProvider(){
             return new RootAnnotationProviderProxy<SrcShortClassDecl, SrcModification>(this) {
-            
+
+            @Override
+            public SrcStoredDefinition myStoredDefinition() {
+                return owningNode.myStoredDefinition();
+            }
+
             @Override
             protected boolean hasProvider() {
                 return owningNode.getSrcExtendsClauseShortClass().hasSrcClassModification();
@@ -540,6 +567,12 @@ aspect SrcAnnotations {
     
     public RootAnnotationProviderProxy<SrcComponentDecl, SrcModification> SrcComponentDecl.createModifierProvider() {
         return new RootAnnotationProviderProxy<SrcComponentDecl, SrcModification>(this) {
+
+            @Override
+            public SrcStoredDefinition myStoredDefinition() {
+                return owningNode.myStoredDefinition();
+            }
+
             @Override
             protected boolean hasProvider() {
                 return owningNode.hasSrcModification();
@@ -585,7 +618,12 @@ aspect SrcAnnotations {
 
     public RootAnnotationProviderProxy<SrcExtendsClause, SrcModification> SrcExtendsClause.createModifierProvider(){
         return new RootAnnotationProviderProxy<SrcExtendsClause, SrcModification>(this) {
-        
+
+        @Override
+        public SrcStoredDefinition myStoredDefinition() {
+            return owningNode.myStoredDefinition();
+        }
+
         @Override
         protected boolean hasProvider() {
             return owningNode.hasSrcClassModification();
@@ -611,6 +649,14 @@ aspect SrcAnnotations {
 
         public ASTAnnotationAnnotationProvider(T owningNode) {
             super(owningNode);
+        }
+
+        @Override
+        public SrcStoredDefinition myStoredDefinition() {
+            if (hasProvider()) {
+                return getProvider().myStoredDefinition();
+            }
+            return null;
         }
 
         @Override
