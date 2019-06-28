@@ -173,9 +173,24 @@ aspect BLT{
                 if (seb != null && !mixed) {
                     block = seb;
                 } else {
-                    BiPGraph nonRealG = new BiPGraph(nonRealEquations, isInitial);
-                    Collection<SimpleEquationBlock> nonRealBlocks = nonRealG.computeNonRealBlocks(producer, stepUtil);
-                    eqnBlock = new EquationBlock(producer, component.computeBlockDependency(), nonRealBlocks, createSimpleBlocks(groupComponent(realEquations), producer));
+                    // Sort solved vs unsolved equations
+                    Collection<E> solvedEquations = new LinkedHashSet<>();
+                    Collection<E> unsolvedEquations = new LinkedHashSet<>();
+                    solvedEquations.addAll(nonRealEquations);
+                    for (E e : realEquations) {
+                        if (e.getMatching().getVariable().isDiscrete() && !isInitial) {
+                            solvedEquations.add(e);
+                        } else {
+                            unsolvedEquations.add(e);
+                        }
+                    }
+                    
+                    // Convert to blocks
+                    BiPGraph nonRealG = new BiPGraph(solvedEquations, isInitial);
+                    Collection<SimpleEquationBlock> solvedBlocks = nonRealG.computeNonRealBlocks(producer, stepUtil);
+                    Collection<SimpleEquationBlock> unsolvedBlocks = createSimpleBlocks(groupComponent(unsolvedEquations), producer);
+                    
+                    eqnBlock = new EquationBlock(producer, component.computeBlockDependency(), solvedBlocks, unsolvedBlocks);
                     block = eqnBlock;
                 }
             }
@@ -2917,10 +2932,23 @@ aspect BLTPrettyPrinting {
             str.formatln("%sDiscrete equations:", indent);
             indexCounter=0;
             for (SimpleEquationBlock seb : localNonRealBlocks()) {
-            	p.prePrettyPrint(str, indexCounter++, indent);
+                p.prePrettyPrint(str, indexCounter++, indent);
                 seb.prettyPrintSub(p, str, innerIndent);
             }
         }
+
+/* 
+        indexCounter=0;
+        for (AbstractEquationBlock seb : solvedBlocks()) {
+            if (!seb.isMeta()) {
+                if (indexCounter == 0) {
+                    str.print("\n", indent, "Solved equations\n");
+                }
+                p.prePrettyPrint(str, indexCounter++, indent);
+                seb.prettyPrintSub(p, str, innerIndent);
+            }
+        }
+*/
         if (localMetaBlocks().size() > 0) {
             str.println();
             str.formatln("%sMeta equations:", indent);

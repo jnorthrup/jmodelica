@@ -251,19 +251,11 @@ der(y) := 1
 
 --- Unsolved mixed system (Block 1) of 2 variables ---
 Unknown continuous variables:
-  x ()
 
 Solved discrete variables:
   g
 
 Continuous residual equations:
-  algorithm
-    g := y > 0;
-    if g and not pre(g) then
-      x := 0;
-    end if;
-
-    Iteration variables: x
 
 Discrete equations:
   algorithm
