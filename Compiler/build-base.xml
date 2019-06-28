@@ -580,6 +580,41 @@
         <if>
             <isset property="javadoc.packages"/>
             <then>
+                <if>
+                    <available file="${javadoc_output}" type="dir" />
+                    <then>
+                        <echo message="javadoc output exist: ${javadoc_output}" />
+                        <echo message="Attempting to remove" />
+                        <delete dir="${javadoc_output}" />
+                    </then>
+                    <else>
+                        <echo message="javadoc output does not exist: ${javadoc_output}"/>
+                    </else>
+                </if>
+                <if>
+                    <available file="${javadoc_output}" type="dir" />
+                    <then>
+                        <echo message="javadoc output still exist: ${javadoc_output}" />
+                        <echo message="Attempting to remove again" />
+                        <delete dir="${javadoc_output}" />
+                    </then>
+                    <else>
+                        <echo message="javadoc output does not exist: ${javadoc_output}"/>
+                    </else>
+                </if>
+                <mkdir dir="${javadoc_output}" />
+                <mkdir dir="${javadoc_output}/test" />
+                <if>
+                    <available file="${javadoc_output}/test" type="dir" />
+                    <then>
+                        <echo message="test dir exist" />
+                    </then>
+                    <else>
+                        <echo message="test dir does not exist"/>
+                    </else>
+                </if>
+                <delete dir="${javadoc_output}" />
+                
                 <javadoc 
                     access="public" 
                     sourcepath="${java_output_final}:${java_dirs}" 
