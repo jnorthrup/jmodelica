@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Modelon AB
+    Copyright (C) 2017 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -147,45 +147,40 @@ package ComponentCountTests
     )})));
     end Conditional2;
 
-    model Connect
+    model Connect1
         connector Ca
             Real y;
         end Ca;
-
+    
         connector Cb
             Real y;
         end Cb;
-
+        
         model C2
             Ca ca;
             Cb cb;
         equation
-            connect(ca, cb);
+            connect(ca,cb);
             ca.y = time;
         end C2;
-
+        
         C2 c2;
 
     annotation(__JModelica(UnitTesting(tests={
         FClassMethodTestCase(
-            name="Connect",
+            name="Connect1",
             methodName="numberOfComponents",
-            description="Test the component count feature with connectors.",
+            description="Test the component count feature with connectors",
             methodResult="1"
     )})));
-    end Connect;
+    end Connect1;
 
-    /*
-     *  Component count does not count towards
-     *  connectors connected to expandable connectors.
-     */
-    model ExpandableConnector
-
+    model Connect2
         expandable connector EC
         end EC;
-
+        
         connector C = Real;
-
+        
         EC ec1, ec2, ec3;
         C c1, c2;
     equation
@@ -197,12 +192,12 @@ package ComponentCountTests
 
     annotation(__JModelica(UnitTesting(tests={
         FClassMethodTestCase(
-            name="ExpandableConnector",
+            name="Connect2",
             methodName="numberOfComponents",
-            description="Test the component count feature with nested expandable connectors.",
+            description="Test the component count feature with nested expandable connectors",
             methodResult="0"
     )})));
-    end ExpandableConnector;
+    end Connect2;
 
     model InnerOuter1
         model A
