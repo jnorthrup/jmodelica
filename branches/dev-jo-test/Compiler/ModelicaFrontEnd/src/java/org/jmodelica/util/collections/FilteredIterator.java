@@ -32,11 +32,13 @@ public class FilteredIterator<T> implements Iterator<T> {
 		next();
 	}
 
-	public boolean hasNext() {
+	@Override
+    public boolean hasNext() {
 		return next != null;
 	}
 
-	public T next() {
+	@Override
+    public T next() {
 		T res = next;
 		boolean found = false;
 		while (!found && parent.hasNext()) {
@@ -48,7 +50,8 @@ public class FilteredIterator<T> implements Iterator<T> {
 		return res;
 	}
 
-	public void remove() {
+	@Override
+    public void remove() {
 		throw new UnsupportedOperationException();
 	}
 

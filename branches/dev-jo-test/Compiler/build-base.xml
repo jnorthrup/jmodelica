@@ -31,15 +31,31 @@
     <property name="java_version" value="1.7"/>
     <property name="java_compiler" value="javac${java_version}"/>
 
-    <property name="target" value="${user.dir}"/>
-    <property name="java_output_intermediate" value="${target}/src/java-generated-intermediate" />
-    <property name="java_output_final"        value="${target}/src/java-generated" />
+    <fail unless="target" message="Property 'target' not set. Should point to build directory where this ant file will generate intermediate files and build outputs. For builds in eclipse we normally use ${workspace_loc}/JModelica/tools/eclipse/antbuild."/>
+    <echo>build-base.xml: running in ${target}</echo>
+
+    <property name="compiler_build" value="${target}/src/build" />
+    
+    <!-- Temporary work directory with generated java files for either Modelica or Optimica configuration -->
+    <property name="java_output_intermediate" value="${compiler_build}/${sub_package}/java-generated-intermediate" />
+    
+    <!-- Temporary work directory with generated java files common for both Modelica and Optimica configuration -->
+    <property name="java_output_intermediate_common" value="${compiler_build}/src/${sub_package}/java-generated-intermediate-common" />
+    
+    <!-- Final output directory with generated java files for either Modelica or Optimica configuration -->
+    <property name="java_output_final" value="${target}/src/generated/${sub_package}/java" />
+    
+    <!-- Final output directory with generated java files common for both Modelica and Optimica configuration -->
+    <property name="java_output_final_common" value="${target}/src/generated/java" />
+    
+    <!-- Temporary work directory for updating static java files -->
     <property name="java_temp" value="${target}/src/java-generated-temporary" />
+    
     <property name="resources_temp" value="${target}/src/resources-temporary" />
-    <property name="junit_output" value="${target}/src/junit-generated" />
+    <property name="junit_output" value="${target}/src/generated/${sub_package}/junit" />
     <property name="test_output" value="${target}/doc/junit-reports" />
     <property name="class_output" value="${target}/bin" />
-    <property name="build_class_output" value="${target}/build/bin" />
+    <property name="build_class_output" value="${compiler_build}/bin" />
     <property name="jar_output" value="${target}/bin" />
 
     <property name="jastadd_dir" value="${base.dir}/../ThirdParty/JastAdd" />
@@ -89,9 +105,9 @@
     <property name="ast_output" value="${java_output_intermediate}/${ast_package_dir}" />
     <propertyregex property="parser_package_dir" input="${parser_package}" defaultValue="${parser_package}" regexp="\." replace="/" global="true" />
     <property name="parsers.output" value="${java_output_intermediate}/${parser_package_dir}" />
-    <property name="parsers.builddir" value="${target}/build/${sub_package}/parsers" />
+    <property name="parsers.builddir" value="${compiler_build}/${sub_package}/parsers" />
     <property name="scanners.output" value="${java_output_intermediate}" />
-    <property name="scanners.builddir" value="${target}/build/${sub_package}/scanners" />
+    <property name="scanners.builddir" value="${compiler_build}/${sub_package}/scanners" />
     <propertyregex property="test_package_dir" input="${test_package}" defaultValue="${test_package}" regexp="\." replace="/" global="true" />
     <property name="test_package_output" value="${junit_output}/${test_package_dir}" />
     <property name="test_class_name" value="Tests" />
@@ -313,7 +329,15 @@
                             <propertyregex property="@{module}.@{gen-extra}.gen_path.tmp" 
                                 input="${@{module}.package.@{generated}}" defaultValue="${@{module}.package.@{generated}}" 
                                 regexp="\." replace="/" global="true" />
-                            <property name="@{module}.@{gen-extra}.gen_path" value="${java_output_intermediate}/${@{module}.@{gen-extra}.gen_path.tmp}"/>
+                            <if>
+                                <matches pattern=".*${sub_package}.*" string="${@{module}.package.@{generated}}"/>
+                                <then>
+                                    <property name="@{module}.@{gen-extra}.gen_path" value="${java_output_intermediate}/${@{module}.@{gen-extra}.gen_path.tmp}"/>
+                                </then>
+                                <else>
+                                    <property name="@{module}.@{gen-extra}.gen_path" value="${java_output_intermediate_common}/${@{module}.@{gen-extra}.gen_path.tmp}"/>
+                                </else>
+                            </if>
                         </then>
                     </if>
                 </sequential>
@@ -453,15 +477,16 @@
         </for>
     </target>
 
-    <!-- Meta target for generating all java files. -->
-    <target name="gen" depends="patch,parser,scanner,gen-test,gen-extra,patch-test" description="Generate all Java files.">
+    <macrodef name="sync-macro">
+        <attribute name="fromdir"  default="NOT SET"/>
+        <attribute name="todir" default="NOT SET"/>
         <!-- 
             Mirror the intermediate directory with the final one (that's used in 
             subsequent steps), copying files that differ and removing files that 
             do not exist anymore. Then remove the intermediate directory.
         -->
         <sequential>
-            <mkdir dir="${java_output_final}" />
+            <mkdir dir="@{todir}" />
             <!-- Build list of files to exclude from deletion -->
             <var name="excludes" value="" />
             <for list="${modules}" param="module">
@@ -486,17 +511,23 @@
                     this also wipes any changed files, to make sure we don't get any problems
                     with file name case on windows.
                 -->
-                <fileset dir="${java_output_final}" includes="**/*" excludes="${excludes}">
-                    <different targetdir="${java_output_intermediate}"/>
+                <fileset dir="@{todir}" includes="**/*" excludes="${excludes}">
+                    <different targetdir="@{fromdir}"/>
                 </fileset>
             </delete>
-            <copy overwrite="true" todir="${java_output_final}">
-                <fileset dir="${java_output_intermediate}" includes="**/*">
-                    <different targetdir="${java_output_final}"/>
+            <copy overwrite="true" todir="@{todir}">
+                <fileset dir="@{fromdir}" includes="**/*">
+                    <different targetdir="@{todir}"/>
                 </fileset>
             </copy>
-            <delete dir="${java_output_intermediate}" />
+            <delete dir="@{fromdir}" />
         </sequential>
+    </macrodef>
+	
+    <!-- Meta target for generating all java files. -->
+    <target name="gen" depends="patch,parser,scanner,gen-test,gen-extra,patch-test" description="Generate all Java files.">
+        <sync-macro fromdir="${java_output_intermediate_common}" todir="${java_output_final_common}" />
+        <sync-macro fromdir="${java_output_intermediate}"        todir="${java_output_final}" />
     </target>
 
     <!-- Compile class used in patch target. -->
@@ -567,7 +598,7 @@
             debug="false" 
             destdir="${class_output}" 
             includeantruntime="false"
-            srcdir="${java_output_final}:${java_dirs}" 
+            srcdir="${java_output_final_common}:${java_output_final}:${java_dirs}" 
             includes="${compile_java_patterns}" 
             excludes="${test_helper_java_patterns}" />
     </target>
@@ -580,10 +611,12 @@
         <if>
             <isset property="javadoc.packages"/>
             <then>
-                <mkdir dir="${javadoc_output}" />
+                <!-- The javadoc directory is sometimes unusable, unclear why.
+                     It is recreated by the javadoc task. -->
+                <delete dir="${javadoc_output}" />
                 <javadoc 
                     access="public" 
-                    sourcepath="${java_output_final}:${java_dirs}" 
+                    sourcepath="${java_output_final_common}:${java_output_final}:${java_dirs}" 
                     destdir="${javadoc_output}" 
                     packagenames="${javadoc.packages}" 
                     excludepackagenames="${test_helper_packages}" 
@@ -911,6 +944,8 @@
 
     <!-- generate all scanners -->
     <target name="scanner-build">
+        <mkdir dir="${java_output_intermediate}" />
+        <mkdir dir="${java_output_intermediate_common}" />
         <for list="${modules}" param="module">
             <sequential>
                 <if>
@@ -928,7 +963,16 @@
                                     </then>
                                 </if>
                                 <propertyregex property="scanners.package_dir" input="${@{module}.@{scanner}.package}" defaultValue="${@{module}.@{scanner}.package}" regexp="\." replace="/" global="true" override="true" />
-                                <var name="@{module}.@{scanner}.output" value="${java_output_intermediate}/${scanners.package_dir}" />
+                            	<if>
+                            		<matches pattern=".*${sub_package}.*" string="${scanners.package_dir}"/>
+                            		<then>
+                            			<var name="@{module}.@{scanner}.output" value="${java_output_intermediate}/${scanners.package_dir}" />
+                        			</then>
+                            		<else>
+                            			<var name="@{module}.@{scanner}.output" value="${java_output_intermediate_common}/${scanners.package_dir}" />
+                            		</else>
+                            		
+                            	</if>
                                 <var name="scanners.file" value="${scanners.builddir}/@{scanner}.flex" />
                                 <if>
                                     <not><isset property="@{module}.@{scanner}.uptodate" /></not>
@@ -1101,13 +1145,15 @@ ${test_class_extra_defs}
 
     <!-- cleans all generated java files -->
     <target name="clean-gen" depends="clean-ast,clean-test,clean-extra" description="Deletes all generated Java files." >
-        <delete dir="${target}/build" />
+        <delete dir="${compiler_build}" />
     </target>
 
     <!-- cleans all generated java files in the compiler -->
     <target name="clean-ast">
         <delete dir="${java_output_intermediate}" />
-        <delete dir="${java_output_final}" />
+        <delete dir="${java_output_intermediate_common}" />
+        <delete><fileset dir="${java_output_final}"/></delete>
+        <delete><fileset dir="${java_output_final_common}"/></delete>
     </target>
 
     <!-- cleans all extra generated java files -->
@@ -1126,7 +1172,7 @@ ${test_class_extra_defs}
 
     <!-- cleans all generated junit files -->
     <target name="clean-test" depends="clean-test-report">
-        <delete dir="${junit_output}" />
+        <delete><fileset dir="${junit_output}"/></delete>
     </target>
 
     <!-- cleans all generated test report -->

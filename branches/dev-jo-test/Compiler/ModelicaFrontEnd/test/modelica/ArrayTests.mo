@@ -1468,6 +1468,52 @@ end ArrayTests.General.ArrayTest54;
 ")})));
 end ArrayTest54;
 
+
+model ArrayTest55
+    record A
+        extends B(c = D());
+    end A;
+    
+    record B
+        parameter C c annotation(Evaluate=true);
+    end B;
+    
+    record C
+        parameter Real x[:,2];
+    end C;
+    
+    record D
+        extends C(x = {{1.5 * mod(i - 1, 10), 1.5 * floor((i - 1) / 10)} for i in 1:100});
+    end D;
+    
+    parameter A a;
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="General_ArrayTest55",
+        description="",
+        flatModel="
+fclass ArrayTests.General.ArrayTest55
+ eval parameter ArrayTests.General.ArrayTest55.A a(c(x(size() = {100, 2}))) = ArrayTests.General.ArrayTest55.A(ArrayTests.General.ArrayTest55.D({{0.0, 0.0}, {1.5, 0.0}, {3.0, 0.0}, {4.5, 0.0}, {6.0, 0.0}, {7.5, 0.0}, {9.0, 0.0}, {10.5, 0.0}, {12.0, 0.0}, {13.5, 0.0}, {0.0, 1.5}, {1.5, 1.5}, {3.0, 1.5}, {4.5, 1.5}, {6.0, 1.5}, {7.5, 1.5}, {9.0, 1.5}, {10.5, 1.5}, {12.0, 1.5}, {13.5, 1.5}, {0.0, 3.0}, {1.5, 3.0}, {3.0, 3.0}, {4.5, 3.0}, {6.0, 3.0}, {7.5, 3.0}, {9.0, 3.0}, {10.5, 3.0}, {12.0, 3.0}, {13.5, 3.0}, {0.0, 4.5}, {1.5, 4.5}, {3.0, 4.5}, {4.5, 4.5}, {6.0, 4.5}, {7.5, 4.5}, {9.0, 4.5}, {10.5, 4.5}, {12.0, 4.5}, {13.5, 4.5}, {0.0, 6.0}, {1.5, 6.0}, {3.0, 6.0}, {4.5, 6.0}, {6.0, 6.0}, {7.5, 6.0}, {9.0, 6.0}, {10.5, 6.0}, {12.0, 6.0}, {13.5, 6.0}, {0.0, 7.5}, {1.5, 7.5}, {3.0, 7.5}, {4.5, 7.5}, {6.0, 7.5}, {7.5, 7.5}, {9.0, 7.5}, {10.5, 7.5}, {12.0, 7.5}, {13.5, 7.5}, {0.0, 9.0}, {1.5, 9.0}, {3.0, 9.0}, {4.5, 9.0}, {6.0, 9.0}, {7.5, 9.0}, {9.0, 9.0}, {10.5, 9.0}, {12.0, 9.0}, {13.5, 9.0}, {0.0, 10.5}, {1.5, 10.5}, {3.0, 10.5}, {4.5, 10.5}, {6.0, 10.5}, {7.5, 10.5}, {9.0, 10.5}, {10.5, 10.5}, {12.0, 10.5}, {13.5, 10.5}, {0.0, 12.0}, {1.5, 12.0}, {3.0, 12.0}, {4.5, 12.0}, {6.0, 12.0}, {7.5, 12.0}, {9.0, 12.0}, {10.5, 12.0}, {12.0, 12.0}, {13.5, 12.0}, {0.0, 13.5}, {1.5, 13.5}, {3.0, 13.5}, {4.5, 13.5}, {6.0, 13.5}, {7.5, 13.5}, {9.0, 13.5}, {10.5, 13.5}, {12.0, 13.5}, {13.5, 13.5}})) /* ArrayTests.General.ArrayTest55.A(ArrayTests.General.ArrayTest55.D({ { 0.0, 0.0 }, { 1.5, 0.0 }, { 3.0, 0.0 }, { 4.5, 0.0 }, { 6.0, 0.0 }, { 7.5, 0.0 }, { 9.0, 0.0 }, { 10.5, 0.0 }, { 12.0, 0.0 }, { 13.5, 0.0 }, { 0.0, 1.5 }, { 1.5, 1.5 }, { 3.0, 1.5 }, { 4.5, 1.5 }, { 6.0, 1.5 }, { 7.5, 1.5 }, { 9.0, 1.5 }, { 10.5, 1.5 }, { 12.0, 1.5 }, { 13.5, 1.5 }, { 0.0, 3.0 }, { 1.5, 3.0 }, { 3.0, 3.0 }, { 4.5, 3.0 }, { 6.0, 3.0 }, { 7.5, 3.0 }, { 9.0, 3.0 }, { 10.5, 3.0 }, { 12.0, 3.0 }, { 13.5, 3.0 }, { 0.0, 4.5 }, { 1.5, 4.5 }, { 3.0, 4.5 }, { 4.5, 4.5 }, { 6.0, 4.5 }, { 7.5, 4.5 }, { 9.0, 4.5 }, { 10.5, 4.5 }, { 12.0, 4.5 }, { 13.5, 4.5 }, { 0.0, 6.0 }, { 1.5, 6.0 }, { 3.0, 6.0 }, { 4.5, 6.0 }, { 6.0, 6.0 }, { 7.5, 6.0 }, { 9.0, 6.0 }, { 10.5, 6.0 }, { 12.0, 6.0 }, { 13.5, 6.0 }, { 0.0, 7.5 }, { 1.5, 7.5 }, { 3.0, 7.5 }, { 4.5, 7.5 }, { 6.0, 7.5 }, { 7.5, 7.5 }, { 9.0, 7.5 }, { 10.5, 7.5 }, { 12.0, 7.5 }, { 13.5, 7.5 }, { 0.0, 9.0 }, { 1.5, 9.0 }, { 3.0, 9.0 }, { 4.5, 9.0 }, { 6.0, 9.0 }, { 7.5, 9.0 }, { 9.0, 9.0 }, { 10.5, 9.0 }, { 12.0, 9.0 }, { 13.5, 9.0 }, { 0.0, 10.5 }, { 1.5, 10.5 }, { 3.0, 10.5 }, { 4.5, 10.5 }, { 6.0, 10.5 }, { 7.5, 10.5 }, { 9.0, 10.5 }, { 10.5, 10.5 }, { 12.0, 10.5 }, { 13.5, 10.5 }, { 0.0, 12.0 }, { 1.5, 12.0 }, { 3.0, 12.0 }, { 4.5, 12.0 }, { 6.0, 12.0 }, { 7.5, 12.0 }, { 9.0, 12.0 }, { 10.5, 12.0 }, { 12.0, 12.0 }, { 13.5, 12.0 }, { 0.0, 13.5 }, { 1.5, 13.5 }, { 3.0, 13.5 }, { 4.5, 13.5 }, { 6.0, 13.5 }, { 7.5, 13.5 }, { 9.0, 13.5 }, { 10.5, 13.5 }, { 12.0, 13.5 }, { 13.5, 13.5 } })) */;
+
+public
+ record ArrayTests.General.ArrayTest55.C
+  parameter Real x[:,2];
+ end ArrayTests.General.ArrayTest55.C;
+
+ record ArrayTests.General.ArrayTest55.A
+  parameter ArrayTests.General.ArrayTest55.C c;
+ end ArrayTests.General.ArrayTest55.A;
+
+ record ArrayTests.General.ArrayTest55.D
+  parameter Real x[:,2];
+ end ArrayTests.General.ArrayTest55.D;
+
+end ArrayTests.General.ArrayTest55;
+")})));
+end ArrayTest55;
+
+
 end General;
 
 
@@ -7279,7 +7325,7 @@ model ForNoRange12
 2 errors found:
 
 Error at line 6, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo':
-  Duplicate component in same class: Real y[:] = {x[i]+y[i]i}
+  Duplicate component in same class: Real y[:] = {x[i]+y[i] for i}
 
 Error at line 6, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', IMPLICIT_FOR_RANGE_INCONSISTENT:
   For index with implicit iteration range used for inconsistent sizes, here used for size [3] and earlier for size [2]

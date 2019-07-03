@@ -106,10 +106,11 @@ public class URIResolver {
      *            the string to interpret as an URI
      */
     public String resolveInPackage(PackageNode n, String str) {
-        String path = null;
+        String path;
         try {
             path = resolveURI(n, str, true);
         } catch (URIException e) {
+            path = null;
         }
         if (path != null) {
             return path;

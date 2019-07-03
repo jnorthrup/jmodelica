@@ -57,7 +57,18 @@ aspect Library {
     public static final String SrcLibNode.PACKAGE_FILE = "package.mo";
     public static final String SrcLibNode.PACKAGE_ORDER_FILE = "package.order";
 
-    syn lazy SrcStoredDefinition SrcLibNode.getSrcStoredDefinition() {
+    /**
+     * getSrcStoredDefinition is not lazy due to the needed to control
+     * the life time of loaded files which needs to outlive
+     * other attributes. 
+     */
+    private SrcStoredDefinition SrcLibNode.srcStoredDefinition = null;
+
+    syn SrcStoredDefinition SrcLibNode.getSrcStoredDefinition() {
+        if (srcStoredDefinition != null) {
+            return srcStoredDefinition;
+        }
+        
         /* If structured
                 a. Read all files
                 b. Check for package.mo
@@ -83,7 +94,8 @@ aspect Library {
                 LIBRARY_FILE_CONTENTS.invoke(this, entity);
             }
             if (cd == null) {
-                return createErrorStoredDefinition();
+                srcStoredDefinition = createErrorStoredDefinition();
+                return srcStoredDefinition;
             }
             if (getStructured()) {
                 String dirName = dirName();
@@ -96,10 +108,12 @@ aspect Library {
                 lcd.readOrderFile(baseDir, util);
                 entity.setSrcClassDecl(lcd, 0);
             }
-            return entity;
+            srcStoredDefinition = entity;
+            return srcStoredDefinition;
         } catch (ParserException e) {
             problem(e.getProblem());
-            return createErrorStoredDefinition();
+            srcStoredDefinition = createErrorStoredDefinition();
+            return srcStoredDefinition;
         } catch (Exception e) {
             String msg = "Error when parsing file: '" + fileName + "':\n" + 
                     "   " + e.getClass().getName() + "\n";
@@ -107,7 +121,8 @@ aspect Library {
                 msg = msg + "   " + e.getMessage();
             error(msg);
             log.debug(e);
-            return createErrorStoredDefinition();
+            srcStoredDefinition = createErrorStoredDefinition();
+            return srcStoredDefinition;
         } 
     }
 

@@ -92,4 +92,23 @@ public final class ListUtil {
         return Arrays.asList(ts);
     }
 
+    /**
+     * Create a new list that is the concatenation of the given lists, in the order given.
+     * 
+     * @param lists  any number of lists to concatenate
+     * @return       a newly created ArrayList that contains the concatenation of the given lists
+     */
+    @SafeVarargs
+    public static <T> ArrayList<T> concatenate(List<T>... lists) {
+        int size = 0;
+        for (List<T> list : lists) {
+            size += list.size();
+        }
+        ArrayList<T> res = new ArrayList<T>(size);
+        for (List<T> list : lists) {
+            res.addAll(list);
+        }
+        return res;
+    }
+
 }

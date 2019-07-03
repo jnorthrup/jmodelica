@@ -252,6 +252,14 @@ BOOLEAN generate_html_diagnostics compiler user false
 flattened model, connection sets, alias sets and BLT form."
 
 ********************************************************************************
+STRING generate_html_diagnostics_output_directory compiler user "."
+
+"Path to directory where compiler output should be generated for the option 
+'generate_html_diagnostics'. Default value is '.'. Directory is created if 
+it doesn't exist. The html diagnostics is generated in a subdirectory of this 
+directory."
+
+********************************************************************************
 INTEGER diagnostics_limit compiler uncommon 500 0 Integer.MAX_VALUE
 
 "This option specifies the equation system size at which the compiler will 
