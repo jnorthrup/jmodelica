@@ -1668,7 +1668,7 @@ aspect InstanceTreeConstruction {
 
     public InstAccess SrcDot.newInstAccess() {
         List<InstAccess> l = new List<InstAccess>();
-        for (SrcAccess a : getSrcAccesss())
+        for (SrcNamedAccess a : getSrcNamedAccesss())
             l.add(a.newInstAccess());
         InstDot ia = new InstDot(l);
         ia.setLocation(this);
