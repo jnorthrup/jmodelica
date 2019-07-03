@@ -36,7 +36,6 @@ import org.junit.runners.model.InitializationError;
 
 public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
 
-    private List<GenericTestTreeNode> nodes;
     private Map<String,Description> caseDesc;
     private Map<String,TestTreeRunner> runners;
     private List<GenericTestTreeNode> children;
@@ -118,6 +117,7 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
         }
     }
 
+    @Override
     protected Description describeChild(GenericTestTreeNode test) {
         if (test instanceof TestTree) {
             return runners.get(test.getName()).getDescription();
@@ -126,10 +126,12 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
         }
     }
 
+    @Override
     protected List<GenericTestTreeNode> getChildren() {
         return children;
     }
 
+    @Override
     protected void runChild(GenericTestTreeNode test, RunNotifier note) {
         if (test instanceof TestTree) {
             runners.get(test.getName()).run(note);
@@ -157,6 +159,7 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
         }
     }
 
+    @Override
     public Description getDescription() {
         return desc;
     }

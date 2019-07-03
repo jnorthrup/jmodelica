@@ -18,7 +18,7 @@ public class TestLogger extends ModelicaLogger {
 
     @Override
     public void close() {
-        
+        // ignore
     }
 
     @Override

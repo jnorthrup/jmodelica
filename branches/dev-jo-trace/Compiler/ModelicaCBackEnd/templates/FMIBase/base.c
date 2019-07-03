@@ -96,8 +96,6 @@ $C_runtime_option_map$
 $C_dynamic_state_coefficients$
 
 
-$C_enum_strings$
-
 int model_ode_guards(jmi_t* jmi) {
 $C_ode_guards$
     return 0;

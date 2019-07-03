@@ -80,6 +80,8 @@ $C_variable_aliases$
 
 #define _atInitial (jmi->atInitial)
 
+$C_enum_strings$
+
 $C_records$
 
 $C_function_headers$

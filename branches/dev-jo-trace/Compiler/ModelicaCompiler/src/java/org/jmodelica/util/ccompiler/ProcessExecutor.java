@@ -60,10 +60,9 @@ public class ProcessExecutor {
             String[] cmd, Map<String,String> env, File workDir, OutputStream stdout, OutputStream stderr) {
         try {
             return executeProcessInternal(cmd, env, workDir, stdout, stderr);
-        } catch (IOException e) {
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
+            return 1;
         }
-        return 1;
     }
 
     private static int executeProcessInternal(

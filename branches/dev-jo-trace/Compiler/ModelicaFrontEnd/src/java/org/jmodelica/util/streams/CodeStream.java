@@ -41,11 +41,11 @@ public class CodeStream {
         this(new PrintStream(os));
     }
 
-    public CodeStream(String file) throws IOException {
+    public CodeStream(String file) {
         this(new File(file));
     }
 
-    public CodeStream(File file) throws IOException {
+    public CodeStream(File file) {
         this(createPrintStream(file, false));
     }
 
@@ -106,7 +106,9 @@ public class CodeStream {
         }
     }
 
-    public void splitFile() {}
+    public void splitFile() {
+        // No default action
+    }
 
     public void println() {
         print(lineEnder);
