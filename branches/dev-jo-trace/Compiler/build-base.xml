@@ -59,8 +59,6 @@
     <taskdef resource="net/sf/antcontrib/antlib.xml">
         <classpath path="${ant-contrib_dir}/target/ant-contrib.jar" />
     </taskdef>
-    <!-- "jastadd" is an ant task class in jastadd2.jar -->
-    <taskdef classname="org.jastadd.JastAddTask" name="jastadd" classpath="${jastadd_dir}/jastadd2.jar" />
     <!-- "jflex" is an ant task class for the scanner generator in JFlex.jar -->
     <taskdef name="jflex" classname="JFlex.anttask.JFlexTask" classpath="${jflex_dir}/lib/JFlex.jar" />
     <!-- "beaver" is an ant task class for the parser generator in beaver.jar -->
