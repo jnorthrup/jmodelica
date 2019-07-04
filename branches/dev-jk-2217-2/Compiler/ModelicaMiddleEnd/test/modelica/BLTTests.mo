@@ -142,8 +142,6 @@ end UnbalancedInitTest1;
 
 end Unbalanced;
 
-package Matching
-
 model MatchingTest1
 	Real x(start=1);
 	Real y;
@@ -159,7 +157,7 @@ equation
 			description="Tests so that the matching algorithm prioritizes start value",
 			equation_sorting=true,
 			flatModel="
-fclass BLTTests.Matching.MatchingTest1
+fclass BLTTests.MatchingTest1
  Real x(start = 1);
  Real y;
 initial equation 
@@ -168,7 +166,7 @@ initial equation
 equation
  der(x) = - x;
  der(y) = - y;
-end BLTTests.Matching.MatchingTest1;
+end BLTTests.MatchingTest1;
 ")})));
 end MatchingTest1;
 
@@ -187,7 +185,7 @@ equation
 			description="Tests so that the matching algorithm prioritizes start value",
 			equation_sorting=true,
 			flatModel="
-fclass BLTTests.Matching.MatchingTest2
+fclass BLTTests.MatchingTest2
  Real x;
  Real y(start = 1);
 initial equation 
@@ -196,7 +194,7 @@ initial equation
 equation
  der(x) = - x;
  der(y) = - y;
-end BLTTests.Matching.MatchingTest2;
+end BLTTests.MatchingTest2;
 ")})));
 end MatchingTest2;
 
@@ -227,7 +225,62 @@ temp_2 = b > pre(c)
 ")})));
 end MatchingTest3;
 
-end Matching;
+model MatchingDiscreteReal1
+    Boolean g;
+    Real x;
+    Real y;
+equation
+    der(y) = 1;
+    when g then
+        reinit(y, 0);
+    end when;
+algorithm 
+    g := y > 0;
+    when {g} then
+        x := 0;
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="MatchingDiscreteRealInMixed1",
+            description="Matching discrete real in mixed algorithm",
+            methodName="printDAEBLT",
+            methodResult="
+--- Solved equation ---
+der(y) := 1
+
+--- Unsolved mixed system (Block 1) of 2 variables ---
+Unknown continuous variables:
+  x ()
+
+Solved discrete variables:
+  g
+
+Continuous residual equations:
+  algorithm
+    g := y > 0;
+    if g and not pre(g) then
+      x := 0;
+    end if;
+
+    Iteration variables: x
+
+Discrete equations:
+  algorithm
+    g := y > 0;
+    if g and not pre(g) then
+      x := 0;
+    end if;
+
+    Assigned variables: g
+
+Meta equations:
+  if g and not pre(g) then
+    reinit(y, 0);
+  end if
+-------------------------------
+")})));
+end MatchingDiscreteReal1;
 
 model ExternalObjectLoop1
     model EO
