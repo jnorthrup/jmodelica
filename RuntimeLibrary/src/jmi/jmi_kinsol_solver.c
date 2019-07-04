@@ -2694,7 +2694,7 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     realtype curtime = block->cur_time;
 	realtype fnorm, cond;
 	jmi_real_t abs_step_i, tol_nom_i;
-	int ret_tmp;
+	int ret;
 	long int i;
     long int nniters = 0;
     int flagNonscaled;
@@ -2833,10 +2833,10 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
 
 					/* calculate step and store in work_vector*/
 					memcpy(N_VGetArrayPointer(solver->work_vector), N_VGetArrayPointer(solver->last_residual), block->n*sizeof(realtype));
-					ret_tmp = jmi_LU_solve(block, solver->J_LU, N_VGetArrayPointer(solver->work_vector));
-					
-					/* We print just for this spike ret_tmp just becauses the compiler complains about unused variables and fails building */
-					jmi_log_node(log, logError, "Error", "got value ret_tmp <i: %d>", ret_tmp);
+					ret = jmi_LU_solve(block, solver->J_LU, N_VGetArrayPointer(solver->work_vector));
+					if (ret != 0) {
+						jmi_log_node(log, logError, "Error", "failed calculating step");
+					}
 					
 					/* Calculate condition number to write to logfile */
 					cond = jmi_calculate_jacobian_condition_number(block);
@@ -2844,7 +2844,7 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
 					if (fnorm < 1e-6 && fnorm < block->options->res_tol * 1e2) {
 						for (i = 0; i < block->n; i++) {
 							abs_step_i = JMI_ABS(N_VGetArrayPointer(solver->work_vector)[i]);
-							tol_nom_i = JMI_MIN(block->options->res_tol * 1e2, 1e-8) * block->nominal[i];
+							tol_nom_i = JMI_MIN(block->options->res_tol * 1e2, 1e-8) * JMI_MAX(JMI_ABS(block->x[i]),block->nominal[i]);
 							jmi_log_node(log, logError, "Error", "Step size for index <i: %d>, <block: %f>", i, N_VGetArrayPointer(solver->work_vector)[i]);
  							if (abs_step_i > tol_nom_i) {
 								jmi_log_node(log, logError, "Error", "Spike test evaluated to false in <block: %s> and for index <i: %d>", block->label, i);
