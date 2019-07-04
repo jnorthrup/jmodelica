@@ -238,12 +238,12 @@ public class ModifiableFile {
      *             if there was any error reading the source file.
      */
     public void restore() throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(source), "UTF-8"));
-        String line = "";
-        while ((line = reader.readLine()) != null) {
-            lines.add(line);
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(source), "UTF-8"))) {
+            String line = "";
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
+            }
         }
-        reader.close();
     }
 
     /**
@@ -255,13 +255,13 @@ public class ModifiableFile {
      *             if there was any error opening the destination file.
      */
     public void write(String characterSet) throws IOException {
-        BufferedWriter writer =
-                new BufferedWriter(new OutputStreamWriter(new FileOutputStream(destination), characterSet));
-        for (String line : lines) {
-            writer.write(line);
-            writer.newLine();
+        try(BufferedWriter writer =
+                new BufferedWriter(new OutputStreamWriter(new FileOutputStream(destination), characterSet))) {
+            for (String line : lines) {
+                writer.write(line);
+                writer.newLine();
+            }
         }
-        writer.close();
     }
 
     @Override

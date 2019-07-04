@@ -26,7 +26,7 @@ aspect SimpleLookup {
     interface ClassLookupable {
         /**
          * Find the SrcClassDecl for this clause or component.
-         * A unknown class is obtained in the case the SrcClassDecl can't be found.
+         * An unknown class is obtained in the case the SrcClassDecl can't be found.
          */
         public SrcClassDecl findClassDecl();
     }
@@ -298,7 +298,7 @@ aspect SimpleLookup {
     * by looking after the target class one "name" piece at a time in the correct scope.
     */
     inh ResolvedAccess ASTNode.simpleLookupHelper(String name);
-    eq SrcDot.getSrcAccess(int i).simpleLookupHelper(String name)             = simpleLookupDot(name, i);
+    eq SrcDot.getSrcNamedAccess(int i).simpleLookupHelper(String name)        = simpleLookupDot(name, i);
     eq SrcGlobalAccess.getSrcAccess().simpleLookupHelper(String name)         = simpleLookupGlobalScope(name);
     eq SrcArrayAccess.getSrcArraySubscripts().simpleLookupHelper(String name) = simpleLookupBypassDot(name);
     eq SrcImportClause.getPackageName().simpleLookupHelper(String name)       = simpleLookupGlobalScope(name);
@@ -356,7 +356,7 @@ aspect SimpleLookup {
 
     /**
      * Lookup in contained elements, extended classes, imports and surrounding classes.
-     * Has to be an simple (unqualified) classname.
+     * Has to be a simple (unqualified) classname.
      * Result is Cached.
      */
     syn lazy ResolvedAccess SrcFullClassDecl.simpleLookupDefaultScope(String name) {
@@ -500,13 +500,13 @@ aspect SimpleLookup {
         if (i == 0) {
             return simpleLookupHelper(name);
         }
-        ResolvedAccess access = getSrcAccess(i - 1).resolveAccess();
+        ResolvedAccess access = getSrcNamedAccess(i - 1).resolveAccess();
         return access.simpleLookupMemberScope(name).fromContext(access.qualifiedName(), access.isProtected());
     }
 
     inh ResolvedAccess SrcAccess.simpleLookupBypassDot(String name);
     eq BaseNode.getChild(int i).simpleLookupBypassDot(String name) = getChild(i).simpleLookupHelper(name);
-    eq SrcDot.getSrcAccess().simpleLookupBypassDot(String name)    = simpleLookupHelper(name);
+    eq SrcDot.getSrcNamedAccess().simpleLookupBypassDot(String name)    = simpleLookupHelper(name);
 
 
     /**
@@ -564,7 +564,7 @@ aspect SimpleLookup {
         if (!res.isUnknown()) {
             return res.fromContext(enclosingClassDecl().qualifiedName() + "." + name(), isProtected());
         }
-        return simpleLookupHelper(name);
+        return res;
     }
 
     /**

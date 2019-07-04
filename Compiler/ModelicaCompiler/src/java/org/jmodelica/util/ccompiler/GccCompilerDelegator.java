@@ -36,6 +36,7 @@ import org.jmodelica.util.streams.NullStream;
 public class GccCompilerDelegator extends CCompilerDelegator {
 
     public static final Creator CREATOR = CCompilerDelegator.addDelegator(GccCompilerDelegator.NAME, new Creator() {
+        @Override
         public CCompilerDelegator create() {
             return new GccCompilerDelegator(EnvironmentUtils.getJModelicaHome(), EnvironmentUtils.getJavaPlatform());
         }
@@ -50,6 +51,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
     /**
      * Get the target platforms to compile for.
      */
+    @Override
     protected String[] getDefaultTargetPlatforms() {
         return new String[] { getBuildPlatform() };
     }
@@ -137,6 +139,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
     /**
      * Compile DLL(s) from generated C code for a set of target platforms.
      */
+    @Override
     protected void compileCCode(ModelicaLogger log, CCompilerArguments args, File workDir, String[] platforms) {
         String make = getMake(getBuildPlatform());
         

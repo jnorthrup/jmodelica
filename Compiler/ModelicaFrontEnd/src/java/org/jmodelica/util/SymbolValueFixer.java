@@ -47,7 +47,7 @@ public class SymbolValueFixer {
 		}
 	}
 
-	private static class AccessEnabler implements PrivilegedAction {
+	private static class AccessEnabler implements PrivilegedAction<Object> {
 
 		public static void enable(Field f) {
 			AccessController.doPrivileged(new AccessEnabler(f));
@@ -59,7 +59,8 @@ public class SymbolValueFixer {
 			field = f;
 		}
 
-		public Object run() {
+		@Override
+        public Object run() {
 			field.setAccessible(true);
 			return null;
 		}

@@ -1156,8 +1156,8 @@ aspect Connections {
                                  rightCompCell, rightOutside, rightCellName);
                 }
             } else {
-                FAccess leftName  = leftComp.getFAccess(index());
-                FAccess rightName = rightComp.getFAccess(right.index());
+                FAccess leftName  = leftComp.getFAccess(accessIndex());
+                FAccess rightName = rightComp.getFAccess(right.accessIndex());
                 connectCells(csm, source, prefix, 
                              leftComp,  leftOutside,  leftName, 
                              rightComp, rightOutside, rightName);
@@ -1202,9 +1202,11 @@ aspect Connections {
         return res;
     }
     
-    syn Index InstAccess.index() = hasFArraySubscripts() ?
+    syn Index InstAccess.accessIndex() = hasFArraySubscripts() ?
             getFArraySubscripts().createIndex() :
             Index.NULL;
+
+    syn Indices InstAccess.accessIndices() = indices().translated();
 
     /**
      * Connect the variables referenced in a connect or branch statement in the connection set manager.

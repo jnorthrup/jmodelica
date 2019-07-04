@@ -17,7 +17,7 @@ package org.jmodelica.util.munkres;
 
 /**
  * Cost represented by an Integer that is used in Munkres problem. A lower
- * value results in the variable beeing more prone for selection since the
+ * value results in the variable being more prone for selection since the
  * Munkres algorithm tries to minimize the sum of all matched variables.
  * 
  * Use the static method create() for instantiating a matrix of this type
@@ -32,7 +32,7 @@ public class IntegerCost implements MunkresCost<IntegerCost> {
     
     @Override
     public int compareTo(IntegerCost other) {
-        return new Integer(value).compareTo(other.value);
+        return Integer.compare(value, other.value);
     }
 
     @Override

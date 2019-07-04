@@ -20,6 +20,7 @@ public abstract class NestledIterable<ChildType,ParentType> implements Iterable<
     @Override
     public Iterator<ChildType> iterator() {
         return new NestledIterator<ChildType,ParentType>(mainIter.iterator()) {
+            @Override
             protected Iterator<ChildType> subIterator(ParentType c) {
                 Iterable<ChildType> ch = subIterable(c);
                 return (ch == null) ? null : ch.iterator();

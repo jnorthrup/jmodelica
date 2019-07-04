@@ -26,7 +26,7 @@ import java.util.Map;
 
 import org.jmodelica.common.URIResolver.URIException;
 import org.jmodelica.util.Criteria;
-import org.jmodelica.util.annotations.AnnotationProvider.SubNodePair;
+import org.jmodelica.util.annotations.AnnotationProvider.SubAnnotationPair;
 import org.jmodelica.util.collections.FilteredIterable;
 import org.jmodelica.util.values.ConstValue;
 import org.jmodelica.util.values.ConstantEvaluationException;
@@ -69,7 +69,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     /**
      * Constructor. <code>name</code> may be null, some nodes simply do not have a name.
      * <code>node</code> may only be null for the instances returned by
-     * {@link #ambiguousNode()} and nodes which doesn't exist yet.
+     * {@link #ambiguousNode()} and nodes which don't exist yet.
      * 
      * @param name Name of the node, optionally null.
      * @param node The node that this annotation node represent.
@@ -101,15 +101,15 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         List<T> subNodes = new ArrayList<T>();
         Map<String, List<T>> oldNodesMap = constructMapIncludingAmbiguous(subNodes_cache);
         Map<String, T> subNodesNameMap = new HashMap<String, T>();
-        for (SubNodePair<N> subNodePair : node.annotationSubNodes()) {
-            String subNodeName = subNodePair.name;
-            N subNodeNode = subNodePair.node;
+        for (SubAnnotationPair<N> subNodePair : node.annotationSubNodes()) {
+            String subNodeName = subNodePair.getAnnotationName();
+            N subNodeNode = subNodePair.getAnnotationValue();
             T subNode = null;
             
             List<T> oldNodes = oldNodesMap.get(subNodeName);
             if (oldNodes != null) {
                 subNode = oldNodes.remove(0);
-                if(oldNodes.isEmpty()) {
+                if (oldNodes.isEmpty()) {
                     oldNodesMap.remove(subNodeName);
                 }
             }
@@ -238,8 +238,6 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         T subNode = subNodesNameMap_cache.get(paths[currentIndex]);
         if (subNode == null) {
             makeEmptySubNodesCacheMutable();
-        }
-        if (subNode == null) {
             subNode = createOrSetSubNodeAndAddToCaches(subNode, paths[currentIndex], null, subNodes_cache,
                     subNodesNameMap_cache);
         }
@@ -276,6 +274,14 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      */
     protected abstract T createNode(String name, N node);
 
+    /**
+     * Tries to infer the name from node and then calls <code>createNode(name, node)</code>.
+     * <code>name</code> may be <code>null</code> at that point. 
+     * @param node The node which the annotation node is representing
+     * @return An annotation node representing node
+     */
+    protected abstract T createNode(N node);
+    
     private N createNodeForChild(GenericAnnotationNode<T, N, V> child) throws AnnotationEditException {
         if (child == valueAnnotation_cache) {
             // Trying to set the value annotation child
@@ -328,7 +334,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     public N node() throws AnnotationEditException {
         if (!hasNode()) {
             if (parent == null) {
-                // This is an null pattern node without hope of creating
+                // This is a null pattern node without hope of creating
                 return null;
             }
             N node = asGeneric(parent()).createNodeForChild(this);
@@ -416,7 +422,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         if (!nodeExists() || isAmbiguous()) {
             return null;
         }
-        return node.annotationValue();
+        return node().annotationValue();
     }
 
     /**
@@ -452,7 +458,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
                 if (hasValue() && annotationNode == null) {
                     valueAnnotation_cache = null;
                 } else {
-                    valueAnnotation_cache = createNode(null, annotationNode);
+                    valueAnnotation_cache = createNode(annotationNode);
                 }
             } else {
                 valueAnnotation_cache = null;
@@ -529,7 +535,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @return true if this node does exist.
      */
     public boolean nodeExists() {
-        if(parent() != null) {
+        if (parent() != null) {
             asGeneric(parent()).computeSubNodesCache();
         }
         return hasNode();
