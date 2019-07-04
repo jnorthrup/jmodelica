@@ -1,3 +1,19 @@
+/*
+    Copyright (C) 2013 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 aspect ExpandableConnectors {
     
     public class ExpandableConnectorSets {
@@ -113,9 +129,7 @@ aspect ExpandableConnectors {
         
         private void connectExpandableConnectors(InstComponentDecl leftComp, InstComponentDecl rightComp) {
             if (!leftComp.isArray()) {
-                ExpandableSet left = setFor(leftComp);
-                ExpandableSet right = setFor(rightComp);
-                left.merge(right);
+                setFor(leftComp).mergeFor(rightComp);
             }
             
             SortedSet<InstComponentDecl> rightChildren = rightComp.containedInstComponents();
@@ -186,7 +200,7 @@ aspect ExpandableConnectors {
             private ExpandableSet replacement = null;
             private boolean expanded;
             private boolean nestedDone;
-            private boolean isok;
+            private boolean isOk;
             
             public ExpandableSet() {
                 connectors = new LinkedHashSet<>();
@@ -195,7 +209,7 @@ aspect ExpandableConnectors {
                 owningMembers = new HashMap<>();
                 expanded = false;
                 nestedDone = false;
-                isok = true;
+                isOk = true;
             }
             
             public ExpandableSet(InstComponentDecl connector) {
@@ -223,15 +237,15 @@ aspect ExpandableConnectors {
                     ConnectorMember[] sorted = members.values().toArray(new ConnectorMember[members.size()]);
                     Arrays.sort(sorted);
                     for (ConnectorMember member : sorted) {
-                        isok = member.check() && isok;
+                        isOk = member.check() && isOk;
                     }
-                    if (isok) { 
+                    if (isOk) { 
                         for (InstComponentDecl conn : connectors()) {
                             expandConnector(conn, sorted);
                         }
                     }
                 }
-                return isok;
+                return isOk;
             }
 
             private Iterable<InstComponentDecl> connectors() {
@@ -260,6 +274,8 @@ aspect ExpandableConnectors {
              * Merge two sets of expandable connectors, keeping this one.
              */
             public void merge(ExpandableSet other) {
+                // TODO: Keep a record of who has references to the set, and update references 
+                //       on merge instead of using actual(). Maybe using a redirection object?
                 if (other == null || other == this)
                     return;
                 
@@ -290,6 +306,18 @@ aspect ExpandableConnectors {
                 }
             }
             
+            /**
+             * Add <code>comp</code> as a connector and merge any set for it.
+             */
+            public void mergeFor(InstComponentDecl comp) {
+                ExpandableSet other = map.get(comp);
+                if (other == null) {
+                    addConnector(comp);
+                } else {
+                    merge(other);
+                }
+            }
+            
             private ExpandableSet actual() {
                 if (replacement == null) {
                     return this;
@@ -317,22 +345,22 @@ aspect ExpandableConnectors {
                 if (unknownPart == unknown.getLastInstAccess()) {
                     FArraySubscripts fas = unknownPart.hasFArraySubscripts() ? unknownPart.getFArraySubscripts() : null;
                     if (member == null) {
-                        member = new ConnectorMember(name, knownComp, known, fas, sourceSize);
+                        member = new ConnectorMember(name, knownComp, known, fas, sourceSize, unknownPart);
                         members.put(name, member);
                     } else {
-                        member.addConnection(knownComp, known, fas, sourceSize);
+                        member.addConnection(knownComp, known, fas, sourceSize, unknownPart);
                     }
                 } else {
-                    // TODO: probably need more to support arrays in this case
                     if (member == null) {
                         // TODO: isn't size/fas/etc needed here?
                         member = new ConnectorMember(name, unknown);
                         members.put(name, member);
                     }
                     // TODO: what is sourceSize in this case? probably shouldn't just toss it
-                    // TODO: handle case where unknownPart is a slice
-                    Index i = unknownPart.index();
-                    member.set(i).addMember(knownComp, known, unknown, unknownPart.getNextInstAccess(), null);
+                    Indices indices = unknownPart.accessIndices();
+                    for (Index i : indices) {
+                        member.set(i).addMember(knownComp, known, unknown, unknownPart.getNextInstAccess(), null);
+                    }
                 }
                 member.addParentSet(actual());
             }
@@ -344,8 +372,9 @@ aspect ExpandableConnectors {
              */
             public void addDeclared(String name) {
                 ConnectorMember member = members.get(name);
-                if (member == null) 
-                    members.put(name, new ConnectorMember(name));
+                if (member == null) {
+                    members.put(name, new ConnectorMember(name, true));
+                }
             }
             
             /**
@@ -379,6 +408,7 @@ aspect ExpandableConnectors {
              * updated for replacements.
              */
             private Set<ExpandableSet> parentSets() {
+                // TODO: Cluncy, update existing set instead
                 boolean replace = false;
                 for (ExpandableSet parent : parentSets) {
                     replace |= parent.replacement != null;
@@ -407,6 +437,8 @@ aspect ExpandableConnectors {
                     memberList.add(member.createInstComponent(parent));
                     templates[i++] = member.template(parent);
                 }
+                // TODO: If there were declared expandable members, we should probably remove 
+                //       them from their sets after merging.
                 parent.expandConnector(memberList, templates);
                 i = 0;
                 for (ConnectorMember member : members) {
@@ -464,7 +496,7 @@ aspect ExpandableConnectors {
                 private boolean calculated;
                 private boolean isExpandable;
                 
-                public ConnectorMember(String name) {
+                public ConnectorMember(String name, boolean expandable) {
                     this.name = name;
                     sources = new ArrayList<Source>(4);
                     nestledAccesses = new ArrayList<InstAccess>(2);
@@ -474,23 +506,23 @@ aspect ExpandableConnectors {
                     calculated = false;
                     error = false;
                     sets = new HashMap<>();
+                    isExpandable = expandable;
                 }
                 
                 public ConnectorMember(String name, InstComponentDecl targetComp, 
-                        InstAccess target, FArraySubscripts fas, Size targetSize) {
-                    this(name);
-                    addConnection(targetComp, target, fas, targetSize);
+                        InstAccess target, FArraySubscripts fas, Size targetSize, InstAccess unknownPart) {
+                    this(name, false);
+                    addConnection(targetComp, target, fas, targetSize, unknownPart);
                 }
                 
                 public ConnectorMember(String name, InstAccess unknown) {
-                    this(name);
+                    this(name, true);
                     nestledAccesses.add(unknown);
                 }
                 
                 public ConnectorMember(ConnectorMember other) {
-                    this(other.name);
+                    this(other.name, false);
                     merge(other);
-                    nestledAccesses = other.nestledAccesses;
                 }
                 
                 public int compareTo(ConnectorMember other) {
@@ -498,16 +530,27 @@ aspect ExpandableConnectors {
                 }
                 
                 public void addConnection(InstComponentDecl targetComp, 
-                        InstAccess target, FArraySubscripts fas, Size targetSize) {
+                        InstAccess target, FArraySubscripts fas, Size targetSize, InstAccess unknownPart) {
                     sources.add(new Source(targetComp, target, fas, targetSize));
                     if (targetComp.isExpandableConnector()) {
-                        // TODO: handle case where this connection is not scalar
-                        ExpandableSet otherSet = map.get(targetComp);
-                        Index i = target.index();
-                        if (otherSet == null) {
-                            set(i).addConnector(targetComp);
-                        } else {
-                            mergeSet(otherSet, i);
+                        Indices indices = unknownPart.accessIndices();
+                        if (indices.ndims() == 0 && target.isArray()) {
+                            indices = target.indices(); // This is not correct if first part of unknown is an array, 
+                                                        // if so, some of the dimensions should be contracted, (use targetSize instead?)
+                        }
+                        for (Index i : indices) {
+                            Index ti = indices.translate(i);
+                            
+                            // This is not always correct, targetComp may already be specified.
+                            // Only specify if target is slice? Or if target is array?
+                            InstComponentDecl specified = targetComp.specify(ti);
+                            
+                            ExpandableSet otherSet = map.get(specified);
+                            if (otherSet == null) {
+                                set(i).addConnector(specified);
+                            } else {
+                                mergeSet(otherSet, i);
+                            }
                         }
                     }
                 }
@@ -517,6 +560,8 @@ aspect ExpandableConnectors {
                         for (Index i : other.sets.keySet()) {
                             mergeSet(other.sets.get(i), i);
                         }
+                        nestledAccesses.addAll(other.nestledAccesses);
+                        isExpandable = true;
                     }
                     for (Source s : other.sources) {
                         sources.add(new Source(s));
@@ -534,7 +579,7 @@ aspect ExpandableConnectors {
                 public ExpandableSet set(Index i) {
                     ExpandableSet set = sets.get(i);
                     if (set == null) {
-                        i = i.clone();
+                        i = i.fix();
                         set = new ExpandableSet(this, i);
                         sets.put(i, set);
                         isExpandable = true;
@@ -598,6 +643,9 @@ aspect ExpandableConnectors {
                         for (Source s : sources) {
                             s.connectExpandableMember(created);
                         }
+                        for (Index i : created.indices()) {
+                            set(i).mergeFor(created.arrayCell(i));
+                        }
                     }
                 }
                 
@@ -651,6 +699,7 @@ aspect ExpandableConnectors {
                     ASTNode templateErrorNode = null;
                     if (sources.isEmpty() && declared.isEmpty()) {
                         error = true;
+                        // TODO: This is no longer compliance error, spec has changed.
                         for (InstAccess nestledAccess : nestledAccesses)
                             nestledAccess.compliance("Nested expandable connectors where some of the intermediate expandable connectors are neither connected to or declared are not supported");
                     } else if (declared.isEmpty()) {
@@ -816,14 +865,14 @@ aspect ExpandableConnectors {
                                 Index targetI = targetInd.translate(i[1]);
                                 InstComponentDecl memberCell = member.arrayCell(memberI.iterator());
                                 InstComponentDecl targetCell = targetComp.arrayCell(targetI.iterator());
-                                setFor(targetCell).merge(setFor(memberCell));
+                                setFor(targetCell).mergeFor(memberCell);
                             }
                         } else {
                             if (localIndices != null) {
                                 Index memberI = localIndices.translate(Index.NULL);
                                 member = member.arrayCell(memberI.iterator());
                             }
-                            setFor(targetComp).merge(setFor(member));
+                            setFor(targetComp).mergeFor(member);
                         }
                     }
                     
@@ -1051,6 +1100,10 @@ aspect ExpandableConnectors {
     }
     
     public boolean InstReplacingExpandableConnectorDecl.checkAsExpandableMemberTemplate(ASTNode errorNode) {
+        return true;
+    }
+    
+    public boolean InstArrayExpandableConnector.checkAsExpandableMemberTemplate(ASTNode errorNode) {
         return true;
     }
     

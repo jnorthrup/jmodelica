@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -2229,8 +2228,8 @@ syn String SrcStoredDefinition.findOutermostLibraryDir() {
 
 syn File SrcAccess.findOutermostLibraryDirForWithin(File f) = null;
 eq SrcDot.findOutermostLibraryDirForWithin(File f) {
-    for (int i = getNumSrcAccess() - 1; i >= 0 && f != null; i--)
-        f = getSrcAccess(i).findOutermostLibraryDirForWithin(f);
+    for (int i = getNumSrcNamedAccess() - 1; i >= 0 && f != null; i--)
+        f = getSrcNamedAccess(i).findOutermostLibraryDirForWithin(f);
     return f;
 }
 eq SrcNamedAccess.findOutermostLibraryDirForWithin(File f) {
@@ -2494,31 +2493,15 @@ public class ModulesSettings {
     }
      
     public void addLibrary(Module module, String name) {
-        HashSet<String> names;
-        
-        if (libraryNames.contains(module)) {
-            names = libraryNames.get(module);
-        } else {
-            names = new HashSet<String>();
-            libraryNames.put(module,  names);
-        }
-        
-        names.add(name);
+        libraryNames.put(module,  name);
     }
     
     public java.util.List<String> getLibraryNames() {
-        LinkedList<String> libNames = new LinkedList<String>();
-        
-        for (HashSet<String> n : libraryNames.values()) {
-            for (String s : n) {
-                libNames.add(s);
-            }
-        }
-        return libNames;
+        return new ArrayList(libraryNames.values());
     }
     
-    private static ArrayList<ModuleContributor> CONTRIBUTORS = new ArrayList<ModuleContributor>();
-    private static Hashtable<Module, HashSet<String>> libraryNames = new Hashtable<Module, HashSet<String>>();
+    private static ArrayList<ModuleContributor> CONTRIBUTORS = new ArrayList<>();
+    private static HashMap<Module, String> libraryNames = new HashMap<>();
     
     public abstract static class ModuleContributor {
         public void addModule(ModulesSettings settings, OptionRegistry options) { }

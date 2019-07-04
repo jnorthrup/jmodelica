@@ -28,17 +28,14 @@ public class OptionsAggregatorTests {
     
     OptionsAggregator setup(String s) throws IOException, OptionsAggregationException {
         OptionsAggregator op = new OptionsAggregator();
-        BufferedReader reader = new BufferedReader(new StringReader(s));
-        try {
+        try(BufferedReader reader = new BufferedReader(new StringReader(s))) {
             op.parseFile("/file/path", reader);
-        } finally {
-            reader.close();
         }
         return op;
     }
     
     @Test
-    public void testLongLine() throws IOException, OptionsAggregationException {
+    public void testLongLine() throws IOException {
         try {
             setup(""
                     + "BOOLEAN opt1 compiler user true"
@@ -52,7 +49,7 @@ public class OptionsAggregatorTests {
     }
     
     @Test
-    public void testSameName() throws IOException, OptionsAggregationException {
+    public void testSameName() throws IOException {
         try {
             setup(""
                     + "BOOLEAN opt1 compiler user true\n"
@@ -109,28 +106,29 @@ public class OptionsAggregatorTests {
                 + "\"A description\"\n"
                 );
         op.modify();
-        StringOutputStream os = new StringOutputStream();
-        OutputStreamWriter osw = new OutputStreamWriter(os);
-        op.generate(osw, "org.pack");
-        osw.close();
-        String expected = 
-                "package org.pack;\n" + 
-                "import java.util.LinkedHashMap;\n" + 
-                "import java.util.Map;\n" + 
-                "\n" + 
-                "import org.jmodelica.common.options.Option;\n" + 
-                "import org.jmodelica.common.options.OptionRegistry;\n" + 
-                "import org.jmodelica.common.options.OptionRegistry.Category;\n" + 
-                "import org.jmodelica.common.options.OptionRegistry.OptionType;\n" + 
-                "\n" + 
-                "public class OptionsAggregated {\n" + 
-                "    public static void addTo(OptionRegistry options) {\n" +
-                "        options.addBooleanOption(\"opt1\", OptionType.compiler, Category.user, true, true, \"\");\n" + 
-                "        options.addBooleanOption(\"opt2\", OptionType.runtime, Category.experimental, false, false, \"A description\");\n" +  
-                "    }\n" + 
-                "}\n" + 
-                "";
-        assertEquals(expected, os.toString());
+        try(StringOutputStream os = new StringOutputStream()) {
+            try(OutputStreamWriter osw = new OutputStreamWriter(os)) {
+                op.generate(osw, "org.pack");
+            }
+            String expected = 
+                    "package org.pack;\n" + 
+                            "import java.util.LinkedHashMap;\n" + 
+                            "import java.util.Map;\n" + 
+                            "\n" + 
+                            "import org.jmodelica.common.options.Option;\n" + 
+                            "import org.jmodelica.common.options.OptionRegistry;\n" + 
+                            "import org.jmodelica.common.options.OptionRegistry.Category;\n" + 
+                            "import org.jmodelica.common.options.OptionRegistry.OptionType;\n" + 
+                            "\n" + 
+                            "public class OptionsAggregated {\n" + 
+                            "    public static void addTo(OptionRegistry options) {\n" +
+                            "        options.addBooleanOption(\"opt1\", OptionType.compiler, Category.user, true, true, \"\");\n" + 
+                            "        options.addBooleanOption(\"opt2\", OptionType.runtime, Category.experimental, false, false, \"A description\");\n" +  
+                            "    }\n" + 
+                            "}\n" + 
+                            "";
+            assertEquals(expected, os.toString());
+        }
     }
     
     @Test
@@ -144,12 +142,13 @@ public class OptionsAggregatorTests {
                 + "\n"
                 );
         op.modify();
-        StringOutputStream os = new StringOutputStream();
-        OutputStreamWriter osw = new OutputStreamWriter(os);
-        op.generateCalls(osw);
-        osw.close();
-        String expected = "        options.addBooleanOption(\"opt1\", OptionType.compiler, Category.user, false, true, \"\");\n";
-        assertEquals(expected, os.toString());
+        try(StringOutputStream os = new StringOutputStream()) {
+            try(OutputStreamWriter osw = new OutputStreamWriter(os)) {
+                op.generateCalls(osw);
+            }
+            String expected = "        options.addBooleanOption(\"opt1\", OptionType.compiler, Category.user, false, true, \"\");\n";
+            assertEquals(expected, os.toString());
+        }
     }
     
     @Test
@@ -167,13 +166,14 @@ public class OptionsAggregatorTests {
                 + "\n"
             );
         op.modify();
-        StringOutputStream os = new StringOutputStream();
-        OutputStreamWriter osw = new OutputStreamWriter(os);
-        op.generateCalls(osw);
-        osw.close();
-        String expected = 
+        try(StringOutputStream os = new StringOutputStream()) {
+            try(OutputStreamWriter osw = new OutputStreamWriter(os)) {
+                op.generateCalls(osw);
+            }
+            String expected = 
                     "        options.addBooleanOption(\"opt1\", OptionType.compiler, Category.user, options.new DefaultInvertBoolean(\"opt2\"), options.new DefaultInvertBoolean(\"opt2\"), \"\");\n" + 
-                    "        options.addBooleanOption(\"opt2\", OptionType.compiler, Category.user, true, true, \"\");\n";
-        assertEquals(expected, os.toString());
+                            "        options.addBooleanOption(\"opt2\", OptionType.compiler, Category.user, true, true, \"\");\n";
+            assertEquals(expected, os.toString());
+        }
     }
 }

@@ -112,6 +112,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
             this.log = log;
         }
 
+        @Override
         public String getMessage() {
             return msg;
         }
@@ -126,12 +127,12 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
 
         @Override
         public void destroyProcess() {
-            
+            // Do nothing
         }
 
         @Override
         public void remove() {
-            
+            // Do nothing
         }
     }
 
@@ -149,11 +150,12 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
             this.msg = "Succesfully compiled external function '" + ext.getName() + "'";
         }
 
+        @Override
         public String getMessage() {
             return msg;
         }
 
-        protected ProcessCommunicator<V, T> createProcessCommunicator(External<K> ext) throws IOException {
+        protected ProcessCommunicator<V, T> createProcessCommunicator() throws IOException {
             return new ProcessCommunicator<V, T>(mc, processBuilder.start());
         }
 
@@ -162,7 +164,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
             log().debug("Evaluating compiled external function: " + ext.getName());
             ProcessCommunicator<V, T> com = null;
             try {
-                com = createProcessCommunicator(ext);
+                com = createProcessCommunicator();
                 setup(ext, values, timeout, com);
                 evaluate(ext, values, timeout, com);
                 return teardown(timeout, com);
@@ -212,7 +214,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
 
         @Override
         public void destroyProcess() {
-
+            // Do nothing
         }
 
         @Override
@@ -321,6 +323,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                 super();
             }
 
+            @Override
             public String getMessage() {
                 return MappedExternalFunction.this.getMessage();
             }
@@ -353,7 +356,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                 if (com == null) {
                     long time1 = System.currentTimeMillis();
                     // Start process if not live.
-                    com = createProcessCommunicator(ext);
+                    com = createProcessCommunicator();
                     long time2 = System.currentTimeMillis();
                     // Send external object constructor inputs
                     MappedExternalFunction.this.setup(ext, values, timeout, com);

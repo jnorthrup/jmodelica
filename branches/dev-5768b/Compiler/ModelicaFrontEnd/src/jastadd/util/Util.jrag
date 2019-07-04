@@ -700,7 +700,7 @@ aspect Names {
   syn lazy String SrcGlobalAccess.name() = "." + getSrcAccessNoTransform().name();
   syn lazy String SrcDot.name() {
 	  StringBuilder buf = new StringBuilder();
-	  List<SrcAccess> l = getSrcAccessListNoTransform();
+	  List<SrcNamedAccess> l = getSrcNamedAccessListNoTransform();
 	  for (int i = 0; i < l.getNumChildNoTransform(); i++) {
 		  buf.append(l.getChildNoTransform(i).name());
 		  buf.append('.');
@@ -729,7 +729,7 @@ aspect Names {
     eq SrcGlobalAccess.qualifiedName()  = "." + getSrcAccess().qualifiedName();
     eq SrcDot.qualifiedName() {
         StringBuilder buf = new StringBuilder();
-        for (SrcAccess a : getSrcAccesss()) {
+        for (SrcNamedAccess a : getSrcNamedAccesss()) {
             buf.append(a.qualifiedName());
             buf.append('.');
         }
@@ -762,7 +762,7 @@ aspect Names {
   eq InstImportUnqualified.name() = "*";    // To avoid returning null
   
   syn String SrcAccess.lastName() = name();
-  eq SrcDot.lastName()            = getSrcAccessListNoTransform().lastChildNoTransform().lastName();
+  eq SrcDot.lastName()            = getSrcNamedAccessListNoTransform().lastChildNoTransform().lastName();
   eq SrcGlobalAccess.lastName()   = getSrcAccessNoTransform().lastName();
   
   syn String InstAccess.lastName() = name();
@@ -947,7 +947,7 @@ aspect Names {
      * unqualified name.
      */ 
     syn SrcAccess SrcAccess.getLastAccess() = this;
-    eq SrcDot.getLastAccess()            = getSrcAccess(getNumSrcAccess() - 1);
+    eq SrcDot.getLastAccess()            = getSrcNamedAccess(getNumSrcNamedAccess() - 1);
     eq SrcGlobalAccess.getLastAccess()   = getSrcAccess().getLastAccess();
     
     syn InstAccess InstAccess.getLastInstAccess() = this;
@@ -959,7 +959,7 @@ aspect Names {
      * unqualified name.
      */
     syn SrcAccess SrcAccess.getFirstAccess() = this;
-    eq SrcDot.getFirstAccess()            = getSrcAccess(0);
+    eq SrcDot.getFirstAccess()            = getSrcNamedAccess(0);
     eq SrcGlobalAccess.getFirstAccess()   = getSrcAccess().getFirstAccess();
 
     // For proxy
@@ -968,7 +968,7 @@ aspect Names {
     }
     
     inh SrcAccess SrcAccess.getNextAccess();
-    eq SrcDot.getSrcAccess(int i).getNextAccess()    = (i >= getNumSrcAccess() - 1) ? null : getSrcAccess(i + 1);
+    eq SrcDot.getSrcNamedAccess(int i).getNextAccess()    = (i >= getNumSrcNamedAccess() - 1) ? null : getSrcNamedAccess(i + 1);
     eq SourceRoot.getProgram().getNextAccess() = computeNextAccess();
     eq Root.getChild().getNextAccess()         = null;
 
@@ -1008,12 +1008,12 @@ aspect Names {
     }
     
     public SrcAccess SrcDot.stripFirstAccess() {
-    	int n = getNumSrcAccess();
+    	int n = getNumSrcNamedAccess();
     	if (n <= 2)
-    		return getSrcAccess(n - 1);
-    	List<SrcAccess> l = new List<SrcAccess>();
+    		return getSrcNamedAccess(n - 1);
+    	List<SrcNamedAccess> l = new List<>();
     	for (int i = 1; i < n; i++)
-    		l.add(getSrcAccess(i));
+    		l.add(getSrcNamedAccess(i));
         return new SrcDot(l);
     }
     
@@ -1055,7 +1055,7 @@ aspect Names {
      */
     inh boolean SrcAccess.inQualified();
     inh boolean InstAccess.inQualified();
-    eq SrcDot.getSrcAccess().inQualified()         = true;
+    eq SrcDot.getSrcNamedAccess().inQualified()         = true;
     eq InstDot.getInstAccess().inQualified() = true;
     eq BaseNode.getChild().inQualified()     = false;
 

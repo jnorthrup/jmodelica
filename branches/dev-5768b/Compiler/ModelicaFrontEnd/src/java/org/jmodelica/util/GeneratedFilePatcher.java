@@ -70,10 +70,8 @@ public class GeneratedFilePatcher {
 			between(out);
 		}
 
-		protected void between(PrintStream out) {}
-		protected String alter(String line, PrintStream out) {
-			return line;
-		}
+		protected abstract void between(PrintStream out);
+		protected abstract String alter(String line, PrintStream out);
 
 	}
 
@@ -95,14 +93,16 @@ public class GeneratedFilePatcher {
 			return patterns;
 		}
 
-		protected void between(PrintStream out) {
+		@Override
+        protected void between(PrintStream out) {
 			if (found) {
 				out.println(insert);
 				found = false;
 			}
 		}
 
-		protected String alter(String line, PrintStream out) {
+		@Override
+        protected String alter(String line, PrintStream out) {
 			if (!line.equals(insert)) {
 				if (before)
 					out.println(insert);
@@ -127,11 +127,11 @@ public class GeneratedFilePatcher {
 		public void apply(File dir) throws IOException {
 			File org = new File(dir, fileName);
 			File temp = new File(org.getPath() + ".temp");
-			BufferedReader in = new BufferedReader(new FileReader(org));
-			PrintStream out = new PrintStream(new BufferedOutputStream(new FileOutputStream(temp)));
-			apply(in, out);
-			in.close();
-			out.close();
+			try(BufferedReader in = new BufferedReader(new FileReader(org))) {
+			    try(PrintStream out = new PrintStream(new BufferedOutputStream(new FileOutputStream(temp)))) {
+			        apply(in, out);
+			    }
+			}
 			org.delete();
 			temp.renameTo(org);
 			System.out.println("Patched " + org);
