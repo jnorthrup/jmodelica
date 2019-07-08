@@ -1095,7 +1095,26 @@ build-python-packages:
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	export PYTHONHOME=$(ORIG_PYTHON_HOME); \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	rm -rf build
 
-install-python-packages: build-python-packages
+install-python-tests:
+@PYTHON_ENABLED_TRUE@	chmod ugo+x jm_tests
+@PYTHON_ENABLED_TRUE@	cp -p jm_tests $(DESTDIR)$(prefix)/jm_tests
+
+@PYTHON_ENABLED_TRUE@	cd $(abs_top_srcdir)/Python/src/tests_jmodelica/; \
+@PYTHON_ENABLED_TRUE@	mkdir -p $(DESTDIR)$(prefix)/Python/tests_jmodelica; \
+@PYTHON_ENABLED_TRUE@	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/tests_jmodelica
+@PYTHON_ENABLED_TRUE@	rm -rf $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/src
+@PYTHON_ENABLED_TRUE@	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
+@PYTHON_ENABLED_TRUE@	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/Makefile.am
+@PYTHON_ENABLED_TRUE@	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/Makefile.in
+@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	cd $(abs_top_srcdir)/Python/src/tests_jmodelica/; \
+@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	mkdir -p $(DESTDIR)$(prefix)/Python_64/tests_jmodelica; \
+@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64/tests_jmodelica
+@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	rm -rf $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/src
+@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
+@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.am
+@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.in
+
+install-python-packages: build-python-packages install-python-tests
 @PYTHON_ENABLED_TRUE@	mkdir -p $(DESTDIR)$(prefix)/Python
 @PYTHON_ENABLED_TRUE@	cp $(abs_top_srcdir)/Python/src/startup.py $(DESTDIR)$(prefix)/
 @PYTHON_ENABLED_TRUE@	cp Python/src/required_defaults.py $(DESTDIR)$(prefix)/Python/
@@ -1131,9 +1150,6 @@ install-python-packages: build-python-packages
 @PYTHON_ENABLED_TRUE@	find pyfmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 @PYTHON_ENABLED_TRUE@	fi; \
 @PYTHON_ENABLED_TRUE@	done
-@PYTHON_ENABLED_TRUE@	cd $(abs_top_srcdir)/Python/src/tests_jmodelica/; \
-@PYTHON_ENABLED_TRUE@	mkdir -p $(DESTDIR)$(prefix)/Python/tests_jmodelica; \
-@PYTHON_ENABLED_TRUE@	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/tests_jmodelica
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	if [ -e $(assimulo_install_dir64)/$${pkgdir}/site-packages/ ]; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	then \
@@ -1162,17 +1178,6 @@ install-python-packages: build-python-packages
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	find pyfmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	fi; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	done
-@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	cd $(abs_top_srcdir)/Python/src/tests_jmodelica/; \
-@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	mkdir -p $(DESTDIR)$(prefix)/Python_64/tests_jmodelica; \
-@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64/tests_jmodelica
-@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	rm -rf $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/src
-@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
-@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.am
-@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.in
-@PYTHON_ENABLED_TRUE@	rm -rf $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/src
-@PYTHON_ENABLED_TRUE@	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
-@PYTHON_ENABLED_TRUE@	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/Makefile.am
-@PYTHON_ENABLED_TRUE@	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/Makefile.in
 @PYTHON_ENABLED_TRUE@	mkdir -p $(DESTDIR)$(prefix)/bin
 @PYTHON_ENABLED_TRUE@	[ -e $(DESTDIR)$(prefix)/bin/jm_python.sh ] && echo "File exists, don't copy jm_python.sh" || cp Python/jm_python.sh $(DESTDIR)$(prefix)/bin/jm_python.sh
 @PYTHON_ENABLED_TRUE@	[ -e $(DESTDIR)$(prefix)/bin/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(DESTDIR)$(prefix)/bin/jm_ipython.sh
@@ -1257,8 +1262,6 @@ install-exec-local: install-python-packages
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML schemas"  || cp  $(abs_top_srcdir)/XML/*.xsd $(DESTDIR)$(prefix)/XML
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML LICENSE"  || cp  $(abs_top_srcdir)/XML/LICENSE $(DESTDIR)$(prefix)/XML
 	cp  $(abs_builddir)/version.txt $(DESTDIR)$(prefix)
-	chmod ugo+x jm_tests
-	cp -p jm_tests $(DESTDIR)$(prefix)/jm_tests
 	if [ "$(INSTALL_EXTRA)" ]; then exec "$(INSTALL_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
 bindistdir: install
