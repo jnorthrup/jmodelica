@@ -1115,4 +1115,86 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end ReinitCTest10;
 
+model ReinitCTestDerAlias1
+    Boolean g;
+    Real x;
+    Real y;
+    Real v;
+equation
+    der(v) = time;
+    der(y) = v;
+    when g then
+        reinit(v, 0);
+    end when;
+algorithm 
+    g := v > 0;
+    when {g} then
+        x := 0;
+    end when;
+
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="ReinitCTestDerAlias1",
+        description="Test reinit of derivative alias",
+        template="
+$C_dae_blocks_residual_functions$
+",
+        generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(BOO, tmp_1)
+    JMI_DEF(REA, tmp_2)
+    if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 6;
+    } else if (evaluation_mode == JMI_BLOCK_DISCRETE_REAL_VALUE_REFERENCE) {
+        x[0] = 6;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870919;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870919;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_1;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _x_1 = x[0];
+        }
+        tmp_1 = _g_0;
+        tmp_2 = _x_1;
+        _x_1 = pre_x_1;
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _sw(0) = jmi_turn_switch(jmi, _der_y_7 - (0), _sw(0), JMI_REL_GT);
+        }
+        _g_0 = _sw(0);
+        if (LOG_EXP_AND(_g_0, LOG_EXP_NOT(pre_g_0))) {
+            _x_1 = 0;
+        }
+        JMI_SWAP(GEN, _g_0, tmp_1)
+        JMI_SWAP(GEN, _x_1, tmp_2)
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _g_0 = (tmp_1);
+        }
+        if (LOG_EXP_AND(_g_0, LOG_EXP_NOT(pre_g_0))) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                JMI_GLOBAL(tmp_3) = 0.0;
+                if (JMI_GLOBAL(tmp_3) != _v_3) {
+                    _v_3 = JMI_GLOBAL(tmp_3);
+                    jmi->reinit_triggered = 1;
+                }
+            }
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = tmp_2 - (_x_1);
+        }
+    }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end ReinitCTestDerAlias1;
+
 end CCodeGenReinitTests;
