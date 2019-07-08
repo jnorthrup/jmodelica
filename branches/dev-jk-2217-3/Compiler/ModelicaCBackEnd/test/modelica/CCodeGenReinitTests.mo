@@ -1183,6 +1183,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
                 JMI_GLOBAL(tmp_3) = 0.0;
                 if (JMI_GLOBAL(tmp_3) != _v_3) {
                     _v_3 = JMI_GLOBAL(tmp_3);
+                    _der_y_7 = JMI_GLOBAL(tmp_3);
                     jmi->reinit_triggered = 1;
                 }
             }
