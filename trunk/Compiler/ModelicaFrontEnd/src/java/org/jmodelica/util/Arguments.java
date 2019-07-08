@@ -205,7 +205,7 @@ public class Arguments {
                 "  -log=<i or w or e> \n" +
                 "  -modelicapath=<path to modelica libraries> \n" +
                 "  -optfile=<path to XML options file> -opt=opt1:val1,opt2:val2\n" + 
-                "  -target=<fmume, me ,fmucs, cs, jmu, fmux, parse or check>\n" +
+                "  -target=<fmume, me, fmucs, cs, jmu, fmux, parse or check>\n" +
                 "  -version=<1.0 or 2.0>\n" +
                 "  -dumpmemuse[=<resolution>] -findflatinst \n" + 
                 "  -platform=<win32 or win64 or linux32 or linux64 or darwin32 or darwin64>" +
