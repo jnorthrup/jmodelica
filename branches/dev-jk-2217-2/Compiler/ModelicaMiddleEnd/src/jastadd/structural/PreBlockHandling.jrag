@@ -381,7 +381,7 @@ aspect PreBlockHandling {
                 boolean containsNestedDiscrete(TarjanComponent<C> component, Set<FVariable> assigned) {
             if (component.getMembers().size() > 1) {
                 for (C subComponent : component) {
-                    if (subComponent.getMembers().size() > 1) {
+                    if (isMultipleEquations(subComponent)) {
                         for (E eqn : subComponent) {
                             if ((!eqn.isMeta() && !eqn.getMatching().getVariable().isContinuous()) || 
                                     hasSwitch(eqn.getEquation(), assigned)) {
@@ -395,6 +395,18 @@ aspect PreBlockHandling {
                 }
             }
             return false;
+        }
+        
+        /**
+         * Helper for containsNestedDiscrete. Returns true if there are more than one FAbstractEquation.
+         */
+        private static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>>
+                boolean isMultipleEquations(C subComponent) {
+            Set<FAbstractEquation> eqns = new HashSet<>();
+            for (E eqn : subComponent) {
+                eqns.add(eqn.getEquation());
+            }
+            return eqns.size() > 1;
         }
         
         /**

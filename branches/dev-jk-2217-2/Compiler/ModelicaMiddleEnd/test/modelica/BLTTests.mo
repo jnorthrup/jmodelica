@@ -242,30 +242,15 @@ algorithm
 
     annotation(__JModelica(UnitTesting(tests={
         FClassMethodTestCase(
-            name="MatchingDiscreteRealInMixed1",
+            name="MatchingDiscreteReal1",
             description="Matching discrete real in mixed algorithm",
             methodName="printDAEBLT",
             methodResult="
 --- Solved equation ---
 der(y) := 1
 
---- Unsolved mixed system (Block 1) of 2 variables ---
-Unknown continuous variables:
-  x ()
-
-Solved discrete variables:
-  g
-
-Continuous residual equations:
-  algorithm
-    g := y > 0;
-    if g and not pre(g) then
-      x := 0;
-    end if;
-
-    Iteration variables: x
-
-Discrete equations:
+--- Pre propagation block (Block 1) ---
+  --- Solved algorithm ---
   algorithm
     g := y > 0;
     if g and not pre(g) then
@@ -273,11 +258,18 @@ Discrete equations:
     end if;
 
     Assigned variables: g
-
-Meta equations:
+  --- Meta equation block ---
   if g and not pre(g) then
     reinit(y, 0);
   end if
+  --- Solved algorithm ---
+  algorithm
+    g := y > 0;
+    if g and not pre(g) then
+      x := 0;
+    end if;
+
+    Assigned variables: x
 -------------------------------
 ")})));
 end MatchingDiscreteReal1;
