@@ -32,6 +32,8 @@ import java.io.StringWriter;
 import java.lang.InterruptedException;
 import java.lang.StringBuilder;
 import java.nio.channels.FileChannel;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1199,10 +1201,12 @@ public class ModelicaCompiler implements LogContainer {
         findFlatToInstanceLinks(fc);
         hookModelFlattened(fc);
         hookCheckAbort();
+
+        OptionRegistry options = fc.myOptions();
         
         // Output the untransformed flattened model
         ASTNode.beginStep("prettyPrintRawFlat()");
-        if (fc.myOptions().getBooleanOption("generate_mof_files")) {
+        if (options.getBooleanOption("generate_mof_files")) {
             log.debug("Creating raw .mof file...");
             CodeStream out = new CodeStream(flatFile);
             fc.prettyPrint_MC(out, "");
@@ -1214,7 +1218,7 @@ public class ModelicaCompiler implements LogContainer {
         log.verbose(fc);
         ASTNode.endStep("prettyPrintRawFlat()");
 
-        if (fc.myOptions().getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
+        if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
             ASTNode.beginStep("htmlDiagnostics()");
             getDiagnosticsGenerator().writeRawFlattenedModel(fc);
             getDiagnosticsGenerator().setModelDiagnosticsBeforeTransform(fc.modelDiagnostics());
@@ -1225,13 +1229,13 @@ public class ModelicaCompiler implements LogContainer {
         
         /* Temporary fix to problems with long compilation times due to later evaluations */
         getExternalFunctionCache().tearDown();
-        fc.myOptions().setIntegerOption("external_constant_evaluation", 0);
+        options.setIntegerOption("external_constant_evaluation", 0);
         
         hookModelTransformed(fc);
         hookCheckAbort();
         
         ASTNode.beginStep("prettyPrintFlat()");
-        if (fc.myOptions().getBooleanOption("generate_mof_files")) {
+        if (options.getBooleanOption("generate_mof_files")) {
             log.debug("Creating transformed .mof file...");
             CodeStream out = new CodeStream(new File(sourceDir, instName + "_transformed.mof"));
             fc.prettyPrint_MC(out, "");
@@ -1253,25 +1257,39 @@ public class ModelicaCompiler implements LogContainer {
         
         dumpMemoryUseFile(fc, "transformed", false);
         
-        if (fc.myOptions().getBooleanOption("write_iteration_variables_to_file")) {
+        if (options.getBooleanOption("write_iteration_variables_to_file")) {
             ASTNode.beginStep("writeIterationVariables()");
             if (!fc.onlyInitBLT())
                 fc.getDAEBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_iteration_variables.txt"));
             fc.getDAEInitBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_initial_system_iteration_variables.txt"));
             ASTNode.endStep("writeIterationVariables()");
         }
-        
-        if (fc.myOptions().getBooleanOption("write_tearing_pairs_to_file")) {
+
+        if (options.getBooleanOption("write_tearing_pairs_to_file")) {
             ASTNode.beginStep("writeIterationVariables()");
             if (!fc.onlyInitBLT())
                 fc.getDAEBLT().writeTearingPairsToFile(new File(instName + "_tearing_pairs.txt"));
             fc.getDAEInitBLT().writeTearingPairsToFile(new File(instName + "_initial_system_tearing_pairs.txt"));
             ASTNode.endStep("writeIterationVariables()");
         }
-        
+
+        if (!options.getStringOption("add_to_fmu").isEmpty()) {
+            ASTNode.beginStep("writingUserFiles()");
+            Path userFile = Paths.get(options.getStringOption("add_to_fmu"));
+            if (Files.exists(userFile)) {
+                log.info("Copying user file to FMU: " + userFile);
+                Path userFilesDir = resourceDir.toPath().resolve(".UserFiles");
+                Files.createDirectories(userFilesDir);
+                Files.copy(userFile, userFilesDir.resolve(userFile.getFileName()));
+            } else {
+                log.warning("Can't add file to FMU because it does not exist: %s", userFile);
+            }
+            ASTNode.endStep("writingUserFiles()");
+        }
+
         fc.errorCheck(target.getCheckType());
         handleCompilerWarnings(fc.collectWarnings());
-        
+
         if (fc.myOptions().getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
             ASTNode.beginStep("htmlDiagnostics()");
             getDiagnosticsGenerator().writeTransformedFlattenedModel(fc);
