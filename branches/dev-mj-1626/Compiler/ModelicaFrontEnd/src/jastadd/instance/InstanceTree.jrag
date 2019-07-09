@@ -667,6 +667,7 @@ aspect Environments {
     eq InstRecordConstructor.getInstExtends().myEnvironment(String name)           = myEnvironment_def(name);
     eq InstComponentDecl.getInstConstrainingComponent().myEnvironment(String name) = getMergedEnvironment().clone();
     eq InstBaseClassDecl.getInstConstrainingClass().myEnvironment(String name)     = getMergedEnvironment().clone();
+    // TODO: This seems like the wriong name - shouldn't we filter on template's name?
     eq InstExpandableConnectorDecl.getInstComponentDecl(int i).myEnvironment(String name)          = 
         useTemplate(i) ? template(i).myEnvironment(name) : myEnvironment_def(name);
     eq InstArrayExpandableConnector.getInstComponentDecl(int i).myEnvironment(String name)         = 
@@ -1667,7 +1668,7 @@ aspect InstanceTreeConstruction {
 
     public InstAccess SrcDot.newInstAccess() {
         List<InstAccess> l = new List<InstAccess>();
-        for (SrcAccess a : getSrcAccesss())
+        for (SrcNamedAccess a : getSrcNamedAccesss())
             l.add(a.newInstAccess());
         InstDot ia = new InstDot(l);
         ia.setLocation(this);

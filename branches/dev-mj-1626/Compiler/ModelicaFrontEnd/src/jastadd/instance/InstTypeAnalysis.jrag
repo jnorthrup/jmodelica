@@ -242,7 +242,7 @@ aspect InstTypeAnalysis {
                     decl = decl.getInstComponentDecl(index.get(i) - 1);
                 }
             }
-            decls.put(index.clone(), decl);
+            decls.put(index.fix(), decl);
         }
         return new ArrayType(indices(), decls, type().scalarType());
     }
@@ -271,7 +271,7 @@ aspect InstBindingType {
             Array array = bexp.getArray();
             Map<Index, FExp> exps = new HashMap<>();
             for (Index i : bexp.indices()) {
-                exps.put(i.clone(), array.get(i));
+                exps.put(i.fix(), array.get(i));
             }
             return new ArrayType(bexp.indices(), exps, bexp.type().scalarType());
         }

@@ -265,10 +265,10 @@ aspect SourceTraversal {
     /**
      * Iterable over each part of a qualified name.
      */
-    syn Iterable<SrcAccess> SrcAccess.nameParts();
+    syn Iterable<? extends SrcAccess> SrcAccess.nameParts();
     eq SrcAccess.nameParts()       = new SingleIterable(this);
     eq SrcGlobalAccess.nameParts() = getSrcAccess().nameParts();
-    eq SrcDot.nameParts()          = getSrcAccesss();
+    eq SrcDot.nameParts()          = getSrcNamedAccesss();
 
     public <T extends SrcClause> Iterable<T> SrcClassDecl.clauses(Class<T> type) {
         return Collections.<T>emptyList();

@@ -1,4 +1,10 @@
 ================= Unreleased ==================
+# Change ; Major; PyFMI ; #5802
+Updated JModelica external to PyFMI 2.5.3
+
+# Change ; Minor ; Compiler ; #5800
+SrcDot now has SrcNamedAccess instead of SrcAccess as children.
+
 # Fixed ; Minor ; Compiler ; #5791
 Fixed source-tree lookup for modifications: don't look up in normal scope if not found in member scope.
 
