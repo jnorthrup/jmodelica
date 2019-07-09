@@ -1,4 +1,10 @@
 ================= Unreleased ==================
+# Change ; Major ; Compiler ; #5804
+Switch to "java.nio.file.Path" instead of "File" or "String"s representing paths in most places.
+"Path" is more thought-through and more powerful, which will allow to implement advanced featuers in the future.
+Note that while java.nio allows to access non-File resources with the same API, the internal workings of JModelica
+currently make restrictions on only supporting file accesses.
+
 # Change ; Major; PyFMI ; #5802
 Updated JModelica external to PyFMI 2.5.3
 
