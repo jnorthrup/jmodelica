@@ -31,7 +31,7 @@
     <property name="java_version" value="1.7"/>
     <property name="java_compiler" value="javac${java_version}"/>
 
-    <fail unless="target" message="Property 'target' not set. Should point to build directory where this ant file will generate intermediate files and build outputs. For builds in eclipse we normally use ${workspace_loc}/JModelica/tools/eclipse/antbuild."/>
+    <fail unless="target" message="Property 'target' not set. Should point to build directory where this ant file will generate intermediate files and build outputs. For builds in eclipse we normally use ${workspace_loc:&lt;project&gt;/tools/eclipse/antbuild}."/>
     <echo>build-base.xml: running in ${target}</echo>
 
     <property name="compiler_build" value="${target}/src/build" />
@@ -75,8 +75,6 @@
     <taskdef resource="net/sf/antcontrib/antlib.xml">
         <classpath path="${ant-contrib_dir}/target/ant-contrib.jar" />
     </taskdef>
-    <!-- "jastadd" is an ant task class in jastadd2.jar -->
-    <taskdef classname="org.jastadd.JastAddTask" name="jastadd" classpath="${jastadd_dir}/jastadd2.jar" />
     <!-- "jflex" is an ant task class for the scanner generator in JFlex.jar -->
     <taskdef name="jflex" classname="JFlex.anttask.JFlexTask" classpath="${jflex_dir}/lib/JFlex.jar" />
     <!-- "beaver" is an ant task class for the parser generator in beaver.jar -->
@@ -611,7 +609,9 @@
         <if>
             <isset property="javadoc.packages"/>
             <then>
-                <mkdir dir="${javadoc_output}" />
+                <!-- The javadoc directory is sometimes unusable, unclear why.
+                     It is recreated by the javadoc task. -->
+                <delete dir="${javadoc_output}" />
                 <javadoc 
                     access="public" 
                     sourcepath="${java_output_final_common}:${java_output_final}:${java_dirs}" 

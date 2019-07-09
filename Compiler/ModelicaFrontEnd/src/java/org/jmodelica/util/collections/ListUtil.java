@@ -93,18 +93,22 @@ public final class ListUtil {
     }
 
     /**
-     * Combines several lists into one.
+     * Create a new list that is the concatenation of the given lists, in the order given.
      * 
-     * @param lists The lists to join.
-     * @return      one list containing all the elements in {@code lists}.
+     * @param lists  any number of lists to concatenate
+     * @return       a newly created ArrayList that contains the concatenation of the given lists
      */
     @SafeVarargs
-    public static <T> List<T> join(List<T>... lists) {
-        List<T> result = new ArrayList<T>();
+    public static <T> ArrayList<T> concatenate(List<T>... lists) {
+        int size = 0;
         for (List<T> list : lists) {
-            result.addAll(list);
+            size += list.size();
         }
-        return result;
+        ArrayList<T> res = new ArrayList<T>(size);
+        for (List<T> list : lists) {
+            res.addAll(list);
+        }
+        return res;
     }
 
 }

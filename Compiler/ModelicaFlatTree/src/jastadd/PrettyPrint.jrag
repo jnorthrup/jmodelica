@@ -937,7 +937,7 @@ aspect PrettyPrint {
     }
 
 	public void SrcDot.prettyPrint(Printer p, CodeStream str, String indent) {
-		getSrcAccesss().prettyPrintWithSep(p, str, indent, ".");
+		getSrcNamedAccesss().prettyPrintWithSep(p, str, indent, ".");
 	}
 
 	public void SrcGlobalAccess.prettyPrint(Printer p, CodeStream str, String indent) {

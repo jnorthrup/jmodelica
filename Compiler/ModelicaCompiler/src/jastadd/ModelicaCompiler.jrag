@@ -2228,8 +2228,8 @@ syn String SrcStoredDefinition.findOutermostLibraryDir() {
 
 syn File SrcAccess.findOutermostLibraryDirForWithin(File f) = null;
 eq SrcDot.findOutermostLibraryDirForWithin(File f) {
-    for (int i = getNumSrcAccess() - 1; i >= 0 && f != null; i--)
-        f = getSrcAccess(i).findOutermostLibraryDirForWithin(f);
+    for (int i = getNumSrcNamedAccess() - 1; i >= 0 && f != null; i--)
+        f = getSrcNamedAccess(i).findOutermostLibraryDirForWithin(f);
     return f;
 }
 eq SrcNamedAccess.findOutermostLibraryDirForWithin(File f) {
