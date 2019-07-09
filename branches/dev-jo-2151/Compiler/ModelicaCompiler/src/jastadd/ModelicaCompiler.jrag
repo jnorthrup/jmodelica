@@ -32,8 +32,6 @@ import java.io.StringWriter;
 import java.lang.InterruptedException;
 import java.lang.StringBuilder;
 import java.nio.channels.FileChannel;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1273,20 +1271,6 @@ public class ModelicaCompiler implements LogContainer {
             ASTNode.endStep("writeIterationVariables()");
         }
 
-        if (!options.getStringOption("add_to_fmu").isEmpty()) {
-            ASTNode.beginStep("writingUserFiles()");
-            Path userFile = Paths.get(options.getStringOption("add_to_fmu"));
-            if (Files.exists(userFile)) {
-                log.info("Copying user file to FMU: " + userFile);
-                Path userFilesDir = resourceDir.toPath().resolve(".UserFiles");
-                Files.createDirectories(userFilesDir);
-                Files.copy(userFile, userFilesDir.resolve(userFile.getFileName()));
-            } else {
-                log.warning("Can't add file to FMU because it does not exist: %s", userFile);
-            }
-            ASTNode.endStep("writingUserFiles()");
-        }
-
         fc.errorCheck(target.getCheckType());
         handleCompilerWarnings(fc.collectWarnings());
 
@@ -1341,24 +1325,6 @@ public class ModelicaCompiler implements LogContainer {
         } finally {
             tryTearDown(doTearDown);
         }
-    }
-    
-    public void doGenerateCode(FClass fc, TargetObject target) throws FileNotFoundException {
-        ASTNode.beginStep("generateCode()");
-        log.info("Generating code...");
-        String name = fc.nameUnderscore();
-        
-        Templates templates = target.getTemplates(getOptions());
-    
-        templates.generateCFiles(this, fc, createCGenerator(fc), sourceDir, name);
-        templates.generateXMLFiles(this, fc, target.getXMLGenerator(fc), outDir, "modelDescription");
-        
-        fc.guidManager().setSourceFile(new File(outDir, "modelDescription.xml"));
-        fc.guidManager().processDependentFiles();
-        
-        hookCodeGenerated(outDir);
-        log.debug("... code generated.");
-        ASTNode.endStep("generateCode()");
     }
     
     /**
@@ -1862,6 +1828,25 @@ public class ModelicaCompiler implements LogContainer {
     }
 
 }
+
+    public void ModelicaCompiler.doGenerateCode(FClass fc, TargetObject target) throws FileNotFoundException {
+        ASTNode.beginStep("generateCode()");
+        log.info("Generating code...");
+        String name = fc.nameUnderscore();
+        
+        Templates templates = target.getTemplates(getOptions());
+    
+        templates.generateCFiles(this, fc, createCGenerator(fc), sourceDir, name);
+        templates.generateXMLFiles(this, fc, target.getXMLGenerator(fc), outDir, "modelDescription");
+        
+        fc.guidManager().setSourceFile(new File(outDir, "modelDescription.xml"));
+        fc.guidManager().processDependentFiles();
+        
+        hookCodeGenerated(outDir);
+        log.debug("... code generated.");
+        ASTNode.endStep("generateCode()");
+    }
+    
 
     /**
      * Retrieves the target platforms.

@@ -456,9 +456,5 @@ STRING compiler_version compiler internal "compiler_version_file_not_read"
 
 "The version string for the compiler. Uses default value during unit testing."
 
-********************************************************************************
-STRING add_to_fmu compiler uncommon ""
+*******************************************************************************
 
-"Adds the file at the given file path to the generated FMU in /resources/.UserFiles/."
-
-********************************************************************************
