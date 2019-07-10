@@ -1,5 +1,8 @@
 ================= Unreleased ==================
 # Fixed ; Minor ; Compiler ; #5793
+Fixed bug where reinit did not set value of aliased derivatives.
+
+# Fixed ; Minor ; Compiler ; #5793
 Improved detection of pre-propagation blocks to fix a case where 
 reinit did not update properly during event iteration.
 
