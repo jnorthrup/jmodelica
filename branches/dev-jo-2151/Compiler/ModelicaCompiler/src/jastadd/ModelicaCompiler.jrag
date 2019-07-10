@@ -1200,11 +1200,11 @@ public class ModelicaCompiler implements LogContainer {
         hookModelFlattened(fc);
         hookCheckAbort();
 
-        OptionRegistry options = fc.myOptions();
+        OptionRegistry fcOptions = fc.myOptions();
         
         // Output the untransformed flattened model
         ASTNode.beginStep("prettyPrintRawFlat()");
-        if (options.getBooleanOption("generate_mof_files")) {
+        if (fcOptions.getBooleanOption("generate_mof_files")) {
             log.debug("Creating raw .mof file...");
             CodeStream out = new CodeStream(flatFile);
             fc.prettyPrint_MC(out, "");
@@ -1216,7 +1216,7 @@ public class ModelicaCompiler implements LogContainer {
         log.verbose(fc);
         ASTNode.endStep("prettyPrintRawFlat()");
 
-        if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
+        if (fcOptions.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
             ASTNode.beginStep("htmlDiagnostics()");
             getDiagnosticsGenerator().writeRawFlattenedModel(fc);
             getDiagnosticsGenerator().setModelDiagnosticsBeforeTransform(fc.modelDiagnostics());
@@ -1227,13 +1227,13 @@ public class ModelicaCompiler implements LogContainer {
         
         /* Temporary fix to problems with long compilation times due to later evaluations */
         getExternalFunctionCache().tearDown();
-        options.setIntegerOption("external_constant_evaluation", 0);
+        fcOptions.setIntegerOption("external_constant_evaluation", 0);
         
         hookModelTransformed(fc);
         hookCheckAbort();
         
         ASTNode.beginStep("prettyPrintFlat()");
-        if (options.getBooleanOption("generate_mof_files")) {
+        if (fcOptions.getBooleanOption("generate_mof_files")) {
             log.debug("Creating transformed .mof file...");
             CodeStream out = new CodeStream(new File(sourceDir, instName + "_transformed.mof"));
             fc.prettyPrint_MC(out, "");
@@ -1255,7 +1255,7 @@ public class ModelicaCompiler implements LogContainer {
         
         dumpMemoryUseFile(fc, "transformed", false);
         
-        if (options.getBooleanOption("write_iteration_variables_to_file")) {
+        if (fcOptions.getBooleanOption("write_iteration_variables_to_file")) {
             ASTNode.beginStep("writeIterationVariables()");
             if (!fc.onlyInitBLT())
                 fc.getDAEBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_iteration_variables.txt"));
@@ -1263,7 +1263,7 @@ public class ModelicaCompiler implements LogContainer {
             ASTNode.endStep("writeIterationVariables()");
         }
 
-        if (options.getBooleanOption("write_tearing_pairs_to_file")) {
+        if (fcOptions.getBooleanOption("write_tearing_pairs_to_file")) {
             ASTNode.beginStep("writeIterationVariables()");
             if (!fc.onlyInitBLT())
                 fc.getDAEBLT().writeTearingPairsToFile(new File(instName + "_tearing_pairs.txt"));
@@ -1274,7 +1274,7 @@ public class ModelicaCompiler implements LogContainer {
         fc.errorCheck(target.getCheckType());
         handleCompilerWarnings(fc.collectWarnings());
 
-        if (fc.myOptions().getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
+        if (fcOptions.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
             ASTNode.beginStep("htmlDiagnostics()");
             getDiagnosticsGenerator().writeTransformedFlattenedModel(fc);
             getDiagnosticsGenerator().writeDiagnostics(fc);
@@ -1325,6 +1325,24 @@ public class ModelicaCompiler implements LogContainer {
         } finally {
             tryTearDown(doTearDown);
         }
+    }
+    
+    public void doGenerateCode(FClass fc, TargetObject target) throws FileNotFoundException {
+        ASTNode.beginStep("generateCode()");
+        log.info("Generating code...");
+        String name = fc.nameUnderscore();
+        
+        Templates templates = target.getTemplates(getOptions());
+    
+        templates.generateCFiles(this, fc, createCGenerator(fc), sourceDir, name);
+        templates.generateXMLFiles(this, fc, target.getXMLGenerator(fc), outDir, "modelDescription");
+        
+        fc.guidManager().setSourceFile(new File(outDir, "modelDescription.xml"));
+        fc.guidManager().processDependentFiles();
+        
+        hookCodeGenerated(outDir);
+        log.debug("... code generated.");
+        ASTNode.endStep("generateCode()");
     }
     
     /**
@@ -1828,25 +1846,6 @@ public class ModelicaCompiler implements LogContainer {
     }
 
 }
-
-    public void ModelicaCompiler.doGenerateCode(FClass fc, TargetObject target) throws FileNotFoundException {
-        ASTNode.beginStep("generateCode()");
-        log.info("Generating code...");
-        String name = fc.nameUnderscore();
-        
-        Templates templates = target.getTemplates(getOptions());
-    
-        templates.generateCFiles(this, fc, createCGenerator(fc), sourceDir, name);
-        templates.generateXMLFiles(this, fc, target.getXMLGenerator(fc), outDir, "modelDescription");
-        
-        fc.guidManager().setSourceFile(new File(outDir, "modelDescription.xml"));
-        fc.guidManager().processDependentFiles();
-        
-        hookCodeGenerated(outDir);
-        log.debug("... code generated.");
-        ASTNode.endStep("generateCode()");
-    }
-    
 
     /**
      * Retrieves the target platforms.
