@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+# Fixed ; Minor ; Compiler ; #5793
+Fixed bug where reinit did not set value of aliased derivatives.
+
 # Change ; Minor ; Compiler ; #5800
 SrcDot now has SrcNamedAccess instead of SrcAccess as children.
 
