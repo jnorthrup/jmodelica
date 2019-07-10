@@ -411,6 +411,16 @@ public class ModelicaCompiler implements LogContainer {
         for (CompilationHooks hooks : hooksList)
             hooks.codeCompiled(this);
     }
+
+    /**
+     * Calls the hook to be called before the FMU is packed.
+     * @param fc the source FClass
+     * @param dir the temporary FMU directory
+     */
+    protected void hookPackFmu(FClass fc, File dir) {
+        for (CompilationHooks hooks : hooksList)
+            hooks.packFmu(this, fc, dir);
+    }
     
     /**
      * Calls the hook to be called after the FMU is packed.
@@ -2127,6 +2137,7 @@ public class ModelicaCompiler implements LogContainer {
 
         File unitFile = fClass.root().getUtilInterface().getCompilationOutputPath();
 
+		hookPackFmu(fClass, outDir);
         try {
             hookCheckAbort();
             copySourceFiles(fClass, sourceDir, outDir);
@@ -2577,7 +2588,15 @@ public interface CompilationHooks {
      * Called after the generated C code is compiled.
      */
     public void codeCompiled(ModelicaCompiler instance);
-    
+
+    /**
+     * Called before the FMU is packed.
+     *
+     * @param fc the source FClass
+     * @param dir the temporary directory containing files to be packed in the FMU
+     */
+    public void packFmu(ModelicaCompiler instance, FClass fc, File dir);
+
     /**
      * Called after the FMU is packed.
      */
@@ -2593,6 +2612,8 @@ public abstract class CompilationHooksImpl implements CompilationHooks {
     public void modelInstantiatied(ModelicaCompiler instance, InstClassDecl icd) {}
     @Override
     public void modelFlattened(ModelicaCompiler instance, FClass fc) {}
+    @Override
+    public void packFmu(ModelicaCompiler instance, FClass fc, File dir) {}
     @Override
     public void fmuPacked(ModelicaCompiler instance, FClass fc, File path) {}
     @Override
