@@ -607,7 +607,7 @@ abstract public class TestCase implements GenericTestCase {
         if (testSemanticProblems(problems) || checkType == ErrorCheckType.CHECK) return;
         
         // Test instantiated class
-        InstClassDecl icd = ipr.lookupInstClassQualified(getClassName()).target();
+        InstClassDecl icd = ipr.instantiateModel(getClassName());
         if (testInstantiated(icd)) return;
         
         // Flatten class and check errors reported during flattening

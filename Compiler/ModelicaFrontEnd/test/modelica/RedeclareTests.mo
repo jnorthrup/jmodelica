@@ -7237,13 +7237,13 @@ model RedeclarePrefix9
     
     C c(redeclare Real x);
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclarePrefix9",
-            description="Check that flow/stream is retained from original declaration in a redeclare if none exist in new declaration",
-            flatModel="
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="Prefix_RedeclarePrefix9",
+        description="Check that flow/stream is retained from original declaration in a redeclare if none exist in new declaration",
+        flatModel="
 fclass RedeclareTests.Prefix.RedeclarePrefix9
- input Real c.x;
+ flow Real c.x;
 end RedeclareTests.Prefix.RedeclarePrefix9;
 ")})));
 end RedeclarePrefix9;
@@ -7259,14 +7259,14 @@ model RedeclarePrefix10
 equation
     connect(c1, c2);
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclarePrefix10",
-            description="Check that flow/stream can be changed in a redeclare",
-            flatModel="
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="Prefix_RedeclarePrefix10",
+        description="Check that flow/stream can be changed in a redeclare",
+        flatModel="
 fclass RedeclareTests.Prefix.RedeclarePrefix10
- input Real c1.x;
- input Real c2.x;
+ flow Real c1.x;
+ flow Real c2.x;
 equation
  - c1.x - c2.x = 0.0;
 end RedeclareTests.Prefix.RedeclarePrefix10;
