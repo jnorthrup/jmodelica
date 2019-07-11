@@ -325,6 +325,23 @@ aspect PreBlockHandling {
          */
         private static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>>
         Collection<TarjanComponent<C>> mergeSubComponents(Collection<TarjanComponent<TarjanComponent<C>>> preBlocks2) {
+            Collection<TarjanComponent<C>> components = mergeTarjanComponents(preBlocks2);
+            Set<FVariable> assigned = assigned(components);
+            Collection<TarjanComponent<C>> newComponents = new ArrayList<TarjanComponent<C>>();
+            for (TarjanComponent<C> component : components) {
+                if (containsNestedDiscrete(component, assigned)) {
+                    component = mergeSubComponents(component);
+                }
+                newComponents.add(component);
+            }
+            return newComponents;
+        }
+
+        /**
+         * Helper for mergeSubComponents. Merges TarjanComponents in a collection.
+         */
+        private static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>>
+                Collection<TarjanComponent<C>> mergeTarjanComponents(Collection<TarjanComponent<TarjanComponent<C>>> preBlocks2) {
             Collection<TarjanComponent<C>> components = new ArrayList<TarjanComponent<C>>();
             for (TarjanComponent<TarjanComponent<C>> preBlock2 : preBlocks2) {
                 Iterator<TarjanComponent<C>> it = preBlock2.iterator();
@@ -333,13 +350,16 @@ aspect PreBlockHandling {
                     TarjanComponent<C> component = it.next();
                     newComponent.mergeWith(component);
                 }
-                
-                if (preBlock2.getMembers().size() > 1) {
-                    
-                } else {
-                }
                 components.add(newComponent);
             }
+            return components;
+        }
+
+        /**
+         * Helper for mergeSubComponents. Collects all matched variables in <code>components</code>.
+         */
+        private static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>>
+                Set<FVariable> assigned(Collection<TarjanComponent<C>> components) {
             Set<FVariable> assigned = new HashSet<>();
             for (TarjanComponent<C> component : components) {
                 for (C subComponent : component) {
@@ -350,48 +370,74 @@ aspect PreBlockHandling {
                     }
                 }
             }
-            Collection<TarjanComponent<C>> newComponents = new ArrayList<TarjanComponent<C>>();
-            for (TarjanComponent<C> component : components) {
-                if (component.getMembers().size() > 1) {
-                    boolean containsNestedDiscrete = false;
-                    for (C subComponent : component) {
-                        if (subComponent.getMembers().size() == 1) {
-                            continue;
-                        }
+            return assigned;
+        }
+
+        /**
+         * Helper for mergeSubComponents. Returns true if there are more than one FAbstractEquation and
+         * there is a matching to a discrete variable.
+         */
+        private static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>>
+                boolean containsNestedDiscrete(TarjanComponent<C> component, Set<FVariable> assigned) {
+            if (component.getMembers().size() > 1) {
+                for (C subComponent : component) {
+                    if (isMultipleEquations(subComponent)) {
                         for (E eqn : subComponent) {
-                            boolean hasSwitch = false;
-                            for (FRelExp exp : eqn.getEquation().relExpInEquation()) {
-                                if (exp.dependsOn(assigned)) {
-                                    hasSwitch = true;
-                                    break;
-                                }
-                            }
-                            if (!eqn.isMeta() && !eqn.getMatching().getVariable().isContinuous() || hasSwitch) {
+                            if ((!eqn.isMeta() && !eqn.getMatching().getVariable().isContinuous()) || 
+                                    hasSwitch(eqn.getEquation(), assigned)) {
                                 // If the matched variable and in effect the
                                 // equation is discrete, then we need to
                                 // extract all sub-blocks into one block.
-                                containsNestedDiscrete = true;
-                                break;
+                                return true;
                             }
                         }
                     }
-                    if (containsNestedDiscrete) {
-                        // Merge!
-                        Iterator<C> it = component.iterator();
-                        C newSubComponent = it.next();
-                        while (it.hasNext()) {
-                            C mergeComponent = it.next();
-                            newSubComponent.mergeWith(mergeComponent);
-                        }
-                        TarjanComponent<C> newComponent = new TarjanComponent<C>();
-                        newComponent.addPredecessors(component.getPredecessors());
-                        newComponent.addMember(newSubComponent);
-                        component = newComponent;
-                    }
                 }
-                newComponents.add(component);
             }
-            return newComponents;
+            return false;
+        }
+        
+        /**
+         * Helper for containsNestedDiscrete. Returns true if there are more than one FAbstractEquation.
+         */
+        private static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>>
+                boolean isMultipleEquations(C subComponent) {
+            Set<FAbstractEquation> eqns = new HashSet<>();
+            for (E eqn : subComponent) {
+                eqns.add(eqn.getEquation());
+            }
+            return eqns.size() > 1;
+        }
+        
+        /**
+         * Helper for containsNestedDiscrete. Returns true if there is a relational expression 
+         * depending on variables in the assigned set in the equation.
+         */
+        private static boolean hasSwitch(FAbstractEquation equation, Set<FVariable> assigned) {
+            for (FRelExp exp : equation.relExpInEquation()) {
+                if (exp.dependsOn(assigned)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        /**
+         * Helper for mergeSubComponents. Returns a new TarjanComponent containing a single member 
+         * merged from the members of <code>component</code>.
+         */
+        private static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>>
+                TarjanComponent<C> mergeSubComponents(TarjanComponent<C> component) {
+            Iterator<C> it = component.iterator();
+            C newSubComponent = it.next();
+            while (it.hasNext()) {
+                C mergeComponent = it.next();
+                newSubComponent.mergeWith(mergeComponent);
+            }
+            TarjanComponent<C> res = new TarjanComponent<C>();
+            res.addPredecessors(component.getPredecessors());
+            res.addMember(newSubComponent);
+            return res;
         }
 
         private static class PreTarjan<C extends TarjanComponent<?>> extends SimpleTarjan<C> {

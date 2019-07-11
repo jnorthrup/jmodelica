@@ -1676,10 +1676,11 @@ aspect Flattening {
         fv.setTypePrefixVariability(variability());
         
         // Only set input/output prefix for top level inputs and outputs
-        if (isTopLevelInputOutput()) 
-            fv.setTypePrefixInputOutput(isInput() ? TypePrefixInputOutput.INPUT : TypePrefixInputOutput.OUTPUT);
-        else
+        if (isTopLevelInputOutput()) {
+            fv.setTypePrefixInputOutput(createTypePrefixInputOutput());
+        } else {
             fv.setTypePrefixInputOutput(TypePrefixInputOutput.NONE);
+        }
         
         if (myInstClass().extendsPrimitive())
             fv.setDerivedType(myInstClass().actualInstClass().qualifiedName());
@@ -1712,12 +1713,28 @@ aspect Flattening {
     }
 
     public TypePrefixInputOutput InstAssignable.createTypePrefixInputOutput() {
-        if (isInput()) {
-            return TypePrefixInputOutput.INPUT;
-        } else if (isOutput()) {
-            return TypePrefixInputOutput.OUTPUT;
+        if (isConnectorVariable()) {
+            if (isInput()) {
+                return TypePrefixInputOutput.INPUT;
+            } else if (isOutput()) {
+                return TypePrefixInputOutput.OUTPUT;
+            } else if (isFlow()) {
+                return TypePrefixInputOutput.FLOW;
+            } else if (isStream()) {
+                return TypePrefixInputOutput.STREAM;
+            } else if (!variability().parameterOrLess()) {
+                return TypePrefixInputOutput.POTENTIAL;
+            } else {
+                return TypePrefixInputOutput.NONE;
+            }
         } else {
-            return TypePrefixInputOutput.NONE;
+            if (isInput()) {
+                return TypePrefixInputOutput.INPUT;
+            } else if (isOutput()) {
+                return TypePrefixInputOutput.OUTPUT;
+            } else {
+                return TypePrefixInputOutput.NONE;
+            }
         }
     }
 

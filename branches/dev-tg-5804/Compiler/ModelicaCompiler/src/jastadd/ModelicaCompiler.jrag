@@ -401,9 +401,9 @@ public class ModelicaCompiler implements LogContainer {
     /**
      * Calls the hook to be called after output code is generated.
      */
-    protected void hookCodeGenerated(File dir) {
+    protected void hookCodeGenerated(FClass fc, File dir) {
         for (CompilationHooks hooks : hooksList)
-            hooks.codeGenerated(this, dir);
+            hooks.codeGenerated(this, fc, dir);
     }
     
     /**
@@ -1433,11 +1433,11 @@ public class ModelicaCompiler implements LogContainer {
     
         templates.generateCFiles(this, fc, createCGenerator(fc), sourceDir, name);
         templates.generateXMLFiles(this, fc, target.getXMLGenerator(fc), outDir, "modelDescription");
+        hookCodeGenerated(fc, outDir);
         
         fc.guidManager().setSourceFile(new File(outDir, "modelDescription.xml"));
         fc.guidManager().processDependentFiles();
         
-        hookCodeGenerated(outDir);
         log.debug("... code generated.");
         ASTNode.endStep("generateCode()");
     }
@@ -2715,7 +2715,7 @@ public interface CompilationHooks {
     /**
      * Called after output code is generated.
      */
-    public void codeGenerated(ModelicaCompiler instance, File dir);
+    public void codeGenerated(ModelicaCompiler instance, FClass fc, File dir);
     
     /**
      * Called after the generated C code is compiled.
@@ -2746,7 +2746,7 @@ public abstract class CompilationHooksImpl implements CompilationHooks {
     @Override
     public void codeGeneratorCreated(ModelicaCompiler instance, AbstractGenerator gen) {}
     @Override
-    public void codeGenerated(ModelicaCompiler instance, File dir) {}
+    public void codeGenerated(ModelicaCompiler instance, FClass fc, File dir) {}
     @Override
     public void codeCompiled(ModelicaCompiler instance) {}
 }

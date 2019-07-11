@@ -1254,6 +1254,11 @@ aspect Visibility {
 
 aspect ComponentDeclMethods {
 
+    inh boolean InstComponentDecl.isConnectorVariable();
+    eq InstClassDecl.getChild().isConnectorVariable() = isConnector();
+    eq InstComponentDecl.getChild().isConnectorVariable() = isConnector() || isConnectorVariable();
+    eq InstRoot.getChild().isConnectorVariable() = false;
+
     /**
      * Check if a SrcComponentDecl is declared flow.
      */
@@ -1325,7 +1330,7 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component is an input component.
      */
-    syn boolean InstComponentDecl.isInput() = isDeclaredInput() || inheritsInput() || (isDeclaredFlow() && !isOutput());
+    syn boolean InstComponentDecl.isInput() = isDeclaredInput() || inheritsInput();
     
     /**
      * Check if this component inherits input from the surrounding component.
@@ -1411,7 +1416,7 @@ aspect ComponentDeclMethods {
      */
     syn boolean InstComponentDecl.isTopLevelInputOutput() = false;
     eq InstAssignable.isTopLevelInputOutput() = isTopLevel() && !inExpandableConnector() && 
-            (isInput() || isOutput()) && !isProtected() && isPublicVar();
+            (isInput() || isOutput() || isConnectorVariable()) && !isProtected() && isPublicVar();
 
     inh boolean InstComponentDecl.isTopLevel();
     eq InstComponentDecl.getChild().isTopLevel() = (isAssignable() || isConnector()) && isTopLevel();

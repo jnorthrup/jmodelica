@@ -207,9 +207,16 @@ aspect CCodeGenGlobalsReinit {
         str.format("%sif (%s != ", (first ? indent : " else "), FExp.global_C(tempName_C()));
         p.print(getVar(), str, indent);
         str.println(") {");
-        str.print(p.indent(indent));
+        String next = p.indent(indent);
+        str.print(next);
         p.print(getVar(), str, indent);
         str.formatln(" = %s;", FExp.global_C(tempName_C()));
+        FVariable der = myFV().derivativeEquivalent();
+        if (der != null) {
+            str.print(next);
+            p.print(der.myDerivativeVariable(), str, indent);
+            str.formatln(" = %s;", FExp.global_C(tempName_C()));
+        }
         str.formatln("%sjmi->reinit_triggered = 1;", p.indent(indent));
         str.format("%s}", indent);
         if (last)
