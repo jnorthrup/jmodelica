@@ -367,9 +367,9 @@ aspect ContentCheck {
 	}
 	
     syn boolean FType.compatibleConstructor(InstClassDecl icd) = false;
-    eq FExternalObjectType.compatibleConstructor(InstClassDecl icd) = getConstructor().name().equals(icd.qualifiedName() + ".constructor");
+    eq FExternalObjectType.compatibleConstructor(InstClassDecl icd) = getConstructor().name().equals("." + icd.qualifiedName() + ".constructor");
     syn boolean FType.compatibleDestructor(InstClassDecl icd) = false;
-    eq FExternalObjectType.compatibleDestructor(InstClassDecl icd) = getDestructor().name().equals(icd.qualifiedName() + ".destructor");
+    eq FExternalObjectType.compatibleDestructor(InstClassDecl icd) = getDestructor().name().equals("." + icd.qualifiedName() + ".destructor");
 	
 	// TODO: check if this is a builtin function (with bad arguments), error otherwise
 //	public void FBuiltinExternalLanguage.contentCheck(ErrorCheckType checkType) {
