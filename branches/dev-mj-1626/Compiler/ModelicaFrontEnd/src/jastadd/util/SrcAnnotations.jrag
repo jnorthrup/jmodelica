@@ -289,6 +289,12 @@ aspect SrcAnnotations {
     public void SrcModification.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         throw new FailedToSetAnnotationValueException();
     }
+    
+    @Override
+    public boolean SrcModification.canChangeAnnotationValue() {
+        return false;
+    }
+    
     @Override
     public void SrcValueModification.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         if (newValue == null) {
@@ -297,6 +303,12 @@ aspect SrcAnnotations {
         }
         setSrcExp(newValue);
     }
+
+    @Override
+    public boolean SrcValueModification.canChangeAnnotationValue() {
+        return true;
+    }
+
     @Override
     public void SrcComponentModification.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         if (!hasSrcModification()) {
@@ -305,6 +317,12 @@ aspect SrcAnnotations {
         }
         getSrcModification().setAnnotationValue(newValue);
     }
+    
+    @Override
+    public boolean SrcComponentModification.canChangeAnnotationValue() {
+        return true;
+    }
+    
     @Override
     public void SrcCompleteModification.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         if (hasSrcValueModification()) {
@@ -316,6 +334,11 @@ aspect SrcAnnotations {
         } else {
             setSrcValueModification(new SrcValueModification(newValue));
         }
+    }
+    
+    @Override
+    public boolean SrcCompleteModification.canChangeAnnotationValue() {
+        return true;
     }
     
     /**
@@ -419,6 +442,11 @@ aspect SrcAnnotations {
 
     @Override
     public void SrcAnnotation.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
+        throw new FailedToSetAnnotationValueException();
+    }
+    
+    public boolean SrcAnnotation.canChangeAnnotationValue() {
+        return false;
     }
 
     syn boolean SrcAnnotation.isEach() = false;
@@ -477,6 +505,11 @@ aspect SrcAnnotations {
         @Override
         public void setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
             throw new FailedToSetAnnotationValueException();
+        }
+        
+        @Override
+        public boolean canChangeAnnotationValue() {
+        	return false;
         }
 
         protected abstract boolean hasProvider();
@@ -601,6 +634,15 @@ aspect SrcAnnotations {
                     getProvider().setAnnotationValue(newValue);
                 } else {
                     owningNode.setSrcModification(new SrcValueModification(newValue));
+                }
+            }
+
+            @Override
+            public boolean canChangeAnnotationValue() {
+                if (hasProvider()) {
+                	return getProvider().canChangeAnnotationValue();
+                } else {
+                    return true;
                 }
             }
             
@@ -741,6 +783,11 @@ aspect SrcAnnotations {
     public void SrcFunctionCall.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         throw new FailedToSetAnnotationValueException();
     }
+    
+    @Override
+    public boolean SrcFunctionCall.canChangeAnnotationValue() {
+        return false;
+    }
 
     @Override
     public SrcAnnotationProvider SrcFunctionCall.addAnnotationSubNode(String name) {
@@ -790,6 +837,11 @@ aspect SrcAnnotations {
     }
 
     @Override
+    public boolean SrcArrayConstructor.canChangeAnnotationValue() {
+        return false;
+    }
+
+    @Override
     public SrcAnnotationProvider SrcArrayConstructor.addAnnotationSubNode(String name) {
         return null;
     }
@@ -825,6 +877,12 @@ aspect SrcAnnotations {
     public void SrcNamedArgument.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         throw new FailedToSetAnnotationValueException();
     }
+    
+    @Override
+    public boolean SrcNamedArgument.canChangeAnnotationValue() {
+        return false;
+    }
+    
 
     @Override
     public SrcAnnotationProvider SrcNamedArgument.addAnnotationSubNode(String name) {
@@ -890,6 +948,12 @@ aspect SrcAnnotations {
         public void setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
             throw new FailedToSetAnnotationValueException();
         }
+        
+        @Override
+        public boolean canChangeAnnotationValue() {
+            return false;
+        }
+        
 
         @Override
         public SrcAnnotationProvider addAnnotationSubNode(String name) throws AnnotationEditException {
@@ -949,6 +1013,11 @@ aspect SrcAnnotations {
         @Override
         public void setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
             throw new FailedToSetAnnotationValueException();
+        }
+
+        @Override
+        public boolean canChangeAnnotationValue() {
+            return false;
         }
 
         @Override
