@@ -1210,11 +1210,11 @@ public class ModelicaCompiler implements LogContainer {
         hookModelFlattened(fc);
         hookCheckAbort();
 
-        OptionRegistry fcOptions = fc.myOptions();
+        OptionRegistry options = fc.myOptions();
         
         // Output the untransformed flattened model
         ASTNode.beginStep("prettyPrintRawFlat()");
-        if (fcOptions.getBooleanOption("generate_mof_files")) {
+        if (options.getBooleanOption("generate_mof_files")) {
             log.debug("Creating raw .mof file...");
             CodeStream out = new CodeStream(flatFile);
             fc.prettyPrint_MC(out, "");
@@ -1226,7 +1226,7 @@ public class ModelicaCompiler implements LogContainer {
         log.verbose(fc);
         ASTNode.endStep("prettyPrintRawFlat()");
 
-        if (fcOptions.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
+        if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
             ASTNode.beginStep("htmlDiagnostics()");
             getDiagnosticsGenerator().writeRawFlattenedModel(fc);
             getDiagnosticsGenerator().setModelDiagnosticsBeforeTransform(fc.modelDiagnostics());
@@ -1237,13 +1237,13 @@ public class ModelicaCompiler implements LogContainer {
         
         /* Temporary fix to problems with long compilation times due to later evaluations */
         getExternalFunctionCache().tearDown();
-        fcOptions.setIntegerOption("external_constant_evaluation", 0);
+        options.setIntegerOption("external_constant_evaluation", 0);
         
         hookModelTransformed(fc);
         hookCheckAbort();
         
         ASTNode.beginStep("prettyPrintFlat()");
-        if (fcOptions.getBooleanOption("generate_mof_files")) {
+        if (options.getBooleanOption("generate_mof_files")) {
             log.debug("Creating transformed .mof file...");
             CodeStream out = new CodeStream(new File(sourceDir, instName + "_transformed.mof"));
             fc.prettyPrint_MC(out, "");
@@ -1265,7 +1265,7 @@ public class ModelicaCompiler implements LogContainer {
         
         dumpMemoryUseFile(fc, "transformed", false);
         
-        if (fcOptions.getBooleanOption("write_iteration_variables_to_file")) {
+        if (options.getBooleanOption("write_iteration_variables_to_file")) {
             ASTNode.beginStep("writeIterationVariables()");
             if (!fc.onlyInitBLT())
                 fc.getDAEBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_iteration_variables.txt"));
@@ -1273,7 +1273,7 @@ public class ModelicaCompiler implements LogContainer {
             ASTNode.endStep("writeIterationVariables()");
         }
 
-        if (fcOptions.getBooleanOption("write_tearing_pairs_to_file")) {
+        if (options.getBooleanOption("write_tearing_pairs_to_file")) {
             ASTNode.beginStep("writeIterationVariables()");
             if (!fc.onlyInitBLT())
                 fc.getDAEBLT().writeTearingPairsToFile(new File(instName + "_tearing_pairs.txt"));
@@ -1284,7 +1284,7 @@ public class ModelicaCompiler implements LogContainer {
         fc.errorCheck(target.getCheckType());
         handleCompilerWarnings(fc.collectWarnings());
 
-        if (fcOptions.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
+        if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
             ASTNode.beginStep("htmlDiagnostics()");
             getDiagnosticsGenerator().writeTransformedFlattenedModel(fc);
             getDiagnosticsGenerator().writeDiagnostics(fc);
