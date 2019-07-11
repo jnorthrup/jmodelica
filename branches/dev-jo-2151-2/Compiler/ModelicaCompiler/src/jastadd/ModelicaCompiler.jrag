@@ -411,6 +411,16 @@ public class ModelicaCompiler implements LogContainer {
         for (CompilationHooks hooks : hooksList)
             hooks.codeCompiled(this);
     }
+
+    /**
+     * Calls the hook to be called before the FMU is packed.
+     * @param fc the source FClass
+     * @param dir the temporary FMU directory
+     */
+    protected void hookPackFmu(FClass fc, File dir) {
+        for (CompilationHooks hooks : hooksList)
+            hooks.packFmu(this, fc, dir);
+    }
     
     /**
      * Calls the hook to be called after the FMU is packed.
@@ -1199,10 +1209,12 @@ public class ModelicaCompiler implements LogContainer {
         findFlatToInstanceLinks(fc);
         hookModelFlattened(fc);
         hookCheckAbort();
+
+        OptionRegistry options = fc.myOptions();
         
         // Output the untransformed flattened model
         ASTNode.beginStep("prettyPrintRawFlat()");
-        if (fc.myOptions().getBooleanOption("generate_mof_files")) {
+        if (options.getBooleanOption("generate_mof_files")) {
             log.debug("Creating raw .mof file...");
             CodeStream out = new CodeStream(flatFile);
             fc.prettyPrint_MC(out, "");
@@ -1214,7 +1226,7 @@ public class ModelicaCompiler implements LogContainer {
         log.verbose(fc);
         ASTNode.endStep("prettyPrintRawFlat()");
 
-        if (fc.myOptions().getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
+        if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
             ASTNode.beginStep("htmlDiagnostics()");
             getDiagnosticsGenerator().writeRawFlattenedModel(fc);
             getDiagnosticsGenerator().setModelDiagnosticsBeforeTransform(fc.modelDiagnostics());
@@ -1225,13 +1237,13 @@ public class ModelicaCompiler implements LogContainer {
         
         /* Temporary fix to problems with long compilation times due to later evaluations */
         getExternalFunctionCache().tearDown();
-        fc.myOptions().setIntegerOption("external_constant_evaluation", 0);
+        options.setIntegerOption("external_constant_evaluation", 0);
         
         hookModelTransformed(fc);
         hookCheckAbort();
         
         ASTNode.beginStep("prettyPrintFlat()");
-        if (fc.myOptions().getBooleanOption("generate_mof_files")) {
+        if (options.getBooleanOption("generate_mof_files")) {
             log.debug("Creating transformed .mof file...");
             CodeStream out = new CodeStream(new File(sourceDir, instName + "_transformed.mof"));
             fc.prettyPrint_MC(out, "");
@@ -1253,26 +1265,26 @@ public class ModelicaCompiler implements LogContainer {
         
         dumpMemoryUseFile(fc, "transformed", false);
         
-        if (fc.myOptions().getBooleanOption("write_iteration_variables_to_file")) {
+        if (options.getBooleanOption("write_iteration_variables_to_file")) {
             ASTNode.beginStep("writeIterationVariables()");
             if (!fc.onlyInitBLT())
                 fc.getDAEBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_iteration_variables.txt"));
             fc.getDAEInitBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_initial_system_iteration_variables.txt"));
             ASTNode.endStep("writeIterationVariables()");
         }
-        
-        if (fc.myOptions().getBooleanOption("write_tearing_pairs_to_file")) {
+
+        if (options.getBooleanOption("write_tearing_pairs_to_file")) {
             ASTNode.beginStep("writeIterationVariables()");
             if (!fc.onlyInitBLT())
                 fc.getDAEBLT().writeTearingPairsToFile(new File(instName + "_tearing_pairs.txt"));
             fc.getDAEInitBLT().writeTearingPairsToFile(new File(instName + "_initial_system_tearing_pairs.txt"));
             ASTNode.endStep("writeIterationVariables()");
         }
-        
+
         fc.errorCheck(target.getCheckType());
         handleCompilerWarnings(fc.collectWarnings());
-        
-        if (fc.myOptions().getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
+
+        if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
             ASTNode.beginStep("htmlDiagnostics()");
             getDiagnosticsGenerator().writeTransformedFlattenedModel(fc);
             getDiagnosticsGenerator().writeDiagnostics(fc);
@@ -2125,6 +2137,7 @@ public class ModelicaCompiler implements LogContainer {
 
         File unitFile = fClass.root().getUtilInterface().getCompilationOutputPath();
 
+		hookPackFmu(fClass, outDir);
         try {
             hookCheckAbort();
             copySourceFiles(fClass, sourceDir, outDir);
@@ -2575,7 +2588,15 @@ public interface CompilationHooks {
      * Called after the generated C code is compiled.
      */
     public void codeCompiled(ModelicaCompiler instance);
-    
+
+    /**
+     * Called before the FMU is packed.
+     *
+     * @param fc the source FClass
+     * @param dir the temporary directory containing files to be packed in the FMU
+     */
+    public void packFmu(ModelicaCompiler instance, FClass fc, File dir);
+
     /**
      * Called after the FMU is packed.
      */
@@ -2591,6 +2612,8 @@ public abstract class CompilationHooksImpl implements CompilationHooks {
     public void modelInstantiatied(ModelicaCompiler instance, InstClassDecl icd) {}
     @Override
     public void modelFlattened(ModelicaCompiler instance, FClass fc) {}
+    @Override
+    public void packFmu(ModelicaCompiler instance, FClass fc, File dir) {}
     @Override
     public void fmuPacked(ModelicaCompiler instance, FClass fc, File path) {}
     @Override
