@@ -1,8 +1,5 @@
 package org.jmodelica.common.options;
 
-import org.jmodelica.modelica.compiler.TestAnnotationizerHelper;
-import org.jmodelica.modelica.compiler.TestCase;
-
 /**
  * An {@link OptionRegistry} wrapper class to be used for testing.
  */
@@ -66,7 +63,7 @@ public class TestOptions extends OptionRegistry {
     }
 
     /**
-     * Getters used by {@link TestCase} and {@link TestAnnotationizerHelper} in order to retrieve options from a
+     * Getters used by TestCase and TestAnnotationizerHelper in order to retrieve options from a
      * testing context.
      * <p>
      * These methods retrieve options of the correct type via generics-magic.
