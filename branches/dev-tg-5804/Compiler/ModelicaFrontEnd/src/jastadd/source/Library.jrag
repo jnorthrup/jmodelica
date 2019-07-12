@@ -471,7 +471,7 @@ aspect Library {
         
         @Deprecated
         public static LoadInfo create(String path) {
-            return new LoadInfo(Paths.get(path));
+            return new LoadInfo(path != null ? Paths.get(path) : null);
         }
         
         public static LoadInfo create(Path path) {
