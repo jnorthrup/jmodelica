@@ -155,8 +155,11 @@ public class ModelicaCompiler implements LogContainer {
         debugSrcIsHome = b;
     }
     
-    protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<CompilationHooks>();
-    protected LinkedList<CompilationHooks> hooksList = new LinkedList<CompilationHooks>(globalHooksList);
+    protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<>();
+    protected LinkedList<CompilationHooks> hooksList = new LinkedList<>(globalHooksList);
+
+    protected static LinkedList<CompilationStartListener> globalCompilationStartListeners = new LinkedList<>();
+    protected LinkedList<CompilationStartListener> compilationStartListeners = new LinkedList<>(globalCompilationStartListeners);
     
     protected File tempDir = null;
     protected File outDir = null;
@@ -319,7 +322,12 @@ public class ModelicaCompiler implements LogContainer {
     public void removeCompilationHooks(CompilationHooks hooks) {
         hooksList.remove(hooks);
     }
-    
+
+    public static <T extends CompilationStartListener> T addGlobalCompilationStartListener(T listener) {
+        globalCompilationStartListeners.add(listener);
+        return listener;
+    }
+
     protected IErrorHandler errorHandler = null;
     
     /**
@@ -333,7 +341,16 @@ public class ModelicaCompiler implements LogContainer {
     public IErrorHandler getErrorHandler() {
         return errorHandler;
     }
-    
+
+    /**
+     * Notifies compilation start listeners that compilation will start.
+     */
+    protected void notifyCompilationStart(ModelicaCompiler mc) {
+        for (CompilationStartListener listener : compilationStartListeners) {
+            listener.onCompileStart(mc);
+        }
+    }
+
     /**
      * Throws a {@link CompilationAbortedException} if any hooks class signals an abort.
      */
@@ -754,6 +771,8 @@ public class ModelicaCompiler implements LogContainer {
          * First save these options in the temporary options' registry to reset when compiling has finished.
          */
         OptionRegistry tempOptions = options.copy();
+
+        notifyCompilationStart(this);
 
         /*
          * Set options for the target.
@@ -2530,56 +2549,67 @@ public interface CompilationHooks {
      * If compilation is aborted before it is finished, a 
      * {@link CompilationAbortedException} is thrown.
      */
-    public boolean shouldAbort(ModelicaCompiler instance);
+    boolean shouldAbort(ModelicaCompiler instance);
     
     /**
      * Called after the supplied code files are parsed.
      */
-    public void filesParsed(ModelicaCompiler instance, SourceRoot sr);
+    void filesParsed(ModelicaCompiler instance, SourceRoot sr);
     
     /**
      * Called after the error checks on the instantiated model are finished without errors.
      * 
      * Since the instance tree is built lazily, this step can not be broken up.
      */
-    public void modelInstantiatied(ModelicaCompiler instance, InstClassDecl icd);
+    void modelInstantiatied(ModelicaCompiler instance, InstClassDecl icd);
     
     /**
      * Called after the model is flattened.
      */
-    public void modelFlattened(ModelicaCompiler instance, FClass fc);
+    void modelFlattened(ModelicaCompiler instance, FClass fc);
     
     /**
      * Called after transformations are applied to the flat model.
      */
-    public void modelTransformed(ModelicaCompiler instance, FClass fc);
+    void modelTransformed(ModelicaCompiler instance, FClass fc);
     
     /**
      * Called after error checks of the flat model are finished without errors.
      */
-    public void flatModelChecked(ModelicaCompiler instance, FClass fc);
+    void flatModelChecked(ModelicaCompiler instance, FClass fc);
     
     /**
      * Called after a code generator is created.
      * 
      * Normally called three times.
      */
-    public void codeGeneratorCreated(ModelicaCompiler instance, AbstractGenerator gen);
+    void codeGeneratorCreated(ModelicaCompiler instance, AbstractGenerator gen);
     
     /**
      * Called after output code is generated.
      */
-    public void codeGenerated(ModelicaCompiler instance, FClass fc, File dir);
+    void codeGenerated(ModelicaCompiler instance, FClass fc, File dir);
     
     /**
      * Called after the generated C code is compiled.
      */
-    public void codeCompiled(ModelicaCompiler instance);
+    void codeCompiled(ModelicaCompiler instance);
     
     /**
      * Called after the FMU is packed.
      */
-    public void fmuPacked(ModelicaCompiler instance, FClass fc, File path);
+    void fmuPacked(ModelicaCompiler instance, FClass fc, File path);
+}
+
+/**
+ * Functional interface for callbacks that should run before compilation starts.
+ */
+public interface CompilationStartListener {
+    /**
+     * Called before compiling ({@link ModelicaCompiler#compileUnit()}).
+     * @param mc the ModelicaCompiler instance that will start compiling.
+     */
+    void onCompileStart(ModelicaCompiler mc);
 }
 
 public abstract class CompilationHooksImpl implements CompilationHooks {
