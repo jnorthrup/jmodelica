@@ -50,12 +50,14 @@ aspect Parsers {
      * Handles all parsing of Modelica code.
      */
     public final class ParserHandler {
-        public static ParseListener parseListener = new ParseListener() {
+        public static final ParseListener DEFAULT_PARSE_LISTENER = new ParseListener() {
             @Override
             public void fileParsed(LoadInfo loadInfo) {
                 ModelicaCompiler.log.info("Parsing " + loadInfo.getPath() + "...");
             }
         };
+
+        public static ParseListener parseListener = DEFAULT_PARSE_LISTENER;
 
         public static final FormattingRecorder<ASTNode<?>> DEFAULT_FORMATTING_RECORDER =
                 new DefaultFormattingRecorder<ASTNode<?>>();
