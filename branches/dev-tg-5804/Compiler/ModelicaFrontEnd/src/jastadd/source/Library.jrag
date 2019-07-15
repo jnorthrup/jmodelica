@@ -19,6 +19,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
+import java.nio.file.InvalidPathException;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.ArrayList;
@@ -458,20 +459,35 @@ aspect Library {
 
         private static final LoadInfo EMPTY = create((Path)null);
 
+        // Only one of path or otherDesc can be non-null. The issue is when switching from File to Path,
+        // invalid path names (e.g., containing '<') started causing an exception, so other load descriptions than
+        // valid path names could not be used any longer. 
+        // Also, converting a path to/from String is not a good solution, as that implicitly limits to using
+        // the default file system.
+        // We should figure out if using a non-file name is really needed as load description,
+        // and if not - get rid of otherDesc.
         private final Path path;
+        private final String otherDesc;
 
         @Deprecated
         public String getPath() {
-            return path != null ? path.toString() : null;
+            return otherDesc != null ? otherDesc : (path != null ? path.toString() : null);
         }
         
         public Path getPathAsPath() {
+            if (otherDesc != null) {
+                throw new IllegalStateException("Cannot retrieve the path as a path - it is an invalid path name");
+            }
             return path;
         }
         
         @Deprecated
         public static LoadInfo create(String path) {
-            return new LoadInfo(path != null ? Paths.get(path) : null);
+            try {
+                return new LoadInfo(path != null ? Paths.get(path) : null);
+            } catch (InvalidPathException e) {
+                return new LoadInfo(path);
+            }
         }
         
         public static LoadInfo create(Path path) {
@@ -485,6 +501,12 @@ aspect Library {
 
     private LoadInfo.LoadInfo(Path path) {
         this.path = path;
+        this.otherDesc = null;
+    }
+    
+    private LoadInfo.LoadInfo(String otherDesc) {
+        this.path = null;
+        this.otherDesc = otherDesc;
     }
 
     public LoadInfo LoadInfo.withPath(Path path) {
