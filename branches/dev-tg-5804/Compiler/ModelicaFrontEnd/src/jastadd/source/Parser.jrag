@@ -233,7 +233,7 @@ aspect Parsers {
         return exp;
     }
 
-    public static final LoadInfo ParserHandler.ANONYMOUS_CLASS_FILENAME = LoadInfo.create((Path)null);
+    public static final LoadInfo ParserHandler.ANONYMOUS_CLASS_FILENAME = LoadInfo.create("<command line argument>");
 
     public SrcBaseClassDecl ParserHandler.parseModelicaAnonymousClassString(String code, SrcRestriction restriction, String targetName)
             throws ParserException, beaver.Parser.Exception, IOException {
