@@ -76,10 +76,7 @@ Program : SrcBaseNode ::=
             /AnonymousClass:SrcBaseClassDecl*/
             /InstProgramRoot/;
 
-SrcStoredDefinition : SrcBaseNode ::= 
-            [SrcWithin]
-            SrcClassDecl*
-            <LoadInfo:LoadInfo>;
+SrcStoredDefinition : SrcBaseNode ::= [SrcWithin] SrcClassDecl*;
 
 SrcWithin : SrcBaseNode ::= [PackageName:SrcAccess];
 
@@ -104,11 +101,10 @@ SrcFullClassDecl : SrcBaseClassDecl ::= [SrcStringComment]
                                   SrcEndDecl;
 
 SrcLibClassDecl : SrcFullClassDecl ::= SrcLibNode*;
-SrcLibNode : SrcClassDecl ::= 
+SrcLibNode : SrcClassDecl ::= <FileName:String>
                         <Structured:boolean> 
                         <Version:String> 
-                        <Reason:SrcLibNode.LoadReason>
-                        <LoadInfo:LoadInfo> 
+                        <Reason:SrcLibNode.LoadReason> 
                         /SrcStoredDefinition/;
 
 SrcShortClassDecl : SrcBaseClassDecl ::= SrcExtendsClauseShortClass;
@@ -322,7 +318,7 @@ SrcDerExp : SrcExp ::= SrcExp;
 SrcAccessExp : SrcExp ::= SrcAccess;
 
 abstract SrcAccess : SrcBaseNode;
-SrcDot             : SrcAccess      ::= SrcNamedAccess*;
+SrcDot             : SrcAccess      ::= SrcAccess*;
 SrcGlobalAccess    : SrcAccess      ::= SrcAccess;
 SrcNamedAccess     : SrcAccess      ::= <ID>;
 SrcArrayAccess     : SrcNamedAccess ::= SrcArraySubscripts;

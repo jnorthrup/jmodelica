@@ -64,7 +64,7 @@ aspect Types {
 
     syn boolean InstNode.isPrimitiveType() = false;
     eq InstPrimitive.isPrimitiveType()     = true;
-    eq InstClassDecl.isPrimitiveType()     = isPrimitive();
+    eq InstClassDecl.isPrimitiveType()     = isOrExtendsPrimitive();
 
     public static String InstNode.subTypeMessage(String name, String message) {
         if (name == null) {
@@ -319,7 +319,6 @@ aspect DerivativeFunctions {
     eq FStatement.shouldBeDifferentiated()        = type().shouldBeDifferentiated();
     eq FAbstractEquation.shouldBeDifferentiated() = variability().continuousVariability();
     eq FFunctionCallLeft.shouldBeDifferentiated() = hasFExp() && myOutput().shouldBeDifferentiated();
-    eq FIndicatorExp.shouldBeDifferentiated()     = false;
 
 
     /**

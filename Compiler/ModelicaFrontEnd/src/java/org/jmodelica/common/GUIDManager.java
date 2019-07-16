@@ -254,12 +254,10 @@ public class GUIDManager {
                 
                 @Override
                 public void flush() throws IOException {
-                    // Do nothing
                 }
                 
                 @Override
                 public void close() throws IOException {
-                    // Do nothing
                 }
             };
         }

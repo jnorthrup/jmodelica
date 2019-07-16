@@ -115,9 +115,6 @@ int jmi_delay_first_event_indicator(jmi_t *jmi, int index, jmi_real_t delay_time
 /** \brief Compute the second (of two) event indicators >= 0 for a variable delay block in *event_indicator. Return -1 on failure, 0 otherwise. */
 int jmi_delay_second_event_indicator(jmi_t *jmi, int index, jmi_real_t delay_time, jmi_real_t *event_indicator);
 
-jmi_real_t jmi_delay_first_event_indicator_exp (jmi_t *jmi, int index, jmi_real_t delay_time);
-jmi_real_t jmi_delay_second_event_indicator_exp(jmi_t *jmi, int index, jmi_real_t delay_time);
-
 
 /** \brief Allocate buffers for the spatialdist block with the given index. Do this before `jmi_spatialdist_init`. */
 int jmi_spatialdist_new(jmi_t *jmi, int index);
@@ -135,8 +132,6 @@ int jmi_spatialdist_record_sample(jmi_t *jmi, int index, jmi_real_t in0, jmi_rea
 
 /** \brief Return the event indicator >= 0 for a spatialdist block in *event_indicator. Return -1 on failure, 0 otherwise. */
 int jmi_spatialdist_event_indicator(jmi_t *jmi, int index, jmi_real_t x, jmi_boolean positiveVelocity, jmi_real_t *event_indicator);
-
-jmi_real_t jmi_spatialdist_event_indicator_exp(jmi_t *jmi, int index, jmi_real_t x, jmi_boolean positiveVelocity);
 
 
 #endif 

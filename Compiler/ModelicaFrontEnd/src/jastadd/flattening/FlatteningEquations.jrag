@@ -44,7 +44,7 @@ aspect FlatEquations {
 
     @Override
     public void FEquation.flattenEqn(Flattener f, List<FAbstractEquation> l) {
-        FEquation flattened = createNode(new List<FAttribute>(), getLeft().flatten(f), getRight().flatten(f));
+        FEquation flattened = new FEquation(getLeft().flatten(f), getRight().flatten(f));
         flattenAttrs(f, flattened);
         flattened.setLocation(this);
         l.add(flattened);

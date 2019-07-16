@@ -188,10 +188,6 @@ aspect ConstantEvaluation {
         	throw new ConstantEvaluationException(this, "use this as array: ");
         }
         
-        public CValue getCell(Index i) {
-            return UNKNOWN;
-        }
-        
         public CValueUnknownUse unknownUse() {
             throw new ConstantEvaluationException(this, "use this as unknown value use: ");
         }
@@ -2052,32 +2048,32 @@ aspect ConstantEvaluation {
     /**
      * Returns the constant value of a flat expression. 
      * 
-     * If the expression is not constant, or if it contains type errors, 
-     * <code>CValue.UNKNOWN</code> is returned.
+     * If the expression is not constant, or if it contains type errors, a 
+     * CValueUnknown object is returned.
      * 
      * The actual evaluation of concrete FExp nodes is performed by dispatching
      * with respect to the primitive type of the expression. For example, when an
      * FAddExp node is evaluated, the computation proceeds in the following steps:
      * 
-     *  - The primitive type of the expression is retrieved using the type()
+     *  - The primitive type of the expression is retreived using the type()
      *    attribute.
      *  - The method add() defined for FType is invoked.
      *  - The resulting CValue is returned. 
      *  
-     *  Using this strategy, a particular FExp node does not need to know the details of
+     *  Using this strategy, a particular FExp node need not know the details of
      *  how to evaluate itself in the case of operands of different types. Rather,
      *  these computations are delegated to the respective types. In particular,
      *  this design simplifies the task of extending the evaluation framework
-     *  to composite types such as arrays and complex numbers. In addition,
+     *  to composite types such as arrays and complex numbers. In addition
      *  the type dispatch makes implementation of support for operator overloading
      *  simpler.
      *  
      *  Note that function evaluation depends on nothing being cached in constant 
-     *  evaluation. If caching is needed later on, an argument to avoid caching must be 
+     *  evaluation. If caching is later needed, an argument to avoid caching must be 
      *  added to cevalCalc() and an alternate ceval() created. Also, the form taking 
      *  an Index should then probably be removed.
      *  
-     *  The VariableEvaluator argument is designed to only work reliably after
+     *  The VariableEvaluator agrument is only designed to work reliably after
      *  scalarization. This is due to that the fact that size, type, array and 
      *  some other functions use ceval() without propagation of the evaluator.
      * 
@@ -2479,7 +2475,7 @@ aspect ConstantEvaluation {
     
     eq FSubscriptedExp.cevalCalc(VariableEvaluator evaluator) {
         Index i = getFArraySubscripts().createIndex(evaluator);
-        return getFExp().ceval(evaluator, i).getCell(i);
+        return getFExp().ceval(evaluator, i).array().getCell(i);
     }
 
     eq FCardinality.cevalCalc(VariableEvaluator evaluator) {
@@ -2647,7 +2643,7 @@ aspect ConstantEvaluation {
                     if (cevalRecordMember.isUnknown()) {
                         return CValue.UNKNOWN; 
                     } else {
-                        return cevalRecordMember.getCell(i);
+                        return cevalRecordMember.array().getCell(i);
                     }
                 } else {
                     return evaluator.ceval(var, i);
@@ -2673,7 +2669,7 @@ aspect ConstantEvaluation {
         CValue res = var.inRecord() ? cevalRecordMember(evaluator, prefix) : evaluator.ceval(var);
         if (res.isUnknown()) return CValue.UNKNOWN;
         if (prefix.hasFArraySubscripts())
-          res = res.getCell(prefix.getFArraySubscripts().createIndex(evaluator));
+          res = res.array().getCell(prefix.getFArraySubscripts().createIndex(evaluator));
         if (res.isUnknown()) return CValue.UNKNOWN;
         return res.record().getMember(last);
     }
@@ -2714,13 +2710,13 @@ aspect ConstantEvaluation {
           if (shouldCevalThroughParent(var)) {
               res = cevalRecordMember(evaluator, this);
               if (i != Index.NULL)
-                  res = res.getCell(i);
+                  res = res.array().getCell(i);
               return res;
           } else {
               res = evaluator.ceval(var, i);
           }
           if (iHere != Index.NULL)
-              res = res.getCell(iHere);
+              res = res.array().getCell(iHere);
         } else if (myInstClassDecl().isEnum()) {
             res = new CValueInteger(myInstClassDecl().enumLiterals().size());
         } else if (myInstClassDecl().isBoolean()) {
@@ -2771,7 +2767,7 @@ aspect ConstantEvaluation {
         hasParentRecordWithBindingExp() ? cevalParentRecord(evaluator).record().getMember(name()) : ceval(evaluator);
     eq InstArrayComponentDecl.getChild().cevalParentRecord(VariableEvaluator evaluator) {
         CValue v = cevalParentRecord(evaluator);
-        return isArray() ? v : v.getCell(myIndex());
+        return isArray() ? v : v.array().getCell(myIndex());
     }
 
     // TODO: if caching, use cevalFunction() instead
@@ -2963,15 +2959,15 @@ aspect ConstantEvaluation {
     syn CValue InstAssignable.cevalNoBExp(VariableEvaluator evaluator, Index i) {
         CValue val = startAttributeCValue(evaluator);
         if (i != Index.NULL) 
-            val = val.getCell(i);
+            val = val.array().getCell(i);
         if ((isInteger() || isReal() || isEnum()) && !val.isUnknown()) {
             try {
                 CValue min = minAttributeCValue(evaluator);
                 if (i != Index.NULL) 
-                    min = min.getCell(i);
+                    min = min.array().getCell(i);
                 CValue max = maxAttributeCValue(evaluator);
                 if (i != Index.NULL) 
-                    max = max.getCell(i);
+                    max = max.array().getCell(i);
                 val =  val.constrainWithin(min, max);
             } catch (ConstantEvaluationException e) {}
         }
@@ -3244,7 +3240,7 @@ aspect ConstantEvaluation {
 	 *  @return The constant value.
 	 */
 	syn CValue FAbstractVariable.ceval(VariableEvaluator evaluator, Index i) = CValue.UNKNOWN;
-	eq FFunctionVariable.ceval(VariableEvaluator evaluator, Index i)         = evaluationValue(evaluator).getCell(i);
+	eq FFunctionVariable.ceval(VariableEvaluator evaluator, Index i)         = evaluationValue(evaluator).array().getCell(i);
 	eq FVariable.ceval(VariableEvaluator evaluator, Index i) {
         CValue val;
         if (isForIndex())
@@ -3255,7 +3251,7 @@ aspect ConstantEvaluation {
             val = getBindingExp().ceval(evaluator, i);
         else
             val = startAttributeCValue();
-        val = val.getCell(i);
+        val = val.array().getCell(i);
         if (isReal())
             val = val.convertReal();
         return val;
@@ -4073,12 +4069,12 @@ aspect ConstantEvaluation {
     }
   
 
-    public class EvaluationValueCache {
+    public class EvaluataionValueCache {
 
         private Map<CommonVariableDecl,CValue> values;
         private Map<CommonVariableDecl,CValue> old;
 
-        public EvaluationValueCache(ASTNode source) {
+        public EvaluataionValueCache(ASTNode source) {
             values = source.collectEvaluationValues(null);
         }
         

@@ -252,14 +252,6 @@ BOOLEAN generate_html_diagnostics compiler user false
 flattened model, connection sets, alias sets and BLT form."
 
 ********************************************************************************
-STRING generate_html_diagnostics_output_directory compiler user "."
-
-"Path to directory where compiler output should be generated for the option 
-'generate_html_diagnostics'. Default value is '.'. Directory is created if 
-it doesn't exist. The html diagnostics is generated in a subdirectory of this 
-directory."
-
-********************************************************************************
 INTEGER diagnostics_limit compiler uncommon 500 0 Integer.MAX_VALUE
 
 "This option specifies the equation system size at which the compiler will 
@@ -391,21 +383,14 @@ BOOLEAN generate_event_switches compiler experimental true
 Setting this option to false can give unexpected results."
 
 ********************************************************************************
-BOOLEAN relational_time_events compiler deprecated true
+BOOLEAN relational_time_events compiler user true
 
-"Deprecated, use option time_events instead. If enabled, then relational 
-operators are allowed to generate time events."
-
-********************************************************************************
-BOOLEAN time_events compiler user true
-
-"If enabled, operators are allowed to generate time events."
+"If enabled, then relational operators are allowed to generate time events."
 
 ********************************************************************************
 BOOLEAN event_output_vars compiler user false
 
-"If enabled, output variables are added to model description for each generated 
-state event indicator."
+"If enabled, output variables are generated for each generated event."
 
 ********************************************************************************
 BOOLEAN disable_smooth_events compiler experimental false
@@ -445,6 +430,21 @@ STRING cc_extra_flags compiler uncommon ":O1"
 ":O1" ":O2"
 
 "Optimization level for c-code compilation"
+
+********************************************************************************
+INTEGER cc_split_element_limit compiler uncommon 1000
+
+"When generating code for large systems, the code is split into multiple 
+functions and files for performance reasons. This option controls how many 
+scalar elements can be evaluated by a function. Value less than 1 indicates 
+no split."
+
+********************************************************************************
+INTEGER cc_split_function_limit compiler uncommon 20
+
+"When generating code for large systems, the code is split into multiple 
+functions and files for performance reasons. This option controls how many 
+functions can be generated in a file. Value less than 1 indicates no split."
 
 ********************************************************************************
 STRING MODELICAPATH compiler internal ""

@@ -34,13 +34,14 @@ public class ModelicaFileRunner extends ParentRunner<GenericTestCase> {
     private GenericTestSuite suite;
     private Description desc;
     private TestSpecification spec;
-    private Map<String,Description> childDesc = new HashMap<>();
+    private Map<String,Description> childDesc;
 
     public ModelicaFileRunner(TestSpecification spec, File testFile) throws InitializationError {
         super(spec.getClass());
         suite = spec.createTestSuite(testFile);
         desc = Description.createSuiteDescription(testFile.getName());
         this.spec = spec;
+        childDesc = new HashMap<String,Description>();
         for (GenericTestCase test : suite.getAll()) {
             String descStr = String.format("%s(%s)", test.getName(), testFile);
             Description chDesc = Description.createSuiteDescription(descStr);
@@ -49,18 +50,14 @@ public class ModelicaFileRunner extends ParentRunner<GenericTestCase> {
         }
     }
 
-    @Override
     public Description describeChild(GenericTestCase test) {
         return childDesc.get(test.getName());
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
     public List<GenericTestCase> getChildren() {
         return (List<GenericTestCase>) suite.getAll();
     }
 
-    @Override
     public void runChild(GenericTestCase test, RunNotifier note) {
         Description d = describeChild(test);
         note.fireTestStarted(d);
@@ -72,7 +69,6 @@ public class ModelicaFileRunner extends ParentRunner<GenericTestCase> {
         note.fireTestFinished(d);
     }
 
-    @Override
     public Description getDescription() {
         return desc;
     }

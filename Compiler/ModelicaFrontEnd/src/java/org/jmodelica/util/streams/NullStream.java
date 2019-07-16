@@ -23,27 +23,17 @@ import java.io.PrintStream;
 public class NullStream {
 	
 	public static final OutputStream OUTPUT = new OutputStream() {
-		@Override
-        public void write(int b) throws IOException {
-		    // ignore - NullStream
-		}
+		public void write(int b) throws IOException {}
 
-		@Override
-        public void write(byte[] b) throws IOException {
-            // ignore - NullStream
-		}
+		public void write(byte[] b) throws IOException {}
 
-		@Override
-        public void write(byte[] b, int off, int len) throws IOException {
-            // ignore - NullStream
-		}
+		public void write(byte[] b, int off, int len) throws IOException {}
 	};
 
 	public static final PrintStream PRINT = new PrintStream(OUTPUT);
 	
 	public static final InputStream INPUT = new InputStream() {
-		@Override
-        public int read() throws IOException {
+		public int read() throws IOException {
 			return -1;
 		}
 	};

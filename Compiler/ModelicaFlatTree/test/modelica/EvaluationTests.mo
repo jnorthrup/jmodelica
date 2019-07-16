@@ -1765,10 +1765,10 @@ model VectorFuncEval5
     end f;
     Real[:,:] y = f({{time,time}}, {{{time},{time}}});
     Real[1,2] y1 = f({{1,2}}, {{{3},{4}}});
-
+    
     annotation(__JModelica(UnitTesting(tests={
         EvalTestCase(
-            name="VectorFuncEval5",
+            name="VectorFuncEval4",
             description="Constant evaluation of vectorized function call",
             variables="
 y1[1,1]

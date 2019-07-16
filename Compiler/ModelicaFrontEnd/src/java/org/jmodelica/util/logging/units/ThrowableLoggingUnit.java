@@ -69,4 +69,8 @@ public class ThrowableLoggingUnit implements LoggingUnit {
         return throwable;
     }
 
+    @Override
+    public void prepareForSerialization() {
+    }
+
 }

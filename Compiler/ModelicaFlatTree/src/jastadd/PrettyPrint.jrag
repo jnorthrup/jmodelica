@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009-2019 Modelon AB
+    Copyright (C) 2009 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -348,52 +348,22 @@ aspect PrettyPrint {
         if (getReplaceable()) {
             str.print("replaceable ");
         }
-
+        
         str.print(getSrcRestriction(), " ");
         if (isClassExtends()) {
             str.print("extends ");
         }
         prettyPrintClassName(p, str, indent);
-
-        if (hasSrcStringComment()) {
-            p.print(getSrcStringComment(), str, indent);
-        }
-
-        if (hasSrcConstrainingClause()) {
-            str.print("constrainedby ");
-            p.print(getSrcConstrainingClause(), str, indent);
-            str.print(" ");
-            if (hasConstrainingClauseComment()) {
-                p.print(getConstrainingClauseComment(), str, indent);
-            }
-        }
-
         str.println();
 
         for (SrcClause cl : getSrcClauses()) {
             p.print(cl, str, indent);
         }
-
-        if (hasSrcExternalClause()) {
-            p.print(getSrcExternalClause(), str, indent);
-        }
-
-        if (hasSrcAnnotation()) {
-            p.print(getSrcAnnotation(), str, indent);
-        }
-
         p.print(getSrcEndDecl(), str, indent);
     }
 
     public void SrcFullClassDecl.prettyPrintClassName(Printer p, CodeStream str, String indent) {
         p.print(getName(), str, indent);
-    }
-
-    public void SrcParseAnnotation.prettyPrint(Printer p, CodeStream str, String indent) {
-        str.print(indent, "annotation ");
-        p.print(getSrcClassModification(), str, indent);
-        str.print(";");
-        str.println();
     }
 
     public void SrcClause.prettyPrint(Printer p, CodeStream str, String indent) {
@@ -573,7 +543,7 @@ aspect PrettyPrint {
 	// For debugging
 	public void SrcLibNode.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.formatln("%s%structured library '%s' at '%s'", indent, 
-				(getStructured() ? "S" : "Uns"), name(), dirName());
+				(getStructured() ? "S" : "Uns"), name(), getFileName());
 	}
 
 	syn boolean SrcComponentClause.isEnumComponentClause() = false;
@@ -890,33 +860,12 @@ aspect PrettyPrint {
 		str.print(")");
 	}
 
-    public void SrcIterExp.prettyPrint(Printer p, CodeStream str, String ident) {
-        getSrcExp().prettyPrint(p,str,ident);
-        str.print(" for ");
-        for (int i = 1; i < getNumChild(); i++) {
-            getChild(i).prettyPrint(p, str, ident);
-        }
-    }
-
 	public void SrcFunctionArguments.prettyPrint(Printer p, CodeStream str, String indent) {
-		for (int i = 0; i < getNumSrcExp(); i++) {
-			p.print(getSrcExp(i), str, indent);
-			if (i < getNumSrcExp() + getNumSrcNamedArgument() - 1) {
+		for (int i=0; i<getNumSrcExp(); i++) {
+			p.print(getSrcExp(i),str,indent);
+			if (i<getNumSrcExp()-1)
 				str.print(",");
-		    }
 		}
-		for (int i = 0; i < getNumSrcNamedArgument(); i++) {
-            p.print(getSrcNamedArgument(i), str, indent);
-            if (i < getNumSrcNamedArgument() - 1) {
-                str.print(",");
-            }
-        }
-	}
-	
-	public void SrcNamedArgument.prettyPrint(Printer p, CodeStream str, String indent) {
-	    p.print(getName(), str, indent);
-	    str.print("=");
-	    getSrcExp().prettyPrint(p, str, indent);
 	}
 
     public void SrcIdDecl.prettyPrint(Printer p, CodeStream str, String indent) {
@@ -937,7 +886,7 @@ aspect PrettyPrint {
     }
 
 	public void SrcDot.prettyPrint(Printer p, CodeStream str, String indent) {
-		getSrcNamedAccesss().prettyPrintWithSep(p, str, indent, ".");
+		getSrcAccesss().prettyPrintWithSep(p, str, indent, ".");
 	}
 
 	public void SrcGlobalAccess.prettyPrint(Printer p, CodeStream str, String indent) {
@@ -1858,7 +1807,7 @@ aspect FlatPrettyPrint {
 	 */
 	protected void FBuiltInFunctionCall.prettyPrintArguments(Printer p, CodeStream str, String indent) {
 		String pre = "";
-		for (FExp exp : myArgs()) {
+		for (FExp exp : childFExps()) {
 			str.print(pre);
 			p.print(exp, str, indent);
 			pre = SEP;
@@ -1887,16 +1836,6 @@ aspect FlatPrettyPrint {
             str.print(SEP, "priority=");
             p.print(getPriority(), str, indent);
         }
-    }
-
-    @Override
-    protected void FDelayIndicator.prettyPrintArguments(Printer p, CodeStream str, String indent) {
-        myDelayExp().prettyPrintArguments(p, str, indent);
-    }
-
-    @Override
-    protected void FSpatialDistIndicator.prettyPrintArguments(Printer p, CodeStream str, String indent) {
-        mySpatialDistExp().prettyPrintArguments(p, str, indent);
     }
 
 	syn String FBuiltInFunctionCall.builtInName();
@@ -1949,9 +1888,6 @@ aspect FlatPrettyPrint {
     eq FReinit.builtInName()             = "reinit";
     eq FDelayExp.builtInName()           = "delay";
     eq FSpatialDistExp.builtInName()     = "spatialDistribution";
-    eq FFirstDelayIndicator.builtInName()= "delayIndicatorFirst";
-    eq FSecondDelayIndicator.builtInName()= "delayIndicatorSecond";
-    eq FSpatialDistIndicator.builtInName()= "spatialDistIndicator";
 	eq FAssert.builtInName()             = "assert";
 	eq FIdentity.builtInName()           = "identity";
 	eq FDiagonal.builtInName()           = "diagonal";
@@ -1970,7 +1906,7 @@ aspect FlatPrettyPrint {
     eq FDecouple.builtInName()           = "Subtask.decouple";
 	eq FSemiLinearExp.builtInName()      = "semiLinear";
 	eq FInStream.builtInName()           = "inStream";
-	eq FDerStream.builtInName()          = "derStream";
+	eq FDerStream.builtInName()         = "derStream";
     eq FExInStream.builtInName()         = "inStreamExpansion";
 	eq FActualStream.builtInName()       = "actualStream";
 	eq FGetInstanceName.builtInName()    = "getInstanceName";
@@ -2123,23 +2059,34 @@ aspect PrettyPrint_MC {
 		return os.toString();
 	}
 
-    public static void List.prettyPrintFAttributeList_MC(Printer p, CodeStream str, String indent, List<FAttribute> l) {
-        boolean firstAttr = true;
-        for (FAttribute attr : l) {
-            if (attr.getAttributeSet() && !attr.isAnnotation()) {
-                if (firstAttr) {
-                    str.print("(");
-                } else {
-                    str.print(", ");
-                }
-                p.print(attr, str, indent);
-                firstAttr = false;
-            }
-        }
-        if (!firstAttr) {
-            str.print(")");
-        }
-    }
+	public void List.prettyPrintFAttributeList_MC(CodeStream str, Printer p) {
+	
+	    boolean attrSet = false;
+	    	boolean firstAttr = true;
+	    	
+	    	for (int i=0;i<getNumChild();i++) {
+	    		if (((FAttribute)getChild(i)).getAttributeSet() && !((FAttribute)getChild(i)).getName().name().equals("fixed")) {
+					attrSet=true;
+					break;
+	 		   	}
+	    	}
+	    
+	    	if (attrSet){
+	    		str.print("(");
+	    		for (int i=0;i<getNumChild();i++) {
+	    
+	    			if (((FAttribute)getChild(i)).getAttributeSet() && !((FAttribute)getChild(i)).getName().name().equals("fixed")) {
+	
+						if (!firstAttr)	
+							str.print(",");
+						p.print(((FAttribute)getChild(i)),str,"");
+						
+						firstAttr = false;
+	 		   		}
+	    		}
+	    		str.print(")");
+	   		}
+	}
 
     public void FVariable.prettyPrint_MC(Printer p, CodeStream str, String indent) {
         str.print(indent, getTypePrefixVariability());
@@ -2148,7 +2095,7 @@ aspect PrettyPrint_MC {
         }
         
         str.print(prettyPrintType(), " ", nameUnderscore());
-        List.prettyPrintFAttributeList_MC(p, str, indent, getFAttributeList());
+        getFAttributeList().prettyPrintFAttributeList_MC(str,p);
         
         FExp bindingExp = null;
         if (hasBindingExp()) {
