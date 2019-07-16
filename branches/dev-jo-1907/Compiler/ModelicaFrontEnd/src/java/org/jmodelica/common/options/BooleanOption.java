@@ -4,12 +4,12 @@ import org.jmodelica.common.options.OptionRegistry.Category;
 import org.jmodelica.common.options.OptionRegistry.Default;
 import org.jmodelica.common.options.OptionRegistry.OptionType;
 
-class BooleanOption extends Option<Boolean> {
+public class BooleanOption extends Option<Boolean> {
 
     public BooleanOption(String key, OptionType type, Category cat, String description,
-            Default<Boolean> def, Default<Boolean> testDefault) {
+            Default<Boolean> def) {
 
-        super(key, type, cat, description, def, testDefault, false);
+        super(key, type, cat, description, def, false);
     }
 
     @Override
@@ -34,11 +34,9 @@ class BooleanOption extends Option<Boolean> {
 
     @Override
     protected void copyTo(OptionRegistry reg, String key) {
-        if (!reg.hasOption(key)) {
-            reg.addBooleanOption(key, getOptionType(), getCategory(), defaultValue, testDefault, getDescription());
-        }
         if (isSet) {
             reg.setBooleanOption(key, value);
+            reg.setBooleanOptionDefault(key, defaultValue);
         }
     }
 

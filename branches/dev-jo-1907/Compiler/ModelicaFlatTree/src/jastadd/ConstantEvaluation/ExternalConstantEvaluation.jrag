@@ -226,7 +226,7 @@ aspect ExternalConstantEvaluation {
         
         ext.externalDependencies(null, incDirs, libs, libDirs);
         
-        OptionRegistry options = ext.myOptions();
+        OptionsAggregated options = ext.myOptions();
         ModulesSettings modulesSettings = createModulesSettings(options);
         
         target.getTemplates(options).generateCFiles(ModelicaCompiler.this, null, createCGenerator(ext), sourceDir, source);

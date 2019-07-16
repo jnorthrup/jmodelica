@@ -31,10 +31,13 @@ import org.jmodelica.util.xml.XMLPrinter;
 
 /**
  * OptionRegistry contains all options for the compiler. Options
- * can be created and retrieved based on type: String, Integer etc.
+ * can be retrieved based on type: String, Integer etc.
  * OptionRegistry also provides methods for handling paths
  * to Modelica libraries.
- * 
+ *
+ * Use OptionsAggregated.buildOptions() to get an option
+ * registry populated with all available options.
+ *
  * The registry is empty by default, options have to be added by
  * calling any of the add*Option methods.
  */
@@ -417,28 +420,16 @@ public class OptionRegistry {
      * ================== */
 
     protected void createBooleanOption(String key, OptionType type, Category cat, String description,
-            Default<Boolean> def, Default<Boolean> testDefault) {
+            Default<Boolean> def) {
 
-        optionsMap.put(key, new BooleanOption(key, type, cat, description, def, testDefault));
+        optionsMap.put(key, new BooleanOption(key, type, cat, description, def));
     }
 
-    public void addBooleanOption(String key, OptionType type, Category cat, boolean def, String description) {
-        addBooleanOption(key, type, cat, def, def, description);
-    }
-
-    public void addBooleanOption(String key, OptionType type, Category cat, boolean def,
-            boolean testDefault, String description) {
-
-        addBooleanOption(key, type, cat, new DefaultValue<>(def),
-                new DefaultValue<>(testDefault), description);
-    }
-
-    public void addBooleanOption(String key, OptionType type, Category cat, Default<Boolean> def,
-            Default<Boolean> testDefault, String description) {
+    public void addBooleanOption(String key, OptionType type, Category cat, Default<Boolean> def, String description) {
 
         if (findBooleanOption(key, true) != null)
             throw new IllegalArgumentException("The option " + key + " already exists.");
-        createBooleanOption(key, type, cat, description, def, testDefault);
+        createBooleanOption(key, type, cat, description, def);
     }
 
 
@@ -477,52 +468,18 @@ public class OptionRegistry {
      *  Integer options.  *
      * ================== */
 
-    protected void createIntegerOption(String key, OptionType type, Category cat,
-            String description, Default<Integer> def, Default<Integer> testDefault) {
-
-        optionsMap.put(key, new IntegerOption(key, type, cat, description, def, testDefault));
-    }
-
     protected void createIntegerOption(String key, OptionType type, Category cat, String description,
-            Default<Integer> def, Default<Integer> testDefault, int min, int max) {
+            Default<Integer> def, int min, int max) {
 
-        optionsMap.put(key, new IntegerOption(key, type, cat, description, def, testDefault, min, max));
+        optionsMap.put(key, new IntegerOption(key, type, cat, description, def, min, max));
     }
 
-    public void addIntegerOption(String key, OptionType type, Category cat, int def, String description,
-            int min, int max) {
-
-        addIntegerOption(key, type, cat, def, def, description, min, max);
-    }
-
-    public void addIntegerOption(String key, OptionType type, Category cat, int def,
-            int testDefault, String description) {
-
-        addIntegerOption(key, type, cat, new DefaultValue<>(def),
-                new DefaultValue<>(testDefault), description);
-    }
-
-    public void addIntegerOption(String key, OptionType type, Category cat, int def, int testDefault,
+    public void addIntegerOption(String key, OptionType type, Category cat, Default<Integer> def,
             String description, int min, int max) {
 
-        addIntegerOption(key, type, cat, new DefaultValue<>(def), new DefaultValue<>(testDefault),
-                description, min, max);
-    }
-
-    public void addIntegerOption(String key, OptionType type, Category cat, Default<Integer> def,
-            Default<Integer> testDefault, String description) {
-
         if (findIntegerOption(key, true) != null)
             throw new IllegalArgumentException("The option " + key + " already exists.");
-        createIntegerOption(key, type, cat, description, def, testDefault);
-    }
-
-    public void addIntegerOption(String key, OptionType type, Category cat, Default<Integer> def,
-            Default<Integer> testDefault, String description, int min, int max) {
-
-        if (findIntegerOption(key, true) != null)
-            throw new IllegalArgumentException("The option " + key + " already exists.");
-        createIntegerOption(key, type, cat, description, def, testDefault, min, max);
+        createIntegerOption(key, type, cat, description, def, min, max);
     }
 
     public void setIntegerOption(String key, int value) {
@@ -539,14 +496,6 @@ public class OptionRegistry {
 
     public int getIntegerOptionDefault(String key) {
         return findIntegerOption(key, false).getDefault();
-    }
-
-    public void expandIntegerOptionMax(String key, int val) {
-        findIntegerOption(key, false).expandMax(val);
-    }
-
-    public void expandIntegerOptionMin(String key, int val) {
-        findIntegerOption(key, false).expandMin(val);
     }
 
     public int getIntegerOption(String key) {
@@ -572,47 +521,19 @@ public class OptionRegistry {
      *  Real options.  *
      * =============== */
 
-    protected void createRealOption(String key, OptionType type, Category cat, String description,
-            Default<Double> def, Default<Double> testDefault) {
-
-        optionsMap.put(key, new RealOption(key, type, cat, description, def, testDefault));
-    }
-
     protected void createRealOption(String key, OptionType type, Category cat, String description, Default<Double> def,
-            Default<Double> testDefault, double min, double max) {
+            double min, double max) {
 
-        optionsMap.put(key, new RealOption(key, type, cat, description, def, testDefault, min, max));
+        optionsMap.put(key, new RealOption(key, type, cat, description, def, min, max));
     }
 
 
-    public void addRealOption(String key, OptionType type, Category cat, double def,
-            double testDefault, String description) {
-
-        addRealOption(key, type, cat, new DefaultValue<>(def),
-                new DefaultValue<>(testDefault), description);
-    }
-
-    public void addRealOption(String key, OptionType type, Category cat, double def, double testDefault,
+    public void addRealOption(String key, OptionType type, Category cat, Default<Double> def,
             String description, double min, double max) {
 
-        addRealOption(key, type, cat, new DefaultValue<>(def), new DefaultValue<>(testDefault), description,
-                min, max);
-    }
-
-    public void addRealOption(String key, OptionType type, Category cat, Default<Double> def,
-            Default<Double> testDefault, String description) {
-
         if (findRealOption(key, true) != null)
             throw new IllegalArgumentException("The option " + key + " already exists.");
-        createRealOption(key, type, cat, description, def, testDefault);
-    }
-
-    public void addRealOption(String key, OptionType type, Category cat, Default<Double> def,
-            Default<Double> testDefault, String description, double min, double max) {
-
-        if (findRealOption(key, true) != null)
-            throw new IllegalArgumentException("The option " + key + " already exists.");
-        createRealOption(key, type, cat, description, def, testDefault, min, max);
+        createRealOption(key, type, cat, description, def, min, max);
     }
 
     public void setRealOption(String key, double value) {
@@ -629,14 +550,6 @@ public class OptionRegistry {
 
     public double getRealOptionDefault(String key) {
         return findRealOption(key, false).getDefault();
-    }
-
-    public void expandRealOptionMax(String key, double val) {
-        findRealOption(key, false).expandMax(val);
-    }
-
-    public void expandRealOptionMin(String key, double val) {
-        findRealOption(key, false).expandMin(val);
     }
 
     public double getRealOption(String key) {
@@ -679,48 +592,17 @@ public class OptionRegistry {
      * ================= */
 
     protected void createStringOption(String key, OptionType type, Category cat, String description, Default<String> def,
-            Default<String> testDefault, String[] vals) {
+            String[] vals) {
 
-        optionsMap.put(key, new StringOption(key, type, cat, description, def, testDefault, vals));
-    }
-
-    public void addStringOption(String key, OptionType type, Category cat, String def, String description) {
-        addStringOption(key, type, cat, def, def, description);
-    }
-
-    public void addStringOption(String key, OptionType type, Category cat, String def,
-            String description, String[] allowed) {
-
-        addStringOption(key, type, cat, new DefaultValue<>(def), new DefaultValue<>(def),
-                description, allowed);
-    }
-
-    public void addStringOption(String key, OptionType type, Category cat, String def,
-            String testDefault, String description) {
-
-        addStringOption(key, type, cat, new DefaultValue<>(def),
-                new DefaultValue<>(testDefault), description);
-    }
-
-    public void addStringOption(String key, OptionType type, Category cat, String def, String testDefault,
-            String description, String[] allowed) {
-
-        addStringOption(key, type, cat, new DefaultValue<>(def), new DefaultValue<>(testDefault),
-                description, allowed);
+        optionsMap.put(key, new StringOption(key, type, cat, description, def, vals));
     }
 
     public void addStringOption(String key, OptionType type, Category cat, Default<String> def,
-            Default<String> testDefault, String description) {
-
-        addStringOption(key, type, cat, def, testDefault, description, (String[]) null);
-    }
-
-    public void addStringOption(String key, OptionType type, Category cat, Default<String> def,
-            Default<String> testDefault, String description, String[] allowed) {
+            String description, String[] allowed) {
 
         if (findStringOption(key, true) != null)
             throw new IllegalArgumentException("The option " + key + " already exists.");
-        createStringOption(key, type, cat, description, def, testDefault, allowed);
+        createStringOption(key, type, cat, description, def, allowed);
     }
 
     public void setStringOption(String key, String value) {
@@ -783,7 +665,7 @@ public class OptionRegistry {
 
 
 
-    private static class IntegerOption extends Option<Integer> {
+    public static class IntegerOption extends Option<Integer> {
         private int min;
         private int max;
 
@@ -800,13 +682,11 @@ public class OptionRegistry {
          *          A description of the option.
          * @param defaultValue
          *          The option's default value.
-         * @param testDefault
-         *          The option's default value when under test.
          */
         public IntegerOption(String key, OptionType type, Category category, String description,
-                Default<Integer> defaultValue, Default<Integer> testDefault) {
+                Default<Integer> defaultValue) {
 
-            this(key, type, category, description, defaultValue, testDefault, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            this(key, type, category, description, defaultValue, Integer.MIN_VALUE, Integer.MAX_VALUE);
         }
 
         /**
@@ -822,17 +702,15 @@ public class OptionRegistry {
          *          A description of the option.
          * @param defaultValue
          *          The option's default value.
-         * @param testDefault
-         *          The option's default value when under test.
          * @param min
          *          The minimum allowed value for this option.
          * @param max
          *          The maximum allowed value for this option.
          */
         public IntegerOption(String key, OptionType type, Category category, String description, 
-                Default<Integer> defaultValue, Default<Integer> testDefault, int min, int max) {
+                Default<Integer> defaultValue, int min, int max) {
 
-            super(key, type, category, description, defaultValue, testDefault, null);
+            super(key, type, category, description, defaultValue, null);
             this.min = min;
             this.max = max;
         }
@@ -917,12 +795,9 @@ public class OptionRegistry {
 
         @Override
         protected void copyTo(OptionRegistry reg, String key) {
-            if (!reg.hasOption(key)) {
-                reg.addIntegerOption(key, getOptionType(), getCategory(), defaultValue, testDefault, getDescription(),
-                        min, max);
-            }
             if (isSet) {
                 reg.setIntegerOption(key, value);
+                reg.setIntegerOptionDefault(key, defaultValue);
             }
         }
 

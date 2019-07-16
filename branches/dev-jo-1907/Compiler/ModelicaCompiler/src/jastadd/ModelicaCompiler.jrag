@@ -142,7 +142,7 @@ public class ModelicaCompiler implements LogContainer {
     
     private CCompilerDelegator delegator = null;
     private String delegator_name = null;
-    private OptionRegistry options = null;
+    private OptionsAggregated options = null;
     private DiagnosticsGenerator diagGenerator = null;
     
     protected boolean dumpMemoryUse = false;
@@ -186,7 +186,7 @@ public class ModelicaCompiler implements LogContainer {
          * in that case it is printed on stdout.
          */
         public static void main(String[] args) {
-            OptionRegistry or = createOptions();
+            OptionsAggregated or = createOptions();
             Type t = null;
             BufferedReader tmpl = null;
             for (String arg : args) {
@@ -230,7 +230,7 @@ public class ModelicaCompiler implements LogContainer {
             }
         }
         
-        private static void emit(Type t, OptionRegistry or, PrintStream out) {
+        private static void emit(Type t, OptionsAggregated or, PrintStream out) {
             switch (t) {
             case XML:
                 or.exportXML(out, OptionRegistry.Category.experimental);
@@ -276,18 +276,16 @@ public class ModelicaCompiler implements LogContainer {
         }
     }
 
-    public static OptionRegistry createOptions() {
-        OptionRegistry res = new OptionRegistry() {};
-        OptionsAggregated.addTo(res);
-        return res;
+    public static OptionsAggregated createOptions() {
+        return OptionsAggregated.buildOptions();
     }
 
-    public static ModulesSettings createModulesSettings(OptionRegistry options)    
+    public static ModulesSettings createModulesSettings(OptionsAggregated options)    
     {
        return new ModulesSettings(options);
     }
 
-    public ModelicaCompiler(OptionRegistry options) {
+    public ModelicaCompiler(OptionsAggregated options) {
         this.options = options;
     }
 
@@ -1407,7 +1405,7 @@ public class ModelicaCompiler implements LogContainer {
         options.setStringOption("MODELICAPATH", modelicapath);
     }
     
-    public OptionRegistry getOptions() {
+    public OptionsAggregated getOptions() {
         return options;
     }
 

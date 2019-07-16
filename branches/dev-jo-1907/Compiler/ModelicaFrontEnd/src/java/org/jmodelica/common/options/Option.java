@@ -19,7 +19,6 @@ import org.jmodelica.util.xml.XMLPrinter;
 public abstract class Option<T> implements Comparable<Option<T>> {
     protected final String key;
     protected Default<T> defaultValue;
-    protected Default<T> testDefault;
     protected T value;
 
     private OptionType type;
@@ -43,13 +42,11 @@ public abstract class Option<T> implements Comparable<Option<T>> {
      *          A description of the option.
      * @param defaultValue
      *          The option's default value.
-     * @param testDefault
-     *          The option's default value when under test.
      * @param value
      *          The initial value of the option.
      */
     public Option(String key, OptionType optionType, Category category, String description,
-            Default<T> defaultValue, Default<T> testDefault, T value) {
+            Default<T> defaultValue, T value) {
 
         this.key = key;
         this.description = description;
@@ -57,7 +54,6 @@ public abstract class Option<T> implements Comparable<Option<T>> {
         this.category = category;
         this.value = value;
         this.defaultValue = defaultValue;
-        this.testDefault = testDefault;
         this.isSet = false;
     }
 
@@ -176,16 +172,6 @@ public abstract class Option<T> implements Comparable<Option<T>> {
      */
     public T getValue() {
         return isSet ? value : defaultValue.value();
-    }
-
-    /**
-     * Retrieves this option's current value when under test.
-     * 
-     * @return
-     *          this option's current value when under test.
-     */
-    public T getTestValue() {
-        return isSet ? value : testDefault.value();
     }
 
     /**

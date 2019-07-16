@@ -67,7 +67,7 @@ abstract public class TestCase implements GenericTestCase {
     
     private String[] modelicaLibraries = new String[0];
 
-    protected OptionRegistry options = createOptionRegistry();
+    protected OptionsAggregated options = createOptionRegistry();
     private Exception exception = null;
     private ArrayList<String> regexp = new ArrayList<String>();
     
@@ -91,11 +91,10 @@ abstract public class TestCase implements GenericTestCase {
      * 
      * Options may be further changed by test annotation.
      */
-    protected OptionRegistry createOptionRegistry() {
-        OptionRegistry or = new TestOptions();
-        OptionsAggregated.addTo(or);
+    protected OptionsAggregated createOptionRegistry() {
+        OptionsAggregated or = OptionsAggregated.buildTestOptions();
         File modelicapath = EnvironmentUtils.getThirdPartyMSL();
-        or.setStringOption("MODELICAPATH", modelicapath.getPath());
+        or.MODELICAPATH.setValue(modelicapath.getPath());
         return or;
     }
 

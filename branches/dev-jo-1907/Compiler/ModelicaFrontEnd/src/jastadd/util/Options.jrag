@@ -15,10 +15,11 @@
 */
 
 import org.jmodelica.common.options.OptionRegistry;
+import org.jmodelica.modelica.compiler.generated.OptionsAggregated;
 
 aspect Options {
 
-    public OptionRegistry ASTNode.myOptions() {
+    public OptionsAggregated ASTNode.myOptions() {
         return root().getUtilInterface().getOptionRegistry();
     }
 

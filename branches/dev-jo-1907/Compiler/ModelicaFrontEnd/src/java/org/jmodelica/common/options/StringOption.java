@@ -11,7 +11,7 @@ import org.jmodelica.common.options.OptionRegistry.Default;
 import org.jmodelica.common.options.OptionRegistry.OptionType;
 
 
-class StringOption extends Option<String> {
+public class StringOption extends Option<String> {
     protected Map<String,String> values;
     private String[] valueArray;
 
@@ -28,15 +28,13 @@ class StringOption extends Option<String> {
      *          A description of the option.
      * @param defaultValue
      *          The option's default value.
-     * @param testDefault
-     *          The option's default value when under test.
      * @param values
      *          The option's possible values (settings).
      */
     public StringOption(String key, OptionType type, Category category, String description,
-            Default<String> defaultValue, Default<String> testDefault, String[] values) {
+            Default<String> defaultValue, String[] values) {
 
-        super(key, type, category, description, defaultValue, testDefault, null);
+        super(key, type, category, description, defaultValue, null);
 
         this.value = null;
         if (values == null) {
@@ -132,12 +130,9 @@ class StringOption extends Option<String> {
 
     @Override
     protected void copyTo(OptionRegistry reg, String key) {
-        if (!reg.hasOption(key)) {
-            reg.addStringOption(key, getOptionType(), getCategory(), defaultValue, testDefault,
-                    getDescription(), valueArray);
-        }
         if (isSet) {
             reg.setStringOption(key, value);
+            reg.setStringOptionDefault(key, defaultValue);
         }
     }
 
