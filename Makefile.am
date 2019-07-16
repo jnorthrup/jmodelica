@@ -500,7 +500,7 @@ JAVA_CASADI_BASE_DIR=$(COMPILER_DIR)
 JAVA_CASADI_BUILD_DIR=$(abs_builddir)
 JAVA_MC_CASADI_ANT_FILE=$(COMPILER_DIR)/ModelicaCompilerCasADi/build.xml
 JAVA_OC_CASADI_ANT_FILE=$(COMPILER_DIR)/OptimicaCompilerCasADi/build.xml
-JAVA_EXEC_CP=$(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar:$(JAVA_BUILD_DIR)/bin/util.jar:$(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar
+JAVA_EXEC_CP=$(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar:$(JAVA_BUILD_DIR)/bin/util.jar
 
 all-local: build-python-packages build-compiler
 	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) https://svn.jmodelica.org > $(abs_builddir)/version.txt
@@ -524,7 +524,19 @@ if HAVE_ANT
 	cp $(JAVA_BUILD_DIR)/bin/separateProcess.jar $(DESTDIR)$(prefix)/lib/
 endif
 
-install-exec-local: install-python-packages install-compiler
+$(DESTDIR)$(prefix)/ThirdParty/Beaver/LICENSE: $(abs_top_srcdir)/Compiler/ModelicaFrontEnd/ThirdParty/Beaver/LICENSE
+	mkdir -p $(@D)
+	cp $(<) $(@)
+
+$(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/beaver-rt.jar: $(abs_top_srcdir)/Compiler/ModelicaFrontEnd/ThirdParty/Beaver/lib/beaver-rt.jar
+	mkdir -p $(@D)
+	cp $(<) $(@)
+
+install-modules-ModelicaFrontEnd: $(DESTDIR)$(prefix)/ThirdParty/Beaver/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/beaver-rt.jar
+
+install-modules: install-modules-ModelicaFrontEnd
+
+install-exec-local: install-python-packages install-compiler install-modules
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/LICENSE $(DESTDIR)$(prefix)/ 
 	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_GPL $(DESTDIR)$(prefix)/lib/
 	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_CPL $(DESTDIR)$(prefix)/lib/
@@ -547,11 +559,7 @@ install-exec-local: install-python-packages install-compiler
 	esac
 
 	cp $(abs_builddir)/DefaultOptions.xml $(DESTDIR)$(prefix)/DefaultOptions.xml
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver
-	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Beaver/
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib
-	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/ 
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty 
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials
 	cp -r $(SUNDIALS_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Sundials
 	cp $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.7.0/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Sundials
