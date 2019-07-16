@@ -551,11 +551,10 @@ aspect SrcAnnotations {
 
     }
     
-        /**
-     * Obtain the enclosing StoredDefinition , keeps track on which file this node belongs.
+    /**
+     * Obtain the enclosing StoredDefinition, keeps track on which file this node belongs.
      */
     inh SrcStoredDefinition SrcBaseNode.myStoredDefinition();
-    inh SrcStoredDefinition SrcExp.myStoredDefinition(); 
     eq SrcStoredDefinition.getChild().myStoredDefinition() = this;
     eq SourceRoot.getChild().myStoredDefinition() = null;
 
