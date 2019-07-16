@@ -506,36 +506,6 @@ all-local: build-python-packages build-compiler
 	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) https://svn.jmodelica.org > $(abs_builddir)/version.txt
 	if [ "$(BUILD_EXTRA)" ]; then exec "$(BUILD_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
-build-compiler:
-if HAVE_ANT
-	mkdir -p $(JAVA_BUILD_DIR)
-	cd $(JAVA_BUILD_DIR); \
-	$(ANT_OPTS) $(ANT) -f "$(JAVA_MC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
-	cd $(JAVA_BUILD_DIR); \
-	$(ANT_OPTS) $(ANT) -f "$(JAVA_OC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
-	java -cp "$(JAVA_EXEC_CP)" org.jmodelica.modelica.compiler.ModelicaCompiler\$$OptionExporter -x "$(abs_builddir)/DefaultOptions.xml"
-endif
-
-install-compiler: build-compiler
-if HAVE_ANT
-	cp $(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar $(DESTDIR)$(prefix)/lib/
-	cp $(JAVA_BUILD_DIR)/bin/util.jar $(DESTDIR)$(prefix)/lib/
-	cp $(JAVA_BUILD_DIR)/bin/OptimicaCompiler.jar $(DESTDIR)$(prefix)/lib/
-	cp $(JAVA_BUILD_DIR)/bin/separateProcess.jar $(DESTDIR)$(prefix)/lib/
-endif
-
-$(DESTDIR)$(prefix)/ThirdParty/Beaver/LICENSE: $(abs_top_srcdir)/Compiler/ModelicaFrontEnd/ThirdParty/Beaver/LICENSE
-	mkdir -p $(@D)
-	cp $(<) $(@)
-
-$(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/beaver-rt.jar: $(abs_top_srcdir)/Compiler/ModelicaFrontEnd/ThirdParty/Beaver/lib/beaver-rt.jar
-	mkdir -p $(@D)
-	cp $(<) $(@)
-
-install-modules-ModelicaFrontEnd: $(DESTDIR)$(prefix)/ThirdParty/Beaver/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/beaver-rt.jar
-
-install-modules: install-modules-ModelicaFrontEnd
-
 install-exec-local: install-python-packages install-compiler install-modules
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/LICENSE $(DESTDIR)$(prefix)/ 
 	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_GPL $(DESTDIR)$(prefix)/lib/
@@ -598,6 +568,36 @@ endif
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML LICENSE"  || cp  $(abs_top_srcdir)/XML/LICENSE $(DESTDIR)$(prefix)/XML
 	cp  $(abs_builddir)/version.txt $(DESTDIR)$(prefix)
 	if [ "$(INSTALL_EXTRA)" ]; then exec "$(INSTALL_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
+
+install-compiler: build-compiler
+if HAVE_ANT
+	cp $(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar $(DESTDIR)$(prefix)/lib/
+	cp $(JAVA_BUILD_DIR)/bin/util.jar $(DESTDIR)$(prefix)/lib/
+	cp $(JAVA_BUILD_DIR)/bin/OptimicaCompiler.jar $(DESTDIR)$(prefix)/lib/
+	cp $(JAVA_BUILD_DIR)/bin/separateProcess.jar $(DESTDIR)$(prefix)/lib/
+endif
+
+build-compiler:
+if HAVE_ANT
+	mkdir -p $(JAVA_BUILD_DIR)
+	cd $(JAVA_BUILD_DIR); \
+	$(ANT_OPTS) $(ANT) -f "$(JAVA_MC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
+	cd $(JAVA_BUILD_DIR); \
+	$(ANT_OPTS) $(ANT) -f "$(JAVA_OC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
+	java -cp "$(JAVA_EXEC_CP)" org.jmodelica.modelica.compiler.ModelicaCompiler\$$OptionExporter -x "$(abs_builddir)/DefaultOptions.xml"
+endif
+
+install-modules: install-modules-ModelicaFrontEnd
+
+install-modules-ModelicaFrontEnd: $(DESTDIR)$(prefix)/ThirdParty/Beaver/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/beaver-rt.jar
+
+$(DESTDIR)$(prefix)/ThirdParty/Beaver/LICENSE: $(abs_top_srcdir)/Compiler/ModelicaFrontEnd/ThirdParty/Beaver/LICENSE
+	mkdir -p $(@D)
+	cp $(<) $(@)
+
+$(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/beaver-rt.jar: $(abs_top_srcdir)/Compiler/ModelicaFrontEnd/ThirdParty/Beaver/lib/beaver-rt.jar
+	mkdir -p $(@D)
+	cp $(<) $(@)
 
 bindistdir: install
 	rm -rf $(bindistdir)
