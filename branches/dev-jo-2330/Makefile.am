@@ -589,15 +589,13 @@ endif
 
 install-modules: install-modules-ModelicaFrontEnd
 
-install-modules-ModelicaFrontEnd: $(DESTDIR)$(prefix)/ThirdParty/Beaver/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/beaver-rt.jar
+BEAVER_INSTALL_DIR = $(DESTDIR)$(prefix)/ThirdParty/Beaver
+BEAVER_SOURCE = $(abs_top_srcdir)/Compiler/ModelicaFrontEnd/ThirdParty/Beaver
 
-$(DESTDIR)$(prefix)/ThirdParty/Beaver/LICENSE: $(abs_top_srcdir)/Compiler/ModelicaFrontEnd/ThirdParty/Beaver/LICENSE
-	mkdir -p $(@D)
-	cp $(<) $(@)
+install-modules-ModelicaFrontEnd: $(BEAVER_INSTALL_DIR)/LICENSE $(BEAVER_INSTALL_DIR)/lib/beaver-rt.jar
 
-$(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/beaver-rt.jar: $(abs_top_srcdir)/Compiler/ModelicaFrontEnd/ThirdParty/Beaver/lib/beaver-rt.jar
-	mkdir -p $(@D)
-	cp $(<) $(@)
+$(BEAVER_INSTALL_DIR)/%: $(BEAVER_SOURCE)/%
+	install -D $(<) $(@)
 
 bindistdir: install
 	rm -rf $(bindistdir)

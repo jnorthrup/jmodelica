@@ -355,6 +355,8 @@ JAVA_CASADI_BUILD_DIR = $(abs_builddir)
 JAVA_MC_CASADI_ANT_FILE = $(COMPILER_DIR)/ModelicaCompilerCasADi/build.xml
 JAVA_OC_CASADI_ANT_FILE = $(COMPILER_DIR)/OptimicaCompilerCasADi/build.xml
 JAVA_EXEC_CP = $(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar:$(JAVA_BUILD_DIR)/bin/util.jar
+BEAVER_INSTALL_DIR = $(DESTDIR)$(prefix)/ThirdParty/Beaver
+BEAVER_SOURCE = $(abs_top_srcdir)/Compiler/ModelicaFrontEnd/ThirdParty/Beaver
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -1264,15 +1266,10 @@ build-compiler:
 
 install-modules: install-modules-ModelicaFrontEnd
 
-install-modules-ModelicaFrontEnd: $(DESTDIR)$(prefix)/ThirdParty/Beaver/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/beaver-rt.jar
+install-modules-ModelicaFrontEnd: $(BEAVER_INSTALL_DIR)/LICENSE $(BEAVER_INSTALL_DIR)/lib/beaver-rt.jar
 
-$(DESTDIR)$(prefix)/ThirdParty/Beaver/LICENSE: $(abs_top_srcdir)/Compiler/ModelicaFrontEnd/ThirdParty/Beaver/LICENSE
-	mkdir -p $(@D)
-	cp $(<) $(@)
-
-$(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/beaver-rt.jar: $(abs_top_srcdir)/Compiler/ModelicaFrontEnd/ThirdParty/Beaver/lib/beaver-rt.jar
-	mkdir -p $(@D)
-	cp $(<) $(@)
+$(BEAVER_INSTALL_DIR)/%: $(BEAVER_SOURCE)/%
+	install -D $(<) $(@)
 
 bindistdir: install
 	rm -rf $(bindistdir)
