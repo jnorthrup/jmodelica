@@ -38,7 +38,7 @@ public class OptionsAggregator {
             + "%n"
             + "    private OptionsAggregated(boolean isTest) {%n"
             + "        this.isTest = isTest;%n"
-            + "        initialize(this);%n"
+            + "        initialize();%n"
             + "    }%n"
             + "%n"
             + "    public static OptionsAggregated buildOptions() {%n"
@@ -224,10 +224,10 @@ public class OptionsAggregator {
                             testDefaultValue, defaultValue);
                 }
             } else {
-                defaultValueInit = String.format("options.new DefaultInvertBoolean(\"%s\")", inverted);
+                defaultValueInit = String.format("new DefaultInvertBoolean(\"%s\")", inverted);
             }
             out.print(indent);
-            out.format("options.%s = new %sOption(\"%s\", OptionType.%s, Category.%s,%n"
+            out.format("%s = new %sOption(\"%s\", OptionType.%s, Category.%s,%n"
                     + indent + "    %s,%n" // Description.
                     + indent + "    %s", // Default value.
                     name, kind, name, type, cat, description, defaultValueInit);
@@ -246,7 +246,7 @@ public class OptionsAggregator {
                 out.print(", (String[]) null");
             }
             out.print(");");
-            out.format("%n%soptions.optionsMap.put(\"%s\", options.%s);", indent, name, name);
+            out.format("%n%soptionsMap.put(\"%s\", %s);", indent, name, name);
         }
     }
 
@@ -273,8 +273,7 @@ public class OptionsAggregator {
             }
         }
         out.println();
-        out.println("    private static void initialize(OptionsAggregated options) {");
-        out.println("        boolean isTest = options.isTest;");
+        out.println("    private void initialize() {");
         generateCalls(out, "        ");
         out.println("    }");
         out.format(FOOTER);

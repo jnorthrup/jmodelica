@@ -110,16 +110,15 @@ public class OptionsAggregatorTests {
                     + "    public BooleanOption opt1;%n"
                     + "    public BooleanOption opt2;%n"
                     + "%n"
-                    + "    private static void initialize(OptionsAggregated options) {%n"
-                    + "        boolean isTest = options.isTest;%n"
-                    + "        options.opt1 = new BooleanOption(\"opt1\", OptionType.compiler, Category.user,%n"
+                    + "    private void initialize() {%n"
+                    + "        opt1 = new BooleanOption(\"opt1\", OptionType.compiler, Category.user,%n"
                     + "            \"\",%n"
                     + "            new DefaultValue<>(true));%n"
-                    + "        options.optionsMap.put(\"opt1\", options.opt1);%n"
-                    + "        options.opt2 = new BooleanOption(\"opt2\", OptionType.runtime, Category.experimental,%n"
+                    + "        optionsMap.put(\"opt1\", opt1);%n"
+                    + "        opt2 = new BooleanOption(\"opt2\", OptionType.runtime, Category.experimental,%n"
                     + "            \"A description\",%n"
                     + "            new DefaultValue<>(false));%n"
-                    + "        options.optionsMap.put(\"opt2\", options.opt2);%n"
+                    + "        optionsMap.put(\"opt2\", opt2);%n"
                     + "    }%n"
                     + OptionsAggregator.FOOTER,
                     "org.pack");
@@ -142,10 +141,10 @@ public class OptionsAggregatorTests {
             try (PrintStream out = new PrintStream(os)) {
                 op.generateCalls(out, "");
             }
-            String expected = String.format("options.opt1 = new BooleanOption(\"opt1\", OptionType.compiler, Category.user,%n"
+            String expected = String.format("opt1 = new BooleanOption(\"opt1\", OptionType.compiler, Category.user,%n"
                     + "    \"\",%n"
                     + "    new DefaultValue<>(isTest ? true : false));%n"
-                    + "options.optionsMap.put(\"opt1\", options.opt1);%n");
+                    + "optionsMap.put(\"opt1\", opt1);%n");
             assertEquals(expected, os.toString());
         }
     }
@@ -169,14 +168,14 @@ public class OptionsAggregatorTests {
             try (PrintStream out = new PrintStream(os)) {
                 op.generateCalls(out, "");
             }
-            String expected = String.format("options.opt1 = new BooleanOption(\"opt1\", OptionType.compiler, Category.user,%n"
+            String expected = String.format("opt1 = new BooleanOption(\"opt1\", OptionType.compiler, Category.user,%n"
                     + "    \"\",%n"
-                    + "    options.new DefaultInvertBoolean(\"opt2\"));%n"
-                    + "options.optionsMap.put(\"opt1\", options.opt1);%n"
-                    + "options.opt2 = new BooleanOption(\"opt2\", OptionType.compiler, Category.user,%n"
+                    + "    new DefaultInvertBoolean(\"opt2\"));%n"
+                    + "optionsMap.put(\"opt1\", opt1);%n"
+                    + "opt2 = new BooleanOption(\"opt2\", OptionType.compiler, Category.user,%n"
                     + "    \"\",%n"
                     + "    new DefaultValue<>(true));%n"
-                    + "options.optionsMap.put(\"opt2\", options.opt2);%n");
+                    + "optionsMap.put(\"opt2\", opt2);%n");
             assertEquals(expected, os.toString());
         }
     }
