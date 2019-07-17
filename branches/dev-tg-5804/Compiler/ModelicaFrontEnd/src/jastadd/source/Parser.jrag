@@ -215,7 +215,7 @@ aspect Parsers {
         return sr;
     }
     
-    public static final LoadInfo ParserHandler.EXP_FILENAME = LoadInfo.create((Path)null);
+    public static final LoadInfo ParserHandler.EXP_FILENAME = LoadInfo.create("<predefined string>");
 
     public SrcExp ParserHandler.parseModelicaExpString(String str)
             throws ParserException, beaver.Parser.Exception, IOException {
