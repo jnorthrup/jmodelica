@@ -13,7 +13,6 @@ import org.jmodelica.common.options.OptionRegistry.OptionType;
 
 public class StringOption extends Option<String> {
     protected Map<String,String> values;
-    private String[] valueArray;
 
     /**
      * Creates an option for string values.
@@ -44,7 +43,6 @@ public class StringOption extends Option<String> {
             for (String v : values)
                 this.values.put(v, v);
         }
-        valueArray = values;
     }
 
     @Override

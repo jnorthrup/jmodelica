@@ -30,18 +30,16 @@ import org.jmodelica.util.xml.DocBookPrinter;
 import org.jmodelica.util.xml.XMLPrinter;
 
 /**
- * OptionRegistry contains all options for the compiler. Options
- * can be retrieved based on type: String, Integer etc.
+ * Base class for storing compile options.
+ *
+ * <p>Options can be retrieved based on type: String, Integer etc.
  * OptionRegistry also provides methods for handling paths
  * to Modelica libraries.
  *
- * Use OptionsAggregated.buildOptions() to get an option
+ * <p>Use OptionsAggregated.buildOptions() to get an option
  * registry populated with all available options.
- *
- * The registry is empty by default, options have to be added by
- * calling any of the add*Option methods.
  */
-public class OptionRegistry {
+public abstract class OptionRegistry {
 
     public abstract static class Default<T> {
         public final Class<T> type;
@@ -182,11 +180,7 @@ public class OptionRegistry {
      * @return
      *          a new {@code OptionRegistry} with the same options and settings as {@code this}.
      */
-    public OptionRegistry copy() {
-        OptionRegistry res = new OptionRegistry();
-        res.copyAllOptions(this);
-        return res;
-    }
+    public abstract OptionRegistry copy();
 
     @SuppressWarnings({
         "unchecked", "rawtypes"
@@ -579,145 +573,6 @@ public class OptionRegistry {
     }
 
 
-
-    public static class IntegerOption extends Option<Integer> {
-        private int min;
-        private int max;
-
-        /**
-         * Creates an option for real values.
-         * 
-         * @param key
-         *          The key to (name of) the option.
-         * @param type
-         *          The type of option.
-         * @param category
-         *          The category of the option.
-         * @param description
-         *          A description of the option.
-         * @param defaultValue
-         *          The option's default value.
-         */
-        public IntegerOption(String key, OptionType type, Category category, String description,
-                Default<Integer> defaultValue) {
-
-            this(key, type, category, description, defaultValue, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        }
-
-        /**
-         * Creates an option for real values.
-         * 
-         * @param key
-         *          The key to (name of) the option.
-         * @param type
-         *          The type of option.
-         * @param category
-         *          The category of the option.
-         * @param description
-         *          A description of the option.
-         * @param defaultValue
-         *          The option's default value.
-         * @param min
-         *          The minimum allowed value for this option.
-         * @param max
-         *          The maximum allowed value for this option.
-         */
-        public IntegerOption(String key, OptionType type, Category category, String description, 
-                Default<Integer> defaultValue, int min, int max) {
-
-            super(key, type, category, description, defaultValue, null);
-            this.min = min;
-            this.max = max;
-        }
-
-        @Override
-        public void setValue(Integer value) {
-            if (value < min || value > max) {
-                invalidValue(value, minMaxStr());
-            }
-            super.setValue(value);
-        }
-
-        @Override
-        protected void setValue(String str) {
-            try {
-                setValue(Integer.parseInt(str));
-            } catch (NumberFormatException e) {
-                invalidValue(str, ", expecting integer value" + minMaxStr());
-            }
-        }
-
-        private String minMaxStr() {
-            return (min == Integer.MIN_VALUE ? "" : ", min: " + min) + (max == Integer.MAX_VALUE ? "" : ", max: " + max);
-        }
-
-        /**
-         * Retrieves the minimum allowed value for this option.
-         * 
-         * @return
-         *          the minimum allowed value for this option.
-         */
-        public int getMin() {
-            return min;
-        }
-
-        /**
-         * Retrieves the maximum allowed value for this option.
-         * 
-         * @return
-         *          the maximum allowed value for this option.
-         */
-        public int getMax() {
-            return max;
-        }
-
-        @Override
-        public Boolean isLimited() {
-            return (min != Integer.MIN_VALUE) || (max != Integer.MAX_VALUE);
-        }
-
-        /**
-         * Lowers the minimum allowed value for this option. Will not raise it.
-         * 
-         * @param val
-         *          The new minimum allowed value.
-         */
-        public void expandMin(int val) {
-            if (val < min)
-                min = val;
-        }
-
-        /**
-         * Raises the maximum allowed value for this option. Will not lower it.
-         * 
-         * @param val
-         *          The new minimum allowed value.
-         */
-        public void expandMax(int val) {
-            if (val > max)
-                max = val;
-        }
-
-        @Override
-        public String getType() {
-            return "integer";
-        }
-
-        @Override
-        public String getValueString() {
-            return Integer.toString(getValue());
-        }
-
-        @Override
-        protected void copyTo(OptionRegistry reg, String key) {
-            if (isSet) {
-                reg.setIntegerOption(key, value);
-            }
-        }
-
-    }
-
-
     public interface OptionFilter {
         public boolean filter(Option<?> o);
     }
@@ -757,5 +612,4 @@ public class OptionRegistry {
             super(message);
         }
     }
-
 }

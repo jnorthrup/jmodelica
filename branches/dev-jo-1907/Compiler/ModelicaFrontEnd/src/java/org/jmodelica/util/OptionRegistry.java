@@ -29,4 +29,10 @@ public class OptionRegistry extends org.jmodelica.common.options.OptionRegistry 
         }
     }
 
+    @Override
+    public org.jmodelica.common.options.OptionRegistry copy() {
+        OptionRegistry res = new OptionRegistry();
+        res.copyAllOptions(this);
+        return res;
+    }
 }

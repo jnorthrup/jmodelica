@@ -19,12 +19,11 @@ public class OptionsAggregator {
 
     /** Format string for the header of generated aggregated options code. */
     public static final String HEADER = "package %s;%n"
-            + "import java.util.HashMap;%n"
-            + "import java.util.Map;%n"
             + "%n"
-            + "import org.jmodelica.common.options.RealOption;%n"
-            + "import org.jmodelica.common.options.OptionRegistry;%n"
             + "import org.jmodelica.common.options.BooleanOption;%n"
+            + "import org.jmodelica.common.options.IntegerOption;%n"
+            + "import org.jmodelica.common.options.OptionRegistry;%n"
+            + "import org.jmodelica.common.options.RealOption;%n"
             + "import org.jmodelica.common.options.StringOption;%n"
             + "%n"
             + "/**%n"
