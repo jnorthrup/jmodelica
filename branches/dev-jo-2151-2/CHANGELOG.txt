@@ -5,9 +5,6 @@ Added compilation hook to run before FMU packing
 # Fixed ; Minor ; Compiler ; #5805
 Fixed ant clean failing with empty target directory
 
-# Fixed ; Minor ; Compiler ; #5805
-Fixed ant clean failing with empty target directory
-
 # Fixed ; Minor ; Compiler ; #5793
 Fixed bug where reinit did not set value of aliased derivatives.
 
