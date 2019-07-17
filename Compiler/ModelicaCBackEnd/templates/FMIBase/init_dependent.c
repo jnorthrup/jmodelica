@@ -13,6 +13,8 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 */
 
+$C_enum_strings$
+
 $C_model_init_eval_dependent_parameters$
 
 $C_model_init_eval_dependent_variables$

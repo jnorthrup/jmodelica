@@ -74,7 +74,7 @@ aspect FlatTypeInterface {
             Map<Index, T> expandedCells = new HashMap<>();
             for (Map.Entry<Index, T> entry : cells.entrySet()) {
                 for (Index index : Indices.create(size)) {
-                    expandedCells.put(index.expand(entry.getKey()).fix(), entry.getValue());
+                    expandedCells.put(index.expand(entry.getKey()).clone(), entry.getValue());
                 }
             }
             cells = expandedCells;
@@ -632,8 +632,6 @@ aspect FlatTypeAnalysis {
     eq FDelayExp.type() = getFExp().type();
     eq FSpatialDistExp.type() = getIn0().type();
 
-    eq FIndicatorExp.type() = FRealType.SCALAR;
-
     /**
      * The scalar type of the expression.
      * 
@@ -772,7 +770,7 @@ aspect FlatTypeAnalysis {
                 // Very difficult to fix here, should be fixed in CommonAccessExp.type() instead.
                 t = t.expand(size().contractRight(ndimsWithoutFAS - ip.ndims()));
                 try {
-                    t = t.cell(accessIndex()).asFType();
+                    t = t.cell(index()).asFType();
                 } catch (ConstantEvaluationException e) {
                     t = ndims() > 0 ? t.arrayType(size()) : t.scalarType();
                 }

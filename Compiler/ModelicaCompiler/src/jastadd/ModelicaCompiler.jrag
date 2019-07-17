@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -399,9 +400,9 @@ public class ModelicaCompiler implements LogContainer {
     /**
      * Calls the hook to be called after output code is generated.
      */
-    protected void hookCodeGenerated(FClass fc, File dir) {
+    protected void hookCodeGenerated(File dir) {
         for (CompilationHooks hooks : hooksList)
-            hooks.codeGenerated(this, fc, dir);
+            hooks.codeGenerated(this, dir);
     }
     
     /**
@@ -955,7 +956,7 @@ public class ModelicaCompiler implements LogContainer {
      */
     private SourceRoot parseModel(String name) 
       throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
-        return parserHandler.parseModel(createUtilInterface(), LoadInfo.create(name));
+        return parserHandler.parseModel(createUtilInterface(), name);
     }
 
     /**
@@ -984,11 +985,7 @@ public class ModelicaCompiler implements LogContainer {
         boolean doTearDown = true;
         try {
             doTearDown = trySetUp();
-            Collection<LoadInfo> loadInfos = new ArrayList<>();
-            for (String path : names) {
-                loadInfos.add(LoadInfo.create(path));
-            }
-            return doParseModel(loadInfos);
+            return doParseModel(names);
         } finally {
             tryTearDown(doTearDown);
         }
@@ -1016,15 +1013,15 @@ public class ModelicaCompiler implements LogContainer {
     public SourceRoot parseString(String code, String name) 
       throws IOException, beaver.Parser.Exception, CompilerException {
         checkSetUp();
-        return parserHandler.parseString(createUtilInterface(), code, LoadInfo.create(name));
+        return parserHandler.parseString(createUtilInterface(), code, name);
     }
 
-    public SourceRoot doParseModel(Collection<LoadInfo> loadInfos) 
+    public SourceRoot doParseModel(String names[]) 
       throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
         checkSetUp();
         ASTNode.getStepInfo().reset();
         ASTNode.beginStep("parseModel()");
-        SourceRoot sr = parserHandler.parseModel(createUtilInterface(), loadInfos);
+        SourceRoot sr = parserHandler.parseModel(createUtilInterface(), names);
         hookFilesParsed(sr);
         ASTNode.endStep("parseModel()");
         
@@ -1058,7 +1055,7 @@ public class ModelicaCompiler implements LogContainer {
         dumpMemoryUseFile(sr, "source", false);
 
         if (options.getBooleanOption("generate_html_diagnostics")) {
-            setDiagnosticsGenerator(new DiagnosticsGenerator(cl, options));
+            setDiagnosticsGenerator(new DiagnosticsGenerator(cl));
         }
 
         // compute instance tree
@@ -1334,11 +1331,11 @@ public class ModelicaCompiler implements LogContainer {
     
         templates.generateCFiles(this, fc, createCGenerator(fc), sourceDir, name);
         templates.generateXMLFiles(this, fc, target.getXMLGenerator(fc), outDir, "modelDescription");
-        hookCodeGenerated(fc, outDir);
         
         fc.guidManager().setSourceFile(new File(outDir, "modelDescription.xml"));
         fc.guidManager().processDependentFiles();
         
+        hookCodeGenerated(outDir);
         log.debug("... code generated.");
         ASTNode.endStep("generateCode()");
     }
@@ -2228,8 +2225,8 @@ syn String SrcStoredDefinition.findOutermostLibraryDir() {
 
 syn File SrcAccess.findOutermostLibraryDirForWithin(File f) = null;
 eq SrcDot.findOutermostLibraryDirForWithin(File f) {
-    for (int i = getNumSrcNamedAccess() - 1; i >= 0 && f != null; i--)
-        f = getSrcNamedAccess(i).findOutermostLibraryDirForWithin(f);
+    for (int i = getNumSrcAccess() - 1; i >= 0 && f != null; i--)
+        f = getSrcAccess(i).findOutermostLibraryDirForWithin(f);
     return f;
 }
 eq SrcNamedAccess.findOutermostLibraryDirForWithin(File f) {
@@ -2493,15 +2490,31 @@ public class ModulesSettings {
     }
      
     public void addLibrary(Module module, String name) {
-        libraryNames.put(module,  name);
+        HashSet<String> names;
+        
+        if (libraryNames.contains(module)) {
+            names = libraryNames.get(module);
+        } else {
+            names = new HashSet<String>();
+            libraryNames.put(module,  names);
+        }
+        
+        names.add(name);
     }
     
     public java.util.List<String> getLibraryNames() {
-        return new ArrayList(libraryNames.values());
+        LinkedList<String> libNames = new LinkedList<String>();
+        
+        for (HashSet<String> n : libraryNames.values()) {
+            for (String s : n) {
+                libNames.add(s);
+            }
+        }
+        return libNames;
     }
     
-    private static ArrayList<ModuleContributor> CONTRIBUTORS = new ArrayList<>();
-    private static HashMap<Module, String> libraryNames = new HashMap<>();
+    private static ArrayList<ModuleContributor> CONTRIBUTORS = new ArrayList<ModuleContributor>();
+    private static Hashtable<Module, HashSet<String>> libraryNames = new Hashtable<Module, HashSet<String>>();
     
     public abstract static class ModuleContributor {
         public void addModule(ModulesSettings settings, OptionRegistry options) { }
@@ -2569,7 +2582,7 @@ public interface CompilationHooks {
     /**
      * Called after output code is generated.
      */
-    public void codeGenerated(ModelicaCompiler instance, FClass fc, File dir);
+    public void codeGenerated(ModelicaCompiler instance, File dir);
     
     /**
      * Called after the generated C code is compiled.
@@ -2600,7 +2613,7 @@ public abstract class CompilationHooksImpl implements CompilationHooks {
     @Override
     public void codeGeneratorCreated(ModelicaCompiler instance, AbstractGenerator gen) {}
     @Override
-    public void codeGenerated(ModelicaCompiler instance, FClass fc, File dir) {}
+    public void codeGenerated(ModelicaCompiler instance, File dir) {}
     @Override
     public void codeCompiled(ModelicaCompiler instance) {}
 }

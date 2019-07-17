@@ -13,6 +13,8 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 */
 
+$C_enum_strings$
+
 $C_dae_init_blocks_residual_functions$
 
 $CAD_dae_init_blocks_residual_functions$

@@ -13,6 +13,8 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 */
 
+$C_enum_strings$
+
 $external_func_includes$
 
 $C_functions$

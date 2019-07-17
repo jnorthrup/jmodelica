@@ -372,11 +372,11 @@ FAccessPart : BaseNode ::= <Name:String>;
 FAccessPartArray : FAccessPart ::= FArraySubscripts;
 
 /**
- * Representation of an attribute for a built-in type.
+ * Representation of an attribute for a built-in types.
  *
  * The attributes (start, unit etc.) of the built-in types are represented by
- * objects of the FAttribute class, which in turn are stored in the 
- * FVariables. FAttribute contains information about the attribute name and
+ * objects of the FAttribute class, which in turned are stored in the 
+ * FVariables. FAttributes contain information about the attribute name and
  * type, its value, whether it is set explicitly by the user and the prefixes
  * each and final. 
  */
@@ -737,7 +737,7 @@ ArrayExp : BaseNode ::= FExp*;
 abstract FExp : BaseNode;
 
 /**
- * Abstract base class for all flattened expressions that are neither literals nor unsupported.
+ * Abstract base class for all flattened expressions that is not literal or unsupported.
  */
 abstract FAbstractExp : FExp;
 
@@ -841,7 +841,7 @@ abstract FBoolBinExp : FBinExp;
 /**
  * Base class for relational expressions.
  */
-abstract FRelExp : FBoolBinExp ::= [Indicator:FAccessExp];
+abstract FRelExp : FBoolBinExp ::= [Indicator:FExp] <IndicatorVarName:String>;
 
 /**
  * Less than expression.
@@ -1315,27 +1315,12 @@ FReinit : FBuiltInFunctionCall ::= Var:FExp FExp;
 /**
  * The delay() operator.
  */
-FDelayExp : FBuiltInFunctionCall ::= FExp Delay:FExp [Max:FExp] Indicator:FAccessExp*;
+FDelayExp : FBuiltInFunctionCall ::= FExp Delay:FExp [Max:FExp];
 
 /**
  * The spatialDistribution() operator.
  */
-FSpatialDistExp : FBuiltInFunctionCall ::= In0:FExp
-                                           In1:FExp
-                                           X:FExp
-                                           PositiveVelocity:FExp
-                                           InitialPoints:FExp
-                                           InitialValues:FExp
-                                           [Indicator:FAccessExp];
-
-/**
- * Used for generating event indicators for the delay() operator.
- */
-abstract FIndicatorExp   : FBuiltInFunctionCall;
-abstract FDelayIndicator : FIndicatorExp;
-FFirstDelayIndicator     : FDelayIndicator;
-FSecondDelayIndicator    : FDelayIndicator;
-FSpatialDistIndicator    : FIndicatorExp;
+FSpatialDistExp : FBuiltInFunctionCall ::= In0:FExp In1:FExp X:FExp PositiveVelocity:FExp InitialPoints:FExp InitialValues:FExp;
 
 /**
  * Sample built-in function.

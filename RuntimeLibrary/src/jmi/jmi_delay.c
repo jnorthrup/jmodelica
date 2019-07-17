@@ -210,18 +210,6 @@ int jmi_delay_second_event_indicator(jmi_t *jmi, int index, jmi_real_t delay_tim
     return jmi_delay_event_indicator(jmi, index, delay_time, event_indicator, FALSE);
 }
 
-jmi_real_t jmi_delay_first_event_indicator_exp(jmi_t *jmi, int index, jmi_real_t delay_time)
-{
-    jmi_real_t event_indicator;
-    jmi_delay_first_event_indicator(jmi, index, delay_time, &event_indicator);
-    return event_indicator;
-}
-jmi_real_t jmi_delay_second_event_indicator_exp(jmi_t *jmi, int index, jmi_real_t delay_time)
-{
-    jmi_real_t event_indicator;
-    jmi_delay_second_event_indicator(jmi, index, delay_time, &event_indicator);
-    return event_indicator;
-}
 
 
  /* Implementation of jmi_spatialdist API, based on jmi_delaybuffer_t */
@@ -374,13 +362,6 @@ int jmi_spatialdist_event_indicator(jmi_t *jmi, int index, jmi_real_t x, jmi_boo
         *event_indicator = t_event - x2left(x);
     }
     return 0;
-}
-
-jmi_real_t jmi_spatialdist_event_indicator_exp(jmi_t *jmi, int index, jmi_real_t x, jmi_boolean positiveVelocity)
-{
-    jmi_real_t event_indicator;
-    jmi_spatialdist_event_indicator(jmi, index, x, positiveVelocity, &event_indicator);
-    return event_indicator;
 }
 
 

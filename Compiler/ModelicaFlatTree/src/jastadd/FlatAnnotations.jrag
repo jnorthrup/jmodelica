@@ -42,11 +42,6 @@ aspect FlatAnnotations {
         protected FlatAnnotation createNode(String name, FlatAnnotationProvider node) {
             return new FlatAnnotation(name, node, this);
         }
-        
-        @Override
-        protected FlatAnnotation createNode(FlatAnnotationProvider node) {
-            return createNode(null, node);
-        }
 
         @Override
         protected FlatAnnotation ambiguousNode() {
@@ -86,7 +81,7 @@ aspect FlatAnnotations {
     }
 
     @Override
-    public Iterable<SubAnnotationPair<FlatAnnotationProvider>> FAttribute.annotationSubNodes() {
+    public Iterable<SubNodePair<FlatAnnotationProvider>> FAttribute.annotationSubNodes() {
         return annotationSubNodes(getFAttributes());
     }
 
@@ -135,7 +130,7 @@ aspect FlatAnnotations {
             }
 
             @Override
-            public Iterable<SubAnnotationPair<FlatAnnotationProvider>> annotationSubNodes() {
+            public Iterable<SubNodePair<FlatAnnotationProvider>> annotationSubNodes() {
                 return FAttribute.annotationSubNodes(attributes.getFAttributeList());
             }
 
@@ -172,11 +167,11 @@ aspect FlatAnnotations {
     }
 
     public class FAttribute {
-        public static Iterable<SubAnnotationPair<FlatAnnotationProvider>> annotationSubNodes(List<FAttribute> list) {
-            return new TransformerIterable<FAttribute, SubAnnotationPair<FlatAnnotationProvider>>(list) {
+        public static Iterable<SubNodePair<FlatAnnotationProvider>> annotationSubNodes(List<FAttribute> list) {
+            return new TransformerIterable<FAttribute, SubNodePair<FlatAnnotationProvider>>(list) {
                 @Override
-                protected SubAnnotationPair<FlatAnnotationProvider> transform(FAttribute a) {
-                    return new SubAnnotationPairImpl<FlatAnnotationProvider>(a.name(), a);
+                protected SubNodePair<FlatAnnotationProvider> transform(FAttribute a) {
+                    return new SubNodePair<FlatAnnotationProvider>(a.name(), a);
                 }
             };
         }

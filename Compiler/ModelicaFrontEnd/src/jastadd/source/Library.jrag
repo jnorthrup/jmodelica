@@ -57,18 +57,7 @@ aspect Library {
     public static final String SrcLibNode.PACKAGE_FILE = "package.mo";
     public static final String SrcLibNode.PACKAGE_ORDER_FILE = "package.order";
 
-    /**
-     * getSrcStoredDefinition is not lazy due to the needed to control
-     * the life time of loaded files which needs to outlive
-     * other attributes. 
-     */
-    private SrcStoredDefinition SrcLibNode.srcStoredDefinition = null;
-
-    syn SrcStoredDefinition SrcLibNode.getSrcStoredDefinition() {
-        if (srcStoredDefinition != null) {
-            return srcStoredDefinition;
-        }
-        
+    syn lazy SrcStoredDefinition SrcLibNode.getSrcStoredDefinition() {
         /* If structured
                 a. Read all files
                 b. Check for package.mo
@@ -82,38 +71,41 @@ aspect Library {
         */
         
         String fileName = fileName();
+        String dirName = null;
+        File baseDir = null;
         String name = name();
+        boolean isStructured = getStructured();
         // TODO: Error if more than one class in file
+        if (isStructured) {
+            dirName = getFileName();
+            baseDir = new File(dirName);
+        }
         try {
             log.info("Reading file: " + fileName);
             UtilInterface util = root().getUtilInterface();
-            SourceRoot sr = util.getParserHandler().parseFile(util, getLoadInfo().withPath(fileName));
+            SourceRoot sr = util.getParserHandler().parseFile(util, fileName);
             SrcStoredDefinition entity = sr.getProgram().getUnstructuredEntity(0);
             SrcClassDecl cd = extractClassDecl(entity, name);
             if (shouldProduceProblem(entity, name)) {
                 LIBRARY_FILE_CONTENTS.invoke(this, entity);
             }
             if (cd == null) {
-                srcStoredDefinition = createErrorStoredDefinition();
-                return srcStoredDefinition;
+                return createErrorStoredDefinition();
             }
-            if (getStructured()) {
-                String dirName = dirName();
-                File baseDir = new File(dirName);
+            entity.setFileName(fileName);
+            if (isStructured) {
                 SrcFullClassDecl fcd = (SrcFullClassDecl) cd;
                 LibraryList ll = new LibraryList();
-                ll.addLibraryDirectory(getLoadInfo().withPath(dirName), getReason());
+                ll.addLibraryDirectory(dirName, getReason());
 
                 SrcLibClassDecl lcd = new SrcLibClassDecl(fcd, ll.createLibNodeList());
                 lcd.readOrderFile(baseDir, util);
                 entity.setSrcClassDecl(lcd, 0);
             }
-            srcStoredDefinition = entity;
-            return srcStoredDefinition;
+            return entity;
         } catch (ParserException e) {
             problem(e.getProblem());
-            srcStoredDefinition = createErrorStoredDefinition();
-            return srcStoredDefinition;
+            return createErrorStoredDefinition();
         } catch (Exception e) {
             String msg = "Error when parsing file: '" + fileName + "':\n" + 
                     "   " + e.getClass().getName() + "\n";
@@ -121,8 +113,7 @@ aspect Library {
                 msg = msg + "   " + e.getMessage();
             error(msg);
             log.debug(e);
-            srcStoredDefinition = createErrorStoredDefinition();
-            return srcStoredDefinition;
+            return createErrorStoredDefinition();
         } 
     }
 
@@ -273,7 +264,7 @@ aspect Library {
     }
 
     private File SrcLibNode.myPackageFile() {
-        return new File(dirName(), myPackageFileName());
+        return new File(getFileName(), myPackageFileName());
     }
     
     private String SrcLibNode.myPackageFileName() {
@@ -304,11 +295,15 @@ aspect Library {
     }
 
     private SrcStoredDefinition SrcLibNode.createErrorStoredDefinition() {
-        return new SrcStoredDefinition(new Opt(), new List(createErrorClass()), getLoadInfo());
+        return new SrcStoredDefinition(new Opt(), new List(createErrorClass()));
     }
 
     private SrcBadClassDecl SrcLibNode.createErrorClass() {
         return new SrcBadClassDecl(name());
+    }
+
+    public SrcLibNode.SrcLibNode(File file, String name, boolean structured, LoadReason reason) {
+        this(new SrcIdDecl(name), file.getPath(), structured, "", reason);
     }
 
     public SrcLibClassDecl.SrcLibClassDecl(SrcFullClassDecl fcd, List<SrcLibNode> lib) {
@@ -358,89 +353,89 @@ aspect Library {
         }
         
         /**
-         * Add the library found in {@link LoadInfo#getPath()} to the list of libraries. 
+         * Add <code>path</code> to list of libraries.
          * 
-         * @param loadInfo  a LoadInfo object
-         * @param reason    reason this library are added
+         * @param path    path of the library to add
+         * @param reason  reason this library are added
          * @return <code>true</code> if a library was added 
          */
-        public boolean addLibrary(LoadInfo loadInfo, SrcLibNode.LoadReason reason) {
-            return add(loadInfo, false, reason);
-        }
-        
-        
-        /**
-         * Add each library found in {@link LoadInfo#getPath()} to the list of libraries. 
-         * 
-         * @param loadInfo  a LoadInfo object
-         * @param reason    reason these libraries are added
-         * @return <code>true</code> if any libraries were added 
-         */
-        public boolean addLibraryDirectory(LoadInfo loadInfo, SrcLibNode.LoadReason reason) {
-            return add(loadInfo, true, reason);
+        public boolean addLibrary(String path, SrcLibNode.LoadReason reason) {
+            return add(path, false, reason);
         }
         
         /**
-         * Add each library found in the collection of loadInfos to the list of libraries. 
+         * Add each library found in the directory <code>path</code> to list of libraries.
          * 
-         * @param loadInfo  a collection of LoadInfo objects
-         * @param reason    reason these libraries are added
+         * @param path    path of the directory containing libraries to add
+         * @param reason  reason these libraries are added
          * @return <code>true</code> if any libraries were added 
          */
-        public boolean addLibraries(Collection<LoadInfo> loadInfos, SrcLibNode.LoadReason reason) {
-            return addAll(loadInfos, false, reason);
+        public boolean addLibraryDirectory(String path, SrcLibNode.LoadReason reason) {
+            return add(path, true, reason);
         }
         
         /**
-         * Add each library found in each of the {@link LoadInfo#getPath()} directories to the list of libraries. 
+         * Add each of <code>paths</code> to list of libraries.
          * 
-         * @param loadInfo  a collection of LoadInfo objects
-         * @param reason    reason these libraries are added
+         * @param paths   paths of the libraries to add
+         * @param reason  reason these libraries are added
          * @return <code>true</code> if any libraries were added 
          */
-        public boolean addLibraryDirectories(Collection<LoadInfo> loadInfos, SrcLibNode.LoadReason reason) {
-            return addAll(loadInfos, true, reason);
+        public boolean addLibraries(String[] paths, SrcLibNode.LoadReason reason) {
+            return addAll(paths, false, reason);
         }
         
-        protected boolean addAll(Collection<LoadInfo> loadInfos, boolean directories, SrcLibNode.LoadReason reason) {
+        /**
+         * Add each library found in each of the directories in <code>paths</code> 
+         * to list of libraries.
+         * 
+         * @param paths   paths of the directories containing libraries to add
+         * @param reason  reason these libraries are added
+         * @return <code>true</code> if any libraries were added 
+         */
+        public boolean addLibraryDirectories(String[] paths, SrcLibNode.LoadReason reason) {
+            return addAll(paths, true, reason);
+        }
+        
+        protected boolean addAll(String[] paths, boolean directories, SrcLibNode.LoadReason reason) {
             boolean res = false;
-            for (LoadInfo loadInfo : loadInfos)
-                if (add(loadInfo, directories, reason))
+            for (String path : paths)
+                if (add(path, directories, reason))
                     res = true;
             return res;
         }
 
         /**
-         * Add the path found in {@link LoadInfo#getPath()} to the list of libraries. 
+         * Add a path to list of libraries.
          * 
-         * @param loadInfo   a LoadInfo object
+         * @param path       the library or directory containing libraries to add
          * @param directory  if <code>true</code>, add all libraries found in the directory 
          *                   <code>path</code>, else add <code>path</code>
          * @param reason     reason for loading this library
          * @return <code>true</code> if any libraries were added 
          */
-        protected boolean add(LoadInfo loadInfo, boolean directory, SrcLibNode.LoadReason reason) {
-            File base = new File(loadInfo.getPath());
+        protected boolean add(String path, boolean directory, SrcLibNode.LoadReason reason) {
+            File base = new File(path);
             if (directory) {
                 boolean res = false;
                 try {
                     File[] files = base.listFiles();
                     if (files != null)
                         for (File file : files)
-                            if (add(file, reason, loadInfo))
+                            if (add(file, reason))
                                 res = true;
                 } catch (SecurityException e) {
                     // TODO: should probably do something constructive here, log an error or something
                 }
                 return res;
             } else {
-                return add(base, reason, loadInfo);
+                return add(base, reason);
             }
         }
 
-        protected boolean add(File path, SrcLibNode.LoadReason reason, LoadInfo loadInfo) {
+        protected boolean add(File path, SrcLibNode.LoadReason reason) {
             try {
-                return add(LibraryDef.create(path, reason, loadInfo));
+                return add(LibraryDef.create(path, reason));
             } catch (SecurityException e) {
                 // TODO: should probably do something constructive here, log an error or something
                 return false;
@@ -457,101 +452,66 @@ aspect Library {
             return res;
         }
         
+        public static class LibraryDef implements Comparable<LibraryDef> {
+            
+            public final String name;
+            public final String version;
+            public final File path;
+            public final boolean structured;
+            public final SrcLibNode.LoadReason reason;
+            
+            public static LibraryDef create(File path, SrcLibNode.LoadReason reason) {
+                if (SrcLibNode.isStructuredLib(path))
+                    return new LibraryDef(path, true, reason);
+                else if (SrcLibNode.isUnstructuredLib(path))
+                    return new LibraryDef(path, false, reason);
+                else
+                    return null;
+            }
+            
+            public SrcLibNode createLibNode() {
+                return new SrcLibNode(path, name, structured, reason);
+            }
+            
+            public int hashCode() {
+                return path.hashCode();
+            }
+            
+            public boolean equals(Object o) {
+                return o instanceof LibraryDef && path.equals(((LibraryDef) o).path);
+            }
+            
+            public int compareTo(LibraryDef def) {
+                int res = name.compareTo(def.name);
+                return res == 0 ? path.compareTo(def.path) : res;
+            }
+            
+            public String toString() {
+                return name;
+            }
+            
+            private LibraryDef(File path, boolean structured, SrcLibNode.LoadReason reason) {
+                String name = path.getName();
+                if (!structured) {
+                    name = name.substring(0, name.lastIndexOf('.'));
+                }
+                String[] parts = name.split(" ", 2);
+                if (parts.length > 1) {
+                    name = parts[0];
+                    version = parts[1];
+                } else {
+                    version = null;
+                }
+                this.name = name;
+                this.path = path;
+                this.structured = structured;
+                this.reason = reason;
+            }
+            
+        }
         
     }
-
-    public class LoadInfo {
-
-        private static final LoadInfo EMPTY = create("");
-
-        private final String path;
-
-        public String getPath() {
-            return path;
-        }
-        
-        public static LoadInfo create(String path) {
-            return new LoadInfo(path);
-        }
-        
-        public static LoadInfo empty() {
-            return EMPTY;
-        }
-    }
-
-    private LoadInfo.LoadInfo(String path) {
-        this.path = path;
-    }
-
-    public LoadInfo LoadInfo.withPath(String path) {
-        return new LoadInfo(path);
-    }
-
-    public class LibraryDef implements Comparable<LibraryDef> {
-        public final String name;
-        public final String version;
-        public final boolean structured;
-        public final SrcLibNode.LoadReason reason;
-        public final LoadInfo loadInfo;
-        
-        public SrcLibNode createLibNode() {
-            return new SrcLibNode(new SrcIdDecl(name), structured, "", reason, loadInfo);
-        }
-        
-        public int hashCode() {
-            return path().hashCode();
-        }
-        
-        public boolean equals(Object o) {
-            return o instanceof LibraryDef && path().equals(((LibraryDef) o).path());
-        }
-        
-        public int compareTo(LibraryDef def) {
-            int res = name.compareTo(def.name);
-            return res == 0 ? path().compareTo(def.path()) : res;
-        }
-        
-        public String path() {
-            return loadInfo.getPath();
-        }
-        
-        public String toString() {
-            return name;
-        }
-        
-        private LibraryDef(String name, String version, boolean structured, SrcLibNode.LoadReason reason, LoadInfo loadInfo) {
-            this.name = name;
-            this.version = version;
-            this.structured = structured;
-            this.reason = reason;
-            this.loadInfo = loadInfo;
-        }
-    }
-
-    public static LibraryDef LibraryDef.create(File path, SrcLibNode.LoadReason reason, LoadInfo loadInfo) {
-        boolean structured;
-        if (SrcLibNode.isStructuredLib(path)) {
-            structured = true;
-        } else if (SrcLibNode.isUnstructuredLib(path)) {
-            structured = false;
-        } else {
-            return null;
-        }
-        String name = path.getName();
-        String version;
-        if (!structured) {
-            name = name.substring(0, name.lastIndexOf('.'));
-        }
-        String[] parts = name.split(" ", 2);
-        if (parts.length > 1) {
-            name = parts[0];
-            version = parts[1];
-        } else {
-            version = null;
-        }
-        return new LibraryDef(name, version, structured, reason, loadInfo.withPath(path.getPath()));
-    }
-
+    
     public class DefaultLibraryList extends LibraryList {
         
         protected OptionRegistry options;
@@ -587,11 +547,7 @@ aspect Library {
             try {
                 String paths = options.getStringOption(name);
                 ASTNode.log.info(name + " = " + paths);
-                Collection<LoadInfo> loadInfos = new ArrayList<>();
-                for (String path : paths.split(File.pathSeparator)) {
-                    loadInfos.add(LoadInfo.create(path));
-                }
-                addLibraryDirectories(loadInfos, SrcLibNode.LoadReason.MODELICAPATH);
+                addLibraryDirectories(paths.split(File.pathSeparator), SrcLibNode.LoadReason.MODELICAPATH);
             } catch (OptionRegistry.UnknownOptionException e) {}
         }
 

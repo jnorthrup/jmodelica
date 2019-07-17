@@ -32,7 +32,7 @@ class SparseIndex<T extends MunkresCost<T>> implements Iterable<RowOrColumn<T>> 
                 throw new UnsupportedOperationException(this + " is not implemented for Type enum");
             }
         }
-    }
+    };
 
     private final Type type;
     private final List<RowOrColumn<T>> innerIndices;
@@ -93,7 +93,6 @@ class SparseIndex<T extends MunkresCost<T>> implements Iterable<RowOrColumn<T>> 
             this.incidences = Collections.unmodifiableCollection(incidences);
         }
 
-        @Override
         public Iterator<Incidence<T>> iterator() {
             return incidences.iterator();
         }

@@ -2,7 +2,6 @@ package org.jmodelica.util.collections;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -14,18 +13,6 @@ public final class ListUtil {
      * Hidden default constructor to prevent instantiation.
      */
     private ListUtil() {}
-
-    /**
-     * Creates a new immutable list with initial list elements.
-     * 
-     * @param <T>       the type of elements the list contains.
-     * @param elements  the elements.
-     * @return          a {@link java.util.List List} containing {@code elements}.
-     */
-    @SafeVarargs
-    public static <T> java.util.List<T> unmodifiableList(T... elements) {
-        return Collections.unmodifiableList(create(elements));
-    }
 
     /**
      * Creates a new list with initial list elements.
@@ -92,38 +79,4 @@ public final class ListUtil {
         return Arrays.asList(ts);
     }
 
-    /**
-     * Create a new list that is the concatenation of the given lists, in the order given.
-     * 
-     * @param lists  any number of lists to concatenate
-     * @return       a newly created ArrayList that contains the concatenation of the given lists
-     */
-    @SafeVarargs
-    public static <T> ArrayList<T> concatenate(List<T>... lists) {
-        int size = 0;
-        for (List<T> list : lists) {
-            size += list.size();
-        }
-        ArrayList<T> res = new ArrayList<T>(size);
-        for (List<T> list : lists) {
-            res.addAll(list);
-        }
-        return res;
-    }
-    
-    /**
-     * Combines several lists into one.
-     * 
-     * @param lists The lists to join.
-     * @return      one list containing all the elements in {@code lists}.
-     */
-    @SafeVarargs
-    public static <T> List<T> join(List<T>... lists) {
-        List<T> result = new ArrayList<T>();
-        for (List<T> list : lists) {
-            result.addAll(list);
-        }
-
-        return result;
-    }
 }

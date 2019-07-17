@@ -32,21 +32,18 @@ public class NotNullCodeStream extends CodeStream {
         super(parent);
     }
 
-    @Override
     public void print(String s) {
         if (s == null)
             throw new NullPointerException();
         super.print(s);
     }
 
-    @Override
     public void print(Object o) {
         if (o == null)
             throw new NullPointerException();
         super.print(o);
     }
 
-    @Override
     public void format(String format, Object... args) {
         for (Object obj : args)
             if (obj == null)

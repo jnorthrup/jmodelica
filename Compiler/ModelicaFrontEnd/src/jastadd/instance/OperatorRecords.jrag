@@ -117,14 +117,13 @@ aspect OperatorRecordTypes {
         return super.zeroLiteral();
     }
     
-    public FExp FType.flattenZeroLiteral(Flattener f) {
+    public FExp FType.flattenZeroLiteral() {
         return sizedZeroLiteral();
     }
     
-    @Override
-    public FExp FOperatorRecordType.flattenZeroLiteral(Flattener f) {
+    public FExp FOperatorRecordType.flattenZeroLiteral() {
         InstClassDecl func = matchOverloadedZero();
-        return (func != null) ? func.flattenOverloadedFunctionCall(f) : zeroLiteral();
+        return (func != null) ? func.flattenOverloadedFunctionCall(Flattener.expressionFlattener()) : zeroLiteral();
     }
 
 }

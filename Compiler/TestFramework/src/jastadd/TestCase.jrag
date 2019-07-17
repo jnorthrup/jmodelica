@@ -575,16 +575,15 @@ abstract public class TestCase implements GenericTestCase {
         // Parse
         SourceRoot sr;
         if (modelicaLibraries.length > 0) {
-            Collection<LoadInfo> loadInfos = new ArrayList<>();
+            String[] names = new String[modelicaLibraries.length + 1];
             File parent = new File(getSourceFileName()).getParentFile();
             for (int i = 0; i < modelicaLibraries.length; i++) {
-                String path = new File(parent, modelicaLibraries[i]).getAbsolutePath();
-                loadInfos.add(LoadInfo.create(path));
+                names[i] = new File(parent, modelicaLibraries[i]).getAbsolutePath();
             }
-            loadInfos.add(LoadInfo.create(getSourceFileName()));
-            sr = getParserHandler().parseModel(uif, loadInfos);
+            names[modelicaLibraries.length] = getSourceFileName();
+            sr = getParserHandler().parseModel(uif, names);
         } else {
-            sr = getParserHandler().parseFile(uif, LoadInfo.create(getSourceFileName()));
+            sr = getParserHandler().parseFile(uif, getSourceFileName());
         }
 
         if (testOptions(options)) {
@@ -607,7 +606,7 @@ abstract public class TestCase implements GenericTestCase {
         if (testSemanticProblems(problems) || checkType == ErrorCheckType.CHECK) return;
         
         // Test instantiated class
-        InstClassDecl icd = ipr.instantiateModel(getClassName());
+        InstClassDecl icd = ipr.lookupInstClassQualified(getClassName()).target();
         if (testInstantiated(icd)) return;
         
         // Flatten class and check errors reported during flattening
