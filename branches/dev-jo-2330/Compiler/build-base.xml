@@ -457,7 +457,7 @@
     </target>
     
     <!-- Build compiler jars. -->
-    <target name="build" depends="compile-ast,manifest" description="Build all jars needed by compiler.">
+    <target name="build" depends="compile-ast,manifest,options" description="Build all jars needed by compiler.">
         <mkdir dir="${jar_output}" />
         <for list="${jars}" param="jar">
             <sequential>
@@ -1141,6 +1141,15 @@ ${test_class_extra_defs}
                 srcdir="${junit_output}:${test_helper_dirs}:${junit_dirs}"/>
     </target>
 
+    <target name="options">
+        <java classpath="${class_output}:${thirdparty_jars_build}" 
+                classname="org.jmodelica.modelica.compiler.OptionExporter" failonerror="true">
+            <arg value="-x" />
+            <arg value="${target}/DefaultOptions.xml" />
+        </java>
+        <echo>Exported options to: ${target}/DefaultOptions.xml</echo>
+    </target>
+    
     <!-- Run all generated JUnit tests. -->
     <target name="test" depends="build-test" description="Run all generated JUnit tests.">
         <mkdir dir="${test_output}" />
