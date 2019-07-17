@@ -5,6 +5,13 @@ Switch to "java.nio.file.Path" instead of "File" or "String"s representing paths
 Note that while java.nio allows to access non-File resources with the same API, the internal workings of JModelica
 currently make restrictions on only supporting file accesses.
 
+================= Unreleased ==================
+# Change ; Minor ; Compiler ; #5806
+Added compilation hook to run before FMU packing
+
+# Fixed ; Minor ; Compiler ; #5805
+Fixed ant clean failing with empty target directory
+
 # Fixed ; Minor ; Compiler ; #5793
 Fixed bug where reinit did not set value of aliased derivatives.
 
