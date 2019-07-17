@@ -79,7 +79,7 @@ import org.jmodelica.util.ccompiler.CCompilerDelegator.Creator;
 import org.jmodelica.util.ccompiler.CCompilerTarget;
 import org.jmodelica.util.ccompiler.GccCompilerDelegator;
 import org.jmodelica.common.LogContainer;
-import org.jmodelica.modelica.compiler.generated.OptionsAggregated;
+import org.jmodelica.modelica.compiler.generated.CompileOptions;
 
 import org.xml.sax.SAXException;
 
@@ -142,7 +142,7 @@ public class ModelicaCompiler implements LogContainer {
     
     private CCompilerDelegator delegator = null;
     private String delegator_name = null;
-    private OptionsAggregated options = null;
+    private CompileOptions options = null;
     private DiagnosticsGenerator diagGenerator = null;
     
     protected boolean dumpMemoryUse = false;
@@ -186,7 +186,7 @@ public class ModelicaCompiler implements LogContainer {
          * in that case it is printed on stdout.
          */
         public static void main(String[] args) {
-            OptionsAggregated or = createOptions();
+            CompileOptions or = createOptions();
             Type t = null;
             BufferedReader tmpl = null;
             for (String arg : args) {
@@ -230,7 +230,7 @@ public class ModelicaCompiler implements LogContainer {
             }
         }
         
-        private static void emit(Type t, OptionsAggregated or, PrintStream out) {
+        private static void emit(Type t, CompileOptions or, PrintStream out) {
             switch (t) {
             case XML:
                 or.exportXML(out, OptionRegistry.Category.experimental);
@@ -276,16 +276,16 @@ public class ModelicaCompiler implements LogContainer {
         }
     }
 
-    public static OptionsAggregated createOptions() {
-        return OptionsAggregated.buildOptions();
+    public static CompileOptions createOptions() {
+        return CompileOptions.buildOptions();
     }
 
-    public static ModulesSettings createModulesSettings(OptionsAggregated options)    
+    public static ModulesSettings createModulesSettings(CompileOptions options)    
     {
        return new ModulesSettings(options);
     }
 
-    public ModelicaCompiler(OptionsAggregated options) {
+    public ModelicaCompiler(CompileOptions options) {
         this.options = options;
     }
 
@@ -1405,7 +1405,7 @@ public class ModelicaCompiler implements LogContainer {
         options.setStringOption("MODELICAPATH", modelicapath);
     }
     
-    public OptionsAggregated getOptions() {
+    public CompileOptions getOptions() {
         return options;
     }
 

@@ -36,8 +36,8 @@ import org.jmodelica.util.xml.XMLPrinter;
  * OptionRegistry also provides methods for handling paths
  * to Modelica libraries.
  *
- * <p>Use OptionsAggregated.buildOptions() to get an option
- * registry populated with all available options.
+ * <p>Use {@link org.jmodelica.modelica.compiler.generated.CompileOptions#buildOptions()}
+ * to get an option registry populated with all available options.
  */
 public abstract class OptionRegistry {
 
