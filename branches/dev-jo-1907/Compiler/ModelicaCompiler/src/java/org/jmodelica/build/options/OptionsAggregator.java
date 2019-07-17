@@ -38,7 +38,7 @@ public class OptionsAggregator {
             + "%n"
             + "    private OptionsAggregated(boolean isTest) {%n"
             + "        this.isTest = isTest;%n"
-            + "        addTo(this);%n"
+            + "        initialize(this);%n"
             + "    }%n"
             + "%n"
             + "    public static OptionsAggregated buildOptions() {%n"
@@ -273,7 +273,7 @@ public class OptionsAggregator {
             }
         }
         out.println();
-        out.println("    public static void addTo(OptionsAggregated options) {");
+        out.println("    private static void initialize(OptionsAggregated options) {");
         out.println("        boolean isTest = options.isTest;");
         generateCalls(out, "        ");
         out.println("    }");

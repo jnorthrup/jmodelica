@@ -419,26 +419,8 @@ public class OptionRegistry {
      *  Boolean options.  *
      * ================== */
 
-    protected void createBooleanOption(String key, OptionType type, Category cat, String description,
-            Default<Boolean> def) {
-
-        optionsMap.put(key, new BooleanOption(key, type, cat, description, def));
-    }
-
-    public void addBooleanOption(String key, OptionType type, Category cat, Default<Boolean> def, String description) {
-
-        if (findBooleanOption(key, true) != null)
-            throw new IllegalArgumentException("The option " + key + " already exists.");
-        createBooleanOption(key, type, cat, description, def);
-    }
-
-
     public void setBooleanOption(String key, boolean value) {
         findBooleanOption(key, false).setValue(value);
-    }
-
-    public void setBooleanOptionDefault(String key, Default<Boolean> def) {
-        findBooleanOption(key, false).setDefault(def);
     }
 
     public Boolean getBooleanOptionDefault(String key) {
@@ -468,30 +450,8 @@ public class OptionRegistry {
      *  Integer options.  *
      * ================== */
 
-    protected void createIntegerOption(String key, OptionType type, Category cat, String description,
-            Default<Integer> def, int min, int max) {
-
-        optionsMap.put(key, new IntegerOption(key, type, cat, description, def, min, max));
-    }
-
-    public void addIntegerOption(String key, OptionType type, Category cat, Default<Integer> def,
-            String description, int min, int max) {
-
-        if (findIntegerOption(key, true) != null)
-            throw new IllegalArgumentException("The option " + key + " already exists.");
-        createIntegerOption(key, type, cat, description, def, min, max);
-    }
-
     public void setIntegerOption(String key, int value) {
         findIntegerOption(key, false).setValue(value);
-    }
-
-    public void setIntegerOptionDefault(String key, int def) {
-        findIntegerOption(key, false).setDefault(new DefaultValue<>(def));
-    }
-
-    public void setIntegerOptionDefault(String key, Default<Integer> def) {
-        findIntegerOption(key, false).setDefault(def);
     }
 
     public int getIntegerOptionDefault(String key) {
@@ -521,31 +481,8 @@ public class OptionRegistry {
      *  Real options.  *
      * =============== */
 
-    protected void createRealOption(String key, OptionType type, Category cat, String description, Default<Double> def,
-            double min, double max) {
-
-        optionsMap.put(key, new RealOption(key, type, cat, description, def, min, max));
-    }
-
-
-    public void addRealOption(String key, OptionType type, Category cat, Default<Double> def,
-            String description, double min, double max) {
-
-        if (findRealOption(key, true) != null)
-            throw new IllegalArgumentException("The option " + key + " already exists.");
-        createRealOption(key, type, cat, description, def, min, max);
-    }
-
     public void setRealOption(String key, double value) {
         findRealOption(key, false).setValue(value);
-    }
-
-    public void setRealOptionDefault(String key, double def) {
-        findRealOption(key, false).setDefault(new DefaultValue<>(def));
-    }
-
-    public void setRealOptionDefault(String key, Default<Double> def) {
-        findRealOption(key, false).setDefault(def);
     }
 
     public double getRealOptionDefault(String key) {
@@ -591,30 +528,8 @@ public class OptionRegistry {
      *  String options.  *
      * ================= */
 
-    protected void createStringOption(String key, OptionType type, Category cat, String description, Default<String> def,
-            String[] vals) {
-
-        optionsMap.put(key, new StringOption(key, type, cat, description, def, vals));
-    }
-
-    public void addStringOption(String key, OptionType type, Category cat, Default<String> def,
-            String description, String[] allowed) {
-
-        if (findStringOption(key, true) != null)
-            throw new IllegalArgumentException("The option " + key + " already exists.");
-        createStringOption(key, type, cat, description, def, allowed);
-    }
-
     public void setStringOption(String key, String value) {
         findStringOption(key, false).setValue(value);
-    }
-
-    public void setStringOptionDefault(String key, String def) {
-        findStringOption(key, false).setDefault(new DefaultValue<>(def));
-    }
-
-    public void setStringOptionDefault(String key, Default<String> def) {
-        findStringOption(key, false).setDefault(def);
     }
 
     public String getStringOptionDefault(String key) {
@@ -797,7 +712,6 @@ public class OptionRegistry {
         protected void copyTo(OptionRegistry reg, String key) {
             if (isSet) {
                 reg.setIntegerOption(key, value);
-                reg.setIntegerOptionDefault(key, defaultValue);
             }
         }
 

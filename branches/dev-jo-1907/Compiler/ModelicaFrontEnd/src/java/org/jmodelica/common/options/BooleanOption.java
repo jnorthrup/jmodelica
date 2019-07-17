@@ -36,7 +36,6 @@ public class BooleanOption extends Option<Boolean> {
     protected void copyTo(OptionRegistry reg, String key) {
         if (isSet) {
             reg.setBooleanOption(key, value);
-            reg.setBooleanOptionDefault(key, defaultValue);
         }
     }
 

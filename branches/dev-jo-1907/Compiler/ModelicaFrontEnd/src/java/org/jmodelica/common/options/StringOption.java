@@ -132,7 +132,6 @@ public class StringOption extends Option<String> {
     protected void copyTo(OptionRegistry reg, String key) {
         if (isSet) {
             reg.setStringOption(key, value);
-            reg.setStringOptionDefault(key, defaultValue);
         }
     }
 

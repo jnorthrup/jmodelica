@@ -110,7 +110,7 @@ public class OptionsAggregatorTests {
                     + "    public BooleanOption opt1;%n"
                     + "    public BooleanOption opt2;%n"
                     + "%n"
-                    + "    public static void addTo(OptionsAggregated options) {%n"
+                    + "    private static void initialize(OptionsAggregated options) {%n"
                     + "        boolean isTest = options.isTest;%n"
                     + "        options.opt1 = new BooleanOption(\"opt1\", OptionType.compiler, Category.user,%n"
                     + "            \"\",%n"

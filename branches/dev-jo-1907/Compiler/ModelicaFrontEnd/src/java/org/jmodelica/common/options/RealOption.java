@@ -157,7 +157,6 @@ public class RealOption extends Option<Double> {
     protected void copyTo(OptionRegistry reg, String key) {
         if (isSet) {
             reg.setRealOption(key, value);
-            reg.setRealOptionDefault(key, defaultValue);
         }
     }
 
