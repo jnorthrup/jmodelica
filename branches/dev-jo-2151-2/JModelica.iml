@@ -41,16 +41,17 @@
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="junit-4.10.jar">
+      <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/ThirdParty/Junit/junit-4.10.jar!/" />
+          <root url="jar://$MODULE_DIR$/../hamcrest-core-1.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../junit-4.12.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/ThirdParty/Junit/junit-4.10-src.jar!/" />
+          <root url="jar://$MODULE_DIR$/../hamcrest-core-1.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../junit-4.12-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="library" exported="" name="junit-4.10" level="project" />
   </component>
 </module>

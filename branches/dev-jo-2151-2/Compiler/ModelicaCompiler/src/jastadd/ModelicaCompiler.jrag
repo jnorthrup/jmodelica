@@ -337,7 +337,7 @@ public class ModelicaCompiler implements LogContainer {
     /**
      * Throws a {@link CompilationAbortedException} if any hooks class signals an abort.
      */
-    protected void hookCheckAbort() {
+    private void hookCheckAbort() {
         for (CompilationHooks hooks : hooksList) {
             if (hooks.shouldAbort(this)) {
                 log.info("Compilation aborted.");
@@ -349,67 +349,75 @@ public class ModelicaCompiler implements LogContainer {
     /**
      * Calls the hook to be called after the supplied code files are parsed.
      */
-    protected void hookFilesParsed(SourceRoot sr) {
-        for (CompilationHooks hooks : hooksList)
+    private void hookFilesParsed(SourceRoot sr) {
+        for (CompilationHooks hooks : hooksList) {
             hooks.filesParsed(this, sr);
+        }
     }
     
     /**
      * Calls the hook to be called after the error checks on the instantiated 
      * model are finished without errors.
      */
-    protected void hookModelInstantiatied(InstClassDecl icd) {
-        for (CompilationHooks hooks : hooksList)
+    private void hookModelInstantiatied(InstClassDecl icd) {
+        for (CompilationHooks hooks : hooksList) {
             hooks.modelInstantiatied(this, icd);
+        }
     }
     
     /**
      * Calls the hook to be called after the model is flattened.
      */
-    protected void hookModelFlattened(FClass fc) {
-        for (CompilationHooks hooks : hooksList)
+    private void hookModelFlattened(FClass fc) {
+        for (CompilationHooks hooks : hooksList) {
             hooks.modelFlattened(this, fc);
+        }
     }
     
     /**
      * Calls the hook to be called after transformations are applied to the model.
      */
-    protected void hookModelTransformed(FClass fc) {
-        for (CompilationHooks hooks : hooksList)
+    private void hookModelTransformed(FClass fc) {
+        for (CompilationHooks hooks : hooksList) {
             hooks.modelTransformed(this, fc);
+        }
     }
     
     /**
      * Calls the hook to be called after error checks of the flat model are 
      * finished without errors.
      */
-    protected void hookFlatModelChecked(FClass fc) {
-        for (CompilationHooks hooks : hooksList)
+    private void hookFlatModelChecked(FClass fc) {
+        for (CompilationHooks hooks : hooksList) {
             hooks.flatModelChecked(this, fc);
+        }
     }
     
     /**
      * Calls the hook to be called after a code generator is created.
      */
-    protected void hookCodeGeneratorCreated(AbstractGenerator gen) {
-        for (CompilationHooks hooks : hooksList)
+    private void hookCodeGeneratorCreated(AbstractGenerator gen) {
+        for (CompilationHooks hooks : hooksList) {
             hooks.codeGeneratorCreated(this, gen);
+        }
     }
     
     /**
      * Calls the hook to be called after output code is generated.
      */
-    protected void hookCodeGenerated(FClass fc, File dir) {
-        for (CompilationHooks hooks : hooksList)
+    private void hookCodeGenerated(FClass fc, File dir) {
+        for (CompilationHooks hooks : hooksList) {
             hooks.codeGenerated(this, fc, dir);
+        }
     }
     
     /**
      * Calls the hook to be called after the generated C code is compiled.
      */
-    protected void hookCodeCompiled() {
-        for (CompilationHooks hooks : hooksList)
+    private void hookCodeCompiled() {
+        for (CompilationHooks hooks : hooksList) {
             hooks.codeCompiled(this);
+        }
     }
 
     /**
@@ -417,17 +425,19 @@ public class ModelicaCompiler implements LogContainer {
      * @param fc the source FClass
      * @param dir the temporary FMU directory
      */
-    protected void hookPackFmu(FClass fc, File dir) {
-        for (CompilationHooks hooks : hooksList)
+    private void hookPackFmu(FClass fc, File dir) {
+        for (CompilationHooks hooks : hooksList) {
             hooks.packFmu(this, fc, dir);
+        }
     }
     
     /**
      * Calls the hook to be called after the FMU is packed.
      */
-    protected void hookFmuPacked(FClass fc, File path) {
-        for (CompilationHooks hooks : hooksList)
+    private void hookFmuPacked(FClass fc, File path) {
+        for (CompilationHooks hooks : hooksList) {
             hooks.fmuPacked(this, fc, path);
+        }
     }
     
     public String getStringOption(String key) throws UnknownOptionException {
@@ -2137,7 +2147,7 @@ public class ModelicaCompiler implements LogContainer {
 
         File unitFile = fClass.root().getUtilInterface().getCompilationOutputPath();
 
-		hookPackFmu(fClass, outDir);
+        hookPackFmu(fClass, outDir);
         try {
             hookCheckAbort();
             copySourceFiles(fClass, sourceDir, outDir);
@@ -2592,6 +2602,7 @@ public interface CompilationHooks {
     /**
      * Called before the FMU is packed.
      *
+     * @param instance compiler instance calling this hook
      * @param fc the source FClass
      * @param dir the temporary directory containing files to be packed in the FMU
      */
