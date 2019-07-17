@@ -1,0 +1,88 @@
+aspect Modifiers {
+    public interface SrcAnnotationProvider {
+        public boolean isClassRedeclare();
+    }
+    public boolean RootAnnotationProviderProxy.isClassRedeclare() {
+        return false;
+    }
+    syn boolean SrcModification.isClassRedeclare() = false;
+    eq SrcClassRedeclare.isClassRedeclare()        = getSrcBaseClassDecl().isShortClassDecl();
+    public boolean ExpValueProvider.isClassRedeclare() {
+        return false;
+    }
+    syn boolean SrcFunctionArguments.isClassRedeclare() = false;
+    syn boolean SrcNamedArgument.isClassRedeclare()     = false;
+    syn boolean SrcAnnotation.isClassRedeclare()        = false;
+    public boolean SrcSingeltonProvider.isClassRedeclare() {
+        return provider.isClassRedeclare();
+    }
+    public boolean SrcAnnotationsIteratorProvider.isClassRedeclare() {
+        return false;
+    }
+
+    public interface SrcAnnotationProvider {
+        public SrcShortClassDecl getSrcClassRedeclare();
+    }
+    public SrcShortClassDecl RootAnnotationProviderProxy.getSrcClassRedeclare() {
+        return null;
+    }
+    syn SrcShortClassDecl SrcModification.getSrcClassRedeclare() = null;
+    // we need to do check if it's a short class decl since our parser allows
+    // full class declaration in the modifier (incorrectly)!
+    eq SrcClassRedeclare.getSrcClassRedeclare() =
+            getSrcBaseClassDecl().isShortClassDecl() ? getSrcBaseClassDecl().asShortClassDecl() : null;
+    public SrcShortClassDecl ExpValueProvider.getSrcClassRedeclare() {
+        return null;
+    }
+    syn SrcShortClassDecl SrcFunctionArguments.getSrcClassRedeclare() = null;
+    syn SrcShortClassDecl SrcNamedArgument.getSrcClassRedeclare()     = null;
+    syn SrcShortClassDecl SrcAnnotation.getSrcClassRedeclare()        = null;
+    public SrcShortClassDecl SrcSingeltonProvider.getSrcClassRedeclare() {
+        return provider.getSrcClassRedeclare();
+    }
+    public SrcShortClassDecl SrcAnnotationsIteratorProvider.getSrcClassRedeclare() {
+        return null;
+    }
+
+    public interface SrcAnnotationProvider {
+        public boolean isComponentRedeclare();
+    }
+    public boolean RootAnnotationProviderProxy.isComponentRedeclare() {
+        return false;
+    }
+    syn boolean SrcModification.isComponentRedeclare() = false;
+    eq SrcComponentRedeclare.isComponentRedeclare()    = true;
+    public boolean ExpValueProvider.isComponentRedeclare() {
+        return false;
+    }
+    syn boolean SrcFunctionArguments.isComponentRedeclare() = false;
+    syn boolean SrcNamedArgument.isComponentRedeclare()     = false;
+    syn boolean SrcAnnotation.isComponentRedeclare()        = false;
+    public boolean SrcSingeltonProvider.isComponentRedeclare() {
+        return provider.isComponentRedeclare();
+    }
+    public boolean SrcAnnotationsIteratorProvider.isComponentRedeclare() {
+        return false;
+    }
+
+    public interface SrcAnnotationProvider {
+        public SrcComponentDecl getSrcComponentRedeclare();
+    }
+    public SrcComponentDecl RootAnnotationProviderProxy.getSrcComponentRedeclare() {
+        return null;
+    }
+    syn SrcComponentDecl SrcModification.getSrcComponentRedeclare() = null;
+    eq SrcComponentRedeclare.getSrcComponentRedeclare()          = getSrcComponentDecl();
+    public SrcComponentDecl ExpValueProvider.getSrcComponentRedeclare() {
+        return null;
+    }
+    syn SrcComponentDecl SrcFunctionArguments.getSrcComponentRedeclare() = null;
+    syn SrcComponentDecl SrcNamedArgument.getSrcComponentRedeclare()     = null;
+    syn SrcComponentDecl SrcAnnotation.getSrcComponentRedeclare()        = null;
+    public SrcComponentDecl SrcSingeltonProvider.getSrcComponentRedeclare() {
+        return provider.getSrcComponentRedeclare();
+    }
+    public SrcComponentDecl SrcAnnotationsIteratorProvider.getSrcComponentRedeclare() {
+        return null;
+    }
+}
