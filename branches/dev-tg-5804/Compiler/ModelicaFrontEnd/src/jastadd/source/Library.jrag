@@ -615,7 +615,9 @@ aspect Library {
                 ASTNode.log.info(name + " = " + paths);
                 Collection<LoadInfo> loadInfos = new ArrayList<>();
                 for (String path : paths.split(File.pathSeparator)) {
-                    loadInfos.add(LoadInfo.create(path));
+                    if (!path.isEmpty()) {
+                        loadInfos.add(LoadInfo.create(path));
+                    }
                 }
                 addLibraryDirectories(loadInfos, SrcLibNode.LoadReason.MODELICAPATH);
             } catch (OptionRegistry.UnknownOptionException e) {}
