@@ -1576,6 +1576,18 @@ public class ModelicaCompiler implements LogContainer {
     }
 
     public static void main(String[] args) {
+        try {
+            if (Files.isDirectory(Paths.get("c:/temp/tg_5804_logs"))) {  
+                try(PrintWriter pw = new PrintWriter(Files.newBufferedWriter(Paths.get("c:/temp/tg_5804_logs/tg_5804_main.log"), StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND))) {
+                    pw.println("ModelicaCompiler.main(): ");
+                    for (String s : args) {
+                        pw.println(s);
+                    }
+                    pw.println();
+                }
+            }
+        } catch (Throwable e) { /* ignore */ }
+    
         // create an empty compiler
         ModelicaCompiler mc = new ModelicaCompiler();
         try {
