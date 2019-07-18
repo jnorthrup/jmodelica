@@ -1145,9 +1145,9 @@ ${test_class_extra_defs}
         <java classpath="${class_output}:${thirdparty_jars_build}" 
                 classname="org.jmodelica.${sub_package}.compiler.OptionExporter" failonerror="true">
             <arg value="-x" />
-            <arg value="${target}/DefaultOptions.xml" />
+            <arg value="${compiler_build}/DefaultOptions.xml" />
         </java>
-        <echo>Exported options to: ${target}/DefaultOptions.xml</echo>
+        <echo>Exported options to: ${compiler_build}/DefaultOptions.xml</echo>
     </target>
     
     <!-- Run all generated JUnit tests. -->

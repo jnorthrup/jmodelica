@@ -573,7 +573,7 @@ ant_output_jars= \
 	$(JAVA_BUILD_DIR)/bin/OptimicaCompiler.jar \
 	$(JAVA_BUILD_DIR)/bin/separateProcess.jar
 
-ant_output_options=$(JAVA_BUILD_DIR)/DefaultOptions.xml
+ant_output_options=$(JAVA_BUILD_DIR)/src/build/DefaultOptions.xml
 
 install-compiler: $(ant_output_jars) $(ant_output_options) TODO-always-trigger
 if HAVE_ANT
