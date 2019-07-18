@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 
 #include "jni.h"
-#include "jccutils.h"
+#include "jccexception.h"
 #include "RefCountedNode.hpp"
 #include "java/util/Collection.h"
 #include "java/util/Iterator.h"
@@ -31,6 +31,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "org/jmodelica/modelica/compiler/generated/CompileOptions.h"
 #include "org/jmodelica/optimica/compiler/ModelicaCompiler.h"
 #include "org/jmodelica/optimica/compiler/generated/CompileOptions.h"
+
+::java::lang::String StringFromUTF(const char *bytes);
 
 namespace ModelicaCasADi
 {
