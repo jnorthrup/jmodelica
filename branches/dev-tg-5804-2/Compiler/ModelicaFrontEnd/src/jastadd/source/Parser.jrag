@@ -204,8 +204,14 @@ aspect Parsers {
 
     public SourceRoot ParserHandler.parseModelicaResource(UtilInterface uif, Reader resource, LoadInfo loadInfo) 
             throws ParserException, beaver.Parser.Exception, IOException {
-        System.err.println("Parsing ModelicaResource: " + loadInfo.getPath());
-        new RuntimeException().printStackTrace();
+        try {
+            if (Files.isDirectory(Paths.get("c:/temp/tg_5804_logs"))) {  
+                try(PrintWriter pw = new PrintWriter(Files.newBufferedWriter(Paths.get("c:/temp/tg_5804_logs/tg_5804_2.log"), StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND))) {
+                    pw.println("Parsing ModelicaResource: " + loadInfo.getPath() + " (asPath = " + (loadInfo.getPathAsPath() != null) + ")");
+                    new RuntimeException().printStackTrace(pw);
+                }
+            }
+        } catch (Throwable e) { /* ignore */ }
             
         AbstractModelicaScanner<ASTNode<?>> scanner = createModelicaScanner(resource);
         beaver.Parser parser = createModelicaParser(scanner, loadInfo);
