@@ -360,7 +360,7 @@ ant_output_jars = \
 	$(JAVA_BUILD_DIR)/bin/OptimicaCompiler.jar \
 	$(JAVA_BUILD_DIR)/bin/separateProcess.jar
 
-ant_output_options = $(JAVA_BUILD_DIR)/DefaultOptions.xml
+ant_output_options=$(JAVA_BUILD_DIR)/src/build/DefaultOptions.xml
 BEAVER_INSTALL_DIR = $(DESTDIR)$(prefix)/ThirdParty/Beaver
 BEAVER_SOURCE = $(abs_top_srcdir)/Compiler/ModelicaFrontEnd/ThirdParty/Beaver
 all: config.h
