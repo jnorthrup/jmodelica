@@ -208,7 +208,7 @@ aspect Parsers {
     public SourceRoot ParserHandler.parseModelicaResource(UtilInterface uif, Reader resource, LoadInfo loadInfo) 
             throws ParserException, beaver.Parser.Exception, IOException {
         System.err.println("Parsing ModelicaResource: " + loadInfo.getPath() + " (asPath = " + loadInfo.getPathAsPath() != null + ")");
-        new RuntimeException(e).printStackTrace();
+        new RuntimeException().printStackTrace();
 
         AbstractModelicaScanner<ASTNode<?>> scanner = createModelicaScanner(resource);
         beaver.Parser parser = createModelicaParser(scanner, loadInfo);

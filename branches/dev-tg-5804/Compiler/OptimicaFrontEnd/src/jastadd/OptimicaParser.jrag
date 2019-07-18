@@ -125,7 +125,7 @@ aspect OptimicaParsers {
     public SourceRoot ParserHandler.parseOptimicaResource(UtilInterface uif, Reader resource, LoadInfo loadInfo)  
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
         System.err.println("Parsing OptimicaResource: " + loadInfo.getPath() + " (asPath = " + loadInfo.getPathAsPath() != null + ")");
-        new RuntimeException(e).printStackTrace();
+        new RuntimeException().printStackTrace();
 
         AbstractModelicaScanner scanner = createOptimicaScanner(resource);
         beaver.Parser parser = createOptimicaParser(scanner, loadInfo);
