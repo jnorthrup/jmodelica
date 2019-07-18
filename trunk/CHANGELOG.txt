@@ -1,4 +1,9 @@
 ================= Unreleased ==================
+# Change ; Minor ; Compiler ; #5810
+Dependency to beaver-rt.jar is now recorded in the jar manifest
+which means it is no longer necessary to add it to the classpath
+when interfacing directly with the compiler jars.
+
 # Change ; Minor ; Compiler ; #5806
 Added compilation hook to run before FMU packing
 
