@@ -16,9 +16,6 @@
 
 
 import org.jmodelica.util.AdjustableSymbol;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 
 aspect Parsers {
 
@@ -210,15 +207,6 @@ aspect Parsers {
 
     public SourceRoot ParserHandler.parseModelicaResource(UtilInterface uif, Reader resource, LoadInfo loadInfo) 
             throws ParserException, beaver.Parser.Exception, IOException {
-        try {
-            if (Files.isDirectory(Paths.get("c:/temp/tg_5804_logs"))) {  
-                try(PrintWriter pw = new PrintWriter(Files.newBufferedWriter(Paths.get("c:/temp/tg_5804_logs/tg_5804.log"), StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND))) {
-                    pw.println("Parsing ModelicaResource: " + loadInfo.getPath() + " (asPath = " + (loadInfo.getPathAsPath() != null) + ")");
-                    new RuntimeException().printStackTrace(pw);
-                }
-            }
-        } catch (Throwable e) { /* ignore */ }
-
         AbstractModelicaScanner<ASTNode<?>> scanner = createModelicaScanner(resource);
         beaver.Parser parser = createModelicaParser(scanner, loadInfo);
         SourceRoot sr = (SourceRoot) parser.parse(scanner);

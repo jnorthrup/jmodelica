@@ -124,15 +124,6 @@ aspect OptimicaParsers {
 
     public SourceRoot ParserHandler.parseOptimicaResource(UtilInterface uif, Reader resource, LoadInfo loadInfo)  
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
-        try {
-            if (Files.isDirectory(Paths.get("c:/temp/tg_5804_logs"))) {  
-                try(PrintWriter pw = new PrintWriter(Files.newBufferedWriter(Paths.get("c:/temp/tg_5804_logs/tg_5804.log"), StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND))) {
-                    pw.println("Parsing OptimicaResource: " + loadInfo.getPath() + " (asPath = " + (loadInfo.getPathAsPath() != null) + ")");
-                    new RuntimeException().printStackTrace(pw);
-                }
-            }
-        } catch (Throwable e) { /* ignore */ }
-
         AbstractModelicaScanner scanner = createOptimicaScanner(resource);
         beaver.Parser parser = createOptimicaParser(scanner, loadInfo);
         SourceRoot sr = (SourceRoot) parser.parse(scanner);
