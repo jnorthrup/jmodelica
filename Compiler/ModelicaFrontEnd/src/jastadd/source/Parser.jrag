@@ -175,6 +175,7 @@ aspect Parsers {
 
     public SourceRoot ParserHandler.parseFile(UtilInterface uif, LoadInfo loadInfo) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
+        parseListener.fileParsed(loadInfo);
         return parseModelicaFile(uif, loadInfo);
     }
 
@@ -206,7 +207,6 @@ aspect Parsers {
 
     public SourceRoot ParserHandler.parseModelicaFile(UtilInterface uif, LoadInfo loadInfo) 
             throws ParserException, beaver.Parser.Exception, IOException {
-        parseListener.fileParsed(loadInfo);
         Reader reader = fileReader(uif, loadInfo.getPath());
         try {
             return parseModelicaResource(uif, reader, loadInfo);
