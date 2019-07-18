@@ -674,8 +674,6 @@ public class ModelicaCompiler implements LogContainer {
          */
         OptionRegistry tempOptions = options.copy();
 
-        notifyCompilationStart(this);
-
         /*
          * Set options for the target.
          */
@@ -943,6 +941,7 @@ public class ModelicaCompiler implements LogContainer {
     public SourceRoot doParseModel(Collection<LoadInfo> loadInfos) 
       throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
         checkSetUp();
+        notifyCompilationStart(this);
         ASTNode.getStepInfo().reset();
         ASTNode.beginStep("parseModel()");
         SourceRoot sr = parserHandler.parseModel(createUtilInterface(), loadInfos);
