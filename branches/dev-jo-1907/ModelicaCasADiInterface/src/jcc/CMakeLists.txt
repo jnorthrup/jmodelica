@@ -76,6 +76,7 @@ set(CLASSES_modelica
   org.jmodelica.modelica.compiler.TornEquationBlock
   org.jmodelica.modelica.compiler.ScalarEquationBlock
   org.jmodelica.modelica.compiler.SolvedScalarEquationBlock
+  org.jmodelica.modelica.compiler.generated.CompileOptions
 )
 
 # todo: consolidate with CLASSES_modelica
@@ -127,6 +128,7 @@ set(CLASSES_optimica
   org.jmodelica.optimica.compiler.TornEquationBlock
   org.jmodelica.optimica.compiler.ScalarEquationBlock
   org.jmodelica.optimica.compiler.SolvedScalarEquationBlock
+  org.jmodelica.optimica.compiler.generated.CompileOptions
 )
 
 

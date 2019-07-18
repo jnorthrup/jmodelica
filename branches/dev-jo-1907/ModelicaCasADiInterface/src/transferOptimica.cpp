@@ -147,7 +147,7 @@ namespace ModelicaCasADi
     }
 
     void transferOptimizationProblem(Ref<OptimizationProblem> optProblem,
-    string modelName, const vector<string> &modelFiles, Ref<CompilerOptionsWrapper> options, string log_level) {
+    string modelName, const vector<string> &modelFiles, Ref<OptimicaOptionsWrapper> options, string log_level) {
         try
         {
             // initalizeClass is needed on classes where static variables are acessed.

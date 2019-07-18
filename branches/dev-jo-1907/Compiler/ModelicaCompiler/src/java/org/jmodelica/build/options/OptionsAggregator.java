@@ -35,6 +35,11 @@ public class OptionsAggregator {
             + "    /** Flag indicating if this option registry is used for testing (test defaults will be used). */ %n"
             + "    private final boolean isTest;%n"
             + "%n"
+            + "    /** @deprecated do not use this: only present for SWIG interface! */%n"
+            + "    @Deprecated public CompileOptions() {%n" // DO NOT REMOVE: default constructor needed for SWIG interface!
+            + "        this.isTest = false;%n"
+            + "    }%n"
+            + "%n"
             + "    private CompileOptions(boolean isTest) {%n"
             + "        this.isTest = isTest;%n"
             + "        initialize();%n"

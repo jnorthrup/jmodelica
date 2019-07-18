@@ -81,10 +81,10 @@ def transfer_model(model, class_name, file_name=[],
     files = map(os.path.abspath, files)
     if has_mop_file(files):
         return modelicacasadi_wrapper.transferModelFromOptimicaCompiler(model, class_name, files,
-            _get_options(compiler_options), compiler_log_level)
+            _get_options_optimica(compiler_options), compiler_log_level)
     else:
         return modelicacasadi_wrapper.transferModelFromModelicaCompiler(model, class_name, files,
-            _get_options(compiler_options), compiler_log_level)
+            _get_options_modelica(compiler_options), compiler_log_level)
 
 def transfer_optimization_problem(ocp, class_name, 
                                   file_name=[],
@@ -153,17 +153,17 @@ def transfer_optimization_problem(ocp, class_name,
     if has_mop_file(files):
         if not accept_model:
             return _transfer_optimica(ocp, class_name, files,
-                                      _get_options(compiler_options), compiler_log_level)
+                                      _get_options_optimica(compiler_options), compiler_log_level)
         else:
             return modelicacasadi_wrapper.transferModelFromOptimicaCompiler(ocp, class_name, files,
-                               _get_options(compiler_options), compiler_log_level)            
+                               _get_options_optimica(compiler_options), compiler_log_level)            
         
     else:
         if not accept_model:
             raise JError("Trying to transfer optimization problem, but no .mop files given.\n" +
                          "Use accept_model=True if you want to create an optimization problem from a model.")
         return modelicacasadi_wrapper.transferModelFromModelicaCompiler(ocp, class_name, files,
-                                  _get_options(compiler_options), compiler_log_level)
+                                  _get_options_modelica(compiler_options), compiler_log_level)
         
 
 def _ensure_jvm():
@@ -179,7 +179,14 @@ def _transfer_optimica(ocp, class_name, files, options, log_level):
     return modelicacasadi_wrapper._transferOptimizationProblem(ocp, class_name, files, options, log_level)
 
 
-def _get_options(compiler_options):
+def _get_options_modelica(compiler_options):
+    return _get_options(compiler_options, ModelicaOptionsWrapper())
+
+
+def _get_options_optimica(compiler_options):
+    return _get_options(compiler_options, OptimicaOptionsWrapper())
+
+def _get_options(compiler_options, options_wrapper):
     """
     Generate an instance of the CompilerOptionsWrapper class
     for ModelicaCasADi. 
@@ -198,8 +205,6 @@ def _get_options(compiler_options):
         CompilerOptionsWrapper --
             
     """
-    options_wrapper = CompilerOptionsWrapper()
-
     if not compiler_options.has_key("MODELICAPATH"):
         options_wrapper.setStringOption("MODELICAPATH", os.path.join(os.environ['JMODELICA_HOME'],'ThirdParty','MSL'))
     else:
@@ -234,7 +239,7 @@ def _get_options(compiler_options):
 
 def printCompilerOptions():
     _ensure_jvm()
-    options_wrapper = CompilerOptionsWrapper()
+    options_wrapper = ModelicaOptionsWrapper()
     options_wrapper.printOpts()
 
 def has_mop_file(files):
