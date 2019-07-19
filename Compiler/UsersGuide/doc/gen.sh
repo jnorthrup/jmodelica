@@ -11,7 +11,7 @@
 HOME="`dirname $0`"
 JAVA_CP="$1"
 DOC_DEST="$2"
-echo "java -cp "${JAVA_CP}" 'org.jmodelica.modelica.compiler.OptionExporter' \
+echo "java -cp "${JAVA_CP}" 'org.jmodelica.modelica.compiler.ModelicaCompiler$OptionExporter' \
     -t "${HOME}/template/Options.xml" -d "${HOME}/Options.xml""
-java -cp "${JAVA_CP}" 'org.jmodelica.modelica.compiler.OptionExporter' \
+java -cp "${JAVA_CP}" 'org.jmodelica.modelica.compiler.ModelicaCompiler$OptionExporter' \
     -t "${HOME}/template/Options.xml" -d "${HOME}/Options.xml"

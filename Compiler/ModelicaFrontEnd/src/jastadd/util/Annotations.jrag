@@ -2012,29 +2012,44 @@ aspect AnnotationAPI {
 
     public interface SrcAnnotationProvider {
         /**
-         * Check if there is an annotation at this location.
+         * Check if there is annotations at this location.
          */
         public boolean hasAnnotation();
     }
 
-    @Override
-    public boolean ExpValueProvider.hasAnnotation() {
-        return annotationSubNodes().iterator().hasNext();
+    public class SrcSingeltonProvider {
+        @Override
+        public boolean hasAnnotation() {
+            return provider.hasAnnotation();
+        }
     }
 
-    @Override
-    public boolean SrcAnnotationsIteratorProvider.hasAnnotation() {
-        return providers.size()>0 && annotationSubNodes().iterator().hasNext();
+    public class ExpValueProvider {
+        @Override
+        public boolean hasAnnotation() {
+            return annotationSubNodes().iterator().hasNext();
+        }
     }
 
-    @Override
-    public boolean SrcModification.hasAnnotation() {
-        return annotationSubNodes().iterator().hasNext();
+    public class SrcAnnotationsIteratorProvider {
+        @Override
+        public boolean hasAnnotation() {
+            return providers.size()>0 && annotationSubNodes().iterator().hasNext();
+        }
     }
 
-    @Override
-    public boolean RootAnnotationProviderProxy.hasAnnotation() {
-        return hasProvider();
+    public class SrcModification {
+        @Override
+        public boolean hasAnnotation() {
+            return annotationSubNodes().iterator().hasNext();
+        }
+    }
+
+    public abstract class RootAnnotationProviderProxy {
+    	@Override
+        public boolean hasAnnotation() {
+            return hasProvider();
+        }
     }
 
     @Override
@@ -2043,12 +2058,7 @@ aspect AnnotationAPI {
     }
 
     @Override
-    public boolean SrcFunctionCall.hasAnnotation() {
-        return annotationSubNodes().iterator().hasNext();
-    }
-
-    @Override
-    public boolean SrcArrayConstructor.hasAnnotation() {
+    public boolean SrcFunctionArguments.hasAnnotation() {
         return annotationSubNodes().iterator().hasNext();
     }
 
@@ -2064,8 +2074,8 @@ aspect AnnotationAPI {
 
     
     /** 
-     * Search for the applicable annotation from the environment. FilteredEnviroment 
-     * is not used since it is peeling which is undesired. Retrieves latest live annotation
+     * Search for the applicable annotation from the enviroment. FilteredEnviroment 
+     * is not used since it is peeling which is undesired. Retrives latest live annotation
      * from the chain of redeclares.
      */
     public SrcAnnotatable InstNode.srcannotatableFromEnviroment() {
@@ -2146,9 +2156,9 @@ aspect AnnotationAPI {
     }
     
     /**
-     * Obtain the source node which is responsible for providing the annotation.
+     * Obtain the source node which is responsable for providing the annotation.
      * A match against this with the same qualifiedName and same fullyQualifiedName is made in the 
-     * Environment. 
+     * Enviroment. 
      */
     public SrcAnnotatable InstAbstractShortClassDecl.mySrcAnnotatable() {
         boolean hasAnnotations = getSrcClassDecl().srcAnnotationProvider().hasAnnotation();
@@ -2163,7 +2173,7 @@ aspect AnnotationAPI {
     }
     
     /**
-     * Obtain the source node which is responsible for providing the annotation.
+     * Obtain the source node which is responsable for providing the annotation.
      */
     public SrcAnnotatable InstClassDecl.mySrcAnnotatable() {
         return getSrcClassDecl();

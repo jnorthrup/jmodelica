@@ -33,25 +33,21 @@ public class CloneOutputStream extends OutputStream {
             close[i] = true;
     }
 
-    @Override
     public void write(int b) throws IOException {
         for (OutputStream o : out)
             o.write(b);
     }
 
-    @Override
     public void write(byte[] b) throws IOException {
         for (OutputStream o : out)
             o.write(b);
     }
 
-    @Override
     public void write(byte[] b, int off, int len) throws IOException {
         for (OutputStream o : out)
             o.write(b, off, len);
     }
 
-    @Override
     public void flush() throws IOException {
         for (OutputStream o : out)
             o.flush();
@@ -62,7 +58,6 @@ public class CloneOutputStream extends OutputStream {
      * 
      * Default is that all child streams are set to be closed.
      */
-    @Override
     public void close() throws IOException {
         for (int i = 0; i < out.length; i++)
             if (close[i])

@@ -120,7 +120,7 @@ void jmi_log_illegal_input(jmi_log_t *log, int *error_indicator, int n, int nans
                 jmi_log_leave(log, inner);
             }
             if(log_level >= 3) {
-                jmi_log_reals(log, outer, logWarning, is_iter_var_flag?"illegal_ivs":"inputs", inputs, n);
+                jmi_log_reals(log, outer, logWarning, is_iter_var_flag?"ivs":"inputs", inputs, n);
 
             }
             jmi_log_leave(log, outer);
@@ -196,8 +196,8 @@ void jmi_log_illegal_output(jmi_log_t *log, int *error_indicator, int n_outputs,
                 jmi_log_leave(log, inner);
             }
             if(log_level >= 3) {
-                jmi_log_reals(log, outer, logWarning, is_iter_var_flag?"illegal_ivs":"inputs", inputs, n_inputs);
-                jmi_log_reals(log, outer, logWarning,  is_iter_var_flag?"illegal_residuals":"outputs", outputs, n_outputs); 
+                jmi_log_reals(log, outer, logWarning, is_iter_var_flag?"ivs":"inputs", inputs, n_inputs);
+                jmi_log_reals(log, outer, logWarning,  is_iter_var_flag?"residuals":"outputs", outputs, n_outputs); 
 
             }
             jmi_log_leave(log, outer);

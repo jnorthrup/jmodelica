@@ -3665,7 +3665,7 @@ model RecordConstructor30
 
 Warning at line 14, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', ASSUMING_EACH,
 In component c:
-  Assuming 'each' for the modification 'd = {R(a={p})}'
+  Assuming 'each' for the modification 'd = {R()}'
 ")})));
 end RecordConstructor30;
 

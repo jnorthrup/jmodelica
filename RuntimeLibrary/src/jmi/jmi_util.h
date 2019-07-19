@@ -41,7 +41,6 @@
         #define JMI_PATH_MAX PATH_MAX
       #else
         #include <linux/limits.h>
-        #include <limits.h>
         #define JMI_PATH_MAX PATH_MAX
       #endif
     #endif

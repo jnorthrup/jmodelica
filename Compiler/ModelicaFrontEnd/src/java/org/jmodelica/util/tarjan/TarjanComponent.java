@@ -9,12 +9,12 @@ import java.util.Map;
 import java.util.Set;
 
 public class TarjanComponent<N> implements Iterable<N> {
-    private Collection<N> members = new LinkedHashSet<>();
+    private Collection<N> members = new LinkedHashSet<N>();
     private Collection<N> predecessors = null;
 
     public void addPredecessors(Collection<N> newPredecessors) {
         if (predecessors == null) {
-            predecessors = new LinkedHashSet<>();
+            predecessors = new LinkedHashSet<N>();
         }
         for (N node : newPredecessors) {
             if (!members.contains(node)) {
@@ -65,19 +65,19 @@ public class TarjanComponent<N> implements Iterable<N> {
 
     public static <C extends TarjanComponent<N>, N> Map<C, Collection<C>>
     computePredecessorsMap(Collection<C> components) {
-        Map<N, C> nodeToComponentMap = new HashMap<>();
+        Map<N, C> nodeToComponentMap = new HashMap<N, C>();
         for (C component : components) {
             for (N node : component.getMembers()) {
                 nodeToComponentMap.put(node, component);
             }
         }
-        Map<C, Collection<C>> res = new HashMap<>();
+        Map<C, Collection<C>> res = new HashMap<C, Collection<C>>();
         for (C component : components) {
-            Set<C> predecessors = new LinkedHashSet<>();
+            Set<C> predecessors = new LinkedHashSet<C>();
             for (N predecessor : component.getPredecessors()) {
                 predecessors.add(nodeToComponentMap.get(predecessor));
             }
-            res.put(component, new ArrayList<>(predecessors));
+            res.put(component, new ArrayList<C>(predecessors));
         }
         return res;
     }

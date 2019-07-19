@@ -1564,7 +1564,7 @@ aspect FlatFunctionUtils {
      syn String FExp.calcTempVarName()          = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.TEMP);
      syn String FAssignStmt.calcTempVarName()   = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.TEMP);
      
-     syn String FExp.calcIndicatorVarName()  = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.INDICATOR);
+     syn String FRelExp.calcIndicatorVarName()  = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.INDICATOR);
      
      syn String FSampleExp.calcIndexVarName()   = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.SAMPLE);
      

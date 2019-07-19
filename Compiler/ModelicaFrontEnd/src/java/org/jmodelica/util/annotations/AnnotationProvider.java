@@ -20,54 +20,53 @@ import org.jmodelica.util.values.Evaluable;
 
 /**
  * Generic interface which all nodes that are supposed to be navigable by
- * {@code GenericAnnotationNode}. This includes modifications and annotations.
- * Provides methods for traversing the tree structure and manipulating the data.
+ * {@code GenericAnnotationNode}. This include modifications and annotations.
+ * Provides methods for traversing the tree structure and manipulate the data.
  * 
- * <p><strong>Overview</strong>:
- * <p>FlatAnnotationProvider: <br>
+ * @param <N> The base node type which we deal with
+ * @param <V> The value that is returned by the nodes
+ * 
+ * Overview: 
+ * FlatAnnotationProvider: 
  *     AnnotationProvider for the Flat tree used for navigating and working with FAttributes & FAttributeList.
  *     Implemented in FlatAnnotation as private class (ListAnnotationProvider)) 
  *     in order to work with FAttributeLists.
  *
- * <p>SrcAnnotationProvider:<br>
+ *SrcAnnotationProvider:
  *     AnnotationProvider for modifications and annotations in the SourceTree.
- *     Implemented by SrcModification and SrcAnnotation directly. SrcComponent and SrcClassDecl provide 
+ *     Implemented by SrcModification and SrcAnnotation directly. SrcComponent and SrcClassDecl provides 
  *     providers which obtain their annotations and modifiers.
  *
- * <p>SrcIterableAnnotationProvider:<br>
- *     Immutable AnnotationProvider type used by, among others, SrcComponentDecl, SrcShortClassDecl and SrcExtendClause
+ *SrcIterableAnnotationProvider:
+ *     immutable AnnotationProvider type used in among other SrcComponentDecl,SrcShortClassDecl and extendClause
  *     to obtain their annotations. 
  *
- * <p>RootAnnotationProvider:<br>
+ *RootAnnotationProvider:
  *     Bridge provider for elements (classes & components and extendsClauses)
  *     which aren't modifications themselves but can have modifications.
  *     Methods are delegated to the actual annotation. Implemented typically as an anonymous inner class.
  *
- * <p>ASTAnnotationAnnotationProvider:<br>
+ *ASTAnnotationAnnotationProvider:
  *     Bridge provider for elements (classes & components and extendsClauses)
  *     which aren't annotations themselves but can have annotations.
  *
- * <p>SrcAnnotationIteratorProvider:<br>
- *     Represents a fixed array of annotations which can be iterated.
+ *SrcSingletonProvider:
+ *     A immutable provider which wraps another potentially mutable provider.
+ *     Makes the provider immutable if not already.
+ *
+ *     Is used for among other things for SrcExp and Arguments which can't
+ *     be providers them self without complications or undesired result.
+ *
+ *SrcAnnotationIteratorProvider:
+ *     Represents an fixed array of annotations which can be iterated.
  *     The array is not mutable.
  *
- * <p>ExpValueProvider:<br>     
+ *ExpValueProvider:     
  *     For navigating expressions (SrcExp). 
- *     Avoiding having expressions being providers themselves which is generally inconvenient.
- *     The only expressions that are providers themselves are SrcFunctionCall and SrcArrayConstructor,
- *     as they are special in the case that they are the only expressions that can have sub-annotations.
- *     
- * @param <N> The base node type which we deal with
- * @param <V> The value that is returned by the nodes
- * 
+ *     Avoiding having expressions being providers themselves which is inconvenient.
  */
 public interface AnnotationProvider<N extends AnnotationProvider<N, V>, V extends Evaluable> {
-    public Iterable<SubAnnotationPair<N>> annotationSubNodes();
-    
-    /**
-     * Returns either the binding expression, if available, otherwise the annotation interpreted as a value,
-     * if possible. Otherwise, returns <code>null</code>.
-     */
+    public Iterable<SubNodePair<N>> annotationSubNodes();
     public V annotationValue();
 
     /**
@@ -89,30 +88,13 @@ public interface AnnotationProvider<N extends AnnotationProvider<N, V>, V extend
     public boolean isFinal();
     public String resolveURI(String str) throws URIException;
 
-    /**
-     * A (name, value) pair representing a sub-annotation.
-     * The name can be <code>null</code>.
-     * @param <N> The base node type which we deal with
-     */
-    public interface SubAnnotationPair<N> {
-        public String getAnnotationName();
-        public N getAnnotationValue();
-    }
-
-    public static class SubAnnotationPairImpl<N> implements SubAnnotationPair<N> {
-        private final String name;
-        private final N node;
-        public SubAnnotationPairImpl(String name, N node) {
+    public class SubNodePair<N> {
+        public String name;
+        public final N node;
+        public SubNodePair(String name, N node) {
             this.name = name;
             this.node = node;
         }
-        @Override
-        public String getAnnotationName() {
-            return name;
-        }
-        @Override
-        public N getAnnotationValue() {
-            return node;
-        }
     }
+    
 }

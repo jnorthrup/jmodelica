@@ -608,8 +608,8 @@ y := sin(x)
 -------------------------------
 ")})));
         end IndependentDownstream1;
-
-
+        
+        
         model PreMergeInteraction
             Boolean sample1 = sample(1, 0.4);
             Real a,b,c;
@@ -619,10 +619,10 @@ y := sin(x)
                 c = b - 2;
             end when;
             b = a + 2;
-
+        
         annotation(__JModelica(UnitTesting(tests={
             FClassMethodTestCase(
-                name="EventPreMerge.PreMergeInteraction",
+                name="EventPreMerge.IndependentDownstream1",
                 description="Ensures event and pre merge interacts well with pre merge",
                 methodName="printDAEBLT",
                 methodResult="
@@ -642,7 +642,7 @@ y := sin(x)
 -------------------------------
 ")})));
         end PreMergeInteraction;
-
+        
         model DiscreteRealMerge
             discrete Real x;
             discrete Real y;

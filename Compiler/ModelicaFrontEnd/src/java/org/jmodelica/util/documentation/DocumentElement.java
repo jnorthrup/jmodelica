@@ -53,8 +53,8 @@ public class DocumentElement implements Comparable<DocumentElement>, Iterable<Do
     public DocumentElement(String tag, String ordinal) {
         this.tag = tag;
         this.ordinal = ordinal;
-        this.elements = new ArrayList<>();
-        this.meta = new LinkedHashMap<>();
+        this.elements = new ArrayList<DocumentElement>();
+        this.meta = new LinkedHashMap<String, String>();
     }
 
     /**
@@ -132,11 +132,13 @@ public class DocumentElement implements Comparable<DocumentElement>, Iterable<Do
     /**
      * Adds several children.
      * 
-     * @param addElements
+     * @param elements
      *            The children to add.
      */
-    public void addElements(Collection<? extends DocumentElement> addElements) {
-        this.elements.addAll(addElements);
+    public void addElements(Collection<? extends DocumentElement> elements) {
+        for (DocumentElement element : elements) {
+            addElement(element);
+        }
     }
 
     /**

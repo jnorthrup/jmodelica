@@ -29,7 +29,7 @@ aspect FmiXML {
     /**
      * Checks if a variable should be exposed in the XML
      */
-    public boolean FVariable.shouldGenerateXMLVariable() {
+    public boolean FVariable.generateXMLVariable() {
         return !isPreVariable() && !isExternalObject() && (
                 !isTemporary() ||
                 isDifferentiatedVariable() ||
@@ -52,7 +52,7 @@ aspect FmiXML {
      * given if the variable doesn't have any index!
      */
     syn int FVariable.fmiXMLVariableIndex() {
-        if (!shouldGenerateXMLVariable()) {
+        if (!generateXMLVariable()) {
             throw new InternalCompilerError("Trying to get xml variable index for variable " + name() + ", this variable is not exposed in xml and does not have an index!");
         }
         Integer index = myFClass().xmlVariableIndexMap().get(generateXMLName());
@@ -130,7 +130,7 @@ aspect FmiXML {
         VariableNameComparator comp = new VariableNameComparator();
         Iterator<FVariable> it = variables.iterator();
         while (it.hasNext()) {
-            if (!it.next().shouldGenerateXMLVariable()) {
+            if (!it.next().generateXMLVariable()) {
                 it.remove();
             }
         }
@@ -1652,7 +1652,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			
 			public void generateChildren(CodeStream genPrinter) {
                 for (FVariable var : fclass.derivativeVariables()) {
-                    if (var.shouldGenerateXMLVariable()) {
+                    if (var.generateXMLVariable()) {
                         variable = var;
                         super.generateChildren(genPrinter);
                     }
@@ -1675,7 +1675,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			
 			public void generateChildren(CodeStream genPrinter) {
                 for (FVariable var : fclass.outputs()) {
-                    if (var.shouldGenerateXMLVariable()) {
+                    if (var.generateXMLVariable()) {
                         variable = var;
                         super.generateChildren(genPrinter);
                     }
@@ -1708,7 +1708,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
                 //Find the initial unknowns if there are any.
                 initialUnknowns = new LinkedList<FVariable>();
                 for (FVariable var : fclass.allVariables()) {
-                    if (var.shouldGenerateXMLVariable() && isInitialUnknown(var)) {
+                    if (var.generateXMLVariable() && isInitialUnknown(var)) {
                         initialUnknowns.add(var);
                     }
                 }
@@ -1770,7 +1770,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
                 return variable.initDAEDependencyIndices(new Criteria<FVariable>() {
                     @Override
                     public boolean test(FVariable var) {
-                        return (var.shouldGenerateXMLVariable() && getInitialType(var) == InitialType.EXACT) || var.isInput();
+                        return (var.generateXMLVariable() && getInitialType(var) == InitialType.EXACT) || var.isInput();
                     }
                 });
             }

@@ -147,7 +147,7 @@ aspect CCodeGenBlocks {
     }
 
     @Override
-    public void HomotopyBlock.genSolvedInResFunc(CodePrinter p, CodeStream str, String indent,
+    public void AbstractSubBLTBlock.genSolvedInResFunc(CodePrinter p, CodeStream str, String indent,
             Set<FAbstractEquation> visited) {
         throw new UnsupportedOperationException("Can not produce solved statements for " + getClass().getSimpleName() + " in a residual function! This block type is not ment to be present inside other blocks, something has gone horribly wrong here!");
     }

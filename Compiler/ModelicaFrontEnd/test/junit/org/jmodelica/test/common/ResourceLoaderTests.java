@@ -41,7 +41,7 @@ public class ResourceLoaderTests {
             rl.loadedResourceRelativePath("/path3/missing");
             fail();
         } catch (InternalCompilerError e) {
-            // expected
+            
         }
     }
     

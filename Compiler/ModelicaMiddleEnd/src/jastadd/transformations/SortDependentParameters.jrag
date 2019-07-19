@@ -194,7 +194,7 @@ aspect ParameterSorting {
 			for (int i = 0; i < n_vars; i++) {
 				FVariable fv = vars.getChild(i);
 				if (fv.hasParameterEquation()) {
-                    depParamIndices.add(Integer.valueOf(i));
+                    depParamIndices.add(new Integer(i));
                 }
             }
             

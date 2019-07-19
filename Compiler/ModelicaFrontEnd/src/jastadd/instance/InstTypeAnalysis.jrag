@@ -72,8 +72,8 @@ aspect InstTypeAnalysis {
     eq InstNode.getChild().myInstForIndexType()                  = fUnknownType();
 
     syn nta FType InstExternalObject.getType() {
-        InstAccess con = new InstGlobalAccess(InstAccess.fromName(myConstructor().qualifiedName()));
-        InstAccess de  = new InstGlobalAccess(InstAccess.fromName(myDestructor().qualifiedName()));
+        InstAccess con = InstAccess.fromName(myConstructor().qualifiedName());
+        InstAccess de  = InstAccess.fromName(myDestructor().qualifiedName());
         return new FExternalObjectType(size(), getClassName().myInstClassDecl().qualifiedName(), con, de);
     }
 
@@ -242,7 +242,7 @@ aspect InstTypeAnalysis {
                     decl = decl.getInstComponentDecl(index.get(i) - 1);
                 }
             }
-            decls.put(index.fix(), decl);
+            decls.put(index.clone(), decl);
         }
         return new ArrayType(indices(), decls, type().scalarType());
     }
@@ -271,7 +271,7 @@ aspect InstBindingType {
             Array array = bexp.getArray();
             Map<Index, FExp> exps = new HashMap<>();
             for (Index i : bexp.indices()) {
-                exps.put(i.fix(), array.get(i));
+                exps.put(i.clone(), array.get(i));
             }
             return new ArrayType(bexp.indices(), exps, bexp.type().scalarType());
         }
@@ -540,20 +540,6 @@ aspect ClassRestriction {
      */
     syn boolean SrcRestriction.isPackage() = false;
     eq SrcPackage.isPackage()             = true;
-
-    /**
-     * Is this class a connector?
-     */
-    syn boolean SrcClassDecl.isConnector() = false;
-    eq SrcBaseClassDecl.isConnector()      = getSrcRestriction().isConnector();
-    eq SrcUnknownClassDecl.isConnector()   = false;
-    eq SrcLibNode.isConnector()            = myClass().isConnector();
-
-    /**
-     * Is this restriction "connector"?
-     */
-    syn boolean SrcRestriction.isConnector() = false;
-    eq SrcConnector.isConnector()             = true;
 
 }
 

@@ -37,9 +37,7 @@ public class MemorySpider {
 			filter = cls;
 		}
 
-		@Override
-        @SuppressWarnings("unchecked")
-        public void visit(Object o, Stack<Frame> path) {
+		public void visit(Object o, Stack<Frame> path) {
 			if (filter.isAssignableFrom(o.getClass()))
 				visitFiltered((T) o, path);
 		}
@@ -48,17 +46,16 @@ public class MemorySpider {
 		
 	}
     
-    private static class GetFieldsAction implements PrivilegedAction<Field[]> {
+    private static class GetFieldsAction implements PrivilegedAction {
     	
-    	private Class<?> cls;
+    	private Class cls;
     	
-    	public Field[] perform(Class<?> cl) {
+    	public Field[] perform(Class cl) {
     		cls = cl;
-    		return AccessController.doPrivileged(this);
+    		return (Field[]) AccessController.doPrivileged(this);
     	}
 
-		@Override
-        public Field[] run() {
+		public Object run() {
 			return cls.getDeclaredFields();
 		}
     	
@@ -91,8 +88,7 @@ public class MemorySpider {
 			this.f = f;
 		}
 		
-		@Override
-        public String toString() {
+		public String toString() {
 			return "field " + f.getName() + " = " + name();
 		}
 
@@ -107,8 +103,7 @@ public class MemorySpider {
 			this.i = i;
 		}
 		
-		@Override
-        public String toString() {
+		public String toString() {
 			return "array cell " + i + " = " + name();
 		}
 
@@ -120,8 +115,7 @@ public class MemorySpider {
 			super(o);
 		}
 		
-		@Override
-        public String toString() {
+		public String toString() {
 			return "initial object: " + name();
 		}
 
@@ -133,14 +127,13 @@ public class MemorySpider {
 			super(o);
 		}
 		
-		@Override
-        public String toString() {
+		public String toString() {
 			return "object in linked list: " + name();
 		}
 
 	}
     
-    private static class GetValueAction implements PrivilegedAction<Object> {
+    private static class GetValueAction implements PrivilegedAction {
     	
     	private Field field;
     	
@@ -155,8 +148,7 @@ public class MemorySpider {
 			}
     	}
 
-		@Override
-        public Object run() {
+		public Object run() {
 			field.setAccessible(true);
 			return null;
 		}
@@ -187,7 +179,7 @@ public class MemorySpider {
 		visited.add(o);
 		visitor.visit(o, path);
 		
-		Class<?> type = o.getClass();
+		Class type = o.getClass();
 		if (type.isArray()) {
 			int len = java.lang.reflect.Array.getLength(o);
 			if (!type.getComponentType().isPrimitive()) {
@@ -196,7 +188,7 @@ public class MemorySpider {
 				}
 			}
 		} else if (o instanceof LinkedList) { // Special case for linked lists for efficiency
-			for (Object o2 : (LinkedList<?>) o)
+			for (Object o2 : (LinkedList) o)
 				traverse(new LinkedListFrame(o2));
 		} else {
 			for (; type != null; type = type.getSuperclass())

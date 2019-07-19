@@ -51,9 +51,7 @@ public final class StringUtil {
             out.append(prefix);
             out.append(text.substring(start));
             out.append(suffix);
-        } catch (IOException e) {
-            throw new RuntimeException("Unexpected IO exception", e);
-        }
+        } catch (IOException e) {}
     }
 
     public static void wrapText(PrintStream out, String text, String indent, int width) {

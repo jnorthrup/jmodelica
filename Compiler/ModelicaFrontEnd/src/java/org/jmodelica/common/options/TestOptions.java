@@ -91,7 +91,7 @@ public class TestOptions extends OptionRegistry {
 
     @Override
     public OptionRegistry copy() {
-        OptionRegistry res = new TestOptions();
+        OptionRegistry res = new TestOptions() {};
         res.copyAllOptions(this);
         return res;
     }

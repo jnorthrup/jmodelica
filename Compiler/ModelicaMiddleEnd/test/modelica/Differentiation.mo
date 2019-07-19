@@ -3193,31 +3193,39 @@ void func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1_e_def0(R_0_r
     jmi_real_t i1_0i;
     jmi_int_t i1_0ie;
     jmi_int_t i1_0in;
-    jmi_real_t i2_1i;
-    jmi_int_t i2_1ie;
-    jmi_int_t i2_1in;
-    jmi_real_t i1_2i;
-    jmi_int_t i1_2ie;
-    jmi_int_t i1_2in;
+    jmi_real_t i1_1i;
+    jmi_int_t i1_1ie;
+    jmi_int_t i1_1in;
+    jmi_real_t i2_2i;
+    jmi_int_t i2_2ie;
+    jmi_int_t i2_2in;
+    jmi_real_t i1_3i;
+    jmi_int_t i1_3ie;
+    jmi_int_t i1_3in;
     JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, rt_a, 1, 1, 1)
     JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
     jmi_array_rec_1(rt_a, 1)->x = tmp_1;
     JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, temp_1_a, 1, 1, 1)
-    *jmi_array_rec_1(temp_1_a, 1) = *jmi_array_rec_1(r_a, 1);
+    JMI_ARRAY_INIT_1(HEAP, jmi_real_t, jmi_array_t, jmi_array_rec_1(temp_1_a, 1)->x, 1, 1, 1)
     i1_0in = 0;
     i1_0ie = floor((1) - (1));
     for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
-        i2_1in = 0;
-        i2_1ie = floor((1) - (1));
-        for (i2_1i = 1; i2_1in <= i2_1ie; i2_1i = 1 + (++i2_1in)) {
-            jmi_array_ref_1(jmi_array_rec_1(rt_a, i1_0i)->x, i2_1i) = jmi_array_val_1(jmi_array_rec_1(temp_1_a, i1_0i)->x, i2_1i);
+        jmi_array_ref_1(jmi_array_rec_1(temp_1_a, 1)->x, i1_0i) = jmi_array_val_1(jmi_array_rec_1(r_a, 1)->x, i1_0i);
+    }
+    i1_1in = 0;
+    i1_1ie = floor((1) - (1));
+    for (i1_1i = 1; i1_1in <= i1_1ie; i1_1i = 1 + (++i1_1in)) {
+        i2_2in = 0;
+        i2_2ie = floor((1) - (1));
+        for (i2_2i = 1; i2_2in <= i2_2ie; i2_2i = 1 + (++i2_2in)) {
+            jmi_array_ref_1(jmi_array_rec_1(rt_a, i1_1i)->x, i2_2i) = jmi_array_val_1(jmi_array_rec_1(temp_1_a, i1_1i)->x, i2_2i);
         }
     }
     y_v = jmi_array_val_1(jmi_array_rec_1(rt_a, 1)->x, 1);
-    i1_2in = 0;
-    i1_2ie = floor((jmi_array_size(r_a, 0)) - (1));
-    for (i1_2i = 1; i1_2in <= i1_2ie; i1_2i = 1 + (++i1_2in)) {
-        if (COND_EXP_EQ(1.0, jmi_array_size(jmi_array_rec_1(r_a, i1_2i)->x, 0), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+    i1_3in = 0;
+    i1_3ie = floor((jmi_array_size(r_a, 0)) - (1));
+    for (i1_3i = 1; i1_3in <= i1_3ie; i1_3i = 1 + (++i1_3in)) {
+        if (COND_EXP_EQ(1.0, jmi_array_size(jmi_array_rec_1(r_a, i1_3i)->x, 0), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
             jmi_assert_failed(\"Mismatching sizes in function 'Differentiation.AlgorithmDifferentiation.RecordArrayTemp1.e', component 'r[i1].x', dimension '1'\", JMI_ASSERT_ERROR);
         }
     }
@@ -3236,35 +3244,35 @@ void func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1_F_def1(R_0_r
     JMI_DYNAMIC_INIT()
     JMI_ARR(STACK, R_0_r, R_0_ra, y_an, 1, 1)
     JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
-    jmi_real_t i1_3i;
-    jmi_int_t i1_3ie;
-    jmi_int_t i1_3in;
     jmi_real_t i1_4i;
     jmi_int_t i1_4ie;
     jmi_int_t i1_4in;
-    jmi_real_t i2_5i;
-    jmi_int_t i2_5ie;
-    jmi_int_t i2_5in;
+    jmi_real_t i1_5i;
+    jmi_int_t i1_5ie;
+    jmi_int_t i1_5in;
+    jmi_real_t i2_6i;
+    jmi_int_t i2_6ie;
+    jmi_int_t i2_6in;
     if (y_a == NULL) {
         JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, y_an, 1, 1, 1)
         JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
         jmi_array_rec_1(y_an, 1)->x = tmp_1;
         y_a = y_an;
     }
-    i1_3in = 0;
-    i1_3ie = floor((1) - (1));
-    for (i1_3i = 1; i1_3in <= i1_3ie; i1_3i = 1 + (++i1_3in)) {
-        if (COND_EXP_EQ(1.0, jmi_array_size(jmi_array_rec_1(x_a, i1_3i)->x, 0), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
-            jmi_assert_failed(\"Mismatching sizes in function 'Differentiation.AlgorithmDifferentiation.RecordArrayTemp1.F', component 'x[i1].x', dimension '1'\", JMI_ASSERT_ERROR);
-        }
-    }
     i1_4in = 0;
     i1_4ie = floor((1) - (1));
     for (i1_4i = 1; i1_4in <= i1_4ie; i1_4i = 1 + (++i1_4in)) {
-        i2_5in = 0;
-        i2_5ie = floor((1) - (1));
-        for (i2_5i = 1; i2_5in <= i2_5ie; i2_5i = 1 + (++i2_5in)) {
-            jmi_array_ref_1(jmi_array_rec_1(y_a, i1_4i)->x, i2_5i) = jmi_array_val_1(jmi_array_rec_1(x_a, i1_4i)->x, i2_5i);
+        if (COND_EXP_EQ(1.0, jmi_array_size(jmi_array_rec_1(x_a, i1_4i)->x, 0), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+            jmi_assert_failed(\"Mismatching sizes in function 'Differentiation.AlgorithmDifferentiation.RecordArrayTemp1.F', component 'x[i1].x', dimension '1'\", JMI_ASSERT_ERROR);
+        }
+    }
+    i1_5in = 0;
+    i1_5ie = floor((1) - (1));
+    for (i1_5i = 1; i1_5in <= i1_5ie; i1_5i = 1 + (++i1_5in)) {
+        i2_6in = 0;
+        i2_6ie = floor((1) - (1));
+        for (i2_6i = 1; i2_6in <= i2_6ie; i2_6i = 1 + (++i2_6in)) {
+            jmi_array_ref_1(jmi_array_rec_1(y_a, i1_5i)->x, i2_6i) = jmi_array_val_1(jmi_array_rec_1(x_a, i1_5i)->x, i2_6i);
         }
     }
     JMI_DYNAMIC_FREE()
@@ -3281,15 +3289,18 @@ void func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1__der_e_def2(
     JMI_DEF(REA, y_v)
     JMI_ARR(STACK, R_0_r, R_0_ra, temp_1_a, 1, 1)
     JMI_ARR(STACK, R_0_r, R_0_ra, _der_temp_1_a, 1, 1)
-    jmi_real_t i1_6i;
-    jmi_int_t i1_6ie;
-    jmi_int_t i1_6in;
-    jmi_real_t i2_7i;
-    jmi_int_t i2_7ie;
-    jmi_int_t i2_7in;
+    jmi_real_t i1_7i;
+    jmi_int_t i1_7ie;
+    jmi_int_t i1_7in;
     jmi_real_t i1_8i;
     jmi_int_t i1_8ie;
     jmi_int_t i1_8in;
+    jmi_real_t i2_9i;
+    jmi_int_t i2_9ie;
+    jmi_int_t i2_9in;
+    jmi_real_t i1_10i;
+    jmi_int_t i1_10ie;
+    jmi_int_t i1_10in;
     JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, rt_a, 1, 1, 1)
     JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
     jmi_array_rec_1(rt_a, 1)->x = tmp_1;
@@ -3298,24 +3309,30 @@ void func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1__der_e_def2(
     jmi_array_rec_1(_der_rt_a, 1)->x = tmp_2;
     JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, temp_1_a, 1, 1, 1)
     JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, _der_temp_1_a, 1, 1, 1)
-    *jmi_array_rec_1(_der_temp_1_a, 1) = *jmi_array_rec_1(_der_r_a, 1);
-    *jmi_array_rec_1(temp_1_a, 1) = *jmi_array_rec_1(r_a, 1);
-    i1_6in = 0;
-    i1_6ie = floor((1) - (1));
-    for (i1_6i = 1; i1_6in <= i1_6ie; i1_6i = 1 + (++i1_6in)) {
-        i2_7in = 0;
-        i2_7ie = floor((1) - (1));
-        for (i2_7i = 1; i2_7in <= i2_7ie; i2_7i = 1 + (++i2_7in)) {
-            jmi_array_ref_1(jmi_array_rec_1(_der_rt_a, i1_6i)->x, i2_7i) = jmi_array_val_1(jmi_array_rec_1(_der_temp_1_a, i1_6i)->x, i2_7i);
-            jmi_array_ref_1(jmi_array_rec_1(rt_a, i1_6i)->x, i2_7i) = jmi_array_val_1(jmi_array_rec_1(temp_1_a, i1_6i)->x, i2_7i);
+    JMI_ARRAY_INIT_1(HEAP, jmi_real_t, jmi_array_t, jmi_array_rec_1(temp_1_a, 1)->x, 1, 1, 1)
+    JMI_ARRAY_INIT_1(HEAP, jmi_real_t, jmi_array_t, jmi_array_rec_1(_der_temp_1_a, 1)->x, 1, 1, 1)
+    i1_7in = 0;
+    i1_7ie = floor((1) - (1));
+    for (i1_7i = 1; i1_7in <= i1_7ie; i1_7i = 1 + (++i1_7in)) {
+        jmi_array_ref_1(jmi_array_rec_1(_der_temp_1_a, 1)->x, i1_7i) = jmi_array_val_1(jmi_array_rec_1(_der_r_a, 1)->x, i1_7i);
+        jmi_array_ref_1(jmi_array_rec_1(temp_1_a, 1)->x, i1_7i) = jmi_array_val_1(jmi_array_rec_1(r_a, 1)->x, i1_7i);
+    }
+    i1_8in = 0;
+    i1_8ie = floor((1) - (1));
+    for (i1_8i = 1; i1_8in <= i1_8ie; i1_8i = 1 + (++i1_8in)) {
+        i2_9in = 0;
+        i2_9ie = floor((1) - (1));
+        for (i2_9i = 1; i2_9in <= i2_9ie; i2_9i = 1 + (++i2_9in)) {
+            jmi_array_ref_1(jmi_array_rec_1(_der_rt_a, i1_8i)->x, i2_9i) = jmi_array_val_1(jmi_array_rec_1(_der_temp_1_a, i1_8i)->x, i2_9i);
+            jmi_array_ref_1(jmi_array_rec_1(rt_a, i1_8i)->x, i2_9i) = jmi_array_val_1(jmi_array_rec_1(temp_1_a, i1_8i)->x, i2_9i);
         }
     }
     _der_y_v = jmi_array_val_1(jmi_array_rec_1(_der_rt_a, 1)->x, 1);
     y_v = jmi_array_val_1(jmi_array_rec_1(rt_a, 1)->x, 1);
-    i1_8in = 0;
-    i1_8ie = floor((jmi_array_size(r_a, 0)) - (1));
-    for (i1_8i = 1; i1_8in <= i1_8ie; i1_8i = 1 + (++i1_8in)) {
-        if (COND_EXP_EQ(1.0, jmi_array_size(jmi_array_rec_1(r_a, i1_8i)->x, 0), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+    i1_10in = 0;
+    i1_10ie = floor((jmi_array_size(r_a, 0)) - (1));
+    for (i1_10i = 1; i1_10in <= i1_10ie; i1_10i = 1 + (++i1_10in)) {
+        if (COND_EXP_EQ(1.0, jmi_array_size(jmi_array_rec_1(r_a, i1_10i)->x, 0), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
             jmi_assert_failed(\"Mismatching sizes in function 'Differentiation.AlgorithmDifferentiation.RecordArrayTemp1.e', component 'r[i1].x', dimension '1'\", JMI_ASSERT_ERROR);
         }
     }
@@ -3336,15 +3353,15 @@ void func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1__der_F_def3(
     JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
     JMI_ARR(STACK, R_0_r, R_0_ra, y_a, 1, 1)
     JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
-    jmi_real_t i1_9i;
-    jmi_int_t i1_9ie;
-    jmi_int_t i1_9in;
-    jmi_real_t i1_10i;
-    jmi_int_t i1_10ie;
-    jmi_int_t i1_10in;
-    jmi_real_t i2_11i;
-    jmi_int_t i2_11ie;
-    jmi_int_t i2_11in;
+    jmi_real_t i1_11i;
+    jmi_int_t i1_11ie;
+    jmi_int_t i1_11in;
+    jmi_real_t i1_12i;
+    jmi_int_t i1_12ie;
+    jmi_int_t i1_12in;
+    jmi_real_t i2_13i;
+    jmi_int_t i2_13ie;
+    jmi_int_t i2_13in;
     JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, y_a, 1, 1, 1)
     JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
     jmi_array_rec_1(y_a, 1)->x = tmp_2;
@@ -3354,21 +3371,21 @@ void func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1__der_F_def3(
         jmi_array_rec_1(_der_y_an, 1)->x = tmp_1;
         _der_y_a = _der_y_an;
     }
-    i1_9in = 0;
-    i1_9ie = floor((1) - (1));
-    for (i1_9i = 1; i1_9in <= i1_9ie; i1_9i = 1 + (++i1_9in)) {
-        if (COND_EXP_EQ(1.0, jmi_array_size(jmi_array_rec_1(x_a, i1_9i)->x, 0), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+    i1_11in = 0;
+    i1_11ie = floor((1) - (1));
+    for (i1_11i = 1; i1_11in <= i1_11ie; i1_11i = 1 + (++i1_11in)) {
+        if (COND_EXP_EQ(1.0, jmi_array_size(jmi_array_rec_1(x_a, i1_11i)->x, 0), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
             jmi_assert_failed(\"Mismatching sizes in function 'Differentiation.AlgorithmDifferentiation.RecordArrayTemp1.F', component 'x[i1].x', dimension '1'\", JMI_ASSERT_ERROR);
         }
     }
-    i1_10in = 0;
-    i1_10ie = floor((1) - (1));
-    for (i1_10i = 1; i1_10in <= i1_10ie; i1_10i = 1 + (++i1_10in)) {
-        i2_11in = 0;
-        i2_11ie = floor((1) - (1));
-        for (i2_11i = 1; i2_11in <= i2_11ie; i2_11i = 1 + (++i2_11in)) {
-            jmi_array_ref_1(jmi_array_rec_1(_der_y_a, i1_10i)->x, i2_11i) = jmi_array_val_1(jmi_array_rec_1(_der_x_a, i1_10i)->x, i2_11i);
-            jmi_array_ref_1(jmi_array_rec_1(y_a, i1_10i)->x, i2_11i) = jmi_array_val_1(jmi_array_rec_1(x_a, i1_10i)->x, i2_11i);
+    i1_12in = 0;
+    i1_12ie = floor((1) - (1));
+    for (i1_12i = 1; i1_12in <= i1_12ie; i1_12i = 1 + (++i1_12in)) {
+        i2_13in = 0;
+        i2_13ie = floor((1) - (1));
+        for (i2_13i = 1; i2_13in <= i2_13ie; i2_13i = 1 + (++i2_13in)) {
+            jmi_array_ref_1(jmi_array_rec_1(_der_y_a, i1_12i)->x, i2_13i) = jmi_array_val_1(jmi_array_rec_1(_der_x_a, i1_12i)->x, i2_13i);
+            jmi_array_ref_1(jmi_array_rec_1(y_a, i1_12i)->x, i2_13i) = jmi_array_val_1(jmi_array_rec_1(x_a, i1_12i)->x, i2_13i);
         }
     }
     JMI_DYNAMIC_FREE()

@@ -35,7 +35,6 @@ public class SplitFilesCodeStream extends CodeStream {
         switchParent(nextFileStream());
     }
     
-    @Override
     public void splitFile() {
         switchParent(nextFileStream());
         print(header);

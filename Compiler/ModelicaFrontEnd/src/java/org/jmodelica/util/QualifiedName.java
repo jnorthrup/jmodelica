@@ -31,7 +31,7 @@ import beaver.Symbol;
 /**
  * Handle splitting strings into different parts of a qualified name.
  */
-public class QualifiedName implements Iterator<String> {
+public class QualifiedName {
     private static Constructor<? extends Scanner> scannerConstructor;
     private static int ID_TOKEN_VALUE;
     private static int EOF_TOKEN_VALUE;
@@ -63,38 +63,20 @@ public class QualifiedName implements Iterator<String> {
     }
     
     private final boolean isGlobal;
-    private final ArrayList<String> names;
+    private final ArrayList<String> names = new ArrayList<>();
     private final boolean isUnQualifiedImport;
     private final Iterator<String> iterator;
 
     public QualifiedName(String name) {
         isUnQualifiedImport = name.endsWith(".*");
         isGlobal = name.startsWith(".");
-        names = new ArrayList<>();
         splitQualifiedClassName(name);
         iterator = names.iterator();
-    }
-    
-    private QualifiedName(QualifiedName orginal) {
-        isUnQualifiedImport = orginal.isUnQualifiedImport;
-        isGlobal = orginal.isGlobal;
-        names = orginal.names;
-        iterator = names.iterator();
-    }
-    
-    /**
-     * Copy this QualifiedName with the iterator reseted.
-     * This method does not reparse the name. 
-     * @return A copy of this QualifiedName with a new iterator
-     */
-    public QualifiedName resetedCopy() {
-        return new QualifiedName(this);
     }
 
     // Interpret name as global or not regardless of dot form or not.
     public QualifiedName(String name, boolean isGlobal) {
         isUnQualifiedImport = name.endsWith(".*");
-        names = new ArrayList<>();
         splitQualifiedClassName(name); 
         this.isGlobal = isGlobal; // Note: must be set after splitting
         iterator = names.iterator();
@@ -104,23 +86,12 @@ public class QualifiedName implements Iterator<String> {
         return names.size();
     }
     
-    @Override
     public boolean hasNext() {
         return iterator.hasNext();
     }
     
-    @Override
     public String next() {
         return iterator.next();
-    }
-    
-    @Override
-    public void remove() {
-        throw new UnsupportedOperationException("remove");
-    }
-    
-    public String getName(int i) {
-        return names.get(i);
     }
 
     private static Scanner newScanner(String name) {
