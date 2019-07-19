@@ -39,11 +39,10 @@ public class SizeNode implements TreeNode {
 	public static SizeNode readTree(String file) throws IOException {
 		BufferedReader in = new BufferedReader(new FileReader(file));
 		SizeNode root = new SizeNode(in.readLine());
-		if (root.level == 0) {
-            root.fill(in);
-        } else {
-            root = fillRev(in, root, 1);
-        }
+		if (root.level == 0)
+			root.fill(in);
+		else
+			root = fillRev(in, root, 1);
 		return root;
 	}
 
@@ -58,17 +57,15 @@ public class SizeNode implements TreeNode {
 	public static SizeNode fillRev(BufferedReader in, SizeNode next, int level) throws IOException {
 		ArrayList<SizeNode> siblings = new ArrayList<SizeNode>();
 		do {
-			if (level < next.level) {
-                next = fillRev(in, next, level + 1);
-            }
+			if (level < next.level)
+				next = fillRev(in, next, level + 1);
 			if (level == next.level) {
 				siblings.add(0, next);
 				next = readNode(in);
 			}
 		} while (level <= next.level);
-		if (next.children == null) {
-            next.children = siblings;
-        }
+		if (next.children == null)
+			next.children = siblings;
 		return next;
 	}
 
@@ -92,57 +89,47 @@ public class SizeNode implements TreeNode {
 
 	private static SizeNode readNode(BufferedReader in) throws IOException {
 		String line = in.readLine();
-		if (line == null) {
-            return null;
-        }
+		if (line == null)
+			return null;
 		return new SizeNode(line);
 	}
 
 	private void add(SizeNode child) {
-		if (children == null) {
-            children = new ArrayList<SizeNode>();
-        }
+		if (children == null) 
+			children = new ArrayList<SizeNode>();
 		children.add(child);
 		child.parent = this;
 	}
 
-	@Override
-    public TreeNode getChildAt(int childIndex) {
+	public TreeNode getChildAt(int childIndex) {
 		return children.get(childIndex);
 	}
 
-	@Override
-    public int getChildCount() {
+	public int getChildCount() {
 		return children != null ? children.size() : 0;
 	}
 
-	@Override
-    public TreeNode getParent() {
+	public TreeNode getParent() {
 		return parent;
 	}
 
-	@Override
-    public int getIndex(TreeNode node) {
+	public int getIndex(TreeNode node) {
 		return children != null ? children.indexOf(node) : -1;
 	}
 
-	@Override
-    public boolean getAllowsChildren() {
+	public boolean getAllowsChildren() {
 		return true;
 	}
 
-	@Override
-    public boolean isLeaf() {
+	public boolean isLeaf() {
 		return getChildCount() == 0;
 	}
 
-	@Override
-    public Enumeration<SizeNode> children() {
+	public Enumeration<SizeNode> children() {
 		return Collections.enumeration(children);
 	}
 	
-	@Override
-    public String toString() {
+	public String toString() {
 		return size + " - " + node;
 	}
 

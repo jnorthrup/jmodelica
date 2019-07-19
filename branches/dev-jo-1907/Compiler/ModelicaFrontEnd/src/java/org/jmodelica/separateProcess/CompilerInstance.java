@@ -17,7 +17,6 @@ package org.jmodelica.separateProcess;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,8 +24,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.jmodelica.util.StringUtil;
 import org.jmodelica.util.logging.IllegalLogStringException;
+import org.jmodelica.util.StringUtil;
 
 /**
  * Class representing a compiler instance to be used when compiling with a separate process.
@@ -60,11 +59,10 @@ public class CompilerInstance {
      */
     public CompilerInstance(String jmodelicaHome) {
         this.jmodelicaHome = jmodelicaHome;
-        if (!new File(joinPath(jmodelicaHome, "lib", "ModelicaCompiler.jar")).exists()) {
+        if (!new File(joinPath(jmodelicaHome, "lib", "ModelicaCompiler.jar")).exists())
             throw new IllegalArgumentException("JMODELICA_HOME does not point to a valid jmodelica installation!");
-        }
         setJavaHome(System.getProperty("java.home"));
-        setClassPath(joinPath(jmodelicaHome, "lib", "ModelicaCompiler.jar"), joinPath(jmodelicaHome, "lib", "OptimicaCompiler.jar"), joinPath(jmodelicaHome, "lib", "util.jar"));
+        setClassPath(joinPath(jmodelicaHome, "lib", "ModelicaCompiler.jar"), joinPath(jmodelicaHome, "lib", "OptimicaCompiler.jar"), joinPath(jmodelicaHome, "lib", "util.jar"), joinPath(jmodelicaHome, "ThirdParty", "Beaver", "lib", "beaver-rt.jar"));
         setTarget("cs");
         setModelicaPath(joinPath(jmodelicaHome, "ThirdParty", "MSL"));
         setLog("w");
@@ -100,9 +98,8 @@ public class CompilerInstance {
 
     public void addClassPath(String... paths) {
         if (paths != null) {
-            for (String path : paths) {
+            for (String path : paths)
                 classPath.add(path);
-            }
         }
     }
 
@@ -149,9 +146,8 @@ public class CompilerInstance {
 
     public void addModelicaPath(String... paths) {
         if (paths != null) {
-            for (String path : paths) {
+            for (String path : paths)
                 modelicaPath.add(path);
-            }
         }
     }
 
@@ -248,19 +244,8 @@ public class CompilerInstance {
         return args;
     }
 
-    public Compilation compile(String modelName, String ... sourceFiles) throws IOException {
+    public Compilation compile(String modelName, String... sourceFiles) throws IOException {
         return new Compilation(buildArgs(modelName, sourceFiles), jmodelicaHome);
-    }
-    
-    public Compilation compile(String modelName, Path ... sourceFiles) throws IOException {
-        if (sourceFiles == null) {
-            return compile(modelName, (String[])null);
-        }
-        String[] files = new String[sourceFiles.length];
-        for (int i = 0; i < sourceFiles.length; i++) {
-            files[i] = sourceFiles[i].toString();
-        }
-        return compile(modelName, files);
     }
 
     private static String join(String delimiter, String... args) {

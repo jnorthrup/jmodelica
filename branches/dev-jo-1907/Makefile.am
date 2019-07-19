@@ -500,12 +500,31 @@ JAVA_CASADI_BASE_DIR=$(COMPILER_DIR)
 JAVA_CASADI_BUILD_DIR=$(abs_builddir)
 JAVA_MC_CASADI_ANT_FILE=$(COMPILER_DIR)/ModelicaCompilerCasADi/build.xml
 JAVA_OC_CASADI_ANT_FILE=$(COMPILER_DIR)/OptimicaCompilerCasADi/build.xml
+JAVA_EXEC_CP=$(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar:$(JAVA_BUILD_DIR)/bin/util.jar:$(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar
 
 all-local: build-python-packages build-compiler
 	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) https://svn.jmodelica.org > $(abs_builddir)/version.txt
 	if [ "$(BUILD_EXTRA)" ]; then exec "$(BUILD_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
-install-exec-local: install-python-packages install-compiler install-modules
+build-compiler:
+if HAVE_ANT
+	mkdir -p $(JAVA_BUILD_DIR)
+	cd $(JAVA_BUILD_DIR); \
+	$(ANT_OPTS) $(ANT) -f "$(JAVA_MC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
+	cd $(JAVA_BUILD_DIR); \
+	$(ANT_OPTS) $(ANT) -f "$(JAVA_OC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
+	java -cp "$(JAVA_EXEC_CP)" org.jmodelica.modelica.compiler.ModelicaCompiler\$$OptionExporter -x "$(abs_builddir)/DefaultOptions.xml"
+endif
+
+install-compiler: build-compiler
+if HAVE_ANT
+	cp $(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar $(DESTDIR)$(prefix)/lib/
+	cp $(JAVA_BUILD_DIR)/bin/util.jar $(DESTDIR)$(prefix)/lib/
+	cp $(JAVA_BUILD_DIR)/bin/OptimicaCompiler.jar $(DESTDIR)$(prefix)/lib/
+	cp $(JAVA_BUILD_DIR)/bin/separateProcess.jar $(DESTDIR)$(prefix)/lib/
+endif
+
+install-exec-local: install-python-packages install-compiler
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/LICENSE $(DESTDIR)$(prefix)/ 
 	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_GPL $(DESTDIR)$(prefix)/lib/
 	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_CPL $(DESTDIR)$(prefix)/lib/
@@ -527,7 +546,12 @@ install-exec-local: install-python-packages install-compiler install-modules
 	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
 	esac
 
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty 
+	cp $(abs_builddir)/DefaultOptions.xml $(DESTDIR)$(prefix)/DefaultOptions.xml
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver
+	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Beaver/
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib
+	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/ 
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials
 	cp -r $(SUNDIALS_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Sundials
 	cp $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.7.0/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Sundials
@@ -566,46 +590,6 @@ endif
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML LICENSE"  || cp  $(abs_top_srcdir)/XML/LICENSE $(DESTDIR)$(prefix)/XML
 	cp  $(abs_builddir)/version.txt $(DESTDIR)$(prefix)
 	if [ "$(INSTALL_EXTRA)" ]; then exec "$(INSTALL_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
-
-ant_output_jars= \
-	$(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar \
-	$(JAVA_BUILD_DIR)/bin/util.jar \
-	$(JAVA_BUILD_DIR)/bin/OptimicaCompiler.jar \
-	$(JAVA_BUILD_DIR)/bin/separateProcess.jar
-
-ant_output_options=$(JAVA_BUILD_DIR)/src/build/DefaultOptions.xml
-
-install-compiler: $(ant_output_jars) $(ant_output_options) TODO-always-trigger
-if HAVE_ANT
-	mkdir -p $(DESTDIR)$(prefix)/lib/
-	install -t $(DESTDIR)$(prefix)/lib/ $(ant_output_jars)
-	install -t $(DESTDIR)$(prefix)/ $(ant_output_options)
-endif
-
-# Dummy target used to always trigger rebuilds. Used to enable references to
-# outputs from phony targets as real targets. For example ant output.
-TODO-always-trigger: ;
-
-$(ant_output_jars) $(ant_output_options): build-compiler
-
-build-compiler:
-if HAVE_ANT
-	mkdir -p $(JAVA_BUILD_DIR)
-	cd $(JAVA_BUILD_DIR); \
-	$(ANT_OPTS) $(ANT) -f "$(JAVA_MC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
-	cd $(JAVA_BUILD_DIR); \
-	$(ANT_OPTS) $(ANT) -f "$(JAVA_OC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
-endif
-
-install-modules: install-modules-ModelicaFrontEnd
-
-BEAVER_INSTALL_DIR = $(DESTDIR)$(prefix)/ThirdParty/Beaver
-BEAVER_SOURCE = $(abs_top_srcdir)/Compiler/ModelicaFrontEnd/ThirdParty/Beaver
-
-install-modules-ModelicaFrontEnd: $(BEAVER_INSTALL_DIR)/LICENSE $(BEAVER_INSTALL_DIR)/lib/beaver-rt.jar
-
-$(BEAVER_INSTALL_DIR)/%: $(BEAVER_SOURCE)/%
-	install -D $(<) $(@)
 
 bindistdir: install
 	rm -rf $(bindistdir)

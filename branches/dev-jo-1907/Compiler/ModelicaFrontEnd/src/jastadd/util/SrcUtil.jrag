@@ -332,10 +332,10 @@ aspect SrcUtil {
      * folder for which the root package.mo is located. The root path for an
      * unstructured library is the modelica file it self.
      */
-    syn Path SrcBaseNode.myLibRootPath() {
+    syn File SrcBaseNode.myLibRootPath() {
         SrcClassDecl topClass = myTopSrcClassDecl();
-        Path fileRoot = Paths.get(topClass.fileName());
-        return topClass.isLibNode() ?  fileRoot.getParent() : fileRoot;
+        File fileRoot = new File(topClass.fileName());
+        return topClass.isLibNode() ?  fileRoot.getParentFile() : fileRoot;
     }
 }
 

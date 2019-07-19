@@ -196,72 +196,76 @@ aspect BLT{
             }
 
             AbstractEquationBlock block = null;
-            Set<FAbstractEquation> activeRealEquations = new LinkedHashSet<FAbstractEquation>();
-            
+            EquationBlock eqnBlock = null;
+            boolean torn = false;
             if (producer.useTearing() && realEquations.size() > 1) {
-                EquationBlock eqnBlock = tear(component, producer, stepUtil, isInitial);
+                eqnBlock = tear(component, producer, stepUtil, isInitial);
                 if (eqnBlock != null && !eqnBlock.solvedBlocks().isEmpty()) {
-                    for (AbstractEquationBlock subBlock : computeActiveBlocks(eqnBlock)) {
-                        activeRealEquations.addAll(subBlock.allEquations());
-                    }
                     block = eqnBlock;
+                    torn = true;
                 }
             }
+            Set<FAbstractEquation> activeRealEquations = new LinkedHashSet<FAbstractEquation>();
+            if (torn) {
+                // Check if an equation block is mixed, i.e., contains both continous
+                // and discrete variables, and if it is linear in the unknowns
+                Map<FVariable, AbstractEquationBlock> varToBlockMap = new HashMap<FVariable, AbstractEquationBlock>();
+                for (AbstractEquationBlock subBlock : eqnBlock.solvedRealBlocks()) {
+                    for (FVariable var : subBlock.allVariables())
+                        varToBlockMap.put(var, subBlock);
+                }
+                Set<FVariable> iterationVariables = new HashSet<FVariable>();
+                for (FVariable var : block.localUnsolvedVariables())
+                    iterationVariables.add(var);
+                Set<AbstractEquationBlock> visitedBlocks = new HashSet<AbstractEquationBlock>();
+                Set<AbstractEquationBlock> activeBlocks = new HashSet<AbstractEquationBlock>();
+                for (SimpleEquationBlock subBlock : eqnBlock.unsolvedBlocks()) {
+                    linearityUseCheck(subBlock, varToBlockMap, iterationVariables, visitedBlocks, activeBlocks);
+                    activeBlocks.add(subBlock);
+                }
+                for (AbstractEquationBlock subBlock : activeBlocks)
+                    activeRealEquations.addAll(subBlock.allEquations());
+            } else {
+                for (E eqn : realEquations)
+                    activeRealEquations.add(eqn.getEquation());
+            }
+            
+            boolean linear = true;
+            for (FAbstractEquation eqn : activeRealEquations)
+                linear &= eqn.checkLinearity(realVariables);
+            
+            boolean mixed = nonRealEquations.size() > 0 && realEquations.size() > 0;
             
             if (block == null) {
-                boolean mixed = nonRealEquations.size() > 0 && realEquations.size() > 0;
                 if (seb != null && !mixed) {
                     block = seb;
                 } else {
                     BiPGraph nonRealG = new BiPGraph(nonRealEquations, isInitial);
                     Collection<SimpleEquationBlock> nonRealBlocks = nonRealG.computeNonRealBlocks(producer, stepUtil);
-                    EquationBlock eqnBlock = producer.createEquationBlock(component, nonRealBlocks, createSimpleBlocks(groupComponent(realEquations), producer));
-                    
-                    // Torn blocks handles meta equations internally.
-                    for (E eqn : metaEquations) {
-                        eqnBlock.addSolvedBlock(createMetaBlock(eqn.getEquation()));
-                    }
-                    
+                    eqnBlock = producer.createEquationBlock(component, nonRealBlocks, createSimpleBlocks(groupComponent(realEquations), producer));
                     block = eqnBlock;
                 }
-                
-                for (E eqn : realEquations) {
-                    activeRealEquations.add(eqn.getEquation());
-                }
             }
             
-            block.computeJacobian(activeRealEquations, realVariables);
-            
+            if (linear) {
+                if (block.canComputeJacobian())
+                    block.computeJacobian(activeRealEquations);
+//                else
+//                   Give warning?
+            }
+            if (eqnBlock != null && !torn) {
+                // Torn blocks handles meta equations internaly!
+                for (E eqn : metaEquations) {
+                    eqnBlock.addSolvedBlock(createMetaBlock(eqn.getEquation()));
+                }
+            }
             return block;
-        }
-        
-        
-        private static Set<AbstractEquationBlock> computeActiveBlocks(EquationBlock block) {
-            // Check if an equation block is mixed, i.e., contains both continuous
-            // and discrete variables, and if it is linear in the unknowns
-            Map<FVariable, AbstractEquationBlock> varToBlockMap = new HashMap<FVariable, AbstractEquationBlock>();
-            for (AbstractEquationBlock subBlock : block.solvedRealBlocks()) {
-                for (FVariable var : subBlock.allVariables()) {
-                    varToBlockMap.put(var, subBlock);
-                }
-            }
-            Set<FVariable> iterationVariables = new HashSet<FVariable>();
-            for (FVariable var : block.localUnsolvedVariables())
-                iterationVariables.add(var);
-            Set<AbstractEquationBlock> visitedBlocks = new HashSet<AbstractEquationBlock>();
-            Set<AbstractEquationBlock> activeBlocks = new HashSet<AbstractEquationBlock>();
-            for (SimpleEquationBlock subBlock : block.unsolvedBlocks()) {
-                linearityUseCheck(subBlock, varToBlockMap, iterationVariables, visitedBlocks, activeBlocks);
-                activeBlocks.add(subBlock);
-            }
-            return activeBlocks;
         }
         
         private static boolean linearityUseCheck(AbstractEquationBlock block, Map<FVariable, AbstractEquationBlock> varToBlockMap,
                 Set<FVariable> iterationVariables, Set<AbstractEquationBlock> visitedBlocks, Set<AbstractEquationBlock> activeBlocks) {
-            if (visitedBlocks.contains(block)) {
+            if (visitedBlocks.contains(block))
                 return activeBlocks.contains(block);
-            }
             visitedBlocks.add(block);
             boolean inLoop = false;
             for (FVariable var : block.inactiveVariables()) {
@@ -270,13 +274,11 @@ aspect BLT{
                     continue;
                 }
                 AbstractEquationBlock varBlock = varToBlockMap.get(var);
-                if (varBlock != null) {
+                if (varBlock != null)
                     inLoop |= linearityUseCheck(varBlock, varToBlockMap, iterationVariables, visitedBlocks, activeBlocks);
-                }
             }
-            if (inLoop) {
+            if (inLoop)
                 activeBlocks.add(block);
-            }
             return inLoop;
         }
 
@@ -1161,19 +1163,9 @@ aspect BLT{
          * the result. This method should only be called if the block is linear.
          * This method also computes the variability of the resulting jacobian.
          */
-        public boolean computeJacobian(Set<FAbstractEquation> activeRealEquations, Set<FVariable> realVariables) {
-            boolean linear = true;
-            for (FAbstractEquation eqn : activeRealEquations) {
-                if (!eqn.checkLinearity(realVariables)) {
-                    return false;
-                }
-            }
-            
-            if (!canComputeJacobian()) {
-                // TODO: warning?
+        public boolean computeJacobian(Set<FAbstractEquation> activeRealEquations) {
+            if (!canComputeJacobian())
                 return false;
-            }
-            
             jacobian = computeJacobian(localRealBlocks(), activeRealEquations);
             variability = computeVariability(jacobian);
             return true;
