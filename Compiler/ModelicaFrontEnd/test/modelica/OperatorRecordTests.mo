@@ -1487,12 +1487,12 @@ end OperatorRecordTests.OperatorOverload29;
             description="",
             flatModel="
 fclass OperatorRecordTests.OperatorRecordConnect1
- OperatorRecordTests.Cplx c1.x;
- input OperatorRecordTests.Cplx c1.y;
- OperatorRecordTests.Cplx c2.x;
- input OperatorRecordTests.Cplx c2.y;
- OperatorRecordTests.Cplx c3.x;
- input OperatorRecordTests.Cplx c3.y;
+ potential OperatorRecordTests.Cplx c1.x;
+ flow OperatorRecordTests.Cplx c1.y;
+ potential OperatorRecordTests.Cplx c2.x;
+ flow OperatorRecordTests.Cplx c2.y;
+ potential OperatorRecordTests.Cplx c3.x;
+ flow OperatorRecordTests.Cplx c3.y;
 equation
  c1.x = c2.x;
  c2.x = c3.x;
@@ -1711,8 +1711,8 @@ end OperatorRecordTests.OperatorRecordConnect3;
             description="Connector with flow operator record without connection",
             flatModel="
 fclass OperatorRecordTests.OperatorRecordConnect4
- OperatorRecordTests.Cplx c.x;
- input OperatorRecordTests.Cplx c.y;
+ potential OperatorRecordTests.Cplx c.x;
+ flow OperatorRecordTests.Cplx c.y;
 
 public
  function OperatorRecordTests.Cplx.'0'

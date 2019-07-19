@@ -14,18 +14,18 @@
       <src_folder value="file://$MODULE_DIR$/Compiler/ModelicaCompiler/src/java" expected_position="7" />
     </src_description>
   </component>
-  <component name="NewModuleRootManager">
-    <output url="file://$MODULE_DIR$/bin" />
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/Compiler/ModelicaFrontEnd/src/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Compiler/ModelicaFrontEnd/test/junit" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/Compiler/ModelicaCompiler/src/java-generated" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/Compiler/OptimicaCompiler/src/java-generated" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/Compiler/ModelicaCompiler/src/junit-generated" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/Compiler/OptimicaCompiler/src/junit-generated" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Compiler/ModelicaCompiler/src/resources" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Compiler/ModelicaCompiler/src/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tools/eclipse/antbuild/src/generated/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tools/eclipse/antbuild/src/generated/modelica/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tools/eclipse/antbuild/src/generated/modelica/junit" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tools/eclipse/antbuild/src/generated/optimica/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tools/eclipse/antbuild/src/generated/optimica/junit" isTestSource="false" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="inheritedJdk" />
@@ -40,7 +40,7 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="junit-4.10.jar">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/ThirdParty/Junit/junit-4.10.jar!/" />
@@ -51,5 +51,6 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="library" exported="" name="junit-4.10" level="project" />
   </component>
 </module>

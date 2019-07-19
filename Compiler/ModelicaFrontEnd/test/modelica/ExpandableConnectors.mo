@@ -93,16 +93,16 @@ fclass ExpandableConnectors.Expandable2
  Real ec3.x.b;
  Real ec3.y.a;
  Real ec3.y.b;
- Real c1.a;
- input Real c1.b;
- Real c2.a;
- input Real c2.b;
- Real c3.a;
- input Real c3.b;
- Real c4.a;
- input Real c4.b;
- Real c5.a;
- input Real c5.b;
+ potential Real c1.a;
+ flow Real c1.b;
+ potential Real c2.a;
+ flow Real c2.b;
+ potential Real c3.a;
+ flow Real c3.b;
+ potential Real c4.a;
+ flow Real c4.b;
+ potential Real c5.a;
+ flow Real c5.b;
 equation
  c1.a = c3.a;
  c3.a = c5.a;
@@ -292,10 +292,10 @@ fclass ExpandableConnectors.Expandable5b
  Real ec2.a.y;
  Real ec3.a.x;
  Real ec3.a.y;
- Real c1.x = 1;
- Real c1.y = 2;
- Real c2.x;
- Real c2.y;
+ potential Real c1.x = 1;
+ potential Real c1.y = 2;
+ potential Real c2.x;
+ potential Real c2.y;
 equation
  c1.x = c2.x;
  c2.x = ec1.a.x;
@@ -658,8 +658,8 @@ end ExpandableConnectors.Expandable14;
 fclass ExpandableConnectors.Expandable15
  Real ec.a.x;
  Real ec.a.y;
- Real c.x;
- Real c.y;
+ potential Real c.x;
+ potential Real c.y;
 equation
  c.x = ec.a.x;
  c.y = ec.a.y;
@@ -964,8 +964,8 @@ fclass ExpandableConnectors.Expandable24
  Real ec.x[1].y;
  Real ec.x[2].x;
  Real ec.x[2].y;
- Real c.x;
- Real c.y;
+ potential Real c.x;
+ potential Real c.y;
 equation
  c.x = ec.x[2].x;
  c.y = ec.x[2].y;
@@ -1003,8 +1003,8 @@ fclass ExpandableConnectors.Expandable25
  Real ec.x[2].y;
  Real ec.x[3].x;
  Real ec.x[3].y;
- Real c.x;
- Real c.y;
+ potential Real c.x;
+ potential Real c.y;
 equation
  c.x = ec.x[2].x;
  c.y = ec.x[2].y;
@@ -2280,7 +2280,7 @@ end ExpandableConnectors.Nested.NestedExpandable5;
             flatModel="
 fclass ExpandableConnectors.Nested.NestedExpandable6
  Real ec.sub1.a;
- Real c1.a;
+ potential Real c1.a;
  Real c2;
 equation
  c1.a = c2;
@@ -2696,15 +2696,15 @@ model ConnectorArray1
 equation
     connect(c[1], ec.x);
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConnectorArray1",
-            description="Connecting to array of connectors",
-            flatModel="
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="ConnectorArray1",
+        description="Connecting to array of connectors",
+        flatModel="
 fclass ExpandableConnectors.ConnectorArrays.ConnectorArray1
- input Real c[1].a[1];
- input Real c[1].b;
- Real c[1].c[2];
+ flow Real c[1].a[1];
+ flow Real c[1].b;
+ potential Real c[1].c[2];
  Real ec.x.a[1];
  Real ec.x.b;
  Real ec.x.c[2];
@@ -2734,18 +2734,18 @@ model ConnectorArray2
 equation
     connect(c, ec.x);
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConnectorArray2",
-            description="Connecting to array of connectors",
-            flatModel="
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="ConnectorArray2",
+        description="Connecting to array of connectors",
+        flatModel="
 fclass ExpandableConnectors.ConnectorArrays.ConnectorArray2
- input Real c[1].a[1];
- input Real c[1].b;
- Real c[1].c[2];
- input Real c[2].a[1];
- input Real c[2].b;
- Real c[2].c[2];
+ flow Real c[1].a[1];
+ flow Real c[1].b;
+ potential Real c[1].c[2];
+ flow Real c[2].a[1];
+ flow Real c[2].b;
+ potential Real c[2].c[2];
  Real ec.x[1].a[1];
  Real ec.x[1].b;
  Real ec.x[1].c[2];
@@ -2783,21 +2783,21 @@ model ConnectorArray3
 equation
     connect(c[2:3], ec.x);
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConnectorArray3",
-            description="Connecting to array of connectors",
-            flatModel="
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="ConnectorArray3",
+        description="Connecting to array of connectors",
+        flatModel="
 fclass ExpandableConnectors.ConnectorArrays.ConnectorArray3
- input Real c[1].a[1];
- input Real c[1].b;
- Real c[1].c[2];
- input Real c[2].a[1];
- input Real c[2].b;
- Real c[2].c[2];
- input Real c[3].a[1];
- input Real c[3].b;
- Real c[3].c[2];
+ flow Real c[1].a[1];
+ flow Real c[1].b;
+ potential Real c[1].c[2];
+ flow Real c[2].a[1];
+ flow Real c[2].b;
+ potential Real c[2].c[2];
+ flow Real c[3].a[1];
+ flow Real c[3].b;
+ potential Real c[3].c[2];
  Real ec.x[1].a[1];
  Real ec.x[1].b;
  Real ec.x[1].c[2];
@@ -2836,18 +2836,18 @@ equation
     connect(c1, ec.x[1]);
     connect(c2, ec.x[3]);
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConnectorArray4",
-            description="Connecting to array of connectors",
-            flatModel="
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="ConnectorArray4",
+        description="Connecting to array of connectors",
+        flatModel="
 fclass ExpandableConnectors.ConnectorArrays.ConnectorArray4
- input Real c1.a[1];
- input Real c1.b;
- Real c1.c[2];
- input Real c2.a[1];
- input Real c2.b;
- Real c2.c[2];
+ flow Real c1.a[1];
+ flow Real c1.b;
+ potential Real c1.c[2];
+ flow Real c2.a[1];
+ flow Real c2.b;
+ potential Real c2.c[2];
  Real ec.x[1].a[1];
  Real ec.x[1].b;
  Real ec.x[1].c[2];
@@ -2893,18 +2893,18 @@ model ConnectorArray5
 equation
     connect(ec.x, c);
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConnectorArray5",
-            description="Structural parameters in connector",
-            flatModel="
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="ConnectorArray5",
+        description="Structural parameters in connector",
+        flatModel="
 fclass ExpandableConnectors.ConnectorArrays.ConnectorArray5
  structural parameter Integer c[1].n = 2 /* 2 */;
- input Real c[1].a[2];
- Real c[1].b[2];
+ flow Real c[1].a[2];
+ potential Real c[1].b[2];
  structural parameter Integer c[2].n = 3 /* 3 */;
- input Real c[2].a[3];
- Real c[2].b[3];
+ flow Real c[2].a[3];
+ potential Real c[2].b[3];
  structural parameter Integer ec.x[1].n = 2 /* 2 */;
  Real ec.x[1].a[2];
  Real ec.x[1].b[2];
@@ -2939,18 +2939,18 @@ equation
     connect(c1, ec.x[1]);
     connect(c2, ec.x[3]);
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ConnectorArray6",
-            description="Array of stream connectors, with gap",
-            flatModel="
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="ConnectorArray6",
+        description="Array of stream connectors, with gap",
+        flatModel="
 fclass ExpandableConnectors.ConnectorArrays.ConnectorArray6
- input Real c1.a;
- Real c1.b;
- Real c1.c;
- input Real c2.a;
- Real c2.b;
- Real c2.c;
+ flow Real c1.a;
+ stream Real c1.b;
+ potential Real c1.c;
+ flow Real c2.a;
+ stream Real c2.b;
+ potential Real c2.c;
  Real ec.x[1].a;
  Real ec.x[1].b;
  Real ec.x[1].c;

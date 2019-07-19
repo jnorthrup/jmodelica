@@ -137,6 +137,10 @@ aspect FlatteningAccess {
         return res;
     }
 
+    public FAccess InstGlobalAccess.flatten(Flattener f) {
+        return getInstAccess().flatten(f);
+    }
+
     syn FAccess InstAccess.getFAccess() {
         throw new InternalCompilerError("getFAccess() not implemented for class '" + getClass().getName() + "'");
     }
