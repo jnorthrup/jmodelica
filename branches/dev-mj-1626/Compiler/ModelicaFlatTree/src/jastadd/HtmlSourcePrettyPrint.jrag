@@ -275,7 +275,7 @@ aspect HtmlSourcePrettyPrint {
 		}
 	}
 	
-	public static String ASTNode.cropAbsolutePath(String path){
+	private static String BaseNode.cropAbsolutePath(String path){
 		String p = path;
 		String dir = System.getProperty("user.dir");
 		try {

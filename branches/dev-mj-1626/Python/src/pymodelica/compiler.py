@@ -332,7 +332,7 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
     cmd.append(_get_separate_JVM())
     
     cmd.append('-cp')
-    cmd.append(pym.environ['COMPILER_JARS'] + os.pathsep + os.path.join(pym.environ['BEAVER_PATH'],'beaver-rt.jar'))
+    cmd.append(pym.environ['COMPILER_JARS'])
     
     for jvm_arg in pym.environ['JVM_ARGS'].split() + jvm_args.split():
         cmd.append(jvm_arg)

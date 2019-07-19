@@ -606,11 +606,12 @@ aspect InstanceErrorCheck {
     // We don't want to error check an entire model, just the classes
     //   that are used. 
     public void InstProgramRoot.checkErrorsInInstClass(String className, ErrorCheckType checkType) throws ModelicaClassNotFoundException {
-        InstLookupResult<InstClassDecl> icd = lookupInstClassQualified(className);
-        if (icd.successful()) 
-            icd.target().errorCheck(checkType);
-        else
+        InstClassDecl icd = instantiateModel(className);
+        if (!icd.isUnknown()) {
+            icd.errorCheck(checkType);
+        } else {
             throw new ModelicaClassNotFoundException(className);
+        }
     }
 
     public void InstClassDecl.checkErrorsInModelInstance(String className, ErrorCheckType checkType) throws ModelicaClassNotFoundException {

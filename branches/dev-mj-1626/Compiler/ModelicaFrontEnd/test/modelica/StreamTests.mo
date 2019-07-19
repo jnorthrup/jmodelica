@@ -230,12 +230,16 @@ equation
             eliminate_alias_variables=false,
             flatModel="
 fclass StreamTests.StreamTest6
- input Real d.a;
- constant Real d.b[1] = 1.0;
- constant Real d.b[2] = 2.0;
- constant Real d.c = 0;
+ flow Real d.a;
+ stream Real d.b[1];
+ stream Real d.b[2];
+ potential Real d.c;
  constant Real f[1] = 1;
  constant Real f[2] = 2;
+equation
+ 1.0 = d.b[1];
+ 2.0 = d.b[2];
+ d.c = 0;
 end StreamTests.StreamTest6;
 ")})));
 end StreamTest6;
@@ -270,9 +274,9 @@ fclass StreamTests.StreamTest7
  Real f.e.a;
  Real f.e.b;
  Real f.e.c;
- input Real g.a;
- Real g.b;
- Real g.c;
+ flow Real g.a;
+ stream Real g.b;
+ potential Real g.c;
  Real h;
 equation
  h = g.b;
@@ -581,9 +585,9 @@ fclass StreamTests.StreamN1M1
  Real a.c.p;
  Real a.c.f;
  Real a.c.s;
- Real c.p;
- input Real c.f;
- Real c.s;
+ potential Real c.p;
+ flow Real c.f;
+ stream Real c.s;
  Real x1;
  Real x2;
 equation
@@ -771,9 +775,9 @@ fclass StreamTests.StreamN2M1
  Real a2.c.p;
  Real a2.c.f;
  Real a2.c.s;
- Real c.p;
- input Real c.f;
- Real c.s;
+ potential Real c.p;
+ flow Real c.f;
+ stream Real c.s;
  Real x1;
  Real x2;
  Real x3;
@@ -845,12 +849,12 @@ fclass StreamTests.StreamN1M2
  Real a.c.p;
  Real a.c.f;
  Real a.c.s;
- Real c1.p;
- input Real c1.f;
- Real c1.s;
- Real c2.p;
- input Real c2.f;
- Real c2.s;
+ potential Real c1.p;
+ flow Real c1.f;
+ stream Real c1.s;
+ potential Real c2.p;
+ flow Real c2.f;
+ stream Real c2.s;
  Real x1;
  Real x2;
  Real x3;
@@ -1034,12 +1038,12 @@ fclass StreamTests.StreamN2M2
  Real a2.c.p;
  Real a2.c.f;
  Real a2.c.s;
- Real c1.p;
- input Real c1.f;
- Real c1.s;
- Real c2.p;
- input Real c2.f;
- Real c2.s;
+ potential Real c1.p;
+ flow Real c1.f;
+ stream Real c1.s;
+ potential Real c2.p;
+ flow Real c2.f;
+ stream Real c2.s;
  Real x1;
  Real x2;
  Real x3;
@@ -1135,12 +1139,12 @@ fclass StreamTests.StreamMinMax3
  Real a2.c.p;
  Real a2.c.f(min = -1);
  Real a2.c.s;
- Real c1.p;
- input Real c1.f(max = -1);
- Real c1.s;
- Real c2.p;
- input Real c2.f(max = 1);
- Real c2.s;
+ potential Real c1.p;
+ flow Real c1.f(max = -1);
+ stream Real c1.s;
+ potential Real c2.p;
+ flow Real c2.f(max = 1);
+ stream Real c2.s;
  Real x1;
  Real x2;
  Real _stream_s_1;
@@ -1208,12 +1212,12 @@ fclass StreamTests.StreamMinMax4
  Real a2.c.p;
  Real a2.c.f(min = -1);
  Real a2.c.s;
- Real c1.p;
- input Real c1.f(max = -1);
- Real c1.s;
- Real c2.p;
- input Real c2.f(max = -1);
- Real c2.s;
+ potential Real c1.p;
+ flow Real c1.f(max = -1);
+ stream Real c1.s;
+ potential Real c2.p;
+ flow Real c2.f(max = -1);
+ stream Real c2.s;
  Real x1;
  Real x2;
 equation
@@ -1265,12 +1269,12 @@ fclass StreamTests.StreamMinMax5
  Real a2.c.p;
  Real a2.c.f(min = 1);
  Real a2.c.s;
- Real c1.p;
- input Real c1.f(max = -1);
- Real c1.s;
- Real c2.p;
- input Real c2.f(max = 1);
- Real c2.s;
+ potential Real c1.p;
+ flow Real c1.f(max = -1);
+ stream Real c1.s;
+ potential Real c2.p;
+ flow Real c2.f(max = 1);
+ stream Real c2.s;
  Real x1;
  Real x2;
 equation
@@ -1903,12 +1907,12 @@ fclass StreamTests.StreamWithConst2
  constant Real a2.c.p = 4.0;
  Real a2.c.f;
  constant Real a2.c.s = 2;
- constant Real c1.p = 4.0;
- input Real c1.f;
- Real c1.s;
- constant Real c2.p = 4.0;
- input Real c2.f;
- Real c2.s;
+ potential Real c1.p;
+ flow Real c1.f;
+ stream Real c1.s;
+ potential Real c2.p;
+ flow Real c2.f;
+ stream Real c2.s;
  Real x1;
  Real x2;
  Real _stream_s_1;
@@ -1930,6 +1934,8 @@ fclass StreamTests.StreamWithConst2
  Real _stream_positiveMax_9;
 equation
  1.0 + a2.c.f - c1.f - c2.f = 0.0;
+ 4.0 = c1.p;
+ c1.p = c2.p;
  c1.s = (_stream_positiveMax_1 * 2.0 + _stream_positiveMax_2 * c2.s) / (_stream_positiveMax_1 + _stream_positiveMax_2);
  c2.s = (_stream_positiveMax_3 * 2.0 + _stream_positiveMax_4 * c1.s) / (_stream_positiveMax_3 + _stream_positiveMax_4);
  x1 = (_stream_positiveMax_5 * 2.0 + _stream_positiveMax_6 * c1.s + _stream_positiveMax_7 * c2.s) / (_stream_positiveMax_5 + _stream_positiveMax_6 + _stream_positiveMax_7);
@@ -1992,18 +1998,18 @@ fclass StreamTests.StreamWithConst3
  Real a2[2].c.p;
  Real a2[2].c.f;
  Real a2[2].c.s;
- constant Real c1[1].p = 3.0;
- input Real c1[1].f;
- Real c1[1].s;
- Real c1[2].p;
- input Real c1[2].f;
- Real c1[2].s;
- constant Real c2[1].p = 3.0;
- input Real c2[1].f;
- Real c2[1].s;
- Real c2[2].p;
- input Real c2[2].f;
- Real c2[2].s;
+ potential Real c1[1].p;
+ flow Real c1[1].f;
+ stream Real c1[1].s;
+ potential Real c1[2].p;
+ flow Real c1[2].f;
+ stream Real c1[2].s;
+ potential Real c2[1].p;
+ flow Real c2[1].f;
+ stream Real c2[1].s;
+ potential Real c2[2].p;
+ flow Real c2[2].f;
+ stream Real c2[2].s;
  Real x1[1];
  Real x1[2];
  Real x2[1];
@@ -2047,6 +2053,8 @@ fclass StreamTests.StreamWithConst3
  Real _stream_positiveMax_21;
 equation
  1.0 + a2[1].c.f - c1[1].f - c2[1].f = 0.0;
+ 3.0 = c1[1].p;
+ c1[1].p = c2[1].p;
  c1[1].s = (_stream_positiveMax_1 * 5.0 + _stream_positiveMax_2 * c2[1].s) / (_stream_positiveMax_1 + _stream_positiveMax_2);
  c2[1].s = (_stream_positiveMax_3 * 5.0 + _stream_positiveMax_4 * c1[1].s) / (_stream_positiveMax_3 + _stream_positiveMax_4);
  a1[2].c.f + a2[2].c.f - c1[2].f - c2[2].f = 0.0;

@@ -1,8 +1,9 @@
 package org.jmodelica.junit;
 
-import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLDecoder;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.jmodelica.util.exceptions.InternalCompilerError;
 
@@ -18,7 +19,7 @@ public class Util {
      * @param name  The name of the sought resource.
      * @return  the path to the resource.
      */
-    public static String resource(Object test, String name) {
+    public static Path resource(Object test, String name) {
         return resource(test.getClass(), name);
     }
 
@@ -29,17 +30,15 @@ public class Util {
      * @param name  The name of the sought resource.
      * @return  the path to the resource.
      */
-    public static String resource(Class<?> clazz, String name) {
+    public static Path resource(Class<?> clazz, String name) {
         try {
             URL url = clazz.getResource(name);
             if (url == null) {
                 throw new InternalCompilerError("Could not resolve url for resource \"" + name +
                         "\" from the class \"" + clazz.getSimpleName() + "\".");
             }
-
-            // This ensures that spaces are encoded correctly!
-            return URLDecoder.decode(url.getPath(), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
+            return Paths.get(url.toURI());
+        } catch (URISyntaxException e) {
             throw new InternalCompilerError("Unable to decode loaded resource URL; " + e.getMessage(), e);
         }
     }
