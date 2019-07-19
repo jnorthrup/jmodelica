@@ -20,26 +20,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 
 #include "jni.h"
-#include "jccexception.h"
 #include "RefCountedNode.hpp"
-#include "java/util/Collection.h"
-#include "java/util/Iterator.h"
-#include "java/lang/String.h"
-#include "JCCEnv.h"
 #include "org/jmodelica/common/options/OptionRegistry.h"
 #include "org/jmodelica/modelica/compiler/ModelicaCompiler.h"
 #include "org/jmodelica/modelica/compiler/generated/CompileOptions.h"
 #include "org/jmodelica/optimica/compiler/ModelicaCompiler.h"
 #include "org/jmodelica/optimica/compiler/generated/CompileOptions.h"
 
-::java::lang::String StringFromUTF(const char *bytes);
-
 namespace ModelicaCasADi
 {
-template<class TCompiler, class TOptions>
-class CompilerOptionsWrapper: public RefCountedNode {
+// One wrapper class for each compiler.
+// Templating these classes to reduce code duplication does not work well with SWIG.
+
+class ModelicaOptionsWrapper : public RefCountedNode {
+    protected:
+        org::jmodelica::modelica::compiler::generated::CompileOptions optr;
+
     public:
-        CompilerOptionsWrapper() : optr(TCompiler::createOptions()) {}
+        ModelicaOptionsWrapper() : optr(org::jmodelica::modelica::compiler::ModelicaCompiler::createOptions()) {}
         void setStringOption(std::string opt, std::string val);
         void setBooleanOption(std::string opt, bool val);
         void setIntegerOption(std::string opt, int val);
@@ -50,96 +48,37 @@ class CompilerOptionsWrapper: public RefCountedNode {
         void printCompilerOptions(std::ostream& out);
         void printOpts() {printCompilerOptions(std::cout);}
 
-        TOptions getOptionRegistry() { return optr; }
+        org::jmodelica::modelica::compiler::generated::CompileOptions getOptionRegistry() { return optr; }
 
+        /** Allows the use of the operator << to print this class to a stream, through Printable */
+        virtual void print(std::ostream& os) const;
+
+        MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
+};
+
+class OptimicaOptionsWrapper : public RefCountedNode {
     protected:
-        TOptions optr;
-};
-
-class ModelicaOptionsWrapper : public CompilerOptionsWrapper<org::jmodelica::modelica::compiler::ModelicaCompiler,
-        org::jmodelica::modelica::compiler::generated::CompileOptions> {
+        org::jmodelica::optimica::compiler::generated::CompileOptions optr;
 
     public:
+        OptimicaOptionsWrapper() : optr(org::jmodelica::optimica::compiler::ModelicaCompiler::createOptions()) {}
+        void setStringOption(std::string opt, std::string val);
+        void setBooleanOption(std::string opt, bool val);
+        void setIntegerOption(std::string opt, int val);
+        void setRealOption(std::string opt, double val);
+
+        bool getBooleanOption(std::string opt);
+
+        void printCompilerOptions(std::ostream& out);
+        void printOpts() {printCompilerOptions(std::cout);}
+
+        org::jmodelica::optimica::compiler::generated::CompileOptions getOptionRegistry() { return optr; }
+
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
 };
-
-class OptimicaOptionsWrapper : public CompilerOptionsWrapper<org::jmodelica::optimica::compiler::ModelicaCompiler,
-        org::jmodelica::optimica::compiler::generated::CompileOptions> {
-
-    public:
-        /** Allows the use of the operator << to print this class to a stream, through Printable */
-        virtual void print(std::ostream& os) const;
-
-        MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
-};
-
-template<class TCompiler, class TOptions>
-bool CompilerOptionsWrapper<TCompiler, TOptions>::getBooleanOption(std::string opt) {
-    bool roption;
-    try {
-        roption = optr.getBooleanOption(StringFromUTF(opt.c_str()));
-    } catch (JavaError e) {
-        rethrowJavaException(e);
-    }
-    return roption;
-}
-
-template<class TCompiler, class TOptions>
-void CompilerOptionsWrapper<TCompiler, TOptions>::setStringOption(std::string opt, std::string val) {
-    try {
-        optr.setStringOption(StringFromUTF(opt.c_str()), StringFromUTF(val.c_str()));
-    } catch (JavaError e) {
-        rethrowJavaException(e);
-    }
-}
-
-template<class TCompiler, class TOptions>
-void CompilerOptionsWrapper<TCompiler, TOptions>::setBooleanOption(std::string opt, bool val) {
-    try {
-        optr.setBooleanOption(StringFromUTF(opt.c_str()), val);
-    } catch (JavaError e) {
-        rethrowJavaException(e);
-    }
-}
-
-template<class TCompiler, class TOptions>
-void CompilerOptionsWrapper<TCompiler, TOptions>::setIntegerOption(std::string opt, int val) {
-    try {
-        optr.setIntegerOption(StringFromUTF(opt.c_str()), val);
-    } catch (JavaError e) {
-        rethrowJavaException(e);
-    }
-}
-
-template<class TCompiler, class TOptions>
-void CompilerOptionsWrapper<TCompiler, TOptions>::setRealOption(std::string opt, double val) {
-    try {
-        optr.setRealOption(StringFromUTF(opt.c_str()), val);
-    } catch (JavaError e) {
-        rethrowJavaException(e);
-    }
-}
-
-template<class TCompiler, class TOptions>
-void CompilerOptionsWrapper<TCompiler, TOptions>::printCompilerOptions(std::ostream& out){
-    try {
-        java::util::Collection opts(optr.getOptionKeys().this$);
-
-        java::util::Iterator iter(opts.iterator().this$);
-        while(iter.hasNext()){
-            java::lang::String key(iter.next().this$);
-            out <<"\033[31m"<<env->toString(key.this$) <<"\033[0m"<< ": ";
-            out << env->toString(optr.getDescription(key).this$);
-            out << "\n";
-        }
-
-    } catch (JavaError e) {
-        rethrowJavaException(e);
-    }
-}
 
 }; // End namespace
 #endif

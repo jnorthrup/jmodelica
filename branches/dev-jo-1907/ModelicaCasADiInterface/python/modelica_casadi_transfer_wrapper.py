@@ -188,7 +188,7 @@ def _get_options_optimica(compiler_options):
 
 def _get_options(compiler_options, options_wrapper):
     """
-    Generate an instance of the CompilerOptionsWrapper class
+    Initialize an instance of the ModelicaOptionsWrapper or OptimicaOptionsWrapper
     for ModelicaCasADi. 
 
     Note that MODELICAPATH is set to the standard for this
@@ -202,7 +202,7 @@ def _get_options(compiler_options, options_wrapper):
 
     Returns::
 
-        CompilerOptionsWrapper --
+        The initialized options_wrapper argument. --
             
     """
     if not compiler_options.has_key("MODELICAPATH"):
