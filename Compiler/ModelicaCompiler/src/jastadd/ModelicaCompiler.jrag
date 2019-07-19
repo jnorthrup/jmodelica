@@ -158,8 +158,7 @@ public class ModelicaCompiler implements LogContainer {
     protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<>();
     protected LinkedList<CompilationHooks> hooksList = new LinkedList<>(globalHooksList);
 
-    protected static LinkedList<CompilationStartListener> globalCompilationStartListeners = new LinkedList<>();
-    protected LinkedList<CompilationStartListener> compilationStartListeners = new LinkedList<>(globalCompilationStartListeners);
+    protected static LinkedList<CompilationStartListener> compilationStartListeners = new LinkedList<>();
     
     protected File tempDir = null;
     protected File outDir = null;
@@ -225,8 +224,8 @@ public class ModelicaCompiler implements LogContainer {
         hooksList.remove(hooks);
     }
 
-    public static <T extends CompilationStartListener> T addGlobalCompilationStartListener(T listener) {
-        globalCompilationStartListeners.add(listener);
+    public static <T extends CompilationStartListener> T addCompilationStartListener(T listener) {
+        compilationStartListeners.add(listener);
         return listener;
     }
 
@@ -247,7 +246,7 @@ public class ModelicaCompiler implements LogContainer {
     /**
      * Notifies compilation start listeners that compilation will start.
      */
-    protected void notifyCompilationStart(ModelicaCompiler mc) {
+    protected static void notifyCompilationStart(ModelicaCompiler mc) {
         for (CompilationStartListener listener : compilationStartListeners) {
             listener.onCompileStart(mc);
         }
