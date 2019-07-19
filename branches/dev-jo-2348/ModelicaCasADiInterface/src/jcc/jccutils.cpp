@@ -7,14 +7,20 @@
 
 using namespace java::lang;
 
-void describeAndClearJavaException(JavaError e) {
+const char* describeAndClearJavaException(JavaError e) {
     std::cout << "Java error occurred: " << std::endl;
-    describeJavaException(); clearJavaException();
+    vm_env->ExceptionDescribe();
+    jboolean isCopy = false;
+    jthrowable exception = vm_env->ExceptionOccurred();
+    jmethodID toString = vm_env->GetMethodID(vm_env->FindClass("java/lang/Object"), "toString", "()Ljava/lang/String;");
+    jstring s = (jstring) vm_env->CallObjectMethod(exception, toString);
+    const char* utf = vm_env->GetStringUTFChars(s, &isCopy);
+    vm_env->ExceptionClear();
+    return utf;
 }
 
 void rethrowJavaException(JavaError e) {
-    describeAndClearJavaException(e);
-    throw std::runtime_error("a java error occurred; details were printed");
+    throw std::runtime_error(describeAndClearJavaException(e));
 }
 
 jstring fromUTF(const char *bytes) {

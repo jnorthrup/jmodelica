@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8.6)
 project(ModelicaCasADi CXX)
 
 
+set_property(GLOBAL PROPERTY RULE_MESSAGES OFF)
+
 set(Python_ADDITIONAL_VERSIONS 2.7 2.6 2.5 2.4)
 
 if(" ${CMAKE_CXX_FLAGS} " MATCHES " -m64 " AND CMAKE_HOST_WIN32)
