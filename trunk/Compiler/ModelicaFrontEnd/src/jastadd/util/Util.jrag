@@ -1421,7 +1421,7 @@ aspect ComponentDeclMethods {
     syn boolean InstComponentDecl.isTopLevel() = isInTopLevel();
 
     inh boolean InstComponentDecl.isInTopLevel();
-    eq InstComponentDecl.getChild().isInTopLevel() = (isAssignable() || isConnector()) && isInTopLevel();
+    eq InstComponentDecl.getChild().isInTopLevel() = (isAssignable() || isConnector()) && isTopLevel();
     eq InstClassDecl.getChild().isInTopLevel()     = true;
     eq Root.getChild().isInTopLevel()              = false;
 
