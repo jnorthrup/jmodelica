@@ -67,6 +67,9 @@
     <property name="beaver-rt_jar" value="${beaver_dir}/lib/beaver-rt.jar"/>
     <property name="ant-contrib_dir" value="${base.dir}/../ThirdParty/Ant-Contrib/ant-contrib-1.0b3" />
 
+    <!-- Used in jar manifest to find thirdparties -->
+    <property name="thirdparty_install_dir" value="../ThirdParty"/>
+    
     <property name="extra_modules" value="" />
 
     <property name="timestamp_format" value="yyyyDDDHHmmssSSS"/>
@@ -423,7 +426,7 @@
                     <for list="${@{module}.thirdparty.jars}" param="jar">
                         <sequential>
                             <var name="thirdparty_jars_build_temp" value="${thirdparty_jars_build_temp}:${@{module}.path}/ThirdParty/@{jar}" />
-                            <var name="thirdparty_jars_manifest_temp" value="${thirdparty_jars_manifest_temp} ../ThirdParty/@{jar}" />
+                            <var name="thirdparty_jars_manifest_temp" value="${thirdparty_jars_manifest_temp} ${thirdparty_install_dir}/@{jar}" />
                         </sequential>
                     </for>
                 </then>
