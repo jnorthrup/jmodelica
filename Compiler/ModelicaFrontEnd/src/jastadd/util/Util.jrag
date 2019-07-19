@@ -1569,6 +1569,14 @@ aspect ClassDeclMethods {
         return false;
     }
 
+    /**
+     * check if this node has a SrcLibNode as parent
+     */
+    inh boolean SrcClassDecl.isLib();
+    eq SourceRoot.getChild().isLib() = false;
+    eq SrcLibNode.getChild().isLib() = true;
+    eq SrcFullClassDecl.getChild().isLib() = false;
+
     syn boolean SrcClassDecl.isLibNode() = false;
     eq SrcLibNode.isLibNode()            = true;
 }
