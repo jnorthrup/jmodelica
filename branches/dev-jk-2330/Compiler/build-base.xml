@@ -67,6 +67,9 @@
     <property name="beaver-rt_jar" value="${beaver_dir}/lib/beaver-rt.jar"/>
     <property name="ant-contrib_dir" value="${base.dir}/../ThirdParty/Ant-Contrib/ant-contrib-1.0b3" />
 
+    <!-- Used in jar manifest to find thirdparties -->
+    <property name="thirdparty_install_dir" value="../ThirdParty"/>
+    
     <property name="extra_modules" value="" />
 
     <property name="timestamp_format" value="yyyyDDDHHmmssSSS"/>
@@ -413,8 +416,28 @@
     <propertyregex property="test_helper_packages" input="${test_helper_packages_temp}" regexp="^," replace="" defaultvalue="" />
     <propertyregex property="test_helper_dirs" input="${test_helper_dirs_temp}" regexp="^:" replace="" defaultvalue="" />
     
+    <var name="thirdparty_jars_build_temp" value="" />
+    <var name="thirdparty_jars_manifest_temp" value="" />
+    <for list="${modules}" param="module">
+        <sequential>
+            <if>
+                <isset property="@{module}.thirdparty.jars" />
+                <then>
+                    <for list="${@{module}.thirdparty.jars}" param="jar">
+                        <sequential>
+                            <var name="thirdparty_jars_build_temp" value="${thirdparty_jars_build_temp}:${@{module}.path}/ThirdParty/@{jar}" />
+                            <var name="thirdparty_jars_manifest_temp" value="${thirdparty_jars_manifest_temp} ${thirdparty_install_dir}/@{jar}" />
+                        </sequential>
+                    </for>
+                </then>
+            </if>
+        </sequential>
+    </for>
+    <property name="thirdparty_jars_build" value="${thirdparty_jars_build_temp}" />
+    <property name="thirdparty_jars_manifest" value="${thirdparty_jars_manifest_temp}" />
+    
     <!-- calculate sets of jar files, and set of java files to compile for them -->
-    <var name="compiler_jars_temp" value="${beaver-rt_jar}" />
+    <var name="compiler_jars_temp" value="${thirdparty_jars_build}" />
     <var name="compile_java_patterns_temp" value="" />
     <for list="${jars}" param="jar">
         <sequential>
@@ -428,9 +451,16 @@
     <propertyregex property="compile_java_patterns_temp3" input="${compile_java_patterns_temp2}" regexp="," replace="/**/*.java," defaultvalue="${compile_java_patterns_temp2}" />
     <propertyregex property="compile_java_patterns" input="${compile_java_patterns_temp3}" regexp=",$" replace="" defaultvalue="" />
     
+    <property name="manifest" value="${compiler_build}/MANIFEST.MF" />
+    <target name="manifest">
+    <!-- Syntax is important in the manifest file -->
+    <echo file="${manifest}">Class-Path:${thirdparty_jars_manifest}
+</echo>
+    <echo>Generated jar manifest: ${manifest}</echo>
+    </target>
     
     <!-- Build compiler jars. -->
-    <target name="build" depends="compile-ast" description="Build all jars needed by compiler.">
+    <target name="build" depends="compile-ast,manifest,options" description="Build all jars needed by compiler.">
         <mkdir dir="${jar_output}" />
         <for list="${jars}" param="jar">
             <sequential>
@@ -459,7 +489,7 @@
                                 </if>
                             </sequential>
                         </for>
-                        <jar destfile="${jar_output}/@{jar}.jar">
+                        <jar destfile="${jar_output}/@{jar}.jar" manifest="${manifest}">
                             <fileset dir="${class_output}" includes="${build_file_patterns}" />
                             <fileset dir="${resources_temp}" />
                         </jar>
@@ -558,7 +588,7 @@
                     <if>
                         <isset property="@{module}.@{generate}"/>
                         <then>
-                            <javac  classpath="${beaver-rt_jar}" 
+                            <javac  classpath="${thirdparty_jars_build}" 
                                     srcdir="${java_dirs}:${@{module}.java_path}" 
                                     compiler="${java_compiler}" 
                                     source="${java_version}" 
@@ -587,7 +617,7 @@
     <target name="compile-ast" depends="gen">
         <mkdir dir="${class_output}" />
         <javac 
-            classpath="${beaver-rt_jar}" 
+            classpath="${thirdparty_jars_build}" 
             compiler="${java_compiler}" 
             source="${java_version}" 
             target="${java_version}" 
@@ -618,7 +648,7 @@
                     destdir="${javadoc_output}" 
                     packagenames="${javadoc.packages}" 
                     excludepackagenames="${test_helper_packages}" 
-                    classpath="${beaver-rt_jar}" />
+                    classpath="${thirdparty_jars_build}" />
             </then>
         </if>
     </target>
@@ -699,7 +729,7 @@
                                 <isset property="@{module}.patch.uptodate" />
                             </and></not>
                             <then>
-                                <java classpath="${class_output}:${beaver-rt_jar}" 
+                                <java classpath="${class_output}:${thirdparty_jars_build}" 
                                         classname="${@{module}.patch}" failonerror="true">
                                     <arg line="${ast_output}" />
                                 </java>
@@ -729,7 +759,7 @@
                             </uptodate>
                             -->
                             <mkdir dir="${@{module}.@{gen-extra}.gen_path}" />
-                            <java classpath="${build_class_output}:${beaver-rt_jar}" 
+                            <java classpath="${build_class_output}:${thirdparty_jars_build}" 
                                     classname="${@{module}.@{generate}}" failonerror="true">
                                 <arg value="${@{module}.@{gen-extra}.gen_path}" />
                                 <arg value="${@{module}.package.@{generated}}" />
@@ -1114,6 +1144,15 @@ ${test_class_extra_defs}
                 srcdir="${junit_output}:${test_helper_dirs}:${junit_dirs}"/>
     </target>
 
+    <target name="options">
+        <java classpath="${class_output}:${thirdparty_jars_build}" 
+                classname="org.jmodelica.${sub_package}.compiler.OptionExporter" failonerror="true">
+            <arg value="-x" />
+            <arg value="${compiler_build}/DefaultOptions.xml" />
+        </java>
+        <echo>Exported options to: ${compiler_build}/DefaultOptions.xml</echo>
+    </target>
+    
     <!-- Run all generated JUnit tests. -->
     <target name="test" depends="build-test" description="Run all generated JUnit tests.">
         <mkdir dir="${test_output}" />

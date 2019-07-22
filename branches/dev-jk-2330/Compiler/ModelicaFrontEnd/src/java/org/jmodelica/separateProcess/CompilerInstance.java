@@ -64,7 +64,7 @@ public class CompilerInstance {
             throw new IllegalArgumentException("JMODELICA_HOME does not point to a valid jmodelica installation!");
         }
         setJavaHome(System.getProperty("java.home"));
-        setClassPath(joinPath(jmodelicaHome, "lib", "ModelicaCompiler.jar"), joinPath(jmodelicaHome, "lib", "OptimicaCompiler.jar"), joinPath(jmodelicaHome, "lib", "util.jar"), joinPath(jmodelicaHome, "ThirdParty", "Beaver", "lib", "beaver-rt.jar"));
+        setClassPath(joinPath(jmodelicaHome, "lib", "ModelicaCompiler.jar"), joinPath(jmodelicaHome, "lib", "OptimicaCompiler.jar"), joinPath(jmodelicaHome, "lib", "util.jar"));
         setTarget("cs");
         setModelicaPath(joinPath(jmodelicaHome, "ThirdParty", "MSL"));
         setLog("w");
