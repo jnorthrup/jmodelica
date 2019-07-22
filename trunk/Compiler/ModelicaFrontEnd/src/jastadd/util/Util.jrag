@@ -672,7 +672,7 @@ aspect FileNames {
     	
     }
     public String SrcLibNode.fileName() {
-        return getStructured() ? myPackageFile().toString() : getLoadInfo().getPath();
+        return getStructured() ? myPackageFile().getPath() : getLoadInfo().getPath();
     }
     public String InstLibNode.fileName() {
         return actualInstClass().fileName();
