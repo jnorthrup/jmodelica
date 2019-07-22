@@ -472,10 +472,10 @@
                     </sequential>
                 </for>
                 <propertyregex property="build_file_patterns" input="${build_file_patterns_temp}" regexp="^," replace="" override="true" />
+                <mkdir dir="${resources_temp}" />
                 <if>
                     <istrue value="${@{jar}.jar.include_resources}" />
                     <then>
-                        <mkdir dir="${resources_temp}" />
                         <for list="${modules}" param="module">
                             <sequential>
                                 <if>
@@ -489,18 +489,13 @@
                                 </if>
                             </sequential>
                         </for>
-                        <jar destfile="${jar_output}/@{jar}.jar" manifest="${manifest}">
-                            <fileset dir="${class_output}" includes="${build_file_patterns}" />
-                            <fileset dir="${resources_temp}" />
-                        </jar>
-                        <delete dir="${resources_temp}" />
                     </then>
-                    <else>
-                        <jar destfile="${jar_output}/@{jar}.jar">
-                            <fileset dir="${class_output}" includes="${build_file_patterns}" />
-                        </jar>
-                    </else>
                 </if>
+                <jar destfile="${jar_output}/@{jar}.jar" manifest="${manifest}">
+                    <fileset dir="${class_output}" includes="${build_file_patterns}" />
+                    <fileset dir="${resources_temp}" />
+                </jar>
+                <delete dir="${resources_temp}" />
             </sequential>
         </for>
     </target>
