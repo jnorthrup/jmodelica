@@ -28,9 +28,7 @@ import javax.swing.JTree;
 import javax.swing.filechooser.FileFilter;
 
 public class SizeTree extends JFrame {
-    private static final long serialVersionUID = 1L;
-
-    public SizeTree(String file) throws IOException {
+	public SizeTree(String file) throws IOException {
 		super("Profiler size file viewer - " + file);
 		SizeNode data = SizeNode.readTree(file);
 		JTree tree = new JTree(data);

@@ -773,7 +773,7 @@ aspect Flattening {
         InstClassDecl func = surroundingInstClass();
         FExternalStmt stmt = new FExternalStmt();
         SrcClassDecl scd = myTopSrcClassDecl();
-        stmt.setLibTopPackagePath(scd == null ? "" : scd.myLibRootPath().toAbsolutePath().toString()); // scd is null for builtins
+        stmt.setLibTopPackagePath(scd == null ? "" : scd.myLibRootPath().getAbsolutePath()); // scd is null for builtins
         stmt.setFExternalLanguage(hasFExternalLanguage() ? 
                 (FExternalLanguage) getFExternalLanguage().fullCopy() : 
                 new FCExternalLanguage());

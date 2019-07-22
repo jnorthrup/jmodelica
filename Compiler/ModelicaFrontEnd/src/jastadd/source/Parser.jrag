@@ -78,28 +78,25 @@ aspect Parsers {
         SourceRoot sr = new SourceRoot(new Program());
         uif.transferRoot(sr);
         for (LoadInfo loadInfo : loadInfos) {
-            Path f = loadInfo.getPathAsPath();
+            File f = new File(loadInfo.getPath());
             LoadInfo tmpInfo = loadInfo;
-            if (Files.isDirectory(f)) {
+            if (f.isDirectory()) 
                 tmpInfo = loadInfo.withPath(SrcLibNode.packageFile(f));
-            }
-            SourceRoot sr_tmp = (tmpInfo.getPathAsPath() != null) ? parseModel(uif, tmpInfo) : null;
+            SourceRoot sr_tmp = (tmpInfo.getPath() != null) ? parseModel(uif, tmpInfo) : null;
             if (!uif.getOptionRegistry().getBooleanOption("ignore_within")) {
-                Path lib = null;
-                if (sr_tmp != null && sr_tmp.isFileInLibrary()) { 
+                String lib = null;
+                if (sr_tmp != null && sr_tmp.isFileInLibrary()) 
                     lib = sr_tmp.findOutermostLibraryDir();
-                }
-                else if (SrcLibNode.isPackageFile(f)) {
+                else if (SrcLibNode.isPackageFile(f))
                     lib = f.getParent();
-                }
                 if (lib != null) {
-                    String type = Files.isDirectory(f) ? "Directory" : "File";
-                    ModelicaCompiler.log.warning("%s '%s' is part of library at '%s', using library instead.", type, loadInfo.getPath(), lib.toString());
+                    String type = f.isDirectory() ? "Directory" : "File";
+                    ModelicaCompiler.log.warning("%s '%s' is part of library at '%s', using library instead.", type, loadInfo.getPath(), lib);
                     loadInfo = loadInfo.withPath(lib);
-                    f = lib;
+                    f = new File(lib);
                 }
             }
-            if (Files.isDirectory(f)) {
+            if (f.isDirectory()) {
                 if (!sr.getProgram().getLibraryList().addLibrary(loadInfo, SrcLibNode.LoadReason.COMMANDLINE)) 
                     ModelicaCompiler.log.error(String.format("Error: The directory '%s' is not a Modelica library.", loadInfo.getPath()));
             } else {
