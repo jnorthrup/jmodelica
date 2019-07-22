@@ -33,7 +33,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 %exception {
     try {
+        bool has_env = env != NULL;
+        if (has_env) env->handlers += 1;
         $action
+        // TODO: reset handlers properly in case an exception is thrown...
+        if (has_env) env->handlers -= 1;
     } catch (const std::exception& e) {
         SWIG_exception(SWIG_RuntimeError, e.what());
     } catch (const char* e) {

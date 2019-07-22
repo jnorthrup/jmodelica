@@ -8,15 +8,37 @@
 using namespace java::lang;
 
 const char* describeAndClearJavaException(JavaError e) {
-    std::cout << "Java error occurred: " << std::endl;
-    vm_env->ExceptionDescribe();
-    jboolean isCopy = false;
-    jthrowable exception = vm_env->ExceptionOccurred();
-    jmethodID toString = vm_env->GetMethodID(vm_env->FindClass("java/lang/Object"), "toString", "()Ljava/lang/String;");
-    jstring s = (jstring) vm_env->CallObjectMethod(exception, toString);
-    const char* utf = vm_env->GetStringUTFChars(s, &isCopy);
+    jthrowable ex = vm_env->ExceptionOccurred();
+    if (ex == NULL) {
+        return "unknown Java exception (already cleared?)";
+    }
     vm_env->ExceptionClear();
-    return utf;
+    jclass swClass = vm_env->FindClass("java/io/StringWriter");
+    jmethodID swConstructor = vm_env->GetMethodID(swClass, "<init>", "()V");
+    jobject sw = vm_env->NewObject(swClass, swConstructor);
+    jclass pwClass = vm_env->FindClass("java/io/PrintWriter");
+    jmethodID pwConstructor = vm_env->GetMethodID(pwClass, "<init>", "(Ljava/io/Writer;)V");
+    jobject pw = vm_env->NewObject(pwClass, pwConstructor, sw);
+	jclass exClass = vm_env->GetObjectClass(ex);
+	jmethodID printStackTrace = vm_env->GetMethodID(exClass, "printStackTrace", "(Ljava/io/PrintWriter;)V");
+	vm_env->CallObjectMethod(ex, printStackTrace, pw);
+	jmethodID toString = vm_env->GetMethodID(swClass, "toString", "()Ljava/lang/String;");
+    std::cerr << "step10" << std::endl;
+	jstring message = (jstring) vm_env->CallObjectMethod(sw, toString);
+    std::cerr << "step11" << std::endl;
+	const char *mstr = vm_env->GetStringUTFChars(message, NULL);
+    // Keep the string so that we can print it in the exception handler.
+    // This would be a memory leak but the JVM will be shut down soon anyway.
+    //vm_env->ReleaseStringUTFChars(message, mstr);
+    vm_env->DeleteLocalRef(pw);
+    vm_env->DeleteLocalRef(pwClass);
+    vm_env->DeleteLocalRef(sw);
+    vm_env->DeleteLocalRef(swClass);
+    vm_env->DeleteLocalRef(message);
+    vm_env->DeleteLocalRef(exClass);
+    vm_env->DeleteLocalRef(ex);
+    return mstr;
+#endif
 }
 
 void rethrowJavaException(JavaError e) {
