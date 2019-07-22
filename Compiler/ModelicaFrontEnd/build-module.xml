@@ -26,6 +26,4 @@
     <property name="ModelicaFrontEnd.ModelicaParser.main" value="Modelica.parser"/>
 
     <property name="ModelicaFrontEnd.test_helpers" value="org.jmodelica.junit"/>
-    
-    <property name="ModelicaFrontEnd.thirdparty.jars" value="Beaver/lib/beaver-rt.jar"/>
 </project>
