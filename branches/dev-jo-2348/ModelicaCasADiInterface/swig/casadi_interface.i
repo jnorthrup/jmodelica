@@ -31,19 +31,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "jccexception.h"
 %}
 
+// Note: the handler count does not get reset to zero if an exception is thrown.
+// This is fine because the JCC environment gets killed in this case.
 %exception {
     try {
         bool has_env = env != NULL;
         if (has_env) env->handlers += 1;
         $action
-        // TODO: reset handlers properly in case an exception is thrown...
         if (has_env) env->handlers -= 1;
     } catch (const std::exception& e) {
         SWIG_exception(SWIG_RuntimeError, e.what());
     } catch (const char* e) {
         SWIG_exception(SWIG_RuntimeError, e);
     } catch (JavaError e) {
-        SWIG_exception(SWIG_RuntimeError, describeAndClearJavaException(e));
+        SWIG_exception(SWIG_RuntimeError, describeAndClearJavaException(e).c_str());
     }
 }
 
