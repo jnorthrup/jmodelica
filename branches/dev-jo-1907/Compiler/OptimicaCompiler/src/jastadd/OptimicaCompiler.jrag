@@ -70,7 +70,7 @@ import java.util.Collection;
  */
 public class OptimicaCompiler extends ModelicaCompiler {
 	
-	public OptimicaCompiler(CompileOptions options) {
+	public OptimicaCompiler(OptionRegistry options) {
 		super(options);
 	}
 	

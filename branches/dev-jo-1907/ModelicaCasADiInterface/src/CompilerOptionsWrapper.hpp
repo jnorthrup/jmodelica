@@ -23,9 +23,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "RefCountedNode.hpp"
 #include "org/jmodelica/common/options/OptionRegistry.h"
 #include "org/jmodelica/modelica/compiler/ModelicaCompiler.h"
-#include "org/jmodelica/modelica/compiler/generated/CompileOptions.h"
+#include "org/jmodelica/modelica/compiler/generated/OptionRegistry.h"
 #include "org/jmodelica/optimica/compiler/ModelicaCompiler.h"
-#include "org/jmodelica/optimica/compiler/generated/CompileOptions.h"
+#include "org/jmodelica/optimica/compiler/generated/OptionRegistry.h"
 
 namespace ModelicaCasADi
 {
@@ -34,7 +34,7 @@ namespace ModelicaCasADi
 
 class ModelicaOptionsWrapper : public RefCountedNode {
     protected:
-        org::jmodelica::modelica::compiler::generated::CompileOptions optr;
+        org::jmodelica::modelica::compiler::generated::OptionRegistry optr;
 
     public:
         ModelicaOptionsWrapper() : optr(org::jmodelica::modelica::compiler::ModelicaCompiler::createOptions()) {}
@@ -48,7 +48,7 @@ class ModelicaOptionsWrapper : public RefCountedNode {
         void printCompilerOptions(std::ostream& out);
         void printOpts() {printCompilerOptions(std::cout);}
 
-        org::jmodelica::modelica::compiler::generated::CompileOptions getOptionRegistry() { return optr; }
+        org::jmodelica::modelica::compiler::generated::OptionRegistry getOptionRegistry() { return optr; }
 
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;
@@ -58,7 +58,7 @@ class ModelicaOptionsWrapper : public RefCountedNode {
 
 class OptimicaOptionsWrapper : public RefCountedNode {
     protected:
-        org::jmodelica::optimica::compiler::generated::CompileOptions optr;
+        org::jmodelica::optimica::compiler::generated::OptionRegistry optr;
 
     public:
         OptimicaOptionsWrapper() : optr(org::jmodelica::optimica::compiler::ModelicaCompiler::createOptions()) {}
@@ -72,7 +72,7 @@ class OptimicaOptionsWrapper : public RefCountedNode {
         void printCompilerOptions(std::ostream& out);
         void printOpts() {printCompilerOptions(std::cout);}
 
-        org::jmodelica::optimica::compiler::generated::CompileOptions getOptionRegistry() { return optr; }
+        org::jmodelica::optimica::compiler::generated::OptionRegistry getOptionRegistry() { return optr; }
 
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;

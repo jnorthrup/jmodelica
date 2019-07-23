@@ -39,7 +39,7 @@ public class TestSuite implements GenericTestSuite {
         l = new ArrayList<TestCase>();
         SourceRoot sr = null;
         File modelicapath = EnvironmentUtils.getThirdPartyMSL();
-        CompileOptions options = CompileOptions.buildTestOptions();
+        OptionRegistry options = OptionRegistry.buildTestOptions();
         options.MODELICAPATH.setValue(modelicapath.getPath());
         ASTNode.log = new SysErrLogger();
         try {

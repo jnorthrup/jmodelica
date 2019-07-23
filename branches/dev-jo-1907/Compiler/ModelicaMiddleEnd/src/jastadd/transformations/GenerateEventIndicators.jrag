@@ -27,7 +27,7 @@ aspect GenerateEventIndicators {
          * <p>
          * Options used by this transformation step:
          * <ul>
-         * <li>{@link OptionRegistry.OptionSpecification#EVENT_OUTPUT_VARS event_output_vars}</li>
+         * <li>{@link AbstractOptionRegistry.OptionSpecification#EVENT_OUTPUT_VARS event_output_vars}</li>
          * </ul>
          * Note that the latter, which enables generation of indicator equations if no indicator statements are needed,
          * is disabled by default when running tests.

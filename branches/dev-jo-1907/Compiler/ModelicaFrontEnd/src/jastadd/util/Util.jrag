@@ -2053,13 +2053,13 @@ aspect UtilInterface {
     public class UtilInterface {
         
         private ModelicaCompiler mc;
-        private CompileOptions options;
+        private OptionRegistry options;
         private IErrorHandler eh;
         private ExternalFunctionCache efc;
         private GUIDManager guidManager;
         private File compilationOutputPath;
         
-        protected UtilInterface(ModelicaCompiler mc, CompileOptions options, IErrorHandler eh, ExternalFunctionCache efc, File compilationOutputPath) {
+        protected UtilInterface(ModelicaCompiler mc, OptionRegistry options, IErrorHandler eh, ExternalFunctionCache efc, File compilationOutputPath) {
             this.mc = mc;
             this.options = options;
             this.eh = eh;
@@ -2072,7 +2072,7 @@ aspect UtilInterface {
             return mc;
         }
         
-        public CompileOptions getOptionRegistry() {
+        public OptionRegistry getOptionRegistry() {
             return options;
         }
         
@@ -2110,15 +2110,15 @@ aspect UtilInterface {
                 other.getErrorHandler(), other.getExternalFunctionCache(), other.getCompilationOutputPath());
     }
     
-    public static UtilInterface UtilInterface.create(CompileOptions options) {
+    public static UtilInterface UtilInterface.create(OptionRegistry options) {
         return create(null, options, new DefaultErrorHandler(), null, null);
     }
     
-    public static UtilInterface UtilInterface.create(CompileOptions options, IErrorHandler eh) {
+    public static UtilInterface UtilInterface.create(OptionRegistry options, IErrorHandler eh) {
         return create(null, options, eh, null, null);
     }
     
-    private static UtilInterface UtilInterface.create(ModelicaCompiler mc, CompileOptions options, 
+    private static UtilInterface UtilInterface.create(ModelicaCompiler mc, OptionRegistry options,
             IErrorHandler eh, ExternalFunctionCache efc, File path) {
         return new UtilInterface(mc, options, eh, efc, path);
     }

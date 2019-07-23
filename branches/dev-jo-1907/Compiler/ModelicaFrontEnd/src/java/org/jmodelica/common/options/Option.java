@@ -2,10 +2,10 @@ package org.jmodelica.common.options;
 
 import java.io.PrintStream;
 
-import org.jmodelica.common.options.OptionRegistry.Category;
-import org.jmodelica.common.options.OptionRegistry.Default;
-import org.jmodelica.common.options.OptionRegistry.InvalidOptionValueException;
-import org.jmodelica.common.options.OptionRegistry.OptionType;
+import org.jmodelica.common.options.AbstractOptionRegistry.Category;
+import org.jmodelica.common.options.AbstractOptionRegistry.Default;
+import org.jmodelica.common.options.AbstractOptionRegistry.InvalidOptionValueException;
+import org.jmodelica.common.options.AbstractOptionRegistry.OptionType;
 import org.jmodelica.util.StringUtil;
 import org.jmodelica.util.xml.DocBookPrinter;
 import org.jmodelica.util.xml.XMLPrinter;
@@ -77,7 +77,7 @@ public abstract class Option<T> implements Comparable<Option<T>> {
      */
     public abstract String getValueString();
 
-    protected abstract void copyTo(OptionRegistry registry, String key);
+    protected abstract void copyTo(AbstractOptionRegistry registry, String key);
     protected abstract void setValue(String string);
 
     /**
@@ -131,7 +131,7 @@ public abstract class Option<T> implements Comparable<Option<T>> {
     public void exportXML(XMLPrinter out) {
         String type = getType();
         out.enter("Option", "type", type);
-        String tag = OptionRegistry.capitalize(type) + "Attributes";
+        String tag = AbstractOptionRegistry.capitalize(type) + "Attributes";
         if (description == null || description.equals("")) {
             out.single(tag, "key", key, "value", getValueString());
         } else {

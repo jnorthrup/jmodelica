@@ -2,9 +2,9 @@ package org.jmodelica.common.options;
 
 import java.util.Locale;
 
-import org.jmodelica.common.options.OptionRegistry.Category;
-import org.jmodelica.common.options.OptionRegistry.Default;
-import org.jmodelica.common.options.OptionRegistry.OptionType;
+import org.jmodelica.common.options.AbstractOptionRegistry.Category;
+import org.jmodelica.common.options.AbstractOptionRegistry.Default;
+import org.jmodelica.common.options.AbstractOptionRegistry.OptionType;
 
 public class RealOption extends Option<Double> {
     protected double min;
@@ -154,7 +154,7 @@ public class RealOption extends Option<Double> {
 
 
     @Override
-    protected void copyTo(OptionRegistry reg, String key) {
+    protected void copyTo(AbstractOptionRegistry reg, String key) {
         if (isSet) {
             reg.setRealOption(key, value);
         }

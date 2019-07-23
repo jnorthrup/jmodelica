@@ -53,8 +53,8 @@ import javax.xml.xpath.XPathExpressionException;
 import org.jmodelica.util.logging.ModelicaLogger;
 import org.jmodelica.util.logging.MemoryLogger;
 import org.jmodelica.util.logging.Level;
-import org.jmodelica.common.options.OptionRegistry;
-import org.jmodelica.common.options.OptionRegistry.UnknownOptionException;
+import org.jmodelica.common.options.AbstractOptionRegistry;
+import org.jmodelica.common.options.AbstractOptionRegistry.UnknownOptionException;
 import org.jmodelica.util.Arguments;
 import org.jmodelica.util.SymbolValueFixer;
 import org.jmodelica.util.EnvironmentUtils;
@@ -79,7 +79,7 @@ import org.jmodelica.util.ccompiler.CCompilerDelegator.Creator;
 import org.jmodelica.util.ccompiler.CCompilerTarget;
 import org.jmodelica.util.ccompiler.GccCompilerDelegator;
 import org.jmodelica.common.LogContainer;
-import org.jmodelica.modelica.compiler.generated.CompileOptions;
+import org.jmodelica.modelica.compiler.generated.OptionRegistry;
 
 import org.xml.sax.SAXException;
 
@@ -142,7 +142,7 @@ public class ModelicaCompiler implements LogContainer {
     
     private CCompilerDelegator delegator = null;
     private String delegator_name = null;
-    private CompileOptions options = null;
+    private OptionRegistry options = null;
     private DiagnosticsGenerator diagGenerator = null;
     
     protected boolean dumpMemoryUse = false;
@@ -186,7 +186,7 @@ public class ModelicaCompiler implements LogContainer {
          * in that case it is printed on stdout.
          */
         public static void main(String[] args) {
-            CompileOptions or = createOptions();
+            OptionRegistry or = createOptions();
             Type t = null;
             BufferedReader tmpl = null;
             for (String arg : args) {
@@ -230,7 +230,7 @@ public class ModelicaCompiler implements LogContainer {
             }
         }
         
-        private static void emit(Type t, CompileOptions or, PrintStream out) {
+        private static void emit(Type t, OptionRegistry or, PrintStream out) {
             switch (t) {
             case XML:
                 or.exportXML(out, OptionRegistry.Category.experimental);
@@ -276,16 +276,15 @@ public class ModelicaCompiler implements LogContainer {
         }
     }
 
-    public static CompileOptions createOptions() {
-        return CompileOptions.buildOptions();
+    public static OptionRegistry createOptions() {
+        return OptionRegistry.buildOptions();
     }
 
-    public static ModulesSettings createModulesSettings(CompileOptions options)    
-    {
+    public static ModulesSettings createModulesSettings(OptionRegistry options) {
        return new ModulesSettings(options);
     }
 
-    public ModelicaCompiler(CompileOptions options) {
+    public ModelicaCompiler(OptionRegistry options) {
         this.options = options;
     }
 
@@ -1405,7 +1404,7 @@ public class ModelicaCompiler implements LogContainer {
         options.setStringOption("MODELICAPATH", modelicapath);
     }
     
-    public CompileOptions getOptions() {
+    public OptionRegistry getOptions() {
         return options;
     }
 
@@ -1583,11 +1582,11 @@ public class ModelicaCompiler implements LogContainer {
             this(type, makeFileFlag, suffix, xmlGenerator, ErrorCheckType.COMPILE);
         }
         
-        public Templates getTemplates(OptionRegistry options) {
+        public Templates getTemplates(AbstractOptionRegistry options) {
             return new Templates(type, options);
         }
         
-        public String createExtraCFlagsString(OptionRegistry options, String fileName) {
+        public String createExtraCFlagsString(AbstractOptionRegistry options, String fileName) {
             
             if (suffix == null) {
                 return "";
@@ -1685,7 +1684,7 @@ public class ModelicaCompiler implements LogContainer {
         /**
          * Sets the default options that should be used for this target object. 
          */
-        public void setDefaultOptions(OptionRegistry options) {
+        public void setDefaultOptions(AbstractOptionRegistry options) {
             for (TargetOptionContributor contributor :
                     TargetOptionContributor.TARGET_DEFAULT_OPTION_CONTRIBUTORS.values()) {
 
@@ -1711,7 +1710,7 @@ public class ModelicaCompiler implements LogContainer {
                     new ModelicaCompiler.TargetOptionContributor() {
 
                         @Override
-                        public void setOptions(TargetObject object, OptionRegistry options) {
+                        public void setOptions(TargetObject object, AbstractOptionRegistry options) {
                             switch (object) {
                                 case FMUME10:
                                     options.setStringOption("fmu_type", "FMUME10");
@@ -1793,7 +1792,7 @@ public class ModelicaCompiler implements LogContainer {
                     new ModelicaCompiler.TargetOptionContributor() {
 
                         @Override
-                        public void setOptions(TargetObject object, OptionRegistry options) {
+                        public void setOptions(TargetObject object, AbstractOptionRegistry options) {
                             switch (object) {
                                 case FMUME10:
                                 case FMUCS10:
@@ -1824,7 +1823,7 @@ public class ModelicaCompiler implements LogContainer {
             new HashMap<String, TargetOptionContributor>();
 
         protected abstract String identity();
-        protected abstract void setOptions(TargetObject object, OptionRegistry options);
+        protected abstract void setOptions(TargetObject object, AbstractOptionRegistry options);
 
         @Override
         public int compareTo(TargetOptionContributor other) {
@@ -2264,7 +2263,7 @@ public class Templates {
     };
 
 
-    public Templates(ModelicaCompiler.TargetType type, OptionRegistry options) {
+    public Templates(ModelicaCompiler.TargetType type, AbstractOptionRegistry options) {
         switch (type) {
         case FMUME10:
             templates = new String[] { null, "fmi1_me_modelica_template.c" };
@@ -2364,7 +2363,7 @@ public class Templates {
         }
     }
     
-    public String createExtraCFlagsString(OptionRegistry options, String name) {
+    public String createExtraCFlagsString(AbstractOptionRegistry options, String name) {
         
         if (C_SOURCE_TEMPLATES == null) {
             return "";
@@ -2396,7 +2395,7 @@ public class Templates {
     private static LinkedHashSet<String> C_SOURCE_TEMPLATES;    
     
     public abstract static class TemplateContributor {
-        public void addTemplates(Templates templates, OptionRegistry options) { }
+        public void addTemplates(Templates templates, AbstractOptionRegistry options) { }
     }
 
     public static <T extends TemplateContributor> T addContributor(T contributor) {
@@ -2444,7 +2443,7 @@ private static final Templates.TemplateContributor ModelicaCompiler.BASIC_TEMPLA
     Templates.addContributor(new Templates.TemplateContributor() {
 
         @Override
-        public void addTemplates(Templates templates, OptionRegistry options) {
+        public void addTemplates(Templates templates, AbstractOptionRegistry options) {
             templates.addCHeaderTemplates("base");
             templates.addCSourceTemplates("base", "init_independent", "init_dependent", "equ_init", "equ", "funcs");
         }

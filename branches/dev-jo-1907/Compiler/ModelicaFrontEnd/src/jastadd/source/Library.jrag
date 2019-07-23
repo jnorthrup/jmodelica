@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.jmodelica.common.options.OptionRegistry;
+import org.jmodelica.common.options.AbstractOptionRegistry;
 import org.jmodelica.util.problemHandling.ProblemProducer;
 import org.jmodelica.api.problemHandling.ProblemKind;
 import org.jmodelica.api.problemHandling.ProblemSeverity;
@@ -592,7 +592,7 @@ aspect Library {
                     loadInfos.add(LoadInfo.create(path));
                 }
                 addLibraryDirectories(loadInfos, SrcLibNode.LoadReason.MODELICAPATH);
-            } catch (OptionRegistry.UnknownOptionException e) {}
+            } catch (AbstractOptionRegistry.UnknownOptionException e) {}
         }
 
     }

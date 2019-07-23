@@ -1,8 +1,8 @@
 package org.jmodelica.common.options;
 
-import org.jmodelica.common.options.OptionRegistry.Category;
-import org.jmodelica.common.options.OptionRegistry.Default;
-import org.jmodelica.common.options.OptionRegistry.OptionType;
+import org.jmodelica.common.options.AbstractOptionRegistry.Category;
+import org.jmodelica.common.options.AbstractOptionRegistry.Default;
+import org.jmodelica.common.options.AbstractOptionRegistry.OptionType;
 
 public class BooleanOption extends Option<Boolean> {
 
@@ -33,7 +33,7 @@ public class BooleanOption extends Option<Boolean> {
     }
 
     @Override
-    protected void copyTo(OptionRegistry reg, String key) {
+    protected void copyTo(AbstractOptionRegistry reg, String key) {
         if (isSet) {
             reg.setBooleanOption(key, value);
         }

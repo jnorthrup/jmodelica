@@ -34,8 +34,8 @@ public class IntegerOption extends Option<Integer> {
      * @param defaultValue
      *          The option's default value.
      */
-    public IntegerOption(String key, OptionRegistry.OptionType type, OptionRegistry.Category category, String description,
-                         OptionRegistry.Default<Integer> defaultValue) {
+    public IntegerOption(String key, AbstractOptionRegistry.OptionType type, AbstractOptionRegistry.Category category, String description,
+                         AbstractOptionRegistry.Default<Integer> defaultValue) {
 
         this(key, type, category, description, defaultValue, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
@@ -58,8 +58,8 @@ public class IntegerOption extends Option<Integer> {
      * @param max
      *          The maximum allowed value for this option.
      */
-    public IntegerOption(String key, OptionRegistry.OptionType type, OptionRegistry.Category category, String description,
-                         OptionRegistry.Default<Integer> defaultValue, int min, int max) {
+    public IntegerOption(String key, AbstractOptionRegistry.OptionType type, AbstractOptionRegistry.Category category, String description,
+                         AbstractOptionRegistry.Default<Integer> defaultValue, int min, int max) {
 
         super(key, type, category, description, defaultValue, null);
         this.min = min;
@@ -145,7 +145,7 @@ public class IntegerOption extends Option<Integer> {
     }
 
     @Override
-    protected void copyTo(OptionRegistry reg, String key) {
+    protected void copyTo(AbstractOptionRegistry reg, String key) {
         if (isSet) {
             reg.setIntegerOption(key, value);
         }

@@ -6,9 +6,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.jmodelica.common.options.OptionRegistry.Category;
-import org.jmodelica.common.options.OptionRegistry.Default;
-import org.jmodelica.common.options.OptionRegistry.OptionType;
+import org.jmodelica.common.options.AbstractOptionRegistry.Category;
+import org.jmodelica.common.options.AbstractOptionRegistry.Default;
+import org.jmodelica.common.options.AbstractOptionRegistry.OptionType;
 
 
 public class StringOption extends Option<String> {
@@ -127,7 +127,7 @@ public class StringOption extends Option<String> {
     }
 
     @Override
-    protected void copyTo(OptionRegistry reg, String key) {
+    protected void copyTo(AbstractOptionRegistry reg, String key) {
         if (isSet) {
             reg.setStringOption(key, value);
         }
