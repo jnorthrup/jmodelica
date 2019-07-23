@@ -23,9 +23,7 @@ const char* describeAndClearJavaException(JavaError e) {
 	jmethodID printStackTrace = vm_env->GetMethodID(exClass, "printStackTrace", "(Ljava/io/PrintWriter;)V");
 	vm_env->CallObjectMethod(ex, printStackTrace, pw);
 	jmethodID toString = vm_env->GetMethodID(swClass, "toString", "()Ljava/lang/String;");
-    std::cerr << "step10" << std::endl;
 	jstring message = (jstring) vm_env->CallObjectMethod(sw, toString);
-    std::cerr << "step11" << std::endl;
 	const char *mstr = vm_env->GetStringUTFChars(message, NULL);
     // Keep the string so that we can print it in the exception handler.
     // This would be a memory leak but the JVM will be shut down soon anyway.
@@ -38,7 +36,6 @@ const char* describeAndClearJavaException(JavaError e) {
     vm_env->DeleteLocalRef(exClass);
     vm_env->DeleteLocalRef(ex);
     return mstr;
-#endif
 }
 
 void rethrowJavaException(JavaError e) {
