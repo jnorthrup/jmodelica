@@ -85,7 +85,6 @@ aspect Library {
         String name = name();
         // TODO: Error if more than one class in file
         try {
-            log.info("Reading file: " + fileName);
             UtilInterface util = root().getUtilInterface();
             SourceRoot sr = util.getParserHandler().parseFile(util, getLoadInfo().withPath(fileName));
             SrcStoredDefinition entity = sr.getProgram().getUnstructuredEntity(0);
