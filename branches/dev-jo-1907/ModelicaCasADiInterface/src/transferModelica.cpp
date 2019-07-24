@@ -81,7 +81,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "org/jmodelica/optimica/compiler/FFunctionDecl.h"
 #include "org/jmodelica/optimica/compiler/Root.h"
 #include "org/jmodelica/optimica/compiler/BaseNode.h"
-#include "org/jmodelica/common/options/OptionRegistry.h"
 #include "org/jmodelica/optimica/compiler/BLT.h"
 #include "org/jmodelica/optimica/compiler/StructuredBLT.h"
 #include "org/jmodelica/optimica/compiler/FEquation.h"
@@ -105,7 +104,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace mc = org::jmodelica::modelica::compiler;
 namespace jl = java::lang;
-using org::jmodelica::common::options::OptionRegistry;
 using std::cout;  using std::endl; using std::string;
 using std::vector;
 

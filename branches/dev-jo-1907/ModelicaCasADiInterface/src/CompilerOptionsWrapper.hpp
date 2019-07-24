@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "jni.h"
 #include "RefCountedNode.hpp"
-#include "org/jmodelica/common/options/OptionRegistry.h"
 #include "org/jmodelica/modelica/compiler/ModelicaCompiler.h"
 #include "org/jmodelica/modelica/compiler/generated/OptionRegistry.h"
 #include "org/jmodelica/optimica/compiler/ModelicaCompiler.h"
