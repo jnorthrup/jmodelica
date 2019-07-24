@@ -155,8 +155,10 @@ public class ModelicaCompiler implements LogContainer {
         debugSrcIsHome = b;
     }
     
-    protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<CompilationHooks>();
-    protected LinkedList<CompilationHooks> hooksList = new LinkedList<CompilationHooks>(globalHooksList);
+    protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<>();
+    protected LinkedList<CompilationHooks> hooksList = new LinkedList<>(globalHooksList);
+
+    protected static LinkedList<CompilationStartListener> compilationStartListeners = new LinkedList<>();
     
     protected File tempDir = null;
     protected File outDir = null;
@@ -167,104 +169,6 @@ public class ModelicaCompiler implements LogContainer {
     protected Collection<Problem> warnings = new ArrayList<Problem>();
 
     private static final String OPTION_EXPORT_TEMPLATE = "==OPTIONS-LIST==";
-
-    /**
-     * Exports default options to XML.
-     */
-    public static class OptionExporter {
-        /**
-         * Exports list of options.
-         * 
-         * Allowed arguments:
-         *   -x <file>    export as XML to <file>
-         *   -d <file>    export as DocBook table to <file>
-         *   -p <file>    export as plain text table to <file>
-         *   -t <file>    next export argument will use <file> as a template, replacing any line containing 
-         *                the value of <code>OPTION_EXPORT_TEMPLATE</code> with generated output
-         * 
-         * For the last export type argument given, the file argument may be ommited, 
-         * in that case it is printed on stdout.
-         */
-        public static void main(String[] args) {
-            OptionRegistry or = createOptions();
-            Type t = null;
-            BufferedReader tmpl = null;
-            for (String arg : args) {
-                if (t == null) {
-                    t = type(arg);
-                } else {
-                    if (t == Type.Template) {
-                        try {
-                            tmpl = new BufferedReader(new FileReader(arg));
-                        } catch (FileNotFoundException e) {
-                            System.err.println("Could not open template file for reading: " + e.getMessage());
-                        }
-                    } else {
-                        try {
-                            PrintStream out = new PrintStream(new BufferedOutputStream(new FileOutputStream(arg)));
-                            if (tmpl != null) {
-                                String line = tmpl.readLine();
-                                while (line != null) {
-                                    if (line.contains(OPTION_EXPORT_TEMPLATE)) {
-                                        emit(t, or, out);
-                                    } else {
-                                        out.println(line);
-                                    }
-                                    line = tmpl.readLine();
-                                }
-                            } else {
-                                emit(t, or, out);
-                            }
-                            out.close();
-                        } catch (FileNotFoundException e) {
-                            System.err.println("Could not open file for writing: " + e.getMessage());
-                        } catch (IOException e) {
-                        }
-                        tmpl = null;
-                    }
-                    t = null;
-                }
-            }
-            if (t != null) {
-                emit(t, or, System.out);
-            }
-        }
-        
-        private static void emit(Type t, OptionRegistry or, PrintStream out) {
-            switch (t) {
-            case XML:
-                or.exportXML(out, OptionRegistry.Category.experimental);
-                break;
-            case DocBook:
-                or.exportDocBook(out, OptionRegistry.Category.experimental);
-                break;
-            case PlainText:
-                or.exportPlainText(out, OptionRegistry.Category.experimental);
-                break;
-            case Template:
-                throw new IllegalArgumentException();
-            }
-        }
-        
-        private static Type type(String arg) {
-            if (arg.equals("-x")) {
-                return Type.XML;
-            } else if (arg.equals("-d")) {
-                return Type.DocBook;
-            } else if (arg.equals("-p")) {
-                return Type.PlainText;
-            } else if (arg.equals("-t")) {
-                return Type.Template;
-            } else {
-                System.err.println("Unknown output type argument: " + arg);
-                return null;
-            }
-        }
-        
-        private enum Type {
-            XML, DocBook, PlainText, Template;
-        }
-    }
     
     /**
      * Basic export of all known problem types
@@ -319,7 +223,12 @@ public class ModelicaCompiler implements LogContainer {
     public void removeCompilationHooks(CompilationHooks hooks) {
         hooksList.remove(hooks);
     }
-    
+
+    public static <T extends CompilationStartListener> T addCompilationStartListener(T listener) {
+        compilationStartListeners.add(listener);
+        return listener;
+    }
+
     protected IErrorHandler errorHandler = null;
     
     /**
@@ -333,11 +242,20 @@ public class ModelicaCompiler implements LogContainer {
     public IErrorHandler getErrorHandler() {
         return errorHandler;
     }
-    
+
+    /**
+     * Notifies compilation start listeners that compilation will start.
+     */
+    protected static void notifyCompilationStart(ModelicaCompiler mc) {
+        for (CompilationStartListener listener : compilationStartListeners) {
+            listener.onCompileStart(mc);
+        }
+    }
+
     /**
      * Throws a {@link CompilationAbortedException} if any hooks class signals an abort.
      */
-    protected void hookCheckAbort() {
+    private void hookCheckAbort() {
         for (CompilationHooks hooks : hooksList) {
             if (hooks.shouldAbort(this)) {
                 log.info("Compilation aborted.");
@@ -349,75 +267,95 @@ public class ModelicaCompiler implements LogContainer {
     /**
      * Calls the hook to be called after the supplied code files are parsed.
      */
-    protected void hookFilesParsed(SourceRoot sr) {
-        for (CompilationHooks hooks : hooksList)
+    private void hookFilesParsed(SourceRoot sr) {
+        for (CompilationHooks hooks : hooksList) {
             hooks.filesParsed(this, sr);
+        }
     }
     
     /**
      * Calls the hook to be called after the error checks on the instantiated 
      * model are finished without errors.
      */
-    protected void hookModelInstantiatied(InstClassDecl icd) {
-        for (CompilationHooks hooks : hooksList)
+    private void hookModelInstantiatied(InstClassDecl icd) {
+        for (CompilationHooks hooks : hooksList) {
             hooks.modelInstantiatied(this, icd);
+        }
     }
     
     /**
      * Calls the hook to be called after the model is flattened.
      */
-    protected void hookModelFlattened(FClass fc) {
-        for (CompilationHooks hooks : hooksList)
+    private void hookModelFlattened(FClass fc) {
+        for (CompilationHooks hooks : hooksList) {
             hooks.modelFlattened(this, fc);
+        }
     }
     
     /**
      * Calls the hook to be called after transformations are applied to the model.
      */
-    protected void hookModelTransformed(FClass fc) {
-        for (CompilationHooks hooks : hooksList)
+    private void hookModelTransformed(FClass fc) {
+        for (CompilationHooks hooks : hooksList) {
             hooks.modelTransformed(this, fc);
+        }
     }
     
     /**
      * Calls the hook to be called after error checks of the flat model are 
      * finished without errors.
      */
-    protected void hookFlatModelChecked(FClass fc) {
-        for (CompilationHooks hooks : hooksList)
+    private void hookFlatModelChecked(FClass fc) {
+        for (CompilationHooks hooks : hooksList) {
             hooks.flatModelChecked(this, fc);
+        }
     }
     
     /**
      * Calls the hook to be called after a code generator is created.
      */
-    protected void hookCodeGeneratorCreated(AbstractGenerator gen) {
-        for (CompilationHooks hooks : hooksList)
+    private void hookCodeGeneratorCreated(AbstractGenerator gen) {
+        for (CompilationHooks hooks : hooksList) {
             hooks.codeGeneratorCreated(this, gen);
+        }
     }
     
     /**
      * Calls the hook to be called after output code is generated.
      */
-    protected void hookCodeGenerated(FClass fc, File dir) {
-        for (CompilationHooks hooks : hooksList)
+    private void hookCodeGenerated(FClass fc, File dir) {
+        for (CompilationHooks hooks : hooksList) {
             hooks.codeGenerated(this, fc, dir);
+        }
     }
     
     /**
      * Calls the hook to be called after the generated C code is compiled.
      */
-    protected void hookCodeCompiled() {
-        for (CompilationHooks hooks : hooksList)
+    private void hookCodeCompiled() {
+        for (CompilationHooks hooks : hooksList) {
             hooks.codeCompiled(this);
+        }
+    }
+
+    /**
+     * Calls the hook to be called before the FMU is packed.
+     * @param fc the source FClass
+     * @param dir the temporary FMU directory
+     */
+    private void hookPackFmu(FClass fc, File dir) {
+        for (CompilationHooks hooks : hooksList) {
+            hooks.packFmu(this, fc, dir);
+        }
     }
     
     /**
      * Calls the hook to be called after the FMU is packed.
      */
-    protected void hookFmuPacked(FClass fc, File path) {
-        for (CompilationHooks hooks : hooksList)
+    private void hookFmuPacked(FClass fc, File path) {
+        for (CompilationHooks hooks : hooksList) {
             hooks.fmuPacked(this, fc, path);
+        }
     }
     
     public String getStringOption(String key) throws UnknownOptionException {
@@ -1022,6 +960,7 @@ public class ModelicaCompiler implements LogContainer {
     public SourceRoot doParseModel(Collection<LoadInfo> loadInfos) 
       throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
         checkSetUp();
+        notifyCompilationStart(this);
         ASTNode.getStepInfo().reset();
         ASTNode.beginStep("parseModel()");
         SourceRoot sr = parserHandler.parseModel(createUtilInterface(), loadInfos);
@@ -1199,10 +1138,12 @@ public class ModelicaCompiler implements LogContainer {
         findFlatToInstanceLinks(fc);
         hookModelFlattened(fc);
         hookCheckAbort();
+
+        OptionRegistry options = fc.myOptions();
         
         // Output the untransformed flattened model
         ASTNode.beginStep("prettyPrintRawFlat()");
-        if (fc.myOptions().getBooleanOption("generate_mof_files")) {
+        if (options.getBooleanOption("generate_mof_files")) {
             log.debug("Creating raw .mof file...");
             CodeStream out = new CodeStream(flatFile);
             fc.prettyPrint_MC(out, "");
@@ -1214,7 +1155,7 @@ public class ModelicaCompiler implements LogContainer {
         log.verbose(fc);
         ASTNode.endStep("prettyPrintRawFlat()");
 
-        if (fc.myOptions().getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
+        if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
             ASTNode.beginStep("htmlDiagnostics()");
             getDiagnosticsGenerator().writeRawFlattenedModel(fc);
             getDiagnosticsGenerator().setModelDiagnosticsBeforeTransform(fc.modelDiagnostics());
@@ -1225,13 +1166,13 @@ public class ModelicaCompiler implements LogContainer {
         
         /* Temporary fix to problems with long compilation times due to later evaluations */
         getExternalFunctionCache().tearDown();
-        fc.myOptions().setIntegerOption("external_constant_evaluation", 0);
+        options.setIntegerOption("external_constant_evaluation", 0);
         
         hookModelTransformed(fc);
         hookCheckAbort();
         
         ASTNode.beginStep("prettyPrintFlat()");
-        if (fc.myOptions().getBooleanOption("generate_mof_files")) {
+        if (options.getBooleanOption("generate_mof_files")) {
             log.debug("Creating transformed .mof file...");
             CodeStream out = new CodeStream(new File(sourceDir, instName + "_transformed.mof"));
             fc.prettyPrint_MC(out, "");
@@ -1253,26 +1194,26 @@ public class ModelicaCompiler implements LogContainer {
         
         dumpMemoryUseFile(fc, "transformed", false);
         
-        if (fc.myOptions().getBooleanOption("write_iteration_variables_to_file")) {
+        if (options.getBooleanOption("write_iteration_variables_to_file")) {
             ASTNode.beginStep("writeIterationVariables()");
             if (!fc.onlyInitBLT())
                 fc.getDAEBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_iteration_variables.txt"));
             fc.getDAEInitBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_initial_system_iteration_variables.txt"));
             ASTNode.endStep("writeIterationVariables()");
         }
-        
-        if (fc.myOptions().getBooleanOption("write_tearing_pairs_to_file")) {
+
+        if (options.getBooleanOption("write_tearing_pairs_to_file")) {
             ASTNode.beginStep("writeIterationVariables()");
             if (!fc.onlyInitBLT())
                 fc.getDAEBLT().writeTearingPairsToFile(new File(instName + "_tearing_pairs.txt"));
             fc.getDAEInitBLT().writeTearingPairsToFile(new File(instName + "_initial_system_tearing_pairs.txt"));
             ASTNode.endStep("writeIterationVariables()");
         }
-        
+
         fc.errorCheck(target.getCheckType());
         handleCompilerWarnings(fc.collectWarnings());
-        
-        if (fc.myOptions().getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
+
+        if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
             ASTNode.beginStep("htmlDiagnostics()");
             getDiagnosticsGenerator().writeTransformedFlattenedModel(fc);
             getDiagnosticsGenerator().writeDiagnostics(fc);
@@ -2125,6 +2066,7 @@ public class ModelicaCompiler implements LogContainer {
 
         File unitFile = fClass.root().getUtilInterface().getCompilationOutputPath();
 
+        hookPackFmu(fClass, outDir);
         try {
             hookCheckAbort();
             copySourceFiles(fClass, sourceDir, outDir);
@@ -2530,56 +2472,76 @@ public interface CompilationHooks {
      * If compilation is aborted before it is finished, a 
      * {@link CompilationAbortedException} is thrown.
      */
-    public boolean shouldAbort(ModelicaCompiler instance);
+    boolean shouldAbort(ModelicaCompiler instance);
     
     /**
      * Called after the supplied code files are parsed.
      */
-    public void filesParsed(ModelicaCompiler instance, SourceRoot sr);
+    void filesParsed(ModelicaCompiler instance, SourceRoot sr);
     
     /**
      * Called after the error checks on the instantiated model are finished without errors.
      * 
      * Since the instance tree is built lazily, this step can not be broken up.
      */
-    public void modelInstantiatied(ModelicaCompiler instance, InstClassDecl icd);
+    void modelInstantiatied(ModelicaCompiler instance, InstClassDecl icd);
     
     /**
      * Called after the model is flattened.
      */
-    public void modelFlattened(ModelicaCompiler instance, FClass fc);
+    void modelFlattened(ModelicaCompiler instance, FClass fc);
     
     /**
      * Called after transformations are applied to the flat model.
      */
-    public void modelTransformed(ModelicaCompiler instance, FClass fc);
+    void modelTransformed(ModelicaCompiler instance, FClass fc);
     
     /**
      * Called after error checks of the flat model are finished without errors.
      */
-    public void flatModelChecked(ModelicaCompiler instance, FClass fc);
+    void flatModelChecked(ModelicaCompiler instance, FClass fc);
     
     /**
      * Called after a code generator is created.
      * 
      * Normally called three times.
      */
-    public void codeGeneratorCreated(ModelicaCompiler instance, AbstractGenerator gen);
+    void codeGeneratorCreated(ModelicaCompiler instance, AbstractGenerator gen);
     
     /**
      * Called after output code is generated.
      */
-    public void codeGenerated(ModelicaCompiler instance, FClass fc, File dir);
+    void codeGenerated(ModelicaCompiler instance, FClass fc, File dir);
     
     /**
      * Called after the generated C code is compiled.
      */
-    public void codeCompiled(ModelicaCompiler instance);
-    
+    void codeCompiled(ModelicaCompiler instance);
+
+    /**
+     * Called before the FMU is packed.
+     *
+     * @param instance compiler instance calling this hook
+     * @param fc the source FClass
+     * @param dir the temporary directory containing files to be packed in the FMU
+     */
+    public void packFmu(ModelicaCompiler instance, FClass fc, File dir);
+
     /**
      * Called after the FMU is packed.
      */
-    public void fmuPacked(ModelicaCompiler instance, FClass fc, File path);
+    void fmuPacked(ModelicaCompiler instance, FClass fc, File path);
+}
+
+/**
+ * Functional interface for callbacks that should run before compilation starts.
+ */
+public interface CompilationStartListener {
+    /**
+     * Called before compiling ({@link ModelicaCompiler#compileUnit()}).
+     * @param mc the ModelicaCompiler instance that will start compiling.
+     */
+    void onCompileStart(ModelicaCompiler mc);
 }
 
 public abstract class CompilationHooksImpl implements CompilationHooks {
@@ -2591,6 +2553,8 @@ public abstract class CompilationHooksImpl implements CompilationHooks {
     public void modelInstantiatied(ModelicaCompiler instance, InstClassDecl icd) {}
     @Override
     public void modelFlattened(ModelicaCompiler instance, FClass fc) {}
+    @Override
+    public void packFmu(ModelicaCompiler instance, FClass fc, File dir) {}
     @Override
     public void fmuPacked(ModelicaCompiler instance, FClass fc, File path) {}
     @Override

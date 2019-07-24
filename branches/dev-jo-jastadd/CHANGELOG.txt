@@ -1,4 +1,19 @@
 ================= Unreleased ==================
+# Fixed ; Minor ; Compiler ; #5808
+Add ParseListener and CompilationStartListener for listening to
+parsed files and compilation start events.
+
+# Change ; Minor ; Compiler ; #5810
+Dependency to beaver-rt.jar is now recorded in the jar manifest
+which means it is no longer necessary to add it to the classpath
+when interfacing directly with the compiler jars.
+
+# Change ; Minor ; Compiler ; #5806
+Added compilation hook to run before FMU packing
+
+# Fixed ; Minor ; Compiler ; #5805
+Fixed ant clean failing with empty target directory
+
 # Fixed ; Minor ; Compiler ; #5793
 Fixed bug where reinit did not set value of aliased derivatives.
 
