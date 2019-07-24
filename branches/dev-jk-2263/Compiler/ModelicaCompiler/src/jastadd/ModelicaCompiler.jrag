@@ -261,9 +261,9 @@ public class ModelicaCompiler implements LogContainer {
      * Calls the hook to be called after the error checks on the instantiated 
      * model are finished without errors.
      */
-    private void hookModelInstantiatied(InstClassDecl icd) {
+    private void hookModelInstantiated(InstClassDecl icd) {
         for (CompilationHooks hooks : hooksList) {
-            hooks.modelInstantiatied(this, icd);
+            hooks.modelInstantiated(this, icd);
         }
     }
     
@@ -1036,7 +1036,7 @@ public class ModelicaCompiler implements LogContainer {
             handleCompilerWarnings(sr.collectWarnings());
         }
         
-        hookModelInstantiatied(icd);
+        hookModelInstantiated(icd);
         ASTNode.endStep("instantiateModel()");
         
         return icd;
@@ -2467,7 +2467,7 @@ public interface CompilationHooks {
      * 
      * Since the instance tree is built lazily, this step can not be broken up.
      */
-    public void modelInstantiatied(ModelicaCompiler instance, InstClassDecl icd);
+    public void modelInstantiated(ModelicaCompiler instance, InstClassDecl icd);
     
     /**
      * Called after the model is flattened.
@@ -2522,7 +2522,7 @@ public abstract class CompilationHooksImpl implements CompilationHooks {
     @Override
     public void modelTransformed(ModelicaCompiler instance, FClass fc) {}
     @Override
-    public void modelInstantiatied(ModelicaCompiler instance, InstClassDecl icd) {}
+    public void modelInstantiated(ModelicaCompiler instance, InstClassDecl icd) {}
     @Override
     public void modelFlattened(ModelicaCompiler instance, FClass fc) {}
     @Override
