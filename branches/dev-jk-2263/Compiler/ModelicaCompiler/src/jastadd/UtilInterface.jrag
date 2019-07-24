@@ -13,10 +13,64 @@ aspect UtilInterface {
         return utilInterface;
     }
     
+    
     /**
      * Provides easy access to non-ast utils via the AST root.
      */
     public class UtilInterface {
+        
+        /**
+         * Registers interfacers when UtilInterface is created.
+         */
+        interface Registrant {
+            Interfacer getInterfacer(UtilInterface uif);
+        }
+        
+        /**
+         * Hooks for different steps in the compilation. Can keep states as opposed to the 
+         * CompilationHooks in ModelicaCompiler.
+         */
+        interface Interfacer {
+            /**
+             * Called when the UtilInterface is transferred between roots.
+             * States need to be copied here.
+             */
+            void transfer(UtilInterface uif);
+            
+            /**
+             * Called after model has been instantiated.
+             */
+            void modelInstantiated(UtilInterface uif, InstClassDecl icd);
+            
+            /**
+             * Called at each transfer and on tearDown.
+             */
+            void clean();
+            
+            /**
+             * Called at end of compilation.
+             */
+            void tearDown();
+        }
+        
+        abstract class InterfacerImpl implements Interfacer {
+            @Override
+            public void transfer(UtilInterface uif) {}
+            @Override
+            public void modelInstantiated(UtilInterface uif, InstClassDecl icd) {}
+            @Override
+            public void clean() {}
+            @Override
+            public void tearDown() {}
+        }
+        
+        private static LinkedList<Registrant> registrants = new LinkedList<>();
+        private static Registrant addRegistrant(Registrant registrant) {
+            registrants.add(registrant);
+            return registrant;
+        }
+        
+        private LinkedList<Interfacer> interfacers;
         
         private ModelicaCompiler mc;
         private OptionRegistry options;
@@ -32,6 +86,11 @@ aspect UtilInterface {
             this.efc = efc;
             this.compilationOutputPath = compilationOutputPath;
             guidManager = new GUIDManager(ASTNode.vendorName(), options.getStringOption("compiler_version"));
+            
+            interfacers = new LinkedList<>();
+            for (UtilInterface.Registrant registrant : registrants) {
+                interfacers.add(registrant.getInterfacer(this));
+            }
         }
         
         public ModelicaCompiler getModelicaCompiler() {
@@ -95,11 +154,19 @@ aspect UtilInterface {
     
     public void UtilInterface.transferRoot(Root root) {
         clean();
-        root.setUtilInterface(UtilInterface.create(this));
+        UtilInterface transferred = UtilInterface.create(this);
+        transferred.interfacers = interfacers;
+        for (Interfacer interfacer : transferred.interfacers) {
+            interfacer.transfer(transferred);
+        }
+        root.setUtilInterface(transferred);
     }
     
     public void UtilInterface.tearDown() {
         clean();
+        for (Interfacer interfacer : interfacers) {
+            interfacer.tearDown();
+        }
     }
     
     public void UtilInterface.clean() {
@@ -107,6 +174,14 @@ aspect UtilInterface {
         if (efc != null) {
             efc.destroyProcesses();
         }
+        for (Interfacer interfacer : interfacers) {
+            interfacer.clean();
+        }
     }
     
+    public void UtilInterface.modelInstantiated(InstClassDecl icd) {
+        for (Interfacer interfacer : interfacers) {
+            interfacer.modelInstantiated(this, icd);
+        }
+    }
 }

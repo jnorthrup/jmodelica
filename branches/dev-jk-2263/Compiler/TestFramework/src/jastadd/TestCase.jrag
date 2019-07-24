@@ -608,6 +608,7 @@ abstract public class TestCase implements GenericTestCase {
         
         // Test instantiated class
         InstClassDecl icd = ipr.instantiateModel(getClassName());
+        uif.modelInstantiated(icd);
         if (testInstantiated(icd)) return;
         
         // Flatten class and check errors reported during flattening

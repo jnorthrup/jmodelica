@@ -265,6 +265,7 @@ public class ModelicaCompiler implements LogContainer {
         for (CompilationHooks hooks : hooksList) {
             hooks.modelInstantiated(this, icd);
         }
+        icd.root().getUtilInterface().modelInstantiated(icd);
     }
     
     /**
