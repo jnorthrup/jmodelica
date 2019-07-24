@@ -31,8 +31,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "jccexception.h"
 %}
 
-// Note: the handler count does not get reset to zero if an exception is thrown.
-// This is fine because the JCC environment gets killed in this case.
+// Note: setting env->handler to non-zero causes JCC to not clear Java exceptions so that we
+// can take the stack trace with describeAndClearJavaException() and rethrow it as a Python
+// exception. The handler count does not get reset to zero if an exception is thrown, but
+// this is fine because the JCC environment gets killed in this case.
 %exception {
     try {
         bool has_env = env != NULL;
