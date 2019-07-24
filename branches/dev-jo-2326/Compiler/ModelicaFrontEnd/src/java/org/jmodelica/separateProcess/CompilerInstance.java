@@ -17,6 +17,7 @@ package org.jmodelica.separateProcess;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -246,6 +247,17 @@ public class CompilerInstance {
 
     public Compilation compile(String modelName, String... sourceFiles) throws IOException {
         return new Compilation(buildArgs(modelName, sourceFiles), jmodelicaHome);
+    }
+    
+    public Compilation compile(String modelName, Path ... sourceFiles) throws IOException {
+        if (sourceFiles == null) {
+            return compile(modelName, (String[])null);
+        }
+        String[] files = new String[sourceFiles.length];
+        for (int i = 0; i < sourceFiles.length; i++) {
+            files[i] = sourceFiles[i].toString();
+        }
+        return compile(modelName, files);
     }
 
     private static String join(String delimiter, String... args) {

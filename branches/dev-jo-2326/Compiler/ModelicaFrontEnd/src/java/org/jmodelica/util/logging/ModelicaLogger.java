@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -169,7 +170,7 @@ public abstract class ModelicaLogger {
      * @param unitFile              the file object pointing to the compiled FMU.
      * @param numberOfComponents    the number of components in the FMU.
      * @return                      an object representing the successful compilation.
-     * @deprecated                  use {@link #logCompiledUnit(File, Collection, int)} instead.
+     * @deprecated                  use {@link #logCompiledUnit(Path, Collection, int)} instead.
      */
     @Deprecated
     public CompiledUnit logCompiledUnit(File unitFile, int numberOfComponents) {
@@ -185,9 +186,23 @@ public abstract class ModelicaLogger {
      * @param warnings              the warnings generated during compilation.
      * @param numberOfComponents    the number of components in the FMU.
      * @return                      an object representing the successful compilation.
+     * @deprecated                  use {@link #logCompiledUnit(Path, Collection, int)} instead.
      */
+    @Deprecated
     public CompiledUnit logCompiledUnit(File unitFile, Collection<Problem> warnings, int numberOfComponents) {
-        CompiledUnit unit = new CompiledUnit(unitFile, warnings, numberOfComponents);
+        return logCompiledUnit(unitFile.toPath(), warnings, numberOfComponents);
+    }
+    
+    /**
+     * Log the compiled unit, it will be written on level info.
+     * 
+     * @param unitPath              the path pointing to the compiled FMU.
+     * @param warnings              the warnings generated during compilation.
+     * @param numberOfComponents    the number of components in the FMU.
+     * @return                      an object representing the successful compilation.
+     */
+    public CompiledUnit logCompiledUnit(Path unitPath, Collection<Problem> warnings, int numberOfComponents) {
+        CompiledUnit unit = new CompiledUnit(unitPath.toFile(), warnings, numberOfComponents);
         logCompiledUnit(unit);
         return unit;
     }
