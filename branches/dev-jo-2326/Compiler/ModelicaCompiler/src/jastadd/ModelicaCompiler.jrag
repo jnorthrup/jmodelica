@@ -644,7 +644,7 @@ public class ModelicaCompiler implements LogContainer {
     public CompiledUnit compileFMU(String className, String fileName[], String target, String compileTo) 
             throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 
-        return compileFMU(className, stringsToPaths(fileName), target, Paths.get(compileTo));
+        return compileFMU(className, stringsToPaths(fileName), target, compileTo == null ? null : Paths.get(compileTo));
     }
     
     /**
@@ -684,7 +684,7 @@ public class ModelicaCompiler implements LogContainer {
     public CompiledUnit compileFMUX(String className, String fileName[], String compileTo) 
             throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 
-        return compileFMUX(className, stringsToPaths(fileName), Paths.get(compileTo));
+        return compileFMUX(className, stringsToPaths(fileName), compileTo == null ? null : Paths.get(compileTo));
     }
 
     /**
@@ -723,7 +723,7 @@ public class ModelicaCompiler implements LogContainer {
     public CompiledUnit compileUnit(String className, String fileName[], String target, String version, String compileTo) 
             throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 
-        return compileUnit(className, stringsToPaths(fileName), target, version, Paths.get(compileTo));
+        return compileUnit(className, stringsToPaths(fileName), target, version, compileTo == null ? null : Paths.get(compileTo));
     }
     
     /**
@@ -1983,7 +1983,7 @@ public class ModelicaCompiler implements LogContainer {
      */
     public FClass ModelicaCompiler.compileModel(String files[], String cl, TargetObject target, String flatName, String compileTo)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-        return compileModel(stringsToPaths(files), cl, target, flatName, Paths.get(compileTo));
+        return compileModel(stringsToPaths(files), cl, target, flatName, compileTo == null ? null : Paths.get(compileTo));
     }
     
     /**
@@ -2033,7 +2033,7 @@ public class ModelicaCompiler implements LogContainer {
     
     public FClass ModelicaCompiler.doCompileModel(String name[], String cl, TargetObject target, String flatName, String compileTo)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-        return doCompileModel(stringsToPaths(name), cl, target, flatName, Paths.get(compileTo));
+        return doCompileModel(stringsToPaths(name), cl, target, flatName, compileTo == null ? null : Paths.get(compileTo));
     }
     
     
