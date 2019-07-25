@@ -316,10 +316,10 @@ class CompilerLogHandler:
         if exception.kind == 'org.jmodelica.util.logging.IllegalLogStringException':
             raise IllegalLogStringError(exception.message)
         
-        if exception.kind == 'org.jmodelica.common.options.OptionRegistry$UnknownOptionException':
+        if exception.kind == 'org.jmodelica.common.options.AbstractOptionRegistry$UnknownOptionException':
             raise UnknownOptionError(exception.message)
 
-        if exception.kind == 'org.jmodelica.common.options.OptionRegistry$InvalidOptionValueException':
+        if exception.kind == 'org.jmodelica.common.options.AbstractOptionRegistry$InvalidOptionValueException':
             raise InvalidOptionValueError(exception.message)
         
         if exception.kind == 'org.jmodelica.util.exceptions.CcodeCompilationException':

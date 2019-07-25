@@ -16,11 +16,12 @@
 
 package org.jmodelica.util.ccompiler;
 
-import org.jmodelica.common.options.OptionRegistry;
+import org.jmodelica.common.options.AbstractOptionRegistry;
+import org.jmodelica.common.options.AbstractOptionRegistry;
 
 public interface CCompilerTarget {
 
-    String createExtraCFlagsString(OptionRegistry options, String fileName);
+    String createExtraCFlagsString(AbstractOptionRegistry options, String fileName);
 
     String getMakeFileFlag();
 

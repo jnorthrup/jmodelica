@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.jmodelica.common.options.OptionRegistry;
+import org.jmodelica.common.options.AbstractOptionRegistry;
 import org.jmodelica.util.problemHandling.ProblemProducer;
 import org.jmodelica.api.problemHandling.ProblemKind;
 import org.jmodelica.api.problemHandling.ProblemSeverity;
@@ -87,7 +87,6 @@ aspect Library {
         String name = name();
         // TODO: Error if more than one class in file
         try {
-            log.info("Reading file: " + fileName);
             UtilInterface util = root().getUtilInterface();
             SourceRoot sr = util.getParserHandler().parseFile(util, getLoadInfo().withPath(Paths.get(fileName)));
             SrcStoredDefinition entity = sr.getProgram().getUnstructuredEntity(0);
@@ -457,7 +456,7 @@ aspect Library {
 
     public class LoadInfo {
 
-        private static final LoadInfo EMPTY = create((Path)null);
+        private static final LoadInfo EMPTY = create("");
 
         // Only one of path or otherDesc can be non-null. The issue is when switching from File to Path,
         // invalid path names (e.g., containing '<') started causing an exception, so other load descriptions than
@@ -471,7 +470,7 @@ aspect Library {
 
         @Deprecated
         public String getPath() {
-            return otherDesc != null ? otherDesc : (path != null ? path.toString() : null);
+            return path != null ? path.toString() : otherDesc;
         }
         
         public Path getPathAsPath() {
@@ -509,6 +508,7 @@ aspect Library {
         this.otherDesc = otherDesc;
     }
 
+    /** Create a new LoadInfo with the specified path, keeping the other attributes of this object. */
     public LoadInfo LoadInfo.withPath(Path path) {
         return new LoadInfo(path);
     }
@@ -620,7 +620,7 @@ aspect Library {
                     }
                 }
                 addLibraryDirectories(loadInfos, SrcLibNode.LoadReason.MODELICAPATH);
-            } catch (OptionRegistry.UnknownOptionException e) {}
+            } catch (AbstractOptionRegistry.UnknownOptionException e) {}
         }
 
     }
