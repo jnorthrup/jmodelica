@@ -36,7 +36,7 @@ set(CLASSES_common
   ifcasadi.MXFunction
   ifcasadi.MXVector
   ifcasadi.ifcasadi
-  org.jmodelica.common.options.OptionRegistry
+  org.jmodelica.common.options.AbstractOptionRegistry
   org.jmodelica.util.streams.CodeStream;
 )
 
@@ -76,6 +76,7 @@ set(CLASSES_modelica
   org.jmodelica.modelica.compiler.TornEquationBlock
   org.jmodelica.modelica.compiler.ScalarEquationBlock
   org.jmodelica.modelica.compiler.SolvedScalarEquationBlock
+  org.jmodelica.modelica.compiler.generated.OptionRegistry
 )
 
 # todo: consolidate with CLASSES_modelica
@@ -127,6 +128,7 @@ set(CLASSES_optimica
   org.jmodelica.optimica.compiler.TornEquationBlock
   org.jmodelica.optimica.compiler.ScalarEquationBlock
   org.jmodelica.optimica.compiler.SolvedScalarEquationBlock
+  org.jmodelica.optimica.compiler.generated.OptionRegistry
 )
 
 

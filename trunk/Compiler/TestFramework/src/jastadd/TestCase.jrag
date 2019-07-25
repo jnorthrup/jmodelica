@@ -92,10 +92,9 @@ abstract public class TestCase implements GenericTestCase {
      * Options may be further changed by test annotation.
      */
     protected OptionRegistry createOptionRegistry() {
-        OptionRegistry or = new TestOptions();
-        OptionsAggregated.addTo(or);
+        OptionRegistry or = OptionRegistry.buildTestOptions();
         File modelicapath = EnvironmentUtils.getThirdPartyMSL();
-        or.setStringOption("MODELICAPATH", modelicapath.getPath());
+        or.MODELICAPATH.setValue(modelicapath.getPath());
         return or;
     }
 
@@ -181,10 +180,10 @@ abstract public class TestCase implements GenericTestCase {
     /**
      * Gets an option's default value.
      * 
-     * @param options   the {@link OptionRegistry} from which to get the option.
+     * @param options   the {@link AbstractOptionRegistry} from which to get the option.
      * @param key       the name of the option.
      */
-    public Object getOptionDefault(OptionRegistry options, String key) {
+    public Object getOptionDefault(AbstractOptionRegistry options, String key) {
         if (!options.hasOption(key)) {
             return null;
         }
@@ -699,7 +698,7 @@ abstract public class TestCase implements GenericTestCase {
      * 
      * @return  {@code true} if the test case should top after this method.
      */
-    public boolean testOptions(OptionRegistry options) {
+    public boolean testOptions(AbstractOptionRegistry options) {
         return false;
     }
 
