@@ -332,6 +332,7 @@ public class ModelicaCompiler implements LogContainer {
         for (CompilationHooks hooks : hooksList) {
             hooks.packFmu(this, fc, dir);
         }
+        fc.root().getUtilInterface().hookPackFmu(fc);
     }
     
     /**

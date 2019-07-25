@@ -23,6 +23,7 @@ aspect UtilInterface {
          * Registers interfacers when UtilInterface is created.
          */
         interface Registrant {
+            boolean enabled(UtilInterface uif);
             Interfacer getInterfacer(UtilInterface uif);
         }
         
@@ -30,37 +31,25 @@ aspect UtilInterface {
          * Hooks for different steps in the compilation. Can keep states as opposed to the 
          * CompilationHooks in ModelicaCompiler.
          */
-        interface Interfacer {
-            /**
-             * Called when the UtilInterface is transferred between roots.
-             * States need to be copied here.
-             */
-            void transfer(UtilInterface uif);
-            
+        abstract class Interfacer {
             /**
              * Called after model has been instantiated.
              */
-            void modelInstantiated(UtilInterface uif, InstClassDecl icd);
+            public void modelInstantiated(InstClassDecl icd) {}
+            
+            /**
+             * Called after code has been compiled.
+             */
+            public void hookPackFmu(FClass fc) {}
             
             /**
              * Called at each transfer and on tearDown.
              */
-            void clean();
+            public void clean() {}
             
             /**
              * Called at end of compilation.
              */
-            void tearDown();
-        }
-        
-        abstract class InterfacerImpl implements Interfacer {
-            @Override
-            public void transfer(UtilInterface uif) {}
-            @Override
-            public void modelInstantiated(UtilInterface uif, InstClassDecl icd) {}
-            @Override
-            public void clean() {}
-            @Override
             public void tearDown() {}
         }
         
@@ -89,7 +78,9 @@ aspect UtilInterface {
             
             interfacers = new LinkedList<>();
             for (UtilInterface.Registrant registrant : registrants) {
-                interfacers.add(registrant.getInterfacer(this));
+                if (registrant.enabled(this)) {
+                    interfacers.add(registrant.getInterfacer(this));
+                }
             }
         }
         
@@ -127,25 +118,11 @@ aspect UtilInterface {
     }
     
     public static UtilInterface UtilInterface.create(ModelicaCompiler mc) {
-        return create(mc, mc.getOptions(), mc.getErrorHandler(), mc.getExternalFunctionCache(), null);
-    }
-    
-    public static UtilInterface UtilInterface.create(UtilInterface other) {
-        return create(other.getModelicaCompiler(), other.getOptionRegistry().copy(), 
-                other.getErrorHandler(), other.getExternalFunctionCache(), other.getCompilationOutputPath());
+        return new UtilInterface(mc, mc.getOptions(), mc.getErrorHandler(), mc.getExternalFunctionCache(), null);
     }
     
     public static UtilInterface UtilInterface.create(OptionRegistry options) {
-        return create(null, options, new DefaultErrorHandler(), null, null);
-    }
-    
-    public static UtilInterface UtilInterface.create(OptionRegistry options, IErrorHandler eh) {
-        return create(null, options, eh, null, null);
-    }
-    
-    private static UtilInterface UtilInterface.create(ModelicaCompiler mc, OptionRegistry options, 
-            IErrorHandler eh, ExternalFunctionCache efc, File path) {
-        return new UtilInterface(mc, options, eh, efc, path);
+        return new UtilInterface(null, options, new DefaultErrorHandler(), null, null);
     }
     
     public void Root.transferRoot(Root other) {
@@ -154,12 +131,19 @@ aspect UtilInterface {
     
     public void UtilInterface.transferRoot(Root root) {
         clean();
-        UtilInterface transferred = UtilInterface.create(this);
-        transferred.interfacers = interfacers;
-        for (Interfacer interfacer : transferred.interfacers) {
-            interfacer.transfer(transferred);
+        root.setUtilInterface(this);
+    }
+    
+    public void UtilInterface.modelInstantiated(InstClassDecl icd) {
+        for (Interfacer interfacer : interfacers) {
+            interfacer.modelInstantiated(icd);
         }
-        root.setUtilInterface(transferred);
+    }
+    
+    public void UtilInterface.hookPackFmu(FClass fc) {
+        for (Interfacer interfacer : interfacers) {
+            interfacer.hookPackFmu(fc);
+        }
     }
     
     public void UtilInterface.tearDown() {
@@ -176,12 +160,6 @@ aspect UtilInterface {
         }
         for (Interfacer interfacer : interfacers) {
             interfacer.clean();
-        }
-    }
-    
-    public void UtilInterface.modelInstantiated(InstClassDecl icd) {
-        for (Interfacer interfacer : interfacers) {
-            interfacer.modelInstantiated(this, icd);
         }
     }
 }
