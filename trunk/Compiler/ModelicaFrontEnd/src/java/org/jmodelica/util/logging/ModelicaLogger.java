@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -88,8 +89,9 @@ public abstract class ModelicaLogger {
     }
 
     private void log(Level level, Object obj) {
-        if (!getLevel().shouldLog(level))
+        if (!getLevel().shouldLog(level)) {
             return;
+        }
         
         if (obj instanceof Throwable) {
             write(level, new ThrowableLoggingUnit((Throwable) obj));
@@ -128,8 +130,9 @@ public abstract class ModelicaLogger {
     }
 
     private void log(Level level, String format, Object... args) {
-        if (!getLevel().shouldLog(level))
+        if (!getLevel().shouldLog(level)) {
             return;
+        }
         write(level, new StringLoggingUnit(format, args));
     }
 
@@ -144,8 +147,9 @@ public abstract class ModelicaLogger {
      * Log a list of problems.
      */
     public void logProblems(Collection<Problem> problems) {
-        for (Problem problem : problems)
+        for (Problem problem : problems) {
             logProblem(problem);
+        }
     }
 
     /**
@@ -169,7 +173,7 @@ public abstract class ModelicaLogger {
      * @param unitFile              the file object pointing to the compiled FMU.
      * @param numberOfComponents    the number of components in the FMU.
      * @return                      an object representing the successful compilation.
-     * @deprecated                  use {@link #logCompiledUnit(File, Collection, int)} instead.
+     * @deprecated                  use {@link #logCompiledUnit(Path, Collection, int)} instead.
      */
     @Deprecated
     public CompiledUnit logCompiledUnit(File unitFile, int numberOfComponents) {
@@ -185,9 +189,23 @@ public abstract class ModelicaLogger {
      * @param warnings              the warnings generated during compilation.
      * @param numberOfComponents    the number of components in the FMU.
      * @return                      an object representing the successful compilation.
+     * @deprecated                  use {@link #logCompiledUnit(Path, Collection, int)} instead.
      */
+    @Deprecated
     public CompiledUnit logCompiledUnit(File unitFile, Collection<Problem> warnings, int numberOfComponents) {
-        CompiledUnit unit = new CompiledUnit(unitFile, warnings, numberOfComponents);
+        return logCompiledUnit(unitFile.toPath(), warnings, numberOfComponents);
+    }
+    
+    /**
+     * Log the compiled unit, it will be written on level info.
+     * 
+     * @param unitPath              the path pointing to the compiled FMU.
+     * @param warnings              the warnings generated during compilation.
+     * @param numberOfComponents    the number of components in the FMU.
+     * @return                      an object representing the successful compilation.
+     */
+    public CompiledUnit logCompiledUnit(Path unitPath, Collection<Problem> warnings, int numberOfComponents) {
+        CompiledUnit unit = new CompiledUnit(unitPath.toFile(), warnings, numberOfComponents);
         logCompiledUnit(unit);
         return unit;
     }
@@ -253,10 +271,11 @@ public abstract class ModelicaLogger {
     }
 
     private OutputStream logStream(Level level) {
-        if (getLevel().shouldLog(level))
+        if (getLevel().shouldLog(level)) {
             return new LogOutputStream(level);
-        else
+        } else {
             return NullStream.OUTPUT;
+        }
     }
 
     /**
@@ -287,8 +306,9 @@ public abstract class ModelicaLogger {
         @Override
         public void write(int b) throws IOException {
             buf[n++] = (byte) b;
-            if (lastR || b == N)
+            if (lastR || b == N) {
                 logBuffer();
+            }
             lastR = (b == R);
         }
 
@@ -318,17 +338,20 @@ public abstract class ModelicaLogger {
 
             while (nlpos >= 0) {
                 nlpos = -1;
-                for (int i = start; nlpos < 0 && i < n; i++)
-                    if (buf[i] == N || buf[i] == R)
+                for (int i = start; nlpos < 0 && i < n; i++) {
+                    if (buf[i] == N || buf[i] == R) {
                         nlpos = i;
+                    }
+                }
                 if (nlpos == n - 1 && buf[nlpos] == R && (start > 0 || n < buf.length)) {
                     lastR = true;
                     nlpos = -1;
                 } else if (nlpos >= 0) {
                     log(level, new String(buf, start, nlpos - start));
                     start = nlpos + 1;
-                    if (start < n && buf[start] == N && buf[start - 1] == R)
+                    if (start < n && buf[start] == N && buf[start - 1] == R) {
                         start++;
+                    }
                 } else if (start == 0 && n == buf.length) {
                     log(level, new String(buf, 0, n));
                     start = n;
@@ -336,8 +359,9 @@ public abstract class ModelicaLogger {
             }
 
             n -= start;
-            if (n > 0 && start > 0)
+            if (n > 0 && start > 0) {
                 System.arraycopy(buf, start, buf, 0, n);
+            }
         }
 
     }
@@ -359,8 +383,9 @@ public abstract class ModelicaLogger {
     public static ModelicaLogger createModelicaLoggersFromLogString(String logString) throws IllegalLogStringException {
         Collection<String> problems = new ArrayList<String>();
         Map<String, LoggerProps> loggerMap = new HashMap<String, LoggerProps>();
-        if (logString == null)
+        if (logString == null) {
             logString = "";
+        }
         logString = logString.trim();
         // Step 1. Parse log string, put in map to remove duplicates
         if (logString.length() > 0) {
@@ -438,14 +463,16 @@ public abstract class ModelicaLogger {
                 problems.add("Unable to open log stream '" + logPair.getKey() + "'!" + (e.getMessage() != null ? " " + e.getMessage() : ""));
             }
         }
-        if (loggers.size() == 0)
+        if (loggers.size() == 0) {
             loggers.add(new StreamingLogger(Level.ERROR, System.out));
+        }
         // Step 3. Create TeeLogger if necessary
         ModelicaLogger logger;
-        if (loggers.size() == 1)
+        if (loggers.size() == 1) {
             logger = loggers.get(0);
-        else
+        } else {
             logger = new TeeLogger(loggers.toArray(new ModelicaLogger[loggers.size()]));
+        }
         if (problems.size() > 0) {
             StringBuilder sb = new StringBuilder();
             sb.append("Invalid log string, the following problems was found:\n");

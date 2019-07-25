@@ -7,7 +7,7 @@ import org.jmodelica.common.evaluation.ExternalProcessMultiCache.External;
 
 /**
  * Represents an external function that can be evaluated using
- * {@link ExternalFunction.evaluate}.
+ * {@link #evaluate}.
  */
 public interface ExternalFunction<K, V> {
 
