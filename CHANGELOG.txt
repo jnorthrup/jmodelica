@@ -1,4 +1,8 @@
 ================= Unreleased ==================
+# Change ; Major ; Compiler ; #5809
+Generate one field per option in OptionRegistry.
+Renamed OptionRegistry to AbstractOptionRegistry, renamed OptionsAggregated to OptionRegistry.
+
 # Change ; Major ; Compiler ; #5804
 Switch to "java.nio.file.Path" instead of "File" or "String"s representing paths in most places.
 "Path" is more thought-through and more powerful, which will allow to implement advanced featuers in the future.
