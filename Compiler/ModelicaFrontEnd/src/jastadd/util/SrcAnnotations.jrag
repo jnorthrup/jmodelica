@@ -471,7 +471,7 @@ aspect SrcAnnotations {
     public interface ASTNodeWithAnnotation {
         public SrcAnnotation getSrcAnnotation();
         public boolean hasSrcAnnotation();
-        public void setSrcAnnotation(SrcAnnotation annotation);
+        public ASTNodeWithAnnotation setSrcAnnotation(SrcAnnotation annotation);
     }
 
     SrcFullClassDecl implements ASTNodeWithAnnotation;

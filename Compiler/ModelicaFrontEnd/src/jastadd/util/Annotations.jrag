@@ -1832,9 +1832,9 @@ aspect AnnotationAPI {
     }
 
     public class FAttributeListAnnotationNode extends AnnotationNode {
-        
+
         public interface FAttributeList {
-            public void addFAttribute(FAttribute attribute);
+            public FAttributeList addFAttribute(FAttribute attribute);
             public List<FAttribute> getFAttributeList();
             public int getNumFAttribute();
         }
