@@ -467,7 +467,7 @@ aspect GenerateEventIndicators {
 
     public interface EventGeneratingExp {
         boolean hasIndicator();
-        void addIndicator(FAccessExp indicator);
+        EventGeneratingExp addIndicator(FAccessExp indicator);
     }
     FRelExp implements EventGeneratingExp;
     FDelayExp implements EventGeneratingExp;
@@ -790,12 +790,14 @@ aspect GenerateEventIndicators {
         return myIndicatorVariables().contains(indicator);
     }
 
-    public void FRelExp.addIndicator(FAccessExp indicator) {
+    public FRelExp FRelExp.addIndicator(FAccessExp indicator) {
         setIndicator(indicator);
+        return this;
     }
 
-    public void FSpatialDistExp.addIndicator(FAccessExp indicator) {
+    public FSpatialDistExp FSpatialDistExp.addIndicator(FAccessExp indicator) {
         setIndicator(indicator);
+        return this;
     }
 
     /* ====================== *
