@@ -672,7 +672,7 @@ aspect FileNames {
     	
     }
     public String SrcLibNode.fileName() {
-        return getStructured() ? myPackageFile().getPath() : getLoadInfo().getPath();
+        return getStructured() ? myPackageFile().toString() : getLoadInfo().getPath();
     }
     public String InstLibNode.fileName() {
         return actualInstClass().fileName();
@@ -2120,7 +2120,7 @@ aspect UtilInterface {
         return create(null, options, eh, null, null);
     }
     
-    private static UtilInterface UtilInterface.create(ModelicaCompiler mc, OptionRegistry options, 
+    private static UtilInterface UtilInterface.create(ModelicaCompiler mc, OptionRegistry options,
             IErrorHandler eh, ExternalFunctionCache efc, File path) {
         return new UtilInterface(mc, options, eh, efc, path);
     }

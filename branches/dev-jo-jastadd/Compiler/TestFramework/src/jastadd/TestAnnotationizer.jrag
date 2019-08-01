@@ -458,10 +458,7 @@ abstract public class TestAnnotationizerHelper {
      * Ensures that option additions are loaded, then create a new TestOptions instance.
      */
     protected static OptionRegistry createTestOptions() {
-        OptionRegistry tmp = ModelicaCompiler.createOptions();
-        OptionRegistry options = new TestOptions();
-        OptionsAggregated.addTo(options);
-        return options;
+        return OptionRegistry.buildTestOptions();
     }
 
 	/**

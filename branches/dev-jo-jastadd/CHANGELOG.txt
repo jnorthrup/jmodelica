@@ -1,4 +1,14 @@
 ================= Unreleased ==================
+# Change ; Major ; Compiler ; #5809
+Generate one field per option in OptionRegistry.
+Renamed OptionRegistry to AbstractOptionRegistry, renamed OptionsAggregated to OptionRegistry.
+
+# Change ; Major ; Compiler ; #5804
+Switch to "java.nio.file.Path" instead of "File" or "String"s representing paths in most places.
+"Path" is more thought-through and more powerful, which will allow to implement advanced featuers in the future.
+Note that while java.nio allows to access non-File resources with the same API, the internal workings of JModelica
+currently make restrictions on only supporting file accesses.
+
 # Fixed ; Minor ; Compiler ; #5808
 Add ParseListener and CompilationStartListener for listening to
 parsed files and compilation start events.

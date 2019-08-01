@@ -21,8 +21,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
 
-import org.jmodelica.common.options.OptionRegistry;
-
 /**
  * 
  * Main compiler class which bundles the tasks needed to compile an Optimica
