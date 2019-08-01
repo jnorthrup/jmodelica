@@ -24,6 +24,12 @@ import org.jmodelica.util.collections.NestledIterable;
 import org.jmodelica.util.collections.SubClassIterable;
 import org.jmodelica.util.Criteria;
 
+import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.Set;
+import java.util.HashSet;
+
+
 aspect SourceTraversal {
 
 
@@ -122,15 +128,16 @@ aspect SourceTraversal {
     };
     syn lazy Iterable<SrcClassDecl> SrcLibClassDecl.classes() {
         // Imposes ordering specified in SrcLibClassDecl.order
-        Map<String,SrcClassDecl> map = new LinkedHashMap<String,SrcClassDecl>();
-        for (SrcClassDecl cd : super.classes())
+        Map<String,SrcClassDecl> map = new LinkedHashMap<>();
+        for (SrcClassDecl cd : super.classes()) {
             map.put(cd.name(), cd);
+        }
         for (SrcLibNode ln : getSrcLibNodes()) {
             map.put(ln.name(), ln);
         }
         
         ArrayList<SrcClassDecl> l = new ArrayList<SrcClassDecl>();
-        for (String name : order) {
+        for (String name : getOrder()) {
             SrcClassDecl cd = map.get(name);
             if (cd != null) {
                 l.add(cd);
@@ -153,7 +160,103 @@ aspect SourceTraversal {
         }
         // Libraries are loaded when needed in instance lookup instead
         return l;
-    } 
+    }
+
+    private boolean SrcLibClassDecl.orderingCorrected = false;
+
+    /**
+     * Get the class and constant ordering loaded from package.order, but 
+     * corrected for any discrepances from the order in package.mo and 
+     * what classes are present in separate files.
+     */
+    public java.util.List<String> SrcLibClassDecl.getOrder() {
+        if (!orderingCorrected) {
+            // package.order file
+            Set<String> orderNames = new HashSet<>(order);
+            
+            // package.mo file
+            ArrayList<String> moFileOrder = new ArrayList<>();
+            for (SrcClause clause : getSrcClauses()) {
+                clause.collectNameOrder(moFileOrder);
+            }
+            Set<String> moNames = new HashSet<>(moFileOrder);
+            
+            // Classes that are in separate files/folders
+            Map<String,SrcLibNode> files = new LinkedHashMap<>();
+            for (SrcLibNode ln : getSrcLibNodes()) {
+                files.put(ln.name().toLowerCase(), ln);
+            }
+            
+            // Process package.mo and part of package.order that corresponds to or is before it
+            ArrayList<String> newOrder = new ArrayList<>();
+            Set<String> passedMoNames = new HashSet<>(moFileOrder.size());
+            Set<String> processedMoNames = new HashSet<>(order.size());
+            Iterator<String> iter = order.iterator();
+            for (String moName : moFileOrder) {
+                if (orderNames.contains(moName) && !passedMoNames.contains(moName)) {
+                    for (String orderName; iter.hasNext() && !moName.equals(orderName = iter.next()); ) {
+                        if (moNames.contains(orderName) && !processedMoNames.contains(orderName)) {
+                            passedMoNames.add(orderName);
+                        } else {
+                            processOrderNameNotInPackageFile(orderName, files, newOrder);
+                        }
+                    }
+                }
+                newOrder.add(moName);
+                processedMoNames.add(moName);
+            }
+            
+            // Tail of package.order file (after the last name from package.mo file)
+            while (iter.hasNext()) {
+                processOrderNameNotInPackageFile(iter.next(), files, newOrder);
+            }
+            
+            // Any classes as separate files that was missing from package.order
+            for (SrcLibNode ln : files.values()) {
+                newOrder.add(ln.name());
+            }
+            
+            order = newOrder;
+            orderingCorrected = true;
+        }
+        return order;
+    }
+
+    private void SrcLibClassDecl.processOrderNameNotInPackageFile(
+            String orderName, Map<String,SrcLibNode> files, ArrayList<String> newOrder) {
+        String lcName = orderName.toLowerCase();
+        SrcLibNode ln = files.get(lcName);
+        if (ln != null) {
+            ln.getSrcStoredDefinition(); // Trigger reading file to get correct case
+            if (ln.name().equals(orderName)) {
+                newOrder.add(orderName);
+                files.remove(lcName);
+            }
+        }
+    }
+
+    public void SrcClause.collectNameOrder(java.util.List<String> order) {}
+
+    public void SrcElementList.collectNameOrder(java.util.List<String> order) {
+        for (SrcElement elem : getSrcElements()) {
+            elem.collectNameOrder(order);
+        }
+    }
+
+    public void SrcElement.collectNameOrder(java.util.List<String> order) {}
+
+    public void SrcClassDecl.collectNameOrder(java.util.List<String> order) {
+        order.add(name());
+    }
+
+    public void SrcComponentClause.collectNameOrder(java.util.List<String> order) {
+        if (isConstant()) {
+            for (SrcComponentDecl comp : getSrcComponentDecls()) {
+                order.add(comp.name());
+            }
+        }
+    }
+
 
     public class SrcFullClassDecl {
 
