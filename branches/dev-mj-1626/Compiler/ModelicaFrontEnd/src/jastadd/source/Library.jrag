@@ -95,7 +95,7 @@ aspect Library {
                 LIBRARY_FILE_CONTENTS.invoke(this, entity);
                 
                 // If the name is the wrong case, update it (since we only give a warning for that).
-                if (entity.getNumSrcClassDecl() == 1) {
+                if (entity != null && entity.getNumSrcClassDecl() == 1) {
                     String actualName = entity.getSrcClassDecl(0).name();
                     if (!name.equals(actualName) && name.equalsIgnoreCase(actualName)) {
                         getNameNoTransform().setID(actualName);
