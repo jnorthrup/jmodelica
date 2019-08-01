@@ -1317,10 +1317,15 @@ aspect ComponentDeclMethods {
      */
     syn boolean SrcComponentDecl.isParameter() = hasSrcTypePrefixVariability() && getSrcTypePrefixVariability().parameterVariability();
     
-     /**
+    /**
      * Check if this component is declared constant.
      */
     syn boolean SrcComponentDecl.isConstant() = hasSrcTypePrefixVariability() && getSrcTypePrefixVariability().constantVariability();
+    
+    /**
+     * Check if this component clause is declared constant.
+     */
+    syn boolean SrcComponentClause.isConstant() = hasSrcTypePrefixVariability() && getSrcTypePrefixVariability().constantVariability();
     
     /**
      * Check if this component is declared discrete.
