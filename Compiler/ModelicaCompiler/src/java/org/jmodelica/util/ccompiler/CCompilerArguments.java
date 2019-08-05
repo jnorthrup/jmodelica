@@ -21,7 +21,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.jmodelica.common.options.AbstractOptionRegistry;
-import org.jmodelica.common.options.AbstractOptionRegistry;
 
 public class CCompilerArguments {
     private String fileName;
