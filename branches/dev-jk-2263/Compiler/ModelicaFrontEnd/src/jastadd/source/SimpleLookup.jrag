@@ -174,6 +174,8 @@ aspect SimpleLookup {
         
         public abstract String name();
         public abstract boolean isUnknown();
+        public abstract boolean isBuiltIn();
+        public abstract SrcBaseNode getTarget();
         public abstract ResolvedAccess fromContext(String context, boolean isProtected);
         public abstract ResolvedAccess simpleLookupMemberScope(String name);
         
@@ -220,6 +222,14 @@ aspect SimpleLookup {
             return true;
         }
         @Override
+        public boolean isBuiltIn() {
+            return true;
+        }
+        @Override
+        public SrcBaseNode getTarget() {
+            return getClassDecl();
+        }
+        @Override
         public ResolvedAccess fromContext(String context, boolean isProtected) {
             return this;
         }
@@ -246,6 +256,16 @@ aspect SimpleLookup {
         }
         
         @Override
+        public boolean isBuiltIn() {
+            return getClassDecl().isBuiltInClass();
+        }
+        
+        @Override
+        public SrcClassDecl getTarget() {
+            return getClassDecl();
+        }
+        
+        @Override
         public ResolvedAccess fromContext(String context, boolean isProtected) {
             return new ClassAccess(getClassDecl(), getComponentDecl(), context, isProtected || isProtected());
         }
@@ -258,6 +278,14 @@ aspect SimpleLookup {
         @Override
         public boolean isClassDecl() {
             return true;
+        }
+        
+        @Override
+        public String globalAccess() {
+            if (getClassDecl().isBuiltInClass()) {
+                return qualifiedName();
+            }
+            return super.globalAccess();
         }
     }
 
@@ -275,6 +303,16 @@ aspect SimpleLookup {
         @Override
         public boolean isUnknown() {
             return getComponentDecl().isUnknown();
+        }
+        
+        @Override
+        public boolean isBuiltIn() {
+            return getComponentDecl().findClassDecl().isBuiltInClass();
+        }
+        
+        @Override
+        public SrcComponentDecl getTarget() {
+            return getComponentDecl();
         }
 
         @Override
