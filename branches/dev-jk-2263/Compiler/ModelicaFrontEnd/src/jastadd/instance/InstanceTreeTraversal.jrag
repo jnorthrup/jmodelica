@@ -1,0 +1,99 @@
+/*
+    Copyright (C) 2019 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+aspect InstanceTreeTraversal {
+    
+    public final <Node extends ASTNode> Collection<Node> ASTNode.collectInstanceNodes(Class<Node> clazz) {
+        ArrayList<Node> nodes = new ArrayList<>();
+        collectInstanceNodes(clazz, nodes);
+        return nodes;
+    }
+    
+    public final <Node extends ASTNode> void ASTNode.collectInstanceNodes(Class<Node> clazz, Collection<Node> result) {
+        if (clazz.isInstance(this)) {
+            result.add(clazz.cast(this));
+            return;
+        }
+        for (ASTNode node : instanceTreeChildren()) {
+            node.collectInstanceNodes(clazz, result);
+        }
+    }
+    
+    protected Collection<ASTNode> ASTNode.instanceTreeChildren() {
+        return ListUtil.<ASTNode>list((Iterable<ASTNode>) this);
+    }
+    
+    @Override
+    protected Collection<ASTNode> InstNode.instanceTreeChildren() {
+        Collection<ASTNode> result = super.instanceTreeChildren();
+        result.add(getElementInstModifications());
+        result.add(getAnnotationExps());
+        return result;
+    }
+    
+    @Override
+    protected Collection<ASTNode> InstClassDecl.instanceTreeChildren() {
+        Collection<ASTNode> result = super.instanceTreeChildren();
+        result.add(getInstImports());
+        result.add(getRedeclaredInstClassDecls());
+        result.add(getFAbstractEquations());
+        result.add(getInstComponentDecls());
+        result.add(getInstClassDecls());
+        result.add(getInstExtendss());
+        result.add(getClassAnnotationOpt());
+        result.add(getFunctionType());
+        return result;
+    }
+    
+    @Override
+    protected Collection<ASTNode> InstLibNode.instanceTreeChildren() {
+        return ListUtil.<ASTNode>create(getActualInstClass());
+    }
+    
+    @Override
+    protected Collection<ASTNode> InstSimpleShortClassDecl.instanceTreeChildren() {
+        return ListUtil.<ASTNode>create(getTarget());
+    }
+    
+    @Override
+    protected Collection<ASTNode> InstComponentDecl.instanceTreeChildren() {
+        Collection<ASTNode> result = super.instanceTreeChildren();
+        result.add(getFArraySubscriptsOpt());
+        result.add(getAnnotationOpt());
+        return result;
+    }
+    
+    @Override
+    protected Collection<ASTNode> InstValueModification.instanceTreeChildren() {
+        Collection<ASTNode> result = super.instanceTreeChildren();
+        result.add(getFExp());
+        return result;
+    }
+    
+    // TODO: rename either this or FClass.collectInstAccess()
+    public Collection<InstAccess> ASTNode.collectInstAccesses() {
+        Collection<InstAccess> results = new ArrayList<>();
+        collectInstanceNodes(InstAccess.class, results);
+        Collection<FArraySubscripts> subscripts = new ArrayList<>();
+        for (InstAccess access : results) {
+            access.collectInstanceNodes(FArraySubscripts.class, subscripts);
+        }
+        for (FArraySubscripts fas : subscripts) {
+            results.addAll(fas.collectInstAccesses());
+        }
+        return results;
+    }
+}
