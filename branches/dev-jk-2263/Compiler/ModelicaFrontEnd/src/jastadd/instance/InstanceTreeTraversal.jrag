@@ -22,65 +22,83 @@ aspect InstanceTreeTraversal {
         return nodes;
     }
     
-    public final <Node extends ASTNode> void ASTNode.collectInstanceNodes(Class<Node> clazz, Collection<Node> result) {
-        if (clazz.isInstance(this)) {
-            result.add(clazz.cast(this));
-            return;
+    public final <Node extends ASTNode> void ASTNode.collectInstanceNodes(final Class<Node> clazz, final Collection<Node> result) {
+        visitInstanceTree(new InstanceTreeVisitor() {
+            @Override
+            public boolean accept(ASTNode node) {
+                if (clazz.isInstance(node)) {
+                    result.add(clazz.cast(node));
+                    return false;
+                }
+                return true;
+            }
+        });
+    }
+    
+    // Java 8 note: Convert to a functional interface with a default method
+    abstract class InstanceTreeVisitor {
+        /**
+         * @return True if the visitor should traverse the subnodes of {@code node}, false otherwise
+         */
+        public abstract boolean accept(ASTNode node);
+        public final void acceptAndTraverse(ASTNode node) {
+            if (accept(node)) {
+                node.visitInstanceChildren(this);
+            }
         }
-        for (ASTNode node : instanceTreeChildren()) {
-            node.collectInstanceNodes(clazz, result);
+    }
+    
+    protected final void ASTNode.visitInstanceTree(InstanceTreeVisitor visitor) {
+        visitor.acceptAndTraverse(this);
+    }
+    
+    protected void ASTNode.visitInstanceChildren(InstanceTreeVisitor visitor) {
+        for (T child : this) {
+            child.visitInstanceTree(visitor);
         }
     }
-    
-    protected Collection<ASTNode> ASTNode.instanceTreeChildren() {
-        return ListUtil.<ASTNode>list((Iterable<ASTNode>) this);
+
+    @Override
+    protected void InstNode.visitInstanceChildren(InstanceTreeVisitor visitor) {
+        super.visitInstanceChildren(visitor);
+        getElementInstModifications().visitInstanceTree(visitor);
+        getAnnotationExps().visitInstanceTree(visitor);
     }
     
     @Override
-    protected Collection<ASTNode> InstNode.instanceTreeChildren() {
-        Collection<ASTNode> result = super.instanceTreeChildren();
-        result.add(getElementInstModifications());
-        result.add(getAnnotationExps());
-        return result;
+    protected void InstClassDecl.visitInstanceChildren(InstanceTreeVisitor visitor) {
+        super.visitInstanceChildren(visitor);
+        getInstImports().visitInstanceTree(visitor);
+        getRedeclaredInstClassDecls().visitInstanceTree(visitor);
+        getFAbstractEquations().visitInstanceTree(visitor);
+        getInstComponentDecls().visitInstanceTree(visitor);
+        getInstClassDecls().visitInstanceTree(visitor);
+        getInstExtendss().visitInstanceTree(visitor);
+        getClassAnnotationOpt().visitInstanceTree(visitor);
+        getFunctionType().visitInstanceTree(visitor);
     }
     
     @Override
-    protected Collection<ASTNode> InstClassDecl.instanceTreeChildren() {
-        Collection<ASTNode> result = super.instanceTreeChildren();
-        result.add(getInstImports());
-        result.add(getRedeclaredInstClassDecls());
-        result.add(getFAbstractEquations());
-        result.add(getInstComponentDecls());
-        result.add(getInstClassDecls());
-        result.add(getInstExtendss());
-        result.add(getClassAnnotationOpt());
-        result.add(getFunctionType());
-        return result;
+    protected void InstLibNode.visitInstanceChildren(InstanceTreeVisitor visitor) {
+        getActualInstClass().visitInstanceTree(visitor);
     }
     
     @Override
-    protected Collection<ASTNode> InstLibNode.instanceTreeChildren() {
-        return ListUtil.<ASTNode>create(getActualInstClass());
+    protected void InstSimpleShortClassDecl.visitInstanceChildren(InstanceTreeVisitor visitor) {
+        getTarget().visitInstanceTree(visitor);
     }
     
     @Override
-    protected Collection<ASTNode> InstSimpleShortClassDecl.instanceTreeChildren() {
-        return ListUtil.<ASTNode>create(getTarget());
+    protected void InstComponentDecl.visitInstanceChildren(InstanceTreeVisitor visitor) {
+        super.visitInstanceChildren(visitor);
+        getFArraySubscriptsOpt().visitInstanceTree(visitor);
+        getAnnotationOpt().visitInstanceTree(visitor);
     }
     
     @Override
-    protected Collection<ASTNode> InstComponentDecl.instanceTreeChildren() {
-        Collection<ASTNode> result = super.instanceTreeChildren();
-        result.add(getFArraySubscriptsOpt());
-        result.add(getAnnotationOpt());
-        return result;
-    }
-    
-    @Override
-    protected Collection<ASTNode> InstValueModification.instanceTreeChildren() {
-        Collection<ASTNode> result = super.instanceTreeChildren();
-        result.add(getFExp());
-        return result;
+    protected void InstValueModification.visitInstanceChildren(InstanceTreeVisitor visitor) {
+        super.visitInstanceChildren(visitor);
+        getFExp().visitInstanceTree(visitor);
     }
     
     // TODO: rename either this or FClass.collectInstAccess()
