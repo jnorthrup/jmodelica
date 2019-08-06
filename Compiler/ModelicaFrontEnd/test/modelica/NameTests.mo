@@ -4137,4 +4137,32 @@ Error at line 13, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/Nam
 ")})));
 end ClassThroughComponent4;
 
+
+model OrderFile1
+    extends TestLib.Order.Order1;
+
+annotation(__JModelica(UnitTesting(tests={
+    InstClassMethodTestCase(
+        name="OrderFile1",
+        description="",
+        modelicaLibraries="TestLib",
+        methodName="testOrderHelper",
+        methodResult="[A, E, B, C, F, D]"
+)})));
+end OrderFile1;
+
+
+model OrderFile2
+    extends TestLib.Order.Order2;
+
+annotation(__JModelica(UnitTesting(tests={
+    InstClassMethodTestCase(
+        name="OrderFile2",
+        description="",
+        modelicaLibraries="TestLib",
+        methodName="testOrderHelper",
+        methodResult="[F, E, A, B, C, D]"
+)})));
+end OrderFile2;
+
 end NameTests;
