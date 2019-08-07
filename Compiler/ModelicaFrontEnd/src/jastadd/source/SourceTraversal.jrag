@@ -24,8 +24,10 @@ import org.jmodelica.util.collections.NestledIterable;
 import org.jmodelica.util.collections.SubClassIterable;
 import org.jmodelica.util.Criteria;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 
@@ -166,7 +168,7 @@ aspect SourceTraversal {
 
     /**
      * Get the class and constant ordering loaded from package.order, but 
-     * corrected for any discrepances from the order in package.mo and 
+     * corrected for any discrepancies from the order in package.mo and 
      * what classes are present in separate files.
      */
     public java.util.List<String> SrcLibClassDecl.getOrder() {
@@ -182,12 +184,20 @@ aspect SourceTraversal {
             Set<String> moNames = new HashSet<>(moFileOrder);
             
             // Classes that are in separate files/folders
-            Map<String,SrcLibNode> files = new LinkedHashMap<>();
+            Map<String,java.util.List<SrcLibNode>> files = new HashMap<>();
             for (SrcLibNode ln : getSrcLibNodes()) {
-                files.put(ln.name().toLowerCase(), ln);
+                String lcName = ln.name().toLowerCase();
+                java.util.List<SrcLibNode> prev = files.put(lcName, Collections.singletonList(ln));
+                if (prev != null) {
+                    java.util.List<SrcLibNode> list = new ArrayList<>(prev);
+                    list.add(ln);
+                    files.put(lcName, list);
+                }
             }
             
-            // Process package.mo and part of package.order that corresponds to or is before it
+            /* Process order in package.mo, and for each name there that is also in package.order,
+             * process package.order up to that point. 
+             */ 
             ArrayList<String> newOrder = new ArrayList<>();
             Set<String> passedMoNames = new HashSet<>(moFileOrder.size());
             Set<String> processedMoNames = new HashSet<>(order.size());
@@ -212,9 +222,12 @@ aspect SourceTraversal {
             }
             
             // Any classes as separate files that was missing from package.order
+            ArrayList<String> fileClassNames = new ArrayList<>();
             for (SrcLibNode ln : files.values()) {
-                newOrder.add(ln.name());
+                fileClassNames.add(ln.name());
             }
+            fileClassNames.sort();
+            newOrder.addAll(fileClassNames);
             
             order = newOrder;
             orderingCorrected = true;
@@ -223,14 +236,26 @@ aspect SourceTraversal {
     }
 
     private void SrcLibClassDecl.processOrderNameNotInPackageFile(
-            String orderName, Map<String,SrcLibNode> files, ArrayList<String> newOrder) {
+            String orderName, Map<String,java.util.List<SrcLibNode>> files, 
+            ArrayList<String> newOrder) {
         String lcName = orderName.toLowerCase();
-        SrcLibNode ln = files.get(lcName);
+        java.util.List<SrcLibNode> list = files.get(lcName);
         if (ln != null) {
-            ln.getSrcStoredDefinition(); // Trigger reading file to get correct case
-            if (ln.name().equals(orderName)) {
-                newOrder.add(orderName);
-                files.remove(lcName);
+            for (SrcLibNode ln : list) {
+                boolean match = ln.name().equals(orderName);
+                if (!match) {
+                    /* Expected class name and file name disagrees on case, 
+                     * trigger parsing to get name from class decl - this updates ln.name().
+                     * Then compare again to see if it was actually a match.
+                     */
+                    ln.getSrcStoredDefinition();
+                    match = ln.name().equals(orderName);
+                }
+                if (match) {
+                    newOrder.add(orderName);
+                    files.remove(lcName);
+                    return;
+                }
             }
         }
     }
