@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+# Change ; Minor ; Compiler ; #5815
+FilterableIterator now adheres to the contract of Iterator and properly supports "null" elements in the parent iterator.
+
 # Change ; Major ; Compiler ; #5809
 Generate one field per option in OptionRegistry.
 Renamed OptionRegistry to AbstractOptionRegistry, renamed OptionsAggregated to OptionRegistry.
