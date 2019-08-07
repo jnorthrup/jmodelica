@@ -223,10 +223,12 @@ aspect SourceTraversal {
             
             // Any classes as separate files that was missing from package.order
             ArrayList<String> fileClassNames = new ArrayList<>();
-            for (SrcLibNode ln : files.values()) {
-                fileClassNames.add(ln.name());
+            for (java.util.List<SrcLibNode> list : files.values()) {
+                for (SrcLibNode ln : list) {
+                    fileClassNames.add(ln.name());
+                }
             }
-            fileClassNames.sort();
+            Collections.sort(fileClassNames, String.CASE_INSENSITIVE_ORDER);
             newOrder.addAll(fileClassNames);
             
             order = newOrder;
@@ -240,7 +242,7 @@ aspect SourceTraversal {
             ArrayList<String> newOrder) {
         String lcName = orderName.toLowerCase();
         java.util.List<SrcLibNode> list = files.get(lcName);
-        if (ln != null) {
+        if (list != null) {
             for (SrcLibNode ln : list) {
                 boolean match = ln.name().equals(orderName);
                 if (!match) {
