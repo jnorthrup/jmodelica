@@ -138,12 +138,14 @@ aspect Library {
     public void SrcLibClassDecl.readOrderFile(File baseDir, UtilInterface util) {
         File orderFile = new File(baseDir, SrcLibNode.PACKAGE_ORDER_FILE);
         if (orderFile.isFile()) {
-            try(BufferedReader in = new BufferedReader(util.getParserHandler().fileReader(util, orderFile))){
-                java.util.List<String> order = new ArrayList<String>();
+            try (BufferedReader in = 
+                    new BufferedReader(util.getParserHandler().fileReader(util, orderFile))) {
+                order = new ArrayList<String>();
                 String line;
-                while ((line = in.readLine()) != null)
+                while ((line = in.readLine()) != null) {
                     order.add(line);
-                setOrder(order);
+                }
+                needsOrderCorrection = true;
             } catch (IOException e) {
                 // TODO: Add a warning about failing to load package.order
             }
@@ -297,10 +299,6 @@ aspect Library {
             : createErrorClass();
 
     private java.util.List<String> SrcLibClassDecl.order = Collections.emptyList();
-    
-    public void SrcLibClassDecl.setOrder(java.util.List<String> order) {
-        this.order = order;
-    }
 
     private SrcStoredDefinition SrcLibNode.createErrorStoredDefinition() {
         return new SrcStoredDefinition(new Opt(), new List(createErrorClass()), getLoadInfo());
