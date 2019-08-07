@@ -164,7 +164,12 @@ aspect SourceTraversal {
         return l;
     }
 
-    private boolean SrcLibClassDecl.orderingCorrected = false;
+    private boolean SrcLibClassDecl.needsOrderCorrection = false;
+
+    public void SrcLibClassDecl.setOrder(java.util.List<String> order) {
+        needsOrderCorrection = false;
+        this.order = order;
+    }
 
     /**
      * Get the class and constant ordering loaded from package.order, but 
@@ -172,7 +177,7 @@ aspect SourceTraversal {
      * what classes are present in separate files.
      */
     public java.util.List<String> SrcLibClassDecl.getOrder() {
-        if (!orderingCorrected) {
+        if (needsOrderCorrection) {
             // package.order file
             Set<String> orderNames = new HashSet<>(order);
             
@@ -187,6 +192,8 @@ aspect SourceTraversal {
             Map<String,java.util.List<SrcLibNode>> files = new HashMap<>();
             for (SrcLibNode ln : getSrcLibNodes()) {
                 String lcName = ln.name().toLowerCase();
+                // There could plausibly be two .mo files and/or folders that only differ
+                // in case. It should be very rare, so we optimize for there only being one.
                 java.util.List<SrcLibNode> prev = files.put(lcName, Collections.singletonList(ln));
                 if (prev != null) {
                     java.util.List<SrcLibNode> list = new ArrayList<>(prev);
@@ -232,7 +239,7 @@ aspect SourceTraversal {
             newOrder.addAll(fileClassNames);
             
             order = newOrder;
-            orderingCorrected = true;
+            needsOrderCorrection = false;
         }
         return order;
     }
@@ -246,7 +253,7 @@ aspect SourceTraversal {
             for (SrcLibNode ln : list) {
                 boolean match = ln.name().equals(orderName);
                 if (!match) {
-                    /* Expected class name and file name disagrees on case, 
+                    /* Expected class name and file name disagree on case, 
                      * trigger parsing to get name from class decl - this updates ln.name().
                      * Then compare again to see if it was actually a match.
                      */

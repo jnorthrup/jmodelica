@@ -4144,7 +4144,7 @@ model OrderFile1
 annotation(__JModelica(UnitTesting(tests={
     InstClassMethodTestCase(
         name="OrderFile1",
-        description="",
+        description="Correction of package.order: correct file",
         modelicaLibraries="TestLib",
         methodName="testOrderHelper",
         methodResult="[A, E, B, C, F, D]"
@@ -4158,11 +4158,39 @@ model OrderFile2
 annotation(__JModelica(UnitTesting(tests={
     InstClassMethodTestCase(
         name="OrderFile2",
-        description="",
+        description="Correction of package.order: package.mo contents in wrong order",
         modelicaLibraries="TestLib",
         methodName="testOrderHelper",
         methodResult="[F, E, A, B, C, D]"
 )})));
 end OrderFile2;
+
+
+model OrderFile3
+    extends TestLib.Order.Order3;
+
+annotation(__JModelica(UnitTesting(tests={
+    InstClassMethodTestCase(
+        name="OrderFile3",
+        description="Correction of package.order: class file has wrong case",
+        modelicaLibraries="TestLib",
+        methodName="testOrderHelper",
+        methodResult="[A, B, F, C, D, E]"
+)})));
+end OrderFile3;
+
+
+model OrderFile4
+    extends TestLib.Order.Order4;
+
+annotation(__JModelica(UnitTesting(tests={
+    InstClassMethodTestCase(
+        name="OrderFile4",
+        description="Correction of package.order: wrong class names in package.order",
+        modelicaLibraries="TestLib",
+        methodName="testOrderHelper",
+        methodResult="[A, B, C, D, E, F]"
+)})));
+end OrderFile4;
 
 end NameTests;
