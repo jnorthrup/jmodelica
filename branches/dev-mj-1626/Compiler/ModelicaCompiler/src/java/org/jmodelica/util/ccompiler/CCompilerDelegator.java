@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jmodelica.common.options.AbstractOptionRegistry;
-import org.jmodelica.common.options.AbstractOptionRegistry;
 import org.jmodelica.util.SystemUtil;
 import org.jmodelica.util.files.FileUtil;
 import org.jmodelica.util.logging.ModelicaLogger;

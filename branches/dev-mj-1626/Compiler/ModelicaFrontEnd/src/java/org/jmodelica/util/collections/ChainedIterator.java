@@ -31,15 +31,17 @@ public class ChainedIterator<E> implements Iterator<E> {
 
 	@Override
     public boolean hasNext() {
-		while (i < its.length && !its[i].hasNext())
+		while (i < its.length && !its[i].hasNext()) {
 			i++;
+		}
 		return i < its.length;
 	}
 
 	@Override
     public E next() {
-		if (!hasNext())
+		if (!hasNext()) {
 			throw new NoSuchElementException();
+		}
 		return its[i].next();
 	}
 

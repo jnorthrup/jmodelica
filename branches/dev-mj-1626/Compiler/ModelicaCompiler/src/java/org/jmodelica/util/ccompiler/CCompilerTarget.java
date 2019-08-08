@@ -17,7 +17,6 @@
 package org.jmodelica.util.ccompiler;
 
 import org.jmodelica.common.options.AbstractOptionRegistry;
-import org.jmodelica.common.options.AbstractOptionRegistry;
 
 public interface CCompilerTarget {
 
