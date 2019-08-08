@@ -31,7 +31,7 @@ aspect UtilInterface {
          * Hooks for different steps in the compilation. Can keep states as opposed to the 
          * CompilationHooks in ModelicaCompiler.
          */
-        abstract class Interfacer {
+        static abstract class Interfacer {
             /**
              * Called after model has been instantiated.
              */
