@@ -1921,8 +1921,8 @@ aspect AnnotationAPI {
     }
     
 	/**
-	 * A runtime exception that is thrown when an action fail while trying
-	 * to alter an annotation node and it's underlying structure.
+	 * A runtime exception that is thrown when an action fails while trying
+	 * to alter an annotation node and its underlying structure.
 	 */
 	public class AnnotationEditException extends RuntimeException {
 		
