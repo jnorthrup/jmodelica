@@ -105,6 +105,8 @@ public class GUIDManagerTest {
     @Test
     public void getTokenAfterProcessFiles() {
         guidManager.setSourceString("Test string");
+        assertEquals("$GUID_TOKEN$", guidManager.getGuidToken());
+        
         guidManager.processDependentFiles();
         
         String actual   = "guid=" + guidManager.getGuidToken();
