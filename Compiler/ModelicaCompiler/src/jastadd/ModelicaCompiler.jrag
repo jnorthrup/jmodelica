@@ -2162,11 +2162,11 @@ public class ModelicaCompiler implements LogContainer {
     }
     
     protected void ModelicaCompiler.warning(String message) {
-        errorHandler.problem(new Problem(message, ProblemSeverity.WARNING));
+        errorHandler.problem(Problem.createProblem(null, ProblemSeverity.WARNING, ProblemKind.OTHER, message));
     }
     
     protected void ModelicaCompiler.error(String message) {
-        errorHandler.problem(new Problem(message, ProblemSeverity.ERROR));
+        errorHandler.problem(Problem.createProblem(null, ProblemSeverity.ERROR, ProblemKind.OTHER, message));
     }
 
     /**
