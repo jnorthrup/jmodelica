@@ -35,7 +35,7 @@ namespace ModelicaCasADi {
 void transferOptimizationProblem(Ref<OptimizationProblem> optProblem,
                                  std::string modelName,
                                  const std::vector<std::string> &modelFiles, 
-                                 Ref<CompilerOptionsWrapper> options, 
+                                 Ref<OptimicaOptionsWrapper> options, 
                                  std::string log_level);
 }; // End namespace
 

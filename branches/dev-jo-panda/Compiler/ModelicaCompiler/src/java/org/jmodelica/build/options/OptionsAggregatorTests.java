@@ -3,11 +3,7 @@ package org.jmodelica.build.options;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.StringReader;
+import java.io.*;
 
 import org.jmodelica.build.options.OptionsAggregator.OptionsAggregationException;
 import org.junit.Test;
@@ -60,7 +56,7 @@ public class OptionsAggregatorTests {
                 );
             fail();
         } catch (OptionsAggregationException e) {
-            assertEquals("Found duplicated option declaration for opt1. Old declaration from /file/path. New declaration from /file/path", e.getMessage());
+            assertEquals("Found duplicated option declaration for opt1. Old declaration from /file/path. New declaration from /file/path.", e.getMessage());
         }
     }
     
@@ -106,27 +102,27 @@ public class OptionsAggregatorTests {
                 + "\"A description\"\n"
                 );
         op.modify();
-        try(StringOutputStream os = new StringOutputStream()) {
-            try(OutputStreamWriter osw = new OutputStreamWriter(os)) {
-                op.generate(osw, "org.pack");
+        try (StringOutputStream os = new StringOutputStream()) {
+            try(PrintStream out = new PrintStream(os)) {
+                op.generate(out, "org.pack");
             }
-            String expected = 
-                    "package org.pack;\n" + 
-                            "import java.util.LinkedHashMap;\n" + 
-                            "import java.util.Map;\n" + 
-                            "\n" + 
-                            "import org.jmodelica.common.options.Option;\n" + 
-                            "import org.jmodelica.common.options.OptionRegistry;\n" + 
-                            "import org.jmodelica.common.options.OptionRegistry.Category;\n" + 
-                            "import org.jmodelica.common.options.OptionRegistry.OptionType;\n" + 
-                            "\n" + 
-                            "public class OptionsAggregated {\n" + 
-                            "    public static void addTo(OptionRegistry options) {\n" +
-                            "        options.addBooleanOption(\"opt1\", OptionType.compiler, Category.user, true, true, \"\");\n" + 
-                            "        options.addBooleanOption(\"opt2\", OptionType.runtime, Category.experimental, false, false, \"A description\");\n" +  
-                            "    }\n" + 
-                            "}\n" + 
-                            "";
+            String expected = String.format(OptionsAggregator.HEADER
+                    + "    public final BooleanOption opt1 = new BooleanOption(\"opt1\", OptionType.compiler, Category.user,%n"
+                    + "            \"\",%n"
+                    + "            new DefaultValue<>(true));%n"
+                    + "    public final BooleanOption opt2 = new BooleanOption(\"opt2\", OptionType.runtime, Category.experimental,%n"
+                    + "            \"A description\",%n"
+                    + "            new DefaultValue<>(false));%n"
+                    + "%n"
+                    + "    {%n"
+                    + "        optionsMap.put(\"opt1\", opt1);%n"
+                    + "        optionsMap.put(\"opt2\", opt2);%n"
+                    + "    }%n"
+                    + "%n"
+                    + "    private void setTestDefaults() {%n"
+                    + "    }%n"
+                    + OptionsAggregator.FOOTER,
+                    "org.pack");
             assertEquals(expected, os.toString());
         }
     }
@@ -142,11 +138,11 @@ public class OptionsAggregatorTests {
                 + "\n"
                 );
         op.modify();
-        try(StringOutputStream os = new StringOutputStream()) {
-            try(OutputStreamWriter osw = new OutputStreamWriter(os)) {
-                op.generateCalls(osw);
+        try (StringOutputStream os = new StringOutputStream()) {
+            try (PrintStream out = new PrintStream(os)) {
+                op.generateTestDefaults(out, "");
             }
-            String expected = "        options.addBooleanOption(\"opt1\", OptionType.compiler, Category.user, false, true, \"\");\n";
+            String expected = String.format("opt1.setDefault(new DefaultValue<>(true));%n");
             assertEquals(expected, os.toString());
         }
     }
@@ -166,13 +162,16 @@ public class OptionsAggregatorTests {
                 + "\n"
             );
         op.modify();
-        try(StringOutputStream os = new StringOutputStream()) {
-            try(OutputStreamWriter osw = new OutputStreamWriter(os)) {
-                op.generateCalls(osw);
+        try (StringOutputStream os = new StringOutputStream()) {
+            try (PrintStream out = new PrintStream(os)) {
+                op.generateDeclarations(out, "");
             }
-            String expected = 
-                    "        options.addBooleanOption(\"opt1\", OptionType.compiler, Category.user, options.new DefaultInvertBoolean(\"opt2\"), options.new DefaultInvertBoolean(\"opt2\"), \"\");\n" + 
-                            "        options.addBooleanOption(\"opt2\", OptionType.compiler, Category.user, true, true, \"\");\n";
+            String expected = String.format("public final BooleanOption opt1 = new BooleanOption(\"opt1\", OptionType.compiler, Category.user,%n"
+                    + "        \"\",%n"
+                    + "        new DefaultInvertBoolean(\"opt2\"));%n"
+                    + "public final BooleanOption opt2 = new BooleanOption(\"opt2\", OptionType.compiler, Category.user,%n"
+                    + "        \"\",%n"
+                    + "        new DefaultValue<>(true));%n");
             assertEquals(expected, os.toString());
         }
     }

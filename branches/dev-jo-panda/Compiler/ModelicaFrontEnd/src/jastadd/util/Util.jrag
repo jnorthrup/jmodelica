@@ -672,7 +672,7 @@ aspect FileNames {
     	
     }
     public String SrcLibNode.fileName() {
-        return getStructured() ? myPackageFile().getPath() : getLoadInfo().getPath();
+        return getStructured() ? myPackageFile().toString() : getLoadInfo().getPath();
     }
     public String InstLibNode.fileName() {
         return actualInstClass().fileName();
@@ -1317,10 +1317,15 @@ aspect ComponentDeclMethods {
      */
     syn boolean SrcComponentDecl.isParameter() = hasSrcTypePrefixVariability() && getSrcTypePrefixVariability().parameterVariability();
     
-     /**
+    /**
      * Check if this component is declared constant.
      */
     syn boolean SrcComponentDecl.isConstant() = hasSrcTypePrefixVariability() && getSrcTypePrefixVariability().constantVariability();
+    
+    /**
+     * Check if this component clause is declared constant.
+     */
+    syn boolean SrcComponentClause.isConstant() = hasSrcTypePrefixVariability() && getSrcTypePrefixVariability().constantVariability();
     
     /**
      * Check if this component is declared discrete.
@@ -1418,10 +1423,12 @@ aspect ComponentDeclMethods {
     eq InstAssignable.isTopLevelInputOutput() = isTopLevel() && !inExpandableConnector() && 
             (isInput() || isOutput() || isConnectorVariable()) && !isProtected() && isPublicVar();
 
-    inh boolean InstComponentDecl.isTopLevel();
-    eq InstComponentDecl.getChild().isTopLevel() = (isAssignable() || isConnector()) && isTopLevel();
-    eq InstClassDecl.getChild().isTopLevel()     = true;
-    eq Root.getChild().isTopLevel()              = false;
+    syn boolean InstComponentDecl.isTopLevel() = isInTopLevel();
+
+    inh boolean InstComponentDecl.isInTopLevel();
+    eq InstComponentDecl.getChild().isInTopLevel() = (isAssignable() || isConnector()) && isTopLevel();
+    eq InstClassDecl.getChild().isInTopLevel()     = true;
+    eq Root.getChild().isInTopLevel()              = false;
 
     /**
      * Check if this equation is declared initial.
@@ -1566,6 +1573,14 @@ aspect ClassDeclMethods {
         }
         return false;
     }
+
+    /**
+     * check if this node has a SrcLibNode as parent
+     */
+    inh boolean SrcClassDecl.isLib();
+    eq SourceRoot.getChild().isLib() = false;
+    eq SrcLibNode.getChild().isLib() = true;
+    eq SrcFullClassDecl.getChild().isLib() = false;
 
     syn boolean SrcClassDecl.isLibNode() = false;
     eq SrcLibNode.isLibNode()            = true;
@@ -2118,7 +2133,7 @@ aspect UtilInterface {
         return create(null, options, eh, null, null);
     }
     
-    private static UtilInterface UtilInterface.create(ModelicaCompiler mc, OptionRegistry options, 
+    private static UtilInterface UtilInterface.create(ModelicaCompiler mc, OptionRegistry options,
             IErrorHandler eh, ExternalFunctionCache efc, File path) {
         return new UtilInterface(mc, options, eh, efc, path);
     }
