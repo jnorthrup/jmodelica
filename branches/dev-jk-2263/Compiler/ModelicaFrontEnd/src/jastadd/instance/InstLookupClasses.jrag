@@ -668,11 +668,12 @@ aspect SimpleInstClassLookup {
 
     public InstClassDecl InstNode.simpleLookupInstClassDeclRecursive(String name) {
         String[] parts = name.split("\\.", 2);
-        InstClassDecl icd = findMatching(getInstClassDecls(), parts[0]);
-        if (icd != null)
+        InstClassDecl icd = findMatching(allInstClassDecls(), parts[0]);
+        if (icd != null) {
             return icd = (parts.length == 1) ? icd : icd.actualInstClass().simpleLookupInstClassDeclRecursive(parts[1]);
-        else
+        } else {
             return unknownInstClassDecl();
+        }
     }
 
     public InstClassDecl InstProgramRoot.simpleLookupInstClassDeclRecursive(String name) {
@@ -680,13 +681,15 @@ aspect SimpleInstClassLookup {
         InstClassDecl icd = findMatching(getInstClassDecls(), parts[0]);
         if (icd == null) {
             InstLookupResult<InstClassDecl> result = lookupLibrary(parts[0]);
-            if (result.successful())
+            if (result.successful()) {
                 icd = result.target();
+            }
         }
-        if (icd != null)
+        if (icd != null) {
             return icd = (parts.length == 1) ? icd : icd.actualInstClass().simpleLookupInstClassDeclRecursive(parts[1]);
-        else
+        } else {
             return unknownInstClassDecl();
+        }
     }
 
     /**
