@@ -59,7 +59,6 @@
         public void syntaxError(Symbol token) {
             
             StringBuilder s = new StringBuilder();
-            //s.append("Syntax error at line "+ Symbol.getLine(token.getStart()) + ", column " + Symbol.getColumn(token.getStart()) + "\n");
             if (token.getId() == Terminals.EOF) {
                 s.append("  Unexpected end of file");
             } else if (token.value != null) {
@@ -68,9 +67,8 @@
                 s.append("  Unexpected token: " + Terminals.NAMES[token.getId()]);
             else 
                 s.append("  Syntactic error");
-            Problem p = new Problem(fileName, s.toString(), ProblemSeverity.ERROR, ProblemKind.SYNTACTIC,
-                    Symbol.getLine(token.getStart()), Symbol.getColumn(token.getStart()),
-                    Symbol.getLine(token.getEnd()), Symbol.getColumn(token.getEnd()));
+            Problem p = Problem.createProblem(fileName, Symbol.getLine(token.getStart()), Symbol.getColumn(token.getStart()),
+                    Symbol.getLine(token.getEnd()), Symbol.getColumn(token.getEnd()), ProblemSeverity.ERROR, ProblemKind.SYNTACTIC, s.toString());
             
             report(p);
         }
@@ -81,15 +79,8 @@
          * @param e     the exception.
          */
         public void scannerError(Scanner.Exception e) {
-            /*
-            StringBuilder s = new StringBuilder(e.getMessage());
-            s.append(" at line ");
-            s.append(e.line);
-            s.append(", column ");
-            s.append(e.column);
-            */
-            Problem p = new Problem(fileName, e.getMessage(), ProblemSeverity.ERROR, ProblemKind.LEXICAL,
-                    e.line, e.column, e.line, e.column);
+            Problem p = Problem.createProblem(fileName, e.line, e.column, e.line, e.column,
+            	ProblemSeverity.ERROR, ProblemKind.LEXICAL, e.getMessage());
             
             report(p);
         }
