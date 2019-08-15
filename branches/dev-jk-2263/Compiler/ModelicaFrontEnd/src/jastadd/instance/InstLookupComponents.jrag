@@ -742,9 +742,10 @@ aspect InstLookupComponents {
         if (name.equals(name())) {
             String className = getPackageName().enclosingName();
             if (!className.equals("")) {
+                // TODO: Stop using simpleLookupInstClassDecl
                 InstClassDecl icd = ((SourceRoot)root()).getProgram().getInstProgramRoot().
                    simpleLookupInstClassDecl(className);
-                return icd.memberInstConstant(getPackageName().getLastInstAccess().name());
+                return icd.memberInstConstantWithExtends(getPackageName().getLastInstAccess().name());
             }
         }
         return InstLookupResult.notFound();

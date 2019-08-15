@@ -612,8 +612,7 @@ aspect InstLookupClasses {
 aspect InstLookupImport {
 
     syn lazy InstClassDecl InstImport.getImportedClass() {
-        // Use simple lookup: only classes which are not inherited can be
-        // imported. 
+        // TODO: Stop using simpleLookupInstClassDecl
         return ((SourceRoot)root()).getProgram().getInstProgramRoot().
             simpleLookupInstClassDecl(getPackageNameNoTransform().name());
     }
