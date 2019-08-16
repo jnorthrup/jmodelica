@@ -454,7 +454,7 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
      *      a {@link Problem} instance.
      */
     public static Problem createProblem(Path filePath, ProblemSeverity severity, ProblemKind kind, String message) {
-        return createProblem(filePath.toString(), 0, 0, 0, 0, severity, kind, message);
+        return createProblem(filePath == null ? null : filePath.toString(), 0, 0, 0, 0, severity, kind, message);
     }
 
 
