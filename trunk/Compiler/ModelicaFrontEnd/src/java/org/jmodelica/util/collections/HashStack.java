@@ -1,17 +1,17 @@
 package org.jmodelica.util.collections;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
-import java.util.Stack;
 
 public class HashStack<T> {
     
-    private final Stack<T> stack = new Stack<T>();
+    private final Deque<T> stack = new ArrayDeque<T>();
     private final HashMap<T,Integer> counter = new HashMap<T,Integer>();
     
     
-    public boolean empty() {
-        counter.clear();
-        return stack.empty();
+    public boolean isEmpty() {
+        return stack.isEmpty();
     }
 
     public T peek() {
@@ -32,7 +32,7 @@ public class HashStack<T> {
         return val;
     }
 
-    public T push(T item) {
+    public void push(T item) {
         Integer count = counter.get(item);
         if (count == null) {
             count = 1;
@@ -40,7 +40,7 @@ public class HashStack<T> {
             count++;
         }
         counter.put(item, count);
-        return stack.push(item);
+        stack.push(item);
     }
 
     public boolean contains(Object o) {
