@@ -301,7 +301,7 @@ aspect Library {
     private java.util.List<String> SrcLibClassDecl.order = Collections.emptyList();
 
     private SrcStoredDefinition SrcLibNode.createErrorStoredDefinition() {
-        return new SrcStoredDefinition(new Opt(), new List(createErrorClass()), getLoadInfo());
+        return new SrcBadDefinition(new Opt(), new List(createErrorClass()), getLoadInfo());
     }
 
     private SrcBadClassDecl SrcLibNode.createErrorClass() {
