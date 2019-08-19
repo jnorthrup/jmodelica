@@ -150,6 +150,7 @@ aspect InstLookupClasses {
 
     inh InstLookupResult<InstClassDecl> InstAccess.lookupInstClassFromTop(String name);
     inh InstLookupResult<InstClassDecl> InstNode.lookupInstClassFromTop(String name);
+    inh InstLookupResult<InstClassDecl> InstImport.lookupInstClassFromTop(String name);
     eq InstRoot.getChild().lookupInstClassFromTop(String name) = genericLookupInstClass(name);
     eq Root.getChild().lookupInstClassFromTop(String name)     = InstLookupResult.notFound();
 
@@ -611,11 +612,10 @@ aspect InstLookupClasses {
 
 aspect InstLookupImport {
 
+    eq InstImport.getPackageName().lookupInstClass(String name) = lookupInstClassFromTop(name);
+
     syn lazy InstClassDecl InstImport.getImportedClass() {
-        // Use simple lookup: only classes which are not inherited can be
-        // imported. 
-        return ((SourceRoot)root()).getProgram().getInstProgramRoot().
-            simpleLookupInstClassDecl(getPackageNameNoTransform().name());
+        return getPackageName().myInstClassDecl();
     }
 
     syn InstLookupResult<InstClassDecl> InstImport.lookupInstClassInImport(String name) {
@@ -668,11 +668,12 @@ aspect SimpleInstClassLookup {
 
     public InstClassDecl InstNode.simpleLookupInstClassDeclRecursive(String name) {
         String[] parts = name.split("\\.", 2);
-        InstClassDecl icd = findMatching(getInstClassDecls(), parts[0]);
-        if (icd != null)
+        InstClassDecl icd = findMatching(allInstClassDecls(), parts[0]);
+        if (icd != null) {
             return icd = (parts.length == 1) ? icd : icd.actualInstClass().simpleLookupInstClassDeclRecursive(parts[1]);
-        else
+        } else {
             return unknownInstClassDecl();
+        }
     }
 
     public InstClassDecl InstProgramRoot.simpleLookupInstClassDeclRecursive(String name) {
@@ -680,13 +681,15 @@ aspect SimpleInstClassLookup {
         InstClassDecl icd = findMatching(getInstClassDecls(), parts[0]);
         if (icd == null) {
             InstLookupResult<InstClassDecl> result = lookupLibrary(parts[0]);
-            if (result.successful())
+            if (result.successful()) {
                 icd = result.target();
+            }
         }
-        if (icd != null)
+        if (icd != null) {
             return icd = (parts.length == 1) ? icd : icd.actualInstClass().simpleLookupInstClassDeclRecursive(parts[1]);
-        else
+        } else {
             return unknownInstClassDecl();
+        }
     }
 
     /**
