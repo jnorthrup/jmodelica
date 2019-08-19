@@ -658,7 +658,7 @@ aspect InstLookupComponents {
     syn InstLookupResult<InstComponentDecl> InstNode.memberInstComponent(String name) { 
         if (isArray()) {
             return arrayMemberInstComponent(name, ndims());
-        } else {    
+        } else {
             return memberInstComponentCached(name);
         }
     }
@@ -740,12 +740,9 @@ aspect InstLookupComponents {
     syn InstLookupResult<InstComponentDecl> InstImport.lookupInstConstantInImport(String name) {
         // Assume import points to a single (constant) component
         if (name.equals(name())) {
-            String className = getPackageName().enclosingName();
-            if (!className.equals("")) {
-                // TODO: Stop using simpleLookupInstClassDecl
-                InstClassDecl icd = ((SourceRoot)root()).getProgram().getInstProgramRoot().
-                   simpleLookupInstClassDecl(className);
-                return icd.memberInstConstantWithExtends(getPackageName().getLastInstAccess().name());
+            InstComponentDecl target = getPackageName().myInstComponentDecl();
+            if (!target.isUnknown() && target.getSrcComponentDecl().isConstant()) {
+                return InstLookupResult.found(target);
             }
         }
         return InstLookupResult.notFound();
@@ -757,9 +754,14 @@ aspect InstLookupComponents {
 
     // This is needed since the member components of InstPrimitive:s (which are attributes)
     // are not instantiated
-    eq InstPrimitive.memberInstComponent(String name)      = myInstClass().memberInstComponent(name);
-    eq InstExtends.memberInstComponent(String name)   = 
-        extendsPrimitive() ? myInstClass().memberInstComponent(name) : super.memberInstComponent(name);
+    eq InstPrimitive.memberInstComponent(String name) = myInstClass().memberInstComponent(name);
+    eq InstExtends.memberInstComponent(String name) {
+        InstClassDecl myInstClass = myInstClass();
+        if (myInstClass.isUnknown()) {
+            return InstLookupResult.<InstComponentDecl>notFound();
+        }
+        return (extendsPrimitive() ? myInstClass().memberInstComponent(name) : super.memberInstComponent(name));
+    }
 
     eq InstComponentDecl.matches(String str) = name().equals(str);
     eq InstForIndex.matches(String str)      = getInstPrimitive().matches(str);

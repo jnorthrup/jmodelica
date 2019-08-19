@@ -150,6 +150,7 @@ aspect InstLookupClasses {
 
     inh InstLookupResult<InstClassDecl> InstAccess.lookupInstClassFromTop(String name);
     inh InstLookupResult<InstClassDecl> InstNode.lookupInstClassFromTop(String name);
+    inh InstLookupResult<InstClassDecl> InstImport.lookupInstClassFromTop(String name);
     eq InstRoot.getChild().lookupInstClassFromTop(String name) = genericLookupInstClass(name);
     eq Root.getChild().lookupInstClassFromTop(String name)     = InstLookupResult.notFound();
 
@@ -611,10 +612,10 @@ aspect InstLookupClasses {
 
 aspect InstLookupImport {
 
+    eq InstImport.getPackageName().lookupInstClass(String name) = lookupInstClassFromTop(name);
+
     syn lazy InstClassDecl InstImport.getImportedClass() {
-        // TODO: Stop using simpleLookupInstClassDecl
-        return ((SourceRoot)root()).getProgram().getInstProgramRoot().
-            simpleLookupInstClassDecl(getPackageNameNoTransform().name());
+        return getPackageName().myInstClassDecl();
     }
 
     syn InstLookupResult<InstClassDecl> InstImport.lookupInstClassInImport(String name) {
