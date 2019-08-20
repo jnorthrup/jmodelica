@@ -1172,13 +1172,13 @@ abstract public class TestAnnotationizerHelper {
         }
         
         protected String[] dataNames() {
-            return new String[] { "arguments", "methodName" };
+            return new String[] { "methodName", "arguments" };
         }
         
         protected void callMethod(Object o) throws Exception {
             checkData(data);
-            arguments = (data[0] == null) ? new Object[0] : (Object[]) data[0];
-            methodName = data[1].toString();
+            methodName = data[0].toString();
+            arguments = (data.length == 1) ? new Object[0] : (Object[]) data[1];
             Method method = o.getClass().getMethod(methodName, TestCase.unwrapClasses(arguments));
             methodResult = method.invoke(o, arguments).toString();
         }

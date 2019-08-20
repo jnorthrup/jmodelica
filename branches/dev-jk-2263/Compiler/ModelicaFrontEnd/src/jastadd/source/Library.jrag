@@ -93,6 +93,14 @@ aspect Library {
             SrcClassDecl cd = extractClassDecl(entity, name);
             if (shouldProduceProblem(entity, name)) {
                 LIBRARY_FILE_CONTENTS.invoke(this, entity);
+                
+                // If the name is the wrong case, update it (since we only give a warning for that).
+                if (entity != null && entity.getNumSrcClassDecl() == 1) {
+                    String actualName = entity.getSrcClassDecl(0).name();
+                    if (!name.equals(actualName) && name.equalsIgnoreCase(actualName)) {
+                        getNameNoTransform().setID(actualName);
+                    }
+                }
             }
             if (cd == null) {
                 srcStoredDefinition = createErrorStoredDefinition();
@@ -130,12 +138,14 @@ aspect Library {
     public void SrcLibClassDecl.readOrderFile(File baseDir, UtilInterface util) {
         File orderFile = new File(baseDir, SrcLibNode.PACKAGE_ORDER_FILE);
         if (orderFile.isFile()) {
-            try(BufferedReader in = new BufferedReader(util.getParserHandler().fileReader(util, orderFile))){
-                java.util.List<String> order = new ArrayList<String>();
+            try (BufferedReader in = 
+                    new BufferedReader(util.getParserHandler().fileReader(util, orderFile))) {
+                order = new ArrayList<String>();
                 String line;
-                while ((line = in.readLine()) != null)
+                while ((line = in.readLine()) != null) {
                     order.add(line);
-                setOrder(order);
+                }
+                needsOrderCorrection = true;
             } catch (IOException e) {
                 // TODO: Add a warning about failing to load package.order
             }
@@ -289,10 +299,6 @@ aspect Library {
             : createErrorClass();
 
     private java.util.List<String> SrcLibClassDecl.order = Collections.emptyList();
-    
-    public void SrcLibClassDecl.setOrder(java.util.List<String> order) {
-        this.order = order;
-    }
 
     private SrcStoredDefinition SrcLibNode.createErrorStoredDefinition() {
         return new SrcStoredDefinition(new Opt(), new List(createErrorClass()), getLoadInfo());
