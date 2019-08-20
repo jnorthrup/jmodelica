@@ -23,6 +23,22 @@
         <listitem>Dependency to beaver-rt.jar is now recorded in the jar manifest which means it is no longer necessary to add it to the classpath when interfacing directly with the compiler jars.</listitem>
     </itemizedlist>
     </section>
+    <section><title>Python Packages Improvements</title>
+    <para>The PyFMI version has been updated from 2.5 to 2.5.3.</para>
+    <para>Important changes to Python packages:</para>
+    <itemizedlist>
+        <listitem>Fixed wrong default value for FMUModelME1Extended.</listitem>
+        <listitem>Improved relative imports of Assimulo dependent classes.</listitem>
+        <listitem>Fixed issue with unicode symbols in result files.</listitem>
+        <listitem>Fixed a number of encode/decoding issues for Python3.</listitem>
+        <listitem>Forced no copy if the provided array is already correct, minor 
+      performance improvement.</listitem>
+        <listitem>Removed a number of C compiler warnings.</listitem>
+        <listitem>Fixed issue with corrupt result files after failed simulations.</listitem>
+        <listitem>Added (hidden) option to only load the XML from an FMU, for testing
+      purposes.</listitem>
+    </itemizedlist>
+    </section>
   </section>
 
   <section>
