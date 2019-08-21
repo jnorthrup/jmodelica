@@ -1328,7 +1328,7 @@ aspect ConstantEvaluation {
 	     * Traverses the array in the same order as indices().iterator().
 	     */
 		public Iterator<CValue> iterator() {
-			return new ConstArrayIterator<CValue>(values);
+            return Arrays.asList(values).iterator();
 		}
 
         /**
@@ -4955,11 +4955,11 @@ aspect VariableEvaluator {
             return access.cevalUse(this);
         }
         
-        public AlgorithmEvaluator createAlgorithmEvaluator(OptionRegistry options, Map<CommonVariableDecl, CValue> values) {
+        public AlgorithmEvaluator createAlgorithmEvaluator(AbstractOptionRegistry options, Map<CommonVariableDecl, CValue> values) {
             return new AlgorithmEvaluator(externalEvaluationEnabled, options, values);
         }
         
-        public AlgorithmEvaluator createEmptyAlgorithmEvaluator(OptionRegistry options) {
+        public AlgorithmEvaluator createEmptyAlgorithmEvaluator(AbstractOptionRegistry options) {
             return new AlgorithmEvaluator(true, options, Collections.<CommonVariableDecl, CValue>emptyMap());
         }
         
@@ -5025,7 +5025,7 @@ aspect VariableEvaluator {
         }
         
         @Override
-        public AlgorithmEvaluator createAlgorithmEvaluator(OptionRegistry options, Map<CommonVariableDecl, CValue> values) {
+        public AlgorithmEvaluator createAlgorithmEvaluator(AbstractOptionRegistry options, Map<CommonVariableDecl, CValue> values) {
             return new PartialAlgorithmEvaluator(externalEvaluationEnabled(), options, values, this);
         }
         
@@ -5059,7 +5059,7 @@ aspect VariableEvaluator {
         }
         
         @Override
-        public AlgorithmEvaluator createAlgorithmEvaluator(OptionRegistry options, Map<CommonVariableDecl, CValue> values) {
+        public AlgorithmEvaluator createAlgorithmEvaluator(AbstractOptionRegistry options, Map<CommonVariableDecl, CValue> values) {
             if (this.values == null) {
                 this.values = values;
             }
@@ -5154,9 +5154,9 @@ aspect VariableEvaluator {
     public class AlgorithmEvaluator extends VariableEvaluator {
         
         protected Map<CommonVariableDecl, CValue> values;
-        private OptionRegistry options;
+        private AbstractOptionRegistry options;
         
-        public AlgorithmEvaluator(boolean evaluateExternalEnabled, OptionRegistry options, Map<CommonVariableDecl, CValue> values) {
+        public AlgorithmEvaluator(boolean evaluateExternalEnabled, AbstractOptionRegistry options, Map<CommonVariableDecl, CValue> values) {
             super(evaluateExternalEnabled);
             this.values  = values;
             this.options = options;
@@ -5227,7 +5227,7 @@ aspect VariableEvaluator {
         protected PartialVariableEvaluator variableEvaluator;
         protected ArrayList<IfEvaluation> ifStack;
         
-        public PartialAlgorithmEvaluator(boolean evaluateExternalEnabled, OptionRegistry options,
+        public PartialAlgorithmEvaluator(boolean evaluateExternalEnabled, AbstractOptionRegistry options,
                 Map<CommonVariableDecl, CValue> values, PartialVariableEvaluator variableEvaluator) {
             super(evaluateExternalEnabled, options, values);
             this.variableEvaluator = variableEvaluator;
@@ -5244,7 +5244,7 @@ aspect VariableEvaluator {
         }
         
         @Override
-        public AlgorithmEvaluator createAlgorithmEvaluator(OptionRegistry options, Map<CommonVariableDecl, CValue> values) {
+        public AlgorithmEvaluator createAlgorithmEvaluator(AbstractOptionRegistry options, Map<CommonVariableDecl, CValue> values) {
             return variableEvaluator.createAlgorithmEvaluator(options, values);
         }
         

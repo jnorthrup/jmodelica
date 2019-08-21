@@ -71,6 +71,13 @@ public interface AnnotationProvider<N extends AnnotationProvider<N, V>, V extend
     public V annotationValue();
 
     /**
+     * Checks whether this AnnotationProvider supports setting new annotation values.
+     * @return <code>true</code> if a subsequent call to {@link #setAnnotationValue} will succeed; <code>false</code> if
+     *         a subsequent call to {@link #setAnnotationValue} will throw an exception.
+     */
+    public boolean canChangeAnnotationValue();
+    
+    /**
      * Change the value of this Annotation/modification if possible.
      * @param newValue The new value
      * @throws FailedToSetAnnotationValueException If the value cannot be changed.

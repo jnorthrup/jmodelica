@@ -382,16 +382,16 @@ fclass ExpandableConnectorArrays.CompositeConnectors
  Real ec3[3].x.b;
  Real ec3[3].y.a;
  Real ec3[3].y.b;
- Real c1.a;
- input Real c1.b;
- Real c2.a;
- input Real c2.b;
- Real c3.a;
- input Real c3.b;
- Real c4.a;
- input Real c4.b;
- Real c5.a;
- input Real c5.b;
+ potential Real c1.a;
+ flow Real c1.b;
+ potential Real c2.a;
+ flow Real c2.b;
+ potential Real c3.a;
+ flow Real c3.b;
+ potential Real c4.a;
+ flow Real c4.b;
+ potential Real c5.a;
+ flow Real c5.b;
 equation
  c1.a = ec1[1].x.a;
  ec1[1].x.a = ec2[1].x.a;
@@ -427,7 +427,8 @@ equation
  ec3[1].y.b = 0.0;
  ec3[2].x.b = 0.0;
  ec3[3].x.b = 0.0;
- ec3[3].y.b = 0.0;end ExpandableConnectorArrays.CompositeConnectors;
+ ec3[3].y.b = 0.0;
+end ExpandableConnectorArrays.CompositeConnectors;
 ")})));
     end CompositeConnectors;
 
@@ -514,10 +515,10 @@ fclass ExpandableConnectorArrays.BindingExpressionComposite
  Real ec2[2].a.y;
  Real ec3[3].a.x;
  Real ec3[3].a.y;
- Real c1.x = 1;
- Real c1.y = 2;
- Real c2.x;
- Real c2.y;
+ potential Real c1.x = 1;
+ potential Real c1.y = 2;
+ potential Real c2.x;
+ potential Real c2.y;
 equation
  c1.x = c2.x;
  c2.x = ec1[1].a.x;
@@ -641,14 +642,14 @@ fclass ExpandableConnectorArrays.ConnectorSlice
  Real ec3[1].a.f;
  Real ec3[2].a.p;
  Real ec3[2].a.f;
- Real c[1].p;
- input Real c[1].f;
- Real c[2].p;
- input Real c[2].f;
- Real c[3].p;
- input Real c[3].f;
- Real c[4].p;
- input Real c[4].f;
+ potential Real c[1].p;
+ flow Real c[1].f;
+ potential Real c[2].p;
+ flow Real c[2].f;
+ potential Real c[3].p;
+ flow Real c[3].f;
+ potential Real c[4].p;
+ flow Real c[4].f;
 equation
  - c[1].f - c[3].f - ec1[1].a.f - ec2[1].a.f - ec3[1].a.f = 0.0;
  c[1].p = c[3].p;
@@ -1629,7 +1630,6 @@ end ExpandableConnectorArrays.ThroughScalar;
 ")})));
     end ThroughScalar;
     
-    // TODO: here too many are connected, a[1] should only contain b and a[2] should only contain d
     model ThroughArray
         expandable connector EC
         end EC;
@@ -1649,7 +1649,7 @@ end ExpandableConnectorArrays.ThroughScalar;
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
             name="ThroughArray",
-            description="",
+            description="Connecting expandable connectors through an array cell, and make contents is not propagated to other cells in same array",
             flatModel="
 fclass ExpandableConnectorArrays.ThroughArray
  Real ec1.a[1].b;
