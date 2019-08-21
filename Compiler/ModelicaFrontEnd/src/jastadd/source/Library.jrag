@@ -471,7 +471,7 @@ aspect Library {
         // the default file system.
         // We should figure out if using a non-file name is really needed as load description,
         // and if not - get rid of otherDesc.
-        private final Path path;
+        private Path path;
         private final String otherDesc;
 
         @Deprecated
@@ -502,6 +502,7 @@ aspect Library {
         public static LoadInfo empty() {
             return EMPTY;
         }
+        
     }
 
     private LoadInfo.LoadInfo(Path path) {
