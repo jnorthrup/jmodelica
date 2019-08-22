@@ -687,7 +687,6 @@
                 <mkdir dir="${java_output_intermediate}" />
                 <!-- run jastadd to generate AST files -->
                 <java classname="org.jastadd.JastAdd" classpath="${jastadd_jar}" failonerror="true">
-                    <arg value="--generateAnnotations=false" />
                     <arg value="--package=${ast_package}" />
                     <arg value="--o=${java_output_intermediate}" />
                     <arg value="--beaver" />
