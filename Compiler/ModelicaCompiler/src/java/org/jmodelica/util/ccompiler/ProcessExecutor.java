@@ -31,7 +31,7 @@ public class ProcessExecutor {
     /**
      * Executes the given command as a separate process, writing any output to the logger.
      * 
-     * Stdout goes on log level "verbose", and stderr on "warning". If the process fails, 
+     * Stdout goes on log level "verbose", and stderr on "warning. If the process fails, 
      * then all output goes on "warning".
      */
     public static int loggedProcess(ModelicaLogger log, String[] cmd, Map<String,String> env, File workDir) {
@@ -87,9 +87,8 @@ public class ProcessExecutor {
     private static String[] convertEnv(Map<String, String> envMap) {
         String[] res = new String[envMap.size()];
         int i = 0;
-        for (String key : envMap.keySet()) {
-			res[i++] = key + '=' + envMap.get(key);
-		}
+        for (String key : envMap.keySet())
+            res[i++] = key + '=' + envMap.get(key);
         return res;
     }
 }
