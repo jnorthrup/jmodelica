@@ -309,8 +309,10 @@ aspect Library {
     }
 
     public SrcLibClassDecl.SrcLibClassDecl(SrcFullClassDecl fcd, List<SrcLibNode> lib) {
-        super(fcd);
-        setSrcLibNodeList(lib);
+        this(fcd.getName(), fcd.getEncapsulated(), fcd.getPartial(), fcd.getSrcRestriction(), fcd.getRedeclare(),
+                fcd.getFinal(), fcd.getInner(), fcd.getOuter(), fcd.getReplaceable(), fcd.getSrcConstrainingClauseOpt(),
+                fcd.getConstrainingClauseCommentOpt(), fcd.getSrcStringCommentOpt(), fcd.getSrcClauseList(),
+                fcd.getSrcExternalClauseOpt(), lib, fcd.getSrcAnnotationOpt(), fcd.getSrcEndDecl());
     }
 
     eq SrcLibClassDecl.getSrcLibNode().enclosingClassDecl() = this;   
