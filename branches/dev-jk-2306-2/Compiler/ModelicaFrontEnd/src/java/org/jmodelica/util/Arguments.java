@@ -208,9 +208,9 @@ public class Arguments {
                 "  -target=<fmume, me, fmucs, cs, jmu, fmux, parse or check>\n" +
                 "  -version=<1.0 or 2.0>\n" +
                 "  -dumpmemuse[=<resolution>] -findflatinst \n" + 
-                "  -platform=<win32 or win64 or linux32 or linux64 or darwin32 or darwin64>" +
-                " If no target is given, -jmu is assumed." +
-                " If no version is given in case of targets 'me' or 'cs', -1.0 is assumed";
+                "  -platform=<win32 or win64 or linux32 or linux64 or darwin32 or darwin64>\n" +
+                " If no target is given, -jmu is assumed.\n" +
+                " If no version is given in case of targets 'me' or 'cs', 1.0 is assumed\n";
     }
 
     public class InvalidArgumentException extends Exception{

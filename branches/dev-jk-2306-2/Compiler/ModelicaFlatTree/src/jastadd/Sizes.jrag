@@ -264,10 +264,10 @@ aspect AccessSizes {
 }
 
 aspect FunctionCallSizes {
-    
+
     public abstract Size FType.getSize();
-    public abstract void FType.setSize(Size size);
-    
+    public abstract FType FType.setSize(Size size);
+
     @Override
     public Size FArrayType.getSize() {
         MutableSize newSize = new MutableSize(getNumFExp());
@@ -277,8 +277,8 @@ aspect FunctionCallSizes {
         return newSize;
     }
     @Override
-    public void FArrayType.setSize(Size size) {throw new InternalCompilerError("FArrayType does not support setSize()");}
-    
+    public FArrayType FArrayType.setSize(Size size) {throw new InternalCompilerError("FArrayType does not support setSize()");}
+
     syn Size FAbstractFunctionCall.sizeOfOutput(int i) = (i == 0) ? size() : Size.SCALAR;
     eq CommonFunctionCall.sizeOfOutput(int i)          = typeOfOutput(i).size();
     
@@ -682,5 +682,5 @@ aspect SizesUtil {
             throw new ConstantEvaluationException();
         }
     }
-    
+
 }

@@ -13,7 +13,6 @@ import org.jmodelica.common.evaluation.ExternalFunction;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Variable;
 import org.jmodelica.common.options.AbstractOptionRegistry;
-import org.jmodelica.common.options.AbstractOptionRegistry;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Value;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Type;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache.External;

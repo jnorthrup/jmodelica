@@ -176,7 +176,7 @@ public class ModelicaCompiler implements LogContainer {
      * Basic export of all known problem types
      */
     public static class ProblemExporter {
-        public static void main(String[] args) {
+        public static void main(String ... args) {
             ASTNode node = new ASTNode(); // Dummy read to initialize all of the producers
             ProblemProducer.exportXML(new PrintStream(System.out));
         }
@@ -984,19 +984,19 @@ public class ModelicaCompiler implements LogContainer {
      *             If any of the model files could not be found.
      * @throws IOException
      *             If there was an error reading any of the model files. (Beaver exception.)
-     * @deprecated use {@link #parseModel(Path[])} instead
+     * @deprecated use {@link #parseModelFromPaths(Path[])} instead
      */
     @Deprecated
-    public SourceRoot parseModel(String files[]) 
+    public SourceRoot parseModel(String[] files)
       throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
-        return parseModel(stringsToPaths(files));
+        // NB: This method is called by compile_wrappers.py! It may not be deleted!
+        return parseModelFromPaths(stringsToPaths(files));
     }
 
     /**
-     * 
      * Parses a set of files and returns a reference to the root of a source tree
      * where the content of all files is contained. Each file is parsed using
-     * the parseModel method.
+     * the {@link #doParseModel}.
      * 
      * @param files
      *            An array of file paths.
@@ -1012,7 +1012,7 @@ public class ModelicaCompiler implements LogContainer {
      * @throws IOException
      *             If there was an error reading any of the model files. (Beaver exception.)
      */
-    public SourceRoot parseModel(Path files[])
+    public SourceRoot parseModelFromPaths(Path[] files)
       throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
         hookCheckAbort();
         boolean doTearDown = true;
@@ -1069,7 +1069,7 @@ public class ModelicaCompiler implements LogContainer {
     /**
      * Parses and instantiated the model <code>cl</code> from the source files <code>name</code>.
      * 
-     * @param name
+     * @param paths
      *            Array of model file or library paths.
      * @param cl
      *            The name of the class in the model file to compile.
@@ -1086,10 +1086,10 @@ public class ModelicaCompiler implements LogContainer {
      * @throws beaver.Parser.Exception
      *             If there was an Beaver parsing exception.
      */
-    private InstClassDecl instantiateModel(Path name[], String cl, TargetObject target)
+    private InstClassDecl instantiateModel(Path[] paths, String cl, TargetObject target)
             throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
         // build source tree
-        SourceRoot sr = parseModel(name);
+        SourceRoot sr = parseModelFromPaths(paths);
         dumpMemoryUseFile(sr, "source", false);
 
         if (options.getBooleanOption("generate_html_diagnostics")) {
@@ -1491,7 +1491,7 @@ public class ModelicaCompiler implements LogContainer {
         logEnvironment("MODELICAPATH", "JAVA_HOME", "JMODELICA_HOME");
     }
 
-    public static void main(String[] args) {
+    public static void main(String ... args) {
         // create an empty compiler
         ModelicaCompiler mc = new ModelicaCompiler();
         try {
@@ -2162,11 +2162,11 @@ public class ModelicaCompiler implements LogContainer {
     }
     
     protected void ModelicaCompiler.warning(String message) {
-        errorHandler.problem(new Problem(message, ProblemSeverity.WARNING));
+        errorHandler.problem(Problem.createProblem(null, ProblemSeverity.WARNING, ProblemKind.OTHER, message));
     }
     
     protected void ModelicaCompiler.error(String message) {
-        errorHandler.problem(new Problem(message, ProblemSeverity.ERROR));
+        errorHandler.problem(Problem.createProblem(null, ProblemSeverity.ERROR, ProblemKind.OTHER, message));
     }
 
     /**
@@ -2752,7 +2752,7 @@ aspect Version {
             return version;
         }
         
-        public static void main(String args[]) {
+        public static void main(String ... args) {
             System.out.println(parseVersion());
         }
     }

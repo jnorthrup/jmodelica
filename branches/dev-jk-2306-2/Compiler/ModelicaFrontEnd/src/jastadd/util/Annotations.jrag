@@ -1832,9 +1832,9 @@ aspect AnnotationAPI {
     }
 
     public class FAttributeListAnnotationNode extends AnnotationNode {
-        
+
         public interface FAttributeList {
-            public void addFAttribute(FAttribute attribute);
+            public FAttributeList addFAttribute(FAttribute attribute);
             public List<FAttribute> getFAttributeList();
             public int getNumFAttribute();
         }
@@ -1921,8 +1921,8 @@ aspect AnnotationAPI {
     }
     
 	/**
-	 * A runtime exception that is thrown when an action fail while trying
-	 * to alter an annotation node and it's underlying structure.
+	 * A runtime exception that is thrown when an action fails while trying
+	 * to alter an annotation node and its underlying structure.
 	 */
 	public class AnnotationEditException extends RuntimeException {
 		

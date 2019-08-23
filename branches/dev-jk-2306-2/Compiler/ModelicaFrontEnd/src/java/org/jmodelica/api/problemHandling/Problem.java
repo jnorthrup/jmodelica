@@ -26,7 +26,6 @@ import org.jmodelica.util.logging.Level;
 import org.jmodelica.util.logging.XMLLogger;
 import org.jmodelica.util.logging.units.LoggingUnit;
 import org.jmodelica.util.problemHandling.ReporterNode;
-import org.jmodelica.util.problemHandling.WarningFilteredProblem;
 
 /**
  * Represents a error or warning given by the compiler during compilation of
@@ -45,79 +44,13 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
     private final String message;
     private final ProblemSeverity severity;
     private final ProblemKind kind;
-    private final Set<String> components = new TreeSet<String>(); // TreeSet is used so that we get a sorted set
+    private final Set<String> components = new TreeSet<>(); // TreeSet is used so that we get a sorted set
 
-    /**
-     * Deprecated in favor of {@link Problem#createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)
-     * createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)}.
-     * 
-     * @param message Human readable message describing the problem
-     */
-    @Deprecated
-    public Problem(String message) {
-        this(message, ProblemSeverity.ERROR);
-    }
 
-    /**
-     * Deprecated in favor of {@link Problem#createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)
-     * createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)}.
-     * 
-     * @param message Human readable message describing the problem
-     * @param severity The severity of the problem
-     */
-    @Deprecated
-    public Problem(String message, ProblemSeverity severity) {
-        this(message, severity, ProblemKind.OTHER);
-    }
-
-    /**
-     * Deprecated in favor of {@link Problem#createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)
-     * createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)}.
-     * 
-     * @param message Human readable message describing the problem
-     * @param severity The severity of the problem
-     * @param kind The type of the problem
-     */
-    @Deprecated
-    public Problem(String message, ProblemSeverity severity, ProblemKind kind) {
-        this(null, null, message, severity, kind, 0, 0, 0, 0);
-    }
-
-    /**
-     * Deprecated in favor of {@link Problem#createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)
-     * createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)}.
-     * 
-     * @param fileName Name or path to the source file where the problem is
-     *          located
-     * @param message Human readable message describing the problem
-     * @param severity The severity of the problem
-     * @param kind The type of the problem
-     * @param beginLine Problem start line in the source file
-     * @param beginColumn Problem start column in the source file
-     * @param endLine Problem end line in the source file
-     * @param endColumn Problem end column in the source file
-     */
-    @Deprecated
-    public Problem(String fileName, String message, ProblemSeverity severity, ProblemKind kind, int beginLine, int beginColumn, int endLine, int endColumn) {
+    protected Problem(String fileName, String message, ProblemSeverity severity, ProblemKind kind, int beginLine, int beginColumn, int endLine, int endColumn) {
         this(null, fileName, message, severity, kind, beginLine, beginColumn, endLine, endColumn);
     }
 
-    /**
-     * Deprecated in favor of {@link Problem#createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)
-     * createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)}.
-     * 
-     * @param identifier An unique identifier for this category of problem
-     * @param fileName Name or path to the source file where the problem is
-     *          located
-     * @param message Human readable message describing the problem
-     * @param severity The severity of the problem
-     * @param kind The type of the problem
-     * @param beginLine Problem start line in the source file
-     * @param beginColumn Problem start column in the source file
-     * @param endLine Problem end line in the source file
-     * @param endColumn Problem end column in the source file
-     */
-    @Deprecated
     protected Problem(String identifier, String fileName, String message, ProblemSeverity severity, ProblemKind kind, int beginLine, int beginColumn, int endLine, int endColumn) {
         this.identifier = identifier;
         this.fileName = fileName;
@@ -128,9 +61,10 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
         this.beginColumn = beginColumn;
         this.endLine = endLine;
         this.endColumn = endColumn;
-        
-        if (message == null)
+
+        if (message == null) {
             throw new NullPointerException();
+        }
     }
 
     /**
@@ -163,7 +97,7 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
     public int beginLine() {
         return beginLine;
     }
-    
+
     /**
      * Provides the starting column in the source file where the problem was
      * encountered.
@@ -181,7 +115,7 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
     public int beginColumn() {
         return beginColumn;
     }
-  
+
     /**
      * Provides the ending line in the source file where the problem was
      * encountered. Beware, for some problems, the start and end line is the
@@ -331,7 +265,7 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
     public boolean equals(Object o) {
         return (o instanceof Problem) && (compareTo((Problem) o) == 0);
     }
-    
+
     @Override
     public int hashCode() {
         // This is not expected to be used much, so no need to take all fields into consideration.
@@ -340,25 +274,33 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
 
     @Override
     public int compareTo(Problem other) {
-        if (kind.order != other.kind.order)
+        if (kind.order != other.kind.order) {
             return kind.order - other.kind.order;
-        if (fileName == null || other.fileName == null) {
-            if (fileName != null)
-                return -1;
-            if (other.fileName != null)
-                return 1;
-        } else {
-            if (!fileName.equals(other.fileName))
-                return fileName.compareTo(other.fileName);
         }
-        if (beginLine != other.beginLine)
+        if (fileName == null || other.fileName == null) {
+            if (fileName != null) {
+                return -1;
+            }
+            if (other.fileName != null) {
+                return 1;
+            }
+        } else {
+            if (!fileName.equals(other.fileName)) {
+                return fileName.compareTo(other.fileName);
+            }
+        }
+        if (beginLine != other.beginLine) {
             return beginLine - other.beginLine;
-        if (beginColumn != other.beginColumn)
+        }
+        if (beginColumn != other.beginColumn) {
             return beginColumn - other.beginColumn;
-        if (endLine != other.endLine)
+        }
+        if (endLine != other.endLine) {
             return endLine - other.endLine;
-        if (endColumn != other.endColumn)
+        }
+        if (endColumn != other.endColumn) {
             return endColumn - other.endColumn;
+        }
         if (identifier != null && other.identifier != null && !identifier.equals(other.identifier)) {
             return identifier.compareTo(other.identifier);
         }
@@ -417,14 +359,17 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
                 int limit = 4;
                 sb.append("In components:\n");
                 int i = 0;
-                if (limit + 1 == components.size())
+                if (limit + 1 == components.size()) {
                     limit += 1;
+                }
                 for (String component : components) {
                     i++;
                     sb.append("    ");
                     sb.append(component);
                     sb.append("\n");
-                    if (i == limit) break;
+                    if (i == limit) {
+                        break;
+                    }
                 }
                 if (components.size() > limit) {
                     sb.append("    .. and ");
@@ -453,15 +398,15 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
     public String printXML(Level level) {
         return XMLLogger.write_node(Problem.capitalize(severity()), 
                 "identifier",   identifier() == null ? "" : identifier(),
-                "kind",         kind().toString().toLowerCase(),
-                "file",         fileName(),
-                "line",         beginLine(),
-                "column",       beginColumn(),
-                "message",      message());
+                        "kind",         kind().toString().toLowerCase(),
+                        "file",         fileName(),
+                        "line",         beginLine(),
+                        "column",       beginColumn(),
+                        "message",      message());
     }
 
     /**
-     * Creates a {@code Problem} object. Internal, do not use!
+     * Creates a {@link Problem} object. Internal, do not use!
      * 
      * @param identifier
      *      The problem's identifier.
@@ -473,8 +418,7 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
      *      The type of the problem (syntactical, semantical, et.c.).
      * @param message
      *      The message to present when the error is reported.
-     * @return
-     *      a {@code Problem} instance.
+     * @return  a  {@link Problem} instance.
      */
     public static Problem createProblem(String identifier, ReporterNode src, ProblemSeverity severity, ProblemKind kind, String message) {
         Problem p;
@@ -496,26 +440,78 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
     }
 
     /**
-     * Creates a {@code Problem} object. Internal, do not use!
+     * Creates a {@link Problem} object. Internal, do not use!
      * 
      * @param filePath
      *      Path to the file which reported the problem (the problem source).
      * @param severity
      *      The severity level of the problem (error, warning).
      * @param kind
-     *      The type of the problem (syntactical, semantical, et.c.).
+     *      The type of the problem (syntactical, semantical, etc.).
      * @param message
      *      The message to present when the error is reported.
      * @return
-     *      a {@code Problem} instance.
+     *      a {@link Problem} instance.
      */
     public static Problem createProblem(Path filePath, ProblemSeverity severity, ProblemKind kind, String message) {
-        return new Problem(filePath.toString(), message, severity, kind, 0, 0, 0, 0);
+        return createProblem(filePath == null ? null : filePath.toString(), 0, 0, 0, 0, severity, kind, message);
     }
-    
+
+
+    /**
+     * Creates a {link Problem} object. Internal, do not use!
+     * 
+     * @param fileName
+     *      File name. Does not have to be a valid path name.
+     * @param fromLine
+     *      The line where the problem starts.
+     * @param fromColumn
+     *      The column where the problem starts.
+     * @param toLine
+     *      The line where the problem ends.
+     * @param toColumn
+     *      The column where the problem ends.
+     * @param severity
+     *      The severity level of the problem (error, warning).
+     * @param kind
+     *      The type of the problem (syntactical, semantical, etc.).
+     * @param message
+     *      The message to present when the error is reported.
+     * @return
+     *      a {@link Problem} instance.
+     */
+    public static Problem createProblem(String fileName, int fromLine, int fromColumn, int toLine, int toColumn, ProblemSeverity severity, ProblemKind kind, String message) {
+        return new Problem(fileName, message, severity, kind, fromLine, fromColumn, toLine, toColumn);
+    }
+
     private static String capitalize(Object o) {
         String name = o.toString();
         return Character.toUpperCase(name.charAt(0)) + name.substring(1).toLowerCase();
     }
+
+    static public class WarningFilteredProblem extends Problem {
+
+        private static final long serialVersionUID = 1L;
+        private int count = 1;
+
+        private WarningFilteredProblem() {
+            super(null, "%d warning(s) has been ignored due to the 'filter_warnings' option", ProblemSeverity.WARNING, ProblemKind.SEMANTIC, 0, 0, 0, 0);
+        }
+
+        @Override
+        public void merge(Problem p) {
+            if (!(p instanceof WarningFilteredProblem)) {
+                throw new IllegalArgumentException("Unable to merge WarningFilteredProblem with Problem of type " + p.getClass().getName());
+            }
+            WarningFilteredProblem other = (WarningFilteredProblem) p;
+            count += other.count;
+        }
+
+        @Override
+        public String message() {
+            return String.format(super.message(), count);
+        }
+    }
+
 }
 
