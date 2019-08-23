@@ -251,14 +251,6 @@ class Test_FMUModelME1Extended:
         assert (res2["J1.w"][-1] - 3.245091100366517) < 1e-4
 
     @testattr(windows_full = True)
-    def test_default_experiment(self):
-        model = FMUModelME1Extended("Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME.fmu",path_to_fmus_me1)
-
-        assert N.abs(model.get_default_experiment_start_time()) < 1e-4
-        assert N.abs(model.get_default_experiment_stop_time()-1.5) < 1e-4
-        assert N.abs(model.get_default_experiment_tolerance()-0.0001) < 1e-4
-
-    @testattr(windows_full = True)
     def test_types_platform(self):
         model = FMUModelME1Extended("Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME.fmu",path_to_fmus_me1)
         assert model.types_platform == "standard32"
@@ -289,13 +281,6 @@ class Test_FMUModelME1Extended:
             model = FMUModelME1Extended("bouncingBall.fmu",path_to_fmus_me1,enable_logging=False)
             res = model.simulate(final_time=1.0)
         assert N.abs(h_res - res.final('h')) < 1e-4
-
-    @testattr(stddist_full = True)
-    def test_log_file_name(self):
-        model = FMUModelME1Extended("bouncingBall.fmu",path_to_fmus_me1)
-        assert os.path.exists("bouncingBall_log.txt")
-        model = FMUModelME1Extended("bouncingBall.fmu",path_to_fmus_me1,log_file_name="Test_log.txt")
-        assert os.path.exists("Test_log.txt")
 
     @testattr(stddist_full = True)
     def test_result_name_file(self):
