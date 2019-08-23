@@ -25,13 +25,36 @@ import org.jmodelica.util.collections.ChainedIterable;
 
 aspect BLT{
 
+    /**
+     * Controls the way blocks are produced when building the BLT.
+     */
     public abstract class BlockProducer {
+        
+        /**
+         * Check if tearing is enabled.
+         */
         public abstract boolean useTearing();
+        
+        /**
+         * Check if tearing is being performed.
+         */
         public abstract boolean duringTearing();
+        
+        /**
+         * Uses to indicate how a block was produced in compiler output.
+         */
         public abstract String symbol();
+        
+        /**
+         * Create an EquationBlock instance from a set of subblocks.
+         */
         public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> EquationBlock createEquationBlock(SCCBlock<E, V> block, Collection<SimpleEquationBlock> nonRealBlocks, Collection<SimpleEquationBlock> realBlocks) {
             return new EquationBlock(this, block.computeBlockDependency(), nonRealBlocks, realBlocks);
         }
+        
+        /**
+         * Create a TornEquationBlock instance from a set of subblocks.
+         */
         public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> TornEquationBlock createTornEquationBlock(SCCBlock<E, V> block) {
             return new TornEquationBlock(this, block.computeBlockDependency());
         }
@@ -54,6 +77,9 @@ aspect BLT{
             }
         }
         
+        /**
+         * Get a BlockProducer to use for automatic tearing.
+         */
         public BlockProducer getAutomaticTearingBlockProducer() {
             return AUTOMATIC_TEARING_BLOCK_PRODUCER;
         }
