@@ -759,5 +759,6 @@ void jmi_init_directional_derivative_callbacks(jmi_directional_derivative_callba
 	jmi_string_t label);
 void jmi_free_directional_derivative_callbacks(jmi_directional_derivative_callbacks_t* dd);
 int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_callbacks_t* dd_callback, void* args);
+int jmi_mark_sw_triggered(jmi_t* jmi, jmi_int_t index);
 
 #endif

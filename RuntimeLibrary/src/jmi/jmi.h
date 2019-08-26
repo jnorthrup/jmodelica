@@ -128,7 +128,10 @@ typedef int (*jmi_residual_func_t)(jmi_t* jmi, jmi_real_t** res);
 typedef int (*jmi_directional_der_residual_func_t)(jmi_t* jmi, jmi_real_t** res,
         jmi_real_t** dF, jmi_real_t** dz);
  
- 
+
+typedef int (*jmi_dependency_func_t)(jmi_t* jmi, jmi_int_t** res);
+
+
  /* @} */
 
 /**
@@ -229,7 +232,8 @@ void jmi_model_init(jmi_t* jmi,
                     jmi_generic_func_t model_ode_initialize,
                     jmi_generic_func_t model_init_eval_independent,
                     jmi_generic_func_t model_init_eval_dependent,
-                    jmi_next_time_event_func_t model_ode_next_time_event);
+                    jmi_next_time_event_func_t model_ode_next_time_event,
+                    jmi_dependency_func_t model_ode_event_dependencies);
 
 /**
  * \brief Dallocates the jmi_model_t struct in jmi if it is not NULL.
@@ -456,7 +460,12 @@ struct jmi_t {
     jmi_real_t* real_u_work;             /**< \brief Work array for the real u variables */
 	jmi_real_work_array_t* real_work;		 /**< \brief Work array for real variables */
 	jmi_int_work_array_t* int_work;		 /**< \brief Work array for int variables */
-    
+    jmi_int_t** events_dependencies;
+    jmi_int_t* events_triggered;
+    jmi_int_t* events_triggered_tmp;
+    jmi_int_t* events_der_updated;
+    jmi_int_t* events_x_updated;
+    jmi_int_t* events_x_updated_tmp;
     jmp_buf try_location[JMI_MAX_EXCEPTION_DEPTH+1];                /**< \brief Buffer for setjmp/longjmp, for exception handling. */
     jmi_int_t current_try_depth;
 
@@ -490,6 +499,7 @@ struct jmi_model_t {
     jmi_generic_func_t init_eval_independent;        /**< \brief A function for initial evaluation of independent parameters. */
     jmi_generic_func_t init_eval_dependent;          /**< \brief A function for initial evaluation of dependent   parameters. */
     jmi_next_time_event_func_t ode_next_time_event;  /**< \brief A function for computing the next time event instant. */
+    jmi_dependency_func_t ode_event_dependencies;
 };
 
 /**
@@ -650,5 +660,7 @@ int jmi_sample_delay_blocks(jmi_t* jmi);
  * @return 
  */
 int jmi_block_completed_integrator_step(jmi_t *jmi);
+
+int jmi_ode_events_dependencies(jmi_t* jmi);
 
 #endif

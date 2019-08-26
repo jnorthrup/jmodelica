@@ -46,7 +46,8 @@ void jmi_model_init(jmi_t* jmi,
                     jmi_generic_func_t model_ode_initialize,
                     jmi_generic_func_t model_init_eval_independent,
                     jmi_generic_func_t model_init_eval_dependent,
-                    jmi_next_time_event_func_t model_ode_next_time_event) {
+                    jmi_next_time_event_func_t model_ode_next_time_event,
+                    jmi_dependency_func_t model_ode_event_dependencies) {
     
     /* Create jmi_model_t struct */
     jmi_model_t* model = (jmi_model_t*)calloc(1, sizeof(jmi_model_t));
@@ -59,6 +60,7 @@ void jmi_model_init(jmi_t* jmi,
     jmi->model->ode_event_indicators = model_ode_event_indicators;
     jmi->model->init_eval_independent = model_init_eval_independent;
     jmi->model->init_eval_dependent   = model_init_eval_dependent;
+    jmi->model->ode_event_dependencies = model_ode_event_dependencies;
 }
 
 void jmi_model_delete(jmi_t* jmi) {
@@ -302,7 +304,18 @@ int jmi_init(jmi_t** jmi,
 
     jmi_->dyn_fcn_mem = jmi_dynamic_function_pool_create(JMI_MEMORY_POOL_SIZE);
     jmi_->dyn_fcn_mem_globals = jmi_dynamic_function_pool_create(JMI_MEMORY_POOL_SIZE);
-
+    
+    jmi_->events_dependencies = (jmi_int_t**)calloc(n_sw,sizeof(jmi_int_t *));
+    for (i = 0; i < n_sw; i++) {
+        jmi_->events_dependencies[i] = (jmi_int_t*)calloc(n_real_x,sizeof(jmi_int_t));
+        memset(jmi_->events_dependencies[i], -1, n_real_x*sizeof(jmi_int_t));
+    }
+    jmi_->events_triggered   = (jmi_int_t*)calloc(n_sw,sizeof(jmi_int_t));
+    jmi_->events_triggered_tmp   = (jmi_int_t*)calloc(n_sw,sizeof(jmi_int_t));
+    jmi_->events_der_updated = (jmi_int_t*)calloc(n_real_x,sizeof(jmi_int_t));
+    jmi_->events_x_updated = (jmi_int_t*)calloc(n_real_x,sizeof(jmi_int_t));
+    jmi_->events_x_updated_tmp = (jmi_int_t*)calloc(n_real_x,sizeof(jmi_int_t));
+    
     return 0;
 }
 
@@ -360,6 +373,17 @@ int jmi_delete(jmi_t* jmi){
     jmi_dynamic_function_pool_destroy(jmi->dyn_fcn_mem_globals);
 
     free(jmi->globals);
+    
+    for (i = 0; i < jmi->n_real_x; i++) {
+        free(jmi->events_dependencies[i]);
+    }
+    free(jmi->events_dependencies);
+    free(jmi->events_triggered);
+    free(jmi->events_triggered_tmp);
+    free(jmi->events_der_updated);
+    free(jmi->events_x_updated);
+    free(jmi->events_x_updated_tmp);
+
 
     return 0;
 }
@@ -504,6 +528,12 @@ int jmi_ode_next_time_event(jmi_t* jmi, jmi_time_event_t* event) {
     jmi_finalize_try(jmi, depth);
     return return_status;
 }
+
+
+int jmi_ode_events_dependencies(jmi_t* jmi) {
+    return jmi->model->ode_event_dependencies(jmi, jmi->events_dependencies);
+}
+
 
 int jmi_dae_R(jmi_t* jmi, jmi_real_t* res) {
     int return_status;

@@ -284,6 +284,12 @@ int jmi_compare_discrete_reals(jmi_real_t* dr_pre, jmi_real_t* dr_post, jmi_real
     return all_discrete_reals_equal;
 }
 
+
+int jmi_mark_sw_triggered(jmi_t* jmi, jmi_int_t index) {
+    jmi->events_triggered[index] = 1;
+    return 0;
+}
+
 jmi_real_t jmi_turn_switch(jmi_t* jmi, jmi_real_t ev_ind, jmi_real_t sw, int rel) {
     /* x >= 0
      * x >  0
