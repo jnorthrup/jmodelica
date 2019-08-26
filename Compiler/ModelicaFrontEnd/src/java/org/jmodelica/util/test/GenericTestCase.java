@@ -17,10 +17,6 @@ package org.jmodelica.util.test;
 
 public interface GenericTestCase extends GenericTestTreeNode {
 
-    /**
-     * Returns {@code true} if this test should be ignored.
-     */
-    public boolean shouldBeIgnored();
     public void testMe(Assert a);
 
 }

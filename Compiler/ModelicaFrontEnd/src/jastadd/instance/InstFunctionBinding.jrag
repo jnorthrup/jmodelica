@@ -81,8 +81,7 @@ aspect InstFunctionBinding {
      * Get the input component this argument is bound to.
      */
     syn InstComponentDecl InstFunctionArgument.getBoundInput() = 
-        isInstRecordConstructorArg() ? myRecordConstructorVirtualInstComponentDecl() : 
-            boundInput == null ? unknownInstComponentDecl() : boundInput;
+        isInstRecordConstructorArg() ? myRecordConstructorVirtualInstComponentDecl() : boundInput;
 
     /**
      * Is this an argument to a record constructor in the instance tree?

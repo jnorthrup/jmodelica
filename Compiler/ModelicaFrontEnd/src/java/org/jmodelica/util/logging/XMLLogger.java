@@ -37,7 +37,7 @@ public final class XMLLogger extends PipeLogger {
         super(level, file);
     }
 
-    public XMLLogger(Level level, OutputStream stream) {
+    public XMLLogger(Level level, OutputStream stream) throws IOException {
         super(level, stream);
     }
 
@@ -47,7 +47,6 @@ public final class XMLLogger extends PipeLogger {
         super.do_close();
     }
 
-    @Override
     protected void write_raw(String logMessage) throws IOException {
         if (!started) {
             started = true;

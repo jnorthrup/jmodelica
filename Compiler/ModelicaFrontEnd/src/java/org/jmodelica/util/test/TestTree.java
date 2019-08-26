@@ -49,7 +49,6 @@ public class TestTree implements GenericTestTreeNode, Iterable<GenericTestTreeNo
         children.add(tc);
     }
 
-    @Override
     public String getName() {
         return name;
     }
@@ -58,7 +57,6 @@ public class TestTree implements GenericTestTreeNode, Iterable<GenericTestTreeNo
         return children.size();
     }
 
-    @Override
     public Iterator<GenericTestTreeNode> iterator() {
         return children.iterator();
     }

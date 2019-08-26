@@ -140,12 +140,6 @@ aspect AccessSizes {
             public FExp copyReplaceAccess(FSizeExp exp) {
                 return exp.copyReplaceAccessExp(this);
             }
-
-            @Override
-            public void addForIndex(InstPrimitive var) {}
-
-            @Override
-            public void removeForIndex(InstPrimitive var) {}
             
             public List<InstAccess> buildContext() {
                  return fs.myInstAccess().accessContextInst();
@@ -264,10 +258,10 @@ aspect AccessSizes {
 }
 
 aspect FunctionCallSizes {
-
+    
     public abstract Size FType.getSize();
-    public abstract FType FType.setSize(Size size);
-
+    public abstract void FType.setSize(Size size);
+    
     @Override
     public Size FArrayType.getSize() {
         MutableSize newSize = new MutableSize(getNumFExp());
@@ -277,8 +271,8 @@ aspect FunctionCallSizes {
         return newSize;
     }
     @Override
-    public FArrayType FArrayType.setSize(Size size) {throw new InternalCompilerError("FArrayType does not support setSize()");}
-
+    public void FArrayType.setSize(Size size) {throw new InternalCompilerError("FArrayType does not support setSize()");}
+    
     syn Size FAbstractFunctionCall.sizeOfOutput(int i) = (i == 0) ? size() : Size.SCALAR;
     eq CommonFunctionCall.sizeOfOutput(int i)          = typeOfOutput(i).size();
     
@@ -432,28 +426,14 @@ aspect SizesUtil {
         public interface ContextReplacer {
             public FExp copyReplaceAccess(CommonAccessExp access);
             public FExp copyReplaceAccess(FSizeExp exp);
-            public void addForIndex(InstPrimitive var);
-            public void removeForIndex(InstPrimitive var);
         }
 
         public static class FunctionContextReplacer implements ContextReplacer {
             private Map<InstComponentDecl,InstFunctionArgument> varMap;
-            private Set<InstComponentDecl> forIndices;
             public FunctionContextReplacer(Map<InstComponentDecl,InstFunctionArgument> varMap) {
                 this.varMap = varMap;
-                forIndices = new HashSet<>();
             }
-
-            @Override
-            public void addForIndex(InstPrimitive var) {
-                forIndices.add(var);
-            }
-
-            @Override
-            public void removeForIndex(InstPrimitive var) {
-                forIndices.remove(var);
-            }
-
+            
             @Override
             public FExp copyReplaceAccess(CommonAccessExp access) {
                 FExp res = access.asInstAccess().copyReplaceAccess(this);
@@ -469,14 +449,6 @@ aspect SizesUtil {
             }
             
             public FExp get(InstComponentDecl icd) {
-                if (forIndices.contains(icd)) {
-                    return icd.createAccessExp();
-                } else {
-                    return lookupInMap(icd);
-                }
-            }
-            
-            protected FExp lookupInMap(InstComponentDecl icd) {
                 if (varMap.containsKey(icd)) {
                     InstFunctionArgument ifa = varMap.get(icd);
                     return ifa == null ? icd.getBindingFExp().copyReplaceAccess(this) : ifa.getFExp();
@@ -493,7 +465,7 @@ aspect SizesUtil {
             }
             
             @Override
-            public FExp lookupInMap(InstComponentDecl icd) {
+            public FExp get(InstComponentDecl icd) {
                 if (expMap.containsKey(icd)) {
                     FExp exp = expMap.get(icd);
                     return exp == null ? icd.getBindingFExp().copyReplaceAccess(this) : exp;
@@ -534,27 +506,6 @@ aspect SizesUtil {
     
     public FExp FSizeExp.copyReplaceAccess(FExp.ContextReplacer crp) {
         return crp.copyReplaceAccess(this);
-    }
-    
-    public FExp FIterExp.copyReplaceAccess(FExp.ContextReplacer crp) {
-        for (CommonForIndex i : getForIndexs()) {
-            i.addToContextReplacer(crp);
-        }
-        FExp res = super.copyReplaceAccess(crp);
-        for (CommonForIndex i : getForIndexs()) {
-            i.removeFromContextReplacer(crp);
-        }
-        return res;
-    }
-    
-    public void CommonForIndex.addToContextReplacer(FExp.ContextReplacer crp) {}
-    public void InstForIndex.addToContextReplacer(FExp.ContextReplacer crp) {
-        crp.addForIndex(getInstPrimitive());
-    }
-    
-    public void CommonForIndex.removeFromContextReplacer(FExp.ContextReplacer crp) {}
-    public void InstForIndex.removeFromContextReplacer(FExp.ContextReplacer crp) {
-        crp.removeForIndex(getInstPrimitive());
     }
     
     public FExp FSizeExp.copyReplaceAccessExp(FExp.ContextReplacer crp) {
@@ -682,5 +633,5 @@ aspect SizesUtil {
             throw new ConstantEvaluationException();
         }
     }
-
+    
 }

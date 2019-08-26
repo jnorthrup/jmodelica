@@ -97,9 +97,13 @@ def run_demo(with_plots=True):
 
     # Load model
     model = load_fmu(fmu_name)
+    
+    # Create options object and set verbosity to zero to disable printouts
+    opts = model.simulate_options()
+    opts['CVode_options']['verbosity'] = 0
 
     # Simulate model response with nominal parameters
-    res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60)
+    res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60,options=opts)
 
     # Load simulation result
     x1_sim = res['qt.x1']
@@ -128,7 +132,7 @@ def run_demo(with_plots=True):
     # Define the objective function
     def f1(x):
 
-        model.reset() # reset instead of reloading the FMU each evaluation
+        model = load_fmu(fmu_name)
 
         # We need to scale the inputs x down since they are scaled up 
         # versions of a1 and a2 (x = scalefactor*[a1 a2])
@@ -139,9 +143,9 @@ def run_demo(with_plots=True):
         model.set('qt.a1',a1)
         model.set('qt.a2',a2)
         
-        # Create options object and set verbosity to disable printouts
+        # Create options object and set verbosity to zero to disable printouts
         opts = model.simulate_options()
-        opts['CVode_options']['verbosity'] = 50
+        opts['CVode_options']['verbosity'] = 0
         
         # Simulate model response with new parameters a1 and a2
         res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60,options=opts)
@@ -189,8 +193,12 @@ def run_demo(with_plots=True):
     model.set('qt.a1',a1_opt)
     model.set('qt.a2',a2_opt)
     
+    # Create options object and set verbosity to zero to disable printouts
+    opts = model.simulate_options()
+    opts['CVode_options']['verbosity'] = 0
+
     # Simulate model response with optimal parameters a1 and a2
-    res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60)
+    res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60,options=opts)
 
     # Load optimal simulation result
     x1_opt = res['qt.x1']
@@ -228,7 +236,7 @@ def run_demo(with_plots=True):
     # Define the objective function
     def f2(x):                
 
-        model.reset() # reset instead of reloading the FMU each evaluation
+        model = load_fmu(fmu_name)
 
         # We need to scale the inputs x down since they are scaled up 
         # versions of a1, a2, a3 and a4 (x = scalefactor*[a1 a2 a3 a4])
@@ -243,9 +251,9 @@ def run_demo(with_plots=True):
         model.set('qt.a3',a3)
         model.set('qt.a4',a4)
         
-        # Create options object and set verbosity to disable printouts
+        # Create options object and set verbosity to zero to disable printouts
         opts = model.simulate_options()
-        opts['CVode_options']['verbosity'] = 50
+        opts['CVode_options']['verbosity'] = 0
         
         # Simulate model response with the new parameters
         res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60,options=opts)
@@ -294,9 +302,13 @@ def run_demo(with_plots=True):
     model.set('qt.a2',a2_opt)
     model.set('qt.a3',a3_opt)
     model.set('qt.a4',a4_opt)
+    
+    # Create options object and set verbosity to zero to disable printouts
+    opts = model.simulate_options()
+    opts['CVode_options']['verbosity'] = 0
 
     # Simulate model response with the optimal parameters
-    res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60)
+    res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60,options=opts)
 
     # Load optimal simulation result
     x1_opt = res['qt.x1']

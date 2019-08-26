@@ -32,21 +32,18 @@ public class SingleIterator<T> implements Iterator<T> {
 		ok = true;
 	}
 	
-	@Override
-    public boolean hasNext() {
+	public boolean hasNext() {
 		return ok;
 	}
 	
-	@Override
-    public T next() {
+	public T next() {
 		if (!ok)
 			throw new NoSuchElementException();
 		ok = false;
 		return elem;
 	}
 	
-	@Override
-    public void remove() {
+	public void remove() {
 		throw new UnsupportedOperationException();
 	}
 }

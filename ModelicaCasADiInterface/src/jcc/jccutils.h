@@ -11,6 +11,11 @@
 #include "initjcc.h"
 #include "jccexception.h"
 
+
+inline void describeJavaException() { vm_env->ExceptionDescribe(); }
+inline void clearJavaException()    { vm_env->ExceptionClear(); }
+
+
 ::java::lang::String StringFromUTF(const char *bytes);
 jstring fromUTF(const char *bytes); /* consider: will the returned jstring leak? */
 

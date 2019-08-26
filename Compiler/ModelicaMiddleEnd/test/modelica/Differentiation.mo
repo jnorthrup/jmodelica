@@ -1538,9 +1538,8 @@ public
   output Real[:] y;
  algorithm
   init y as Real[2];
-  for i1 in 1:2 loop
-   y[i1] := x[i1];
-  end for;
+  y[1] := x[1];
+  y[2] := x[2];
   return;
  annotation(Inline = false);
  end Differentiation.Expressions.ConstantFunctionCallArray.f;
@@ -1989,25 +1988,8 @@ public
   input Real[:] x;
   input Real[:,:] A;
   output Real y;
-  Real temp_1;
-  Real temp_2;
-  Real[:] temp_3;
-  Real temp_4;
  algorithm
-  init temp_3 as Real[2];
-  for i2 in 1:2 loop
-   temp_4 := 0.0;
-   for i3 in 1:2 loop
-    temp_4 := temp_4 + x[i3] * A[i3,i2];
-   end for;
-   temp_3[i2] := temp_4;
-  end for;
-  temp_2 := 0.0;
-  for i1 in 1:2 loop
-   temp_2 := temp_2 + temp_3[i1] * x[i1];
-  end for;
-  temp_1 := temp_2;
-  y := temp_1;
+  y := (x[1] * A[1,1] + x[2] * A[2,1]) * x[1] + (x[1] * A[1,2] + x[2] * A[2,2]) * x[2];
   return;
  annotation(derivative = Differentiation.DerivativeAnnotation.Test2.f_der);
  end Differentiation.DerivativeAnnotation.Test2.f;
@@ -2018,42 +2000,8 @@ public
   input Real[:] der_x;
   input Real[:,:] der_A;
   output Real der_y;
-  Real temp_1;
-  Real temp_2;
-  Real[:] temp_3;
-  Real temp_4;
-  Real temp_5;
-  Real temp_6;
-  Real[:] temp_7;
-  Real temp_8;
  algorithm
-  init temp_3 as Real[2];
-  for i2 in 1:2 loop
-   temp_4 := 0.0;
-   for i3 in 1:2 loop
-    temp_4 := temp_4 + 2 * x[i3] * A[i3,i2];
-   end for;
-   temp_3[i2] := temp_4;
-  end for;
-  temp_2 := 0.0;
-  for i1 in 1:2 loop
-   temp_2 := temp_2 + temp_3[i1] * der_x[i1];
-  end for;
-  temp_1 := temp_2;
-  init temp_7 as Real[2];
-  for i2 in 1:2 loop
-   temp_8 := 0.0;
-   for i3 in 1:2 loop
-    temp_8 := temp_8 + x[i3] * der_A[i3,i2];
-   end for;
-   temp_7[i2] := temp_8;
-  end for;
-  temp_6 := 0.0;
-  for i1 in 1:2 loop
-   temp_6 := temp_6 + temp_7[i1] * x[i1];
-  end for;
-  temp_5 := temp_6;
-  der_y := temp_1 + temp_5;
+  der_y := (2 * x[1] * A[1,1] + 2 * x[2] * A[2,1]) * der_x[1] + (2 * x[1] * A[1,2] + 2 * x[2] * A[2,2]) * der_x[2] + ((x[1] * der_A[1,1] + x[2] * der_A[2,1]) * x[1] + (x[1] * der_A[1,2] + x[2] * der_A[2,2]) * x[2]);
   return;
  end Differentiation.DerivativeAnnotation.Test2.f_der;
 
@@ -3109,273 +3057,33 @@ end Differentiation.AlgorithmDifferentiation.InitArray;
                 generatedCode="
 void func_Differentiation_AlgorithmDifferentiation_RecordArray_F_def0(R_0_ra* x_a, R_0_ra* y_a) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STACK, R_0_r, R_0_ra, y_an, 1, 1)
-    jmi_real_t i1_0i;
-    jmi_int_t i1_0ie;
-    jmi_int_t i1_0in;
+    JMI_ARR(STAT, R_0_r, R_0_ra, y_an, 1, 1)
     if (y_a == NULL) {
-        JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, y_an, 1, 1, 1)
+        JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, y_an, 1, 1, 1)
         y_a = y_an;
     }
-    i1_0in = 0;
-    i1_0ie = floor((1) - (1));
-    for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
-        jmi_array_rec_1(y_a, i1_0i)->x = jmi_array_rec_1(x_a, i1_0i)->x;
-    }
+    jmi_array_rec_1(y_a, 1)->x = jmi_array_rec_1(x_a, 1)->x;
     JMI_DYNAMIC_FREE()
     return;
 }
 
 void func_Differentiation_AlgorithmDifferentiation_RecordArray__der_F_def1(R_0_ra* x_a, R_0_ra* _der_x_a, R_0_ra* _der_y_a) {
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STACK, R_0_r, R_0_ra, _der_y_an, 1, 1)
-    JMI_ARR(STACK, R_0_r, R_0_ra, y_a, 1, 1)
-    jmi_real_t i1_1i;
-    jmi_int_t i1_1ie;
-    jmi_int_t i1_1in;
-    JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, y_a, 1, 1, 1)
+    JMI_ARR(STAT, R_0_r, R_0_ra, _der_y_an, 1, 1)
+    JMI_ARR(STAT, R_0_r, R_0_ra, y_a, 1, 1)
+    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, y_a, 1, 1, 1)
     if (_der_y_a == NULL) {
-        JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, _der_y_an, 1, 1, 1)
+        JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, _der_y_an, 1, 1, 1)
         _der_y_a = _der_y_an;
     }
-    i1_1in = 0;
-    i1_1ie = floor((1) - (1));
-    for (i1_1i = 1; i1_1in <= i1_1ie; i1_1i = 1 + (++i1_1in)) {
-        jmi_array_rec_1(_der_y_a, i1_1i)->x = jmi_array_rec_1(_der_x_a, i1_1i)->x;
-        jmi_array_rec_1(y_a, i1_1i)->x = jmi_array_rec_1(x_a, i1_1i)->x;
-    }
+    jmi_array_rec_1(_der_y_a, 1)->x = jmi_array_rec_1(_der_x_a, 1)->x;
+    jmi_array_rec_1(y_a, 1)->x = jmi_array_rec_1(x_a, 1)->x;
     JMI_DYNAMIC_FREE()
     return;
 }
 
 ")})));
         end RecordArray;
-
-        model RecordArrayTemp1
-            record R
-                Real[1] x;
-            end R;
-
-            function F
-                input R[1] x;
-                output R[1] y;
-            algorithm
-                y := x;
-            annotation(Inline=false, smoothOrder=3);
-            end F;
-    
-            function e
-                input R[:] r;
-                R[:] rt = {r[1]};
-                output Real y = rt[1].x[1];
-                algorithm
-                annotation(smoothOrder=1);
-            end e;
-            Real x1;
-            Real x2;
-        equation
-            der(x1) + der(x2) = 1;
-            x1 + e(F({R({x2})})) = 1;
-
-        annotation(__JModelica(UnitTesting(tests={
-            CCodeGenTestCase(
-                name="AlgorithmDifferentiation_RecordArrayTemp1",
-                description="Test code gen of differentiated function with array of records #3611",
-                dynamic_states=false,
-                template="$C_functions$",
-                generatedCode="
-void func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1_e_def0(R_0_ra* r_a, jmi_real_t* y_o) {
-    JMI_DYNAMIC_INIT()
-    JMI_ARR(STACK, R_0_r, R_0_ra, rt_a, 1, 1)
-    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
-    JMI_DEF(REA, y_v)
-    JMI_ARR(STACK, R_0_r, R_0_ra, temp_1_a, 1, 1)
-    jmi_real_t i1_0i;
-    jmi_int_t i1_0ie;
-    jmi_int_t i1_0in;
-    jmi_real_t i2_1i;
-    jmi_int_t i2_1ie;
-    jmi_int_t i2_1in;
-    jmi_real_t i1_2i;
-    jmi_int_t i1_2ie;
-    jmi_int_t i1_2in;
-    JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, rt_a, 1, 1, 1)
-    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
-    jmi_array_rec_1(rt_a, 1)->x = tmp_1;
-    JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, temp_1_a, 1, 1, 1)
-    *jmi_array_rec_1(temp_1_a, 1) = *jmi_array_rec_1(r_a, 1);
-    i1_0in = 0;
-    i1_0ie = floor((1) - (1));
-    for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
-        i2_1in = 0;
-        i2_1ie = floor((1) - (1));
-        for (i2_1i = 1; i2_1in <= i2_1ie; i2_1i = 1 + (++i2_1in)) {
-            jmi_array_ref_1(jmi_array_rec_1(rt_a, i1_0i)->x, i2_1i) = jmi_array_val_1(jmi_array_rec_1(temp_1_a, i1_0i)->x, i2_1i);
-        }
-    }
-    y_v = jmi_array_val_1(jmi_array_rec_1(rt_a, 1)->x, 1);
-    i1_2in = 0;
-    i1_2ie = floor((jmi_array_size(r_a, 0)) - (1));
-    for (i1_2i = 1; i1_2in <= i1_2ie; i1_2i = 1 + (++i1_2in)) {
-        if (COND_EXP_EQ(1.0, jmi_array_size(jmi_array_rec_1(r_a, i1_2i)->x, 0), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
-            jmi_assert_failed(\"Mismatching sizes in function 'Differentiation.AlgorithmDifferentiation.RecordArrayTemp1.e', component 'r[i1].x', dimension '1'\", JMI_ASSERT_ERROR);
-        }
-    }
-    JMI_RET(GEN, y_o, y_v)
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-jmi_real_t func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1_e_exp0(R_0_ra* r_a) {
-    JMI_DEF(REA, y_v)
-    func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1_e_def0(r_a, &y_v);
-    return y_v;
-}
-
-void func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1_F_def1(R_0_ra* x_a, R_0_ra* y_a) {
-    JMI_DYNAMIC_INIT()
-    JMI_ARR(STACK, R_0_r, R_0_ra, y_an, 1, 1)
-    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
-    jmi_real_t i1_3i;
-    jmi_int_t i1_3ie;
-    jmi_int_t i1_3in;
-    jmi_real_t i1_4i;
-    jmi_int_t i1_4ie;
-    jmi_int_t i1_4in;
-    jmi_real_t i2_5i;
-    jmi_int_t i2_5ie;
-    jmi_int_t i2_5in;
-    if (y_a == NULL) {
-        JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, y_an, 1, 1, 1)
-        JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
-        jmi_array_rec_1(y_an, 1)->x = tmp_1;
-        y_a = y_an;
-    }
-    i1_3in = 0;
-    i1_3ie = floor((1) - (1));
-    for (i1_3i = 1; i1_3in <= i1_3ie; i1_3i = 1 + (++i1_3in)) {
-        if (COND_EXP_EQ(1.0, jmi_array_size(jmi_array_rec_1(x_a, i1_3i)->x, 0), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
-            jmi_assert_failed(\"Mismatching sizes in function 'Differentiation.AlgorithmDifferentiation.RecordArrayTemp1.F', component 'x[i1].x', dimension '1'\", JMI_ASSERT_ERROR);
-        }
-    }
-    i1_4in = 0;
-    i1_4ie = floor((1) - (1));
-    for (i1_4i = 1; i1_4in <= i1_4ie; i1_4i = 1 + (++i1_4in)) {
-        i2_5in = 0;
-        i2_5ie = floor((1) - (1));
-        for (i2_5i = 1; i2_5in <= i2_5ie; i2_5i = 1 + (++i2_5in)) {
-            jmi_array_ref_1(jmi_array_rec_1(y_a, i1_4i)->x, i2_5i) = jmi_array_val_1(jmi_array_rec_1(x_a, i1_4i)->x, i2_5i);
-        }
-    }
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-void func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1__der_e_def2(R_0_ra* r_a, R_0_ra* _der_r_a, jmi_real_t* _der_y_o) {
-    JMI_DYNAMIC_INIT()
-    JMI_DEF(REA, _der_y_v)
-    JMI_ARR(STACK, R_0_r, R_0_ra, rt_a, 1, 1)
-    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
-    JMI_ARR(STACK, R_0_r, R_0_ra, _der_rt_a, 1, 1)
-    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
-    JMI_DEF(REA, y_v)
-    JMI_ARR(STACK, R_0_r, R_0_ra, temp_1_a, 1, 1)
-    JMI_ARR(STACK, R_0_r, R_0_ra, _der_temp_1_a, 1, 1)
-    jmi_real_t i1_6i;
-    jmi_int_t i1_6ie;
-    jmi_int_t i1_6in;
-    jmi_real_t i2_7i;
-    jmi_int_t i2_7ie;
-    jmi_int_t i2_7in;
-    jmi_real_t i1_8i;
-    jmi_int_t i1_8ie;
-    jmi_int_t i1_8in;
-    JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, rt_a, 1, 1, 1)
-    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
-    jmi_array_rec_1(rt_a, 1)->x = tmp_1;
-    JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, _der_rt_a, 1, 1, 1)
-    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
-    jmi_array_rec_1(_der_rt_a, 1)->x = tmp_2;
-    JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, temp_1_a, 1, 1, 1)
-    JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, _der_temp_1_a, 1, 1, 1)
-    *jmi_array_rec_1(_der_temp_1_a, 1) = *jmi_array_rec_1(_der_r_a, 1);
-    *jmi_array_rec_1(temp_1_a, 1) = *jmi_array_rec_1(r_a, 1);
-    i1_6in = 0;
-    i1_6ie = floor((1) - (1));
-    for (i1_6i = 1; i1_6in <= i1_6ie; i1_6i = 1 + (++i1_6in)) {
-        i2_7in = 0;
-        i2_7ie = floor((1) - (1));
-        for (i2_7i = 1; i2_7in <= i2_7ie; i2_7i = 1 + (++i2_7in)) {
-            jmi_array_ref_1(jmi_array_rec_1(_der_rt_a, i1_6i)->x, i2_7i) = jmi_array_val_1(jmi_array_rec_1(_der_temp_1_a, i1_6i)->x, i2_7i);
-            jmi_array_ref_1(jmi_array_rec_1(rt_a, i1_6i)->x, i2_7i) = jmi_array_val_1(jmi_array_rec_1(temp_1_a, i1_6i)->x, i2_7i);
-        }
-    }
-    _der_y_v = jmi_array_val_1(jmi_array_rec_1(_der_rt_a, 1)->x, 1);
-    y_v = jmi_array_val_1(jmi_array_rec_1(rt_a, 1)->x, 1);
-    i1_8in = 0;
-    i1_8ie = floor((jmi_array_size(r_a, 0)) - (1));
-    for (i1_8i = 1; i1_8in <= i1_8ie; i1_8i = 1 + (++i1_8in)) {
-        if (COND_EXP_EQ(1.0, jmi_array_size(jmi_array_rec_1(r_a, i1_8i)->x, 0), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
-            jmi_assert_failed(\"Mismatching sizes in function 'Differentiation.AlgorithmDifferentiation.RecordArrayTemp1.e', component 'r[i1].x', dimension '1'\", JMI_ASSERT_ERROR);
-        }
-    }
-    JMI_RET(GEN, _der_y_o, _der_y_v)
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-jmi_real_t func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1__der_e_exp2(R_0_ra* r_a, R_0_ra* _der_r_a) {
-    JMI_DEF(REA, _der_y_v)
-    func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1__der_e_def2(r_a, _der_r_a, &_der_y_v);
-    return _der_y_v;
-}
-
-void func_Differentiation_AlgorithmDifferentiation_RecordArrayTemp1__der_F_def3(R_0_ra* x_a, R_0_ra* _der_x_a, R_0_ra* _der_y_a) {
-    JMI_DYNAMIC_INIT()
-    JMI_ARR(STACK, R_0_r, R_0_ra, _der_y_an, 1, 1)
-    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
-    JMI_ARR(STACK, R_0_r, R_0_ra, y_a, 1, 1)
-    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
-    jmi_real_t i1_9i;
-    jmi_int_t i1_9ie;
-    jmi_int_t i1_9in;
-    jmi_real_t i1_10i;
-    jmi_int_t i1_10ie;
-    jmi_int_t i1_10in;
-    jmi_real_t i2_11i;
-    jmi_int_t i2_11ie;
-    jmi_int_t i2_11in;
-    JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, y_a, 1, 1, 1)
-    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
-    jmi_array_rec_1(y_a, 1)->x = tmp_2;
-    if (_der_y_a == NULL) {
-        JMI_ARRAY_INIT_1(STACK, R_0_r, R_0_ra, _der_y_an, 1, 1, 1)
-        JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
-        jmi_array_rec_1(_der_y_an, 1)->x = tmp_1;
-        _der_y_a = _der_y_an;
-    }
-    i1_9in = 0;
-    i1_9ie = floor((1) - (1));
-    for (i1_9i = 1; i1_9in <= i1_9ie; i1_9i = 1 + (++i1_9in)) {
-        if (COND_EXP_EQ(1.0, jmi_array_size(jmi_array_rec_1(x_a, i1_9i)->x, 0), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
-            jmi_assert_failed(\"Mismatching sizes in function 'Differentiation.AlgorithmDifferentiation.RecordArrayTemp1.F', component 'x[i1].x', dimension '1'\", JMI_ASSERT_ERROR);
-        }
-    }
-    i1_10in = 0;
-    i1_10ie = floor((1) - (1));
-    for (i1_10i = 1; i1_10in <= i1_10ie; i1_10i = 1 + (++i1_10in)) {
-        i2_11in = 0;
-        i2_11ie = floor((1) - (1));
-        for (i2_11i = 1; i2_11in <= i2_11ie; i2_11i = 1 + (++i2_11in)) {
-            jmi_array_ref_1(jmi_array_rec_1(_der_y_a, i1_10i)->x, i2_11i) = jmi_array_val_1(jmi_array_rec_1(_der_x_a, i1_10i)->x, i2_11i);
-            jmi_array_ref_1(jmi_array_rec_1(y_a, i1_10i)->x, i2_11i) = jmi_array_val_1(jmi_array_rec_1(x_a, i1_10i)->x, i2_11i);
-        }
-    }
-    JMI_DYNAMIC_FREE()
-    return;
-}
-")})));
-        end RecordArrayTemp1;
 
         model While
             function F

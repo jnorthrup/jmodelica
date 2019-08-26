@@ -16,14 +16,12 @@
 
 package org.jmodelica.util;
 
-import org.jmodelica.common.options.AbstractOptionRegistry;
-
-public class OptionRegistry extends AbstractOptionRegistry {
+public class OptionRegistry extends org.jmodelica.common.options.OptionRegistry  {
     /*
      * This class is only here to support old versions of pymodelica
      */
     
-    public static class UnknownOptionException extends AbstractOptionRegistry.UnknownOptionException {
+    public static class UnknownOptionException extends org.jmodelica.common.options.OptionRegistry.UnknownOptionException { 
         private static final long serialVersionUID = 7226800291471043612L;
 
         public UnknownOptionException(String message) {
@@ -31,10 +29,4 @@ public class OptionRegistry extends AbstractOptionRegistry {
         }
     }
 
-    @Override
-    public AbstractOptionRegistry copy() {
-        OptionRegistry res = new OptionRegistry();
-        res.copyAllOptions(this);
-        return res;
-    }
 }

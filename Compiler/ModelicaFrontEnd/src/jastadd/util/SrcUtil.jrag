@@ -26,11 +26,6 @@ aspect SrcUtil {
     syn boolean SrcExp.isBooleanLiteral()  = false;
     eq SrcBooleanLitExp.isBooleanLiteral() = true;
 
-    inh boolean SrcExp.isBindingExpression();
-    eq SrcModification.getChild().isBindingExpression()   = true;
-    eq SrcNamedArgument.getSrcExp().isBindingExpression() = true;
-    eq BaseNode.getChild().isBindingExpression()          = false;
-
     /**
      * Returns the class declaration which surrounds this element. Null if no
      * such declaration can be found.
@@ -89,17 +84,17 @@ aspect SrcUtil {
 //    syn boolean SrcClause.isElementList() = false;
 //    eq SrcElementList    .isElementList() = true;
 //    /**
-//     * Is this clause a public element list?
+//     * Is this clause an public element list?
 //     */
 //    syn boolean SrcClause  .isPublicElementList() = false;
 //    eq SrcPublicElementList.isPublicElementList() = true;
 //    /**
-//     * Is this clause a default element list?
+//     * Is this clause an default element list?
 //     */
 //    syn boolean SrcClause   .isDefaultElementList() = false;
 //    eq SrcDefaultElementList.isDefaultElementList() = true;
 //    /**
-//     * Is this clause a protected element list?
+//     * Is this clause an protected element list?
 //     */
 //    syn boolean SrcClause     .isProtectedElementList() = false;
 //    eq SrcProtectedElementList.isProtectedElementList() = true;
@@ -167,7 +162,7 @@ aspect SrcUtil {
 //    syn SrcComponentClause SrcElement.asComponentClause() = (SrcComponentClause) this;
 //
 //    /**
-//     * Is this element an extends clause declaration?
+//     * Is this element an extends caluse declaration?
 //     */
 //    syn boolean SrcElement.isExtendsClause() = false;
 //    eq SrcExtendsClause   .isExtendsClause() = true;
@@ -178,7 +173,7 @@ aspect SrcUtil {
 //    syn SrcExtendsClause SrcElement.asExtendsClause() = (SrcExtendsClause) this;
 //
 //    /**
-//     * Is this element an import clause declaration?
+//     * Is this element an import caluse declaration?
 //     */
 //    syn boolean SrcElement.isImportClause() = false;
 //    eq SrcImportClause    .isImportClause() = true;
@@ -213,17 +208,17 @@ aspect SrcUtil {
     syn boolean SrcClause.isElementList() = false;
     eq SrcElementList    .isElementList() = true;
     /**
-     * Is this clause a public element list?
+     * Is this clause an public element list?
      */
     syn boolean SrcClause  .isPublicElementList() = false;
     eq SrcPublicElementList.isPublicElementList() = true;
     /**
-     * Is this clause a default element list?
+     * Is this clause an default element list?
      */
     syn boolean SrcClause   .isDefaultElementList() = false;
     eq SrcDefaultElementList.isDefaultElementList() = true;
     /**
-     * Is this clause a protected element list?
+     * Is this clause an protected element list?
      */
     syn boolean SrcClause     .isProtectedElementList() = false;
     eq SrcProtectedElementList.isProtectedElementList() = true;
@@ -291,7 +286,7 @@ aspect SrcUtil {
     syn SrcComponentClause SrcElement.asComponentClause() = (SrcComponentClause) this;
 
     /**
-     * Is this element an extends clause declaration?
+     * Is this element an extends caluse declaration?
      */
     syn boolean SrcElement.isExtendsClause() = false;
     eq SrcExtendsClause   .isExtendsClause() = true;
@@ -302,7 +297,7 @@ aspect SrcUtil {
     syn SrcExtendsClause SrcElement.asExtendsClause() = (SrcExtendsClause) this;
 
     /**
-     * Is this element an import clause declaration?
+     * Is this element an import caluse declaration?
      */
     syn boolean SrcElement.isImportClause() = false;
     eq SrcImportClause    .isImportClause() = true;
@@ -332,10 +327,10 @@ aspect SrcUtil {
      * folder for which the root package.mo is located. The root path for an
      * unstructured library is the modelica file it self.
      */
-    syn Path SrcBaseNode.myLibRootPath() {
+    syn File SrcBaseNode.myLibRootPath() {
         SrcClassDecl topClass = myTopSrcClassDecl();
-        Path fileRoot = Paths.get(topClass.fileName());
-        return topClass.isLibNode() ?  fileRoot.getParent() : fileRoot;
+        File fileRoot = new File(topClass.fileName());
+        return topClass.isLibNode() ?  fileRoot.getParentFile() : fileRoot;
     }
 }
 

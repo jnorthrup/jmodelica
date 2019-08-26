@@ -2,6 +2,7 @@ package org.jmodelica.test.common;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -139,9 +140,7 @@ public class URIResolverTest {
         try {
             new URIResolverMock().resolveURIChecked(n, "modelica://pack2/subpath");
             fail();
-        } catch (URIException e) {
-            // expected
-        }
+        } catch (URIException e) {}
     }
     
     @Test
@@ -174,7 +173,6 @@ public class URIResolverTest {
             URIResolver.DEFAULT.resolveURIChecked(n, "]");
             fail();
         } catch (URIException e) {
-            // expected
         }
     }
 }

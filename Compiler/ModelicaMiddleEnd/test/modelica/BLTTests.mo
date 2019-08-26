@@ -31,7 +31,7 @@ model UnbalancedTest1_Err
 1 errors found:
 
 Error in flattened model:
-  The system is structurally singular. The following variable(s) could not be matched to any equation:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
      y
      z
 
@@ -54,7 +54,7 @@ equation
 1 errors found:
 
 Error in flattened model:
-  The system is structurally singular. The following variable(s) could not be matched to any equation:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
      y
 
   The following equation(s) could not be matched to any variable:
@@ -93,7 +93,7 @@ equation
 1 errors found:
 
 Error in flattened model:
-  The system is structurally singular. The following variable(s) could not be matched to any equation:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
      x
 ")})));
 end UnbalancedTest4_Err;
@@ -131,7 +131,7 @@ initial equation
 			description="Test error messages for unbalanced initial systems.",
 			errorMessage="
 Error in flattened model:
-  The initialization system is structurally singular. The following variable(s) could not be matched to any equation:
+  The initialization system is structurally singular. The following varible(s) could not be matched to any equation:
      y
 
   The following equation(s) could not be matched to any variable:
@@ -141,6 +141,8 @@ Error in flattened model:
 end UnbalancedInitTest1;
 
 end Unbalanced;
+
+package Matching
 
 model MatchingTest1
 	Real x(start=1);
@@ -157,7 +159,7 @@ equation
 			description="Tests so that the matching algorithm prioritizes start value",
 			equation_sorting=true,
 			flatModel="
-fclass BLTTests.MatchingTest1
+fclass BLTTests.Matching.MatchingTest1
  Real x(start = 1);
  Real y;
 initial equation 
@@ -166,7 +168,7 @@ initial equation
 equation
  der(x) = - x;
  der(y) = - y;
-end BLTTests.MatchingTest1;
+end BLTTests.Matching.MatchingTest1;
 ")})));
 end MatchingTest1;
 
@@ -185,7 +187,7 @@ equation
 			description="Tests so that the matching algorithm prioritizes start value",
 			equation_sorting=true,
 			flatModel="
-fclass BLTTests.MatchingTest2
+fclass BLTTests.Matching.MatchingTest2
  Real x;
  Real y(start = 1);
 initial equation 
@@ -194,7 +196,7 @@ initial equation
 equation
  der(x) = - x;
  der(y) = - y;
-end BLTTests.MatchingTest2;
+end BLTTests.Matching.MatchingTest2;
 ")})));
 end MatchingTest2;
 
@@ -225,54 +227,7 @@ temp_2 = b > pre(c)
 ")})));
 end MatchingTest3;
 
-model MatchingDiscreteReal1
-    Boolean g;
-    Real x;
-    Real y;
-equation
-    der(y) = 1;
-    when g then
-        reinit(y, 0);
-    end when;
-algorithm 
-    g := y > 0;
-    when {g} then
-        x := 0;
-    end when;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="MatchingDiscreteReal1",
-            description="Matching discrete real in mixed algorithm",
-            methodName="printDAEBLT",
-            methodResult="
---- Solved equation ---
-der(y) := 1
-
---- Pre propagation block (Block 1) ---
-  --- Solved algorithm ---
-  algorithm
-    g := y > 0;
-    if g and not pre(g) then
-      x := 0;
-    end if;
-
-    Assigned variables: g
-  --- Meta equation block ---
-  if g and not pre(g) then
-    reinit(y, 0);
-  end if
-  --- Solved algorithm ---
-  algorithm
-    g := y > 0;
-    if g and not pre(g) then
-      x := 0;
-    end if;
-
-    Assigned variables: x
--------------------------------
-")})));
-end MatchingDiscreteReal1;
+end Matching;
 
 model ExternalObjectLoop1
     model EO

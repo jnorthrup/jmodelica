@@ -24,7 +24,7 @@ FlatRoot : Root ::= FClass;
  * DAE equations and functions.
  *
  * FClass corresponds to a flattened Modelica model and contains essentially
- * a list of variables, a list of functions and a list of equations, 
+ * a list of variables and variables, a list of functions and a list of equations, 
  * of which some are initial equations.
  */ 
 FClass : BaseNode ::= FAccess 
@@ -74,6 +74,7 @@ FRecordDecl : BaseNode ::= FAccess FVariable*;
 FEnumDecl : BaseNode ::= Name:FIdDecl FEnumSpecification [FStringComment];
 abstract FEnumSpecification : BaseNode;
 FEnumLiteralList : FEnumSpecification ::= FEnumLiteral*;
+FEnumUnspecified : FEnumSpecification;
 FEnumLiteral : FAbstractVariable ::= Name:CommonAccess [FStringComment];
 
 /**
@@ -84,13 +85,17 @@ abstract FAbstractVariable : BaseNode;
 /**
  * A flat variable in a function.
  */
-FFunctionVariable : FAbstractVariable ::= <VisibilityType:VisibilityType>
-                                          <TypePrefixInputOutput:TypePrefixInputOutput>
+FFunctionVariable : FAbstractVariable ::= <TypePrefixInputOutput:TypePrefixInputOutput>
                                           FAttribute*
                                           Type:FType
                                           [BindingExp:FExp]
                                           FAccess
                                           <Order:int>;
+
+/**
+ * An array variable in a function. 
+ */
+FFunctionArray : FFunctionVariable;
 
 /**
  * A flat variable corresponding to an unknown declaration.
@@ -372,11 +377,11 @@ FAccessPart : BaseNode ::= <Name:String>;
 FAccessPartArray : FAccessPart ::= FArraySubscripts;
 
 /**
- * Representation of an attribute for a built-in type.
+ * Representation of an attribute for a built-in types.
  *
  * The attributes (start, unit etc.) of the built-in types are represented by
- * objects of the FAttribute class, which in turn are stored in the 
- * FVariables. FAttribute contains information about the attribute name and
+ * objects of the FAttribute class, which in turned are stored in the 
+ * FVariables. FAttributes contain information about the attribute name and
  * type, its value, whether it is set explicitly by the user and the prefixes
  * each and final. 
  */
@@ -635,12 +640,9 @@ FBreakStmt : FStatement;
 FReturnStmt : FStatement;
 
 /**
- * Class for array initialization statements. 
- * Expands subcomponent initialization during scalarization 
- * if shallow and during code generation otherwise.
+ * Class for array initalization statements.
  */
-FInitArrayStmt : FStatement ::= FAccessExp /Type:FType/ <Shallow:boolean> Size:FExp*;
-
+FInitArrayStmt : FStatement ::= FAccessExp /Type:FType/;
 /**
  * Class for derivated array initalization statements.
  */
@@ -655,12 +657,6 @@ abstract FIfWhenStmt : FStatement ::= FIfWhenClause*;
  * Flattened if statement.
  */
 FIfStmt : FIfWhenStmt ::= ElseStmt:FStatement*;
-
-/**
- * If statement used for assigning temporaries that 
- * need to be guarded by if conditions.
- */
-FIfStmtTemp : FIfStmt;
 
 /**
  * Flattened when statement.
@@ -686,7 +682,7 @@ FWhenClause : FIfWhenClause;
 /**
  * Flattened for statement.
  */
-FForStmt : FStatement ::= Index:FForIndex ForStmt:FStatement* /UnrolledForStmt:FStatement*/;
+FForStmt : FStatement ::= Index:FForIndex ForStmt:FStatement*;
 
 /**
  * Flattened while statement.
@@ -737,7 +733,7 @@ ArrayExp : BaseNode ::= FExp*;
 abstract FExp : BaseNode;
 
 /**
- * Abstract base class for all flattened expressions that are neither literals nor unsupported.
+ * Abstract base class for all flattened expressions that is not literal or unsupported.
  */
 abstract FAbstractExp : FExp;
 
@@ -841,7 +837,7 @@ abstract FBoolBinExp : FBinExp;
 /**
  * Base class for relational expressions.
  */
-abstract FRelExp : FBoolBinExp ::= [Indicator:FAccessExp];
+abstract FRelExp : FBoolBinExp ::= [Indicator:FExp] <IndicatorVarName:String>;
 
 /**
  * Less than expression.
@@ -1315,27 +1311,12 @@ FReinit : FBuiltInFunctionCall ::= Var:FExp FExp;
 /**
  * The delay() operator.
  */
-FDelayExp : FBuiltInFunctionCall ::= FExp Delay:FExp [Max:FExp] Indicator:FAccessExp*;
+FDelayExp : FBuiltInFunctionCall ::= FExp Delay:FExp [Max:FExp];
 
 /**
  * The spatialDistribution() operator.
  */
-FSpatialDistExp : FBuiltInFunctionCall ::= In0:FExp
-                                           In1:FExp
-                                           X:FExp
-                                           PositiveVelocity:FExp
-                                           InitialPoints:FExp
-                                           InitialValues:FExp
-                                           [Indicator:FAccessExp];
-
-/**
- * Used for generating event indicators for the delay() operator.
- */
-abstract FIndicatorExp   : FBuiltInFunctionCall;
-abstract FDelayIndicator : FIndicatorExp;
-FFirstDelayIndicator     : FDelayIndicator;
-FSecondDelayIndicator    : FDelayIndicator;
-FSpatialDistIndicator    : FIndicatorExp;
+FSpatialDistExp : FBuiltInFunctionCall ::= In0:FExp In1:FExp X:FExp PositiveVelocity:FExp InitialPoints:FExp InitialValues:FExp;
 
 /**
  * Sample built-in function.

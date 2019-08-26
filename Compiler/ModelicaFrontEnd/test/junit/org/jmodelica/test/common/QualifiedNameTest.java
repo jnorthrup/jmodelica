@@ -1,8 +1,6 @@
 package org.jmodelica.test.common;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 
 import org.jmodelica.util.QualifiedName;
 import org.jmodelica.util.exceptions.NameFormatException;
@@ -12,19 +10,19 @@ public class QualifiedNameTest {
 
     @Test
     public void globalWithQuotedContainingExcapedDot() {
-        assertEquals("(global) ['quotedWith.Dot\\'.', secondPart]", 
+        assertEquals("['quotedWith.Dot\\'.', secondPart]", 
                 new QualifiedName(".'quotedWith.Dot\\'.'.secondPart").toString());
     }
 
     @Test
     public void globalDotted()  {
-        assertEquals("(global) [first, second, third]", 
+        assertEquals("[first, second, third]", 
                 new QualifiedName(".first.second.third").toString());
     }
 
     @Test
     public void global() {
-        assertEquals("(global) [global]", 
+        assertEquals("[global]", 
                 new QualifiedName(".global").toString());
     }
 
@@ -52,28 +50,8 @@ public class QualifiedNameTest {
     }
 
     @Test
-    public void countNumberOfParts() {
-        assertEquals(4, new QualifiedName("A.'B'.C.D").numberOfParts());
-    }
-
-    @Test
-    public void nonSimpleNameParts() {
-        assertEquals(4, new QualifiedName(".A.'B'.C.D").numberOfParts());
-    }
-    
-    @Test
-    public void globalSimpleNameParts() {
-        assertTrue(QualifiedName.isValidSimpleIdentifier(".'A'", true));
-    }
-
-    @Test
-    public void globalSimpleNamePartsNegative() {
-        assertFalse(QualifiedName.isValidSimpleIdentifier(".'A'", false));
-    }
-
-    @Test
     public void nameFromUnqualifiedImport() {
-        assertEquals(".* [A, B, C]", new QualifiedName("A.B.C.*").toString());
+        assertEquals("[A, B, C]", new QualifiedName("A.B.C.*").toString());
     }
 
     @Test(expected=NameFormatException.class)

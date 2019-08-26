@@ -73,7 +73,7 @@ aspect ContentCheck {
     
     public void FReinit.contentCheck(ErrorCheckType checkType) {
         if (!inWhen() || inAlgorithm()) 
-            error("The reinit() operator is only allowed in when clauses that are within an equation section.");
+            error("The reinit() operator is only allowed in when equations");
     }
 	
 	public void InstExternal.contentCheck(ErrorCheckType checkType) {
@@ -153,13 +153,6 @@ aspect ContentCheck {
             error("Classed derived from ExternalObject can neither be used in an extends-clause nor in a short class defenition");
         if (myInstClass().isOperatorRecord())
             contentCheckExtendsOperatorRecord(checkType);
-    }
-
-    @Override
-    public void InstEnum.contentCheck(ErrorCheckType checkType) {
-        if (isUnspecifiedEnum() && !checkType.allowUnspecifiedEnums()) {
-            ASTNode.UNSPECIFIED_ENUM_COMPONENT.invoke(this, this);
-        }
     }
 
     /**
@@ -367,9 +360,9 @@ aspect ContentCheck {
 	}
 	
     syn boolean FType.compatibleConstructor(InstClassDecl icd) = false;
-    eq FExternalObjectType.compatibleConstructor(InstClassDecl icd) = getConstructor().name().equals("." + icd.qualifiedName() + ".constructor");
+    eq FExternalObjectType.compatibleConstructor(InstClassDecl icd) = getConstructor().name().equals(icd.qualifiedName() + ".constructor");
     syn boolean FType.compatibleDestructor(InstClassDecl icd) = false;
-    eq FExternalObjectType.compatibleDestructor(InstClassDecl icd) = getDestructor().name().equals("." + icd.qualifiedName() + ".destructor");
+    eq FExternalObjectType.compatibleDestructor(InstClassDecl icd) = getDestructor().name().equals(icd.qualifiedName() + ".destructor");
 	
 	// TODO: check if this is a builtin function (with bad arguments), error otherwise
 //	public void FBuiltinExternalLanguage.contentCheck(ErrorCheckType checkType) {
@@ -379,19 +372,7 @@ aspect ContentCheck {
 	public void FUnknownExternalLanguage.contentCheck(ErrorCheckType checkType) {
 		error("The external language specification \"" + getLanguage() + "\" is not supported");
 	}
-    
-    public static final SimpleErrorProducer ASTNode.NON_PARAMETER_SAMPLE_ARGUMENTS =
-            new SimpleErrorProducer("NON_PARAMETER_SAMPLE_ARGUMENTS", ProblemKind.SEMANTIC, 
-                    "Sample arguments need to be parameter expressions");
-    
-    public void FSampleExp.contentCheck(ErrorCheckType checkType) {
-        for (FExp ch : childFExps()) {
-            if (!ch.variability().parameterOrLess()) {
-                NON_PARAMETER_SAMPLE_ARGUMENTS.invoke(ch);
-            }
-        }
-    }
-
+	
 	inh boolean FIterExp.iterExpUseOK();
 	eq FExp.getChild().iterExpUseOK()          = false;
 	eq Root.getChild().iterExpUseOK()          = false;
@@ -863,25 +844,6 @@ aspect ContentCheck {
     eq InstRoot.getChild().myOperatorRecord()          = null;
     eq Root.getChild().myOperatorRecord()              = null;
 
-    /**
-     * If this class is in an operator record or in a package in an operator record.
-     */
-     syn boolean SrcClassDecl.hasOperatorRecord() = getSrcRestriction().isOperatorRecord() ? true : (isPackage() ? hasOperatorRecord() : false);
-    inh boolean SrcClassDecl.hasOperatorRecordHelper();
-    eq SrcLibNode.getChild().hasOperatorRecordHelper()    = hasOperatorRecordHelper();
-    eq SrcClassDecl.getChild().hasOperatorRecordHelper()  {
-        if (hasSrcRestriction()) {
-            if (getSrcRestriction().isOperatorRecord()) {
-                return true;
-            }
-            return isPackage() ? hasOperatorRecordHelper() : false;
-        }
-        return false;
-    }
-    eq Root.getChild().hasOperatorRecordHelper()          = false;
-
-    syn boolean SrcRestriction.isOperatorRecord() = false;
-    eq SrcOperatorRecord.isOperatorRecord() = true;
 }
 
 aspect ForceVariability {

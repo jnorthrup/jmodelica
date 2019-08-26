@@ -30,11 +30,11 @@ public class JModelicaRunner extends ParentRunner<ModuleRunner> {
 
     private List<ModuleRunner> children;
 
-    public JModelicaRunner(Class<?> testClass) throws InitializationError {
+    public JModelicaRunner(Class testClass) throws InitializationError {
         super(testClass);
         if (TestSpecification.class.isAssignableFrom(testClass)) {
             try {
-                TestSpecification spec = (TestSpecification) testClass.getDeclaredConstructor().newInstance();
+                TestSpecification spec = (TestSpecification) testClass.newInstance();
                 children = new ArrayList<ModuleRunner>();
                 for (File f : spec.getModuleDirs()) {
                     File testDir = new File(f, "src/test");
@@ -49,17 +49,14 @@ public class JModelicaRunner extends ParentRunner<ModuleRunner> {
         }
     }
 
-    @Override
     public Description describeChild(ModuleRunner mod) {
         return mod.getDescription();
     }
 
-    @Override
     public List<ModuleRunner> getChildren() {
         return children;
     }
 
-    @Override
     public void runChild(ModuleRunner mod, RunNotifier note) {
         mod.run(note);
     }

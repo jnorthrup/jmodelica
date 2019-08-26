@@ -430,31 +430,6 @@ aspect Derivatives {
     }
 
     @Override
-    protected FExp FGlobalAccessExp.diffExp(String name) {
-        return type().diffExpanded(this, name);
-    }
-
-    protected FExp FType.diffExpanded(FExp exp, String name) {
-        if (isArray()) {
-            return exp.getArray().buildDiff(name);
-        } else {
-            return diffScalarExpanded(exp, name);
-        }
-    }
-
-    protected FExp FType.diffScalarExpanded(FExp exp, String name) {
-        return exp.diffZero();
-    }
-
-    protected FExp FRecordType.diffScalarExpanded(FExp exp, String name) {
-        List<FExp> args = new List<>();
-        for (FRecordComponentType frct : getComponents()) {
-            args.add(exp.component(frct.getName()).diff(name));
-        }
-        return new FRecordConstructor(new FRecordAccess(getName()), args);
-    }
-
-    @Override
     protected FExp FPreExp.diffExp(String name) {
         if (name.equals(name())) {
             return type().createSizedLiteral(1);
@@ -561,7 +536,7 @@ aspect Derivatives {
             if (variability().continuousVariability() || inFunction() && type().containsReal()) {
                 return createDerExp(1);
             } else {
-                return diffZero();
+                return type().sizedZeroLiteral();
             }
         } else if (name.equals(myName)) {
             FExp exp = type().createSizedLiteral(1);
@@ -570,7 +545,7 @@ aspect Derivatives {
             }
             return exp;
         } else {
-            return diffZero();
+            return type().sizedZeroLiteral();
         }
     }
 
@@ -599,11 +574,10 @@ aspect Derivatives {
     
     @Override
     protected FExp FRecordConstructor.diffExp(String name) {
-        List<FExp> args = new List<>();
-        for (FExp arg : getArgs()) {
-            args.add(arg.diff(name));
-        }
-        return new FRecordConstructor(getRecord().treeCopy(), args);
+        FRecordConstructor res = new FRecordConstructor(getRecord().fullCopy(), new List());
+        for (FExp arg : getArgs())
+            res.addArg(arg.diff(name));
+        return res;
     }
     
     @Override
@@ -1048,9 +1022,9 @@ aspect AlgorithmDifferentiation{
     
     @Override
     public void FInitArrayStmt.diff(List<FStatement> diffed) {
-        diffed.add(treeCopy());
+        diffed.add(fullCopy());
         if (order() == myFAlgorithm().order() && shouldBeDifferentiated()) {
-            diffed.add(new FDerivatedInitArrayStmt(getFAccessExp().createDerExp(1).asFAccessExp(), getShallow(), getSizes().treeCopy(), order() + 1));
+            diffed.add(new FDerivatedInitArrayStmt(getFAccessExp().createDerExp(1).asFAccessExp(), order() + 1));
         }
     }
     
@@ -1067,9 +1041,10 @@ aspect AlgorithmDifferentiation{
         diffed.add(new FWhileStmt(getTest().fullCopy(), statements));
     }
     
-    syn FFunctionVariable FFunctionVariable.createDerivative() = new FFunctionVariable(
-            getVisibilityType(), getTypePrefixInputOutput(), new List<FAttribute>(), getType().treeCopy(), 
-            new Opt<FExp>(), getFAccess().createDerPrefixedName(1), order() + 1);
+    syn FFunctionVariable FFunctionVariable.createDerivative() {
+        return createNode(getTypePrefixInputOutput(), getType().fullCopy(), new Opt<FExp>(), 
+                getFAccess().createDerPrefixedName(1), order() + 1);
+    }
     
     rewrite FDerExp {
         when (inFunction()) to CommonAccessExp 

@@ -20,7 +20,6 @@
 %goal element;
 %goal abstract_equation;
 %goal argument;
-%goal access_scalar;
 
 %header {:
  package $PARSER_PACKAGE$;
@@ -59,6 +58,7 @@
         public void syntaxError(Symbol token) {
             
             StringBuilder s = new StringBuilder();
+            //s.append("Syntax error at line "+ Symbol.getLine(token.getStart()) + ", column " + Symbol.getColumn(token.getStart()) + "\n");
             if (token.getId() == Terminals.EOF) {
                 s.append("  Unexpected end of file");
             } else if (token.value != null) {
@@ -67,8 +67,9 @@
                 s.append("  Unexpected token: " + Terminals.NAMES[token.getId()]);
             else 
                 s.append("  Syntactic error");
-            Problem p = Problem.createProblem(fileName, Symbol.getLine(token.getStart()), Symbol.getColumn(token.getStart()),
-                    Symbol.getLine(token.getEnd()), Symbol.getColumn(token.getEnd()), ProblemSeverity.ERROR, ProblemKind.SYNTACTIC, s.toString());
+            Problem p = new Problem(fileName, s.toString(), ProblemSeverity.ERROR, ProblemKind.SYNTACTIC,
+                    Symbol.getLine(token.getStart()), Symbol.getColumn(token.getStart()),
+                    Symbol.getLine(token.getEnd()), Symbol.getColumn(token.getEnd()));
             
             report(p);
         }
@@ -79,8 +80,15 @@
          * @param e     the exception.
          */
         public void scannerError(Scanner.Exception e) {
-            Problem p = Problem.createProblem(fileName, e.line, e.column, e.line, e.column,
-            	ProblemSeverity.ERROR, ProblemKind.LEXICAL, e.getMessage());
+            /*
+            StringBuilder s = new StringBuilder(e.getMessage());
+            s.append(" at line ");
+            s.append(e.line);
+            s.append(", column ");
+            s.append(e.column);
+            */
+            Problem p = new Problem(fileName, e.getMessage(), ProblemSeverity.ERROR, ProblemKind.LEXICAL,
+                    e.line, e.column, e.line, e.column);
             
             report(p);
         }
@@ -179,16 +187,6 @@
     public void setFileName(String fn) {
         if (report instanceof Report)
             ((Report) report).setFileName(fn);
-    }
-    
-    private LoadInfo loadInfo;
-    
-    public void setLoadInfo(LoadInfo loadInfo) {
-        this.loadInfo = loadInfo;
-    }
-    
-    public LoadInfo getLoadInfo() {
-        return loadInfo;
     }
     
     Symbol annotationTok = null;
@@ -290,7 +288,7 @@ Program program
 SrcStoredDefinition stored_definition
     = within? base_class_decl_list 
     {:
-        SrcStoredDefinition def = new SrcStoredDefinition(within, base_class_decl_list, getLoadInfo());
+        SrcStoredDefinition def = new SrcStoredDefinition(within, base_class_decl_list);
         def.setLineBreakMap(lineBreakMap);
         formattingRecorder.postParsing(def);
         return def; 
@@ -428,7 +426,7 @@ SrcBaseClassDecl base_class_decl
     :}
     | error 
     {: 
-        return new SrcBadClassDecl();
+      return new SrcBadClassDecl();
     :};
 
 SrcExtendsClauseShortClass extends_clause_short_class
@@ -967,7 +965,7 @@ SrcValueModification value_modification
 /*  
 // Assign modification for binding equations in functions - enable after figuring out 
 // a good way to make it an error outside of functions. Preferably parse error, but that 
-// likely requires much more code duplication than we want to accept.
+// likely requires much more code duplication then we want to accept.
 AssignModification assign_modification
     = COLON EQUALS exp    {: return new AssignModification(exp); :}
     ;
@@ -1637,7 +1635,7 @@ SrcDot access_dot
       DOT
       access_single
     {:
-        access_dot.addSrcNamedAccess(access_single);
+        access_dot.addSrcAccess(access_single);
         return access_dot;
     :}
     ;
@@ -1677,7 +1675,7 @@ SrcDot access_scalar_dot
       DOT
       access_single_scalar
     {:
-        access_scalar_dot.addSrcNamedAccess(access_single_scalar);
+        access_scalar_dot.addSrcAccess(access_single_scalar);
         return access_scalar_dot;
     :}
     ;

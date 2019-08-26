@@ -41,7 +41,6 @@
         #define JMI_PATH_MAX PATH_MAX
       #else
         #include <linux/limits.h>
-        #include <limits.h>
         #define JMI_PATH_MAX PATH_MAX
       #endif
     #endif
@@ -139,6 +138,9 @@ typedef struct _jmi_time_event_t {
  * is before the time event T1 defined by <code>event</code> then T1 is updated to T2.
  */
 void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, double time);
+
+/* This is a temporary remnant of CppAD*/            
+#define AD_WRAP_LITERAL(x) ((jmi_real_t) (x))
 
 #define COND_EXP_EQ(op1,op2,th,el) ((op1==op2)? (th): (el)) /**< \brief Macro for conditional expression == <br> */
 #define COND_EXP_LE(op1,op2,th,el) ((op1<=op2)? (th): (el)) /**< \brief Macro for conditional expression <= <br> */

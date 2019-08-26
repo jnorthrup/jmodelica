@@ -491,21 +491,10 @@ public
   input Real[:] x;
   input Real[:,:] A;
   output Real[:] y;
-  Real[:] temp_1;
-  Real temp_2;
  algorithm
   init y as Real[2];
-  init temp_1 as Real[2];
-  for i1 in 1:2 loop
-   temp_2 := 0.0;
-   for i2 in 1:2 loop
-    temp_2 := temp_2 + A[i1,i2] * x[i2];
-   end for;
-   temp_1[i1] := temp_2;
-  end for;
-  for i1 in 1:2 loop
-   y[i1] := temp_1[i1];
-  end for;
+  y[1] := A[1,1] * x[1] + A[1,2] * x[2];
+  y[2] := A[2,1] * x[1] + A[2,2] * x[2];
   return;
  annotation(derivative = IndexReduction.IndexReduction27_DerFunc.f_der);
  end IndexReduction.IndexReduction27_DerFunc.f;
@@ -516,21 +505,10 @@ public
   input Real[:] der_x;
   input Real[:,:] der_A;
   output Real[:] der_y;
-  Real[:] temp_1;
-  Real temp_2;
  algorithm
   init der_y as Real[2];
-  init temp_1 as Real[2];
-  for i1 in 1:2 loop
-   temp_2 := 0.0;
-   for i2 in 1:2 loop
-    temp_2 := temp_2 + A[i1,i2] * der_x[i2];
-   end for;
-   temp_1[i1] := temp_2;
-  end for;
-  for i1 in 1:2 loop
-   der_y[i1] := temp_1[i1];
-  end for;
+  der_y[1] := A[1,1] * der_x[1] + A[1,2] * der_x[2];
+  der_y[2] := A[2,1] * der_x[1] + A[2,2] * der_x[2];
   return;
  end IndexReduction.IndexReduction27_DerFunc.f_der;
 
@@ -611,20 +589,9 @@ public
   input Real[:] x;
   input Real[:,:] A;
   output IndexReduction.IndexReduction28_Record.R y;
-  Real[:] temp_1;
-  Real temp_2;
  algorithm
-  init temp_1 as Real[2];
-  for i1 in 1:2 loop
-   temp_2 := 0.0;
-   for i2 in 1:2 loop
-    temp_2 := temp_2 + A[i1,i2] * x[i2];
-   end for;
-   temp_1[i1] := temp_2;
-  end for;
-  for i1 in 1:2 loop
-   y.a[i1] := temp_1[i1];
-  end for;
+  y.a[1] := A[1,1] * x[1] + A[1,2] * x[2];
+  y.a[2] := A[2,1] * x[1] + A[2,2] * x[2];
   return;
  annotation(derivative = IndexReduction.IndexReduction28_Record.f_der);
  end IndexReduction.IndexReduction28_Record.f;
@@ -635,20 +602,9 @@ public
   input Real[:] der_x;
   input Real[:,:] der_A;
   output IndexReduction.IndexReduction28_Record.R der_y;
-  Real[:] temp_1;
-  Real temp_2;
  algorithm
-  init temp_1 as Real[2];
-  for i1 in 1:2 loop
-   temp_2 := 0.0;
-   for i2 in 1:2 loop
-    temp_2 := temp_2 + A[i1,i2] * der_x[i2];
-   end for;
-   temp_1[i1] := temp_2;
-  end for;
-  for i1 in 1:2 loop
-   der_y.a[i1] := temp_1[i1];
-  end for;
+  der_y.a[1] := A[1,1] * der_x[1] + A[1,2] * der_x[2];
+  der_y.a[2] := A[2,1] * der_x[1] + A[2,2] * der_x[2];
   return;
  end IndexReduction.IndexReduction28_Record.f_der;
 
@@ -1060,7 +1016,7 @@ fclass IndexReduction.IndexReduction52
  Real b;
  Real _der_x;
  Real _der_y;
- Real _der_dy;
+ Real _der_dx;
  Real _der_a;
  Real _der_der_x;
  Real _der_der_y;
@@ -1068,31 +1024,33 @@ fclass IndexReduction.IndexReduction52
  Real _der_der_b;
  Real temp_1;
  Real temp_4;
+ Real _der_temp_1;
  Real _der_temp_4;
  Real _der_der_temp_4;
 initial equation
- dx = 0.0;
+ dy = 0.0;
  b = 0.0;
 equation
  sin(_der_x) = dx;
  cos(_der_y) = dy;
- der(dx) = v * x;
- _der_dy = v * y;
+ _der_dx = v * x;
+ der(dy) = v * y;
  a * b = 1;
- temp_1 = x + 3.14;
- temp_4 = time;
  a = temp_1 * temp_4 + 42;
  b = temp_1 * temp_4 + y;
+ temp_1 = x + 3.14;
+ temp_4 = time;
  a * der(b) + _der_a * b = 0;
+ _der_a = temp_1 * _der_temp_4 + _der_temp_1 * temp_4;
+ der(b) = temp_1 * _der_temp_4 + _der_temp_1 * temp_4 + _der_y;
+ _der_temp_1 = _der_x;
  _der_temp_4 = 1.0;
- _der_a = temp_1 * _der_temp_4 + _der_x * temp_4;
- der(b) = temp_1 * _der_temp_4 + _der_x * temp_4 + _der_y;
- cos(_der_x) * _der_der_x = der(dx);
- - sin(_der_y) * _der_der_y = _der_dy;
+ cos(_der_x) * _der_der_x = _der_dx;
+ - sin(_der_y) * _der_der_y = der(dy);
  a * _der_der_b + _der_a * der(b) + (_der_a * der(b) + _der_der_a * b) = 0;
+ _der_der_a = temp_1 * _der_der_temp_4 + _der_temp_1 * _der_temp_4 + (_der_temp_1 * _der_temp_4 + _der_der_x * temp_4);
+ _der_der_b = temp_1 * _der_der_temp_4 + _der_temp_1 * _der_temp_4 + (_der_temp_1 * _der_temp_4 + _der_der_x * temp_4) + _der_der_y;
  _der_der_temp_4 = 0.0;
- _der_der_a = temp_1 * _der_der_temp_4 + _der_x * _der_temp_4 + (_der_x * _der_temp_4 + _der_der_x * temp_4);
- _der_der_b = temp_1 * _der_der_temp_4 + _der_x * _der_temp_4 + (_der_x * _der_temp_4 + _der_der_x * temp_4) + _der_der_y;
 end IndexReduction.IndexReduction52;
 ")})));
 end IndexReduction52;
@@ -1451,20 +1409,24 @@ fclass IndexReduction.TemporaryVarStates1
  Real _der_x2[2];
  Real temp_6;
  Real temp_7;
+ Real temp_8;
+ Real temp_9;
 initial equation
  temp_6 = 0.0;
  temp_7 = 0.0;
 equation
  _der_x1[1] + _der_x2[1] = 2;
  _der_x1[2] + _der_x2[2] = 3;
- temp_6 = A[1,1] * x2[1] + A[1,2] * x2[2];
- temp_7 = A[2,1] * x2[1] + A[2,2] * x2[2];
+ temp_6 = A[1,1] * temp_8 + A[1,2] * temp_9;
+ temp_7 = A[2,1] * temp_8 + A[2,2] * temp_9;
  - x1[1] = temp_6;
  - x1[2] = temp_7;
  der(temp_6) = A[1,1] * _der_x2[1] + A[1,2] * _der_x2[2];
  der(temp_7) = A[2,1] * _der_x2[1] + A[2,2] * _der_x2[2];
  - _der_x1[1] = der(temp_6);
  - _der_x1[2] = der(temp_7);
+ temp_8 = x2[1];
+ temp_9 = x2[2];
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
@@ -1542,7 +1504,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             double beta = 1;
             int n1 = 1;
             int n2 = 1;
-            Q1[0] = - COND_EXP_EQ(_sw(0), JMI_TRUE, 1.0, -1.0);
+            Q1[0] = - COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1.0), AD_WRAP_LITERAL(-1.0));
             for (i = 0; i < 1; i += 1) {
                 Q1[i + 0] = (Q1[i + 0]) / (1.0);
             }
@@ -1557,7 +1519,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _der_x_3 = x[0];
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-            _sw(0) = jmi_turn_switch(jmi, _x_1 - (0.0), _sw(0), JMI_REL_GEQ);
+            _sw(0) = jmi_turn_switch(jmi, _x_1 - (AD_WRAP_LITERAL(0.0)), _sw(0), JMI_REL_GEQ);
         }
         _der_y_2 = COND_EXP_EQ(_sw(0), JMI_TRUE, _der_x_3, - _der_x_3);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
@@ -1939,13 +1901,8 @@ public
   input Real x;
   input Real[:] a;
   output Real y;
-  Real temp_1;
  algorithm
-  temp_1 := 0.0;
-  for i1 in 1:2 loop
-   temp_1 := temp_1 + a[i1];
-  end for;
-  y := x + temp_1;
+  y := x + (a[1] + a[2]);
   return;
  annotation(derivative(noDerivative = a) = IndexReduction.FunctionAttributeScalarization2.F1_der,Inline = false);
  end IndexReduction.FunctionAttributeScalarization2.F1;
@@ -2216,6 +2173,7 @@ fclass IndexReduction.NonDiffArgs.Test3
  Real y;
  Real z;
  Real _der_y;
+ Real temp_12;
  Real temp_13;
  Real temp_14;
 initial equation 
@@ -2224,7 +2182,8 @@ equation
  _der_y * der(x) = 1;
  z = IndexReduction.NonDiffArgs.Test3.F3(time);
  y = x * temp_13 + x * temp_14;
- _der_y = (der(x) * temp_13 + der(x) * temp_14) * der(x);
+ temp_12 = der(x);
+ _der_y = (temp_12 * temp_13 + temp_12 * temp_14) * temp_12;
  (IndexReduction.NonDiffArgs.Test3.R(temp_13, temp_14)) = IndexReduction.NonDiffArgs.Test3.F2(z);
 
 public
@@ -2387,7 +2346,9 @@ fclass IndexReduction.NonDiffArgs.ExtraIncidences.Test1
  Real _der_s2;
  Real _der_w;
  Real temp_4;
+ Real temp_7;
  Real temp_14;
+ Real temp_17;
 equation
  v1 = _der_s1;
  v2 = _der_s2;
@@ -2395,13 +2356,15 @@ equation
  s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(cos(time), w, T);
  w = _der_s2 + sin(time);
  T = sin(s2);
+ temp_7 = w;
  temp_4 = cos(time);
- _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(temp_4 * w, w, T);
+ _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(temp_4 * temp_7, temp_7, T);
  _der_w = a2 + cos(time);
- a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1((temp_4 * _der_w + (- sin(time)) * w) * w, w, T);
+ a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1((temp_4 * _der_w + (- sin(time)) * temp_7) * temp_7, temp_7, T);
+ temp_17 = w;
  temp_14 = - sin(time);
- _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(temp_14 * w, w, T);
- a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1((temp_14 * _der_w + (- cos(time)) * w) * w, w, T);
+ _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(temp_14 * temp_17, temp_17, T);
+ a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1((temp_14 * _der_w + (- cos(time)) * temp_17) * temp_17, temp_17, T);
 
 public
  function IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1
@@ -2479,8 +2442,9 @@ fclass IndexReduction.NonDiffArgs.ExtraIncidences.Test2
  Real _der_s3;
  Real _der_w;
  Real temp_4;
- Real temp_12;
+ Real temp_7;
  Real temp_14;
+ Real temp_17;
 equation
  v1 = _der_s1;
  v2 = _der_s2;
@@ -2490,14 +2454,15 @@ equation
  s1 + s2 + s3 = 0;
  w = _der_s2 + sin(time);
  T = sin(s2);
+ temp_7 = w;
  temp_4 = cos(time);
- _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1(temp_4 * w, w, T);
+ _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1(temp_4 * temp_7, temp_7, T);
  _der_w = a2 + cos(time);
- a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1((temp_4 * _der_w + (- sin(time)) * w) * w, w, T);
- temp_12 = sin(time);
+ a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1((temp_4 * _der_w + (- sin(time)) * temp_7) * temp_7, temp_7, T);
+ temp_17 = sin(time);
  temp_14 = - sin(time);
- _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1(temp_14 * temp_12, temp_12, T);
- a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1((temp_14 * cos(time) + (- cos(time)) * temp_12) * temp_12, temp_12, T);
+ _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1(temp_14 * temp_17, temp_17, T);
+ a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1((temp_14 * cos(time) + (- cos(time)) * temp_17) * temp_17, temp_17, T);
  _der_s1 + _der_s2 + _der_s3 = 0;
  a1 + a2 + a3 = 0;
 
@@ -2584,10 +2549,11 @@ fclass IndexReduction.NonDiffArgs.ExtraIncidences.Test3
  Real _der_s3;
  Real _der_w;
  Real temp_4;
- Real temp_12;
+ Real temp_7;
  Real temp_14;
- Real temp_22;
+ Real temp_17;
  Real temp_24;
+ Real temp_27;
 equation
  v1a = _der_s1a;
  v1b = _der_s1b;
@@ -2599,18 +2565,19 @@ equation
  s1a + s1b + s2 + s3 = 0;
  w = _der_s2 + sin(time);
  T = sin(s2);
+ temp_7 = w;
  temp_4 = cos(time);
- _der_s1a + _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_4 * w, w, T);
+ _der_s1a + _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_4 * temp_7, temp_7, T);
  _der_w = a2 + cos(time);
- a1a + a1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_4 * _der_w + (- sin(time)) * w) * w, w, T);
- temp_12 = cos(time);
+ a1a + a1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_4 * _der_w + (- sin(time)) * temp_7) * temp_7, temp_7, T);
+ temp_17 = cos(time);
  temp_14 = cos(time);
- _der_s1a - _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_14 * temp_12, temp_12, T);
- a1a - a1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_14 * (- sin(time)) + (- sin(time)) * temp_12) * temp_12, temp_12, T);
- temp_22 = sin(time);
+ _der_s1a - _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_14 * temp_17, temp_17, T);
+ a1a - a1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_14 * (- sin(time)) + (- sin(time)) * temp_17) * temp_17, temp_17, T);
+ temp_27 = sin(time);
  temp_24 = - sin(time);
- _der_s1a + _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_24 * temp_22, temp_22, T);
- a1a + a1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_24 * cos(time) + (- cos(time)) * temp_22) * temp_22, temp_22, T);
+ _der_s1a + _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_24 * temp_27, temp_27, T);
+ a1a + a1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_24 * cos(time) + (- cos(time)) * temp_27) * temp_27, temp_27, T);
  _der_s1a + _der_s1b + _der_s2 + _der_s3 = 0;
  a1a + a1b + a2 + a3 = 0;
 
@@ -3520,7 +3487,7 @@ Error in flattened model:
   Index reduction failed: Maximum number of expressions in a single equation has been reached
 
 Error in flattened model:
-  The system is structurally singular. The following variable(s) could not be matched to any equation:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
      der(x2)
 
   The following equation(s) could not be matched to any variable:
@@ -3584,7 +3551,7 @@ Error in flattened model:
   Index reduction failed: Munkres algorithm was unable to find a matching; Unable to find any uncovered incidence
 
 Error in flattened model:
-  The system is structurally singular. The following variable(s) could not be matched to any equation:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
      a1
      a2
 
@@ -4093,14 +4060,15 @@ fclass IndexReduction.FunctionInlining.Test5
  parameter Real p = 2 /* 2 */;
  Real _der_x;
  Real _der_b;
- Real temp_2;
-initial equation
+ parameter Real temp_2;
+initial equation 
  y = 0.0;
+parameter equation
+ temp_2 = if p > 0 then p else 0;
 equation
  _der_x = der(y) * 2;
  x ^ 2 + y ^ 2 = IndexReduction.FunctionInlining.Test5.F(b, if p > 0 then p else 0);
  b = time;
- temp_2 = if p > 0 then p else 0;
  2 * x * _der_x + 2 * y * der(y) = IndexReduction.FunctionInlining.Test5.F(_der_b, temp_2);
  _der_b = 1.0;
 
@@ -4454,11 +4422,15 @@ fclass IndexReduction.FunctionInlining.Test9
  Real _der_x;
  Real _der_vx;
  Real _der_der_y;
+ parameter Real temp_1;
  Real temp_2;
- Real _der_temp_1;
+ parameter Real temp_5;
 initial equation
  y = 0.0;
  vy = 0.0;
+parameter equation
+ temp_1 = p[1];
+ temp_5 = temp_1;
 equation
  _der_x = vx;
  der(y) = vy;
@@ -4466,10 +4438,9 @@ equation
  der(vy) = a * y;
  x + y = IndexReduction.FunctionInlining.Test9.F({p[1]}, time);
  temp_2 = time;
- _der_x + der(y) = IndexReduction.FunctionInlining.Test9.F({p[1]}, p[1] + temp_2 * p[1]);
+ _der_x + der(y) = IndexReduction.FunctionInlining.Test9.F({temp_1}, temp_1 + temp_2 * temp_1);
  _der_der_y = der(vy);
- _der_temp_1 = 0.0;
-  _der_vx + _der_der_y = IndexReduction.FunctionInlining.Test9.F({p[1]}, (_der_temp_1 + (temp_2 * _der_temp_1 + p[1])) * p[1] + (p[1] + temp_2 * p[1]) * p[1]);
+ _der_vx + _der_der_y = IndexReduction.FunctionInlining.Test9.F({temp_5}, temp_1 * temp_5 + (temp_1 + temp_2 * temp_1) * temp_5);
 
 public
  function IndexReduction.FunctionInlining.Test9.F
@@ -4640,6 +4611,7 @@ fclass IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback
  Real x;
  Real y;
  Real _der_y;
+ Real temp_12;
  Real temp_13;
  Real temp_14;
 initial equation 
@@ -4647,7 +4619,8 @@ initial equation
 equation
  _der_y * der(x) = 1;
  y = x * temp_13 + x * temp_14;
- _der_y = (der(x) * temp_13 + der(x) * temp_14) * der(x);
+ temp_12 = der(x);
+ _der_y = (temp_12 * temp_13 + temp_12 * temp_14) * temp_12;
  (IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback.R(temp_13, temp_14)) = IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback.F2(x);
 
 public
@@ -4674,112 +4647,6 @@ end IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback;
         end AllIncidencesFallback;
         
     end IncidencesThroughFunctions;
-
-model DiffGlobalAccess1
-    record R
-        Real[1] x;
-    end R;
-
-    function g
-        input Real x;
-        input R[:] rs;
-        output Real y = x + rs[1].x[1];
-    algorithm
-    end g;
-
-    function f
-        input Real x;
-        output Real y = g(x,rs);
-        constant R[:] rs = {R({1})};
-    algorithm
-        annotation(Inline=false, smoothOrder=1);
-    end f;
-
-    Real x;
-    Real y(stateSelect=StateSelect.always);
-equation
-    der(x) = -x;
-    y=100*f(x);
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="DiffGlobalAccess1",
-            description="Test of system with non differentiated variable with StateSelect always and prefer",
-            flatModel="
-fclass IndexReduction.DiffGlobalAccess1
- Real x;
- Real y(stateSelect = StateSelect.always);
- Real _der_x;
-global variables
- constant IndexReduction.DiffGlobalAccess1.R IndexReduction.DiffGlobalAccess1.f.rs[1] = {IndexReduction.DiffGlobalAccess1.R({1})};
-initial equation
- y = 0.0;
-equation
- _der_x = - x;
- y = 100 * IndexReduction.DiffGlobalAccess1.f(x);
- der(y) = 100 * IndexReduction.DiffGlobalAccess1._der_f(x, _der_x);
-
-public
- function IndexReduction.DiffGlobalAccess1.f
-  input Real x;
-  output Real y;
- algorithm
-  y := IndexReduction.DiffGlobalAccess1.g(x, global(IndexReduction.DiffGlobalAccess1.f.rs));
-  return;
- annotation(Inline = false,smoothOrder = 1,derivative(order = 1) = IndexReduction.DiffGlobalAccess1._der_f);
- end IndexReduction.DiffGlobalAccess1.f;
-
- function IndexReduction.DiffGlobalAccess1.g
-  input Real x;
-  input IndexReduction.DiffGlobalAccess1.R[:] rs;
-  output Real y;
- algorithm
-  y := x + rs[1].x[1];
-  for i1 in 1:size(rs, 1) loop
-   assert(1 == size(rs[i1].x, 1), \"Mismatching sizes in function 'IndexReduction.DiffGlobalAccess1.g', component 'rs[i1].x', dimension '1'\");
-  end for;
-  return;
- annotation(derivative(order = 1) = IndexReduction.DiffGlobalAccess1._der_g);
- end IndexReduction.DiffGlobalAccess1.g;
-
- function IndexReduction.DiffGlobalAccess1._der_f
-  input Real x;
-  input Real _der_x;
-  output Real _der_y;
-  Real y;
- algorithm
-  _der_y := IndexReduction.DiffGlobalAccess1._der_g(x, global(IndexReduction.DiffGlobalAccess1.f.rs), _der_x, {IndexReduction.DiffGlobalAccess1.R({0.0})});
-  y := IndexReduction.DiffGlobalAccess1.g(x, global(IndexReduction.DiffGlobalAccess1.f.rs));
-  return;
- annotation(smoothOrder = 0);
- end IndexReduction.DiffGlobalAccess1._der_f;
-
- function IndexReduction.DiffGlobalAccess1._der_g
-  input Real x;
-  input IndexReduction.DiffGlobalAccess1.R[:] rs;
-  input Real _der_x;
-  input IndexReduction.DiffGlobalAccess1.R[:] _der_rs;
-  output Real _der_y;
-  Real y;
- algorithm
-  _der_y := _der_x + _der_rs[1].x[1];
-  y := x + rs[1].x[1];
-  for i1 in 1:size(rs, 1) loop
-   assert(1 == size(rs[i1].x, 1), \"Mismatching sizes in function 'IndexReduction.DiffGlobalAccess1.g', component 'rs[i1].x', dimension '1'\");
-  end for;
-  return;
- annotation(smoothOrder = 0);
- end IndexReduction.DiffGlobalAccess1._der_g;
-
- record IndexReduction.DiffGlobalAccess1.R
-  Real x[1];
- end IndexReduction.DiffGlobalAccess1.R;
-
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
-
-end IndexReduction.DiffGlobalAccess1;
-")})));
-end DiffGlobalAccess1;
 
 end IndexReduction;
 

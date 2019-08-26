@@ -1,21 +1,13 @@
 package org.jmodelica.common.ast.prefixes;
 
 public enum VisibilityType {
-    /*
-     * ordinal() is used for alias elimination so the order
-     * here is important.
-     */
-    TEMPORARY,
-    HIDDEN,
-    EXPANDABLE,
-    PROTECTED,
+
     PUBLIC,
+    PROTECTED,
+    TEMPORARY,
+    EXPANDABLE,
     RUNTIME_OPTION,
-    INTERFACE;
-    
-    public boolean isInterface() {
-        return this == INTERFACE;
-    }
+    HIDDEN;
     
     public boolean isPublic() {
         return this == PUBLIC;
@@ -39,10 +31,6 @@ public enum VisibilityType {
     
     public boolean isHidden() {
         return this == HIDDEN;
-    }
-
-    public static VisibilityType mostRestrictive(VisibilityType v1, VisibilityType v2) {
-        return values()[Math.min(v1.ordinal(), v2.ordinal())];
     }
 
 }

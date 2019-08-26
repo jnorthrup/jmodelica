@@ -49,7 +49,7 @@ def furuta_dfo_cost(x):
     
     # Create options object and set verbosity to zero to disable printouts
     opts = model.simulate_options()
-    opts['CVode_options']['verbosity'] = 50
+    opts['CVode_options']['verbosity'] = 0
     
     # Simulate model response with new parameter values
     res = model.simulate(start_time=0., final_time=40, options=opts)

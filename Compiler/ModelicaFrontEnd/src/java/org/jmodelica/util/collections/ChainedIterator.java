@@ -29,24 +29,19 @@ public class ChainedIterator<E> implements Iterator<E> {
 		this.its = its;
 	}
 
-	@Override
-    public boolean hasNext() {
-		while (i < its.length && !its[i].hasNext()) {
+	public boolean hasNext() {
+		while (i < its.length && !its[i].hasNext())
 			i++;
-		}
 		return i < its.length;
 	}
 
-	@Override
-    public E next() {
-		if (!hasNext()) {
+	public E next() {
+		if (!hasNext())
 			throw new NoSuchElementException();
-		}
 		return its[i].next();
 	}
 
-	@Override
-    public void remove() {
+	public void remove() {
 		throw new UnsupportedOperationException();
 	}
 

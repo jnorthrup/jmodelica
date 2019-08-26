@@ -2523,31 +2523,6 @@ Error at line 3, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/Name
 end ImportTest12;
 
 
-model ImportTest13
-    package P1
-        constant Real c = 3;
-        type T = Real;
-    end P1;
-    
-    package P2
-        extends P1;
-    end P2;
-    
-    import NameTests.ImportTest13.P2.T;
-    import NameTests.ImportTest13.P2.c;
-    T t = c;
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ImportTest13",
-            description="Importing inherited elements",
-            flatModel="
-fclass NameTests.ImportTest13
- Real t = 3.0;
-end NameTests.ImportTest13;
-")})));
-end ImportTest13;
-
-
 model ShortClassDeclTest1
   model A
     Real x=2;
@@ -3799,19 +3774,21 @@ model InheritFlowTest1
 equation
 	connect(b1, b2);
 
-annotation(__JModelica(UnitTesting(tests={
-    FlatteningTestCase(
-        name="InheritFlowTest1",
-        description="Check that flow is propagated to child components",
-        flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="InheritFlowTest1",
+            description="Check that flow is propagated to child components",
+            flatModel="
 fclass NameTests.InheritFlowTest1
- potential Real b1.ap.x;
- flow Real b1.af.x;
- potential Real b2.ap.x;
- flow Real b2.af.x;
+ Real b1.ap.x;
+ Real b1.af.x;
+ Real b2.ap.x;
+ Real b2.af.x;
 equation
  - b1.af.x - b2.af.x = 0.0;
  b1.ap.x = b2.ap.x;
+ b1.af.x = 0.0;
+ b2.af.x = 0.0;
 end NameTests.InheritFlowTest1;
 ")})));
 end InheritFlowTest1;
@@ -4161,61 +4138,5 @@ Error at line 13, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/Nam
   Cannot find class declaration for a
 ")})));
 end ClassThroughComponent4;
-
-
-model OrderFile1
-    extends TestLib.Order.Order1;
-
-annotation(__JModelica(UnitTesting(tests={
-    InstClassMethodTestCase(
-        name="OrderFile1",
-        description="Correction of package.order: correct file",
-        modelicaLibraries="TestLib",
-        methodName="testOrderHelper",
-        methodResult="[A, E, B, C, F, D]"
-)})));
-end OrderFile1;
-
-
-model OrderFile2
-    extends TestLib.Order.Order2;
-
-annotation(__JModelica(UnitTesting(tests={
-    InstClassMethodTestCase(
-        name="OrderFile2",
-        description="Correction of package.order: package.mo contents in wrong order",
-        modelicaLibraries="TestLib",
-        methodName="testOrderHelper",
-        methodResult="[F, E, A, B, C, D]"
-)})));
-end OrderFile2;
-
-
-model OrderFile3
-    extends TestLib.Order.Order3;
-
-annotation(__JModelica(UnitTesting(tests={
-    InstClassMethodTestCase(
-        name="OrderFile3",
-        description="Correction of package.order: class file has wrong case",
-        modelicaLibraries="TestLib",
-        methodName="testOrderHelper",
-        methodResult="[A, B, F, C, D, E]"
-)})));
-end OrderFile3;
-
-
-model OrderFile4
-    extends TestLib.Order.Order4;
-
-annotation(__JModelica(UnitTesting(tests={
-    InstClassMethodTestCase(
-        name="OrderFile4",
-        description="Correction of package.order: wrong class names in package.order",
-        modelicaLibraries="TestLib",
-        methodName="testOrderHelper",
-        methodResult="[A, B, C, D, E, F]"
-)})));
-end OrderFile4;
 
 end NameTests;

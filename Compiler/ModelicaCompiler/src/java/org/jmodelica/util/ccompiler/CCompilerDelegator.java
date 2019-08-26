@@ -26,7 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jmodelica.common.options.AbstractOptionRegistry;
+import org.jmodelica.common.options.OptionRegistry;
 import org.jmodelica.util.SystemUtil;
 import org.jmodelica.util.files.FileUtil;
 import org.jmodelica.util.logging.ModelicaLogger;
@@ -35,7 +35,7 @@ import org.jmodelica.util.logging.ModelicaLogger;
  * Base class for interface to C compiler.
  * 
  * To add a new delegator, call {@link #addDelegator(String, CCompilerDelegator.Creator)} before 
- * AbstractOptionRegistry is instantiated. This is preferably accomplished by using a JastAdd
+ * OptionRegistry is instantiated. This is preferably accomplished by using a JastAdd 
  * aspect to add a static field in this class that gets its value from addDelegator().
  */
 public abstract class CCompilerDelegator {
@@ -81,17 +81,12 @@ public abstract class CCompilerDelegator {
     
     /**
      * Create a C compiler delegator for the given set of options.
-     * Not case sensitive. Comparation is done in lower case.
      */
     public static CCompilerDelegator delegatorFor(String c_compiler) {
-        Creator c = creators.get(c_compiler.toLowerCase());
-        if (c == null) {
-            throw new IllegalArgumentException("c_compiler doesn't support option " + c_compiler);
-        }
-        return c.create();
+        return creators.get(c_compiler).create();
     }
     
-    public static void addCompilerOptionValues(AbstractOptionRegistry opt) {
+    public static void addCompilerOptionValues(OptionRegistry opt) {
         for (String name : creators.keySet())
             opt.addStringOptionAllowed(OPTION, name);
     }
@@ -252,7 +247,6 @@ public abstract class CCompilerDelegator {
     protected interface StringOperation {
         
         public static final StringOperation NULL_OP = new StringOperation() {
-            @Override
             public String op(String str) { return str; }
         };
         
@@ -268,7 +262,6 @@ public abstract class CCompilerDelegator {
             this.ops = ops;
         }
         
-        @Override
         public String op(String path) {
             for (StringOperation op : ops)
                 path = op.op(path);
@@ -289,7 +282,6 @@ public abstract class CCompilerDelegator {
             this.prefix = prefix;
         }
         
-        @Override
         public String op(String path) {
             if (getBuildPlatform().startsWith("win")) {
                 return String.format("%s\\\"%s\\\"", prefix, path);
@@ -307,7 +299,6 @@ public abstract class CCompilerDelegator {
             this.platform = platform;
         }
         
-        @Override
         public String op(String path) {
             File f = new File(path, platform);
             return f.isDirectory() ? f.getPath() : path;
@@ -327,7 +318,6 @@ public abstract class CCompilerDelegator {
                 format = "lib%s.so";
         }
         
-        @Override
         public String op(String library) {
             return String.format(format, library);
         }

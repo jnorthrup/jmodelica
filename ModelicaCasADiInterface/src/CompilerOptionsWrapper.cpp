@@ -29,125 +29,80 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace ModelicaCasADi 
 {
-void ModelicaOptionsWrapper::setStringOption(std::string opt, std::string val) {
-    try {
+void CompilerOptionsWrapper::setStringOption(std::string opt, std::string val) {
+    try 
+    {
         optr.setStringOption(StringFromUTF(opt.c_str()), StringFromUTF(val.c_str()));
-    } catch (JavaError e) {
+    }
+    catch (JavaError e) 
+    {
+        rethrowJavaException(e);
+    }
+}
+void CompilerOptionsWrapper::setBooleanOption(std::string opt, bool val) {
+    try 
+    {
+    optr.setBooleanOption(StringFromUTF(opt.c_str()), val);
+    }
+    catch (JavaError e) 
+    {
+        rethrowJavaException(e);
+    }
+}
+void CompilerOptionsWrapper::setIntegerOption(std::string opt, int val) {
+    try 
+    {
+    optr.setIntegerOption(StringFromUTF(opt.c_str()), val);
+    }
+    catch (JavaError e) 
+    {
+        rethrowJavaException(e);
+    }
+}
+void CompilerOptionsWrapper::setRealOption(std::string opt, double val) {
+    try 
+    {
+    optr.setRealOption(StringFromUTF(opt.c_str()), val);
+    }
+    catch (JavaError e) 
+    {
         rethrowJavaException(e);
     }
 }
 
-void ModelicaOptionsWrapper::setBooleanOption(std::string opt, bool val) {
-    try {
-        optr.setBooleanOption(StringFromUTF(opt.c_str()), val);
-    } catch (JavaError e) {
-        rethrowJavaException(e);
-    }
-}
-
-void ModelicaOptionsWrapper::setIntegerOption(std::string opt, int val) {
-    try {
-        optr.setIntegerOption(StringFromUTF(opt.c_str()), val);
-    } catch (JavaError e) {
-        rethrowJavaException(e);
-    }
-}
-
-void ModelicaOptionsWrapper::setRealOption(std::string opt, double val) {
-    try {
-        optr.setRealOption(StringFromUTF(opt.c_str()), val);
-    } catch (JavaError e) {
-        rethrowJavaException(e);
-    }
-}
-
-void ModelicaOptionsWrapper::printCompilerOptions(std::ostream& out){
-    try {
-        java::util::Collection opts(optr.getOptionKeys().this$);
-
-        java::util::Iterator iter(opts.iterator().this$);
-        while(iter.hasNext()){
-            java::lang::String key(iter.next().this$);
-            out <<"\033[31m"<<env->toString(key.this$) <<"\033[0m"<< ": ";
-            out << env->toString(optr.getDescription(key).this$);
-            out << "\n";
-        }
-
-    } catch (JavaError e) {
-        rethrowJavaException(e);
-    }
-}
-
-bool ModelicaOptionsWrapper::getBooleanOption(std::string opt) {
-    bool roption;
-    try {
+bool CompilerOptionsWrapper::getBooleanOption(std::string opt) {
+    bool roption;    
+    try 
+    {
         roption = optr.getBooleanOption(StringFromUTF(opt.c_str()));
-    } catch (JavaError e) {
+    }
+    catch (JavaError e) 
+    {
         rethrowJavaException(e);
     }
     return roption;
 }
 
-void ModelicaOptionsWrapper::print(std::ostream& os) const { os << "ModelicaOptionsWrapper(" << env->toString(optr.this$) << ")"; }
-
-void OptimicaOptionsWrapper::setStringOption(std::string opt, std::string val) {
-    try {
-        optr.setStringOption(StringFromUTF(opt.c_str()), StringFromUTF(val.c_str()));
-    } catch (JavaError e) {
-        rethrowJavaException(e);
-    }
-}
-
-void OptimicaOptionsWrapper::setBooleanOption(std::string opt, bool val) {
-    try {
-        optr.setBooleanOption(StringFromUTF(opt.c_str()), val);
-    } catch (JavaError e) {
-        rethrowJavaException(e);
-    }
-}
-
-void OptimicaOptionsWrapper::setIntegerOption(std::string opt, int val) {
-    try {
-        optr.setIntegerOption(StringFromUTF(opt.c_str()), val);
-    } catch (JavaError e) {
-        rethrowJavaException(e);
-    }
-}
-
-void OptimicaOptionsWrapper::setRealOption(std::string opt, double val) {
-    try {
-        optr.setRealOption(StringFromUTF(opt.c_str()), val);
-    } catch (JavaError e) {
-        rethrowJavaException(e);
-    }
-}
-
-void OptimicaOptionsWrapper::printCompilerOptions(std::ostream& out){
-    try {
+void CompilerOptionsWrapper::printCompilerOptions(std::ostream& out){
+    try 
+    {
         java::util::Collection opts(optr.getOptionKeys().this$);
-
+        
         java::util::Iterator iter(opts.iterator().this$);
         while(iter.hasNext()){
             java::lang::String key(iter.next().this$);
-            out <<"\033[31m"<<env->toString(key.this$) <<"\033[0m"<< ": ";
+            out <<"\033[31m"<<env->toString(key.this$) <<"\033[0m"<< ": ";            
             out << env->toString(optr.getDescription(key).this$);
             out << "\n";
         }
-
-    } catch (JavaError e) {
-        rethrowJavaException(e);
+        
     }
+    catch (JavaError e) 
+    {
+        rethrowJavaException(e);
+    }       
 }
 
-bool OptimicaOptionsWrapper::getBooleanOption(std::string opt) {
-    bool roption;
-    try {
-        roption = optr.getBooleanOption(StringFromUTF(opt.c_str()));
-    } catch (JavaError e) {
-        rethrowJavaException(e);
-    }
-    return roption;
-}
 
-void OptimicaOptionsWrapper::print(std::ostream& os) const { os << "OptimicaOptionsWrapper(" << env->toString(optr.this$) << ")"; }
+void CompilerOptionsWrapper::print(std::ostream& os) const { os << "CompilerOptionsWrapper(" << env->toString(optr.this$) << ")"; }
 }; // End namespace

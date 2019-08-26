@@ -130,70 +130,68 @@ aspect ExportFunctions {
 			sep = ", ";
 		}
 	}
-    
-    public void FFunctionVariable.exportWrapperDecl_C(CodeStream str) {
-        if (isArray()) {
-            String name = name_C();
-            str.format("%s* %sp", exportWrapperType_C(), name);
-            for (int i = 0; i < ndims(); i++) {
-                str.format(", int %s%d", name, i);
-            }
-        } else {
-            str.format("%s %s", exportWrapperType_C(), name_C());
-        }
-    }
-    
-    public void FFunctionVariable.exportWrapperTypeDecl_C(CodeStream str) {
-        if (isArray()) {
-            str.format("%s*", exportWrapperType_C());
-            for (int i = 0; i < ndims(); i++) {
-                str.print(", int");
-            }
-        } else {
-            str.print(exportWrapperType_C());
-        }
-    }
-    
-    public void FFunctionVariable.exportWrapperCall_C(CodeStream str) {
-        if (isArray()) {
-            String name = name_C();
-            str.format("%sp", name);
-            for (int i = 0; i < ndims(); i++) {
-                str.format(", %s%d", name, i);
-            }
-        } else {
-            str.print(name_C());
-        }
-    }
-    
-    public void FFunctionVariable.exportWrapperDeclareTemp_C(CodeStream str, String ind) {
-        if (isArray()) {
-            // NB: makes assumptions about definitions in jmi_array_none.h
-            String name = name_C();
-            str.format("%sint %s_size[%d];\n", ind, name, ndims());
-            str.format("%sjmi_array_t %s_obj;\n", ind, name);
-            str.format("%sjmi_array_t* %s = &%s_obj;\n", ind, name, name);
-        }
-    }
-    
-    public void FFunctionVariable.exportWrapperInitTemp_C(CodeStream str, String ind) {
-        if (isArray()) {
-            // NB: makes assumptions about definitions in jmi_array_none.h
-            String name = name_C();
-            str.format("%s%s_obj.var = %sp;\n", ind, name, name);
-            str.format("%s%s_obj.size = %s_size;\n", ind, name, name);
-            str.format("%s%s_obj.num_dims = %d;\n", ind, name, ndims());
-            str.format("%s%s_obj.num_elems = 1", ind, name);
-            for (int i = 0; i < ndims(); i++) {
-                str.format(" * %s%d", name, i);
-            }
-            str.print(";\n");
-            for (int i = 0; i < ndims(); i++) {
-                str.format("%s%s_size[%d] = %s%d;\n", ind, name, i, name, i);
-            }
-        }
-    }
-    
+	
+	public void FFunctionVariable.exportWrapperDecl_C(CodeStream str) {
+		str.format("%s %s", exportWrapperType_C(), name_C());
+	}
+	
+	public void FFunctionVariable.exportWrapperTypeDecl_C(CodeStream str) {
+		str.print(exportWrapperType_C());
+	}
+	
+	public void FFunctionVariable.exportWrapperCall_C(CodeStream str) {
+		str.print(name_C());
+	}
+	
+	public void FFunctionArray.exportWrapperDecl_C(CodeStream str) {
+		String name = name_C();
+		str.format("%s* %sp", exportWrapperType_C(), name);
+		for (int i = 0; i < ndims(); i++) 
+			str.format(", int %s%d", name, i);
+	}
+	
+	public void FFunctionArray.exportWrapperTypeDecl_C(CodeStream str) {
+		str.format("%s*", exportWrapperType_C());
+		for (int i = 0; i < ndims(); i++) 
+			str.print(", int");
+	}
+	
+	public void FFunctionArray.exportWrapperCall_C(CodeStream str) {
+		String name = name_C();
+		str.format("%sp", name);
+		for (int i = 0; i < ndims(); i++) 
+			str.format(", %s%d", name, i);
+	}
+	
+	public void FFunctionVariable.exportWrapperDeclareTemp_C(CodeStream str, String ind) {
+	}
+	
+	public void FFunctionVariable.exportWrapperInitTemp_C(CodeStream str, String ind) {
+	}
+	
+	public void FFunctionArray.exportWrapperDeclareTemp_C(CodeStream str, String ind) {
+		// NB: makes assumptions about definitions in jmi_array_none.h
+		String name = name_C();
+		str.format("%sint %s_size[%d];\n", ind, name, ndims());
+		str.format("%sjmi_array_t %s_obj;\n", ind, name);
+		str.format("%sjmi_array_t* %s = &%s_obj;\n", ind, name, name);
+	}
+	
+	public void FFunctionArray.exportWrapperInitTemp_C(CodeStream str, String ind) {
+		// NB: makes assumptions about definitions in jmi_array_none.h
+		String name = name_C();
+		str.format("%s%s_obj.var = %sp;\n", ind, name, name);
+		str.format("%s%s_obj.size = %s_size;\n", ind, name, name);
+		str.format("%s%s_obj.num_dims = %d;\n", ind, name, ndims());
+		str.format("%s%s_obj.num_elems = 1", ind, name);
+		for (int i = 0; i < ndims(); i++)
+			str.format(" * %s%d", name, i);
+		str.print(";\n");
+		for (int i = 0; i < ndims(); i++)
+			str.format("%s%s_size[%d] = %s%d;\n", ind, name, i, name, i);
+	}
+
+
     syn lazy java.util.List<java.util.List<FFunctionDecl>> FClass.exportWrapperGroups() {
         ListMap<String,FFunctionDecl> map = new LinkedHashListMap<String,FFunctionDecl>();
         for (FFunctionDecl f : getFFunctionDecls()) {

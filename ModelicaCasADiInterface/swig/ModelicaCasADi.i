@@ -112,9 +112,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %instantiate_Ref(ModelicaCasADi, Model)
 
 %instantiate_Ref(ModelicaCasADi, OptimizationProblem)
-
-%instantiate_Ref(ModelicaCasADi, OptimicaOptionsWrapper)
-%instantiate_Ref(ModelicaCasADi, ModelicaOptionsWrapper)
+%instantiate_Ref(ModelicaCasADi, CompilerOptionsWrapper)
 
 // These must be in dependency order!
 // SWIG doesn't follow #includes in the header files
@@ -240,12 +238,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %extend ModelicaCasADi::OptimizationProblem {
   std::string __repr__() { return $self->repr(); }
 }
-%extend ModelicaCasADi::ModelicaOptionsWrapper {
+%extend ModelicaCasADi::CompilerOptionsWrapper {
   std::string __repr__() { return $self->repr(); }
 }
-%extend ModelicaCasADi::OptimicaOptionsWrapper {
-  std::string __repr__() { return $self->repr(); }
-}
+
 /*
 #ifdef SWIG
     %extend ModelicaCasADi::Printable{

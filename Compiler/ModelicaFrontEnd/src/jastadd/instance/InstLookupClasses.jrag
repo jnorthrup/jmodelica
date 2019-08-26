@@ -78,23 +78,20 @@ aspect InstLookupClasses {
 
     // The lexical scope of modifiers in short classes is the "outer" scope, although
     // the short class declaration is modeled as containing an extends clause
-    eq InstExtendsShortClass.getInstClassModification().lookupInstClass(String name)             = getLookupNode().lookupInstClass(name);
-    eq InstExtendsShortClass.getClassName().lookupInstClass(String name)                         = lookupInstClassInChain(name);
-    eq InstReplacingExtendsShortClass.getClassName().lookupInstClass(String name)                = lookupInstClassInChain(name);
-    eq InstShortClassDecl.getChild().lookupInstClass(String name)                                = lookupInstClass(name);
-    eq InstSimpleShortClassDecl.getChild().lookupInstClass(String name)                          = lookupInstClass(name);
-    eq InstLibNode.getChild().lookupInstClass(String name)                                       = lookupInstClass(name);
-    eq InstReplacingShortClassDecl.getChild().lookupInstClass(String name)                       = getInstClassRedeclare().lookupInstClass(name);
-    eq InstReplacingSimpleShortClassDecl.getChild().lookupInstClass(String name)                 = getInstClassRedeclare().lookupInstClass(name);
-    eq InstReplacingShortClassDecl.getOriginalInstClass().lookupInstClass(String name)           = lookupInstClass(name);
-    eq InstReplacingSimpleShortClassDecl.getOriginalInstClass().lookupInstClass(String name)     = lookupInstClass(name);
-    eq InstReplacingFullClassDecl.getOriginalInstClass().lookupInstClass(String name)            = lookupInstClass(name);
-    eq InstReplacingShortClassDecl.getInstConstrainingClass().lookupInstClass(String name)       = lookupInstClass(name);
-    eq InstReplacingSimpleShortClassDecl.getInstConstrainingClass().lookupInstClass(String name) = lookupInstClass(name);
-    eq InstReplacingFullClassDecl.getInstConstrainingClass().lookupInstClass(String name)        = lookupInstClass(name);
-    eq InstConstrainingComponent.getChild().lookupInstClass(String name)                         = 
+    eq InstExtendsShortClass.getInstClassModification().lookupInstClass(String name)         = getLookupNode().lookupInstClass(name);
+    eq InstExtendsShortClass.getClassName().lookupInstClass(String name)                     = lookupInstClassInChain(name);
+    eq InstReplacingExtendsShortClass.getClassName().lookupInstClass(String name)            = lookupInstClassInChain(name);
+    eq InstShortClassDecl.getChild().lookupInstClass(String name)                            = lookupInstClass(name);
+    eq InstSimpleShortClassDecl.getChild().lookupInstClass(String name)                      = lookupInstClass(name);
+    eq InstLibNode.getChild().lookupInstClass(String name)                                   = lookupInstClass(name);
+    eq InstReplacingShortClassDecl.getChild().lookupInstClass(String name)                   = getInstClassRedeclare().lookupInstClass(name);
+    eq InstReplacingSimpleShortClassDecl.getChild().lookupInstClass(String name)             = getInstClassRedeclare().lookupInstClass(name);
+    eq InstReplacingShortClassDecl.getOriginalInstClass().lookupInstClass(String name)       = lookupInstClass(name);
+    eq InstReplacingSimpleShortClassDecl.getOriginalInstClass().lookupInstClass(String name) = lookupInstClass(name);
+    eq InstReplacingFullClassDecl.getOriginalInstClass().lookupInstClass(String name)        = lookupInstClass(name);
+    eq InstConstrainingComponent.getChild().lookupInstClass(String name)                     = 
         (getInstRedeclare() != null) ? getInstRedeclare().lookupInstClass(name) : lookupInstClass(name);
-    eq InstConstrainingClass.getChild().lookupInstClass(String name)                             = 
+    eq InstConstrainingClass.getChild().lookupInstClass(String name)                         = 
         (getInstRedeclare() != null) ? getInstRedeclare().lookupInstClass(name) : lookupInstClass(name);
 
     eq InstReplacingRecord.getOriginalInstComponent().lookupInstClass(String name)    = lookupInstClass(name);
@@ -150,7 +147,6 @@ aspect InstLookupClasses {
 
     inh InstLookupResult<InstClassDecl> InstAccess.lookupInstClassFromTop(String name);
     inh InstLookupResult<InstClassDecl> InstNode.lookupInstClassFromTop(String name);
-    inh InstLookupResult<InstClassDecl> InstImport.lookupInstClassFromTop(String name);
     eq InstRoot.getChild().lookupInstClassFromTop(String name) = genericLookupInstClass(name);
     eq Root.getChild().lookupInstClassFromTop(String name)     = InstLookupResult.notFound();
 
@@ -612,10 +608,11 @@ aspect InstLookupClasses {
 
 aspect InstLookupImport {
 
-    eq InstImport.getPackageName().lookupInstClass(String name) = lookupInstClassFromTop(name);
-
     syn lazy InstClassDecl InstImport.getImportedClass() {
-        return getPackageName().myInstClassDecl();
+        // Use simple lookup: only classes which are not inherited can be
+        // imported. 
+        return ((SourceRoot)root()).getProgram().getInstProgramRoot().
+            simpleLookupInstClassDecl(getPackageNameNoTransform().name());
     }
 
     syn InstLookupResult<InstClassDecl> InstImport.lookupInstClassInImport(String name) {
@@ -668,12 +665,11 @@ aspect SimpleInstClassLookup {
 
     public InstClassDecl InstNode.simpleLookupInstClassDeclRecursive(String name) {
         String[] parts = name.split("\\.", 2);
-        InstClassDecl icd = findMatching(allInstClassDecls(), parts[0]);
-        if (icd != null) {
+        InstClassDecl icd = findMatching(getInstClassDecls(), parts[0]);
+        if (icd != null)
             return icd = (parts.length == 1) ? icd : icd.actualInstClass().simpleLookupInstClassDeclRecursive(parts[1]);
-        } else {
+        else
             return unknownInstClassDecl();
-        }
     }
 
     public InstClassDecl InstProgramRoot.simpleLookupInstClassDeclRecursive(String name) {
@@ -681,15 +677,13 @@ aspect SimpleInstClassLookup {
         InstClassDecl icd = findMatching(getInstClassDecls(), parts[0]);
         if (icd == null) {
             InstLookupResult<InstClassDecl> result = lookupLibrary(parts[0]);
-            if (result.successful()) {
+            if (result.successful())
                 icd = result.target();
-            }
         }
-        if (icd != null) {
+        if (icd != null)
             return icd = (parts.length == 1) ? icd : icd.actualInstClass().simpleLookupInstClassDeclRecursive(parts[1]);
-        } else {
+        else
             return unknownInstClassDecl();
-        }
     }
 
     /**

@@ -38,21 +38,13 @@ public class ErrorTestCase extends TestCase {
             return getCheckType() == ErrorCheckType.CHECK;
         }
 
-        String test = formatErrorMessage(problems);
+        String test = new CompilerException(problems).getMessage(true);
         String correct = getErrorMessage();
         String f_test = filterTestResult(test, true);
         String f_correct = filterTestResult(correct, false);
 
         compareResult("Wrong errors reported.", f_correct, f_test);
         return true;
-    }
-
-    /**
-     * Format a collection of problems into an error report, the same way the compiler 
-     * would.
-     */
-    protected String formatErrorMessage(Collection<Problem> problems) {
-        return new CompilerException(problems).getMessage(true);
     }
 
 	/**

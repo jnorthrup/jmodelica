@@ -13,7 +13,7 @@ public class ReverseListIterable<T> implements Iterable<T> {
 
     @Override
     public Iterator<T> iterator() {
-        return new ReverseListIterator<T>(list);
+        return new ReverseListIterator(list);
     }
 
 }

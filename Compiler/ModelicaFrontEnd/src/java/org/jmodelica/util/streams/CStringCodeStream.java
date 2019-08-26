@@ -37,7 +37,6 @@ public class CStringCodeStream extends CodeStream {
         buffer = new byte[lim];
     }
     
-    @Override
     public void print(String s) {
         if (n <= limit) {
             byte[] bytes = s.getBytes(UTF8);
@@ -47,12 +46,10 @@ public class CStringCodeStream extends CodeStream {
         }
     }
     
-    @Override
     public void format(String format, Object... args) {
         print(String.format(format, args));
     }
     
-    @Override
     public void close() {
         boolean trunc = n > limit;
         if (trunc) {

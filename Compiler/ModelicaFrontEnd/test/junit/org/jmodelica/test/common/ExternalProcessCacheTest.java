@@ -12,7 +12,7 @@ import org.jmodelica.common.evaluation.ExternalProcessCache;
 import org.jmodelica.common.evaluation.ExternalFunction;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Variable;
-import org.jmodelica.common.options.AbstractOptionRegistry;
+import org.jmodelica.common.options.OptionRegistry;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Value;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Type;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache.External;
@@ -194,7 +194,7 @@ public class ExternalProcessCacheTest {
         }
 
         @Override
-        public AbstractOptionRegistry myOptions() {
+        public OptionRegistry myOptions() {
             // TODO Auto-generated method stub
             return null;
         }
