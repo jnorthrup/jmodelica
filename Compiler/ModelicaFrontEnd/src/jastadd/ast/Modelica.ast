@@ -103,7 +103,13 @@ SrcFullClassDecl : SrcBaseClassDecl ::= [SrcStringComment]
                                   [SrcAnnotation]
                                   SrcEndDecl;
 
-SrcLibClassDecl : SrcFullClassDecl ::= SrcLibNode*;
+SrcLibClassDecl : SrcFullClassDecl ::= [SrcStringComment] 
+                                  SrcClause*
+                                  [SrcExternalClause] 
+                                  SrcLibNode*
+                                  [SrcAnnotation]
+                                  SrcEndDecl;
+
 SrcLibNode : SrcClassDecl ::= 
                         <Structured:boolean> 
                         <Version:String> 
