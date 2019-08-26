@@ -104,6 +104,8 @@ void jmi_setup_experiment(jmi_t* jmi, jmi_boolean tolerance_defined,
     jmi->options.block_solver_options.res_tol = jmi->newton_tolerance;
     jmi->options.block_solver_options.events_epsilon = jmi->events_epsilon;
     jmi->options.block_solver_options.time_events_epsilon = jmi->time_events_epsilon;
+    
+    jmi_ode_events_dependencies(jmi);
 }
 
 int jmi_initialize(jmi_t* jmi) {
@@ -522,9 +524,12 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     switches = jmi_get_sw(jmi);
     
     max_iterations = 30;       /* Maximum number of event iterations */
-
+    
     /* Performed at the first event iteration: */
     if (jmi->nbr_event_iter == 0) {
+        
+        memset(jmi->events_triggered, 0, jmi->n_sw*sizeof(jmi_int_t));
+        memset(jmi->events_x_updated, 0, jmi->n_real_x*sizeof(jmi_int_t));
         
         /* Reset terminate flag. */
         jmi->model_terminate = 0;
@@ -640,6 +645,11 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
                 }
             }
         }
+        for (i = jmi->offs_sw; i < jmi->offs_sw+jmi->n_sw; i++) {
+            if (z[i - jmi->offs_sw + jmi->offs_pre_sw] != z[i]) {
+                jmi_mark_sw_triggered(jmi, i - jmi->offs_sw);
+            }
+        }
         
         /* Close the log node for the discrete variables update */
         if (jmi->jmi_callbacks.log_options.log_level >= 5){
@@ -662,6 +672,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
             for (i = 0; i < jmi->n_real_x; i++) {
                 if (jmi_get_real_x(jmi)[i] != jmi_get_z(jmi)[jmi->offs_pre_real_x+i]) {
                     verify_state_value_changed = 1; /* State has changed */
+                    jmi->events_x_updated[i] = 1;
                     jmi_log_node(jmi->log, logInfo, "StateUpdated", " <real: #r%d#> <from: %E> <to: %E>", jmi_get_value_ref_from_index(i+jmi->offs_real_x, JMI_REAL), jmi_get_z(jmi)[jmi->offs_pre_real_x+i], jmi_get_real_x(jmi)[i]);
                 }
             }
@@ -785,7 +796,24 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
                 return -1;
             }
             
+            memcpy(jmi->events_triggered_tmp, jmi->events_triggered, jmi->n_sw*sizeof(jmi_int_t));
+            memcpy(jmi->events_x_updated_tmp, jmi->events_x_updated, jmi->n_real_x*sizeof(jmi_int_t));
+            
             ret = jmi_event_iteration(jmi, intermediate_results, event_info);
+            
+            {
+                int i;
+                for (i = 0; i < jmi->n_sw; i++) {
+                    if (jmi->events_triggered_tmp[i] != 0) {
+                        jmi->events_triggered[i] = 1;
+                    }
+                }
+                for (i = 0; i < jmi->n_real_x; i++) {
+                    if (jmi->events_x_updated_tmp[i] != 0) {
+                        jmi->events_x_updated[i] = 1;
+                    }
+                }
+            }
             
             /* If there was a previous state value changed, restore the flag */
             if (state_values_changed == TRUE) {
@@ -809,6 +837,45 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     if (jmi->updated_states == JMI_TRUE) {
         event_info->state_values_changed = TRUE;
         jmi->updated_states = FALSE;
+    }
+    
+    if (event_info->iteration_converged == TRUE) {
+        jmi_log_node_t node, inner;
+        int i = 0, j = 0;
+        
+        memset(jmi->events_der_updated, 0, jmi->n_real_x*sizeof(jmi_int_t));
+        for (i = 0; i < jmi->n_sw; i++) {
+            if (jmi->events_triggered[i] == 1) {
+                for (j = 0; j < jmi->n_real_x; j++) {
+                    if (jmi->events_dependencies[i][j] != -1) {
+                        jmi->events_der_updated[jmi->events_dependencies[i][j]] = 1;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+        node = jmi_log_enter_fmt(jmi->log, logError, "EventDerivativesImpacted", "Impacted derivatives and states by the event.");
+        inner = jmi_log_enter_vector_(jmi->log, node, logError, "derivatives");
+        /* printf("Impacted der(.): "); */
+        for (i = 0; i < jmi->n_real_x; i++) {
+            if (jmi->events_der_updated[i] != 0) {
+                /* printf("%d ", i); */
+                jmi_log_int_(jmi->log, i);
+            }
+        }
+        jmi_log_leave(jmi->log, inner);
+        /* printf(", Impacted x(.): "); */
+        inner = jmi_log_enter_vector_(jmi->log, node, logError, "states");
+        for (i = 0; i < jmi->n_real_x; i++) {
+            if (jmi->events_x_updated[i] != 0) {
+                /* printf("%d ", i); */
+                jmi_log_int_(jmi->log, i);
+            }
+        }
+        /* printf("\n"); */
+        jmi_log_leave(jmi->log, inner);
+        jmi_log_leave(jmi->log, node);
     }
     
     return 0;

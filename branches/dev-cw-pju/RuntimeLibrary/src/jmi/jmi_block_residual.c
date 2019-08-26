@@ -177,6 +177,15 @@ int jmi_block_check_discrete_variables_change(void* b, double* x) {
     
     non_reals_equal = non_reals_equal && strings_equal;
     
+    if (!switches_equal) {
+        int i;
+        for (i = 0; i < block->n_sw; i++) {
+            if (switches[i] != block->work_switches[i]) {
+                jmi_mark_sw_triggered(jmi, block->sw_index[i]-jmi->offs_sw);
+            }
+        }
+    }
+    
     if (switches_equal && non_reals_equal && discrete_reals_equal) { 
         ret = JMI_EQUAL;
     } else if (!switches_equal && !non_reals_equal && !discrete_reals_equal) { 
