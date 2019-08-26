@@ -11,6 +11,37 @@
   <title>Release Notes</title>
 
   <section>
+    <title>Release notes for JModelica.org version 2.14</title>
+        <section>
+            <title>Important information</title>
+            <para>Note, with the next release the Python distribution bundled with JModelica is planned to be updated from version 2.7 to version 3.x.</para>
+        </section>
+    <section><title>Compiler Changes</title>
+    <para>Important changes to the compiler:</para>
+    <itemizedlist>
+        <listitem>Generate one field per option in OptionRegistry. Renamed OptionRegistry to AbstractOptionRegistry, renamed OptionsAggregated to OptionRegistry.</listitem>
+        <listitem>Switch to "java.nio.file.Path" instead of "File" or "String"s representing paths in most places. "Path" is more thought-through and more powerful, which will allow to implement advanced featuers in the future. Note that while java.nio allows to access non-File resources with the same API, the internal workings of JModelica currently make restrictions on only supporting file accesses. </listitem>
+        <listitem>Added new option time_events, allows time events to be generated, enabled by default. Deprecated option relational_time_events. </listitem>
+        <listitem>SrcDot now has SrcNamedAccess instead of SrcAccess as children.</listitem>
+        <listitem>Dependency to beaver-rt.jar is now recorded in the jar manifest which means it is no longer necessary to add it to the classpath when interfacing directly with the compiler jars.</listitem>
+    </itemizedlist>
+    </section>
+            <section><title>Python Packages Improvements</title>
+            <para>Important changes to Python packages:</para>
+            <para>The PyFMI version has been updated from 2.5 to 2.5.3, this infer the following changes:</para>
+            <itemizedlist>
+                <listitem>Fixed wrong default value for FMUModelME1Extended.</listitem>
+                <listitem>Improved relative imports of Assimulo dependent classes.</listitem>
+                <listitem>Fixed issue with unicode symbols in result files.</listitem>
+                <listitem>Fixed a number of encode/decoding issues for Python3.</listitem>
+                <listitem>Forced no copy if the provided array is already correct, minor 
+              performance improvement.</listitem>
+                <listitem>Fixed issue with corrupt result files after failed simulations.</listitem>
+            </itemizedlist>
+            </section>
+  </section>
+
+  <section>
     <title>Release notes for JModelica.org version 2.12</title>    
     <section><title>Compiler Changes</title>
     <para>A major change in this release is the update of Java version used into OpenJDK 11.</para>
