@@ -1,0 +1,104 @@
+import java.util.Collections;
+
+aspect EventDependencies {
+
+    // This collection isn't complete as not all event generating expresssions
+    // contributes. This needs to be fixed before this feature becomes final!
+    coll Set<Integer> FAbstractEquation.referencedEventIndicatorSwitchIndex() [new LinkedHashSet<Integer>()] 
+        with add root FClass;
+    FRelExp contributes mySwitchIndex() when hasSwitchIndex() to FAbstractEquation.referencedEventIndicatorSwitchIndex() for myFEquation();
+    
+    public boolean FRelExp.hasSwitchIndex() {
+        try {
+            this.mySwitchIndex();
+            return true;
+        }catch(UnsupportedOperationException e){
+            return false;
+        }
+    }
+    
+    inh boolean FExp.inRelExp();
+    eq FRelExp.getChild().inRelExp() = hasSwitchIndex();
+    eq SourceRoot.getChild().inRelExp() = false;
+    eq FlatRoot.getChild().inRelExp() = false;
+    
+    public Set<FAbstractVariable> FAbstractEquation.referencedFVariablesExcludingFromFRelExp() {
+        Set<FAbstractVariable> vars = new LinkedHashSet<FAbstractVariable>();
+        for (FAccessExp var: this.referencedCommonAccessExps()) {
+            if (!var.inRelExp() ) {
+                vars.add(var.myFV());
+            }
+        }
+        return vars;
+    }
+    
+    public Collection<Integer> AbstractEquationBlock.eventSwitchIndexDependencies(Set<FAbstractVariable> referencedVars) {
+        Set<Integer> eventIndicatorExps = new LinkedHashSet<Integer>();
+        
+        if (referencedVars == null) {
+            referencedVars = new LinkedHashSet<FAbstractVariable>();
+        }
+        
+        for (FAbstractEquation eqn : allEquations()) {
+            eventIndicatorExps.addAll(eqn.referencedEventIndicatorSwitchIndex());
+            referencedVars.addAll(eqn.referencedFVariablesExcludingFromFRelExp());
+        }
+        for (AbstractEquationBlock eb : blockDependency.immediatePredecessors()) {
+            Set<FAbstractVariable> varsEB = new LinkedHashSet<FAbstractVariable>(eb.allVariables());
+            Set<FAbstractVariable> intersection = new LinkedHashSet<>(referencedVars);
+            intersection.retainAll(varsEB);
+            
+            if (!intersection.isEmpty()) {
+                eventIndicatorExps.addAll(eb.eventSwitchIndexDependencies(referencedVars));
+            }
+        }
+        return eventIndicatorExps;
+    }
+
+    syn Collection<Integer> FVariable.daeEventSwitchIndexDependencies() {
+        Collection<Integer> exps = new LinkedHashSet<Integer>();
+        if (myDAEEquationBlock() == null) {
+            return Collections.emptyList();
+        }
+        exps.addAll(myDAEEquationBlock().eventSwitchIndexDependencies(null));
+        return exps;
+    }
+    
+    public class CGenerator extends GenericGenerator {
+        public class DAETag_C_event_dependencies extends DAETag {
+            
+            Map<Integer, ArrayList<Integer>> eventIndexMap;
+            
+            public DAETag_C_event_dependencies(AbstractGenerator myGenerator, FClass fclass) {
+                super("C_ode_event_dependencies", myGenerator, fclass);
+
+                eventIndexMap = new HashMap<Integer, ArrayList<Integer>>();
+                
+                int i = 0;
+                for (FVariable fv : fclass.derivativeVariables()) {
+                    for (Integer switchIndex: fv.daeEventSwitchIndexDependencies()) {
+                        if (eventIndexMap.containsKey(switchIndex)) {
+                            eventIndexMap.get(switchIndex).add(i);
+                        } else {
+                            eventIndexMap.put(switchIndex, new ArrayList<Integer>());
+                            eventIndexMap.get(switchIndex).add(i);
+                        }
+                    }
+                    i = i + 1;
+                }
+            }
+            
+            public void generate(CodeStream str) {
+                int i;
+                
+                for (Integer switchIndex : eventIndexMap.keySet()) {
+                    i = 0;
+                    for (Integer derivativeIndex: eventIndexMap.get(switchIndex)) {
+                        str.format("res[%d][%d] = %d;\n", switchIndex, i, derivativeIndex);
+                        i = i + 1;
+                    }
+                }
+            }
+        }
+    }
+}
