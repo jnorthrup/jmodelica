@@ -843,7 +843,7 @@ aspect Flattening {
                 getBindingFExp().flattenUsedFuncsAndEnums(f);
             FAccess access = getFAccess().treeCopy().removeFArraySubscripts();
             FType type = type().flatten(f, this, !isInput());
-            TypePrefixInputOutput io = createTypePrefixInputOutput();
+            CausalityConnectorPrefix io = createCausalityConnectorPrefix();
             
             vars.addChild(new FFunctionVariable(io.functionVisibility(), io, type, new Opt<FExp>(), access));
             
@@ -1677,9 +1677,9 @@ aspect Flattening {
         
         // Only set input/output prefix for top level inputs and outputs
         if (isTopLevelInputOutput()) {
-            fv.setTypePrefixInputOutput(createTypePrefixInputOutput());
+            fv.setCausalityConnectorPrefix(createCausalityConnectorPrefix());
         } else {
-            fv.setTypePrefixInputOutput(TypePrefixInputOutput.NONE);
+            fv.setCausalityConnectorPrefix(CausalityConnectorPrefix.NONE);
         }
         
         if (myInstClass().extendsPrimitive())
@@ -1712,28 +1712,28 @@ aspect Flattening {
         return fv;
     }
 
-    public TypePrefixInputOutput InstAssignable.createTypePrefixInputOutput() {
+    public CausalityConnectorPrefix InstAssignable.createCausalityConnectorPrefix() {
         if (isConnectorVariable()) {
             if (isInput()) {
-                return TypePrefixInputOutput.INPUT;
+                return CausalityConnectorPrefix.INPUT;
             } else if (isOutput()) {
-                return TypePrefixInputOutput.OUTPUT;
+                return CausalityConnectorPrefix.OUTPUT;
             } else if (isFlow()) {
-                return TypePrefixInputOutput.FLOW;
+                return CausalityConnectorPrefix.FLOW;
             } else if (isStream()) {
-                return TypePrefixInputOutput.STREAM;
+                return CausalityConnectorPrefix.STREAM;
             } else if (!variability().parameterOrLess()) {
-                return TypePrefixInputOutput.POTENTIAL;
+                return CausalityConnectorPrefix.POTENTIAL;
             } else {
-                return TypePrefixInputOutput.NONE;
+                return CausalityConnectorPrefix.NONE;
             }
         } else {
             if (isInput()) {
-                return TypePrefixInputOutput.INPUT;
+                return CausalityConnectorPrefix.INPUT;
             } else if (isOutput()) {
-                return TypePrefixInputOutput.OUTPUT;
+                return CausalityConnectorPrefix.OUTPUT;
             } else {
-                return TypePrefixInputOutput.NONE;
+                return CausalityConnectorPrefix.NONE;
             }
         }
     }
