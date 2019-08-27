@@ -110,7 +110,7 @@ aspect SetFDerivativeVariables {
         }
         fdv.setVisibilityType(getVisibilityType());
         fdv.setTypePrefixVariability(getTypePrefixVariability());
-        fdv.setTypePrefixInputOutput(TypePrefixInputOutput.NONE);
+        fdv.setCausalityConnectorPrefix(CausalityConnectorPrefix.NONE);
         fdv.setFAccess(getFAccess().fullCopy());
         fdv.setOrder(order() + 1);
         fdv.setMeIntegrated(this);

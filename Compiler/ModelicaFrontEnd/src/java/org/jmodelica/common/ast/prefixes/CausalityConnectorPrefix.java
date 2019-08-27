@@ -1,7 +1,7 @@
 package org.jmodelica.common.ast.prefixes;
 
 // TODO Rename class
-public enum TypePrefixInputOutput {
+public enum CausalityConnectorPrefix {
 
     NONE(""),
     INPUT("input"),
@@ -13,7 +13,7 @@ public enum TypePrefixInputOutput {
     
     private String toString;
     
-    private TypePrefixInputOutput(String toString) {
+    private CausalityConnectorPrefix(String toString) {
         this.toString = toString;
     }
     

@@ -738,16 +738,6 @@ aspect DynamicStateSelect{
     }
     
     public class EquationBlockFactory {
-        static BLTBlockCreator dynamicStateBlockCreator = addBLTBlockCreator(new BLTBlockCreator() {
-            @Override
-            public AbstractEquationBlock computeBlock(SCCBlock component, BlockProducer producer, StepUtil stepUtil) {
-                if (component.containsDynamicStates()) {
-                    return computeDynamicStateBlock(component, producer, stepUtil);
-                } else {
-                    return null;
-                }
-            }
-        });
         
         private static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> DynamicStateBlock computeDynamicStateBlock(SCCBlock<E, V> component, BlockProducer producer, StepUtil stepUtil) {
             final Map<DynamicStateSet, FDynamicAlgebraicVariable[]> setVarMap = new LinkedHashMap<DynamicStateSet, FDynamicAlgebraicVariable[]>();
