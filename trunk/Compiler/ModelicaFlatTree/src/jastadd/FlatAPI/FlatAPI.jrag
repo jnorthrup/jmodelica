@@ -3162,9 +3162,9 @@ aspect FlatEnumerations {
 aspect FlatCausality {
     
     syn boolean FAbstractVariable.isInput() = false;
-    eq FVariable.isInput() = getTypePrefixInputOutput().inputCausality();
+    eq FVariable.isInput() = getCausalityConnectorPrefix().inputCausality();
     syn boolean FAbstractVariable.isOutput() = false;
-    eq FVariable.isOutput() = getTypePrefixInputOutput().outputCausality();
+    eq FVariable.isOutput() = getCausalityConnectorPrefix().outputCausality();
       
 }
 
