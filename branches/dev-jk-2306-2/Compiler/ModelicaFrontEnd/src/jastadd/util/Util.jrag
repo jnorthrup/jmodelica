@@ -1419,8 +1419,8 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component is part of a component that is declared input or output on the top level.
      */
-    syn boolean InstComponentDecl.isTopLevelInputOutput() = false;
-    eq InstAssignable.isTopLevelInputOutput() = isTopLevel() && !inExpandableConnector() && 
+    syn boolean InstComponentDecl.isTopLevelCausalOrConnector() = false;
+    eq InstAssignable.isTopLevelCausalOrConnector() = isTopLevel() && !inExpandableConnector() && 
             (isInput() || isOutput() || isConnectorVariable()) && !isProtected() && isPublicVar();
 
     syn boolean InstComponentDecl.isTopLevel() = isInTopLevel();

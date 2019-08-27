@@ -843,7 +843,7 @@ aspect Flattening {
                 getBindingFExp().flattenUsedFuncsAndEnums(f);
             FAccess access = getFAccess().treeCopy().removeFArraySubscripts();
             FType type = type().flatten(f, this, !isInput());
-            CausalityConnectorPrefix io = createCausalityConnectorPrefix();
+            CausalityConnectorPrefix io = myCausalityConnectorPrefix();
             
             vars.addChild(new FFunctionVariable(io.functionVisibility(), io, type, new Opt<FExp>(), access));
             
@@ -1674,16 +1674,11 @@ aspect Flattening {
         FVariable fv = global ? createEmptyFGlobalVariable(f) : createEmptyFVariable();
         fv.setVisibilityType(createVisibilityType());
         fv.setTypePrefixVariability(variability());
+        fv.setCausalityConnectorPrefix(myCausalityConnectorPrefix());
         
-        // Only set input/output prefix for top level inputs and outputs
-        if (isTopLevelInputOutput()) {
-            fv.setCausalityConnectorPrefix(createCausalityConnectorPrefix());
-        } else {
-            fv.setCausalityConnectorPrefix(CausalityConnectorPrefix.NONE);
-        }
-        
-        if (myInstClass().extendsPrimitive())
+        if (myInstClass().extendsPrimitive()) {
             fv.setDerivedType(myInstClass().actualInstClass().qualifiedName());
+        }
         
         boolean flattenBinding = binding.shouldFlattenExp(this);
         List<FAttribute> attrs = new List<FAttribute>();
@@ -1712,7 +1707,10 @@ aspect Flattening {
         return fv;
     }
 
-    public CausalityConnectorPrefix InstAssignable.createCausalityConnectorPrefix() {
+    public CausalityConnectorPrefix InstAssignable.myCausalityConnectorPrefix() {
+        if (!isTopLevelCausalOrConnector()) {
+            return CausalityConnectorPrefix.NONE;
+        }
         if (isConnectorVariable()) {
             if (isInput()) {
                 return CausalityConnectorPrefix.INPUT;

@@ -80,7 +80,7 @@ aspect InstVariability {
     private boolean InstAssignable.circularVariability = false;
     
     public TypePrefixVariability InstAssignable.calcVariability(TypePrefixVariability v) {
-        if (v.constantVariability() && isInput() && inFunction() && isTopLevelInputOutput()) {
+        if (v.constantVariability() && isInput() && inFunction() && isTopLevelCausalOrConnector()) {
             return Variability.DISCRETE;
         }
         if (v.parameterVariability() && !inRecordDecl() && !circularVariability) {
