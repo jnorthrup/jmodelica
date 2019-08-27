@@ -106,49 +106,6 @@ class Test_Sparse_Linear_Block:
 
         fmu_name = compile_fmu("LinearTest.TwoTornSystems1", file_name, version=1.0,
                         compiler_options={"generate_sparse_block_jacobian_threshold": 0})
-        
-class Test_Sensitivities_FMI2:
-    @classmethod
-    def setUpClass(cls):
-        file_name = os.path.join(get_files_path(), 'Modelica', 'Sensitivities.mo')
-        compile_fmu("BasicSens1", file_name, version=2.0)
-        
-    @testattr(noncompliantfmi = True)
-    def test_basicsens1(self):
-        model = load_fmu("BasicSens1.fmu")
-        
-        opts = model.simulate_options()
-        opts["sensitivities"] = ["d"]
-
-        res = model.simulate(options=opts)
-        nose.tools.assert_almost_equal(res.final('dx/dd'), 0.36789, 3)
-        
-        assert res.solver.statistics["nsensfcnfcns"] > 0
-        
-    @testattr(windows_base = True)
-    def test_basicsens1dir(self):
-        model = load_fmu(os.path.join(get_files_path(), "FMUs/ME2.0", "BasicSens1.fmu"))
-        
-        opts = model.simulate_options()
-        opts["sensitivities"] = ["d"]
-
-        res = model.simulate(options=opts)
-        nose.tools.assert_almost_equal(res.final('dx/dd'), 0.36789, 3)
-        
-        assert res.solver.statistics["nsensfcnfcns"] > 0
-        
-    @testattr(windows_base = True)
-    def test_basicsens2(self):
-        model = load_fmu(os.path.join(get_files_path(), "FMUs/ME2.0", "BasicSens2.fmu"))
-        
-        opts = model.simulate_options()
-        opts["sensitivities"] = ["d"]
-
-        res = model.simulate(options=opts)
-        nose.tools.assert_almost_equal(res.final('dx/dd'), 0.36789, 3)
-        
-        assert res.solver.statistics["nsensfcnfcns"] == 0
-        
 
 class Test_Time_Events_FMU10:
     @classmethod
