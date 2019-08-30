@@ -3168,7 +3168,7 @@ aspect FlatCausality {
     eq FFunctionVariable.isInput()  = getCausalityConnectorPrefix().inputCausality (useCausalPorts());
     eq FFunctionVariable.isOutput() = getCausalityConnectorPrefix().outputCausality(useCausalPorts());
     
-    syn boolean FAbstractVariable.useCausalPorts() = myOptions().causal_ports.getValue();
+    syn boolean ASTNode.useCausalPorts() = myOptions().causal_ports.getValue();
 }
 
 aspect FlatTypes {
