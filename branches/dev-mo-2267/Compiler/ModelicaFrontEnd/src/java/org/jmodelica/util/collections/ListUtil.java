@@ -2,6 +2,7 @@ package org.jmodelica.util.collections;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -99,13 +100,13 @@ public final class ListUtil {
      * @return       a newly created ArrayList that contains the concatenation of the given lists
      */
     @SafeVarargs
-    public static <T> ArrayList<T> concatenate(List<T>... lists) {
+    public static <T> ArrayList<T> concatenate(Collection<? extends T>... lists) {
         int size = 0;
-        for (List<T> list : lists) {
+        for (Collection<? extends T> list : lists) {
             size += list.size();
         }
         ArrayList<T> res = new ArrayList<T>(size);
-        for (List<T> list : lists) {
+        for (Collection<? extends T> list : lists) {
             res.addAll(list);
         }
         return res;
