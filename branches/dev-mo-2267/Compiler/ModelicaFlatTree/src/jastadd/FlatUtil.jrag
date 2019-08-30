@@ -1112,9 +1112,6 @@ aspect FlatFunctionUtils {
     syn boolean FFunctionCall.isPartialFunctionCall() = false;
     eq FPartialFunctionCall.isPartialFunctionCall()   = true;
      
-     syn boolean FFunctionVariable.isInput()  = getCausalityConnectorPrefix().inputCausality();
-     syn boolean FFunctionVariable.isOutput() = getCausalityConnectorPrefix().outputCausality();
-     
      /**
       * Returns a list of all InstComponentDecls declared as "input".
       */

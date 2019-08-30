@@ -63,3 +63,9 @@ INTEGER dynamic_states_limit compiler uncommon 10
 Value == 0 indicates disabled."
 
 *******************************************************************************
+BOOLEAN causal_ports compiler experimental false
+
+"Treat top level connector variables as causal variables. Flow and instream
+variables as inputs, potential and stream variables as outputs."
+
+*******************************************************************************

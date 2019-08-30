@@ -3162,10 +3162,13 @@ aspect FlatEnumerations {
 aspect FlatCausality {
     
     syn boolean FAbstractVariable.isInput() = false;
-    eq FVariable.isInput() = getCausalityConnectorPrefix().inputCausality();
     syn boolean FAbstractVariable.isOutput() = false;
-    eq FVariable.isOutput() = getCausalityConnectorPrefix().outputCausality();
-      
+    eq FVariable.isInput()          = getCausalityConnectorPrefix().inputCausality (useCausalPorts());
+    eq FVariable.isOutput()         = getCausalityConnectorPrefix().outputCausality(useCausalPorts());
+    eq FFunctionVariable.isInput()  = getCausalityConnectorPrefix().inputCausality (useCausalPorts());
+    eq FFunctionVariable.isOutput() = getCausalityConnectorPrefix().outputCausality(useCausalPorts());
+    
+    syn boolean FAbstractVariable.useCausalPorts() = myOptions().causal_ports.getValue();
 }
 
 aspect FlatTypes {

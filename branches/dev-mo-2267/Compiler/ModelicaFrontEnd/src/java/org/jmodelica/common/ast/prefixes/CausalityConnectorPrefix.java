@@ -21,12 +21,18 @@ public enum CausalityConnectorPrefix {
         return this == NONE;
     }
     
-    public boolean inputCausality() {
-        return this == INPUT || this == FLOW || this == INSTREAM;
+    public boolean inputCausality(boolean causalPorts) {
+        if (causalPorts) {
+            return this == INPUT || this == FLOW || this == INSTREAM;
+        }
+        return this == INPUT;
     }
     
-    public boolean outputCausality() {
-        return this == OUTPUT || this == POTENTIAL || this == STREAM;
+    public boolean outputCausality(boolean causalPorts) {
+        if (causalPorts) {
+            return this == OUTPUT || this == POTENTIAL || this == STREAM;
+        }
+        return this == OUTPUT;
     }
     
     public boolean isConnectorPrefix() {
