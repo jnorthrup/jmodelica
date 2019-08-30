@@ -212,8 +212,12 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      */
     protected void generateAttributeIfSet(String name, FVariable variable, CodeStream printer) {
         if (variable.attributeSet(name)) {
-            String value = variable.attributeCValue(name).xmlValue();
-            generateAttribute(name, value, printer);
+            try {
+                String value = variable.attributeCValue(name).xmlValue();
+                generateAttribute(name, value, printer);
+            } catch (FunctionEvaluationException e) {
+                // Do not set attribute if we can not evaluate it.
+            }
         }
     }
     

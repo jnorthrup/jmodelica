@@ -305,24 +305,16 @@ SrcWithin within
     {: 
         return new SrcWithin(access); 
     :};
-
+  
 List base_class_decl_list
-    = top_level_base_class_decl SEMICOLON 
+    = base_class_decl SEMICOLON 
     {: 
-        return new List().add(top_level_base_class_decl); 
+        return new List().add(base_class_decl); 
     :}
-    | base_class_decl_list top_level_base_class_decl SEMICOLON 
+    | base_class_decl_list base_class_decl SEMICOLON 
     {: 
-        base_class_decl_list.add(top_level_base_class_decl);
+        base_class_decl_list.add(base_class_decl);
         return base_class_decl_list; 
-    :};
-
-SrcBaseClassDecl top_level_base_class_decl
-    = has_final base_class_decl
-    {:
-        adjustStart(has_final, base_class_decl);
-        base_class_decl.setFinal(has_final.value);
-        return base_class_decl;
     :};
 
 SrcBaseClassDecl anonymous_short_class 
