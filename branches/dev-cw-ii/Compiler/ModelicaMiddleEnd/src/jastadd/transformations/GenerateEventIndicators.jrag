@@ -27,7 +27,7 @@ aspect GenerateEventIndicators {
          * <p>
          * Options used by this transformation step:
          * <ul>
-         * <li>{@link OptionRegistry.OptionSpecification#EVENT_OUTPUT_VARS event_output_vars}</li>
+         * <li>{@link AbstractOptionRegistry.OptionSpecification#EVENT_OUTPUT_VARS event_output_vars}</li>
          * </ul>
          * Note that the latter, which enables generation of indicator equations if no indicator statements are needed,
          * is disabled by default when running tests.
@@ -161,6 +161,18 @@ aspect GenerateEventIndicators {
         protected void addEquations(Collection<? extends FAbstractEquation> eqns) {
             for (FAbstractEquation eqn : eqns) {
                 addEquation(eqn);
+            }
+        }
+
+        /**
+         * Add generated equations to be added to the flat class.
+         *
+         * @param eqns
+         *          The equations to be added.
+         */
+        protected void generateEquations(Collection<FAbstractEquation> eqns) {
+            for (FAbstractEquation eqn : eqns) {
+                generateEquation(eqn);
             }
         }
 
@@ -402,6 +414,18 @@ aspect GenerateEventIndicators {
         }
 
         /**
+         * Add generated equations to be added to the flat class.
+         *
+         * @param eqns
+         *          The equations to be added.
+         */
+        protected void generateEquations(Collection<FAbstractEquation> eqns) {
+            for (FAbstractEquation eqn : eqns) {
+                generateEquation(eqn);
+            }
+        }
+
+        /**
          * Transforms an algorithm.
          * <p>
          *
@@ -441,6 +465,14 @@ aspect GenerateEventIndicators {
 
     }
 
+    public interface EventGeneratingExp {
+        boolean hasIndicator();
+        EventGeneratingExp addIndicator(FAccessExp indicator);
+    }
+    FRelExp implements EventGeneratingExp;
+    FDelayExp implements EventGeneratingExp;
+    FSpatialDistExp implements EventGeneratingExp;
+
     /**
      * Generates initial statements and indicator statements for relational expressions.
      * <p>
@@ -479,20 +511,25 @@ aspect GenerateEventIndicators {
          */
         @Override
         public boolean transform(FAlgorithm alg) {
-
-            for (FRelExp exp : alg.relExpInEquation()) {
-
+            genIndicatorFromAlgorithm(alg.relExpInEquation(), alg, false);
+            genIndicatorFromAlgorithm(alg.delayExpInEquation(), alg, true);
+            genIndicatorFromAlgorithm(alg.spatialDistExpInEquation(), alg, true);
+            return true;
+        }
+        
+        private <Exp extends FExp & EventGeneratingExp> 
+        void genIndicatorFromAlgorithm(Collection<Exp> exps, FAlgorithm alg, boolean generateIndicatorIfNotOutput) {
+            for (Exp exp : exps) {
                 if (exp.dependsOn(alg.referencedFVariablesInLHS())) {
-                    exp.genIndicator(eventOutputVars);
-
+                    exp.genIndicators(eventOutputVars);
+    
                     if (exp.needsIndicatorInit()) {
-                        addStatement(exp.indicatorInitStmt());
+                        addStatements(exp.createIndicatorInitStmts());
                     }
-                } else if (exp.shouldGenerateIndicator() && eventOutputVars) {
-                    exp.genIndicator(eventOutputVars);
+                } else if (exp.shouldGenerateIndicator() && (eventOutputVars || generateIndicatorIfNotOutput)) {
+                    exp.genIndicators(eventOutputVars);
                 }
             }
-            return true;
         }
 
         /**
@@ -503,15 +540,21 @@ aspect GenerateEventIndicators {
          */
         @Override
         public void transform(FStatement stmt) {
-
-            for (FRelExp exp : stmt.relExpInStmt()) {
+            genIndicatorFromStatement(stmt.relExpInStmt(), stmt, false);
+            genIndicatorFromStatement(stmt.delayExpInStmt(), stmt, true);
+            genIndicatorFromStatement(stmt.spatialDistExpInStmt(), stmt, true);
+            addStatement(stmt);
+        }
+        
+        private <Exp extends FExp & EventGeneratingExp> 
+        void genIndicatorFromStatement(Collection<Exp> exps, FStatement stmt, boolean generateIndicatorIfNotOutput) {
+            for (Exp exp : exps) {
                 if (exp.dependsOn(stmt.myFAlgorithm().referencedFVariablesInLHS())) {
-                    addStatement(exp.indicatorStmt());
-                } else if (exp.shouldGenerateIndicator() && eventOutputVars) {
-                    generateEquation(exp.indicatorEquation());
+                    addStatements(exp.createIndicatorStmts());
+                } else if (exp.shouldGenerateIndicator() && (eventOutputVars || generateIndicatorIfNotOutput)) {
+                    generateEquations(exp.createIndicatorEquations());
                 }
             }
-            addStatement(stmt);
         }
 
     }
@@ -547,23 +590,35 @@ aspect GenerateEventIndicators {
          */
         @Override
         public void transform(FAbstractEquation eqn) {
-            for (FRelExp exp : eqn.relExpInEquation()) {
-                if (exp.shouldGenerateIndicator() && eventOutputVars) {
-                    exp.genIndicator(eventOutputVars);
-                    generateEquation(exp.indicatorEquation());
+            genIndicatorsFromEquations(eqn.relExpInEquation(), false);
+            genIndicatorsFromEquations(eqn.delayExpInEquation(), true);
+            genIndicatorsFromEquations(eqn.spatialDistExpInEquation(), true);
+            addEquation(eqn);
+        }
+        
+        private <Exp extends FExp & EventGeneratingExp> 
+        void genIndicatorsFromEquations(Collection<Exp> exps, boolean generateIndicatorIfNotOutput) {
+            for (Exp exp : exps) {
+                if (exp.shouldGenerateIndicator() && (eventOutputVars || generateIndicatorIfNotOutput)) {
+                    exp.genIndicators(eventOutputVars);
+                    generateEquations(exp.createIndicatorEquations());
                 }
             }
-            addEquation(eqn);
         }
     }
 
-    syn boolean FRelExp.shouldGenerateIndicator() = generatesEvent() && !isTimeEventGenerating() &&
-            !inFunctionCall() && !containsCommonFunctionCallExp();
+    public boolean FExp.shouldGenerateIndicator() {
+        return generatesEvent() && !isTimeEventGenerating() && !inFunctionCall();
+    }
 
     /**
      * Checks whether or not this relational expression requires an initialization statement.
      */
+    public boolean EventGeneratingExp.needsIndicatorInit();
+    
     inh boolean FRelExp.needsIndicatorInit();
+    inh boolean FDelayExp.needsIndicatorInit();
+    inh boolean FSpatialDistExp.needsIndicatorInit();
     eq Root.getChild().needsIndicatorInit()                = false;
     eq FAlgorithm.getChild().needsIndicatorInit()          = false;
     eq FForStmt.getForStmt().needsIndicatorInit()          = true;
@@ -571,7 +626,7 @@ aspect GenerateEventIndicators {
     eq FIfWhenClause.getFStatement().needsIndicatorInit()  = true;
     eq FWhileStmt.getWhileStmt().needsIndicatorInit()      = true;
 
-    inh boolean FExp.isIndicator();
+    inh boolean FAccessExp.isIndicator();
     eq FClass.getChild().isIndicator() = false;
     eq FRelExp.getIndicator().isIndicator() = true;
 
@@ -587,17 +642,69 @@ aspect GenerateEventIndicators {
     /**
      * Creates an assign equation for the indicator.
      */
-    syn FAbstractEquation FRelExp.indicatorEquation() = new FEquation(getIndicator().fullCopy(), indicatorExp());
+    public Collection<FAbstractEquation> EventGeneratingExp.createIndicatorEquations();
+    @Override
+    public Collection<FAbstractEquation> FRelExp.createIndicatorEquations() {
+        return ListUtil.<FAbstractEquation>unmodifiableList(
+                new FEquation(getIndicator().treeCopy(), createIndicatorExp())
+                );
+    }
+    @Override
+    public  Collection<FAbstractEquation> FDelayExp.createIndicatorEquations() {
+        return ListUtil.<FAbstractEquation>unmodifiableList(
+                new FEquation(getIndicator(0).treeCopy(), new FFirstDelayIndicator()),
+                new FEquation(getIndicator(1).treeCopy(), new FSecondDelayIndicator())
+                );
+    }
+    @Override
+    public Collection<FAbstractEquation> FSpatialDistExp.createIndicatorEquations() {
+        return ListUtil.<FAbstractEquation>unmodifiableList(new FEquation(getIndicator().treeCopy(), createIndicatorExp()));
+    }
 
     /**
      * Creates an assign statement for the indicator.
      */
-    syn FStatement FRelExp.indicatorStmt() = new FAssignStmt(getIndicator().asFAccessExp().fullCopy(), indicatorExp());
+    public Collection<FStatement> EventGeneratingExp.createIndicatorStmts();
+    @Override
+    public Collection<FStatement> FRelExp.createIndicatorStmts() {
+        return ListUtil.<FStatement>unmodifiableList(
+                new FAssignStmt(getIndicator().treeCopy(), createIndicatorExp())
+                );
+    }
+    @Override
+    public Collection<FStatement> FDelayExp.createIndicatorStmts() {
+        return ListUtil.<FStatement>unmodifiableList(
+                new FAssignStmt(getIndicator(0).treeCopy(), new FFirstDelayIndicator()),
+                new FAssignStmt(getIndicator(1).treeCopy(), new FSecondDelayIndicator())
+                );
+    }
+    @Override
+    public Collection<FStatement> FSpatialDistExp.createIndicatorStmts() {
+        return ListUtil.<FStatement>unmodifiableList(new FAssignStmt(getIndicator().treeCopy(), createIndicatorExp()));
+    }
 
     /**
      * Creates an initialization statement for the indicator.
      */
-    syn FStatement FRelExp.indicatorInitStmt() = new FAssignStmt(getIndicator().asFAccessExp().fullCopy(), new FIntegerLitExp(1));
+    public Collection<FStatement> EventGeneratingExp.createIndicatorInitStmts();
+    @Override
+    public Collection<FStatement> FRelExp.createIndicatorInitStmts() {
+        return ListUtil.<FStatement>unmodifiableList(
+                new FAssignStmt(getIndicator().treeCopy(), new FIntegerLitExp(1))
+        );
+    }
+
+    @Override
+    public Collection<FStatement> FDelayExp.createIndicatorInitStmts() {
+        return ListUtil.<FStatement>unmodifiableList(
+                new FAssignStmt(getIndicator(0).treeCopy(), new FIntegerLitExp(1)),
+                new FAssignStmt(getIndicator(0).treeCopy(), new FIntegerLitExp(1))
+        );
+    }
+    @Override
+    public Collection<FStatement> FSpatialDistExp.createIndicatorInitStmts() {
+        return ListUtil.<FStatement>unmodifiableList(new FAssignStmt(getIndicator().treeCopy(), new FIntegerLitExp(1)));
+    }
 
     /**
      * Checks whether or not an expression depends on any variable in a collection of them.
@@ -614,33 +721,83 @@ aspect GenerateEventIndicators {
         return false;
     }
 
+    public void EventGeneratingExp.genIndicators(boolean output);
+
     /**
-     * Creates an indicator for this FRelExp.
+     * Creates an indicator for {@value exp}.
      */
-    public void FRelExp.genIndicator(boolean output) {
-        String variableName = calcIndicatorVarName();
+    @Override
+    public void FRelExp.genIndicators(boolean output) {
+        genIndicator(this, output);
+    }
+    @Override
+    public void FDelayExp.genIndicators(boolean output) {
+        genIndicator(this, output);
+        genIndicator(this, output);
+    }
+    @Override
+    public void FSpatialDistExp.genIndicators(boolean output) {
+        genIndicator(this, output);
+    }
+    
+    public static <Exp extends FExp & EventGeneratingExp> void FExp.genIndicator(Exp exp, boolean output) {
         FVariable v = new FRealVariable(VisibilityType.PUBLIC, Variability.CONTINUOUS,
-                new FAccessFull(variableName));
+                new FAccessFull(exp.calcIndicatorVarName()));
 
         if (output) {
-            v.setTypePrefixInputOutput(TypePrefixInputOutput.OUTPUT);
+            v.setCausalityConnectorPrefix(CausalityConnectorPrefix.OUTPUT);
         }
 
-        myFClass().addFVariable(v);
-        setIndicator(v.createAccessExp());
-        setIndicatorVarName(variableName);
+        exp.myFClass().addFVariable(v);
+        exp.addIndicator(v.createAccessExp());
     }
 
     /**
      * Creates an expression for the event indicator.
      */
-    public FExp FRelExp.indicatorExp() {
+    public FExp FRelExp.createIndicatorExp() {
         FExp res = new FSubExp(getLeft().fullCopy(), getRight().fullCopy());
 
         if (myOptions().getBooleanOption("event_indicator_scaling")) {
             res = new FDivExp(res, nominal());
         }
         return res;
+    }
+    public FExp FSpatialDistExp.createIndicatorExp() {
+        return new FSpatialDistIndicator();
+    }
+
+    public Collection<FVariable> EventGeneratingExp.myIndicatorVariables();
+    public Collection<FVariable> FRelExp.myIndicatorVariables() {
+        return Collections.singleton(getIndicator().myFV().asFVariable());
+    }
+    public Collection<FVariable> FDelayExp.myIndicatorVariables() {
+        Collection<FVariable> res = new HashSet<>();
+        for (FAccessExp indicator : getIndicators()) {
+            res.add(indicator.myFV().asFVariable());
+        }
+        return res;
+    }
+    public Collection<FVariable> FSpatialDistExp.myIndicatorVariables() {
+        return Collections.singleton(getIndicator().myFV().asFVariable());
+    }
+
+    public boolean FDelayExp.hasIndicator(FVariable indicator) {
+        return myIndicatorVariables().contains(indicator);
+    }
+
+    public boolean FSpatialDistExp.hasIndicator(FVariable indicator) {
+        return myIndicatorVariables().contains(indicator);
+    }
+
+    public FRelExp FRelExp.addIndicator(FAccessExp indicator) {
+        setIndicator(indicator);
+        return this;
+    }
+
+    public FSpatialDistExp FSpatialDistExp.addIndicator(FAccessExp indicator) {
+        setIndicator(indicator);
+        return this;
     }
 
     /* ====================== *

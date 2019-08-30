@@ -17,38 +17,51 @@
 package org.jmodelica.util.collections;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import org.jmodelica.util.Criteria;
 
 public class FilteredIterator<T> implements Iterator<T> {
 	
+	private final Iterator<T> parent;
+	private final Criteria<? super T> criteria;
 	private T next;
-	private Iterator<T> parent;
-	private Criteria<? super T> criteria;
+	private boolean hasNext = true;
 	
 	public FilteredIterator(Iterator<T> parent, Criteria<? super T> criteria) {
 		this.parent = parent;
 		this.criteria = criteria;
-		next();
+		progress();
 	}
-
-	public boolean hasNext() {
-		return next != null;
-	}
-
-	public T next() {
-		T res = next;
-		boolean found = false;
-		while (!found && parent.hasNext()) {
+	
+	private void progress() {
+		while (parent.hasNext()) {
 			next = parent.next();
-			found = criteria.test(next);
+			if (criteria.test(next)) {
+				return;
+			}
 		}
-		if (!found)
-			next = null;
+		next = null;
+		hasNext = false;
+	}
+
+	@Override
+    public boolean hasNext() {
+		return hasNext;
+	}
+
+	@Override
+    public T next() {
+		if (!hasNext) {
+			throw new NoSuchElementException();
+		}
+		T res = next;
+		progress();
 		return res;
 	}
 
-	public void remove() {
+	@Override
+    public void remove() {
 		throw new UnsupportedOperationException();
 	}
 

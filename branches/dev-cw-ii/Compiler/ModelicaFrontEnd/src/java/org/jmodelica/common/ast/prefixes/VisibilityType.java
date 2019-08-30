@@ -5,8 +5,8 @@ public enum VisibilityType {
      * ordinal() is used for alias elimination so the order
      * here is important.
      */
-    HIDDEN,
     TEMPORARY,
+    HIDDEN,
     EXPANDABLE,
     PROTECTED,
     PUBLIC,
@@ -39,6 +39,10 @@ public enum VisibilityType {
     
     public boolean isHidden() {
         return this == HIDDEN;
+    }
+
+    public static VisibilityType mostRestrictive(VisibilityType v1, VisibilityType v2) {
+        return values()[Math.min(v1.ordinal(), v2.ordinal())];
     }
 
 }

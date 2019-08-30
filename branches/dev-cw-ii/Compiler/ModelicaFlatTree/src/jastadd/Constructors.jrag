@@ -17,7 +17,7 @@
 import java.util.ArrayList;
 import java.util.Collection;
 import org.jmodelica.common.ast.prefixes.EquationType;
-import org.jmodelica.common.ast.prefixes.TypePrefixInputOutput;
+import org.jmodelica.common.ast.prefixes.CausalityConnectorPrefix;
 import org.jmodelica.common.ast.prefixes.VisibilityType;
 
 aspect Constructors {
@@ -330,21 +330,28 @@ aspect Constructors {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), eqns, guard, elseClause);
     }
 
-	/**
-	 * Create an access from a class name.
-	 */
-	public static InstAccess InstAccess.fromName(String name) {
-		String[] parts = name.split("\\.");
-		if (parts.length == 1) {
-			return new InstParseAccess(parts[0]);
-		} else {
-			List<InstAccess> l = new List<InstAccess>();
-			for (String part : parts)
-				l.add(new InstParseAccess(part));
-			return new InstDot(l);
-		}
-	}
-	
+    /**
+     * Create an access from a class name.
+     */
+    public static InstAccess InstAccess.fromName(String... names) {
+        ArrayList<InstAccess> l = new ArrayList<>();
+        for (String name : names) {
+            String[] parts = name.split("\\.");
+            if (parts.length == 1) {
+                l.add(new InstParseAccess(parts[0]));
+            } else {
+                for (String part : parts) {
+                    l.add(new InstParseAccess(part));
+                }
+            }
+        }
+        if (l.size() == 1) {
+            return l.get(0);
+        } else {
+            return new InstDot(new List<InstAccess>(l));
+        }
+    }
+
 	/**
 	 * Constructs an FForIndex with a temporary index variable and a 
 	 *        range expression starting at 1 as the in expression.
@@ -432,44 +439,47 @@ aspect Constructors {
      *              the assumption that <code>exp</code> is of the same type. When one is 
      *              Integer and the other Real, this assumption gives the correct result.
      */
-    public FExp FExp.appendSum(FExp exp, boolean neg, FType type) {
+    public FExp FExp.appendSum(Flattener f, FExp exp, boolean neg, FType type) {
         if (exp == null)
-            return neg ? type.createFNegExp(this) : this;
+            return neg ? type.createFNegExp(f, this) : this;
         else
-            return neg ? type.createFSubExp(exp, this) : type.createFAddExp(exp, this);
+            return neg ? type.createFSubExp(f, exp, this) : type.createFAddExp(f, exp, this);
     }
 
     /**
      * Create a negation expression for the flat tree for an expression of this type.
      */
-    public FExp FType.createFNegExp(FExp a) {
+    public FExp FType.createFNegExp(Flattener f, FExp a) {
         return new FNegExp(a);
     }
 
-    public FExp FOperatorRecordType.createFNegExp(FExp a) {
-        return matchOverloadedOperator(null, FExp.OP_NEG).flattenOverloadedFunctionCall(Flattener.expressionFlattener(), arr(a), arr(this));
+    @Override
+    public FExp FOperatorRecordType.createFNegExp(Flattener f, FExp a) {
+        return matchOverloadedOperator(null, FExp.OP_NEG).flattenOverloadedFunctionCall(f, arr(a), arr(this));
     }
 
     /**
      * Create a subtraction expression for the flat tree for two expressions of this type.
      */
-    public FExp FType.createFSubExp(FExp a, FExp b) {
+    public FExp FType.createFSubExp(Flattener f, FExp a, FExp b) {
         return new FSubExp(a, b);
     }
 
-    public FExp FOperatorRecordType.createFSubExp(FExp a, FExp b) {
-        return matchOverloadedOperator(this, FExp.OP_SUB).flattenOverloadedFunctionCall(Flattener.expressionFlattener(), arr(a, b), arr(this, this));
+    @Override
+    public FExp FOperatorRecordType.createFSubExp(Flattener f, FExp a, FExp b) {
+        return matchOverloadedOperator(this, FExp.OP_SUB).flattenOverloadedFunctionCall(f, arr(a, b), arr(this, this));
     }
 
     /**
      * Create an addition expression for the flat tree for two expressions of this type.
      */
-    public FExp FType.createFAddExp(FExp a, FExp b) {
+    public FExp FType.createFAddExp(Flattener f, FExp a, FExp b) {
         return new FAddExp(a, b);
     }
 
-    public FExp FOperatorRecordType.createFAddExp(FExp a, FExp b) {
-        return matchOverloadedOperator(this, FExp.OP_ADD).flattenOverloadedFunctionCall(Flattener.expressionFlattener(), arr(a, b), arr(this, this));
+    @Override
+    public FExp FOperatorRecordType.createFAddExp(Flattener f, FExp a, FExp b) {
+        return matchOverloadedOperator(this, FExp.OP_ADD).flattenOverloadedFunctionCall(f, arr(a, b), arr(this, this));
     }
 
     public class ASTNode {
@@ -494,7 +504,7 @@ aspect Constructors {
 	 */
 	public FRealVariable.FRealVariable(VisibilityType vt, 
 			TypePrefixVariability variability, FAccess name) {
-		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name);
+		this(vt, variability, CausalityConnectorPrefix.NONE, new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
     /**
@@ -502,7 +512,7 @@ aspect Constructors {
      */
     public FDerivativeVariable.FDerivativeVariable(VisibilityType vt, 
             TypePrefixVariability variability, FAccess name, int order) {
-        this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, order);
+        this(vt, variability, CausalityConnectorPrefix.NONE, new List(), (String) null, new Opt(), new Opt(), name, order);
     }
 
     /**
@@ -510,7 +520,7 @@ aspect Constructors {
      */
     public FDummyDerivativeVariable.FDummyDerivativeVariable(VisibilityType vt, 
             TypePrefixVariability variability, FAccess name, int order) {
-        this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, order);
+        this(vt, variability, CausalityConnectorPrefix.NONE, new List(), (String) null, new Opt(), new Opt(), name, order);
     }
 
 	/**
@@ -518,7 +528,7 @@ aspect Constructors {
 	 */
 	public FPreRealVariable.FPreRealVariable(FRealVariable fv) {
 		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
-				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
+				CausalityConnectorPrefix.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
 				new Opt(), new Opt(), fv.getFAccess().fullCopy());
 	}
 	
@@ -527,7 +537,7 @@ aspect Constructors {
 	 */
 	public FIntegerVariable.FIntegerVariable(VisibilityType vt, 
 			TypePrefixVariability variability, FAccess name) {
-		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name);
+		this(vt, variability, CausalityConnectorPrefix.NONE, new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
 	/**
@@ -535,7 +545,7 @@ aspect Constructors {
 	 */
 	public FPreIntegerVariable.FPreIntegerVariable(FIntegerVariable fv) {
 		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
-				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
+				CausalityConnectorPrefix.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
 				new Opt(), new Opt(), fv.getFAccess().fullCopy());
 	}
 	
@@ -544,7 +554,7 @@ aspect Constructors {
 	 */
 	public FEnumVariable.FEnumVariable(VisibilityType vt, 
 			TypePrefixVariability variability, FAccess name, FAccess enumName) {
-		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, enumName);
+		this(vt, variability, CausalityConnectorPrefix.NONE, new List(), (String) null, new Opt(), new Opt(), name, enumName);
 	}
 	
 	/**
@@ -552,7 +562,7 @@ aspect Constructors {
 	 */
 	public FPreEnumVariable.FPreEnumVariable(FEnumVariable fv) {
 		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
-				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
+				CausalityConnectorPrefix.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
 				new Opt(), new Opt(), fv.getFAccess().fullCopy(), fv.getEnum().fullCopy());
 	}
 	
@@ -561,7 +571,7 @@ aspect Constructors {
 	 */
 	public FBooleanVariable.FBooleanVariable(VisibilityType vt, 
 			TypePrefixVariability variability, FAccess name) {
-		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name);
+		this(vt, variability, CausalityConnectorPrefix.NONE, new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
 	/**
@@ -569,7 +579,7 @@ aspect Constructors {
 	 */
 	public FPreBooleanVariable.FPreBooleanVariable(FBooleanVariable fv) {
 		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
-				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
+				CausalityConnectorPrefix.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
 				new Opt(), new Opt(), fv.getFAccess().fullCopy());
 	}
 	
@@ -578,7 +588,7 @@ aspect Constructors {
 	 */
 	public FStringVariable.FStringVariable(VisibilityType vt, 
 			TypePrefixVariability variability, FAccess name) {
-		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name);
+		this(vt, variability, CausalityConnectorPrefix.NONE, new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
 	/**
@@ -586,7 +596,7 @@ aspect Constructors {
 	 */
 	public FPreStringVariable.FPreStringVariable(FStringVariable fv) {
 		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
-				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
+				CausalityConnectorPrefix.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
 				new Opt(), new Opt(), fv.getFAccess().fullCopy());
 	}
 	
@@ -595,7 +605,7 @@ aspect Constructors {
 	 */
 	public FRecordVariable.FRecordVariable(VisibilityType vt, 
 			TypePrefixVariability variability, FAccess name, FRecordAccess record) {
-		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, record);
+		this(vt, variability, CausalityConnectorPrefix.NONE, new List(), (String) null, new Opt(), new Opt(), name, record);
 	}
 	
     /**
@@ -603,21 +613,21 @@ aspect Constructors {
      */
     public FExternalObjectVariable.FExternalObjectVariable(VisibilityType vt, 
             TypePrefixVariability variability, FAccess name, CommonAccess constructorName) {
-        this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, constructorName);
+        this(vt, variability, CausalityConnectorPrefix.NONE, new List(), (String) null, new Opt(), new Opt(), name, constructorName);
     }
 
     /**
      * Constructs a new dynamic state variable
      */
     public FDynamicStateVariable.FDynamicStateVariable(DynamicStateSet set, int number) {
-        this(VisibilityType.PUBLIC, Variability.CONTINUOUS, TypePrefixInputOutput.NONE, new List(), (String)null, new Opt(), new Opt(), new FAccessFull("_ds." + set.id() + ".s" + number), set, number);
+        this(VisibilityType.PUBLIC, Variability.CONTINUOUS, CausalityConnectorPrefix.NONE, new List(), (String)null, new Opt(), new Opt(), new FAccessFull("_ds." + set.id() + ".s" + number), set, number);
     }
 
     /**
      * Constructs a new dynamic state variable
      */
     public FDynamicAlgebraicVariable.FDynamicAlgebraicVariable(DynamicStateSet set, int number) {
-        this(VisibilityType.PUBLIC, Variability.CONTINUOUS, TypePrefixInputOutput.NONE, new List(), (String)null, new Opt(), new Opt(), new FAccessFull("_ds." + set.id() + ".a" + number), set, number);
+        this(VisibilityType.PUBLIC, Variability.CONTINUOUS, CausalityConnectorPrefix.NONE, new List(), (String)null, new Opt(), new Opt(), new FAccessFull("_ds." + set.id() + ".a" + number), set, number);
     }
     
 	/**
@@ -734,41 +744,26 @@ aspect Constructors {
     public FAttribute.FAttribute(String typeName, String name, FExp value, boolean isSet, int level) {
         this(new FAccessString(typeName), new FIdDecl(name), value, isSet, level);
     }
-	
-	/**
-	 * Create an FFunctionArray with the given name and type. 
-	 *        Extracts array subscripts from type.
-	 */
-	public FFunctionArray.FFunctionArray(FType type, String name) {
-        this(TypePrefixInputOutput.NONE, type, new Opt(), new FAccessFull(name));
-	}
-	
-	/**
-	 * Create an FFunctionVariable with the given name and type. 
-	 */
-	public FFunctionVariable.FFunctionVariable(FType type, String name) {
-		this(TypePrefixInputOutput.NONE, new List<FAttribute>(), type, new Opt(), new FAccessString(name), 0);
-	}
-	
+    
+    /**
+     * Create an FFunctionVariable with the given name and type. 
+     */
+    public FFunctionVariable.FFunctionVariable(VisibilityType vt, FType type, String name) {
+        this(vt, CausalityConnectorPrefix.NONE, new List<FAttribute>(), type, new Opt(), new FAccessString(name), 0);
+    }
+    
     /**
      * Create an FFunctionVariable with the given name, type and input/output prefix. 
      */
-    public FFunctionVariable.FFunctionVariable(FType type, String name, TypePrefixInputOutput inputOutput) {
-        this(inputOutput, new List<FAttribute>(), type, new Opt<FExp>(), new FAccessString(name), 0);
+    public FFunctionVariable.FFunctionVariable(VisibilityType vt, FType type, String name, CausalityConnectorPrefix inputOutput) {
+        this(vt, inputOutput, new List<FAttribute>(), type, new Opt<FExp>(), new FAccessString(name), 0);
     }
     
     /**
      * Create an FFunctionVariable with everything but order and attributes given.
      */
-    public FFunctionVariable.FFunctionVariable(TypePrefixInputOutput inputOutput, FType type, Opt<FExp> bindingExp, FAccess name) {
-        this(inputOutput, new List<FAttribute>(), type, bindingExp, name, 0);
-    }
-    
-    /**
-     * Create an FFunctionArray with everything but order and attributes given.
-     */
-    public FFunctionArray.FFunctionArray(TypePrefixInputOutput inputOutput, FType type, Opt<FExp> bindingExp, FAccess name) {
-        this(inputOutput, new List<FAttribute>(), type, bindingExp, name, 0);
+    public FFunctionVariable.FFunctionVariable(VisibilityType vt, CausalityConnectorPrefix inputOutput, FType type, Opt<FExp> bindingExp, FAccess name) {
+        this(vt, inputOutput, new List<FAttribute>(), type, bindingExp, name, 0);
     }
     
 	/**
@@ -899,6 +894,7 @@ aspect InheritedFactoryMethods {
 	public abstract FUnaryBuiltIn             FUnaryBuiltIn.createEmptyNode();
 	public abstract FEventGenExp              FEventGenExp.createEmptyNode();
 	public abstract FBinEventGenExp           FBinEventGenExp.createEmptyNode();
+    public abstract FDelayIndicator           FDelayIndicator.createEmptyNode();
 	public abstract FMathematicalFunctionCall FMathematicalFunctionCall.createEmptyNode();
 	public abstract FInfArgsFunctionCall      FInfArgsFunctionCall.createEmptyNode();
 	public abstract FMinMaxExp      		  FMinMaxExp.createEmptyNode();
@@ -936,7 +932,7 @@ aspect InheritedFactoryMethods {
 	public FNotExp FNotExp.createEmptyNode() { return new FNotExp(); }
 	public FOrExp  FOrExp.createEmptyNode()  { return new FOrExp();  }
 	public FAndExp FAndExp.createEmptyNode() { return new FAndExp(); }
-	
+
 	// Literal expressions (all have different children, so mostly here for completeness)
 	public FRealLitExp         FRealLitExp.createEmptyNode()         { return new FRealLitExp();         }
 	public FIntegerLitExp      FIntegerLitExp.createEmptyNode()      { return new FIntegerLitExp();      }
@@ -965,6 +961,11 @@ aspect InheritedFactoryMethods {
 	public FNoExp          FNoExp.createEmptyNode()          { return new FNoExp();          }
     public FColonSizeExp   FColonSizeExp.createEmptyNode()   { return new FColonSizeExp();   }
     public FInStreamEpsExp FInStreamEpsExp.createEmptyNode() { return new FInStreamEpsExp(); }
+    
+    // Event indicator expressions
+    public FFirstDelayIndicator  FFirstDelayIndicator.createEmptyNode()  { return new FFirstDelayIndicator(); }
+    public FSecondDelayIndicator FSecondDelayIndicator.createEmptyNode() { return new FSecondDelayIndicator(); }
+    public FSpatialDistIndicator FSpatialDistIndicator.createEmptyNode() { return new FSpatialDistIndicator(); }
 
     // Identifier expressions
     public abstract CommonAccessExp CommonAccessExp.createEmptyNode();
@@ -1302,7 +1303,11 @@ aspect InheritedFactoryMethods {
 	public FIfEquation   FIfEquation.createEmptyNode()   { return new FIfEquation(); }
 	public FWhenEquation FWhenEquation.createEmptyNode() { return new FWhenEquation(); }
 	public FElseEquation FElseEquation.createEmptyNode() { return new FElseEquation(); }
-	
+
+    public FEquation FEquation.createNode(List<FAttribute> attrs, FExp left, FExp right) {
+        return new FEquation(attrs, left, right);
+    }
+
 	public abstract FIfWhenStmt FIfWhenStmt.createEmptyNode();
 	public FIfStmt   FIfStmt.createEmptyNode()   { return new FIfStmt(); }
 	public FWhenStmt FWhenStmt.createEmptyNode() { return new FWhenStmt(); }
@@ -1320,23 +1325,6 @@ aspect InheritedFactoryMethods {
 	public FAttribute           FAttribute.createEmptyNode()         { return new FAttribute(); }
 	public FInternalAttribute   FInternalAttribute.createEmptyNode() { return new FInternalAttribute(); }
     public FAnnotationAttribute FAnnotationAttribute.createEmptyNode() { return new FAnnotationAttribute(); }
-	
-	
-    /**
-     * Create new node of same class as this, with the specified children.
-     */
-    public FFunctionVariable FFunctionVariable.createNode(TypePrefixInputOutput prefix, FType type, Opt<FExp> bindingExp, FAccess name, int order) {
-        FFunctionVariable node = createEmptyNode();
-        node.setTypePrefixInputOutput(prefix);
-        node.setType(type);
-        node.setBindingExpOpt(bindingExp);
-        node.setFAccess(name);
-        node.setOrder(order);
-        return node;
-    }
-    
-    public FFunctionVariable FFunctionVariable.createEmptyNode() { return new FFunctionVariable(); }
-    public FFunctionArray    FFunctionArray.createEmptyNode()    { return new FFunctionArray(); }
 
 	/**
 	 * Create new node of same class as this, with the specified 
@@ -1412,20 +1400,20 @@ aspect InheritedFactoryMethods {
     public FSemiLinearExp.FSemiLinearExp(FExp a1, FExp a2, FExp a3) { this(emptyArgs(), a1, a2, a3); }
     public FLinspace.FLinspace(FExp a1, FExp a2, FExp a3)           { this(emptyArgs(), a1, a2, a3); }
     
-    public FDelayExp.FDelayExp(FExp a1, FExp a2, Opt<FExp> a3) { this(emptyArgs(), a1, a2, a3); }
+    public FDelayExp.FDelayExp(FExp a1, FExp a2, Opt<FExp> a3) { this(emptyArgs(), a1, a2, a3, List.EMPTY); }
     public FAssert.FAssert(FExp a1, FExp a2, Opt<FExp> a3)     { this(emptyArgs(), a1, a2, a3); }
     
     public FFillExp.FFillExp(List<FExp> dims, FExp exp)              { this(emptyArgs(), dims, exp); }
     public FSpatialDistExp.FSpatialDistExp(FExp a1, FExp a2, FExp a3, FExp a4, FExp a5, FExp a6) { 
-        this(emptyArgs(), a1, a2, a3, a4, a5, a6);
+        this(emptyArgs(), a1, a2, a3, a4, a5, a6, Opt.EMPTY);
     }
     public FExInStream.FExInStream(FExp a1, FExp a2, List<FExp> a3) { this(emptyArgs(), a1, a2, a3); }
     
-    public FLtExp.FLtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FExp>(), (String) null); }
-    public FLeqExp.FLeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FExp>(), (String) null); }
-    public FGtExp.FGtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FExp>(), (String) null); }
-    public FGeqExp.FGeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FExp>(), (String) null); }
-    public FEqExp.FEqExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FExp>(), (String) null); }
-    public FNeqExp.FNeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FExp>(), (String) null); }
+    public FLtExp.FLtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FAccessExp>()); }
+    public FLeqExp.FLeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FAccessExp>()); }
+    public FGtExp.FGtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FAccessExp>()); }
+    public FGeqExp.FGeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FAccessExp>()); }
+    public FEqExp.FEqExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FAccessExp>()); }
+    public FNeqExp.FNeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FAccessExp>()); }
 
 }

@@ -31,17 +31,35 @@
     <property name="java_version" value="1.7"/>
     <property name="java_compiler" value="javac${java_version}"/>
 
-    <property name="target" value="${user.dir}"/>
-    <property name="java_output_intermediate" value="${target}/src/java-generated-intermediate" />
-    <property name="java_output_final"        value="${target}/src/java-generated" />
+    <fail unless="target" message="Property 'target' not set. Should point to build directory where this ant file will generate intermediate files and build outputs. For builds in eclipse we normally use ${workspace_loc:&lt;project&gt;/tools/eclipse/antbuild}."/>
+    <echo>build-base.xml: running in ${target}</echo>
+
+    <property name="compiler_build" value="${target}/src/build" />
+    
+    <!-- Temporary work directory with generated java files for either Modelica or Optimica configuration -->
+    <property name="java_output_intermediate" value="${compiler_build}/${sub_package}/java-generated-intermediate" />
+    
+    <!-- Temporary work directory with generated java files common for both Modelica and Optimica configuration -->
+    <property name="java_output_intermediate_common" value="${compiler_build}/src/${sub_package}/java-generated-intermediate-common" />
+    
+    <!-- Final output directory with generated java files for either Modelica or Optimica configuration -->
+    <property name="java_output_final" value="${target}/src/generated/${sub_package}/java" />
+    
+    <!-- Final output directory with generated java files common for both Modelica and Optimica configuration -->
+    <property name="java_output_final_common" value="${target}/src/generated/java" />
+    
+    <!-- Temporary work directory for updating static java files -->
     <property name="java_temp" value="${target}/src/java-generated-temporary" />
+    
     <property name="resources_temp" value="${target}/src/resources-temporary" />
-    <property name="junit_output" value="${target}/src/junit-generated" />
+    <property name="junit_output" value="${target}/src/generated/${sub_package}/junit" />
     <property name="test_output" value="${target}/doc/junit-reports" />
     <property name="class_output" value="${target}/bin" />
+    <property name="build_class_output" value="${compiler_build}/bin" />
     <property name="jar_output" value="${target}/bin" />
 
-    <property name="jastadd_dir" value="${base.dir}/../ThirdParty/JastAdd" />
+    <property name="jastadd_jar" value="${base.dir}/../ThirdParty/JastAdd/jastadd-2.3.4.jar" />
+	<property name="jastaddparser_jar" value="${base.dir}/../ThirdParty/JastAdd/JastAddParser.jar" />
     <property name="junit_dir" value="${base.dir}/../ThirdParty/Junit" />
     <property name="junit_jar" value="${junit_dir}/junit-4.10.jar" />
     <property name="jflex_dir" value="${base.dir}/../ThirdParty/JFlex/jflex-1.4.3" />
@@ -50,6 +68,9 @@
     <property name="beaver-rt_jar" value="${beaver_dir}/lib/beaver-rt.jar"/>
     <property name="ant-contrib_dir" value="${base.dir}/../ThirdParty/Ant-Contrib/ant-contrib-1.0b3" />
 
+    <!-- Used in jar manifest to find thirdparties -->
+    <property name="thirdparty_install_dir" value="../ThirdParty"/>
+    
     <property name="extra_modules" value="" />
 
     <property name="timestamp_format" value="yyyyDDDHHmmssSSS"/>
@@ -58,8 +79,6 @@
     <taskdef resource="net/sf/antcontrib/antlib.xml">
         <classpath path="${ant-contrib_dir}/target/ant-contrib.jar" />
     </taskdef>
-    <!-- "jastadd" is an ant task class in jastadd2.jar -->
-    <taskdef classname="org.jastadd.JastAddTask" name="jastadd" classpath="${jastadd_dir}/jastadd2.jar" />
     <!-- "jflex" is an ant task class for the scanner generator in JFlex.jar -->
     <taskdef name="jflex" classname="JFlex.anttask.JFlexTask" classpath="${jflex_dir}/lib/JFlex.jar" />
     <!-- "beaver" is an ant task class for the parser generator in beaver.jar -->
@@ -87,7 +106,10 @@
     <propertyregex property="ast_package_dir" input="${ast_package}" defaultValue="${ast_package}" regexp="\." replace="/" global="true" />
     <property name="ast_output" value="${java_output_intermediate}/${ast_package_dir}" />
     <propertyregex property="parser_package_dir" input="${parser_package}" defaultValue="${parser_package}" regexp="\." replace="/" global="true" />
-    <property name="parser_output" value="${java_output_intermediate}/${parser_package_dir}" />
+    <property name="parsers.output" value="${java_output_intermediate}/${parser_package_dir}" />
+    <property name="parsers.builddir" value="${compiler_build}/${sub_package}/parsers" />
+    <property name="scanners.output" value="${java_output_intermediate}" />
+    <property name="scanners.builddir" value="${compiler_build}/${sub_package}/scanners" />
     <propertyregex property="test_package_dir" input="${test_package}" defaultValue="${test_package}" regexp="\." replace="/" global="true" />
     <property name="test_package_output" value="${junit_output}/${test_package_dir}" />
     <property name="test_class_name" value="Tests" />
@@ -309,7 +331,15 @@
                             <propertyregex property="@{module}.@{gen-extra}.gen_path.tmp" 
                                 input="${@{module}.package.@{generated}}" defaultValue="${@{module}.package.@{generated}}" 
                                 regexp="\." replace="/" global="true" />
-                            <property name="@{module}.@{gen-extra}.gen_path" value="${java_output_intermediate}/${@{module}.@{gen-extra}.gen_path.tmp}"/>
+                            <if>
+                                <matches pattern=".*${sub_package}.*" string="${@{module}.package.@{generated}}"/>
+                                <then>
+                                    <property name="@{module}.@{gen-extra}.gen_path" value="${java_output_intermediate}/${@{module}.@{gen-extra}.gen_path.tmp}"/>
+                                </then>
+                                <else>
+                                    <property name="@{module}.@{gen-extra}.gen_path" value="${java_output_intermediate_common}/${@{module}.@{gen-extra}.gen_path.tmp}"/>
+                                </else>
+                            </if>
                         </then>
                     </if>
                 </sequential>
@@ -387,8 +417,28 @@
     <propertyregex property="test_helper_packages" input="${test_helper_packages_temp}" regexp="^," replace="" defaultvalue="" />
     <propertyregex property="test_helper_dirs" input="${test_helper_dirs_temp}" regexp="^:" replace="" defaultvalue="" />
     
+    <var name="thirdparty_jars_build_temp" value="" />
+    <var name="thirdparty_jars_manifest_temp" value="" />
+    <for list="${modules}" param="module">
+        <sequential>
+            <if>
+                <isset property="@{module}.thirdparty.jars" />
+                <then>
+                    <for list="${@{module}.thirdparty.jars}" param="jar">
+                        <sequential>
+                            <var name="thirdparty_jars_build_temp" value="${thirdparty_jars_build_temp}:${@{module}.path}/ThirdParty/@{jar}" />
+                            <var name="thirdparty_jars_manifest_temp" value="${thirdparty_jars_manifest_temp} ${thirdparty_install_dir}/@{jar}" />
+                        </sequential>
+                    </for>
+                </then>
+            </if>
+        </sequential>
+    </for>
+    <property name="thirdparty_jars_build" value="${thirdparty_jars_build_temp}" />
+    <property name="thirdparty_jars_manifest" value="${thirdparty_jars_manifest_temp}" />
+    
     <!-- calculate sets of jar files, and set of java files to compile for them -->
-    <var name="compiler_jars_temp" value="${beaver-rt_jar}" />
+    <var name="compiler_jars_temp" value="${thirdparty_jars_build}" />
     <var name="compile_java_patterns_temp" value="" />
     <for list="${jars}" param="jar">
         <sequential>
@@ -402,9 +452,16 @@
     <propertyregex property="compile_java_patterns_temp3" input="${compile_java_patterns_temp2}" regexp="," replace="/**/*.java," defaultvalue="${compile_java_patterns_temp2}" />
     <propertyregex property="compile_java_patterns" input="${compile_java_patterns_temp3}" regexp=",$" replace="" defaultvalue="" />
     
+    <property name="manifest" value="${compiler_build}/MANIFEST.MF" />
+    <target name="manifest">
+    <!-- Syntax is important in the manifest file -->
+    <echo file="${manifest}">Class-Path:${thirdparty_jars_manifest}
+</echo>
+    <echo>Generated jar manifest: ${manifest}</echo>
+    </target>
     
     <!-- Build compiler jars. -->
-    <target name="build" depends="compile-ast" description="Build all jars needed by compiler.">
+    <target name="build" depends="compile-ast,manifest,options" description="Build all jars needed by compiler.">
         <mkdir dir="${jar_output}" />
         <for list="${jars}" param="jar">
             <sequential>
@@ -416,10 +473,10 @@
                     </sequential>
                 </for>
                 <propertyregex property="build_file_patterns" input="${build_file_patterns_temp}" regexp="^," replace="" override="true" />
+                <mkdir dir="${resources_temp}" />
                 <if>
                     <istrue value="${@{jar}.jar.include_resources}" />
                     <then>
-                        <mkdir dir="${resources_temp}" />
                         <for list="${modules}" param="module">
                             <sequential>
                                 <if>
@@ -433,31 +490,27 @@
                                 </if>
                             </sequential>
                         </for>
-                        <jar destfile="${jar_output}/@{jar}.jar">
-                            <fileset dir="${class_output}" includes="${build_file_patterns}" />
-                            <fileset dir="${resources_temp}" />
-                        </jar>
-                        <delete dir="${resources_temp}" />
                     </then>
-                    <else>
-                        <jar destfile="${jar_output}/@{jar}.jar">
-                            <fileset dir="${class_output}" includes="${build_file_patterns}" />
-                        </jar>
-                    </else>
                 </if>
+                <jar destfile="${jar_output}/@{jar}.jar" manifest="${manifest}">
+                    <fileset dir="${class_output}" includes="${build_file_patterns}" />
+                    <fileset dir="${resources_temp}" />
+                </jar>
+                <delete dir="${resources_temp}" />
             </sequential>
         </for>
     </target>
 
-    <!-- Meta target for generating all java files. -->
-    <target name="gen" depends="patch,parser,scanner,gen-test,gen-extra,patch-test" description="Generate all Java files.">
+    <macrodef name="sync-macro">
+        <attribute name="fromdir"  default="NOT SET"/>
+        <attribute name="todir" default="NOT SET"/>
         <!-- 
             Mirror the intermediate directory with the final one (that's used in 
             subsequent steps), copying files that differ and removing files that 
             do not exist anymore. Then remove the intermediate directory.
         -->
         <sequential>
-            <mkdir dir="${java_output_final}" />
+            <mkdir dir="@{todir}" />
             <!-- Build list of files to exclude from deletion -->
             <var name="excludes" value="" />
             <for list="${modules}" param="module">
@@ -482,17 +535,23 @@
                     this also wipes any changed files, to make sure we don't get any problems
                     with file name case on windows.
                 -->
-                <fileset dir="${java_output_final}" includes="**/*" excludes="${excludes}">
-                    <different targetdir="${java_output_intermediate}"/>
+                <fileset dir="@{todir}" includes="**/*" excludes="${excludes}">
+                    <different targetdir="@{fromdir}"/>
                 </fileset>
             </delete>
-            <copy overwrite="true" todir="${java_output_final}">
-                <fileset dir="${java_output_intermediate}" includes="**/*">
-                    <different targetdir="${java_output_final}"/>
+            <copy overwrite="true" todir="@{todir}">
+                <fileset dir="@{fromdir}" includes="**/*">
+                    <different targetdir="@{todir}"/>
                 </fileset>
             </copy>
-            <delete dir="${java_output_intermediate}" />
+            <delete dir="@{fromdir}" />
         </sequential>
+    </macrodef>
+	
+    <!-- Meta target for generating all java files. -->
+    <target name="gen" depends="patch,parser,scanner,gen-test,gen-extra,patch-test" description="Generate all Java files.">
+        <sync-macro fromdir="${java_output_intermediate_common}" todir="${java_output_final_common}" />
+        <sync-macro fromdir="${java_output_intermediate}"        todir="${java_output_final}" />
     </target>
 
     <!-- Compile class used in patch target. -->
@@ -519,25 +578,23 @@
         <attribute name="generate"  default="NOT SET"/>
         <attribute name="gen-extra" default="NOT SET"/>
         <sequential>
-            <mkdir dir="${class_output}" />
+            <mkdir dir="${build_class_output}" />
             <for list="${modules}" param="module">
                 <sequential>
                     <if>
                         <isset property="@{module}.@{generate}"/>
                         <then>
-                            <javac  classpath="${beaver-rt_jar}" 
-                                    sourcepath="${java_output_intermediate}:${java_dirs}" 
+                            <javac  classpath="${thirdparty_jars_build}" 
+                                    srcdir="${java_dirs}:${@{module}.java_path}" 
                                     compiler="${java_compiler}" 
                                     source="${java_version}" 
                                     target="${java_version}" 
                                     fork="true" 
                                     encoding="UTF8" 
                                     debug="false" 
-                                    destdir="${class_output}" 
+                                    destdir="${build_class_output}" 
                                     includeantruntime="false"
                                     excludes="${test_helper_java_patterns}" >
-                                <src path="${@{module}.java_path}" />
-                                <src path="${java_output_intermediate}" />
                                 <include name="${@{module}.@{gen-extra}.javafile}.java" />
                             </javac>
                         </then>
@@ -556,7 +613,7 @@
     <target name="compile-ast" depends="gen">
         <mkdir dir="${class_output}" />
         <javac 
-            classpath="${beaver-rt_jar}" 
+            classpath="${thirdparty_jars_build}" 
             compiler="${java_compiler}" 
             source="${java_version}" 
             target="${java_version}" 
@@ -565,7 +622,7 @@
             debug="false" 
             destdir="${class_output}" 
             includeantruntime="false"
-            srcdir="${java_output_final}:${java_dirs}" 
+            srcdir="${java_output_final_common}:${java_output_final}:${java_dirs}" 
             includes="${compile_java_patterns}" 
             excludes="${test_helper_java_patterns}" />
     </target>
@@ -578,14 +635,16 @@
         <if>
             <isset property="javadoc.packages"/>
             <then>
-                <mkdir dir="${javadoc_output}" />
+                <!-- The javadoc directory is sometimes unusable, unclear why.
+                     It is recreated by the javadoc task. -->
+                <delete dir="${javadoc_output}" />
                 <javadoc 
                     access="public" 
-                    sourcepath="${java_output_final}:${java_dirs}" 
+                    sourcepath="${java_output_final_common}:${java_output_final}:${java_dirs}" 
                     destdir="${javadoc_output}" 
                     packagenames="${javadoc.packages}" 
                     excludepackagenames="${test_helper_packages}" 
-                    classpath="${beaver-rt_jar}" />
+                    classpath="${thirdparty_jars_build}" />
             </then>
         </if>
     </target>
@@ -627,7 +686,7 @@
                 <!-- create a directory for the generated files -->
                 <mkdir dir="${java_output_intermediate}" />
                 <!-- run jastadd to generate AST files -->
-                <java classname="org.jastadd.JastAdd" classpath="${jastadd_dir}/jastadd2.jar" failonerror="true">
+                <java classname="org.jastadd.JastAdd" classpath="${jastadd_jar}" failonerror="true">
                     <arg value="--package=${ast_package}" />
                     <arg value="--o=${java_output_intermediate}" />
                     <arg value="--beaver" />
@@ -638,6 +697,7 @@
                     <arg value="--emptyContainerSingletons" />
                     <arg value="--indent=4space" />
                     <arg value="--inhEqCheck=false" />
+                    <arg value="--optimize-imports" />
                     <arg line="${jastadd_files}" />
                 </java>
                 <!-- delete stale java files created in earlier runs -->
@@ -666,7 +726,7 @@
                                 <isset property="@{module}.patch.uptodate" />
                             </and></not>
                             <then>
-                                <java classpath="${class_output}:${beaver-rt_jar}" 
+                                <java classpath="${class_output}:${thirdparty_jars_build}" 
                                         classname="${@{module}.patch}" failonerror="true">
                                     <arg line="${ast_output}" />
                                 </java>
@@ -696,7 +756,7 @@
                             </uptodate>
                             -->
                             <mkdir dir="${@{module}.@{gen-extra}.gen_path}" />
-                            <java classpath="${class_output}:${beaver-rt_jar}" 
+                            <java classpath="${build_class_output}:${thirdparty_jars_build}" 
                                     classname="${@{module}.@{generate}}" failonerror="true">
                                 <arg value="${@{module}.@{gen-extra}.gen_path}" />
                                 <arg value="${@{module}.package.@{generated}}" />
@@ -814,7 +874,7 @@
     </target>
     
     <!-- generate all parsers -->
-    <target name="parser">
+    <target name="parser-build">
         <for list="${modules}" param="module">
             <sequential>
                 <if>
@@ -841,7 +901,7 @@
                                     </else>
                                 </if>
                                 <!-- check if files are up to date -->
-                                <uptodate property="@{module}.@{parser}.uptodate" targetfile="${parser_output}/@{parser}.java">
+                                <uptodate property="@{module}.@{parser}.uptodate" targetfile="${parsers.builddir}/@{parser}.java">
                                     <srcresources>
                                         <fileset file="${parser_main_path}" />
                                         <fileset file="${parser_header_path}" />
@@ -855,31 +915,31 @@
                                         <if>
                                             <isset property="@{module}.@{parser}.extend" />
                                             <then>
-                                                <concat destfile="${parser_output}/@{parser}.parser">
+                                                <concat destfile="${parsers.builddir}/@{parser}.parser">
                                                     <fileset file="${parser_main_path}" />
                                                     <fileset file="${parser_tail_path}" />
                                                 </concat>
                                             </then>
                                             <else>
-                                                <copy file="${parser_main_path}" tofile="${parser_output}/@{parser}.parser" overwrite="true" />
+                                                <copy file="${parser_main_path}" tofile="${parsers.builddir}/@{parser}.parser" overwrite="true" />
                                             </else>
                                         </if>
                                         <!-- write package names into parser specification -->
-                                        <replace file="${parser_output}/@{parser}.parser">
+                                        <replace file="${parsers.builddir}/@{parser}.parser">
                                             <replacefilter token="$PARSER_PACKAGE$" value="${parser_package}" />
                                             <replacefilter token="$AST_PACKAGE$" value="${ast_package}" />
                                         </replace>
                                         <!-- translate to beaver syntax -->
-                                        <java classpath="${jastadd_dir}/JastAddParser.jar:${beaver-rt_jar}" classname="Main">
-                                            <arg value="${parser_output}/@{parser}.parser"/>
-                                            <arg value="${parser_output}/@{parser}.raw.beaver"/>
+                                        <java classpath="${jastaddparser_jar}:${beaver-rt_jar}" classname="Main">
+                                            <arg value="${parsers.builddir}/@{parser}.parser"/>
+                                            <arg value="${parsers.builddir}/@{parser}.raw.beaver"/>
                                         </java>
                                         <!-- add extra beaver code and generate parser -->
-                                        <concat destfile="${parser_output}/@{parser}.beaver">
+                                        <concat destfile="${parsers.builddir}/@{parser}.beaver">
                                             <fileset file="${parser_header_path}" />
-                                            <fileset file="${parser_output}/@{parser}.raw.beaver" />
+                                            <fileset file="${parsers.builddir}/@{parser}.raw.beaver" />
                                         </concat>
-                                        <beaver file="${parser_output}/@{parser}.beaver" terminalNames="yes" compress="no" useSwitch="yes" />
+                                        <beaver file="${parsers.builddir}/@{parser}.beaver" terminalNames="yes" compress="no" useSwitch="yes" />
                                     </then>
                                 </if>
                             </sequential>
@@ -888,22 +948,29 @@
                 </if>
             </sequential>
         </for>
-        <!-- clean up intermediate files -->
-        <if>
-            <available file="${parser_output}" type="dir" />
-            <then>
-                <delete deleteonexit="true">
-                    <fileset dir="${parser_output}">
-                        <include name="*.parser" />
-                        <include name="*.beaver" />
-                    </fileset>
-                </delete>
-            </then>
-        </if>
+    </target>
+
+    <target name="parser" depends="parser-build">
+        <for list="${modules}" param="module">
+            <sequential>
+                <if>
+                    <isset property="@{module}.parsers"/>
+                    <then>
+                        <for list="${@{module}.parsers}" param="parser">
+                            <sequential>
+                                <copy file="${parsers.builddir}/@{parser}.java" tofile="${parsers.output}/@{parser}.java" overwrite="true" />
+                            </sequential>
+                        </for>
+                    </then>
+                </if>
+            </sequential>
+        </for>
     </target>
 
     <!-- generate all scanners -->
-    <target name="scanner">
+    <target name="scanner-build">
+        <mkdir dir="${java_output_intermediate}" />
+        <mkdir dir="${java_output_intermediate_common}" />
         <for list="${modules}" param="module">
             <sequential>
                 <if>
@@ -913,39 +980,53 @@
                             <sequential>
                                 <uptodate property="@{module}.@{scanner}.uptodate" 
                                         srcfile="${@{module}.path}/src/parser/${@{module}.@{scanner}}" 
-                                        targetfile="${parser_output}/@{scanner}.java" />
+                                        targetfile="${scanners.builddir}/@{scanner}.java" />
                                 <if>
-                                    <isset property="@{module}.@{scanner}.package" />
+                                    <not><isset property="@{module}.@{scanner}.package" /></not>
                                     <then>
-                                        <var name="scanners.package" value="${@{module}.@{scanner}.package}" />
-                                        <propertyregex property="scanners.package_dir" input="${scanners.package}" defaultValue="${scanners.package}" regexp="\." replace="/" global="true" override="true" />
-                                        <var name="scanners.output" value="${java_output_intermediate}/${scanners.package_dir}" />
-                                        <mkdir dir="${scanners.output}" />
+                                        <var name="@{module}.@{scanner}.package" value="${parser_package}" />
                                     </then>
-                                    <else>
-                                        <var name="scanners.package" value="${parser_package}" />
-                                        <var name="scanners.output" value="${parser_output}" />
-                                    </else>
                                 </if>
-                                <var name="scanners.file" value="${scanners.output}/@{scanner}.flex" />
+                                <propertyregex property="scanners.package_dir" input="${@{module}.@{scanner}.package}" defaultValue="${@{module}.@{scanner}.package}" regexp="\." replace="/" global="true" override="true" />
+                            	<if>
+                            		<matches pattern=".*${sub_package}.*" string="${scanners.package_dir}"/>
+                            		<then>
+                            			<var name="@{module}.@{scanner}.output" value="${java_output_intermediate}/${scanners.package_dir}" />
+                        			</then>
+                            		<else>
+                            			<var name="@{module}.@{scanner}.output" value="${java_output_intermediate_common}/${scanners.package_dir}" />
+                            		</else>
+                            		
+                            	</if>
+                                <var name="scanners.file" value="${scanners.builddir}/@{scanner}.flex" />
                                 <if>
                                     <not><isset property="@{module}.@{scanner}.uptodate" /></not>
                                     <then>
                                         <copy file="${@{module}.path}/src/parser/${@{module}.@{scanner}}" tofile="${scanners.file}" overwrite="true" />
                                         <replace file="${scanners.file}">
-                                            <replacefilter token="$PARSER_PACKAGE$" value="${scanners.package}" />
+                                            <replacefilter token="$PARSER_PACKAGE$" value="${@{module}.@{scanner}.package}" />
                                             <replacefilter token="$AST_PACKAGE$" value="${ast_package}" />
                                         </replace>
-                                    	<jflex file="${scanners.file}" outdir="${scanners.output}" nobak="yes" />
-                                        <!-- clean up intermediate file
-                                    	<echo>
-                                            scanners.file=${scanners.file}
-                                    		scanners.output=${scanners.output}
-                                            scanners.package=${scanners.package}
-                                    	</echo> -->
-                                        <delete deleteonexit="true" file="${scanners.file}" />
+                                        <jflex file="${scanners.file}" nobak="yes" />
                                     </then>
                                 </if>
+                            </sequential>
+                        </for>
+                    </then>
+                </if>
+            </sequential>
+        </for>
+    </target>
+
+    <target name="scanner" depends="scanner-build">
+        <for list="${modules}" param="module">
+            <sequential>
+                <if>
+                    <isset property="@{module}.scanners"/>
+                    <then>
+                        <for list="${@{module}.scanners}" param="scanner">
+                            <sequential>
+                                <copy file="${scanners.builddir}/@{scanner}.java" tofile="${@{module}.@{scanner}.output}/@{scanner}.java" overwrite="true" />
                             </sequential>
                         </for>
                     </then>
@@ -1060,6 +1141,15 @@ ${test_class_extra_defs}
                 srcdir="${junit_output}:${test_helper_dirs}:${junit_dirs}"/>
     </target>
 
+    <target name="options">
+        <java classpath="${class_output}:${thirdparty_jars_build}" 
+                classname="org.jmodelica.${sub_package}.compiler.OptionExporter" failonerror="true">
+            <arg value="-x" />
+            <arg value="${compiler_build}/DefaultOptions.xml" />
+        </java>
+        <echo>Exported options to: ${compiler_build}/DefaultOptions.xml</echo>
+    </target>
+    
     <!-- Run all generated JUnit tests. -->
     <target name="test" depends="build-test" description="Run all generated JUnit tests.">
         <mkdir dir="${test_output}" />
@@ -1082,17 +1172,22 @@ ${test_class_extra_defs}
     <!-- cleans all binary files -->
     <target name="clean-bin" description="Deletes all binary files.">
         <delete dir="${class_output}" />
+        <delete dir="${build_class_output}" />
         <delete dir="${test_class_output}" />
         <delete dir="${jar_output}" />
     </target>
 
     <!-- cleans all generated java files -->
-    <target name="clean-gen" depends="clean-ast,clean-test,clean-extra" description="Deletes all generated Java files." />
+    <target name="clean-gen" depends="clean-ast,clean-test,clean-extra" description="Deletes all generated Java files." >
+        <delete dir="${compiler_build}" />
+    </target>
 
     <!-- cleans all generated java files in the compiler -->
     <target name="clean-ast">
         <delete dir="${java_output_intermediate}" />
-        <delete dir="${java_output_final}" />
+        <delete dir="${java_output_intermediate_common}" />
+        <delete dir="${java_output_final}"/>
+        <delete dir="${java_output_final_common}"/>
     </target>
 
     <!-- cleans all extra generated java files -->

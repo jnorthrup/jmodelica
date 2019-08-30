@@ -221,7 +221,7 @@ aspect FlatTypeCheck {
             CommonType actualBT = actualBindingType();
             
             boolean reportedError = false;
-            if (!expectedBT.size().equals(actualBT.size())) {
+            if (!expectedBT.size().equivalent(actualBT.size(), unknownAllowed)) {
                 InstValueModification ivm = myInstValueMod();
                 InstModification needsEach = ivm.findModificationLackingEach(actualBT.size());
                 if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
@@ -444,32 +444,54 @@ aspect FlatTypeCheck {
     public static final ErrorProducerUnlessDisabled ASTNode.ARRAY_SIZE_MISMATCH_IN_CONNECT =
             new ErrorProducerUnlessDisabled("ARRAY_SIZE_MISMATCH_IN_CONNECT", ProblemKind.SEMANTIC,
                     "Sizes do not match in connection, size of '%s' is %s and size of '%s' is %s");
+    public static final ErrorProducerUnlessDisabled ASTNode.EXPANDABLE_ARRAY_SIZE_MISMATCH_IN_CONNECT =
+            new ErrorProducerUnlessDisabled("ARRAY_SIZE_MISMATCH_IN_CONNECT", ProblemKind.SEMANTIC,
+                    "Sizes do not match in connection, size of the part of '%s' referring to " + 
+                    "the expandable connector is %s and size of '%s' is %s");
 
     public void FConnectClause.typeCheck(ErrorCheckType checkType) {
         InstAccess left  = getConnector1();
         InstAccess right = getConnector2();
         boolean checkTypes = !isDisabled();
+        boolean isExpandable = false;
         boolean expandableSame = true;
         for (InstAccess access = left; access != null; access = (access == left) ? right : null) {
-            if (!access.isExpandableConnectorPart() && !access.isUnknown() && !access.myInstComponentDecl().myInstClass().isUnknown()) {
+            if (access.isExpandableConnectorPart()) {
+                isExpandable = true;
+            } else if (!access.isUnknown() && !access.myInstComponentDecl().myInstClass().isUnknown()) {
                 if (!access.myInstComponentDecl().isConnector())
                     CONNECT_WITH_INVALID_TYPE.invoke(access);
             } else {
                 checkTypes = false;
             }
-            if (access.myInstComponentDecl().isExpandableConnector())
+            if (access.myInstComponentDecl().isExpandableConnector()) {
                 expandableSame = !expandableSame;
+            }
         }
-        if (!expandableSame && !left.isUnknown() && !right.isUnknown())
+        if (!expandableSame && !left.isUnknown() && !right.isUnknown()) {
             CONNECT_EXPANDABLE_AND_NON_EXPANDABLE_TYPE.invoke(this);
+        }
         if (checkTypes) { 
-            InstComponentDecl leftComp  = left.lookupEvaluatingIndices();
-            InstComponentDecl rightComp = right.lookupEvaluatingIndices();
-            if (!leftComp.connectableTo(rightComp)) {
-                TYPE_MISMATCH_IN_CONNECT.invoke(this);
-            } else if (!left.size().equivalent(right.size(), false)) {
-                ARRAY_SIZE_MISMATCH_IN_CONNECT.invokeWithCondition(this, left.ndims() == right.ndims(), 
-                        left, left.size(), right, right.size());
+            if (isExpandable) {
+                boolean leftUnknown = left.isExpandableConnectorPart();
+                InstAccess known   = leftUnknown ? right : left;
+                InstAccess unknown = leftUnknown ? left  : right;
+                Size knownSize   = known.size();
+                Size unknownSize = unknown.findExpandableConnectorPart().partSize();
+                if (knownSize.ndims() < unknownSize.ndims() || 
+                        !unknownSize.equivalent(knownSize.contractRight(unknownSize.ndims()), false)) {
+                    EXPANDABLE_ARRAY_SIZE_MISMATCH_IN_CONNECT.invoke(
+                            this, unknown, unknownSize, known, knownSize);
+                }
+            } else {
+                InstComponentDecl leftComp  = left.lookupEvaluatingIndices();
+                InstComponentDecl rightComp = right.lookupEvaluatingIndices();
+                if (!leftComp.connectableTo(rightComp)) {
+                    TYPE_MISMATCH_IN_CONNECT.invoke(this);
+                } else if (!left.size().equivalent(right.size(), false)) {
+                    ARRAY_SIZE_MISMATCH_IN_CONNECT.invokeWithCondition(this, left.ndims() == right.ndims(), 
+                            left, left.size(), right, right.size());
+                }
             }
         }
     }
@@ -768,7 +790,7 @@ aspect FlatTypeCheck {
     protected void InstComponentAccess.typeError(InstAccess top) {
         InstComponentDecl icd = myInstComponentDecl();
         if (!icd.isUnknown() && !icd.myInstClass().isUnknown() && !inCardinality()) {
-            if (!icd.isOrExtendsPrimitive() && !icd.isRecord()) {
+            if (!icd.isPrimitive() && !icd.isRecord()) {
                 top.error("Accesses to composite components other than records are not allowed: " + top.name());
             }
         }
@@ -777,7 +799,7 @@ aspect FlatTypeCheck {
     protected void InstComponentArrayAccess.typeError(InstAccess top) {
         InstComponentDecl icd = myInstComponentDecl();
         if (!icd.isUnknown() && !icd.myInstClass().isUnknown() && !inCardinality()) {
-            if (!icd.isOrExtendsPrimitive() && !icd.isRecord()) {
+            if (!icd.isPrimitive() && !icd.isRecord()) {
                 top.error("Accesses to composite components other than records are not allowed: " + top.name());
             }
         }
@@ -1504,19 +1526,16 @@ aspect FlatTypeCheck {
             }
         }
         if (!typeOk) {
-            if (getBoundInput() == null) {
-                error(nonBoundArgumentTypeError());
+            String msg = argumentTypeError();
+            if (msg != null) {
+                error(msg);
             } else {
-                String msg = argumentTypeError();
-                if (msg != null)
-                    error(msg);
-                else
-                    error("%s: types of %s and input %s are not compatible\n" + 
-                          "    type of '%s' is %s\n" + 
-                          "    expected type is %s", 
-                          functionCallDecription(), argumentDesc(), getBoundInput().name(), 
-                          getFExp(), getFExp().type(),
-                          argumentDefinedTypeValid() ? getBoundInput().type().toString() : expectedArgumentType());
+                error("%s: types of %s and input %s are not compatible\n" + 
+                      "    type of '%s' is %s\n" + 
+                      "    expected type is %s", 
+                      functionCallDecription(), argumentDesc(), getBoundInput().name(), 
+                      getFExp(), getFExp().type(),
+                      argumentDefinedTypeValid() ? getBoundInput().type().toString() : expectedArgumentType());
             }
         }
     }
@@ -1542,13 +1561,6 @@ aspect FlatTypeCheck {
 
     public void InstDefaultArgument.typeCheck(ErrorCheckType checkType) {}
 
-    inh String InstFunctionArgument.nonBoundArgumentTypeError();
-    eq FExp.getChild().nonBoundArgumentTypeError() {
-        throw new UnsupportedOperationException("Method nonBoundArgumentTypeError() not implemented for type " + getClass().getSimpleName());
-    }
-    eq FArrayDimAsArgsExp.getOriginalArg(int i).nonBoundArgumentTypeError() = 
-        functionCallDecription() + ": type of positional argument " + i + " is not compatible with Integer";
-  
   inh String InstFunctionArgument.argumentTypeError();
   eq FExp.getChild().argumentTypeError()         = null;
   eq FCardinality.getChild().argumentTypeError() = "The argument of cardinality() must be a scalar reference to a connector";

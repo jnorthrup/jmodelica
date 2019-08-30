@@ -151,10 +151,6 @@ aspect Flattening {
             return fc; // TODO: Remove this method
         }
         
-        public static Flattener expressionFlattener() {
-            return new Flattener(null); // TODO: Provide proper context
-        }
-        
         public boolean isFlattened(InstNode n) {
             return flattenedNodes.contains(n.qualifiedTypeName());
         }
@@ -256,7 +252,7 @@ aspect Flattening {
         }
         
         public void contribute(InstNode n) {
-            n.contribute(fc);
+            n.contribute(this, fc);
         }
     }
     
@@ -489,7 +485,7 @@ aspect Flattening {
             flattenUsedFuncsAndEnums(f);
             ffd.updateRecordArraySizes();
             
-            contribute(ffd);
+            contribute(f, ffd);
         }
     }
 
@@ -777,7 +773,7 @@ aspect Flattening {
         InstClassDecl func = surroundingInstClass();
         FExternalStmt stmt = new FExternalStmt();
         SrcClassDecl scd = myTopSrcClassDecl();
-        stmt.setLibTopPackagePath(scd == null ? "" : scd.myLibRootPath().getAbsolutePath()); // scd is null for builtins
+        stmt.setLibTopPackagePath(scd == null ? "" : scd.myLibRootPath().toAbsolutePath().toString()); // scd is null for builtins
         stmt.setFExternalLanguage(hasFExternalLanguage() ? 
                 (FExternalLanguage) getFExternalLanguage().fullCopy() : 
                 new FCExternalLanguage());
@@ -845,16 +841,12 @@ aspect Flattening {
         if (!flattenAsGlobalVariableFromFunction()) {
             if (hasInstValueMod())
                 getBindingFExp().flattenUsedFuncsAndEnums(f);
-            Opt eo = new Opt();
             FAccess access = getFAccess().treeCopy().removeFArraySubscripts();
-            FFunctionVariable ffv = createFFunctionVariable(f, eo, access);
-            if (isInput())
-                ffv.setTypePrefixInputOutput(TypePrefixInputOutput.INPUT);
-            else if (isOutput())
-                ffv.setTypePrefixInputOutput(TypePrefixInputOutput.OUTPUT);
-            else
-                ffv.setTypePrefixInputOutput(TypePrefixInputOutput.NONE);
-            vars.addChild(ffv);
+            FType type = type().flatten(f, this, !isInput());
+            CausalityConnectorPrefix io = myCausalityConnectorPrefix();
+            
+            vars.addChild(new FFunctionVariable(io.functionVisibility(), io, type, new Opt<FExp>(), access));
+            
             if (isComposite()) {
                 addFInitArrayStmt(f, stmts, isInput(), expandedFAccessCalc(), new ForNames());
             }
@@ -874,7 +866,7 @@ aspect Flattening {
             if (input) {
                 size().addSizeCheck(f, l, this, access);
             } else {
-                FInitArrayStmt stmt = new FInitArrayStmt(new FAccessExp(access));
+                FInitArrayStmt stmt = new FInitArrayStmt(new FAccessExp(access), false, new List<FExp>());
                 stmt.shouldBeSorted = true;
                 l.add(stmt);
             }
@@ -931,7 +923,15 @@ aspect Flattening {
     
     public void InstAssignable.addBindingAssignments(Flattener f, List<FStatement> l) {
         if (hasBindingFExp()) {
-            FStatement stmt = new FAssignStmt(setLocationOf(new FAccessExp(expandedFAccessCalc())), getBindingFExp().flatten(f));
+            FAssignableExp left = setLocationOf(new FAccessExp(expandedFAccessCalc()));
+            FStatement stmt;
+            if (scalarizedAsFFunctionCallStmt()) {
+                List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
+                lefts.add(new FFunctionCallLeft(new Opt<FExp>(left)));
+                stmt = new FFunctionCallStmt(lefts, (FAbstractFunctionCall) getBindingFExp().flatten(f));
+            } else {
+                stmt = new FAssignStmt(left, getBindingFExp().flatten(f));
+            }
             stmt.shouldBeSorted = true;
             l.add(stmt);
         } else {
@@ -961,17 +961,6 @@ aspect Flattening {
         public boolean foundOther(T t) {
             return successful() && target() != t;
         }
-    }
-
-    public FFunctionVariable InstAssignable.createFFunctionVariable(Flattener f, Opt eo, FAccess access) {
-        // TODO: if we need separate variable class for records, override this
-        FType type = type().flatten(f, this, !isInput());
-        FFunctionVariable ffv;
-        if (isArray())
-            ffv = new FFunctionArray(TypePrefixInputOutput.NONE, type, eo, access);
-        else
-            ffv = new FFunctionVariable(TypePrefixInputOutput.NONE, type, eo, access);
-        return ffv;
     }
     
     public FType FType.flatten(Flattener f, InstAssignable ia, boolean keepSizeExpressions) {
@@ -1521,23 +1510,23 @@ aspect Flattening {
     public abstract FVariable InstAssignable.createEmptyFVariable();
     
     public FVariable InstPrimitive.createEmptyFVariable() {
-        if (isReal()) 
+        if (isReal()) {
             return new FRealVariable();
-        if (isInteger()) 
+        } else if (isInteger()) {
             return new FIntegerVariable();
-        if (isBoolean()) 
+        } else if (isBoolean()) {
             return new FBooleanVariable();
-        if (isString()) 
+        } else if (isString()) {
             return new FStringVariable();
-        throw new UnsupportedOperationException("InstPrimitive without type");
-    }   
+        } else if (isEnum()) {
+            FEnumVariable fv = new FEnumVariable();
+            fv.setEnum(new FAccessString(myInstClass().actualInstClass().qualifiedName()));
+            return fv;
+        } else {
+            throw new UnsupportedOperationException("InstPrimitive without type");
+        }
+    }
 
-    public FEnumVariable InstEnum.createEmptyFVariable() {
-        FEnumVariable fv = new FEnumVariable();
-        fv.setEnum(new FAccessString(myInstClass().actualInstClass().qualifiedName()));
-        return fv;
-    }   
-    
     public FVariable InstRecord.createEmptyFVariable() {
         FRecordVariable rec = new FRecordVariable();
         rec.setRecord(new FRecordAccess(qualifiedTypeName()));
@@ -1629,7 +1618,7 @@ aspect Flattening {
             clearModificationLevel(m);
         }
         if (a == null && (list.getNumChild() > 0 || (!isBound && canBind))) {
-            a = new FAttribute(getClassName().flatten(), 
+            a = new FAttribute(getClassName().flatten(f), 
                     new FIdDecl(new FAccessString(name())), 
                     new Opt(), true, 0, new Opt(), new Opt(), list);
             attr.add(a);
@@ -1661,7 +1650,7 @@ aspect Flattening {
     }
     
     public void InstClassDecl.addFDerivedType(Flattener f) {
-        if (!f.isFlattened(this) && extendsPrimitive()) {
+        if (!f.isFlattened(this) && (extendsPrimitive() || isExternalObject())) {
             List<FAttribute> attr = new List<FAttribute>();
             addAttributes(f, attr, totalMergedEnvironment());
             FType baseType = primitiveScalarType().fullCopy();
@@ -1685,15 +1674,11 @@ aspect Flattening {
         FVariable fv = global ? createEmptyFGlobalVariable(f) : createEmptyFVariable();
         fv.setVisibilityType(createVisibilityType());
         fv.setTypePrefixVariability(variability());
+        fv.setCausalityConnectorPrefix(myCausalityConnectorPrefix());
         
-        // Only set input/output prefix for top level inputs and outputs
-        if (isTopLevelInputOutput()) 
-            fv.setTypePrefixInputOutput(isInput() ? TypePrefixInputOutput.INPUT : TypePrefixInputOutput.OUTPUT);
-        else
-            fv.setTypePrefixInputOutput(TypePrefixInputOutput.NONE);
-        
-        if (myInstClass().extendsPrimitive())
+        if (myInstClass().extendsPrimitive()) {
             fv.setDerivedType(myInstClass().actualInstClass().qualifiedName());
+        }
         
         boolean flattenBinding = binding.shouldFlattenExp(this);
         List<FAttribute> attrs = new List<FAttribute>();
@@ -1717,9 +1702,38 @@ aspect Flattening {
         fv.setFAccess(name);
         fv.setLocation(this);
         
-        contribute(fv);
+        contribute(f, fv);
         
         return fv;
+    }
+
+    public CausalityConnectorPrefix InstAssignable.myCausalityConnectorPrefix() {
+        if (!isTopLevelCausalOrConnector()) {
+            return CausalityConnectorPrefix.NONE;
+        }
+        if (isConnectorVariable()) {
+            if (isInput()) {
+                return CausalityConnectorPrefix.INPUT;
+            } else if (isOutput()) {
+                return CausalityConnectorPrefix.OUTPUT;
+            } else if (isFlow()) {
+                return CausalityConnectorPrefix.FLOW;
+            } else if (isStream()) {
+                return CausalityConnectorPrefix.STREAM;
+            } else if (!variability().parameterOrLess()) {
+                return CausalityConnectorPrefix.POTENTIAL;
+            } else {
+                return CausalityConnectorPrefix.NONE;
+            }
+        } else {
+            if (isInput()) {
+                return CausalityConnectorPrefix.INPUT;
+            } else if (isOutput()) {
+                return CausalityConnectorPrefix.OUTPUT;
+            } else {
+                return CausalityConnectorPrefix.NONE;
+            }
+        }
     }
 
     public VisibilityType InstAssignable.createVisibilityType() {
@@ -3373,19 +3387,19 @@ aspect AttributeContributer {
          * This method is called during flattening of components. All
          * expressions that are added must be flattened.
          */
-        protected void contribute(InstAssignable src, FVariable dest) {}
+        protected void contribute(Flattener f, InstAssignable src, FVariable dest) {}
 
         /**
          * This method is called during flattening of functions. All
          * expressions that are added must be flattened.
          */
-        protected void contribute(InstBaseClassDecl src, FFunctionDecl dest) {}
+        protected void contribute(Flattener f, InstBaseClassDecl src, FFunctionDecl dest) {}
 
         /**
          * This method is called during flattening of the model. All
          * expressions that are added must be flattened.
          */
-        protected void contribute(InstNode src, FClass dest) {}
+        protected void contribute(Flattener f, InstNode src, FClass dest) {}
 
         /**
          * This method is called in order to determine if an attribute should
@@ -3455,25 +3469,25 @@ aspect AttributeContributer {
     }
     
     public class InstAssignable {
-        public <N extends FVariable> N contribute(N variable) {
+        public <N extends FVariable> N contribute(Flattener f, N variable) {
             for (AttributeContributer contributer : attributeContributers())
-                contributer.contribute(this, variable);
+                contributer.contribute(f, this, variable);
             return variable;
         }
     }
     
     public class InstBaseClassDecl {
-        public <N extends FFunctionDecl> N contribute(N function) {
+        public <N extends FFunctionDecl> N contribute(Flattener f, N function) {
             for (AttributeContributer contributer : attributeContributers())
-                contributer.contribute(this, function);
+                contributer.contribute(f, this, function);
             return function;
         }
     }
     
     public class InstNode {
-        public FClass contribute(FClass fClass) {
+        public FClass contribute(Flattener f, FClass fClass) {
             for (AttributeContributer contributer : attributeContributers())
-                contributer.contribute(this, fClass);
+                contributer.contribute(f, this, fClass);
             return fClass;
         }
     }

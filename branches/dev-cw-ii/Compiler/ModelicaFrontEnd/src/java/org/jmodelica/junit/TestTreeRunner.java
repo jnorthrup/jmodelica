@@ -36,7 +36,6 @@ import org.junit.runners.model.InitializationError;
 
 public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
 
-    private List<GenericTestTreeNode> nodes;
     private Map<String,Description> caseDesc;
     private Map<String,TestTreeRunner> runners;
     private List<GenericTestTreeNode> children;
@@ -62,6 +61,10 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
         if (tree == null) {
             name = testFile.getName();
             tree = spec.createTestSuite(testFile).getTree();
+            if (tree == null) {
+                throw new InitializationError("Test file '" + name
+                        + "' does not contain any tests. Note: The declared package name must match the file name");
+            }
         } else {
             name = tree.getName();
         }
@@ -114,6 +117,7 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
         }
     }
 
+    @Override
     protected Description describeChild(GenericTestTreeNode test) {
         if (test instanceof TestTree) {
             return runners.get(test.getName()).getDescription();
@@ -122,33 +126,40 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
         }
     }
 
+    @Override
     protected List<GenericTestTreeNode> getChildren() {
         return children;
     }
 
+    @Override
     protected void runChild(GenericTestTreeNode test, RunNotifier note) {
         if (test instanceof TestTree) {
             runners.get(test.getName()).run(note);
         } else {
             Description d = caseDesc.get(test.getName());
-            note.fireTestStarted(d);
-            try {
-                ((GenericTestCase) test).testMe(spec.asserter());
-            } catch (Throwable e) {
-                note.fireTestFailure(new Failure(d, e));
-                if(outputFailing) {
-                    try(PrintWriter pw = new PrintWriter(new FileOutputStream(new File(outputFailingFile), appendMode))) {
-                        pw.println(testFile.getAbsolutePath()+","+modelNames.get(test.getName()));
-                        appendMode = true;
-                    } catch (FileNotFoundException e1) {
-                        e1.printStackTrace();
+            if(((GenericTestCase) test).shouldBeIgnored()) {
+                note.fireTestIgnored(d);
+            } else {
+                note.fireTestStarted(d);
+                try {
+                    ((GenericTestCase) test).testMe(spec.asserter());
+                } catch (Throwable e) {
+                    note.fireTestFailure(new Failure(d, e));
+                    if(outputFailing) {
+                        try(PrintWriter pw = new PrintWriter(new FileOutputStream(new File(outputFailingFile), appendMode))) {
+                            pw.println(testFile.getAbsolutePath()+","+modelNames.get(test.getName()));
+                            appendMode = true;
+                        } catch (FileNotFoundException e1) {
+                            e1.printStackTrace();
+                        }
                     }
                 }
+                note.fireTestFinished(d);
             }
-            note.fireTestFinished(d);
         }
     }
 
+    @Override
     public Description getDescription() {
         return desc;
     }

@@ -16,7 +16,11 @@
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = ThirdParty/winpthreads ThirdParty/SuperLU ThirdParty/Sundials ThirdParty/Minpack ThirdParty/Blas ThirdParty/Lapack ThirdParty/MSL external/FMILibrary RuntimeLibrary Python
+SUBDIRS = ThirdParty/winpthreads ThirdParty/SuperLU ThirdParty/Sundials ThirdParty/Minpack ThirdParty/Blas ThirdParty/Lapack ThirdParty/MSL external/FMILibrary RuntimeLibrary
+
+if PYTHON_ENABLED
+SUBDIRS += Python
+endif
 
 assimulo_install_dir=$(abs_builddir)/Assimulo_install
 pymodelica_install_dir=$(abs_builddir)/pymodelica_install
@@ -39,8 +43,10 @@ pyjmi_build_dir64=$(abs_builddir)/PyJMI_build64
 bindistdir=JModelica.org-$(VERSION)-bin
 
 casadi:
+if COMPILE_WITH_IPOPT
 	cd $(abs_builddir)/ThirdParty/CasADi; \
 	make -f Makefile  "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR)" "IPOPT_HOME=$(IPOPT_HOME)" "CASADI_PYTHON_INST_DIR=${CASADI_PYTHON_INST_DIR}" "CASADI_INST_DIR=${CASADI_INST_DIR}" "CASADI_PLUGIN_INST_DIR=${CASADI_PLUGIN_INST_DIR}" "CMAKE_CASADI_ARGS=${CMAKE_CASADI_ARGS}" "CMAKE_CASADI_COMPILER_ARGS=${CMAKE_CASADI_COMPILER_ARGS}" "CMAKE_CASADI_CXX_FLAG=${CMAKE_CASADI_CXX_FLAG}" "CMAKE_PYTHON_LIB=${CMAKE_PYTHON_LIB}"
+endif
 if COMPILE_WITH_IPOPT64
 	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
 	export PYTHONHOME=$(PYTHON64_HOME); \
@@ -51,12 +57,14 @@ if COMPILE_WITH_IPOPT64
 endif
 
 install_casadi: casadi
+if COMPILE_WITH_IPOPT
 	cd $(abs_builddir)/ThirdParty/CasADi; \
 	make -f Makefile install "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR)" "IPOPT_HOME=$(IPOPT_HOME)"
 	mkdir -p $(DESTDIR)$(prefix)/Python/
 	cp -r $(abs_builddir)/casadi_install/casadi $(DESTDIR)$(prefix)/Python/
 	## temp fix
 	cp $(abs_builddir)/casadi_build/swig/casadi_core.py $(DESTDIR)$(prefix)/Python/casadi
+endif
 if COMPILE_WITH_IPOPT64  
 	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
 	export PYTHONHOME=$(PYTHON64_HOME);  
@@ -112,6 +120,7 @@ install_casadi_interface: install_casadi $(MC_LIB) $(DESTDIR)$(prefix)/Python/mo
 	if [ "$(INSTALL_EXTRA_CASADI)" ]; then exec "$(INSTALL_EXTRA_CASADI)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
 ifcasadi: casadi
+if COMPILE_WITH_IPOPT
 	mkdir -p $(MC_BUILD)/ifcasadi; \
 	cd $(MC_BUILD)/ifcasadi; \
 	case $(build) in \
@@ -123,6 +132,7 @@ ifcasadi: casadi
 	    -DIFCASADI_OUTDIR="$(MC_CASADI_BUILD)" -DCASADI_HOME="$(CASADI_HOME)" -DCASADI_BUILD_DIR="$(CASADI_BUILD_DIR)";; \
 	esac 
 	cd $(MC_BUILD)/ifcasadi;  make
+endif
 if COMPILE_WITH_IPOPT64
 	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}";
 	export PYTHONHOME=$(PYTHON64_HOME);
@@ -136,6 +146,7 @@ if COMPILE_WITH_IPOPT64
 endif
 
 $(MC_LIB): $(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar $(OC_CASADI_BUILD)/bin/OptimicaCompiler.jar $(MC_CASADI_BUILD)/bin/util.jar ifcasadi
+if COMPILE_WITH_IPOPT
 	rm -rf $(MC_LIB)
 	mkdir -p $(MC_LIB)
 	cp $(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar $(MC_LIB)
@@ -148,7 +159,8 @@ $(MC_LIB): $(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar $(OC_CASADI_BUILD)/bin/Op
 	cp $(MC_BUILD)/ifcasadi/ifcasadi.dll $(MC_LIB) ;; \
 	*) \
 	cp $(MC_BUILD)/ifcasadi/libifcasadi.so $(MC_LIB) ;; \
-	esac 
+	esac
+endif
 if COMPILE_WITH_IPOPT64
 	rm -rf $(MC_LIB64)
 	mkdir -p $(MC_LIB64)
@@ -159,12 +171,12 @@ if COMPILE_WITH_IPOPT64
 endif
 
 mc_modelica: ifcasadi
-	cd $(MC_CASADI_BUILD); $(ANT_OPTS) $(ANT) -f "$(JAVA_MC_CASADI_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)"
+	cd $(MC_CASADI_BUILD); $(ANT_OPTS) $(ANT) -f "$(JAVA_MC_CASADI_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(MC_CASADI_BUILD)"
 
 mc_optimica: ifcasadi
-	mkdir -p $(OC_CASADI_BUILD)/src/java-generated
-	cp -pr $(MC_CASADI_BUILD)/src/java-generated/ifcasadi $(OC_CASADI_BUILD)/src/java-generated
-	cd $(OC_CASADI_BUILD); $(ANT_OPTS) $(ANT) -f "$(JAVA_OC_CASADI_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)"
+	mkdir -p $(OC_CASADI_BUILD)/src/generated/optimica/java
+	cp -pr $(MC_CASADI_BUILD)/src/generated/modelica/java/ifcasadi $(OC_CASADI_BUILD)/src/generated/optimica/java
+	cd $(OC_CASADI_BUILD); $(ANT_OPTS) $(ANT) -f "$(JAVA_OC_CASADI_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(OC_CASADI_BUILD)"
 
 $(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar: mc_modelica
 $(MC_CASADI_BUILD)/bin/util.jar:             mc_modelica
@@ -178,6 +190,7 @@ $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py: modelicacasad
 
 
 modelicacasadi_wrapper: $(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar $(OC_CASADI_BUILD)/bin/OptimicaCompiler.jar $(MC_CASADI_BUILD)/bin/util.jar ifcasadi # $(MC_LIB)
+if COMPILE_WITH_IPOPT
 	mkdir -p $(MC_BUILD)/modelicacasadi_wrapper; \
 	cd $(MC_BUILD)/modelicacasadi_wrapper; \
 	case $(build) in \
@@ -193,6 +206,7 @@ modelicacasadi_wrapper: $(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar $(OC_CASADI_
 	    "$(CMAKE_PYTHON_LIB)" "$(CMAKE_PYTHON_INCLUDE)" ;; \
 	esac 
 	cd $(MC_BUILD)/modelicacasadi_wrapper;  make modelicacasadi_wrapper
+endif
 if COMPILE_WITH_IPOPT64
 	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
 	export PYTHONHOME=$(PYTHON64_HOME); \
@@ -213,11 +227,13 @@ endif
  $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py: install_modelicacasadi_wrapper
  
  install_modelicacasadi_wrapper: $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py
+if COMPILE_WITH_IPOPT
 	mkdir -p $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper
 	cp $(MC_BUILD)/modelicacasadi_wrapper/swig/*modelicacasadi_wrapper* $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper 
 	rm -f $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
 	touch $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
 	echo "from modelicacasadi_wrapper import *" >> $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
+endif
 if COMPILE_WITH_IPOPT64
 	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
 	export PYTHONHOME=$(PYTHON64_HOME);
@@ -231,11 +247,13 @@ if COMPILE_WITH_IPOPT64
 endif
 
  install_modelicacasadi_transfer: $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py 
+if COMPILE_WITH_IPOPT
 	mkdir -p $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
 	rm -f $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
 	touch $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
 	echo "from modelica_casadi_transfer_wrapper import *" >> $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
 	cp $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
+endif
 if COMPILE_WITH_IPOPT64    
 	mkdir -p $(DESTDIR)$(prefix)/Python_64/modelicacasadi_transfer
 	rm -f $(DESTDIR)$(prefix)/Python_64/modelicacasadi_transfer/__init__.py
@@ -250,8 +268,9 @@ else
 NUMPY_NO_MSVCR_ARG=
 endif
 
-build-python-packages:
 
+build-python-packages:
+if PYTHON_ENABLED
 if WITH_OPENMP
 	mkdir -p $(assimulo_build_dir); \
 	cd $(abs_top_srcdir)/external; \
@@ -361,7 +380,35 @@ if WITH_PYTHON64
 	rm -rf build
 endif
 endif
-install-python-packages: build-python-packages
+endif
+
+install-python-tests:
+if PYTHON_ENABLED
+	chmod ugo+x jm_tests
+	cp -p jm_tests $(DESTDIR)$(prefix)/jm_tests
+	
+	cd $(abs_top_srcdir)/Python/src/tests_jmodelica/; \
+	mkdir -p $(DESTDIR)$(prefix)/Python/tests_jmodelica; \
+	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/tests_jmodelica
+	rm -rf $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/src
+	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
+	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/Makefile.am
+	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/Makefile.in
+if JM_WIN64
+if WITH_PYTHON64 
+	cd $(abs_top_srcdir)/Python/src/tests_jmodelica/; \
+	mkdir -p $(DESTDIR)$(prefix)/Python_64/tests_jmodelica; \
+	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64/tests_jmodelica
+	rm -rf $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/src
+	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
+	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.am
+	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.in
+endif
+endif
+endif
+
+install-python-packages: build-python-packages install-python-tests
+if PYTHON_ENABLED
 	mkdir -p $(DESTDIR)$(prefix)/Python
 	cp $(abs_top_srcdir)/Python/src/startup.py $(DESTDIR)$(prefix)/
 	cp Python/src/required_defaults.py $(DESTDIR)$(prefix)/Python/
@@ -401,9 +448,6 @@ endif
 	find pyfmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 	fi; \
 	done
-	cd $(abs_top_srcdir)/Python/src/tests_jmodelica/; \
-	mkdir -p $(DESTDIR)$(prefix)/Python/tests_jmodelica; \
-	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/tests_jmodelica
 if JM_WIN64
 	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
 	if [ -e $(assimulo_install_dir64)/$${pkgdir}/site-packages/ ]; \
@@ -433,25 +477,14 @@ if JM_WIN64
 	find pyfmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64; \
 	fi; \
 	done
-if WITH_PYTHON64 
-	cd $(abs_top_srcdir)/Python/src/tests_jmodelica/; \
-	mkdir -p $(DESTDIR)$(prefix)/Python_64/tests_jmodelica; \
-	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64/tests_jmodelica
-	rm -rf $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/src
-	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
-	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.am
-	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.in
 endif
-endif
-	rm -rf $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/src
-	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
-	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/Makefile.am
-	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/Makefile.in
 	mkdir -p $(DESTDIR)$(prefix)/bin
 	[ -e $(DESTDIR)$(prefix)/bin/jm_python.sh ] && echo "File exists, don't copy jm_python.sh" || cp Python/jm_python.sh $(DESTDIR)$(prefix)/bin/jm_python.sh
 	[ -e $(DESTDIR)$(prefix)/bin/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(DESTDIR)$(prefix)/bin/jm_ipython.sh
 	chmod ugo+x $(DESTDIR)$(prefix)/bin/jm_*.sh
-
+endif
+	
+	
 # Hooks for extra build or install actions. Must be empty or the path of a shell script to execute. 
 # Both scripts will get the source directory as the first argument and the install directory as the second.
 BUILD_EXTRA=
@@ -467,29 +500,12 @@ JAVA_CASADI_BASE_DIR=$(COMPILER_DIR)
 JAVA_CASADI_BUILD_DIR=$(abs_builddir)
 JAVA_MC_CASADI_ANT_FILE=$(COMPILER_DIR)/ModelicaCompilerCasADi/build.xml
 JAVA_OC_CASADI_ANT_FILE=$(COMPILER_DIR)/OptimicaCompilerCasADi/build.xml
-JAVA_EXEC_CP=$(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar:$(JAVA_BUILD_DIR)/bin/util.jar:$(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar
 
 all-local: build-python-packages build-compiler
 	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) https://svn.jmodelica.org > $(abs_builddir)/version.txt
 	if [ "$(BUILD_EXTRA)" ]; then exec "$(BUILD_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
-build-compiler:
-if HAVE_ANT
-	mkdir -p $(JAVA_BUILD_DIR)
-	cd $(JAVA_BUILD_DIR); \
-	$(ANT_OPTS) $(ANT) -f "$(JAVA_MC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)"
-	cd $(JAVA_BUILD_DIR); \
-	$(ANT_OPTS) $(ANT) -f "$(JAVA_OC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)"
-	java -cp "$(JAVA_EXEC_CP)" org.jmodelica.modelica.compiler.ModelicaCompiler\$$OptionExporter -x "$(abs_builddir)/DefaultOptions.xml"
-endif
-
-install-exec-local: install-python-packages
-if HAVE_ANT
-	cp $(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar $(DESTDIR)$(prefix)/lib/
-	cp $(JAVA_BUILD_DIR)/bin/util.jar $(DESTDIR)$(prefix)/lib/
-	cp $(JAVA_BUILD_DIR)/bin/OptimicaCompiler.jar $(DESTDIR)$(prefix)/lib/
-	cp $(JAVA_BUILD_DIR)/bin/separateProcess.jar $(DESTDIR)$(prefix)/lib/
-endif
+install-exec-local: install-python-packages install-compiler install-modules
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/LICENSE $(DESTDIR)$(prefix)/ 
 	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_GPL $(DESTDIR)$(prefix)/lib/
 	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_CPL $(DESTDIR)$(prefix)/lib/
@@ -511,12 +527,7 @@ endif
 	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
 	esac
 
-	cp $(abs_builddir)/DefaultOptions.xml $(DESTDIR)$(prefix)/DefaultOptions.xml
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver
-	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Beaver/
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib
-	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/ 
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty 
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials
 	cp -r $(SUNDIALS_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Sundials
 	cp $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.7.0/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Sundials
@@ -554,9 +565,47 @@ endif
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML schemas"  || cp  $(abs_top_srcdir)/XML/*.xsd $(DESTDIR)$(prefix)/XML
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML LICENSE"  || cp  $(abs_top_srcdir)/XML/LICENSE $(DESTDIR)$(prefix)/XML
 	cp  $(abs_builddir)/version.txt $(DESTDIR)$(prefix)
-	chmod ugo+x jm_tests
-	cp -p jm_tests $(DESTDIR)$(prefix)/jm_tests
 	if [ "$(INSTALL_EXTRA)" ]; then exec "$(INSTALL_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
+
+ant_output_jars= \
+	$(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar \
+	$(JAVA_BUILD_DIR)/bin/util.jar \
+	$(JAVA_BUILD_DIR)/bin/OptimicaCompiler.jar \
+	$(JAVA_BUILD_DIR)/bin/separateProcess.jar
+
+ant_output_options=$(JAVA_BUILD_DIR)/src/build/DefaultOptions.xml
+
+install-compiler: $(ant_output_jars) $(ant_output_options) TODO-always-trigger
+if HAVE_ANT
+	mkdir -p $(DESTDIR)$(prefix)/lib/
+	install -t $(DESTDIR)$(prefix)/lib/ $(ant_output_jars)
+	install -t $(DESTDIR)$(prefix)/ $(ant_output_options)
+endif
+
+# Dummy target used to always trigger rebuilds. Used to enable references to
+# outputs from phony targets as real targets. For example ant output.
+TODO-always-trigger: ;
+
+$(ant_output_jars) $(ant_output_options): build-compiler
+
+build-compiler:
+if HAVE_ANT
+	mkdir -p $(JAVA_BUILD_DIR)
+	cd $(JAVA_BUILD_DIR); \
+	$(ANT_OPTS) $(ANT) -f "$(JAVA_MC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
+	cd $(JAVA_BUILD_DIR); \
+	$(ANT_OPTS) $(ANT) -f "$(JAVA_OC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
+endif
+
+install-modules: install-modules-ModelicaFrontEnd
+
+BEAVER_INSTALL_DIR = $(DESTDIR)$(prefix)/ThirdParty/Beaver
+BEAVER_SOURCE = $(abs_top_srcdir)/Compiler/ModelicaFrontEnd/ThirdParty/Beaver
+
+install-modules-ModelicaFrontEnd: $(BEAVER_INSTALL_DIR)/LICENSE $(BEAVER_INSTALL_DIR)/lib/beaver-rt.jar
+
+$(BEAVER_INSTALL_DIR)/%: $(BEAVER_SOURCE)/%
+	install -D $(<) $(@)
 
 bindistdir: install
 	rm -rf $(bindistdir)
@@ -606,13 +655,13 @@ clean-casadi-interface:
 #	rm -rf $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
 if HAVE_ANT
 	cd $(JAVA_CASADI_BUILD_DIR)/ModelicaCompilerCasADi; \
-	$(ANT_OPTS) $(ANT) clean ; rm -rf $(MC_CASADI_BUILD)/src/cpp-generated $(MC_CASADI_BUILD)/src/java-generated/ifcasadi 
+	$(ANT_OPTS) $(ANT) clean ; rm -rf $(MC_CASADI_BUILD)/src/cpp-generated $(MC_CASADI_BUILD)/src/generated/modelica/java/ifcasadi 
 	cd $(JAVA_CASADI_BUILD_DIR)/OptimicaCompilerCasADi; \
-	$(ANT_OPTS) $(ANT) clean ; rm -rf $(OC_CASADI_BUILD)/src/cpp-generated $(OC_CASADI_BUILD)/src/java-generated/ifcasadi 
+	$(ANT_OPTS) $(ANT) clean ; rm -rf $(OC_CASADI_BUILD)/src/cpp-generated $(OC_CASADI_BUILD)/src/generated/optimica/java/ifcasadi 
 endif
 	
-
 clean-python-packages:
+if PYTHON_ENABLED
 	if [ -d $(assimulo_build_dir)/Assimulo ]; then \
 		cd $(assimulo_build_dir)/Assimulo; \
 		python setup.py clean --all --sundials-home=$(SUNDIALS_HOME); \
@@ -633,6 +682,7 @@ clean-python-packages:
 	-cd $(abs_top_srcdir)/Python/src; \
 	python setup_pyjmi.py clean --all 
 	-rm -rf $(pyjmi_install_dir)|| echo  Could not remove $(pyjmi_install_dir)
+endif
 
 clean-frontends:
 if HAVE_ANT

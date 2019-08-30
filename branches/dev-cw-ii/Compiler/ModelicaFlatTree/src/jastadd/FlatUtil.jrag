@@ -333,6 +333,7 @@ aspect FlatNames {
     
     syn String FFunctionDecl.qualifiedName()     = name();
     syn String FFunctionVariable.qualifiedName() = name();
+    syn String FAbstractVariable.qualifiedName() = name();
     
     syn String FAbstractFunctionCall.name();
     eq InstFunctionCall.name()      = getNameNoTransform().name();
@@ -481,6 +482,12 @@ aspect FlatNames {
      */
     syn boolean FAccess.isSimple() = true;
     eq FAccessFull.isSimple()      = false;
+    
+    /**
+     * Checks if this access is empty.
+     */
+    syn boolean FAccess.isEmpty() = false;
+    eq FAccessEmpty.isEmpty()     = true;
 
     /**
      * Check if this use has any expression or colon array subscripts. 
@@ -1105,8 +1112,8 @@ aspect FlatFunctionUtils {
     syn boolean FFunctionCall.isPartialFunctionCall() = false;
     eq FPartialFunctionCall.isPartialFunctionCall()   = true;
      
-     syn boolean FFunctionVariable.isInput()  = getTypePrefixInputOutput().inputCausality();
-     syn boolean FFunctionVariable.isOutput() = getTypePrefixInputOutput().outputCausality();
+     syn boolean FFunctionVariable.isInput()  = getCausalityConnectorPrefix().inputCausality();
+     syn boolean FFunctionVariable.isOutput() = getCausalityConnectorPrefix().outputCausality();
      
      /**
       * Returns a list of all InstComponentDecls declared as "input".
@@ -1557,7 +1564,7 @@ aspect FlatFunctionUtils {
      syn String FExp.calcTempVarName()          = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.TEMP);
      syn String FAssignStmt.calcTempVarName()   = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.TEMP);
      
-     syn String FRelExp.calcIndicatorVarName()  = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.INDICATOR);
+     syn String FExp.calcIndicatorVarName()  = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.INDICATOR);
      
      syn String FSampleExp.calcIndexVarName()   = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.SAMPLE);
      

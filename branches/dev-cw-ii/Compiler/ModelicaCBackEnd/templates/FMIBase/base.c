@@ -96,8 +96,6 @@ $C_runtime_option_map$
 $C_dynamic_state_coefficients$
 
 
-$C_enum_strings$
-
 int model_ode_update_old(jmi_t *jmi) {
 $C_ode_update_old$
     return 0;

@@ -42,18 +42,22 @@ public class ModuleRunner extends ParentRunner<ModelicaFileRunner> {
         }
     }
 
+    @Override
     public Description describeChild(ModelicaFileRunner mod) {
         return mod.getDescription();
     }
 
+    @Override
     public List<ModelicaFileRunner> getChildren() {
         return children;
     }
 
+    @Override
     public void runChild(ModelicaFileRunner mod, RunNotifier note) {
         mod.run(note);
     }
 
+    @Override
     public Description getDescription() {
         return desc;
     }

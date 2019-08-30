@@ -24,28 +24,32 @@ public enum ErrorCheckType {
     /** Used to invoke the parts of the error check that has side effects 
      *  (e.g. for structural parameters) on generated components. */
     GENERATED;
-    
+
     public boolean allowBadGeneratedInner() {
         return this == CHECK;
     }
-    
+
     public boolean allowConstantNoValue() {
         return this == CHECK;
     }
-    
+
     public boolean allowIncompleteSizes() {
         return this == CHECK;
     }
-    
+
     public boolean allowIncompleteReplaceableFunc() {
         return this == CHECK;
     }
-    
+
     public boolean allowExternalObjectMissingBindingExpression() {
         return this == CHECK;
     }
-    
+
     public boolean checkInactiveComponents() {
+        return this == CHECK;
+    }
+
+    public boolean allowUnspecifiedEnums() {
         return this == CHECK;
     }
 
