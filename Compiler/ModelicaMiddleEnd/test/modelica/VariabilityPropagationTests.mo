@@ -773,12 +773,12 @@ no or infinitely many solutions (A is singular).\");
   Integer[:] ipiv;
  algorithm
   init x as Real[size(A, 1)];
-  for i1 in 1:size(b, 1) loop
+  for i1 in 1:size(A, 1) loop
    x[i1] := b[i1];
   end for;
   init Awork as Real[size(A, 1), size(A, 1)];
   for i1 in 1:size(A, 1) loop
-   for i2 in 1:size(A, 2) loop
+   for i2 in 1:size(A, 1) loop
     Awork[i1,i2] := A[i1,i2];
    end for;
   end for;
@@ -1022,10 +1022,15 @@ parameter equation
 public
  function VariabilityPropagationTests.ConstantStartFunc1.f
   output Real[:] o;
+  Integer[:] temp_1;
  algorithm
   init o as Real[2];
-  o[1] := 1;
-  o[2] := 2;
+  init temp_1 as Integer[2];
+  temp_1[1] := 1;
+  temp_1[2] := 2;
+  for i1 in 1:2 loop
+   o[i1] := temp_1[i1];
+  end for;
   return;
  end VariabilityPropagationTests.ConstantStartFunc1.f;
 
@@ -1350,9 +1355,14 @@ parameter equation
 public
  function VariabilityPropagationTests.EvalFail2.f
   output Real[:] y;
+  Integer[:] temp_1;
  algorithm
   init y as Real[1];
-  y[1] := 1;
+  init temp_1 as Integer[1];
+  temp_1[1] := 1;
+  for i1 in 1:1 loop
+   y[i1] := temp_1[i1];
+  end for;
   assert(false, \"nope\");
   return;
  end VariabilityPropagationTests.EvalFail2.f;
@@ -1493,10 +1503,15 @@ public
  function VariabilityPropagationTests.IfEquationTemp1.f
   input Real x;
   output Real[:] y;
+  Real[:] temp_1;
  algorithm
   init y as Real[2];
-  y[1] := x;
-  y[2] := x + 1;
+  init temp_1 as Real[2];
+  temp_1[1] := x;
+  temp_1[2] := x + 1;
+  for i1 in 1:2 loop
+   y[i1] := temp_1[i1];
+  end for;
   return;
  end VariabilityPropagationTests.IfEquationTemp1.f;
 
@@ -1535,10 +1550,15 @@ public
  function VariabilityPropagationTests.IfEquationTemp2.f
   input Real x;
   output Real[:] y;
+  Real[:] temp_1;
  algorithm
   init y as Real[2];
-  y[1] := x;
-  y[2] := x + 1;
+  init temp_1 as Real[2];
+  temp_1[1] := x;
+  temp_1[2] := x + 1;
+  for i1 in 1:2 loop
+   y[i1] := temp_1[i1];
+  end for;
   return;
  end VariabilityPropagationTests.IfEquationTemp2.f;
 
@@ -1730,5 +1750,31 @@ end VariabilityPropagationTests.ExternalObjectConstant2;
 ")})));
 end ExternalObjectConstant2;
 
+    model CompositeStmt1
+        record R
+            Real x;
+        end R;
+        
+        function f
+            input R r;
+            constant R c(x=1);
+            output R[:] y = {c, r};
+        algorithm
+            annotation(Inline=false);
+        end f;
+        
+        R[:] r = f(R(2));
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="CompositeStmt1",
+            description="",
+            flatModel="
+fclass VariabilityPropagationTests.CompositeStmt1
+ constant Real r[1].x = 1;
+ constant Real r[2].x = 2;
+end VariabilityPropagationTests.CompositeStmt1;
+")})));
+    end CompositeStmt1;
 
 end VariabilityPropagationTests;

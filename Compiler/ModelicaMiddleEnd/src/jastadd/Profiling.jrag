@@ -329,7 +329,7 @@ aspect LightProfiling {
 			}
 			
 			public String toStringRaw(long diff, long endVal) {
-				return new Long(diff).toString();
+				return Long.toString(diff);
 			}
 		}
 		

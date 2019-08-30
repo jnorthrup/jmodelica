@@ -64,7 +64,7 @@ aspect Types {
 
     syn boolean InstNode.isPrimitiveType() = false;
     eq InstPrimitive.isPrimitiveType()     = true;
-    eq InstClassDecl.isPrimitiveType()     = isOrExtendsPrimitive();
+    eq InstClassDecl.isPrimitiveType()     = isPrimitive();
 
     public static String InstNode.subTypeMessage(String name, String message) {
         if (name == null) {
@@ -92,6 +92,8 @@ aspect Types {
             InstNode superType, InstNode subType, String name, boolean top) {
         if (subType == superType) {
             return null;
+        } else if (subType.isEnum() && superType.isEnum()) {
+            return InstNode.compareEnumTypes(superType.myInstClass(), subType.myInstClass(), name, top);
         } else if (!subType.baseClassName().equals(superType.baseClassName())) {
             return subTypeMessage(name, "are of different primitive types");
         } else if (subType.ndims() == superType.ndims() || 
@@ -102,6 +104,29 @@ aspect Types {
             return subTypeMessage(name, "have incompatible number of dimensions");
         }
     }
+
+    public static String InstNode.compareEnumTypes(InstClassDecl superType, InstClassDecl subType, String name, boolean top) {
+        ArrayList<InstEnumLiteral> subTypeLiterals = subType.enumLiterals();
+        ArrayList<InstEnumLiteral> superTypeLiterals = superType.enumLiterals();
+
+        int subTypeLiteralsSize = subTypeLiterals.size();
+        int superTypeLiteralsSize = superTypeLiterals.size();
+        boolean enumLiteralsEqual = subTypeLiteralsSize == superTypeLiteralsSize;
+        for (int i = 0; enumLiteralsEqual && i < subTypeLiteralsSize; i++) {
+            InstEnumLiteral subTypeLiteral = subTypeLiterals.get(i);
+            InstEnumLiteral superTypeLiteral = superTypeLiterals.get(i);
+            enumLiteralsEqual &= InstComponentDecl.NAME_COMPARATOR.compare(subTypeLiteral, superTypeLiteral) == 0;
+        }
+
+        if (superType.isUnspecifiedEnum() || enumLiteralsEqual) {
+            return null;
+        } else {
+            return "the enumeration '"+subType.name()+"' should have the same literals in the same order as the enumeration '"+superType.name()+"'.\n"+
+                            "'"+subType.name()+"' has literals: "+prettyPrintWithSep(subTypeLiterals, ", ")+"\n"+
+                            "'"+superType.name()+"' has literals: "+prettyPrintWithSep(superTypeLiterals, ", ")+"\n";
+        }
+    }
+
 
     public static String InstNode.compareCompositeTypes(
             InstNode superType, InstNode subType, String name, boolean top) {
@@ -294,6 +319,7 @@ aspect DerivativeFunctions {
     eq FStatement.shouldBeDifferentiated()        = type().shouldBeDifferentiated();
     eq FAbstractEquation.shouldBeDifferentiated() = variability().continuousVariability();
     eq FFunctionCallLeft.shouldBeDifferentiated() = hasFExp() && myOutput().shouldBeDifferentiated();
+    eq FIndicatorExp.shouldBeDifferentiated()     = false;
 
 
     /**

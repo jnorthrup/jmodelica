@@ -44,3 +44,22 @@ BOOLEAN generate_runtime_option_parameters compiler uncommon true false
 for normal compilation."
 
 *******************************************************************************
+
+BOOLEAN unroll_functions compiler experimental false false
+
+"Internal option used for casadi transfer. If true, loops in functions are 
+unrolled. All sizes in functions are assumed to be known. Will cause 
+compilation errors if not."
+
+*******************************************************************************
+BOOLEAN dynamic_states compiler uncommon true
+
+"If enabled, dynamic states will be calculated and generated."
+
+*******************************************************************************
+INTEGER dynamic_states_limit compiler uncommon 10
+
+"Limit for size of dynamic state sets. Value < 0 indicates infinite. 
+Value == 0 indicates disabled."
+
+*******************************************************************************

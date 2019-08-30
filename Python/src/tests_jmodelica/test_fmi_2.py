@@ -48,28 +48,6 @@ CS2 = 'bouncingBall2_cs.fmu'
 ME1 = 'bouncingBall.fmu'
 CS1 = 'bouncingBall.fmu'
 
-class Test_FMIUtil:
-    
-    @testattr(stddist_full = True)
-    def test_cpr_seed(self):
-        structure = OrderedDict([('der(inertia3.phi)', ['inertia3.w']),
-             ('der(inertia3.w)', ['damper.phi_rel', 'inertia3.phi']),
-             ('der(damper.phi_rel)', ['damper.w_rel']),
-             ('der(damper.w_rel)',
-              ['damper.phi_rel', 'damper.w_rel', 'inertia3.phi'])])
-        
-        states = ['inertia3.phi', 'inertia3.w', 'damper.phi_rel', 'damper.w_rel']
-        
-        groups = fmi_util.cpr_seed(structure, states)
-        
-        assert groups[0][5] == [1,2,3]
-        assert groups[1][5] == [5,7]
-        assert groups[2][5] == [8,9]
-        assert groups[0][4] == [0,1,2]
-        assert groups[1][4] == [3,4]
-        assert groups[2][4] == [5,6]
-
-
 class Test_FMUModelBase2:
     @classmethod
     def setUpClass(cls):
@@ -77,7 +55,6 @@ class Test_FMUModelBase2:
         Sets up the test class.
         """
         cls.negAliasFmu = compile_fmu("NegatedAlias",os.path.join(path_to_mofiles,"NegatedAlias.mo"), version=2.0)
-        cls.enumeration3 = compile_fmu("Enumerations.Enumeration3",os.path.join(path_to_mofiles,"Enumerations.mo"), version=2.0)
         cls.enumeration4 = compile_fmu("Enumerations.Enumeration4",os.path.join(path_to_mofiles,"Enumerations.mo"), version=2.0)
         cls.nonlinear8 = compile_fmu("NonLinear.NonLinear8",os.path.join(path_to_mofiles,"NonLinear.mo"), version=2.0)
         cls.brentEnforce = compile_fmu("TestBrent.Bounds", os.path.join(path_to_mofiles,"TestBrent.mo"), version=2.0)
@@ -115,32 +92,7 @@ class Test_FMUModelBase2:
         assert "variable" in err_msg
         assert "min" in err_msg
         assert "max" in err_msg
-    
-    @testattr(stddist_full = True)
-    def test_get_scalar_variable(self):
-        negated_alias  = load_fmu(Test_FMUModelBase2.negAliasFmu)
-        
-        sc_x = negated_alias.get_scalar_variable("x")
-        
-        assert sc_x.name == "x"
-        assert sc_x.value_reference >= 0
-        assert sc_x.type == fmi.FMI2_REAL
-        assert sc_x.variability == fmi.FMI2_CONTINUOUS
-        assert sc_x.causality == fmi.FMI2_LOCAL
 
-        nose.tools.assert_raises(FMUException, negated_alias.get_scalar_variable, "not_existing")
-    
-    @testattr(stddist_full = True)
-    def test_declared_enumeration_type(self):
-        enumeration_model = load_fmu(Test_FMUModelBase2.enumeration3)
-        
-        enum = enumeration_model.get_variable_declared_type("x")
-        assert len(enum.items.keys()) == 2
-        enum = enumeration_model.get_variable_declared_type("home")
-        assert len(enum.items.keys()) == 4
-        
-        nose.tools.assert_raises(FMUException, enumeration_model.get_variable_declared_type, "z")
-    
     @testattr(stddist_full = True)
     def test_set_enumeration(self):
         enumeration_model = load_fmu(Test_FMUModelBase2.enumeration4)
@@ -163,35 +115,6 @@ class Test_FMUModelBase2:
         negated_alias  = load_fmu(Test_FMUModelBase2.negAliasFmu)
         
         assert negated_alias.get_version() == "2.0"
-
-    @testattr(stddist_full = True)
-    def test_caching(self):
-        negated_alias  = load_fmu(Test_FMUModelBase2.negAliasFmu)
-        
-        assert len(negated_alias.cache) == 0 #No starting cache
-        
-        vars_1 = negated_alias.get_model_variables()
-        vars_2 = negated_alias.get_model_variables()
-        assert id(vars_1) == id(vars_2)
-        
-        vars_3 = negated_alias.get_model_variables(filter="*")
-        assert id(vars_1) != id(vars_3)
-        
-        vars_4 = negated_alias.get_model_variables(type=0)
-        assert id(vars_3) != id(vars_4)
-        
-        vars_5 = negated_alias.get_model_time_varying_value_references()
-        vars_7 = negated_alias.get_model_time_varying_value_references()
-        assert id(vars_5) != id(vars_1)
-        assert id(vars_5) == id(vars_7)
-        
-        negated_alias  = load_fmu(Test_FMUModelBase2.negAliasFmu)
-        
-        assert len(negated_alias.cache) == 0 #No starting cache
-        
-        vars_6 = negated_alias.get_model_variables()
-        assert id(vars_1) != id(vars_6)
-
 
     @testattr(stddist_full = True)
     def test_set_get_negated_real(self):
@@ -242,14 +165,6 @@ class Test_FMUModelBase2:
         model.set_additional_logger(my_custom_logger)
         model.simulate()
         assert(len(messages) > 0)
-        
-    @testattr(windows_full = True)
-    def test_get_erronous_nominals(self):
-        
-        model = load_fmu("NominalTest4.fmu",path_to_fmus_me2)
-        
-        nose.tools.assert_almost_equal(model.get_variable_nominal("x"), 2.0)
-        nose.tools.assert_almost_equal(model.get_variable_nominal("y"), 1.0)
 
 class Test_FMUModelCS2:
     """
@@ -286,7 +201,7 @@ class Test_FMUModelCS2:
         nose.tools.assert_raises(Exception, model.simulate)
     
     @testattr(stddist_full = True)
-    def test_terminate(self):
+    def test_terminate_3(self):
         model = load_fmu(Test_FMUModelCS2.terminate)
         
         model.initialize()
@@ -304,13 +219,6 @@ class Test_FMUModelCS2:
         assert res.status == fmi.FMI_DISCARD
         assert abs(res["time"][-1] - 0.5) < 1e-3
 
-    @testattr(stddist_full = True)
-    def test_log_file_name(self):
-        path, file_name = os.path.split(self.coupled_name)
-        coupled = load_fmu(self.coupled_name)
-        
-        assert coupled.get_log_file_name() == file_name.replace(".","_")[:-4]+"_log.txt"
-        
     @testattr(stddist_full = True)
     def test_part_log(self):
         model = load_fmu(self.coupled_name, log_level=6)
@@ -517,20 +425,6 @@ class Test_FMUModelCS2:
         nose.tools.assert_raises(FMUException, coupled.get_output_derivatives, 578, 0)
 
     @testattr(stddist_full = True)
-    def test_get_directional_derivative_capability(self):
-        """
-        Test the method get_directional_derivative in FMUModelCS2
-        """
-        
-        # Setup
-        bounce = load_fmu(self.bouncing_name)
-        bounce.setup_experiment()
-        bounce.initialize()
-        
-        # Bouncing ball don't have the capability, check that this is handled
-        nose.tools.assert_raises(FMUException, bounce.get_directional_derivative, [1], [1], [1])
-        
-    @testattr(stddist_full = True)
     def test_simulate(self):
         """
         Test the main features of the method simulate() in FMUmodelCS2
@@ -679,13 +573,96 @@ class Test_FMUModelME2:
         """
         cls.coupled_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="me", version="2.0", compiler_options={'eliminate_alias_constants':False})
         cls.bouncing_name = compile_fmu("BouncingBall",os.path.join(path_to_mofiles,"BouncingBall.mo"), target="me", version="2.0", compiler_options={'eliminate_alias_constants':False})
-        cls.output2_name = compile_fmu("OutputTest2",os.path.join(path_to_mofiles,"OutputTest.mo"), target="me", version="2.0")
-        cls.no_state_name = compile_fmu("NoState.Example1", os.path.join(path_to_mofiles,"noState.mo"), target="me", version="2.0")
         cls.enum_name = compile_fmu("Enumerations.Enumeration2", os.path.join(path_to_mofiles,"Enumerations.mo"), target="me", version="2.0")    
         cls.string1 = compile_fmu("StringModel1",os.path.join(path_to_mofiles,"TestString.mo"), target="me", version="2.0")
         cls.linear2 = compile_fmu("LinearTest.Linear2", os.path.join(path_to_mofiles,"Linear.mo"), target="me", version="2.0")
+    def _get_discrete_inputs_results(self, model_name):
+        """ 
+            Used by test_model_bool_input_pre_operator_without_edge
+            and
+            test_model_bool_input_pre_operator_with_edge
+        """
+        rtol = 1e-6
+        atol = rtol
+        ncp = 500
+        libpaths = [os.path.join(get_files_path(), 'Modelica', 'DiscreteInputTestModels.mo')]
+        n = compile_fmu(model_name,
+                        libpaths,
+                        jvm_args='-Xmx6g')
+
+        m = load_fmu(n)
+
+        start = 0.400
+        stop = 0.405
+
+        m.initialize(start_time=start, tolerance=rtol)
+        m.event_update()
+        m.enter_continuous_time_mode()
+
+        opts = m.simulate_options()
+
+        opts["initialize"] = False
+        opts["CVode_options"]["rtol"] = rtol
+        opts["CVode_options"]["atol"] = atol
+        opts['ncp'] = ncp
+
+        ts = []
+        inp = [True]
+        results = []
+        m.set("Bool_A", True)
+
+        for h in N.linspace(start, stop, 21)[:-1]:
+            ts.append(h)
+            inp.append(not inp[-1])
+            
+            m.enter_event_mode()
+            m.set("Bool_B", inp[-1])
+            m.event_update()
+            m.enter_continuous_time_mode()
+            res_jm = m.simulate(h, h+0.00025, options=opts)
+            
+            results.extend(res_jm["Real_B"])
         
+        return results
+
+
+    def _discrete_inputs_get_reference_data(self, path_to_reference_data):
+        """ 
+            Used by test_model_bool_input_pre_operator_without_edge
+            and
+            test_model_bool_input_pre_operator_with_edge
+        """
+        ref_values = []
+        with open(path_to_reference_data, 'r') as f:
+            ref_values = f.readlines()
+
+        # remove all newlines and convert elements to float since they are strings
+        ref_values = map(lambda s: s.strip(), ref_values)
+        ref_values = [float(x) for x in ref_values]
+        return ref_values
     
+    @testattr(stddist_full = True)
+    def test_model_bool_input_pre_operator_without_edge(self):
+        """Test boolean inputs used in a pre operator and without using edge"""
+        model_name = 'DiscreteInputTestModels.boolInputInPreOperatorWithoutEdge'
+        results_no_edge = self._get_discrete_inputs_results(model_name)
+
+        path_to_reference_data = os.path.join(get_files_path(), 'Modelica', 'DiscreteInputTestValues.txt')
+        ref_values = self._discrete_inputs_get_reference_data(path_to_reference_data)
+
+        assert N.amax(N.array(ref_values) - results_no_edge) == 0.0
+
+    @testattr(stddist_full = True)
+    def test_model_bool_input_pre_operator_with_edge(self):
+        """Test boolean inputs used in a pre operator and using edge"""
+        model_name = 'DiscreteInputTestModels.boolInputInPreOperatorWithEdge'
+        results_with_edge = self._get_discrete_inputs_results(model_name)
+
+        path_to_reference_data = os.path.join(get_files_path(), 'Modelica', 'DiscreteInputTestValues.txt')
+        ref_values = self._discrete_inputs_get_reference_data(path_to_reference_data)
+
+        assert N.amax(N.array(ref_values) - results_with_edge) == 0.0
+
     @testattr(stddist_full = True)
     def test_relative_tolerance(self):
         model = load_fmu(self.linear2)
@@ -696,35 +673,7 @@ class Test_FMUModelME2:
         res = model.simulate(options=opts)
         
         assert res.options["CVode_options"]["atol"] == 1e-10
-        
-        model = load_fmu(self.no_state_name)
-        
-        opts = model.simulate_options()
-        opts["CVode_options"]["rtol"] = 1e-8
-        
-        res = model.simulate(options=opts)
-        
-        assert res.options["CVode_options"]["atol"] == 1e-10
-    
-    @testattr(stddist_full = True)
-    def test_get_time_varying_variables(self):
-        model = load_fmu(self.coupled_name)
-        
-        [r,i,b] = model.get_model_time_varying_value_references()
-        [r_f, i_f, b_f] = model.get_model_time_varying_value_references(filter="*")
-        
-        assert len(r) == len(r_f)
-        assert len(i) == len(i_f)
-        assert len(b) == len(b_f)
-        
-        vars = model.get_variable_alias("J4.phi")
-        for var in vars:
-            [r,i,b] = model.get_model_time_varying_value_references(filter=var)
-            assert len(r) == 1
-        
-        [r,i,b] = model.get_model_time_varying_value_references(filter=vars.keys())
-        assert len(r) == 1
-    
+
     @testattr(stddist_full = True)
     def test_get_string(self):
         model = load_fmu(self.string1)
@@ -754,53 +703,7 @@ class Test_FMUModelME2:
         D = model._get_A(use_structure_info=False, output_matrix=C)
         assert D is not C
         N.allclose(D, C.toarray())
-    
-    @testattr(stddist_full = True)
-    def test_estimate_directional_derivatives_BCD(self):
-        
-        model = load_fmu(self.output2_name)
-        model.initialize()
-        model.event_update()
-        model.enter_continuous_time_mode()
-        
-        for func in [model._get_B, model._get_C, model._get_C]:
-            A = func(use_structure_info=True)
-            B = func(use_structure_info=True, output_matrix=A)
-            assert A is B #Test that the returned matrix is actually the same as the input
-            N.allclose(A.toarray(),B.toarray())
-            A = func(use_structure_info=False)
-            B = func(use_structure_info=False, output_matrix=A)
-            assert A is B
-            N.allclose(A,B)
-            C = func(use_structure_info=True, output_matrix=A)
-            assert A is not C
-            N.allclose(C.toarray(), A)
-            D = func(use_structure_info=False, output_matrix=C)
-            assert D is not C
-            N.allclose(D, C.toarray())
-    
-    @testattr(stddist_full = True)
-    def test_units(self):
-        
-        model = load_fmu(self.coupled_name)
-        model_bb = load_fmu(self.bouncing_name)
-        
-        assert model.get_variable_unit("J1.w") == "rad/s"
-        assert model.get_variable_unit("J1.phi") == "rad"
-        
-        nose.tools.assert_raises(FMUException, model.get_variable_unit, "clutch1.useHeatPort")
-        nose.tools.assert_raises(FMUException, model.get_variable_unit, "clutch1.sss")
-        nose.tools.assert_raises(FMUException, model.get_variable_unit, "clutch1.sss")
-        nose.tools.assert_raises(FMUException, model_bb.get_variable_unit, "h")
-    
-    @testattr(stddist_full = True)
-    def test_display_units(self):
-        
-        model = load_fmu(self.coupled_name)
-        
-        assert model.get_variable_display_unit("J1.phi") == "deg"
-        nose.tools.assert_raises(FMUException, model.get_variable_display_unit, "J1.w")
-        
+
     @testattr(stddist_full = True)
     def test_display_values(self):
         model = load_fmu(self.coupled_name)
@@ -828,17 +731,6 @@ class Test_FMUModelME2:
         model.set("one", 2)
         assert model.get("one") == 2
 
-    @testattr(windows_full = True)
-    def test_malformed_xml(self):
-        nose.tools.assert_raises(FMUException, load_fmu, os.path.join(path_to_fmus_me2, "MalFormed.fmu"))
-
-    @testattr(stddist_full = True)
-    def test_log_file_name(self):
-        path, file_name = os.path.split(self.coupled_name)
-        coupled = load_fmu(self.coupled_name)
-        
-        assert coupled.get_log_file_name() == file_name.replace(".","_")[:-4]+"_log.txt"
-    
     @testattr(stddist_full = True)
     def test_version(self):
         bounce = load_fmu(self.bouncing_name)
@@ -854,7 +746,6 @@ class Test_FMUModelME2:
         assert coupled.get_variable_initial("sin1.y") == fmi.FMI2_INITIAL_CALCULATED
         vars = coupled.get_model_variables()
         assert vars["sin1.y"].initial == fmi.FMI2_INITIAL_CALCULATED
-        
     
     @testattr(windows_full = True)
     def test_init(self):
@@ -1041,39 +932,7 @@ class Test_FMUModelME2:
         nose.tools.assert_almost_equal(n_states[0], 0.0001)
         n_states=coupled.nominal_continuous_states
         nose.tools.assert_almost_equal(n_states[0], 0.0001)
-
-    @testattr(stddist_full = True)
-    def test_output_dependencies(self):
-        model = load_fmu(self.output2_name)
         
-        [state_dep, input_dep] = model.get_output_dependencies()
-        
-        assert state_dep["y1"][0] == "x1"
-        assert state_dep["y1"][1] == "x2"
-        assert state_dep["y2"][0] == "x2"
-        assert state_dep["y3"][0] == "x1"
-        assert input_dep["y1"][0] == "u1"
-        assert input_dep["y3"][0] == "u1"
-        assert len(input_dep["y2"]) == 0
-        
-    @testattr(stddist_full = True)
-    def test_output_dependencies_2(self):
-        model = load_fmu(self.coupled_name)
-        
-        [state_dep, input_dep] = model.get_output_dependencies()
-        
-        assert len(state_dep.keys()) == 0
-        assert len(input_dep.keys()) == 0
-        
-    @testattr(stddist_full = True)
-    def test_derivative_dependencies(self):
-        model = load_fmu(self.no_state_name)
-        
-        [state_dep, input_dep] = model.get_derivatives_dependencies()
-        
-        assert len(state_dep.keys()) == 0
-        assert len(input_dep.keys()) == 0
-
     @testattr(stddist_full = True)
     def test_get_derivatives(self):
         """
@@ -1104,21 +963,6 @@ class Test_FMUModelME2:
         der = coupled.get_derivatives()
         diff = N.sort(N.array([coupled.get_real(i) for i in der_ref]))-N.sort(der)
         nose.tools.assert_almost_equal(N.sum(diff), 0.)
-
-    @testattr(stddist_full = True)
-    def test_get_directional_derivative_capability(self):
-        """
-        Test the method get_directional_derivative in FMUModelME2
-        """
-        
-        # Setup
-        bounce = load_fmu(self.bouncing_name)
-        bounce.setup_experiment()
-        bounce.initialize()
-        
-        # Bouncing ball don't have the capability, check that this is handled
-        nose.tools.assert_raises(FMUException, bounce.get_directional_derivative, [1], [1], [1])
-        
         
     @testattr(stddist_full = True)
     def test_simulate_with_debug_option(self):
@@ -1132,20 +976,7 @@ class Test_FMUModelME2:
         
         from pyfmi.debug import CVodeDebugInformation
         debug = CVodeDebugInformation(coupled.get_identifier()+"_debug.txt")
-        
-    @testattr(stddist_full = True)
-    def test_simulate_with_debug_option_no_state(self):
-        coupled = load_fmu(self.no_state_name)
 
-        opts=coupled.simulate_options()
-        opts["logging"] = True
-        
-        #Verify that a simulation is successful
-        res=coupled.simulate(options=opts)
-        
-        from pyfmi.debug import CVodeDebugInformation
-        debug = CVodeDebugInformation(coupled.get_identifier()+"_debug.txt")
-        
     @testattr(stddist_full = True)
     def test_simulate_options(self):
         """
@@ -1296,60 +1127,6 @@ class Test_FMUModelME2:
                 nose.tools.assert_almost_equal(diff[-1],0.0)
             height_old = height
             bounce.reset()
-
-
-class Test_Result_Writing:
-    """
-    This test the result writing functionality.
-    """
-    @classmethod
-    def setUpClass(cls):
-        file_name = os.path.join(get_files_path(), 'Modelica', 'Friction.mo')
-        cls.enum_name = compile_fmu("Friction2", file_name, target="me", version="2.0")
-        
-    @testattr(stddist_full = True)
-    def test_enumeration_file(self):
-        
-        model = load_fmu(self.enum_name)
-        data_type = model.get_variable_data_type("mode")
-        
-        assert data_type == fmi.FMI2_ENUMERATION
-        
-        opts = model.simulate_options()
-        
-        res = model.simulate(options=opts)
-        res["mode"] #Check that the enumeration variable is in the dict, otherwise exception
-        
-    @testattr(stddist_full = True)
-    def test_enumeration_memory(self):
-        
-        model = load_fmu(self.enum_name)
-        data_type = model.get_variable_data_type("mode")
-        
-        assert data_type == fmi.FMI2_ENUMERATION
-        
-        opts = model.simulate_options()
-        opts["result_handling"] = "memory"
-        
-        res = model.simulate(options=opts)
-        res["mode"] #Check that the enumeration variable is in the dict, otherwise exception
-        
-    @testattr(stddist_full = True)
-    def test_enumeration_csv(self):
-        
-        model = load_fmu(self.enum_name)
-        data_type = model.get_variable_data_type("mode")
-        
-        assert data_type == fmi.FMI2_ENUMERATION
-        
-        from pyfmi.common.io import ResultHandlerCSV
-        opts = model.simulate_options()
-        opts["result_handling"] = "custom"
-        opts["result_handler"] = ResultHandlerCSV(model)
-        
-        res = model.simulate(options=opts)
-        res["mode"] #Check that the enumeration variable is in the dict, otherwise exception
-        
 
 class Test_load_fmu2:
     """

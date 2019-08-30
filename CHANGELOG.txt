@@ -1,4 +1,100 @@
 ================= Unreleased ==================
+# Change ; Minor ; Compiler ; #5815
+FilterableIterator now adheres to the contract of Iterator and properly supports "null" elements in the parent iterator.
+
+# Change ; Major ; Compiler ; #5809
+Generate one field per option in OptionRegistry.
+Renamed OptionRegistry to AbstractOptionRegistry, renamed OptionsAggregated to OptionRegistry.
+
+# Change ; Major ; Compiler ; #5804
+Switch to "java.nio.file.Path" instead of "File" or "String"s representing paths in most places.
+"Path" is more thought-through and more powerful, which will allow to implement advanced featuers in the future.
+Note that while java.nio allows to access non-File resources with the same API, the internal workings of JModelica
+currently make restrictions on only supporting file accesses.
+
+# Fixed ; Minor ; Compiler ; #5808
+Add ParseListener and CompilationStartListener for listening to
+parsed files and compilation start events.
+
+# Change ; Minor ; Compiler ; #5810
+Dependency to beaver-rt.jar is now recorded in the jar manifest
+which means it is no longer necessary to add it to the classpath
+when interfacing directly with the compiler jars.
+
+# Change ; Minor ; Compiler ; #5806
+Added compilation hook to run before FMU packing
+
+# Fixed ; Minor ; Compiler ; #5805
+Fixed ant clean failing with empty target directory
+
+# Fixed ; Minor ; Compiler ; #5793
+Fixed bug where reinit did not set value of aliased derivatives.
+
+# Fixed ; Minor ; Compiler ; #5793
+Improved detection of pre-propagation blocks to fix a case where 
+reinit did not update properly during event iteration.
+
+# Change ; Major; PyFMI ; #5802
+Updated JModelica external to PyFMI 2.5.3
+
+# Change ; Minor ; Compiler ; #5800
+SrcDot now has SrcNamedAccess instead of SrcAccess as children.
+
+# Fixed ; Minor ; Compiler ; #5791
+Fixed source-tree lookup for modifications: don't look up in normal scope if not found in member scope.
+
+# Fixed ; Minor ; Runtime; #5776
+Fixed bug with boolean inputs where the input was used in a pre() operator.
+
+# Fixed ; Minor ; Compiler ; #5771
+Fixed a bug regarding searching in surrounding classes
+in one of the simple (source) class lookup methods.
+
+# Fixed ; Minor ; Compiler ; #5735
+Fixed exception during code generation caused by bug in temporary removal after function inlining.
+
+# Fixed ; Minor ; Compiler ; #5772
+Fixed exception from negated alias in assign statement left hand side.
+
+# Fixed ; Minor ; Compiler ; #5756
+Fixed c-code generation bug for some array assignments which led to segfaults.
+
+# Feature ; Minor ; Compiler ; #5758
+Added new option time_events, allows time events to be generated, enabled by default.
+Deprecated option relational_time_events.
+
+# Fixed ; Minor ; Compiler ; #5763
+Improved scalarization of record arrays.
+
+# Fixed ; Minor ; Compiler ; #5756
+Improved array initialization for primitive arrays in global constants.
+
+# Fixed ; Minor ; Compiler ; #5753
+Added error check for variability of sample arguments.
+
+# Feature ; Minor ; Compiler ; #5735
+Loop unrolling is now an internal option.
+
+# Fixed ; Minor ; Compiler ; #5748
+Fixed NullPointerException from flattening global access used as subscript
+
+# Feature ; Minor ; Compiler ; #5735
+Turned off loop unrolling in functions to increase performance.
+
+# Feature ; Minor ; Compiler ; #5735
+Added option for controlling maximum allowed size of dynamic state
+sets. Changed default from 8 to 10.
+
+# Feature ; Minor ; Compiler ; #5726
+Orginal annotations should be preserved when components are redeclared
+ unless new annotations are added in the redeclaring declaration.
+
+; Feature ; Minor ; Compiler ; #5725
+Added splitting of generated C code for initialization of global constants (improves compilation time).
+
+; Fixed ; Minor ; Compiler ; #5721
+Fix c_compiler so it's case insensitive.
+
 ; Feature ; Major ; Compiler ; #5515
 Turned on initial variability propagation by default.
 

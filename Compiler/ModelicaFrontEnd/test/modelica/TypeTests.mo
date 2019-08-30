@@ -2799,12 +2799,10 @@ public
  algorithm
   init x as Real[n];
   init t as Real[5];
-  t[1] := 1;
-  t[2] := 2;
-  t[3] := 3;
-  t[4] := 4;
-  t[5] := 5;
-  for i1 in 1:max(integer(n + 1 - 2) + 1, 0) loop
+  for i1 in 1:5 loop
+   t[i1] := i1;
+  end for;
+  for i1 in 1:n loop
    x[i1] := t[div(2 + (i1 - 1), n)];
   end for;
   return;

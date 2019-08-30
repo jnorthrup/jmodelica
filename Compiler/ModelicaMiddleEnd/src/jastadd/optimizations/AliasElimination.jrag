@@ -328,13 +328,17 @@ aspect AliasElimination {
 		for (ASTNode n : this)
 			n.enableAliasRewrite();
 	}
-	
-	public void FAccessExp.enableAliasRewrite() {
-		super.enableAliasRewrite();
-		rewriteAlias = true;
-		is$Final = false;
-	}
-	
+
+    public void FAccessExp.enableAliasRewrite() {
+        super.enableAliasRewrite();
+        rewriteAlias = !isLHSAssignStmt();
+        is$Final = false;
+    }
+
+    inh boolean FAccessExp.isLHSAssignStmt();
+    eq BaseNode.getChild().isLHSAssignStmt() = false;
+    eq FAssignStmt.getLeft().isLHSAssignStmt() = true;
+
 	public void FAssignStmt.enableAliasRewrite() {
 		super.enableAliasRewrite();
 		rewriteAlias = true;
@@ -542,11 +546,23 @@ aspect AliasElimination {
      */
     syn boolean FVariable.shouldEliminateTemporary() = 
         isTemporary() && 
-        nonDefiningUses().size() <= 1 && 
         definingUses().size() <= 1 && 
+        (nonDefiningUses().size() <= 1 || (definingUses().size() == 1 && definingUses().iterator().next().myFEquation().isOkInlineTemporaries())) && 
         !isPreVariable() && myPreVariable().isUnknown() && 
         (definingUses().isEmpty() || !definingUses().iterator().next().myFEquation().generatesEvents()) && 
         !isDifferentiatedVariable() && !isDerivativeVariable();
+
+    syn boolean FAbstractEquation.isOkInlineTemporaries() = false;
+    eq FEquation.isOkInlineTemporaries() = getRight().isOkInlineTemporaries();
+    
+    syn boolean FExp.isOkInlineTemporaries() = false;
+    eq FAccessExp.isOkInlineTemporaries() = true;
+    /* This rule is needed to sort out dynamic state selection in equations inlined from resolve 
+       function in Modelica.Mechanics.MultiBody.Examples.Constraints.RevoluteConstraint */
+    eq FDotMulExp.isOkInlineTemporaries() = getLeft().isTempAccess() && getRight().isTempAccess();
+    
+    syn boolean FExp.isTempAccess() = false;
+    eq FAccessExp.isTempAccess() = myFV().isTemporary();
 
 	/**
 	 * Inline all non-defining uses of variable, and remove equation defining it.
@@ -572,17 +588,18 @@ aspect AliasElimination {
             } else {
                 return false;
             }
-		}
-		
-		if (nonDefiningUses().isEmpty())
-			value.removeFromUses();
-		value.parent = null;
-		
-		for (FAccessExp use : nonDefiningUses())
-			use.replaceMe(value.unboundCopy());
+        }
+        
+        value.updateUses(FAccessExp.USES_REMOVER);
+        for (FAccessExp use : nonDefiningUses()) {
+            FExp copy = value.treeCopy();
+            use.replaceMe(copy);
+            copy.updateUses(FAccessExp.USES_ADDER);
+        }
+        
         return true;
-	}
-	
+    }
+    
     public boolean FVariable.inlineUsesFunctionCallLeft() {
         FAccessExp defineUse = definingUses().iterator().next();
         FExp value;
@@ -620,46 +637,74 @@ aspect AliasElimination {
     public void FAbstractEquation.markForRemoval() {
         markedForRemoval = true;
     }
-	
-	/**
-	 * Remove all uses in an expression from the uses lists of their respective variables.
-	 * 
-	 * Should only be used to allow iterative algorithms to use updated uses lists while 
-	 * removing expressions. Only valid in flat tree.
-	 */
-	public void FExp.removeFromUses() {
-		for (FExp e : childFExps())
-			e.removeFromUses();
-	}
-	
-	public void FAccessExp.removeFromUses() {
-		FAbstractVariable var = myFV();
-		var.uses().remove(this);
-		var.definingUses().remove(this);
-		var.nonDefiningUses().remove(this);
-		getFAccess().removeFromUses();
-	}
-	
-	/**
-	 * Remove all uses in expressions in array subscripts from the uses lists of their respective variables.
-	 * 
-	 * Should only be used to allow iterative algorithms to use updated uses lists while 
-	 * removing expressions. Only valid in flat tree.
-	 */
-	public void FAccess.removeFromUses() {}
-	
-	public void FAccessFull.removeFromUses() {
+
+
+    public interface UsesUpdater {
+        public void update(FAbstractVariable var, FAccessExp use);
+    }
+
+    public static final UsesUpdater FAccessExp.USES_REMOVER = new UsesUpdater() {
+        @Override
+        public void update(FAbstractVariable var, FAccessExp use) {
+            var.uses().remove(use);
+            var.definingUses().remove(use);
+            var.nonDefiningUses().remove(use);
+        }
+    };
+    
+    public static final UsesUpdater FAccessExp.USES_ADDER = new UsesUpdater() {
+        @Override
+        public void update(FAbstractVariable var, FAccessExp use) {
+            var.uses().add(use);
+            var.nonDefiningUses().add(use);
+        }
+    };
+
+    /**
+     * Update uses sets of variables referenced in expressions.
+     * 
+     * Should only be used to allow iterative algorithms to use updated 
+     * uses lists while removing expressions. Only valid in flat tree.
+     */
+    public void FExp.updateUses(UsesUpdater uu) {
+        for (FExp e : childFExps()) {
+            e.updateUses(uu);
+        }
+    }
+
+    public void FAccessExp.updateUses(UsesUpdater uu) {
+        uu.update(myFV(), this);
+        getFAccess().updateUses(uu);
+    }
+
+    /**
+     * Update uses sets of variables referenced in expressions in array subscripts.
+     * 
+     * Should only be used to allow iterative algorithms to use updated 
+     * uses lists while removing expressions. Only valid in flat tree.
+     */
+    public abstract void FAccess.updateUses(UsesUpdater uu);
+
+    public void FAccessFull.updateUses(UsesUpdater uu) {
         for (FAccessPart p : getFAccessParts()) {
             if (p.hasFArraySubscripts()) {
-                p.getFArraySubscripts().removeFromUses();
+                p.getFArraySubscripts().updateUses(uu);
             }
         }
-	}
-	
-    public void FArraySubscripts.removeFromUses() {}
-    public void FArrayExpSubscripts.removeFromUses() {
+    }
+
+    public void FAccessEmpty.updateUses(UsesUpdater uu) {
+        
+    }
+
+    public void FAccessString.updateUses(UsesUpdater uu) {
+        
+    }
+
+    public void FArraySubscripts.updateUses(UsesUpdater uu) {}
+    public void FArrayExpSubscripts.updateUses(UsesUpdater uu) {
         for (FSubscript s : getFSubscripts()) {
-            s.removeFromUses();
+            s.updateUses(uu);
         }
     }
 
@@ -669,12 +714,12 @@ aspect AliasElimination {
 	 * Should only be used to allow iterative algorithms to use updated uses lists while 
 	 * removing expressions. Only valid in flat tree.
 	 */
-	public void FSubscript.removeFromUses() {}
-	
-	public void FExpSubscript.removeFromUses() {
-		getFExp().removeFromUses();
-	}
-	
+    public void FSubscript.updateUses(UsesUpdater uu) {}
+
+    public void FExpSubscript.updateUses(UsesUpdater uu) {
+        getFExp().updateUses(uu);
+    }
+
 	/**
 	 * Remove all equations with <code>markedForRemoval == true</code>. 
 	 */

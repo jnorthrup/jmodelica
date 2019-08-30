@@ -283,7 +283,8 @@ aspect DynamicStateSelect{
         
     }
 
-    public Set<IndexReductionVar> IndexReductionBiPGraph.computeDynamicStateSets(Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix, IndexReductionResult result) {
+    public Set<IndexReductionVar> IndexReductionBiPGraph.computeDynamicStateSets(int dynamicStateLimit, 
+            Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix, IndexReductionResult result) {
         if (result.hasDSFailed())
             return Collections.emptySet();
         Map<IndexReductionVar, IndexReductionEq> initialMatching = new HashMap<IndexReductionVar, IndexReductionEq>();
@@ -426,7 +427,7 @@ aspect DynamicStateSelect{
         
         boolean skipDynamicStates = false;
         for (DSSet set : dsSets) {
-            if (set.eqns.size() > 8 || set.vars.size() > 8) {
+            if (dynamicStateLimit >= 0 && (set.eqns.size() > dynamicStateLimit || set.vars.size() > dynamicStateLimit)) {
                 ASTNode.log.verbose("Too big dynamic state set, %d equations and %d variables!", set.eqns.size(), set.vars.size());
                 ASTNode.log.verbose(set);
                 skipDynamicStates = true;
@@ -737,8 +738,9 @@ aspect DynamicStateSelect{
     }
     
     public class EquationBlockFactory {
-        private static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> DynamicStateBlock computeDynamicStateBlock(SCCBlock<E, V> component, BlockProducer producer, OptionRegistry options) {
-            Map<DynamicStateSet, FDynamicAlgebraicVariable[]> setVarMap = new LinkedHashMap<DynamicStateSet, FDynamicAlgebraicVariable[]>();
+        
+        private static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> DynamicStateBlock computeDynamicStateBlock(SCCBlock<E, V> component, BlockProducer producer, StepUtil stepUtil) {
+            final Map<DynamicStateSet, FDynamicAlgebraicVariable[]> setVarMap = new LinkedHashMap<DynamicStateSet, FDynamicAlgebraicVariable[]>();
             Collection<V> otherVars = new ArrayList<V>();
             for (E eqn : component.getMembers()) {
                 if (eqn.isMeta()) {
@@ -768,7 +770,7 @@ aspect DynamicStateSelect{
             int setCounter = 0;
             int totalNumAlgebraics = 0;
             int totalNumCombinations = 1;
-            Collection<FVariable> allDynamicStates = new ArrayList<FVariable>();
+            final Collection<FVariable> allDynamicStates = new ArrayList<FVariable>();
             for (Map.Entry<DynamicStateSet, FDynamicAlgebraicVariable[]> entry : setVarMap.entrySet()) {
                 boolean allSet = true;
                 DynamicStateSet set = entry.getKey();
@@ -804,6 +806,30 @@ aspect DynamicStateSelect{
                 throw new BLTException("Ouch! There are more than 42 combinations for the dynamic states, there were " + totalNumCombinations + " combinations!");
             FVariable[][] combinations = combineDSCombinations(setCombinations, totalNumAlgebraics);
             DynamicStateBLT[] blts = new DynamicStateBLT[combinations.length];
+            calculateBlockBLTs(blts, component, producer, stepUtil, combinations, otherVars,
+                    new BLTProducer<DynamicStateBLT>() {
+                @Override
+                public DynamicStateBLT create(FVariable[] combination) {
+                    Set<FVariable> algebraics = new LinkedHashSet<FVariable>(Arrays.asList(combination));
+                    Collection<FVariable> states = new ArrayList<FVariable>();
+                    for (FVariable var : allDynamicStates) {
+                        if (!algebraics.contains(var)) {
+                            states.add(var);
+                        }
+                    }
+                    return new DynamicStateBLT(setVarMap.keySet(), states, algebraics);
+                }
+            });
+            return new DynamicStateBlock(producer, component.computeBlockDependency(), blts, setVarMap.keySet());
+        }
+        
+        interface BLTProducer<B extends BLT> {
+            B create(FVariable[] combination);
+        }
+        
+        public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, B extends BLT> void calculateBlockBLTs(B[] blts, SCCBlock<E, V> component, 
+                BlockProducer producer, StepUtil stepUtil, 
+                FVariable[][] combinations, Collection<V> otherVars, BLTProducer<B> bltProducer) {
             for (int i = 0; i < combinations.length; i++) {
                 FVariable[] combination = combinations[i];
                 StringBuilder sb = new StringBuilder();
@@ -822,14 +848,9 @@ aspect DynamicStateSelect{
                 }
                 ASTNode.log.debug(graph);
                 graph.maximumMatching(true);
-                Set<FVariable> algebraics = new LinkedHashSet<FVariable>(Arrays.asList(combination));
-                Collection<FVariable> states = new ArrayList<FVariable>();
-                for (FVariable var : allDynamicStates)
-                    if (!algebraics.contains(var))
-                        states.add(var);
-                DynamicStateBLT blt = new DynamicStateBLT(setVarMap.keySet(), states, algebraics);
+                B blt = bltProducer.create(combination);
                 if (graph.isComplete()) {
-                    blt = graph.computeBLT(options, producer, blt, false);
+                    blt = graph.computeBLT(stepUtil, producer, blt, false);
                 } else {
                     ASTNode.log.verbose("  This combination does not have a valid solution!");
                     ASTNode.log.debug(graph.printMatchingObj());
@@ -837,7 +858,6 @@ aspect DynamicStateSelect{
                 ASTNode.log.debug(blt);
                 blts[i] = blt;
             }
-            return new DynamicStateBlock(producer, component.computeBlockDependency(), blts, setVarMap.keySet());
         }
     }
     

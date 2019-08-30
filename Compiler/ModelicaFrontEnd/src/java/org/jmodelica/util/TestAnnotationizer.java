@@ -36,7 +36,7 @@ import java.util.Scanner;
  * parsing the arguments and choosing between Modelica and Optimica versions 
  * of TestAnnotationizerHelper.
  * 
- * Usage: java TestAnnotationizer java TestAnnotationizer <.mo file path> [options...] [description]
+ * Usage: java TestAnnotationizer <.mo file path> [options...] [description]
  *   Options:
  *     -w           write result to file instead of stdout
  *     -m/-o        create annotation for Modelica/Optimica (default is infer from file path)
@@ -60,7 +60,7 @@ import java.util.Scanner;
  */
 public class TestAnnotationizer {
 
-    private enum Lang { none, modelica, optimica };
+    private enum Lang { none, modelica, optimica }
 
     public static void main(String[] args) throws Exception {
         if (args.length == 0) {
@@ -80,6 +80,7 @@ public class TestAnnotationizer {
         boolean repeat = false;
         Lang inputlang = Lang.none;
         Lang lang = Lang.none;
+        String platform = null;
         String opts = null;
         String checkType = null;
         String libs = null;
@@ -93,6 +94,8 @@ public class TestAnnotationizer {
                 modelName = value;
             } else if (arg.startsWith("-d=")) {
                 data = value;
+            } else if (arg.startsWith("-P=")) {
+                platform = value;
             } else if (arg.startsWith("-p=")) {
                 opts = value;
             } else if (arg.startsWith("-k=")) {
@@ -197,7 +200,7 @@ public class TestAnnotationizer {
                     testType = in.readLine().trim();
                 }
                 
-                doAnnotation(optimica, filePath, testType, modelName, description, opts, data, checkType, libs, write);
+                doAnnotation(optimica, filePath, testType, modelName, description, platform, opts, data, checkType, libs, write);
             }
             
             if (repeat) {
@@ -224,36 +227,36 @@ public class TestAnnotationizer {
         
         ArrayList<String> packStack = new ArrayList<String>();
         packStack.add("");
-        BufferedReader f = new BufferedReader(new FileReader(new File(filePath)));
-        String fullLine;
-        String[] line;
-        boolean inModel = false;
-        while((fullLine = f.readLine()) != null) {
-            line = fullLine.trim().split(" ");
-            if (!inModel && (line[0].equals("package") || line[0].equals("model"))) {
-                String top = packStack.get(packStack.size()-1);
-                if (top != "") {
-                    top += ".";
-                }
-                top += line[1];
-                if (line[0].equals("model")) {
-                    inModel = true;
-                    if (!except.contains(top)) {
-                        models.add(top);
+        try(BufferedReader f = new BufferedReader(new FileReader(new File(filePath)))) {
+            String fullLine;
+            String[] line;
+            boolean inModel = false;
+            while((fullLine = f.readLine()) != null) {
+                line = fullLine.trim().split(" ");
+                if (!inModel && (line[0].equals("package") || line[0].equals("model"))) {
+                    String top = packStack.get(packStack.size()-1);
+                    if (top != "") {
+                        top += ".";
                     }
-                }
-                if (!(line.length > 2 && line[2].startsWith("="))) {
-                    packStack.add(top);
-                }
-            } else if (line[0].equals("end")){
-                String[] t = packStack.get(packStack.size()-1).split("\\.");
-                if (line[1].equals(t[t.length-1] + ";")) {
-                    packStack.remove(packStack.size()-1);
-                    inModel = false;
+                    top += line[1];
+                    if (line[0].equals("model")) {
+                        inModel = true;
+                        if (!except.contains(top)) {
+                            models.add(top);
+                        }
+                    }
+                    if (!(line.length > 2 && line[2].startsWith("="))) {
+                        packStack.add(top);
+                    }
+                } else if (line[0].equals("end")){
+                    String[] t = packStack.get(packStack.size()-1).split("\\.");
+                    if (line[1].equals(t[t.length-1] + ";")) {
+                        packStack.remove(packStack.size()-1);
+                        inModel = false;
+                    }
                 }
             }
         }
-        f.close();
         allModelsIterator = models.iterator();
         return allModelsIterator;
     }
@@ -265,14 +268,14 @@ public class TestAnnotationizer {
     }
 
     private static void doAnnotation(boolean optimica, String filePath,
-            String testType, String modelName, String description, String optStr, 
+            String testType, String modelName, String description, String platform, String optStr, 
             String data, String checkType, String libStr, boolean write) throws Exception {
         String[] opts = (optStr == null) ? new String[0] : optStr.split(",");
         String[] libs = (libStr == null) ? new String[0] : libStr.split(",");
         Method m = getHelperClass(optimica ? OPTIMICA : MODELICA).getMethod("doAnnotation", 
-                String.class, String.class, String.class, String.class, String[].class, String.class, 
+                String.class, String.class, String.class, String.class, String.class, String[].class, String.class, 
                 String.class, String[].class, boolean.class);
-        m.invoke(null, filePath, testType, modelName, description, opts, data, checkType, libs, write);
+        m.invoke(null, filePath, testType, modelName, description, platform, opts, data, checkType, libs, write);
     }
 
     private static void usageError() throws Exception {
@@ -283,11 +286,13 @@ public class TestAnnotationizer {
 	private static final String[] OPTIMICA = { "org.jmodelica.optimica.compiler.TestAnnotationizerHelper" };
 	private static final String[] ANY      = { MODELICA[0], OPTIMICA[0] };
 	
-	private static Class getHelperClass(String[] names) {
+	private static Class<?> getHelperClass(String[] names) {
 		for (String name : names) {
 			try {
 				return Class.forName(name);
-			} catch (Exception e) {}
+			} catch (Exception e) {
+			    // ignore
+			}
 		}
 		System.err.println("Could not load helper class. Compiler classes must be on path.");
 		System.exit(1);

@@ -11,10 +11,14 @@ public class TestLogger extends ModelicaLogger {
     public TestLogger() {
         super(Level.INFO);
     }
+    
+    public TestLogger(Level loglevel) {
+    	super(loglevel);
+    }
 
     @Override
     public void close() {
-        
+        // ignore
     }
 
     @Override

@@ -26,7 +26,14 @@ aspect FExpToCasADi {
     public class ModelicaCompiler {
         public FClass compileModelNoCodeGen(String name[], String cl)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-            return compileModel(name, cl, createTargetObject("nocodegen", null), null, null);
+            OptionRegistry tempOptions = options.copy();
+            TargetObject target = createTargetObject("nocodegen", null);
+            target.setDefaultOptions(options);
+            try {
+                return compileModel(name, cl, target, null, null);
+            } finally {
+                options.copyAllOptions(tempOptions);
+            }
         }
     }
 
@@ -196,6 +203,13 @@ aspect FExpToCasADi {
         throw new UnsupportedOperationException("If-Statements are unsupported (try to rewrite into if-expressions): " + toString());
     }
     
+    MXVector FForStmt.updateExpressionsAccordingToStatement(MXVector expressions, MXVector allVars) {
+        for (FStatement stmt : getUnrolledForStmts()) {
+            expressions = stmt.updateExpressionsAccordingToStatement(expressions, allVars);
+        }
+        return expressions;
+    }
+    
     /**
      * @param A MX that is searched for
      * @param A MXVector that is searched in
@@ -262,7 +276,7 @@ aspect FExpToCasADi {
     /**
      * Returns this expression as A MX. Note that this might
      * not make sense for some expressions, e.g. function calls with
-     * several outputs and FAccessExp for FFunctionArray.
+     * several outputs and FAccessExp for arrays.
      * @return A MX
      */
     syn MX FExp.toMX() {
@@ -369,6 +383,10 @@ aspect FExpToCasADi {
         }
     }
     
+    eq FGlobalAccessExp.toMX() {
+        return ceval().buildLiteral().toMX();
+    }
+    
     /**
      * Connects the use of a variable in an expression with
      * the symbolic and lazy MX for that variable. 
@@ -385,6 +403,10 @@ aspect FExpToCasADi {
             MXVec.add(toMX());
             return MXVec;
         }
+    }
+    
+    eq FGlobalAccessExp.toMXVector() {
+        return ceval().buildLiteral().toMXVector();
     }
     
     /**
@@ -454,7 +476,7 @@ aspect FExpToCasADi {
      
      /**
       * For retrieving the MXVector representation of this variable.
-      * Some variables, e.g. FFunctionArray can only be represented
+      * Some variables, e.g. arrays can only be represented
       * as MXVector
       * @return A MXVector
       */
@@ -467,25 +489,13 @@ aspect FExpToCasADi {
     /**
      * For retrieving the MX representation of this variable.
      * Note that some variables can not be represented as a single MX, e.g.
-     * FFunctionArray. These may need to be represented as MXVector.
+     * arrays. These may need to be represented as MXVector.
      */
-    syn lazy MX FAbstractVariable.asMXVariable() {
-        throw new UnsupportedOperationException("Cannot convert variable to MX: " + toString());
-    }
-    
-    
-    eq FVariable.asMXVariable() = ifcasadi.msym(name());
+    syn lazy MX FAbstractVariable.asMXVariable();
+    eq UnknownFVariable .asMXVariable() { throw new UnsupportedOperationException("Cannot convert unknown variable to MX"); }
+    eq FEnumLiteral     .asMXVariable() { throw new UnsupportedOperationException("Cannot convert enum literal to MX"); }
+    eq FVariable        .asMXVariable() = ifcasadi.msym(name());
     eq FFunctionVariable.asMXVariable() = ifcasadi.msym(getFAccess().toString());
-    
-    eq FFunctionArray.asMXVector() {
-        MXVector MXVec = new MXVector();
-        for (int i = 0; i < size().numElements(); ++i) {
-            MX mx = ifcasadi.msym(getFAccess().toString() + "_" +i);
-            MXVec.add(mx);
-        }
-        return MXVec;
-    }
-     
     
     /**
      * Retrieves the MXVector for this variable. 
@@ -498,7 +508,12 @@ aspect FExpToCasADi {
      */ 
     eq FFunctionVariable.asMXVector() {
         MXVector MXVec = new MXVector();
-        if (isRecord()) {
+        if (isArray()) {
+            for (int i = 0; i < size().numElements(); ++i) {
+                MX mx = ifcasadi.msym(getFAccess().toString() + "_" +i);
+                MXVec.add(mx);
+            }
+        } else if (isRecord()) {
             for (FVariable fvar : myFRecordDecl().getFVariables()) {             
                 ArrayList<String> myFlattenedVariables = new ArrayList<String>();
                 myFlattenedVariables.add(name());

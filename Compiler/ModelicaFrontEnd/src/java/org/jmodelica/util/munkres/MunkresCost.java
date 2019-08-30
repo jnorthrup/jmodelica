@@ -29,6 +29,7 @@ public interface MunkresCost<T> extends Comparable<T> {
      * @param other The other cost
      * @return Integer indicating the difference between the two costs
      */
+    @Override
     public int compareTo(T other);
 
     /**

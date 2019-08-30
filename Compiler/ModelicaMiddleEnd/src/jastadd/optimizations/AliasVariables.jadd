@@ -66,18 +66,17 @@ aspect AliasVariables {
 	 * @return True if negated alias, otherwise false.
 	 */
 	syn boolean FAbstractVariable.isNegated() = false;
-	
-	eq FVariable.isNegated() {
-		AliasManager aliasManager = myFClass().getAliasManager();
-		AliasManager.AliasVariable alias = aliasManager.getAliasVariable(this);
-		AliasManager.AliasSet aliasSet = alias.getSet();
-		if (alias == null) {
-			return false;
-		} else {
-            AliasManager.AliasVariable iav = aliasSet.getModelVariable();
-			return (alias.isNegated() != iav.isNegated());
-		}
-	}
+
+    eq FVariable.isNegated() {
+        AliasManager aliasManager = myFClass().getAliasManager();
+        AliasManager.AliasVariable alias = aliasManager.getAliasVariable(this);
+        if (alias == null) {
+            return false;
+        }
+        AliasManager.AliasSet aliasSet = alias.getSet();
+        AliasManager.AliasVariable iav = aliasSet.getModelVariable();
+        return (alias.isNegated() != iav.isNegated());
+    }
 
     /**
      * Set each attribute of this variable to the most relevant version from the 
@@ -923,6 +922,13 @@ aspect AliasVariables {
     syn long FVariable.aliasHeuristicScore() {
         long score = 0;
         
+        // Annotations
+        score *= 10;
+        if (containsActiveAnnotations()) {
+            score += 1;
+        }
+        
+        score *= 10;
         VisibilityType t = getVisibilityType();
         if (t.isProtected()) {
             // Some models fail to simulate without this
@@ -940,12 +946,6 @@ aspect AliasVariables {
             } else {
                 score += 1;
             }
-        }
-
-        // Annotations
-        score *= 10;
-        if (containsActiveAnnotations()) {
-            score += 1;
         }
 
         // Stateselect level

@@ -606,11 +606,12 @@ aspect InstanceErrorCheck {
     // We don't want to error check an entire model, just the classes
     //   that are used. 
     public void InstProgramRoot.checkErrorsInInstClass(String className, ErrorCheckType checkType) throws ModelicaClassNotFoundException {
-        InstLookupResult<InstClassDecl> icd = lookupInstClassQualified(className);
-        if (icd.successful()) 
-            icd.target().errorCheck(checkType);
-        else
+        InstClassDecl icd = instantiateModel(className);
+        if (!icd.isUnknown()) {
+            icd.errorCheck(checkType);
+        } else {
             throw new ModelicaClassNotFoundException(className);
+        }
     }
 
     public void InstClassDecl.checkErrorsInModelInstance(String className, ErrorCheckType checkType) throws ModelicaClassNotFoundException {
@@ -1016,7 +1017,16 @@ aspect InstanceErrorCheck {
 			}
 		}
 	}
+
 	
+    public static final SimpleProblemProducer ASTNode.UNSPECIFIED_ENUM_COMPONENT =
+            new SimpleErrorProducer("UNSPECIFIED_ENUM_COMPONENT", ProblemKind.SEMANTIC,
+                    "Components of unspecified enumerations are not allowed in simulation models:\n %s");
+
+	syn boolean InstNode.isUnspecifiedEnum() = false;
+	eq InstPrimitive.isUnspecifiedEnum() = myInstClass().isUnspecifiedEnum();
+	eq InstClassDecl.isUnspecifiedEnum() = enumLiterals().isEmpty();
+
 	public void InstExtends.collectErrors(ErrorCheckType checkType) {
 	    if (!errorChecked) {
 	    	if (checkType.checkForRecursiveStructure() && isRecursed()) {

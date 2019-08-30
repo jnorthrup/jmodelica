@@ -18,10 +18,12 @@ package org.jmodelica.junit;
 import org.jmodelica.util.test.Assert;
 
 public class JUnitAssert implements Assert {
+    @Override
     public void fail(String msg) {
         org.junit.Assert.fail(msg);
     }
 
+    @Override
     public void assertEquals(String msg, String expected, String actual) {
         org.junit.Assert.assertEquals(msg, expected, actual);
     }

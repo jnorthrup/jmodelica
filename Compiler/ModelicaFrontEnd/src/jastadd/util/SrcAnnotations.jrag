@@ -15,7 +15,7 @@
 */
 
 import org.jmodelica.util.annotations.AnnotationProvider;
-import org.jmodelica.util.annotations.AnnotationProvider.SubNodePair;
+import org.jmodelica.util.annotations.AnnotationProvider.SubAnnotationPair;
 import org.jmodelica.util.annotations.FailedToSetAnnotationValueException;
 import org.jmodelica.util.annotations.GenericAnnotationNode;
 import org.jmodelica.util.annotations.IterableAnnotationProvider;
@@ -44,7 +44,7 @@ aspect SrcAnnotations {
         return srcAnnotation(SrcAnnotationNode.defaultEvaluator(), path);
     }
     public SrcAnnotationNode InstComponentDecl.srcAnnotation(String ... path) {
-        return SrcAnnotationNode.createFor(srcAnnotationProvider(), new SrcAnnotationNode.InstEvaluator(this), path);
+        return SrcAnnotationNode.createFor(srcAnnotationProvider(), new SrcAnnotationNode.InstEvaluator(containingInstNode()), path);
     }
 
     public SrcAnnotationNode SrcExtendsClause.srcAnnotation(String ... path) {
@@ -100,8 +100,8 @@ aspect SrcAnnotations {
      ******************/
 
     /**
-     * Represent an Annotation in the Source tree. Wrapps an 
-     * SrcAnnotationProvider which corresponds to the actual annotation/s in the AST.
+     * Represent an Annotation in the Source tree. Wraps a SrcAnnotationProvider which corresponds to the actual 
+     * annotation/s in the AST.
      */
     public class SrcAnnotationNode extends GenericAnnotationNode<SrcAnnotationNode, SrcAnnotationProvider, SrcExp> {
         
@@ -124,6 +124,12 @@ aspect SrcAnnotations {
         @Override
         protected SrcAnnotationNode createNode(String name, SrcAnnotationProvider node) {
             return new SrcAnnotationNode(name, node, this, evaluator);
+        }
+
+        @Override
+        protected SrcAnnotationNode createNode(SrcAnnotationProvider node) {
+            String name = node instanceof SrcFunctionCall ? ((SrcFunctionCall)node).namedAnnotationProviderName() : null;
+            return createNode(name, node);
         }
 
         @Override
@@ -171,8 +177,7 @@ aspect SrcAnnotations {
             
             @Override
             public ConstValue evaluate(SrcExp evaluable) {
-                FExp fexp = context.dynamicFExp(evaluable.instantiate());
-                return fexp.evaluateValue();
+                return context.ceval(evaluable);
             }
             
         }
@@ -182,7 +187,9 @@ aspect SrcAnnotations {
      * AnnotationProvider for modifications and annotations in the SourceTree.
      * See overview on AnnotationProvider for more info.
      */ 
-    public interface SrcAnnotationProvider extends AnnotationProvider<SrcAnnotationProvider, SrcExp> {}
+    public interface SrcAnnotationProvider extends AnnotationProvider<SrcAnnotationProvider, SrcExp> {
+        public SrcClassDecl enclosingClassDecl();
+    }
     
     /**
      * immutable AnnotationProvider used to obtain the annotations from elements which can have annotations. 
@@ -209,15 +216,15 @@ aspect SrcAnnotations {
     eq SrcComponentModification.annotationValue() = hasSrcModification() ? getSrcModification().annotationValue() : null;
     eq SrcValueModification.annotationValue() = getSrcExp();
 
-    syn Iterable<SubNodePair<SrcAnnotationProvider>> SrcModification.annotationSubNodes() = Collections.emptyList();
+    syn Iterable<SubAnnotationPair<SrcAnnotationProvider>> SrcModification.annotationSubNodes() = Collections.emptyList();
     eq SrcCompleteModification.annotationSubNodes() = getSrcClassModification().annotationSubNodes();
     eq SrcComponentModification.annotationSubNodes() = 
             hasSrcModification() ? getSrcModification().annotationSubNodes() : super.annotationSubNodes();
     eq SrcClassModification.annotationSubNodes() {
-        return new TransformerIterable<SrcArgument, SubNodePair<SrcAnnotationProvider>>(getSrcArguments()) {
+        return new TransformerIterable<SrcArgument, SubAnnotationPair<SrcAnnotationProvider>>(getSrcArguments()) {
             @Override
-            protected SubNodePair<SrcAnnotationProvider> transform(SrcArgument a) {
-                return new SubNodePair<SrcAnnotationProvider>(a.annotationName(), a);
+            protected SubAnnotationPair<SrcAnnotationProvider> transform(SrcArgument a) {
+                return new SubAnnotationPairImpl<SrcAnnotationProvider>(a.annotationName(), a);
             }
         };
     }
@@ -282,6 +289,12 @@ aspect SrcAnnotations {
     public void SrcModification.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         throw new FailedToSetAnnotationValueException();
     }
+    
+    @Override
+    public boolean SrcModification.canChangeAnnotationValue() {
+        return false;
+    }
+    
     @Override
     public void SrcValueModification.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         if (newValue == null) {
@@ -290,6 +303,12 @@ aspect SrcAnnotations {
         }
         setSrcExp(newValue);
     }
+
+    @Override
+    public boolean SrcValueModification.canChangeAnnotationValue() {
+        return true;
+    }
+
     @Override
     public void SrcComponentModification.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         if (!hasSrcModification()) {
@@ -298,6 +317,12 @@ aspect SrcAnnotations {
         }
         getSrcModification().setAnnotationValue(newValue);
     }
+    
+    @Override
+    public boolean SrcComponentModification.canChangeAnnotationValue() {
+        return true;
+    }
+    
     @Override
     public void SrcCompleteModification.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         if (hasSrcValueModification()) {
@@ -309,6 +334,11 @@ aspect SrcAnnotations {
         } else {
             setSrcValueModification(new SrcValueModification(newValue));
         }
+    }
+    
+    @Override
+    public boolean SrcCompleteModification.canChangeAnnotationValue() {
+        return true;
     }
     
     /**
@@ -412,13 +442,18 @@ aspect SrcAnnotations {
 
     @Override
     public void SrcAnnotation.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
+        throw new FailedToSetAnnotationValueException();
+    }
+    
+    public boolean SrcAnnotation.canChangeAnnotationValue() {
+        return false;
     }
 
     syn boolean SrcAnnotation.isEach() = false;
 
     syn boolean SrcAnnotation.isFinal() = false;
 
-    syn Iterable<SubNodePair<SrcAnnotationProvider>> SrcAnnotation.annotationSubNodes() = Collections.emptyList();
+    syn Iterable<SubAnnotationPair<SrcAnnotationProvider>> SrcAnnotation.annotationSubNodes() = Collections.emptyList();
     eq SrcParseAnnotation.annotationSubNodes() = getSrcClassModification().annotationSubNodes();
 
     public SrcAnnotationProvider SrcAnnotation.addAnnotationSubNode(String name) {
@@ -430,13 +465,13 @@ aspect SrcAnnotations {
     }
 
     /**
-     * Interface which should be implemented by all AST nodes which have a
-     * Opt<SrcAnnotation> as child (which we wan't to traverse with this API).
+     * Interface which should be implemented by all AST nodes which have an
+     * Opt<SrcAnnotation> as child (which we want to traverse with this API).
      */
     public interface ASTNodeWithAnnotation {
         public SrcAnnotation getSrcAnnotation();
         public boolean hasSrcAnnotation();
-        public void setSrcAnnotation(SrcAnnotation annotation);
+        public ASTNodeWithAnnotation setSrcAnnotation(SrcAnnotation annotation);
     }
 
     SrcFullClassDecl implements ASTNodeWithAnnotation;
@@ -448,13 +483,18 @@ aspect SrcAnnotations {
      * Bridge provider for elements which aren't annotations & modifications
      * themselves but can have annotations/modifications.
      * Methods are delegated to the actual annotation. Implemented typically as an anonymous inner class.
-     *  See overview on AnnotationProvider for more info.
+     * See overview on AnnotationProvider for more info.
      */
     public abstract class RootAnnotationProviderProxy<T extends ASTNode, S extends ASTNode & SrcAnnotationProvider> implements SrcAnnotationProvider {
         protected final T owningNode;
 
         public RootAnnotationProviderProxy(T owningNode) {
             this.owningNode = owningNode;
+        }
+
+        @Override
+        public SrcClassDecl enclosingClassDecl() {
+            return owningNode.enclosingClassDecl();
         }
 
         @Override
@@ -466,18 +506,23 @@ aspect SrcAnnotations {
         public void setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
             throw new FailedToSetAnnotationValueException();
         }
+        
+        @Override
+        public boolean canChangeAnnotationValue() {
+        	return false;
+        }
 
         protected abstract boolean hasProvider();
         protected abstract void createProvider();
         protected abstract S getProvider();
 
         @Override
-        public Iterable<SubNodePair<SrcAnnotationProvider>> annotationSubNodes() {
+        public Iterable<SubAnnotationPair<SrcAnnotationProvider>> annotationSubNodes() {
             SrcAnnotationProvider provider = (SrcAnnotationProvider) getProvider();
             if (provider != null) {
                 return provider.annotationSubNodes();
             } else {
-                return Collections.<SubNodePair<SrcAnnotationProvider>>emptyList();
+                return Collections.emptyList();
             }
         }
 
@@ -506,9 +551,35 @@ aspect SrcAnnotations {
 
     }
     
+    /**
+     * Obtain the enclosing StoredDefinition, keeps track on which file this node belongs.
+     */
+    inh SrcStoredDefinition SrcBaseNode.myStoredDefinition();
+    eq SrcStoredDefinition.getChild().myStoredDefinition() = this;
+    eq SourceRoot.getChild().myStoredDefinition() = null;
+
+    public interface SrcAnnotationProvider {
+        public SrcStoredDefinition myStoredDefinition();
+    }
+
+    @Override
+    public SrcStoredDefinition ExpValueProvider.myStoredDefinition() {
+        return exp.myStoredDefinition();
+    }
+
+    @Override
+    public SrcStoredDefinition SrcAnnotationsIteratorProvider.myStoredDefinition() {
+        return null;
+    }
+
      public RootAnnotationProviderProxy<SrcShortClassDecl, SrcModification> SrcShortClassDecl.createModifierProvider(){
             return new RootAnnotationProviderProxy<SrcShortClassDecl, SrcModification>(this) {
-            
+
+            @Override
+            public SrcStoredDefinition myStoredDefinition() {
+                return owningNode.myStoredDefinition();
+            }
+
             @Override
             protected boolean hasProvider() {
                 return owningNode.getSrcExtendsClauseShortClass().hasSrcClassModification();
@@ -528,6 +599,12 @@ aspect SrcAnnotations {
     
     public RootAnnotationProviderProxy<SrcComponentDecl, SrcModification> SrcComponentDecl.createModifierProvider() {
         return new RootAnnotationProviderProxy<SrcComponentDecl, SrcModification>(this) {
+
+            @Override
+            public SrcStoredDefinition myStoredDefinition() {
+                return owningNode.myStoredDefinition();
+            }
+
             @Override
             protected boolean hasProvider() {
                 return owningNode.hasSrcModification();
@@ -558,12 +635,21 @@ aspect SrcAnnotations {
                     owningNode.setSrcModification(new SrcValueModification(newValue));
                 }
             }
+
+            @Override
+            public boolean canChangeAnnotationValue() {
+                if (hasProvider()) {
+                	return getProvider().canChangeAnnotationValue();
+                } else {
+                    return true;
+                }
+            }
             
             @Override
             public SrcAnnotationProvider addAnnotationSubNode(String name) {
                 if (!hasProvider()) {
                     createProvider();
-                }else if (owningNode.getSrcModification().isValueModification()) {
+                } else if (owningNode.getSrcModification().isValueModification()) {
                     setSrcModification(owningNode.getSrcModification().moveValueModIntoCompleteMod());
                 }
                 return getProvider().addAnnotationSubNode(name);
@@ -573,7 +659,12 @@ aspect SrcAnnotations {
 
     public RootAnnotationProviderProxy<SrcExtendsClause, SrcModification> SrcExtendsClause.createModifierProvider(){
         return new RootAnnotationProviderProxy<SrcExtendsClause, SrcModification>(this) {
-        
+
+        @Override
+        public SrcStoredDefinition myStoredDefinition() {
+            return owningNode.myStoredDefinition();
+        }
+
         @Override
         protected boolean hasProvider() {
             return owningNode.hasSrcClassModification();
@@ -599,6 +690,14 @@ aspect SrcAnnotations {
 
         public ASTAnnotationAnnotationProvider(T owningNode) {
             super(owningNode);
+        }
+
+        @Override
+        public SrcStoredDefinition myStoredDefinition() {
+            if (hasProvider()) {
+                return getProvider().myStoredDefinition();
+            }
+            return null;
         }
 
         @Override
@@ -634,83 +733,131 @@ aspect SrcAnnotations {
     }
 
     /*******************
-     *       SrcExp        
+     *       SrcExp     
      ******************/
-    /*
-     * SrcExp cant implement SrcAnnotationProvider since then it will be both the
-     * provider and the value of an annotation, take for example
-     * SrcArrayConstructor. We want to use it as an annotation node when it
-     * represents the list of graphical primitives in an diagram or icon. But
-     * in some situations we want to treat it as the value of annother
-     * annotation node. When it is a provider, what would  annotationValue()
-     * return? If it returns this, then that would be wrong, since when it is
-     * the provider, then it is the RHS of the equal sign that is the value,
-     * which doesn't exist for an SrcArrayConstructor, implying it should return
-     * null. Mean while if it actually was the RHS of another exp, then it
-     * should return this. So we need this class.
-     * 
-     * Remember a provider points to the entire annotation node, e.g.:
-     *      a(b,c,d)=e
-     * while annotationValue() points at 'e' in this case.
+    /* SrcExp is not an AnnotationProvider in general. Only the special cases SrcFunction and
+     * SrcArrayConstructor are currently AnnotationProviders (they are special in the sense
+     * that they are the only expressions that can have sub-annotations).
+     * This could be revisited in the future - SrcExp could be made an annotation provider.
      */
 
     syn SrcAnnotationProvider SrcExp.asAnnotationProvider() = null;
-    eq SrcArrayConstructor.asAnnotationProvider()           = getSrcFunctionArguments();
-    eq SrcFunctionCall.asAnnotationProvider()               = new SrcSingeltonProvider(name(), getSrcFunctionArguments());
+    eq SrcFunctionCall.asAnnotationProvider()               = this;
+    eq SrcArrayConstructor.asAnnotationProvider()           = this;
 
     syn SrcAnnotationProvider SrcExp.asNamedAnnotationProvider() = null;
-    eq SrcFunctionCall.asNamedAnnotationProvider() = hasSrcFunctionArguments() ? getSrcFunctionArguments() : null;
+    eq SrcFunctionCall.asNamedAnnotationProvider()               = this;
 
     syn String SrcExp.namedAnnotationProviderName() {
-        throw new IllegalArgumentException("Can't call namedAnnotationName() for the type " + getClass().getSimpleName());
+        throw new IllegalArgumentException("Cannot call namedAnnotationProviderName() for the type " + getClass().getSimpleName());
     }
-    eq SrcFunctionCall.namedAnnotationProviderName() = name();
+    eq SrcFunctionCall.namedAnnotationProviderName()     = name();
 
-    SrcFunctionArguments implements SrcAnnotationProvider;
+    SrcFunctionCall implements SrcAnnotationProvider;
 
     @Override
-    public SrcExp SrcFunctionArguments.annotationValue() {
-        return null;
-    }
-
-    @Override
-    public Iterable<SubNodePair<SrcAnnotationProvider>> SrcFunctionArguments.annotationSubNodes() {
-        return new ChainedIterable(new TransformerIterable<SrcExp, SubNodePair<SrcAnnotationProvider>>(getSrcExps()) {
+    public Iterable<SubAnnotationPair<SrcAnnotationProvider>> SrcFunctionCall.annotationSubNodes() {
+        if (!hasSrcFunctionArguments()) {
+            return Collections.emptyList();
+        }
+        return new ChainedIterable(new TransformerIterable<SrcExp, SubAnnotationPair<SrcAnnotationProvider>>(getSrcFunctionArguments().getSrcExps()) {
             @Override
-            protected SubNodePair<SrcAnnotationProvider> transform(SrcExp exp) {
+            protected SubAnnotationPair<SrcAnnotationProvider> transform(SrcExp exp) {
                 if (exp.asNamedAnnotationProvider() == null) {
-                    return new SubNodePair<SrcAnnotationProvider>(null, new ExpValueProvider(exp));
+                    return new SubAnnotationPairImpl<SrcAnnotationProvider>(null, new ExpValueProvider(exp));
                 } else {
-                    return new SubNodePair<SrcAnnotationProvider>(exp.namedAnnotationProviderName(),
+                    return new SubAnnotationPairImpl<SrcAnnotationProvider>(exp.namedAnnotationProviderName(),
                             exp.asNamedAnnotationProvider());
                 }
             }
-        }, new TransformerIterable<SrcNamedArgument, SubNodePair<SrcAnnotationProvider>>(getSrcNamedArguments()) {
+        }, new TransformerIterable<SrcNamedArgument, SubAnnotationPair<SrcAnnotationProvider>>(getSrcFunctionArguments().getSrcNamedArguments()) {
             @Override
-            protected SubNodePair<SrcAnnotationProvider> transform(SrcNamedArgument arg) {
-                return new SubNodePair<SrcAnnotationProvider>(arg.getName().name(), arg);
+            protected SubAnnotationPair<SrcAnnotationProvider> transform(SrcNamedArgument arg) {
+                return new SubAnnotationPairImpl<SrcAnnotationProvider>(arg.getName().name(), arg);
             }
         });
     }
 
     @Override
-    public void SrcFunctionArguments.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
+    public void SrcFunctionCall.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         throw new FailedToSetAnnotationValueException();
+    }
+    
+    @Override
+    public boolean SrcFunctionCall.canChangeAnnotationValue() {
+        return false;
     }
 
     @Override
-    public SrcAnnotationProvider SrcFunctionArguments.addAnnotationSubNode(String name) {
+    public SrcAnnotationProvider SrcFunctionCall.addAnnotationSubNode(String name) {
         return null;
     }
 
     @Override
-    public boolean SrcFunctionArguments.isEach() {
+    public boolean SrcFunctionCall.isEach() {
         return false;
     }
 
     @Override
-    public boolean SrcFunctionArguments.isFinal() {
+    public boolean SrcFunctionCall.isFinal() {
         return false;
+    }
+
+    @Override
+    public SrcExp SrcFunctionCall.annotationValue() {
+        return this;
+    }
+    
+    SrcArrayConstructor implements SrcAnnotationProvider;
+    
+    @Override
+    public Iterable<SubAnnotationPair<SrcAnnotationProvider>> SrcArrayConstructor.annotationSubNodes() {
+        return new ChainedIterable(new TransformerIterable<SrcExp, SubAnnotationPair<SrcAnnotationProvider>>(getSrcFunctionArguments().getSrcExps()) {
+            @Override
+            protected SubAnnotationPair<SrcAnnotationProvider> transform(SrcExp exp) {
+                if (exp.asNamedAnnotationProvider() == null) {
+                    return new SubAnnotationPairImpl<SrcAnnotationProvider>(null, new ExpValueProvider(exp));
+                } else {
+                    return new SubAnnotationPairImpl<SrcAnnotationProvider>(exp.namedAnnotationProviderName(),
+                            exp.asNamedAnnotationProvider());
+                }
+            }
+        }, new TransformerIterable<SrcNamedArgument, SubAnnotationPair<SrcAnnotationProvider>>(getSrcFunctionArguments().getSrcNamedArguments()) {
+            @Override
+            protected SubAnnotationPair<SrcAnnotationProvider> transform(SrcNamedArgument arg) {
+                return new SubAnnotationPairImpl<SrcAnnotationProvider>(arg.getName().name(), arg);
+            }
+        });
+    }
+
+    @Override
+    public void SrcArrayConstructor.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
+        throw new FailedToSetAnnotationValueException();
+    }
+
+    @Override
+    public boolean SrcArrayConstructor.canChangeAnnotationValue() {
+        return false;
+    }
+
+    @Override
+    public SrcAnnotationProvider SrcArrayConstructor.addAnnotationSubNode(String name) {
+        return null;
+    }
+
+    @Override
+    public boolean SrcArrayConstructor.isEach() {
+        return false;
+    }
+
+    @Override
+    public boolean SrcArrayConstructor.isFinal() {
+        return false;
+    }
+
+    @Override
+    public SrcExp SrcArrayConstructor.annotationValue() {
+        return this;
     }
 
     SrcNamedArgument implements SrcAnnotationProvider;
@@ -721,14 +868,20 @@ aspect SrcAnnotations {
     }
 
     @Override
-    public Iterable<SubNodePair<SrcAnnotationProvider>> SrcNamedArgument.annotationSubNodes() {
-        return Collections.<SubNodePair<SrcAnnotationProvider>>emptyList();
+    public Iterable<SubAnnotationPair<SrcAnnotationProvider>> SrcNamedArgument.annotationSubNodes() {
+        return Collections.emptyList();
     }
 
     @Override
     public void SrcNamedArgument.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         throw new FailedToSetAnnotationValueException();
     }
+    
+    @Override
+    public boolean SrcNamedArgument.canChangeAnnotationValue() {
+        return false;
+    }
+    
 
     @Override
     public SrcAnnotationProvider SrcNamedArgument.addAnnotationSubNode(String name) {
@@ -744,105 +897,15 @@ aspect SrcAnnotations {
     public boolean SrcNamedArgument.isFinal() {
         return false;
     }
-//    SrcArrayConstructor implements SrcAnnotationProvider;
-//
-//    @Override
-//    public SrcExp SrcArrayConstructor.annotationValue() {
-//        return null;
-//    }
-//
-//    @Override
-//    public Iterable<SubNodePair<SrcAnnotationProvider>> SrcArrayConstructor.annotationSubNodes() {
-//        return new TransformerIterable<SrcExp, SubNodePair<SrcAnnotationProvider>>(getSrcFunctionArguments().getSrcExps()) {
-//            @Override
-//            protected SubNodePair<SrcAnnotationProvider> transform(SrcExp exp) {
-//                return new SubNodePair<SrcAnnotationProvider>(null, new ExpAnnotationProvider(exp));
-//            }
-//        };
-//    }
-//
-//    @Override
-//    public void SrcArrayConstructor.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
-//        throw new FailedToSetAnnotationValueException();
-//    }
-//
-//    @Override
-//    public SrcAnnotationProvider SrcArrayConstructor.addAnnotationSubNode(String name) {
-//        return null;
-//    }
-//
-//    @Override
-//    public boolean SrcArrayConstructor.isEach() {
-//        return false;
-//    }
-//
-//    @Override
-//    public boolean SrcArrayConstructor.isFinal() {
-//        return false;
-//    }
 
     /*******************
      *     Helpers      
      ******************/
-    
-    /**
-     * A immutable provider which wrapps another potentially mutable provider.
-     * Makes the provider immutable if not already.
-     * 
-     * Is used for among other things when it inconvienient for the value to 
-     * a provider itself.
-     * See overview on AnnotationProvider for more info.
-     */
-    public class SrcSingeltonProvider implements SrcAnnotationProvider {
-
-        private final SrcAnnotationProvider provider;
-        private final String name;
-
-        public SrcSingeltonProvider(String name, SrcAnnotationProvider provider) {
-            this.provider = provider;
-            this.name = name;
-        }
-
-        @Override
-        public SrcExp annotationValue() {
-            return null;
-        }
-
-        @Override
-        public Iterable<SubNodePair<SrcAnnotationProvider>> annotationSubNodes() {
-            return Collections.singletonList(new SubNodePair<SrcAnnotationProvider>(name, provider));
-        }
-
-        @Override
-        public void setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
-            throw new FailedToSetAnnotationValueException();
-        }
-
-        @Override
-        public SrcAnnotationProvider addAnnotationSubNode(String name) {
-            return null;
-        }
-
-        @Override
-        public boolean isEach() {
-            return false;
-        }
-
-        @Override
-        public boolean isFinal() {
-            return false;
-        }
-
-        @Override
-        public String resolveURI(String str) throws URIException {
-            return provider.resolveURI(str);
-        }
-    }
 
     /**
-     * Represents an fixed array of annotations which can be iterated. 
+     * Represents a fixed array of annotations which can be iterated over. 
      * The array is not mutable.
-     * See overview on AnnotationProvider for more info.
+     * See overview in AnnotationProvider for more info.
      */
     public class SrcAnnotationsIteratorProvider implements SrcIterableAnnotationProvider {
 
@@ -856,13 +919,23 @@ aspect SrcAnnotations {
         }
 
         @Override
-        public Iterable<SubNodePair<SrcAnnotationProvider>> annotationSubNodes() {
+        public Iterable<SubAnnotationPair<SrcAnnotationProvider>> annotationSubNodes() {
             int length = providers.size();
             Iterable[] iterables = new Iterable[length];
             for (int i = 0; i < length; ++i) {
                 iterables[i] = providers.get(i).annotationSubNodes();
             }
-            return new ChainedIterable<SubNodePair<SrcAnnotationProvider>>(iterables);
+            return new ChainedIterable<SubAnnotationPair<SrcAnnotationProvider>>(iterables);
+        }
+
+        @Override
+        public SrcClassDecl enclosingClassDecl() {
+            /*
+             * Currently (2019-04-25) there are two uses of SrcAnnotationsIteratorProvider.
+             * It is ok to use get(0) in both cases since there is at least one provider
+             * and all providers have the same enclosing class.
+             */
+            return providers.get(0).enclosingClassDecl();
         }
 
         @Override
@@ -874,6 +947,12 @@ aspect SrcAnnotations {
         public void setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
             throw new FailedToSetAnnotationValueException();
         }
+        
+        @Override
+        public boolean canChangeAnnotationValue() {
+            return false;
+        }
+        
 
         @Override
         public SrcAnnotationProvider addAnnotationSubNode(String name) throws AnnotationEditException {
@@ -896,7 +975,7 @@ aspect SrcAnnotations {
         }
 
         @Override
-        public Iterator<SubNodePair<SrcAnnotationProvider>> iterator() {
+        public Iterator<SubAnnotationPair<SrcAnnotationProvider>> iterator() {
             return annotationSubNodes().iterator();
         }
 
@@ -904,7 +983,7 @@ aspect SrcAnnotations {
 
     /**
      * For navigating expressions (SrcExp). 
-     * Avoiding having expressions beeing providers themselves which is inconvienient.
+     * Avoiding having expressions being providers themselves which is inconvenient.
      * See overview on AnnotationProvider for more info.
      */
     public class ExpValueProvider implements SrcAnnotationProvider {
@@ -916,18 +995,28 @@ aspect SrcAnnotations {
         }
 
         @Override
+        public SrcClassDecl enclosingClassDecl() {
+            return exp.enclosingClassDecl();
+        }
+
+        @Override
         public SrcExp annotationValue() {
             return exp;
         }
 
         @Override
-        public Iterable<SubNodePair<SrcAnnotationProvider>> annotationSubNodes() {
-            return Collections.<SubNodePair<SrcAnnotationProvider>>emptyList();
+        public Iterable<SubAnnotationPair<SrcAnnotationProvider>> annotationSubNodes() {
+            return Collections.emptyList();
         }
 
         @Override
         public void setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
             throw new FailedToSetAnnotationValueException();
+        }
+
+        @Override
+        public boolean canChangeAnnotationValue() {
+            return false;
         }
 
         @Override

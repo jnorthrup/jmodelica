@@ -2,11 +2,11 @@ package org.jmodelica.common.options;
 
 import java.util.Locale;
 
-import org.jmodelica.common.options.OptionRegistry.Category;
-import org.jmodelica.common.options.OptionRegistry.Default;
-import org.jmodelica.common.options.OptionRegistry.OptionType;
+import org.jmodelica.common.options.AbstractOptionRegistry.Category;
+import org.jmodelica.common.options.AbstractOptionRegistry.Default;
+import org.jmodelica.common.options.AbstractOptionRegistry.OptionType;
 
-class RealOption extends Option<Double> {
+public class RealOption extends Option<Double> {
     protected double min;
     protected double max;
 
@@ -23,13 +23,11 @@ class RealOption extends Option<Double> {
      *          A description of the option.
      * @param defaultValue
      *          The option's default value.
-     * @param testDefault
-     *          The option's default value when under test.
      */
     public RealOption(String key, OptionType type, Category category, String description,
-            Default<Double> defaultValue, Default<Double> testDefault) {
+            Default<Double> defaultValue) {
 
-        this(key, type, category, description, defaultValue, testDefault, Double.MIN_VALUE, Double.MAX_VALUE);
+        this(key, type, category, description, defaultValue, Double.MIN_VALUE, Double.MAX_VALUE);
     }
 
     /**
@@ -45,17 +43,15 @@ class RealOption extends Option<Double> {
      *          A description of the option.
      * @param defaultValue
      *          The option's default value.
-     * @param testDefault
-     *          The option's default value when under test.
      * @param min
      *          The minimum allowed value for this option.
      * @param max
      *          The maximum allowed value for this option.
      */
     public RealOption(String key, OptionType type, Category category, String description,
-            Default<Double> defaultValue, Default<Double> testDefault, double min, double max) {
+            Default<Double> defaultValue, double min, double max) {
 
-        super(key, type, category, description, defaultValue, testDefault, 0.0);
+        super(key, type, category, description, defaultValue, 0.0);
         this.min = min;
         this.max = max;
     }
@@ -158,11 +154,7 @@ class RealOption extends Option<Double> {
 
 
     @Override
-    protected void copyTo(OptionRegistry reg, String key) {
-        if (!reg.hasOption(key)) {
-            reg.addRealOption(key, getOptionType(), getCategory(), defaultValue, testDefault,
-                    getDescription(), min, max);
-        }
+    protected void copyTo(AbstractOptionRegistry reg, String key) {
         if (isSet) {
             reg.setRealOption(key, value);
         }

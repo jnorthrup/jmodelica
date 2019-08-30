@@ -163,11 +163,13 @@ public class ProcessCommunicator<V extends Value, T extends Type<V>> {
         try {
             in.close();
         } catch (IOException e) {
+            // Do nothing
         }
         in = null;
         try {
             out.close();
         } catch (IOException e) {
+            // Nothing can be done to recover - ignore
         }
         out = null;
 

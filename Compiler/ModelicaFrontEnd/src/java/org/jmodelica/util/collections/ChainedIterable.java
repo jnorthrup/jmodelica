@@ -29,6 +29,7 @@ public class ChainedIterable<T> implements Iterable<T> {
 
     @Override
     public Iterator<T> iterator() {
+        @SuppressWarnings("unchecked")
         Iterator<? extends T>[] iterators = new Iterator[its.length];
         for (int i = 0; i < its.length; i++)
             iterators[i] = its[i].iterator();
