@@ -81,8 +81,8 @@ aspect Connections {
 
     protected FExp FInStream.expandInStreamExp() {
         // Always create expression from the connection set where the variable is an inside connector. 
-        String name = getFExp().asCommonAccess().name();
-        ConnectionSet cs = myFClass().getConnectionSetManager().getStreamConnectionSet(name, false);
+        FAccess name = getFExp().asCommonAccess().asFAccess();
+        ConnectionSet cs = myFClass().getConnectionSetManager().getStreamConnectionSet(name.name(), false);
         return cs.expandInStreamExp(name);
     }
 
@@ -469,7 +469,7 @@ aspect Connections {
 		 * 
 		 * @param name  the name of the variable to generate name for
 		 */
-		public FExp expandInStreamExp(String name) {
+		public FExp expandInStreamExp(FAccess name) {
 			throw new UnsupportedOperationException();
 		}
 		
@@ -551,6 +551,8 @@ aspect Connections {
 	}
 
     public class StreamConnectionSet extends ConnectionSet {
+        
+        private static final String inStreamSuffix = "_instream_";
 
         private double nominal = Double.MAX_VALUE;
 
@@ -573,6 +575,15 @@ aspect Connections {
                     f.addNormalEquation(new FEquation(left, right));
                 }
             }
+
+            ConnectionSetEntry fst = first();
+            InstAssignable fstVar = (InstAssignable) fst.getVar();
+            if (size() == 1 && fst.isInside() && fstVar.isTopLevelCausalOrConnector()
+                    && (fstVar.isInput() || fstVar.isOutput() || fstVar.useCausalPorts())) {
+                FVariable fv = fstVar.createFVariable(f, fstVar.getFAccess().treeCopy().append(inStreamSuffix), FlattenBindingExp.NONE, false);
+                fv.setCausalityConnectorPrefix(CausalityConnectorPrefix.INSTREAM);
+                f.addFVariable(fv);
+            }
         }
 
         /**
@@ -580,9 +591,14 @@ aspect Connections {
          * 
          * @param name  the name of the variable to generate name for
          */
-        public FExp expandInStreamExp(String name) {
-            ConnectionSetEntry e = getConnectionSetEntry(name, false);
-            FExp exp = expandInStreamExp(e, name, new FAccessExp(name));
+        @Override
+        public FExp expandInStreamExp(FAccess name) {
+            ConnectionSetEntry e = getConnectionSetEntry(name.name(), false);
+            FAccess access = name.treeCopy();
+            if (name.useCausalPorts()) {
+                access.append(inStreamSuffix);
+            }
+            FExp exp = expandInStreamExp(e, name.name(), new FAccessExp(access));
             exp.enableStreamsRewrite();
             return exp;
         }

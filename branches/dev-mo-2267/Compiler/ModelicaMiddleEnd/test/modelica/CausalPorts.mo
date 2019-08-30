@@ -28,7 +28,7 @@ equation
     c.a = 1;
 annotation(__JModelica(UnitTesting(tests={
     TransformCanonicalTestCase(
-        description="No equals ",
+        description="No zero equation for top level flow connector variables when using causal_ports",
         causal_ports=true,
         eliminate_alias_variables=false,
         variability_propagation=false,
@@ -42,6 +42,7 @@ end CausalPorts.Flow1;
 ")})));
 end Flow1;
 
+
 model Flow2
     connector C
         Real a;
@@ -53,13 +54,14 @@ model Flow2
     end A;
     
     C c;
-    A a;
+    A a1, a2;
 equation
     c.a = 1;
-    connect(a.c, c);
+    a2.c.a = 2;
+    connect(a1.c, c);
 annotation(__JModelica(UnitTesting(tests={
     TransformCanonicalTestCase(
-        description="",
+        description="causal_ports only affect top level connectors",
         causal_ports=true,
         eliminate_alias_variables=false,
         variability_propagation=false,
@@ -67,14 +69,51 @@ annotation(__JModelica(UnitTesting(tests={
 fclass CausalPorts.Flow2
  potential Real c.a;
  flow Real c.b;
- Real a.c.a;
- Real a.c.b;
+ Real a1.c.a;
+ Real a1.c.b;
+ Real a2.c.a;
+ Real a2.c.b;
 equation
  c.a = 1;
- a.c.a = c.a;
- a.c.b - c.b = 0.0;
+ a2.c.a = 2;
+ a1.c.a = c.a;
+ a1.c.b - c.b = 0.0;
+ a2.c.b = 0.0;
 end CausalPorts.Flow2;
 ")})));
 end Flow2;
+
+
+model Stream1
+    connector C
+        Real p;
+        flow Real f;
+        stream Real s;
+    end C;
+    C c;
+equation
+    c.p = time;
+    c.s = inStream(c.s);
+annotation(__JModelica(UnitTesting(tests={
+    TransformCanonicalTestCase(
+        description="Top level stream connector variables get an inStream variable when using causal_ports",
+        causal_ports=true,
+        eliminate_alias_variables=false,
+        variability_propagation=false,
+        flatModel="
+fclass CausalPorts.Stream1
+ potential Real c.p;
+ flow Real c.f;
+ stream Real c.s;
+ inStream Real c.s._instream_;
+equation
+ c.p = time;
+ c.s = c.s._instream_;
+end CausalPorts.Stream1;
+")})));
+end Stream1;
+
+
+// TODO Add test with outside stream connector
 
 end CausalPorts;
