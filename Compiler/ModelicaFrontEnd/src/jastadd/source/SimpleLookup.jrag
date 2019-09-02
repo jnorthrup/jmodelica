@@ -259,6 +259,14 @@ aspect SimpleLookup {
         public boolean isClassDecl() {
             return true;
         }
+        
+        @Override
+        public String globalAccess() {
+            if (getClassDecl().isBuiltInClass()) {
+                return qualifiedName();
+            }
+            return super.globalAccess();
+        }
     }
 
     public class ComponentAccess extends ResolvedAccess {

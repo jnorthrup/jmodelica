@@ -438,9 +438,9 @@ aspect FlatTypeAnalysis {
 
     eq FRecordConstructor.type() = getType();
 
-    syn FType FRecordConstructor.getType() = getRecord().recordType().forConstructor(getArgs());
+    syn FRecordType FRecordConstructor.getType() = getRecord().recordType().forConstructor(getArgs());
 
-    public FType FRecordType.forConstructor(List<? extends HasType> args) {
+    public FRecordType FRecordType.forConstructor(List<? extends HasType> args) {
         FRecordType frt = treeCopy();
         for (int i = 0; i < frt.getNumComponent(); i++) {
             frt.updateComponent(args.getChild(i).type(), i);
