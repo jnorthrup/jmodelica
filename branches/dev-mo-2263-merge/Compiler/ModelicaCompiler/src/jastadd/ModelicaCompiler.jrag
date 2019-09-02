@@ -1625,11 +1625,12 @@ public class ModelicaCompiler implements LogContainer {
             this(type, makeFileFlag, suffix, xmlGenerator, ErrorCheckType.COMPILE);
         }
         
-        public Templates getTemplates(AbstractOptionRegistry options) {
+        public Templates getTemplates(OptionRegistry options) {
             return new Templates(type, options);
         }
         
-        public String createExtraCFlagsString(AbstractOptionRegistry options, String fileName) {
+        public String createExtraCFlagsString(AbstractOptionRegistry abstractOptions, String fileName) {
+            OptionRegistry options = (OptionRegistry) abstractOptions;
             
             if (suffix == null) {
                 return "";
@@ -2354,7 +2355,7 @@ public class Templates {
     };
 
 
-    public Templates(ModelicaCompiler.TargetType type, AbstractOptionRegistry options) {
+    public Templates(ModelicaCompiler.TargetType type, OptionRegistry options) {
         switch (type) {
         case FMUME10:
             templates = new String[] { null, "fmi1_me_modelica_template.c" };
@@ -2486,7 +2487,7 @@ public class Templates {
     private static LinkedHashSet<String> C_SOURCE_TEMPLATES;    
     
     public abstract static class TemplateContributor {
-        public void addTemplates(Templates templates, AbstractOptionRegistry options) { }
+        public void addTemplates(Templates templates, OptionRegistry options) { }
     }
 
     public static <T extends TemplateContributor> T addContributor(T contributor) {
@@ -2534,7 +2535,7 @@ private static final Templates.TemplateContributor ModelicaCompiler.BASIC_TEMPLA
     Templates.addContributor(new Templates.TemplateContributor() {
 
         @Override
-        public void addTemplates(Templates templates, AbstractOptionRegistry options) {
+        public void addTemplates(Templates templates, OptionRegistry options) {
             templates.addCHeaderTemplates("base");
             templates.addCSourceTemplates("base", "init_independent", "init_dependent", "equ_init", "equ", "funcs");
         }

@@ -1421,7 +1421,7 @@ aspect ComponentDeclMethods {
      */
     syn boolean InstComponentDecl.isTopLevelCausalOrConnector() = false;
     eq InstAssignable.isTopLevelCausalOrConnector() = isTopLevel() && !inExpandableConnector() && 
-            (isInput() || isOutput() || isConnectorVariable()) && !isProtected() && isPublicVar();
+            (isInput() || isOutput() || isConnectorVariable()) && isPublicVar();
 
     syn boolean InstComponentDecl.isTopLevel() = isInTopLevel();
 
