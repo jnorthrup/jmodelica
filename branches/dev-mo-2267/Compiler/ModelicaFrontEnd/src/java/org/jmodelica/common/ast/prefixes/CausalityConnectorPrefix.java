@@ -21,6 +21,10 @@ public enum CausalityConnectorPrefix {
         return this == NONE;
     }
     
+    public boolean isInStream() {
+        return this == INSTREAM;
+    }
+    
     public boolean inputCausality(boolean causalPorts) {
         if (causalPorts) {
             return this == INPUT || this == FLOW || this == INSTREAM;

@@ -552,7 +552,7 @@ aspect Connections {
 
     public class StreamConnectionSet extends ConnectionSet {
         
-        private static final String inStreamSuffix = "_instream_";
+        private static final String inStreamSuffix = "__instream_";
 
         private double nominal = Double.MAX_VALUE;
 
@@ -580,7 +580,8 @@ aspect Connections {
             InstAssignable fstVar = (InstAssignable) fst.getVar();
             if (size() == 1 && fst.isInside() && fstVar.isTopLevelCausalOrConnector()
                     && (fstVar.isInput() || fstVar.isOutput() || fstVar.useCausalPorts())) {
-                FVariable fv = fstVar.createFVariable(f, fstVar.getFAccess().treeCopy().append(inStreamSuffix), FlattenBindingExp.NONE, false);
+                FAccess inStreamAccess = createInStreamAccess(fstVar.getFAccess());
+                FVariable fv = fstVar.createFVariable(f, inStreamAccess, FlattenBindingExp.NONE, false);
                 fv.setCausalityConnectorPrefix(CausalityConnectorPrefix.INSTREAM);
                 f.addFVariable(fv);
             }
@@ -594,9 +595,9 @@ aspect Connections {
         @Override
         public FExp expandInStreamExp(FAccess name) {
             ConnectionSetEntry e = getConnectionSetEntry(name.name(), false);
-            FAccess access = name.treeCopy();
-            if (name.useCausalPorts()) {
-                access.append(inStreamSuffix);
+            FAccess access = name;
+            if (name.useCausalPorts() && !name.lookupFV(name.name() + inStreamSuffix).isUnknown()) {
+                access = createInStreamAccess(name);
             }
             FExp exp = expandInStreamExp(e, name.name(), new FAccessExp(access));
             exp.enableStreamsRewrite();
@@ -632,6 +633,10 @@ aspect Connections {
             } else {
                 return new FExInStream(def, new FMulExp(new FInStreamEpsExp(), new FRealLitExp(nominal)), vars);
             }
+        }
+        
+        private FAccess createInStreamAccess(FAccess access) {
+            return access.copyPrefix().append(access.lastActualPartName() + inStreamSuffix);
         }
     }
 
