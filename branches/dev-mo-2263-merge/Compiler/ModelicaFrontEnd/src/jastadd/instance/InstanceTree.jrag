@@ -2223,13 +2223,6 @@ aspect InstanceAST_API {
     eq InstReplacingPrimitive.isRedeclared()            = true;
 
     /**
-     * Is this declaration redeclare?
-     */
-    syn boolean InstNode.isRedeclare() = false;
-    eq InstClassDecl.isRedeclare()     = getSrcClassDecl().getRedeclare();
-    eq InstComponentDecl.isRedeclare() = getSrcComponentDecl().hasRedeclare();
-
-    /**
      * Is this declaration replaceable?
      */
     syn boolean InstNode.isReplaceable() = false;

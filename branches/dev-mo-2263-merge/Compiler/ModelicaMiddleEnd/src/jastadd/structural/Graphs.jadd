@@ -1176,15 +1176,15 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             boolean forceGroupMembersIntoSameBlock) {
         tarjanReset();
         
-        Collection<SCCContributor> groupMemberContributers;
+        Collection<SCCContributor> groupMemberContributors;
         if (forceGroupMembersIntoSameBlock) {
-            groupMemberContributers = Collections.<SCCContributor>singletonList(GROUP_MEMBER_CONTRIBUTOR);
+            groupMemberContributors = Collections.<SCCContributor>singletonList(GROUP_MEMBER_CONTRIBUTOR);
         } else {
-            groupMemberContributers = Collections.<SCCContributor>emptyList();
+            groupMemberContributors = Collections.<SCCContributor>emptyList();
         }
         
         Collection<SCCContributor> contributors = new ArrayList<SCCContributor>();
-        for (SCCContributor contributor : new ChainedIterable<SCCContributor>(getSCCContributors(), groupMemberContributers, extraContributors)) {
+        for (SCCContributor contributor : new ChainedIterable<SCCContributor>(getSCCContributors(), groupMemberContributors, extraContributors)) {
             if (!contributor.isActive(stepUtil))
                 continue;
             contributors.add(contributor);
