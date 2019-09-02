@@ -1,8 +1,8 @@
 package org.jmodelica.test.common;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.jmodelica.common.GUIDManager;
 import org.junit.Before;
@@ -100,6 +100,17 @@ public class GUIDManagerTest {
         test("Teststring", dependent, expected);
         test("Test\nstring", dependent, expected);
         test("Test\r\nstring", dependent, expected);
+    }
+    
+    @Test
+    public void getTokenAfterProcessFiles() {
+        guidManager.setSourceString("Test string");
+        guidManager.processDependentFiles();
+        
+        String actual   = "guid=" + guidManager.getGuidToken();
+        String expected = "guid=fd3dbec9730101bff92acc820befc34";
+        
+        assertEquals(ignoreWhitespace(expected), ignoreWhitespace(actual));
     }
 
 }

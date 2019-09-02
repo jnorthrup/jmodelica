@@ -31,7 +31,7 @@ aspect UtilInterface {
          * Hooks for different steps in the compilation. Can keep states as opposed to the 
          * CompilationHooks in ModelicaCompiler.
          */
-        abstract class Interfacer {
+        static abstract class Interfacer {
             /**
              * Called after model has been instantiated.
              */
@@ -40,7 +40,12 @@ aspect UtilInterface {
             /**
              * Called after code has been compiled.
              */
-            public void hookPackFmu(FClass fc) {}
+            public void packFmu(FClass fc) {}
+            
+            /**
+             * Called after code has been compiled.
+             */
+            public void fmuPacked(FClass fc, File path) {}
             
             /**
              * Called at each transfer and on tearDown.
@@ -140,9 +145,15 @@ aspect UtilInterface {
         }
     }
     
-    public void UtilInterface.hookPackFmu(FClass fc) {
+    public void UtilInterface.packFmu(FClass fc) {
         for (Interfacer interfacer : interfacers) {
-            interfacer.hookPackFmu(fc);
+            interfacer.packFmu(fc);
+        }
+    }
+    
+    public void UtilInterface.fmuPacked(FClass fc, File path) {
+        for (Interfacer interfacer : interfacers) {
+            interfacer.fmuPacked(fc, path);
         }
     }
     
