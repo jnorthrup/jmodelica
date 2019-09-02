@@ -1,4 +1,6 @@
 aspect Modifiers {
+    syn boolean SrcModification.isRedeclare() = isClassRedeclare() || isComponentRedeclare();
+    
     public interface SrcAnnotationProvider {
         public boolean isClassRedeclare();
     }

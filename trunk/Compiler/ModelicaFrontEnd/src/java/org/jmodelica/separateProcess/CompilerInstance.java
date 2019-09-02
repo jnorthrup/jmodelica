@@ -28,6 +28,9 @@ import java.util.Map;
 import org.jmodelica.util.StringUtil;
 import org.jmodelica.util.logging.IllegalLogStringException;
 
+import static org.jmodelica.util.StringUtil.join;
+import static org.jmodelica.util.StringUtil.joinPath;
+
 /**
  * Class representing a compiler instance to be used when compiling with a separate process.
  */
@@ -261,22 +264,6 @@ public class CompilerInstance {
             files[i] = sourceFiles[i].toString();
         }
         return compile(modelName, files);
-    }
-
-    private static String join(String delimiter, String... args) {
-        return StringUtil.join(delimiter, args);
-    }
-
-    private static String join(String delimiter, Collection<String> args) {
-        return StringUtil.join(delimiter, args);
-    }
-
-    private static String join(String delimiter, String pairDelimiter, Map<String, String> args) {
-        return StringUtil.join(delimiter, pairDelimiter, args);
-    }
-
-    private static String joinPath(String... args) {
-        return StringUtil.joinPath(args);
     }
 
     /**
