@@ -1110,11 +1110,11 @@ aspect Flattening {
 
     public enum FlattenBindingExp {
         ALL, PARAMETER, NONE;
-        
-        public boolean shouldFlattenExp(InstAssignable var) {
-            return (this == ALL) || (this == PARAMETER && var.variability().parameterOrLess());
-        }
     }
+
+    syn boolean InstAssignable.shouldFlattenExp(FlattenBindingExp binding) = 
+            (binding == FlattenBindingExp.ALL) || 
+            (binding == FlattenBindingExp.PARAMETER && variability().parameterOrLess());
 
     // Generic method for flattening
     public void ASTNode.flatten(Flattener f, FlattenBindingExp binding, int level) {
@@ -1603,7 +1603,7 @@ aspect Flattening {
         if (a != null) {
             list.addAll(a.getFAttributes());
         }
-        boolean flattenBinding = binding.shouldFlattenExp(this);
+        boolean flattenBinding = shouldFlattenExp(binding);
         if (flattenBinding && !isConstant() && declaredSizeCalc().isUnknownNoEval()) {
             FInternalAttribute ia = (FInternalAttribute)findMatching(list, "size()");
             if (ia == null) {
@@ -1680,7 +1680,7 @@ aspect Flattening {
             fv.setDerivedType(myInstClass().actualInstClass().qualifiedName());
         }
         
-        boolean flattenBinding = binding.shouldFlattenExp(this);
+        boolean flattenBinding = shouldFlattenExp(binding);
         List<FAttribute> attrs = new List<FAttribute>();
         if (!inRecordDecl()) {
             attrs.addAll(fv.getFAttributes());
