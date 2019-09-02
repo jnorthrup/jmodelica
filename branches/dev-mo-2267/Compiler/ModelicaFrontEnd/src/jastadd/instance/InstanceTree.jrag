@@ -2757,17 +2757,15 @@ aspect InstArrays {
 	 * given on the declaration's class (in the case of short
 	 * class declarations).
 	 */
-	syn lazy FArraySubscripts InstComponentDecl.getFArraySubscripts() {
+    syn lazy Opt<FArraySubscripts> InstComponentDecl.getFArraySubscriptsOpt() {
 	    if (myFSubscripts().isEmpty())
-	        return null;
+            return Opt.EMPTY;
         List<FSubscript> list = new List<FSubscript>();
         for (Subscript s : myFSubscripts()) { 
             list.add(s.deferredCopy());
         }
-        return new FArrayExpSubscripts(list);
+        return new Opt(new FArrayExpSubscripts(list));
 	}
-	
-	syn boolean InstComponentDecl.hasFArraySubscripts() = getFArraySubscripts()!=null;
 	
 }
 

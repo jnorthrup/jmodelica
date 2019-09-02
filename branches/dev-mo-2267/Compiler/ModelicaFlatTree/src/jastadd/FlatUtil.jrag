@@ -1964,8 +1964,8 @@ aspect AttributeUtil {
     syn boolean FClass.containsActiveAnnotations() {
         if (getNumFAttribute() == 0)
             return false;
-        for (AttributeContributer contributer : attributeContributers())
-            if (contributer.containsActiveAttributes(this))
+        for (AttributeContributor contributor : attributeContributors())
+            if (contributor.containsActiveAttributes(this))
                 return true;
         return false;
     }
@@ -1976,8 +1976,8 @@ aspect AttributeUtil {
     syn boolean FVariable.containsActiveAnnotations() {
         if (getNumFAttribute() == 0)
             return false;
-        for (AttributeContributer contributer : attributeContributers())
-            if (contributer.containsActiveAttributes(this))
+        for (AttributeContributor contributor : attributeContributors())
+            if (contributor.containsActiveAttributes(this))
                 return true;
         return false;
     }
@@ -1988,8 +1988,8 @@ aspect AttributeUtil {
     syn boolean FAbstractEquation.containsActiveAnnotations() {
         if (getNumFAttribute() == 0)
             return false;
-        for (AttributeContributer contributer : attributeContributers())
-            if (contributer.containsActiveAttributes(this))
+        for (AttributeContributor contributor : attributeContributors())
+            if (contributor.containsActiveAttributes(this))
                 return true;
         return false;
     }
@@ -2000,8 +2000,8 @@ aspect AttributeUtil {
     syn boolean FFunctionDecl.containsActiveAnnotations() {
         if (getNumFAttribute() == 0)
             return false;
-        for (AttributeContributer contributer : attributeContributers())
-            if (contributer.containsActiveAttributes(this))
+        for (AttributeContributor contributor : attributeContributors())
+            if (contributor.containsActiveAttributes(this))
                 return true;
         return false;
     }
