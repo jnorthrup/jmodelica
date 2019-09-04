@@ -21,6 +21,7 @@
 %goal abstract_equation;
 %goal argument;
 %goal access_scalar;
+%goal subscript;
 
 %header {:
  package $PARSER_PACKAGE$;

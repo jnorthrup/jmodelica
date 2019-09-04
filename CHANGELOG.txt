@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+# Change ; Minor ; Compiler; #5830
+ParseHandler now have a target for Subscript.
+
 # Change ; Major ; PyFMI ; #5826
 Updated JModelica external to PyFMI 2.5.4
 
