@@ -17,6 +17,7 @@ import java.io.PrintStream;
 */
 
 import org.jmodelica.util.XMLUtil;
+import org.jmodelica.util.values.FunctionEvaluationException;
 
 /**
  * A generator class containing basic functionality for generating XML files.
@@ -212,8 +213,12 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      */
     protected void generateAttributeIfSet(String name, FVariable variable, CodeStream printer) {
         if (variable.attributeSet(name)) {
-            String value = variable.attributeCValue(name).xmlValue();
-            generateAttribute(name, value, printer);
+            try {
+                String value = variable.attributeCValue(name).xmlValue();
+                generateAttribute(name, value, printer);
+            } catch (FunctionEvaluationException e) {
+            
+            }
         }
     }
     
