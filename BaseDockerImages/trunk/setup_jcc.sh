@@ -35,7 +35,7 @@ fi
 pip install jcc==2.23
 
 JCC_INSTALL_DIR=$(find /usr -type d -name jcc | sed -n 1p)
-cp ${USR_PATH}/Docker/build/jcc.patch ${JCC_INSTALL_DIR}
+cp ${DOCKER_SRC_DIR}/jcc.patch ${JCC_INSTALL_DIR}
 cd ${JCC_INSTALL_DIR}
 patch < jcc.patch
 

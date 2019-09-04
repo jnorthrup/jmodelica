@@ -20,19 +20,21 @@ MAINTAINER Modelon
 
 ARG DOCKER_USR_PATH=/tmp/dockerfiles
 ARG GCC_INSTALL_TYPE=UBUNTU_DEFAULT
+ARG SRC_DIR=base_jmodelica
 ENV USR_PATH=${DOCKER_USR_PATH}
 ENV GCC_INSTALLATION_TYPE=${GCC_INSTALL_TYPE}
+ENV DOCKER_SRC_DIR=${USR_PATH}/Docker/build
 RUN useradd -ms /bin/bash baseuser && groupadd docker && usermod -aG docker baseuser
 # switch user back and forth to create bashrc
 USER baseuser
 USER root
 
-COPY *.sh ${USR_PATH}/Docker/build/
-COPY jcc.patch ${USR_PATH}/Docker/build/
-RUN chmod +x ${USR_PATH}/Docker/build/*.sh
+COPY *.sh ${DOCKER_SRC_DIR}/
+COPY jcc.patch ${DOCKER_SRC_DIR}/
+RUN chmod +x ${DOCKER_SRC_DIR}/*.sh
 
-RUN ${USR_PATH}/Docker/build/setup.sh
-RUN ${USR_PATH}/Docker/build/centos_python_env.sh
+RUN ${DOCKER_SRC_DIR}/setup.sh
+RUN ${DOCKER_SRC_DIR}/centos_python_env.sh
 RUN rm -rf ${USR_PATH}
 RUN rm -rf /*.tgz
 USER baseuser

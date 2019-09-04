@@ -14,7 +14,7 @@
 
 set -e
 
-. ${USR_PATH}/Docker/build/settings.sh 
+. ${DOCKER_SRC_DIR}/settings.sh 
 
 echo "GCC_INSTALLATION_TYPE="${GCC_INSTALLATION_TYPE}
 
@@ -23,7 +23,7 @@ if [ ${GCC_INSTALLATION_TYPE} = "CENTOS_DEFAULT" ] || [ ${GCC_INSTALLATION_TYPE}
 
 elif [ ${GCC_INSTALLATION_TYPE} = "GCC_SOURCE" ]; then
     echo "finished"
-    . ${USR_PATH}/Docker/build/build_gcc.sh
+    . ${DOCKER_SRC_DIR}/build_gcc.sh
 
 elif [ ${GCC_INSTALLATION_TYPE} = "CENTOS7_GCC6" ]; then
     yum install -y centos-release-scl-rh

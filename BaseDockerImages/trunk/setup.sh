@@ -16,8 +16,8 @@
 set -e
 
 echo "STAGE 1/3: SETTING UP REQUIREMENTS"
-. ${USR_PATH}/Docker/build/setup_requirements.sh
+. ${DOCKER_SRC_DIR}/setup_requirements.sh
 echo "STAGE 2/3: SETTING UP IPOPT"
-. ${USR_PATH}/Docker/build/setup_ipopt.sh
+. ${DOCKER_SRC_DIR}/setup_ipopt.sh
 echo "STAGE 3/3: SETTING UP JCC"
-. ${USR_PATH}/Docker/build/setup_jcc.sh
+. ${DOCKER_SRC_DIR}/setup_jcc.sh

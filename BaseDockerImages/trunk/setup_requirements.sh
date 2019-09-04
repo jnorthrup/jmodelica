@@ -15,7 +15,7 @@
 
 set -e
 
-. ${USR_PATH}/Docker/build/settings.sh
+. ${DOCKER_SRC_DIR}/settings.sh
 
 BUILD_PKGS_JM_COMMON="vim sudo cmake swig wget tar patch"
 BUILD_PKGS_JM_REDHAT="redhat-lsb ant-junit dos2unix python-pip bc make lucene which subversion java-1.8.0-openjdk-devel python-devel python-jpype zlib-devel boost-devel"
@@ -58,7 +58,7 @@ fi
 
 # Install GCC, input argument is defined in Dockerfile
 echo "--------------- INSTALLING GCC ---------------"
-. ${USR_PATH}/Docker/build/setup_gcc.sh ${GCC_INSTALLATION_TYPE}
+. ${DOCKER_SRC_DIR}/setup_gcc.sh ${GCC_INSTALLATION_TYPE}
 
 
 
