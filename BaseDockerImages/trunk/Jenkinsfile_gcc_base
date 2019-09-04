@@ -37,7 +37,7 @@ node('docker') {
     
     stage ("Building ${IMG_NAME} ${PLATFORM_VERSION}, GCC ${GCC_VERSION_TO_BUILD}") {
         checkout scm
-        def DOCKER_IMAGE = docker.build("${REPO}/${IMG_NAME}", "--no-cache --pull --build-arg DOCKER_LINUX_DIST=${PLATFORM} --build-arg DOCKER_DIST_VERSION=${PLATFORM_VERSION} --build-arg GCC_VERSION_TO_BUILD=${GCC_VERSION} .")
+        def DOCKER_IMAGE = docker.build("${REPO}/${IMG_NAME}", "--no-cache --pull --build-arg DOCKER_LINUX_DIST=${PLATFORM} --build-arg DOCKER_DIST_VERSION=${PLATFORM_VERSION} --build-arg GCC_VERSION_TO_BUILD=${GCC_VERSION_TO_BUILD} .")
         pushImage(DOCKER_IMAGE, "${IMG_NAME}", "${PUSH_TAG}")
     }
 }
