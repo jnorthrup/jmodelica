@@ -1,9 +1,15 @@
 #!/bin/bash
 set -e
 # note this is currently for CentOS only
-ME="build_gcc.sh"
+ME="$( basename "${BASH_SOURCE[0]}" )"
 
-export GCC_VERSION=6.3.0
+if [ -z "${GCC_VERSION}" ]; then
+    echo "${ME}: Variable GCC_VERSION is not set, exiting..."
+    exit 1
+else
+    echo "${ME}: GCC_VERSION=${GCC_VERSION}, continuing..."
+fi
+
 export BUILD_DIR=gcc-${GCC_VERSION}-build
 
 echo "============================================="

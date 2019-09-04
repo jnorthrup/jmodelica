@@ -1,0 +1,43 @@
+// 
+//    Copyright (C) 2018 Modelon AB
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the Common Public License as published by
+//    IBM, version 1.0 of the License.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY. See the Common Public License for more details.
+//
+//    You should have received a copy of the Common Public License
+//    along with this program.  If not, see
+//     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
+
+
+def REPO="jmodelica"
+
+
+def pushImage(docker_image, image_name, push_tag) {
+    stage ("Push ${image_name}:${push_tag}") {
+        //note we push to registry.hub.docker, it doesn't work otherwise, please read link below
+        //https://getintodevops.com/blog/building-your-first-docker-image-with-jenkins-2-guide-for-developers
+        //docker.withRegistry('https://registry.hub.docker.com', 'jmodelica-dockerhub') {
+        //    docker_image.push("${push_tag}")
+        //}
+        echo "Currently not pushing automatically..."
+    }
+}
+
+node('docker') {
+    IMG_NAME = "gcc_base"
+    PLATFORM="centos"
+    PLATFORM_VERSION="7.4.1708"
+    GCC_VERSION_TO_BUILD="6.3.0"
+    // PUSH_TAG = tag for image on dockerhub
+    PUSH_TAG = "6.3.0"
+    
+    stage ("Building ${IMG_NAME} ${PLATFORM_VERSION}, GCC ${GCC_VERSION_TO_BUILD}") {
+        checkout scm
+        def DOCKER_IMAGE = docker.build("${REPO}/${IMG_NAME}", "--no-cache --pull --build-arg DOCKER_LINUX_DIST=${PLATFORM} --build-arg DOCKER_DIST_VERSION=${PLATFORM_VERSION} --build-arg GCC_VERSION_TO_BUILD=${GCC_VERSION} .")
+        pushImage(DOCKER_IMAGE, "${IMG_NAME}", "${PUSH_TAG}")
+    }
+}
