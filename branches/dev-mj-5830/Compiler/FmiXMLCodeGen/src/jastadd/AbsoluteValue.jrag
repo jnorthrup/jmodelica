@@ -65,19 +65,17 @@ aspect AbsoluteValue {
     /*
      * Contribution
      */
-    private static AttributeContributer ASTNode.ABSOLUTE_VALUE_CONTRIBUTER =
-            addAttributeContributer(new AttributeContributer.AbsoluteValueContributer());
+    private static AttributeContributor ASTNode.ABSOLUTE_VALUE_CONTRIBUTOR =
+            addAttributeContributor(new AbsoluteValueContributor());
 
-    public abstract class AttributeContributer {
-        public static class AbsoluteValueContributer extends AttributeContributer {
-            public AbsoluteValueContributer() {
-                super("AbsoluteValueContributer");
-            }
-            
-            protected void contribute(Flattener f, InstAssignable src, FVariable dest) {
-                if (!src.isAbsoluteValue()) {
-                    dest.annotation("absoluteValue").setValue(new FBooleanLitExpFalse());
-                }
+    public class AbsoluteValueContributor extends AttributeContributor {
+        public AbsoluteValueContributor() {
+            super("AbsoluteValueContributor");
+        }
+        
+        protected void contribute(Flattener f, InstAssignable src, FVariable dest) {
+            if (!src.isAbsoluteValue()) {
+                dest.annotation("absoluteValue").setValue(new FBooleanLitExpFalse());
             }
         }
     }
