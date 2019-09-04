@@ -289,9 +289,9 @@ Program program
     :};
   
 SrcStoredDefinition stored_definition
-    = within? base_class_decl_list 
+    = within? top_level_base_class_decl_list 
     {:
-        SrcStoredDefinition def = new SrcStoredDefinition(within, base_class_decl_list, getLoadInfo());
+        SrcStoredDefinition def = new SrcStoredDefinition(within, top_level_base_class_decl_list, getLoadInfo());
         def.setLineBreakMap(lineBreakMap);
         formattingRecorder.postParsing(def);
         return def; 
@@ -307,15 +307,15 @@ SrcWithin within
         return new SrcWithin(access); 
     :};
 
-List base_class_decl_list
+List top_level_base_class_decl_list
     = top_level_base_class_decl SEMICOLON 
     {: 
         return new List().add(top_level_base_class_decl); 
     :}
-    | base_class_decl_list top_level_base_class_decl SEMICOLON 
+    | top_level_base_class_decl_list top_level_base_class_decl SEMICOLON 
     {: 
-        base_class_decl_list.add(top_level_base_class_decl);
-        return base_class_decl_list; 
+        top_level_base_class_decl_list.add(top_level_base_class_decl);
+        return top_level_base_class_decl_list; 
     :};
 
 SrcBaseClassDecl top_level_base_class_decl
