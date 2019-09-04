@@ -15,12 +15,14 @@
 
 set -e
 
+ME="$( basename "${BASH_SOURCE[0]}" )"
+
 . ${DOCKER_SRC_DIR}/settings.sh
 
 BUILD_PKGS_JM_COMMON="vim sudo cmake swig wget tar patch"
-BUILD_PKGS_JM_REDHAT="redhat-lsb ant-junit dos2unix python-pip bc make lucene which subversion java-1.8.0-openjdk-devel python-devel python-jpype zlib-devel boost-devel"
-BUILD_PKGS_JM_FEDORA="redhat-lsb ant-junit dos2unix bc make lucene which subversion java-1.8.0-openjdk-devel zlib-devel python-pip python-devel python-jpype boost-devel"
-BUILD_PKGS_JM_DEBIAN="dos2unix dc ant python-lucene subversion openjdk-8-jdk python-dev python-jpype zlib1g-dev libboost-dev"
+BUILD_PKGS_JM_REDHAT="redhat-lsb ant-junit dos2unix python-pip bc make lucene which subversion python-devel python-jpype zlib-devel boost-devel"
+BUILD_PKGS_JM_FEDORA="redhat-lsb ant-junit dos2unix bc make lucene which subversion zlib-devel python-pip python-devel python-jpype boost-devel"
+BUILD_PKGS_JM_DEBIAN="dos2unix dc ant python-lucene subversion python-dev python-jpype zlib1g-dev libboost-dev"
 
 BUILD_PYTHON_PIP_PACKAGES="html5lib jupyter colorama nbformat Jinja2 openpyxl mock natsort six MarkupSafe lxml>=4.0.0 matplotlib==2.0.2 scipy cython nose ipython==5.7 ipykernel==4.10.0"
 
@@ -57,8 +59,12 @@ if [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then
 fi
 
 # Install GCC, input argument is defined in Dockerfile
-echo "--------------- INSTALLING GCC ---------------"
+echo "${ME}: --------------- INSTALLING GCC ---------------"
 . ${DOCKER_SRC_DIR}/setup_gcc.sh ${GCC_INSTALLATION_TYPE}
+
+# Install OpenJDK, input argument is defined in Dockerfile
+echo "${ME}: --------------- INSTALLING OpenJDK ---------------"
+. ${DOCKER_SRC_DIR}/setup_openjdk.sh
 
 
 

@@ -48,9 +48,9 @@ node('docker') {
     pushTag = "18.04"
     
     stage ("Building ${imageName} ${platformVersion}") {
-        checkout scm
-        def dockerImageRef = buildBaseImage("${imageName}", "${repoName}", "ubuntu", "${platformVersion}", "UBUNTU_DEFAULT")
-        pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")
+        //checkout scm
+        //def dockerImageRef = buildBaseImage("${imageName}", "${repoName}", "ubuntu", "${platformVersion}", "UBUNTU_DEFAULT")
+        //pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")
     }
     
     imageName = "centos_base"
@@ -58,12 +58,12 @@ node('docker') {
     pushTag = "6"
     
     stage ("Building ${imageName} ${platformVersion}") {
-        checkout scm
-        def dockerImageRef = buildBaseImage("${imageName}", "${repoName}", "centos", "${platformVersion}", "CENTOS_GCCv482")
-        dockerImageRef.inside {
-            sh 'echo Built version: && cat /etc/centos-release'
-        }
-        pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")
+        //checkout scm
+        //def dockerImageRef = buildBaseImage("${imageName}", "${repoName}", "centos", "${platformVersion}", "CENTOS_GCCv482")
+        //dockerImageRef.inside {
+        //    sh 'echo Built version: && cat /etc/centos-release'
+        //}
+        //pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")
     }
     
     imageName = "centos_base"
@@ -76,7 +76,7 @@ node('docker') {
         dockerImageRef.inside {
             sh 'echo Built version: && cat /etc/centos-release'
         }
-        pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")
+        //pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")
     }
     
     imageName = "centos_base"
@@ -84,11 +84,11 @@ node('docker') {
     pushTag = "7.2"
     
     stage ("Building ${imageName} ${platformVersion}") {
-        checkout scm
-        def dockerImageRef = buildBaseImage("${imageName}", "${repoName}", "centos", "${platformVersion}", "CENTOS_DEFAULT")
-        dockerImageRef.inside {
-            sh 'echo Built version: && cat /etc/centos-release'
-        }
-        pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")
+        //checkout scm
+        //def dockerImageRef = buildBaseImage("${imageName}", "${repoName}", "centos", "${platformVersion}", "CENTOS_DEFAULT")
+        //dockerImageRef.inside {
+        //    sh 'echo Built version: && cat /etc/centos-release'
+        //}
+        //pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")
     }
 }
