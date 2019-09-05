@@ -63,10 +63,6 @@ aspect OptimicaParsers {
     refine Parsers public short ParserHandler.accessScalarGoal() {
         return org.jmodelica.optimica.parser.ModelicaParser.AltGoals.access_scalar;
     }
-    
-    refine Parsers public short ParserHandler.subscriptGoal() {
-        return org.jmodelica.optimica.parser.ModelicaParser.AltGoals.subscript;
-    }
 
     public beaver.Parser ParserHandler.createOptimicaParser(AbstractModelicaScanner<ASTNode<?>> scanner, LoadInfo loadInfo) {
         org.jmodelica.optimica.parser.OptimicaParser parser = new org.jmodelica.optimica.parser.OptimicaParser();

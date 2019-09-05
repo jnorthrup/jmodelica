@@ -11,11 +11,7 @@
   <title>Release Notes</title>
 
   <section>
-    <title>Release notes for JModelica.org version 2.14</title>
-        <section>
-            <title>Important information</title>
-            <para>Note, with the next release the Python distribution bundled with JModelica is planned to be updated from version 2.7 to version 3.x.</para>
-        </section>
+    <title>Release notes for JModelica.org version 2.14</title>    
     <section><title>Compiler Changes</title>
     <para>Important changes to the compiler:</para>
     <itemizedlist>

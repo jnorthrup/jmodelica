@@ -40,8 +40,6 @@ pymodelica_build_dir64=$(abs_builddir)/pymodelica_build64
 pyfmi_build_dir64=$(abs_builddir)/PyFMI_build64
 pyjmi_build_dir64=$(abs_builddir)/PyJMI_build64
 
-assimulo_src_dir=$(abs_top_srcdir)/external/Assimulo
-
 bindistdir=JModelica.org-$(VERSION)-bin
 
 casadi:
@@ -275,7 +273,7 @@ build-python-packages:
 if PYTHON_ENABLED
 if WITH_OPENMP
 	mkdir -p $(assimulo_build_dir); \
-	cd $(assimulo_src_dir)/..; \
+	cd $(abs_top_srcdir)/external; \
 	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir); \
 	cd $(assimulo_build_dir)/Assimulo; \
 	case $(build) in \
@@ -289,7 +287,7 @@ if WITH_OPENMP
 if JM_WIN64
 if WITH_PYTHON64
 	mkdir -p $(assimulo_build_dir64); \
-	cd $(assimulo_src_dir)/..; \
+	cd $(abs_top_srcdir)/external; \
 	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir64); \
 	cd $(assimulo_build_dir)/Assimulo; \
 	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
@@ -302,7 +300,7 @@ endif
 endif
 if !WITH_OPENMP
 	mkdir -p $(assimulo_build_dir); \
-	cd $(assimulo_src_dir)/..; \
+	cd $(abs_top_srcdir)/external; \
 	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir); \
 	cd $(assimulo_build_dir)/Assimulo; \
 	case $(build) in \
@@ -316,7 +314,7 @@ if !WITH_OPENMP
 if JM_WIN64
 if WITH_PYTHON64
 	mkdir -p $(assimulo_build_dir64); \
-	cd $(assimulo_src_dir)/..; \
+	cd $(abs_top_srcdir)/external; \
 	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir64); \
 	cd $(assimulo_build_dir64)/Assimulo; \
 	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
@@ -507,23 +505,7 @@ all-local: build-python-packages build-compiler
 	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) https://svn.jmodelica.org > $(abs_builddir)/version.txt
 	if [ "$(BUILD_EXTRA)" ]; then exec "$(BUILD_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
-build-compiler:
-if HAVE_ANT
-	mkdir -p $(JAVA_BUILD_DIR)
-	cd $(JAVA_BUILD_DIR); \
-	$(ANT_OPTS) $(ANT) -f "$(JAVA_MC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
-	cd $(JAVA_BUILD_DIR); \
-	$(ANT_OPTS) $(ANT) -f "$(JAVA_OC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
-	java -cp "$(JAVA_EXEC_CP)" org.jmodelica.modelica.compiler.ModelicaCompiler\$$OptionExporter -x "$(abs_builddir)/DefaultOptions.xml"
-endif
-
-install-exec-local: install-python-packages
-if HAVE_ANT
-	cp $(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar $(DESTDIR)$(prefix)/lib/
-	cp $(JAVA_BUILD_DIR)/bin/util.jar $(DESTDIR)$(prefix)/lib/
-	cp $(JAVA_BUILD_DIR)/bin/OptimicaCompiler.jar $(DESTDIR)$(prefix)/lib/
-	cp $(JAVA_BUILD_DIR)/bin/separateProcess.jar $(DESTDIR)$(prefix)/lib/
-endif
+install-exec-local: install-python-packages install-compiler install-modules
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/LICENSE $(DESTDIR)$(prefix)/ 
 	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_GPL $(DESTDIR)$(prefix)/lib/
 	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_CPL $(DESTDIR)$(prefix)/lib/

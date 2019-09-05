@@ -31,7 +31,7 @@
     <property name="java_version" value="1.7"/>
     <property name="java_compiler" value="javac${java_version}"/>
 
-    <fail unless="target" message="Property 'target' not set. Should point to build directory where this ant file will generate intermediate files and build outputs. For builds in eclipse we normally use ${workspace_loc}/JModelica/tools/eclipse/antbuild."/>
+    <fail unless="target" message="Property 'target' not set. Should point to build directory where this ant file will generate intermediate files and build outputs. For builds in eclipse we normally use ${workspace_loc:&lt;project&gt;/tools/eclipse/antbuild}."/>
     <echo>build-base.xml: running in ${target}</echo>
 
     <property name="compiler_build" value="${target}/src/build" />
@@ -1186,8 +1186,8 @@ ${test_class_extra_defs}
     <target name="clean-ast">
         <delete dir="${java_output_intermediate}" />
         <delete dir="${java_output_intermediate_common}" />
-        <delete><fileset dir="${java_output_final}"/></delete>
-        <delete><fileset dir="${java_output_final_common}"/></delete>
+        <delete dir="${java_output_final}"/>
+        <delete dir="${java_output_final_common}"/>
     </target>
 
     <!-- cleans all extra generated java files -->
@@ -1206,7 +1206,7 @@ ${test_class_extra_defs}
 
     <!-- cleans all generated junit files -->
     <target name="clean-test" depends="clean-test-report">
-        <delete><fileset dir="${junit_output}"/></delete>
+        <delete dir="${junit_output}" />
     </target>
 
     <!-- cleans all generated test report -->

@@ -536,7 +536,7 @@ aspect Connections {
 
         public void generateEquations(Flattener f) {
             ConnectionSetEntry fst = first();
-            if (size() == 1 && fst.isInside() && fst.getVar().isTopLevelCausalOrConnector()) {
+            if (size() == 1 && fst.isInside() && fst.getVar().isTopLevelInputOutput()) {
                 return;
             }
             FExp e = null;

@@ -102,7 +102,7 @@ abstract InstComponentDecl : InstBaseNode ::= <Name:String>
                                               <SrcComponentDecl:SrcComponentDecl> 
                                               [InstModification] 
                                               [InstConstrainingComponent] 
-                                              /[FArraySubscripts]/ 
+                                              /FArraySubscripts/ 
                                               [ConditionalAttribute:FExp]
                                               /[Annotation:InstClassModification]/
                                               /[ClassAnnotation:InstClassModification]/;
