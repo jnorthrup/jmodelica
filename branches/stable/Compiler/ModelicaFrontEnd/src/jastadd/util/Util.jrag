@@ -672,7 +672,7 @@ aspect FileNames {
     	
     }
     public String SrcLibNode.fileName() {
-        return getStructured() ? myPackageFile().toString() : getLoadInfo().getPath();
+        return getStructured() ? myPackageFile().getPath() : getLoadInfo().getPath();
     }
     public String InstLibNode.fileName() {
         return actualInstClass().fileName();
@@ -700,7 +700,7 @@ aspect Names {
   syn lazy String SrcGlobalAccess.name() = "." + getSrcAccessNoTransform().name();
   syn lazy String SrcDot.name() {
 	  StringBuilder buf = new StringBuilder();
-	  List<SrcNamedAccess> l = getSrcNamedAccessListNoTransform();
+	  List<SrcAccess> l = getSrcAccessListNoTransform();
 	  for (int i = 0; i < l.getNumChildNoTransform(); i++) {
 		  buf.append(l.getChildNoTransform(i).name());
 		  buf.append('.');
@@ -729,7 +729,7 @@ aspect Names {
     eq SrcGlobalAccess.qualifiedName()  = "." + getSrcAccess().qualifiedName();
     eq SrcDot.qualifiedName() {
         StringBuilder buf = new StringBuilder();
-        for (SrcNamedAccess a : getSrcNamedAccesss()) {
+        for (SrcAccess a : getSrcAccesss()) {
             buf.append(a.qualifiedName());
             buf.append('.');
         }
@@ -762,7 +762,7 @@ aspect Names {
   eq InstImportUnqualified.name() = "*";    // To avoid returning null
   
   syn String SrcAccess.lastName() = name();
-  eq SrcDot.lastName()            = getSrcNamedAccessListNoTransform().lastChildNoTransform().lastName();
+  eq SrcDot.lastName()            = getSrcAccessListNoTransform().lastChildNoTransform().lastName();
   eq SrcGlobalAccess.lastName()   = getSrcAccessNoTransform().lastName();
   
   syn String InstAccess.lastName() = name();
@@ -947,7 +947,7 @@ aspect Names {
      * unqualified name.
      */ 
     syn SrcAccess SrcAccess.getLastAccess() = this;
-    eq SrcDot.getLastAccess()            = getSrcNamedAccess(getNumSrcNamedAccess() - 1);
+    eq SrcDot.getLastAccess()            = getSrcAccess(getNumSrcAccess() - 1);
     eq SrcGlobalAccess.getLastAccess()   = getSrcAccess().getLastAccess();
     
     syn InstAccess InstAccess.getLastInstAccess() = this;
@@ -959,7 +959,7 @@ aspect Names {
      * unqualified name.
      */
     syn SrcAccess SrcAccess.getFirstAccess() = this;
-    eq SrcDot.getFirstAccess()            = getSrcNamedAccess(0);
+    eq SrcDot.getFirstAccess()            = getSrcAccess(0);
     eq SrcGlobalAccess.getFirstAccess()   = getSrcAccess().getFirstAccess();
 
     // For proxy
@@ -968,7 +968,7 @@ aspect Names {
     }
     
     inh SrcAccess SrcAccess.getNextAccess();
-    eq SrcDot.getSrcNamedAccess(int i).getNextAccess()    = (i >= getNumSrcNamedAccess() - 1) ? null : getSrcNamedAccess(i + 1);
+    eq SrcDot.getSrcAccess(int i).getNextAccess()    = (i >= getNumSrcAccess() - 1) ? null : getSrcAccess(i + 1);
     eq SourceRoot.getProgram().getNextAccess() = computeNextAccess();
     eq Root.getChild().getNextAccess()         = null;
 
@@ -1008,12 +1008,12 @@ aspect Names {
     }
     
     public SrcAccess SrcDot.stripFirstAccess() {
-    	int n = getNumSrcNamedAccess();
+    	int n = getNumSrcAccess();
     	if (n <= 2)
-    		return getSrcNamedAccess(n - 1);
-    	List<SrcNamedAccess> l = new List<>();
+    		return getSrcAccess(n - 1);
+    	List<SrcAccess> l = new List<SrcAccess>();
     	for (int i = 1; i < n; i++)
-    		l.add(getSrcNamedAccess(i));
+    		l.add(getSrcAccess(i));
         return new SrcDot(l);
     }
     
@@ -1055,7 +1055,7 @@ aspect Names {
      */
     inh boolean SrcAccess.inQualified();
     inh boolean InstAccess.inQualified();
-    eq SrcDot.getSrcNamedAccess().inQualified()         = true;
+    eq SrcDot.getSrcAccess().inQualified()         = true;
     eq InstDot.getInstAccess().inQualified() = true;
     eq BaseNode.getChild().inQualified()     = false;
 
@@ -1254,11 +1254,6 @@ aspect Visibility {
 
 aspect ComponentDeclMethods {
 
-    inh boolean InstComponentDecl.isConnectorVariable();
-    eq InstClassDecl.getChild().isConnectorVariable() = isConnector();
-    eq InstComponentDecl.getChild().isConnectorVariable() = isConnector() || isConnectorVariable();
-    eq InstRoot.getChild().isConnectorVariable() = false;
-
     /**
      * Check if a SrcComponentDecl is declared flow.
      */
@@ -1317,15 +1312,10 @@ aspect ComponentDeclMethods {
      */
     syn boolean SrcComponentDecl.isParameter() = hasSrcTypePrefixVariability() && getSrcTypePrefixVariability().parameterVariability();
     
-    /**
+     /**
      * Check if this component is declared constant.
      */
     syn boolean SrcComponentDecl.isConstant() = hasSrcTypePrefixVariability() && getSrcTypePrefixVariability().constantVariability();
-    
-    /**
-     * Check if this component clause is declared constant.
-     */
-    syn boolean SrcComponentClause.isConstant() = hasSrcTypePrefixVariability() && getSrcTypePrefixVariability().constantVariability();
     
     /**
      * Check if this component is declared discrete.
@@ -1335,7 +1325,7 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component is an input component.
      */
-    syn boolean InstComponentDecl.isInput() = isDeclaredInput() || inheritsInput();
+    syn boolean InstComponentDecl.isInput() = isDeclaredInput() || inheritsInput() || (isDeclaredFlow() && !isOutput());
     
     /**
      * Check if this component inherits input from the surrounding component.
@@ -1421,14 +1411,12 @@ aspect ComponentDeclMethods {
      */
     syn boolean InstComponentDecl.isTopLevelInputOutput() = false;
     eq InstAssignable.isTopLevelInputOutput() = isTopLevel() && !inExpandableConnector() && 
-            (isInput() || isOutput() || isConnectorVariable()) && !isProtected() && isPublicVar();
+            (isInput() || isOutput()) && !isProtected() && isPublicVar();
 
-    syn boolean InstComponentDecl.isTopLevel() = isInTopLevel();
-
-    inh boolean InstComponentDecl.isInTopLevel();
-    eq InstComponentDecl.getChild().isInTopLevel() = (isAssignable() || isConnector()) && isTopLevel();
-    eq InstClassDecl.getChild().isInTopLevel()     = true;
-    eq Root.getChild().isInTopLevel()              = false;
+    inh boolean InstComponentDecl.isTopLevel();
+    eq InstComponentDecl.getChild().isTopLevel() = (isAssignable() || isConnector()) && isTopLevel();
+    eq InstClassDecl.getChild().isTopLevel()     = true;
+    eq Root.getChild().isTopLevel()              = false;
 
     /**
      * Check if this equation is declared initial.
@@ -1573,14 +1561,6 @@ aspect ClassDeclMethods {
         }
         return false;
     }
-
-    /**
-     * check if this node has a SrcLibNode as parent
-     */
-    inh boolean SrcClassDecl.isLib();
-    eq SourceRoot.getChild().isLib() = false;
-    eq SrcLibNode.getChild().isLib() = true;
-    eq SrcFullClassDecl.getChild().isLib() = false;
 
     syn boolean SrcClassDecl.isLibNode() = false;
     eq SrcLibNode.isLibNode()            = true;
@@ -2133,7 +2113,7 @@ aspect UtilInterface {
         return create(null, options, eh, null, null);
     }
     
-    private static UtilInterface UtilInterface.create(ModelicaCompiler mc, OptionRegistry options,
+    private static UtilInterface UtilInterface.create(ModelicaCompiler mc, OptionRegistry options, 
             IErrorHandler eh, ExternalFunctionCache efc, File path) {
         return new UtilInterface(mc, options, eh, efc, path);
     }

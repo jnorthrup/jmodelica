@@ -20,20 +20,20 @@ import java.io.File;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.jmodelica.common.options.AbstractOptionRegistry;
+import org.jmodelica.common.options.OptionRegistry;
 
 public class CCompilerArguments {
     private String fileName;
-    private AbstractOptionRegistry options;
+    private OptionRegistry options;
     private CCompilerTarget target;
     
     Set<String> externalLibraries;
     Set<String> externalLibraryDirectories;
     Set<String> externalIncludeDirectories;
     
-    public CCompilerArguments(String fileName, AbstractOptionRegistry options, CCompilerTarget target,
-                              Set<String> externalLibraries, Set<String> externalLibraryDirectories,
-                              Set<String> externalIncludeDirectories) {
+    public CCompilerArguments(String fileName, OptionRegistry options, CCompilerTarget target, 
+            Set<String> externalLibraries, Set<String> externalLibraryDirectories, 
+            Set<String> externalIncludeDirectories) {
         
         this.fileName = fileName;
         this.options = options;
@@ -55,7 +55,7 @@ public class CCompilerArguments {
         return res;
     }
 
-    public AbstractOptionRegistry getOptions() {
+    public OptionRegistry getOptions() {
         return options;
     }
     

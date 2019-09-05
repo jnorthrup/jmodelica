@@ -354,15 +354,7 @@ JAVA_CASADI_BASE_DIR = $(COMPILER_DIR)
 JAVA_CASADI_BUILD_DIR = $(abs_builddir)
 JAVA_MC_CASADI_ANT_FILE = $(COMPILER_DIR)/ModelicaCompilerCasADi/build.xml
 JAVA_OC_CASADI_ANT_FILE = $(COMPILER_DIR)/OptimicaCompilerCasADi/build.xml
-ant_output_jars = \
-	$(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar \
-	$(JAVA_BUILD_DIR)/bin/util.jar \
-	$(JAVA_BUILD_DIR)/bin/OptimicaCompiler.jar \
-	$(JAVA_BUILD_DIR)/bin/separateProcess.jar
-
-ant_output_options=$(JAVA_BUILD_DIR)/src/build/DefaultOptions.xml
-BEAVER_INSTALL_DIR = $(DESTDIR)$(prefix)/ThirdParty/Beaver
-BEAVER_SOURCE = $(abs_top_srcdir)/Compiler/ModelicaFrontEnd/ThirdParty/Beaver
+JAVA_EXEC_CP = $(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar:$(JAVA_BUILD_DIR)/bin/util.jar:$(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -1103,26 +1095,7 @@ build-python-packages:
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	export PYTHONHOME=$(ORIG_PYTHON_HOME); \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	rm -rf build
 
-install-python-tests:
-@PYTHON_ENABLED_TRUE@	chmod ugo+x jm_tests
-@PYTHON_ENABLED_TRUE@	cp -p jm_tests $(DESTDIR)$(prefix)/jm_tests
-
-@PYTHON_ENABLED_TRUE@	cd $(abs_top_srcdir)/Python/src/tests_jmodelica/; \
-@PYTHON_ENABLED_TRUE@	mkdir -p $(DESTDIR)$(prefix)/Python/tests_jmodelica; \
-@PYTHON_ENABLED_TRUE@	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/tests_jmodelica
-@PYTHON_ENABLED_TRUE@	rm -rf $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/src
-@PYTHON_ENABLED_TRUE@	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
-@PYTHON_ENABLED_TRUE@	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/Makefile.am
-@PYTHON_ENABLED_TRUE@	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/Makefile.in
-@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	cd $(abs_top_srcdir)/Python/src/tests_jmodelica/; \
-@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	mkdir -p $(DESTDIR)$(prefix)/Python_64/tests_jmodelica; \
-@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64/tests_jmodelica
-@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	rm -rf $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/src
-@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
-@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.am
-@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.in
-
-install-python-packages: build-python-packages install-python-tests
+install-python-packages: build-python-packages
 @PYTHON_ENABLED_TRUE@	mkdir -p $(DESTDIR)$(prefix)/Python
 @PYTHON_ENABLED_TRUE@	cp $(abs_top_srcdir)/Python/src/startup.py $(DESTDIR)$(prefix)/
 @PYTHON_ENABLED_TRUE@	cp Python/src/required_defaults.py $(DESTDIR)$(prefix)/Python/
@@ -1158,6 +1131,9 @@ install-python-packages: build-python-packages install-python-tests
 @PYTHON_ENABLED_TRUE@	find pyfmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 @PYTHON_ENABLED_TRUE@	fi; \
 @PYTHON_ENABLED_TRUE@	done
+@PYTHON_ENABLED_TRUE@	cd $(abs_top_srcdir)/Python/src/tests_jmodelica/; \
+@PYTHON_ENABLED_TRUE@	mkdir -p $(DESTDIR)$(prefix)/Python/tests_jmodelica; \
+@PYTHON_ENABLED_TRUE@	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/tests_jmodelica
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	if [ -e $(assimulo_install_dir64)/$${pkgdir}/site-packages/ ]; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	then \
@@ -1186,6 +1162,17 @@ install-python-packages: build-python-packages install-python-tests
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	find pyfmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	fi; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	done
+@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	cd $(abs_top_srcdir)/Python/src/tests_jmodelica/; \
+@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	mkdir -p $(DESTDIR)$(prefix)/Python_64/tests_jmodelica; \
+@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64/tests_jmodelica
+@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	rm -rf $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/src
+@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
+@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.am
+@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.in
+@PYTHON_ENABLED_TRUE@	rm -rf $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/src
+@PYTHON_ENABLED_TRUE@	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
+@PYTHON_ENABLED_TRUE@	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/Makefile.am
+@PYTHON_ENABLED_TRUE@	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/Makefile.in
 @PYTHON_ENABLED_TRUE@	mkdir -p $(DESTDIR)$(prefix)/bin
 @PYTHON_ENABLED_TRUE@	[ -e $(DESTDIR)$(prefix)/bin/jm_python.sh ] && echo "File exists, don't copy jm_python.sh" || cp Python/jm_python.sh $(DESTDIR)$(prefix)/bin/jm_python.sh
 @PYTHON_ENABLED_TRUE@	[ -e $(DESTDIR)$(prefix)/bin/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(DESTDIR)$(prefix)/bin/jm_ipython.sh
@@ -1195,7 +1182,19 @@ all-local: build-python-packages build-compiler
 	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) https://svn.jmodelica.org > $(abs_builddir)/version.txt
 	if [ "$(BUILD_EXTRA)" ]; then exec "$(BUILD_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
-install-exec-local: install-python-packages install-compiler install-modules
+build-compiler:
+@HAVE_ANT_TRUE@	mkdir -p $(JAVA_BUILD_DIR)
+@HAVE_ANT_TRUE@	cd $(JAVA_BUILD_DIR); \
+@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) -f "$(JAVA_MC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
+@HAVE_ANT_TRUE@	cd $(JAVA_BUILD_DIR); \
+@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) -f "$(JAVA_OC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
+@HAVE_ANT_TRUE@	java -cp "$(JAVA_EXEC_CP)" org.jmodelica.modelica.compiler.ModelicaCompiler\$$OptionExporter -x "$(abs_builddir)/DefaultOptions.xml"
+
+install-exec-local: install-python-packages
+@HAVE_ANT_TRUE@	cp $(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar $(DESTDIR)$(prefix)/lib/
+@HAVE_ANT_TRUE@	cp $(JAVA_BUILD_DIR)/bin/util.jar $(DESTDIR)$(prefix)/lib/
+@HAVE_ANT_TRUE@	cp $(JAVA_BUILD_DIR)/bin/OptimicaCompiler.jar $(DESTDIR)$(prefix)/lib/
+@HAVE_ANT_TRUE@	cp $(JAVA_BUILD_DIR)/bin/separateProcess.jar $(DESTDIR)$(prefix)/lib/
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/LICENSE $(DESTDIR)$(prefix)/ 
 	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_GPL $(DESTDIR)$(prefix)/lib/
 	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_CPL $(DESTDIR)$(prefix)/lib/
@@ -1217,7 +1216,12 @@ install-exec-local: install-python-packages install-compiler install-modules
 	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
 	esac
 
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty 
+	cp $(abs_builddir)/DefaultOptions.xml $(DESTDIR)$(prefix)/DefaultOptions.xml
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver
+	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Beaver/
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib
+	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/ 
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials
 	cp -r $(SUNDIALS_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Sundials
 	cp $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.7.0/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Sundials
@@ -1253,32 +1257,9 @@ install-exec-local: install-python-packages install-compiler install-modules
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML schemas"  || cp  $(abs_top_srcdir)/XML/*.xsd $(DESTDIR)$(prefix)/XML
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML LICENSE"  || cp  $(abs_top_srcdir)/XML/LICENSE $(DESTDIR)$(prefix)/XML
 	cp  $(abs_builddir)/version.txt $(DESTDIR)$(prefix)
+	chmod ugo+x jm_tests
+	cp -p jm_tests $(DESTDIR)$(prefix)/jm_tests
 	if [ "$(INSTALL_EXTRA)" ]; then exec "$(INSTALL_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
-
-install-compiler: $(ant_output_jars) $(ant_output_options) TODO-always-trigger
-@HAVE_ANT_TRUE@	mkdir -p $(DESTDIR)$(prefix)/lib/
-@HAVE_ANT_TRUE@	install -t $(DESTDIR)$(prefix)/lib/ $(ant_output_jars)
-@HAVE_ANT_TRUE@	install -t $(DESTDIR)$(prefix)/ $(ant_output_options)
-
-# Dummy target used to always trigger rebuilds. Used to enable references to
-# outputs from phony targets as real targets. For example ant output.
-TODO-always-trigger: ;
-
-$(ant_output_jars) $(ant_output_options): build-compiler
-
-build-compiler:
-@HAVE_ANT_TRUE@	mkdir -p $(JAVA_BUILD_DIR)
-@HAVE_ANT_TRUE@	cd $(JAVA_BUILD_DIR); \
-@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) -f "$(JAVA_MC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
-@HAVE_ANT_TRUE@	cd $(JAVA_BUILD_DIR); \
-@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) -f "$(JAVA_OC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
-
-install-modules: install-modules-ModelicaFrontEnd
-
-install-modules-ModelicaFrontEnd: $(BEAVER_INSTALL_DIR)/LICENSE $(BEAVER_INSTALL_DIR)/lib/beaver-rt.jar
-
-$(BEAVER_INSTALL_DIR)/%: $(BEAVER_SOURCE)/%
-	install -D $(<) $(@)
 
 bindistdir: install
 	rm -rf $(bindistdir)

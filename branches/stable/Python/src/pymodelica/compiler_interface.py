@@ -33,7 +33,7 @@ if not jpype.isJVMStarted():
     _jvm_class_path = pym.environ['COMPILER_JARS']
     _jvm_ext_dirs = pym.environ['BEAVER_PATH']
     jpype.startJVM(pym.environ['JPYPE_JVM'], 
-        '-Djava.class.path=%s' % os.pathsep.join([_jvm_class_path]),
+        '-Djava.class.path=%s' % os.pathsep.join([_jvm_class_path,os.path.join(_jvm_ext_dirs, 'beaver-rt.jar')]),
         *_jvm_args)
     org = jpype.JPackage('org')
     print "JVM started."
@@ -52,10 +52,10 @@ OptionRegistryInterface = org.jmodelica.common.options.OptionRegistry
 
 # Exceptions
 UnknownOptionException = jpype.JClass(
-    'org.jmodelica.common.options.AbstractOptionRegistry$UnknownOptionException')
+    'org.jmodelica.common.options.OptionRegistry$UnknownOptionException')
     
 InvalidOptionValueException = jpype.JClass(
-    'org.jmodelica.common.options.AbstractOptionRegistry$InvalidOptionValueException')
+    'org.jmodelica.common.options.OptionRegistry$InvalidOptionValueException')
 
 IllegalLogStringException = org.jmodelica.util.logging.IllegalLogStringException
 

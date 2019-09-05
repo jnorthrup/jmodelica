@@ -71,11 +71,10 @@ public class GccCompilerDelegator extends CCompilerDelegator {
      * Get the make command to use for the specified build platform.
      */
     protected String getMake(String platform) {
-        if (getBuildPlatform().startsWith("win")) {
-			return new File(getEnv().get("MINGW_HOME"), "bin/mingw32-make").getPath();
-		} else {
-			return "make";
-		}
+        if (getBuildPlatform().startsWith("win")) 
+            return new File(getEnv().get("MINGW_HOME"), "bin/mingw32-make").getPath();
+        else
+            return "make";
     }
     
     protected final QuoteOperation INC_OP = new QuoteOperation("-I");
@@ -169,17 +168,14 @@ public class GccCompilerDelegator extends CCompilerDelegator {
             String[] mArgs = new String[] { make, "-f", makefile.getPath(), "-j", Integer.toString(args.getMaxProc()), 
                     args.getTarget().getMakeFileFlag(), makefileVar };
             ArrayList<String> vArgs = new ArrayList<String>(pVars.size());
-            for (Map.Entry<String,String> var : pVars.entrySet()) {
-				if (var.getValue() != null) {
-					vArgs.add(var.getKey() + '=' + var.getValue());
-				}
-			}
+            for (Map.Entry<String,String> var : pVars.entrySet())
+                if (var.getValue() != null)
+                    vArgs.add(var.getKey() + '=' + var.getValue());
             String[] cmd = new String[mArgs.length + vArgs.size()];
             System.arraycopy(mArgs, 0, cmd, 0, mArgs.length);
             int i = mArgs.length;
-            for (String arg : vArgs) {
-				cmd[i++] = arg;
-			}
+            for (String arg : vArgs)
+                cmd[i++] = arg;
                 
             log.debug("C-code compilation command:");
             log.debug(printStringArrayObject(cmd));

@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.jmodelica.common.LogContainer;
-import org.jmodelica.common.options.AbstractOptionRegistry;
+import org.jmodelica.common.options.OptionRegistry;
 import org.jmodelica.util.ccompiler.CCompilerDelegator;
 import org.jmodelica.util.exceptions.CcodeCompilationException;
 
@@ -24,7 +24,7 @@ public class ExternalProcessMultiCache<K extends ExternalProcessMultiCache.Varia
 
         public boolean shouldCacheProcess();
 
-        public AbstractOptionRegistry myOptions();
+        public OptionRegistry myOptions();
 
         public String libraryDirectory();
 

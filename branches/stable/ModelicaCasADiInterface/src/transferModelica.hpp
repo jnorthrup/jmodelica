@@ -35,13 +35,13 @@ namespace ModelicaCasADi {
 void transferModelFromModelicaCompiler(Ref<Model> m, 
                            std::string modelName, 
                            const std::vector<std::string> &modelFiles,
-                           Ref<ModelicaOptionsWrapper> options, 
+                           Ref<CompilerOptionsWrapper> options, 
                            std::string log_level);
                            
 void transferModelFromOptimicaCompiler(Ref<Model> m,
                            std::string modelName, 
                            const std::vector<std::string> &modelFiles, 
-                           Ref<OptimicaOptionsWrapper> options, 
+                           Ref<CompilerOptionsWrapper> options, 
                            std::string log_level);
                            
                            

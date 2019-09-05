@@ -17,35 +17,33 @@
 package org.jmodelica.util.collections;
 
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
-public class ChainedIterator<E> implements Iterator<E> {
+/**
+ * \brief Generic iterator over constant array.
+ */
+public class ConstArrayIterator<T> implements Iterator<T> {
 	
-	private Iterator<? extends E>[] its;
-	private int i;
+	protected T[] elems;
+	protected int i;
 	
-    @SafeVarargs // This is safe, we never edit the array!
-    public ChainedIterator(Iterator<? extends E>... its) {
-		this.its = its;
+	public ConstArrayIterator(T[] arr) {
+		elems = arr;
+		i = 0;
 	}
-
+	
 	@Override
     public boolean hasNext() {
-		while (i < its.length && !its[i].hasNext())
-			i++;
-		return i < its.length;
+		return i < elems.length;
 	}
-
+	
 	@Override
-    public E next() {
-		if (!hasNext())
-			throw new NoSuchElementException();
-		return its[i].next();
+    public T next() {
+		return elems[i++];
 	}
-
+	
 	@Override
     public void remove() {
 		throw new UnsupportedOperationException();
 	}
-
+	
 }

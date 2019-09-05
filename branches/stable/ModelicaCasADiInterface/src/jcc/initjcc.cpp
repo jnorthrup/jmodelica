@@ -39,7 +39,8 @@ jint initJVM()
     string mcjar = mclib + "/ModelicaCompiler.jar";
     string ocjar = mclib + "/OptimicaCompiler.jar";
     string utiljar = mclib + "/util.jar";
-    string classpath = mcjar + CLASSPATH_SEP + ocjar + CLASSPATH_SEP + utiljar;
+    string beaverjar = jmhome + "/ThirdParty/Beaver/lib/beaver-rt.jar";
+    string classpath = mcjar + CLASSPATH_SEP + ocjar + CLASSPATH_SEP + utiljar + CLASSPATH_SEP + beaverjar;
     string casadilib;
     try {
         casadilib = string(getenv_checked("CASADI_LIB_HOME"));

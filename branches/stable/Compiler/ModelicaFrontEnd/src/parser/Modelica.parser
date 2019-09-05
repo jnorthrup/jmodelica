@@ -59,6 +59,7 @@
         public void syntaxError(Symbol token) {
             
             StringBuilder s = new StringBuilder();
+            //s.append("Syntax error at line "+ Symbol.getLine(token.getStart()) + ", column " + Symbol.getColumn(token.getStart()) + "\n");
             if (token.getId() == Terminals.EOF) {
                 s.append("  Unexpected end of file");
             } else if (token.value != null) {
@@ -67,8 +68,9 @@
                 s.append("  Unexpected token: " + Terminals.NAMES[token.getId()]);
             else 
                 s.append("  Syntactic error");
-            Problem p = Problem.createProblem(fileName, Symbol.getLine(token.getStart()), Symbol.getColumn(token.getStart()),
-                    Symbol.getLine(token.getEnd()), Symbol.getColumn(token.getEnd()), ProblemSeverity.ERROR, ProblemKind.SYNTACTIC, s.toString());
+            Problem p = new Problem(fileName, s.toString(), ProblemSeverity.ERROR, ProblemKind.SYNTACTIC,
+                    Symbol.getLine(token.getStart()), Symbol.getColumn(token.getStart()),
+                    Symbol.getLine(token.getEnd()), Symbol.getColumn(token.getEnd()));
             
             report(p);
         }
@@ -79,8 +81,15 @@
          * @param e     the exception.
          */
         public void scannerError(Scanner.Exception e) {
-            Problem p = Problem.createProblem(fileName, e.line, e.column, e.line, e.column,
-            	ProblemSeverity.ERROR, ProblemKind.LEXICAL, e.getMessage());
+            /*
+            StringBuilder s = new StringBuilder(e.getMessage());
+            s.append(" at line ");
+            s.append(e.line);
+            s.append(", column ");
+            s.append(e.column);
+            */
+            Problem p = new Problem(fileName, e.getMessage(), ProblemSeverity.ERROR, ProblemKind.LEXICAL,
+                    e.line, e.column, e.line, e.column);
             
             report(p);
         }
@@ -1637,7 +1646,7 @@ SrcDot access_dot
       DOT
       access_single
     {:
-        access_dot.addSrcNamedAccess(access_single);
+        access_dot.addSrcAccess(access_single);
         return access_dot;
     :}
     ;
@@ -1677,7 +1686,7 @@ SrcDot access_scalar_dot
       DOT
       access_single_scalar
     {:
-        access_scalar_dot.addSrcNamedAccess(access_single_scalar);
+        access_scalar_dot.addSrcAccess(access_single_scalar);
         return access_scalar_dot;
     :}
     ;

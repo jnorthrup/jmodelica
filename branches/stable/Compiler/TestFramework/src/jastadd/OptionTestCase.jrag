@@ -17,7 +17,7 @@
 import org.jmodelica.util.collections.ListUtil;
 
 /**
- * Test class to be used in the test framework for testing {@link AbstractOptionRegistry} options.
+ * Test class to be used in the test framework for testing {@link OptionRegistry} options.
  * <p>
  * This test case compares expected default values of options to their actual values in the registry. A null result
  * denotes the case where the option does not exist.
@@ -83,7 +83,7 @@ public class OptionTestCase extends TestCase {
      * 
      * @param options   the options' registry containing all option specifications.
      */
-    private  void checkOptions(AbstractOptionRegistry options) {
+    private  void checkOptions(OptionRegistry options) {
         StringBuilder error = new StringBuilder();
         StringBuilder correct = new StringBuilder();
 
@@ -147,7 +147,7 @@ public class OptionTestCase extends TestCase {
     }
 
     @Override
-    public boolean testOptions(AbstractOptionRegistry options) {
+    public boolean testOptions(OptionRegistry options) {
         checkOptions(options);
         return true;
     }

@@ -72,11 +72,6 @@ public class DummyAnnotProvider implements AnnotationProvider<DummyAnnotProvider
     public void setAnnotationValue(Evaluable newValue) throws FailedToSetAnnotationValueException {
         value = newValue;
     }
-    
-    @Override
-    public boolean canChangeAnnotationValue() {
-        return true;
-    }
 
     @Override
     public DummyAnnotProvider addAnnotationSubNode(String name) throws AnnotationEditException {

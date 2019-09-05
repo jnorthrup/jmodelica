@@ -96,11 +96,6 @@ aspect FlatAnnotations {
     }
 
     @Override
-    public boolean FAttribute.canChangeAnnotationValue() {
-        return true;
-    }
-
-    @Override
     public FlatAnnotationProvider FAttribute.addAnnotationSubNode(String name) {
         return addAnnotationSubNode(this, name);
     }
@@ -147,11 +142,6 @@ aspect FlatAnnotations {
             @Override
             public void setAnnotationValue(FExp newValue) throws FailedToSetAnnotationValueException {
                 throw new FailedToSetAnnotationValueException();
-            }
-
-            @Override
-            public boolean canChangeAnnotationValue() {
-                return false;
             }
 
             @Override

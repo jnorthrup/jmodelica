@@ -52,7 +52,7 @@ int main(int argc, char ** argv)
    setUpJVM();
    {
       //OptionWrapper
-      ModelicaCasADi::Ref<ModelicaCasADi::ModelicaOptionsWrapper> options = new ModelicaCasADi::ModelicaOptionsWrapper();
+      ModelicaCasADi::Ref<ModelicaCasADi::CompilerOptionsWrapper> options = new ModelicaCasADi::CompilerOptionsWrapper();
       options->setStringOption("inline_functions", "none");
       options->setBooleanOption("automatic_tearing", false); //disable tearing
       options->setBooleanOption("equation_sorting", true); //Enables blt

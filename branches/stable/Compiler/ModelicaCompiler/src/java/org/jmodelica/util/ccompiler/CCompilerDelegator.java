@@ -26,7 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jmodelica.common.options.AbstractOptionRegistry;
+import org.jmodelica.common.options.OptionRegistry;
 import org.jmodelica.util.SystemUtil;
 import org.jmodelica.util.files.FileUtil;
 import org.jmodelica.util.logging.ModelicaLogger;
@@ -35,7 +35,7 @@ import org.jmodelica.util.logging.ModelicaLogger;
  * Base class for interface to C compiler.
  * 
  * To add a new delegator, call {@link #addDelegator(String, CCompilerDelegator.Creator)} before 
- * AbstractOptionRegistry is instantiated. This is preferably accomplished by using a JastAdd
+ * OptionRegistry is instantiated. This is preferably accomplished by using a JastAdd 
  * aspect to add a static field in this class that gets its value from addDelegator().
  */
 public abstract class CCompilerDelegator {
@@ -91,7 +91,7 @@ public abstract class CCompilerDelegator {
         return c.create();
     }
     
-    public static void addCompilerOptionValues(AbstractOptionRegistry opt) {
+    public static void addCompilerOptionValues(OptionRegistry opt) {
         for (String name : creators.keySet())
             opt.addStringOptionAllowed(OPTION, name);
     }

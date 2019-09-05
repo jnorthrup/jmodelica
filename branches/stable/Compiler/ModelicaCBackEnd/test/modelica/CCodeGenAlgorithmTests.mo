@@ -1753,7 +1753,9 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
+    if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
         x[0] = 3;
         x[1] = 4;
     } else if (evaluation_mode == JMI_BLOCK_DISCRETE_REAL_VALUE_REFERENCE) {
@@ -1773,8 +1775,16 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[3] = 536870920;
         x[4] = 536870921;
         x[5] = 536870922;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
+        (*res)[0] = 1;
+        (*res)[1] = (*res)[0];
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _a_1;
+        x[1] = _b_2;
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _a_1 = x[0];
+            _b_2 = x[1];
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
             if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
@@ -1812,16 +1822,22 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             }
             _temp_1_3 = _sw(0);
         }
-        _a_1 = pre_a_1;
-        _b_2 = pre_b_2;
-        if (LOG_EXP_AND(_temp_1_3, LOG_EXP_NOT(pre_temp_1_3))) {
-            _a_1 = _a_1 + 1;
-        } else if (LOG_EXP_OR(_atInitial, LOG_EXP_AND(_temp_2_4, LOG_EXP_NOT(pre_temp_2_4)))) {
-            _a_1 = _a_1 - 1;
-        } else if (LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_temp_3_5, LOG_EXP_NOT(pre_temp_3_5)), LOG_EXP_AND(_temp_4_6, LOG_EXP_NOT(pre_temp_4_6))), LOG_EXP_AND(_temp_5_7, LOG_EXP_NOT(pre_temp_5_7))), LOG_EXP_AND(_temp_6_8, LOG_EXP_NOT(pre_temp_6_8)))) {
-            _b_2 = _b_2 + 1;
-        }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            tmp_1 = _a_1;
+            tmp_2 = _b_2;
+            _a_1 = pre_a_1;
+            _b_2 = pre_b_2;
+            if (LOG_EXP_AND(_temp_1_3, LOG_EXP_NOT(pre_temp_1_3))) {
+                _a_1 = _a_1 + 1;
+            } else if (LOG_EXP_OR(_atInitial, LOG_EXP_AND(_temp_2_4, LOG_EXP_NOT(pre_temp_2_4)))) {
+                _a_1 = _a_1 - 1;
+            } else if (LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_temp_3_5, LOG_EXP_NOT(pre_temp_3_5)), LOG_EXP_AND(_temp_4_6, LOG_EXP_NOT(pre_temp_4_6))), LOG_EXP_AND(_temp_5_7, LOG_EXP_NOT(pre_temp_5_7))), LOG_EXP_AND(_temp_6_8, LOG_EXP_NOT(pre_temp_6_8)))) {
+                _b_2 = _b_2 + 1;
+            }
+            JMI_SWAP(GEN, _a_1, tmp_1)
+            JMI_SWAP(GEN, _b_2, tmp_2)
+            (*res)[0] = tmp_1 - (_a_1);
+            (*res)[1] = tmp_2 - (_b_2);
         }
     }
     JMI_DYNAMIC_FREE()

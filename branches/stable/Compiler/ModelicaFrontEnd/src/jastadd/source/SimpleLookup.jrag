@@ -298,7 +298,7 @@ aspect SimpleLookup {
     * by looking after the target class one "name" piece at a time in the correct scope.
     */
     inh ResolvedAccess ASTNode.simpleLookupHelper(String name);
-    eq SrcDot.getSrcNamedAccess(int i).simpleLookupHelper(String name)        = simpleLookupDot(name, i);
+    eq SrcDot.getSrcAccess(int i).simpleLookupHelper(String name)             = simpleLookupDot(name, i);
     eq SrcGlobalAccess.getSrcAccess().simpleLookupHelper(String name)         = simpleLookupGlobalScope(name);
     eq SrcArrayAccess.getSrcArraySubscripts().simpleLookupHelper(String name) = simpleLookupBypassDot(name);
     eq SrcImportClause.getPackageName().simpleLookupHelper(String name)       = simpleLookupGlobalScope(name);
@@ -500,13 +500,13 @@ aspect SimpleLookup {
         if (i == 0) {
             return simpleLookupHelper(name);
         }
-        ResolvedAccess access = getSrcNamedAccess(i - 1).resolveAccess();
+        ResolvedAccess access = getSrcAccess(i - 1).resolveAccess();
         return access.simpleLookupMemberScope(name).fromContext(access.qualifiedName(), access.isProtected());
     }
 
     inh ResolvedAccess SrcAccess.simpleLookupBypassDot(String name);
     eq BaseNode.getChild(int i).simpleLookupBypassDot(String name) = getChild(i).simpleLookupHelper(name);
-    eq SrcDot.getSrcNamedAccess().simpleLookupBypassDot(String name)    = simpleLookupHelper(name);
+    eq SrcDot.getSrcAccess().simpleLookupBypassDot(String name)    = simpleLookupHelper(name);
 
 
     /**

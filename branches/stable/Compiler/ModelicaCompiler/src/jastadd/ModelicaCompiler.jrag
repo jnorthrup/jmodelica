@@ -32,8 +32,6 @@ import java.io.StringWriter;
 import java.lang.InterruptedException;
 import java.lang.StringBuilder;
 import java.nio.channels.FileChannel;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,8 +53,8 @@ import javax.xml.xpath.XPathExpressionException;
 import org.jmodelica.util.logging.ModelicaLogger;
 import org.jmodelica.util.logging.MemoryLogger;
 import org.jmodelica.util.logging.Level;
-import org.jmodelica.common.options.AbstractOptionRegistry;
-import org.jmodelica.common.options.AbstractOptionRegistry.UnknownOptionException;
+import org.jmodelica.common.options.OptionRegistry;
+import org.jmodelica.common.options.OptionRegistry.UnknownOptionException;
 import org.jmodelica.util.Arguments;
 import org.jmodelica.util.SymbolValueFixer;
 import org.jmodelica.util.EnvironmentUtils;
@@ -81,7 +79,7 @@ import org.jmodelica.util.ccompiler.CCompilerDelegator.Creator;
 import org.jmodelica.util.ccompiler.CCompilerTarget;
 import org.jmodelica.util.ccompiler.GccCompilerDelegator;
 import org.jmodelica.common.LogContainer;
-import org.jmodelica.modelica.compiler.generated.OptionRegistry;
+import org.jmodelica.modelica.compiler.generated.OptionsAggregated;
 
 import org.xml.sax.SAXException;
 
@@ -157,10 +155,8 @@ public class ModelicaCompiler implements LogContainer {
         debugSrcIsHome = b;
     }
     
-    protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<>();
-    protected LinkedList<CompilationHooks> hooksList = new LinkedList<>(globalHooksList);
-
-    protected static LinkedList<CompilationStartListener> compilationStartListeners = new LinkedList<>();
+    protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<CompilationHooks>();
+    protected LinkedList<CompilationHooks> hooksList = new LinkedList<CompilationHooks>(globalHooksList);
     
     protected File tempDir = null;
     protected File outDir = null;
@@ -171,22 +167,123 @@ public class ModelicaCompiler implements LogContainer {
     protected Collection<Problem> warnings = new ArrayList<Problem>();
 
     private static final String OPTION_EXPORT_TEMPLATE = "==OPTIONS-LIST==";
+
+    /**
+     * Exports default options to XML.
+     */
+    public static class OptionExporter {
+        /**
+         * Exports list of options.
+         * 
+         * Allowed arguments:
+         *   -x <file>    export as XML to <file>
+         *   -d <file>    export as DocBook table to <file>
+         *   -p <file>    export as plain text table to <file>
+         *   -t <file>    next export argument will use <file> as a template, replacing any line containing 
+         *                the value of <code>OPTION_EXPORT_TEMPLATE</code> with generated output
+         * 
+         * For the last export type argument given, the file argument may be ommited, 
+         * in that case it is printed on stdout.
+         */
+        public static void main(String[] args) {
+            OptionRegistry or = createOptions();
+            Type t = null;
+            BufferedReader tmpl = null;
+            for (String arg : args) {
+                if (t == null) {
+                    t = type(arg);
+                } else {
+                    if (t == Type.Template) {
+                        try {
+                            tmpl = new BufferedReader(new FileReader(arg));
+                        } catch (FileNotFoundException e) {
+                            System.err.println("Could not open template file for reading: " + e.getMessage());
+                        }
+                    } else {
+                        try {
+                            PrintStream out = new PrintStream(new BufferedOutputStream(new FileOutputStream(arg)));
+                            if (tmpl != null) {
+                                String line = tmpl.readLine();
+                                while (line != null) {
+                                    if (line.contains(OPTION_EXPORT_TEMPLATE)) {
+                                        emit(t, or, out);
+                                    } else {
+                                        out.println(line);
+                                    }
+                                    line = tmpl.readLine();
+                                }
+                            } else {
+                                emit(t, or, out);
+                            }
+                            out.close();
+                        } catch (FileNotFoundException e) {
+                            System.err.println("Could not open file for writing: " + e.getMessage());
+                        } catch (IOException e) {
+                        }
+                        tmpl = null;
+                    }
+                    t = null;
+                }
+            }
+            if (t != null) {
+                emit(t, or, System.out);
+            }
+        }
+        
+        private static void emit(Type t, OptionRegistry or, PrintStream out) {
+            switch (t) {
+            case XML:
+                or.exportXML(out, OptionRegistry.Category.experimental);
+                break;
+            case DocBook:
+                or.exportDocBook(out, OptionRegistry.Category.experimental);
+                break;
+            case PlainText:
+                or.exportPlainText(out, OptionRegistry.Category.experimental);
+                break;
+            case Template:
+                throw new IllegalArgumentException();
+            }
+        }
+        
+        private static Type type(String arg) {
+            if (arg.equals("-x")) {
+                return Type.XML;
+            } else if (arg.equals("-d")) {
+                return Type.DocBook;
+            } else if (arg.equals("-p")) {
+                return Type.PlainText;
+            } else if (arg.equals("-t")) {
+                return Type.Template;
+            } else {
+                System.err.println("Unknown output type argument: " + arg);
+                return null;
+            }
+        }
+        
+        private enum Type {
+            XML, DocBook, PlainText, Template;
+        }
+    }
     
     /**
      * Basic export of all known problem types
      */
     public static class ProblemExporter {
-        public static void main(String ... args) {
+        public static void main(String[] args) {
             ASTNode node = new ASTNode(); // Dummy read to initialize all of the producers
             ProblemProducer.exportXML(new PrintStream(System.out));
         }
     }
 
     public static OptionRegistry createOptions() {
-        return OptionRegistry.buildOptions();
+        OptionRegistry res = new OptionRegistry() {};
+        OptionsAggregated.addTo(res);
+        return res;
     }
 
-    public static ModulesSettings createModulesSettings(OptionRegistry options) {
+    public static ModulesSettings createModulesSettings(OptionRegistry options)    
+    {
        return new ModulesSettings(options);
     }
 
@@ -222,12 +319,7 @@ public class ModelicaCompiler implements LogContainer {
     public void removeCompilationHooks(CompilationHooks hooks) {
         hooksList.remove(hooks);
     }
-
-    public static <T extends CompilationStartListener> T addCompilationStartListener(T listener) {
-        compilationStartListeners.add(listener);
-        return listener;
-    }
-
+    
     protected IErrorHandler errorHandler = null;
     
     /**
@@ -241,20 +333,11 @@ public class ModelicaCompiler implements LogContainer {
     public IErrorHandler getErrorHandler() {
         return errorHandler;
     }
-
-    /**
-     * Notifies compilation start listeners that compilation will start.
-     */
-    protected static void notifyCompilationStart(ModelicaCompiler mc) {
-        for (CompilationStartListener listener : compilationStartListeners) {
-            listener.onCompileStart(mc);
-        }
-    }
-
+    
     /**
      * Throws a {@link CompilationAbortedException} if any hooks class signals an abort.
      */
-    private void hookCheckAbort() {
+    protected void hookCheckAbort() {
         for (CompilationHooks hooks : hooksList) {
             if (hooks.shouldAbort(this)) {
                 log.info("Compilation aborted.");
@@ -266,95 +349,75 @@ public class ModelicaCompiler implements LogContainer {
     /**
      * Calls the hook to be called after the supplied code files are parsed.
      */
-    private void hookFilesParsed(SourceRoot sr) {
-        for (CompilationHooks hooks : hooksList) {
+    protected void hookFilesParsed(SourceRoot sr) {
+        for (CompilationHooks hooks : hooksList)
             hooks.filesParsed(this, sr);
-        }
     }
     
     /**
      * Calls the hook to be called after the error checks on the instantiated 
      * model are finished without errors.
      */
-    private void hookModelInstantiatied(InstClassDecl icd) {
-        for (CompilationHooks hooks : hooksList) {
+    protected void hookModelInstantiatied(InstClassDecl icd) {
+        for (CompilationHooks hooks : hooksList)
             hooks.modelInstantiatied(this, icd);
-        }
     }
     
     /**
      * Calls the hook to be called after the model is flattened.
      */
-    private void hookModelFlattened(FClass fc) {
-        for (CompilationHooks hooks : hooksList) {
+    protected void hookModelFlattened(FClass fc) {
+        for (CompilationHooks hooks : hooksList)
             hooks.modelFlattened(this, fc);
-        }
     }
     
     /**
      * Calls the hook to be called after transformations are applied to the model.
      */
-    private void hookModelTransformed(FClass fc) {
-        for (CompilationHooks hooks : hooksList) {
+    protected void hookModelTransformed(FClass fc) {
+        for (CompilationHooks hooks : hooksList)
             hooks.modelTransformed(this, fc);
-        }
     }
     
     /**
      * Calls the hook to be called after error checks of the flat model are 
      * finished without errors.
      */
-    private void hookFlatModelChecked(FClass fc) {
-        for (CompilationHooks hooks : hooksList) {
+    protected void hookFlatModelChecked(FClass fc) {
+        for (CompilationHooks hooks : hooksList)
             hooks.flatModelChecked(this, fc);
-        }
     }
     
     /**
      * Calls the hook to be called after a code generator is created.
      */
-    private void hookCodeGeneratorCreated(AbstractGenerator gen) {
-        for (CompilationHooks hooks : hooksList) {
+    protected void hookCodeGeneratorCreated(AbstractGenerator gen) {
+        for (CompilationHooks hooks : hooksList)
             hooks.codeGeneratorCreated(this, gen);
-        }
     }
     
     /**
      * Calls the hook to be called after output code is generated.
      */
-    private void hookCodeGenerated(FClass fc, File dir) {
-        for (CompilationHooks hooks : hooksList) {
-            hooks.codeGenerated(this, fc, dir);
-        }
+    protected void hookCodeGenerated(File dir) {
+        for (CompilationHooks hooks : hooksList)
+            hooks.codeGenerated(this, dir);
     }
     
     /**
      * Calls the hook to be called after the generated C code is compiled.
      */
-    private void hookCodeCompiled() {
-        for (CompilationHooks hooks : hooksList) {
+    protected void hookCodeCompiled() {
+        for (CompilationHooks hooks : hooksList)
             hooks.codeCompiled(this);
-        }
-    }
-
-    /**
-     * Calls the hook to be called before the FMU is packed.
-     * @param fc the source FClass
-     * @param dir the temporary FMU directory
-     */
-    private void hookPackFmu(FClass fc, File dir) {
-        for (CompilationHooks hooks : hooksList) {
-            hooks.packFmu(this, fc, dir);
-        }
     }
     
     /**
      * Calls the hook to be called after the FMU is packed.
      */
-    private void hookFmuPacked(FClass fc, File path) {
-        for (CompilationHooks hooks : hooksList) {
+    protected void hookFmuPacked(FClass fc, File path) {
+        for (CompilationHooks hooks : hooksList)
             hooks.fmuPacked(this, fc, path);
-        }
     }
     
     public String getStringOption(String key) throws UnknownOptionException {
@@ -605,19 +668,11 @@ public class ModelicaCompiler implements LogContainer {
         }
     }
     
-    private static Path[] stringsToPaths(String[] s) {
-        Path paths[] = new Path[s.length];
-        for (int i = 0; i < s.length; i++) {
-            paths[i] = Paths.get(s[i]);
-        }
-        return paths;
-    }
-    
     /**
      * Creates a target object.
      * 
      * @param target The type of target: me, cs, ect. Use nocodegen for a NOCODEGEN target.
-     * @param version The version in case of an fmu. Use null for a NOCODEGEN.
+     * @param version The version in case of a fmu. Use null for a NOCODEGEN.
      */
     public TargetObject createTargetObject(String target, String version) {
         return TargetObject.getTarget(target, version);
@@ -627,107 +682,44 @@ public class ModelicaCompiler implements LogContainer {
      * Compiles a model and creates an FMU, convenience method for compileUnit that uses default version.
      * <p>
      * Compiles a model (parsing, instantiating, flattening, code generation and 
-     * binary file compilation) and packs the result in an FMU.
+     * binary file compilation) and packs the result in a FMU.
      * 
      * @param className name of model class in the model file to compile.
      * @param fileName  array of model file or library paths.
      * @param target    the compiler target. Valid options are 'me' or 'cs'.
      * @param compileTo specify location of the compiled FMU. If a file is specified, the model will be renamed to this
-     *                  name during the compilation. If directory is specified, the model will keep its original name.
+     *                  name during the compilation. If directory, the  model will keep its original name.
      * @return          a {@link CompiledUnit} result object.
-     * @deprecated      Use {@link #compileFMU(String, Path[], String, Path)} instead
      */
-    @Deprecated
     public CompiledUnit compileFMU(String className, String fileName[], String target, String compileTo) 
             throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 
-        return compileFMU(className, stringsToPaths(fileName), target, compileTo == null ? null : Paths.get(compileTo));
-    }
-    
-    /**
-     * Compiles a model and creates an FMU, convenience method for compileUnit that uses default version.
-     * <p>
-     * Compiles a model (parsing, instantiating, flattening, code generation and 
-     * binary file compilation) and packs the result in an FMU.
-     * 
-     * @param className name of model class in the model file to compile.
-     * @param paths     array of model file or library paths.
-     * @param target    the compiler target. Valid options are 'me' or 'cs'.
-     * @param compileTo specify location of the compiled FMU. If a file is specified, the model will be renamed to this
-     *                  name during the compilation. If directory is specified, the model will keep its original name.
-     * @return          a {@link CompiledUnit} result object.
-     * @deprecated      Use {@link #compileFMU(String, Path[], String, Path)} instead
-     */
-    public CompiledUnit compileFMU(String className, Path paths[], String target, Path compileTo)
-            throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-    
-        return compileUnit(className, paths, target, "1.0" , compileTo);
+        return compileUnit(className, fileName, target, "1.0" , compileTo);
     }
 
     /**
      * Compiles a model and creates an FMUX, convenience method for compileUnit.
      * <p>
      * Compiles a model (parsing, instantiating, flattening and XML code 
-     * generation) and packs the result in an FMUX.
+     * generation) and packs the result in a FMUX.
      * 
      * @param className name of model class in the model file to compile.
      * @param fileName  array of model file or library paths.
      * @param compileTo specify location of the compiled FMUX. If a file is specified, the model will be renamed to this
      *                  name during the compilation. If directory, the  model will keep its original name.
      * @return          a {@link CompiledUnit} result object.
-     * @deprecated      Use {@link #compileFMUX(String, Path[], Path)} instead
      */
-    @Deprecated
     public CompiledUnit compileFMUX(String className, String fileName[], String compileTo) 
-            throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-
-        return compileFMUX(className, stringsToPaths(fileName), compileTo == null ? null : Paths.get(compileTo));
-    }
-
-    /**
-     * Compiles a model and creates an FMUX, convenience method for compileUnit.
-     * <p>
-     * Compiles a model (parsing, instantiating, flattening and XML code 
-     * generation) and packs the result in an FMUX.
-     * 
-     * @param className name of model class in the model file to compile.
-     * @param fileName  array of model file or library paths.
-     * @param compileTo specify location of the compiled FMUX. If a file is specified, the model will be renamed to this
-     *                  name during the compilation. If directory, the  model will keep its original name.
-     * @return          a {@link CompiledUnit} result object.
-     */
-    public CompiledUnit compileFMUX(String className, Path fileName[], Path compileTo) 
             throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 
         return compileUnit(className, fileName, "fmux", null , compileTo);
     }
-    /**
-     * Compiles an FMU or FMUX. Is a wrapper.
-     * <p>
-     * Compiles a model (parsing, instantiating, flattening, code generation and 
-     * binary file compilation) and packs the result in an FMU/FMUX.
-     * 
-     * @param className name of model class in the model file to compile.
-     * @param fileName  array of model file or library paths.
-     * @param target    the compiler target. Valid options are 'me' or 'cs'.
-     * @param version   the FMI version. Valid options are '1.0' or '2.0'.
-     * @param compileTo specify location of the compiled FMU/FMUX. If a file is specified, the model will be renamed to
-     *                  this name during the compilation. If directory, the  model will keep its original name.
-     * @return          a {@link CompiledUnit} result object.
-     * @deprecated      Use {@link #compileUnit(String, Path[], String, String, String)} instead.
-     */
-    @Deprecated
-    public CompiledUnit compileUnit(String className, String fileName[], String target, String version, String compileTo) 
-            throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 
-        return compileUnit(className, stringsToPaths(fileName), target, version, compileTo == null ? null : Paths.get(compileTo));
-    }
-    
     /**
-     * Compiles an FMU or FMUX. Is a wrapper.
+     * Compiles a FMU or FMUX. Is a wrapper.
      * <p>
      * Compiles a model (parsing, instantiating, flattening, code generation and 
-     * binary file compilation) and packs the result in an FMU/FMUX.
+     * binary file compilation) and packs the result in a FMU/FMUX.
      * 
      * @param className name of model class in the model file to compile.
      * @param fileName  array of model file or library paths.
@@ -737,7 +729,7 @@ public class ModelicaCompiler implements LogContainer {
      *                  this name during the compilation. If directory, the  model will keep its original name.
      * @return          a {@link CompiledUnit} result object.
      */
-    public CompiledUnit compileUnit(String className, Path fileName[], String target, String version, Path compileTo) 
+    public CompiledUnit compileUnit(String className, String fileName[], String target, String version, String compileTo) 
             throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 
         TargetObject targetObject = TargetObject.getTarget(target, version);
@@ -745,7 +737,7 @@ public class ModelicaCompiler implements LogContainer {
     }
 
     /**
-     * Compiles an FMU or FMUX.
+     * Compiles a FMU or FMUX.
      * 
      * @param className name of model class in the model file to compile.
      * @param fileName  array of model file or library paths.
@@ -754,7 +746,7 @@ public class ModelicaCompiler implements LogContainer {
      *                  this name during the compilation. If directory, the  model will keep its original name.
      * @return          a {@link CompiledUnit} result object.
      */
-    protected CompiledUnit compileUnit(String className, Path fileName[], TargetObject target, Path compileTo) 
+    protected CompiledUnit compileUnit(String className, String fileName[], TargetObject target, String compileTo) 
             throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 
         /*
@@ -783,7 +775,7 @@ public class ModelicaCompiler implements LogContainer {
         }
     }
 
-    protected CompiledUnit doCompileUnit(String className, Path fileName[], TargetObject target, Path compileTo) 
+    protected CompiledUnit doCompileUnit(String className, String fileName[], TargetObject target, String compileTo) 
         throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 
         CompiledUnit unit = null;
@@ -808,12 +800,12 @@ public class ModelicaCompiler implements LogContainer {
              * Compile mo-file and generate code for all templates that are not null.
              */
             String flatName = null;
-            if (!Files.isDirectory(compileTo)) {
-                flatName = compileTo.getFileName().toString();
+            File compileToPath = new File(compileTo);
+            if (!compileToPath.isDirectory()) {
+                flatName = compileToPath.getName();
                 int i = flatName.lastIndexOf('.');
-                if (i > 0) {
+                if (i > 0)
                     flatName = flatName.substring(0, i);
-                }
             }
             FClass fc = compileModel(fileName, className, target, flatName, compileTo);
 
@@ -848,25 +840,26 @@ public class ModelicaCompiler implements LogContainer {
         return unit;
     }
 
-    protected void parseFiles(Path[] paths) throws IOException {
+    protected void parseFiles(String[] paths) {
         StepInfo.TimeItem time = new StepInfo.TimeItem();
         time.begin();
-        parseFiles(Arrays.asList(paths), true);
+        File[] files = new File[paths.length];
+        for (int i = 0; i < paths.length; i++)
+            files[i] = new File(paths[i]);
+        parseFiles(files, true);
         time.end();
         log.info("Total time: " + time);
     }
 
-    private void parseFiles(Iterable<Path> files, boolean all) throws IOException {
-        for (Path file : files) {
-            if (Files.isDirectory(file)) {
-                try(DirectoryStream<Path> ds = Files.newDirectoryStream(file)) { 
-                    parseFiles(ds, false);
-                }
+    private void parseFiles(File[] files, boolean all) {
+        for (File file : files) {
+            if (file.isDirectory()) {
+                parseFiles(file.listFiles(), false);
             } else {
-                String path = file.toString();
+                String path = file.getPath();
                 try {
                     if (all || hasModelicaFileExt(path)) {
-                        parseModel(file);
+                        parseModel(path);
                         log.info(file + " parsed OK.");
                     }
                 } catch (CompilerException e) {
@@ -960,7 +953,7 @@ public class ModelicaCompiler implements LogContainer {
      * @throws IOException
      *             If there was an error reading the model file. (Beaver exception.)
      */
-    private SourceRoot parseModel(Path name) 
+    private SourceRoot parseModel(String name) 
       throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
         return parserHandler.parseModel(createUtilInterface(), LoadInfo.create(name));
     }
@@ -971,7 +964,7 @@ public class ModelicaCompiler implements LogContainer {
      * where the content of all files is contained. Each file is parsed using
      * the parseModel method.
      * 
-     * @param files
+     * @param names
      *            An array of file names.
      *
      * @return The root of the source tree.
@@ -981,45 +974,18 @@ public class ModelicaCompiler implements LogContainer {
      * @throws CompilerException
      *             If errors have been found during the parsing.
      * @throws FileNotFoundException
-     *             If any of the model files could not be found.
+     *             If the model file could not be found.
      * @throws IOException
-     *             If there was an error reading any of the model files. (Beaver exception.)
-     * @deprecated use {@link #parseModelFromPaths(Path[])} instead
+     *             If there was an error reading the model file. (Beaver exception.)
      */
-    @Deprecated
-    public SourceRoot parseModel(String[] files)
-      throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
-        // NB: This method is called by compile_wrappers.py! It may not be deleted!
-        return parseModelFromPaths(stringsToPaths(files));
-    }
-
-    /**
-     * Parses a set of files and returns a reference to the root of a source tree
-     * where the content of all files is contained. Each file is parsed using
-     * the {@link #doParseModel}.
-     * 
-     * @param files
-     *            An array of file paths.
-     *
-     * @return The root of the source tree.
-     * 
-     * @throws beaver.Parser.Exception
-     *             If there was a Beaver parsing exception.
-     * @throws CompilerException
-     *             If errors have been found during the parsing.
-     * @throws FileNotFoundException
-     *             If any of the model files could not be found.
-     * @throws IOException
-     *             If there was an error reading any of the model files. (Beaver exception.)
-     */
-    public SourceRoot parseModelFromPaths(Path[] files)
+    public SourceRoot parseModel(String names[]) 
       throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
         hookCheckAbort();
         boolean doTearDown = true;
         try {
             doTearDown = trySetUp();
             Collection<LoadInfo> loadInfos = new ArrayList<>();
-            for (Path path : files) {
+            for (String path : names) {
                 loadInfos.add(LoadInfo.create(path));
             }
             return doParseModel(loadInfos);
@@ -1056,7 +1022,6 @@ public class ModelicaCompiler implements LogContainer {
     public SourceRoot doParseModel(Collection<LoadInfo> loadInfos) 
       throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
         checkSetUp();
-        notifyCompilationStart(this);
         ASTNode.getStepInfo().reset();
         ASTNode.beginStep("parseModel()");
         SourceRoot sr = parserHandler.parseModel(createUtilInterface(), loadInfos);
@@ -1069,7 +1034,7 @@ public class ModelicaCompiler implements LogContainer {
     /**
      * Parses and instantiated the model <code>cl</code> from the source files <code>name</code>.
      * 
-     * @param paths
+     * @param name
      *            Array of model file or library paths.
      * @param cl
      *            The name of the class in the model file to compile.
@@ -1086,10 +1051,10 @@ public class ModelicaCompiler implements LogContainer {
      * @throws beaver.Parser.Exception
      *             If there was an Beaver parsing exception.
      */
-    private InstClassDecl instantiateModel(Path[] paths, String cl, TargetObject target)
+    private InstClassDecl instantiateModel(String name[], String cl, TargetObject target)
             throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
         // build source tree
-        SourceRoot sr = parseModelFromPaths(paths);
+        SourceRoot sr = parseModel(name);
         dumpMemoryUseFile(sr, "source", false);
 
         if (options.getBooleanOption("generate_html_diagnostics")) {
@@ -1234,12 +1199,10 @@ public class ModelicaCompiler implements LogContainer {
         findFlatToInstanceLinks(fc);
         hookModelFlattened(fc);
         hookCheckAbort();
-
-        OptionRegistry options = fc.myOptions();
         
         // Output the untransformed flattened model
         ASTNode.beginStep("prettyPrintRawFlat()");
-        if (options.getBooleanOption("generate_mof_files")) {
+        if (fc.myOptions().getBooleanOption("generate_mof_files")) {
             log.debug("Creating raw .mof file...");
             CodeStream out = new CodeStream(flatFile);
             fc.prettyPrint_MC(out, "");
@@ -1251,7 +1214,7 @@ public class ModelicaCompiler implements LogContainer {
         log.verbose(fc);
         ASTNode.endStep("prettyPrintRawFlat()");
 
-        if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
+        if (fc.myOptions().getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
             ASTNode.beginStep("htmlDiagnostics()");
             getDiagnosticsGenerator().writeRawFlattenedModel(fc);
             getDiagnosticsGenerator().setModelDiagnosticsBeforeTransform(fc.modelDiagnostics());
@@ -1262,13 +1225,13 @@ public class ModelicaCompiler implements LogContainer {
         
         /* Temporary fix to problems with long compilation times due to later evaluations */
         getExternalFunctionCache().tearDown();
-        options.setIntegerOption("external_constant_evaluation", 0);
+        fc.myOptions().setIntegerOption("external_constant_evaluation", 0);
         
         hookModelTransformed(fc);
         hookCheckAbort();
         
         ASTNode.beginStep("prettyPrintFlat()");
-        if (options.getBooleanOption("generate_mof_files")) {
+        if (fc.myOptions().getBooleanOption("generate_mof_files")) {
             log.debug("Creating transformed .mof file...");
             CodeStream out = new CodeStream(new File(sourceDir, instName + "_transformed.mof"));
             fc.prettyPrint_MC(out, "");
@@ -1290,26 +1253,26 @@ public class ModelicaCompiler implements LogContainer {
         
         dumpMemoryUseFile(fc, "transformed", false);
         
-        if (options.getBooleanOption("write_iteration_variables_to_file")) {
+        if (fc.myOptions().getBooleanOption("write_iteration_variables_to_file")) {
             ASTNode.beginStep("writeIterationVariables()");
             if (!fc.onlyInitBLT())
                 fc.getDAEBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_iteration_variables.txt"));
             fc.getDAEInitBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_initial_system_iteration_variables.txt"));
             ASTNode.endStep("writeIterationVariables()");
         }
-
-        if (options.getBooleanOption("write_tearing_pairs_to_file")) {
+        
+        if (fc.myOptions().getBooleanOption("write_tearing_pairs_to_file")) {
             ASTNode.beginStep("writeIterationVariables()");
             if (!fc.onlyInitBLT())
                 fc.getDAEBLT().writeTearingPairsToFile(new File(instName + "_tearing_pairs.txt"));
             fc.getDAEInitBLT().writeTearingPairsToFile(new File(instName + "_initial_system_tearing_pairs.txt"));
             ASTNode.endStep("writeIterationVariables()");
         }
-
+        
         fc.errorCheck(target.getCheckType());
         handleCompilerWarnings(fc.collectWarnings());
-
-        if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
+        
+        if (fc.myOptions().getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
             ASTNode.beginStep("htmlDiagnostics()");
             getDiagnosticsGenerator().writeTransformedFlattenedModel(fc);
             getDiagnosticsGenerator().writeDiagnostics(fc);
@@ -1371,11 +1334,11 @@ public class ModelicaCompiler implements LogContainer {
     
         templates.generateCFiles(this, fc, createCGenerator(fc), sourceDir, name);
         templates.generateXMLFiles(this, fc, target.getXMLGenerator(fc), outDir, "modelDescription");
-        hookCodeGenerated(fc, outDir);
         
         fc.guidManager().setSourceFile(new File(outDir, "modelDescription.xml"));
         fc.guidManager().processDependentFiles();
         
+        hookCodeGenerated(outDir);
         log.debug("... code generated.");
         ASTNode.endStep("generateCode()");
     }
@@ -1491,7 +1454,7 @@ public class ModelicaCompiler implements LogContainer {
         logEnvironment("MODELICAPATH", "JAVA_HOME", "JMODELICA_HOME");
     }
 
-    public static void main(String ... args) {
+    public static void main(String[] args) {
         // create an empty compiler
         ModelicaCompiler mc = new ModelicaCompiler();
         try {
@@ -1622,11 +1585,11 @@ public class ModelicaCompiler implements LogContainer {
             this(type, makeFileFlag, suffix, xmlGenerator, ErrorCheckType.COMPILE);
         }
         
-        public Templates getTemplates(AbstractOptionRegistry options) {
+        public Templates getTemplates(OptionRegistry options) {
             return new Templates(type, options);
         }
         
-        public String createExtraCFlagsString(AbstractOptionRegistry options, String fileName) {
+        public String createExtraCFlagsString(OptionRegistry options, String fileName) {
             
             if (suffix == null) {
                 return "";
@@ -1724,7 +1687,7 @@ public class ModelicaCompiler implements LogContainer {
         /**
          * Sets the default options that should be used for this target object. 
          */
-        public void setDefaultOptions(AbstractOptionRegistry options) {
+        public void setDefaultOptions(OptionRegistry options) {
             for (TargetOptionContributor contributor :
                     TargetOptionContributor.TARGET_DEFAULT_OPTION_CONTRIBUTORS.values()) {
 
@@ -1750,7 +1713,7 @@ public class ModelicaCompiler implements LogContainer {
                     new ModelicaCompiler.TargetOptionContributor() {
 
                         @Override
-                        public void setOptions(TargetObject object, AbstractOptionRegistry options) {
+                        public void setOptions(TargetObject object, OptionRegistry options) {
                             switch (object) {
                                 case FMUME10:
                                     options.setStringOption("fmu_type", "FMUME10");
@@ -1832,7 +1795,7 @@ public class ModelicaCompiler implements LogContainer {
                     new ModelicaCompiler.TargetOptionContributor() {
 
                         @Override
-                        public void setOptions(TargetObject object, AbstractOptionRegistry options) {
+                        public void setOptions(TargetObject object, OptionRegistry options) {
                             switch (object) {
                                 case FMUME10:
                                 case FMUCS10:
@@ -1863,7 +1826,7 @@ public class ModelicaCompiler implements LogContainer {
             new HashMap<String, TargetOptionContributor>();
 
         protected abstract String identity();
-        protected abstract void setOptions(TargetObject object, AbstractOptionRegistry options);
+        protected abstract void setOptions(TargetObject object, OptionRegistry options);
 
         @Override
         public int compareTo(TargetOptionContributor other) {
@@ -1949,7 +1912,7 @@ public class ModelicaCompiler implements LogContainer {
      * Prints an error and returns without completion if, for example, a file 
      * can not be found or if the parsing fails. Supports multiple model files.
      * 
-     * @param files
+     * @param name
      *            Array of model file or library paths.
      * @param cl
      *            The name of the class in the model file to compile.
@@ -1976,65 +1939,20 @@ public class ModelicaCompiler implements LogContainer {
      * @throws ModelicaClassNotFoundException
      *             If the Modelica class to parse, instantiate or flatten is not
      *             found.
-     * @deprecated Use {@link #compileModel(Path[], String, TargetObject, String, Path)} instead
+     * 
      */
-    public FClass ModelicaCompiler.compileModel(String files[], String cl, TargetObject target, String flatName, String compileTo)
-          throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-        return compileModel(stringsToPaths(files), cl, target, flatName, compileTo == null ? null : Paths.get(compileTo));
-    }
-    
-    /**
-     * Compiles a Modelica model. A model file name and class must be provided.
-     * Prints an error and returns without completion if, for example, a file 
-     * can not be found or if the parsing fails. Supports multiple model files.
-     * 
-     * @param files
-     *            Array of model file or library paths.
-     * @param cl
-     *            The name of the class in the model file to compile.
-     * @param target
-     *            The target object for the compiler.
-     * @param flatName
-     *            Name of the unit/flat model supplied by the user, if any.
-     * 
-     * @return A flat representation of the class specified by <code>cl</code>.
-     *            Returns null for some targets.
-     * 
-     * @throws beaver.Parser.Exception
-     *             If there was an Beaver parsing exception.
-     * @throws CompilerException
-     *             If errors have been found during the parsing, instantiation
-     *             or flattening.
-     * @throws FileNotFoundException
-     *             If the model file can not be found.
-     * @throws IOException
-     *             If there was an error reading the model file. (Beaver
-     *             exception.)
-     * @throws IOException
-     *             If there was an error creating the .mof file.
-     * @throws ModelicaClassNotFoundException
-     *             If the Modelica class to parse, instantiate or flatten is not
-     *             found.
-     * @deprecated Use {@link #compileModel(Path[], String, TargetObject, String, Path)} instead
-     */
-     public FClass ModelicaCompiler.compileModel(Path files[], String cl, TargetObject target, String flatName, Path compileTo)
+    public FClass ModelicaCompiler.compileModel(String name[], String cl, TargetObject target, String flatName, String compileTo)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
         boolean doTearDown = true;
         try {
             doTearDown = trySetUp();
-            return doCompileModel(files, cl, target, flatName, compileTo);
+            return doCompileModel(name, cl, target, flatName, compileTo);
         } finally {
             tryTearDown(doTearDown);
         }
     }
     
     public FClass ModelicaCompiler.doCompileModel(String name[], String cl, TargetObject target, String flatName, String compileTo)
-          throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-        return doCompileModel(stringsToPaths(name), cl, target, flatName, compileTo == null ? null : Paths.get(compileTo));
-    }
-    
-    
-    public FClass ModelicaCompiler.doCompileModel(Path name[], String cl, TargetObject target, String flatName, Path compileTo)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
         if (target.equals(TargetObject.PARSE)) {
             parseFiles(name);
@@ -2059,7 +1977,7 @@ public class ModelicaCompiler implements LogContainer {
             InstClassDecl icl = instantiateModel(name, cl, target);
             
             if (compileTo != null) {
-                File unitFile = makePackagingDirs(cl, compileTo.toFile(), target);
+                File unitFile = makePackagingDirs(cl, new File(compileTo), target);
                 icl.root().getUtilInterface().setCompilationOutputPath(unitFile);
             }
             
@@ -2162,11 +2080,11 @@ public class ModelicaCompiler implements LogContainer {
     }
     
     protected void ModelicaCompiler.warning(String message) {
-        errorHandler.problem(Problem.createProblem(null, ProblemSeverity.WARNING, ProblemKind.OTHER, message));
+        errorHandler.problem(new Problem(message, ProblemSeverity.WARNING));
     }
     
     protected void ModelicaCompiler.error(String message) {
-        errorHandler.problem(Problem.createProblem(null, ProblemSeverity.ERROR, ProblemKind.OTHER, message));
+        errorHandler.problem(new Problem(message, ProblemSeverity.ERROR));
     }
 
     /**
@@ -2200,14 +2118,13 @@ public class ModelicaCompiler implements LogContainer {
     }
 
     /**
-     * Packs an FMU (helper function for {@link #compileUnit()}).
+     * Packs a FMU (helper function for {@link #compileUnit()}).
      */
     protected File ModelicaCompiler.packUnit(String className,
             TargetObject target, FClass fClass) throws PackingFailedException {
 
         File unitFile = fClass.root().getUtilInterface().getCompilationOutputPath();
 
-        hookPackFmu(fClass, outDir);
         try {
             hookCheckAbort();
             copySourceFiles(fClass, sourceDir, outDir);
@@ -2292,34 +2209,32 @@ aspect CompilationHelpers {
 
 syn boolean SourceRoot.isFileInLibrary() = findOutermostLibraryDir() != null;
 
-syn lazy Path SourceRoot.findOutermostLibraryDir() {
+syn lazy String SourceRoot.findOutermostLibraryDir() {
     if (getProgram().getNumUnstructuredEntity() != 1) 
         return null;
     else
         return getProgram().getUnstructuredEntity(0).findOutermostLibraryDir();
 }
 
-syn Path SrcStoredDefinition.findOutermostLibraryDir() {
-    if (!hasSrcWithin() || !getSrcWithin().hasPackageName()) {
+syn String SrcStoredDefinition.findOutermostLibraryDir() {
+    if (!hasSrcWithin() || !getSrcWithin().hasPackageName())
         return null;
-    }
-    Path me = Paths.get(fileName()).toAbsolutePath();
-    if (SrcLibNode.isPackageFile(me)) {
-        me = me.getParent();
-    }
-    Path lib = getSrcWithin().getPackageName().findOutermostLibraryDirForWithin(me);
-    return (lib != null) ? lib : null;
+    File me = new File(fileName()).getAbsoluteFile();
+    if (SrcLibNode.isPackageFile(me))
+        me = me.getParentFile();
+    File lib = getSrcWithin().getPackageName().findOutermostLibraryDirForWithin(me);
+    return (lib != null) ? lib.getPath() : null;
 }
 
-syn Path SrcAccess.findOutermostLibraryDirForWithin(Path f) = null;
-eq SrcDot.findOutermostLibraryDirForWithin(Path f) {
-    for (int i = getNumSrcNamedAccess() - 1; i >= 0 && f != null; i--)
-        f = getSrcNamedAccess(i).findOutermostLibraryDirForWithin(f);
+syn File SrcAccess.findOutermostLibraryDirForWithin(File f) = null;
+eq SrcDot.findOutermostLibraryDirForWithin(File f) {
+    for (int i = getNumSrcAccess() - 1; i >= 0 && f != null; i--)
+        f = getSrcAccess(i).findOutermostLibraryDirForWithin(f);
     return f;
 }
-eq SrcNamedAccess.findOutermostLibraryDirForWithin(Path f) {
-    f = f.getParent();
-    if (f != null && f.getFileName().toString().equals(getID()) && SrcLibNode.isStructuredLib(f))
+eq SrcNamedAccess.findOutermostLibraryDirForWithin(File f) {
+    f = f.getParentFile();
+    if (f != null && f.getName().equals(getID()) && SrcLibNode.isStructuredLib(f))
         return f;
     else 
         return null;
@@ -2351,7 +2266,7 @@ public class Templates {
     };
 
 
-    public Templates(ModelicaCompiler.TargetType type, AbstractOptionRegistry options) {
+    public Templates(ModelicaCompiler.TargetType type, OptionRegistry options) {
         switch (type) {
         case FMUME10:
             templates = new String[] { null, "fmi1_me_modelica_template.c" };
@@ -2451,7 +2366,7 @@ public class Templates {
         }
     }
     
-    public String createExtraCFlagsString(AbstractOptionRegistry options, String name) {
+    public String createExtraCFlagsString(OptionRegistry options, String name) {
         
         if (C_SOURCE_TEMPLATES == null) {
             return "";
@@ -2483,7 +2398,7 @@ public class Templates {
     private static LinkedHashSet<String> C_SOURCE_TEMPLATES;    
     
     public abstract static class TemplateContributor {
-        public void addTemplates(Templates templates, AbstractOptionRegistry options) { }
+        public void addTemplates(Templates templates, OptionRegistry options) { }
     }
 
     public static <T extends TemplateContributor> T addContributor(T contributor) {
@@ -2531,7 +2446,7 @@ private static final Templates.TemplateContributor ModelicaCompiler.BASIC_TEMPLA
     Templates.addContributor(new Templates.TemplateContributor() {
 
         @Override
-        public void addTemplates(Templates templates, AbstractOptionRegistry options) {
+        public void addTemplates(Templates templates, OptionRegistry options) {
             templates.addCHeaderTemplates("base");
             templates.addCSourceTemplates("base", "init_independent", "init_dependent", "equ_init", "equ", "funcs");
         }
@@ -2615,76 +2530,56 @@ public interface CompilationHooks {
      * If compilation is aborted before it is finished, a 
      * {@link CompilationAbortedException} is thrown.
      */
-    boolean shouldAbort(ModelicaCompiler instance);
+    public boolean shouldAbort(ModelicaCompiler instance);
     
     /**
      * Called after the supplied code files are parsed.
      */
-    void filesParsed(ModelicaCompiler instance, SourceRoot sr);
+    public void filesParsed(ModelicaCompiler instance, SourceRoot sr);
     
     /**
      * Called after the error checks on the instantiated model are finished without errors.
      * 
      * Since the instance tree is built lazily, this step can not be broken up.
      */
-    void modelInstantiatied(ModelicaCompiler instance, InstClassDecl icd);
+    public void modelInstantiatied(ModelicaCompiler instance, InstClassDecl icd);
     
     /**
      * Called after the model is flattened.
      */
-    void modelFlattened(ModelicaCompiler instance, FClass fc);
+    public void modelFlattened(ModelicaCompiler instance, FClass fc);
     
     /**
      * Called after transformations are applied to the flat model.
      */
-    void modelTransformed(ModelicaCompiler instance, FClass fc);
+    public void modelTransformed(ModelicaCompiler instance, FClass fc);
     
     /**
      * Called after error checks of the flat model are finished without errors.
      */
-    void flatModelChecked(ModelicaCompiler instance, FClass fc);
+    public void flatModelChecked(ModelicaCompiler instance, FClass fc);
     
     /**
      * Called after a code generator is created.
      * 
      * Normally called three times.
      */
-    void codeGeneratorCreated(ModelicaCompiler instance, AbstractGenerator gen);
+    public void codeGeneratorCreated(ModelicaCompiler instance, AbstractGenerator gen);
     
     /**
      * Called after output code is generated.
      */
-    void codeGenerated(ModelicaCompiler instance, FClass fc, File dir);
+    public void codeGenerated(ModelicaCompiler instance, File dir);
     
     /**
      * Called after the generated C code is compiled.
      */
-    void codeCompiled(ModelicaCompiler instance);
-
-    /**
-     * Called before the FMU is packed.
-     *
-     * @param instance compiler instance calling this hook
-     * @param fc the source FClass
-     * @param dir the temporary directory containing files to be packed in the FMU
-     */
-    public void packFmu(ModelicaCompiler instance, FClass fc, File dir);
-
+    public void codeCompiled(ModelicaCompiler instance);
+    
     /**
      * Called after the FMU is packed.
      */
-    void fmuPacked(ModelicaCompiler instance, FClass fc, File path);
-}
-
-/**
- * Functional interface for callbacks that should run before compilation starts.
- */
-public interface CompilationStartListener {
-    /**
-     * Called before compiling ({@link ModelicaCompiler#compileUnit()}).
-     * @param mc the ModelicaCompiler instance that will start compiling.
-     */
-    void onCompileStart(ModelicaCompiler mc);
+    public void fmuPacked(ModelicaCompiler instance, FClass fc, File path);
 }
 
 public abstract class CompilationHooksImpl implements CompilationHooks {
@@ -2697,8 +2592,6 @@ public abstract class CompilationHooksImpl implements CompilationHooks {
     @Override
     public void modelFlattened(ModelicaCompiler instance, FClass fc) {}
     @Override
-    public void packFmu(ModelicaCompiler instance, FClass fc, File dir) {}
-    @Override
     public void fmuPacked(ModelicaCompiler instance, FClass fc, File path) {}
     @Override
     public void flatModelChecked(ModelicaCompiler instance, FClass fc) {}
@@ -2707,7 +2600,7 @@ public abstract class CompilationHooksImpl implements CompilationHooks {
     @Override
     public void codeGeneratorCreated(ModelicaCompiler instance, AbstractGenerator gen) {}
     @Override
-    public void codeGenerated(ModelicaCompiler instance, FClass fc, File dir) {}
+    public void codeGenerated(ModelicaCompiler instance, File dir) {}
     @Override
     public void codeCompiled(ModelicaCompiler instance) {}
 }
@@ -2752,7 +2645,7 @@ aspect Version {
             return version;
         }
         
-        public static void main(String ... args) {
+        public static void main(String args[]) {
             System.out.println(parseVersion());
         }
     }

@@ -1283,11 +1283,11 @@ equation
         b.r[i].x = 1;
     end for;
 
-annotation(__JModelica(UnitTesting(tests={
-    FlatteningTestCase(
-        name="General_ArrayTest47",
-        description="",
-        flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="General_ArrayTest47",
+            description="",
+            flatModel="
 fclass ArrayTests.General.ArrayTest47
  ArrayTests.General.ArrayTest47.B b(n = 2,r(size() = {2}));
  ArrayTests.General.ArrayTest47.R_input c.r[2];
@@ -1299,7 +1299,7 @@ equation
 
 public
  record ArrayTests.General.ArrayTest47.R_output
-  potential Real x;
+  Real x;
  end ArrayTests.General.ArrayTest47.R_output;
 
  record ArrayTests.General.ArrayTest47.B
@@ -1308,7 +1308,7 @@ public
  end ArrayTests.General.ArrayTest47.B;
 
  record ArrayTests.General.ArrayTest47.R_input
-  potential Real x;
+  Real x;
  end ArrayTests.General.ArrayTest47.R_input;
 
 end ArrayTests.General.ArrayTest47;

@@ -92,9 +92,10 @@ abstract public class TestCase implements GenericTestCase {
      * Options may be further changed by test annotation.
      */
     protected OptionRegistry createOptionRegistry() {
-        OptionRegistry or = OptionRegistry.buildTestOptions();
+        OptionRegistry or = new TestOptions();
+        OptionsAggregated.addTo(or);
         File modelicapath = EnvironmentUtils.getThirdPartyMSL();
-        or.MODELICAPATH.setValue(modelicapath.getPath());
+        or.setStringOption("MODELICAPATH", modelicapath.getPath());
         return or;
     }
 
@@ -104,50 +105,50 @@ abstract public class TestCase implements GenericTestCase {
         }
         return str;
     }
+	
+	/**
+	 * Set a string option to be used during compilation.
+	 */
+	public void setStringOption(String key, String value) {
+		try {
+			options.setStringOption(key, value);
+		} catch (UnknownOptionException e) {
+			exception = e;
+		}
+	}
     
-    /**
-     * Set a string option to be used during compilation.
-     */
-    public void setStringOption(String key, String value) {
-        try {
-            options.setStringOption(key, value);
-        } catch (UnknownOptionException e) {
-            exception = e;
-        }
-    }
-    
-    /**
-     * Set a boolean option to be used during compilation.
-     */
-    public void setBooleanOption(String key, boolean value) {
-        try {
-            options.setBooleanOption(key, value);
-        } catch (UnknownOptionException e) {
-            exception = e;
-        }
-    }
-    
-    /**
-     * Set an integer option to be used during compilation.
-     */
-    public void setIntegerOption(String key, int value) {
-        try {
-            options.setIntegerOption(key, value);
-        } catch (UnknownOptionException e) {
-            exception = e;
-        }
-    }
-    
-    /**
-     * Set a real option to be used during compilation.
-     */
-    public void setRealOption(String key, double value) {
-        try {
-            options.setRealOption(key, value);
-        } catch (UnknownOptionException e) {
-            exception = e;
-        }
-    }
+	/**
+	 * Set a boolean option to be used during compilation.
+	 */
+	public void setBooleanOption(String key, boolean value) {
+		try {
+			options.setBooleanOption(key, value);
+		} catch (UnknownOptionException e) {
+			exception = e;
+		}
+	}
+	
+	/**
+	 * Set an integer option to be used during compilation.
+	 */
+	public void setIntegerOption(String key, int value) {
+		try {
+			options.setIntegerOption(key, value);
+		} catch (UnknownOptionException e) {
+			exception = e;
+		}
+	}
+	
+	/**
+	 * Set a real option to be used during compilation.
+	 */
+	public void setRealOption(String key, double value) {
+		try {
+			options.setRealOption(key, value);
+		} catch (UnknownOptionException e) {
+			exception = e;
+		}
+	}
     
     /**
      * Set a string option to be used during compilation.
@@ -180,10 +181,10 @@ abstract public class TestCase implements GenericTestCase {
     /**
      * Gets an option's default value.
      * 
-     * @param options   the {@link AbstractOptionRegistry} from which to get the option.
+     * @param options   the {@link OptionRegistry} from which to get the option.
      * @param key       the name of the option.
      */
-    public Object getOptionDefault(AbstractOptionRegistry options, String key) {
+    public Object getOptionDefault(OptionRegistry options, String key) {
         if (!options.hasOption(key)) {
             return null;
         }
@@ -201,95 +202,95 @@ abstract public class TestCase implements GenericTestCase {
         throw new IllegalArgumentException("Unexpected option value type for " + key + ".");
     }
 
-    /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
 
-    /**
-     * @param name the name to set
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    /**
-     * @return the description
-     */
-    public String getDescription() {
-        return description;
-    }
+	/**
+	 * @return the description
+	 */
+	public String getDescription() {
+		return description;
+	}
 
-    /**
-     * @param description the description to set
-     */
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	/**
+	 * @param description the description to set
+	 */
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    /**
-     * platform is an optional annotation that allows to specify for which platforms the test should be run or skipped.
-     * see {@code org.jmodelica.util.Arguments#tooltip()} for possible platforms.
-     * 
-     * Assume that the system platform is win64.
-     * Example 1 (only excluded platforms):
-     *   annotation(
-     *     platform="!linux64")
-     * Here, win64 is included, because it is not listed as an excluded platform.
-     * 
-     * Example 2 (both included and excluded platforms):
-     *   annotation(
-     *     platform="win32 !linux64")
-     * Here, win64 is excluded, because the list of platforms includes included platforms, 
-     * and win64 is not listed as an included platform.
-     * 
-     * Example 3 (no platform annotation):
-     *   annotation(
-     *     )
-     * When the platform annotation is omitted, win64 is included, because it is not listed as an excluded platform. 
-     * @return the platform
-     */
-    public String getPlatform() {
-        return platform;
-    }
+	/**
+	 * platform is an optional annotation that allows to specify for which platforms the test should be run or skipped.
+	 * see {@code org.jmodelica.util.Arguments#tooltip()} for possible platforms.
+	 * 
+	 * Assume that the system platform is win64.
+	 * Example 1 (only excluded platforms):
+	 *   annotation(
+	 *     platform="!linux64")
+	 * Here, win64 is included, because it is not listed as an excluded platform.
+	 * 
+	 * Example 2 (both included and excluded platforms):
+	 *   annotation(
+	 *     platform="win32 !linux64")
+	 * Here, win64 is excluded, because the list of platforms includes included platforms, 
+	 * and win64 is not listed as an included platform.
+	 * 
+	 * Example 3 (no platform annotation):
+	 *   annotation(
+	 *     )
+	 * When the platform annotation is omitted, win64 is included, because it is not listed as an excluded platform. 
+	 * @return the platform
+	 */
+	public String getPlatform() {
+		return platform;
+	}
 
-    /**
-     * @param platform the platform to set
-     */
-    public void setPlatform(String platform) {
-        this.platform = platform;
-    }
+	/**
+	 * @param platform the platform to set
+	 */
+	public void setPlatform(String platform) {
+		this.platform = platform;
+	}
 
-    /**
-     * @return the sourceFileName
-     */
-    public String getSourceFileName() {
-        return sourceFileName;
-    }
+	/**
+	 * @return the sourceFileName
+	 */
+	public String getSourceFileName() {
+		return sourceFileName;
+	}
 
-    /**
-     * @param sourceFileName the sourceFileName to set
-     */
-    public void setSourceFileName(String sourceFileName) {
-        
-        this.sourceFileName = sourceFileName;
-    }
+	/**
+	 * @param sourceFileName the sourceFileName to set
+	 */
+	public void setSourceFileName(String sourceFileName) {
+	    
+		this.sourceFileName = sourceFileName;
+	}
 
-    /**
-     * @return the className
-     */
-    public String getClassName() {
-        return className;
-    }
+	/**
+	 * @return the className
+	 */
+	public String getClassName() {
+		return className;
+	}
 
-    /**
-     * @param className the className to set
-     */
-    public void setClassName(String className) {
-        this.className = className;
-    }
+	/**
+	 * @param className the className to set
+	 */
+	public void setClassName(String className) {
+		this.className = className;
+	}
 
     /**
      * @return the beginLine
@@ -323,20 +324,20 @@ abstract public class TestCase implements GenericTestCase {
         return regexp;
     }
 
-    /**
-     * Activate or deactivate filtering (see {@link #filter(String)}).
-     */
-    public void setFilter(boolean val) {
-        filter = val;
-    }
-    
-    /**
-     * Activate or deactivate incusion of warnings and compliance errors 
-     *        in error check (see {@link #filterProblems(Collection)}).
-     */
-    public void setCheckAll(boolean val) {
-        checkAll = val;
-    }
+	/**
+	 * Activate or deactivate filtering (see {@link #filter(String)}).
+	 */
+	public void setFilter(boolean val) {
+		filter = val;
+	}
+	
+	/**
+	 * Activate or deactivate incusion of warnings and compliance errors 
+	 *        in error check (see {@link #filterProblems(Collection)}).
+	 */
+	public void setCheckAll(boolean val) {
+		checkAll = val;
+	}
     
     /**
      * Set type of error checking to be performed.
@@ -365,18 +366,18 @@ abstract public class TestCase implements GenericTestCase {
     public boolean hasModelicaLibraries() {
         return modelicaLibraries.length > 0;
     }
-    
-    /**
-     * Perform filtering on string, if activated.
-     */
-    protected String filter(String str) {
-        if (filter) {
-            // TODO: Add more filters
-            str = str.replace("%dir%", testFileDirectory());
-            str = str.replace("%msl%", mslDirectory());
-        }
-        return str;
-    }
+	
+	/**
+	 * Perform filtering on string, if activated.
+	 */
+	protected String filter(String str) {
+		if (filter) {
+			// TODO: Add more filters
+			str = str.replace("%dir%", testFileDirectory());
+			str = str.replace("%msl%", mslDirectory());
+		}
+		return str;
+	}
 
     /**
      * Get the path to the directory containing the test file.
@@ -386,27 +387,27 @@ abstract public class TestCase implements GenericTestCase {
         return URIResolver.DEFAULT.canonicalPath(file.getParentFile());
     }
 
-    /**
-     * Get the path to the directory containing the MSL.
-     */
-    protected String mslDirectory() {
-        for (String path : options.getStringOption("MODELICAPATH").split(File.pathSeparator)) {
-            File f = new File(path, "Modelica");
-            if (f.isDirectory())
-                return f.getAbsolutePath();
-        }
-        return null;
-    }
-    
-    /**
-     * Remove all whitespace.
-     */
-    public String removeWhitespace(String str) {
-        // TODO: this can mask errors, we need a better filtering
-        return str.replaceAll("\\s+", "");
-    }
-    
-    private Assert asserter;
+	/**
+	 * Get the path to the directory containing the MSL.
+	 */
+	protected String mslDirectory() {
+		for (String path : options.getStringOption("MODELICAPATH").split(File.pathSeparator)) {
+			File f = new File(path, "Modelica");
+			if (f.isDirectory())
+				return f.getAbsolutePath();
+		}
+		return null;
+	}
+	
+	/**
+	 * Remove all whitespace.
+	 */
+	public String removeWhitespace(String str) {
+		// TODO: this can mask errors, we need a better filtering
+		return str.replaceAll("\\s+", "");
+	}
+	
+	private Assert asserter;
 
     /**
      * Perform an assertion that two strings are equal. Whitespaces and line
@@ -477,35 +478,35 @@ abstract public class TestCase implements GenericTestCase {
         return str.replaceAll(parts[1], parts[2]);
     }
 
-    /**
-     * Signal that the test failed.
-     * 
-     * @param msg  a message describing what went wrong
-     */
-    protected void fail(String msg) {
-        asserter.fail(getDescription() + "\n" + getClass().getSimpleName() + ": " + msg);
-    }
-    
-    /**
-     * Signal that the test failed.
-     * 
-     * @param e  the exception that caused the failure
-     */
-    protected void fail(Throwable e) {
-        if (e instanceof ModelicaException) 
-            fail(e.getMessage());
+	/**
+	 * Signal that the test failed.
+	 * 
+	 * @param msg  a message describing what went wrong
+	 */
+	protected void fail(String msg) {
+		asserter.fail(getDescription() + "\n" + getClass().getSimpleName() + ": " + msg);
+	}
+	
+	/**
+	 * Signal that the test failed.
+	 * 
+	 * @param e  the exception that caused the failure
+	 */
+	protected void fail(Throwable e) {
+		if (e instanceof ModelicaException) 
+			fail(e.getMessage());
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        e.printStackTrace(new PrintStream(out));
-        fail("Exception caught in test case: " + out.toString());
-    }
-    
-    public boolean shouldBeIgnored() {
-        String platforms = getPlatform();
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		e.printStackTrace(new PrintStream(out));
+		fail("Exception caught in test case: " + out.toString());
+	}
+	
+	public boolean shouldBeIgnored() {
+	    String platforms = getPlatform();
         PlatformSet platformSet = PlatformSet.parse(platforms);
         String systemPlatform = EnvironmentUtils.getSystemPlatform();
         return platformSet.isPlatformExcluded(systemPlatform);
-    }
+	}
 
     public static class PlatformSet {
         private static PlatformSet EMPTY_PLATFORMSET = new PlatformSet(Collections.<String>emptySet(), Collections.<String>emptySet());
@@ -541,20 +542,20 @@ abstract public class TestCase implements GenericTestCase {
        }
     }
 
-    public void testMe(Assert a) {
-        try {
-            asserter = a;
-            performTest();
-        } catch (ParserException e) {
-            fail(e);
-        } catch (ModelicaClassNotFoundException e) {
-            fail(e);
-        } catch (beaver.Parser.Exception e) {
-            fail(e);
-        } catch (IOException e) {
-            fail(e);
-        }
-    }
+	public void testMe(Assert a) {
+		try {
+			asserter = a;
+			performTest();
+		} catch (ParserException e) {
+			fail(e);
+		} catch (ModelicaClassNotFoundException e) {
+			fail(e);
+		} catch (beaver.Parser.Exception e) {
+			fail(e);
+		} catch (IOException e) {
+			fail(e);
+		}
+	}
 
     public void performTest() throws ParserException, beaver.Parser.Exception, 
                 IOException, ModelicaClassNotFoundException {
@@ -566,14 +567,11 @@ abstract public class TestCase implements GenericTestCase {
         }
     }
     
-    private void performTest(UtilInterface uif) throws ParserException, beaver.Parser.Exception, 
+    public void performTest(UtilInterface uif) throws ParserException, beaver.Parser.Exception, 
                 IOException, ModelicaClassNotFoundException {
         if (exception != null)
             fail(exception);
-
-        // Create a mock compiler to notify compilation listeners.
-        ModelicaCompiler.notifyCompilationStart(new ModelicaCompiler(uif.getOptionRegistry()));
-
+        
         // Parse
         SourceRoot sr;
         if (modelicaLibraries.length > 0) {
@@ -609,7 +607,7 @@ abstract public class TestCase implements GenericTestCase {
         if (testSemanticProblems(problems) || checkType == ErrorCheckType.CHECK) return;
         
         // Test instantiated class
-        InstClassDecl icd = ipr.instantiateModel(getClassName());
+        InstClassDecl icd = ipr.lookupInstClassQualified(getClassName()).target();
         if (testInstantiated(icd)) return;
         
         // Flatten class and check errors reported during flattening
@@ -636,11 +634,11 @@ abstract public class TestCase implements GenericTestCase {
             problems = e.getProblems();
         }
         if (testTransformedProblems(problems)) return;
-        
-        
-        // Test transformed class
-        testTransformed(fc);
-    }
+		
+		
+		// Test transformed class
+	    testTransformed(fc);
+	}
 
     /**
      * Compares two objects by class and value.
@@ -698,20 +696,20 @@ abstract public class TestCase implements GenericTestCase {
      * 
      * @return  {@code true} if the test case should top after this method.
      */
-    public boolean testOptions(AbstractOptionRegistry options) {
+    public boolean testOptions(OptionRegistry options) {
         return false;
     }
 
-    /**
-     * Perform tests on the set of semantic problems found in the instance tree.
-     * 
-     * Default implementation fails if any errors other than COMPLIANCE were found, and returns false otherwise.
-     * 
-     * @return  <code>true</code> if test case shoule stop after this method
-     */
-    protected boolean testSemanticProblems(Collection<Problem> problems) {
-        return testProblems(problems);
-    }
+	/**
+	 * Perform tests on the set of semantic problems found in the instance tree.
+	 * 
+	 * Default implementation fails if any errors other than COMPLIANCE were found, and returns false otherwise.
+	 * 
+	 * @return  <code>true</code> if test case shoule stop after this method
+	 */
+	protected boolean testSemanticProblems(Collection<Problem> problems) {
+		return testProblems(problems);
+	}
 
     /**
      * Perform tests on instantiated class.
@@ -722,23 +720,23 @@ abstract public class TestCase implements GenericTestCase {
         return false;
     }
 
-    /**
-     * Perform tests on flattened class.
-     * 
-     * @return  <code>true</code> if test case should stop after this method
-     */
-    protected boolean testFlattened(FClass fc) {
-        return false;
-    }
+	/**
+	 * Perform tests on flattened class.
+	 * 
+	 * @return  <code>true</code> if test case should stop after this method
+	 */
+	protected boolean testFlattened(FClass fc) {
+		return false;
+	}
 
-    /**
-     * Perform tests on flat class after transform canonical step.
-     * 
-     * @return  <code>true</code> if test case should stop after this method
-     */
-    protected boolean testTransformed(FClass fc) {
-        return false;
-    }
+	/**
+	 * Perform tests on flat class after transform canonical step.
+	 * 
+	 * @return  <code>true</code> if test case should stop after this method
+	 */
+	protected boolean testTransformed(FClass fc) {
+		return false;
+	}
 
     /**
     * Perform tests on source tree.
@@ -749,41 +747,41 @@ abstract public class TestCase implements GenericTestCase {
         return false;
     }
 
-    /**
-     * Perform tests on the set of semantic problems found after transform canonical step.
-     * 
-     * Default implementation fails if any errors other than COMPLIANCE were found, and returns false otherwise.
-     * 
-     * @return  <code>true</code> if test case shoule stop after this method
-     */
-    protected boolean testTransformedProblems(Collection<Problem> problems) {
-        return testProblems(problems);
-    }
-    
-    /**
-     * Perform tests on a set of semantic problems.
-     * 
-     * Default implementation fails if any errors other than COMPLIANCE were found, and returns false otherwise.
-     * 
-     * @return  <code>true</code> if test case should stop after this method
-     */
-    protected boolean testProblems(Collection<Problem> problems) {
-        filterProblems(problems);
-        if (problems.size() > 0)
-            fail(new CompilerException(problems));
-        return false;
-    }
-    
-    /**
-     * Filters out any uninteresting problems from a set of semantic problems.
-     * 
-     * Default implementation removes any warnings and any COMPLIANCE errors.
-     */
-    protected void filterProblems(Collection<Problem> problems) {
-        for (Iterator<Problem> it = problems.iterator(); it.hasNext(); )
-            if (!it.next().isTestError(checkAll))
-                it.remove();
-    }
+	/**
+	 * Perform tests on the set of semantic problems found after transform canonical step.
+	 * 
+	 * Default implementation fails if any errors other than COMPLIANCE were found, and returns false otherwise.
+	 * 
+	 * @return  <code>true</code> if test case shoule stop after this method
+	 */
+	protected boolean testTransformedProblems(Collection<Problem> problems) {
+		return testProblems(problems);
+	}
+	
+	/**
+	 * Perform tests on a set of semantic problems.
+	 * 
+	 * Default implementation fails if any errors other than COMPLIANCE were found, and returns false otherwise.
+	 * 
+	 * @return  <code>true</code> if test case should stop after this method
+	 */
+	protected boolean testProblems(Collection<Problem> problems) {
+		filterProblems(problems);
+		if (problems.size() > 0)
+			fail(new CompilerException(problems));
+		return false;
+	}
+	
+	/**
+	 * Filters out any uninteresting problems from a set of semantic problems.
+	 * 
+	 * Default implementation removes any warnings and any COMPLIANCE errors.
+	 */
+	protected void filterProblems(Collection<Problem> problems) {
+		for (Iterator<Problem> it = problems.iterator(); it.hasNext(); )
+			if (!it.next().isTestError(checkAll))
+				it.remove();
+	}
 
     private static final Pattern PAT_ERROR_LINE = 
             Pattern.compile("at line ([0-9]+)(, column [0-9]+, in file '([^']+)')");
@@ -808,32 +806,32 @@ abstract public class TestCase implements GenericTestCase {
         return buf.toString();
     }
 
-    /**
-     * Compare a flat class to a pretty-printed correct model and fail if different.
-     */
-    protected void testPrettyPrint(FClass fc, String correct) {
-        TokenTester tt = new TokenTester();
-        String test = fc.prettyPrint("");
-        if (!tt.test(test, correct)) {
-            String diff = tt.firstDiff();
-            String err = "Flat class does not match expected.";
-            assertEquals(err, correct, test);
-        }
-    }
-    
-    /**
-     * Sort lines in string alphabetically.
-     */
-    protected String sortLines(String str) {
-        String[] lines = str.split("\n|\r|\r\n");
-        Arrays.sort(lines);
-        StringBuilder buf = new StringBuilder();
-        for (String line : lines) {
-            buf.append(line);
-            buf.append('\n');
-        }
-        return buf.toString();
-    }
+	/**
+	 * Compare a flat class to a pretty-printed correct model and fail if different.
+	 */
+	protected void testPrettyPrint(FClass fc, String correct) {
+		TokenTester tt = new TokenTester();
+		String test = fc.prettyPrint("");
+		if (!tt.test(test, correct)) {
+			String diff = tt.firstDiff();
+			String err = "Flat class does not match expected.";
+			assertEquals(err, correct, test);
+		}
+	}
+	
+	/**
+	 * Sort lines in string alphabetically.
+	 */
+	protected String sortLines(String str) {
+		String[] lines = str.split("\n|\r|\r\n");
+		Arrays.sort(lines);
+		StringBuilder buf = new StringBuilder();
+		for (String line : lines) {
+			buf.append(line);
+			buf.append('\n');
+		}
+		return buf.toString();
+	}
 
     /**
      * Allows us to switch parser.

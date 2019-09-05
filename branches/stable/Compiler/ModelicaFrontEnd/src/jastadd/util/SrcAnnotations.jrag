@@ -289,12 +289,6 @@ aspect SrcAnnotations {
     public void SrcModification.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         throw new FailedToSetAnnotationValueException();
     }
-    
-    @Override
-    public boolean SrcModification.canChangeAnnotationValue() {
-        return false;
-    }
-    
     @Override
     public void SrcValueModification.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         if (newValue == null) {
@@ -303,12 +297,6 @@ aspect SrcAnnotations {
         }
         setSrcExp(newValue);
     }
-
-    @Override
-    public boolean SrcValueModification.canChangeAnnotationValue() {
-        return true;
-    }
-
     @Override
     public void SrcComponentModification.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         if (!hasSrcModification()) {
@@ -317,12 +305,6 @@ aspect SrcAnnotations {
         }
         getSrcModification().setAnnotationValue(newValue);
     }
-    
-    @Override
-    public boolean SrcComponentModification.canChangeAnnotationValue() {
-        return true;
-    }
-    
     @Override
     public void SrcCompleteModification.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         if (hasSrcValueModification()) {
@@ -334,11 +316,6 @@ aspect SrcAnnotations {
         } else {
             setSrcValueModification(new SrcValueModification(newValue));
         }
-    }
-    
-    @Override
-    public boolean SrcCompleteModification.canChangeAnnotationValue() {
-        return true;
     }
     
     /**
@@ -442,11 +419,6 @@ aspect SrcAnnotations {
 
     @Override
     public void SrcAnnotation.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
-        throw new FailedToSetAnnotationValueException();
-    }
-    
-    public boolean SrcAnnotation.canChangeAnnotationValue() {
-        return false;
     }
 
     syn boolean SrcAnnotation.isEach() = false;
@@ -471,7 +443,7 @@ aspect SrcAnnotations {
     public interface ASTNodeWithAnnotation {
         public SrcAnnotation getSrcAnnotation();
         public boolean hasSrcAnnotation();
-        public ASTNodeWithAnnotation setSrcAnnotation(SrcAnnotation annotation);
+        public void setSrcAnnotation(SrcAnnotation annotation);
     }
 
     SrcFullClassDecl implements ASTNodeWithAnnotation;
@@ -505,11 +477,6 @@ aspect SrcAnnotations {
         @Override
         public void setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
             throw new FailedToSetAnnotationValueException();
-        }
-        
-        @Override
-        public boolean canChangeAnnotationValue() {
-        	return false;
         }
 
         protected abstract boolean hasProvider();
@@ -551,35 +518,9 @@ aspect SrcAnnotations {
 
     }
     
-    /**
-     * Obtain the enclosing StoredDefinition, keeps track on which file this node belongs.
-     */
-    inh SrcStoredDefinition SrcBaseNode.myStoredDefinition();
-    eq SrcStoredDefinition.getChild().myStoredDefinition() = this;
-    eq SourceRoot.getChild().myStoredDefinition() = null;
-
-    public interface SrcAnnotationProvider {
-        public SrcStoredDefinition myStoredDefinition();
-    }
-
-    @Override
-    public SrcStoredDefinition ExpValueProvider.myStoredDefinition() {
-        return exp.myStoredDefinition();
-    }
-
-    @Override
-    public SrcStoredDefinition SrcAnnotationsIteratorProvider.myStoredDefinition() {
-        return null;
-    }
-
      public RootAnnotationProviderProxy<SrcShortClassDecl, SrcModification> SrcShortClassDecl.createModifierProvider(){
             return new RootAnnotationProviderProxy<SrcShortClassDecl, SrcModification>(this) {
-
-            @Override
-            public SrcStoredDefinition myStoredDefinition() {
-                return owningNode.myStoredDefinition();
-            }
-
+            
             @Override
             protected boolean hasProvider() {
                 return owningNode.getSrcExtendsClauseShortClass().hasSrcClassModification();
@@ -599,12 +540,6 @@ aspect SrcAnnotations {
     
     public RootAnnotationProviderProxy<SrcComponentDecl, SrcModification> SrcComponentDecl.createModifierProvider() {
         return new RootAnnotationProviderProxy<SrcComponentDecl, SrcModification>(this) {
-
-            @Override
-            public SrcStoredDefinition myStoredDefinition() {
-                return owningNode.myStoredDefinition();
-            }
-
             @Override
             protected boolean hasProvider() {
                 return owningNode.hasSrcModification();
@@ -635,15 +570,6 @@ aspect SrcAnnotations {
                     owningNode.setSrcModification(new SrcValueModification(newValue));
                 }
             }
-
-            @Override
-            public boolean canChangeAnnotationValue() {
-                if (hasProvider()) {
-                	return getProvider().canChangeAnnotationValue();
-                } else {
-                    return true;
-                }
-            }
             
             @Override
             public SrcAnnotationProvider addAnnotationSubNode(String name) {
@@ -659,12 +585,7 @@ aspect SrcAnnotations {
 
     public RootAnnotationProviderProxy<SrcExtendsClause, SrcModification> SrcExtendsClause.createModifierProvider(){
         return new RootAnnotationProviderProxy<SrcExtendsClause, SrcModification>(this) {
-
-        @Override
-        public SrcStoredDefinition myStoredDefinition() {
-            return owningNode.myStoredDefinition();
-        }
-
+        
         @Override
         protected boolean hasProvider() {
             return owningNode.hasSrcClassModification();
@@ -690,14 +611,6 @@ aspect SrcAnnotations {
 
         public ASTAnnotationAnnotationProvider(T owningNode) {
             super(owningNode);
-        }
-
-        @Override
-        public SrcStoredDefinition myStoredDefinition() {
-            if (hasProvider()) {
-                return getProvider().myStoredDefinition();
-            }
-            return null;
         }
 
         @Override
@@ -782,11 +695,6 @@ aspect SrcAnnotations {
     public void SrcFunctionCall.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         throw new FailedToSetAnnotationValueException();
     }
-    
-    @Override
-    public boolean SrcFunctionCall.canChangeAnnotationValue() {
-        return false;
-    }
 
     @Override
     public SrcAnnotationProvider SrcFunctionCall.addAnnotationSubNode(String name) {
@@ -836,11 +744,6 @@ aspect SrcAnnotations {
     }
 
     @Override
-    public boolean SrcArrayConstructor.canChangeAnnotationValue() {
-        return false;
-    }
-
-    @Override
     public SrcAnnotationProvider SrcArrayConstructor.addAnnotationSubNode(String name) {
         return null;
     }
@@ -876,12 +779,6 @@ aspect SrcAnnotations {
     public void SrcNamedArgument.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         throw new FailedToSetAnnotationValueException();
     }
-    
-    @Override
-    public boolean SrcNamedArgument.canChangeAnnotationValue() {
-        return false;
-    }
-    
 
     @Override
     public SrcAnnotationProvider SrcNamedArgument.addAnnotationSubNode(String name) {
@@ -947,12 +844,6 @@ aspect SrcAnnotations {
         public void setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
             throw new FailedToSetAnnotationValueException();
         }
-        
-        @Override
-        public boolean canChangeAnnotationValue() {
-            return false;
-        }
-        
 
         @Override
         public SrcAnnotationProvider addAnnotationSubNode(String name) throws AnnotationEditException {
@@ -1012,11 +903,6 @@ aspect SrcAnnotations {
         @Override
         public void setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
             throw new FailedToSetAnnotationValueException();
-        }
-
-        @Override
-        public boolean canChangeAnnotationValue() {
-            return false;
         }
 
         @Override

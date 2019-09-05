@@ -322,7 +322,7 @@ SrcDerExp : SrcExp ::= SrcExp;
 SrcAccessExp : SrcExp ::= SrcAccess;
 
 abstract SrcAccess : SrcBaseNode;
-SrcDot             : SrcAccess      ::= SrcNamedAccess*;
+SrcDot             : SrcAccess      ::= SrcAccess*;
 SrcGlobalAccess    : SrcAccess      ::= SrcAccess;
 SrcNamedAccess     : SrcAccess      ::= <ID>;
 SrcArrayAccess     : SrcNamedAccess ::= SrcArraySubscripts;

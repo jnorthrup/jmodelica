@@ -28,8 +28,7 @@ public class GeneratedFilePatcher {
 
 	private Patch[] patches = new Patch[] {
 		new Patch("ASTNode.java", new Change[] {
-			new AddLine("    SymbolValueFixer.fix(node);", true, "\\s*public [^ ]* clone().*", "\\s*return .*;"),
-			new AddLine("import org.jmodelica.util.SymbolValueFixer;", false, "package .*;")
+			new AddLine("    SymbolValueFixer.fix(node);", true, "\\s*public [^ ]* clone().*", "\\s*return .*;")
 		})
 	};
 	

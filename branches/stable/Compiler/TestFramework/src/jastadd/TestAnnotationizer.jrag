@@ -458,7 +458,10 @@ abstract public class TestAnnotationizerHelper {
      * Ensures that option additions are loaded, then create a new TestOptions instance.
      */
     protected static OptionRegistry createTestOptions() {
-        return OptionRegistry.buildTestOptions();
+        OptionRegistry tmp = ModelicaCompiler.createOptions();
+        OptionRegistry options = new TestOptions();
+        OptionsAggregated.addTo(options);
+        return options;
     }
 
 	/**
@@ -695,7 +698,7 @@ abstract public class TestAnnotationizerHelper {
 			problems = e.getProblems();
 		}
 		handleCompilerProblems(problems);
-        return ipr.instantiateModel(className);
+		return ipr.lookupInstClassQualified(className).target();
 	}
 
     /**
@@ -1172,13 +1175,13 @@ abstract public class TestAnnotationizerHelper {
         }
         
         protected String[] dataNames() {
-            return new String[] { "methodName", "arguments" };
+            return new String[] { "arguments", "methodName" };
         }
         
         protected void callMethod(Object o) throws Exception {
             checkData(data);
-            methodName = data[0].toString();
-            arguments = (data.length == 1) ? new Object[0] : (Object[]) data[1];
+            arguments = (data[0] == null) ? new Object[0] : (Object[]) data[0];
+            methodName = data[1].toString();
             Method method = o.getClass().getMethod(methodName, TestCase.unwrapClasses(arguments));
             methodResult = method.invoke(o, arguments).toString();
         }

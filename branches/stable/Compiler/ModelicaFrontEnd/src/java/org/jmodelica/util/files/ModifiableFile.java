@@ -231,7 +231,7 @@ public class ModifiableFile {
      * <p>
      * Note that if the source file is also the destination file, as is the case
      * when the constructor {@link #ModifiableFile(File)} is used, using
-     * {@link #write} will also update the point to which this method can
+     * {@link #write()} will also update the point to which this method can
      * revert content.
      * 
      * @throws IOException

@@ -6,13 +6,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.jmodelica.common.options.AbstractOptionRegistry.Category;
-import org.jmodelica.common.options.AbstractOptionRegistry.Default;
-import org.jmodelica.common.options.AbstractOptionRegistry.OptionType;
+import org.jmodelica.common.options.OptionRegistry.Category;
+import org.jmodelica.common.options.OptionRegistry.Default;
+import org.jmodelica.common.options.OptionRegistry.OptionType;
 
 
-public class StringOption extends Option<String> {
+class StringOption extends Option<String> {
     protected Map<String,String> values;
+    private String[] valueArray;
 
     /**
      * Creates an option for string values.
@@ -27,13 +28,15 @@ public class StringOption extends Option<String> {
      *          A description of the option.
      * @param defaultValue
      *          The option's default value.
+     * @param testDefault
+     *          The option's default value when under test.
      * @param values
      *          The option's possible values (settings).
      */
     public StringOption(String key, OptionType type, Category category, String description,
-            Default<String> defaultValue, String[] values) {
+            Default<String> defaultValue, Default<String> testDefault, String[] values) {
 
-        super(key, type, category, description, defaultValue, null);
+        super(key, type, category, description, defaultValue, testDefault, null);
 
         this.value = null;
         if (values == null) {
@@ -43,6 +46,7 @@ public class StringOption extends Option<String> {
             for (String v : values)
                 this.values.put(v, v);
         }
+        valueArray = values;
     }
 
     @Override
@@ -127,7 +131,11 @@ public class StringOption extends Option<String> {
     }
 
     @Override
-    protected void copyTo(AbstractOptionRegistry reg, String key) {
+    protected void copyTo(OptionRegistry reg, String key) {
+        if (!reg.hasOption(key)) {
+            reg.addStringOption(key, getOptionType(), getCategory(), defaultValue, testDefault,
+                    getDescription(), valueArray);
+        }
         if (isSet) {
             reg.setStringOption(key, value);
         }

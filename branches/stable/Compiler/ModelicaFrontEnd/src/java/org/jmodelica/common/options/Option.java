@@ -2,10 +2,10 @@ package org.jmodelica.common.options;
 
 import java.io.PrintStream;
 
-import org.jmodelica.common.options.AbstractOptionRegistry.Category;
-import org.jmodelica.common.options.AbstractOptionRegistry.Default;
-import org.jmodelica.common.options.AbstractOptionRegistry.InvalidOptionValueException;
-import org.jmodelica.common.options.AbstractOptionRegistry.OptionType;
+import org.jmodelica.common.options.OptionRegistry.Category;
+import org.jmodelica.common.options.OptionRegistry.Default;
+import org.jmodelica.common.options.OptionRegistry.InvalidOptionValueException;
+import org.jmodelica.common.options.OptionRegistry.OptionType;
 import org.jmodelica.util.StringUtil;
 import org.jmodelica.util.xml.DocBookPrinter;
 import org.jmodelica.util.xml.XMLPrinter;
@@ -19,6 +19,7 @@ import org.jmodelica.util.xml.XMLPrinter;
 public abstract class Option<T> implements Comparable<Option<T>> {
     protected final String key;
     protected Default<T> defaultValue;
+    protected Default<T> testDefault;
     protected T value;
 
     private OptionType type;
@@ -42,11 +43,13 @@ public abstract class Option<T> implements Comparable<Option<T>> {
      *          A description of the option.
      * @param defaultValue
      *          The option's default value.
+     * @param testDefault
+     *          The option's default value when under test.
      * @param value
      *          The initial value of the option.
      */
     public Option(String key, OptionType optionType, Category category, String description,
-            Default<T> defaultValue, T value) {
+            Default<T> defaultValue, Default<T> testDefault, T value) {
 
         this.key = key;
         this.description = description;
@@ -54,6 +57,7 @@ public abstract class Option<T> implements Comparable<Option<T>> {
         this.category = category;
         this.value = value;
         this.defaultValue = defaultValue;
+        this.testDefault = testDefault;
         this.isSet = false;
     }
 
@@ -77,7 +81,7 @@ public abstract class Option<T> implements Comparable<Option<T>> {
      */
     public abstract String getValueString();
 
-    protected abstract void copyTo(AbstractOptionRegistry registry, String key);
+    protected abstract void copyTo(OptionRegistry registry, String key);
     protected abstract void setValue(String string);
 
     /**
@@ -131,7 +135,7 @@ public abstract class Option<T> implements Comparable<Option<T>> {
     public void exportXML(XMLPrinter out) {
         String type = getType();
         out.enter("Option", "type", type);
-        String tag = AbstractOptionRegistry.capitalize(type) + "Attributes";
+        String tag = OptionRegistry.capitalize(type) + "Attributes";
         if (description == null || description.equals("")) {
             out.single(tag, "key", key, "value", getValueString());
         } else {
@@ -172,6 +176,16 @@ public abstract class Option<T> implements Comparable<Option<T>> {
      */
     public T getValue() {
         return isSet ? value : defaultValue.value();
+    }
+
+    /**
+     * Retrieves this option's current value when under test.
+     * 
+     * @return
+     *          this option's current value when under test.
+     */
+    public T getTestValue() {
+        return isSet ? value : testDefault.value();
     }
 
     /**
