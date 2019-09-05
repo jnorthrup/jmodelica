@@ -87,8 +87,9 @@ aspect OptimicaParsers {
         return org.jmodelica.optimica.parser.OptimicaParser.AltGoals.anonymous_short_class;
     }
 
-    refine Parsers public SourceRoot ParserHandler.parseFile(UtilInterface uif, LoadInfo loadInfo) 
+    refine Parsers public SourceRoot ParserHandler.parseFile(UtilInterface uif, LoadInfo loadInfo)
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
+        parseListener.fileParsed(loadInfo);
         return parseOptimicaFile(uif, loadInfo);
     }
 
