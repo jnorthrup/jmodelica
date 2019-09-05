@@ -580,10 +580,10 @@ aspect Connections {
             InstAssignable fstVar = (InstAssignable) fst.getVar();
             if (size() == 1 && fst.isInside() && fstVar.isTopLevelCausalOrConnector()
                     && (fstVar.isInput() || fstVar.isOutput() || fstVar.useCausalPorts())) {
-                FAccess inStreamAccess = createInStreamAccess(fstVar.getFAccess());
-                FVariable fv = fstVar.createFVariable(f, inStreamAccess, FlattenBindingExp.NONE, false);
+                FVariable fv = fstVar.flatten(f, FlattenBindingExp.NONE, 1, false);
+                FAccess inStreamAccess = createInStreamAccess(fv.getFAccess());
+                fv.setFAccess(inStreamAccess);
                 fv.setCausalityConnectorPrefix(CausalityConnectorPrefix.INSTREAM);
-                f.addFVariable(fv);
             }
         }
 
@@ -593,16 +593,28 @@ aspect Connections {
          * @param name  the name of the variable to generate name for
          */
         @Override
-        public FExp expandInStreamExp(FAccess name) {
-            ConnectionSetEntry e = getConnectionSetEntry(name.name(), false);
-            FAccess access = name;
-            if (name.useCausalPorts() && !name.lookupFV(name.name() + inStreamSuffix).isUnknown()) {
-                access = createInStreamAccess(name);
+        public FExp expandInStreamExp(FAccess access) {
+            String name = access.name();
+            ConnectionSetEntry e = getConnectionSetEntry(name, false);
+            String nameWithSuffix = nameWithSuffix(name);
+            if (access.useCausalPorts() && !access.lookupFV(nameWithSuffix).isUnknown()) {
+                access = new FAccessString(nameWithSuffix);
             }
-            FExp exp = expandInStreamExp(e, name.name(), new FAccessExp(access));
+            FExp exp = expandInStreamExp(e, name, new FAccessExp(access));
             exp.enableStreamsRewrite();
             return exp;
         }
+        
+        public String nameWithSuffix(String access) {
+            String name = access;
+            String subscripts = "";
+            if (name.endsWith("]")) {
+                int subscriptsIndex = access.lastIndexOf("[");
+                name = access.substring(0, subscriptsIndex);
+                subscripts = access.substring(subscriptsIndex);
+            }
+            return name + inStreamSuffix + subscripts;
+       }
 
         /**
          * Create an expression for the inStream() of the given entry.
@@ -636,7 +648,8 @@ aspect Connections {
         }
         
         private FAccess createInStreamAccess(FAccess access) {
-            return access.copyPrefix().append(access.lastActualPartName() + inStreamSuffix);
+            FAccess lastPart = access.copyLastSuffix();
+            return access.copyPrefix().append(lastPart.name() + inStreamSuffix, lastPart.getFArraySubscripts());
         }
     }
 

@@ -95,7 +95,22 @@ equation
     c.p = time;
     c.s = inStream(c.s);
 annotation(__JModelica(UnitTesting(tests={
-    TransformCanonicalTestCase(
+    FlatteningTestCase(
+        description="Top level stream connector variables get an inStream variable when using causal_ports",
+        causal_ports=true,
+        eliminate_alias_variables=false,
+        variability_propagation=false,
+        flatModel="
+fclass CausalPorts.Stream1
+ potential Real c.p;
+ flow Real c.f;
+ stream Real c.s;
+ inStream Real c.s__instream_;
+equation
+ c.p = time;
+ c.s = inStream(c.s);
+end CausalPorts.Stream1;
+"), TransformCanonicalTestCase(
         description="Top level stream connector variables get an inStream variable when using causal_ports",
         causal_ports=true,
         eliminate_alias_variables=false,
@@ -177,6 +192,59 @@ equation
 end CausalPorts.Stream2;
 ")})));
 end Stream2;
+
+
+model Stream3
+    connector C
+        Real p;
+        flow Real f;
+        stream Real[0] s1;
+        stream Real[2] s2;
+    end C;
+    C c;
+equation
+    c.p = time;
+    c.s1 = inStream(c.s1);
+    c.s2 = inStream(c.s2);
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        description="Stream arrays create the same number of inStream variables",
+        causal_ports=true,
+        eliminate_alias_variables=false,
+        variability_propagation=false,
+        flatModel="
+fclass CausalPorts.Stream3
+ potential Real c.p;
+ flow Real c.f;
+ stream Real c.s1[0];
+ stream Real c.s2[2];
+ inStream Real c.s1__instream_[0];
+ inStream Real c.s2__instream_[2];
+equation
+ c.p = time;
+ c.s1[1:0] = inStream(c.s1[1:0]);
+ c.s2[1:2] = inStream(c.s2[1:2]);
+end CausalPorts.Stream3;
+"), TransformCanonicalTestCase(
+        description="Stream arrays create the same number of inStream variables",
+        causal_ports=true,
+        eliminate_alias_variables=false,
+        variability_propagation=false,
+        flatModel="
+fclass CausalPorts.Stream3
+ potential Real c.p;
+ flow Real c.f;
+ stream Real c.s2[1];
+ stream Real c.s2[2];
+ inStream Real c.s2__instream_[1];
+ inStream Real c.s2__instream_[2];
+equation
+ c.p = time;
+ c.s2[1] = c.s2__instream_[1];
+ c.s2[2] = c.s2__instream_[2];
+end CausalPorts.Stream3;
+")})));
+end Stream3;
 
 
 end CausalPorts;
