@@ -19,11 +19,13 @@ FROM $DOCKER_LINUX_DIST:$DOCKER_DIST_TAG
 MAINTAINER Modelon
 
 ARG DOCKER_USR_PATH=/tmp/dockerfiles
+ARG ENABLE_PYTHON="yes"
+ENV PYTHON_ENABLED=${ENABLE_PYTHON}
 ENV USR_PATH=${DOCKER_USR_PATH}
 ENV DOCKER_SRC_DIR=${USR_PATH}/Docker/build
 ARG SRC_DIR=scripts
 
-ARG GCC_INSTALL_TYPE=UBUNTU_DEFAULT
+ARG GCC_INSTALL_TYPE=CENTOS_DEFAULT
 ENV GCC_INSTALLATION_TYPE=${GCC_INSTALL_TYPE}
 ARG GCC_VERSION_TO_BUILD=6.3.0
 ENV GCC_VERSION=${GCC_VERSION_TO_BUILD}
@@ -37,7 +39,13 @@ COPY ${SRC_DIR}/*.sh ${DOCKER_SRC_DIR}/
 COPY ${SRC_DIR}/jcc.patch ${DOCKER_SRC_DIR}/
 RUN chmod +x ${DOCKER_SRC_DIR}/*.sh
 
-RUN ${DOCKER_SRC_DIR}/setup.sh
+# split the scripts into separate RUNS in order to utilize caching in case build fails mid build
+RUN ${DOCKER_SRC_DIR}/setup_openjdk.sh
+RUN ${DOCKER_SRC_DIR}/setup_requirements.sh
+RUN ${DOCKER_SRC_DIR}/setup_gcc.sh
+RUN ${DOCKER_SRC_DIR}/setup_ant.sh
+RUN ${DOCKER_SRC_DIR}/setup_ipopt.sh
+RUN ${DOCKER_SRC_DIR}/setup_jcc.sh
 RUN ${DOCKER_SRC_DIR}/centos_python_env.sh
 RUN rm -rf ${USR_PATH}
 RUN rm -rf /*.tgz

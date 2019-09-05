@@ -20,11 +20,12 @@ ME="$( basename "${BASH_SOURCE[0]}" )"
 . ${DOCKER_SRC_DIR}/settings.sh
 
 BUILD_PKGS_JM_COMMON="vim sudo cmake swig wget tar patch"
-BUILD_PKGS_JM_REDHAT="redhat-lsb ant-junit dos2unix python-pip bc make lucene which subversion python-devel python-jpype zlib-devel boost-devel"
+# removed ant-junit from REDHAT list
+BUILD_PKGS_JM_REDHAT="redhat-lsb dos2unix python-pip bc make lucene which subversion python-devel python-jpype zlib-devel boost-devel"
 BUILD_PKGS_JM_FEDORA="redhat-lsb ant-junit dos2unix bc make lucene which subversion zlib-devel python-pip python-devel python-jpype boost-devel"
 BUILD_PKGS_JM_DEBIAN="dos2unix dc ant python-lucene subversion python-dev python-jpype zlib1g-dev libboost-dev"
 
-BUILD_PYTHON_PIP_PACKAGES="html5lib jupyter colorama nbformat Jinja2 openpyxl mock natsort six MarkupSafe lxml>=4.0.0 matplotlib==2.0.2 scipy cython nose ipython==5.7 ipykernel==4.10.0"
+BUILD_PYTHON_PIP_PACKAGES="html5lib notebook==5.7.8 jupyter colorama nbformat Jinja2 openpyxl mock natsort six MarkupSafe lxml>=4.0.0 matplotlib==2.0.2 scipy==1.2.2 cython==0.29.13 nose ipython==5.7 ipykernel==4.10.0"
 
 if [ "$LINUX_DISTRIBUTION" = "CENTOS" ]; then
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_REDHAT
@@ -55,43 +56,34 @@ pckinstall $BUILD_PKGS_JM
 if [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then
     # to avoid installing gcc 7 as well for ubuntu we do this
 	apt-get install -y --no-install-recommends python-pip
-    pip install setuptools
-fi
-
-# Install GCC, input argument is defined in Dockerfile
-echo "${ME}: --------------- INSTALLING GCC ---------------"
-. ${DOCKER_SRC_DIR}/setup_gcc.sh ${GCC_INSTALLATION_TYPE}
-
-# Install OpenJDK, input argument is defined in Dockerfile
-echo "${ME}: --------------- INSTALLING OpenJDK ---------------"
-. ${DOCKER_SRC_DIR}/setup_openjdk.sh
-
-
-
-if [ "$LINUX_DISTRIBUTION" = "CENTOS" ] || [ "$LINUX_DISTRIBUTION" = "FEDORA" ]; then
-    echo "Installing extra python packages with pip on CentOS"
-    ANT_VERSION=1.9.9
-    wget http://archive.apache.org/dist/ant/binaries/apache-ant-$ANT_VERSION-bin.tar.gz
-    ANTTMP=anttmp
-    mkdir $ANTTMP && cd $ANTTMP && tar -xvf ../apache-ant-$ANT_VERSION-bin.tar.gz && cd ..
-    mv $ANTTMP/apache-ant-$ANT_VERSION /opt/ant && rm -rf apache-ant-$ANT_VERSION-bin.tar.gz && rm -rf $ANTTMP
-    echo 'export ANT_HOME=/opt/ant/'>/etc/profile.d/antenv.sh
-    chmod 0755 /etc/profile.d/antenv.sh
-elif [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then
-    echo "Installing extra packages for Ubuntu"
+    
+    if [ ! -z "${PYTHON_ENABLED}" ]; then
+        pip install setuptools
+    fi
+    
+    echo "${ME}: Installing extra packages for Ubuntu"
     #Install package lsb separately because it conflicts with the installation above
     apt-get -y install lsb python3-notebook jupyter-core python-ipykernel
+    
     echo "Installing extra python packages with pip on Ubuntu"
-    pip install numpy==1.14.4 
+    if [ ! -z "${PYTHON_ENABLED}" ]; then
+        pip install numpy==1.14.4
+    fi
 fi
 
 
 if [ -f /etc/centos-release ] && [ "$(cat /etc/centos-release | tr -dc '0-9.'|cut -d \. -f1)" -eq "6" ];
 then
-    echo "Not installing python packages on CentOS 6"
+    echo "${ME}: Not installing python packages on CentOS 6"
 else
-    pip install $BUILD_PYTHON_PIP_PACKAGES
+    if [ ! -z "${PYTHON_ENABLED}" ]; then
+        echo "${ME}:  Installing python packages..."
+        pip install $BUILD_PYTHON_PIP_PACKAGES
+    fi
 fi
 
-echo "=== installed python packages ==="
-pip list 
+if [ ! -z "${PYTHON_ENABLED}" ]; then
+    echo "${ME}: Installed python packages:"
+    pip list 
+fi
+

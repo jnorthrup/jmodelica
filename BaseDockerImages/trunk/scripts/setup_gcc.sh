@@ -13,9 +13,10 @@
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
 set -e
-
 . ${DOCKER_SRC_DIR}/settings.sh 
 
+ME="$( basename "${BASH_SOURCE[0]}" )"
+echo "${ME}: --------------- INSTALLING GCC ---------------"
 echo "GCC_INSTALLATION_TYPE="${GCC_INSTALLATION_TYPE}
 
 if [ ${GCC_INSTALLATION_TYPE} = "CENTOS_DEFAULT" ] || [ ${GCC_INSTALLATION_TYPE} = "FEDORA_DEFAULT" ]; then

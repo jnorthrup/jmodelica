@@ -20,7 +20,7 @@ def platformVersion
 def pushTag
 
 def buildBaseImage(image_name, repo_name, platform, platform_version, gcc_install_type) {
-    return docker.build("${repo_name}/$image_name", "--no-cache --pull --build-arg DOCKER_LINUX_DIST=$platform --build-arg DOCKER_DIST_TAG=$platform_version --build-arg GCC_INSTALL_TYPE=$gcc_install_type .")
+    return docker.build("${repo_name}/$image_name", "--no-cache --pull --build-arg DOCKER_LINUX_DIST=$platform --build-arg DOCKER_DIST_TAG=$platform_version --build-arg GCC_INSTALL_TYPE=$gcc_install_type --build-arg ENABLE_PYTHON="yes" .")
 }
 
 def pushImage(docker_image, repo_name, image_name, push_tag) {

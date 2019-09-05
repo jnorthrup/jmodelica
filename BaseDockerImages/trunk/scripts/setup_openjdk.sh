@@ -13,13 +13,20 @@
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
 set -e
-
-ME="$( basename "${BASH_SOURCE[0]}" )"
-
 . ${DOCKER_SRC_DIR}/settings.sh 
 
+ME="$( basename "${BASH_SOURCE[0]}" )"
+echo "${ME}: --------------- INSTALLING OpenJDK ---------------"
+
 if [ "$LINUX_DISTRIBUTION" = "CENTOS" ]; then
-	yum -y install java-11-openjdk-devel
+    if [ -f /etc/centos-release ] && [ "$(cat /etc/centos-release | tr -dc '0-9.'|cut -d \. -f1)" -eq "6" ]; then
+        # for CentOS 6 we install openjdk 8 because 11 is not an option
+        echo "${ME}: Identified platform as CentOS 6, installing OpenJDK 8"
+        yum -y install java-1.8.0-openjdk-devel
+    else
+        echo "${ME}: Installing OpenJDK 11"
+        yum -y install java-11-openjdk-devel
+    fi
 elif [ "$LINUX_DISTRIBUTION" = "FEDORA" ]; then
     dnf install java-1.8.0-openjdk-devel -y
 elif [ "$LINUX_DISTRIBUTION" = "REDHAT" ]; then
