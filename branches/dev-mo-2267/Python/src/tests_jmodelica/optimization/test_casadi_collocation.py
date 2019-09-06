@@ -2102,7 +2102,7 @@ class TestLocalDAECollocator(object):
         N.testing.assert_array_less([nbr_iter, -nbr_iter], [100, -5])
         N.testing.assert_allclose(objective, cost_ref, 1e-3, 1e-4)
         N.testing.assert_array_less([total_exec_time, -total_exec_time],
-                                    [1., 0.])
+                                    [10., 0.])
 
     @testattr(casadi_base = True)
     def test_input_interpolator(self):
