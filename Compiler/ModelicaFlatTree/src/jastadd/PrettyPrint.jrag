@@ -1188,8 +1188,8 @@ aspect FlatPrettyPrint {
         
         str.print(getTypePrefixVariability());
         
-        if (!getCausalityConnectorPrefix().isNone()) {
-            str.print(getCausalityConnectorPrefix(), " ");
+        if (!getTypePrefixInputOutput().isNone()) {
+            str.print(getTypePrefixInputOutput(), " ");
         }
         
         str.print(prettyPrintType(), " ", displayName());
@@ -1348,8 +1348,8 @@ aspect FlatPrettyPrint {
     }
 
     public void FFunctionVariable.prettyPrint(Printer p, CodeStream str, String indent) {
-        if (!getCausalityConnectorPrefix().isNone()) {
-            str.print(getCausalityConnectorPrefix(), " ");
+        if (!getTypePrefixInputOutput().isNone()) {
+            str.print(getTypePrefixInputOutput(), " ");
         }
         str.print(getType().scalarType());
         if (isArray()) {
@@ -2143,8 +2143,8 @@ aspect PrettyPrint_MC {
 
     public void FVariable.prettyPrint_MC(Printer p, CodeStream str, String indent) {
         str.print(indent, getTypePrefixVariability());
-        if (!getCausalityConnectorPrefix().isNone()) {
-            str.print(getCausalityConnectorPrefix(), " ");
+        if (!getTypePrefixInputOutput().isNone()) {
+            str.print(getTypePrefixInputOutput(), " ");
         }
         
         str.print(prettyPrintType(), " ", nameUnderscore());

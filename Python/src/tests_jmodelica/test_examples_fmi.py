@@ -98,13 +98,11 @@ def test_fmi_bouncing_ball():
 def test_fmu_with_input():
     """ Run FMU with input example. """
     fmu_with_input.run_demo(False)
-
-"""
+    
 @testattr(windows_base = True)
 def test_furuta_modified():
-    #Test the furuta_modified example.
+    """ Test the furuta_modified example. """
     furuta_modified.run_demo(False)
-"""
 
 @testattr(windows_base = True)
 def test_furuta_dfo():

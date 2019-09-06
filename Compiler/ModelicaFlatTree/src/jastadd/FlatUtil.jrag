@@ -1112,8 +1112,8 @@ aspect FlatFunctionUtils {
     syn boolean FFunctionCall.isPartialFunctionCall() = false;
     eq FPartialFunctionCall.isPartialFunctionCall()   = true;
      
-     syn boolean FFunctionVariable.isInput()  = getCausalityConnectorPrefix().inputCausality();
-     syn boolean FFunctionVariable.isOutput() = getCausalityConnectorPrefix().outputCausality();
+     syn boolean FFunctionVariable.isInput()  = getTypePrefixInputOutput().inputCausality();
+     syn boolean FFunctionVariable.isOutput() = getTypePrefixInputOutput().outputCausality();
      
      /**
       * Returns a list of all InstComponentDecls declared as "input".
@@ -1967,8 +1967,8 @@ aspect AttributeUtil {
     syn boolean FClass.containsActiveAnnotations() {
         if (getNumFAttribute() == 0)
             return false;
-        for (AttributeContributor contributor : attributeContributors())
-            if (contributor.containsActiveAttributes(this))
+        for (AttributeContributer contributer : attributeContributers())
+            if (contributer.containsActiveAttributes(this))
                 return true;
         return false;
     }
@@ -1979,8 +1979,8 @@ aspect AttributeUtil {
     syn boolean FVariable.containsActiveAnnotations() {
         if (getNumFAttribute() == 0)
             return false;
-        for (AttributeContributor contributor : attributeContributors())
-            if (contributor.containsActiveAttributes(this))
+        for (AttributeContributer contributer : attributeContributers())
+            if (contributer.containsActiveAttributes(this))
                 return true;
         return false;
     }
@@ -1991,8 +1991,8 @@ aspect AttributeUtil {
     syn boolean FAbstractEquation.containsActiveAnnotations() {
         if (getNumFAttribute() == 0)
             return false;
-        for (AttributeContributor contributor : attributeContributors())
-            if (contributor.containsActiveAttributes(this))
+        for (AttributeContributer contributer : attributeContributers())
+            if (contributer.containsActiveAttributes(this))
                 return true;
         return false;
     }
@@ -2003,8 +2003,8 @@ aspect AttributeUtil {
     syn boolean FFunctionDecl.containsActiveAnnotations() {
         if (getNumFAttribute() == 0)
             return false;
-        for (AttributeContributor contributor : attributeContributors())
-            if (contributor.containsActiveAttributes(this))
+        for (AttributeContributer contributer : attributeContributers())
+            if (contributer.containsActiveAttributes(this))
                 return true;
         return false;
     }

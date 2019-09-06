@@ -843,7 +843,7 @@ aspect Flattening {
                 getBindingFExp().flattenUsedFuncsAndEnums(f);
             FAccess access = getFAccess().treeCopy().removeFArraySubscripts();
             FType type = type().flatten(f, this, !isInput());
-            CausalityConnectorPrefix io = myCausalityConnectorPrefix();
+            TypePrefixInputOutput io = createTypePrefixInputOutput();
             
             vars.addChild(new FFunctionVariable(io.functionVisibility(), io, type, new Opt<FExp>(), access));
             
@@ -1110,11 +1110,11 @@ aspect Flattening {
 
     public enum FlattenBindingExp {
         ALL, PARAMETER, NONE;
+        
+        public boolean shouldFlattenExp(InstAssignable var) {
+            return (this == ALL) || (this == PARAMETER && var.variability().parameterOrLess());
+        }
     }
-
-    syn boolean InstAssignable.shouldFlattenExp(FlattenBindingExp binding) = 
-            (binding == FlattenBindingExp.ALL) || 
-            (binding == FlattenBindingExp.PARAMETER && variability().parameterOrLess());
 
     // Generic method for flattening
     public void ASTNode.flatten(Flattener f, FlattenBindingExp binding, int level) {
@@ -1603,7 +1603,7 @@ aspect Flattening {
         if (a != null) {
             list.addAll(a.getFAttributes());
         }
-        boolean flattenBinding = shouldFlattenExp(binding);
+        boolean flattenBinding = binding.shouldFlattenExp(this);
         if (flattenBinding && !isConstant() && declaredSizeCalc().isUnknownNoEval()) {
             FInternalAttribute ia = (FInternalAttribute)findMatching(list, "size()");
             if (ia == null) {
@@ -1674,13 +1674,18 @@ aspect Flattening {
         FVariable fv = global ? createEmptyFGlobalVariable(f) : createEmptyFVariable();
         fv.setVisibilityType(createVisibilityType());
         fv.setTypePrefixVariability(variability());
-        fv.setCausalityConnectorPrefix(myCausalityConnectorPrefix());
         
-        if (myInstClass().extendsPrimitive()) {
-            fv.setDerivedType(myInstClass().actualInstClass().qualifiedName());
+        // Only set input/output prefix for top level inputs and outputs
+        if (isTopLevelInputOutput()) {
+            fv.setTypePrefixInputOutput(createTypePrefixInputOutput());
+        } else {
+            fv.setTypePrefixInputOutput(TypePrefixInputOutput.NONE);
         }
         
-        boolean flattenBinding = shouldFlattenExp(binding);
+        if (myInstClass().extendsPrimitive())
+            fv.setDerivedType(myInstClass().actualInstClass().qualifiedName());
+        
+        boolean flattenBinding = binding.shouldFlattenExp(this);
         List<FAttribute> attrs = new List<FAttribute>();
         if (!inRecordDecl()) {
             attrs.addAll(fv.getFAttributes());
@@ -1707,31 +1712,28 @@ aspect Flattening {
         return fv;
     }
 
-    public CausalityConnectorPrefix InstAssignable.myCausalityConnectorPrefix() {
-        if (!isTopLevelCausalOrConnector()) {
-            return CausalityConnectorPrefix.NONE;
-        }
+    public TypePrefixInputOutput InstAssignable.createTypePrefixInputOutput() {
         if (isConnectorVariable()) {
             if (isInput()) {
-                return CausalityConnectorPrefix.INPUT;
+                return TypePrefixInputOutput.INPUT;
             } else if (isOutput()) {
-                return CausalityConnectorPrefix.OUTPUT;
+                return TypePrefixInputOutput.OUTPUT;
             } else if (isFlow()) {
-                return CausalityConnectorPrefix.FLOW;
+                return TypePrefixInputOutput.FLOW;
             } else if (isStream()) {
-                return CausalityConnectorPrefix.STREAM;
+                return TypePrefixInputOutput.STREAM;
             } else if (!variability().parameterOrLess()) {
-                return CausalityConnectorPrefix.POTENTIAL;
+                return TypePrefixInputOutput.POTENTIAL;
             } else {
-                return CausalityConnectorPrefix.NONE;
+                return TypePrefixInputOutput.NONE;
             }
         } else {
             if (isInput()) {
-                return CausalityConnectorPrefix.INPUT;
+                return TypePrefixInputOutput.INPUT;
             } else if (isOutput()) {
-                return CausalityConnectorPrefix.OUTPUT;
+                return TypePrefixInputOutput.OUTPUT;
             } else {
-                return CausalityConnectorPrefix.NONE;
+                return TypePrefixInputOutput.NONE;
             }
         }
     }
@@ -3362,17 +3364,17 @@ aspect InstantiatedExpressions {
 
 }
 
-aspect AttributeContributor {
+aspect AttributeContributer {
     
     /**
      * Class used during instantiation of equations and flattening of variables
-     * to delecate to different contributors. This class is subtyped for each
-     * contributor!
+     * to delecate to different contributers. This class is subtyped for each
+     * contributer!
      */
-    public abstract class AttributeContributor {
+    public abstract class AttributeContributer {
         private final String name;
 
-        public AttributeContributor(String name) {
+        public AttributeContributer(String name) {
             this.name = name;
         }
 
@@ -3436,58 +3438,58 @@ aspect AttributeContributor {
     }
 
     /**
-     * A list that contains all attribute contributors. New contributors are added
-     * dynamically during static evaluation by calling addAttributeContributor().
+     * A list that contains all attribute contributers. New contributers are added
+     * dynamically during static evaluation by calling addAttributeContributer().
      * 
-     * @see ASTNode.addAttributeContributor()
+     * @see ASTNode.addAttributeContributer()
      */
-    private static Collection<AttributeContributor> ASTNode.ATTRIBUTE_CONTRIBUTES;
+    private static Collection<AttributeContributer> ASTNode.ATTRIBUTE_CONTRIBUTES;
     
     /**
-     * Add InstantiationContributor to the list of contributors. This method
+     * Add InstantiationContributer to the list of contributers. This method
      * should only be called from SrcAbstractEquation in order to ensure that the
      * checker is added corretly during static evaluation, hence the private
      * visibility.
      */
-    private static AttributeContributor ASTNode.addAttributeContributor(AttributeContributor contributor) {
+    private static AttributeContributer ASTNode.addAttributeContributer(AttributeContributer contributer) {
         if (ATTRIBUTE_CONTRIBUTES == null)
-            ATTRIBUTE_CONTRIBUTES = new ArrayList<AttributeContributor>();
-        ATTRIBUTE_CONTRIBUTES.add(contributor);
-        return contributor;
+            ATTRIBUTE_CONTRIBUTES = new ArrayList<AttributeContributer>();
+        ATTRIBUTE_CONTRIBUTES.add(contributer);
+        return contributer;
     }
     
-    public static Collection<AttributeContributor> ASTNode.attributeContributors() {
+    public static Collection<AttributeContributer> ASTNode.attributeContributers() {
         return Collections.unmodifiableCollection(ATTRIBUTE_CONTRIBUTES);
     }
     
     public class SrcAbstractEquation {
         public <N extends FAbstractEquation> N contribute(N equation) {
-            for (AttributeContributor contributor : attributeContributors())
-                contributor.contribute(this, equation);
+            for (AttributeContributer contributer : attributeContributers())
+                contributer.contribute(this, equation);
             return equation;
         }
     }
     
     public class InstAssignable {
         public <N extends FVariable> N contribute(Flattener f, N variable) {
-            for (AttributeContributor contributor : attributeContributors())
-                contributor.contribute(f, this, variable);
+            for (AttributeContributer contributer : attributeContributers())
+                contributer.contribute(f, this, variable);
             return variable;
         }
     }
     
     public class InstBaseClassDecl {
         public <N extends FFunctionDecl> N contribute(Flattener f, N function) {
-            for (AttributeContributor contributor : attributeContributors())
-                contributor.contribute(f, this, function);
+            for (AttributeContributer contributer : attributeContributers())
+                contributer.contribute(f, this, function);
             return function;
         }
     }
     
     public class InstNode {
         public FClass contribute(Flattener f, FClass fClass) {
-            for (AttributeContributor contributor : attributeContributors())
-                contributor.contribute(f, this, fClass);
+            for (AttributeContributer contributer : attributeContributers())
+                contributer.contribute(f, this, fClass);
             return fClass;
         }
     }

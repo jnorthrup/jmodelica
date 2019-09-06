@@ -926,9 +926,7 @@ algorithm
 end f;
 
 function fw
-protected
-    R r_;
-public
+protected R r_;
 	output R r;
 algorithm
 	r.a[1:2] := 2*f();

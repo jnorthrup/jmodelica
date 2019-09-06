@@ -1328,7 +1328,7 @@ aspect ConstantEvaluation {
 	     * Traverses the array in the same order as indices().iterator().
 	     */
 		public Iterator<CValue> iterator() {
-            return Arrays.asList(values).iterator();
+			return new ConstArrayIterator<CValue>(values);
 		}
 
         /**

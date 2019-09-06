@@ -176,10 +176,6 @@ aspect Parsers {
         return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.access_scalar;
     }
 
-    public short ParserHandler.subscriptGoal() {
-        return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.subscript;
-    }
-
     public SourceRoot ParserHandler.parseFile(UtilInterface uif, LoadInfo loadInfo) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
         parseListener.fileParsed(loadInfo);
@@ -253,13 +249,6 @@ aspect Parsers {
             scanner.getFormattingRecorder().postParsing(exp);
         }
         return exp;
-    }
-
-    public SrcSubscript ParserHandler.parseSubscript(String code, LoadInfo loadInfo) throws IOException, beaver.Parser.Exception {
-        final AbstractModelicaScanner<ASTNode<?>> scanner = createModelicaScanner(new StringReader(code));
-        final beaver.Parser parser = createModelicaParser(scanner, loadInfo);
-        final SrcSubscript srcSubscript = (SrcSubscript) parser.parse(scanner, subscriptGoal());
-        return srcSubscript;
     }
 
     public static final LoadInfo ParserHandler.ANONYMOUS_CLASS_FILENAME = LoadInfo.create("<command line argument>");

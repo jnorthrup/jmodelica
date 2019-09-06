@@ -33,9 +33,8 @@ public final class StringUtil {
             int end = width;
             int len = text.length();
             while (end < len) {
-                while (end > start && text.charAt(end) != splitAt) {
+                while (end > start && text.charAt(end) != splitAt)
                     end--;
-                }
                 out.append(prefix);
                 if (end <= start) {
                     out.append(text.substring(start, start + width - 1));
@@ -224,36 +223,6 @@ public final class StringUtil {
         } else {
             return quoted;
         }
-    }
-
-    /**
-     * If {@code text} starts with {@code prefix}, return a copy of {@code text}
-     * with the prefix removed. If not, return {@code text}.
-     */
-    public static String removePrefix(String text, String prefix) {
-        if (text.startsWith(prefix)) {
-            return text.substring(prefix.length());
-        }
-        return text;
-    }
-
-    /**
-     * Returns a copy of {@code text} but with all the {@code prefixes} removed.
-     * The prefixes will only be removed in the order they occur. The whitespace
-     * following any of the prefixes is removed.
-     */
-    public static String removePrefixes(String text, String... prefixes) {
-        for (String prefix : prefixes) {
-            text = trimLeading(removePrefix(text, prefix));
-        }
-        return text;
-    }
-
-    /**
-     * Returns a string whose value is {@code text}, but with all leading whitespace removed.
-     */
-    public static String trimLeading(String text) {
-        return text.replaceAll("^\\s+", "");
     }
 
 }
