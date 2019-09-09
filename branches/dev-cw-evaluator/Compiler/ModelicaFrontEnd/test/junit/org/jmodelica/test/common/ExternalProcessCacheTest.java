@@ -222,9 +222,21 @@ public class ExternalProcessCacheTest {
             // TODO Auto-generated method stub
             return null;
         }
+        
+        @Override
+        public String functionArgsSerialized(boolean returnVar) {
+            // TODO Auto-generated method stub
+            return null;
+        }
 
         @Override
         public Iterable<VariableMock> varsToDeserialize() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        
+        @Override
+        public String[] library() {
             // TODO Auto-generated method stub
             return null;
         }

@@ -289,6 +289,50 @@ aspect CCodeGenExternalCeval {
         return functionArgs;
     }
     
+    syn String FExternalStmt.convertFtypeToExternalString(FType arg, boolean useSeparator) {
+        String input = "";
+        if (arg.isReal()) {
+            input = input.concat("d");
+        } else if (arg.isInteger() || arg.isEnum()) {
+            input = input.concat("i");
+        } else if (arg.isString()) {
+            input = input.concat("s");
+        } else if (arg.isRecord()) {
+            input = input.concat("R[");
+            for (FRecordComponentType rType: ((FRecordType)arg).getComponents()) {
+                input = input.concat(convertFtypeToExternalString(rType.getFType(), true));
+            }
+            input = input.concat("]");
+        }
+        if (useSeparator) {
+            input = input.concat(",");
+        }
+        return input;
+    }
+    
+    syn String FExternalStmt.functionArgsSerialized(boolean returnVar) {
+        boolean skippedReturnVar = false;
+        String input = "";
+        for (ExternalArgument var : functionArgsToSerialize()) {
+            if (returnVar) {
+                if (hasReturnVar()) {
+                    return convertFtypeToExternalString(var.type(), false);
+                } else {
+                    return "void";
+                }
+            }
+            if (hasReturnVar() && skippedReturnVar != true) { 
+                skippedReturnVar = true;
+                continue; 
+            }
+            if (var.isOutput()) {
+               input = input.concat("*");
+            }
+            input = input.concat(convertFtypeToExternalString(var.type(), true));
+        }
+        return input;
+    }
+    
     /**
      * List of CommonVariableDecl which has to be read from the process
      * when evaluating an external function.

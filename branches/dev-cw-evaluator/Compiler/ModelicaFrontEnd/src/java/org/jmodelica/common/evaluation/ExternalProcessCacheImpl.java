@@ -2,6 +2,7 @@ package org.jmodelica.common.evaluation;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Type;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Value;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Variable;
 import org.jmodelica.util.EnvironmentUtils;
+import org.jmodelica.util.SystemUtil;
 import org.jmodelica.util.ccompiler.CCompilerDelegator;
 import org.jmodelica.util.exceptions.CcodeCompilationException;
 import org.jmodelica.util.logging.ModelicaLogger;
@@ -41,7 +43,66 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
     ModelicaLogger log() {
         return mc.log();
     }
-
+    
+    private String getSharedLibrary(External<K> ext) {
+        /* Messy messy... */
+        String sharedLib = "";
+        final String extName = ext.getName();
+        String platform = CCompilerDelegator.reduceBits(EnvironmentUtils.getJavaPlatform(),
+                mc.getCCompiler().getTargetPlatforms());
+        File f = new File(ext.libraryDirectory(), platform);
+        String libLoc = f.isDirectory() ? f.getPath() : ext.libraryDirectory();
+        File dir = new File(libLoc);
+        File[] matches = dir.listFiles(new FilenameFilter()
+        {
+          public boolean accept(File dir, String name)
+          {
+             return name.contains(extName) && name.endsWith(SystemUtil.sharedLibraryExtension());
+          }
+        });
+        for(File file : matches) {
+            sharedLib = file.toString();
+            break;
+        }
+        if (sharedLib.equals("")) {
+            for (String lib : ext.library()) {
+                File tmp = new File(libLoc, lib.concat(SystemUtil.sharedLibraryExtension()));
+                if (tmp.exists() && !tmp.isDirectory()) {
+                    sharedLib = tmp.toString();
+                }
+            }
+        }
+        return sharedLib;
+    }
+    
+    private String getOutputArguments(E ext) {
+        String output = ext.functionArgsSerialized(true);
+        if (output.equals("")) {
+            return "void";
+        }
+        return output;
+    }
+    
+    private String getInputArguments(E ext) {
+        return ext.functionArgsSerialized(false);
+    }
+    
+    public boolean canUseEvaluator(E ext) {
+        for (K eo : ext.externalObjectsToSerialize()) {
+            return false;
+        }
+        
+        if (!(ext.myOptions().getBooleanOption("enable_external_evaluator"))) {
+            return false;
+        }
+        /* TODO:
+         * Verify that the library used is a shared library, not static. */
+        /* Builtins, such as Modelica functions should be accepted 
+           Verify that the actual inputs/outputs are supported */
+        
+        return true;
+    }
+    
     @Override
     public ExternalFunction<K, V> getExternalFunction(E ext) {
         ExternalFunction<K, V> ef = cachedExternals.get(ext.getName());
@@ -51,11 +112,30 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
             }
             try {
                 long time = System.currentTimeMillis();
-                String executable = mc.compileExternal(ext);
-                if (ext.shouldCacheProcess()) {
-                    ef = new MappedExternalFunction(ext, executable);
+                String executable = null;
+                ArrayList<String> arguments = null;
+                if (canUseEvaluator(ext)) {
+                    String jmHome = System.getenv("JMODELICA_HOME");
+                    executable = jmHome + File.separator + "bin" + File.separator + CCompilerDelegator.reduceBits(EnvironmentUtils.getJavaPlatform(),mc.getCCompiler().getTargetPlatforms()) + File.separator + "jmi_evaluator" + SystemUtil.executableExtension();
+                    
+                    String sharedLibrary = getSharedLibrary(ext);
+                    if (sharedLibrary.equals("")) { sharedLibrary = "NoSharedLibrary"; }
+                    
+                    arguments = new ArrayList<String>();
+                    arguments.add(executable);
+                    arguments.add(sharedLibrary);
+                    arguments.add(ext.getName());
+                    arguments.add(getOutputArguments(ext));
+                    arguments.add(getInputArguments(ext));
+                    
+                    mc.log().debug("Using pre-compiled evaluator for outputs: '" + getOutputArguments(ext) + "' and inputs: '" + getInputArguments(ext));
                 } else {
-                    ef = new CompiledExternalFunction(ext, executable);
+                    executable = mc.compileExternal(ext);
+                }
+                if (ext.shouldCacheProcess()) {
+                    ef = new MappedExternalFunction(ext, executable, arguments);
+                } else {
+                    ef = new CompiledExternalFunction(ext, executable, arguments);
                 }
                 time = System.currentTimeMillis() - time;
                 mc.log().debug("Succesfully compiled external function '" + ext.getName() + "' to executable '"
@@ -141,11 +221,13 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
      */
     private class CompiledExternalFunction implements ExternalFunction<K, V> {
         protected String executable;
+        protected ArrayList<String> arguments;
         protected ProcessBuilder processBuilder;
         private String msg;
 
-        public CompiledExternalFunction(External<K> ext, String executable) {
+        public CompiledExternalFunction(External<K> ext, String executable, ArrayList<String> arguments) {
             this.executable = executable;
+            this.arguments = arguments;
             this.processBuilder = createProcessBuilder(ext);
             this.msg = "Succesfully compiled external function '" + ext.getName() + "'";
         }
@@ -188,6 +270,8 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
 
         public void evaluate(External<K> ext, Map<K, V> values, int timeout, ProcessCommunicator<V, T> com)
                 throws IOException {
+            long time = System.currentTimeMillis();
+            log().debug("Evaluating external function: " + ext.getName());
             com.startTimer(timeout);
             com.check("EVAL");
 
@@ -200,6 +284,8 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                 values.put(cvd, com.get(cvd.type()));
             com.accept("READY");
             com.cancelTimer();
+            time = System.currentTimeMillis() - time;
+            log().debug("Finished evaluating external function, time: " + time + "ms");
         }
 
         public int teardown(int timeout, ProcessCommunicator<V, T> com) throws IOException {
@@ -219,11 +305,23 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
 
         @Override
         public void remove() {
-            new File(executable).delete();
+            if (arguments == null) {
+                new File(executable).delete();
+            }
+        }
+        
+        public ProcessBuilder _createProcessBuilder(External<K> ext) {
+            ProcessBuilder pb;
+            if (arguments == null) {
+                pb = new ProcessBuilder(executable);
+            } else {
+                pb = new ProcessBuilder(arguments);
+            }
+            return pb;
         }
 
         private ProcessBuilder createProcessBuilder(External<K> ext) {
-            ProcessBuilder pb = new ProcessBuilder(executable);
+            ProcessBuilder pb = _createProcessBuilder(ext);
             Map<String, String> env = pb.environment();
             if (env.keySet().contains("Path")) {
                 env.put("PATH", env.get("Path"));
@@ -267,8 +365,8 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
 
         private final int externalConstantEvaluationMaxProc;
 
-        public MappedExternalFunction(External<K> ext, String executable) {
-            super(ext, executable);
+        public MappedExternalFunction(External<K> ext, String executable, ArrayList<String> arguments) {
+            super(ext, executable, arguments);
             externalConstantEvaluationMaxProc = ext.myOptions()
                     .getIntegerOption("external_constant_evaluation_max_proc");
         }
