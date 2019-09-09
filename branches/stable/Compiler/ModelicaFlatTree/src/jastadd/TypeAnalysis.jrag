@@ -51,6 +51,7 @@ aspect FlatTypeInterface {
         public boolean isRecord();
         public boolean isFunction();
         public boolean isExternalObject();
+        public boolean isPrimitiveType();
     }
     
     FType implements CommonType;
@@ -156,15 +157,16 @@ aspect FlatTypeInterface {
             return scalarType.toString() + (ndims() > 0 ? size() : "");
         };
         
-        public boolean isBoolean() { return scalarType().isBoolean(); }
-        public boolean isInteger() { return scalarType().isInteger(); }
-        public boolean isReal() { return scalarType().isReal(); }
-        public boolean isNumeric() { return scalarType().isNumeric(); }
-        public boolean isString() { return scalarType().isString(); }
-        public boolean isEnum() { return scalarType().isEnum(); }
-        public boolean isRecord() { return scalarType().isRecord(); }
-        public boolean isFunction() { return scalarType().isFunction(); }
+        public boolean isBoolean()        { return scalarType().isBoolean();        }
+        public boolean isInteger()        { return scalarType().isInteger();        }
+        public boolean isReal()           { return scalarType().isReal();           }
+        public boolean isNumeric()        { return scalarType().isNumeric();        }
+        public boolean isString()         { return scalarType().isString();         }
+        public boolean isEnum()           { return scalarType().isEnum();           }
+        public boolean isRecord()         { return scalarType().isRecord();         }
+        public boolean isFunction()       { return scalarType().isFunction();       }
         public boolean isExternalObject() { return scalarType().isExternalObject(); }
+        public boolean isPrimitiveType()  { return scalarType().isPrimitiveType();  }
     }
 
 }
@@ -1256,6 +1258,12 @@ aspect BuiltInFlatTypes {
     eq FExternalObjectType.isExternalObject()   = true;
     syn boolean FType.isFunction()              = false;
     eq FFunctionType.isFunction()               = true;
+    syn boolean FType.isPrimitiveType()         = false;
+    eq FRealType   .isPrimitiveType()           = true;
+    eq FIntegerType.isPrimitiveType()           = true;
+    eq FBooleanType.isPrimitiveType()           = true;
+    eq FStringType .isPrimitiveType()           = true;
+    eq FEnumType   .isPrimitiveType()           = true;
 
     syn boolean FType.isArray()  = getSize() != Size.SCALAR;
     syn boolean FType.isScalar() = getSize() == Size.SCALAR;

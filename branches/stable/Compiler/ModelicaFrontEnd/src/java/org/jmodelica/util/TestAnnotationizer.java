@@ -138,11 +138,11 @@ public class TestAnnotationizer {
         }
         
         if (filePath == null && !hasInputFilePath) {
-            System.err.println("No input file specified. give path as argument or use -file");
+            System.err.println("No input file specified. give path as argument or use -f");
         }
 
         if (all_models && hasInputFilePath) {
-            System.err.println("Cannot use -a and -file at the same time");
+            System.err.println("Cannot use -a and -f at the same time");
         }
         
         Scanner inputFileScanner = null;
@@ -156,25 +156,19 @@ public class TestAnnotationizer {
             inputFileScanner = new Scanner(new File(inputFilePath));
             cont = inputFileScanner.hasNextLine();
         }
+        @SuppressWarnings("resource")
+        BufferedReader in = cont ? new BufferedReader(new InputStreamReader(System.in)) : null;
+        String packageName = getPackageName(filePath);
         while (cont) {
-            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-            if(hasInputFilePath) {
+            if (hasInputFilePath) {
                 String line = inputFileScanner.nextLine();
                 String[] parts = line.split(",");
                 filePath = parts[0];
-                modelName = parts[1];
-            }
-            String packageName = null;
-            if(!(all_models || hasInputFilePath)) {
                 packageName = getPackageName(filePath);
-                modelName = composeModelName(packageName, modelName);
-            } else if (hasInputFilePath) {
-                packageName = getPackageName(filePath);
-                modelName = packageName + "." + modelName;
-            }
-            if (all_models) {
+                modelName = packageName + "." + parts[1];
+            } else if (all_models) {
                 modelName = allModelsIterator.next();
-            } else if (!modelName.contains(".")) {
+            } else if (modelName == null) {
                 System.out.print("Enter class name: ");
                 System.out.flush();
                 String given = in.readLine().trim();
@@ -182,7 +176,7 @@ public class TestAnnotationizer {
                     System.out.println("Empty modelname given, exiting.");
                     System.exit(0);
                 }
-                modelName = composeModelName(modelName, given);
+                modelName = composeModelName(packageName, given);
             }
             
             if (inputlang == Lang.none)
@@ -204,7 +198,7 @@ public class TestAnnotationizer {
             }
             
             if (repeat) {
-                modelName = packageName;
+                modelName = null;
             } else if (all_models) {
                 cont = allModelsIterator.hasNext();
             } else if (hasInputFilePath) {
