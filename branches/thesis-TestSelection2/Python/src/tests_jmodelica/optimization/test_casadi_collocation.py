@@ -105,6 +105,12 @@ class TestLocalDAECollocator(object):
                         class_path, vdp_file_path,
                         compiler_options=dict({"inline_functions": "none"}.items() + self.compiler_opts.items()))
         
+        class_path = "VDP_pack.VDP_Opt_Function_global_constant"
+        self.vdp_function_op_global_constant = \
+                transfer_to_casadi_interface(
+                        class_path, vdp_file_path,
+                        compiler_options=dict({"inline_functions": "none"}.items() + self.compiler_opts.items()))
+        
         cstr_file_path = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
         class_path = "CSTR.CSTR"
         fmu_cstr = compile_fmu(class_path, cstr_file_path,
@@ -2096,7 +2102,7 @@ class TestLocalDAECollocator(object):
         N.testing.assert_array_less([nbr_iter, -nbr_iter], [100, -5])
         N.testing.assert_allclose(objective, cost_ref, 1e-3, 1e-4)
         N.testing.assert_array_less([total_exec_time, -total_exec_time],
-                                    [1., 0.])
+                                    [10., 0.])
 
     @testattr(casadi_base = True)
     def test_input_interpolator(self):
@@ -2205,6 +2211,29 @@ class TestLocalDAECollocator(object):
         Test a VDP model containing a function.
         """
         op = self.vdp_function_op
+
+        # Reference values
+        cost_ref = 3.17619580332244e0
+        u_norm_ref = 2.8723837585e-1
+
+        opts = self.optimize_options(op)
+
+        # Test with full SX expansion
+        opts['expand_to_sx'] = "NLP"
+        res = op.optimize(options=opts)
+        assert_results(res, cost_ref, u_norm_ref)
+
+        # Test without SX expansion
+        opts['expand_to_sx'] = "no"
+        res = op.optimize(options=opts)
+        assert_results(res, cost_ref, u_norm_ref)
+
+    @testattr(casadi_base = True)
+    def test_vdp_function_global_constant(self):
+        """
+        Test a VDP model containing a function with global constant.
+        """
+        op = self.vdp_function_op_global_constant
 
         # Reference values
         cost_ref = 3.17619580332244e0

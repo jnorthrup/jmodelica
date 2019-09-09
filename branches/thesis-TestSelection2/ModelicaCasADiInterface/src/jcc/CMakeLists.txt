@@ -36,7 +36,7 @@ set(CLASSES_common
   ifcasadi.MXFunction
   ifcasadi.MXVector
   ifcasadi.ifcasadi
-  org.jmodelica.util.OptionRegistry
+  org.jmodelica.common.options.AbstractOptionRegistry
   org.jmodelica.util.streams.CodeStream;
 )
 
@@ -56,8 +56,9 @@ set(CLASSES_modelica
   org.jmodelica.modelica.compiler.FFunctionCallEquation
   org.jmodelica.modelica.compiler.FFunctionCallLeft
   org.jmodelica.modelica.compiler.FExp
-  org.jmodelica.modelica.compiler.FIdUse
-  org.jmodelica.modelica.compiler.FIdUseExp
+  org.jmodelica.modelica.compiler.CommonAccess
+  org.jmodelica.modelica.compiler.FAccess
+  org.jmodelica.modelica.compiler.CommonAccessExp
   org.jmodelica.modelica.compiler.FVariable
   org.jmodelica.modelica.compiler.FRealVariable
   org.jmodelica.modelica.compiler.FDerivativeVariable
@@ -75,6 +76,7 @@ set(CLASSES_modelica
   org.jmodelica.modelica.compiler.TornEquationBlock
   org.jmodelica.modelica.compiler.ScalarEquationBlock
   org.jmodelica.modelica.compiler.SolvedScalarEquationBlock
+  org.jmodelica.modelica.compiler.generated.OptionRegistry
 )
 
 # todo: consolidate with CLASSES_modelica
@@ -101,8 +103,9 @@ set(CLASSES_optimica
   org.jmodelica.optimica.compiler.FFunctionCallEquation
   org.jmodelica.optimica.compiler.FFunctionCallLeft
   org.jmodelica.optimica.compiler.FExp
-  org.jmodelica.optimica.compiler.FIdUse
-  org.jmodelica.optimica.compiler.FIdUseExp
+  org.jmodelica.optimica.compiler.CommonAccess
+  org.jmodelica.optimica.compiler.FAccess
+  org.jmodelica.optimica.compiler.CommonAccessExp
   org.jmodelica.optimica.compiler.FVariable
   org.jmodelica.optimica.compiler.FRealVariable
   org.jmodelica.optimica.compiler.FDerivativeVariable
@@ -125,6 +128,7 @@ set(CLASSES_optimica
   org.jmodelica.optimica.compiler.TornEquationBlock
   org.jmodelica.optimica.compiler.ScalarEquationBlock
   org.jmodelica.optimica.compiler.SolvedScalarEquationBlock
+  org.jmodelica.optimica.compiler.generated.OptionRegistry
 )
 
 

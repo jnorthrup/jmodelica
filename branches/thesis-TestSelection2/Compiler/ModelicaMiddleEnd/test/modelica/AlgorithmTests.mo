@@ -35,23 +35,23 @@ model Break1
             flatModel="
 fclass AlgorithmTests.For.Break1
  Real x;
- discrete Boolean Break1.temp_1;
+ discrete Boolean temp_1;
 initial equation 
- pre(Break1.temp_1) = false;
+ pre(temp_1) = false;
 algorithm
  x := 1;
- Break1.temp_1 := true;
- if Break1.temp_1 then
+ temp_1 := true;
+ if temp_1 then
   x := x + 1;
-  Break1.temp_1 := false;
-  if Break1.temp_1 then
+  temp_1 := false;
+  if temp_1 then
    x := x + 1;
   end if;
  end if;
- if Break1.temp_1 then
+ if temp_1 then
   x := x + 1;
-  Break1.temp_1 := false;
-  if Break1.temp_1 then
+  temp_1 := false;
+  if temp_1 then
    x := x + 2;
   end if;
  end if;
@@ -80,31 +80,31 @@ model Break2
             flatModel="
 fclass AlgorithmTests.For.Break2
  Real x;
- discrete Boolean Break2.temp_1;
+ discrete Boolean temp_1;
 initial equation 
- pre(Break2.temp_1) = false;
+ pre(temp_1) = false;
 algorithm
  x := 1;
- Break2.temp_1 := true;
- if Break2.temp_1 then
+ temp_1 := true;
+ if temp_1 then
   x := x + 1;
   if noEvent(x > 2) then
-   Break2.temp_1 := false;
+   temp_1 := false;
   else
    x := x + 1;
   end if;
-  if Break2.temp_1 then
+  if temp_1 then
    x := x + 1;
   end if;
  end if;
- if Break2.temp_1 then
+ if temp_1 then
   x := x + 1;
   if noEvent(x > 2) then
-   Break2.temp_1 := false;
+   temp_1 := false;
   else
    x := x + 1;
   end if;
-  if Break2.temp_1 then
+  if temp_1 then
    x := x + 2;
   end if;
  end if;
@@ -139,45 +139,45 @@ model Break3
             flatModel="
 fclass AlgorithmTests.For.Break3
  Real x;
- discrete Boolean Break3.temp_1;
- discrete Boolean Break3.temp_2;
+ discrete Boolean temp_1;
+ discrete Boolean temp_2;
 initial equation 
- pre(Break3.temp_1) = false;
- pre(Break3.temp_2) = false;
+ pre(temp_1) = false;
+ pre(temp_2) = false;
 algorithm
  x := 1;
- Break3.temp_1 := true;
- if Break3.temp_1 then
-  Break3.temp_2 := true;
-  if Break3.temp_2 then
+ temp_1 := true;
+ if temp_1 then
+  temp_2 := true;
+  if temp_2 then
    if noEvent(x > 1) then
     x := 2;
    elseif noEvent(x > 2) then
     x := 3;
    else
     if noEvent(x > 3) then
-     Break3.temp_2 := false;
+     temp_2 := false;
     end if;
-    if Break3.temp_2 then
+    if temp_2 then
      x := 4;
     end if;
    end if;
   end if;
-  if Break3.temp_2 then
+  if temp_2 then
    if noEvent(x > 1) then
     x := 2;
    elseif noEvent(x > 2) then
     x := 3;
    else
     if noEvent(x > 3) then
-     Break3.temp_2 := false;
+     temp_2 := false;
     end if;
-    if Break3.temp_2 then
+    if temp_2 then
      x := 4;
     end if;
    end if;
   end if;
-  Break3.temp_1 := false;
+  temp_1 := false;
  end if;
 end AlgorithmTests.For.Break3;
 ")})));
@@ -201,21 +201,21 @@ model BreakNames1
             variability_propagation=false,
             flatModel="
 fclass AlgorithmTests.For.BreakNames1
- discrete Boolean BreakNames1.temp_1;
+ discrete Boolean temp_1;
  Real a;
 algorithm
  a := 0.0;
- BreakNames1.temp_1 := true;
- if BreakNames1.temp_1 then
+ temp_1 := true;
+ if temp_1 then
   a := a + 1;
   if a > 0.0 then
-   BreakNames1.temp_1 := false;
+   temp_1 := false;
   end if;
  end if;
- if BreakNames1.temp_1 then
+ if temp_1 then
   a := a + 2;
   if a > 0.0 then
-   BreakNames1.temp_1 := false;
+   temp_1 := false;
   end if;
  end if;
 end AlgorithmTests.For.BreakNames1;
@@ -259,40 +259,40 @@ model BreakNames2
             variability_propagation=false,
             flatModel="
 fclass AlgorithmTests.For.BreakNames2
- discrete Boolean m1.BreakNames2.temp_1;
+ discrete Boolean temp_1;
  Real m1.a;
  Real m1.b;
- discrete Boolean m2.BreakNames2.temp_2;
+ discrete Boolean temp_2;
  Real m2.a;
  Real m2.b;
 algorithm
  m1.a := 0.0;
- m1.BreakNames2.temp_1 := true;
- if m1.BreakNames2.temp_1 then
+ temp_1 := true;
+ if temp_1 then
   m1.b := m1.a + 1;
   if m1.b < 0.0 then
-   m1.BreakNames2.temp_1 := false;
+   temp_1 := false;
   end if;
  end if;
- if m1.BreakNames2.temp_1 then
+ if temp_1 then
   m1.b := m1.a + 2;
   if m1.b < 0.0 then
-   m1.BreakNames2.temp_1 := false;
+   temp_1 := false;
   end if;
  end if;
 algorithm
  m2.a := 0.0;
- m2.BreakNames2.temp_2 := true;
- if m2.BreakNames2.temp_2 then
+ temp_2 := true;
+ if temp_2 then
   m2.b := m2.b + m2.a + 1;
   if m2.b > 10.0 then
-   m2.BreakNames2.temp_2 := false;
+   temp_2 := false;
   end if;
  end if;
- if m2.BreakNames2.temp_2 then
+ if temp_2 then
   m2.b := m2.b + m2.a + 2;
   if m2.b > 10.0 then
-   m2.BreakNames2.temp_2 := false;
+   temp_2 := false;
   end if;
  end if;
 end AlgorithmTests.For.BreakNames2;
@@ -319,24 +319,24 @@ model BreakNames3
             variability_propagation=false,
             flatModel="
 fclass AlgorithmTests.For.BreakNames3
- discrete Boolean BreakNames3.temp_3;
+ discrete Boolean temp_3;
  Real temp_1[2] = {1, 2};
  Real temp_2;
  Real temp_4;
 algorithm
- BreakNames3.temp_3 := true;
- if BreakNames3.temp_3 then
+ temp_3 := true;
+ if temp_3 then
   temp_2 := temp_2 + temp_1[3 - 1];
   temp_4 := temp_4 + temp_1[1];
   if temp_2 > temp_4 then
-   BreakNames3.temp_3 := false;
+   temp_3 := false;
   end if;
  end if;
- if BreakNames3.temp_3 then
+ if temp_3 then
   temp_2 := temp_2 + temp_1[3 - 2];
   temp_4 := temp_4 + temp_1[2];
   if temp_2 > temp_4 then
-   BreakNames3.temp_3 := false;
+   temp_3 := false;
   end if;
  end if;
 end AlgorithmTests.For.BreakNames3;
@@ -436,7 +436,7 @@ public
     y[i1,i2] := x[i2,i1];
    end for;
   end for;
-  init temp_1 as Real[size(x, 2), size(x, 1)];
+  init temp_1 as Real[size(x, 1), size(x, 2)];
   for i1 in 1:size(x, 1) loop
    for i2 in 1:size(x, 2) loop
     temp_1[i1,i2] := y[i2,i1];
@@ -517,8 +517,8 @@ public
   input AlgorithmTests.TempAssign2.R[:] x;
   output AlgorithmTests.TempAssign2.R[:] y;
   Integer t;
-  AlgorithmTests.TempAssign2.R[:] temp_1;
-  Integer[:] temp_2;
+  Integer[:] temp_1;
+  AlgorithmTests.TempAssign2.R[:] temp_2;
  algorithm
   init y as AlgorithmTests.TempAssign2.R[size(x, 1)];
   for i1 in 1:size(x, 1) loop
@@ -526,18 +526,18 @@ public
    y[i1].b := x[i1].b;
   end for;
   t := size(x, 1);
-  init temp_1 as AlgorithmTests.TempAssign2.R[max(t, 0)];
-  init temp_2 as Integer[max(t, 0)];
+  init temp_1 as Integer[max(t, 0)];
   for i1 in 1:max(t, 0) loop
-   temp_2[i1] := t + 1 - i1;
+   temp_1[i1] := t + 1 - i1;
+  end for;
+  init temp_2 as AlgorithmTests.TempAssign2.R[max(t, 0)];
+  for i1 in 1:max(t, 0) loop
+   temp_2[i1].a := y[temp_1[i1]].a;
+   temp_2[i1].b := y[temp_1[i1]].b;
   end for;
   for i1 in 1:max(t, 0) loop
-   temp_1[i1].a := y[temp_2[i1]].a;
-   temp_1[i1].b := y[temp_2[i1]].b;
-  end for;
-  for i1 in 1:max(t, 0) loop
-   y[i1].a := temp_1[i1].a;
-   y[i1].b := temp_1[i1].b;
+   y[i1].a := temp_2[i1].a;
+   y[i1].b := temp_2[i1].b;
   end for;
   return;
  end AlgorithmTests.TempAssign2.f;
@@ -615,30 +615,34 @@ public
   input AlgorithmTests.TempAssign3.R[:] x;
   output AlgorithmTests.TempAssign3.R[:] y;
   Integer t;
-  AlgorithmTests.TempAssign3.R[:] temp_1;
-  Integer[:] temp_2;
+  Integer[:] temp_1;
+  AlgorithmTests.TempAssign3.R[:] temp_2;
  algorithm
   init y as AlgorithmTests.TempAssign3.R[size(x, 1)];
   for i1 in 1:size(x, 1) loop
-   y[i1].a[1] := x[i1].a[1];
-   y[i1].a[2] := x[i1].a[2];
+   for i2 in 1:2 loop
+    y[i1].a[i2] := x[i1].a[i2];
+   end for;
   end for;
   t := size(x, 1);
   for i1 in 1:size(x, 1) loop
    assert(2 == size(x[i1].a, 1), \"Mismatching sizes in function 'AlgorithmTests.TempAssign3.f', component 'x[i1].a', dimension '1'\");
   end for;
-  init temp_1 as AlgorithmTests.TempAssign3.R[max(t, 0)];
-  init temp_2 as Integer[max(t, 0)];
+  init temp_1 as Integer[max(t, 0)];
   for i1 in 1:max(t, 0) loop
-   temp_2[i1] := t + 1 - i1;
+   temp_1[i1] := t + 1 - i1;
+  end for;
+  init temp_2 as AlgorithmTests.TempAssign3.R[max(t, 0)];
+  for i1 in 1:max(t, 0) loop
+   init temp_2[i1].a as Real[2];
+   for i2 in 1:2 loop
+    temp_2[i1].a[i2] := y[temp_1[i1]].a[i2];
+   end for;
   end for;
   for i1 in 1:max(t, 0) loop
-   temp_1[i1].a[1] := y[temp_2[i1]].a[1];
-   temp_1[i1].a[2] := y[temp_2[i1]].a[2];
-  end for;
-  for i1 in 1:max(t, 0) loop
-   y[i1].a[1] := temp_1[i1].a[1];
-   y[i1].a[2] := temp_1[i1].a[2];
+   for i2 in 1:2 loop
+    y[i1].a[i2] := temp_2[i1].a[i2];
+   end for;
   end for;
   return;
  end AlgorithmTests.TempAssign3.f;
@@ -694,11 +698,16 @@ public
  function AlgorithmTests.TempAssign4.f
   input Real x;
   output Real[:] y;
+  Real[:] temp_1;
  algorithm
   init y as Real[3];
-  y[1] := x;
-  y[2] := x;
-  y[3] := x;
+  init temp_1 as Real[3];
+  temp_1[1] := x;
+  temp_1[2] := x;
+  temp_1[3] := x;
+  for i1 in 1:3 loop
+   y[i1] := temp_1[i1];
+  end for;
   return;
  end AlgorithmTests.TempAssign4.f;
 
@@ -834,39 +843,39 @@ algorithm
             variability_propagation=false,
             flatModel="
 fclass AlgorithmTests.UnusedBranch5
- discrete Boolean UnusedBranch5.temp_1;
+ discrete Boolean temp_1;
  Real x;
  discrete input Boolean b;
 algorithm
- UnusedBranch5.temp_1 := true;
- if UnusedBranch5.temp_1 then
+ temp_1 := true;
+ if temp_1 then
   if b then
    x := 1;
   else
    x := 4;
   end if;
  end if;
- if UnusedBranch5.temp_1 then
+ if temp_1 then
   if b then
    x := 1;
   else
    x := 4;
   end if;
  end if;
- if UnusedBranch5.temp_1 then
+ if temp_1 then
   if b then
    x := 1;
   else
    x := 3;
-   UnusedBranch5.temp_1 := false;
+   temp_1 := false;
   end if;
  end if;
- if UnusedBranch5.temp_1 then
+ if temp_1 then
   if b then
    x := 1;
   else
    x := 3;
-   UnusedBranch5.temp_1 := false;
+   temp_1 := false;
   end if;
  end if;
 end AlgorithmTests.UnusedBranch5;

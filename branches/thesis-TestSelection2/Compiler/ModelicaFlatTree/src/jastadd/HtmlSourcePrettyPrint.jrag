@@ -153,7 +153,7 @@ aspect HtmlSourcePrettyPrint {
         ArrayList<FVariable> protectedVars = new ArrayList<FVariable>();
         for (FVariable fv : getFVariables()) {
             if (!fv.isDerivativeVariable() && !fv.isPreVariable() &&
-                    !fv.getFVisibilityType().isRuntimeOptionVisibility()) {
+                    !fv.getVisibilityType().isRuntimeOptionVisibility()) {
                 if (fv.isProtected()) {
                   protectedVars.add(fv);
                 } else {
@@ -170,13 +170,15 @@ aspect HtmlSourcePrettyPrint {
             }
         }
 
-        if (getNumFInitialEquation()>0)
+        if (getNumFInitialEquation() > 0) {
             str.print(indent + "<b>initial equation</b><br>\n");
+        }
         getFInitialEquations().prettyPrintWithFix(p, str, nextInd, "", "");
 
-        if (getNumFParameterEquation()>0)
+        if (getNumParameterEquation() > 0) {
             str.print(indent + "<b>parameter equation</b><br>\n");
-        getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", "");
+        }
+        getParameterEquations().prettyPrintWithFix(p, str, nextInd, "", "");
     
         boolean wroteEquation = false;
         for (FAbstractEquation e : getFAbstractEquations()) {
@@ -214,74 +216,77 @@ aspect HtmlSourcePrettyPrint {
     }
 	
 	syn String BaseNode.htmlSourceNodeClass() = null;
-	eq FTypePrefixVariability.htmlSourceNodeClass() = "variabilityPrefix";
-	eq FIdUseExp.htmlSourceNodeClass() = variability().htmlSourceVarUseClass();
+	eq TypePrefixVariability.htmlSourceNodeClass() = "variabilityPrefix";
+	eq CommonAccessExp.htmlSourceNodeClass() = variability().htmlSourceVarUseClass();
 	
-	syn String FTypePrefixVariability.htmlSourceVarUseClass() = null;
-	eq FConstant.htmlSourceVarUseClass() = "constantUse";
-	eq FParameter.htmlSourceVarUseClass() = "parameterUse";
-	eq FContinuous.htmlSourceVarUseClass() = "continuousUse";
-	eq FDiscrete.htmlSourceVarUseClass() = "discreteUse";
+	public String TypePrefixVariability.htmlSourceVarUseClass() { 
+	    return null;
+	}
+	public String Constant.htmlSourceVarUseClass() { return "constantUse"; }
+	public String Parameter.htmlSourceVarUseClass() { return "parameterUse"; }
+	public String Continuous.htmlSourceVarUseClass() { return "continuousUse"; }
+	public String Discrete.htmlSourceVarUseClass() { return "discreteUse"; }
 	
 	public void BaseNode.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
 		SourceLocation[] file = null;
-		if(fName instanceof String){
+		if (fName instanceof String) {
 			file = new SourceLocation[1];
 			file[0] = new SourceLocation((String)fName, start, end);
-		}else if(fName != null){
+		} else if(fName != null) {
 			file = (SourceLocation[])fName;			
 		}
 		String nodeClass = htmlSourceNodeClass();
-		
-		if((file != null || htmlSourceNodeClass() != null) && p instanceof HtmlSourcePrettyPrinter){// && !locationContainedBy()){
+
+		if ((file != null || htmlSourceNodeClass() != null) && p instanceof HtmlSourcePrettyPrinter) {// && !locationContainedBy()){
 			String dir = System.getProperty("user.dir");
 			Boolean containedByParent = locationContainedBy();
 			HtmlSourcePrettyPrinter hp = (HtmlSourcePrettyPrinter)p;
 
 			str.print("<span ");
 			str.print("class=\"");
-			if(htmlSourceNodeClass() != null){
+			if (htmlSourceNodeClass() != null) {
 				str.print(htmlSourceNodeClass());
 			}
-			
-			if(file != null ){
-				if(!containedByParent){
-					if(htmlSourceNodeClass() != null){
+
+			if (file != null) {
+				if (!containedByParent) {
+					if (htmlSourceNodeClass() != null) {
 						str.print(" ");
 					}
 					str.print("newLevel");
 				}
 				str.print("\" title=\"");
-				for(int i = 0; i < file.length; i++){
+				for (int i = 0; i < file.length; i++) {
 					String fileName = cropAbsolutePath(file[i].getFile());
-					if(i > 0)
-						str.print("&#10;");									// makes linebreaks to show multiple sources
-					
+					if (i > 0) {
+						str.print("&#10;");                                   // makes linebreaks to show multiple sources
+				    }
+
 					str.format("%s %d:%d %d:%d", fileName, file[i].getStartLine(), file[i].getStartColumn(),  file[i].getEndLine(), file[i].getEndColumn());
 				}
 			}
-			
+
 			str.print("\">");
 			prettyPrint(p, str, indent);
-			
+
 			str.print("</span>");
-		}else{
+		} else {
 			prettyPrint(p, str, indent);
 		}
 	}
 	
-	public static String ASTNode.cropAbsolutePath(String path){
+	private static String BaseNode.cropAbsolutePath(String path){
 		String p = path;
 		String dir = System.getProperty("user.dir");
-		try{
-			if(p.substring(0, dir.lastIndexOf("\\")).equals(dir.substring(0, dir.lastIndexOf("\\")))){
+		try {
+			if (p.substring(0, dir.lastIndexOf("\\")).equals(dir.substring(0, dir.lastIndexOf("\\")))) {
 			   	p = p.substring(dir.lastIndexOf("\\") + 1);
 			}
-		}catch(IndexOutOfBoundsException e){}
+		} catch (IndexOutOfBoundsException e) {}
 		return p;
 	}
 	
-	public void FAbstractEquation.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent){
+	public void FAbstractEquation.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
 		super.htmlSourcePrettyPrint(p, str, indent);
 		str.print(";<br>\n");
 	}
@@ -296,12 +301,11 @@ aspect HtmlSourcePrettyPrint {
 	
     public void FAlgorithm.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
-		p.print(getType(),str,"");
 		str.print("algorithm<br>\n");
 		getFStatements().prettyPrintWithIndent(p, str, p.indent(indent), ";<br>");
 	}
     
-    public void FDerivedType.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent){
+    public void FDerivedType.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
     	if (!getBaseType().isEnum()) {
 	    	str.print(indent + "<b>type</b><i> " + getName() + "</i> = ");
 	    	str.print(getBaseType());
@@ -310,7 +314,7 @@ aspect HtmlSourcePrettyPrint {
     	}
     }
     
-    public void FRecordDecl.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent){
+    public void FRecordDecl.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
     	str.print(indent + "<b>record</b> " + name() + "<br>\n");
     	getFVariables().prettyPrintWithFix(p, str, p.indent(indent), "", ";<br>\n");
     	str.print(indent + "<b>end</b> " + name() + ";<br><br>\n\n");

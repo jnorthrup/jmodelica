@@ -20,7 +20,7 @@ merge_path() {
 # ====== Variables to set ======
 
 # Memory allocation for the ant process
-ANT_OPTS="-Xmx1g"
+ANT_OPTS="-Xmx2g"
 
 # Default tests - run if no tests are chosen
 # Possible values: modelica, optimica, python or combination (e.g. "modelica optimica")
@@ -346,7 +346,7 @@ function junit_test() {
     n) junit_test_n $1 || res=1 ;;
   esac
   if [ -n "${XML_RES_PATH:-}" ]; then
-    cp "doc/junit-reports/TESTS-TestSuites.xml" "${XML_RES_PATH}"
+    cp "${BUILD}/doc/junit-reports/TESTS-TestSuites.xml" "${XML_RES_PATH}"
   fi
   return $res
 }
@@ -396,9 +396,9 @@ function nose_test() {
 
 function ant_test() {
   if [[ "$1" == "Modelica" ]]; then
-    ant -f ${MC_ANT_ARGS} ${CLEAN_JUNIT} clean-test test
+    ant -f ${MC_ANT_ARGS} -Dtarget=${BUILD} ${CLEAN_JUNIT} test
   else
-    ant -f ${OC_ANT_ARGS} ${CLEAN_JUNIT} clean-test test
+    ant -f ${OC_ANT_ARGS} -Dtarget=${BUILD} ${CLEAN_JUNIT} test
   fi
 }
 

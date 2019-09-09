@@ -32,7 +32,7 @@ def setStringAssertFail(model, name):
         setString(model, name, "something")
         assert False, "Expected exception"
     except FMUException as e:
-        assert e.message=="Failed to set the String values.", "Wrong error: '" + e.message + "'"
+        assert e.message.startswith("Failed to set the String values."), "Wrong error: '" + e.message + "'"
 
 class TestStringParameter1(SimulationTest):
     """

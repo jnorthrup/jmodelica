@@ -48,12 +48,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "org/jmodelica/optimica/compiler/FRealVariable.h"
 #include "org/jmodelica/optimica/compiler/FDerivativeVariable.h"
 #include "org/jmodelica/optimica/compiler/FTimedVariable.h"
-#include "org/jmodelica/optimica/compiler/FIdUse.h"
+#include "org/jmodelica/optimica/compiler/CommonAccess.h"
+#include "org/jmodelica/optimica/compiler/FAccess.h"
 #include "org/jmodelica/optimica/compiler/FExp.h"
 #include "org/jmodelica/optimica/compiler/FFunctionDecl.h"
 #include "org/jmodelica/optimica/compiler/Root.h"
 #include "org/jmodelica/optimica/compiler/BaseNode.h"
-#include "org/jmodelica/util/OptionRegistry.h"
 #include "org/jmodelica/optimica/compiler/BLT.h"
 #include "org/jmodelica/optimica/compiler/StructuredBLT.h"
 #include "org/jmodelica/optimica/compiler/FEquation.h"
@@ -80,7 +80,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace oc = org::jmodelica::optimica::compiler;
 namespace jl = java::lang;
 using std::vector; using std::string;
-using org::jmodelica::util::OptionRegistry;
 using casadi::MX;
 
 namespace ModelicaCasADi
@@ -146,7 +145,7 @@ namespace ModelicaCasADi
     }
 
     void transferOptimizationProblem(Ref<OptimizationProblem> optProblem,
-    string modelName, const vector<string> &modelFiles, Ref<CompilerOptionsWrapper> options, string log_level) {
+    string modelName, const vector<string> &modelFiles, Ref<OptimicaOptionsWrapper> options, string log_level) {
         try
         {
             // initalizeClass is needed on classes where static variables are acessed.

@@ -40,7 +40,7 @@ public final class Compilation
     
     private final Process process;
     private final LogReceiver receiver;
-    private final Collection<Problem> problems = new ConcurrentLinkedQueue<Problem>();
+    private final Collection<Problem> problems = new ConcurrentLinkedQueue<>();
     private Throwable exception = null;
     private CompiledUnit compiledUnit = null;
     
@@ -63,6 +63,7 @@ public final class Compilation
 
     public boolean join(boolean throwException) throws Throwable, InterruptedException {
         process.waitFor();
+        receiver.join();
         if (exception != null) {
             if (throwException)
                 throw exception;
@@ -86,7 +87,7 @@ public final class Compilation
     }
 
     public Iterator<Problem> getErrors() {
-        return new FilteredIterator<Problem>(getProblems(), new Criteria<Problem>() {
+        return new FilteredIterator<>(getProblems(), new Criteria<Problem>() {
             @Override
             public boolean test(Problem elem) {
                 return elem.severity() == ProblemSeverity.ERROR;
@@ -94,7 +95,7 @@ public final class Compilation
     }
     
     public Iterator<Problem> getWarnings() {
-        return new FilteredIterator<Problem>(getProblems(), new Criteria<Problem>() {
+        return new FilteredIterator<>(getProblems(), new Criteria<Problem>() {
             @Override
             public boolean test(Problem elem) {
                 return elem.severity() == ProblemSeverity.WARNING;
@@ -163,7 +164,7 @@ public final class Compilation
         private void readAndThrow(InputStream stream) {
             try {
                 byte[] buffer = new byte[2048];
-                while (stream.read(buffer) != -1);
+                while (stream.read(buffer) != -1) { /* ignore the received data */ }
             } catch (IOException e) {
                 // Not much to do here, we are in serious problems if we get here!
                 e.printStackTrace();

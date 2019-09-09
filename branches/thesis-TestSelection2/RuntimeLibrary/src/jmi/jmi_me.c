@@ -58,9 +58,7 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
     jmi_->resource_location = resource_location;
     
     /* set start values*/
-    if (jmi_generic_func(jmi_, jmi_set_start_values) != 0) {
-        jmi_log_node(jmi_->log, logError, "SetStartValuesFailure","Failed to set start values.");
-        jmi_delete(jmi_);
+    if (jmi_init_eval_independent(jmi) != 0) {
         return -1;
     }
     
@@ -110,7 +108,7 @@ void jmi_setup_experiment(jmi_t* jmi, jmi_boolean tolerance_defined,
 
 int jmi_initialize(jmi_t* jmi) {
     int retval;
-    jmi_log_node_t top_node;
+    jmi_log_node_t top_node={0};
     
     if (jmi->is_initialized == 1) {
         jmi_log_comment(jmi->log, logError, "FMU is already initialized: only one initialization is allowed");
@@ -122,8 +120,8 @@ int jmi_initialize(jmi_t* jmi) {
                                 "Starting initialization.");
     }
     
-    /* Evaluate parameters */
-    retval = jmi_init_eval_parameters(jmi);
+    /* Reevaluate parameters and start variables if necessary */
+    retval = jmi_init_eval_dependent(jmi);
     
     if(retval != 0) { /* Error check */
         jmi_log_comment(jmi->log, logError, "Error evaluating dependent parameters. Initialization failed.");
@@ -364,6 +362,17 @@ int jmi_get_directional_derivative(jmi_t* jmi,
     
     jmi_real_t* store_dz = jmi->dz[0];
     int i, ef;
+    jmi_log_node_t node={0};
+
+    if (jmi->jmi_callbacks.log_options.log_level >= 5) {
+        node =jmi_log_enter_fmt(jmi->log, logInfo, "GetDirectionalDerivatives",
+                                "Call to get directional derivatives at <t:%g>.", jmi_get_t(jmi)[0]);
+        if (jmi->jmi_callbacks.log_options.log_level >= 6){
+            jmi_log_vrefs(jmi->log, node, logInfo, "known", 'r', (const int*)vKnown_ref, nKnown);
+            jmi_log_vrefs(jmi->log, node, logInfo, "unknown", 'r', (const int*)vUnknown_ref, nUnknown);
+            jmi_log_reals(jmi->log, node, logInfo, "direction", dvKnown, nKnown);
+        }
+    }
     
     jmi->dz[0]                  = jmi->dz_active_variables_buf[jmi->dz_active_index];
     jmi->dz_active_variables[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
@@ -377,12 +386,24 @@ int jmi_get_directional_derivative(jmi_t* jmi,
     }
 
     ef = jmi_ode_derivatives_dir_der(jmi);
+    if (ef != 0) {
+        jmi_log_node(jmi->log, logError, "Error",
+                "Evaluating the directional derivatives failed at <t:%g>.", jmi_get_t(jmi)[0]);
+    }
+
     for (i = 0; i < nUnknown; i++) {
         dvUnknown[i] = jmi->dz_active_variables[0][jmi_get_index_from_value_ref(vUnknown_ref[i])-jmi->offs_real_dx];
     }
 
     jmi->dz_active_variables[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
     jmi->dz[0] = store_dz;
+
+    if (jmi->jmi_callbacks.log_options.log_level >= 5){
+        if (jmi->jmi_callbacks.log_options.log_level >= 6){
+            jmi_log_reals(jmi->log, node, logInfo, "derivative", dvUnknown, nUnknown);
+        }
+        jmi_log_leave(jmi->log, node);
+    }
 
     return ef;
 }
@@ -419,7 +440,7 @@ int jmi_set_continuous_states(jmi_t* jmi, const jmi_real_t x[], size_t nx) {
 
 int jmi_completed_integrator_step(jmi_t* jmi, jmi_real_t* triggered_event) {
     int retval = 0;
-    jmi_log_node_t node;
+    jmi_log_node_t node={0};
     *triggered_event = JMI_FALSE;
     
     if (jmi->jmi_callbacks.log_options.log_level >= 5){
@@ -485,6 +506,168 @@ static int jmi_exists_grt_than_time_event(jmi_t* jmi) {
            jmi_abs(jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time)< jmi->time_events_epsilon;
 }
 
+int jmi_exit_event_mode(jmi_t* jmi, jmi_event_info_t* event_info) {
+    jmi_int_t retval;
+    jmi_log_node_t final_node = jmi_log_enter(jmi->log, logInfo, "final_step");
+
+    /* Reset the number of event iterations */
+    jmi->nbr_event_iter = 0;
+
+    /* If the event epsilon is 0 due to initialization of the system, reset it */
+    if (jmi->events_epsilon == 0.0) {
+        jmi->events_epsilon = jmi->tmp_events_epsilon;
+    }
+
+    /* Reset atEvent flag */
+    jmi->atEvent = JMI_FALSE;
+
+    /* Final evaluation of the model with event flag set to false. It can
+     * for example change values of booleans that should only be true during
+     * events due to a sample function.
+    */
+    retval = jmi_ode_derivatives(jmi);
+    if(retval != 0) {
+        jmi_log_comment(jmi->log, logError, "Final evaluation of the model equations during event iteration failed.");
+        return -1;
+    }
+    jmi->recomputeVariables = 0; /* The variables are computed. End of event iteration. */
+    
+    /* Sample delay blocks */
+    jmi_delay_set_event_mode(jmi, JMI_TRUE);
+    retval = jmi_sample_delay_blocks(jmi);
+    if(retval != 0) {
+        jmi_log_comment(jmi->log, logError, "Delay sampling after event iteration failed.");
+        return -1;
+    }
+    
+    /* Compute the next time event */
+    retval = jmi_next_time_event(jmi);
+    if(retval != 0) { /* Error check */
+        jmi_log_comment(jmi->log, logError, "Computation of next time event failed.");
+        return -1;
+    }
+    
+    /* If there is an upcoming time event, then set the event information
+     * accordingly.
+     */
+    if (jmi->nextTimeEvent.defined) {
+        event_info->next_event_time_defined = TRUE;
+        event_info->next_event_time = jmi->nextTimeEvent.time;
+        if (event_info->next_event_time < jmi_get_t(jmi)[0]) {  /* Next event time is less than the current, error! */
+            jmi_log_node(jmi->log, logError, "NextTimeEventFailure", "Failed to compute the next time event. "
+                                "The next time event was computed to <t:%E> while the current time is <t:%E>.",
+                                event_info->next_event_time,jmi_get_t(jmi)[0]);
+            return -1;
+        }
+        jmi_log_node(jmi->log, logInfo, "NextTimeEvent", "A next time event is defined and computed to occur at <t:%E>",event_info->next_event_time);
+    } else {
+        event_info->next_event_time_defined = FALSE;
+    }
+    
+    /* Save the z values to the z_last vector */
+    jmi_save_last_successful_values(jmi);
+    /* Block completed step, it should be saved and used when integrating */
+    jmi->save_restore_solver_state_mode = 1;
+    retval = jmi_block_completed_integrator_step(jmi);
+    if(retval != 0) {
+        jmi_log_comment(jmi->log, logError, "Completed block steps during event iteration failed.");
+        return -1;
+    }
+    
+    jmi_log_leave(jmi->log, final_node);
+
+    if (jmi->n_sw > 0) {
+        jmi_real_t* switches = jmi_get_sw(jmi);
+        jmi_log_reals(jmi->log, jmi_log_get_current_node(jmi->log), logInfo, "post-switches", switches, jmi->n_sw);
+    }
+    
+    /* Check for chattering and log it */
+    jmi_chattering_check(jmi);
+    
+    if (jmi_exists_grt_than_time_event(jmi)) {
+        int ret;
+        jmi_boolean state_values_changed = event_info->state_values_changed;
+        jmi->nbr_consec_time_events++;
+        
+        if (jmi->nbr_consec_time_events > 2) {
+            jmi_log_node(jmi->log, logError, "NextTimeEventFailure",
+                "Time event phase failure. Got next time event <t:%E> at "
+                "current time <t:%E> that should already have been handled.",
+                jmi->nextTimeEvent.time, jmi_get_t(jmi)[0]);
+            return -1;
+        }
+        
+        ret = jmi_enter_event_mode(jmi);
+        if(ret != 0) {
+            jmi_log_comment(jmi->log, logError, "Failed to re-enter the event mode at the second time event.");
+            return -1;
+        }
+        
+        ret = jmi_event_iteration(jmi, FALSE, event_info);
+        
+        /* If there was a previous state value changed, restore the flag */
+        if (state_values_changed == TRUE) {
+            event_info->state_values_changed = state_values_changed;
+        }
+        
+        return ret;
+    } else {
+        jmi->nbr_consec_time_events = 0;
+    }
+
+    return 0;
+}
+
+int jmi_enter_event_mode(jmi_t* jmi) {
+    jmi_int_t retval;
+    
+    /* Reset terminate flag. */
+    jmi->model_terminate = 0;
+    
+    /* Initial evaluation of model so that we enter the event iteration with correct values. */
+    /* TODO, make sure all blocks are updated */
+    retval = jmi_ode_derivatives(jmi);
+
+    if(retval != 0) {
+        jmi_log_comment(jmi->log, logError, "Initial evaluation of the model equations during event iteration failed.");
+        return -1;
+    }
+    
+    /* This is an implicit accepted step. */
+    retval = jmi_block_completed_integrator_step(jmi);
+    if(retval != 0) {
+        jmi_log_comment(jmi->log, logError, "Completed block steps during event iteration failed.");
+        return -1;
+    }
+    
+    /* We don't need to save and restore state during event iteration */
+    jmi->save_restore_solver_state_mode = 0;
+    
+    /* We are at a time event -> set atTimeEvent to true. */
+    if (jmi->nextTimeEvent.defined) {
+        jmi->atTimeEvent = jmi_abs(jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time) < jmi->time_events_epsilon;
+        if(jmi->atTimeEvent) {
+            jmi->eventPhase = jmi->nextTimeEvent.phase;
+        } else {
+            jmi->eventPhase = JMI_TIME_GREATER;
+        }
+        if(!jmi->atTimeEvent && jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time > 0) { /* We passed the next time event, return error */
+            jmi_log_node(jmi->log, logError, "NextTimeEventPassed",
+                "Current time <t: %E> is after next time event <next_time_event: %E>. Consider to change option <time_events_default_tol: %E>.",
+                jmi_get_t(jmi)[0], jmi->nextTimeEvent.time, jmi->time_events_epsilon);
+            return -1;
+        }
+    }else{
+        jmi->atTimeEvent = JMI_FALSE;
+        jmi->eventPhase = JMI_TIME_GREATER;
+    }
+    
+    /* Copy current values to pre values */
+    jmi_copy_pre_values(jmi);
+    
+    return 0;
+}
+
 int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
                         jmi_event_info_t* event_info) {
                             
@@ -492,21 +675,21 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     jmi_int_t i, max_iterations;
     jmi_real_t* z = jmi_get_z(jmi);
     jmi_real_t* switches;
-    jmi_log_node_t top_node;
-    jmi_log_node_t iter_node;
-    jmi_log_node_t discrete_node;
-    jmi_log_node_t reinit_node;
+    jmi_log_node_t top_node={0};
+    jmi_log_node_t iter_node={0};
+    jmi_log_node_t discrete_node={0};
+    jmi_log_node_t reinit_node={0};
 
     /* Used for logging */
     switches = jmi_get_sw(jmi);
     
     max_iterations = 30;       /* Maximum number of event iterations */
+    
+    /* We are at an event -> set atEvent to true. */
+    jmi->atEvent = JMI_TRUE;
 
     /* Performed at the first event iteration: */
     if (jmi->nbr_event_iter == 0) {
-        
-        /* Reset terminate flag. */
-        jmi->model_terminate = 0;
 
         /* Reset eventInfo */
         event_info->next_event_time_defined = FALSE;         /* The next event time is not set. */
@@ -522,49 +705,6 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         
         if (jmi->n_sw > 0) {
             jmi_log_reals(jmi->log, top_node, logInfo, "pre-switches", switches, jmi->n_sw);
-        }
-
-        /* Initial evaluation of model so that we enter the event iteration with correct values. */
-        /* TODO, make sure all blocks are updated */
-        retval = jmi_ode_derivatives(jmi);
-
-        if(retval != 0) {
-            jmi_log_comment(jmi->log, logError, "Initial evaluation of the model equations during event iteration failed.");
-            jmi_log_unwind(jmi->log, top_node);
-            return -1;
-        }
-        
-        /* This is an implicit accepted step. */
-        retval = jmi_block_completed_integrator_step(jmi);
-        if(retval != 0) {
-            jmi_log_comment(jmi->log, logError, "Completed block steps during event iteration failed.");
-            jmi_log_unwind(jmi->log, top_node);
-            return -1;
-        }
-
-        /* We are at an event -> set atEvent to true. */
-        jmi->atEvent = JMI_TRUE;
-        
-        /* We don't need to save and restore state during event iteration */
-        jmi->save_restore_solver_state_mode = 0;
-        
-        /* We are at a time event -> set atTimeEvent to true. */
-        if (jmi->nextTimeEvent.defined) {
-            jmi->atTimeEvent = jmi_abs(jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time) < jmi->time_events_epsilon;
-            if(jmi->atTimeEvent) {
-                jmi->eventPhase = jmi->nextTimeEvent.phase;
-            } else {
-                jmi->eventPhase = JMI_TIME_GREATER;
-            }
-            if(!jmi->atTimeEvent && jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time > 0) { /* We passed the next time event, return error */
-                jmi_log_node(jmi->log, logError, "NextTimeEventPassed",
-                    "Current time <t: %E> is after next time event <next_time_event: %E>. Consider to change option <time_events_default_tol: %E>.",
-                    jmi_get_t(jmi)[0], jmi->nextTimeEvent.time, jmi->time_events_epsilon);
-                return -1;
-            }
-        }else{
-            jmi->atTimeEvent = JMI_FALSE;
-            jmi->eventPhase = JMI_TIME_GREATER;
         }
         
     } else if (intermediate_results) {
@@ -582,7 +722,9 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
                                       "Global iteration <iter:%I>, at <t:%E>", jmi->nbr_event_iter, jmi_get_t(jmi)[0]);
         
         /* Copy current values to pre values */
-        jmi_copy_pre_values(jmi);
+        if (jmi->nbr_event_iter > 1) {
+            jmi_copy_pre_values(jmi);
+        }
 
         /* Evaluate the ODE */
         retval = jmi_ode_derivatives(jmi);
@@ -670,117 +812,15 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     
     /* Only do the final steps if the event iteration is done. */
     if (event_info->iteration_converged == TRUE) {
-        jmi_log_node_t final_node = jmi_log_enter(jmi->log, logInfo, "final_step");
-
-        /* Reset the number of event iterations */
-        jmi->nbr_event_iter = 0;
-
-        /* If the event epsilon is 0 due to initialization of the system, reset it */
-        if (jmi->events_epsilon == 0.0) {
-            jmi->events_epsilon = jmi->tmp_events_epsilon;
-        }
-
-        /* Reset atEvent flag */
-        jmi->atEvent = JMI_FALSE;
-
-        /* Final evaluation of the model with event flag set to false. It can
-         * for example change values of booleans that should only be true during
-         * events due to a sample function.
-        */
-        retval = jmi_ode_derivatives(jmi);
+        retval = jmi_exit_event_mode(jmi, event_info);
+        
         if(retval != 0) {
-            jmi_log_comment(jmi->log, logError, "Final evaluation of the model equations during event iteration failed.");
             jmi_log_unwind(jmi->log, top_node);
             return -1;
         }
-        jmi->recomputeVariables = 0; /* The variables are computed. End of event iteration. */
-        
-        /* Sample delay blocks */
-        jmi_delay_set_event_mode(jmi, JMI_TRUE);
-        retval = jmi_sample_delay_blocks(jmi);
-        if(retval != 0) {
-            jmi_log_comment(jmi->log, logError, "Delay sampling after event iteration failed.");
-            jmi_log_unwind(jmi->log, top_node);
-            return -1;
-        }
-        
-        /* Compute the next time event */
-        retval = jmi_next_time_event(jmi);
-        if(retval != 0) { /* Error check */
-            jmi_log_comment(jmi->log, logError, "Computation of next time event failed.");
-            jmi_log_unwind(jmi->log, top_node);
-            return -1;
-        }
-        
-        /* If there is an upcoming time event, then set the event information
-         * accordingly.
-         */
-        if (jmi->nextTimeEvent.defined) {
-            event_info->next_event_time_defined = TRUE;
-            event_info->next_event_time = jmi->nextTimeEvent.time;
-            if (event_info->next_event_time < jmi_get_t(jmi)[0]) {  /* Next event time is less than the current, error! */
-                jmi_log_node(jmi->log, logError, "NextTimeEventFailure", "Failed to compute the next time event. "
-                                    "The next time event was computed to <t:%E> while the current time is <t:%E>.",
-                                    event_info->next_event_time,jmi_get_t(jmi)[0]);
-                jmi_log_unwind(jmi->log, top_node);
-                return -1;
-            }
-            jmi_log_node(jmi->log, logInfo, "NextTimeEvent", "A next time event is defined and computed to occur at <t:%E>",event_info->next_event_time);
-        } else {
-            event_info->next_event_time_defined = FALSE;
-        }
-        
-        /* Save the z values to the z_last vector */
-        jmi_save_last_successful_values(jmi);
-        /* Block completed step, it should be saved and used when integrating */
-        jmi->save_restore_solver_state_mode = 1;
-        retval = jmi_block_completed_integrator_step(jmi);
-        if(retval != 0) {
-            jmi_log_comment(jmi->log, logError, "Completed block steps during event iteration failed.");
-            jmi_log_unwind(jmi->log, top_node);
-            return -1;
-        }
-        
-        jmi_log_leave(jmi->log, final_node);
-
-        if (jmi->n_sw > 0) {
-            jmi_log_reals(jmi->log, top_node, logInfo, "post-switches", switches, jmi->n_sw);
-        }
-        
-        /* Check for chattering and log it */
-        jmi_chattering_check(jmi);
-        
-        if (jmi_exists_grt_than_time_event(jmi)) {
-            int ret;
-            jmi_boolean state_values_changed = event_info->state_values_changed;
-            jmi->nbr_consec_time_events++;
-            
-            if (jmi->nbr_consec_time_events > 2) {
-                jmi_log_node(jmi->log, logError, "NextTimeEventFailure",
-                    "Time event phase failure. Got next time event <t:%E> at "
-                    "current time <t:%E> that should already have been handled.",
-                    jmi->nextTimeEvent.time, jmi_get_t(jmi)[0]);
-                jmi_log_unwind(jmi->log, top_node);
-                return -1;
-            }
-            
-            ret = jmi_event_iteration(jmi, intermediate_results, event_info);
-            
-            /* If there was a previous state value changed, restore the flag */
-            if (state_values_changed == TRUE) {
-                event_info->state_values_changed = state_values_changed;
-            } 
-            
-            return ret;
-        } else {
-            jmi->nbr_consec_time_events = 0;
-        }
-        
-        jmi_log_leave(jmi->log, top_node);
-
-    } else if (intermediate_results) {
-        jmi_log_leave(jmi->log, top_node);
     }
+    
+    jmi_log_leave(jmi->log, top_node);
 
     /* If everything went well, check if termination of simulation was requested. */
     event_info->terminate_simulation = jmi->model_terminate ? TRUE : FALSE;
@@ -824,7 +864,7 @@ int jmi_update_and_terminate(jmi_t* jmi) {
         jmi->recomputeVariables = 0;
     }
 
-    jmi_destruct_external_objs(jmi);
+    jmi_destruct_external_objects(jmi);
     jmi->user_terminate = 1;
 
     return 0;

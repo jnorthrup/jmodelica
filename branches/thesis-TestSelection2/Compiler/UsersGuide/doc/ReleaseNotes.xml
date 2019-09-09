@@ -9,20 +9,177 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <title>Release Notes</title>
-  <!--section>
+
+  <section>
+    <title>Release notes for JModelica.org version 2.14</title>
+        <section>
+            <title>Important information</title>
+            <para>Note, with the next release the Python distribution bundled with JModelica is planned to be updated from version 2.7 to version 3.x.</para>
+        </section>
+    <section><title>Compiler Changes</title>
+    <para>Important changes to the compiler:</para>
+    <itemizedlist>
+        <listitem>Generate one field per option in OptionRegistry. Renamed OptionRegistry to AbstractOptionRegistry, renamed OptionsAggregated to OptionRegistry.</listitem>
+        <listitem>Switch to "java.nio.file.Path" instead of "File" or "String"s representing paths in most places. "Path" is more thought-through and more powerful, which will allow to implement advanced featuers in the future. Note that while java.nio allows to access non-File resources with the same API, the internal workings of JModelica currently make restrictions on only supporting file accesses. </listitem>
+        <listitem>Added new option time_events, allows time events to be generated, enabled by default. Deprecated option relational_time_events. </listitem>
+        <listitem>SrcDot now has SrcNamedAccess instead of SrcAccess as children.</listitem>
+        <listitem>Dependency to beaver-rt.jar is now recorded in the jar manifest which means it is no longer necessary to add it to the classpath when interfacing directly with the compiler jars.</listitem>
+    </itemizedlist>
+    </section>
+            <section><title>Python Packages Improvements</title>
+            <para>Important changes to Python packages:</para>
+            <para>The PyFMI version has been updated from 2.5 to 2.5.3, this infer the following changes:</para>
+            <itemizedlist>
+                <listitem>Fixed wrong default value for FMUModelME1Extended.</listitem>
+                <listitem>Improved relative imports of Assimulo dependent classes.</listitem>
+                <listitem>Fixed issue with unicode symbols in result files.</listitem>
+                <listitem>Fixed a number of encode/decoding issues for Python3.</listitem>
+                <listitem>Forced no copy if the provided array is already correct, minor 
+              performance improvement.</listitem>
+                <listitem>Fixed issue with corrupt result files after failed simulations.</listitem>
+            </itemizedlist>
+            </section>
+  </section>
+
+  <section>
+    <title>Release notes for JModelica.org version 2.12</title>    
+    <section><title>Compiler Changes</title>
+    <para>A major change in this release is the update of Java version used into OpenJDK 11.</para>
+    <para>Important changes to the compiler:</para>
+    <itemizedlist>
+        <listitem>Added support for unspecified enumerations.</listitem>
+        <listitem>Turned off loop unrolling in functions to increase performance.</listitem>
+        <listitem>Improved array initialization for primitive arrays in global constants.</listitem>
+        <listitem>Added option for controlling maximum allowed size of dynamic state sets. Changed default from 8 to 10.</listitem>
+    </itemizedlist>
+    </section>
+  </section>
+  
+    <section>
+    <title>Release notes for JModelica.org version 2.10</title>    
+    <section><title>Compiler Changes</title>
+    <para>Important changes to the compiler:</para>
+    <itemizedlist>
+        <listitem>Fixed a bug that resulted in variables not being re-initialized in certain cases by adding writeback
+            of reinitialization in block residual functions.</listitem>
+    </itemizedlist>
+    </section>
+    </section>
+
+    <section>
+    <title>Release notes for JModelica.org version 2.8</title>    
+    <para>For this release there are some minor performance and debug improvements</para>
+    </section>
+
+    <section>
+    <title>Release notes for JModelica.org version 2.6.1</title>    
+    
+    <section><title>Compiler Changes</title>
+    <para>Important changes to the compiler:</para>
+    <itemizedlist>
+        <listitem>Fixed lookup of constraining class of redeclared class.</listitem>
+    </itemizedlist>
+    </section>
+    </section>
+    
+    <section>
+    <title>Release notes for JModelica.org version 2.6</title>    
+    
+    <section><title>Compiler Changes</title>
+    <para>Important changes to the compiler:</para>
+    <itemizedlist>
+        <listitem>Fixed type checking of array sizes for elements in arrays of records.</listitem>
+        <listitem>Made sure to release the package.order file after reading.</listitem>
+    </itemizedlist>
+    </section>
+    </section>
+    
+    <section>
+    <title>Release notes for JModelica.org version 2.5</title>    
+    <section><title>Python Packages Improvements</title>
+    <para>Important changes to Python packages:</para>
+    <itemizedlist>
+        <listitem>Fixed issue with reusing the PyFMI computed FD Jacobian.</listitem>
+    </itemizedlist>
+    </section>
+    
+    <section><title>Compiler Changes</title>
+    <para>Important changes to the compiler:</para>
+    <itemizedlist>
+        <listitem>Updated the GUID calculation in FMUs to only be dependent on the generated model description XML.</listitem>
+        <listitem>Updated calculation order of start values and dependent parameters to reduce number of evaluations.</listitem>
+        <listitem>Fixed that binding expression splitting doesn't check bounds.</listitem>
+        <listitem>Don't allow any inlining of equations in when loops.</listitem>
+        <listitem>Fixed exception from specific combination of record with array of unknown size in if expression in binding expression.</listitem>
+        <listitem>Enabled evaluation of non-literal expressions in annotations.</listitem>
+    </itemizedlist>
+    </section>
+    </section>
+    
+    <section>
+    <title>Release notes for JModelica.org version 2.4</title>    
+    <section><title>Runtime Changes</title>
+    <para>Important changes to Runtime:</para>
+    <itemizedlist>
+        <listitem>Improved the runtime logging framework due to performance issues with specific models.</listitem>
+    </itemizedlist>
+    </section>
+    
+    <section><title>Compiler Changes</title>
+    <para>Important changes to the compiler:</para>
+    <itemizedlist>
+        <listitem>Minor improvements of compilation and simulation performance.</listitem>
+        <listitem>loadResource on directories now always leads to compile time evaluation of path.</listitem>
+    </itemizedlist>
+    </section>
+    </section>
+
+    <section>
+    <title>Release notes for JModelica.org version 2.3</title>    
+    <section><title>Compiler Changes</title>
+    <para>Important changes to the compiler:</para>
+    <itemizedlist>
+        <listitem>Support for initial parameter external objects.</listitem>
+        <listitem>Changed error check of arguments when compiling from command line to allow empty library argument if a modelica path is supplied.</listitem>
+    </itemizedlist>
+    </section>
+    <section><title>Python Packages Improvements</title>
+    <para>Important improvements to our Python packages:</para>
+    <itemizedlist>
+        <listitem>Fixed issue with getting time varying variables (sometimes wrong variables were returned).</listitem>
+        <listitem>Added functionality to set enumerations with strings.</listitem>
+        <listitem>Improved input handling for FMI2.</listitem>
+    </itemizedlist>
+    </section>
+  </section>
+  <section>
     <title>Release notes for JModelica.org version 2.2</title>
     <section><title>Highlights</title>
     <itemizedlist>
 		<listitem>Support for 64-bit Python has been added together with
         new and updated Python packages, see <xref linkend="Release22Python"/>.
         This enables simulation of 64-bit FMUs with PyFMI.</listitem>
+        <listitem>The bundled gcc C-compiler is now updated to gcc-tdm 5.1.0 which
+        enables compilation of 64 bit FMUs.</listitem>
+        <listitem>Full string support</listitem>
+        <listitem>Changed the default FMI version when compiling FMUs from Python to FMI 2.0 instead of FMI 1.0.</listitem>
+        <listitem>Changed default file storing method to binary format when simulating FMUs with PyFMI in Python.</listitem>
+        <listitem>Achieved significant speedup in some models by adding a new memory allocation algorithm.</listitem>
         <listitem>There is now support for OPC communication through the
         bundled Python package OpenOPC together with <emphasis>Graybox OPC
         Automation Wrapper</emphasis>.</listitem>
-        <listitem>The bundled gcc C-compiler is now updated to gcc-tdm 5.1.0 which
-        enables compilation of 64 bit FMUs.</listitem>
     </itemizedlist>
     </section>
+    
+    
+    <section><title>Compiler Changes</title>
+    <para>Important changes to the compiler:</para>
+    <itemizedlist>
+        <listitem>Removed the experimental directional derivative generation feature.</listitem>
+        <listitem>Added option for disabling external evaluation during variability propagation</listitem>
+    </itemizedlist>
+    </section>
+    
     <section xml:id="Release22Python">
     <title>Python distributions</title>
     <para>With this release there are now two bundled Python interpreters, one
@@ -32,7 +189,7 @@
     freeopcua, jupyter, SALib, natsort, pyserial, pyro</emphasis> and 
     <emphasis>coverage.</emphasis> </para>
     </section>
-  </section-->
+  </section>
   <section>
     <title>Release notes for JModelica.org version 2.1</title>
 	<section><title>Highlights</title>

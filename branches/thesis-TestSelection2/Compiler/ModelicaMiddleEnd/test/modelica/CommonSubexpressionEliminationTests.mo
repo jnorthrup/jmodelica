@@ -236,11 +236,28 @@ public
   input Real x;
   output Real y;
   output CommonSubexpressionEliminationTests.FunctionCall6.R r;
+  Real[:,:] temp_1;
+  Real[:] temp_2;
+  Real[:] temp_3;
  algorithm
   y := x;
+  init temp_1 as Real[2, 1];
+  init temp_2 as Real[1];
+  temp_2[1] := x;
+  for i1 in 1:1 loop
+   temp_1[1,i1] := temp_2[i1];
+  end for;
+  init temp_3 as Real[1];
+  temp_3[1] := x;
+  for i1 in 1:1 loop
+   temp_1[2,i1] := temp_3[i1];
+  end for;
   r.x := x;
-  r.y[1,1] := x;
-  r.y[2,1] := x;
+  for i1 in 1:2 loop
+   for i2 in 1:1 loop
+    r.y[i1,i2] := temp_1[i1,i2];
+   end for;
+  end for;
   return;
  annotation(Inline = false);
  end CommonSubexpressionEliminationTests.FunctionCall6.f2;
@@ -749,5 +766,94 @@ end CommonSubexpressionEliminationTests.Math.Log10;
 end Log10;
 
 end Math;
+
+model IfExp1
+    function f
+        input Real x;
+        output Real y;
+    algorithm
+        annotation(Inline=false);
+    end f;
+
+    Real x = time;
+    Real y = if f(time) > x then f(time) else f(time) + 1;
+    Real z = f(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfExp1",
+            description="",
+            common_subexp_elim=true,
+            flatModel="
+fclass CommonSubexpressionEliminationTests.IfExp1
+ Real x;
+ Real y;
+ Real z;
+equation
+ x = time;
+ y = if z > x then CommonSubexpressionEliminationTests.IfExp1.f(time) else CommonSubexpressionEliminationTests.IfExp1.f(time) + 1;
+ z = CommonSubexpressionEliminationTests.IfExp1.f(time);
+
+public
+ function CommonSubexpressionEliminationTests.IfExp1.f
+  input Real x;
+  output Real y;
+ algorithm
+  return;
+ annotation(Inline = false);
+ end CommonSubexpressionEliminationTests.IfExp1.f;
+
+end CommonSubexpressionEliminationTests.IfExp1;
+")})));
+end IfExp1;
+
+model WhenExp1
+    function f
+        input Real x;
+        output Real y;
+    algorithm
+        annotation(Inline=false);
+    end f;
+
+    Real x = time;
+    Real y;
+    Real z = f(time);
+equation
+    when f(time) > x then 
+        y = f(time);
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="WhenExp1",
+            description="",
+            common_subexp_elim=true,
+            flatModel="
+fclass CommonSubexpressionEliminationTests.WhenExp1
+ Real x;
+ discrete Real y;
+ Real z;
+ discrete Boolean temp_1;
+initial equation
+ pre(y) = 0.0;
+ pre(temp_1) = false;
+equation
+ temp_1 = z > x;
+ y = if temp_1 and not pre(temp_1) then CommonSubexpressionEliminationTests.WhenExp1.f(time) else pre(y);
+ x = time;
+ z = CommonSubexpressionEliminationTests.WhenExp1.f(time);
+
+public
+ function CommonSubexpressionEliminationTests.WhenExp1.f
+  input Real x;
+  output Real y;
+ algorithm
+  return;
+ annotation(Inline = false);
+ end CommonSubexpressionEliminationTests.WhenExp1.f;
+
+end CommonSubexpressionEliminationTests.WhenExp1;
+")})));
+end WhenExp1;
 
 end CommonSubexpressionEliminationTests;

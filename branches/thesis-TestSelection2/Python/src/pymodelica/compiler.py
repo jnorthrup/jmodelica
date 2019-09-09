@@ -26,9 +26,11 @@ import sys
 import platform as plt
 import logging
 from subprocess import Popen, PIPE
+import subprocess
 from compiler_logging import CompilerLogHandler
 from compiler_exceptions import JError
 from compiler_exceptions import IllegalCompilerArgumentError
+from compiler_exceptions import IllegalLogStringError
 
 import pymodelica as pym
 from pymodelica.common import xmlparser
@@ -101,7 +103,9 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
             
         compile_to --
             Specify target file or directory. If file, any intermediate directories 
-            will be created if they don't exist. If directory, the path given must exist.
+            will be created if they don't exist. Furthermore, the Modelica model will
+            be renamed to this name. If directory, the path given must exist and the model
+            will keep its original name.
             Default: Current directory.
 
         compiler_log_level --
@@ -180,7 +184,9 @@ def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={},
             
         compile_to --
             Specify target file or directory. If file, any intermediate directories 
-            will be created if they don't exist. If directory, the path given must exist.
+            will be created if they don't exist. Furthermore, the Modelica model will
+            be renamed to this name. If directory, the path given must exist and the model
+            will keep its original name.
             Default: Current directory.
 
         compiler_log_level --
@@ -300,7 +306,9 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
             
         compile_to --
             Specify target file or directory. If file, any intermediate directories 
-            will be created if they don't exist. If directory, the path given must exist.
+            will be created if they don't exist. Furthermore, the Modelica model will
+            be renamed to this name. If directory, the path given must exist and the model
+            will keep its original name.
             Default: Current directory.
         
         compiler_log_level --
@@ -324,7 +332,7 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
     cmd.append(_get_separate_JVM())
     
     cmd.append('-cp')
-    cmd.append(pym.environ['COMPILER_JARS'] + os.pathsep + os.path.join(pym.environ['BEAVER_PATH'],'beaver-rt.jar'))
+    cmd.append(pym.environ['COMPILER_JARS'])
     
     for jvm_arg in pym.environ['JVM_ARGS'].split() + jvm_args.split():
         cmd.append(jvm_arg)
@@ -356,7 +364,12 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
     
     cmd.append(class_name)
     
-    process = Popen(cmd, stderr=PIPE)
+    if plt.system() == "Windows":
+        si = subprocess.STARTUPINFO()
+        si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    else:
+        si = None
+    process = Popen(cmd, stderr=PIPE, startupinfo=si)
     log = CompilerLogHandler()
     log.start(process.stderr);
     try:

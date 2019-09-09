@@ -16,9 +16,7 @@
 package org.jmodelica.util.test;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 
 public class TestTree implements GenericTestTreeNode, Iterable<GenericTestTreeNode> {
     private String name;
@@ -51,6 +49,7 @@ public class TestTree implements GenericTestTreeNode, Iterable<GenericTestTreeNo
         children.add(tc);
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -59,6 +58,7 @@ public class TestTree implements GenericTestTreeNode, Iterable<GenericTestTreeNo
         return children.size();
     }
 
+    @Override
     public Iterator<GenericTestTreeNode> iterator() {
         return children.iterator();
     }

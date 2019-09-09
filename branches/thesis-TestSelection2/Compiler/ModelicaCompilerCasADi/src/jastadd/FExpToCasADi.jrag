@@ -26,7 +26,14 @@ aspect FExpToCasADi {
     public class ModelicaCompiler {
         public FClass compileModelNoCodeGen(String name[], String cl)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-            return compileModel(name, cl, createTargetObject("nocodegen", null), null);
+            OptionRegistry tempOptions = options.copy();
+            TargetObject target = createTargetObject("nocodegen", null);
+            target.setDefaultOptions(options);
+            try {
+                return compileModel(name, cl, target, null, null);
+            } finally {
+                options.copyAllOptions(tempOptions);
+            }
         }
     }
 
@@ -196,6 +203,13 @@ aspect FExpToCasADi {
         throw new UnsupportedOperationException("If-Statements are unsupported (try to rewrite into if-expressions): " + toString());
     }
     
+    MXVector FForStmt.updateExpressionsAccordingToStatement(MXVector expressions, MXVector allVars) {
+        for (FStatement stmt : getUnrolledForStmts()) {
+            expressions = stmt.updateExpressionsAccordingToStatement(expressions, allVars);
+        }
+        return expressions;
+    }
+    
     /**
      * @param A MX that is searched for
      * @param A MXVector that is searched in
@@ -247,7 +261,7 @@ aspect FExpToCasADi {
     /********* Expressions **********
      * Expressions are transformed to MX expressions recursively. 
      * The transformation of expressions to MX produces several MX
-     * for some expressions, such as some function calls and FIdUseExps.
+     * for some expressions, such as some function calls and FAccessExps.
      */
       
     /**
@@ -262,7 +276,7 @@ aspect FExpToCasADi {
     /**
      * Returns this expression as A MX. Note that this might
      * not make sense for some expressions, e.g. function calls with
-     * several outputs and FIdUseExp for FFunctionArray.
+     * several outputs and FAccessExp for arrays.
      * @return A MX
      */
     syn MX FExp.toMX() {
@@ -353,14 +367,14 @@ aspect FExpToCasADi {
     /**
      * Connects the use of a variable in an expression with
      * the symbolic and lazy MX for that variable. 
-     * Note that sometimes FIdUseExp points to a whole
+     * Note that sometimes FAccessExp points to a whole
      * matrices or record, and these should be transformed to vectors
      * of MX instead. 
      * @return A MX
      */
-    eq FIdUseExp.toMX() {
+    eq FAccessExp.toMX() {
         if (myFV().inRecord()) {
-            return getParent().getMXVariableFromRecordHashMap(getFIdUse().getFQName().toString());
+            return getParent().getMXVariableFromRecordHashMap(getFAccess().toString());
         } else if (hasFArraySubscripts() && inFunction()) {
             int flatIndex = getFArraySubscripts().computeFlattenedIndexBasedOnSizeData(myFV().size());
             return myFV().asMXVector().get(flatIndex);
@@ -369,15 +383,19 @@ aspect FExpToCasADi {
         }
     }
     
+    eq FGlobalAccessExp.toMX() {
+        return ceval().buildLiteral().toMX();
+    }
+    
     /**
      * Connects the use of a variable in an expression with
      * the symbolic and lazy MX for that variable. 
-     * Note that this function can handle the case when the FIdUseExp
+     * Note that this function can handle the case when the FAccessExp
      * points to whole matrices or records, e.g. as outputs of 
      * function calls inside functions. 
      * @return A MX
      */
-    eq FIdUseExp.toMXVector() {
+    eq FAccessExp.toMXVector() {
         if (inFunction() && (size().numElements() > 1 || type().isRecord())) {
             return myFV().asMXVector();
         } else {
@@ -387,21 +405,28 @@ aspect FExpToCasADi {
         }
     }
     
+    eq FGlobalAccessExp.toMXVector() {
+        return ceval().buildLiteral().toMXVector();
+    }
+    
     /**
      * Returns a zero-based index for flattened arrays and records.
      * Row-major, e.g. Real[2,2] is indexed as : [1,2] -> 1, [2,1] -> 2
      */
     int FArraySubscripts.computeFlattenedIndexBasedOnSizeData(Size size) {
         int flattenedIndex = 0;
-        List<FSubscript> subs = getFSubscripts();
-        int nbrOfSizeDimsZeroBased = subs.getNumChild() - 1;
+        ArrayList<Subscript> subs = new ArrayList<>(numSubscript());
+        for (Subscript sub : subscripts()) {
+            subs.add(sub);
+        }
+        int nbrOfSizeDimsZeroBased = subs.size() - 1;
         
         try {
-            flattenedIndex += subs.getChild(nbrOfSizeDimsZeroBased).value() - 1;
+            flattenedIndex += subs.get(nbrOfSizeDimsZeroBased).value() - 1;
             int base = 1;
             for (int i = nbrOfSizeDimsZeroBased; i > 0 ; --i) {
                 base*=size.get(i);
-                flattenedIndex +=  base*(subs.getChild(i - 1).value() - 1);
+                flattenedIndex +=  base*(subs.get(i - 1).value() - 1);
             }
             return flattenedIndex;
         } catch (ConstantEvaluationException exp) {
@@ -451,7 +476,7 @@ aspect FExpToCasADi {
      
      /**
       * For retrieving the MXVector representation of this variable.
-      * Some variables, e.g. FFunctionArray can only be represented
+      * Some variables, e.g. arrays can only be represented
       * as MXVector
       * @return A MXVector
       */
@@ -464,38 +489,31 @@ aspect FExpToCasADi {
     /**
      * For retrieving the MX representation of this variable.
      * Note that some variables can not be represented as a single MX, e.g.
-     * FFunctionArray. These may need to be represented as MXVector.
+     * arrays. These may need to be represented as MXVector.
      */
-    syn lazy MX FAbstractVariable.asMXVariable() {
-        throw new UnsupportedOperationException("Cannot convert variable to MX: " + toString());
-    }
-    
-    
-    eq FVariable.asMXVariable() = ifcasadi.msym(name());
-    eq FFunctionVariable.asMXVariable() = ifcasadi.msym(getFQName().toString());
-    
-    eq FFunctionArray.asMXVector() {
-        MXVector MXVec = new MXVector();
-        for (int i = 0; i < size().numElements(); ++i) {
-            MX mx = ifcasadi.msym(getFQName().toString() + "_" +i);
-            MXVec.add(mx);
-        }
-        return MXVec;
-    }
-     
+    syn lazy MX FAbstractVariable.asMXVariable();
+    eq UnknownFVariable .asMXVariable() { throw new UnsupportedOperationException("Cannot convert unknown variable to MX"); }
+    eq FEnumLiteral     .asMXVariable() { throw new UnsupportedOperationException("Cannot convert enum literal to MX"); }
+    eq FVariable        .asMXVariable() = ifcasadi.msym(name());
+    eq FFunctionVariable.asMXVariable() = ifcasadi.msym(getFAccess().toString());
     
     /**
      * Retrieves the MXVector for this variable. 
      * Note that this method handles records. MX variables for records
      * are created by recursive flattening. These MX variables are saved in
      * a hashmap in the FFunctionDecl, put there via AST traversation. Furthermore
-     * the key for the variables in the hashmap is the same as the FQName
-     * of the FIdUse's that later refer to them. 
+     * the key for the variables in the hashmap is the same as the FAccess
+     * of the CommonAccess's that later refer to them. 
      * @return A MXVector.
      */ 
     eq FFunctionVariable.asMXVector() {
         MXVector MXVec = new MXVector();
-        if (isRecord()) {
+        if (isArray()) {
+            for (int i = 0; i < size().numElements(); ++i) {
+                MX mx = ifcasadi.msym(getFAccess().toString() + "_" +i);
+                MXVec.add(mx);
+            }
+        } else if (isRecord()) {
             for (FVariable fvar : myFRecordDecl().getFVariables()) {             
                 ArrayList<String> myFlattenedVariables = new ArrayList<String>();
                 myFlattenedVariables.add(name());
@@ -597,7 +615,7 @@ aspect FExpToCasADi {
     
     /**
      * Does a recursive AST traversation up to the first encountered FFunctionDecl. The FFunctionDecl has an hash map that contains 
-     * MX symbolic variables for records, and the MX for the passed in key (which should be equal to the FQName of the variable) is returned. 
+     * MX symbolic variables for records, and the MX for the passed in key (which should be equal to the FAccess of the variable) is returned. 
      * @param A String 
      * @return A MX
      */
@@ -610,7 +628,7 @@ aspect FExpToCasADi {
     }
     
     /**
-     * Retrieves the MX for the record variable with this key (which should be equal to the FQName of the variable).
+     * Retrieves the MX for the record variable with this key (which should be equal to the FAccess of the variable).
      * @param A String 
      * @return A MX
      */
@@ -618,7 +636,7 @@ aspect FExpToCasADi {
     
     /**
      * Does a recursive AST traversation to the first encountered FFunctionDecl. The FFunctionDecl
-     * has a hash map where the key,value-pair passed in is set. The key should be the FQName of a 
+     * has a hash map where the key,value-pair passed in is set. The key should be the FAccess of a 
      * variable  in a record and value its symbolic MX. 
      * @param A String 
      * @param A MX
@@ -630,7 +648,7 @@ aspect FExpToCasADi {
     }
     
     /**
-     * Sets the passed in key,value-pair in the map, where the key should be the FQName 
+     * Sets the passed in key,value-pair in the map, where the key should be the FAccess 
      * of a variable in a record, and value its symbolic MX. 
      * @param A String
      * @param A MX

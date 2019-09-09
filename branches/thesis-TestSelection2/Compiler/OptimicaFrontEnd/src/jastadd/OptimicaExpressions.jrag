@@ -29,18 +29,21 @@ aspect OptimicaExpressions {
 		 }
 	}
 	/*
-	rewrite FIdUseExp {
+	rewrite CommonAccessExp {
 		when (name().equals("startTime") && !rewritten) to FStartTimeExp {
 			return new FStartTimeExp();
 		}
 	}
 
-	rewrite FIdUseExp {
+	rewrite CommonAccessExp {
 		when (name().equals("finalTime") && !rewritten) to FFinalTimeExp {
 			return new FFinalTimeExp();
 		}
 	}
 	*/
+
+    eq InstTimedVariable.getName().kind() = Kind.COMPONENT_ACCESS;
+
 	refine InstNameClassification eq InstFunctionCall.getName().kind() = Kind.AMBIGUOUS_ACCESS;
 	
 	eq FStartTimeExp.cevalCalc(VariableEvaluator evaluator) {
@@ -86,8 +89,8 @@ aspect OptimicaExpressions {
 	 */
 	rewrite FTimedVariable {
 		when (rewriteAlias && !getName().myFV().isUnknown() && getName().myFV().isAlias()) to FExp {
-			FQName new_name = (FQName)((FVariable)getName().myFV()).alias().getFQName().fullCopy();
-			FExp new_exp = new FTimedVariable(new FIdUse(new_name),getArg());
+			FAccess new_name = ((FVariable)getName().myFV()).alias().getFAccess().treeCopy();
+			FExp new_exp = new FTimedVariable(new_name, getArg());
 			if (getName().myFV().isNegated()) 
 				new_exp = new FNegExp(new_exp);
 			return new_exp;
@@ -178,10 +181,11 @@ aspect OptimicaArrays {
 	eq FStartTimeExp.size() = Size.SCALAR;
 	eq FFinalTimeExp.size() = Size.SCALAR;
 
-	eq InstTimedVariable.getArray() {
-		if (!isArray()) 
-			return super.getArray();
-		Array array = new Array(indices());
+    eq InstTimedVariable.getArray() = isArray() ? getArrayExp() : this;
+    eq FTimedVariable.getArray() = isArray() ? getArrayExp() : this;
+
+	syn lazy ArrayExp InstTimedVariable.getArrayExp() {
+		ArrayExp array = new ArrayExp(indices());
 		for (Index i : array.indices()) {
 			InstAccess name = getName().specify(i);
 			FExp arg = getArg().fullCopy();
@@ -190,13 +194,11 @@ aspect OptimicaArrays {
 		return array;
 	}
 
-	eq FTimedVariable.getArray() {
-		if (!isArray()) 
-			return super.getArray();
-		Array array = new Array(indices());
+	syn lazy ArrayExp FTimedVariable.getArrayExp() {
+		ArrayExp array = new ArrayExp(indices());
 		for (Index i : array.indices()) {
-			FIdUse name = getName().specify(i, true);
-			FExp arg = getArg().fullCopy();
+			FAccess name = getName().specify(i, true);
+			FExp arg = getArg().treeCopy();
 			array.set(i, new FTimedVariable(name, arg));
 		}
 		return array;

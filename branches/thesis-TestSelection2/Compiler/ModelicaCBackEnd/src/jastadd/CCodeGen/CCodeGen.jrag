@@ -150,7 +150,7 @@ aspect CCodeGen {
      * Record declaration
      */
     
-    syn String FRecordDecl.name_C()      = getFQName().lastActualTypePartName() + "_" + recordIndex();
+    syn String FRecordDecl.name_C()      = getFAccess().lastActualTypePartName() + "_" + recordIndex();
 	
     @Override
     public void FRecordDecl.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
@@ -218,7 +218,7 @@ aspect CCodeGen {
     public static final String ASTNode.C_SUFFIX_FPOUT    = "fpout";
     public static final String ASTNode.C_SUFFIX_SETFLAG  = "_s";
     
-    public class FTypePrefixVariability {
+    public abstract class TypePrefixVariability {
         public enum VariabilityCausality_C {
             CI("ci"),
             CD("cd"),
@@ -242,17 +242,31 @@ aspect CCodeGen {
         }
     }
     
-    syn FTypePrefixVariability.VariabilityCausality_C FVariable.variabilityCausality_C() = variability().variabilityCausality_C(this);
+    public TypePrefixVariability.VariabilityCausality_C FVariable.variabilityCausality_C() {
+        return variability().variabilityCausality_C(this);
+    }
     
-    syn VariabilityCausality_C FTypePrefixVariability.variabilityCausality_C(FVariable fv) {
+    public VariabilityCausality_C TypePrefixVariability.variabilityCausality_C(FVariable fv) {
         throw new UnsupportedOperationException();
     }
-    eq FConstant.variabilityCausality_C(FVariable fv)          = fv.isIndependentConstant()  ? VariabilityCausality_C.CI : VariabilityCausality_C.CD;
-    eq FParameter.variabilityCausality_C(FVariable fv)         = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PD;
-    eq FStructParameter.variabilityCausality_C(FVariable fv)   = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PS;
-    eq FFinalParameter.variabilityCausality_C(FVariable fv)    = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PF;
-    eq FEvalTrueParameter.variabilityCausality_C(FVariable fv) = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PE;
-    eq FDiscrete.variabilityCausality_C(FVariable fv)          = VariabilityCausality_C.W;
+    public VariabilityCausality_C Constant.variabilityCausality_C(FVariable fv) {
+        return fv.isIndependentConstant()  ? VariabilityCausality_C.CI : VariabilityCausality_C.CD;
+    }
+    public VariabilityCausality_C Parameter.variabilityCausality_C(FVariable fv) {
+        return fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PD;
+    }
+    public VariabilityCausality_C StructParameter.variabilityCausality_C(FVariable fv) {
+        return fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PS;
+    }
+    public VariabilityCausality_C FinalParameter.variabilityCausality_C(FVariable fv) {
+        return fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PF;
+    }
+    public VariabilityCausality_C EvalTrueParameter.variabilityCausality_C(FVariable fv) {
+        return fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PE;
+    }
+    public VariabilityCausality_C Discrete.variabilityCausality_C(FVariable fv) {
+        return VariabilityCausality_C.W;
+    }
 
 	syn String FAbstractVariable.funcArrayType(boolean assign) = 
 		isRecord() ? C_ARRAY_RECORD : (assign ? C_ARRAY_REFERENCE : C_ARRAY_VALUE);
@@ -264,8 +278,8 @@ aspect CCodeGen {
 
 	syn lazy String FAbstractVariable.name_C() = null;
 	eq FVariable.name_C()           = isForIndex() ? 
-										name_C(null, variableIndex() + C_SUFFIX_INDEX) : 
-										name_C(""); 
+										name_C(null, variableIndex() + C_SUFFIX_INDEX) :
+										name_C("");
     eq FStringVariable.name_C()     = name_C("_s_" + variabilityCausality_C());
 	eq FPreRealVariable.name_C()    = preName_C();
 	eq FPreBooleanVariable.name_C() = preName_C();
@@ -273,16 +287,21 @@ aspect CCodeGen {
 	eq FPreStringVariable.name_C()  = preName_C();
 	eq FPreEnumVariable.name_C()    = preName_C();
 
-	eq FFunctionVariable.name_C()   = name_C(null, C_SUFFIX_VARIABLE);
-	eq FFunctionArray.name_C()      = name_C(null, C_SUFFIX_ARRAY);
-	
+    eq FFunctionVariable.name_C()   = isArray() ? 
+                                       name_C(null, C_SUFFIX_ARRAY) : 
+                                       name_C(null, C_SUFFIX_VARIABLE);
+
 	syn String FAbstractVariable.preName_C() = null; 
 	eq FVariable.preName_C() = name_C("pre");
-	
-	protected String FVariable.name_C(String prefix) {
-		return name_C(prefix, Integer.toString(variableIndex()));
-	}
-	
+
+    protected String FVariable.name_C(String prefix) {
+        return name_C(prefix, Integer.toString(variableIndex()));
+    }
+
+    protected String FGlobalVariable.name_C(String prefix) {
+        return FExp.global_C(nameUnderscore());
+    }
+
 	protected String FAbstractVariable.name_C(String prefix, String suffix) {
 		StringBuilder buf = new StringBuilder();
 		if (prefix != null) {
@@ -295,10 +314,13 @@ aspect CCodeGen {
 		return buf.toString();
 	}
 	
-	syn String FFunctionVariable.nameReturn_C() = 
-		isRecord() ? name_C() : name_C(null, C_SUFFIX_RETURN);
-    syn String FFunctionArray.nameReturn_C() =
-        isString() ? name_C(null, C_SUFFIX_RETURN) : name_C();
+    syn String FFunctionVariable.nameReturn_C() {
+        if (isArray()) {
+            return isString() ? name_C(null, C_SUFFIX_RETURN) : name_C();
+        } else {
+            return isRecord() ? name_C() : name_C(null, C_SUFFIX_RETURN);
+        }
+    }
 
     public static void ASTNode.genFunctionStart(CodeStream str, String indent) {
         str.print(indent);
@@ -332,10 +354,15 @@ aspect CCodeGen {
 
     @Override
 	public void FFunctionVariable.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-		if (!isInput()) {
-			String suffix = (isOutput() && isComposite() && !isString()) ? C_SUFFIX_NULL : "";
-			print(p.createDeclPrinter(str), name_C() + suffix, indent);
-		}
+        if (!isInput()) {
+            if (getVisibilityType().isTemporary() && isComposite()) {
+                Dynamicity dyn = size().isUnknown() ? Dynamicity.HEAP : Dynamicity.STACK;
+                type().printDecl_C(p, str, indent, dyn, name_C(), false);
+            } else {
+                String suffix = (isOutput() && isComposite() && !isString()) ? C_SUFFIX_NULL : "";
+                print(p.createDeclPrinter(str), name_C() + suffix, indent);
+            }
+        }
 	}
 
     @Override
@@ -394,21 +421,7 @@ aspect CCodeGen {
     }
 
     public static void FStatement.printAssignStmt_C(CodeStream str, String indent, String dst, String src) {
-        str.print(indent + dst + " = " + src + ";\n");
-    }
-
-    public void FType.printScalarDecl_C(CodePrinter p, CodeStream str, String indent, boolean external, String name) {
-        str.print(indent);
-        str.print("JMI_DEF(");
-        str.print(macroTypeDecl(external));
-        str.print(", ");
-        str.print(name);
-        str.print(")\n");
-    }
-
-    @Override
-    public void FRecordType.printScalarDecl_C(CodePrinter p, CodeStream str, String indent, boolean external, String name) {
-        str.formatln("%sJMI_RECORD_STATIC(%s, %s)", indent, nameScalar_C(p, external), name);
+        str.println(indent, dst, " = ", src, ";");
     }
 
     /**
@@ -452,7 +465,7 @@ aspect CCodeGen {
     @Override
     public void FEquation.genAssignment_C(CodePrinter p, CodeStream str, String indent) {
         p.printPreSteps(this, str, indent);
-        FIdUseExp left = (FIdUseExp)getLeft().stripNegations();
+        FAccessExp left = getLeft().stripNegations().asFAccessExp();
         FVariable fv = (FVariable)left.myFV();
         if (fv.isExternalObject()) {
             fv.genDestructorCall_C(p, str, indent);
@@ -466,7 +479,7 @@ aspect CCodeGen {
     }
 
     public void FExternalObjectVariable.genDestructorCall_C(CodePrinter p, CodeStream str, String indent) {
-        if (hasConstructorCall(Index.NULL)) {
+        if (hasConstructorCall()) {
             str.formatln("%sif (%s != NULL) {", indent, name_C());
             p.print(getDestructorCall(), str, p.indent(indent));
             str.formatln("%s%s = NULL;", p.indent(indent), name_C());
@@ -478,21 +491,13 @@ aspect CCodeGen {
 
     syn FFunctionCallStmt FExternalObjectVariable.getDestructorCall() {
         String strName = type().name() + ".destructor";
-        FIdUse name = new FIdUse(strName);
+        FAccess name = new FAccessString(strName);
         List<FExp> args = new List<FExp>();
-        args.add(createUseExp());
+        args.add(createAccessExp());
         FFunctionCall call = new FFunctionCall(name, args, FFunctionType.create(strName, new ArrayList<FVariable>(), myFClass()));
         return new FFunctionCallStmt(new List<FFunctionCallLeft>(), call);
     }
 
-    syn String FFunctionCallLeft.name_C() {
-        if (replaceWithTemp()) {
-            return getFExp().tempName_C();
-        } else {
-            return ((FIdUseExp) getFExp()).getFIdUse().name_C();
-        }
-    }
-    
     public void FExp.genEventResidualVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         throw new UnsupportedOperationException("Method not implemented for class " + getClass().getSimpleName() + "!");
     }
@@ -504,17 +509,10 @@ aspect CCodeGen {
 
     @Override
     public void FDelayExp.genEventResidualVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        if (!p.inInitialSystem()) {
-            p.printVarDecls(getDelay(), str, indent);
-        }
     }
 
     @Override
     public void FSpatialDistExp.genEventResidualVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        if (!p.inInitialSystem()) {
-            p.printVarDecls(getX(), str, indent);
-            p.printVarDecls(getPositiveVelocity(), str, indent);
-        }
     }
 
     public void FExp.genEventResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
@@ -532,38 +530,19 @@ aspect CCodeGen {
 
     @Override
     public void FDelayExp.genEventResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
-        if (p.inInitialSystem()) {
-            str.formatln("%s(*res)[%d] = JMI_DELAY_INITIAL_EVENT_RES;", indent, enumerator.next());
-            str.formatln("%s(*res)[%d] = JMI_DELAY_INITIAL_EVENT_RES;", indent, enumerator.next());
-        } else {
-            p.printPreSteps(getDelay(), str, indent);
-            int index = myDelayIndex();
-            str.format("%sjmi_delay_first_event_indicator(jmi, %d, ", indent, index);
-            p.print(getDelay(), str, indent);
-            str.print(", &(*res)[" + enumerator.next() + "]);\n");
-            str.format("%sjmi_delay_second_event_indicator(jmi, %d, ", indent, index);
-            p.print(getDelay(), str, indent);
-            str.print(", &(*res)[" + enumerator.next() + "]);\n");
-            p.printPostSteps(getDelay(), str, indent);
+        for (FExp indicator : getIndicators()) {
+            str.format("%s(*res)[%d] = ", indent, enumerator.next());
+            p.print(indicator, str, indent);
+            str.println(";");
         }
     }
 
     @Override
     public void FSpatialDistExp.genEventResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
-        if (p.inInitialSystem()) {
-            str.formatln("%s(*res)[%d] = JMI_DELAY_INITIAL_EVENT_RES;", indent, enumerator.next());
-        } else {
-            p.printPreSteps(getX(), str, indent);
-            p.printPreSteps(getPositiveVelocity(), str, indent);
-            int index = mySpatialDistIndex();
-            str.format("%sef = jmi_spatialdist_event_indicator(jmi, %d, ", indent, index);
-            p.print(getX(), str, indent);
-            str.print(", ");
-            p.print(getPositiveVelocity(), str, indent);
-            str.print(", &(*res)[" + enumerator.next() + "]);\n");
-            p.printPostSteps(getX(), str, indent);
-            p.printPostSteps(getPositiveVelocity(), str, indent);
-        }
+        FExp indicator = getIndicator();
+        str.format("%s(*res)[%d] = ", indent, enumerator.next());
+        p.print(indicator, str, indent);
+        str.println(";");
     }
     
     syn nta FExp FRelExp.getIndicatorNominal() = FExp.nominalMax(getLeft(), getRight());
@@ -609,7 +588,7 @@ aspect CCodeGen {
         }
         
         if (guard && hb) {
-            sp.print(str, ", " + FLitExp.macro_C + "(1))");
+            sp.print(str, ", 1.0)");
         }
     }
     
@@ -888,15 +867,33 @@ aspect CCodeGen {
 	}
 
     public void FVariable.genStartValue_C(CodePrinter p, CodeStream str, String indent) {
-        p.printPreSteps(this, str, indent);
-        FExp exp = useBindingExpAsStart() ? getBindingExp() : startAttributeExp();
-        boolean noExp = exp == null;
-        if (noExp)
-            setBindingExp(exp = type().zeroLiteral());
-        genAssignment_C(p, str, indent, name_C(), exp, false);
-        if (noExp)
-            setBindingExpOpt(new Opt());
-        p.printPostSteps(this, str, indent);
+        if (shouldGenStartValue()) {
+            p.printPreSteps(this, str, indent);
+            FExp exp = startValueExp();
+            boolean noExp = exp == null;
+            Opt bindingExpOpt = null;
+            if (noExp) {
+                bindingExpOpt = getBindingExpOpt();
+                setBindingExp(exp = type().zeroLiteral());
+            }
+            genAssignment_C(p, str, indent, name_C(), exp, false);
+            if (noExp) {
+                setBindingExpOpt(bindingExpOpt);
+            }
+            p.printPostSteps(this, str, indent);
+        }
+    }
+
+    syn boolean FVariable.shouldGenStartValue() {
+        FExp exp = startValueExp();
+        return !type().isNumeric() || (exp != null && !exp.isZeroLiteral());
+    }
+
+    syn FExp FVariable.startValueExp() = useBindingExpAsStart() ? getBindingExp() : startAttributeExp();
+
+    syn boolean FVariable.hasDependentStartValue() {
+        FExp exp = startValueExp();
+        return exp != null && !exp.variability().constantVariability();
     }
 
     public void FVariable.genAssignment_C(CodePrinter p, CodeStream str, String indent, String name, FExp right,

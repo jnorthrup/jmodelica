@@ -49,11 +49,7 @@ class Test_CoupledFMUModelME2:
         Sets up the test class.
         """
         cls.cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", version=2.0)
-        
-        cls.ls_full = compile_fmu("LinearStability.FullSystem" , os.path.join(path_to_mofiles,"CoupledME.mo"), version=2.0)
-        cls.ls_sub1 = compile_fmu("LinearStability.SubSystem1" , os.path.join(path_to_mofiles,"CoupledME.mo"), version=2.0)
-        cls.ls_sub2 = compile_fmu("LinearStability.SubSystem2" , os.path.join(path_to_mofiles,"CoupledME.mo"), version=2.0)
-        
+
         cls.ls_event_full = compile_fmu("LinearStability.FullSystemWithEvents" , os.path.join(path_to_mofiles,"CoupledME.mo"), version=2.0)
         cls.ls_event_sub1 = compile_fmu("LinearStability.SubSystemWithEvents1" , os.path.join(path_to_mofiles,"CoupledME.mo"), version=2.0)
         cls.ls_event_sub2 = compile_fmu("LinearStability.SubSystemWithEvents2" , os.path.join(path_to_mofiles,"CoupledME.mo"), version=2.0)
@@ -69,32 +65,6 @@ class Test_CoupledFMUModelME2:
         cls.piplant = compile_fmu("PIPlant", os.path.join(path_to_mofiles,"CoupledME.mo"), version="2.0")
         cls.pi      = compile_fmu("PI",      os.path.join(path_to_mofiles,"CoupledME.mo"), version="2.0")
         cls.plant   = compile_fmu("Plant",   os.path.join(path_to_mofiles,"CoupledME.mo"), version="2.0")
-        
-    @testattr(stddist_full = True)
-    def test_loading(self):
-        
-        model_cc_1 = load_fmu(Test_CoupledFMUModelME2.cc_name)
-        model_cc_2 = load_fmu(Test_CoupledFMUModelME2.cc_name)
-        
-        models = [model_cc_1, model_cc_2]
-        connections = []
-        
-        nose.tools.assert_raises(fmi.FMUException, CoupledFMUModelME2, models, connections)
-        
-        models = [("First", model_cc_1), model_cc_2]
-        nose.tools.assert_raises(fmi.FMUException, CoupledFMUModelME2, models, connections)
-        
-        models = [("First", model_cc_1), ("First", model_cc_2)]
-        nose.tools.assert_raises(fmi.FMUException, CoupledFMUModelME2, models, connections)
-        
-        models = [("First", model_cc_1), ("Second", model_cc_2)]
-        coupled = CoupledFMUModelME2(models, connections)
-        
-        connections = [("k")]
-        nose.tools.assert_raises(fmi.FMUException, CoupledFMUModelME2, models, connections)
-        
-        connections = [(model_cc_1, "J1.phi", model_cc_2, "J2.phi")]
-        nose.tools.assert_raises(fmi.FMUException, CoupledFMUModelME2, models, connections)
         
     @testattr(stddist_full = True)
     def test_basic_simulation(self):
@@ -120,62 +90,7 @@ class Test_CoupledFMUModelME2:
         nose.tools.assert_almost_equal(res.final("time"),1.5)
         nose.tools.assert_almost_equal(res.final("First.J1.w"),res.final("Second.J1.w"))
         nose.tools.assert_almost_equal(res.final("First.J1.w"), 3.2501079, places=3)
-        
-    @testattr(stddist_full = True)
-    def test_get_variable_valueref(self):
-        
-        model_cc_1 = load_fmu(Test_CoupledFMUModelME2.cc_name)
-        model_cc_2 = load_fmu(Test_CoupledFMUModelME2.cc_name)
-        
-        models = [("First", model_cc_1), ("Second", model_cc_2)]
-        connections = []
-        
-        coupled = CoupledFMUModelME2(models, connections)
-        
-        nose.tools.assert_raises(fmi.FMUException,  coupled.get_variable_valueref, "J1.w")
-        
-        vr_1 = coupled.get_variable_valueref("First.J1.w")
-        vr_2 = coupled.get_variable_valueref("Second.J1.w")
 
-        assert vr_1 != vr_2
-        
-        var_name_1 = coupled.get_variable_by_valueref(vr_1)
-        var_name_2 = coupled.get_variable_by_valueref(vr_2)
-        
-        assert var_name_1 == "First.J1.w"
-        assert var_name_2 == "Second.J1.w"
-    
-    @testattr(stddist_full = True)
-    def test_ode_sizes(self):
-        
-        model_cc_1 = load_fmu(Test_CoupledFMUModelME2.cc_name)
-        model_cc_2 = load_fmu(Test_CoupledFMUModelME2.cc_name)
-        
-        models = [("First", model_cc_1), ("Second", model_cc_2)]
-        connections = []
-        
-        coupled = CoupledFMUModelME2(models, connections)
-        
-        [nbr_states, nbr_event_ind] = coupled.get_ode_sizes()
-        
-        assert nbr_states == 16
-        assert nbr_event_ind == 66
-        
-    @testattr(stddist_full = True)
-    def test_alias(self):
-        
-        model_cc_1 = load_fmu(Test_CoupledFMUModelME2.cc_name)
-        model_cc_2 = load_fmu(Test_CoupledFMUModelME2.cc_name)
-        
-        models = [("First", model_cc_1), ("Second", model_cc_2)]
-        connections = []
-        
-        coupled = CoupledFMUModelME2(models, connections)
-        
-        aliases = coupled.get_variable_alias("First.J4.phi")
-        assert "First.J4.phi" in aliases.keys()
-        assert coupled.get_variable_alias_base("First.J4.phi") == "First.J4.flange_a.phi"
-        
     @testattr(stddist_full = True)
     def test_get_set_real(self):
         
@@ -195,172 +110,6 @@ class Test_CoupledFMUModelME2:
         nose.tools.assert_almost_equal(coupled.get("First.J1.w"),3)
         nose.tools.assert_almost_equal(coupled.get("Second.J1.w"),4)
     
-    @testattr(stddist_full = True)
-    def test_variable_variability(self):
-        
-        model_cc_1 = load_fmu(Test_CoupledFMUModelME2.cc_name)
-        model_cc_2 = load_fmu(Test_CoupledFMUModelME2.cc_name)
-        
-        models = [("First", model_cc_1), ("Second", model_cc_2)]
-        connections = []
-        
-        coupled = CoupledFMUModelME2(models, connections)
-        
-        nose.tools.assert_raises(fmi.FMUException,  coupled.get_variable_variability, "J1.w")
-        
-        variability = coupled.get_variable_variability("First.J1.w")
-        
-        assert variability == model_cc_1.get_variable_variability("J1.w")
-        
-    @testattr(stddist_full = True)
-    def test_variable_causality(self):
-        
-        model_cc_1 = load_fmu(Test_CoupledFMUModelME2.cc_name)
-        model_cc_2 = load_fmu(Test_CoupledFMUModelME2.cc_name)
-        
-        models = [("First", model_cc_1), ("Second", model_cc_2)]
-        connections = []
-        
-        coupled = CoupledFMUModelME2(models, connections)
-        
-        nose.tools.assert_raises(fmi.FMUException,  coupled.get_variable_causality, "J1.w")
-        
-        causality = coupled.get_variable_causality("First.J1.w")
-        
-        assert causality == model_cc_1.get_variable_causality("J1.w")
-        
-    @testattr(stddist_full = True)
-    def test_model_variables(self):
-        
-        model_cc_1 = load_fmu(Test_CoupledFMUModelME2.cc_name)
-        model_cc_2 = load_fmu(Test_CoupledFMUModelME2.cc_name)
-        
-        models = [("First", model_cc_1), ("Second", model_cc_2)]
-        connections = []
-        
-        coupled = CoupledFMUModelME2(models, connections)
-        
-        vars = coupled.get_model_variables()
-        vars_1 = model_cc_1.get_model_variables()
-        vars_2 = model_cc_2.get_model_variables()
-        
-        assert len(vars) == len(vars_1) + len(vars_2)
-        
-        vars = coupled.get_model_variables(include_alias=False)
-        vars_1 = model_cc_1.get_model_variables(include_alias=False)
-        vars_2 = model_cc_2.get_model_variables(include_alias=False)
-        
-        assert len(vars) == len(vars_1) + len(vars_2)
-        
-        vars = coupled.get_model_variables(include_alias=False, type=fmi.FMI2_INTEGER)
-        vars_1 = model_cc_1.get_model_variables(include_alias=False, type=fmi.FMI2_INTEGER)
-        vars_2 = model_cc_2.get_model_variables(include_alias=False, type=fmi.FMI2_INTEGER)
-        
-        assert len(vars) == len(vars_1) + len(vars_2)
-
-    @testattr(stddist_full = True)
-    def test_states_list(self):
-        
-        model_cc_1 = load_fmu(Test_CoupledFMUModelME2.cc_name)
-        model_cc_2 = load_fmu(Test_CoupledFMUModelME2.cc_name)
-        
-        models = [("First", model_cc_1), ("Second", model_cc_2)]
-        connections = []
-        
-        coupled = CoupledFMUModelME2(models, connections)
-        
-        states = coupled.get_states_list()
-        
-        for state in states:
-            assert state.startswith("First.") or state.startswith("Second.")
-            var = coupled.get_variable_by_valueref(states[state].value_reference)
-            alias_vars = coupled.get_variable_alias(var).keys()
-            assert state in alias_vars
-            
-    @testattr(stddist_full = True)
-    def test_derivatives_list(self):
-        
-        model_cc_1 = load_fmu(Test_CoupledFMUModelME2.cc_name)
-        model_cc_2 = load_fmu(Test_CoupledFMUModelME2.cc_name)
-        
-        models = [("First", model_cc_1), ("Second", model_cc_2)]
-        connections = []
-        
-        coupled = CoupledFMUModelME2(models, connections)
-        
-        states = coupled.get_derivatives_list()
-        
-        for state in states:
-            assert state.startswith("First.") or state.startswith("Second.")
-            var = coupled.get_variable_by_valueref(states[state].value_reference)
-            alias_vars = coupled.get_variable_alias(var).keys()
-            assert state in alias_vars
-
-    @testattr(stddist_full = True)
-    def test_reversed_connections(self):
-        model_sub_1 = load_fmu(Test_CoupledFMUModelME2.ls_sub1)
-        model_sub_2 = load_fmu(Test_CoupledFMUModelME2.ls_sub2)
-        model_full  = load_fmu(Test_CoupledFMUModelME2.ls_full)
-        
-        models = [("First", model_sub_1), ("Second", model_sub_2)]
-        connections = [(model_sub_2,"y1",model_sub_1,"u2"),
-                       (model_sub_1,"y2",model_sub_2,"u1")]
-        
-        nose.tools.assert_raises(fmi.FMUException,  CoupledFMUModelME2, models, connections)
-        
-        connections = [(model_sub_2,"u2",model_sub_1,"y1"),
-                       (model_sub_1,"u1",model_sub_2,"y2")]
-                       
-        nose.tools.assert_raises(fmi.FMUException,  CoupledFMUModelME2, models, connections)
-
-    @testattr(stddist_full = True)
-    def test_inputs_list(self):
-        
-        model_sub_1 = load_fmu(Test_CoupledFMUModelME2.ls_sub1)
-        model_sub_2 = load_fmu(Test_CoupledFMUModelME2.ls_sub2)
-        model_full  = load_fmu(Test_CoupledFMUModelME2.ls_full)
-        
-        models = [("First", model_sub_1), ("Second", model_sub_2)]
-        connections = [(model_sub_1,"y1",model_sub_2,"u2"),
-                       (model_sub_2,"y2",model_sub_1,"u1")]
-        
-        coupled = CoupledFMUModelME2(models, connections=connections)
-
-        #Inputs should not be listed if they are internally connected
-        vars = coupled.get_input_list().keys()
-        assert len(vars) == 0
-        
-        coupled = CoupledFMUModelME2(models, connections=[])
-        vars = coupled.get_input_list().keys()
-        assert "First.u1" in vars
-        assert "Second.u2" in vars
-
-    @testattr(stddist_full = True)
-    def test_linear_example(self):
-        
-        model_sub_1 = load_fmu(Test_CoupledFMUModelME2.ls_sub1)
-        model_sub_2 = load_fmu(Test_CoupledFMUModelME2.ls_sub2)
-        model_full  = load_fmu(Test_CoupledFMUModelME2.ls_full)
-        
-        models = [("First", model_sub_1), ("Second", model_sub_2)]
-        connections = [(model_sub_1,"y1",model_sub_2,"u2"),
-                       (model_sub_2,"y2",model_sub_1,"u1")]
-        
-        coupled = CoupledFMUModelME2(models, connections=connections)
-
-        res = coupled.simulate()
-        res_full = model_full.simulate()
-        
-        nose.tools.assert_almost_equal(res.final("First.x1"),res_full.final("p1.x1"))
-        nose.tools.assert_almost_equal(res.final("Second.x2"),res_full.final("p2.x2"))
-        nose.tools.assert_almost_equal(res.initial("First.x1"),res_full.initial("p1.x1"))
-        nose.tools.assert_almost_equal(res.initial("Second.x2"),res_full.initial("p2.x2"))
-        
-        nose.tools.assert_almost_equal(res.final("First.u1"),res_full.final("p1.u1"))
-        nose.tools.assert_almost_equal(res.final("Second.u2"),res_full.final("p2.u2"))
-        nose.tools.assert_almost_equal(res.initial("First.u1"),res_full.initial("p1.u1"))
-        nose.tools.assert_almost_equal(res.initial("Second.u2"),res_full.initial("p2.u2"))
-
     @testattr(stddist_full = True)
     def test_quarter_car(self):
 
@@ -469,8 +218,8 @@ class Test_CoupledFMUModelME2:
 
         res = coupled_model.simulate(final_time=4)
         
-        nose.tools.assert_almost_equal(res.final("plant.speed"),res_full.final("plant.speed"), places=4)
-        nose.tools.assert_almost_equal(res.final("plant.inputTorque"),res_full.final("plant.inputTorque"), places=4)
-        nose.tools.assert_almost_equal(res.initial("plant.speed"),res_full.initial("plant.speed"), places=4)
-        nose.tools.assert_almost_equal(res.initial("plant.inputTorque"),res_full.initial("plant.inputTorque"), places=4)
+        nose.tools.assert_almost_equal(res.final("plant.speed"),res_full.final("plant.speed"), places=3)
+        nose.tools.assert_almost_equal(res.final("plant.inputTorque"),res_full.final("plant.inputTorque"), places=3)
+        nose.tools.assert_almost_equal(res.initial("plant.speed"),res_full.initial("plant.speed"), places=3)
+        nose.tools.assert_almost_equal(res.initial("plant.inputTorque"),res_full.initial("plant.inputTorque"), places=3)
         

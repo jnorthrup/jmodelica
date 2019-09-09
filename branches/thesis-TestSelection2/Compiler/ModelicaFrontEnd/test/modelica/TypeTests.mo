@@ -122,19 +122,19 @@ Error at line 5, column 4, in file 'Compiler/ModelicaFrontEnd/test/modelica/Type
             errorMessage="
 5 errors found:
 
-Error at line 3, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
+Error at line 3, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   The type of the binding expression of the attribute start for the variable y does not match the declared type of the variable
 
-Error at line 3, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
+Error at line 3, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   The type of the binding expression of the attribute unit for the variable y does not match the declared type of the variable
 
-Error at line 3, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
+Error at line 3, column 29, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   The type of the binding expression of the attribute nominal for the variable y does not match the declared type of the variable
 
-Error at line 3, column 40, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
+Error at line 3, column 41, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   The type of the binding expression of the attribute min for the variable y does not match the declared type of the variable
 
-Error at line 3, column 49, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
+Error at line 3, column 50, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   The type of the binding expression of the attribute max for the variable y does not match the declared type of the variable
 ")})));
 	end TypeTest6;
@@ -331,6 +331,19 @@ Error at line 7, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/Typ
 ")})));
 end TypeRel6;
 
+model SplitStringComment
+ Real x "a"+"b"+"c";
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="SplitStringComment",
+            description="tests flattening of split string comments",
+            flatModel="
+fclass TypeTests.SplitStringComment
+ Real x \"abc\";
+end TypeTests.SplitStringComment;
+")})));
+end SplitStringComment;
 
 
 model AbsType1
@@ -1053,7 +1066,7 @@ model RecursiveStructure1
             errorMessage="
 1 errors found:
 
-Error at line 6, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo',
+Error at line 7, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo',
 In component a2:
   Recursive class structure
 ")})));
@@ -1103,7 +1116,7 @@ model RecursiveStructure3
             errorMessage="
 1 errors found:
 
-Error at line 6, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo',
+Error at line 7, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo',
 In component a2:
   Recursive class structure
 ")})));
@@ -1123,7 +1136,7 @@ model RecursiveStructure4
             errorMessage="
 1 errors found:
 
-Error at line 2, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo',
+Error at line 3, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo',
 In component a:
   Recursive class structure
 ")})));
@@ -2497,7 +2510,7 @@ Error at line 16, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/Ty
     type of 'x1' is Real[size(x1, 1)]
     type of 'x2' is Real
 
-Compliance error at line 19, column 26, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_COMPOSITE:
+Compliance error at line 20, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_COMPOSITE:
   Functional input arguments with record/array inputs/outputs is currently not supported
 
 Error at line 23, column 49, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo':
@@ -2514,7 +2527,7 @@ Error at line 23, column 68, in file 'Compiler/ModelicaFrontEnd/test/modelica/Ty
 Error at line 23, column 73, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo':
   Creating functional input argument mf(): no input matching named argument x4 found
 
-Compliance error at line 27, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_COMPOSITE:
+Compliance error at line 28, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_COMPOSITE:
   Functional input arguments with record/array inputs/outputs is currently not supported
 
 Error at line 32, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo':
@@ -2786,12 +2799,10 @@ public
  algorithm
   init x as Real[n];
   init t as Real[5];
-  t[1] := 1;
-  t[2] := 2;
-  t[3] := 3;
-  t[4] := 4;
-  t[5] := 5;
-  for i1 in 1:max(integer(n + 1 - 2) + 1, 0) loop
+  for i1 in 1:5 loop
+   t[i1] := i1;
+  end for;
+  for i1 in 1:n loop
    x[i1] := t[div(2 + (i1 - 1), n)];
   end for;
   return;
@@ -2814,7 +2825,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', NOMINAL_EQUAL_TO_ZERO:
+Error at line 2, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', NOMINAL_EQUAL_TO_ZERO:
   The attribute nominal for the variable x is set to 0, evaluating to 0.0. A nominal value of zero is not meaningful. Please set the nominal value to the expected magnitude of the variable.
 ")})));
 end NominalValue1;
@@ -2834,7 +2845,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 4, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', NOMINAL_EQUAL_TO_ZERO:
+Error at line 4, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', NOMINAL_EQUAL_TO_ZERO:
   The attribute nominal for the variable x is set to p1 - p2, evaluating to 0.0. A nominal value of zero is not meaningful. Please set the nominal value to the expected magnitude of the variable.
 ")})));
 end NominalValue2;
@@ -2871,7 +2882,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', NOMINAL_ELEMENT_EQUAL_TO_ZERO:
+Error at line 2, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', NOMINAL_ELEMENT_EQUAL_TO_ZERO:
   The attribute nominal for the variable x is set to {1, 0, 2, 0}, where element [2] evaluates to 0.0. A nominal value of zero is not meaningful. Please set the nominal value to the expected magnitude of the variable.
 ")})));
 end NominalValue4;
@@ -2886,7 +2897,7 @@ model ConstantNoBindingExp1
             errorMessage="
 1 warnings found:
 
-Warning at line 1, column 27, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', CONSTANT_MISSING_BINDING_EXPRESSION:
+Warning at line 2, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', CONSTANT_MISSING_BINDING_EXPRESSION:
   The constant c does not have a binding expression
 ")})));
 end ConstantNoBindingExp1;
@@ -2901,7 +2912,7 @@ model ParameterNoBindingExp1
             errorMessage="
 1 warnings found:
 
-Warning at line 1, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 2, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter p does not have a binding expression
 ")})));
 end ParameterNoBindingExp1;
@@ -2919,7 +2930,7 @@ initial equation
             errorMessage="
 1 warnings found:
 
-Warning at line 1, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 2, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter p1 does not have a binding expression
 ")})));
 end ParameterNoBindingExp2;

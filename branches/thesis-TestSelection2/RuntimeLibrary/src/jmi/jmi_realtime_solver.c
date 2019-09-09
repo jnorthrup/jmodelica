@@ -132,9 +132,11 @@ int jmi_realtime_solver_solve(jmi_block_solver_t *block) {
     jmi_realtime_solver_t* solver = (jmi_realtime_solver_t*)block->solver;
     jmi_real_t tolerance = block->options->res_tol;
     jmi_int_t ret, i;
-    jmi_log_node_t destnode;
+    jmi_log_node_t destnode={0};
     jmi_int_t broyden_updates = block->options->jacobian_update_mode == jmi_broyden_jacobian_update_mode;
     clock_t start_measuring = jmi_block_solver_start_clock(block);
+    clock_t jac_measuring, fac_measuring;
+    jmi_real_t elapsed_time_jac = 0.0, elapsed_time_fac = 0.0;
     
     /* Initialize the work vector */
     block->F(block->problem_data,block->x,block->res,JMI_BLOCK_INITIALIZE);
@@ -146,9 +148,12 @@ int jmi_realtime_solver_solve(jmi_block_solver_t *block) {
     ret = block->F(block->problem_data,block->x,block->res,JMI_BLOCK_EVALUATE);
     if(ret) { jmi_realtime_solver_error_handling(block, block->x, JMI_REALTIME_SOLVER_BLOCK_EVALUATION_FAIL); return -1; }
     
+
     if(block->init || block->at_event || !broyden_updates) {
         /* Compute the Jacobian (always and only done once) */
+        jac_measuring = jmi_block_solver_start_clock(block);
         ret = jmi_realtime_solver_jacobian(block, block->res, solver->factorization);
+        elapsed_time_jac = jmi_block_solver_elapsed_time(block, jac_measuring);
         if (ret) { jmi_realtime_solver_error_handling(block, block->x, JMI_REALTIME_SOLVER_JACOBIAN_APPROXIMATION_FAIL); return -1; }
         
         if (block->callbacks->log_options.log_level >= JMI_REALTIME_PROGRESS_LOG_LEVEL) {
@@ -159,7 +164,9 @@ int jmi_realtime_solver_solve(jmi_block_solver_t *block) {
         if (broyden_updates) { memcpy(solver->jacobian, solver->factorization, block->n*block->n*sizeof(jmi_real_t)); }
         
         /* Factorize the Jacobian */
+        fac_measuring = jmi_block_solver_start_clock(block);
         ret = jmi_linear_algebra_LU_factorize(solver->factorization, solver->pivots, block->n);
+        elapsed_time_fac = jmi_block_solver_elapsed_time(block, fac_measuring);
         if (ret) { jmi_realtime_solver_error_handling(block, block->x, JMI_REALTIME_SOLVER_LU_FACTORIZATION_FAIL); return -1; }
         
         if (block->callbacks->log_options.log_level >= JMI_REALTIME_PROGRESS_LOG_LEVEL) {
@@ -173,7 +180,7 @@ int jmi_realtime_solver_solve(jmi_block_solver_t *block) {
                                      "Realtime solver invoked for <block:%s>", block->label);
         jmi_log_reals(block->log, destnode, logInfo, "ivs", block->x, block->n);
         if((block->callbacks->log_options.log_level >= 6)) {
-        jmi_log_real_matrix(block->log, destnode, logInfo, "LU", solver->factorization, block->n, block->n);
+            jmi_log_real_matrix(block->log, destnode, logInfo, "LU", solver->factorization, block->n, block->n);
         }
     }
     
@@ -233,12 +240,12 @@ int jmi_realtime_solver_solve(jmi_block_solver_t *block) {
         solver->nbr_non_convergence++;
         
         jmi_log_node(block->log, logWarning, "RealtimeNonConvergence", 
-                    "Failed to converge <block: %s> at <t: %f> due to <WRMS: %f> after <iteration: %d> and after elapsed <time: %f>. Continuing...", 
-                    block->label, block->cur_time, solver->last_wrms, i, jmi_block_solver_elapsed_time(block, start_measuring));
+                    "Failed to converge <block: %s> at <t: %f> due to <WRMS: %f> after <iteration: %d> and after elapsed <time: %f> whereof <Jac: %f> and <LU: %f>. Continuing...", 
+                    block->label, block->cur_time, solver->last_wrms, i, jmi_block_solver_elapsed_time(block, start_measuring), elapsed_time_jac, elapsed_time_fac);
     } else {
         jmi_log_node(block->log, logInfo, "RealtimeConvergence", 
-                    "Succeeded to converge <block: %s> at <t: %f> with <WRMS: %f> after <iteration: %d> and after elapsed <time: %f>.", 
-                    block->label, block->cur_time, solver->last_wrms, i, jmi_block_solver_elapsed_time(block, start_measuring));
+                    "Succeeded to converge <block: %s> at <t: %f> with <WRMS: %f> after <iteration: %d> and after elapsed <time: %f> whereof <Jac: %f> and <LU: %f>.", 
+                    block->label, block->cur_time, solver->last_wrms, i, jmi_block_solver_elapsed_time(block, start_measuring), elapsed_time_jac, elapsed_time_fac);
     }
     
     return 0;
@@ -327,7 +334,7 @@ int jmi_realtime_solver_jacobian(jmi_block_solver_t *block, jmi_real_t* f, jmi_r
 
 
 void jmi_realtime_solver_error_handling(jmi_block_solver_t *block, jmi_real_t* x, jmi_realtime_solver_error_codes_t return_code) {
-    jmi_log_node_t node;
+    jmi_log_node_t node={0};
     
     
     if (return_code == JMI_REALTIME_SOLVER_BLOCK_EVALUATION_FAIL) {

@@ -115,7 +115,7 @@ aspect CommonSubexpressionElimination {
                 public void add(FAbstractEquation fae) {
                     fae.parent = getFAbstractEquationListNoTransform();
                     if (fae.variability().parameterOrLess()) {
-                        addFParameterEquationNoTransform(fae);
+                        addParameterEquationNoTransform(fae);
                     } else {
                         addFAbstractEquationNoTransform(fae);
                     }
@@ -128,8 +128,8 @@ aspect CommonSubexpressionElimination {
 
                     FAbstractFunctionCall call = get(0);
 
-                    final FTypePrefixVariability variability = call.variability().combine(
-                            ASTNode.fFixedParameter()).combineDown(call.type().funcOutputVariability());
+                    final TypePrefixVariability variability = call.variability().combine(
+                            Variability.FIXEDPARAMETER).combineDown(call.type().funcOutputVariability());
 
                     FAbstractVariable var = variablesMap().lookup(call.tempVarName());
                     if (var == null) {
@@ -138,7 +138,7 @@ aspect CommonSubexpressionElimination {
                         variablesMap().addVariable(var);
                     }
 
-                    repl = var.createUseExp();
+                    repl = var.createAccessExp();
                     merge(0, repl);
                     return repl;
                 }
@@ -164,6 +164,12 @@ aspect CommonSubexpressionElimination {
     
     public void FIfWhenElseEquation.collectFunctionCalls(FClass.commonSubexpressionEliminationIfSet m) {
         
+    }
+    
+    public void FIfExp.collectFunctionCalls(FClass.commonSubexpressionEliminationIfSet m) {
+        getIfExp().collectFunctionCalls(m);
+        /* In the branches we would have to consider the conditions (if expression) before we extract
+         * to a new equation. We also also have to consider the variability (is this a when-clause?). */
     }
     
     public void FFunctionCall.collectFunctionCalls(FClass.commonSubexpressionEliminationIfSet m) {

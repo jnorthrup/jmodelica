@@ -1,4 +1,280 @@
 ================= Unreleased ==================
+# Change ; Minor ; Compiler; #5830
+ParseHandler now have a target for Subscript.
+
+# Change ; Major ; PyFMI ; #5826
+Updated JModelica external to PyFMI 2.5.4
+
+# Change ; Minor ; Compiler ; #5815
+FilterableIterator now adheres to the contract of Iterator and properly supports "null" elements in the parent iterator.
+
+# Change ; Major ; Compiler ; #5809
+Generate one field per option in OptionRegistry.
+Renamed OptionRegistry to AbstractOptionRegistry, renamed OptionsAggregated to OptionRegistry.
+
+# Change ; Major ; Compiler ; #5804
+Switch to "java.nio.file.Path" instead of "File" or "String"s representing paths in most places.
+"Path" is more thought-through and more powerful, which will allow to implement advanced featuers in the future.
+Note that while java.nio allows to access non-File resources with the same API, the internal workings of JModelica
+currently make restrictions on only supporting file accesses.
+
+# Fixed ; Minor ; Compiler ; #5808
+Add ParseListener and CompilationStartListener for listening to
+parsed files and compilation start events.
+
+# Change ; Minor ; Compiler ; #5810
+Dependency to beaver-rt.jar is now recorded in the jar manifest
+which means it is no longer necessary to add it to the classpath
+when interfacing directly with the compiler jars.
+
+# Change ; Minor ; Compiler ; #5806
+Added compilation hook to run before FMU packing
+
+# Fixed ; Minor ; Compiler ; #5805
+Fixed ant clean failing with empty target directory
+
+# Fixed ; Minor ; Compiler ; #5793
+Fixed bug where reinit did not set value of aliased derivatives.
+
+# Fixed ; Minor ; Compiler ; #5793
+Improved detection of pre-propagation blocks to fix a case where 
+reinit did not update properly during event iteration.
+
+# Change ; Major; PyFMI ; #5802
+Updated JModelica external to PyFMI 2.5.3
+
+# Change ; Minor ; Compiler ; #5800
+SrcDot now has SrcNamedAccess instead of SrcAccess as children.
+
+# Fixed ; Minor ; Compiler ; #5791
+Fixed source-tree lookup for modifications: don't look up in normal scope if not found in member scope.
+
+# Fixed ; Minor ; Runtime; #5776
+Fixed bug with boolean inputs where the input was used in a pre() operator.
+
+# Fixed ; Minor ; Compiler ; #5771
+Fixed a bug regarding searching in surrounding classes
+in one of the simple (source) class lookup methods.
+
+# Fixed ; Minor ; Compiler ; #5735
+Fixed exception during code generation caused by bug in temporary removal after function inlining.
+
+# Fixed ; Minor ; Compiler ; #5772
+Fixed exception from negated alias in assign statement left hand side.
+
+# Fixed ; Minor ; Compiler ; #5756
+Fixed c-code generation bug for some array assignments which led to segfaults.
+
+# Feature ; Minor ; Compiler ; #5758
+Added new option time_events, allows time events to be generated, enabled by default.
+Deprecated option relational_time_events.
+
+# Fixed ; Minor ; Compiler ; #5763
+Improved scalarization of record arrays.
+
+# Fixed ; Minor ; Compiler ; #5756
+Improved array initialization for primitive arrays in global constants.
+
+# Fixed ; Minor ; Compiler ; #5753
+Added error check for variability of sample arguments.
+
+# Feature ; Minor ; Compiler ; #5735
+Loop unrolling is now an internal option.
+
+# Fixed ; Minor ; Compiler ; #5748
+Fixed NullPointerException from flattening global access used as subscript
+
+# Feature ; Minor ; Compiler ; #5735
+Turned off loop unrolling in functions to increase performance.
+
+# Feature ; Minor ; Compiler ; #5735
+Added option for controlling maximum allowed size of dynamic state
+sets. Changed default from 8 to 10.
+
+# Feature ; Minor ; Compiler ; #5726
+Orginal annotations should be preserved when components are redeclared
+ unless new annotations are added in the redeclaring declaration.
+
+; Feature ; Minor ; Compiler ; #5725
+Added splitting of generated C code for initialization of global constants (improves compilation time).
+
+; Fixed ; Minor ; Compiler ; #5721
+Fix c_compiler so it's case insensitive.
+
+; Feature ; Major ; Compiler ; #5515
+Turned on initial variability propagation by default.
+
+; Fixed ; Minor ; Runtime ; #5710
+Fixed so that the flag "enforce_bounds" is taken into account in Brent.
+
+; Fixed ; Minor ; PyFMI ; #5709
+Fixed issue with the absolute tolerance not being set when only the
+relative tolerance has been provided.
+
+; Fixed ; Minor ; Runtime ; #5708
+Updated the error message when Brent fails to backet a root.
+
+; Feature ; Minor ; Compiler ; #5696
+Enabled parameter alias elimination by default.
+
+; Fixed ; Minor ; PyFMI ; #5706
+Added checks on the nominal values.
+
+; Feature ; Minor ; Compiler ; #5515
+Expanded variability propagation to also work on initial system. 
+Controlled with experimental option, default off.
+
+; Change ; Minor ; Compiler ; #5694
+Reworked GUID generation to only depend on modelDescription.xml.
+
+; Fixed ; Minor ; Compiler ; #5663
+Fixed type checking of array sizes for elements in arrays of records.
+
+; Fixed ; Minor ; Compiler ; #5699
+Made sure to release the package.order file after reading.
+
+; Fixed ; Minor ; Documentation ; #5698
+Add more javadoc for how the AnnotationProvider framework works.
+
+; Fixed ; Minor ; Compiler ; #5689
+Enabled evaluation of non-literal expressions in annotations.
+
+; Fixed ; Minor ; Compiler ; #5692
+Fixed exception from specific combination of record with array of unknown 
+size in if expression in binding expression.
+
+; Fixed ; Major ; Compiler ; #5634
+Updated calculation order of start values and dependent parameters to reduce
+number of evaluations.
+
+; Fixed ; Minor ; Compiler ; #5688
+Fixed that binding expression splitting doesn't check bounds.
+
+; Fixed ; Minor ; Compiler ; #5687
+Don't allow any inlining of equations in when loops.
+
+; Fixed ; Minor ; Runtime ; #5684
+Fixed segfault when calling free directly after a reset on CS FMUs.
+
+; Fixed ; Minor ; Compiler ; #5676
+Fixed a problem causing incorrect annotation trees to be created in some cases.
+
+; Fixed ; Major ; Build system ; #5671
+Fixed an issue where gcc compiled FMUs did not work on Windows 10 together
+with a VS2017 compiled software.
+
+; Changed ; Minor ; Compiler ; #5670
+Update handling of constants, and accesses to package constants, in functions
+for improved compilation and simulation performance.
+
+; Fixed ; Minor ; PyFMI ; #5668
+Fixed issue with reusing the PyFMI computed FD Jacobian.
+
+; Fixed ; Minor ; Runtime ; #5665
+Updated the loglevel conversion between runtime and Kinsol which in some
+models has significant impact on the performance.
+
+; Change ; Minor ; Compiler ; #5659
+loadResource on directories now always leads to compile time evaluation of path.
+
+; Fixed ; Minor ; Compiler ; #5642
+Improved and added tests for SimpleLookup. Now supports Quoted names.
+
+; Fixed ; Minor ; Compiler ; #5640 
+Fixed a problem where functions had to restrictive visibility.
+Added header information for functions which needed greater visibility.
+
+; Fixed ; Minor ; Compiler ; #5632
+Fixed issue with FExp.dynamicFExp(FExp exp) for null input.
+
+; Fixed ; Minor ; PyFMI ; #5624
+Made binary result saving more robust.
+
+; Fixed ; Minor ; PyFMI ; #5623
+Fixed issue with using the result filter together with FMI1
+
+; Change ; Minor ; MSL ; #5619
+Patched MSL resources to work with VS2015.
+
+; Feature ; Minor ; Compiler ; #5605
+Support for initial parameter external objects.
+
+; Change ; Minor ; Compiler ; #5612 
+Changed error check of arguments when compiling from command line to allow empty library argument if a
+modelica path is supplied.
+
+; Fixed ; Minor ; PyFMI ; #5615
+Improved input handling for FMI2
+
+; Fixed ; Minor ; PyFMI ; #5613
+Fixed simulation logging when there are no states.
+
+; Fixed ; Minor ; Compiler ; #5569
+Fixed bug where generic annotation framework returned wrong value or threw
+exception (depended on underlying implementation) if the node was ambiguous,
+instead it now returns another ambiguous node.
+
+; Fixed ; Minor ; Runtime ; #5608
+Removed the -g flag when building FMUs
+
+; Fixed ; Minor ; Compiler ; #5606
+Improved ability to obtain annotation value and 
+remove modifications.
+
+; Fixed ; Minor ; Compiler ; #5594
+Added functionality to remove annotations/modifications.
+
+; Fixed ; Minor ; Compiler ; #5604
+Fixed bug where using an iterator expression to set the binding 
+expression of a member of a record array member in a record declaration 
+would cause a crash in certain circumstances.
+
+; Fixed ; Minor ; PyFMI ; #5597
+Fixed issue with getting time varying variables (sometimes wrong 
+variables was returned)
+
+; Fixed ; Minor ; Runtime ; #5590
+Fixed solver trace when beta condition failures occur.
+
+; Feature ; Minor ; PyFMI ; #5587
+Added functionality to set enumerations with strings
+
+; Fixed ; Minor ; Compiler ; #5579 
+Improved handling of event generating relational expressions
+with nested blocks.
+
+; Feature ; Minor ; Compiler ; #5584
+Added variable index comment before each variable in the FMI ModelVariables
+XML.
+
+; Fixed ; Minor ; Compiler ; #5490
+Fixed bug that caused some errors to be reported on the wrong line.
+
+; Feature ; Minor ; PyFMI ; #5089
+Added option to limit the maximum size of the log file.
+
+; Fixed ; Minor ; Compiler ; #5564
+Using absoluteValue annotation to generate relativeQuantity attribute
+
+; Fixed ; Minor ; Compiler ; #5563
+Fixed bugs for start attribute generation in xml
+
+; Fixed ; Minor ; Compiler ; #5560
+Improved temporary counting leading to smaller generated c-functions
+
+; Fixed ; Minor ; Compiler ; #5559
+Fixed a problem with vectorized functions where the 
+sizes of the dimensions where incorrectly handled.
+
+; Fixed ; Minor ; Compiler ; #5557
+Fixed dependency computation for dynamic derivatives, the FMU XML didn't list
+the corresponding dynamic states as dependencies for the dynamic derivatives.
+
+================= Stable-2018-02-09 ==================
+; Change ; Minor ; Runtime; #5555
+Added so that the internal solver is re-initialized if inputs are
+changed in a co-simulation FMU.
+
 ; Change ; Minor ; Compiler ; #5549
 Moved static variable declarations for generated temporaries to
 generated struct in order to improve multithreading capabilities.

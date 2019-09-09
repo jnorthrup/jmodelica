@@ -32,6 +32,7 @@ from pymodelica.compiler_wrappers import ModelicaCompiler
 from pymodelica.compiler_wrappers import OptimicaCompiler
 from pymodelica import compile_fmu
 import pymodelica as pym
+from pyfmi import load_fmu
 
 
 class Test_Compiler:
@@ -200,6 +201,15 @@ class Test_Compiler:
         nose.tools.assert_raises(pym.compiler_exceptions.UnknownOptionError, Test_Compiler.mc.get_integer_option, option) 
 
     @testattr(stddist_full = True)
+    def test_setget_integer_option_value_error(self):
+        """ Test that integer option setter raises the proper error. """
+        #try to set to an invalid value
+        option = 'log_level'
+        invalid_value = 30
+        nose.tools.assert_raises(pym.compiler_exceptions.InvalidOptionValueError, Test_Compiler.mc.set_integer_option, option, invalid_value)
+
+
+    @testattr(stddist_full = True)
     def test_setget_real_option(self):
         """ Test real option setter and getter. """
         option = 'events_tol_factor'
@@ -274,7 +284,27 @@ class Test_Compiler:
             comp_res = 0
     
         assert comp_res==1, "Compilation failed in test_MODELICAPATH"
-        
+
+class Test_Compile_Load:
+    
+    @testattr(windows_base = True)
+    def test_load_FMU_VS2017(self):
+        """
+        Test that a gcc compiled FMU can be loaded into a VS2017 compiled program.
+        """
+        cwd = os.getcwd()
+        try:
+            import subprocess
+            os.chdir(os.path.join(get_files_path(), "Programs", "Load_and_initialize"))
+            name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", compile_to="CC.fmu", compiler_options={"c_compiler":"gcc"}, platform="win64")
+            
+            #Basically just verify that the process terminates
+            return_code = subprocess.call("LoadAndInitialize.exe CC.fmu .", shell=True)
+            assert return_code == 0
+        except pym.compiler_exceptions.CcodeCompilationError:
+            pass #64bit not supported
+        os.chdir(cwd)
+
 class Test_Compiler_functions:
     """ This class tests the compiler functions. """
 
@@ -289,6 +319,18 @@ class Test_Compiler_functions:
         cls.fpath_oc = os.path.join(get_files_path(), 'Modelica', 
             'Pendulum_pack.mop')
         cls.cpath_oc = "Pendulum_pack.Pendulum_Opt"
+    
+    @testattr(stddist_full = True)
+    def test_compile_to_argument(self):
+        
+        name = pym.compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", compile_to="Coupled.fmu")
+        
+        assert name.endswith("Coupled.fmu")
+        
+        model = load_fmu(name)
+        
+        assert model.get_name() == "Coupled"
+        assert model.get_identifier() == "Coupled"
    
     @testattr(stddist_full = True)
     def test_compile_fmu_illegal_target_error(self):

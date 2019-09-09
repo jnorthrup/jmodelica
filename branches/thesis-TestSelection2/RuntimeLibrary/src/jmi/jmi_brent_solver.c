@@ -86,10 +86,8 @@ int brentdf(jmi_real_t y, jmi_real_t f, jmi_real_t* df, void* problem_data) {
         
     if (block->dF) {
         /* utilize directional derivatives to calculate Jacobian */
-        block->x[0] = y;
-        
         block->dx[0] = 1;
-        ret = block->dF(block->problem_data,block->x,block->dx,block->res,block->dres,JMI_BLOCK_EVALUATE);
+        ret = block->dF(block->problem_data,&y,block->dx,&f,block->dres,JMI_BLOCK_EVALUATE);
         *df = block->dres[0];
         block->dx[0] = 0;
         
@@ -106,7 +104,7 @@ int brentdf(jmi_real_t y, jmi_real_t f, jmi_real_t* df, void* problem_data) {
         inc = JMI_MAX(JMI_ABS(y), block->nominal[0])*sign*1e-8;
         y += inc;
         /* make sure we're inside bounds*/
-        if((y > block->max[0]) || (y < block->min[0])) {
+        if(block->options->enforce_bounds_flag && ((y > block->max[0]) || (y < block->min[0]))) {
             inc = -inc;
             y = y0 + inc;
         }
@@ -117,7 +115,7 @@ int brentdf(jmi_real_t y, jmi_real_t f, jmi_real_t* df, void* problem_data) {
         if (ret) {
             inc = -inc;
             y = y0 + inc;
-            if ((y <= block->max[0]) && (y >= block->min[0])) {
+            if (block->options->enforce_bounds_flag && ((y <= block->max[0]) && (y >= block->min[0]))) {
                 ret = brentf(y, &ftemp, block);
             }
         }
@@ -248,7 +246,7 @@ int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, double *
     double delta_prev = delta;
     int flag;
     int i = 0;
-    jmi_log_node_t node;
+    jmi_log_node_t node={0};
     
     if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) { 
             node = jmi_log_enter_fmt(block->log, logInfo, "BrentNewton", 
@@ -308,13 +306,13 @@ int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, double *
         x_tmp = x - delta;
         
         /* Clamping */
-        if (x_tmp < block->min[0]) {
+        if (block->options->enforce_bounds_flag && x_tmp < block->min[0]) {
             if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
                 jmi_log_fmt(block->log, node, logInfo, "Clamping iteration variable <ivs: %f> to minimum, <min: %f>",
                     x_tmp,block->min[0]);
             }
             x_tmp = block->min[0];
-        } else if (x_tmp > block->max[0]) {
+        } else if (block->options->enforce_bounds_flag && x_tmp > block->max[0]) {
             if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
                 jmi_log_fmt(block->log, node, logInfo, "Clamping iteration variable <ivs: %f> to maximum, <max: %f>",
                     x_tmp,block->max[0]);
@@ -416,7 +414,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
     double dNewton = 0.0;
     double xBest = 0.0;
     double fBest = 0.0;
-    jmi_log_node_t topnode;
+    jmi_log_node_t topnode={0};
     jmi_log_t *log = block->log;
 #ifdef JMI_PROFILE_RUNTIME
     if (block->parent_block) {
@@ -630,8 +628,8 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         double lower = x, f_lower = f;
         double upper = x, f_upper = f;
         /* Introduce to avoid IllegalIterationVariableInput warnings */
-        double bracketMin = JMI_MAX(block->min[0], -block->nominal[0]*JMI_LIMIT_VALUE);
-        double bracketMax = JMI_MIN(block->max[0], block->nominal[0]*JMI_LIMIT_VALUE);
+        double bracketMin = JMI_MAX(block->options->enforce_bounds_flag ? block->min[0] : -BIG_REAL, -block->nominal[0]*JMI_LIMIT_VALUE);
+        double bracketMax = JMI_MIN(block->options->enforce_bounds_flag ? block->max[0] : BIG_REAL, block->nominal[0]*JMI_LIMIT_VALUE);
 
         double initialStepStatic = block->nominal[0]*BRENT_INITIAL_STEP_FACTOR;
         double initialStepStaticSmall = initialStepStatic*BRENT_INITIAL_STEP_FACTOR;
@@ -746,7 +744,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                     jmi_brent_solver_print_solve_end(block, &topnode, JMI_BRENT_SUCCESS);
                     return JMI_BRENT_SUCCESS;
                 }
-                jmi_log_node(log, logError, "BrentBracketFailed", "Could not bracket the root in <block: %s>. Both lower and upper are at bounds.", block->label);
+                jmi_log_node(log, logError, "BrentBracketFailed", "Could not bracket the root in <block: %s>. Iteration variable <variable:#r%d#>, search interval bounds: <min: %g>, <max: %g>.", block->label, block->value_references[0], block->min[0], block->max[0]);
                 jmi_brent_solver_print_solve_end(block, &topnode, JMI_BRENT_ROOT_BRACKETING_FAILED);
                 /* Write initial guess back to model. */ 
                 block->x[0] = init;
@@ -839,7 +837,7 @@ int jmi_brent_search(jmi_brent_func_t f, jmi_real_t u_min, jmi_real_t u_max, jmi
     int flag;
     jmi_block_solver_t* block = (jmi_block_solver_t*)data;
     jmi_log_t* log = block->log;
-    jmi_log_node_t log_node;
+    jmi_log_node_t log_node={0};
     if (block->callbacks->log_options.log_level >= BRENT_EXTENDED_LOG_LEVEL) {
         log_node = jmi_log_enter(log, logInfo, "BrentSearch");
     }
