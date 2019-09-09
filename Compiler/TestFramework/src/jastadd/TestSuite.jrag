@@ -38,13 +38,12 @@ public class TestSuite implements GenericTestSuite {
         name = className;
         l = new ArrayList<TestCase>();
         SourceRoot sr = null;
-        String modelica_path = ModelicaCompiler.getJModelicaHome() + File.separator + 
-                "ThirdParty" + File.separator + "MSL";
-        OptionRegistry options = new TestOptions();
-        options.setStringOption("MODELICAPATH", modelica_path);
+        File modelicapath = EnvironmentUtils.getThirdPartyMSL();
+        OptionRegistry options = OptionRegistry.buildTestOptions();
+        options.MODELICAPATH.setValue(modelicapath.getPath());
         ASTNode.log = new SysErrLogger();
         try {
-            sr = TestCase.PARSER_HANDLER.parseFile(UtilInterface.create(options), fileName);
+            sr = TestCase.PARSER_HANDLER.parseFile(UtilInterface.create(options), LoadInfo.create(fileName));
         } catch (Exception e) {
             asserter.fail("Error when parsing file: " + fileName + "\n" + e);
         }

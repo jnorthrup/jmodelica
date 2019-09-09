@@ -275,10 +275,6 @@ aspect ErrorCheck {
 	  return getUtilInterface().getErrorHandler();
   }
 
-  syn int ASTNode.lineNumber() = (start != 0 || getParent()==null)? beginLine() : getParent().lineNumber();
-  syn int ASTNode.columnNumber() = (start != 0 || getParent()==null)? beginColumn() : getParent().columnNumber();
-  
-  
   ASTNode implements ReporterNode;
   
   public void ASTNode.reportProblem(Problem problem) {
@@ -430,6 +426,7 @@ aspect ErrorCheck {
     // TODO: find way to move side-effects out from inh attr
     inh boolean FExp.lockBranch(ErrorCheckType checkType);
     inh boolean FExpSubscript.lockBranch(ErrorCheckType checkType);
+    inh boolean FIntegerSubscript.lockBranch(ErrorCheckType checkType);
     inh boolean FAbstractEquation.lockBranch(ErrorCheckType checkType);
     inh boolean FStatement.lockBranch(ErrorCheckType checkType);
     inh boolean FIfWhenClause.lockBranch(ErrorCheckType checkType);
@@ -583,7 +580,7 @@ aspect ErrorCheck {
     inh InstComponentDecl ASTNode.errorEnclosingComponent();
     eq InstNode.getChild().errorEnclosingComponent() = containingInstComponent();
     eq InstComponentDecl.getChild().errorEnclosingComponent() {
-        if (isRedeclared() || getComponentDecl().hasRedeclare()) {
+        if (isRedeclared() || getSrcComponentDecl().hasRedeclare()) {
             return errorEnclosingComponent();
         } else {
             return containingInstComponent();
@@ -597,7 +594,7 @@ aspect ErrorCheck {
 
     syn String ASTNode.errorComponentName() {
         InstComponentDecl parent = errorEnclosingComponent();
-        return parent == null ? null : parent.getFQName().scalarName(false);
+        return parent == null ? null : parent.getFAccess().scalarName(false);
     }
 
 }
@@ -609,11 +606,12 @@ aspect InstanceErrorCheck {
     // We don't want to error check an entire model, just the classes
     //   that are used. 
     public void InstProgramRoot.checkErrorsInInstClass(String className, ErrorCheckType checkType) throws ModelicaClassNotFoundException {
-        InstLookupResult<InstClassDecl> icd = lookupInstClassQualified(className);
-        if (icd.successful()) 
-            icd.target().errorCheck(checkType);
-        else
+        InstClassDecl icd = instantiateModel(className);
+        if (!icd.isUnknown()) {
+            icd.errorCheck(checkType);
+        } else {
             throw new ModelicaClassNotFoundException(className);
+        }
     }
 
     public void InstClassDecl.checkErrorsInModelInstance(String className, ErrorCheckType checkType) throws ModelicaClassNotFoundException {
@@ -695,9 +693,9 @@ aspect InstanceErrorCheck {
             }
             getInstRestriction().collectErrors(checkType);
             getInstGeneratedInners().collectErrors(checkType);
-            if (getBaseClassDecl() instanceof FullClassDecl) {
-                FullClassDecl fcd = (FullClassDecl) getBaseClassDecl();
-                if (!(fcd.getName().getID().equals(fcd.getEndDecl().getEndID()))) {
+            if (getSrcBaseClassDecl() instanceof SrcFullClassDecl) {
+                SrcFullClassDecl fcd = (SrcFullClassDecl) getSrcBaseClassDecl();
+                if (!(fcd.getName().getID().equals(fcd.getSrcEndDecl().getEndID()))) {
                     error("The declaration and end names of a class should be the same");
                 }
             }
@@ -773,21 +771,20 @@ aspect InstanceErrorCheck {
             derivative.ast().error("Function name is missing in derivative annotation declaration");
             return;
         }
-        String name = derivative.string();
-        if (name == null) {
+        InstLookupResult<InstClassDecl> lr = derivative.lookupInstClass();
+        if (lr == null) {
             derivative.ast().error("Invalid derivative function reference");
             return;
         }
-        InstLookupResult<InstClassDecl> lr = lookupDerivativeFunction(name);
         if (lr.isProblem()) {
-            lr.problem(derivative.ast(), "function", name);
+            lr.problem(derivative.ast(), "function", derivative.valueToString());
             if (lr.isError()) {
                 return;
             }
         }
         InstClassDecl icd = lr.target().actualInstClass();
         if (!icd.isFunction()) {
-            derivative.ast().error("The class " + name + " is not a function");
+            derivative.ast().error("The class " + derivative.valueToString() + " is not a function");
             return;
         }
         icd.collectErrors(checkType);
@@ -795,14 +792,14 @@ aspect InstanceErrorCheck {
         Set<String> noAndZeroDerivatives = new HashSet<String>();
         for (AnnotationNode attrNode : derivative) {
             if ("noDerivative".equals(attrNode.name()) || "zeroDerivative".equals(attrNode.name())) {
-                if (!attrNode.isStringValue()) {
+                InstLookupResult<InstComponentDecl> res = attrNode.lookupInstComponent();
+                if (res == null) {
                     attrNode.ast().error("Expecting variable reference for " + attrNode.name() + " annotation");
                     continue;
                 }
-                String varName = attrNode.string();
+                String varName = attrNode.valueToString();
                 if (!noAndZeroDerivatives.add(varName))
                     attrNode.ast().error("Multiple noDerivative or zeroDerivative declarations for " + varName);
-                InstLookupResult<InstComponentDecl> res = genericLookupInstComponent(varName);
                 if (res.isNotFound())
                     attrNode.ast().error("Unable to find " + varName);
                 else if (!res.target().isInput())
@@ -818,11 +815,6 @@ aspect InstanceErrorCheck {
             }
         }
     }
-
-    syn InstLookupResult<InstClassDecl> InstBaseClassDecl.lookupDerivativeFunction(String name)  = lookupInstClassQualified(name);
-    eq InstReplacingFullClassDecl.lookupDerivativeFunction(String name)        = getInstClassRedeclare().lookupInstClassQualified(name);
-    eq InstReplacingShortClassDecl.lookupDerivativeFunction(String name)       = getInstClassRedeclare().lookupInstClassQualified(name);
-    eq InstReplacingSimpleShortClassDecl.lookupDerivativeFunction(String name) = getInstClassRedeclare().lookupInstClassQualified(name);
 
     public void InstSimpleShortClassDecl.collectErrors(ErrorCheckType checkType) {
         if (!errorChecked) {
@@ -974,11 +966,11 @@ aspect InstanceErrorCheck {
                 }
             }
             
-            FTypePrefixVariability v = variability().combine();
+            TypePrefixVariability v = variability().combine();
             // Mark parameters with Evaluate=true as structural
             if (v.parameterVariability() && isEvalAnnotated(true)) {
                 if (v.fixedParameterOrLess()) {
-                    forceVariability(checkType, fStructParameter());
+                    forceVariability(checkType, Variability.STRUCTPARAMETER);
                 } else {
                     warning("Evaluate annotation is ignored for parameters with fixed=false");
                 }
@@ -1016,7 +1008,7 @@ aspect InstanceErrorCheck {
 				InstComponentModification icm = (InstComponentModification)im;
 				if (icm.hasInstModification() && icm.getInstModification().hasInstValueMod()) {
 					FExp val_mod = icm.getInstModification().instValueMod();
-                    if (val_mod.variability().lessOrEqual(fConstant())) {
+                    if (val_mod.variability().lessOrEqual(Variability.CONSTANT)) {
                         val_mod.checkConstantExpression(checkType, "attribute", icm.getName().name());
                     } else if (!val_mod.variability().parameterOrLess()) {
                         ASTNode.START_VALUE_NOT_PARAMETER.invoke(val_mod, icm.getName().name(), val_mod);
@@ -1025,7 +1017,16 @@ aspect InstanceErrorCheck {
 			}
 		}
 	}
+
 	
+    public static final SimpleProblemProducer ASTNode.UNSPECIFIED_ENUM_COMPONENT =
+            new SimpleErrorProducer("UNSPECIFIED_ENUM_COMPONENT", ProblemKind.SEMANTIC,
+                    "Components of unspecified enumerations are not allowed in simulation models:\n %s");
+
+	syn boolean InstNode.isUnspecifiedEnum() = false;
+	eq InstPrimitive.isUnspecifiedEnum() = myInstClass().isUnspecifiedEnum();
+	eq InstClassDecl.isUnspecifiedEnum() = enumLiterals().isEmpty();
+
 	public void InstExtends.collectErrors(ErrorCheckType checkType) {
 	    if (!errorChecked) {
 	    	if (checkType.checkForRecursiveStructure() && isRecursed()) {
@@ -1184,7 +1185,7 @@ aspect InstanceErrorCheck {
 	eq Root.getChild().myAccessExists()       = false;
 	eq InstAccess.getChild().myAccessExists() = !myInstComponentDecl().isUnknown();
 	
-	public void FArraySubscripts.collectErrors(ErrorCheckType checkType) {
+	public void FArrayExpSubscripts.collectErrors(ErrorCheckType checkType) {
 		// Should this check be in the access instead?
         int ndims = myDims();
 		if (getNumFSubscript() > ndims && !isInstComponentSize() && myAccessExists()) {
@@ -1198,6 +1199,16 @@ aspect InstanceErrorCheck {
     		super.collectErrors(checkType);
 		}
 	}
+
+    public void FArrayLitSubscripts.collectErrors(ErrorCheckType checkType) {
+        /*
+         * Does not need implementation since error checking is done in the instance tree,
+         * and there should not be any FArrayLitSubscripts there.
+         * The reason for that is information necessary for error printing (line and column number)
+         * is not saved in FArrayLitSubscripts.
+         */
+        throw new UnsupportedOperationException();
+    }
 
     public void FBreakStmt.collectErrors(ErrorCheckType checkType) {
         if (enclosingLoop() == null)
@@ -1488,10 +1499,11 @@ aspect InstanceErrorCheck {
     /**
      * Check if this node is in a recursive structure.
      */
-    syn boolean InstNode.isRecursed()      = false;
-    eq InstComponentDecl.isRecursed()      = !isPrimitive() && isWithin(myInstClass());
-    eq InstExtends.isRecursed()            = isWithin(myInstClass());
-    eq InstArrayComponentDecl.isRecursed() = instComponentDecl().isRecursed();
+    syn boolean InstNode       .isRecursed() = false;
+    eq InstComponentDecl       .isRecursed() = !isPrimitive() && isWithin(myInstClass());
+    eq InstExtends             .isRecursed() = isWithin(myInstClass());
+    eq InstSimpleShortClassDecl.isRecursed() = isWithin(actualInstClass());
+    eq InstArrayComponentDecl  .isRecursed() = instComponentDecl().isRecursed();
 
 	// TODO: check if we realy need this in addition to isRecursed()
 	/**
@@ -1562,17 +1574,19 @@ aspect InstanceErrorCheck {
     protected static final byte InstNode.RECURSIVE_YES     = 1;
     protected static final byte InstNode.RECURSIVE_NO      = 2;
 
-	/**
-	 * Check if <code>icd</code> is an ancestor of this node or any ancestor is an 
-	 *        instance of <code>icd</code>.
-	 */
-	inh boolean InstComponentDecl.isWithin(InstClassDecl icd);
-	inh boolean InstExtends.isWithin(InstClassDecl icd);
-	eq InstNode.getChild().isWithin(InstClassDecl icd)          = isOfInstClassDecl(icd);
-	eq InstComponentDecl.getChild().isWithin(InstClassDecl icd) = isOfInstClassDecl(icd) || isWithin(icd);
-	eq InstExtends.getChild().isWithin(InstClassDecl icd)       = isOfInstClassDecl(icd) || isWithin(icd);
-    eq Root.getChild().isWithin(InstClassDecl icd)              = false;
-	
+    /**
+     * Check if <code>icd</code> is an ancestor of this node or any ancestor is an 
+     *        instance of <code>icd</code>.
+     */
+    inh boolean InstComponentDecl.isWithin(InstClassDecl icd);
+    inh boolean InstExtends      .isWithin(InstClassDecl icd);
+    inh boolean InstClassDecl    .isWithin(InstClassDecl icd);
+    eq InstNode         .getChild().isWithin(InstClassDecl icd) = isOfInstClassDecl(icd);
+    eq InstComponentDecl.getChild().isWithin(InstClassDecl icd) = isOfInstClassDecl(icd) || isWithin(icd);
+    eq InstClassDecl    .getChild().isWithin(InstClassDecl icd) = icd == this || (!isFunction() && isWithin(icd));
+    eq InstExtends      .getChild().isWithin(InstClassDecl icd) = isOfInstClassDecl(icd) || isWithin(icd);
+    eq Root             .getChild().isWithin(InstClassDecl icd) = false;
+
 	/**
 	 * Check if this node is equal to or an instance of <code>icd</code>.
 	 */

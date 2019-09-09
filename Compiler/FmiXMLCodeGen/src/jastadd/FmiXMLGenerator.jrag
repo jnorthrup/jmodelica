@@ -29,7 +29,7 @@ aspect FmiXML {
     /**
      * Checks if a variable should be exposed in the XML
      */
-    public boolean FVariable.generateXMLVariable() {
+    public boolean FVariable.shouldGenerateXMLVariable() {
         return !isPreVariable() && !isExternalObject() && (
                 !isTemporary() ||
                 isDifferentiatedVariable() ||
@@ -46,19 +46,69 @@ aspect FmiXML {
         variableIndexMap.put(generateXMLName(), enumerator.next());
     }
 
-    public void FVariable.generateXMLDependencyIndex(Set<Integer> dependencyIndex, Map<String,Integer> variableIndexMap) {
-        dependencyIndex.add(variableIndexMap.get(generateXMLName()));
+    /**
+     * Returns the variable index in the xml for this variable! Only use this
+     * method if you're sure that it is generated in the XML, exception is
+     * given if the variable doesn't have any index!
+     */
+    syn int FVariable.fmiXMLVariableIndex() {
+        if (!shouldGenerateXMLVariable()) {
+            throw new InternalCompilerError("Trying to get xml variable index for variable " + name() + ", this variable is not exposed in xml and does not have an index!");
+        }
+        Integer index = myFClass().xmlVariableIndexMap().get(generateXMLName());
+        if (index == null) {
+            throw new InternalCompilerError("Got null when retrieving xml variable index for variable " + name() + "!");
+        }
+        return index;
     }
 
-    public String FVariable.generateXMLName() {
-        return name();
+    public void FVariable.generateXMLDependencyIndex(Set<Integer> dependencyIndex) {
+        dependencyIndex.add(fmiXMLVariableIndex());
     }
 
-    public int FVariable.generateXMLValueReference() {
-        return valueReference();
+    syn String FVariable.generateXMLName() = name();
+
+    syn int FVariable.generateXMLValueReference() = valueReference();
+
+    /**
+     * Generate dependency indices for the DAE system. The provided filter is
+     * used to determine whether the variable index should be included or not.
+     */
+    syn Iterable<Integer> FVariable.daeDependencyIndices(Criteria<FVariable> filter) =
+            computeIndicesDependencies(dependsOn(), filter);
+
+    /**
+     * Generate dependency indices for the Init DAE system. The provided filter
+     * is used to determine whether the variable index should be included or
+     * not.
+     */
+    syn Iterable<Integer> FVariable.initDAEDependencyIndices(Criteria<FVariable> filter) = 
+            computeIndicesDependencies(hasParameterEquation() ? myParameterDependencies() : initDependsOn(), filter);
+
+    /**
+     * Computes and filters the XML indices for the list of provided variables
+     * and returns them in a sorted set. The filtering is based on the provided
+     * criteria object. If it isn't possible to compute set, then null is
+     * returned. This can occur if the set references an non-scalar variable
+     * and the set isn't computed for efficiency reasons.
+     * 
+     * If the provided filter is null, then all dependences will be added to
+     * the list.
+     */
+    private static Collection<Integer> FVariable.computeIndicesDependencies(Iterable<FVariable> dependencies, Criteria<FVariable> filter) {
+        TreeSet<Integer> dependencyIndex = new TreeSet<Integer>();
+        for (FVariable var : dependencies) {
+            if (filter == null || filter.test(var)) {
+                var.generateXMLDependencyIndex(dependencyIndex);
+                if (var.numScalars() > 1) {
+                    return null;
+                }
+            }
+        }
+        return dependencyIndex;
     }
-    
-    public FExp FVariable.generateXMLStartExp() {
+
+    syn FExp FVariable.generateXMLStartExp() {
         if (useBindingExpAsStart()) 
             return getBindingExp();
         else if (startAttributeSet() && !isDependentParameter() && !isAlias())
@@ -80,7 +130,7 @@ aspect FmiXML {
         VariableNameComparator comp = new VariableNameComparator();
         Iterator<FVariable> it = variables.iterator();
         while (it.hasNext()) {
-            if (!it.next().generateXMLVariable()) {
+            if (!it.next().shouldGenerateXMLVariable()) {
                 it.remove();
             }
         }
@@ -205,7 +255,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
     }
 
     /**
-     * Used for registering new tool tag undet the vendor annotation tag. 
+     * Used for registering new tool specific tag under the vendor annotation tag. 
      * Returns the name for conveninence.
      */
     public static String addVendorAnnotationTool(String childName) {
@@ -262,7 +312,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
     public class XMLTag_vendorAnnotations_tool extends XMLTag_tool {
         
         public XMLTag_vendorAnnotations_tool(AbstractGenerator myGenerator, FClass fclass) {
-            super(VENDOR_ANNOTATIONS_TOOL_MAIN, ASTNode.vendorName(), myGenerator, fclass);
+            super(VENDOR_ANNOTATIONS_TOOL_MAIN, fclass.guidManager().getToolNameToken(), myGenerator, fclass);
         }
 
         public String[] children() {
@@ -328,7 +378,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
         }
         
         public String annotationValue() {
-            return fclass.myOptions().getStringOption("compiler_version");
+            return getFClass().guidManager().getCompilerVersionToken();
         }
     }
 
@@ -356,6 +406,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
 
         public void generateVariableChildren(CodeStream genPrinter, FVariable var) {
             variable = var;
+            generateComment("Variable with index #" + var.fmiXMLVariableIndex(), genPrinter);
             super.generateChildren(genPrinter);
         }
     }
@@ -405,14 +456,18 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
      */
     protected boolean generateStartAttribute(FVariable var) {
         FExp startExp = var.generateXMLStartExp();
-        return startExp != null && startExp.isConstantExp();
+        if (startExp != null) {
+            return startExp.isConstantExp();
+        }
+        return !var.variability().parameterOrLess() && var.fixedAttribute() && !var.isAlias();
     }
 
     protected void generateStartAttributeIfSet(FVariable var, CodeStream genPrinter) {
         if (generateStartAttribute(var)) {
             FExp startExp = var.generateXMLStartExp();
-            String val = var.type().convert(startExp.ceval()).xmlValue();
-            generateAttribute(FAttribute.START, val, genPrinter);
+            CValue val = startExp != null ? startExp.ceval() : var.startAttributeCValue();
+            val = var.type().convert(val);
+            generateAttribute(FAttribute.START, val.xmlValue(), genPrinter);
         }
     }
 
@@ -564,8 +619,6 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 	 */
 	public class XMLTag_fmiModelDescription extends XMLTag {
 		
-		private final SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-		
 		public XMLTag_fmiModelDescription(AbstractGenerator myGenerator, FClass fclass) {
 			super("fmiModelDescription", "fmiModelDescription", myGenerator, fclass);
 		}
@@ -579,9 +632,9 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
             generateAttribute("fmiVersion",               "1.0",                                   genPrinter);
             generateAttribute("modelName",                fclass.name(),                           genPrinter);
             generateAttribute("modelIdentifier",          fclass.nameUnderscore(),                 genPrinter);
-            generateAttribute("guid",                     fclass.guid(),                           genPrinter);
-            generateAttribute("generationTool",           ASTNode.vendorName(),                    genPrinter);
-            generateAttribute("generationDateAndTime",    dateformat.format(new Date()),           genPrinter);
+            generateAttribute("guid",                     fclass.guidManager().getGuidToken(),     genPrinter);
+            generateAttribute("generationTool",     fclass.guidManager().getGenerationToolToken(), genPrinter);
+            generateAttribute("generationDateAndTime",    fclass.guidManager().getDateToken(),     genPrinter);
             generateAttribute("variableNamingConvention", "structured",                            genPrinter);
             generateAttribute("numberOfContinuousStates", fclass.numDifferentiatedRealVariables(), genPrinter);
             generateAttribute("numberOfEventIndicators",  numberOfEventIndicators(fclass),         genPrinter);
@@ -801,7 +854,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 			public void generateAttributes(CodeStream genPrinter) {
                 generateAttributeIfSet(FAttribute.QUANTITY, variable, genPrinter);
                 generateUnitAndDisplayUnitAttribute(genPrinter, variable);
-                generateAttribute("relativeQuantity", false, genPrinter);
+                generateAttribute("relativeQuantity", !variable.isAbsoluteValue(), genPrinter);
                 generateAttributeIfSet(FAttribute.MIN,     variable, genPrinter);
                 generateAttributeIfSet(FAttribute.MAX,     variable, genPrinter);
                 generateAttributeIfSet(FAttribute.NOMINAL, variable, genPrinter);
@@ -992,8 +1045,6 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 	 */
 	public class XMLTag_fmiModelDescription extends XMLTag {
 		
-		private final SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-		
 		public XMLTag_fmiModelDescription(AbstractGenerator myGenerator, FClass fclass) {
 			super("fmiModelDescription", "fmiModelDescription", myGenerator, fclass);
 		}
@@ -1005,13 +1056,13 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
         }
 
         public void generateAttributes(CodeStream genPrinter) {
-            generateAttribute("fmiVersion",               "2.0",                           genPrinter);
-            generateAttribute("modelName",                fclass.name(),                   genPrinter);
-            generateAttribute("guid",                     fclass.guid(),                   genPrinter);
-            generateAttribute("generationTool",           ASTNode.vendorName(),            genPrinter);
-            generateAttribute("generationDateAndTime",    dateformat.format(new Date()),   genPrinter);
-            generateAttribute("variableNamingConvention", "structured",                    genPrinter);
-            generateAttribute("numberOfEventIndicators",  numberOfEventIndicators(fclass), genPrinter);
+            generateAttribute("fmiVersion",               "2.0",                               genPrinter);
+            generateAttribute("modelName",                fclass.name(),                       genPrinter);
+            generateAttribute("guid",                     fclass.guidManager().getGuidToken(), genPrinter);
+            generateAttribute("generationTool", fclass.guidManager().getGenerationToolToken(), genPrinter);
+            generateAttribute("generationDateAndTime",    fclass.guidManager().getDateToken(), genPrinter);
+            generateAttribute("variableNamingConvention", "structured",                        genPrinter);
+            generateAttribute("numberOfEventIndicators",  numberOfEventIndicators(fclass),     genPrinter);
         }
 	}
 	
@@ -1478,7 +1529,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             public void generateAttributes(CodeStream genPrinter) {
                 generateAttributeIfSet(FAttribute.QUANTITY, variable, genPrinter);
                 generateUnitAndDisplayUnitAttribute(genPrinter, variable);
-                generateAttribute("relativeQuantity", false, genPrinter);
+                generateAttribute("relativeQuantity", !variable.isAbsoluteValue(), genPrinter);
                 generateAttributeIfSet(FAttribute.MIN,     variable, genPrinter);
                 generateAttributeIfSet(FAttribute.MAX,     variable, genPrinter);
                 generateAttributeIfSet(FAttribute.NOMINAL, variable, genPrinter);
@@ -1601,7 +1652,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			
 			public void generateChildren(CodeStream genPrinter) {
                 for (FVariable var : fclass.derivativeVariables()) {
-                    if (var.generateXMLVariable()) {
+                    if (var.shouldGenerateXMLVariable()) {
                         variable = var;
                         super.generateChildren(genPrinter);
                     }
@@ -1624,7 +1675,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			
 			public void generateChildren(CodeStream genPrinter) {
                 for (FVariable var : fclass.outputs()) {
-                    if (var.generateXMLVariable()) {
+                    if (var.shouldGenerateXMLVariable()) {
                         variable = var;
                         super.generateChildren(genPrinter);
                     }
@@ -1657,7 +1708,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
                 //Find the initial unknowns if there are any.
                 initialUnknowns = new LinkedList<FVariable>();
                 for (FVariable var : fclass.allVariables()) {
-                    if (var.generateXMLVariable() && isInitialUnknown(var)) {
+                    if (var.shouldGenerateXMLVariable() && isInitialUnknown(var)) {
                         initialUnknowns.add(var);
                     }
                 }
@@ -1686,30 +1737,18 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
          * Base class for tags used to generate XML Tags Unknown
          */
         public abstract class XMLTag_unknown extends XMLTag {
-            
+
             public XMLTag_unknown(String name, String xml, AbstractGenerator myGenerator, FClass fclass) {
                 super(name, xml, myGenerator, fclass);
             }
-            
-            abstract Set<FVariable> dependentVariables(FVariable var);
-            abstract boolean isInitialKnown(FVariable var);
-            
+
+            protected abstract Iterable<Integer> dependencyIndices();
+
             public void generateAttributes(CodeStream genPrinter) {
-                
-                generateAttribute("index", fclass.xmlVariableIndexMap().get(variable.generateXMLName()), genPrinter);
-                boolean hasNonScalarDependency = false;
-                //Find the dependencies.
-                TreeSet<Integer> dependencyIndex = new TreeSet<Integer>();
-                for (FVariable vv : dependentVariables(variable)) {
-                    if (isInitialKnown(vv)) {
-                        vv.generateXMLDependencyIndex(dependencyIndex, fclass.xmlVariableIndexMap());
-                        if (vv.numScalars() > 1) {
-                            hasNonScalarDependency = true;
-                        }
-                    }
-                }
-                if (!hasNonScalarDependency) {
-                    // If we have depenency on a non-scalar, then we skip the 
+                generateAttribute("index", variable.fmiXMLVariableIndex(), genPrinter);
+                Iterable<Integer> dependencyIndex = dependencyIndices();
+                if (dependencyIndex != null) {
+                    // If we have dependency on a non-scalar, then we skip the 
                     // dependencies filed since it can become to verbose!
                     // According to the FMI specification this means that this
                     // unknown depends on all knowns!
@@ -1717,7 +1756,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
                 }
             }
         }
-        
+
         public class XMLTag_unknownForInit extends XMLTag_unknown {
 
             private HashMap<FVariable, HashSet<FVariable>> parameterDependencies = null;
@@ -1725,32 +1764,32 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             public XMLTag_unknownForInit(AbstractGenerator myGenerator, FClass fclass) {
                 super("unknownForInit", "Unknown", myGenerator, fclass);
             }
-            
-            protected Set<FVariable> dependentVariables(FVariable var) {
-                if (var.hasParameterEquation())
-                    return var.myParameterDependencies();
-                else
-                    return var.initDependsOn();
-            }
-            
-            protected boolean isInitialKnown(FVariable var) {
-                boolean isExact = getInitialType(var) == InitialType.EXACT;
-                return var.generateXMLVariable() && isExact || var.isInput();
+
+            @Override
+            protected Iterable<Integer> dependencyIndices() {
+                return variable.initDAEDependencyIndices(new Criteria<FVariable>() {
+                    @Override
+                    public boolean test(FVariable var) {
+                        return (var.shouldGenerateXMLVariable() && getInitialType(var) == InitialType.EXACT) || var.isInput();
+                    }
+                });
             }
         }
-        
+
         public class XMLTag_unknownForSimulation extends XMLTag_unknown {
 
             public XMLTag_unknownForSimulation(AbstractGenerator myGenerator, FClass fclass) {
                 super("unknownForSimulation", "Unknown", myGenerator, fclass);
             }
-            
-            protected Set<FVariable> dependentVariables(FVariable var) {
-                return var.dependsOn();
-            }
-            
-            protected boolean isInitialKnown(FVariable var) {
-                return var.isDifferentiatedVariable() || var.isInput();
+
+            @Override
+            protected Iterable<Integer> dependencyIndices() {
+                return variable.daeDependencyIndices(new Criteria<FVariable>() {
+                    @Override
+                    public boolean test(FVariable var) {
+                        return var.isDifferentiatedVariable() || var.isFDynamicStateVariable() || var.isInput();
+                    }
+                });
             }
         }
     }

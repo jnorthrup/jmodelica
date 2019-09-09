@@ -75,12 +75,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "org/jmodelica/optimica/compiler/FRealVariable.h"
 #include "org/jmodelica/optimica/compiler/FDerivativeVariable.h"
 #include "org/jmodelica/optimica/compiler/FTimedVariable.h"
-#include "org/jmodelica/optimica/compiler/FIdUse.h"
+#include "org/jmodelica/optimica/compiler/CommonAccess.h"
+#include "org/jmodelica/optimica/compiler/FAccess.h"
 #include "org/jmodelica/optimica/compiler/FExp.h"
 #include "org/jmodelica/optimica/compiler/FFunctionDecl.h"
 #include "org/jmodelica/optimica/compiler/Root.h"
 #include "org/jmodelica/optimica/compiler/BaseNode.h"
-#include "org/jmodelica/util/OptionRegistry.h"
 #include "org/jmodelica/optimica/compiler/BLT.h"
 #include "org/jmodelica/optimica/compiler/StructuredBLT.h"
 #include "org/jmodelica/optimica/compiler/FEquation.h"
@@ -104,7 +104,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace mc = org::jmodelica::modelica::compiler;
 namespace jl = java::lang;
-using org::jmodelica::util::OptionRegistry;
 using std::cout;  using std::endl; using std::string;
 using std::vector;
 
@@ -155,9 +154,9 @@ namespace ModelicaCasADi
 
     }OCStruct;
 
-    template <typename CStruct, typename TModel>
+    template <typename CStruct, typename TModel, typename TOptions>
         void transferModel(Ref<TModel> m, string modelName, const vector<string> &modelFiles,
-    Ref<CompilerOptionsWrapper> options, string log_level) {
+    Ref<TOptions> options, string log_level) {
         
         bool with_blt = options->getBooleanOption("equation_sorting");
         typename CStruct::TCompiler compiler(options->getOptionRegistry());
@@ -233,12 +232,12 @@ namespace ModelicaCasADi
     }
 
     void transferModelFromModelicaCompiler(Ref<Model> m, string modelName, const vector<string> &modelFiles,
-    Ref<CompilerOptionsWrapper> options, string log_level) {
+            Ref<ModelicaOptionsWrapper> options, string log_level) {
         try
         {
             jl::System::initializeClass(false);
             mc::ModelicaCompiler::initializeClass(false);
-            transferModel<MCStruct, Model >(m,modelName,modelFiles,options,log_level);
+            transferModel<MCStruct, Model, ModelicaOptionsWrapper>(m,modelName,modelFiles,options,log_level);
         }
         catch (JavaError e) {
             // Release all CasADi resources that it has been given
@@ -249,12 +248,12 @@ namespace ModelicaCasADi
     }
 
     void transferModelFromOptimicaCompiler(Ref<Model> m,
-    string modelName, const vector<string> &modelFiles, Ref<CompilerOptionsWrapper> options, string log_level) {
+    string modelName, const vector<string> &modelFiles, Ref<OptimicaOptionsWrapper> options, string log_level) {
         try
         {
             jl::System::initializeClass(false);
             oc::ModelicaCompiler::initializeClass(false);
-            transferModel<OCStruct, Model >(m,modelName,modelFiles,options,log_level);
+            transferModel<OCStruct, Model, OptimicaOptionsWrapper>(m,modelName,modelFiles,options,log_level);
         }
         catch (JavaError e) {
             // Release all CasADi resources that it has been given

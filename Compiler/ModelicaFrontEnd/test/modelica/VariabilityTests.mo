@@ -65,6 +65,36 @@ end VariabilityTests.Structural2;
 end Structural2;
 
 
+model Structural3
+    model A
+        parameter Integer p;
+    end A;
+
+    model B
+        parameter Integer p;
+        Real x[p] = (1:p) * time;
+    end B;
+    
+    model C
+        extends A;
+        extends B;
+    end C;
+    
+    C c(p = 2);
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="Structural3",
+        description="",
+        flatModel="
+fclass VariabilityTests.Structural3
+ structural parameter Integer c.p = 2 /* 2 */;
+ Real c.x[2] = (1:2) * time;
+end VariabilityTests.Structural3;
+")})));
+end Structural3;
+
+
 model EvaluateAnnotation1
 	parameter Real a = 1.0;
 	parameter Real b = a annotation(Evaluate=true);
@@ -113,7 +143,7 @@ initial equation
             errorMessage="
 1 warnings found:
 
-Warning at line 1, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/VariabilityTests.mo':
+Warning at line 2, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/VariabilityTests.mo':
   Evaluate annotation is ignored for parameters with fixed=false
 ")})));
 end EvaluateAnnotation2_Warn;
@@ -1058,6 +1088,419 @@ Error at line 9, column 27, in file '...', CANNOT_EVALUATE_LOADRESOURCE:
 ")})));
 end LoadResource6;
 
+model LoadResource7
+    parameter String p1 = "modelica://Modelica/Resources/Data/Utilities";
+    parameter String p2 = Modelica.Utilities.Files.loadResource(p1);
+    String p3 = Modelica.Utilities.Files.loadResource(p1) + "file.txt";
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="LoadResource7",
+            description="Mark loadResource input as structural",
+            regexp="/\"[^\"]+\"/\"\"/",
+            flatModel="
+fclass VariabilityTests.LoadResource.LoadResource7
+ structural (loadResource) parameter String p1 = \"\" /* \"\" */;
+ structural parameter String p2 = \"\" /* \"\" */;
+ discrete String p3 = \"\" + \"\";
+end VariabilityTests.LoadResource.LoadResource7;
+")})));
+end LoadResource7;
+
 end LoadResource;
+
+
+model BindingExpVariability1
+    model EO
+        extends ExternalObject;
+        function constructor
+            input Real x;
+            output EO eo;
+            external;
+        end constructor;
+        function destructor
+            input EO eo;
+            external;
+        end destructor;
+    end EO;
+    
+    Real x;
+    parameter EO eo = EO(x);
+    parameter EO eo1 = eo1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BindingExpVariability1",
+            description="",
+            errorMessage="
+Error at line 16, column 5, in file '...', BINDING_EXPRESSION_VARIABILITY:
+  Variability of binding expression (continuous-time) must be lower or equal to the variability of the component (parameter)
+  
+Error at line 17, column 24, in file '...':
+  Circularity in binding expression of parameter: eo1 = eo1
+")})));
+end BindingExpVariability1;
+
+model RecordVariabilityScalarization1
+        record R1
+            Real x;
+            constant Real y = 2;
+        end R1;
+        
+        record R2
+            Real x;
+            constant Real z = 2;
+        end R2;
+        
+        parameter R1 r1(x=time);
+        parameter R2 r2(x=time);
+        parameter Real[:] x = {r1.x, r2.x};
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordVariabilityScalarization1",
+            description="",
+            flatModel="
+fclass VariabilityTests.RecordVariabilityScalarization1
+ parameter Real r1.x;
+ constant Real r1.y = 2;
+ parameter Real r2.x;
+ parameter Real x[1];
+ parameter Real x[2];
+parameter equation
+ r1.x = time;
+ r2.x = time;
+ x[1] = r1.x;
+ x[2] = r2.x;
+end VariabilityTests.RecordVariabilityScalarization1;
+")})));
+end RecordVariabilityScalarization1;
+
+model ExternalObjectConstant1
+    model EO
+        extends ExternalObject;
+        function constructor
+            input Real x;
+            output EO eo;
+            external;
+        end constructor;
+        function destructor
+            input EO eo;
+            external;
+        end destructor;
+    end EO;
+    
+    function f
+        input EO x;
+        output Real y;
+        external;
+    end f;
+    
+    constant Real x = 1;
+    constant EO eo = EO(x);
+    constant EO eo1 = eo;
+    constant EO eo2 = eo;
+    Real y = f(eo1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ExternalObjectConstant1",
+            description="",
+            flatModel="
+fclass VariabilityTests.ExternalObjectConstant1
+ constant Real x = 1;
+ Real y = VariabilityTests.ExternalObjectConstant1.f(global(VariabilityTests.ExternalObjectConstant1.eo1));
+global variables
+ constant VariabilityTests.ExternalObjectConstant1.EO VariabilityTests.ExternalObjectConstant1.eo = VariabilityTests.ExternalObjectConstant1.EO.constructor(1.0);
+ constant VariabilityTests.ExternalObjectConstant1.EO VariabilityTests.ExternalObjectConstant1.eo1 = global(VariabilityTests.ExternalObjectConstant1.eo);
+
+public
+ function VariabilityTests.ExternalObjectConstant1.EO.destructor
+  input VariabilityTests.ExternalObjectConstant1.EO eo;
+ algorithm
+  external \"C\" destructor(eo);
+  return;
+ end VariabilityTests.ExternalObjectConstant1.EO.destructor;
+
+ function VariabilityTests.ExternalObjectConstant1.EO.constructor
+  input Real x;
+  output VariabilityTests.ExternalObjectConstant1.EO eo;
+ algorithm
+  external \"C\" eo = constructor(x);
+  return;
+ end VariabilityTests.ExternalObjectConstant1.EO.constructor;
+
+ function VariabilityTests.ExternalObjectConstant1.f
+  input VariabilityTests.ExternalObjectConstant1.EO x;
+  output Real y;
+ algorithm
+  external \"C\" y = f(x);
+  return;
+ end VariabilityTests.ExternalObjectConstant1.f;
+
+ type VariabilityTests.ExternalObjectConstant1.EO = ExternalObject;
+end VariabilityTests.ExternalObjectConstant1;
+")})));
+end ExternalObjectConstant1;
+
+model ExternalObjectConstant2
+    model EO
+        extends ExternalObject;
+        function constructor
+            input Real x;
+            output EO eo;
+            external;
+        end constructor;
+        function destructor
+            input EO eo;
+            external;
+        end destructor;
+    end EO;
+    
+    function f
+        input EO x;
+        output Real y;
+        external;
+    end f;
+    
+    function g
+        input EO x;
+        output EO y = x;
+    algorithm
+        annotation(Inline=false);
+    end g;
+    
+    constant Real x = 1;
+    constant EO eo = EO(x);
+    constant EO eo1 = g(eo);
+    Real y = f(eo1);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ExternalObjectConstant2",
+            description="",
+            flatModel="
+            
+fclass VariabilityTests.ExternalObjectConstant2
+ constant Real x = 1;
+ Real y = VariabilityTests.ExternalObjectConstant2.f(global(VariabilityTests.ExternalObjectConstant2.eo1));
+global variables
+ constant VariabilityTests.ExternalObjectConstant2.EO VariabilityTests.ExternalObjectConstant2.eo = VariabilityTests.ExternalObjectConstant2.EO.constructor(1.0);
+ constant VariabilityTests.ExternalObjectConstant2.EO VariabilityTests.ExternalObjectConstant2.eo1 = VariabilityTests.ExternalObjectConstant2.g(global(VariabilityTests.ExternalObjectConstant2.eo));
+
+public
+ function VariabilityTests.ExternalObjectConstant2.EO.destructor
+  input VariabilityTests.ExternalObjectConstant2.EO eo;
+ algorithm
+  external \"C\" destructor(eo);
+  return;
+ end VariabilityTests.ExternalObjectConstant2.EO.destructor;
+
+ function VariabilityTests.ExternalObjectConstant2.EO.constructor
+  input Real x;
+  output VariabilityTests.ExternalObjectConstant2.EO eo;
+ algorithm
+  external \"C\" eo = constructor(x);
+  return;
+ end VariabilityTests.ExternalObjectConstant2.EO.constructor;
+
+ function VariabilityTests.ExternalObjectConstant2.g
+  input VariabilityTests.ExternalObjectConstant2.EO x;
+  output VariabilityTests.ExternalObjectConstant2.EO y;
+ algorithm
+  y := x;
+  return;
+ annotation(Inline = false);
+ end VariabilityTests.ExternalObjectConstant2.g;
+
+ function VariabilityTests.ExternalObjectConstant2.f
+  input VariabilityTests.ExternalObjectConstant2.EO x;
+  output Real y;
+ algorithm
+  external \"C\" y = f(x);
+  return;
+ end VariabilityTests.ExternalObjectConstant2.f;
+
+ type VariabilityTests.ExternalObjectConstant2.EO = ExternalObject;
+end VariabilityTests.ExternalObjectConstant2;
+")})));
+end ExternalObjectConstant2;
+
+model ExternalObjectGlobalConstant1
+    
+    package P
+        model EO
+            extends ExternalObject;
+            function constructor
+                input Real x;
+                output EO eo;
+                external;
+            end constructor;
+            function destructor
+                input EO eo;
+                external;
+            end destructor;
+        end EO;
+        
+        function f
+            output Real y;
+            external "C" y = f(eo1);
+        end f;
+        
+        constant Real x = 1;
+        constant EO eo = EO(x);
+        constant EO eo1 = eo;
+    end P;
+    
+    function f
+        input Real x;
+        output Real y = x + P.f();
+    algorithm
+    end f;
+
+    Real y = f(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ExternalObjectGlobalConstant1",
+            description="",
+            flatModel="
+fclass VariabilityTests.ExternalObjectGlobalConstant1
+ Real y = VariabilityTests.ExternalObjectGlobalConstant1.f(time);
+global variables
+ constant VariabilityTests.ExternalObjectGlobalConstant1.P.EO VariabilityTests.ExternalObjectGlobalConstant1.P.eo = VariabilityTests.ExternalObjectGlobalConstant1.P.EO.constructor(1.0);
+ constant VariabilityTests.ExternalObjectGlobalConstant1.P.EO VariabilityTests.ExternalObjectGlobalConstant1.P.eo1 = global(VariabilityTests.ExternalObjectGlobalConstant1.P.eo);
+
+public
+ function VariabilityTests.ExternalObjectGlobalConstant1.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x + VariabilityTests.ExternalObjectGlobalConstant1.P.f();
+  return;
+ end VariabilityTests.ExternalObjectGlobalConstant1.f;
+
+ function VariabilityTests.ExternalObjectGlobalConstant1.P.f
+  output Real y;
+ algorithm
+  external \"C\" y = f(global(VariabilityTests.ExternalObjectGlobalConstant1.P.eo1));
+  return;
+ end VariabilityTests.ExternalObjectGlobalConstant1.P.f;
+
+ function VariabilityTests.ExternalObjectGlobalConstant1.P.EO.destructor
+  input VariabilityTests.ExternalObjectGlobalConstant1.P.EO eo;
+ algorithm
+  external \"C\" destructor(eo);
+  return;
+ end VariabilityTests.ExternalObjectGlobalConstant1.P.EO.destructor;
+
+ function VariabilityTests.ExternalObjectGlobalConstant1.P.EO.constructor
+  input Real x;
+  output VariabilityTests.ExternalObjectGlobalConstant1.P.EO eo;
+ algorithm
+  external \"C\" eo = constructor(x);
+  return;
+ end VariabilityTests.ExternalObjectGlobalConstant1.P.EO.constructor;
+
+ type VariabilityTests.ExternalObjectGlobalConstant1.P.EO = ExternalObject;
+end VariabilityTests.ExternalObjectGlobalConstant1;
+")})));
+end ExternalObjectGlobalConstant1;
+
+model ExternalObjectGlobalConstant2
+    model EO
+        extends ExternalObject;
+        function constructor
+            input Real x;
+            output EO eo;
+            external;
+        end constructor;
+        function destructor
+            input EO eo;
+            external;
+        end destructor;
+    end EO;
+    
+    function f
+        input EO x;
+        output Real y;
+        external;
+    end f;
+    
+    record R
+        EO eo;
+    end R;
+    
+    package P
+        constant Real x = 1;
+        constant EO[:] eo = {EO(x)};
+    end P;
+    
+    Real y1 = f(P.eo[1]);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="ExternalObjectGlobalConstant2",
+            description="",
+            errorMessage="
+Compliance error at line 27, column 9, in file '...', EXTERNAL_OBJECT_CONSTANT_IN_COMPOSITE:
+  Access to external object constants in arrays or records is not supported
+
+Compliance error at line 30, column 17, in file '...', EXTERNAL_OBJECT_CONSTANT_IN_COMPOSITE:
+  Access to external object constants in arrays or records is not supported
+
+Compliance error at line 30, column 19, in file '...', EXTERNAL_OBJECT_CONSTANT_IN_COMPOSITE:
+  Access to external object constants in arrays or records is not supported
+")})));
+end ExternalObjectGlobalConstant2;
+
+model ExternalObjectGlobalConstant3
+    model EO
+        extends ExternalObject;
+        function constructor
+            input Real x;
+            output EO eo;
+            external;
+        end constructor;
+        function destructor
+            input EO eo;
+            external;
+        end destructor;
+    end EO;
+    
+    function f
+        input EO x;
+        output Real y;
+        external;
+    end f;
+    
+    record R
+        EO eo;
+    end R;
+    
+    package P
+        constant Real x = 1;
+        constant R r = R(EO(x));
+    end P;
+    
+    Real y2 = f(P.r.eo);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="ExternalObjectGlobalConstant3",
+            description="",
+            errorMessage="
+Compliance error at line 22, column 9, in file '...', EXTERNAL_OBJECT_CONSTANT_IN_COMPOSITE,
+In component r:
+  Access to external object constants in arrays or records is not supported
+
+Compliance error at line 30, column 17, in file '...', EXTERNAL_OBJECT_CONSTANT_IN_COMPOSITE:
+  Access to external object constants in arrays or records is not supported
+
+Compliance error at line 30, column 21, in file '...', EXTERNAL_OBJECT_CONSTANT_IN_COMPOSITE:
+  Access to external object constants in arrays or records is not supported
+")})));
+end ExternalObjectGlobalConstant3;
+
 
 end VariabilityTests;

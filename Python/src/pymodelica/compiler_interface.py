@@ -33,11 +33,11 @@ if not jpype.isJVMStarted():
     _jvm_class_path = pym.environ['COMPILER_JARS']
     _jvm_ext_dirs = pym.environ['BEAVER_PATH']
     jpype.startJVM(pym.environ['JPYPE_JVM'], 
-        '-Djava.class.path=%s' % _jvm_class_path, 
-        '-Djava.ext.dirs=%s' % _jvm_ext_dirs,
+        '-Djava.class.path=%s' % os.pathsep.join([_jvm_class_path]),
         *_jvm_args)
     org = jpype.JPackage('org')
     print "JVM started."
+
 
 # Compilers
 ModelicaCompilerInterface = None
@@ -48,12 +48,15 @@ if pym._optimica_class:
     OptimicaCompilerInterface = jpype.JClass(pym._optimica_class)
 
 # Options registry
-OptionRegistryInterface = org.jmodelica.util.OptionRegistry
+OptionRegistryInterface = org.jmodelica.common.options.OptionRegistry
 
 # Exceptions
 UnknownOptionException = jpype.JClass(
-    'org.jmodelica.util.OptionRegistry$UnknownOptionException')
+    'org.jmodelica.common.options.AbstractOptionRegistry$UnknownOptionException')
     
+InvalidOptionValueException = jpype.JClass(
+    'org.jmodelica.common.options.AbstractOptionRegistry$InvalidOptionValueException')
+
 IllegalLogStringException = org.jmodelica.util.logging.IllegalLogStringException
 
 CompilerException = org.jmodelica.util.exceptions.CompilerException

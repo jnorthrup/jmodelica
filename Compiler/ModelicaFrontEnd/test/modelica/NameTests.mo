@@ -1710,16 +1710,15 @@ model ConstantLookup32
 fclass NameTests.ConstantLookup32
  parameter Integer j = 1 /* 1 */;
  Real y = NameTests.ConstantLookup32.f(j);
+global variables
+ constant NameTests.ConstantLookup32.A NameTests.ConstantLookup32.C.d[2] = {NameTests.ConstantLookup32.A(3), NameTests.ConstantLookup32.A(4)};
 
 public
  function NameTests.ConstantLookup32.f
-  NameTests.ConstantLookup32.A[:] d;
   input Integer i;
   output Real x;
  algorithm
-  init d as NameTests.ConstantLookup32.A[2];
-  d := {NameTests.ConstantLookup32.A(3), NameTests.ConstantLookup32.A(4)};
-  x := d[i].b;
+  x := global(NameTests.ConstantLookup32.C.d[i].b);
   return;
  end NameTests.ConstantLookup32.f;
 
@@ -1768,16 +1767,15 @@ model ConstantLookup33
 fclass NameTests.ConstantLookup33
  parameter Integer j = 1 /* 1 */;
  Real y = NameTests.ConstantLookup33.f(j);
+global variables
+ constant NameTests.ConstantLookup33.D.A NameTests.ConstantLookup33.C.d[2] = {NameTests.ConstantLookup33.D.A(3), NameTests.ConstantLookup33.D.A(4)};
 
 public
  function NameTests.ConstantLookup33.f
-  NameTests.ConstantLookup33.D.A[:] d;
   input Integer i;
   output Real x;
  algorithm
-  init d as NameTests.ConstantLookup33.D.A[2];
-  d := {NameTests.ConstantLookup33.D.A(3), NameTests.ConstantLookup33.D.A(4)};
-  x := d[i].b;
+  x := global(NameTests.ConstantLookup33.C.d[i].b);
   return;
  end NameTests.ConstantLookup33.f;
 
@@ -1804,6 +1802,7 @@ model ConstantLookup34
         output Real x;
     algorithm
         x := A.x[i].y[i];
+        annotation(Inline=false);
     end f;
     
     parameter Integer j = 1;
@@ -1817,22 +1816,19 @@ model ConstantLookup34
 fclass NameTests.ConstantLookup34
  parameter Integer j = 1 /* 1 */;
  parameter Real z;
+global variables
+ constant NameTests.ConstantLookup34.A.B NameTests.ConstantLookup34.A.x[2] = {NameTests.ConstantLookup34.A.B({1, 2}), NameTests.ConstantLookup34.A.B({3, 4})};
 parameter equation
  z = NameTests.ConstantLookup34.f(j);
 
 public
  function NameTests.ConstantLookup34.f
-  NameTests.ConstantLookup34.A.B[:] temp_1;
   input Integer i;
   output Real x;
  algorithm
-  init temp_1 as NameTests.ConstantLookup34.A.B[2];
-  temp_1[1].y[1] := 1;
-  temp_1[1].y[2] := 2;
-  temp_1[2].y[1] := 3;
-  temp_1[2].y[2] := 4;
-  x := temp_1[i].y[i];
+  x := global(NameTests.ConstantLookup34.A.x[i].y[i]);
   return;
+ annotation(Inline = false);
  end NameTests.ConstantLookup34.f;
 
  record NameTests.ConstantLookup34.A.B
@@ -1902,20 +1898,18 @@ model ConstantLookup35
 fclass NameTests.ConstantLookup35
  parameter Integer b.j = 1 /* 1 */;
  parameter Real b.z;
+global variables
+ constant Real NameTests.ConstantLookup35.L.a[2] = {1, 2};
 parameter equation
  b.z = NameTests.ConstantLookup35.J.f1(b.j);
 
 public
  function NameTests.ConstantLookup35.J.f1
-  Real[:] a;
   input Integer i;
   output Real x;
   Real y;
  algorithm
-  init a as Real[2];
-  a[1] := 1;
-  a[2] := 2;
-  y := a[i];
+  y := global(NameTests.ConstantLookup35.L.a[i]);
   x := y;
   return;
  end NameTests.ConstantLookup35.J.f1;
@@ -1937,6 +1931,7 @@ model ConstantLookup36
 		constant B[2] a = { B({1,2}), B({3,4}) };
     algorithm
         x := a[i].b[i];
+        annotation(Inline=false);
     end f;
     
     parameter Integer j = 1;
@@ -1950,22 +1945,19 @@ model ConstantLookup36
 fclass NameTests.ConstantLookup36
  parameter Integer j = 1 /* 1 */;
  parameter Real z;
+global variables
+ constant NameTests.ConstantLookup36.B NameTests.ConstantLookup36.f.a[2] = {NameTests.ConstantLookup36.B({1, 2}), NameTests.ConstantLookup36.B({3, 4})};
 parameter equation
  z = NameTests.ConstantLookup36.f(j);
 
 public
  function NameTests.ConstantLookup36.f
-  NameTests.ConstantLookup36.B[:] a;
   input Integer i;
   output Real x;
  algorithm
-  init a as NameTests.ConstantLookup36.B[2];
-  a[1].b[1] := 1;
-  a[1].b[2] := 2;
-  a[2].b[1] := 3;
-  a[2].b[2] := 4;
-  x := a[i].b[i];
+  x := global(NameTests.ConstantLookup36.f.a[i].b[i]);
   return;
+ annotation(Inline = false);
  end NameTests.ConstantLookup36.f;
 
  record NameTests.ConstantLookup36.B
@@ -2069,6 +2061,49 @@ model ConstantLookup40
     parameter Real y = A.x;
 end ConstantLookup40;
 
+model ConstantLookup41
+    class P1
+        Real x;
+    end P1;
+    
+    package P2
+        extends P1;
+    end P2;
+
+    Real x = P2.x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConstantLookup41",
+            description="Constant lookup: in not ok package",
+            errorMessage="
+Error at line 6, column 5, in file '...':
+  Packages may only contain classes and constants
+")})));
+end ConstantLookup41;
+
+model ConstantLookup42
+    class P1
+        constant Real x;
+    equation
+        x = 1;
+    end P1;
+    
+    package P2
+        extends P1;
+    end P2;
+
+    Real x = P2.x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConstantLookup42",
+            description="Constant lookup: in not ok package",
+            errorMessage="
+Error at line 8, column 5, in file '...':
+  Packages may only contain classes and constants
+")})));
+end ConstantLookup42;
 
 class ExtendsTest1
   class C
@@ -2488,6 +2523,31 @@ Error at line 3, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/Name
 end ImportTest12;
 
 
+model ImportTest13
+    package P1
+        constant Real c = 3;
+        type T = Real;
+    end P1;
+    
+    package P2
+        extends P1;
+    end P2;
+    
+    import NameTests.ImportTest13.P2.T;
+    import NameTests.ImportTest13.P2.c;
+    T t = c;
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ImportTest13",
+            description="Importing inherited elements",
+            flatModel="
+fclass NameTests.ImportTest13
+ Real t = 3.0;
+end NameTests.ImportTest13;
+")})));
+end ImportTest13;
+
+
 model ShortClassDeclTest1
   model A
     Real x=2;
@@ -2895,7 +2955,7 @@ equation
  der(v) = 1;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
 
 end NameTests.StateSelectTest;
 ")})));
@@ -2962,7 +3022,7 @@ model ConditionalComponentTest1_Err
             errorMessage="
 1 errors found:
 
-Error at line 1, column 35, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
+Error at line 2, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a boolean expression
 ")})));
 end ConditionalComponentTest1_Err;
@@ -2978,7 +3038,7 @@ model ConditionalComponentTest2_Err
             errorMessage="
 1 errors found:
 
-Error at line 2, column 39, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
+Error at line 3, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a scalar expression
 ")})));
 end ConditionalComponentTest2_Err;
@@ -2994,10 +3054,10 @@ model ConditionalComponentTest3_Err
             errorMessage="
 2 errors found:
 
-Error at line 2, column 33, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
+Error at line 3, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a boolean expression
 
-Error at line 2, column 33, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
+Error at line 3, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a scalar expression
 ")})));
 end ConditionalComponentTest3_Err;
@@ -3617,7 +3677,7 @@ model InheritInputTest3
             errorMessage="
 1 errors found:
 
-Error at line 4, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 6, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Can't declare x as input, since it contains a component declared as input or output
 ")})));
 end InheritInputTest3;
@@ -3637,7 +3697,7 @@ model InheritInputTest4
             errorMessage="
 1 errors found:
 
-Error at line 4, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 6, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Can't declare x as output, since it contains a component declared as input or output
 ")})));
 end InheritInputTest4;
@@ -3699,7 +3759,7 @@ model InheritOutputTest3
             errorMessage="
 1 errors found:
 
-Error at line 4, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 6, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Can't declare x as output, since it contains a component declared as input or output
 ")})));
 end InheritOutputTest3;
@@ -3719,7 +3779,7 @@ model InheritOutputTest4
             errorMessage="
 1 errors found:
 
-Error at line 4, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 6, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Can't declare x as input, since it contains a component declared as input or output
 ")})));
 end InheritOutputTest4;
@@ -3739,21 +3799,19 @@ model InheritFlowTest1
 equation
 	connect(b1, b2);
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="InheritFlowTest1",
-            description="Check that flow is propagated to child components",
-            flatModel="
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="InheritFlowTest1",
+        description="Check that flow is propagated to child components",
+        flatModel="
 fclass NameTests.InheritFlowTest1
- Real b1.ap.x;
- Real b1.af.x;
- Real b2.ap.x;
- Real b2.af.x;
+ potential Real b1.ap.x;
+ flow Real b1.af.x;
+ potential Real b2.ap.x;
+ flow Real b2.af.x;
 equation
  - b1.af.x - b2.af.x = 0.0;
  b1.ap.x = b2.ap.x;
- b1.af.x = 0.0;
- b2.af.x = 0.0;
 end NameTests.InheritFlowTest1;
 ")})));
 end InheritFlowTest1;
@@ -3773,7 +3831,7 @@ model InheritFlowTest2
             errorMessage="
 1 errors found:
 
-Error at line 4, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 6, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Can't declare x as flow, since it contains a component declared as flow
 ")})));
 end InheritFlowTest2;
@@ -3839,7 +3897,7 @@ model DuplicateVariables3
             errorMessage="
 1 errors found:
 
-Error at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 3, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Duplicate component in same class: Real x
 ")})));
 end DuplicateVariables3;
@@ -3885,7 +3943,7 @@ model DuplicateVariables6
             errorMessage="
 1 errors found:
 
-Error at line 3, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
+Error at line 4, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
 In component a:
   Duplicate component in same class: Real x
 ")})));
@@ -3926,13 +3984,13 @@ model BadEscape2
             errorMessage="
 6 errors found:
 
-Error at line 1, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 2, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Illegal escape sequence at position 2 in quoted identifier: '\\q'
 
-Error at line 1, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 2, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Illegal escape sequence at position 28 in quoted identifier: '\\#'
 
-Error at line 1, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 2, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Illegal escape sequence at position 7 in quoted identifier: '\\ '
 
 Error at line 3, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
@@ -4103,5 +4161,61 @@ Error at line 13, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/Nam
   Cannot find class declaration for a
 ")})));
 end ClassThroughComponent4;
+
+
+model OrderFile1
+    extends TestLib.Order.Order1;
+
+annotation(__JModelica(UnitTesting(tests={
+    InstClassMethodTestCase(
+        name="OrderFile1",
+        description="Correction of package.order: correct file",
+        modelicaLibraries="TestLib",
+        methodName="testOrderHelper",
+        methodResult="[A, E, B, C, F, D]"
+)})));
+end OrderFile1;
+
+
+model OrderFile2
+    extends TestLib.Order.Order2;
+
+annotation(__JModelica(UnitTesting(tests={
+    InstClassMethodTestCase(
+        name="OrderFile2",
+        description="Correction of package.order: package.mo contents in wrong order",
+        modelicaLibraries="TestLib",
+        methodName="testOrderHelper",
+        methodResult="[F, E, A, B, C, D]"
+)})));
+end OrderFile2;
+
+
+model OrderFile3
+    extends TestLib.Order.Order3;
+
+annotation(__JModelica(UnitTesting(tests={
+    InstClassMethodTestCase(
+        name="OrderFile3",
+        description="Correction of package.order: class file has wrong case",
+        modelicaLibraries="TestLib",
+        methodName="testOrderHelper",
+        methodResult="[A, B, F, C, D, E]"
+)})));
+end OrderFile3;
+
+
+model OrderFile4
+    extends TestLib.Order.Order4;
+
+annotation(__JModelica(UnitTesting(tests={
+    InstClassMethodTestCase(
+        name="OrderFile4",
+        description="Correction of package.order: wrong class names in package.order",
+        modelicaLibraries="TestLib",
+        methodName="testOrderHelper",
+        methodResult="[A, B, C, D, E, F]"
+)})));
+end OrderFile4;
 
 end NameTests;

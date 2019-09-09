@@ -26,11 +26,13 @@ public class ParallelIterator<T> implements Iterator<T[]> {
 	private T[] elems;
 	private Iterator<? extends T>[] iters;
 	private boolean max;
-	
+
+    @SafeVarargs
 	public ParallelIterator(T[] res, Iterator<? extends T>... iterators) {
 		this(res, false, iterators);
 	}
-	
+
+    @SafeVarargs
 	public ParallelIterator(T[] res, boolean max, Iterator<? extends T>... iterators) {
 		iters = iterators;
 		elems = res;
@@ -41,20 +43,23 @@ public class ParallelIterator<T> implements Iterator<T[]> {
 			elems[i] = null;
 	}
 	
-	public boolean hasNext() {
+	@Override
+    public boolean hasNext() {
 		for (Iterator<? extends T> it : iters)
 			if (it.hasNext() == max)
 				return max;
 		return !max;
 	}
 	
-	public T[] next() {
+	@Override
+    public T[] next() {
 		for (int i = 0; i < iters.length; i++)
 			elems[i] = iters[i].hasNext() ? iters[i].next() : null;
 		return elems;
 	}
 
-	public void remove() {
+	@Override
+    public void remove() {
 		for (Iterator<? extends T> it : iters)
 			it.remove();
 	}

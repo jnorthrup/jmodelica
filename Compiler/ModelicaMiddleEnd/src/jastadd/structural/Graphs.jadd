@@ -126,7 +126,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         return equationIndexMap.getList(eqn);
     }
 
-    private E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta, String prefix, String subfix, Enumerator enumerator) {
+    private E addEquation(FAbstractEquation eqn, int groupNumber, TypePrefixVariability variability, FType type, boolean isMeta, String prefix, String subfix, Enumerator enumerator) {
         String name;
         do {
             name = prefix + enumerator.next() + subfix;
@@ -134,15 +134,15 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         return addEquation(eqn, groupNumber, variability, type, isMeta, name);
     }
 
-    protected E addEquation(FAbstractEquation eqn, int groupNumber, Collection<E> groupMemberList, FTypePrefixVariability variability, FType type, String name) {
+    protected E addEquation(FAbstractEquation eqn, int groupNumber, Collection<E> groupMemberList, TypePrefixVariability variability, FType type, String name) {
         return addEquation(eqn, groupNumber, groupMemberList, variability, type, false, name);
     }
 
-    protected E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta, String name) {
+    protected E addEquation(FAbstractEquation eqn, int groupNumber, TypePrefixVariability variability, FType type, boolean isMeta, String name) {
         return addEquation(eqn, groupNumber, equationIndexMap.getList(eqn, true), variability, type, isMeta, name);
     }
 
-    protected E addEquation(FAbstractEquation eqn, int groupNumber, Collection<E> groupMemberList, FTypePrefixVariability variability, FType type, boolean isMeta, String name) {
+    protected E addEquation(FAbstractEquation eqn, int groupNumber, Collection<E> groupMemberList, TypePrefixVariability variability, FType type, boolean isMeta, String name) {
         E e = equationMap.get(name);
         if (e != null)
             throw new IllegalArgumentException("Equation with the name '" + name + "' already exists:\n" + e.getEquation() + "\nNew equation:\n" + eqn);
@@ -152,7 +152,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         return e;
     }
 
-    protected abstract E createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<E> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta);
+    protected abstract E createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<E> groupMembers, TypePrefixVariability variability, FType type, boolean isMeta);
 
     public V addVariable(FVariable var) {
         return addVariable(var.name(), var);
@@ -219,62 +219,59 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
 
     public enum VarType {
         DERIVATIVE_VARIABLES { 
-            public Collection<? extends FVariable> variables(FClass c)            { return c.derivativeVariables(); }
-            public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.derivativeVariables(); }
-            public boolean isOk(FTypePrefixVariability variability)               { return variability.continuousVariability(); }
+            public Collection<? extends FVariable> variables(BLTVariables c)            { return c.derivativeVariables(); }
+            public boolean isOk(TypePrefixVariability variability)               { return variability.continuousVariability(); }
         },
         DIFFERENTIATED_VARIABLES { 
-            public Collection<? extends FVariable> variables(FClass c)            { return c.allDifferentiatedRealVariables(); }
-            public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.differentiatedRealVariables(); }
-            public boolean isOk(FTypePrefixVariability variability)               { return variability.continuousVariability(); }
+            public Collection<? extends FVariable> variables(BLTVariables c)            { return c.allDifferentiatedRealVariables(); }
+            public boolean isOk(TypePrefixVariability variability)               { return variability.continuousVariability(); }
         }, 
         ALGEBRAIC_VARIABLES { 
-            public Collection<? extends FVariable> variables(FClass c)            { return c.normalAlgebraicVariables(); }
-            public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.algebraicVariables(); }
+            public Collection<? extends FVariable> variables(BLTVariables c)            { return c.normalAlgebraicVariables(); }
         }, 
         CONTINUOUS_ALGEBRAIC_VARIABLES { 
-            public Collection<? extends FVariable> variables(FClass c)            { return c.normalAlgebraicContinousRealVariables(); }
-            public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.algebraicContinousRealVariables(); }
-            public boolean isOk(FTypePrefixVariability variability)               { return variability.continuousVariability(); }
+            public Collection<? extends FVariable> variables(BLTVariables c)            { return c.normalAlgebraicContinousRealVariables(); }
+            public boolean isOk(TypePrefixVariability variability)               { return variability.continuousVariability(); }
         }, 
         DISCRETE_ALGEBRAIC_VARIABLES { 
-            public Collection<? extends FVariable> variables(FClass c)            { return c.discreteVariables(); }
-            public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.discreteVariables(); }
-            public boolean isOk(FTypePrefixVariability variability)               { return variability.discreteVariability(); }
+            public Collection<? extends FVariable> variables(BLTVariables c)            { return c.discreteVariables(); }
+            public boolean isOk(TypePrefixVariability variability)               { return variability.discreteVariability(); }
         }, 
         DISCRETE_PRE_VARIABLES { 
-            public Collection<? extends FVariable> variables(FClass c)            { return c.discretePreVariables(); }
-            public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.discretePreVariables(); }
-            public boolean isOk(FTypePrefixVariability variability)               { return variability.discreteVariability(); }
+            public Collection<? extends FVariable> variables(BLTVariables c)            { return c.discretePreVariables(); }
+            public boolean isOk(TypePrefixVariability variability)               { return variability.discreteVariability(); }
         },
         NON_FIXED_PARAMETERS {
-            public Collection<? extends FVariable> variables(FClass c)            { return c.initialParameters(); }
-            public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.initialParameters(); }
-            public boolean isOk(FTypePrefixVariability variability)               { return variability.parameterVariability(); }
+            public Collection<? extends FVariable> variables(BLTVariables c)            { return c.initialParameters(); }
+            public boolean isOk(TypePrefixVariability variability)               { return variability.parameterVariability(); }
         };
 
-        public abstract Collection<? extends FVariable> variables(FClass c);
-        public abstract Collection<? extends FVariable> variables(FAbstractEquation e);
-        public boolean isOk(FTypePrefixVariability e) { return true; }
+        public abstract Collection<? extends FVariable> variables(BLTVariables c);
+        public boolean isOk(TypePrefixVariability e) { return true; }
     }
 
-    public void addVariables(FClass fclass, EnumSet<VarType> variableTypes) {
-        for (VarType t : variableTypes)
-            for (FVariable fv : t.variables(fclass))
+    public void addVariables(BLTVariables variables, EnumSet<VarType> variableTypes) {
+        for (VarType t : variableTypes) {
+            for (FVariable fv : t.variables(variables)) {
                 addVariable(fv.name(), fv);
+            }
+        }
+        for (FVariable fv : variables.extraVariables()) {
+            addVariable(fv.name(), fv);
+        }
     }
 
-    public void addEquations(java.util.List<FAbstractEquation> eqns, EnumSet<VarType> variableTypes) {
+    public void addEquations(Iterable<FAbstractEquation> eqns, EnumSet<VarType> variableTypes) {
         do_addEquations(eqns, variableTypes, DEFAULT_EQ_PREFIX, enumerator);
     }
 
-    public void addEquations(java.util.List<FAbstractEquation> eqns, EnumSet<VarType> variableTypes, String eqNamePrefix, Enumerator enumerator) {
+    public void addEquations(Iterable<FAbstractEquation> eqns, EnumSet<VarType> variableTypes, String eqNamePrefix, Enumerator enumerator) {
         if (eqNamePrefix.equals(DEFAULT_EQ_PREFIX))
             throw new IllegalArgumentException("The equation name prefix '" + eqNamePrefix + "' is reserved!");
         do_addEquations(eqns, variableTypes, eqNamePrefix, enumerator);
     }
 
-    private void do_addEquations(java.util.List<FAbstractEquation> eqns, EnumSet<VarType> variableTypes, String eqNamePrefix, Enumerator enumerator) {
+    private void do_addEquations(Iterable<FAbstractEquation> eqns, EnumSet<VarType> variableTypes, String eqNamePrefix, Enumerator enumerator) {
         Set<FVariable> emptySet = Collections.emptySet();
         for (FAbstractEquation e : eqns) {
             
@@ -320,7 +317,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
     }
     
-    protected FIdUseExpLookupVisitor getFIdUseExpLookupVisitor() {
+    protected CommonAccessExpLookupVisitor<FAccessExp> getCommonAccessExpLookupVisitor() {
         if (isInitialSystem()) {
             return InitDAEVarUseLookupVisitor.instance;
         } else {
@@ -345,12 +342,12 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         
         protected Set<V> vars() {
             if (vars == null) {
-                vars = resolver.lookupVars(equation.findFIdUseExpsInTree(getFIdUseExpLookupVisitor()));
+                vars = resolver.lookupVars(equation.findCommonAccessExpsInTree(getCommonAccessExpLookupVisitor()));
             }
             return vars;
         }
         
-        public FTypePrefixVariability variability(int i) {
+        public TypePrefixVariability variability(int i) {
             return equation.variability();
         }
         
@@ -361,7 +358,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         public void addEdges(E eqn, boolean log) {
             for (V var : vars()) {
                 if (log) {
-                    ASTNode.log.verbose("*** %s", var);
+                    getStepLogger().logVerbose("*** %s", var);
                 }
                 addEdge(eqn, var);
             }
@@ -378,32 +375,32 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
      * side (one variable on the left hand side per scalar equation)
      */
     protected interface AssignmentIncidenceMap {
-        public Iterable<FIdUseExp> rhs(String assignedLHS);
-        public Collection<FIdUseExp> assigned();
+        public Iterable<FAccessExp> rhs(String assignedLHS);
+        public Collection<FAccessExp> assigned();
     }
     
     /**
      * Handles normal equations which are on the form "x = ...".
      */
     protected class SingleAssignmentIncidenceMap extends IncidenceMap implements AssignmentIncidenceMap {
-        private final FIdUseExp assigned;
-        private Collection<FIdUseExp> rhsUses;
+        private final FAccessExp assigned;
+        private Collection<FAccessExp> rhsUses;
         
         public SingleAssignmentIncidenceMap(FEquation eqn, VariableResolver<E, V> resolver) {
             super(eqn, resolver);
-            assigned = eqn.getLeft().asFIdUseExp();
+            assigned = eqn.getLeft().asFAccessExp();
            
         }
         
-        private Collection<FIdUseExp> rhsUses() {
+        private Collection<FAccessExp> rhsUses() {
             if (rhsUses == null) {
-                rhsUses = equation.FIdUseExpsInRHS(getFIdUseExpLookupVisitor());
+                rhsUses = equation.FAccessExpsInRHS(getCommonAccessExpLookupVisitor());
             }
             return rhsUses;
         }
         
         @Override
-        public Iterable<FIdUseExp> rhs(String assignedLHS) {
+        public Iterable<FAccessExp> rhs(String assignedLHS) {
             if (assignedLHS.equals(assigned.name())) {
                 return rhsUses();
             } else {
@@ -412,7 +409,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
         
         @Override
-        public Collection<FIdUseExp> assigned() {
+        public Collection<FAccessExp> assigned() {
             return Collections.singletonList(assigned);
         }
     }
@@ -423,7 +420,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
      */
     protected abstract class MultiIncidenceMap extends IncidenceMap {
         private Map<Integer, V> lhs = null;
-        private Set<FIdUseExp> lhsUses = null;
+        private Set<FAccessExp> lhsUses = null;
         protected final EnumSet<VarType> variableTypes;
         
         public MultiIncidenceMap(FAbstractEquation e, VariableResolver<E, V> resolver, EnumSet<VarType> variableTypes) {
@@ -431,9 +428,9 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             this.variableTypes = variableTypes;
         }
         
-        protected Set<FIdUseExp> lhsUses() {
+        protected Set<FAccessExp> lhsUses() {
             if (lhsUses == null) {
-                lhsUses = equation.FIdUseExpsInLHS(getFIdUseExpLookupVisitor());
+                lhsUses = equation.FAccessExpsInLHS(getCommonAccessExpLookupVisitor());
             }
             return lhsUses;
         }
@@ -451,7 +448,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         
         protected void buildLhsFunction(Map<Integer, V> lhs, EnumSet<VarType> variableTypes) {
             int i = 0;
-            for (FIdUseExp use : lhsUses()) {
+            for (FAccessExp use : lhsUses()) {
                 if (variableTypes != null) {
                     FAbstractVariable fv = use.myFV();
                     if (fv != null && !addLhs(fv, variableTypes)) {
@@ -462,7 +459,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             }
         }
         
-        protected void buildLhsFunction(Map<Integer, V> lhs, FIdUseExp use, int i) {
+        protected void buildLhsFunction(Map<Integer, V> lhs, FAccessExp use, int i) {
             V var = getVariable(use.name());
             lhs.put(i, var);
         }
@@ -477,7 +474,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
         
         @Override
-        public FTypePrefixVariability variability(int i) {
+        public TypePrefixVariability variability(int i) {
             V var = lhs().get(i);
             if (var == null) {
                 return super.variability(i);
@@ -485,8 +482,8 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             return variability(var.getVariable());
         }
         
-        private FTypePrefixVariability variability(FAbstractVariable fv) {
-            FTypePrefixVariability v = fv.variability();
+        private TypePrefixVariability variability(FAbstractVariable fv) {
+            TypePrefixVariability v = fv.variability();
             if (v.parameterOrLess()) {
                 v = fv.type().funcOutputVariability();
             }
@@ -536,7 +533,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         
         protected Set<V> rhs() {
             if (rhs == null) {
-                rhs = resolver.lookupVars(equation.FIdUseExpsInRHS());
+                rhs = resolver.lookupVars(equation.FAccessExpsInRHS());
                 if (equation instanceof FAlgorithm) {
                     rhs.removeAll(resolver.lookupVars(lhsUses()));
                 }
@@ -579,26 +576,26 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
      */
     protected class SplitIncidenceMap extends MultiIncidenceMap implements AssignmentIncidenceMap {
         protected ArrayList<Set<V>> splitMap;
-        protected Map<FIdUseExp, Collection<FIdUseExp>> resolvedDependencies;
-        private Map<String, FIdUseExp> nameToAssignedMap;
+        protected Map<FAccessExp, Collection<FAccessExp>> resolvedDependencies;
+        private Map<String, FAccessExp> nameToAssignedMap;
         
         public SplitIncidenceMap(FFunctionCallEquation e, VariableResolver<E, V> resolver, EnumSet<VarType> variableTypes) {
             super(e, resolver, variableTypes);
         }
         
-        private Map<FIdUseExp, Collection<FIdUseExp>> sortDependencies(Map<FIdUseExp, Set<FIdUseExp>> unsortedDependencies) {
+        private Map<FAccessExp, Collection<FAccessExp>> sortDependencies(Map<FAccessExp, Set<FAccessExp>> unsortedDependencies) {
             final Map<String, Integer> varToPosMap = new HashMap<String, Integer>();
             int counter = 0;
-            for (FIdUseExp use : equation.FIdUseExpsInRHS()) {
+            for (FAccessExp use : equation.FAccessExpsInRHS()) {
                 if (!varToPosMap.containsKey(use.name())) {
                     varToPosMap.put(use.name(), counter++);
                 }
             }
-            Map<FIdUseExp, Collection<FIdUseExp>> resolvedDependencies = new HashMap<FIdUseExp, Collection<FIdUseExp>>();
-            for (Map.Entry<FIdUseExp, Set<FIdUseExp>> entry : unsortedDependencies.entrySet()) {
-                ArrayList<FIdUseExp> uses = new ArrayList<FIdUseExp>(entry.getValue());
-                Collections.sort(uses, new Comparator<FIdUseExp>() {
-                    public int compare(FIdUseExp a, FIdUseExp b) {
+            Map<FAccessExp, Collection<FAccessExp>> resolvedDependencies = new HashMap<>();
+            for (Map.Entry<FAccessExp, Set<FAccessExp>> entry : unsortedDependencies.entrySet()) {
+                ArrayList<FAccessExp> uses = new ArrayList<>(entry.getValue());
+                Collections.sort(uses, new Comparator<FAccessExp>() {
+                    public int compare(FAccessExp a, FAccessExp b) {
                         return varToPosMap.get(a.name()) - varToPosMap.get(b.name());
                     }
                 });
@@ -607,19 +604,19 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             return resolvedDependencies;
         }
         
-        protected Map<FIdUseExp, Collection<FIdUseExp>> resolvedDependencies() {
+        protected Map<FAccessExp, Collection<FAccessExp>> resolvedDependencies() {
             if (resolvedDependencies == null) {
                 DependencyVariableEvaluator pve = new DependencyVariableEvaluator();
                 FFunctionCallEquation equation = (FFunctionCallEquation) this.equation;
                 try {
                     equation.getCall().evaluate(pve);
-                    Map<FIdUseExp, Set<FIdUseExp>> unsortedDependencies = pve.resolveDependencies(equation);
+                    Map<FAccessExp, Set<FAccessExp>> unsortedDependencies = pve.resolveDependencies(equation);
                     resolvedDependencies = sortDependencies(unsortedDependencies);
                 } catch (ConstantEvaluationException e) {
                     ASTNode.log.debug("SplitIncidenceMap failed to compute dependency information, falling back to normal heuristics!");
-                    resolvedDependencies = new HashMap<FIdUseExp, Collection<FIdUseExp>>();
-                    Collection<FIdUseExp> rhs = equation.FIdUseExpsInRHS();
-                    for (FIdUseExp lhs : lhsUses()) {
+                    resolvedDependencies = new HashMap<FAccessExp, Collection<FAccessExp>>();
+                    Collection<FAccessExp> rhs = equation.FAccessExpsInRHS();
+                    for (FAccessExp lhs : lhsUses()) {
                         resolvedDependencies.put(lhs, rhs);
                     }
                 }
@@ -627,11 +624,11 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             return resolvedDependencies;
         }
         
-        protected Map<String, FIdUseExp> nameToAssignedMap() {
+        protected Map<String, FAccessExp> nameToAssignedMap() {
             if (nameToAssignedMap == null) {
-                nameToAssignedMap = new HashMap<String, FIdUseExp>();
-                for (FIdUseExp use : lhsUses()) {
-                    FIdUseExp old = nameToAssignedMap.put(use.name(), use);
+                nameToAssignedMap = new HashMap<>();
+                for (FAccessExp use : lhsUses()) {
+                    FAccessExp old = nameToAssignedMap.put(use.name(), use);
                     if (old != null) {
                         throw new UnsupportedOperationException("The following equation assignes the same variable twice, " + old + ", this class doesn't handle that:\n" + equation);
                     }
@@ -648,7 +645,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
         
         @Override
-        protected void buildLhsFunction(Map<Integer, V> lhs, FIdUseExp use, int i) {
+        protected void buildLhsFunction(Map<Integer, V> lhs, FAccessExp use, int i) {
             super.buildLhsFunction(lhs, use, i);
             Set<V> s = resolver.lookupVars(resolvedDependencies().get(use));
             splitMap.add(s);
@@ -661,13 +658,13 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
 
         @Override
-        public Collection<FIdUseExp> assigned() {
+        public Collection<FAccessExp> assigned() {
             return lhsUses();
         }
 
         @Override
-        public final Iterable<FIdUseExp> rhs(String assignedLHS) {
-            FIdUseExp use = nameToAssignedMap().get(assignedLHS);
+        public final Iterable<FAccessExp> rhs(String assignedLHS) {
+            FAccessExp use = nameToAssignedMap().get(assignedLHS);
             if (use == null) {
                 return Collections.emptyList();
             } else {
@@ -1065,8 +1062,8 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             this.option = option;
         }
 
-        public boolean isActive(OptionRegistry options) {
-            return option == null || options != null && options.getBooleanOption(option);
+        public boolean isActive(StepUtil stepUtil) {
+            return option == null || stepUtil != null && stepUtil.getOptionRegistry().getBooleanOption(option);
         }
 
         /**
@@ -1171,24 +1168,24 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     }
     
 
-    public Collection<C> tarjan(OptionRegistry options, boolean forceGroupMembersIntoSameBlock) {
-        return tarjan(options, Collections.<SCCContributor>emptyList(), forceGroupMembersIntoSameBlock);
+    public Collection<C> tarjan(StepUtil stepUtil, boolean forceGroupMembersIntoSameBlock) {
+        return tarjan(stepUtil, Collections.<SCCContributor>emptyList(), forceGroupMembersIntoSameBlock);
     }
 
-    public Collection<C> tarjan(OptionRegistry options, Collection<SCCContributor> extraContributors,
+    public Collection<C> tarjan(StepUtil stepUtil, Collection<SCCContributor> extraContributors,
             boolean forceGroupMembersIntoSameBlock) {
         tarjanReset();
         
-        Collection<SCCContributor> groupMemberContributers;
+        Collection<SCCContributor> groupMemberContributors;
         if (forceGroupMembersIntoSameBlock) {
-            groupMemberContributers = Collections.<SCCContributor>singletonList(GROUP_MEMBER_CONTRIBUTOR);
+            groupMemberContributors = Collections.<SCCContributor>singletonList(GROUP_MEMBER_CONTRIBUTOR);
         } else {
-            groupMemberContributers = Collections.<SCCContributor>emptyList();
+            groupMemberContributors = Collections.<SCCContributor>emptyList();
         }
         
         Collection<SCCContributor> contributors = new ArrayList<SCCContributor>();
-        for (SCCContributor contributor : new ChainedIterable<SCCContributor>(getSCCContributors(), groupMemberContributers, extraContributors)) {
-            if (!contributor.isActive(options))
+        for (SCCContributor contributor : new ChainedIterable<SCCContributor>(getSCCContributors(), groupMemberContributors, extraContributors)) {
+            if (!contributor.isActive(stepUtil))
                 continue;
             contributors.add(contributor);
         }
@@ -1478,60 +1475,60 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     }
 }
 
-    public class DAEVarUseLookupVisitor implements FIdUseExpLookupVisitor {
-        public static final FIdUseExpLookupVisitor instance = new DAEVarUseLookupVisitor();
+    public class DAEVarUseLookupVisitor extends FAccessExpLookupVisitor {
+        public static final DAEVarUseLookupVisitor instance = new DAEVarUseLookupVisitor();
         
         @Override
-        public void visit(ASTNode<? extends ASTNode> node, Set<FIdUseExp> set) {
+        public void visit(ASTNode<? extends ASTNode> node, Set<FAccessExp> set) {
             node.findDAEVarUsesInTree(set, this);
         }
     }
 
-    public class InitDAEVarUseLookupVisitor implements FIdUseExpLookupVisitor {
-        public static final FIdUseExpLookupVisitor instance = new InitDAEVarUseLookupVisitor();
+    public class InitDAEVarUseLookupVisitor extends FAccessExpLookupVisitor {
+        public static final InitDAEVarUseLookupVisitor instance = new InitDAEVarUseLookupVisitor();
         
         @Override
-        public void visit(ASTNode<? extends ASTNode> node, Set<FIdUseExp> set) {
+        public void visit(ASTNode<? extends ASTNode> node, Set<FAccessExp> set) {
             node.findInitDAEVarUsesInTree(set, this);
         }
     }
     
-    public class InitUniqueDAEVarUseLookupVisitor implements FIdUseExpLookupVisitor {
-        public static final FIdUseExpLookupVisitor instance = new InitUniqueDAEVarUseLookupVisitor();
+    public class InitUniqueDAEVarUseLookupVisitor extends FAccessExpLookupVisitor {
+        public static final InitUniqueDAEVarUseLookupVisitor instance = new InitUniqueDAEVarUseLookupVisitor();
         
         @Override
-        public void visit(ASTNode<? extends ASTNode> node, Set<FIdUseExp> set) {
+        public void visit(ASTNode<? extends ASTNode> node, Set<FAccessExp> set) {
             node.findInitUniqueDAEVarUsesInTree(set, this);
         }
     }
     
 
-    public void ASTNode.findDAEVarUsesInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
-        findFIdUseExpsInTree(set, visitor);
+    public void ASTNode.findDAEVarUsesInTree(Set<FAccessExp> set, CommonAccessExpLookupVisitor<FAccessExp> visitor) {
+        findCommonAccessExpsInTree(set, visitor);
     }
 
     @Override
-    public void FHomotopyExp.findDAEVarUsesInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
+    public void FHomotopyExp.findDAEVarUsesInTree(Set<FAccessExp> set, CommonAccessExpLookupVisitor<FAccessExp> visitor) {
         visitor.visit(getActual(), set);
     }
 
-    public void ASTNode.findInitDAEVarUsesInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
-        findFIdUseExpsInTree(set, visitor);
+    public void ASTNode.findInitDAEVarUsesInTree(Set<FAccessExp> set, CommonAccessExpLookupVisitor<FAccessExp> visitor) {
+        findCommonAccessExpsInTree(set, visitor);
     }
 
-    public Set<FIdUseExp> ASTNode.findInitUniqueDAEVarUsesInTree() {
-        return findFIdUseExpsInTree(InitUniqueDAEVarUseLookupVisitor.instance);
+    public Set<FAccessExp> ASTNode.findInitUniqueDAEVarUsesInTree() {
+        return findCommonAccessExpsInTree(InitUniqueDAEVarUseLookupVisitor.instance);
     }
 
-    public void ASTNode.findInitUniqueDAEVarUsesInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
+    public void ASTNode.findInitUniqueDAEVarUsesInTree(Set<FAccessExp> set, CommonAccessExpLookupVisitor<FAccessExp> visitor) {
         for (ASTNode n : this) {
             visitor.visit(n, set);
         }
     }
 
-    public void FHomotopyExp.findInitUniqueDAEVarUsesInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
+    public void FHomotopyExp.findInitUniqueDAEVarUsesInTree(Set<FAccessExp> set, CommonAccessExpLookupVisitor<FAccessExp> visitor) {
         visitor.visit(getActual(), set);
-        DefaultFidUseExpLookupVisitor.instance.visit(getSimplified(), set);
+        DefaultFAccessExpLookupVisitor.instance.visit(getSimplified(), set);
     }
     
 
@@ -1555,8 +1552,8 @@ public class SCCBlock<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> e
         return containsHomotopy;
     }
     
-    public AbstractEquationBlock createEquationBlock(EquationBlockFactory.BlockProducer producer, OptionRegistry options, boolean isInitial) {
-        return EquationBlockFactory.createEquationBlock(this, producer, options, isInitial);
+    public AbstractEquationBlock createEquationBlock(BlockProducer producer, StepUtil stepUtil, boolean isInitial) {
+        return EquationBlockFactory.createEquationBlock(this, producer, stepUtil, isInitial);
     }
 }
 
@@ -1575,7 +1572,7 @@ public class BiPGraph extends AbstractBiPGraph<Eq, Var, SCCBlock<Eq, Var>> {
     }
 
     @Override
-    protected Eq createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<Eq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
+    protected Eq createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<Eq> groupMembers, TypePrefixVariability variability, FType type, boolean isMeta) {
         return new Eq(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
     }
 
@@ -1592,7 +1589,7 @@ public class BiPGraph extends AbstractBiPGraph<Eq, Var, SCCBlock<Eq, Var>> {
 
 public class Eq extends AbstractEq<Eq, Var> {
 
-    public Eq(String name, FAbstractEquation eqn, int groupNumber, Collection<Eq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
+    public Eq(String name, FAbstractEquation eqn, int groupNumber, Collection<Eq> groupMembers, TypePrefixVariability variability, FType type, boolean isMeta) {
         super(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
     }
 
@@ -1648,7 +1645,7 @@ public class SolvingBiPGraph extends AbstractBiPGraph<SolvingEq, SolvingVar, SCC
     }
 
     @Override
-    protected SolvingEq createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<SolvingEq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
+    protected SolvingEq createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<SolvingEq> groupMembers, TypePrefixVariability variability, FType type, boolean isMeta) {
         return new SolvingEq(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
     }
 
@@ -1678,7 +1675,7 @@ public class SolvingEq extends AbstractEq<SolvingEq, SolvingVar> implements Comp
     private int sameTypeOccurrences = 0;
     private boolean isRes = false;
 
-    public SolvingEq(String name, FAbstractEquation eqn, int groupNumber, Collection<SolvingEq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
+    public SolvingEq(String name, FAbstractEquation eqn, int groupNumber, Collection<SolvingEq> groupMembers, TypePrefixVariability variability, FType type, boolean isMeta) {
         super(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
     }
 
@@ -1821,7 +1818,7 @@ public class SolvingVar extends AbstractVar<SolvingEq, SolvingVar> implements Co
         diff = (getVariable().attributeSet(FAttribute.START) ? 1 : 0) - (other.getVariable().attributeSet(FAttribute.START) ? 1 : 0);
         if (diff != 0)
             return diff;
-        diff = other.getVariable().getFQName().numDots() - getVariable().getFQName().numDots();
+        diff = other.getVariable().getFAccess().numDots() - getVariable().getFAccess().numDots();
         if (diff != 0)
             return diff;
         return 0;
@@ -1834,7 +1831,7 @@ public abstract class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractV
     private final String name;
     private final FAbstractEquation eqn;
     private final int groupNumber;
-    private final FTypePrefixVariability variability;
+    private final TypePrefixVariability variability;
     private final FType type;
     private final boolean isMeta;
     private java.util.List<V> variables = new ArrayList<V>();
@@ -1854,7 +1851,7 @@ public abstract class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractV
      */
     private final Collection<E> groupMembers;
 
-    public AbstractEq(String name, FAbstractEquation eqn, int groupNumber, Collection<E> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
+    public AbstractEq(String name, FAbstractEquation eqn, int groupNumber, Collection<E> groupMembers, TypePrefixVariability variability, FType type, boolean isMeta) {
         this.name = name;
         this.eqn = eqn;
         this.groupNumber = groupNumber;
@@ -1986,7 +1983,7 @@ public abstract class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractV
         return null;
     }
 
-    public FTypePrefixVariability variability() {
+    public TypePrefixVariability variability() {
         return variability;
     }
 
@@ -2102,21 +2099,21 @@ public abstract class AbstractVar<E extends AbstractEq<E, V>, V extends Abstract
 
 public class AbstractBiPGraph {
     protected static interface VariableResolver<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> {
-        public Set<V> lookupVars(Iterable<FIdUseExp> set);
+        public Set<V> lookupVars(Iterable<FAccessExp> set);
     }
 }
 
 public VariableResolver<E, V> AbstractBiPGraph.defaultVariableResolver() {
     return new VariableResolver<E,V>() {
-        public Set<V> lookupVars(Iterable<FIdUseExp> set) {
+        public Set<V> lookupVars(Iterable<FAccessExp> set) {
             return AbstractBiPGraph.this.lookupVars(set);
         }
     };
 }
 
-public Set<V> AbstractBiPGraph.lookupVars(Iterable<FIdUseExp> set) {
+public Set<V> AbstractBiPGraph.lookupVars(Iterable<FAccessExp> set) {
     Set<V> res = new LinkedHashSet<V>();
-    for (FIdUseExp use : set) {
+    for (FAccessExp use : set) {
         V var = getVariable(use.name());
         if (var != null)
             res.add(var);

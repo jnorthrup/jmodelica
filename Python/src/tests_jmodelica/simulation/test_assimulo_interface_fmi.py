@@ -106,49 +106,6 @@ class Test_Sparse_Linear_Block:
 
         fmu_name = compile_fmu("LinearTest.TwoTornSystems1", file_name, version=1.0,
                         compiler_options={"generate_sparse_block_jacobian_threshold": 0})
-        
-class Test_Sensitivities_FMI2:
-    @classmethod
-    def setUpClass(cls):
-        file_name = os.path.join(get_files_path(), 'Modelica', 'Sensitivities.mo')
-        compile_fmu("BasicSens1", file_name, version=2.0)
-        
-    @testattr(noncompliantfmi = True)
-    def test_basicsens1(self):
-        model = load_fmu("BasicSens1.fmu")
-        
-        opts = model.simulate_options()
-        opts["sensitivities"] = ["d"]
-
-        res = model.simulate(options=opts)
-        nose.tools.assert_almost_equal(res.final('dx/dd'), 0.36789, 3)
-        
-        assert res.solver.statistics["nsensfcnfcns"] > 0
-        
-    @testattr(windows_base = True)
-    def test_basicsens1dir(self):
-        model = load_fmu(os.path.join(get_files_path(), "FMUs/ME2.0", "BasicSens1.fmu"))
-        
-        opts = model.simulate_options()
-        opts["sensitivities"] = ["d"]
-
-        res = model.simulate(options=opts)
-        nose.tools.assert_almost_equal(res.final('dx/dd'), 0.36789, 3)
-        
-        assert res.solver.statistics["nsensfcnfcns"] > 0
-        
-    @testattr(windows_base = True)
-    def test_basicsens2(self):
-        model = load_fmu(os.path.join(get_files_path(), "FMUs/ME2.0", "BasicSens2.fmu"))
-        
-        opts = model.simulate_options()
-        opts["sensitivities"] = ["d"]
-
-        res = model.simulate(options=opts)
-        nose.tools.assert_almost_equal(res.final('dx/dd'), 0.36789, 3)
-        
-        assert res.solver.statistics["nsensfcnfcns"] == 0
-        
 
 class Test_Time_Events_FMU10:
     @classmethod
@@ -1321,15 +1278,7 @@ class Test_FMI_ODE_CS_2:
         
         for i in range(len(res["der(x)"])):
             assert res["der(x)"][i] == 0.0
-            
-    @testattr(stddist_full = True)
-    def test_simulation_without_initialization(self):
-        model = load_fmu("TimeEvents_Basic5.fmu")
-        opts = model.simulate_options()
-        opts["initialize"] = False
 
-        nose.tools.assert_raises(FMUException, model.simulate, options=opts)
-    
     @testattr(stddist_full = True)
     def test_time_event_basic_5(self):
         model = load_fmu("TimeEvents_Basic5.fmu")
@@ -1390,24 +1339,6 @@ class Test_FMI_ODE_CS:
         nose.tools.assert_almost_equal(res.final("x"), 3.89, 2)
         
     @testattr(stddist_full = True)
-    def test_simulation_without_initialization(self):
-        model = load_fmu("TimeEvents_Advanced5.fmu")
-        opts = model.simulate_options()
-        opts["initialize"] = False
-
-        nose.tools.assert_raises(FMUException, model.simulate, options=opts)
-        
-    @testattr(stddist_full = True)
-    def test_no_returned_result(self):
-        model = load_fmu("TimeEvents_Advanced5.fmu")
-        opts = model.simulate_options()
-        opts["return_result"] = False
-        
-        res = model.simulate(options=opts)
-
-        nose.tools.assert_raises(Exception,res._get_result_data)
-            
-    @testattr(stddist_full = True)
     def test_updated_values_in_result(self):
         model = load_fmu("LinearTest_Linear1.fmu")
         opts = model.simulate_options()
@@ -1435,11 +1366,56 @@ class Test_FMI_ODE_2:
 
         _ex1_name = compile_fmu("NoState.Example1", file_name, version=2.0)
         _ex2_name = compile_fmu("NoState.Example2", file_name, version=2.0)
-        #_in1_name = compile_fmu("Inputs.SimpleInput", file_name_in)
-        #_in3_name = compile_fmu("Inputs.SimpleInput3", file_name_in)
+        _in1_name = compile_fmu("Inputs.SimpleInput", file_name_in, version=2.0)
+        _in_disc_name = compile_fmu("Inputs.PlantDiscreteInputs", file_name_in, version=2.0)
         _cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", version=2.0)
         #_in3_name = compile_fmu("LinearTest.Linear1", file_name_linear)
+    
+    @testattr(stddist_full = True)
+    def test_discrete_input(self):
+        model = load_fmu("Inputs_PlantDiscreteInputs.fmu")
         
+        input_object = (["Tenv","onSwitch"], N.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]))
+        
+        res = model.simulate(input=input_object)
+        
+        nose.tools.assert_almost_equal(res.final('onSwitch') ,1.000000000)  
+        
+        model.reset()
+        
+        input_object = (["Tenv","onSwitch"], N.array([[0.0, 0.0], [1.0, 1.0]]))
+        
+        nose.tools.assert_raises(FMUException, model.simulate, input=input_object)
+    
+    
+    @testattr(stddist_full = True)
+    def test_simple_input(self):
+        model = load_fmu("Inputs_SimpleInput.fmu")
+        
+        input_object = ("u", N.array([[0.0, 0.0], [1.0, 1.0]]))
+        
+        res = model.simulate(input=input_object)
+        
+        nose.tools.assert_almost_equal(res.final('y') ,1.000000000)
+        nose.tools.assert_almost_equal(res.final('u') ,1.000000000)
+        
+        model.reset()
+        
+        input_object = ("u", N.array([[0.0, 0.0], [1.0, 1.0]]))
+        
+        res = model.simulate(input=input_object)
+        
+        nose.tools.assert_almost_equal(res.final('y') ,1.000000000)
+        nose.tools.assert_almost_equal(res.final('u') ,1.000000000)
+    
+    @testattr(stddist_full = True)
+    def test_input_values_not_input(self):
+        model = load_fmu("Inputs_SimpleInput.fmu")
+        
+        input_object = ("y", N.array([[0.0, 0.0], [1.0, 1.0]]))
+        
+        nose.tools.assert_raises(FMUException, model.simulate, input=input_object)
+    
     @testattr(stddist_base = True)
     def test_cc_with_radau(self):
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
@@ -1464,6 +1440,43 @@ class Test_FMI_ODE_2:
         
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
     
+    @testattr(stddist_base = True)
+    def test_with_jacobian(self):
+
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
+        opts = model.simulate_options()
+        opts["CVode_options"]["rtol"] = 1e-7
+        assert opts["with_jacobian"] == "Default"
+        
+        res = model.simulate(final_time=1.5,options=opts)
+        print res.final("J1.w")
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
+        assert res.solver.statistics["nfcnjacs"] > 0
+        
+        opts["with_jacobian"] = True
+        model.reset()
+    
+        res = model.simulate(final_time=1.5,options=opts)
+        print res.final("J1.w")
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
+        assert res.solver.statistics["nfcnjacs"] == 0
+        
+        opts["CVode_options"]["usejac"] = False
+        model.reset()
+    
+        res = model.simulate(final_time=1.5,options=opts)
+        print res.final("J1.w")
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
+        assert res.solver.statistics["nfcnjacs"] > 0
+        
+        opts["with_jacobian"] = False
+        model.reset()
+    
+        res = model.simulate(final_time=1.5,options=opts)
+        print res.final("J1.w")
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
+        assert res.solver.statistics["nfcnjacs"] > 0
+
     @testattr(stddist_full = True)
     def test_no_state1(self):
         """
@@ -1542,6 +1555,19 @@ class Test_FMI_ODE:
         self._dqSim     = FMIODE(self._dq)
         
     @testattr(stddist_full = True)
+    def test_max_log_file_size(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu", log_level=5)
+        model.set("_log_level", 5)
+        model.set_max_log_size(10)
+        
+        model.simulate()
+        
+        with open("Modelica_Mechanics_Rotational_Examples_CoupledClutches_log.txt") as f:
+            for line in f:
+                pass
+            assert "The log file has reached its maximum size" in line
+        
+    @testattr(stddist_full = True)
     def test_updated_values_in_result(self):
         model = load_fmu("LinearTest_Linear1.fmu")
         opts = model.simulate_options()
@@ -1551,18 +1577,7 @@ class Test_FMI_ODE:
         
         for i in range(len(res["der(x)"])):
             assert res["der(x)"][i] == 0.0
-            
-    @testattr(stddist_full = True)
-    def test_maxord_is_set(self):
-        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
-        opts = model.simulate_options()
-        opts["solver"] = "CVode"
-        opts["CVode_options"]["maxord"] = 1
-        
-        res = model.simulate(final_time=1.5,options=opts)
-        
-        assert res.solver.maxord == 1
-    
+
     @testattr(stddist_base = True)
     def test_cc_with_cvode(self):
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
@@ -1573,33 +1588,7 @@ class Test_FMI_ODE:
         res = model.simulate(final_time=1.5,options=opts)
         
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
-        
-    @testattr(stddist_full = True)
-    def test_no_result(self):
-        opts = self._bounce.simulate_options()
-        opts["result_handling"] = "none"
-        opts["initialize"] = False
-        res = self._bounce.simulate(options=opts)
-        
-        nose.tools.assert_raises(Exception,res._get_result_data)
-        
-    @testattr(stddist_full = True)
-    def test_no_returned_result(self):
-        opts = self._bounce.simulate_options()
-        opts["return_result"] = False
-        opts["initialize"] = False
-        res = self._bounce.simulate(options=opts)
-        
-        nose.tools.assert_raises(Exception,res._get_result_data)
-    
-    @testattr(stddist_full = True)
-    def test_simulation_without_initialization(self):
-        bounce  = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
-        opts = bounce.simulate_options()
-        opts["initialize"] = False
-        
-        nose.tools.assert_raises(FMUException, bounce.simulate, options=opts)
-    
+
     @testattr(stddist_full = True)
     def test_reset_internal_variables(self):
         model = load_fmu("Inputs_SimpleInput.fmu")
@@ -1717,60 +1706,6 @@ class Test_FMI_ODE:
         
         nose.tools.assert_almost_equal(res.initial('x') ,-1.000000000)
         nose.tools.assert_almost_equal(res.final('x'),-1.000000000)
-    
-    @testattr(stddist_full = True)
-    def test_result_name_file(self):
-        """
-        Tests user naming of result file (FMIODE).
-        """
-        res = self._dq.simulate(options={"initialize":False, "result_handling":"file"})
-        
-        #Default name
-        assert res.result_file == "dq_result.txt"
-        assert os.path.exists(res.result_file)
-        
-        res = self._bounce.simulate(options={"result_file_name":
-                                    "bouncingBallt_result_test.txt",
-                                             "initialize":False})
-                                    
-        #User defined name
-        assert res.result_file == "bouncingBallt_result_test.txt"
-        assert os.path.exists(res.result_file)
-        
-    @testattr(stddist_full = True)
-    def test_result_enumeration(self):
-        """
-        Tests that enumerations are written to the result
-        """
-        file_name = os.path.join(get_files_path(), 'Modelica', 'Friction.mo')
-
-        enum_name = compile_fmu("Friction2", file_name)
-        
-        model = load_fmu(enum_name)
-        
-        data_type = model.get_variable_data_type("mode")
-        
-        from pyfmi.fmi import FMI_ENUMERATION
-        assert data_type == FMI_ENUMERATION
-        
-        opts = model.simulate_options()
-        
-        res = model.simulate(options=opts)
-        res["mode"] #Check that the enumeration variable is in the dict, otherwise exception
-        
-        model.reset()
-        opts["result_handling"] = "memory"
-        
-        res = model.simulate(options=opts)
-        res["mode"] #Check that the enumeration variable is in the dict, otherwise exception
-        
-        from pyfmi.common.io import ResultHandlerCSV
-        model.reset()
-        opts["result_handling"] = "custom"
-        opts["result_handler"] = ResultHandlerCSV(model)
-        
-        res = model.simulate(options=opts)
-        res["mode"] #Check that the enumeration variable is in the dict, otherwise exception
         
     @testattr(stddist_full = True)
     def test_result_enumeration_2(self):
@@ -1937,13 +1872,6 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(res.final('x'), 0.27510283167449501, 4)
         nose.tools.assert_almost_equal(res.final('y'), -0.96141480746068897, 4)
         
-        model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
-        
-        res = model.simulate(final_time=10, options={'ncp':1000})
-    
-        nose.tools.assert_almost_equal(res.initial('x'), 1.000000, 4)
-        nose.tools.assert_almost_equal(res.initial('y'), 0.000000, 4)
-        
     @testattr(windows_base = True)
     def test_simulation_completed_step_radau(self):
         model = load_fmu('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
@@ -1952,14 +1880,6 @@ class Test_FMI_ODE:
         opts["solver"] = "Radau5ODE"
         res = model.simulate(final_time=10, options=opts)
     
-        assert N.abs(res.final('y')+0.96069759894208395) < 1e-2
-        assert N.abs(res.final('x')-0.27759705219420999) < 1e-1
-        
-        model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
-        
-        opts["ncp"] = 1000
-        res = model.simulate(final_time=10, options=opts)
-
         assert N.abs(res.final('y')+0.96069759894208395) < 1e-2
         assert N.abs(res.final('x')-0.27759705219420999) < 1e-1
         
@@ -1973,14 +1893,6 @@ class Test_FMI_ODE:
     
         assert N.abs(res.final('y')+0.95766129067717698) < 1e-1
         assert N.abs(res.final('x')-0.28789729477457998) < 1e-1
-        
-        model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
-        
-        opts["ncp"] = 1000
-        res = model.simulate(final_time=10, options=opts)
-
-        assert N.abs(res.final('y')+0.95766129067716799) < 1e-1
-        assert N.abs(res.final('x')-0.28789729477461101) < 1e-1
     
     @testattr(windows_base = True)
     def test_simulation_completed_step_rodas(self):
@@ -1993,14 +1905,6 @@ class Test_FMI_ODE:
         assert N.abs(res.final('y')+0.96104146428710602) < 1e-1
         assert N.abs(res.final('x')-0.27640424005592701) < 1e-1
         
-        model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
-        
-        opts["ncp"] = 1000
-        res = model.simulate(final_time=10, options=opts)
-
-        assert N.abs(res.final('y')+0.96104146428710602) < 1e-1
-        assert N.abs(res.final('x')-0.27640424005592701) < 1e-1
-        
     @testattr(windows_base = True)
     def test_simulation_completed_step_lsodar(self):
         model = load_fmu('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
@@ -2009,14 +1913,6 @@ class Test_FMI_ODE:
         opts["solver"] = "LSODAR"
         res = model.simulate(final_time=10, options=opts)
     
-        assert N.abs(res.final('y')+0.96311062033198303) < 1e-1
-        assert N.abs(res.final('x')-0.26910580261997902) < 1e-1
-        
-        model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
-        
-        opts["ncp"] = 1000
-        res = model.simulate(final_time=10, options=opts)
-
         assert N.abs(res.final('y')+0.96311062033198303) < 1e-1
         assert N.abs(res.final('x')-0.26910580261997902) < 1e-1
     
@@ -2100,7 +1996,7 @@ class Test_FMI_ODE:
         """
         This tests a simulation with different start time.
         """
-        bounce = FMUModel('bouncingBall.fmu', path_to_fmus_me1)
+        bounce = load_fmu('bouncingBall.fmu', path_to_fmus_me1)
         #bounce.initialize()
         opts = bounce.simulate_options()
         opts["CVode_options"]["rtol"] = 1e-4

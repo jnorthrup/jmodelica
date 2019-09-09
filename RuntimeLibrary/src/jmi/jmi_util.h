@@ -41,6 +41,7 @@
         #define JMI_PATH_MAX PATH_MAX
       #else
         #include <linux/limits.h>
+        #include <limits.h>
         #define JMI_PATH_MAX PATH_MAX
       #endif
     #endif
@@ -53,6 +54,8 @@
 #define JMI_PATH_MAX 256
 #endif
 
+#define JMI_REAL_WORK_ARRAY_SIZE 15
+#define JMI_INT_WORK_ARRAY_SIZE 3
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -136,9 +139,6 @@ typedef struct _jmi_time_event_t {
  * is before the time event T1 defined by <code>event</code> then T1 is updated to T2.
  */
 void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, double time);
-
-/* This is a temporary remnant of CppAD*/            
-#define AD_WRAP_LITERAL(x) ((jmi_real_t) (x))
 
 #define COND_EXP_EQ(op1,op2,th,el) ((op1==op2)? (th): (el)) /**< \brief Macro for conditional expression == <br> */
 #define COND_EXP_LE(op1,op2,th,el) ((op1<=op2)? (th): (el)) /**< \brief Macro for conditional expression <= <br> */
@@ -724,5 +724,38 @@ jmi_string_t* jmi_create_strings(size_t n);
  * Free a string vector created by jmi_create_strings. Will also free each element.
  */
 void jmi_free_strings(jmi_string_t* s, size_t n);
+
+typedef int (*jmi_directional_derivative_base_func_t)(void* args, jmi_real_t* x, jmi_real_t* y);
+
+typedef int (*jmi_directional_derivative_attributes_func_t)(void* args, jmi_real_t* y);
+
+typedef struct jmi_directional_derivative_callbacks_t jmi_directional_derivative_callbacks_t;
+
+struct jmi_directional_derivative_callbacks_t {
+	size_t n_input; /* Number of input variables */
+	size_t n_output; /* Number of outputs */
+	jmi_real_t* input; /* Input variable values */
+	jmi_real_t* d_input; /* Direction for directional derivative */
+	jmi_real_t* output; /* Output variable values */
+	jmi_real_t* d_output; /* Directional derivatives for each output, to be calculated by runtime */
+	jmi_directional_derivative_attributes_func_t F_max; /* Callback for max values for input variables */
+	jmi_directional_derivative_attributes_func_t F_min; /*  Callback for min values for input variables */
+	jmi_directional_derivative_attributes_func_t F_input_nominal; /* Callback for nominal values for input variables */
+	jmi_directional_derivative_attributes_func_t F_output_nominal; /* Callback for nominal values for output variables */
+	jmi_directional_derivative_base_func_t F;	
+	jmi_string_t label; /* Label for origin of directional derivative callback */
+};
+jmi_directional_derivative_callbacks_t* jmi_create_directional_derivative_callbacks(size_t n_input, size_t n_output);
+
+#define JMI_INIT_DIRECTIONAL_DERIVATIVE_CALLBACKS(DD, FMAX, FMIN, FNOM, FNOMOUT, F, LABEL) \
+    jmi_init_directional_derivative_callbacks(DD, &FMAX, &FMIN, &FNOM, &FNOMOUT, &F, #LABEL);
+void jmi_init_directional_derivative_callbacks(jmi_directional_derivative_callbacks_t* dd, jmi_directional_derivative_attributes_func_t F_max,
+	jmi_directional_derivative_attributes_func_t F_min,
+	jmi_directional_derivative_attributes_func_t F_input_nominal,
+	jmi_directional_derivative_attributes_func_t F_output_nominal,
+	jmi_directional_derivative_base_func_t F,	
+	jmi_string_t label);
+void jmi_free_directional_derivative_callbacks(jmi_directional_derivative_callbacks_t* dd);
+int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_callbacks_t* dd_callback, void* args);
 
 #endif

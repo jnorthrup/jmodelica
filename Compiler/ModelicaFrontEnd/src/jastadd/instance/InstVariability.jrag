@@ -21,21 +21,21 @@ import java.util.Collections;
 
 aspect InstVariability {
 
-    syn lazy FTypePrefixVariability InstComponentDecl.definedVariability() = localDefinedVariability().combineDown(overrideVariability());
+    syn lazy TypePrefixVariability InstComponentDecl.definedVariability() = localDefinedVariability().combineDown(overrideVariability());
 
-    syn lazy FTypePrefixVariability InstComponentDecl.localDefinedVariability() {
-        ComponentDecl cd = getComponentDecl();
-        return cd.hasTypePrefixVariability() ? cd.getTypePrefixVariability().flatten() : noDefinedVariability();
+    syn lazy TypePrefixVariability InstComponentDecl.localDefinedVariability() {
+        SrcComponentDecl cd = getSrcComponentDecl();
+        return cd.hasSrcTypePrefixVariability() ? cd.getSrcTypePrefixVariability().flatten() : noDefinedVariability();
     }
 
-    syn FTypePrefixVariability InstComponentDecl.noDefinedVariability() = fContinuous();
+    syn TypePrefixVariability InstComponentDecl.noDefinedVariability() = Variability.CONTINUOUS;
     eq InstReplacingComposite.noDefinedVariability() = getOriginalInstComponent().localDefinedVariability();
     eq InstReplacingRecord.noDefinedVariability()    = getOriginalInstComponent().localDefinedVariability();
     eq InstReplacingPrimitive.noDefinedVariability() = getOriginalInstComponent().localDefinedVariability();
 
-    inh FTypePrefixVariability InstNode.overrideVariability();
-    eq Root.getChild().overrideVariability()                  = fContinuous();
-    eq InstClassDecl.getChild().overrideVariability()         = fContinuous();
+    inh TypePrefixVariability InstNode.overrideVariability();
+    eq Root.getChild().overrideVariability()                  = Variability.CONTINUOUS;
+    eq InstClassDecl.getChild().overrideVariability()         = Variability.CONTINUOUS;
     eq InstComponentDecl.getChild().overrideVariability()     = definedVariability();
     eq InstRecordConstructor.getChild().overrideVariability() = variability();
     
@@ -48,19 +48,26 @@ aspect InstVariability {
      * Get variability without any variability propagation, structural considerations, etc.
      * Does not combine component variabilities for records.
      */
-    syn FTypePrefixVariability InstComponentDecl.originalVariability() = definedVariability().combineDown(defaultVariability());
+    syn TypePrefixVariability InstComponentDecl.originalVariability() = definedVariability().combineDown(defaultVariability());
     
     /**
      * Calculate variability.
      * This attribute should only have one equation, sometimes we flush it manually.
      */
-    syn lazy FTypePrefixVariability InstComponentDecl.variability() = calcVariability();
+    syn lazy TypePrefixVariability InstComponentDecl.variability() = calcVariability();
     
-    syn FTypePrefixVariability InstComponentDecl.calcVariability() = originalVariability();
+    syn TypePrefixVariability InstComponentDecl.calcVariability() = originalVariability();
     
-    eq InstEnumLiteral.calcVariability()                           = fConstant();
-    eq UnknownInstComponentDecl.calcVariability()                  = fConstant();
-    eq InstExternalObject.calcVariability()                        = fParameter();
+    eq InstEnumLiteral.calcVariability()          = Variability.CONSTANT;
+    eq UnknownInstComponentDecl.calcVariability() = Variability.CONSTANT;
+    eq InstAssignable.calcVariability()           = calcVariability(super.calcVariability());
+    eq InstExternalObject.calcVariability() {
+        TypePrefixVariability v = super.calcVariability();
+        if (!v.constantVariability()) {
+            v = calcVariability(Variability.FIXEDPARAMETER).combine(Variability.FIXEDPARAMETER).combineDown(Variability.INITIALPARAMETER);
+        }
+        return v;
+    }
     
     // Parameters variabilities also depend on binding expressions since its nice
     // to propagate known values, these include: 
@@ -72,22 +79,21 @@ aspect InstVariability {
     // we have to guard agains circularity.
     private boolean InstAssignable.circularVariability = false;
     
-    eq InstAssignable.calcVariability() {
-        FTypePrefixVariability v =  super.calcVariability();
-        if (v.constantVariability() && isInput() && inFunction() && isTopLevelInputOutput()) {
-            return fDiscrete();
+    public TypePrefixVariability InstAssignable.calcVariability(TypePrefixVariability v) {
+        if (v.constantVariability() && isInput() && inFunction() && isTopLevelCausalOrConnector()) {
+            return Variability.DISCRETE;
         }
         if (v.parameterVariability() && !inRecordDecl() && !circularVariability) {
             circularVariability = true;
-            if (!isRecord()) {
+            if (isPrimitive()) {
                 if (isSetAsInitial()) {
-                    v = fInitialParameter();
+                    v = Variability.INITIALPARAMETER;
                 } else if (isEvalAnnotated(true)) {
-                    v = fEvalTrueParameter();
+                    v = Variability.EVALTRUEPARAMETER;
                 } else if (isEvalAnnotated(false)) {
-                    v = fEvalFalseParameter();
+                    v = Variability.EVALFALSEPARAMETER;
                 } else if (isFinalIndependent()) {
-                    v = fFinalParameter();
+                    v = Variability.FINALPARAMETER;
                 }
                 if (!(forcedVariability.testParameterVariability() && v.evalFalseParameterVariability())) {
                     v = v.combineDown(forcedVariability);
@@ -102,13 +108,13 @@ aspect InstVariability {
     eq InstRecord.calcVariability() {
         InstComponentDecl rec = scalar();
         if (rec == null) {
-            return fContinuous();
+            return Variability.CONTINUOUS;
         }
-        List<FComponentVariability> l = new List<FComponentVariability>();
+        Map<String, TypePrefixVariability> map = new HashMap<>();
         for (InstComponentDecl icd : rec.allInstComponentDecls()) {
-            l.add(new FComponentVariability(icd.name(), icd.variability()));
+            map.put(icd.name(), icd.variability());
         }
-        return new FCompositeVariability(l).combineInherit(super.calcVariability());
+        return new CompositeVariability(map).combineInherit(super.calcVariability());
     }
 
     syn boolean InstAssignable.isFinalIndependent() =
@@ -140,11 +146,11 @@ aspect InstVariability {
             attributeCValueSet(defaultVariableEvaluator(), FAttribute.FIXED) != null && 
             !fixedAttributeCValue().reduceBooleanAnd();
 
-    syn FTypePrefixVariability InstComponentDecl.defaultVariability() = fContinuous();
+    syn TypePrefixVariability InstComponentDecl.defaultVariability() = Variability.CONTINUOUS;
     eq InstArrayComponentDecl.defaultVariability()                    = parentDefaultVariability();
-    eq InstPrimitive.defaultVariability()                             = isReal() ? fContinuous() : fDiscrete(); 
+    eq InstPrimitive.defaultVariability()                             = isReal() ? Variability.CONTINUOUS : Variability.DISCRETE; 
     
-    syn FTypePrefixVariability InstComponentDecl.bExpVariability() = fContinuous();
+    syn TypePrefixVariability InstComponentDecl.bExpVariability() = Variability.CONTINUOUS;
     eq InstAssignable.bExpVariability() {
         if (hasBindingFExp() && !getBindingFExp().type().isUnknown()) {
             return getBindingFExp().variability().dependentVariability();
@@ -153,41 +159,55 @@ aspect InstVariability {
         }
     }
 
-    syn FTypePrefixVariability FTypePrefixVariability.dependentVariability() = this;
-    eq FStructParameter.dependentVariability() = ASTNode.fStructParameter();
+    public TypePrefixVariability TypePrefixVariability.dependentVariability() { return this; }
+    public TypePrefixVariability StructParameter.dependentVariability() { return Variability.STRUCTPARAMETER; }
 
     /**
      * Combines variabilities with rules required for propagating variabilities.
      */
-    syn FTypePrefixVariability FTypePrefixVariability.combinePropagate(FTypePrefixVariability other) = other;
-    eq FCompositeVariability.combinePropagate(FTypePrefixVariability other) = combine(other, propagateCombiner);
-    eq FConstant.combinePropagate(FTypePrefixVariability other)             = other.combineDown(fFixedParameter());
-    eq FParameter.combinePropagate(FTypePrefixVariability other)            = other.combineDown(this);
-    eq FInitialParameter.combinePropagate(FTypePrefixVariability other)     = this;
-    eq FEvalTrueParameter.combinePropagate(FTypePrefixVariability other)    =
-            fStructParameter().combinePropagate(other);
-    eq FEvalFalseParameter.combinePropagate(FTypePrefixVariability other)    =
-            other.testParameterVariability() ? this : super.combinePropagate(other);
+    public TypePrefixVariability TypePrefixVariability.combinePropagate(TypePrefixVariability other) { return other; }
+    public TypePrefixVariability CompositeVariability.combinePropagate(TypePrefixVariability other) {
+        return combine(other, propagateCombiner);
+    }
+    public TypePrefixVariability Constant.combinePropagate(TypePrefixVariability other) {
+        return other.combineDown(Variability.FIXEDPARAMETER);
+    }
+    public TypePrefixVariability Parameter.combinePropagate(TypePrefixVariability other) {
+        return other.combineDown(this);
+    }
+    public TypePrefixVariability InitialParameter.combinePropagate(TypePrefixVariability other) {
+        return this;
+    }
+    public TypePrefixVariability EvalTrueParameter.combinePropagate(TypePrefixVariability other) {
+        return Variability.STRUCTPARAMETER.combinePropagate(other);
+    }
+    public TypePrefixVariability EvalFalseParameter.combinePropagate(TypePrefixVariability other) {
+        return other.testParameterVariability() ? this : super.combinePropagate(other);
+    }
     
-    class FCompositeVariability {
+    class CompositeVariability {
         protected static Combiner propagateCombiner = new Combiner() {
             @Override
-            public FTypePrefixVariability combine(FTypePrefixVariability v1, FTypePrefixVariability v2) {
+            public TypePrefixVariability combine(TypePrefixVariability v1, TypePrefixVariability v2) {
                 return v1.combinePropagate(v2);
             }
         };
     }
     
-    syn FTypePrefixVariability FTypePrefixVariability.combineInherit(FTypePrefixVariability other) =
-            other.combineDown(this);
-    eq FCompositeVariability.combineInherit(FTypePrefixVariability other) = combine(other, inheritCombiner);
-    eq FInitialParameter.combineInherit(FTypePrefixVariability other)     =
-            other.parameterVariability() ? this : super.combineInherit(other);
+    public TypePrefixVariability TypePrefixVariability.combineInherit(TypePrefixVariability other) {
+        return other.combineDown(this);
+    }
+    public TypePrefixVariability CompositeVariability.combineInherit(TypePrefixVariability other) {
+        return combine(other, inheritCombiner);
+    }
+    public TypePrefixVariability InitialParameter.combineInherit(TypePrefixVariability other) {
+        return other.parameterVariability() ? this : super.combineInherit(other);
+    }
     
-    class FCompositeVariability {
+    class CompositeVariability {
         protected static Combiner inheritCombiner = new Combiner() {
             @Override
-            public FTypePrefixVariability combine(FTypePrefixVariability v1, FTypePrefixVariability v2) {
+            public TypePrefixVariability combine(TypePrefixVariability v1, TypePrefixVariability v2) {
                 return v1.combineInherit(v2);
             }
         };
@@ -196,76 +216,16 @@ aspect InstVariability {
     /**
      * The variability of the surrounding component, if any (null otherwise).
      */
-    inh FTypePrefixVariability InstComponentDecl.parentDefaultVariability();
+    inh TypePrefixVariability InstComponentDecl.parentDefaultVariability();
     eq InstComponentDecl.getChild().parentDefaultVariability() = variability();
     eq InstClassDecl.getChild().parentDefaultVariability()     = null;
     eq Root.getChild().parentDefaultVariability()              = null;
-    
-    
-    protected static Set<InstComponentDecl> FAbstractEquation.assignedSetFromEqns(List<FAbstractEquation> eqns) {
-        Set<InstComponentDecl> res = new HashSet<InstComponentDecl>();
-        for (FAbstractEquation eqn : eqns)
-            res.addAll(eqn.assignedSet());
-        return res;
-    }
-
-    /**
-     * Gives the set of components assigned in this equation.
-     * 
-     * Only works in instance tree.
-     * For if and when equations, only the first branch is considered.
-     */
-    syn lazy Set<InstComponentDecl> FAbstractEquation.assignedSet() = Collections.emptySet();
-    eq InstForClauseE.assignedSet()      = assignedSetFromEqns(getFAbstractEquations());
-    eq FIfWhenElseEquation.assignedSet() = assignedSetFromEqns(getFAbstractEquations());
-    eq FEquation.assignedSet()           = getLeft().accessedVarSet();
-    eq FFunctionCallEquation.assignedSet() {
-        LinkedHashSet<InstComponentDecl> s = new LinkedHashSet<InstComponentDecl>();
-        for (FFunctionCallLeft left : getLefts()) {
-            if (left.hasFExp()) {
-                s.addAll(left.getFExp().accessedVarSet());
-            }
-        }
-        return s;
-    }
-
-    /**
-     * If this is an instance tree access, return set containing accessed var, otherwise empty set.
-     */
-    syn Set<InstComponentDecl> FExp.accessedVarSet() = Collections.emptySet();
-    eq FIdUseExp.accessedVarSet()                    = getFIdUse().accessedVarSet();
-
-    /**
-     * If this is an instance tree access, return set containing accessed var, otherwise empty set.
-     */
-    syn Set<InstComponentDecl> FIdUse.accessedVarSet() = Collections.emptySet();
-    eq FIdUseInstAccess.accessedVarSet()               = getInstAccess().accessedVarSet();
-
-    /**
-     * Get set containing accessed var.
-     */
-    syn Set<InstComponentDecl> InstAccess.accessedVarSet() = 
-        Collections.singleton(myInstComponentDecl());
-
-
-    eq FIdUseInstAccess.variability() = getInstAccess().myInstComponentDecl().variability().combine(indexVariability());
-
-    eq FIdUseInstAccess.indexVariability() = getInstAccess().indexVariability();
-
-    syn FTypePrefixVariability InstAccess.indexVariability() = fConstant();
-    eq InstArrayAccess.indexVariability()                    = getFArraySubscripts().variability();
-    eq InstDot.indexVariability() {
-        FTypePrefixVariability variability = fConstant();
-        for (InstAccess part : getInstAccesss())
-            variability = variability.combine(part.indexVariability());
-        return variability;
-    }
 
 }
 
 aspect InstExpVariability {
     eq InstFunctionCall.expVariability() {
-        FTypePrefixVariability total = fConstant();
+        TypePrefixVariability total = Variability.CONSTANT;
         for (InstFunctionArgument arg : getArgs()) {
             if (arg.isOKArg()) {
                 arg.getFExp();
@@ -276,28 +236,43 @@ aspect InstExpVariability {
     }
     eq InstRecordConstructor.expVariability() = InstFunctionArgument.variability(getArgs());
     
-    public static FTypePrefixVariability InstFunctionArgument.variability(List<InstFunctionArgument> args) {
-        FTypePrefixVariability total = fConstant();
+    public static TypePrefixVariability InstFunctionArgument.variability(List<InstFunctionArgument> args) {
+        TypePrefixVariability total = Variability.CONSTANT;
         for (InstFunctionArgument arg : args) {
             total = total.combine(arg.variability().combine());
         }
         return total;
     }
     
-    syn FTypePrefixVariability InstFunctionArgument.variability() = isOKArg() ? getFExp().variability() : fConstant();
-    eq InstDefaultArgument.variability()                          = fConstant();
+    syn TypePrefixVariability InstFunctionArgument.variability() = isOKArg() ? getFExp().variability() : Variability.CONSTANT;
+    eq InstDefaultArgument.variability()                          = Variability.CONSTANT;
+
+    /*
+     * Uses
+     */
+
+    eq InstAccess.variability() = myInstComponentDecl().variability().combine(indexVariability());
+
+    syn TypePrefixVariability InstAccess.indexVariability() = Variability.CONSTANT;
+    eq InstArrayAccess.indexVariability()                    = getFArraySubscripts().variability();
+    eq InstDot.indexVariability() {
+        TypePrefixVariability variability = Variability.CONSTANT;
+        for (InstAccess part : getInstAccesss())
+            variability = variability.combine(part.indexVariability());
+        return variability;
+    }
 }
 
 
 aspect SourceVariability {
 
-    syn boolean TypePrefixVariability.constantVariability() = false;
-    eq Constant.constantVariability() = true;   
-    syn boolean TypePrefixVariability.parameterVariability() = false;
-    eq Parameter.parameterVariability() = true; 
-    syn boolean TypePrefixVariability.discreteVariability() = false;
-    eq Discrete.discreteVariability() = true;   
-    syn boolean TypePrefixVariability.continuousVariability() = false;
-    eq Continuous.continuousVariability() = true;
+    syn boolean SrcTypePrefixVariability.constantVariability() = false;
+    eq SrcConstant.constantVariability() = true;   
+    syn boolean SrcTypePrefixVariability.parameterVariability() = false;
+    eq SrcParameter.parameterVariability() = true; 
+    syn boolean SrcTypePrefixVariability.discreteVariability() = false;
+    eq SrcDiscrete.discreteVariability() = true;   
+    syn boolean SrcTypePrefixVariability.continuousVariability() = false;
+    eq SrcContinuous.continuousVariability() = true;
 
 }

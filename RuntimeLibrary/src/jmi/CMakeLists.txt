@@ -92,7 +92,9 @@ set(JMISources
     jmi_delay_impl.h
     jmi_dynamic_state.h
     jmi_chattering.h
+    jmi_work_array.h
     jmi_math.h
+    jmi_math_ad.h
     jmi_types.h
     
     jmi_util.c
@@ -108,7 +110,9 @@ set(JMISources
     jmi_delay.c
     jmi_dynamic_state.c
     jmi_chattering.c
+    jmi_work_array.c
     jmi_math.c
+    jmi_math_ad.c
     
     ${JMICommonSources}
     ${JMIBlockSourcesPartial}
@@ -163,6 +167,10 @@ if (${BUILD_BLOCK_SOLVER_LIB})
         set_target_properties(jmi_block_solver PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -Wno-long-long -O2 -msse2 -mfpmath=sse")
     endif()
     
+    #Install the libraries
+    install(TARGETS jmi_block_solver
+        DESTINATION "${RTLIB_LIB_DIR}")
+    
     if(JMI_SUNDIALS AND JMI_LAPACK AND JMI_MINPACK)
         add_executable(jmi_block_solver_test jmi_block_solver_test.c)
         target_link_libraries(jmi_block_solver_test jmi_block_solver ${JMI_SUNDIALS} ${JMI_LAPACK} ${JMI_MINPACK})
@@ -189,9 +197,6 @@ if (${BUILD_JMI_LIB})
     add_library(jmi STATIC ${JMISources})
     if(NOT MSVC)
         set_target_properties(jmi PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -Wno-long-long -O2 -msse2 -mfpmath=sse")
-        if (WIN32)
-            include_directories(${TOP_SRC}/ThirdParty/pthreads/include)
-        endif()
     endif()
     include_directories(${TOP_SRC}/RuntimeLibrary/src/jmi)
 

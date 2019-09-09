@@ -1756,6 +1756,30 @@ y1[3]
 ")})));
 end VectorFuncEval4;
 
+model VectorFuncEval5
+    function f
+            input Real x1;
+            input Real[:] x2;
+            output Real y = x1;
+        algorithm
+    end f;
+    Real[:,:] y = f({{time,time}}, {{{time},{time}}});
+    Real[1,2] y1 = f({{1,2}}, {{{3},{4}}});
+
+    annotation(__JModelica(UnitTesting(tests={
+        EvalTestCase(
+            name="VectorFuncEval5",
+            description="Constant evaluation of vectorized function call",
+            variables="
+y1[1,1]
+y1[1,2]
+",
+            values="
+1.0
+2.0
+")})));
+end VectorFuncEval5;
+
 model StringConcat
  Real a = 1;
  parameter String b = "1" + "2";
@@ -1802,6 +1826,65 @@ x = if a[1,1] > a[1,2] then true else false;
             maxTime=2.0
  )})));
 end ParameterEval1;
+
+model EvalInheritedAnnotation
+    model BaseEvalFalse
+        parameter Real x(start=1);
+        parameter Real y(start=3);
+        replaceable parameter Real z = x + y annotation(Evaluate=false);
+    end BaseEvalFalse;
+    
+    model EvalTrue
+        extends BaseEvalFalse(redeclare replaceable parameter Real z = 2*x + y annotation(Evaluate=true)); 
+    end EvalTrue;
+    
+    model EvalStillTrue
+        extends EvalTrue(redeclare replaceable parameter Real z = 3*x + y); 
+        annotation(__JModelica(UnitTesting(tests={
+            FlatteningTestCase(
+                name="C",
+                description="Evaluate primitives without binding exp",
+                flatModel="
+        fclass EvaluationTests.EvalInheritedAnnotation.EvalStillTrue
+         structural parameter Real x = 1 /* 1 */;
+         structural parameter Real y = 3 /* 3 */;
+         eval parameter Real z = 6.0 /* 6.0 */;
+        end EvaluationTests.EvalInheritedAnnotation.EvalStillTrue;
+    ")})));
+    end EvalStillTrue;
+    
+    model EvalStillTrue2
+        extends EvalStillTrue;
+        annotation(__JModelica(UnitTesting(tests={
+            FlatteningTestCase(
+                name="D",
+                description="Evaluate primitives without binding exp",
+                flatModel="
+        fclass EvaluationTests.EvalInheritedAnnotation.EvalStillTrue2
+         structural parameter Real x = 1 /* 1 */;
+         structural parameter Real y = 3 /* 3 */;
+         eval parameter Real z = 6.0 /* 6.0 */;
+        end EvaluationTests.EvalInheritedAnnotation.EvalStillTrue2;
+    ")})));
+    end EvalStillTrue2;
+    
+    model EvalDefaultFalse
+        extends EvalStillTrue2(redeclare replaceable parameter Real z = y annotation());
+        annotation(__JModelica(UnitTesting(tests={
+            FlatteningTestCase(
+                name="E",
+                description="Evaluate primitives without binding exp",
+                flatModel="
+        fclass EvaluationTests.EvalInheritedAnnotation.EvalDefaultFalse
+         parameter Real x(start = 1);
+         parameter Real y(start = 3);
+         parameter Real z = y;
+        end EvaluationTests.EvalInheritedAnnotation.EvalDefaultFalse;
+    ")})));
+    end EvalDefaultFalse;
+end EvalInheritedAnnotation;
+
+
 
 model EvalNoBinding1
     parameter Real x(start=1);
@@ -1862,9 +1945,9 @@ fclass EvaluationTests.EvalNoBinding3
 
 public
  record EvaluationTests.EvalNoBinding3.R
-  parameter Real x(start = 2);
-  Real c[2,2](start = {{3, 4}, {5, 6}});
-  Real d[2,2](each start = 7);
+  parameter Real x;
+  Real c[2,2];
+  Real d[2,2];
  end EvaluationTests.EvalNoBinding3.R;
 
 end EvaluationTests.EvalNoBinding3;
@@ -1894,9 +1977,9 @@ fclass EvaluationTests.EvalNoBinding4
 
 public
  record EvaluationTests.EvalNoBinding4.R
-  parameter Real x(start = 2);
-  Real c[2,2](start = {{3, 4}, {5, 6}});
-  Real d[2,2](each start = 7);
+  parameter Real x;
+  Real c[2,2];
+  Real d[2,2];
  end EvaluationTests.EvalNoBinding4.R;
 
 end EvaluationTests.EvalNoBinding4;
@@ -1936,13 +2019,13 @@ model EvalNoBinding5
             errorMessage="
 3 errors found:
 
-Error at line 21, column 10, in file '...', EXTERNAL_OBJECT_MISSING_BINDING_EXPRESSION:
+Error at line 23, column 5, in file '...', EXTERNAL_OBJECT_MISSING_BINDING_EXPRESSION:
   The external object 'a' does not have a binding expression
 
 Error at line 24, column 27, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
   Could not evaluate binding expression for structural parameter 'n': 'f(a)'
     in function 'EvaluationTests.EvalNoBinding5.f'
-    Could not evaluate external function
+    Could not evaluate external function, unknown values in arguments
 
 Error at line 25, column 12, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
   Could not evaluate array size expression: n
@@ -4244,5 +4327,33 @@ fclass EvaluationTests.ZeroSizeRecordArray1
 end EvaluationTests.ZeroSizeRecordArray1;
 ")})));
 end ZeroSizeRecordArray1;
+
+model EvaluatePartialFunction1
+    function g
+        input Integer[:] x;
+        output Integer y;
+    algorithm
+        y := sum(x);
+    end g;
+
+    function f
+        input Integer x;
+        output Integer y;
+    end f;
+    
+    constant Integer[:] n = g(f({{2}}));
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="EvaluatePartialFunction1",
+            description="Check for no NullPointerException when evaluating partial vectorized function",
+            errorMessage="
+Error at line 14, column 29, in file '...':
+  Could not evaluate binding expression for constant 'n': 'g(f({{2}}))'
+
+Error at line 14, column 31, in file '...':
+  Calling function f(): can only call functions that have one algorithm section or external function specification
+")})));
+end EvaluatePartialFunction1;
 
 end EvaluationTests;

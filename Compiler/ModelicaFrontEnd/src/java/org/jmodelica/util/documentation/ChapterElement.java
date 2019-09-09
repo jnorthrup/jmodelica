@@ -13,8 +13,8 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 
+import org.jmodelica.util.StringUtil;
 import org.jmodelica.util.files.ModifiableFile;
-import org.jmodelica.util.xml.StringUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -194,14 +194,14 @@ public class ChapterElement extends DocumentElement {
     public void writeFile(File destination, Map<String, String> replacements, String characterSet) throws IOException {
         File dest =
                 new File(destination.getAbsolutePath() + (destination.isDirectory() ? File.separator + fileName : ""));
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dest), characterSet));
+        try(BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dest), characterSet))) {
 
-        String text = text("");
-        for (String key : replacements.keySet()) {
-            text = text.replaceAll(key, replacements.get(key));
+            String text = text("");
+            for (String key : replacements.keySet()) {
+                text = text.replaceAll(key, replacements.get(key));
+            }
+            writer.write(text);
         }
-        writer.write(text);
-        writer.close();
     }
 
     /**

@@ -78,29 +78,29 @@ aspect DynamicStateSelect{
     eq FDynamicAlgebraicVariable.asFDynamicAlgebraicVariable() = this;
     
     syn boolean FVarRefExp.isDynamicState() = false;
-    eq FIdUseExp.isDynamicState() = myFV().isDynamicState();
+    eq FAccessExp.isDynamicState() = myFV().isDynamicState();
     eq FDSRefExp.isDynamicState() = true;
 
     eq FDynamicAlgebraicVariable.bltDependencyVars() = getSet().fVarsColl();
 
-    inh boolean FIdUseExp.shouldRewriteToDSRef();
+    inh boolean FAccessExp.shouldRewriteToDSRef();
     eq BaseNode.getChild().shouldRewriteToDSRef()        = true;
     eq DynamicStateSet.getChild().shouldRewriteToDSRef() = false;
     eq FDSRefExp.getChild().shouldRewriteToDSRef()       = false;
 
-    private boolean FIdUseExp.dynamicStateRewriteEnabled = false;
+    private boolean FAccessExp.dynamicStateRewriteEnabled = false;
     public void ASTNode.enableDynamicStateRewrite() {
         for (ASTNode n : this)
             n.enableDynamicStateRewrite();
     }
 
     @Override
-    public void FIdUseExp.enableDynamicStateRewrite() {
+    public void FAccessExp.enableDynamicStateRewrite() {
         super.enableDynamicStateRewrite();
         dynamicStateRewriteEnabled = true;
     }
 
-    rewrite FIdUseExp {
+    rewrite FAccessExp {
         when (dynamicStateRewriteEnabled && isDynamicState() && shouldRewriteToDSRef()) to FDSRefExp {
             dynamicStateRewriteEnabled = false;
             return new FDSRefExp(myFV().dynamicStateSet().id(), this);
@@ -110,31 +110,31 @@ aspect DynamicStateSelect{
     syn DynamicStateSet FDSRefExp.mySet() = myFClass().getDynamicStateManager().getSet(getSetId() - 1);
     syn DynamicStateSet FDSDerExp.mySet() = myFClass().getDynamicStateManager().getSet(getSetId() - 1);
 
-    syn List<FIdUseExp> FDSRefExp.getUseList() {
+    syn List<FAccessExp> FDSRefExp.getUseList() {
         DynamicStateSet set = mySet();
-        List<FIdUseExp> list = new List<FIdUseExp>();
+        List<FAccessExp> list = new List<>();
         for (int i = 1; i <= set.numAlgebraics(); i++)
-            list.add(new FIdUseExp("_ds." + set.id() + ".a" + i));
+            list.add(new FAccessExp("_ds." + set.id() + ".a" + i));
         return list;
     }
 
     @Override
-    public void FDSRefExp.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
-        for (FIdUseExp exp : getUses())
-            set.add(exp);
+    public <T extends CommonAccessExp> void FDSRefExp.findCommonAccessExpsInTree(Set<T> set, CommonAccessExpLookupVisitor<T> visitor) {
+        for (FAccessExp exp : getUses())
+            visitor.visit(exp, set);
         visitor.visit(getOrg(), set);
     }
 
     syn List<FExp> FDSDerExp.getUseList() {
         DynamicStateSet set = mySet();
         List<FExp> list = new List<FExp>();
-        for (FIdUseExp var : set.getVars())
+        for (FAccessExp var : set.getVars())
             list.add(var.diff(TIME));
         return list;
     }
 
     @Override
-    public void FDSDerExp.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
+    public <T extends CommonAccessExp> void FDSDerExp.findCommonAccessExpsInTree(Set<T> set, CommonAccessExpLookupVisitor<T> visitor) {
         for (FExp exp : getUses())
             visitor.visit(exp, set);
     }
@@ -218,13 +218,13 @@ aspect DynamicStateSelect{
         }
         DynamicStateManager manager = getDynamicStateManager();
         for (IndexReductionBiPGraph.DSSet resSet : result.getDSSets()) {
-            List<FIdUseExp> varList = new List<FIdUseExp>();
+            List<FAccessExp> varList = new List<>();
             for (IndexReductionVar var : resSet.vars) {
                 FVariable fVar = var.getVariable();
                 if (fVar.order() == 1)
-                    varList.add(fVar.getMeIntegrated().createUseExp());
+                    varList.add(fVar.getMeIntegrated().createAccessExp());
                 else
-                    varList.add(new FIdUseExp(fVar.getFQName().createDerPrefixedName(fVar.order() - 1)));
+                    varList.add(new FAccessExp(fVar.getFAccess().createDerPrefixedName(fVar.order() - 1)));
             }
             List<DynamicStateCoefficient> coffList = new List<DynamicStateCoefficient>();
             for (int eqn = 0; eqn < resSet.coefficients.length; eqn++) {
@@ -246,7 +246,7 @@ aspect DynamicStateSelect{
                 FDynamicStateVariable var = new FDynamicStateVariable(set, i);
                 stateVars[i - 1] = var;
                 addFVariable(var);
-                addFEquation(new FEquation(new FDerExp(var.createFIdUse()), new FDSDerExp(set.id(), i)));
+                addFEquation(new FEquation(new FDerExp(var.createFAccess()), new FDSDerExp(set.id(), i)));
             }
             set.setStateVars(stateVars);
             manager.addSet(set);
@@ -256,7 +256,7 @@ aspect DynamicStateSelect{
     
     rewrite FDerExp {
         when (myFV().isDynamicDerivativeVariable()) to FDynamicDerExp {
-            return new FDynamicDerExp(getFIdUse(), getOriginalVariable(), order());
+            return new FDynamicDerExp(getFAccess(), getOriginalVariable(), order());
         }
     }
     
@@ -283,7 +283,8 @@ aspect DynamicStateSelect{
         
     }
 
-    public Set<IndexReductionVar> IndexReductionBiPGraph.computeDynamicStateSets(Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix, IndexReductionResult result) {
+    public Set<IndexReductionVar> IndexReductionBiPGraph.computeDynamicStateSets(int dynamicStateLimit, 
+            Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix, IndexReductionResult result) {
         if (result.hasDSFailed())
             return Collections.emptySet();
         Map<IndexReductionVar, IndexReductionEq> initialMatching = new HashMap<IndexReductionVar, IndexReductionEq>();
@@ -426,7 +427,7 @@ aspect DynamicStateSelect{
         
         boolean skipDynamicStates = false;
         for (DSSet set : dsSets) {
-            if (set.eqns.size() > 8 || set.vars.size() > 8) {
+            if (dynamicStateLimit >= 0 && (set.eqns.size() > dynamicStateLimit || set.vars.size() > dynamicStateLimit)) {
                 ASTNode.log.verbose("Too big dynamic state set, %d equations and %d variables!", set.eqns.size(), set.vars.size());
                 ASTNode.log.verbose(set);
                 skipDynamicStates = true;
@@ -542,7 +543,7 @@ aspect DynamicStateSelect{
         if (var.getVariable().stateSelection() == FVariable.StateSelect.ALWAYS) {
             return FVariable.StateSelect.ALWAYS;
         }
-        for (FIdUseExp exp : eq.getEquation().findFIdUseExpsInTree()) {
+        for (FAccessExp exp : eq.getEquation().findFAccessExpsInTree()) {
             if (getVariable(exp.name()) == var && !exp.getOriginalVariable().isEmpty()) {
                 return exp.myOriginalFV().stateSelection();
             }
@@ -737,8 +738,9 @@ aspect DynamicStateSelect{
     }
     
     public class EquationBlockFactory {
-        private static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> DynamicStateBlock computeDynamicStateBlock(SCCBlock<E, V> component, BlockProducer producer, OptionRegistry options) {
-            Map<DynamicStateSet, FDynamicAlgebraicVariable[]> setVarMap = new LinkedHashMap<DynamicStateSet, FDynamicAlgebraicVariable[]>();
+        
+        private static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> DynamicStateBlock computeDynamicStateBlock(SCCBlock<E, V> component, BlockProducer producer, StepUtil stepUtil) {
+            final Map<DynamicStateSet, FDynamicAlgebraicVariable[]> setVarMap = new LinkedHashMap<DynamicStateSet, FDynamicAlgebraicVariable[]>();
             Collection<V> otherVars = new ArrayList<V>();
             for (E eqn : component.getMembers()) {
                 if (eqn.isMeta()) {
@@ -768,7 +770,7 @@ aspect DynamicStateSelect{
             int setCounter = 0;
             int totalNumAlgebraics = 0;
             int totalNumCombinations = 1;
-            Collection<FVariable> allDynamicStates = new ArrayList<FVariable>();
+            final Collection<FVariable> allDynamicStates = new ArrayList<FVariable>();
             for (Map.Entry<DynamicStateSet, FDynamicAlgebraicVariable[]> entry : setVarMap.entrySet()) {
                 boolean allSet = true;
                 DynamicStateSet set = entry.getKey();
@@ -804,6 +806,30 @@ aspect DynamicStateSelect{
                 throw new BLTException("Ouch! There are more than 42 combinations for the dynamic states, there were " + totalNumCombinations + " combinations!");
             FVariable[][] combinations = combineDSCombinations(setCombinations, totalNumAlgebraics);
             DynamicStateBLT[] blts = new DynamicStateBLT[combinations.length];
+            calculateBlockBLTs(blts, component, producer, stepUtil, combinations, otherVars,
+                    new BLTProducer<DynamicStateBLT>() {
+                @Override
+                public DynamicStateBLT create(FVariable[] combination) {
+                    Set<FVariable> algebraics = new LinkedHashSet<FVariable>(Arrays.asList(combination));
+                    Collection<FVariable> states = new ArrayList<FVariable>();
+                    for (FVariable var : allDynamicStates) {
+                        if (!algebraics.contains(var)) {
+                            states.add(var);
+                        }
+                    }
+                    return new DynamicStateBLT(setVarMap.keySet(), states, algebraics);
+                }
+            });
+            return new DynamicStateBlock(producer, component.computeBlockDependency(), blts, setVarMap.keySet());
+        }
+        
+        interface BLTProducer<B extends BLT> {
+            B create(FVariable[] combination);
+        }
+        
+        public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, B extends BLT> void calculateBlockBLTs(B[] blts, SCCBlock<E, V> component, 
+                BlockProducer producer, StepUtil stepUtil, 
+                FVariable[][] combinations, Collection<V> otherVars, BLTProducer<B> bltProducer) {
             for (int i = 0; i < combinations.length; i++) {
                 FVariable[] combination = combinations[i];
                 StringBuilder sb = new StringBuilder();
@@ -822,14 +848,9 @@ aspect DynamicStateSelect{
                 }
                 ASTNode.log.debug(graph);
                 graph.maximumMatching(true);
-                Set<FVariable> algebraics = new LinkedHashSet<FVariable>(Arrays.asList(combination));
-                Collection<FVariable> states = new ArrayList<FVariable>();
-                for (FVariable var : allDynamicStates)
-                    if (!algebraics.contains(var))
-                        states.add(var);
-                DynamicStateBLT blt = new DynamicStateBLT(setVarMap.keySet(), states, algebraics);
+                B blt = bltProducer.create(combination);
                 if (graph.isComplete()) {
-                    blt = graph.computeBLT(options, producer, blt, false);
+                    blt = graph.computeBLT(stepUtil, producer, blt, false);
                 } else {
                     ASTNode.log.verbose("  This combination does not have a valid solution!");
                     ASTNode.log.debug(graph.printMatchingObj());
@@ -837,7 +858,6 @@ aspect DynamicStateSelect{
                 ASTNode.log.debug(blt);
                 blts[i] = blt;
             }
-            return new DynamicStateBlock(producer, component.computeBlockDependency(), blts, setVarMap.keySet());
         }
     }
     

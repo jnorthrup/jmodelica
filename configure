@@ -641,29 +641,20 @@ HAVE_ANT_FALSE
 HAVE_ANT_TRUE
 ANT_OPTS
 ANT
-jmilib
-ipoptlib
 _JAVA_HOME_
 MINGW_HOME
+USE_TDM_GCC_FALSE
+USE_TDM_GCC_TRUE
 NUMPY_NO_MSVCR_FALSE
 NUMPY_NO_MSVCR_TRUE
-COPY_PTHREADS_LIB_FALSE
-COPY_PTHREADS_LIB_TRUE
 WITH_MINGW_FALSE
 WITH_MINGW_TRUE
-ECLIPSE_HOME
-WITH_ECLIPSE_FALSE
-WITH_ECLIPSE_TRUE
-SUPERLU_HOME
-WITH_SUPERLU_FALSE
-WITH_SUPERLU_TRUE
 MINPACK_HOME
-WITH_SUNDIALS_FALSE
-WITH_SUNDIALS_TRUE
-WITH_SUNDIALS
 SUNDIALS_HOME
 CASADI_HOME
 WITH_CASADI
+PYTHON_ENABLED_FALSE
+PYTHON_ENABLED_TRUE
 IPOPT64_HOME
 IPOPT64_LIB
 IPOPT64_INC
@@ -816,10 +807,8 @@ with_sysroot
 enable_libtool_lock
 with_ipopt
 with_ipopt64
+enable_python
 with_casadi
-with_sundials
-with_superlu
-with_eclipse
 with_mingw
 '
       ac_precious_vars='build_alias
@@ -1467,6 +1456,8 @@ Optional Features:
   --enable-fast-install[=PKGS]
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
+  --enable-python         use --enable-python=no to remove python modules from
+                          build
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1480,9 +1471,6 @@ Optional Packages:
   --with-ipopt64          IPOPT installation directory [default=check]
   --with-casadi           CasADI Python-interface installation directory
                           [default=check]
-  --with-sundials         SUNDIALS installation directory [default=check]
-  --with-superlu          SuperLU installation directory [default=check]
-  --with-eclipse          Eclipse installation directory [default=no]
   --with-mingw            MinGW installation directory. [default=no]
 
 Some influential environment variables:
@@ -4824,7 +4812,7 @@ case $build in
     enable_win32_dll=yes
 
 case $host in
-*-*-cygwin* | *-*-msys* | *-*-mingw* | *-*-pw32* | *-*-cegcc*)
+*-*-cygwin* | *-*-mingw* | *-*-pw32* | *-*-cegcc*)
   if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}as", so it can be a program name with args.
 set dummy ${ac_tool_prefix}as; ac_word=$2
@@ -5137,7 +5125,7 @@ $as_echo "#define WIN32 1" >>confdefs.h
     enable_win32_dll=yes
 
 case $host in
-*-*-cygwin* | *-*-msys* | *-*-mingw* | *-*-pw32* | *-*-cegcc*)
+*-*-cygwin* | *-*-mingw* | *-*-pw32* | *-*-cegcc*)
   if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}as", so it can be a program name with args.
 set dummy ${ac_tool_prefix}as; ac_word=$2
@@ -6200,7 +6188,7 @@ else
     lt_cv_sys_max_cmd_len=-1;
     ;;
 
-  cygwin* | msys* | mingw* | cegcc*)
+  cygwin* | mingw* | cegcc*)
     # On Win9x/ME, this test blows up -- it succeeds, but takes
     # about 5 minutes as the teststring grows exponentially.
     # Worse, since 9x/ME are not pre-emptively multitasking,
@@ -6387,9 +6375,6 @@ else
       *-*-cygwin* )
         lt_cv_to_host_file_cmd=func_convert_file_cygwin_to_w32
         ;;
-      *-*-msys* ) # msys in msysdvlpr mode == unsupported!
-        lt_cv_to_host_file_cmd=func_convert_file_noop
-        ;;
       * ) # otherwise, assume *nix
         lt_cv_to_host_file_cmd=func_convert_file_nix_to_w32
         ;;
@@ -6403,27 +6388,8 @@ else
       *-*-cygwin* )
         lt_cv_to_host_file_cmd=func_convert_file_noop
         ;;
-      *-*-msys* ) # msys in msysdvlpr mode == unsupported!
-        lt_cv_to_host_file_cmd=func_convert_file_noop
-        ;;
       * ) # otherwise, assume *nix
         lt_cv_to_host_file_cmd=func_convert_file_nix_to_cygwin
-        ;;
-    esac
-    ;;
-  *-*-msys* ) # that is, msys in msysdvlpr mode
-    case $build in
-      *-*-mingw* ) # actually msys in normal mode == unsupported
-        lt_cv_to_host_file_cmd=func_convert_file_noop
-        ;;
-      *-*-cygwin* ) # unsupported
-        lt_cv_to_host_file_cmd=func_convert_file_noop
-        ;;
-      *-*-msys* ) # msys in msysdvlpr mode
-        lt_cv_to_host_file_cmd=func_convert_file_noop
-        ;;
-      * ) # otherwise, assume *nix == unsupported
-        lt_cv_to_host_file_cmd=func_convert_file_noop
         ;;
     esac
     ;;
@@ -6485,7 +6451,7 @@ case $reload_flag in
 esac
 reload_cmds='$LD$reload_flag -o $output$reload_objs'
 case $host_os in
-  cygwin* | msys* | mingw* | pw32* | cegcc*)
+  cygwin* | mingw* | pw32* | cegcc*)
     if test "$GCC" != yes; then
       reload_cmds=false
     fi
@@ -6640,7 +6606,7 @@ bsdi[45]*)
   lt_cv_file_magic_test_file=/shlib/libc.so
   ;;
 
-cygwin* | msys* )
+cygwin*)
   # func_win32_libid is a shell function defined in ltmain.sh
   lt_cv_deplibs_check_method='file_magic ^x86 archive import|^x86 DLL'
   lt_cv_file_magic_cmd='func_win32_libid'
@@ -6958,7 +6924,7 @@ else
   lt_cv_sharedlib_from_linklib_cmd='unknown'
 
 case $host_os in
-cygwin* | msys* | mingw* | pw32* | cegcc*)
+cygwin* | mingw* | pw32* | cegcc*)
   # two different shell functions defined in ltmain.sh
   # decide which to use based on capabilities of $DLLTOOL
   case `$DLLTOOL --help 2>&1` in
@@ -7450,7 +7416,7 @@ case $host_os in
 aix*)
   symcode='[BCDT]'
   ;;
-cygwin* | msys* | mingw* | pw32* | cegcc*)
+cygwin* | mingw* | pw32* | cegcc*)
   symcode='[ABCDGISTW]'
   ;;
 hpux*)
@@ -9507,7 +9473,7 @@ lt_prog_compiler_static=
       # PIC is the default for these OSes.
       ;;
 
-    mingw* | cygwin* | msys* | pw32* | os2* | cegcc*)
+    mingw* | cygwin* | pw32* | os2* | cegcc*)
       # This hack is so that the source file can tell whether it is being
       # built for inclusion in a dll (and should export symbols for example).
       # Although the cygwin gcc ignores -fPIC, still need this for old-style
@@ -9589,7 +9555,7 @@ lt_prog_compiler_static=
       fi
       ;;
 
-    mingw* | cygwin* | msys* | pw32* | os2* | cegcc*)
+    mingw* | cygwin* | pw32* | os2* | cegcc*)
       # This hack is so that the source file can tell whether it is being
       # built for inclusion in a dll (and should export symbols for example).
       lt_prog_compiler_pic='-DDLL_EXPORT'
@@ -10066,7 +10032,7 @@ $as_echo_n "checking whether the $compiler linker ($LD) supports shared librarie
   extract_expsyms_cmds=
 
   case $host_os in
-  cygwin* | msys* | mingw* | pw32* | cegcc*)
+  cygwin* | mingw* | pw32* | cegcc*)
     # FIXME: the MSVC++ port hasn't been tested in a loooong time
     # When not using gcc, we currently assume that we are using
     # Microsoft Visual C++.
@@ -10181,7 +10147,7 @@ _LT_EOF
       fi
       ;;
 
-    cygwin* | msys* | mingw* | pw32* | cegcc*)
+    cygwin* | mingw* | pw32* | cegcc*)
       # _LT_TAGVAR(hardcode_libdir_flag_spec, ) is actually meaningless,
       # as there is no search path for DLLs.
       hardcode_libdir_flag_spec='-L$libdir'
@@ -10639,7 +10605,7 @@ fi
       export_dynamic_flag_spec=-rdynamic
       ;;
 
-    cygwin* | msys* | mingw* | pw32* | cegcc*)
+    cygwin* | mingw* | pw32* | cegcc*)
       # When not using gcc, we currently assume that we are using
       # Microsoft Visual C++.
       # hardcode_libdir_flag_spec is actually meaningless, as there is
@@ -11600,7 +11566,7 @@ bsdi[45]*)
   # libtool to hard-code these into programs
   ;;
 
-cygwin* | msys* | mingw* | pw32* | cegcc*)
+cygwin* | mingw* | pw32* | cegcc*)
   version_type=windows
   shrext_cmds=".dll"
   need_version=no
@@ -11632,12 +11598,6 @@ cygwin* | msys* | mingw* | pw32* | cegcc*)
 
       sys_lib_search_path_spec="$sys_lib_search_path_spec /usr/lib/w32api"
       ;;
-    msys*)
-      # MSYS DLLs use 'msys-' prefix rather than 'lib'
-      soname_spec='`echo ${libname} | sed -e 's/^lib/msys-/'``echo ${release} | $SED -e 's/[.]/-/g'`${versuffix}${shared_ext}'
-
-      sys_lib_search_path_spec="$sys_lib_search_path_spec /usr/lib/w32api"
-      ;;
     mingw* | cegcc*)
       # MinGW DLLs use traditional 'lib' prefix
       soname_spec='${libname}`echo ${release} | $SED -e 's/[.]/-/g'`${versuffix}${shared_ext}'
@@ -11657,7 +11617,7 @@ cygwin* | msys* | mingw* | pw32* | cegcc*)
     library_names_spec='${libname}.dll.lib'
 
     case $build_os in
-    mingw* | msys*)
+    mingw*)
       sys_lib_search_path_spec=
       lt_save_ifs=$IFS
       IFS=';'
@@ -12336,7 +12296,7 @@ else
     lt_cv_dlopen_libs=
     ;;
 
-  cygwin* | msys*)
+  cygwin*)
     lt_cv_dlopen="dlopen"
     lt_cv_dlopen_libs=
     ;;
@@ -13586,7 +13546,7 @@ fi
         esac
         ;;
 
-      cygwin* | msys* | mingw* | pw32* | cegcc*)
+      cygwin* | mingw* | pw32* | cegcc*)
 	case $GXX,$cc_basename in
 	,cl* | no,cl*)
 	  # Native MSVC
@@ -14617,7 +14577,7 @@ lt_prog_compiler_static_CXX=
     beos* | irix5* | irix6* | nonstopux* | osf3* | osf4* | osf5*)
       # PIC is the default for these OSes.
       ;;
-    mingw* | cygwin* | msys* | os2* | pw32* | cegcc*)
+    mingw* | cygwin* | os2* | pw32* | cegcc*)
       # This hack is so that the source file can tell whether it is being
       # built for inclusion in a dll (and should export symbols for example).
       # Although the cygwin gcc ignores -fPIC, still need this for old-style
@@ -14687,7 +14647,7 @@ lt_prog_compiler_static_CXX=
 	  ;;
 	esac
 	;;
-      mingw* | cygwin* | msys* | os2* | pw32* | cegcc*)
+      mingw* | cygwin* | os2* | pw32* | cegcc*)
 	# This hack is so that the source file can tell whether it is being
 	# built for inclusion in a dll (and should export symbols for example).
 	lt_prog_compiler_pic_CXX='-DDLL_EXPORT'
@@ -15172,7 +15132,7 @@ $as_echo_n "checking whether the $compiler linker ($LD) supports shared librarie
   pw32*)
     export_symbols_cmds_CXX="$ltdll_cmds"
     ;;
-  cygwin* | msys* | mingw* | cegcc*)
+  cygwin* | mingw* | cegcc*)
     case $cc_basename in
     cl*) ;;
     *)
@@ -15441,7 +15401,7 @@ bsdi[45]*)
   # libtool to hard-code these into programs
   ;;
 
-cygwin* | msys* | mingw* | pw32* | cegcc*)
+cygwin* | mingw* | pw32* | cegcc*)
   version_type=windows
   shrext_cmds=".dll"
   need_version=no
@@ -15472,11 +15432,6 @@ cygwin* | msys* | mingw* | pw32* | cegcc*)
       soname_spec='`echo ${libname} | sed -e 's/^lib/cyg/'``echo ${release} | $SED -e 's/[.]/-/g'`${versuffix}${shared_ext}'
 
       ;;
-    msys*)
-      # MSYS DLLs use 'msys-' prefix rather than 'lib'
-      soname_spec='`echo ${libname} | sed -e 's/^lib/msys-/'``echo ${release} | $SED -e 's/[.]/-/g'`${versuffix}${shared_ext}'
-
-      ;;
     mingw* | cegcc*)
       # MinGW DLLs use traditional 'lib' prefix
       soname_spec='${libname}`echo ${release} | $SED -e 's/[.]/-/g'`${versuffix}${shared_ext}'
@@ -15496,7 +15451,7 @@ cygwin* | msys* | mingw* | pw32* | cegcc*)
     library_names_spec='${libname}.dll.lib'
 
     case $build_os in
-    mingw* | msys*)
+    mingw*)
       sys_lib_search_path_spec=
       lt_save_ifs=$IFS
       IFS=';'
@@ -16310,7 +16265,7 @@ lt_prog_compiler_static_F77=
       # PIC is the default for these OSes.
       ;;
 
-    mingw* | cygwin* | msys* | pw32* | os2* | cegcc*)
+    mingw* | cygwin* | pw32* | os2* | cegcc*)
       # This hack is so that the source file can tell whether it is being
       # built for inclusion in a dll (and should export symbols for example).
       # Although the cygwin gcc ignores -fPIC, still need this for old-style
@@ -16392,7 +16347,7 @@ lt_prog_compiler_static_F77=
       fi
       ;;
 
-    mingw* | cygwin* | msys* | pw32* | os2* | cegcc*)
+    mingw* | cygwin* | pw32* | os2* | cegcc*)
       # This hack is so that the source file can tell whether it is being
       # built for inclusion in a dll (and should export symbols for example).
       lt_prog_compiler_pic_F77='-DDLL_EXPORT'
@@ -16854,7 +16809,7 @@ $as_echo_n "checking whether the $compiler linker ($LD) supports shared librarie
   extract_expsyms_cmds=
 
   case $host_os in
-  cygwin* | msys* | mingw* | pw32* | cegcc*)
+  cygwin* | mingw* | pw32* | cegcc*)
     # FIXME: the MSVC++ port hasn't been tested in a loooong time
     # When not using gcc, we currently assume that we are using
     # Microsoft Visual C++.
@@ -16969,7 +16924,7 @@ _LT_EOF
       fi
       ;;
 
-    cygwin* | msys* | mingw* | pw32* | cegcc*)
+    cygwin* | mingw* | pw32* | cegcc*)
       # _LT_TAGVAR(hardcode_libdir_flag_spec, F77) is actually meaningless,
       # as there is no search path for DLLs.
       hardcode_libdir_flag_spec_F77='-L$libdir'
@@ -17415,7 +17370,7 @@ fi
       export_dynamic_flag_spec_F77=-rdynamic
       ;;
 
-    cygwin* | msys* | mingw* | pw32* | cegcc*)
+    cygwin* | mingw* | pw32* | cegcc*)
       # When not using gcc, we currently assume that we are using
       # Microsoft Visual C++.
       # hardcode_libdir_flag_spec is actually meaningless, as there is
@@ -18172,7 +18127,7 @@ bsdi[45]*)
   # libtool to hard-code these into programs
   ;;
 
-cygwin* | msys* | mingw* | pw32* | cegcc*)
+cygwin* | mingw* | pw32* | cegcc*)
   version_type=windows
   shrext_cmds=".dll"
   need_version=no
@@ -18203,11 +18158,6 @@ cygwin* | msys* | mingw* | pw32* | cegcc*)
       soname_spec='`echo ${libname} | sed -e 's/^lib/cyg/'``echo ${release} | $SED -e 's/[.]/-/g'`${versuffix}${shared_ext}'
 
       ;;
-    msys*)
-      # MSYS DLLs use 'msys-' prefix rather than 'lib'
-      soname_spec='`echo ${libname} | sed -e 's/^lib/msys-/'``echo ${release} | $SED -e 's/[.]/-/g'`${versuffix}${shared_ext}'
-
-      ;;
     mingw* | cegcc*)
       # MinGW DLLs use traditional 'lib' prefix
       soname_spec='${libname}`echo ${release} | $SED -e 's/[.]/-/g'`${versuffix}${shared_ext}'
@@ -18227,7 +18177,7 @@ cygwin* | msys* | mingw* | pw32* | cegcc*)
     library_names_spec='${libname}.dll.lib'
 
     case $build_os in
-    mingw* | msys*)
+    mingw*)
       sys_lib_search_path_spec=
       lt_save_ifs=$IFS
       IFS=';'
@@ -18858,14 +18808,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-# By default, we want to install bin, lib, and include
-# in the directory where configure is run.
 
-
-
-#AS_IF([test "x$JMODELICA_HOME" = x],
-# 	AC_PREFIX_DEFAULT([`pwd`]),
-#        AC_PREFIX_DEFAULT(["$JMODELICA_HOME"]))
 
 if test "x$F77" != x; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: gfortran seems to be working" >&5
@@ -19178,6 +19121,33 @@ IPOPT64_HOME=$ipopt64
 
 
 
+#------------- Configure python packages into build ----------------------------
+
+# Check whether --enable-python was given.
+if test "${enable_python+set}" = set; then :
+  enableval=$enable_python; python=${enableval}
+else
+  python=yes
+fi
+
+
+ if test "$python" = "yes"; then
+  PYTHON_ENABLED_TRUE=
+  PYTHON_ENABLED_FALSE='#'
+else
+  PYTHON_ENABLED_TRUE='#'
+  PYTHON_ENABLED_FALSE=
+fi
+
+if test "$python" = "yes"; then
+        echo configure: Python modules are enabled
+else
+        echo configure: Python modules are disabled
+fi
+
+
+#-----------------------------------------
+
 if test "x$with_casadi" != xno; then :
   WITH_CASADI="true"
 else
@@ -19237,126 +19207,12 @@ else
   WITH_CASADI="false"
 fi
 
-
-# Checks for libraries.
-# SUNDIALS
-
-# Check whether --with-sundials was given.
-if test "${with_sundials+set}" = set; then :
-  withval=$with_sundials; sundials=$withval
-else
-  with_sundials=no
-fi
-
-
-if test "x$with_sundials" = xno; then :
-  sundials="$CURR_DIR/sundials_install"
-fi
-
-if test "x$with_sundials" = xno; then :
-  with_sundials=automatic
-fi
-
 # Set output variables to be exported to the Makefiles
 
-
-
- if test "x$with_sundials" != xno; then
-  WITH_SUNDIALS_TRUE=
-  WITH_SUNDIALS_FALSE='#'
-else
-  WITH_SUNDIALS_TRUE='#'
-  WITH_SUNDIALS_FALSE=
-fi
-
-
-
-SUNDIALS_HOME=$sundials
+SUNDIALS_HOME="$CURR_DIR/sundials_install"
 
 
 MINPACK_HOME="$CURR_DIR/minpack_install"
-
-
-# Check whether --with-superlu was given.
-if test "${with_superlu+set}" = set; then :
-  withval=$with_superlu; superlu=$withval
-else
-  with_superlu=no
-fi
-
-
-if test "x$with_superlu" = xno; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: SuperLU installation not specified." >&5
-$as_echo "SuperLU installation not specified." >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: SuperLU installation specified." >&5
-$as_echo "SuperLU installation specified." >&6; }
-fi
-
- if test "x$with_superlu" != xno; then
-  WITH_SUPERLU_TRUE=
-  WITH_SUPERLU_FALSE='#'
-else
-  WITH_SUPERLU_TRUE='#'
-  WITH_SUPERLU_FALSE=
-fi
-
-
-
-SUPERLU_HOME=$superlu
-
-
-# Check whether --with-eclipse was given.
-if test "${with_eclipse+set}" = set; then :
-  withval=$with_eclipse; eclipse=$withval
-else
-  with_eclipse=no
-fi
-
-
-if test "x$with_eclipse" = xno; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: Eclipse installation not specified." >&5
-$as_echo "Eclipse installation not specified." >&6; }
-else
-  as_ac_File=`$as_echo "ac_cv_file_$eclipse/eclipse" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $eclipse/eclipse" >&5
-$as_echo_n "checking for $eclipse/eclipse... " >&6; }
-if eval \${$as_ac_File+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "$eclipse/eclipse"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-eval ac_res=\$$as_ac_File
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
-
-else
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "Eclipse installation specifed, but seems to be corrupt!
-See \`config.log' for more details" "$LINENO" 5 ; }
-fi
-
-fi
-
- if test "x$with_eclipse" != xno; then
-  WITH_ECLIPSE_TRUE=
-  WITH_ECLIPSE_FALSE='#'
-else
-  WITH_ECLIPSE_TRUE='#'
-  WITH_ECLIPSE_FALSE=
-fi
-
-
-
-ECLIPSE_HOME=$eclipse
 
 # Checks for mingw.
 
@@ -19429,20 +19285,20 @@ $as_echo "$with_tdm" >&6; }
 
 fi
 
- if test "$with_mingw" != no -a "$with_tdm" = no; then
-  COPY_PTHREADS_LIB_TRUE=
-  COPY_PTHREADS_LIB_FALSE='#'
-else
-  COPY_PTHREADS_LIB_TRUE='#'
-  COPY_PTHREADS_LIB_FALSE=
-fi
-
  if test "$with_mingw" != no -a "$with_tdm" = yes; then
   NUMPY_NO_MSVCR_TRUE=
   NUMPY_NO_MSVCR_FALSE='#'
 else
   NUMPY_NO_MSVCR_TRUE='#'
   NUMPY_NO_MSVCR_FALSE=
+fi
+
+ if test "$with_tdm" = yes; then
+  USE_TDM_GCC_TRUE=
+  USE_TDM_GCC_FALSE='#'
+else
+  USE_TDM_GCC_TRUE='#'
+  USE_TDM_GCC_FALSE=
 fi
 
 
@@ -19454,8 +19310,6 @@ MINGW_HOME=$mingw
 # Detect Java home directory
 
 
-
-
 case $build in
   *-mingw*)
     # The SDK installer sets the environment variable JAVA_HOME, so there we don't need _JAVA_HOME_
@@ -19465,36 +19319,6 @@ case $build in
 	_JAVA_HOME_=`$(dirname $0)/run_java.sh org.jmodelica.util.GetJavaHome`
     ;;
 esac
-
-
-case $build in
-  *-cygwin*)
-    ipoptlib="-L$ipopt/lib -lipopt -lg2c -ldl"
-    ;;
-  *-mingw*)
-    ipoptlib="-L$ipopt/lib -lipopt -lm \
-       -lgfortran -lpthread -lmingw32 -lmoldname -lmingwex -lmsvcrt \
-       -luser32 -lkernel32 -ladvapi32 -lshell32 -lstdc++"
-    ;;
-  *-apple*)
-        ipoptlib="-L$ipopt/lib -lipopt -llapack -lblas -lm -lgfortran"
-    ;;
-  *)
-    ipoptlib="-L$ipopt/lib -lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran -lpthread"
-    ;;
-esac
-
-#AC_SUBST(JMALLLIBS)
-#JMALLLIBS="../ModelInterface/libmodelinterface.la ../OptimicaInterface/liboptimica.la"
-
-# Used in examples
-#jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm";
-if test "x$with_ipopt" != xno; then :
-  jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm -ljmi_solver"
-else
-  jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm"
-fi
-
 
 # Extract the first word of "ant", so it can be a program name with args.
 set dummy ant; ac_word=$2
@@ -19976,7 +19800,7 @@ REQUIRE_OPTIMICA_COMPILER=True
 
 
 
-ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/SuperLU/Makefile ThirdParty/Sundials/Makefile ThirdParty/Minpack/Makefile ThirdParty/CasADi/Makefile external/FMILibrary/Makefile Python/jm_ipython.sh Python/jm_python.sh Python/Makefile RuntimeLibrary/Makefile jm_tests Python/src/required_defaults.py"
+ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/winpthreads/Makefile ThirdParty/SuperLU/Makefile ThirdParty/Sundials/Makefile ThirdParty/Minpack/Makefile ThirdParty/CasADi/Makefile ThirdParty/MSL/Makefile external/FMILibrary/Makefile Python/jm_ipython.sh Python/jm_python.sh Python/Makefile RuntimeLibrary/Makefile jm_tests Python/src/required_defaults.py"
 
 
 cat >confcache <<\_ACEOF
@@ -20124,28 +19948,20 @@ if test -z "${COMPILE_WITH_IPOPT64_TRUE}" && test -z "${COMPILE_WITH_IPOPT64_FAL
   as_fn_error $? "conditional \"COMPILE_WITH_IPOPT64\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${WITH_SUNDIALS_TRUE}" && test -z "${WITH_SUNDIALS_FALSE}"; then
-  as_fn_error $? "conditional \"WITH_SUNDIALS\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${WITH_SUPERLU_TRUE}" && test -z "${WITH_SUPERLU_FALSE}"; then
-  as_fn_error $? "conditional \"WITH_SUPERLU\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${WITH_ECLIPSE_TRUE}" && test -z "${WITH_ECLIPSE_FALSE}"; then
-  as_fn_error $? "conditional \"WITH_ECLIPSE\" was never defined.
+if test -z "${PYTHON_ENABLED_TRUE}" && test -z "${PYTHON_ENABLED_FALSE}"; then
+  as_fn_error $? "conditional \"PYTHON_ENABLED\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${WITH_MINGW_TRUE}" && test -z "${WITH_MINGW_FALSE}"; then
   as_fn_error $? "conditional \"WITH_MINGW\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${COPY_PTHREADS_LIB_TRUE}" && test -z "${COPY_PTHREADS_LIB_FALSE}"; then
-  as_fn_error $? "conditional \"COPY_PTHREADS_LIB\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
 if test -z "${NUMPY_NO_MSVCR_TRUE}" && test -z "${NUMPY_NO_MSVCR_FALSE}"; then
   as_fn_error $? "conditional \"NUMPY_NO_MSVCR\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${USE_TDM_GCC_TRUE}" && test -z "${USE_TDM_GCC_FALSE}"; then
+  as_fn_error $? "conditional \"USE_TDM_GCC\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_ANT_TRUE}" && test -z "${HAVE_ANT_FALSE}"; then
@@ -21233,10 +21049,12 @@ do
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "ThirdParty/Blas/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Blas/Makefile" ;;
     "ThirdParty/Lapack/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Lapack/Makefile" ;;
+    "ThirdParty/winpthreads/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/winpthreads/Makefile" ;;
     "ThirdParty/SuperLU/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/SuperLU/Makefile" ;;
     "ThirdParty/Sundials/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Sundials/Makefile" ;;
     "ThirdParty/Minpack/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Minpack/Makefile" ;;
     "ThirdParty/CasADi/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/CasADi/Makefile" ;;
+    "ThirdParty/MSL/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/MSL/Makefile" ;;
     "external/FMILibrary/Makefile") CONFIG_FILES="$CONFIG_FILES external/FMILibrary/Makefile" ;;
     "Python/jm_ipython.sh") CONFIG_FILES="$CONFIG_FILES Python/jm_ipython.sh" ;;
     "Python/jm_python.sh") CONFIG_FILES="$CONFIG_FILES Python/jm_python.sh" ;;

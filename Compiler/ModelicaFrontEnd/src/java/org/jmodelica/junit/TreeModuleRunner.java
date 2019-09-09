@@ -16,7 +16,6 @@
 package org.jmodelica.junit;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,31 +30,35 @@ public class TreeModuleRunner extends ParentRunner<TestTreeRunner> {
     private List<TestTreeRunner> children;
     private Description desc;
 
-    public TreeModuleRunner(TestSpecification spec, File path) throws InitializationError {
+    public TreeModuleRunner(TestSpecification spec, UniqueNameCreator nc, File path, String packageName) throws InitializationError {
         super(spec.getClass());
         children = new ArrayList<TestTreeRunner>();
         String name = path.getName();
         desc = Description.createSuiteDescription(name);
         File testDir = new File(path, TreeJModelicaRunner.TEST_SUB_PATH);
         for (File f : testDir.listFiles(TreeJModelicaRunner.MODELICA_FILES)) {
-            TestTreeRunner mod = new TestTreeRunner(spec, f, name);
+            TestTreeRunner mod = new TestTreeRunner(spec, nc, f, name, packageName);
             children.add(mod);
             desc.addChild(mod.getDescription());
         }
     }
 
+    @Override
     public Description describeChild(TestTreeRunner mod) {
         return mod.getDescription();
     }
 
+    @Override
     public List<TestTreeRunner> getChildren() {
         return children;
     }
 
+    @Override
     public void runChild(TestTreeRunner mod, RunNotifier note) {
         mod.run(note);
     }
 
+    @Override
     public Description getDescription() {
         return desc;
     }

@@ -24,14 +24,15 @@ FlatRoot : Root ::= FClass;
  * DAE equations and functions.
  *
  * FClass corresponds to a flattened Modelica model and contains essentially
- * a list of variables and variables, a list of functions and a list of equations, 
+ * a list of variables, a list of functions and a list of equations, 
  * of which some are initial equations.
  */ 
-FClass : BaseNode ::= FQName 
+FClass : BaseNode ::= FAccess 
                       FVariable* 
-                      AliasVariable:FVariable* 
+                      AliasVariable:FVariable*
+                      FGlobalVariable*
                       FInitialEquation:FAbstractEquation*
-                      FParameterEquation:FAbstractEquation*
+                      ParameterEquation:FAbstractEquation*
                       FAbstractEquation*
                       FFunctionDecl*
                       FRecordDecl*
@@ -47,7 +48,7 @@ FClass : BaseNode ::= FQName
  *
  * Results from a class with the restriction "function" and an algorithm block.
  */
-FFunctionDecl : BaseNode ::= FQName 
+FFunctionDecl : BaseNode ::= FAccess 
                              FFunctionVariable* 
                              FAlgorithm 
                              FAttribute*;
@@ -65,7 +66,7 @@ FDestructorDecl : FFunctionDecl;
 /**
  * A flattenend record declaration.
  */
-FRecordDecl : BaseNode ::= FQName FVariable*;
+FRecordDecl : BaseNode ::= FAccess FVariable*;
 
 /**
  * A flattenend enumeration declaration.
@@ -73,8 +74,7 @@ FRecordDecl : BaseNode ::= FQName FVariable*;
 FEnumDecl : BaseNode ::= Name:FIdDecl FEnumSpecification [FStringComment];
 abstract FEnumSpecification : BaseNode;
 FEnumLiteralList : FEnumSpecification ::= FEnumLiteral*;
-FEnumUnspecified : FEnumSpecification;
-FEnumLiteral : FAbstractVariable ::= Name:FIdUse [FStringComment];
+FEnumLiteral : FAbstractVariable ::= Name:CommonAccess [FStringComment];
 
 /**
  * Abstract base class for flat variables.
@@ -84,17 +84,13 @@ abstract FAbstractVariable : BaseNode;
 /**
  * A flat variable in a function.
  */
-FFunctionVariable : FAbstractVariable ::= [FTypePrefixInputOutput]
+FFunctionVariable : FAbstractVariable ::= <VisibilityType:VisibilityType>
+                                          <CausalityConnectorPrefix:CausalityConnectorPrefix>
                                           FAttribute*
                                           Type:FType
                                           [BindingExp:FExp]
-                                          FQName
+                                          FAccess
                                           <Order:int>;
-
-/**
- * An array variable in a function. 
- */
-FFunctionArray : FFunctionVariable;
 
 /**
  * A flat variable corresponding to an unknown declaration.
@@ -109,16 +105,16 @@ UnknownFVariable : FAbstractVariable;
  * (input or output). In addition, FVariable contains a list of attributes
  * and, optionally, a binding expression. FVariables may represent both array
  * variables and scalar variables: this information is embedded in the 
- * FQName class.
+ * FAccess class.
  */
-abstract FVariable : FAbstractVariable ::= FVisibilityType
-                                           FTypePrefixVariability
-                                           [FTypePrefixInputOutput]
+abstract FVariable : FAbstractVariable ::= <VisibilityType:VisibilityType>
+                                           <TypePrefixVariability:TypePrefixVariability>
+                                           <CausalityConnectorPrefix:CausalityConnectorPrefix>
                                            FAttribute*
                                            <DerivedType>
                                            [BindingExp:FExp]
                                            [FStringComment]
-                                           FQName;
+                                           FAccess;
 
 /**
  * Represents a set of attributes that can be used by several variables.
@@ -133,92 +129,11 @@ FDerivedType : BaseNode ::= <Name> BaseType:FType FAttribute*;
 abstract FTypePrefix : BaseNode;
 
 /**
- * Base class for variability type prefixes.
+ * Variables accessed in a global scope separate from the normal lookup scope 
+ * (in the flat tree). Can be looked up from functions and equations. For example 
+ * package constants that can't be inlined during flattening. Referenced by FGlobalAccessExp.
  */
-abstract FTypePrefixVariability : FTypePrefix;
-
-/**
- * Continuous (default) variability.
- *
- * Continuous is not a valid prefix but is used to identify expressions that 
- * are not declared as parameters, constants, or discrete.
- */
-FContinuous : FTypePrefixVariability;
-
-/**
- * Discrete variability.
- */
-FDiscrete : FTypePrefixVariability;
-
-/**
- * Parameter variability.
- */
-abstract FParameter : FTypePrefixVariability;
-
-FInitialParameter : FParameter;
-
-FFixedParameter : FParameter;
-
-FIndexParameter : FParameter;
-
-/**
- * Evaluate false parameter variability.
- */
-FEvalFalseParameter : FFixedParameter;
-
-/**
- * Parameter with known value variability
- */
-abstract FKnownParameter : FParameter;
-
-/**
- * Structural parameter variability.
- */
-FStructParameter : FKnownParameter ::= <Reason:String>;
-
-/**
- * Used to force variability for if equation tests
- * Is canceled by setting Evaluate=false
- */
-FTestParameter   : FStructParameter;
-
-/**
- * Evaluate true parameter variability.
- */
-FEvalTrueParameter : FKnownParameter;
-
-/**
- * Final parameter variability.
- */
-FFinalParameter : FKnownParameter;
-
-/**
- * Constant variability.
- */
-FConstant : FTypePrefixVariability;
-
-/**
- * Composite variability. Represents variability of
- * records between flattening and scalarization.
- */
-FCompositeVariability : FTypePrefixVariability ::= Component:FComponentVariability*;
-
-FComponentVariability ::= <Name:String> Variability:FTypePrefixVariability;
-
-/**
- * Base class for causality type prefixes.
- */
-abstract FTypePrefixInputOutput : FTypePrefix;
-
-/**
- * Input causality.
- */ 
-FInput : FTypePrefixInputOutput;
-
-/**
- * Output causality.
- */
-FOutput : FTypePrefixInputOutput;
+FGlobalVariable : FVariable ::= FType;
 
 /**
  * FVariable of type Real.
@@ -243,12 +158,12 @@ FStringVariable : FVariable;
 /**
  * FVariable of type Enumeration.
  */
-FEnumVariable : FVariable ::= Enum:FQName /Type:FType/;
+FEnumVariable : FVariable ::= Enum:FAccess /Type:FType/;
 
 /**
  * An external object variable.
  */
-FExternalObjectVariable : FVariable ::= Constructor:FIdUse /DestructorCall:FFunctionCallStmt/;
+FExternalObjectVariable : FVariable ::= Constructor:CommonAccess /DestructorCall:FFunctionCallStmt/;
 
 /**
  * Pre FVariable of type Real.
@@ -278,7 +193,7 @@ FPreEnumVariable : FEnumVariable;
 /**
  * FVariable of a record type.
  */
-FRecordVariable : FVariable ::= Record:FQName /Type:FType/;
+FRecordVariable : FVariable ::= Record:FRecordAccess /Type:FType/;
 
 /**
  * Abstract variable type for all the different derivative variable types.
@@ -317,40 +232,6 @@ FDynamicStateVariable : FRealVariable ::= <Set:DynamicStateSet> <Number:int>;
 FDynamicAlgebraicVariable : FRealVariable ::= <Set:DynamicStateSet> <Number:int>;
 
 /**
- * Node representing the visibility of an FVariable object.
- */
-abstract FVisibilityType : BaseNode;
-
-/**
- * Public visibility.
- */
-FPublicVisibilityType : FVisibilityType;
-
-/**
- * Protected visibility.
- */
-FProtectedVisibilityType : FVisibilityType;
-
-/**
- * Visibility for temporary variable. 
- *
- * Used to mark temporary variables added during elaboration, e.g. to handle function calls returning array.
- */
-FTemporaryVisibilityType : FPublicVisibilityType;
-
-/**
- * Visibility for variables in expandable connectors. 
- *
- * Used to mark temporary variables added during elaboration, e.g. to handle function calls returning array.
- */
-FExpandableVisibilityType : FPublicVisibilityType;
-
-/**
- * Visibility for runtime option parameters. 
- */
-FRuntimeOptionVisibilityType : FPublicVisibilityType;
-
-/**
  * Base class for all type nodes.
  */
 abstract FType : BaseNode;
@@ -377,7 +258,7 @@ FRecordType : FCellType ::= <Name> Component:FRecordComponentType* <FClass:FClas
 /**
  * Class representing the external object type.
  */
-FExternalObjectType : FCellType ::= <Name> Constructor:FIdUse Destructor:FIdUse;
+FExternalObjectType : FCellType ::= <Name> Constructor:CommonAccess Destructor:CommonAccess;
 
 /**
  * Partial function call type
@@ -453,53 +334,53 @@ FUnknownType : FCellType;
  * A qualified name supporting array subscripts.
  *
  * Flattened variables and identifiers typically have qualified names, which
- * are represented by FQName. FQName contains a list of FQNamePart objects
+ * are represented by FAccess. FAccess contains a list of FAccessPart objects
  * which in turn contains a name and, optionally, array subscripts. The 
- * structure of the FQName class is motivated by the fact that flat names
+ * structure of the FAccess class is motivated by the fact that flat names
  * needs to be printed in a number of different way (dot notation, underscore
  * notation etc).
  */
-abstract FQName : BaseNode;
+abstract FAccess : CommonAccess ::= /ExpandedSubscripts:FArraySubscripts/;
 
 /**
- * An empty FQName, used as the start of prefixes.
+ * An empty FAccess, used as the start of prefixes.
  */
-FQNameEmpty : FQName;
+FAccessEmpty : FAccess;
 
 /**
- * An FQName that is a simple string, used for scalarized names and simple names. 
+ * An FAccess that is a simple string, used for scalarized names and simple names. 
  */
-FQNameString : FQName ::= <Name:String>;
+FAccessString : FAccess ::= <Name:String>;
 
 /**
- * A full FQName, with a list of FQNameParts.
+ * A full FAccess, with a list of FAccessParts.
  */
-FQNameFull : FQName ::= FQNamePart*;
+FAccessFull : FAccess ::= FAccessPart*;
 
 /**
  * A name part without array subscripts.
  * 
- * To be used in FQName:s.
+ * To be used in FAccess:s.
  */
-FQNamePart : BaseNode ::= <Name:String>;
+FAccessPart : BaseNode ::= <Name:String>;
 
 /**
  * A name part with array subscripts.
  * 
- * To be used in FQName:s.
+ * To be used in FAccess:s.
  */
-FQNamePartArray : FQNamePart ::= FArraySubscripts;
+FAccessPartArray : FAccessPart ::= FArraySubscripts;
 
 /**
- * Representation of an attribute for a built-in types.
+ * Representation of an attribute for a built-in type.
  *
  * The attributes (start, unit etc.) of the built-in types are represented by
- * objects of the FAttribute class, which in turned are stored in the 
- * FVariables. FAttributes contain information about the attribute name and
+ * objects of the FAttribute class, which in turn are stored in the 
+ * FVariables. FAttribute contains information about the attribute name and
  * type, its value, whether it is set explicitly by the user and the prefixes
  * each and final. 
  */
-FAttribute : BaseNode ::= Type:FIdUse
+FAttribute : BaseNode ::= Type:CommonAccess
                           Name:FIdDecl
                           [Value:FExp]
                           <AttributeSet:boolean>
@@ -539,9 +420,11 @@ FFinal : BaseNode;
 FStringComment : BaseNode ::= <Comment:String>;
 
 /**
- * Array subscripts used in FQNames.
+ * Array subscripts used in FAccesss.
  */
-FArraySubscripts : BaseNode ::= FSubscript*;
+abstract FArraySubscripts : BaseNode;
+FArrayExpSubscripts : FArraySubscripts ::= FSubscript*;
+FArrayLitSubscripts : FArraySubscripts;
 
 /**
  * Base class for array subscripts.
@@ -564,27 +447,12 @@ FExpSubscript : FSubscript ::= FExp /AccessContextSizeExp:FExp/;
 FIntegerSubscript : FSubscript ::= <Value:int>;
 
 /**
- * Classifies a flattened equation as initial or normal.
- */
-abstract FEquationType : BaseNode;
-
-/**
- * Classifies a flattened equation as normal.
- */
-FNormalEquation : FEquationType;
-
-/**
- * Classifies a flattened equation as initial.
- */
-FInitialEquation : FEquationType;
-
-/**
  * Base class for flattened equations.
  *
  * The NTA InitialEquation is used to represent default initial equations for
  * when equations that are not active during initialization.
  */
-abstract FAbstractEquation : BaseNode ::= Type:FEquationType
+abstract FAbstractEquation : BaseNode ::= <Type:EquationType>
                                           /InitialEquation:FAbstractEquation*/
                                           FAttribute*
                                           [FStringComment];
@@ -610,7 +478,7 @@ FFunctionCallEquation : FAbstractEquation ::= Left:FFunctionCallLeft* Call:FAbst
 /**
  * A class for storing hand guided tearing on system level.
  */
-FResidualPair : BaseNode ::= ResidualEquation:FIdUse IterationVariable:FIdUse <Level:int>;
+FResidualPair : BaseNode ::= ResidualEquation:CommonAccess IterationVariable:CommonAccess <Level:int>;
 
 /**
  * One of the left hand side variables in a function call equation. 
@@ -627,9 +495,9 @@ FFunctionCallLeft : BaseNode ::= [FExp];
  * connect statements has been transformed into regular equations, but only
  * as an intermediate node type.
  */
-FConnectClause : FAbstractEquation ::= <ConnectClause:ConnectClause>
-                                       Connector1:FIdUseInstAccess 
-                                       Connector2:FIdUseInstAccess;
+FConnectClause : FAbstractEquation ::= <SrcConnectClause:SrcConnectClause>
+                                       Connector1:InstAccess 
+                                       Connector2:InstAccess;
 
 /**
  * Base class for operators concerning overconstrained connection graphs.
@@ -767,9 +635,11 @@ FBreakStmt : FStatement;
 FReturnStmt : FStatement;
 
 /**
- * Class for array initalization statements.
+ * Class for array initialization statements. 
+ * Expands subcomponent initialization during scalarization 
+ * if shallow and during code generation otherwise.
  */
-FInitArrayStmt : FStatement ::= FIdUseExp;
+FInitArrayStmt : FStatement ::= FAccessExp /Type:FType/ <Shallow:boolean> Size:FExp*;
 
 /**
  * Class for derivated array initalization statements.
@@ -785,6 +655,12 @@ abstract FIfWhenStmt : FStatement ::= FIfWhenClause*;
  * Flattened if statement.
  */
 FIfStmt : FIfWhenStmt ::= ElseStmt:FStatement*;
+
+/**
+ * If statement used for assigning temporaries that 
+ * need to be guarded by if conditions.
+ */
+FIfStmtTemp : FIfStmt;
 
 /**
  * Flattened when statement.
@@ -810,7 +686,7 @@ FWhenClause : FIfWhenClause;
 /**
  * Flattened for statement.
  */
-FForStmt : FStatement ::= Index:FForIndex ForStmt:FStatement*;
+FForStmt : FStatement ::= Index:FForIndex ForStmt:FStatement* /UnrolledForStmt:FStatement*/;
 
 /**
  * Flattened while statement.
@@ -819,8 +695,10 @@ FWhileStmt : FStatement ::= Test:FExp WhileStmt:FStatement*;
 
 /**
  * An external function interface in the flat tree. Implemented as a statement.
+ *
+ * LibTopPackagePath is the file path of the package file of the library that this external statement originated from.
  */
-FExternalStmt : FStatement ::= FExternalLanguage [ReturnVar:FIdUseExp] <Name> Arg:FExp*;
+FExternalStmt : FStatement ::= FExternalLanguage [ReturnVar:CommonAccessExp] <Name> Arg:FExp* <LibTopPackagePath>;
 
 /**
  * A language specification for an external function.
@@ -851,31 +729,15 @@ FUnknownExternalLanguage : FExternalLanguage ::= <Language>;
 /**
  * Describes the set of scalarized FExp nodes corresponding to an array expression.
  */
-Array : BaseNode ::= FExp*;
-
-/**
- * Dummy array for representing a scalar expression in algorithms handling Arrays. 
- * 
- * Iterator acts as if on a vector of length 1.
- * 
- * The get() and set() methods ignore the Index and always operate on the single element.
- * This allows a ScalarAsArray to be used with an Array in an algorithm that expects 
- * two Array objects, as long as the Indices from a real Array is used to iterate. 
- * 
- * Since the indices of a scalar makes no sense, the Iterator returned by 
- * indices().iterator() will have no elements. 
- * 
- * The Iterator returned by iterator() will have one element.
- */
-ScalarAsArray : Array;
+ArrayExp : BaseNode ::= FExp*;
 
 /**
  * Abstract base class for all flattened expressions.
  */
-abstract FExp : BaseNode ::= /Array/;
+abstract FExp : BaseNode;
 
 /**
- * Abstract base class for all flattened expressions that is not literal or unsupported.
+ * Abstract base class for all flattened expressions that are neither literals nor unsupported.
  */
 abstract FAbstractExp : FExp;
 
@@ -887,7 +749,7 @@ abstract FAbstractScalarExp : FAbstractExp;
 /**
  * Abstract base class for all flattened expressions that can be an array.
  */
-abstract FAbstractArrayExp : FAbstractExp;
+abstract FAbstractArrayExp : FAbstractExp ::= /ArrayExp/;
 
 /**
  * Unsupported expression.
@@ -979,7 +841,7 @@ abstract FBoolBinExp : FBinExp;
 /**
  * Base class for relational expressions.
  */
-abstract FRelExp : FBoolBinExp ::= [Indicator:FExp];
+abstract FRelExp : FBoolBinExp ::= [Indicator:FAccessExp];
 
 /**
  * Less than expression.
@@ -1111,21 +973,21 @@ FForIndex : CommonForIndex ::= FVariable FExp;
 FIfExp : FAbstractArrayExp ::= IfExp:FExp ThenExp:FExp ElseExp:FExp;
 
 /**
- * Declaration of a qualified name. 
+ * If expression in instance tree.
  */
-FIdDecl : BaseNode ::= FQName;
+InstIfExp : FIfExp;
 
 /**
- * Abstract superclass for accesses in both instance and flat trees.
+ * Declaration of a qualified name. 
  */
-abstract CommonAccess : BaseNode;
+FIdDecl : BaseNode ::= FAccess;
 
 /**
  * A qualified identifier.
  */
-FIdUse : CommonAccess ::= FQName /ExpandedSubscripts:FArraySubscripts/;
+abstract CommonAccess : BaseNode;
 
-
+FRecordAccess : FAccessString;
 
 /**
  * Abstract FExp type for all FExps that describes a variable references.
@@ -1145,19 +1007,31 @@ FComponentExp : FExp ::= FExp <Name:String>;
 /**
  * A qualifed identifier in an expression.
  */
-FIdUseExp : FAssignableExp ::= FIdUse <OriginalVariable:String>;
+abstract CommonAccessExp : FAssignableExp;
+
+FAccessExp : CommonAccessExp ::= FAccess <OriginalVariable:String>;
 
 /**
- * A reference to a dynamic state
+ * Access expression to global variable
  */
-FDSRefExp : FVarRefExp ::= <SetId:int> /Use:FIdUseExp*/ Org:FIdUseExp;
+FGlobalAccessExp : FAccessExp;
 
+/**
+ * A reference to a dynamic state. These are the states that are introduced by
+ * the compiler and exposed as state in the FMU.
+ */
+FDSRefExp : FVarRefExp ::= <SetId:int> /Use:FAccessExp*/ Org:FAccessExp;
+
+/**
+ * A reference to a dynamic derivative, similar to FDSRefExp but the derivative
+ * of a state. Introduced by the compiler and exposed as derivative in the FMU.
+ */
 FDSDerExp : FVarRefExp ::= <SetId:int> <Number:int> /Use:FExp*/;
 
 /**
  * Identifier of temporary variable, used during scalarization
  */
-FIdTempExp : FIdUseExp;
+FTempAccessExp : FAccessExp;
 
 /**
  * The built-in function der in the instance tree.
@@ -1167,7 +1041,7 @@ InstDerExp : FUnaryExp;
 /**
  * Abstract super class for all der related expressions.
  */
-abstract FAbstractDerExp : FIdUseExp ::= <Order:int>;
+abstract FAbstractDerExp : FAccessExp ::= <Order:int>;
 
 /**
  * The built-in function der.
@@ -1180,7 +1054,10 @@ FDerExp : FAbstractDerExp;
 FDummyDerExp : FAbstractDerExp; 
 
 /**
- * The built-in function der converted into a dynamic derivative.
+ * Reference to differentiated variable which is a dynamic derivative, i.e. the
+ * original model derivative is part of a dynamic set. Not to confuse with
+ * FDSDerExp which represents the actual derivative in the FMU. This derivative
+ * ins't exposed as an derivative in the FMU.
  */
 FDynamicDerExp : FAbstractDerExp; 
 
@@ -1192,7 +1069,7 @@ InstPreExp : FUnaryBuiltIn;
 /**
  * Pre built-in function.
  */
-FPreExp : FIdUseExp;
+FPreExp : FAccessExp;
 
 /**
  * Higher order derivatives occurring as a result of index reduction.
@@ -1200,14 +1077,9 @@ FPreExp : FIdUseExp;
 InstHDerExp : InstDerExp ::= <Order:int>; 
 
 /**
- * Identifier in the instance tree.
- */
-FIdUseInstAccess : FIdUse ::= InstAccess;
-
-/**
  * Record constructor.
  */
-FRecordConstructor : FBuiltInFunctionCall ::= Record:FIdUse Arg:FExp* /Type:FType/;
+FRecordConstructor : FBuiltInFunctionCall ::= Record:FRecordAccess Arg:FExp* /Type:FType/;
 
 /**
  * Record constructor in instance trees.
@@ -1216,7 +1088,8 @@ InstRecordConstructor : FAbstractFunctionCall ::= Record:InstAccess
                                                   Arg:InstFunctionArgument* 
                                                   /InstComponentDecl*/ 
                                                   /InstExtends*/
-                                                  /InstModification*/;
+                                                  /InstModification*/
+                                                  /Type:FType/;
 
 /**
  * Array constructor expression.
@@ -1301,12 +1174,12 @@ abstract CommonFunctionCall : FAbstractFunctionCall;
 /**
  * Generic function call expression in flat tree.
  */
-FFunctionCall : CommonFunctionCall ::= Name:FIdUse Arg:FExp* FType;
+FFunctionCall : CommonFunctionCall ::= Name:FAccess Arg:FExp* FType;
  
 /**
  * Partial function call expression in flat tree.
  */
-FPartialFunctionCall : FFunctionCall ::= ArgName:FIdUse*;
+FPartialFunctionCall : FFunctionCall ::= ArgName:CommonAccess*;
  
 /**
  * Generic vectorized function call expression.
@@ -1349,11 +1222,30 @@ InstPositionalArgument : InstGivenArgument ::= <Pos:int>;
 InstNamedArgument : InstGivenArgument ::= Name:InstAccess;
 
 /**
+ * Function call argument using default value in the instance tree.
+ */
+InstDefaultArgument : InstFunctionArgument ::= <OriginalFExp:FExp> /FExp/;
+
+/**
+ * Bad function call argument in the instance tree.
+ *  
+ * This node indicates a semantic error.
+ */
+abstract InstBadArgument : InstFunctionArgument;
+
+/**
  * Missing function call argument in the instance tree.
  *  
  * This node indicates a semantic error.
  */
-InstMissingArgument : InstFunctionArgument;
+InstMissingArgument : InstBadArgument;
+
+/**
+ * Unknown function call argument in the instance tree.
+ *  
+ * This node indicates a semantic error.
+ */
+InstUnknownArgument : InstBadArgument;
 
 /**
  * Function call argument in the instance tree for when several 
@@ -1361,12 +1253,7 @@ InstMissingArgument : InstFunctionArgument;
  *  
  * This node indicates a semantic error.
  */
-InstMultipleBoundArgument : InstFunctionArgument ::= Arg:InstFunctionArgument*;
-
-/**
- * Function call argument using default value in the instance tree.
- */
-InstDefaultArgument : InstFunctionArgument ::= <OriginalFExp:FExp> /FExp/;
+InstMultipleBoundArgument : InstBadArgument ::= Arg:InstFunctionArgument*;
 
 // Built in functions
 /**
@@ -1428,12 +1315,27 @@ FReinit : FBuiltInFunctionCall ::= Var:FExp FExp;
 /**
  * The delay() operator.
  */
-FDelayExp : FBuiltInFunctionCall ::= FExp Delay:FExp [Max:FExp];
+FDelayExp : FBuiltInFunctionCall ::= FExp Delay:FExp [Max:FExp] Indicator:FAccessExp*;
 
 /**
  * The spatialDistribution() operator.
  */
-FSpatialDistExp : FBuiltInFunctionCall ::= In0:FExp In1:FExp X:FExp PositiveVelocity:FExp InitialPoints:FExp InitialValues:FExp;
+FSpatialDistExp : FBuiltInFunctionCall ::= In0:FExp
+                                           In1:FExp
+                                           X:FExp
+                                           PositiveVelocity:FExp
+                                           InitialPoints:FExp
+                                           InitialValues:FExp
+                                           [Indicator:FAccessExp];
+
+/**
+ * Used for generating event indicators for the delay() operator.
+ */
+abstract FIndicatorExp   : FBuiltInFunctionCall;
+abstract FDelayIndicator : FIndicatorExp;
+FFirstDelayIndicator     : FDelayIndicator;
+FSecondDelayIndicator    : FDelayIndicator;
+FSpatialDistIndicator    : FIndicatorExp;
 
 /**
  * Sample built-in function.
@@ -1809,7 +1711,7 @@ DynamicStateManager : BaseNode ::= Set:DynamicStateSet*;
 /**
  * A set of dynamic states
  */
-DynamicStateSet : BaseNode ::= <SetId:Integer> <NumAlgebraics:Integer> Var:FIdUseExp* Coefficient:DynamicStateCoefficient* <StateVars:FDynamicStateVariable[]> <AlgebraicVars:FDynamicAlgebraicVariable[]>;
+DynamicStateSet : BaseNode ::= <SetId:Integer> <NumAlgebraics:Integer> Var:FAccessExp* Coefficient:DynamicStateCoefficient* <StateVars:FDynamicStateVariable[]> <AlgebraicVars:FDynamicAlgebraicVariable[]>;
 
 /**
  * Node that contains the coefficient incidence for a specific dynamic state

@@ -160,7 +160,7 @@ aspect EquationSolve {
     private static FExp FEquation.computeActiveSolution(Collection<FExp> exps, FVariable var,
             boolean dontAllowDivisionByVariable, double tol) {
         java.util.List<FExp> parts = new ArrayList<FExp>();
-        FTypePrefixVariability mulCoeffVar = fConstant(); // Keep track of variability
+        TypePrefixVariability mulCoeffVar = Variability.CONSTANT; // Keep track of variability
         // Compute new expressions for the active terms
         for (FExp e : exps) {
             ArrayList<FExp> fac = e.factors();
@@ -202,7 +202,7 @@ aspect EquationSolve {
             }
             parts.add(coeff);
         }
-        if (dontAllowDivisionByVariable && !mulCoeffVar.lessOrEqual(fConstant())) {
+        if (dontAllowDivisionByVariable && !mulCoeffVar.lessOrEqual(Variability.CONSTANT)) {
             return new FNoExp();
         }
         return FExp.createBalancedBinaryTree(new FAddExp(), parts);
@@ -325,10 +325,6 @@ aspect EquationSolve {
 	syn boolean FExp.isNegTerm(String name) = false;
 	eq FNegExp.isNegTerm(String name) = getFExp().isIdentifier(name);
 	
-	syn int FEquation.nbrUses(String name) {
-		return getLeft().nbrUses(name) + getRight().nbrUses(name);
-	}
-	
 	syn int ASTNode.nbrUses(String name) {
 		int n = 0;
 		for (int i=0;i<getNumChild();i++) {
@@ -336,11 +332,10 @@ aspect EquationSolve {
 		}
 		return n;
 	}
-	
-	eq FIdUseExp.nbrUses(String name) = name.equals(name())? 1: 0;
-	eq FDerExp.nbrUses(String name) = name.equals(name())? 1: 0;
-	eq FPreExp.nbrUses(String name) = name.equals(name())? 1: 0;
-	
+
+    eq FEquation.nbrUses(String name) = getLeft().nbrUses(name) + getRight().nbrUses(name);
+    eq CommonAccessExp.nbrUses(String name) = name.equals(name())? 1: 0;
+
     syn FExp FRelExp.solutionForTime() {
         if (getLeft() instanceof FTimeExp && getRight().variability().discreteOrLess()) {
             return getRight();
@@ -539,10 +534,10 @@ aspect ExpressionSimplification {
         return super.equals(other);
     }
 
-    eq FIdUseExp.equalsSymbolic(FExp other) {
-        if (!(other instanceof FIdUseExp))
+    eq CommonAccessExp.equalsSymbolic(FExp other) {
+        if (!(other instanceof CommonAccessExp))
             return false;
-        FIdUseExp o = (FIdUseExp) other;
+        CommonAccessExp o = other.asCommonAccessExp();
         return toString().equals(o.toString());
     }
 

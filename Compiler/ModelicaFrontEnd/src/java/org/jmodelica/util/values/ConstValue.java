@@ -216,6 +216,7 @@ public abstract class ConstValue {
      * 
      * @return The string.
      */
+    @Override
     public String toString() { 
         return stringValue(); 
     }
@@ -309,5 +310,26 @@ public abstract class ConstValue {
      */
     public boolean hasStringValue() {
         return false;
+    }
+    
+    /**
+     * Checks if this value is an unknown caused by an unresolvable access.
+     */
+    public boolean isUnknownAccess() {
+        return false;
+    }
+    
+    /**
+     * If this value is an unknown access returns the access as a string, otherwise null.
+     */
+    public String access() {
+        throw new ConstantEvaluationException(this, "get access from");
+    }
+    
+    /**
+     * If this value is an unknown access returns the access as a string, otherwise null.
+     */
+    public String[] accessVector() {
+        throw new ConstantEvaluationException(this, "get access vector from");
     }
 }

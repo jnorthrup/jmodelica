@@ -1,8 +1,8 @@
 package org.jmodelica.util.problemHandling;
 
-import org.jmodelica.util.OptionRegistry;
+import org.jmodelica.common.options.AbstractOptionRegistry;
 
 public interface ProblemOptionsProvider {
-    public OptionRegistry getOptionRegistry();
+    public AbstractOptionRegistry getOptionRegistry();
     public boolean filterThisWarning(String identifier);
 }

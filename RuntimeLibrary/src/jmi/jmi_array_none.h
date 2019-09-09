@@ -66,25 +66,35 @@ JMI_ARRAY_TYPE(jmi_extobj_t, jmi_extobj_array_t)
 #define JMI_ARRAY_INIT(dyn, type, arr, name, ne, nd) \
     JMI_ARRAY_INIT_##dyn(type, arr, name, ne, nd)
 
-/* Static array declaration macro */
-#define JMI_ARRAY_DECL_STAT(type, arr, name, ne, nd) \
+/* Stack array declaration macro */
+#define JMI_ARRAY_DECL_STACK(type, arr, name, ne, nd) \
     int  name##_size[nd];\
     type name##_var[(ne == 0) ? 1 : ne] = {0};\
-    arr  name##_obj = { 0, (int) (nd), (int) (ne), 0 };\
+    arr  name##_obj = { NULL, (int) (nd), (int) (ne), 0, NULL };\
     arr* name = &name##_obj;
 
-/* Dynamic array declaration macro */
-#define JMI_ARRAY_DECL_DYNA(type, arr, name, ne, nd) \
+/* Data section array declaration macro */
+#define JMI_ARRAY_DECL_DATA(type, arr, name, ne, nd) \
+    static int  name##_size[nd];\
+    static arr  name##_obj = { name##_size, (int) (nd), (int) (ne), 0, name##_var};\
+    static arr* name = &name##_obj;
+
+/* Heap array declaration macro */
+#define JMI_ARRAY_DECL_HEAP(type, arr, name, ne, nd) \
     arr* name = NULL;
 
-/* Static array initialization macros */
-#define JMI_ARRAY_INIT_STAT(type, arr, name, ne, nd) \
+/* Stack array initialization macros */
+#define JMI_ARRAY_INIT_STACK(type, arr, name, ne, nd) \
     name->size = name##_size; \
-    name->var  = name##_var;
+    name->var = name##_var;
 
-/* Dynamic array initialization macros.
+/* Data section initialization */
+#define JMI_ARRAY_INIT_DATA(type, arr, name, ne, nd) \
+    ;
+
+/* Heap array initialization macros.
  * Might be called several times for the same name. */
-#define JMI_ARRAY_INIT_DYNA(type, arr, name, ne, nd) \
+#define JMI_ARRAY_INIT_HEAP(type, arr, name, ne, nd) \
     if (name == NULL) {\
         char *tmp_ptr = jmi_dynamic_function_pool_alloc(&dyn_mem, 1*sizeof(arr)+nd*sizeof(int)+ne*sizeof(type), TRUE);\
         name            = (arr*) tmp_ptr;\
@@ -338,6 +348,8 @@ JMI_ARRAY_TYPE(jmi_extobj_t, jmi_extobj_array_t)
 /* Assign (copy) SRC to DEST */
 #define JMI_ASG(TYPE, DEST, SRC) \
     JMI_ASG_##TYPE(DEST, SRC)
+#define JMI_ASG_GEN(DEST, SRC) \
+	DEST = SRC;
 #define JMI_ASG_GEN_ARR(DEST, SRC) \
     { \
       int i; \
@@ -411,6 +423,36 @@ void jmi_swap_string(jmi_string_t *dest, jmi_string_t *src);
     
 /* Number of empty bytes at end of string */
 #define JMI_STR_LEFT(DEST) DEST##_len - JMI_LEN(DEST)
+
+/**
+ * Set dest to value. Assumes dimension of dest is equal to dimension of arr.
+ */
+#define JMI_SET(TYPE,DEST,SRC,ARR,OFFSET) \
+    JMI_SET_##TYPE(DEST,SRC,ARR,OFFSET)
+#define JMI_SET_GEN(DEST,SRC,ARR,OFFSET) \
+    DEST[OFFSET] = SRC;
+#define JMI_SET_GEN_ARR(DEST,SRC,ARR,OFFSET) \
+    jmi_set(DEST, SRC, ARR, OFFSET);
+
+void jmi_set(jmi_real_t* dest, jmi_real_t src, jmi_array_t* arr, size_t offset);
+
+#define JMI_COPY(TYPE,DIR,PTR,ARR,OFFSET) \
+    JMI_COPY_##TYPE(DIR,PTR,ARR,OFFSET)
+#define JMI_COPY_GEN(DIR,PTR,ARR,OFFSET) \
+	JMI_COPY_GEN_##DIR(PTR,ARR,OFFSET)
+#define JMI_COPY_GEN_L(PTR,ARR,OFFSET) \
+    PTR[OFFSET] = ARR;
+#define JMI_COPY_GEN_R(PTR,ARR,OFFSET) \
+    ARR = PTR[OFFSET];
+#define JMI_COPY_GEN_ARR(DIR,PTR,ARR,OFFSET) \
+	JMI_COPY_GEN_ARR_##DIR(PTR,ARR,OFFSET)
+#define JMI_COPY_GEN_ARR_L(PTR,ARR,OFFSET) \
+    jmi_copy_to_ptr(PTR, ARR, OFFSET);
+#define JMI_COPY_GEN_ARR_R(PTR,ARR,OFFSET) \
+    jmi_copy_to_arr(ARR, PTR, OFFSET);
+
+void jmi_copy_to_arr(jmi_array_t* dest, jmi_real_t* src, size_t offset);
+void jmi_copy_to_ptr(jmi_real_t* dest, jmi_array_t* src, size_t offset);
 
 void jmi_transpose_matrix(jmi_array_t* arr, jmi_real_t* src, jmi_real_t* dest);
 void jmi_transpose_matrix_to_int(jmi_array_t* arr, jmi_real_t* src, jmi_int_t* dest);

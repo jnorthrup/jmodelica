@@ -157,16 +157,26 @@ public final class FileUtil {
 
     /**
      * Copies a file from one location to another.
+     * Wrapper function for {@link #copy(File, File, boolean)} defaulting to
+     * override any existing file
+     * in {@code destination}.
      * 
-     * @param source
-     *            The file to copy.
-     * @param destination
-     *            The location of the copied file.
-     * @param replace
-     *            A flag specifying whether or not to replace the file if it
+     * @param source The file to copy.
+     * @param destination The location of the copied file.
+     * @throws IOException if there was any error copying the file.
+     */
+    public static void copy(File source, File destination) throws IOException {
+        copy(source, destination, true);
+    }
+
+    /**
+     * Copies a file from one location to another.
+     * 
+     * @param source The file to copy.
+     * @param destination The location of the copied file.
+     * @param replace A flag specifying whether or not to replace the file if it
      *            already exists at {@code destination}.
-     * @throws IOException
-     *             if there was any error copying the file.
+     * @throws IOException if there was any error copying the file.
      */
     public static void copy(File source, File destination, boolean replace) throws IOException {
         if (!source.exists()) {
@@ -230,21 +240,31 @@ public final class FileUtil {
     }
 
     /**
-     * Deletes a directory, any of its sub-directories, and all files within the
-     * directories.
+     * Deletes a file or directory recursively.
+     * <p>
+     * If a file is provided, that file is deleted, if a directory is provided,
+     * then all child files and directories are deleted recursively first.
+     * <p>
+     * The return argument of this method indicates whether the delete was
+     * successful, basically an aggregate of the return value for
+     * {@link File#delete()}.
      * 
-     * @param directory
-     *            The directory to delete.
+     * @param file The file or directory to delete.
+     * @return True if the file doesn't exist, or if, file or entire directory
+     *         structure was deleted, otherwise false.
      */
-    public static void recursiveDelete(File directory) {
-        for (File file : directory.listFiles()) {
-            if (file.isDirectory()) {
-                recursiveDelete(file);
-            } else {
-                file.delete();
+    public static boolean recursiveDelete(File file) {
+        if (!file.exists()) {
+            return true;
+        }
+        boolean res = true;
+        if (file.isDirectory()) {
+            for (File subFile : file.listFiles()) {
+                res &= recursiveDelete(subFile);
             }
         }
-        directory.delete();
+        res &= file.delete();
+        return res;
     }
 
     /**
@@ -264,10 +284,11 @@ public final class FileUtil {
     /**
      * Filters a set of file on their extensions.
      * 
-     * @param files         the files to filter.
-     * @param extensions    the extensions to filter on.
-     * @return              a collection of files from {@code files} with a file extension present
-     *                      in {@code extensions}.
+     * @param files the files to filter.
+     * @param extensions the extensions to filter on.
+     * @return a collection of files from {@code files} with a file extension
+     *         present
+     *         in {@code extensions}.
      */
     public static Collection<File> filterOnExtensions(Collection<File> files, String... extensions) {
         Collection<File> filtered = new ArrayList<File>();
@@ -281,7 +302,7 @@ public final class FileUtil {
         }
         return filtered;
     }
-    
+
     /**
      * Quick method for specifying {@link StandardCopyOption#REPLACE_EXISTING}.
      * 
@@ -300,7 +321,7 @@ public final class FileUtil {
      * Creates a list of {@link File} objects from a list of string paths.
      * 
      * @param paths the string paths.
-     * @return      a list of {@link File} objects.
+     * @return a list of {@link File} objects.
      */
     public static Collection<File> toFile(String... paths) {
         java.util.List<File> files = new ArrayList<File>();
@@ -309,12 +330,12 @@ public final class FileUtil {
         }
         return files;
     }
-    
+
     /**
      * Creates a list of {@link File} objects from a list of string paths.
      * 
      * @param paths the string paths.
-     * @return      a list of {@link File} objects.
+     * @return a list of {@link File} objects.
      */
     public static Collection<File> toFile(List<String> paths) {
         java.util.List<File> files = new ArrayList<File>();
@@ -322,6 +343,25 @@ public final class FileUtil {
             files.add(new File(name));
         }
         return files;
+    }
+
+    /**
+     * Creates a file object from a list of names.
+     * 
+     * @param names the names, i.e. directory names and the file name.
+     * @return a file pointing to "{@code names[0]/names[1]/...}".
+     */
+    public static File pathsToFile(String... names) {
+        int length = names.length;
+        if (length == 0) {
+            throw new IllegalArgumentException("Can not build file no names.");
+        }
+
+        File file = new File(names[0]);
+        for (int i = 1; i < length; ++i) {
+            file = new File(file, names[i]);
+        }
+        return file;
     }
 
 }

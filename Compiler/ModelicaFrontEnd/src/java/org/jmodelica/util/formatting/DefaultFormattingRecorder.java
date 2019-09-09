@@ -6,10 +6,12 @@ package org.jmodelica.util.formatting;
 public final class DefaultFormattingRecorder<T> extends FormattingRecorder<T> {
     @Override
     public void addItem(FormattingType type, String data, int startLine, int startColumn, int endLine, int endColumn) {
+        // Do nothing
     }
 
     @Override
     public void reset() {
+        // Do nothing
     }
 
     @Override

@@ -19,6 +19,9 @@ import java.util.regex.Pattern;
 
 import org.jmodelica.util.ErrorCheckType;
 
+import org.jmodelica.common.URIResolver;
+import org.jmodelica.common.URIResolver.URIException;
+
 aspect ContentCheck {
 
     /**
@@ -70,21 +73,46 @@ aspect ContentCheck {
     
     public void FReinit.contentCheck(ErrorCheckType checkType) {
         if (!inWhen() || inAlgorithm()) 
-            error("The reinit() operator is only allowed in when equations");
+            error("The reinit() operator is only allowed in when clauses that are within an equation section.");
     }
 	
 	public void InstExternal.contentCheck(ErrorCheckType checkType) {
-		if (!inFunction())
+        if (!inFunction()) {
 			error("External function declarations are only allowed in functions");
-	}
-	
+        }
+        contentCheckDirectoryAnnotation(checkType, "IncludeDirectory");
+        contentCheckDirectoryAnnotation(checkType, "LibraryDirectory");
+    }
+
+    public void InstExternal.contentCheckDirectoryAnnotation(ErrorCheckType checkType, String name) {
+        AnnotationNode libDir = annotation(name);
+        if (libDir.exists()) {
+            if (libDir.isStringValue()) {
+                try {
+                    URIResolver.DEFAULT.resolveChecked(this, libDir.string());
+                } catch (URIException e) {
+                    ASTNode.EXTERNAL_DIRECTORY_ANNOTATION.invoke(this, name, e.getMessage());
+                }
+            } else {
+                ASTNode.EXTERNAL_DIRECTORY_ANNOTATION_TYPE.invoke(this, name);
+            }
+        }
+    }
+
+    public static final SimpleProblemProducer ASTNode.EXTERNAL_DIRECTORY_ANNOTATION =
+            new SimpleErrorProducer("EXTERNAL_DIRECTORY_ANNOTATION", ProblemKind.SEMANTIC,
+                    "%s annotation could not be resolved\n  %s");
+    public static final SimpleProblemProducer ASTNode.EXTERNAL_DIRECTORY_ANNOTATION_TYPE =
+            new SimpleErrorProducer("EXTERNAL_DIRECTORY_ANNOTATION_TYPE", ProblemKind.SEMANTIC,
+                    "%s annotation only allows scalar string values");
+
 	public void FReturnStmt.contentCheck(ErrorCheckType checkType) {
 		if (!inFunction())
 			error("Return statements are only allowed in functions");
 	}
 	
 	public void FWhenStmt.contentCheck(ErrorCheckType checkType) {
-		if (myFAlgorithm().getType() instanceof FInitialEquation || myFAlgorithm().isInitial())
+		if (myFAlgorithm().getType().isInitial() || myFAlgorithm().isInitial())
 			error("When statements are not allowed in initial algorithms");
 		else if (inFunction())
 			error("When statements are not allowed in functions");
@@ -125,6 +153,13 @@ aspect ContentCheck {
             error("Classed derived from ExternalObject can neither be used in an extends-clause nor in a short class defenition");
         if (myInstClass().isOperatorRecord())
             contentCheckExtendsOperatorRecord(checkType);
+    }
+
+    @Override
+    public void InstEnum.contentCheck(ErrorCheckType checkType) {
+        if (isUnspecifiedEnum() && !checkType.allowUnspecifiedEnums()) {
+            ASTNode.UNSPECIFIED_ENUM_COMPONENT.invoke(this, this);
+        }
     }
 
     /**
@@ -227,8 +262,9 @@ aspect ContentCheck {
 
     public void InstComponentDecl.contentCheck(ErrorCheckType checkType) {
         if (!inFunction()) // Array sizes outside functions should be structural parameters
-            size().forceVariability(checkType, fStructParameter());
-        checkQuotedIdentifier(getComponentDecl(), name());
+            size().forceVariability(checkType, Variability.STRUCTPARAMETER);
+        checkQuotedIdentifier(getSrcComponentDecl(), name());
+        checkAbsoluteValue();
     }
 
     public void InstAssignable.contentCheck(ErrorCheckType checkType) {
@@ -244,8 +280,15 @@ aspect ContentCheck {
             if (inherit != null)
                 inherit.error("Can't declare %s as flow, since it contains a component declared as flow", name());
         }
+        if (isExternalObject() && hasBindingFExp() && !getBindingFExp().variability().lessOrEqual(variability())) {
+            ASTNode.BINDING_EXPRESSION_VARIABILITY.invoke(this, 
+                getBindingFExp().variability().toStringLiteral(), variability().toStringLiteral());
+        }
     }
 
+    public static final SimpleProblemProducer ASTNode.BINDING_EXPRESSION_VARIABILITY =
+        new SimpleErrorProducer("BINDING_EXPRESSION_VARIABILITY", ProblemKind.SEMANTIC, 
+            "Variability of binding expression (%s) must be lower or equal to the variability of the component (%s)");
     
     public static final SimpleProblemProducer ASTNode.CONSTANT_INPUT =
         new SimpleErrorProducer("CONSTANT_INPUT", ProblemKind.SEMANTIC, "Function input may not be constant");
@@ -278,7 +321,8 @@ aspect ContentCheck {
             }
         }
         
-        checkQuotedIdentifier(getClassDecl(), name());
+        checkQuotedIdentifier(getSrcClassDecl().getName(), name());
+        checkAbsoluteValue();
     }
     
     private static Set<String> AnnotationNode.buildExternalFunctionAnnotations() {
@@ -323,9 +367,9 @@ aspect ContentCheck {
 	}
 	
     syn boolean FType.compatibleConstructor(InstClassDecl icd) = false;
-    eq FExternalObjectType.compatibleConstructor(InstClassDecl icd) = getConstructor().name().equals(icd.qualifiedName() + ".constructor");
+    eq FExternalObjectType.compatibleConstructor(InstClassDecl icd) = getConstructor().name().equals("." + icd.qualifiedName() + ".constructor");
     syn boolean FType.compatibleDestructor(InstClassDecl icd) = false;
-    eq FExternalObjectType.compatibleDestructor(InstClassDecl icd) = getDestructor().name().equals(icd.qualifiedName() + ".destructor");
+    eq FExternalObjectType.compatibleDestructor(InstClassDecl icd) = getDestructor().name().equals("." + icd.qualifiedName() + ".destructor");
 	
 	// TODO: check if this is a builtin function (with bad arguments), error otherwise
 //	public void FBuiltinExternalLanguage.contentCheck(ErrorCheckType checkType) {
@@ -335,7 +379,19 @@ aspect ContentCheck {
 	public void FUnknownExternalLanguage.contentCheck(ErrorCheckType checkType) {
 		error("The external language specification \"" + getLanguage() + "\" is not supported");
 	}
-	
+    
+    public static final SimpleErrorProducer ASTNode.NON_PARAMETER_SAMPLE_ARGUMENTS =
+            new SimpleErrorProducer("NON_PARAMETER_SAMPLE_ARGUMENTS", ProblemKind.SEMANTIC, 
+                    "Sample arguments need to be parameter expressions");
+    
+    public void FSampleExp.contentCheck(ErrorCheckType checkType) {
+        for (FExp ch : childFExps()) {
+            if (!ch.variability().parameterOrLess()) {
+                NON_PARAMETER_SAMPLE_ARGUMENTS.invoke(ch);
+            }
+        }
+    }
+
 	inh boolean FIterExp.iterExpUseOK();
 	eq FExp.getChild().iterExpUseOK()          = false;
 	eq Root.getChild().iterExpUseOK()          = false;
@@ -394,7 +450,7 @@ aspect ContentCheck {
     
     public void FIfEquation.checkMayContainConnect(ErrorCheckType checkType, FConnectClause connect) {
         super.checkMayContainConnect(checkType, connect);
-        FTypePrefixVariability v = getTest().variability();
+        TypePrefixVariability v = getTest().variability();
         if (!v.fixedParameterOrLess()) {
             connect.error("Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions");
         } else {
@@ -423,7 +479,7 @@ aspect ContentCheck {
 		super.contentCheck(checkType);
 		if (inWhen())
 			error("Nestled when clauses are not allowed");
-		else if (getType() instanceof FInitialEquation || isInitial()) {
+		else if (getType().isInitial() || isInitial()) {
 			error("When equations are not allowed in initial equation sections");
 		} else {
 			if (!isBalancedAssignments())
@@ -449,8 +505,8 @@ aspect ContentCheck {
             boolean inWhen = inWhen();
             boolean balanced = inWhen ? isBalancedAssignments() : isBalancedEquations();
             boolean functionCallEqu = hasFunctionCallEquations(); 
-            if (hasOnlyFixedParamTests()) {
-                forceTestVariability(checkType, balanced ? ASTNode.fTestParameter() : ASTNode.fStructParameter());
+            if (canSelectBranch()) {
+                forceTestVariability(checkType, balanced ? Variability.TESTPARAMETER : Variability.STRUCTPARAMETER);
             } else {
                 if (!balanced) {
                     error(inWhen ? UNBALANCED_ERROR_WHEN : UNBALANCED_ERROR);
@@ -459,16 +515,20 @@ aspect ContentCheck {
         }
     }
 
+    syn boolean FIfWhenElseEquation.canSelectBranch() = true;
+    eq FIfWhenEquation.canSelectBranch()              = getTest().variability().fixedParameterOrLess() 
+            && (!hasElse() || getElse().canSelectBranch());
+
 	public void FEquation.contentCheck(ErrorCheckType checkType) {
 		super.contentCheck(checkType);
 		if (inWhen() && !isAssignmentEqn())
 			error("Only assignment equations are allowed in when clauses");
 	}
 
-    protected void FIfWhenElseEquation.forceTestVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
+    protected void FIfWhenElseEquation.forceTestVariability(ErrorCheckType checkType, TypePrefixVariability v) {}
 
     @Override
-    protected void FIfEquation.forceTestVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+    protected void FIfEquation.forceTestVariability(ErrorCheckType checkType, TypePrefixVariability v) {
         getTest().forceVariability(checkType, v);
         if (hasElse()) {
             getElse().forceTestVariability(checkType, v);
@@ -489,16 +549,52 @@ aspect ContentCheck {
 	syn boolean FIfWhenEquation.elseIsBalancedAssignments() = 
 		assignedSet().equals(getElse().assignedSet()) && getElse().isBalancedAssignments();
 
+
+    protected static Set<InstComponentDecl> FAbstractEquation.assignedSetFromEqns(List<FAbstractEquation> eqns) {
+        Set<InstComponentDecl> res = new HashSet<InstComponentDecl>();
+        for (FAbstractEquation eqn : eqns)
+            res.addAll(eqn.assignedSet());
+        return res;
+    }
+
+    /**
+     * Gives the set of components assigned in this equation.
+     * 
+     * Only works in instance tree.
+     * For if and when equations, only the first branch is considered.
+     */
+    syn lazy Set<InstComponentDecl> FAbstractEquation.assignedSet() = Collections.emptySet();
+    eq InstForClauseE.assignedSet()      = assignedSetFromEqns(getFAbstractEquations());
+    eq FIfWhenElseEquation.assignedSet() = assignedSetFromEqns(getFAbstractEquations());
+    eq FEquation.assignedSet()           = getLeft().accessedVarSet();
+    eq FFunctionCallEquation.assignedSet() {
+        LinkedHashSet<InstComponentDecl> s = new LinkedHashSet<InstComponentDecl>();
+        for (FFunctionCallLeft left : getLefts()) {
+            if (left.hasFExp()) {
+                s.addAll(left.getFExp().accessedVarSet());
+            }
+        }
+        return s;
+    }
+
+    /**
+     * If this is an instance tree access, return set containing accessed var, otherwise empty set.
+     */
+    syn Set<InstComponentDecl> FExp.accessedVarSet() = Collections.emptySet();
+    eq InstAccessExp.accessedVarSet()                = getInstAccess().accessedVarSet();
+
+    /**
+     * If this is an instance tree access, return set containing accessed var, otherwise empty set.
+     */
+    syn Set<InstComponentDecl> InstAccess.accessedVarSet() = Collections.singleton(myInstComponentDecl());
+
+
     inh boolean FIfEquation.isTopWhenIfEquation();
     eq FClass.getChild().isTopWhenIfEquation()              = true;
     eq InstClassDecl.getChild().isTopWhenIfEquation()       = true;
     eq FIfWhenElseEquation.getChild().isTopWhenIfEquation() = true;
     eq FIfWhenEquation.getElse().isTopWhenIfEquation()      = false;
 
-    syn boolean FIfWhenElseEquation.hasOnlyFixedParamTests() = true;
-    eq FIfWhenEquation.hasOnlyFixedParamTests()              = getTest().variability().fixedParameterOrLess() 
-            && (!hasElse() || getElse().hasOnlyFixedParamTests());
-	
 	syn boolean FAbstractEquation.isAssignmentEqn() = false;
 	eq FEquation.isAssignmentEqn()                  = getLeft().isAccess();
 	
@@ -715,7 +811,7 @@ aspect ContentCheck {
     }
     
     syn boolean FType.externalValid() = externalValid(false);
-    syn boolean FType.externalValid(boolean rec)      = false;
+    syn boolean FType.externalValid(boolean rec)  = false;
     eq FExternalObjectType.externalValid(boolean rec) = !rec || !isArray();
     eq FPrimitiveType.externalValid(boolean rec)      = !rec || !isArray();
     eq FRecordType.externalValid(boolean rec) {
@@ -739,11 +835,21 @@ aspect ContentCheck {
     /**
      * Check if this class fulfills the requirements of a package.
      */
-    syn boolean InstClassDecl.isOkPackage() {
-        for (InstComponentDecl icd : getInstComponentDecls())
-            if (!icd.isConstant())
+    syn boolean InstNode.isOkPackage() {
+        for (InstComponentDecl icd : getInstComponentDecls()) {
+            if (!icd.isConstant()) {
                 return false;
-        return getNumFAbstractEquation() == 0;
+            }
+        }
+        if (getNumFAbstractEquation() != 0) {
+            return false;
+        }
+        for (InstExtends ie : getInstExtendss()) {
+            if (!ie.isOkPackage()) {
+                return false;
+            }
+        }
+        return true;
     }
     eq InstSimpleShortClassDecl.isOkPackage() = actualInstClass().isOkPackage();
     eq InstLibNode.isOkPackage()              = actualInstClass().isOkPackage();
@@ -757,42 +863,62 @@ aspect ContentCheck {
     eq InstRoot.getChild().myOperatorRecord()          = null;
     eq Root.getChild().myOperatorRecord()              = null;
 
+    /**
+     * If this class is in an operator record or in a package in an operator record.
+     */
+     syn boolean SrcClassDecl.hasOperatorRecord() = getSrcRestriction().isOperatorRecord() ? true : (isPackage() ? hasOperatorRecord() : false);
+    inh boolean SrcClassDecl.hasOperatorRecordHelper();
+    eq SrcLibNode.getChild().hasOperatorRecordHelper()    = hasOperatorRecordHelper();
+    eq SrcClassDecl.getChild().hasOperatorRecordHelper()  {
+        if (hasSrcRestriction()) {
+            if (getSrcRestriction().isOperatorRecord()) {
+                return true;
+            }
+            return isPackage() ? hasOperatorRecordHelper() : false;
+        }
+        return false;
+    }
+    eq Root.getChild().hasOperatorRecordHelper()          = false;
+
+    syn boolean SrcRestriction.isOperatorRecord() = false;
+    eq SrcOperatorRecord.isOperatorRecord() = true;
 }
 
 aspect ForceVariability {
 
-    private FTypePrefixVariability InstAssignable.forcedVariability = fContinuous();
+    private TypePrefixVariability InstAssignable.forcedVariability = Variability.CONTINUOUS;
 
     public void FExp.markAsStructuralParameter(ErrorCheckType checkType) {
-        forceVariability(checkType, fStructParameter());
+        forceVariability(checkType, Variability.STRUCTPARAMETER);
     }
 
-    public void FExp.forceVariability(ErrorCheckType checkType,  FTypePrefixVariability v) {
+    public void FExp.forceVariability(ErrorCheckType checkType,  TypePrefixVariability v) {
         if (!inFunction()) {
             forceUsesVariability(checkType, v);
         }
     }
 
-    public void FArraySubscripts.forceVariability(ErrorCheckType checkType,  FTypePrefixVariability v) {
+    public void FArraySubscripts.forceVariability(ErrorCheckType checkType,  TypePrefixVariability v) {}
+    public void FArrayExpSubscripts.forceVariability(ErrorCheckType checkType,  TypePrefixVariability v) {
         for (FSubscript s : getFSubscripts()) {
             s.forceVariability(checkType, v);
         }
     }
 
-    public void FSubscript.forceVariability(ErrorCheckType checkType,  FTypePrefixVariability v) {}
+    public void FSubscript.forceVariability(ErrorCheckType checkType,  TypePrefixVariability v) {}
 
-    public void FExpSubscript.forceVariability(ErrorCheckType checkType,  FTypePrefixVariability v) {
+    public void FExpSubscript.forceVariability(ErrorCheckType checkType,  TypePrefixVariability v) {
         getFExp().forceVariability(checkType, v);
     }
 
 
-    public void InstComponentDecl.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
+    public void InstComponentDecl.forceVariability(ErrorCheckType checkType, TypePrefixVariability v) {}
 
-    public void InstAssignable.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+    public void InstAssignable.forceVariability(ErrorCheckType checkType, TypePrefixVariability v) {
         if (forcedVariability.lessOrEqual(v)) {
             return;
         }
-        FTypePrefixVariability currentVariability = variability().combine();
+        TypePrefixVariability currentVariability = variability().combine();
         if (!currentVariability.parameterVariability() || inFunction() || isForIndex())
             return;
         if (indices().numElements() > 0 && currentVariability.initialParameterVariability()) {
@@ -810,18 +936,18 @@ aspect ForceVariability {
         }
     }
 
-    public void InstRecord.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+    public void InstRecord.forceVariability(ErrorCheckType checkType, TypePrefixVariability v) {
         for (InstComponentDecl icd : allInstComponentDecls()) {
             icd.forceVariability(checkType, v);
         }
     }
 
-    public void InstExternalObject.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
+    public void InstExternalObject.forceVariability(ErrorCheckType checkType, TypePrefixVariability v) {}
 
 
-    public void Size.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
+    public void Size.forceVariability(ErrorCheckType checkType, TypePrefixVariability v) {}
 
-    public void MutableSize.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+    public void MutableSize.forceVariability(ErrorCheckType checkType, TypePrefixVariability v) {
         for (FExp e : exps) {
             if (e != null) {
                 e.forceVariability(checkType, v);
@@ -830,37 +956,37 @@ aspect ForceVariability {
     }
 
 
-    public void ASTNode.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+    public void ASTNode.forceUsesVariability(ErrorCheckType checkType, TypePrefixVariability v) {
         for (ASTNode n : this) {
             n.forceUsesVariability(checkType, v);
         }
     }
 
-    public void FAbstractExp.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+    public void FAbstractExp.forceUsesVariability(ErrorCheckType checkType, TypePrefixVariability v) {
         super.forceUsesVariability(checkType, v);
         setVariabilityNotCalculated();
     }
 
-    public void FSizeExp.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+    public void FSizeExp.forceUsesVariability(ErrorCheckType checkType, TypePrefixVariability v) {
         getDimOpt().forceUsesVariability(checkType, v);
     }
 
-    public void FNdimsExp.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
+    public void FNdimsExp.forceUsesVariability(ErrorCheckType checkType, TypePrefixVariability v) {}
 
-    public void InstAccess.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+    public void InstAccess.forceUsesVariability(ErrorCheckType checkType, TypePrefixVariability v) {
         myInstComponentDecl().forceVariability(checkType, v);
         forceUsesInSubscriptsVariability(checkType, v);
     }
 
-    public void InstAccess.forceUsesInSubscriptsVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
+    public void InstAccess.forceUsesInSubscriptsVariability(ErrorCheckType checkType, TypePrefixVariability v) {}
 
-    public void InstDot.forceUsesInSubscriptsVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+    public void InstDot.forceUsesInSubscriptsVariability(ErrorCheckType checkType, TypePrefixVariability v) {
         for (InstAccess ia : getInstAccesss()) {
             ia.forceUsesInSubscriptsVariability(checkType, v);
         }
     }
 
-    public void InstArrayAccess.forceUsesInSubscriptsVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+    public void InstArrayAccess.forceUsesInSubscriptsVariability(ErrorCheckType checkType, TypePrefixVariability v) {
         getFArraySubscripts().forceUsesVariability(checkType, v);
     }
 
