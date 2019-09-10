@@ -21,8 +21,8 @@ public enum CausalityConnectorPrefix {
         return this == NONE;
     }
     
-    public boolean isInStream() {
-        return this == INSTREAM;
+    public boolean isStream() {
+        return this == STREAM;
     }
     
     public interface CausalPortsEvaluator {

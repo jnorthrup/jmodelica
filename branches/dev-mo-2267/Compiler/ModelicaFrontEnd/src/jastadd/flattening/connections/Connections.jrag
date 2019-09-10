@@ -575,16 +575,6 @@ aspect Connections {
                     f.addNormalEquation(new FEquation(left, right));
                 }
             }
-
-            ConnectionSetEntry fst = first();
-            InstAssignable fstVar = (InstAssignable) fst.getVar();
-            if (size() == 1 && fst.isInside() && fstVar.isTopLevelCausalOrConnector()
-                    && (fstVar.isInput() || fstVar.isOutput() || fstVar.useCausalPorts())) {
-                FVariable fv = fstVar.flatten(f, FlattenBindingExp.NONE, 1, false);
-                FAccess inStreamAccess = createInStreamAccess(fv.getFAccess());
-                fv.setFAccess(inStreamAccess);
-                fv.setCausalityConnectorPrefix(CausalityConnectorPrefix.INSTREAM);
-            }
         }
 
         /**
@@ -596,24 +586,21 @@ aspect Connections {
         public FExp expandInStreamExp(FAccess access) {
             String name = access.name();
             ConnectionSetEntry e = getConnectionSetEntry(name, false);
-            String nameWithSuffix = nameWithSuffix(name);
-            if (access.useCausalPorts() && !access.lookupFV(nameWithSuffix).isUnknown()) {
-                access = new FAccessString(nameWithSuffix);
+            if (access.useCausalPorts()) {
+                AnnotationNode instreamAnnotation = access.myFV().annotation().vendorNode().forPath("internal/instream");
+                if (instreamAnnotation.exists()) {
+                    String instreamName = instreamAnnotation.ceval().stringValue();
+                    access = nameWithSubscripts(instreamName, name);
+                }
             }
             FExp exp = expandInStreamExp(e, name, new FAccessExp(access));
             exp.enableStreamsRewrite();
             return exp;
         }
         
-        public String nameWithSuffix(String access) {
-            String name = access;
-            String subscripts = "";
-            if (name.endsWith("]")) {
-                int subscriptsIndex = access.lastIndexOf("[");
-                name = access.substring(0, subscriptsIndex);
-                subscripts = access.substring(subscriptsIndex);
-            }
-            return name + inStreamSuffix + subscripts;
+        public FAccess nameWithSubscripts(String name, String access) {
+            String subscripts = (access.endsWith("]")) ? access.substring(access.lastIndexOf("[")) : "";
+            return new FAccessString(name + subscripts);
        }
 
         /**
@@ -645,11 +632,6 @@ aspect Connections {
             } else {
                 return new FExInStream(def, new FMulExp(new FInStreamEpsExp(), new FRealLitExp(nominal)), vars);
             }
-        }
-        
-        private FAccess createInStreamAccess(FAccess access) {
-            FAccess lastPart = access.copyLastSuffix();
-            return access.copyPrefix().append(lastPart.name() + inStreamSuffix, lastPart.getFArraySubscripts());
         }
     }
 

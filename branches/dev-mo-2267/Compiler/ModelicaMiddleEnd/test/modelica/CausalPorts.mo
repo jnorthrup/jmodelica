@@ -104,7 +104,7 @@ annotation(__JModelica(UnitTesting(tests={
 fclass CausalPorts.Stream1
  potential Real c.p;
  flow Real c.f;
- stream Real c.s;
+ stream Real c.s annotation(__Modelon(internal(instream = \"c.s__instream_\")));
  inStream Real c.s__instream_;
 equation
  c.p = time;
@@ -119,7 +119,7 @@ end CausalPorts.Stream1;
 fclass CausalPorts.Stream1
  potential Real c.p;
  flow Real c.f;
- stream Real c.s;
+ stream Real c.s annotation(__Modelon(internal(instream = \"c.s__instream_\")));
  inStream Real c.s__instream_;
 equation
  c.p = time;
@@ -172,14 +172,14 @@ annotation(__JModelica(UnitTesting(tests={
 fclass CausalPorts.Stream2
  potential Real c.p;
  flow Real c.f;
- stream Real c.s;
+ stream Real c.s annotation(__Modelon(internal(instream = \"c.s__instream_\")));
+ inStream Real c.s__instream_;
  Real a1.c.p;
  Real a1.c.f;
  Real a1.c.s;
  Real a2.c.p;
  Real a2.c.f;
  Real a2.c.s;
- inStream Real c.s__instream_;
 equation
  c.p = time;
  c.s = c.s__instream_;
@@ -216,9 +216,9 @@ annotation(__JModelica(UnitTesting(tests={
 fclass CausalPorts.Stream3
  potential Real c.p;
  flow Real c.f;
- stream Real c.s1[0];
- stream Real c.s2[2];
+ stream Real c.s1[0] annotation(__Modelon(internal(instream = \"c.s1__instream_\")));
  inStream Real c.s1__instream_[0];
+ stream Real c.s2[2] annotation(__Modelon(internal(instream = \"c.s2__instream_\")));
  inStream Real c.s2__instream_[2];
 equation
  c.p = time;
@@ -234,8 +234,8 @@ end CausalPorts.Stream3;
 fclass CausalPorts.Stream3
  potential Real c.p;
  flow Real c.f;
- stream Real c.s2[1];
- stream Real c.s2[2];
+ stream Real c.s2[1] annotation(__Modelon(internal(instream = \"c.s2__instream_\")));
+ stream Real c.s2[2] annotation(__Modelon(internal(instream = \"c.s2__instream_\")));
  inStream Real c.s2__instream_[1];
  inStream Real c.s2__instream_[2];
 equation
@@ -245,6 +245,59 @@ equation
 end CausalPorts.Stream3;
 ")})));
 end Stream3;
+
+
+model Stream4
+    connector C
+        Real p;
+        flow Real f;
+        stream Real 's.s';
+        stream Real 's.s__instream_';
+    end C;
+    C 'c.c';
+equation
+    'c.c'.p = time;
+    'c.c'.'s.s' = inStream('c.c'.'s.s');
+    'c.c'.'s.s__instream_' = inStream('c.c'.'s.s__instream_');
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        description="Instream variable name is already used",
+        causal_ports=true,
+        eliminate_alias_variables=false,
+        variability_propagation=false,
+        flatModel="
+fclass CausalPorts.Stream4
+ potential Real 'c.c'.p;
+ flow Real 'c.c'.f;
+ stream Real 'c.c'.'s.s' annotation(__Modelon(internal(instream = \"'c.c'.'s.s__instream_2'\")));
+ inStream Real 'c.c'.'s.s__instream_2';
+ stream Real 'c.c'.'s.s__instream_' annotation(__Modelon(internal(instream = \"'c.c'.'s.s__instream___instream_'\")));
+ inStream Real 'c.c'.'s.s__instream___instream_';
+equation
+ 'c.c'.p = time;
+ 'c.c'.'s.s' = inStream('c.c'.'s.s');
+ 'c.c'.'s.s__instream_' = inStream('c.c'.'s.s__instream_');
+end CausalPorts.Stream4;
+"), TransformCanonicalTestCase(
+        description="Instream variable name is already used",
+        causal_ports=true,
+        eliminate_alias_variables=false,
+        variability_propagation=false,
+        flatModel="
+fclass CausalPorts.Stream4
+ potential Real 'c.c'.p;
+ flow Real 'c.c'.f;
+ stream Real 'c.c'.'s.s' annotation(__Modelon(internal(instream = \"'c.c'.'s.s__instream_2'\")));
+ inStream Real 'c.c'.'s.s__instream_2';
+ stream Real 'c.c'.'s.s__instream_' annotation(__Modelon(internal(instream = \"'c.c'.'s.s__instream___instream_'\")));
+ inStream Real 'c.c'.'s.s__instream___instream_';
+equation
+ 'c.c'.p = time;
+ 'c.c'.'s.s' = 'c.c'.'s.s__instream_2';
+ 'c.c'.'s.s__instream_' = 'c.c'.'s.s__instream___instream_';
+end CausalPorts.Stream4;
+")})));
+end Stream4;
 
 
 end CausalPorts;

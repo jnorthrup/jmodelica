@@ -1219,7 +1219,7 @@ aspect Flattening {
         flatten(f, binding, level, false);
     }
 
-    public FVariable InstAssignable.flatten(Flattener f, FlattenBindingExp binding, int level, boolean global) {
+    public void InstAssignable.flatten(Flattener f, FlattenBindingExp binding, int level, boolean global) {
         if (useInFlattening() && (global || !flattenAsGlobalVariable())) {
             if (hasBindingFExp()) {
                 getBindingFExp().flattenAssertExternal(f);
@@ -1237,11 +1237,40 @@ aspect Flattening {
             } else {
                 f.addFVariable(fv);
             }
+            if (fv.getCausalityConnectorPrefix().isStream() && useCausalPorts()) {
+                FVariable inStream = fv.treeCopy();
+                FAccess inStreamAccess = createInStreamAccess(inStream.getFAccess());
+                inStream.setFAccess(inStreamAccess);
+                inStream.setCausalityConnectorPrefix(CausalityConnectorPrefix.INSTREAM);
+                fv.annotation().vendorNode().forPath("internal/instream").setValue(new FStringLitExp(inStreamAccess.name()));
+                f.addFVariable(inStream);
+            }
             flattenMyType(f);
             clearModificationLevel(oldLevels);
-            return fv;
         }
-        return null;
+    }
+    
+    inh FAccess InstAssignable.createInStreamAccess(FAccess streamAccess);
+    eq InstClassDecl.getChild().createInStreamAccess(FAccess streamAccess) {
+        FAccess lastPart = streamAccess.copyLastSuffix();
+        String streamName = lastPart.name();
+        String end = "";
+        if (streamName.endsWith("]")) {
+            int index = streamName.lastIndexOf("[");
+            end = streamName.substring(index);
+            streamName = streamName.substring(0, index);
+        }
+        if (streamName.endsWith("'")) {
+            streamName = streamName.substring(0, streamName.length() - 1);
+            end = "'" + end;
+        }
+        FAccess result = streamAccess.copyPrefix().append(streamName + "__instream_" + end, lastPart.getFArraySubscripts());
+        int i = 2;
+        while (componentExists(new QualifiedName(result.name()))) {
+            result = streamAccess.copyPrefix().append(streamName + "__instream_" + i + end, lastPart.getFArraySubscripts());
+            i++;
+        }
+        return result;
     }
     
     public void ASTNode.flattenAssertExternal(Flattener f) {
