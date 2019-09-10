@@ -32,6 +32,28 @@ from assimulo.solvers.sundials import CVodeError
 
 path_to_mofiles = os.path.join(get_files_path(), 'Modelica')
 
+class TestEvaluator:
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        cls.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
+    
+    @testattr(stddist_base = True)
+    def test_builtin_substring(self):
+        """ 
+        Test compiling a model with external functions in a static library.
+        """
+        cpath = "ExtFunctionTests.Substring"
+        fmu_name = compile_fmu(cpath, self.fpath)
+        model = load_fmu(fmu_name)
+        
+        assert model.get("sub") == "Y"
+        assert model.get("string2") == "line"
+        assert model.get("len") == 16
+        assert model.get("start") == 4
+
 class TestExternalStatic:
 
     @classmethod

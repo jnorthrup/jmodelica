@@ -22,6 +22,8 @@
 
 /* Builtins */
 extern const char* ModelicaStrings_substring(const char*, int, int);
+extern const char* ModelicaStrings_length(const char*);
+extern const char* ModelicaStrings_skipWhiteSpace(const char*, int);
 
 #define ERROR_LOAD_DLL 3
 #define ERROR_LOAD_FUNCTION 4
@@ -181,6 +183,8 @@ typedef double (__stdcall *f_d_dd)(double, double);
 typedef double (__stdcall *f_d_i)(int);
 typedef double(__stdcall *f_d_idd)(int, double, double);
 typedef int (__stdcall *f_i_ii)(int, int);
+typedef int (__stdcall *f_i_s)(const char*);
+typedef int (__stdcall *f_i_si)(const char*, int);
 typedef void(__stdcall *f___iddpR_ddddddddddd_)(int, double, double, R_ddddddddddd**);
 typedef void (*generic_funcptr)(void);
 
@@ -303,7 +307,58 @@ void jmi_call_double_fcn(generic_funcptr fcn, const char* inputs) {
     JMCEVAL_print(Real, d_output);
 }
 
-void jmi_call_string_fcn_sii(generic_funcptr fcn, const char *out) {
+void jmi_call_integer_fcn_s(generic_funcptr fcn, double *out) {
+    JMI_DEF(STR, arg_0)
+
+    JMCEVAL_parse(String, arg_0);
+
+    JMCEVAL_check("CALC");
+    if (JMCEVAL_try()) {
+        /* Calc phase */
+        *out = ((f_i_s)fcn)(arg_0);
+    }
+    else {
+        JMCEVAL_failed();
+    }
+}
+
+void jmi_call_integer_fcn_si(generic_funcptr fcn, double *out) {
+    JMI_DEF(STR, arg_0)
+    JMI_DEF(INT, arg_1)
+    JMI_DEF(INT_EXT, tmp_1)
+
+    JMCEVAL_parse(String, arg_0);
+    JMCEVAL_parse(Integer, arg_1);
+
+    JMCEVAL_check("CALC");
+    if (JMCEVAL_try()) {
+        /* Calc phase */
+        tmp_1 = (int)arg_1;
+        *out = ((f_i_si)fcn)(arg_0, tmp_1);
+    }
+    else {
+        JMCEVAL_failed();
+    }
+}
+
+void jmi_call_integer_fcn(generic_funcptr fcn, const char* inputs) {
+    JMI_DEF(INT, i_output)
+    JMCEVAL_parse(Integer, i_output);
+
+    if (strcmp(inputs, "s,") == 0) {
+        jmi_call_integer_fcn_s(fcn, &i_output);
+    } else if (strcmp(inputs, "s,i,") == 0) {
+        jmi_call_integer_fcn_si(fcn, &i_output);
+    } else {
+        printf(ERROR_NOT_SUPPORTED_INPUT_ARGS_MSG);
+        exit(ERROR_NOT_SUPPORTED_INPUT_ARGS);
+    }
+
+    JMCEVAL_check("DONE");
+    JMCEVAL_print(Integer, i_output);
+}
+
+void jmi_call_string_fcn_sii(generic_funcptr fcn, char **out) {
     JMI_DEF(STR, arg_0)
     JMI_DEF(INT, arg_1)
     JMI_DEF(INT, arg_2)
@@ -319,7 +374,7 @@ void jmi_call_string_fcn_sii(generic_funcptr fcn, const char *out) {
         /* Calc phase */
         tmp_1 = (int)arg_1;
         tmp_2 = (int)arg_2;
-        out = ((f_s_sii)fcn)(arg_0, tmp_1, tmp_2);
+        *out = ((f_s_sii)fcn)(arg_0, tmp_1, tmp_2);
     } else {
         JMCEVAL_failed();
     }
@@ -330,7 +385,7 @@ void jmi_call_string_fcn(generic_funcptr fcn, const char* inputs) {
     JMCEVAL_parse(String, s_output);
 
     if (strcmp(inputs, "s,i,i,") == 0) {
-        jmi_call_string_fcn_sii(fcn, s_output);
+        jmi_call_string_fcn_sii(fcn, &s_output);
     } else {
         printf(ERROR_NOT_SUPPORTED_INPUT_ARGS_MSG);
         exit(ERROR_NOT_SUPPORTED_INPUT_ARGS);
@@ -368,6 +423,10 @@ int main(int argc, const char* argv[])
     /* Builtins */
     if (strcmp(argv[2], "ModelicaStrings_substring") == 0) {
         funci = (generic_funcptr)ModelicaStrings_substring;
+    } else if (strcmp(argv[2], "ModelicaStrings_length") == 0) {
+        funci = (generic_funcptr)ModelicaStrings_length;
+    } else if (strcmp(argv[2], "ModelicaStrings_skipWhiteSpace") == 0) {
+        funci = (generic_funcptr)ModelicaStrings_skipWhiteSpace;
     }
 
     if (funci == NULL) {
@@ -432,8 +491,10 @@ int main(int argc, const char* argv[])
 
         if (strcmp(output_args, "d") == 0) {
             jmi_call_double_fcn(funci, input_args);
-        } else if(strcmp(output_args, "s") == 0) {
+        } else if (strcmp(output_args, "s") == 0) {
             jmi_call_string_fcn(funci, input_args);
+        } else if (strcmp(output_args, "i") == 0) {
+            jmi_call_integer_fcn(funci, input_args);
         } else if (strcmp(output_args, "void") == 0) {
             jmi_call_void_fcn(funci, input_args);
         } else {

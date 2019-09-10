@@ -293,7 +293,7 @@ aspect CCodeGenExternalCeval {
         String input = "";
         if (arg.isReal()) {
             input = input.concat("d");
-        } else if (arg.isInteger() || arg.isEnum()) {
+        } else if (arg.isInteger() || arg.isEnum() || arg.isBoolean()) {
             input = input.concat("i");
         } else if (arg.isString()) {
             input = input.concat("s");

@@ -116,7 +116,9 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                 ArrayList<String> arguments = null;
                 if (canUseEvaluator(ext)) {
                     String jmHome = System.getenv("JMODELICA_HOME");
-                    executable = jmHome + File.separator + "bin" + File.separator + CCompilerDelegator.reduceBits(EnvironmentUtils.getJavaPlatform(),mc.getCCompiler().getTargetPlatforms()) + File.separator + "jmi_evaluator" + SystemUtil.executableExtension();
+                    String platform = CCompilerDelegator.reduceBits(EnvironmentUtils.getJavaPlatform(),mc.getCCompiler().getTargetPlatforms());
+                    String bits = platform.contains("64") && SystemUtil.isWindows() ? "64" : "";
+                    executable = jmHome + File.separator + "bin" + bits + File.separator + "jmi_evaluator" + SystemUtil.executableExtension();
                     
                     String sharedLibrary = getSharedLibrary(ext);
                     if (sharedLibrary.equals("")) { sharedLibrary = "NoSharedLibrary"; }
