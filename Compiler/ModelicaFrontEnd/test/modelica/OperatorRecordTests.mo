@@ -709,6 +709,57 @@ end OperatorRecordTests.OperatorOverload13;
     end OperatorOverload13;
 
 
+    model OperatorOverload14
+		operator record Cplx2 = Cplx;
+        Cplx c1 = Cplx(1, 2);
+        Cplx2 c2 = Cplx2(3, 4);
+        Cplx c3 = c1 + c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload14",
+            description="Short class decls of operator records",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload14
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.OperatorOverload14.Cplx2 c2 = OperatorRecordTests.Cplx.'constructor'(3, 4);
+ OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx.'+'(c1, c2);
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'+'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  return;
+ end OperatorRecordTests.Cplx.'+';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+ record OperatorRecordTests.OperatorOverload14.Cplx2
+  Real re;
+  Real im;
+ end OperatorRecordTests.OperatorOverload14.Cplx2;
+
+end OperatorRecordTests.OperatorOverload14;
+")})));
+    end OperatorOverload14;
+
+
     model OperatorOverload15
         Cplx[2] c1 = { Cplx(1, 2), Cplx(3, 4) };
         Cplx[2] c2 = { Cplx(5, 6), Cplx(7, 8) };
@@ -1590,6 +1641,61 @@ end OperatorRecordTests.OperatorRecordConnect2;
     end OperatorRecordConnect2;
 
 
+    model OperatorRecordConnect3
+        connector C = Cplx;
+
+        C c1, c2, c3;
+    equation
+        connect(c1, c2);
+		c3 = c1 + c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorRecordConnect3",
+            description="Connectors that are operator records",
+            flatModel="
+fclass OperatorRecordTests.OperatorRecordConnect3
+ OperatorRecordTests.OperatorRecordConnect3.C c1;
+ OperatorRecordTests.OperatorRecordConnect3.C c2;
+ OperatorRecordTests.OperatorRecordConnect3.C c3;
+equation
+ c3 = OperatorRecordTests.Cplx.'+'(c1, c2);
+ c1 = c2;
+
+public
+ function OperatorRecordTests.Cplx.'+'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  return;
+ end OperatorRecordTests.Cplx.'+';
+
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ record OperatorRecordTests.OperatorRecordConnect3.C
+  Real re;
+  Real im;
+ end OperatorRecordTests.OperatorRecordConnect3.C;
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorRecordConnect3;
+")})));
+    end OperatorRecordConnect3;
+
 
     model OperatorRecordConnect4
         connector C
@@ -1635,6 +1741,41 @@ end OperatorRecordTests.OperatorRecordConnect4;
 ")})));
     end OperatorRecordConnect4;
 
+
+    model OperatorRecordConnect5
+        connector C = Cplx;
+        
+        model A
+            C c;
+        end A;
+        
+        A a[2];
+        C c[2];
+    equation
+        connect(a.c, c);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorRecordConnect5",
+            description="Test connecting to array of operator record",
+            flatModel="
+fclass OperatorRecordTests.OperatorRecordConnect5
+ OperatorRecordTests.OperatorRecordConnect5.C a[1].c;
+ OperatorRecordTests.OperatorRecordConnect5.C a[2].c;
+ OperatorRecordTests.OperatorRecordConnect5.C c[2];
+equation
+ a[1].c = c[1];
+ a[2].c = c[2];
+
+public
+ record OperatorRecordTests.OperatorRecordConnect5.C
+  Real re;
+  Real im;
+ end OperatorRecordTests.OperatorRecordConnect5.C;
+
+end OperatorRecordTests.OperatorRecordConnect5;
+")})));
+    end OperatorRecordConnect5;
 
 
     model OperatorLimitations1
