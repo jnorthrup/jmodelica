@@ -246,7 +246,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
 
     /**
      * Used for registering new vendor annotation tag. Returns the name
-     * for conveninence. Vendor annotation tags should inherit 
+     * for convenience. Vendor annotation tags should inherit 
      * FMIVendorAnnotation.
      */
     public static String addVendorAnnotation(String childName) {
@@ -256,7 +256,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
 
     /**
      * Used for registering new tool specific tag under the vendor annotation tag. 
-     * Returns the name for conveninence.
+     * Returns the name for convenience.
      */
     public static String addVendorAnnotationTool(String childName) {
         vendorAnnotationTools.add(childName);
