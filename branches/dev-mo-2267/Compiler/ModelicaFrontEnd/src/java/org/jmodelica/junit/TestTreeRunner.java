@@ -99,7 +99,6 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
                 }
             } 
             if (!(test instanceof TestTree)) {
-                String maybeSubTestName = test.getName();
                 String uniqueName = nc.makeUnique(testName);
                 test.setName(uniqueName);
                 // TODO: Upgrade JUnit version, then use createTestDescription(String, String) instead
@@ -108,9 +107,9 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
                 caseDesc.put(uniqueName, chDesc);
                 if(outputFailing) {
                     if(name.equals(testFile.getName())) { //Top-level test
-                        modelNames.put(maybeSubTestName, testName);
+                        modelNames.put(uniqueName, testName);
                     } else {
-                        modelNames.put(maybeSubTestName, String.format("%s.%s", name, testName));
+                        modelNames.put(uniqueName, String.format("%s.%s", name, testName));
                     }
                 }
             }
