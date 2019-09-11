@@ -87,18 +87,44 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
         return ext.functionArgsSerialized(false);
     }
     
-    public boolean canUseEvaluator(E ext) {
+    private ArrayList<String> builtinExternalFunctions = new ArrayList<String>() {{
+        add("ModelicaStrings_substring");
+        add("ModelicaStrings_length");
+        add("item3");
+    }};
+    
+    public boolean canUseEvaluator(E ext, ArrayList<String> arguments) {
+        if (!(ext.myOptions().getBooleanOption("enable_external_evaluator"))) {
+            return false;
+        }
+        
+        /* External objects not supported at the moment */
         for (K eo : ext.externalObjectsToSerialize()) {
             return false;
         }
         
-        if (!(ext.myOptions().getBooleanOption("enable_external_evaluator"))) {
-            return false;
+        String sharedLibrary = getSharedLibrary(ext);
+        String functionName  = ext.getName();
+        String outputArguments = getOutputArguments(ext);
+        String inputArguments  = getInputArguments(ext);
+        
+        
+        if (sharedLibrary.equals("")) {
+            if (builtinExternalFunctions.contains(functionName)) {
+                sharedLibrary = "NoSharedLibrary";
+            } else {
+                /* Not a built in and not found any shared libraries */
+                return false;
+            }
         }
+        
+        arguments.add(sharedLibrary);
+        arguments.add(functionName);
+        arguments.add(outputArguments);
+        arguments.add(inputArguments);
         /* TODO:
-         * Verify that the library used is a shared library, not static. */
-        /* Builtins, such as Modelica functions should be accepted 
-           Verify that the actual inputs/outputs are supported */
+         * Verify that the actual inputs/outputs are supported
+         */
         
         return true;
     }
@@ -113,27 +139,20 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
             try {
                 long time = System.currentTimeMillis();
                 String executable = null;
-                ArrayList<String> arguments = null;
-                if (canUseEvaluator(ext)) {
+                ArrayList<String> arguments = new ArrayList<String>();
+                if (canUseEvaluator(ext, arguments)) {
                     String jmHome = System.getenv("JMODELICA_HOME");
                     String platform = CCompilerDelegator.reduceBits(EnvironmentUtils.getJavaPlatform(),mc.getCCompiler().getTargetPlatforms());
                     String bits = platform.contains("64") && SystemUtil.isWindows() ? "64" : "";
                     executable = jmHome + File.separator + "bin" + bits + File.separator + "jmi_evaluator" + SystemUtil.executableExtension();
                     
-                    String sharedLibrary = getSharedLibrary(ext);
-                    if (sharedLibrary.equals("")) { sharedLibrary = "NoSharedLibrary"; }
-                    
-                    arguments = new ArrayList<String>();
-                    arguments.add(executable);
-                    arguments.add(sharedLibrary);
-                    arguments.add(ext.getName());
-                    arguments.add(getOutputArguments(ext));
-                    arguments.add(getInputArguments(ext));
+                    arguments.add(0, executable); /* Needs to be first */
                     
                     mc.log().debug("Using pre-compiled evaluator for outputs: '" + getOutputArguments(ext) + "' and inputs: '" + getInputArguments(ext));
                 } else {
                     executable = mc.compileExternal(ext);
                 }
+                arguments = arguments.size() == 0 ? null : arguments; /* Can likely be made better...*/
                 if (ext.shouldCacheProcess()) {
                     ef = new MappedExternalFunction(ext, executable, arguments);
                 } else {
