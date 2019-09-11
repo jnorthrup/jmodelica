@@ -46,11 +46,11 @@ class TestEvaluator:
         Test compiling a model with external functions in a static library.
         """
         cpath = "ExtFunctionTests.Substring"
-        fmu_name = compile_fmu(cpath, self.fpath)
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"enable_external_evaluator":True})
         model = load_fmu(fmu_name)
         
-        assert model.get("sub") == "Y"
-        assert model.get("string2") == "line"
+        assert model.get("sub")[0] == "Y"
+        assert model.get("string2")[0] == "line"
         assert model.get("len") == 16
         assert model.get("start") == 4
 
