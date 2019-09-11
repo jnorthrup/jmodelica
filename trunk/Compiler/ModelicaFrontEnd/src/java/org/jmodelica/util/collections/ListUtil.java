@@ -100,7 +100,7 @@ public final class ListUtil {
      * @return       a newly created ArrayList that contains the concatenation of the given lists
      */
     @SafeVarargs
-    public static <T> ArrayList<T> concatenate(List<T>... lists) {
+    public static <T> ArrayList<T> concatenate(List<? extends T>... lists) {
         return buildList(lists);
     }
     
@@ -111,13 +111,13 @@ public final class ListUtil {
      * @return       a newly created ArrayList that contains the concatenation of the given collections
      */
     @SafeVarargs
-    public static <T> ArrayList<T> buildList(Collection<T>... collections) {
+    public static <T> ArrayList<T> buildList(Collection<? extends T>... collections) {
         int size = 0;
-        for (Collection<T> list : collections) {
+        for (Collection<? extends T> list : collections) {
             size += list.size();
         }
         ArrayList<T> res = new ArrayList<T>(size);
-        for (Collection<T> list : collections) {
+        for (Collection<? extends T> list : collections) {
             res.addAll(list);
         }
         return res;
