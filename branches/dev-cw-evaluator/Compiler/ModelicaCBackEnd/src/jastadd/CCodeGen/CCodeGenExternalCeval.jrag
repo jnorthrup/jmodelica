@@ -304,6 +304,9 @@ aspect CCodeGenExternalCeval {
             }
             input = input.concat("]");
         }
+        if (arg.isArray()) {
+            input = input.concat("v");
+        }
         if (useSeparator) {
             input = input.concat(",");
         }

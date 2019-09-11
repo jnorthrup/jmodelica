@@ -52,23 +52,25 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                 mc.getCCompiler().getTargetPlatforms());
         File f = new File(ext.libraryDirectory(), platform);
         String libLoc = f.isDirectory() ? f.getPath() : ext.libraryDirectory();
-        File dir = new File(libLoc);
-        File[] matches = dir.listFiles(new FilenameFilter()
-        {
-          public boolean accept(File dir, String name)
-          {
-             return name.contains(extName) && name.endsWith(SystemUtil.sharedLibraryExtension());
-          }
-        });
-        for(File file : matches) {
-            sharedLib = file.toString();
-            break;
-        }
-        if (sharedLib.equals("")) {
-            for (String lib : ext.library()) {
-                File tmp = new File(libLoc, lib.concat(SystemUtil.sharedLibraryExtension()));
-                if (tmp.exists() && !tmp.isDirectory()) {
-                    sharedLib = tmp.toString();
+        if (libLoc != null) {
+            File dir = new File(libLoc);
+            File[] matches = dir.listFiles(new FilenameFilter()
+            {
+              public boolean accept(File dir, String name)
+              {
+                 return name.contains(extName) && name.endsWith(SystemUtil.sharedLibraryExtension());
+              }
+            });
+            for(File file : matches) {
+                sharedLib = file.toString();
+                break;
+            }
+            if (sharedLib.equals("")) {
+                for (String lib : ext.library()) {
+                    File tmp = new File(libLoc, lib.concat(SystemUtil.sharedLibraryExtension()));
+                    if (tmp.exists() && !tmp.isDirectory()) {
+                        sharedLib = tmp.toString();
+                    }
                 }
             }
         }
@@ -148,7 +150,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                     
                     arguments.add(0, executable); /* Needs to be first */
                     
-                    mc.log().debug("Using pre-compiled evaluator for outputs: '" + getOutputArguments(ext) + "' and inputs: '" + getInputArguments(ext));
+                    mc.log().debug("Using pre-compiled evaluator for outputs: '" + getOutputArguments(ext) + "' and inputs: '" + getInputArguments(ext) +"'");
                 } else {
                     executable = mc.compileExternal(ext);
                 }
