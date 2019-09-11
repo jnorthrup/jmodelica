@@ -1252,22 +1252,10 @@ aspect Flattening {
     
     inh FAccess InstAssignable.createInStreamAccess(FAccess streamAccess);
     eq InstClassDecl.getChild().createInStreamAccess(FAccess streamAccess) {
-        FAccess lastPart = streamAccess.copyLastSuffix();
-        String streamName = lastPart.name();
-        String end = "";
-        if (streamName.endsWith("]")) {
-            int index = streamName.lastIndexOf("[");
-            end = streamName.substring(index);
-            streamName = streamName.substring(0, index);
-        }
-        if (streamName.endsWith("'")) {
-            streamName = streamName.substring(0, streamName.length() - 1);
-            end = "'" + end;
-        }
-        FAccess result = streamAccess.copyPrefix().append(streamName + "__instream_" + end, lastPart.getFArraySubscripts());
+        FAccess result = streamAccess.copyAndAddSuffix("__instream_");
         int i = 2;
         while (componentExists(new QualifiedName(result.name()))) {
-            result = streamAccess.copyPrefix().append(streamName + "__instream_" + i + end, lastPart.getFArraySubscripts());
+            result = streamAccess.copyAndAddSuffix("__instream_" + i);
             i++;
         }
         return result;
