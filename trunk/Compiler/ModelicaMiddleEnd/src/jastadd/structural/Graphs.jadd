@@ -1037,9 +1037,9 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     }
 
     /**
-     * Retrevies the list of strongly connected component contributors.
+     * Retrieves the list of strongly connected component contributors.
      * This method should always be used since it ensures that the list is
-     * initialized propperly.
+     * initialized properly.
      */
     public static Collection<SCCContributor> getSCCContributors() {
         if (SCCContributors == null)
