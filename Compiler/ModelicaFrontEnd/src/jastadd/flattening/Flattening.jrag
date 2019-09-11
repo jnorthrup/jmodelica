@@ -1237,9 +1237,28 @@ aspect Flattening {
             } else {
                 f.addFVariable(fv);
             }
+            if (fv.getCausalityConnectorPrefix().isStream() && useCausalPorts()) {
+                FVariable inStream = fv.treeCopy();
+                FAccess inStreamAccess = createInStreamAccess(inStream.getFAccess());
+                inStream.setFAccess(inStreamAccess);
+                inStream.setCausalityConnectorPrefix(CausalityConnectorPrefix.INSTREAM);
+                fv.annotation().vendorNode().forPath("internal/instream").setValue(new FStringLitExp(inStreamAccess.name()));
+                f.addFVariable(inStream);
+            }
             flattenMyType(f);
             clearModificationLevel(oldLevels);
         }
+    }
+    
+    inh FAccess InstAssignable.createInStreamAccess(FAccess streamAccess);
+    eq InstClassDecl.getChild().createInStreamAccess(FAccess streamAccess) {
+        FAccess result = streamAccess.copyAndAddSuffix("__instream_");
+        int i = 2;
+        while (componentExists(new QualifiedName(result.name()))) {
+            result = streamAccess.copyAndAddSuffix("__instream_" + i);
+            i++;
+        }
+        return result;
     }
     
     public void ASTNode.flattenAssertExternal(Flattener f) {

@@ -21,12 +21,37 @@ public enum CausalityConnectorPrefix {
         return this == NONE;
     }
     
-    public boolean inputCausality() {
-        return this == INPUT || this == FLOW || this == INSTREAM;
+    public boolean isStream() {
+        return this == STREAM;
     }
     
-    public boolean outputCausality() {
-        return this == OUTPUT || this == POTENTIAL || this == STREAM;
+    public interface CausalPortsEvaluator {
+        boolean useCausalPorts();
+    }
+    
+    /**
+     * We use a {@link CausalPortsEvaluator} here instead of an evaluated boolean
+     * to reduce the number of calls to useCausalPorts().
+     * Replace with a Predicate when updating to Java 8.
+     */
+    public boolean inputCausality(CausalPortsEvaluator evaluator) {
+        if (this == INPUT) {
+            return true;
+        }
+        if (this == FLOW || this == INSTREAM) {
+            return evaluator.useCausalPorts();
+        }
+        return false;
+    }
+    
+    public boolean outputCausality(CausalPortsEvaluator evaluator) {
+        if (this == OUTPUT) {
+            return true;
+        }
+        if (this == POTENTIAL || this == STREAM) {
+            return evaluator.useCausalPorts();
+        }
+        return false;
     }
     
     public boolean isConnectorPrefix() {
