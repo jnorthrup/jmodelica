@@ -208,8 +208,9 @@ aspect FlatTypeAnalysis {
 
     inh CommonVariableDecl FExternalStmt.myConstructorOutput();
     eq Root.getChild().myConstructorOutput() = null;
-    eq FFunctionDecl.getChild().myConstructorOutput()     = myOutputs().get(0);
-    eq InstFullClassDecl.getChild().myConstructorOutput() = myOutputs().get(0);
+    eq FFunctionDecl.getChild().myConstructorOutput()      = myOutputs().get(0);
+    eq InstFullClassDecl.getChild().myConstructorOutput()  = myOutputs().get(0);
+    eq InstShortClassDecl.getChild().myConstructorOutput() = myOutputs().get(0);
 
     public ArrayList<FExp> FExternalStmt.myConstructorArgs() {
         ArrayList<FExp> res = new ArrayList<FExp>();
