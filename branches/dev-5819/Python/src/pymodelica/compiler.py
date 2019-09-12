@@ -27,10 +27,10 @@ import platform as plt
 import logging
 from subprocess import Popen, PIPE
 import subprocess
-from compiler_logging import CompilerLogHandler
-from compiler_exceptions import JError
-from compiler_exceptions import IllegalCompilerArgumentError
-from compiler_exceptions import IllegalLogStringError
+from .compiler_logging import CompilerLogHandler
+from .compiler_exceptions import JError
+from .compiler_exceptions import IllegalCompilerArgumentError
+from .compiler_exceptions import IllegalLogStringError
 
 import pymodelica as pym
 from pymodelica.common import xmlparser
@@ -138,8 +138,8 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
     
     """
     #Remove in JModelica.org version 2.3
-    if compiler_options.has_key("extra_lib_dirs"):
-        print "Warning: The option 'extra_lib_dirs' has been deprecated and will be removed. Please use the 'file_name' to pass additional libraries."
+    if "extra_lib_dirs" in compiler_options:
+        print("Warning: The option 'extra_lib_dirs' has been deprecated and will be removed. Please use the 'file_name' to pass additional libraries.")
     
     if (target != "me" and target != "cs" and target != "me+cs"):
         raise IllegalCompilerArgumentError("Unknown target '" + target + "'. Use 'me', 'cs' or 'me+cs' to compile an FMU.")
@@ -227,11 +227,11 @@ def _compile_unit(class_name, file_name, compiler, target, version,
     """
     Helper function for compile_fmu and compile_fmux.
     """
-    for key, value in compiler_options.iteritems():
+    for key, value in compiler_options.items():
         if isinstance(value, list):
             compiler_options[key] = list_to_string(value)
     
-    if isinstance(file_name, basestring):
+    if isinstance(file_name, str):
         file_name = [file_name]
         
     if platform == 'auto':
@@ -383,7 +383,7 @@ def _gen_compiler_options(compiler_options):
     options so the Java compiler understands it.
     """
     # Save in opts in the form: opt1:val1,opt2:val2
-    opts = ','.join(['%s:%s' %(k, v) for k, v in compiler_options.iteritems()])
+    opts = ','.join(['%s:%s' %(k, v) for k, v in compiler_options.items()])
     # Convert all Python True/False to Java true/false
     opts = opts.replace('True', 'true')
     opts = opts.replace('False', 'false')
@@ -452,7 +452,7 @@ def _ensure_path(start, end):
 
 
 def _get_compiler(files, selected_compiler='auto'):
-    from compiler_wrappers import ModelicaCompiler, OptimicaCompiler
+    from .compiler_wrappers import ModelicaCompiler, OptimicaCompiler
     
     comp = _which_compiler(files, selected_compiler)
     if comp is 'MODELICA':

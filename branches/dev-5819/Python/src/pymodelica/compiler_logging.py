@@ -19,7 +19,7 @@ Internal module, handles log output from the compiler
 """
 import xml.sax
 from threading import Thread
-from compiler_exceptions import *
+from .compiler_exceptions import *
 import sys
 import traceback
 import os
@@ -216,7 +216,7 @@ class LogHandlerThread(Thread):
         """
         try:
             xml.sax.parse(self.stream, LogErrorParser(self.result))
-        except xml.sax.SAXParseException, e:
+        except xml.sax.SAXParseException as e:
             self.result.problems.append(CompilationException('xml.sax.SAXParseException', self.stream.genErrorMsg(e),""))
 
 class _CompilerResultHolder:
@@ -281,7 +281,7 @@ class CompilerLogHandler:
         given by the compiler process.
         """
         if (self.loggerThread is None):
-            print "Invalid call order!"
+            print("Invalid call order!")
         self.loggerThread.join()
         problems = self.loggerThread.result.problems
         name = self.loggerThread.result.name
@@ -300,7 +300,7 @@ class CompilerLogHandler:
                 warnings.append(problem)
         if not exceptions:
             if not errors:
-                from compiler import CompilerResult
+                from .compiler import CompilerResult
                 return CompilerResult(name, warnings)
             else:
                 raise CompilerError(errors, warnings)

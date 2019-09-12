@@ -19,6 +19,7 @@ from collections import OrderedDict, Iterable
 import casadi
 import sys
 import modelicacasadi_wrapper as mc
+from functools import reduce
 
 
 class EKFArrivalCost(object):
@@ -170,7 +171,7 @@ class EKFArrivalCost(object):
 
 
         # Substitute named variables with vector variables in expressions
-        named_vars = reduce(list.__add__, named_mvar_struct.values()) 
+        named_vars = reduce(list.__add__, list(named_mvar_struct.values())) 
         self._mvar_struct = OrderedDict()
         self._mvar_struct["time"] = casadi.MX.sym("time")
         self._mvar_struct["dx"] = casadi.MX.sym("dx", self._nvar['dx'])
@@ -358,7 +359,7 @@ class EKFArrivalCost(object):
 
         #Sort Values for reference point
         stop=False
-        for vt in z0.keys():
+        for vt in list(z0.keys()):
             RefPoint[vt] = N.zeros(self._nvar[vt])
             passed_indices = list()
             for var_tuple in z0[vt]:
@@ -382,7 +383,7 @@ class EKFArrivalCost(object):
             raise RuntimeError(error_message)
      
         missing_types = [vt for vt in var_kinds \
-                         if vt not in z0.keys() and self._nvar[vt]!=0]
+                         if vt not in list(z0.keys()) and self._nvar[vt]!=0]
         if len(missing_types) !=0:
             error_message = "Error: Please provide the " +\
                             "following types in z0:\n"
@@ -698,7 +699,7 @@ class EKFArrivalCost(object):
         matrix = N.zeros((dim,dim))
         for (list, cov_matrix) in cov_list:
             #Check if the expected iterable object is instead a string
-            if isinstance(list, basestring):
+            if isinstance(list, str):
                 i = name_list.index(list)
                 matrix[i, i] = cov_matrix
             else:

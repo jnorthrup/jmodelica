@@ -45,6 +45,7 @@ from pyjmi.common.io import ResultDymolaTextual, ResultDymolaBinary
 from pyjmi.common.core import TrajectoryLinearInterpolation
 
 from pyjmi.common.io import VariableNotFoundError as jmiVariableNotFoundError
+from functools import reduce
 
 #Check to see if pyfmi is installed so that we also catch the error generated
 #from that package

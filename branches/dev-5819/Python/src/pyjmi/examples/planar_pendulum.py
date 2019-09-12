@@ -56,7 +56,7 @@ def run_demo(with_plots=True):
     maxerr = N.max(err)
 
     if maxerr > 1e-6:
-        print "Maximum error: ", maxerr 
+        print("Maximum error: ", maxerr) 
         assert maxerr < 1e-4
     
     assert N.abs(res.final('x') - 0.38735171)       < 1e-3

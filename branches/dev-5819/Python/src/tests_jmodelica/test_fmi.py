@@ -432,7 +432,7 @@ class Test_FMUModelCS1:
         rlc_square = load_fmu(Test_FMUModelCS1.rlc_circuit_square)
         res1 = rlc_square.simulate()
         resistor_v = res1['resistor.v']
-        print resistor_v[-1]
+        print(resistor_v[-1])
         assert N.abs(resistor_v[-1] + 0.233534539103) < 1e-3
         rlc_square.reset()
         res2 = rlc_square.simulate()
@@ -1336,52 +1336,52 @@ class Test_RaisesIfNonConverge:
 
         m.set('u1',3)
 
-        print 'u1' + str(m.get('u1'))
-        print 'x1' + str(m.get('x1'))
-        print 'y1' + str(m.get('y1'))
-        print 'z1' + str(m.get('z1'))
+        print('u1' + str(m.get('u1')))
+        print('x1' + str(m.get('x1')))
+        print('y1' + str(m.get('y1')))
+        print('z1' + str(m.get('z1')))
 
         m.set('y1',0.)
 
         m.initialize()
 
-        print "model initialized"
+        print("model initialized")
 
-        print 'u1' + str(m.get('u1'))
-        print 'x1' + str(m.get('x1'))
-        print 'y1' + str(m.get('y1'))
-        print 'z1' + str(m.get('z1'))
+        print('u1' + str(m.get('u1')))
+        print('x1' + str(m.get('x1')))
+        print('y1' + str(m.get('y1')))
+        print('z1' + str(m.get('z1')))
 
         m.set('u1',4)
 
-        print "Inpu1t set"
+        print("Inpu1t set")
 
-        print 'u1' + str(m.get('u1'))
-        print 'x1' + str(m.get('x1'))
-        print 'y1' + str(m.get('y1'))
-        print 'z1' + str(m.get('z1'))
+        print('u1' + str(m.get('u1')))
+        print('x1' + str(m.get('x1')))
+        print('y1' + str(m.get('y1')))
+        print('z1' + str(m.get('z1')))
 
         m.get_derivatives()
 
-        print "Set initial valu1e of y1"
+        print("Set initial valu1e of y1")
         m.set('y1',0.5)
 
-        print 'x1' + str(m.get('x1'))
-        print 'y1' + str(m.get('y1'))
-        print 'z1' + str(m.get('z1'))
+        print('x1' + str(m.get('x1')))
+        print('y1' + str(m.get('y1')))
+        print('z1' + str(m.get('z1')))
 
-        print "Set bad initial valu1e of p"
+        print("Set bad initial valu1e of p")
         m.set('p',0.5)
         #Why should this fail? NEEDS TO BE INVESTIGATED!
         #nose.tools.assert_raises(FMUException,m.get, 'x1')
 
-        print "Set good p"
+        print("Set good p")
         m.set('p',4)
-        print 'x1 = ' + str(m.get('x1'))
-        print 'y1' + str(m.get('y1'))
-        print 'z1' + str(m.get('z1'))
+        print('x1 = ' + str(m.get('x1')))
+        print('y1' + str(m.get('y1')))
+        print('z1' + str(m.get('z1')))
 
-        print "Set large p & u1"
+        print("Set large p & u1")
         m.set('p',1e300)
         m.set('u1',1e300)
         nose.tools.assert_raises(FMUException,m.get, 'z1')

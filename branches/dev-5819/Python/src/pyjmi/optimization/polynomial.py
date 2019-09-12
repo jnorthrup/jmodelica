@@ -30,13 +30,11 @@ except ImportError:
     logging.warning(
         'Could not find CasADi package, aborting.')
 
-class LocalPol(object):
+class LocalPol(object, metaclass=abc.ABCMeta):
     
     """
     Abstract base class for Lagrange polynomials used for local collocation.
     """
-    
-    __metaclass__ = abc.ABCMeta
     
     def __init__(self, n):
         """
@@ -62,8 +60,8 @@ class LocalPol(object):
     def _calc_der_vals(self):
         # Derivatives of all basis polynomials at all interpolation points
         der_vals = casadi.DMatrix.ones(self.n + 1, self.n + 1)
-        for j in xrange(self.n + 1):
-            for k in xrange(self.n + 1):
+        for j in range(self.n + 1):
+            for k in range(self.n + 1):
                 der_vals[j, k] = lagrange_derivative_eval(self.p, j,
                                                           self.p[k])
         

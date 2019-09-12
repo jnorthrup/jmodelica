@@ -73,11 +73,11 @@ def test_op_structure():
     # Assert external data
     ext_data = GB.options['external_data']
     # input data
-    for inp in inputs.keys():
+    for inp in list(inputs.keys()):
 		evaluated_input = ext_data.eliminated[inp].eval(time)
 		N.array_equal(inputs[inp], evaluated_input)
     # measurement data
-    for meas in measurements.keys():
+    for meas in list(measurements.keys()):
 		evaluated_meas = ext_data.eliminated['GreyBox_measured_'+meas].eval(time)
 		N.array_equal(measurements[meas], evaluated_meas)
 		
@@ -97,7 +97,7 @@ def test_op_structure_sum():
     time = RCdata['time'][0:3]
     
     # Only use first 3 measurements
-    for var in measurements.keys():
+    for var in list(measurements.keys()):
         measurements[var] = measurements[var][0:3]
         
     # Extract control signal data from measurements
@@ -122,13 +122,13 @@ def test_op_structure_sum():
     
     # Assert external data
     ext_data = GB.options['external_data']
-    for inp in inputs.keys():
+    for inp in list(inputs.keys()):
 		evaluated_input = ext_data.eliminated[inp].eval(time)
 		N.array_equal(inputs[inp], evaluated_input)
 
    	# Assert objective and objective integrand
     assert strnorm(GB.op.getObjectiveIntegrand().getDescription()) == strnorm('0')
-    print strnorm(GB.op.getObjective().getDescription())
+    print(strnorm(GB.op.getObjective().getDescription()))
     assert strnorm(GB.op.getObjective().getDescription()) == strnorm('((((((((sq((E(0.000000)-133.837))/GreyBox_r_E)+(sq((E(2.004008)-132.493))/GreyBox_r_E))+(sq((E(4.008016)-129.124))/GreyBox_r_E))+(3*log(GreyBox_r_E)))+(sq((P(0.000000)-138))/GreyBox_r_P))+(sq((P(2.004008)-141.156))/GreyBox_r_P))+(sq((P(4.008016)-132.906))/GreyBox_r_P))+(3*log(GreyBox_r_P)))')
 
 @testattr(casadi_base = True)
@@ -194,7 +194,7 @@ def test_nonuniform_element_length():
     time = RCdata['time'] 
     
     # remove every third measurement to get nonuniform distribution of measurements
-    for var in measurements.keys():
+    for var in list(measurements.keys()):
 		measurements[var] = N.delete(measurements[var], slice(None, None, 3))
     
     time = N.delete(time, slice(None, None, 3))  

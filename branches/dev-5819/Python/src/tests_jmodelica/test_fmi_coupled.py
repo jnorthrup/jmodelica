@@ -173,7 +173,7 @@ class Test_CoupledFMUModelME2:
         coupled = CoupledFMUModelME2(models, connections)
         
         aliases = coupled.get_variable_alias("First.J4.phi")
-        assert "First.J4.phi" in aliases.keys()
+        assert "First.J4.phi" in list(aliases.keys())
         assert coupled.get_variable_alias_base("First.J4.phi") == "First.J4.flange_a.phi"
         
     @testattr(stddist_full = True)
@@ -274,7 +274,7 @@ class Test_CoupledFMUModelME2:
         for state in states:
             assert state.startswith("First.") or state.startswith("Second.")
             var = coupled.get_variable_by_valueref(states[state].value_reference)
-            alias_vars = coupled.get_variable_alias(var).keys()
+            alias_vars = list(coupled.get_variable_alias(var).keys())
             assert state in alias_vars
             
     @testattr(stddist_full = True)
@@ -293,7 +293,7 @@ class Test_CoupledFMUModelME2:
         for state in states:
             assert state.startswith("First.") or state.startswith("Second.")
             var = coupled.get_variable_by_valueref(states[state].value_reference)
-            alias_vars = coupled.get_variable_alias(var).keys()
+            alias_vars = list(coupled.get_variable_alias(var).keys())
             assert state in alias_vars
 
     @testattr(stddist_full = True)
@@ -327,11 +327,11 @@ class Test_CoupledFMUModelME2:
         coupled = CoupledFMUModelME2(models, connections=connections)
 
         #Inputs should not be listed if they are internally connected
-        vars = coupled.get_input_list().keys()
+        vars = list(coupled.get_input_list().keys())
         assert len(vars) == 0
         
         coupled = CoupledFMUModelME2(models, connections=[])
-        vars = coupled.get_input_list().keys()
+        vars = list(coupled.get_input_list().keys())
         assert "First.u1" in vars
         assert "Second.u2" in vars
 

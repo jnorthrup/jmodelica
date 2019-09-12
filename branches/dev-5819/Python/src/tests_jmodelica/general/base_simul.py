@@ -183,7 +183,7 @@ class _BaseSimOptTest:
 
         # Remove values outside overlap
         #time = filter((lambda t: t >= t1 and t <= t2), time) #This is not a good approach
-        time = filter((lambda t: t >= t1 and t <= t2), res.t)
+        time = list(filter((lambda t: t >= t1 and t <= t2), res.t))
 
         # Check error for each time point
         for i,t in enumerate(time):
@@ -346,12 +346,12 @@ def _set_ipopt_options(nlp, opts):
     Set all options contained in dict opts in Ipopt NLP object nlp.
     Selects method to use from the type of each value.
     """
-    for k, v in opts.iteritems():
+    for k, v in opts.items():
         if isinstance(v, int):
             nlp.opt_coll_ipopt_set_int_option(k, v)
         elif isinstance(v, float):
             nlp.opt_coll_ipopt_set_num_option(k, v)
-        elif isinstance(v, basestring):
+        elif isinstance(v, str):
             nlp.opt_coll_ipopt_set_string_option(k, v)
 
 
@@ -360,14 +360,14 @@ def _set_compiler_options(cmp, opts):
     Set all options contained in dict opts in compiler cmp.
     Selects method to use from the type of each value.
     """
-    for k, v in opts.iteritems():
+    for k, v in opts.items():
         if isinstance(v, bool):
             cmp.set_boolean_option(k, v)
         elif isinstance(v, int):
             cmp.set_integer_option(k, v)
         elif isinstance(v, float):
             cmp.set_real_option(k, v)
-        elif isinstance(v, basestring):
+        elif isinstance(v, str):
             cmp.set_string_option(k, v)
 
 

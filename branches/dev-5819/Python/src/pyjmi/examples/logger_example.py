@@ -44,48 +44,48 @@ def run_demo():
     
     m.set('u1',3)
 
-    print 'u1' + str(m.get('u1'))
-    print 'x1' + str(m.get('x1'))
-    print 'y1' + str(m.get('y1'))
-    print 'z1' + str(m.get('z1'))
+    print('u1' + str(m.get('u1')))
+    print('x1' + str(m.get('x1')))
+    print('y1' + str(m.get('y1')))
+    print('z1' + str(m.get('z1')))
 
     m.set('y1',0.)
 
     m.initialize()
 
-    print "model initialized"
+    print("model initialized")
 
-    print 'u1' + str(m.get('u1'))
-    print 'x1' + str(m.get('x1'))
-    print 'y1' + str(m.get('y1'))
-    print 'z1' + str(m.get('z1'))
+    print('u1' + str(m.get('u1')))
+    print('x1' + str(m.get('x1')))
+    print('y1' + str(m.get('y1')))
+    print('z1' + str(m.get('z1')))
 
     m.set('u1',4)
 
-    print "Input set"
+    print("Input set")
 
-    print 'u1' + str(m.get('u1'))
-    print 'x1' + str(m.get('x1'))
-    print 'y1' + str(m.get('y1'))
-    print 'z1' + str(m.get('z1'))
+    print('u1' + str(m.get('u1')))
+    print('x1' + str(m.get('x1')))
+    print('y1' + str(m.get('y1')))
+    print('z1' + str(m.get('z1')))
 
     m.get_derivatives()
 
     m.set('y1',0.5)
 
-    print "Set initial value of y1"
+    print("Set initial value of y1")
 
-    print 'x1' + str(m.get('x1'))
-    print 'y1' + str(m.get('y1'))
-    print 'z1' + str(m.get('z1'))
+    print('x1' + str(m.get('x1')))
+    print('y1' + str(m.get('y1')))
+    print('z1' + str(m.get('z1')))
 
     m.set('p',0.5)
 
-    print "Set initial value of p"
+    print("Set initial value of p")
 
-    print 'x1' + str(m.get('x1'))
-    print 'y1' + str(m.get('y1'))
-    print 'z1' + str(m.get('z1'))
+    print('x1' + str(m.get('x1')))
+    print('y1' + str(m.get('y1')))
+    print('z1' + str(m.get('z1')))
 
     # Parse the log file and print some of its contents
 
@@ -96,34 +96,34 @@ def run_demo():
     # Parse the entire XML log
     log = parse_jmi_log(log_file_name)
 
-    print
-    print 'Top log node:        log =', log
-    print 'Unnamed sub nodes:   log.nodes = ['
+    print()
+    print('Top log node:        log =', log)
+    print('Unnamed sub nodes:   log.nodes = [')
     for node in log.nodes:
-        print '   ', node, ','
-    print ']'
+        print('   ', node, ',')
+    print(']')
 
     # Gather information pertaining to equation solves
     solves = gather_solves(log)
 
-    print
-    print 'Number of solver invocations:',                      len(solves)
-    print 'Time of first solve:',                               solves[0].t
-    print 'Number of block solves in first solver invocation:', len(solves[0].block_solves)
-    print 'Names of iteration variables in first block solve:', solves[0].block_solves[0].variables
-    print 'Min bounds in first block solve:',                   solves[0].block_solves[0].min
-    print 'Max bounds in first block solve:',                   solves[0].block_solves[0].max
-    print 'Initial residual scaling in first block solve:',     solves[0].block_solves[0].initial_residual_scaling
-    print 'Number of iterations in first block solve:',         len(solves[0].block_solves[0].iterations)
-    print
-    print 'First iteration in first block solve: '
-    print '  Iteration variables:',              solves[0].block_solves[0].iterations[0].ivs
-    print '  Scaled residuals:',                 solves[0].block_solves[0].iterations[0].scaled_residuals
-    print '  Jacobian:\n',                       solves[0].block_solves[0].iterations[0].jacobian
-    print '  Jacobian updated in iteration:',    solves[0].block_solves[0].iterations[0].jacobian_updated
-    print '  Residual scaling factors:',         solves[0].block_solves[0].iterations[0].residual_scaling
-    print '  Residual scaling factors_updated:', solves[0].block_solves[0].iterations[0].residual_scaling_updated
-    print '  Scaled residual norm:',             solves[0].block_solves[0].iterations[0].scaled_residual_norm
+    print()
+    print('Number of solver invocations:',                      len(solves))
+    print('Time of first solve:',                               solves[0].t)
+    print('Number of block solves in first solver invocation:', len(solves[0].block_solves))
+    print('Names of iteration variables in first block solve:', solves[0].block_solves[0].variables)
+    print('Min bounds in first block solve:',                   solves[0].block_solves[0].min)
+    print('Max bounds in first block solve:',                   solves[0].block_solves[0].max)
+    print('Initial residual scaling in first block solve:',     solves[0].block_solves[0].initial_residual_scaling)
+    print('Number of iterations in first block solve:',         len(solves[0].block_solves[0].iterations))
+    print()
+    print('First iteration in first block solve: ')
+    print('  Iteration variables:',              solves[0].block_solves[0].iterations[0].ivs)
+    print('  Scaled residuals:',                 solves[0].block_solves[0].iterations[0].scaled_residuals)
+    print('  Jacobian:\n',                       solves[0].block_solves[0].iterations[0].jacobian)
+    print('  Jacobian updated in iteration:',    solves[0].block_solves[0].iterations[0].jacobian_updated)
+    print('  Residual scaling factors:',         solves[0].block_solves[0].iterations[0].residual_scaling)
+    print('  Residual scaling factors_updated:', solves[0].block_solves[0].iterations[0].residual_scaling_updated)
+    print('  Scaled residual norm:',             solves[0].block_solves[0].iterations[0].scaled_residual_norm)
 
 if __name__ == "__main__":
     run_demo()

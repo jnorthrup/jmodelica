@@ -470,7 +470,7 @@ class TestAssertEqu1(SimulationTest):
         try:
             self.run(cvode_options={"minh":1e-15})
             assert False, 'Simulation not stopped by failed assertions'
-        except CVodeError, e:
+        except CVodeError as e:
             self.assert_equals('Simulation stopped at wrong time', e.t, 2.0)
     
 class TestAssertEqu2(SimulationTest):
@@ -490,7 +490,7 @@ class TestAssertEqu2(SimulationTest):
         try:
             self.run()
             assert False, 'Simulation not stopped by failed assertions'
-        except FMUException, e:
+        except FMUException as e:
             self.assert_equals('Simulation stopped at wrong time', self.model.time, 2.0)
         
 class TestAssertFunc(SimulationTest):
@@ -510,7 +510,7 @@ class TestAssertFunc(SimulationTest):
         try:
             self.run(cvode_options={"minh":1e-15})
             assert False, 'Simulation not stopped by failed assertions'
-        except CVodeError, e:
+        except CVodeError as e:
             self.assert_equals('Simulation stopped at wrong time', e.t, 2.0)
 
      

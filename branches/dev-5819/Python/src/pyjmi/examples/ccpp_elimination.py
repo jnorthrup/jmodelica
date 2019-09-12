@@ -115,9 +115,9 @@ def run_demo(with_plots=True):
     # variable elimination
     eliminables = op.getEliminableVariables()
     algebraics = op.getVariables(op.REAL_ALGEBRAIC)
-    print "Number of algebraics:  ",len(algebraics)
+    print("Number of algebraics:  ",len(algebraics))
 
-    print "Eliminating variables!"
+    print("Eliminating variables!")
     
     eliminable_algebraics = [a for a in algebraics if a in eliminables]
     variables_to_eliminate = list()
@@ -138,9 +138,9 @@ def run_demo(with_plots=True):
     # Alternative way of eliminating variables however this method do not eliminate any bounded variables
     #op.eliminateAlgebraics()    
     
-    print "Done with elimination" 
+    print("Done with elimination") 
     eliminated_vars = op.getEliminatedVariables()
-    print "Number of variables that were eliminated: ", len(eliminated_vars)    
+    print("Number of variables that were eliminated: ", len(eliminated_vars))    
     
     
 

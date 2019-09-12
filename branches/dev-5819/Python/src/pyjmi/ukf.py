@@ -217,9 +217,9 @@ class UKF:
         try:
             P_sqrt = S.linalg.cholesky(P, lower = True)
         except N.linalg.LinAlgError:
-            print 'The covariance matrix was not positive definite:'
-            print 'P = '
-            print P
+            print('The covariance matrix was not positive definite:')
+            print('P = ')
+            print(P)
             raise
    
         #Calculate sigma matrix
@@ -245,7 +245,7 @@ class UKF:
         """
         
         #Sort measurements alphabetically and extract values into scaled form
-        y = collections.OrderedDict(sorted(y.items(), key = lambda t: t[0]))
+        y = collections.OrderedDict(sorted(list(y.items()), key = lambda t: t[0]))
         y_scaled = []
         for measurement in self.mes:
             y_scaled = y_scaled + [y[measurement.get_name()]/measurement.get_nominal_value()]
@@ -367,20 +367,20 @@ class UKF:
                 opt = model.simulate_options()
                 opt['CVode_options']['atol'] = 1e-8
                 opt['CVode_options']['rtol'] = 1e-6
-                print 'Simulating sigma-point '+str(i+1)+' out of '+str(sigma.shape[1])+' :'
+                print('Simulating sigma-point '+str(i+1)+' out of '+str(sigma.shape[1])+' :')
                 try:
                     result = model.simulate(start_time = currTime, final_time = currTime + h, options = opt, input = u)
                 except (CVodeError, ValueError, FMUException) as e:
-                    print e
+                    print(e)
                     retry = True
-                    print 'Failed sigma point simulation'
+                    print('Failed sigma point simulation')
                     if k == 1:
-                        if currTime in self.fails.keys():
+                        if currTime in list(self.fails.keys()):
                             self.fails[currTime] = self.fails[currTime] + 1
                         else:
                             self.fails[currTime] = 1
                     if k == 10:
-                        print 'Simulation failed 10 times, will use result from last sigma point instead'
+                        print('Simulation failed 10 times, will use result from last sigma point instead')
                         break
                 k = k + 1
 			
@@ -475,7 +475,7 @@ class UKFOptions(OptionBase):
             value = float(value)
         
         if (key == 'P_0' or key == 'P_v' or key == 'P_n') and type(value) == dict:
-            for var in value.keys():
+            for var in list(value.keys()):
                 if type(value[var]) == int:
                     value[var] = float(value[var])
                 elif type(value[var]) != float and type(value[var]) != N.float64:
@@ -492,7 +492,7 @@ class UKFOptions(OptionBase):
         """Update the options for the UKF"""
         
         #Check for invalid options and arguments
-        keys = kw.keys()
+        keys = list(kw.keys())
         for key in keys:
             value = kw[key]
             if key not in self:
@@ -500,7 +500,7 @@ class UKFOptions(OptionBase):
             elif (key == 'alpha' or key == 'beta' or key == 'kappa') and type(value) == int:
                 value = float(value)
             elif (key == 'P_0' or key == 'P_v' or key == 'P_n') and type(value) == dict:
-                for var in value.keys():
+                for var in list(value.keys()):
                     if type(value[var]) == int:
                         value[var] = float(value[var])
                     elif type(value[var]) != float:

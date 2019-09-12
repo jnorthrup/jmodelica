@@ -185,7 +185,7 @@ class Test_Time_Events_FMU10:
         model = load_fmu("TimeEvents_Basic1.fmu")
         model.initialize()
         ev = model.get_event_info()
-        print ev.nextEventTime
+        print(ev.nextEventTime)
         assert ev.nextEventTime == 1
         
     @testattr(stddist_full = True)
@@ -193,7 +193,7 @@ class Test_Time_Events_FMU10:
         model = load_fmu("TimeEvents_Basic2.fmu")
         model.initialize()
         ev = model.get_event_info()
-        print ev.nextEventTime
+        print(ev.nextEventTime)
         assert ev.nextEventTime == 2
         assert ev.nextEventTime == model.get("p")
         
@@ -202,7 +202,7 @@ class Test_Time_Events_FMU10:
         model = load_fmu("TimeEvents_Basic3.fmu")
         model.initialize()
         ev = model.get_event_info()
-        print ev.nextEventTime
+        print(ev.nextEventTime)
         assert ev.nextEventTime == 1.5
         
     @testattr(stddist_full = True)
@@ -226,12 +226,12 @@ class Test_Time_Events_FMU10:
         model = load_fmu("TimeEvents_Advanced1.fmu")
         model.initialize()
         ev = model.get_event_info()
-        print ev.nextEventTime
+        print(ev.nextEventTime)
         assert ev.nextEventTime == 0.5
         
         model.simulate(options={"initialize":False})
         
-        print "i (should be 2): ", model.get("i") 
+        print("i (should be 2): ", model.get("i")) 
         assert model.get("i") == 2
         
     @testattr(stddist_base = True)
@@ -239,12 +239,12 @@ class Test_Time_Events_FMU10:
         model = load_fmu("TimeEvents_Advanced2.fmu")
         model.initialize()
         ev = model.get_event_info()
-        print ev.nextEventTime
+        print(ev.nextEventTime)
         assert ev.nextEventTime == 0.5
         
         model.simulate(options={"initialize":False})
         
-        print "i (should be 2): ", model.get("i") 
+        print("i (should be 2): ", model.get("i")) 
         assert model.get("i") == 2
         
     @testattr(stddist_base = True)
@@ -252,13 +252,13 @@ class Test_Time_Events_FMU10:
         model = load_fmu("TimeEvents_Advanced3.fmu")
         model.initialize()
         ev = model.get_event_info()
-        print ev.nextEventTime
+        print(ev.nextEventTime)
         assert ev.nextEventTime == 0.5
         
         model.simulate(options={"initialize":False})
         
-        print "i (should be 2): ", model.get("i") 
-        print "j (should be 1): ", model.get("j") 
+        print("i (should be 2): ", model.get("i")) 
+        print("j (should be 1): ", model.get("j")) 
         assert model.get("i") == 2
         assert model.get("j") == 1
         
@@ -267,13 +267,13 @@ class Test_Time_Events_FMU10:
         model = load_fmu("TimeEvents_Advanced4.fmu")
         model.initialize()
         ev = model.get_event_info()
-        print ev.nextEventTime
+        print(ev.nextEventTime)
         assert ev.nextEventTime == 0.5
         
         model.simulate(options={"initialize":False})
         
-        print "i (should be 1): ", model.get("i") 
-        print "j (should be 1): ", model.get("j") 
+        print("i (should be 1): ", model.get("i")) 
+        print("j (should be 1): ", model.get("j")) 
         assert model.get("i") == 1
         assert model.get("j") == 1
         
@@ -282,13 +282,13 @@ class Test_Time_Events_FMU10:
         model = load_fmu("TimeEvents_Mixed1.fmu")
         model.initialize()
         ev = model.get_event_info()
-        print ev.nextEventTime
+        print(ev.nextEventTime)
         assert ev.nextEventTime == 1.5
         
         res = model.simulate(final_time=4, options={"initialize":False})
         
-        print "x: ", res["x"]
-        print "dx: ", res["der(x)"]
+        print("x: ", res["x"])
+        print("dx: ", res["der(x)"])
         
         assert res.solver.statistics["ntimeevents"] == 2
         assert res.solver.statistics["nstateevents"] == 2
@@ -421,7 +421,7 @@ class Test_Time_Events_FMU20:
         model.event_update()
         model.enter_continuous_time_mode()
         ev = model.get_event_info()
-        print ev.nextEventTime
+        print(ev.nextEventTime)
         assert ev.nextEventTime == 1
         
     @testattr(stddist_full = True)
@@ -431,7 +431,7 @@ class Test_Time_Events_FMU20:
         model.event_update()
         model.enter_continuous_time_mode()
         ev = model.get_event_info()
-        print ev.nextEventTime
+        print(ev.nextEventTime)
         assert ev.nextEventTime == 2
         assert ev.nextEventTime == model.get("p")
         
@@ -442,7 +442,7 @@ class Test_Time_Events_FMU20:
         model.event_update()
         model.enter_continuous_time_mode()
         ev = model.get_event_info()
-        print ev.nextEventTime
+        print(ev.nextEventTime)
         assert ev.nextEventTime == 1.5
         
     @testattr(stddist_full = True)
@@ -472,12 +472,12 @@ class Test_Time_Events_FMU20:
         model.event_update()
         model.enter_continuous_time_mode()
         ev = model.get_event_info()
-        print ev.nextEventTime
+        print(ev.nextEventTime)
         assert ev.nextEventTime == 0.5
         
         model.simulate(options={"initialize":False})
         
-        print "i (should be 2): ", model.get("i") 
+        print("i (should be 2): ", model.get("i")) 
         assert model.get("i") == 2
         
     @testattr(stddist_base = True)
@@ -487,12 +487,12 @@ class Test_Time_Events_FMU20:
         model.event_update()
         model.enter_continuous_time_mode()
         ev = model.get_event_info()
-        print ev.nextEventTime
+        print(ev.nextEventTime)
         assert ev.nextEventTime == 0.5
         
         model.simulate(options={"initialize":False})
         
-        print "i (should be 2): ", model.get("i") 
+        print("i (should be 2): ", model.get("i")) 
         assert model.get("i") == 2
         
     @testattr(stddist_base = True)
@@ -502,13 +502,13 @@ class Test_Time_Events_FMU20:
         model.event_update()
         model.enter_continuous_time_mode()
         ev = model.get_event_info()
-        print ev.nextEventTime
+        print(ev.nextEventTime)
         assert ev.nextEventTime == 0.5
         
         model.simulate(options={"initialize":False})
         
-        print "i (should be 2): ", model.get("i") 
-        print "j (should be 1): ", model.get("j") 
+        print("i (should be 2): ", model.get("i")) 
+        print("j (should be 1): ", model.get("j")) 
         assert model.get("i") == 2
         assert model.get("j") == 1
         
@@ -523,8 +523,8 @@ class Test_Time_Events_FMU20:
         
         model.simulate(options={"initialize":False})
         
-        print "i (should be 1): ", model.get("i") 
-        print "j (should be 1): ", model.get("j") 
+        print("i (should be 1): ", model.get("i")) 
+        print("j (should be 1): ", model.get("j")) 
         assert model.get("i") == 1
         assert model.get("j") == 1
         
@@ -535,13 +535,13 @@ class Test_Time_Events_FMU20:
         model.event_update()
         model.enter_continuous_time_mode()
         ev = model.get_event_info()
-        print ev.nextEventTime
+        print(ev.nextEventTime)
         assert ev.nextEventTime == 1.5
         
         res = model.simulate(final_time=4, options={"initialize":False})
         
-        print "x: ", res["x"]
-        print "dx: ", res["der(x)"]
+        print("x: ", res["x"])
+        print("dx: ", res["der(x)"])
         
         assert res.solver.statistics["ntimeevents"] == 2
         assert res.solver.statistics["nstateevents"] == 2
@@ -1518,7 +1518,7 @@ class Test_FMI_ODE_2:
         assert opts["with_jacobian"] == "Default"
         
         res = model.simulate(final_time=1.5,options=opts)
-        print res.final("J1.w")
+        print(res.final("J1.w"))
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
         assert res.solver.statistics["nfcnjacs"] > 0
         
@@ -1526,7 +1526,7 @@ class Test_FMI_ODE_2:
         model.reset()
     
         res = model.simulate(final_time=1.5,options=opts)
-        print res.final("J1.w")
+        print(res.final("J1.w"))
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
         assert res.solver.statistics["nfcnjacs"] == 0
         
@@ -1534,7 +1534,7 @@ class Test_FMI_ODE_2:
         model.reset()
     
         res = model.simulate(final_time=1.5,options=opts)
-        print res.final("J1.w")
+        print(res.final("J1.w"))
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
         assert res.solver.statistics["nfcnjacs"] > 0
         
@@ -1542,7 +1542,7 @@ class Test_FMI_ODE_2:
         model.reset()
     
         res = model.simulate(final_time=1.5,options=opts)
-        print res.final("J1.w")
+        print(res.final("J1.w"))
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
         assert res.solver.statistics["nfcnjacs"] > 0
 

@@ -49,7 +49,7 @@ shooter = shooting.MultipleShooter(model,initial_u,grid)
 #shooter.set_time_step(5.)
 shooter.h(N.array(opt_vals))
 print('z')
-print(model._m.getZ())
+print((model._m.getZ()))
 
 interval = [0., 5.]
 

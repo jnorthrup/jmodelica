@@ -135,9 +135,9 @@ class Test_FMUModelBase2:
         enumeration_model = load_fmu(Test_FMUModelBase2.enumeration3)
         
         enum = enumeration_model.get_variable_declared_type("x")
-        assert len(enum.items.keys()) == 2
+        assert len(list(enum.items.keys())) == 2
         enum = enumeration_model.get_variable_declared_type("home")
-        assert len(enum.items.keys()) == 4
+        assert len(list(enum.items.keys())) == 4
         
         nose.tools.assert_raises(FMUException, enumeration_model.get_variable_declared_type, "z")
     
@@ -746,7 +746,7 @@ class Test_FMUModelME2:
             ref_values = f.readlines()
 
         # remove all newlines and convert elements to float since they are strings
-        ref_values = map(lambda s: s.strip(), ref_values)
+        ref_values = [s.strip() for s in ref_values]
         ref_values = [float(x) for x in ref_values]
         return ref_values
     
@@ -808,7 +808,7 @@ class Test_FMUModelME2:
             [r,i,b] = model.get_model_time_varying_value_references(filter=var)
             assert len(r) == 1
         
-        [r,i,b] = model.get_model_time_varying_value_references(filter=vars.keys())
+        [r,i,b] = model.get_model_time_varying_value_references(filter=list(vars.keys()))
         assert len(r) == 1
     
     @testattr(stddist_full = True)
@@ -1148,8 +1148,8 @@ class Test_FMUModelME2:
         
         [state_dep, input_dep] = model.get_output_dependencies()
         
-        assert len(state_dep.keys()) == 0
-        assert len(input_dep.keys()) == 0
+        assert len(list(state_dep.keys())) == 0
+        assert len(list(input_dep.keys())) == 0
         
     @testattr(stddist_full = True)
     def test_derivative_dependencies(self):
@@ -1157,8 +1157,8 @@ class Test_FMUModelME2:
         
         [state_dep, input_dep] = model.get_derivatives_dependencies()
         
-        assert len(state_dep.keys()) == 0
-        assert len(input_dep.keys()) == 0
+        assert len(list(state_dep.keys())) == 0
+        assert len(list(input_dep.keys())) == 0
 
     @testattr(stddist_full = True)
     def test_get_derivatives(self):
@@ -1186,7 +1186,7 @@ class Test_FMUModelME2:
         nose.tools.assert_almost_equal(der[0], 2.000000)
 
         der_list = coupled.get_derivatives_list()
-        der_ref  = N.array([s.value_reference for s in der_list.values()])
+        der_ref  = N.array([s.value_reference for s in list(der_list.values())])
         der = coupled.get_derivatives()
         diff = N.sort(N.array([coupled.get_real(i) for i in der_ref]))-N.sort(der)
         nose.tools.assert_almost_equal(N.sum(diff), 0.)

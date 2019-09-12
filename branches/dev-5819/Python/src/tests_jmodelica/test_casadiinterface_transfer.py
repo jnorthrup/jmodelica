@@ -370,7 +370,7 @@ class ModelicaTransfer(object):
         actual = ""
         for var in model.getVariables(Model.REAL_PARAMETER_DEPENDENT):
             actual += str(var) + "\n"
-        print expected, "\n", actual
+        print(expected, "\n", actual)
         assert strnorm(actual) == strnorm(expected)
 
 
