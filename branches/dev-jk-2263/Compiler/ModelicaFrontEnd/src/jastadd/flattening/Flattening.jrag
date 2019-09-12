@@ -778,6 +778,7 @@ aspect Flattening {
                 (FExternalLanguage) getFExternalLanguage().fullCopy() : 
                 new FCExternalLanguage());
         stmt.extractLibrary(this);
+        contribute(stmt);
         if (hasInstExternalCall()) {
             InstExternalCall call = getInstExternalCall();
             if (call.hasReturnVar()) {
@@ -831,6 +832,7 @@ aspect Flattening {
         FExternalStmt stmt = new FExternalStmt(getFExternalLanguage().treeCopy(), ret, getName(), args, getLibTopPackagePath());
         stmt.extractLibrary(this);
         sl.add(stmt);
+        contribute(stmt);
         return false;
     }
     
@@ -3402,6 +3404,12 @@ aspect AttributeContributor {
         protected void contribute(Flattener f, InstNode src, FClass dest) {}
 
         /**
+         * This method is called during flattening of external statements. All
+         * expressions that are added must be flattened.
+         */
+        protected void contribute(AnnotationNode src, FExternalStmt dest) {}
+
+        /**
          * This method is called in order to determine if an attribute should
          * be considered as active. Return true if the attributes that was
          * added earlier alters the models behaviour.
@@ -3489,6 +3497,24 @@ aspect AttributeContributor {
             for (AttributeContributor contributor : attributeContributors())
                 contributor.contribute(f, this, fClass);
             return fClass;
+        }
+    }
+    
+    public class InstExternal {
+        public FExternalStmt contribute(FExternalStmt stmt) {
+            for (AttributeContributor contributor : attributeContributors()) {
+                contributor.contribute(annotation(), stmt);
+            }
+            return stmt;
+        }
+    }
+    
+    public class FExternalStmt {
+        public FExternalStmt contribute(FExternalStmt stmt) {
+            for (AttributeContributor contributor : attributeContributors()) {
+                contributor.contribute(annotation(), stmt);
+            }
+            return stmt;
         }
     }
     
