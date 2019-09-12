@@ -118,57 +118,33 @@ aspect TestFramework {
                     }
                 }
                 
-                addTestCase(ts, tc);
+                // Set generic information of the test case and add to list
+                tc.setSourceFileName(fileName());
+                tc.setClassName(qualifiedName());
+                tc.setBeginLine(beginLine());
+                ts.add(tc);
                 log.debug("Created test case '" + className + "' for class '" + tc.getClassName() + "'");
             }
         } catch (ClassNotFoundException e) {
+            // TODO: Maybe we should throw exceptions instead of log?
             // No such class was found - log that
-            testCaseError(ts, e, className, "class not found");
+            testCaseError(className, "class not found");
         } catch (NoSuchMethodException e) {
             // No such method was found - log that
-            testCaseError(ts, e, className, 
-                    "attribute '" + attrName + "' not found or used with wrong type of expression");
+            testCaseError(className, "attribute '" + attrName + "' not found or used with wrong type of expression");
         } catch (ConstantEvaluationException e) {
             // Could not evaluate attribute - log that
-            testCaseError(ts, e, className, "evaluation of attribute '" + attrName + "' failed");
+            testCaseError(className, "evaluation of attribute '" + attrName + "' failed");
         } catch (Exception e) {
             // The test case class did not behave as expected - log that
-            testCaseError(ts, e, className, "malformed test case class");
+            testCaseError(className, "malformed test case class");
         }
     }
-
-
-    /**
-     * Set generic information of the test case and add to list
-     */
-    public void SrcClassDecl.addTestCase(TestSuite ts, TestCase tc) {
-        tc.setSourceFileName(fileName());
-        tc.setClassName(qualifiedName());
-        tc.setBeginLine(beginLine());
-        ts.add(tc);
-    }
-
-
-    public void SrcClassDecl.testCaseError(
-            TestSuite ts, Throwable cause, String className, String desc) {
+    
+    
+    public void SrcClassDecl.testCaseError(String className, String msg) {
         String[] fn = fileName().split("[/\\\\]Compiler[/\\\\]");
-        String msg = String.format("%s:%d: Creating test case '%s' - %s", 
-                fn[fn.length - 1], beginLine(), className, desc);
-        FrameworkError err = new FrameworkError(new TestFrameworkException(msg, cause));
-        err.setName(name());
-        addTestCase(ts, err);
-    }
-
-    public class TestFrameworkException extends RuntimeException {
-        public TestFrameworkException(String msg, Throwable cause) {
-            super(msg, cause);
-        }
-        
-        @Override
-        public Throwable fillInStackTrace() {
-            // Only use stack trace from cause
-            return this;
-        }
+        log.error("%s:%d: Creating test case '%s' - %s", fn[fn.length - 1], beginLine(), className, msg);
     }
 
 }

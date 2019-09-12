@@ -164,7 +164,7 @@ aspect AliasElimination {
     syn boolean FAbstractVariable.canBeAlias() = false;
     eq FVariable.canBeAlias() = !getFAccess().myDerFV(order() + 1).isDummyDerivativeVariable() 
             && !isPreVariable() && !isNonDummyDerivativeVariable()
-            && getCausalityConnectorPrefix().isNone() && !isIndependentParameter()
+            && !isInput() && !isOutput() && !isIndependentParameter()
             && !isInterface();
 
     syn int FExp.aliasSign() = 1;

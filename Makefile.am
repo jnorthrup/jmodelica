@@ -40,8 +40,6 @@ pymodelica_build_dir64=$(abs_builddir)/pymodelica_build64
 pyfmi_build_dir64=$(abs_builddir)/PyFMI_build64
 pyjmi_build_dir64=$(abs_builddir)/PyJMI_build64
 
-assimulo_src_dir=$(abs_top_srcdir)/external/Assimulo
-
 bindistdir=JModelica.org-$(VERSION)-bin
 
 casadi:
@@ -275,7 +273,7 @@ build-python-packages:
 if PYTHON_ENABLED
 if WITH_OPENMP
 	mkdir -p $(assimulo_build_dir); \
-	cd $(assimulo_src_dir)/..; \
+	cd $(abs_top_srcdir)/external; \
 	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir); \
 	cd $(assimulo_build_dir)/Assimulo; \
 	case $(build) in \
@@ -289,7 +287,7 @@ if WITH_OPENMP
 if JM_WIN64
 if WITH_PYTHON64
 	mkdir -p $(assimulo_build_dir64); \
-	cd $(assimulo_src_dir)/..; \
+	cd $(abs_top_srcdir)/external; \
 	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir64); \
 	cd $(assimulo_build_dir)/Assimulo; \
 	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
@@ -302,7 +300,7 @@ endif
 endif
 if !WITH_OPENMP
 	mkdir -p $(assimulo_build_dir); \
-	cd $(assimulo_src_dir)/..; \
+	cd $(abs_top_srcdir)/external; \
 	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir); \
 	cd $(assimulo_build_dir)/Assimulo; \
 	case $(build) in \
@@ -316,7 +314,7 @@ if !WITH_OPENMP
 if JM_WIN64
 if WITH_PYTHON64
 	mkdir -p $(assimulo_build_dir64); \
-	cd $(assimulo_src_dir)/..; \
+	cd $(abs_top_srcdir)/external; \
 	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir64); \
 	cd $(assimulo_build_dir64)/Assimulo; \
 	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \

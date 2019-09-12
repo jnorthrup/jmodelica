@@ -138,11 +138,11 @@ public class TestAnnotationizer {
         }
         
         if (filePath == null && !hasInputFilePath) {
-            System.err.println("No input file specified. give path as argument or use -f");
+            System.err.println("No input file specified. give path as argument or use -file");
         }
 
         if (all_models && hasInputFilePath) {
-            System.err.println("Cannot use -a and -f at the same time");
+            System.err.println("Cannot use -a and -file at the same time");
         }
         
         Scanner inputFileScanner = null;
@@ -156,17 +156,25 @@ public class TestAnnotationizer {
             inputFileScanner = new Scanner(new File(inputFilePath));
             cont = inputFileScanner.hasNextLine();
         }
-        @SuppressWarnings("resource")
-        BufferedReader in = cont ? new BufferedReader(new InputStreamReader(System.in)) : null;
         while (cont) {
-            if (hasInputFilePath) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+            if(hasInputFilePath) {
                 String line = inputFileScanner.nextLine();
                 String[] parts = line.split(",");
                 filePath = parts[0];
-                modelName = getPackageName(filePath) + "." + parts[1];
-            } else if (all_models) {
+                modelName = parts[1];
+            }
+            String packageName = null;
+            if(!(all_models || hasInputFilePath)) {
+                packageName = getPackageName(filePath);
+                modelName = composeModelName(packageName, modelName);
+            } else if (hasInputFilePath) {
+                packageName = getPackageName(filePath);
+                modelName = packageName + "." + modelName;
+            }
+            if (all_models) {
                 modelName = allModelsIterator.next();
-            } else if (modelName == null) {
+            } else if (!modelName.contains(".")) {
                 System.out.print("Enter class name: ");
                 System.out.flush();
                 String given = in.readLine().trim();
@@ -174,12 +182,12 @@ public class TestAnnotationizer {
                     System.out.println("Empty modelname given, exiting.");
                     System.exit(0);
                 }
-                modelName = composeModelName(getPackageName(filePath), given);
+                modelName = composeModelName(modelName, given);
             }
             
-            if (inputlang == Lang.none) {
+            if (inputlang == Lang.none)
                 lang = filePath.contains("Optimica") ? Lang.optimica : Lang.modelica;
-            } else {
+            else {
                 lang = inputlang;
             }
             boolean optimica = lang == Lang.optimica;
@@ -196,7 +204,7 @@ public class TestAnnotationizer {
             }
             
             if (repeat) {
-                modelName = null;
+                modelName = packageName;
             } else if (all_models) {
                 cont = allModelsIterator.hasNext();
             } else if (hasInputFilePath) {
@@ -292,13 +300,12 @@ public class TestAnnotationizer {
 	}
 
 	private static String composeModelName(String extracted, String entered) {
-		if (entered == null) {
-            return extracted;
-        } else if (entered.contains(".")) {
-            return entered;
-        } else {
-            return extracted + "." + entered;
-        }
+		if (entered == null)
+			return extracted;
+		else if (entered.contains("."))
+			return entered;
+		else
+			return extracted + "." + entered;
 	}
 
 	private static String getPackageName(String filePath) {

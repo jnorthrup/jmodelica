@@ -301,7 +301,7 @@ aspect Library {
     private java.util.List<String> SrcLibClassDecl.order = Collections.emptyList();
 
     private SrcStoredDefinition SrcLibNode.createErrorStoredDefinition() {
-        return new SrcBadDefinition(new Opt(), new List(createErrorClass()), getLoadInfo());
+        return new SrcStoredDefinition(new Opt(), new List(createErrorClass()), getLoadInfo());
     }
 
     private SrcBadClassDecl SrcLibNode.createErrorClass() {
@@ -309,11 +309,8 @@ aspect Library {
     }
 
     public SrcLibClassDecl.SrcLibClassDecl(SrcFullClassDecl fcd, List<SrcLibNode> lib) {
-        this(fcd.getName(), fcd.getEncapsulated(), fcd.getPartial(), fcd.getSrcRestriction(), fcd.getRedeclare(),
-                fcd.getFinal(), fcd.getInner(), fcd.getOuter(), fcd.getReplaceable(), fcd.getSrcConstrainingClauseOpt(),
-                fcd.getConstrainingClauseCommentOpt(), fcd.getSrcStringCommentOpt(), fcd.getSrcClauseList(),
-                fcd.getSrcExternalClauseOpt(), lib, fcd.getSrcAnnotationOpt(), fcd.getSrcEndDecl());
-        setLocation(fcd);
+        super(fcd);
+        setSrcLibNodeList(lib);
     }
 
     eq SrcLibClassDecl.getSrcLibNode().enclosingClassDecl() = this;   
@@ -474,7 +471,7 @@ aspect Library {
         // the default file system.
         // We should figure out if using a non-file name is really needed as load description,
         // and if not - get rid of otherDesc.
-        private Path path;
+        private final Path path;
         private final String otherDesc;
 
         @Deprecated
@@ -505,7 +502,6 @@ aspect Library {
         public static LoadInfo empty() {
             return EMPTY;
         }
-        
     }
 
     private LoadInfo.LoadInfo(Path path) {

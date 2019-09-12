@@ -19,6 +19,4 @@ public interface GenericTestTreeNode {
 
     public String getName();
 
-    public void setName(String name);
-
 }

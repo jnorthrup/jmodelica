@@ -1328,7 +1328,7 @@ aspect ConstantEvaluation {
 	     * Traverses the array in the same order as indices().iterator().
 	     */
 		public Iterator<CValue> iterator() {
-            return Arrays.asList(values).iterator();
+			return new ConstArrayIterator<CValue>(values);
 		}
 
         /**
@@ -1664,11 +1664,6 @@ aspect ConstantEvaluation {
 
         @Override
         public String stringExpValue() {
-            return value;
-        }
-
-        @Override
-        public String objectValue() {
             return value;
         }
 
@@ -2788,16 +2783,16 @@ aspect ConstantEvaluation {
     eq FSqrtExp.cevalCalc(VariableEvaluator evaluator)  = new CValueReal(StrictMath.sqrt(getFExp().ceval(evaluator).realValue()));
     eq FEnumIntegerExp.cevalCalc(VariableEvaluator evaluator) = getFExp().ceval(evaluator).convertInteger();
     eq FStringExp.cevalCalc(VariableEvaluator evaluator) {
-        if (getValue().isArray() || !getValue().type().isPrimitive()) {
-            return CValue.UNKNOWN;
-        }
-        CValue cval = getValue().ceval(evaluator);
-        if (getValue().type().isReal()) {
-            cval = cval.convertReal();
-        }
-        Object value = cval.objectValue();
-        String format = formatString(evaluator);
-        return new CValueString(String.format((Locale) null, format, value));
+        Object value;
+        if (getValue().type().isReal())
+          value = getValue().ceval(evaluator).realValue();
+        else if (getValue().type().isInteger())
+          value = getValue().ceval(evaluator).intValue();
+        else if (getValue().type().isBoolean() || getValue().type().isEnum())
+          value = getValue().ceval(evaluator).stringExpValue();
+        else
+          return CValue.UNKNOWN;
+        return new CValueString(String.format((Locale) null, formatString(), value));
     }
     eq FGetInstanceName.cevalCalc(VariableEvaluator evaluator) = new CValueString(calcInstanceName());
 
@@ -2809,33 +2804,16 @@ aspect ConstantEvaluation {
         throw new UnsupportedOperationException("The getInstanceName() operator is not allowed in the flat tree.");
     }
 
-    syn String FStringExp.formatString(VariableEvaluator evaluator) {
-        StringBuilder buf = new StringBuilder("%");
-        if (hasFormat()) {
-            buf.append(getFormat().ceval(evaluator).stringValue());
-        } else {
-            int minLength = minimumLength(evaluator);
-            if (minLength > 0) {
-                if (leftJustified(evaluator)) {
-                    buf.append('-');
-                }
-                buf.append(minLength);
-            }
-            if (getValue().type().isReal()) {
-                buf.append('.');
-                buf.append(significantDigits(evaluator));
-            }
-            buf.append(getValue().type().formatSpecifier());
-        }
-        return buf.toString();
-    }
+    // TODO: support format args
+    syn String FStringExp.formatString() = "%" + formatFlags() + formatWidth() + formatPrecision() + formatSpecifier();
 
-    syn int FStringExp.minimumLength(VariableEvaluator evaluator)     = 
-        hasMinimumLength() ? getMinimumLength().ceval(evaluator).intValue() : 0;
-    syn boolean FStringExp.leftJustified(VariableEvaluator evaluator) = 
-        hasLeftJustified() ? getLeftJustified().ceval(evaluator).booleanValue() : true;
-    syn int FStringExp.significantDigits(VariableEvaluator evaluator) = 
-        hasSignificantDigits() ? getSignificantDigits().ceval(evaluator).intValue() : DEFAULT_PRECISION;
+    syn String FStringExp.formatWidth()     = minimumLength() > 0 ? String.valueOf(minimumLength()) : "";
+    syn String FStringExp.formatFlags()     = leftJustified() && minimumLength() > 0 ? "-" : "";
+    syn String FStringExp.formatPrecision() = getValue().type().isReal() ? "." + significantDigits() : "";
+    syn String FStringExp.formatSpecifier() = getValue().type().formatSpecifier();
+    syn int FStringExp.minimumLength()     = hasMinimumLength() ? getMinimumLength().ceval().intValue() : 0;
+    syn boolean FStringExp.leftJustified() = hasLeftJustified() ? getLeftJustified().ceval().booleanValue() : true;
+    syn int FStringExp.significantDigits() = hasSignificantDigits() ? getSignificantDigits().ceval().intValue() : DEFAULT_PRECISION;
     syn String FType.formatSpecifier() {
         throw new UnsupportedOperationException();
     }
@@ -2843,7 +2821,6 @@ aspect ConstantEvaluation {
     eq FIntegerType.formatSpecifier() = "d";
     eq FBooleanType.formatSpecifier() = "s";
     eq FEnumType.formatSpecifier()    = "s";
-    eq FStringType.formatSpecifier()  = "s";
     public static final int FStringExp.DEFAULT_PRECISION = 6;
 
     eq FDivFuncExp.cevalCalc(VariableEvaluator evaluator)         = type().truncToZero(type().div(getX().ceval(evaluator), getY().ceval(evaluator)));

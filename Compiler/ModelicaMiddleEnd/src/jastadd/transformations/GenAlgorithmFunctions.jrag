@@ -153,20 +153,20 @@ aspect GenAlgorithmFunctions {
 	 * Create an input representing this variable in a generated algorithm function.
 	 */
 	public FFunctionVariable FVariable.createFFunctionOutput() {
-		return createFFunctionVariable(CausalityConnectorPrefix.OUTPUT);
+		return createFFunctionVariable(TypePrefixInputOutput.OUTPUT);
 	}
 
 	/**
 	 * Create an output representing this variable in a generated algorithm function.
 	 */
 	public FFunctionVariable FVariable.createFFunctionInput() {
-		return createFFunctionVariable(CausalityConnectorPrefix.INPUT);
+		return createFFunctionVariable(TypePrefixInputOutput.INPUT);
 	}
 
     /**
      * Create an function variable representing this variable in a generated algorithm function.
      */
-    public FFunctionVariable FVariable.createFFunctionVariable(CausalityConnectorPrefix io) {
+    public FFunctionVariable FVariable.createFFunctionVariable(TypePrefixInputOutput io) {
         FType type = (FType) type().treeCopy();
         return new FFunctionVariable(io.functionVisibility(), io, type, new Opt<FExp>(), getFAccess().treeCopy());
     }

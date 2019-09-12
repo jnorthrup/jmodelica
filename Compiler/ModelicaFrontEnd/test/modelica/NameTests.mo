@@ -2523,31 +2523,6 @@ Error at line 3, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/Name
 end ImportTest12;
 
 
-model ImportTest13
-    package P1
-        constant Real c = 3;
-        type T = Real;
-    end P1;
-    
-    package P2
-        extends P1;
-    end P2;
-    
-    import NameTests.ImportTest13.P2.T;
-    import NameTests.ImportTest13.P2.c;
-    T t = c;
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ImportTest13",
-            description="Importing inherited elements",
-            flatModel="
-fclass NameTests.ImportTest13
- Real t = 3.0;
-end NameTests.ImportTest13;
-")})));
-end ImportTest13;
-
-
 model ShortClassDeclTest1
   model A
     Real x=2;
@@ -3812,8 +3787,6 @@ fclass NameTests.InheritFlowTest1
 equation
  - b1.af.x - b2.af.x = 0.0;
  b1.ap.x = b2.ap.x;
- b1.af.x = 0.0;
- b2.af.x = 0.0;
 end NameTests.InheritFlowTest1;
 ")})));
 end InheritFlowTest1;

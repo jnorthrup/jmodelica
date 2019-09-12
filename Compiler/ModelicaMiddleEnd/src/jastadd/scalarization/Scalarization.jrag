@@ -439,7 +439,7 @@ aspect Scalarization {
 		FVariable fv = createEmptyNode();
 		fv.setVisibilityType(getVisibilityType());
 		fv.setTypePrefixVariability(getTypePrefixVariability());
-		fv.setCausalityConnectorPrefix(getCausalityConnectorPrefix());
+		fv.setTypePrefixInputOutput(getTypePrefixInputOutput());
 		if (hasFStringComment())
 			fv.setFStringComment(getFStringComment().fullCopy());
 
@@ -632,12 +632,12 @@ aspect Scalarization {
         private String name;
         
         // input/output prefix of top-level variable
-        private CausalityConnectorPrefix inputOutput;
+        private TypePrefixInputOutput inputOutput;
         
         private Index index;
         
         private ScalarizingVariableInstance(String name, Map<String, FAttribute> mattrs, FExp be,
-                TypePrefixVariability variability, VisibilityType visibility, CausalityConnectorPrefix inputOutput, Index i)  {
+                TypePrefixVariability variability, VisibilityType visibility, TypePrefixInputOutput inputOutput, Index i)  {
             bExp = be;
             this.name = name;
             index = i;
@@ -648,14 +648,14 @@ aspect Scalarization {
         }
         
         private ScalarizingVariableInstance(String name, List<FAttribute> attrs, FExp be,
-                TypePrefixVariability variability, VisibilityType visibility, CausalityConnectorPrefix inputOutput, Index i)  {
+                TypePrefixVariability variability, VisibilityType visibility, TypePrefixInputOutput inputOutput, Index i)  {
             this(name, ScalarizingVariableInstance.mapped(attrs), be, variability, visibility, inputOutput, i);
         }
         
         public ScalarizingVariableInstance(Scalarizer.Variable s, FVariable fv) {
             this(fv.name(), fv.getFAttributes(),
                     fv.hasBindingExp() ? fv.getBindingExp().dynamicFExp(fv.getBindingExp().scalarize(s.select(fv.variability()))) : null,
-                    fv.variability(), fv.getVisibilityType(), fv.getCausalityConnectorPrefix(), Index.NULL);
+                    fv.variability(), fv.getVisibilityType(), fv.getTypePrefixInputOutput(), Index.NULL);
         }
         
         private static Map<String, FAttribute> mapped(List<FAttribute> as) {
@@ -734,7 +734,7 @@ aspect Scalarization {
                 fv.setBindingExpOpt(new Opt());
             }
             fv.setTypePrefixVariability(variability);
-            fv.setCausalityConnectorPrefix(inputOutput);
+            fv.setTypePrefixInputOutput(inputOutput);
             List<FAttribute> attrs = new List<FAttribute>();
             for (FAttribute attr : mattrs.values()) {
                 attr.scalarize(attrs, index, s.sp);
@@ -760,7 +760,7 @@ aspect Scalarization {
 		fv.getFAccess().scalarized = true;
 		fv.setVisibilityType(getVisibilityType());
 		fv.setTypePrefixVariability(getTypePrefixVariability());
-		fv.setCausalityConnectorPrefix(getCausalityConnectorPrefix());
+		fv.setTypePrefixInputOutput(getTypePrefixInputOutput());
 		fv.setDerivedType(getDerivedType());
 		if (hasBindingExp())
 			fv.setBindingExp(getBindingExp().fullCopy());
