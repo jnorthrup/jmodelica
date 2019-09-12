@@ -45,7 +45,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
     }
     
     private String getSharedLibrary(External<K> ext) {
-        /* Messy messy... */
+        /* Messy messy... Please fix me...*/
         String sharedLib = "";
         final String extName = ext.getName();
         String platform = CCompilerDelegator.reduceBits(EnvironmentUtils.getJavaPlatform(),
@@ -92,7 +92,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
     private ArrayList<String> builtinExternalFunctions = new ArrayList<String>() {{
         add("ModelicaStrings_substring");
         add("ModelicaStrings_length");
-        add("item3");
+        add("ModelicaStrings_skipWhiteSpace");
     }};
     
     public boolean canUseEvaluator(E ext, ArrayList<String> arguments) {
@@ -125,7 +125,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
         arguments.add(outputArguments);
         arguments.add(inputArguments);
         /* TODO:
-         * Verify that the actual inputs/outputs are supported
+         * Verify that the actual inputs/outputs are supported (not sure how to best do that)!
          */
         
         return true;
@@ -142,6 +142,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                 long time = System.currentTimeMillis();
                 String executable = null;
                 ArrayList<String> arguments = new ArrayList<String>();
+                String debugMsg = "";
                 if (canUseEvaluator(ext, arguments)) {
                     String jmHome = System.getenv("JMODELICA_HOME");
                     String platform = CCompilerDelegator.reduceBits(EnvironmentUtils.getJavaPlatform(),mc.getCCompiler().getTargetPlatforms());
@@ -150,9 +151,12 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                     
                     arguments.add(0, executable); /* Needs to be first */
                     
-                    mc.log().debug("Using pre-compiled evaluator for outputs: '" + getOutputArguments(ext) + "' and inputs: '" + getInputArguments(ext) +"'");
+                    debugMsg = "Succesfully connected external function '" + ext.getName() + "' to the evaluator '"
+                            + executable + "' with outputs: '" + getOutputArguments(ext) + "' and inputs: '" + getInputArguments(ext) + "'";
                 } else {
                     executable = mc.compileExternal(ext);
+                    debugMsg = "Succesfully compiled external function '" + ext.getName() + "' to executable '"
+                            + executable + "' code for evaluation";
                 }
                 arguments = arguments.size() == 0 ? null : arguments; /* Can likely be made better...*/
                 if (ext.shouldCacheProcess()) {
@@ -161,8 +165,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                     ef = new CompiledExternalFunction(ext, executable, arguments);
                 }
                 time = System.currentTimeMillis() - time;
-                mc.log().debug("Succesfully compiled external function '" + ext.getName() + "' to executable '"
-                        + executable + "' code for evaluation, time: " + time + "ms");
+                mc.log().debug(debugMsg +", time: " + time + "ms");
             } catch (FileNotFoundException e) {
                 ef = failedEval(ext, "c-code generation failed '" + e.getMessage() + "'", true);
                 mc.log().debug(ef.getMessage());
@@ -293,8 +296,6 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
 
         public void evaluate(External<K> ext, Map<K, V> values, int timeout, ProcessCommunicator<V, T> com)
                 throws IOException {
-            long time = System.currentTimeMillis();
-            log().debug("Evaluating external function: " + ext.getName());
             com.startTimer(timeout);
             com.check("EVAL");
 
@@ -307,8 +308,6 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                 values.put(cvd, com.get(cvd.type()));
             com.accept("READY");
             com.cancelTimer();
-            time = System.currentTimeMillis() - time;
-            log().debug("Finished evaluating external function, time: " + time + "ms");
         }
 
         public int teardown(int timeout, ProcessCommunicator<V, T> com) throws IOException {
