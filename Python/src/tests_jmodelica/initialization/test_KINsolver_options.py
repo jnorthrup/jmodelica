@@ -317,7 +317,7 @@ class TestInitOptions20:
         self.model.initialize()
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        print solves
+        print(solves)
         nose.tools.assert_equals(len(solves), 2)
     
     @testattr(stddist_full = True)

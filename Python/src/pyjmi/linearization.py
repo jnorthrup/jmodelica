@@ -24,6 +24,7 @@ import numpy as N
 from collections import OrderedDict, Iterable
 import pyjmi.jmi as jmi
 from pyjmi.common.core import TrajectoryLinearInterpolation
+from functools import reduce
 
 int = N.int32
 N.int = N.int32
@@ -225,7 +226,7 @@ def linearize_dae_with_point(optProblem,t0,z0):
     dae = casadi.substitute([optProblem.getDaeResidual()], par_vars, par_vals)
     
     # Substitute named variables with vector variables in expressions
-    named_vars = reduce(list.__add__, named_mvar_struct.values()) 
+    named_vars = reduce(list.__add__, list(named_mvar_struct.values())) 
     mvar_struct = OrderedDict()
     mvar_struct["time"] = casadi.MX.sym("time")
     mvar_struct["dx"] = casadi.MX.sym("dx", n_var['dx'])
@@ -280,7 +281,7 @@ def linearize_dae_with_point(optProblem,t0,z0):
     
     #Sort Values for reference point
     stop=False
-    for vt in z0.keys():
+    for vt in list(z0.keys()):
         RefPoint[vt] = N.zeros(n_var[vt])
         passed_indices = list()
         for var_tuple in z0[vt]:
@@ -303,7 +304,7 @@ def linearize_dae_with_point(optProblem,t0,z0):
         sys.exit()
                 
     missing_types = [vt for vt in var_kinds \
-                     if vt not in z0.keys() and n_var[vt]!=0]
+                     if vt not in list(z0.keys()) and n_var[vt]!=0]
     if len(missing_types) !=0:
         sys.stderr.write("Error: Please provide the following types in z0:\n")
         for j in missing_types:
@@ -473,7 +474,7 @@ def linearize_dae_with_simresult(optProblem, t0, sim_result):
     dae = casadi.substitute([optProblem.getDaeResidual()], par_vars, par_vals)
     
     # Substitute named variables with vector variables in expressions
-    named_vars = reduce(list.__add__, named_mvar_struct.values()) 
+    named_vars = reduce(list.__add__, list(named_mvar_struct.values())) 
     mvar_struct = OrderedDict()
     mvar_struct["time"] = casadi.MX.sym("time")
     mvar_struct["dx"] = casadi.MX.sym("dx", n_var['dx'])
@@ -531,10 +532,10 @@ def linearize_dae_with_simresult(optProblem, t0, sim_result):
             try:
                 data = sim_result.result_data.get_variable_data(name)
             except (pyfmi.common.io.VariableNotFoundError, pyjmi.common.io.VariableNotFoundError):
-                print("Warning: Could not find initial " +
+                print(("Warning: Could not find initial " +
                       "trajectory for variable " + name +
                       ". Using initialGuess attribute value " +
-                      "instead.")
+                      "instead."))
                 ordinates = N.array([[
                     op.get_attr(var, "initialGuess")]])
                 abscissae = N.array([0])

@@ -181,11 +181,11 @@ def run_demo(with_plots=True):
     [a1_opt,a2_opt] = x_opt/1e6
 
     # Print optimal parameter values and optimal function value
-    print 'Optimal parameter values:'
-    print 'a1 = ' + str(a1_opt*1e4) + ' cm^2'
-    print 'a2 = ' + str(a2_opt*1e4) + ' cm^2'
-    print 'Optimal function value: ' + str(f_opt)
-    print ' '
+    print('Optimal parameter values:')
+    print('a1 = ' + str(a1_opt*1e4) + ' cm^2')
+    print('a2 = ' + str(a2_opt*1e4) + ' cm^2')
+    print('Optimal function value: ' + str(f_opt))
+    print(' ')
 
     model = load_fmu(fmu_name)
 
@@ -287,13 +287,13 @@ def run_demo(with_plots=True):
     [a1_opt,a2_opt,a3_opt,a4_opt] = x_opt/1e6
 
     # Print optimal parameters and function value
-    print 'Optimal parameter values:'
-    print 'a1 = ' + str(a1_opt*1e4) + ' cm^2'
-    print 'a2 = ' + str(a2_opt*1e4) + ' cm^2'
-    print 'a3 = ' + str(a3_opt*1e4) + ' cm^2'
-    print 'a4 = ' + str(a4_opt*1e4) + ' cm^2'
-    print 'Optimal function value: ' + str(f_opt)
-    print ' '
+    print('Optimal parameter values:')
+    print('a1 = ' + str(a1_opt*1e4) + ' cm^2')
+    print('a2 = ' + str(a2_opt*1e4) + ' cm^2')
+    print('a3 = ' + str(a3_opt*1e4) + ' cm^2')
+    print('a4 = ' + str(a4_opt*1e4) + ' cm^2')
+    print('Optimal function value: ' + str(f_opt))
+    print(' ')
 
     model = load_fmu(fmu_name)
     

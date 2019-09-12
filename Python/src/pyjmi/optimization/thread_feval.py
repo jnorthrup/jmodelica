@@ -83,7 +83,7 @@ def feval(func_file_name,x,debug):
 		th.join()
 		retval = th.retval
 		if retval != 0:
-			raise OSError, 'Something went wrong with the function evaluation: os.system did not return 0.'
+			raise OSError('Something went wrong with the function evaluation: os.system did not return 0.')
 		f_string = file(dir_name+'/f_value.txt').read()
 		fval = eval(f_string)
 	
@@ -105,7 +105,7 @@ def feval(func_file_name,x,debug):
 		for i in range(m):
 			retval = threads[i].retval
 			if retval != 0:
-				raise OSError, 'Something went wrong with the function evaluation: os.system did not return 0.'
+				raise OSError('Something went wrong with the function evaluation: os.system did not return 0.')
 			dir_name = 'dir_'+str(i+1)
 			f_string = file(dir_name+'/f_value.txt').read()
 			fval[i] = eval(f_string)

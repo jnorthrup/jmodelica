@@ -226,7 +226,7 @@ class Test_FMUModelME1Extended:
         rlc_square  = FMUModelME1Extended(Test_FMUModelME1Extended.rlc_circuit_square)
         res1 = rlc_square.simulate()
         resistor_v = res1['resistor.v']
-        print resistor_v[-1]
+        print(resistor_v[-1])
         assert N.abs(resistor_v[-1] + 0.233534539103) < 1e-3
         rlc_square.reset()
         res2 = rlc_square.simulate()

@@ -155,9 +155,9 @@ def run_demo(with_plots = True):
         constr_x_est_t = constr_MHE_object.step(u_t, y_t)
         unconstr_x_est_t = unconstr_MHE_object.step(u_t, y_t)
         #Add the results to x_est
-        for key in constr_x_est.keys():
+        for key in list(constr_x_est.keys()):
             constr_x_est[key].append(constr_x_est_t[key])
-        for key in unconstr_x_est.keys():
+        for key in list(unconstr_x_est.keys()):
             unconstr_x_est[key].append(unconstr_x_est_t[key])
         ###Prepare the simulation
         #Create the input object
@@ -165,7 +165,7 @@ def run_demo(with_plots = True):
         input_object = ('Tc', u_traj)
         
         #Set the initial values of the states
-        for (key, list)in x.items():
+        for (key, list)in list(x.items()):
             model.set('_start_' + key, list[-1])
         
         #Simulate with one communication point to get the 
@@ -175,7 +175,7 @@ def run_demo(with_plots = True):
                              options={'ncp':1})
     
         #Extract the state values from the result object
-        for key in x.keys():
+        for key in list(x.keys()):
             x[key].append(res[key][-1])
         #reset the FMU
         model.reset()

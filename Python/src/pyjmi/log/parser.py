@@ -21,7 +21,7 @@ Parser for the new JModelica FMU log format
 from xml import sax
 import re
 import numpy as np
-from tree import *
+from .tree import *
 
 
 ## Leaf parser ##
@@ -154,8 +154,8 @@ def parse_xml_log(filename, accept_errors=False):
         parser.parse(filename)
     except sax.SAXException as e:
         if accept_errors:
-            print 'Warning: Failure during parsing of XML JMI log:\n', e
-            print 'Parsed log will be incomplete.'
+            print('Warning: Failure during parsing of XML JMI log:\n', e)
+            print('Parsed log will be incomplete.')
         else:
             raise Exception('Failed to parse XML JMI log:\n' + repr(e))
         
@@ -179,8 +179,8 @@ def parse_jmi_log(filename, modulename = 'Model', accept_errors=False):
         parser.close()
     except sax.SAXException as e:
         if accept_errors:
-            print 'Warning: Failure during parsing of XML JMI log:\n', e
-            print 'Parsed log will be incomplete'
+            print('Warning: Failure during parsing of XML JMI log:\n', e)
+            print('Parsed log will be incomplete')
         else:
             raise Exception('Failed to parse XML JMI log:\n' + repr(e))
     

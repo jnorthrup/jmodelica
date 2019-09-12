@@ -21,10 +21,10 @@ Interfaces to the JModelica.org Modelica and Optimica compilers.
 import jpype
 
 import pymodelica as pym
-from compiler_interface import *
-from compiler_logging import CompilerLogHandler, LogHandlerThread
+from .compiler_interface import *
+from .compiler_logging import CompilerLogHandler, LogHandlerThread
 from pymodelica.common.core import list_to_string
-from compiler_exceptions import *
+from .compiler_exceptions import *
 
 
 class ModelicaCompiler(object):
@@ -64,10 +64,10 @@ class ModelicaCompiler(object):
             types (float, boolean, string, integer or list).
         """
         # set compiler options
-        for key, value in compiler_options.iteritems():
+        for key, value in compiler_options.items():
             if isinstance(value, bool):
                 self.set_boolean_option(key, value)
-            elif isinstance(value, basestring):
+            elif isinstance(value, str):
                 self.set_string_option(key,value)
             elif isinstance(value, int):
                 self.set_integer_option(key,value)
@@ -319,7 +319,7 @@ class ModelicaCompiler(object):
         return warnings
         
     def set_target_platforms(self, platforms):
-        if isinstance(platforms, basestring):
+        if isinstance(platforms, str):
             platforms = [platforms]
         self._compiler.targetPlatforms = platforms
         
@@ -362,7 +362,7 @@ class ModelicaCompiler(object):
             self._compiler.closeLogger()
         except jpype.JavaException as ex:
             self._handle_exception(ex)
-        from compiler import CompilerResult
+        from .compiler import CompilerResult
         return CompilerResult(unit, self.get_warnings())
 
     def parse_model(self,model_file_name):
@@ -395,7 +395,7 @@ class ModelicaCompiler(object):
             JError if there was a runtime exception thrown by the underlying 
             Java classes.
         """        
-        if isinstance(model_file_name, basestring):
+        if isinstance(model_file_name, str):
             model_file_name = [model_file_name]
         try:
             sr = self._compiler.parseModel(model_file_name)
@@ -522,7 +522,7 @@ class ModelicaCompiler(object):
             errors = []
             warnings = []
             while itr.hasNext():
-                problem = itr.next()
+                problem = next(itr)
                 if str(problem.severity()).lower() == 'warning':
                     warnings.append(CompilationWarning( \
                         problem.identifier(), \
