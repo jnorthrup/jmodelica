@@ -24,13 +24,14 @@ import abc
 import numpy as N
 import numpy.linalg
 import scipy.special as SP
+from six import with_metaclass
 try:
     import casadi
 except ImportError:
     logging.warning(
         'Could not find CasADi package, aborting.')
 
-class LocalPol(object, metaclass=abc.ABCMeta):
+class LocalPol(object, with_metaclass(abc.ABCMeta)):
     
     """
     Abstract base class for Lagrange polynomials used for local collocation.

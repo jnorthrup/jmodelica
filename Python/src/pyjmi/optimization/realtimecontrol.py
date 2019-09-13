@@ -15,7 +15,7 @@ from pyjmi.optimization.casadi_collocation import BlockingFactors
 from casadi import ExternalFunction, NlpSolver
 from pymodelica import compile_fmu
 from pyfmi import load_fmu
-
+from six import with_metaclass
 
 class ParameterChanges(object):
     
@@ -81,7 +81,7 @@ class ParameterChanges(object):
         return None
       
       
-class RealTimeBase(object, metaclass=ABCMeta):
+class RealTimeBase(object, with_metaclass(metaclass=ABCMeta)):
     
     def __init__(self, dt, t_final, start_values, output_names, 
                  input_names, par_changes = ParameterChanges(), noise=0):
