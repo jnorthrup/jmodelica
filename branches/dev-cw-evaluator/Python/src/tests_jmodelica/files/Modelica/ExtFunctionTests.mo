@@ -1,13 +1,38 @@
 package ExtFunctionTests
 
-model Substring
+model Evaluator_Substring
     constant String full="Yy00";
     constant String sub=Modelica.Utilities.Strings.substring(full,1,1);
     constant String string1 = "This is line 111";
     constant String string2 = Modelica.Utilities.Strings.substring(string1,9,12); // string2 = \"line\"
     constant Integer len = Modelica.Utilities.Strings.length(string1);
     constant Integer start = Modelica.Utilities.Strings.Advanced.skipWhiteSpace("   Hello", 1);
-end Substring;
+end Evaluator_Substring;
+
+model Evaluator_Add
+ function add1
+     input Real a;
+     input Real b;
+     output Real c;
+
+     external "C" c=add(a,b) annotation(Library="addNumbersShared",
+                             Include="#include \"addNumbers.h\"");
+ end add1;
+ 
+ function add2
+     input Real a;
+     input Real b;
+     output Real c;
+
+     external "C" add_output(a,b,c) annotation(Library="addNumbersShared",
+                             Include="#include \"addNumbers.h\"");
+ end add2;
+
+ constant Real a = 1;
+ constant Real b = 2;
+ Real c = add1(a,b);
+ Real d = add2(a,b);
+end Evaluator_Add;
 
 model ExtFunctionTest1
  Real a(start=1) = 1;
