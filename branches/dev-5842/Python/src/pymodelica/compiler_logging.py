@@ -128,6 +128,12 @@ class KeepLastStream():
         self.last = self.stream.read(num)
         return self.last
     
+    def close():
+        """
+        Closes the underlying stream.
+        """
+        self.stream.close()
+    
     def genErrorMsg(self, e):
         column = e.getColumnNumber()
         localLine = e.getLineNumber() - self.line
