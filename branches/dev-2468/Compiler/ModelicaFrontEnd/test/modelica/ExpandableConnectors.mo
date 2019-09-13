@@ -104,6 +104,11 @@ fclass ExpandableConnectors.Expandable2
  potential Real c5.a;
  flow Real c5.b;
 equation
+ c1.b = 0.0;
+ c2.b = 0.0;
+ c3.b = 0.0;
+ c4.b = 0.0;
+ c5.b = 0.0;
  c1.a = c3.a;
  c3.a = c5.a;
  c5.a = ec1.x.a;
@@ -2709,6 +2714,8 @@ fclass ExpandableConnectors.ConnectorArrays.ConnectorArray1
  Real ec.x.b;
  Real ec.x.c[2];
 equation
+ c[1].a[1:1] = zeros(1);
+ c[1].b = 0.0;
  - c[1].a[1:1] - ec.x.a[1:1] = zeros(1);
  - c[1].b - ec.x.b = 0.0;
  c[1].c[1:2] = ec.x.c[1:2];
@@ -2753,6 +2760,10 @@ fclass ExpandableConnectors.ConnectorArrays.ConnectorArray2
  Real ec.x[2].b;
  Real ec.x[2].c[2];
 equation
+ c[1].a[1:1] = zeros(1);
+ c[1].b = 0.0;
+ c[2].a[1:1] = zeros(1);
+ c[2].b = 0.0;
  - c[1].a[1:1] - ec.x[1].a[1:1] = zeros(1);
  - c[1].b - ec.x[1].b = 0.0;
  c[1].c[1:2] = ec.x[1].c[1:2];
@@ -2805,6 +2816,12 @@ fclass ExpandableConnectors.ConnectorArrays.ConnectorArray3
  Real ec.x[2].b;
  Real ec.x[2].c[2];
 equation
+ c[1].a[1:1] = zeros(1);
+ c[1].b = 0.0;
+ c[2].a[1:1] = zeros(1);
+ c[2].b = 0.0;
+ c[3].a[1:1] = zeros(1);
+ c[3].b = 0.0;
  - c[2].a[1:1] - ec.x[1].a[1:1] = zeros(1);
  - c[2].b - ec.x[1].b = 0.0;
  c[2].c[1:2] = ec.x[1].c[1:2];
@@ -2858,6 +2875,10 @@ fclass ExpandableConnectors.ConnectorArrays.ConnectorArray4
  Real ec.x[3].b;
  Real ec.x[3].c[2];
 equation
+ c1.a[1:1] = zeros(1);
+ c1.b = 0.0;
+ c2.a[1:1] = zeros(1);
+ c2.b = 0.0;
  - c1.a[1:1] - ec.x[1].a[1:1] = zeros(1);
  - c1.b - ec.x[1].b = 0.0;
  c1.c[1:2] = ec.x[1].c[1:2];
@@ -2912,6 +2933,8 @@ fclass ExpandableConnectors.ConnectorArrays.ConnectorArray5
  Real ec.x[2].a[3];
  Real ec.x[2].b[3];
 equation
+ c[1].a[1:2] = zeros(2);
+ c[2].a[1:3] = zeros(3);
  - c[1].a[1:2] - ec.x[1].a[1:2] = zeros(2);
  c[1].b[1:2] = ec.x[1].b[1:2];
  - c[2].a[1:3] - ec.x[2].a[1:3] = zeros(3);
@@ -2961,6 +2984,8 @@ fclass ExpandableConnectors.ConnectorArrays.ConnectorArray6
  Real ec.x[3].b;
  Real ec.x[3].c;
 equation
+ c1.a = 0.0;
+ c2.a = 0.0;
  - c1.a - ec.x[1].a = 0.0;
  c1.b = inStream(ec.x[1].b);
  ec.x[1].b = inStream(c1.b);

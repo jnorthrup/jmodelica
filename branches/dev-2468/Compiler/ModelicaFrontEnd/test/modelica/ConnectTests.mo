@@ -315,6 +315,10 @@ equation
  - a1[1].y - a2[1].y = 0.0;
  a1[2].x = a2[2].x;
  - a1[2].y - a2[2].y = 0.0;
+ a1[1].y = 0.0;
+ a1[2].y = 0.0;
+ a2[1].y = 0.0;
+ a2[2].y = 0.0;
 end ConnectTests.ConnectTest7;
 ")})));
 end ConnectTest7;
@@ -351,6 +355,10 @@ equation
  a[2].x = a[3].x;
  a[3].x = a[4].x;
  - a[1].y - a[2].y - a[3].y - a[4].y = 0.0;
+ a[1].y = 0.0;
+ a[2].y = 0.0;
+ a[3].y = 0.0;
+ a[4].y = 0.0;
 end ConnectTests.ConnectTest8;
 ")})));
 end ConnectTest8;
@@ -379,6 +387,8 @@ fclass ConnectTests.ConnectTest9
 equation
  a[1].x = a[2].x;
  - a[1].y - a[2].y = 0.0;
+ a[1].y = 0.0;
+ a[2].y = 0.0;
 end ConnectTests.ConnectTest9;
 ")})));
 end ConnectTest9;
@@ -453,6 +463,10 @@ equation
  - c1.b1.y - c2.b1.y = 0.0;
  c1.b2.x = c2.b2.x;
  - c1.b2.y - c2.b2.y = 0.0;
+ c1.b1.y = 0.0;
+ c1.b2.y = 0.0;
+ c2.b1.y = 0.0;
+ c2.b2.y = 0.0;
 end ConnectTests.ConnectTest11;
 ")})));
 end ConnectTest11;
@@ -548,6 +562,30 @@ equation
  b[3,1].a[2].x = b[3,2].a[2].x;
  b[3,2].a[2].x = b[3,3].a[2].x;
  - b[1,1].a[1].y - b[1,1].a[2].y - b[1,2].a[1].y - b[1,2].a[2].y - b[1,3].a[1].y - b[1,3].a[2].y - b[1,4].a[1].y - b[2,1].a[1].y - b[2,1].a[2].y - b[2,2].a[1].y - b[2,2].a[2].y - b[2,3].a[1].y - b[2,3].a[2].y - b[2,4].a[1].y - b[3,1].a[2].y - b[3,2].a[2].y - b[3,3].a[2].y = 0.0;
+ b[1,1].a[1].y = 0.0;
+ b[1,1].a[2].y = 0.0;
+ b[1,2].a[1].y = 0.0;
+ b[1,2].a[2].y = 0.0;
+ b[1,3].a[1].y = 0.0;
+ b[1,3].a[2].y = 0.0;
+ b[1,4].a[1].y = 0.0;
+ b[1,4].a[2].y = 0.0;
+ b[2,1].a[1].y = 0.0;
+ b[2,1].a[2].y = 0.0;
+ b[2,2].a[1].y = 0.0;
+ b[2,2].a[2].y = 0.0;
+ b[2,3].a[1].y = 0.0;
+ b[2,3].a[2].y = 0.0;
+ b[2,4].a[1].y = 0.0;
+ b[2,4].a[2].y = 0.0;
+ b[3,1].a[1].y = 0.0;
+ b[3,1].a[2].y = 0.0;
+ b[3,2].a[1].y = 0.0;
+ b[3,2].a[2].y = 0.0;
+ b[3,3].a[1].y = 0.0;
+ b[3,3].a[2].y = 0.0;
+ b[3,4].a[1].y = 0.0;
+ b[3,4].a[2].y = 0.0;
 end ConnectTests.ConnectTest12;
 ")})));
 end ConnectTest12;
@@ -594,6 +632,12 @@ equation
  b[1].a[2].x = b[2].a[2].x;
  b[2].a[2].x = b[3].a[2].x;
  - b[1].a[2].y - b[2].a[2].y - b[3].a[2].y = 0.0;
+ b[1].a[1].y = 0.0;
+ b[1].a[2].y = 0.0;
+ b[2].a[1].y = 0.0;
+ b[2].a[2].y = 0.0;
+ b[3].a[1].y = 0.0;
+ b[3].a[2].y = 0.0;
 end ConnectTests.ConnectTest13;
 ")})));
 end ConnectTest13;
@@ -669,6 +713,22 @@ equation
  - b1[2,2].a[1].y - b2[2,2].a[1].y = 0.0;
  b1[2,2].a[2].x = b2[2,2].a[2].x;
  - b1[2,2].a[2].y - b2[2,2].a[2].y = 0.0;
+ b1[1,1].a[1].y = 0.0;
+ b1[1,1].a[2].y = 0.0;
+ b1[1,2].a[1].y = 0.0;
+ b1[1,2].a[2].y = 0.0;
+ b1[2,1].a[1].y = 0.0;
+ b1[2,1].a[2].y = 0.0;
+ b1[2,2].a[1].y = 0.0;
+ b1[2,2].a[2].y = 0.0;
+ b2[1,1].a[1].y = 0.0;
+ b2[1,1].a[2].y = 0.0;
+ b2[1,2].a[1].y = 0.0;
+ b2[1,2].a[2].y = 0.0;
+ b2[2,1].a[1].y = 0.0;
+ b2[2,1].a[2].y = 0.0;
+ b2[2,2].a[1].y = 0.0;
+ b2[2,2].a[2].y = 0.0;
 end ConnectTests.ConnectTest14;
 ")})));
 end ConnectTest14;
@@ -743,6 +803,22 @@ equation
  - b[1,2,2].a[1].y - b[2,2,2].a[1].y = 0.0;
  b[1,2,2].a[2].x = b[2,2,2].a[2].x;
  - b[1,2,2].a[2].y - b[2,2,2].a[2].y = 0.0;
+ b[1,1,1].a[1].y = 0.0;
+ b[1,1,1].a[2].y = 0.0;
+ b[1,1,2].a[1].y = 0.0;
+ b[1,1,2].a[2].y = 0.0;
+ b[1,2,1].a[1].y = 0.0;
+ b[1,2,1].a[2].y = 0.0;
+ b[1,2,2].a[1].y = 0.0;
+ b[1,2,2].a[2].y = 0.0;
+ b[2,1,1].a[1].y = 0.0;
+ b[2,1,1].a[2].y = 0.0;
+ b[2,1,2].a[1].y = 0.0;
+ b[2,1,2].a[2].y = 0.0;
+ b[2,2,1].a[1].y = 0.0;
+ b[2,2,1].a[2].y = 0.0;
+ b[2,2,2].a[1].y = 0.0;
+ b[2,2,2].a[2].y = 0.0;
 end ConnectTests.ConnectTest15;
 ")})));
 end ConnectTest15;
@@ -1124,6 +1200,10 @@ equation
  - a1.b[1].y - a2.b[1].y = 0.0;
  a1.b[2].x = a2.b[2].x;
  - a1.b[2].y - a2.b[2].y = 0.0;
+ a1.b[1].y = 0.0;
+ a1.b[2].y = 0.0;
+ a2.b[1].y = 0.0;
+ a2.b[2].y = 0.0;
 end ConnectTests.ConnectTest26;
 ")})));
 end ConnectTest26;
@@ -1569,6 +1649,7 @@ fclass ConnectTests.ConnectOuterTest9
  Real b.d.c2.x;
  Real b.d.c2.y;
 equation
+ c1.y = 0.0;
  b.c2.x = c1.x;
  - b.c2.y - c1.y = 0.0;
  b.c1.y = 0.0;
@@ -2618,11 +2699,13 @@ equation
         end if;
     end for;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="StreamTest6",
-            description="Check that inStream() using out-of-bounds array access does not cause crash when used in inactive if branch",
-            flatModel="
+annotation(__JModelica(UnitTesting(tests={
+    TransformCanonicalTestCase(
+        name="StreamTest6",
+        description="Check that inStream() using out-of-bounds array access does not cause crash when used in inactive if branch",
+        eliminate_alias_variables=false,
+        variability_propagation=false,
+        flatModel="
 fclass ConnectTests.StreamTest6
  structural parameter Integer n = 2 /* 2 */;
  Real x[1];
@@ -2652,6 +2735,8 @@ equation
  a[2].a = b[2].a.a;
  - a[2].b + b[2].a.b = 0.0;
  a[2].c = b[2].a.c;
+ a[1].b = 0.0;
+ a[2].b = 0.0;
 end ConnectTests.StreamTest6;
 ")})));
 end StreamTest6;
@@ -2713,6 +2798,8 @@ annotation(__JModelica(UnitTesting(tests={
     TransformCanonicalTestCase(
         name="Cardinality2",
         description="cardinality(): basic test",
+        eliminate_alias_variables=false,
+        variability_propagation=false,
         flatModel="
 fclass ConnectTests.Cardinality2
  potential Real x.a;
@@ -3153,6 +3240,8 @@ annotation(__JModelica(UnitTesting(tests={
     TransformCanonicalTestCase(
         name="TopLevelIO2",
         description="",
+        eliminate_alias_variables=false,
+        variability_propagation=false,
         flatModel="
 fclass ConnectTests.TopLevelIO2
  input Real c1.x;
@@ -3162,6 +3251,7 @@ fclass ConnectTests.TopLevelIO2
 equation
  - c1.f + m.c2.f = 0.0;
  c1.x = m.c2.x;
+ c1.f = 0.0;
 end ConnectTests.TopLevelIO2;
 ")})));
 end TopLevelIO2;

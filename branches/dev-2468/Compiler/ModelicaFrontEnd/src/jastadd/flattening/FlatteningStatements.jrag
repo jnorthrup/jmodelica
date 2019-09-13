@@ -244,11 +244,22 @@ aspect FlatStatements {
     eq InstForStmt.getChild().breakCondName() = myTempVarName();
     eq Root.getChild().breakCondName() = null;
 
-    public boolean InstClassDecl.componentExists(String name) {
+    public boolean InstNode.componentExists(String name) {
         for (InstComponentDecl decl : allInstComponentDecls()) {
             if (decl.name().equals(name)) {
                 return true;
             }
+        }
+        return false;
+    }
+    
+    public boolean InstNode.componentExists(Iterator<String> qualifiedName) {
+        if (!qualifiedName.hasNext()) {
+            return true;
+        }
+        String name = qualifiedName.next();
+        if (componentExists(name)) {
+            return memberInstComponent(name).targetOrNull().componentExists(qualifiedName);
         }
         return false;
     }

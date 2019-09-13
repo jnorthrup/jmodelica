@@ -1619,6 +1619,9 @@ aspect MultiDeclMethods {
         public void flattenFunction(Flattener f);
     }
     
+    syn InstClassDecl InstNode.asInstClassDecl() {
+        throw new UnsupportedOperationException();
+    }
     syn InstClassDecl InstClassDecl.asInstClassDecl() = this;
     syn InstClassDecl InstPartialFunction.asInstClassDecl()  = unknownInstClassDecl();
     
@@ -1628,8 +1631,7 @@ aspect MultiDeclMethods {
     syn InstClassDecl InstClassDecl.actualInstClassDecl()       = actualInstClass();
     syn InstClassDecl InstPartialFunction.actualInstClassDecl() = myInstClass().actualInstClass();
     
-    syn InstNode InstClassDecl.asInstNode() = this;
-    syn InstNode InstPartialFunction.asInstNode()  = this;
+    syn InstNode InstNode.asInstNode() = this;
     
     syn InstCallable InstFunctionCall.myInstCallable() = getName().myInstCallable();
     

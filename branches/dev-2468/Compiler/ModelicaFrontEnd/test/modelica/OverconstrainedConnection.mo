@@ -334,6 +334,8 @@ annotation(__JModelica(UnitTesting(tests={
 fclass OverconstrainedConnection.OverconstrainedCorrect6
  potential Real c1.x;
  flow Real c1.y;
+equation
+ c1.y = 0.0;
 end OverconstrainedConnection.OverconstrainedCorrect6;
 ")})));
 end OverconstrainedCorrect6;
