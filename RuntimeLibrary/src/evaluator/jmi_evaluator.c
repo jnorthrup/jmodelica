@@ -186,7 +186,30 @@ typedef int (__stdcall *f_i_ii)(int, int);
 typedef int (__stdcall *f_i_s)(const char*);
 typedef int (__stdcall *f_i_si)(const char*, int);
 typedef void(__stdcall *f___iddpR_ddddddddddd_)(int, double, double, R_ddddddddddd**);
+typedef void(__stdcall *f___ddpd)(double, double, double*);
 typedef void (*generic_funcptr)(void);
+
+void jmi_call_void_fcn_ddpd(generic_funcptr fcn) { 
+    JMI_DEF(REA, arg_0)
+    JMI_DEF(REA, arg_1)
+    JMI_DEF(REA, arg_2)
+
+    JMCEVAL_parse(Real, arg_0);
+    JMCEVAL_parse(Real, arg_1);
+    JMCEVAL_parse(Real, arg_2);
+    
+    JMCEVAL_check("CALC");
+    if (JMCEVAL_try()) {
+        /* Calc phase */
+        ((f___ddpd)fcn)(arg_0, arg_1, &arg_2);
+
+        JMCEVAL_check("DONE");
+        JMCEVAL_print(Real, arg_2);
+    }
+    else {
+        JMCEVAL_failed();
+    }
+}
 
 void jmi_call_void_fcn_iddpR_ddddddddddd_(generic_funcptr fcn) {
     JMI_DEF(INT, arg_0)
@@ -399,6 +422,8 @@ void jmi_call_void_fcn(generic_funcptr fcn, const char* inputs) {
 
     if (strcmp(inputs, "i,d,d,*R[d,d,d,d,d,d,d,d,d,d,d,],") == 0) {
         jmi_call_void_fcn_iddpR_ddddddddddd_(fcn);
+    } else if (strcmp(inputs, "d,d,*d,") == 0) {
+        jmi_call_void_fcn_ddpd(fcn);
     } else {
         printf(ERROR_NOT_SUPPORTED_INPUT_ARGS_MSG);
         exit(ERROR_NOT_SUPPORTED_INPUT_ARGS);

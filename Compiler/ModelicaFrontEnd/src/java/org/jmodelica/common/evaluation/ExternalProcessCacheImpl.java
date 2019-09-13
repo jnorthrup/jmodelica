@@ -70,6 +70,11 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                     File tmp = new File(libLoc, lib.concat(SystemUtil.sharedLibraryExtension()));
                     if (tmp.exists() && !tmp.isDirectory()) {
                         sharedLib = tmp.toString();
+                    } else {
+                        File tmpWithLib = new File(libLoc, "lib"+lib.concat(SystemUtil.sharedLibraryExtension()));
+                        if (tmpWithLib.exists() && !tmpWithLib.isDirectory()) {
+                            sharedLib = tmpWithLib.toString();
+                        }
                     }
                 }
             }
@@ -109,7 +114,6 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
         String functionName  = ext.getName();
         String outputArguments = getOutputArguments(ext);
         String inputArguments  = getInputArguments(ext);
-        
         
         if (sharedLibrary.equals("")) {
             if (builtinExternalFunctions.contains(functionName)) {

@@ -21,6 +21,7 @@ import os, subprocess, shutil
 from os.path import join as path
 
 import nose
+import fnmatch
 
 from pymodelica import compile_fmu
 from pymodelica.common.core import get_platform_dir, create_temp_dir
@@ -42,18 +43,40 @@ class TestEvaluator:
     
     @testattr(stddist_base = True)
     def test_builtin_substring(self):
-        """ 
-        Test compiling a model with external functions in a static library.
-        """
-        cpath = "ExtFunctionTests.Substring"
-        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"enable_external_evaluator":True})
+        cpath = "ExtFunctionTests.Evaluator_Substring"
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"enable_external_evaluator":True}, compiler_log_level="d:log.txt")
+        
+        nbr_of_evaluator_calls = 0
+        with open("log.txt") as f:
+            res = fnmatch.filter(f, "Succesfully connected external function '*' to the evaluator*")
+            nbr_of_evaluator_calls = len(res)
+        
+        assert nbr_of_evaluator_calls == 3, "Wrong number of external function calls, check log."
+        
         model = load_fmu(fmu_name)
         
-        assert model.get("sub")[0] == "Y"
-        assert model.get("string2")[0] == "line"
-        assert model.get("len") == 16
-        assert model.get("start") == 4
-
+        assert model.get("sub")[0] == "Y", model.get("sub")
+        assert model.get("string2")[0] == "line", model.get("string2")
+        assert model.get("len") == 16, model.get("len")
+        assert model.get("start") == 4, model.get("start")
+    
+    @testattr(stddist_base = True)
+    def test_add(self):
+        cpath = "ExtFunctionTests.Evaluator_Add"
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"enable_external_evaluator":True}, compiler_log_level="d:log.txt")
+        
+        nbr_of_evaluator_calls = 0
+        with open("log.txt") as f:
+            res = fnmatch.filter(f, "Succesfully connected external function '*' to the evaluator*")
+            nbr_of_evaluator_calls = len(res)
+        
+        assert nbr_of_evaluator_calls == 2, "Wrong number of external function calls, check log."
+        
+        model = load_fmu(fmu_name)
+        
+        assert model.get("c") == 3, model.get("c")
+        assert model.get("d") == 3, model.get("d")
+    
 class TestExternalStatic:
 
     @classmethod

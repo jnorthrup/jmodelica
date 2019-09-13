@@ -71,8 +71,10 @@ endif()
 
 #Build addNumbers library
 add_library(addNumbers STATIC ${ADDNUMBERS_Sources})
+add_library(addNumbersShared SHARED ${ADDNUMBERS_Sources})
 if(NOT MSVC)
     set_target_properties(addNumbers PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -O2")
+    set_target_properties(addNumbersShared PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -O2")
 endif()
 
 #Build arrayFunctions library
@@ -106,6 +108,7 @@ endif()
 
 #Install the libraries
 install(TARGETS addNumbers DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
+install(TARGETS addNumbersShared DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
 install(TARGETS arrayFunctions DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
 install(TARGETS externalFunctionsC DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
 install(TARGETS extObjects DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
