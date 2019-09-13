@@ -317,7 +317,6 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FSizeExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        str.print("(size_t) ");
         size().printSize_C(p, str, indent, getFExp(), dimension());
     }
 
