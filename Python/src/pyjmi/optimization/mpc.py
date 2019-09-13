@@ -132,7 +132,7 @@ class MPC(object):
             self.res['w'] = []
             self.res['elim_vars'] = []
 
-			
+            
         # Create array to storage eliminated variables
         self.eliminated_variables = op.getEliminatedVariables()
            
@@ -427,7 +427,7 @@ class MPC(object):
         # Check if horizon_time equals finalTime
         if N.abs(self.op.get('finalTime')-self.op.get('startTime')-\
                                                 self.horizon_time) > 1e-6:
-			self.op.set('finalTime',self.op.get('startTime')+self.horizon_time)
+            self.op.set('finalTime',self.op.get('startTime')+self.horizon_time)
             #print("Warning: The final time has been changed to %s" % op.get('finalTime'))
         print(("The prediction horizon is %s" % self.horizon_time))
 
@@ -533,7 +533,7 @@ class MPC(object):
         for k in range(n_values):
             for i,var in enumerate (self.eliminated_variables):
                 elims[i] = sim_res[var.getName()][k]
-			
+            
             self.res['elim_vars'].append(elims)
        
     def _add_times(self):
@@ -882,7 +882,7 @@ class MPC(object):
 
     def extract_states(self, sim_res, mean=0, st_dev=0.000):
         """
-		Extracts the last value of the states from a simulation result object 
+        Extracts the last value of the states from a simulation result object 
         and adds a noise with mean and variance as defined. 
         If 'create_comp_result' is True the method also saves and concatenates 
         all sim_res to create a complete MPC simulation result file.
@@ -902,7 +902,7 @@ class MPC(object):
                 Factor to be multiplied with the current value of each state to
                 define the stanard deviation of the noise.
                 Default: 0.000
-		"""
+        """
         if self.create_comp_result:
             self._append_to_result_file(sim_res)
         states = {}
@@ -958,7 +958,7 @@ class MPC(object):
         res_p = N.array(0).reshape(-1)
         
         if len(self.eliminated_variables) == 0:
-            self.res_elim_vars = N.ones([len(self.res['t']),0])	
+            self.res_elim_vars = N.ones([len(self.res['t']),0])    
         else:
             self.res_elim_vars = N.array(self.res['elim_vars']).reshape\
                                             ([-1, len(self.eliminated_variables)])                        
@@ -1012,18 +1012,18 @@ class MPC(object):
     def set(self, name, value): 
         """ 
         Sets the specified parameters in names to the value in values. 
- 	         
- 	        Parameters:: 
-	 	             
- 	            names -- 
- 	                List of parameter names whose values are to be changed.  
- 	                 
- 	                Type: [string] or string  
- 	                 
- 	            values -- 
- 	                Corresponding new values for the parameters. 
- 	                 
- 	                Type: [float] or float 
+              
+             Parameters:: 
+                      
+                 names -- 
+                     List of parameter names whose values are to be changed.  
+                      
+                     Type: [string] or string  
+                      
+                 values -- 
+                     Corresponding new values for the parameters. 
+                      
+                     Type: [float] or float 
         """ 
         self.op.set(name, value)
     
