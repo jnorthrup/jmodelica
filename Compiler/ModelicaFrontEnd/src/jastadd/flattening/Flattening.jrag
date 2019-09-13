@@ -2157,6 +2157,20 @@ aspect Flattening {
 
     syn boolean InstComponentDecl.isBuiltIn() = false;
     eq InstBuiltIn.isBuiltIn()                = true;
+    syn boolean InstBuiltInClassDecl.isBuiltIn()                = true;
+    syn boolean SrcBuiltInClassDecl.isBuiltIn()       = true;
+    syn boolean SrcClassDecl.isBuiltIn() = ((SourceRoot) root()).getProgram().getBuiltInTypes().hasChild(this)
+            || ((SourceRoot) root()).getProgram().getBuiltInFunctions().hasChild(this);
+    
+    public boolean List.hasChild(ASTNode node) {
+        for(ASTNode child : children) {
+            if(child == node) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
 
     public void InstComponentModification.collectAttributes(Flattener f,
             List<FAttribute> attrs, AttributeExpRetriever aer, boolean cls) {
