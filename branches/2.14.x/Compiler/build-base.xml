@@ -644,7 +644,8 @@
                     destdir="${javadoc_output}" 
                     packagenames="${javadoc.packages}" 
                     excludepackagenames="${test_helper_packages}" 
-                    classpath="${thirdparty_jars_build}" />
+                    classpath="${thirdparty_jars_build}"
+                    additionalparam="--no-module-directories" />
             </then>
         </if>
     </target>
