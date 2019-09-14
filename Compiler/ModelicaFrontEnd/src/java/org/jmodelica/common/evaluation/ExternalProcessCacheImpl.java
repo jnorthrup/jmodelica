@@ -119,7 +119,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
             if (builtinExternalFunctions.contains(functionName)) {
                 sharedLibrary = "NoSharedLibrary";
             } else {
-                /* Not a built in and not found any shared libraries */
+                mc.log().debug("Could not find a shared library containing '" + functionName + "'. Disabling use of the evaluator...");
                 return false;
             }
         }
