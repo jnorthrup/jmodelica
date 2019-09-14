@@ -1,11 +1,11 @@
 #include "addNumbers.h"
 
-double add(double a, double b)
+DllExport double add(double a, double b)
 {
   return a + b;
 }
 
-void add_output(double a, double b, double *c)
+DllExport void add_output(double a, double b, double *c)
 {
   *c = a + b;
 }
