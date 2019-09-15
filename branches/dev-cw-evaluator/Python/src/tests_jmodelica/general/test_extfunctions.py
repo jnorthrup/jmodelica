@@ -77,6 +77,19 @@ class TestEvaluator:
         assert model.get("c") == 3, model.get("c")
         assert model.get("d") == 3, model.get("d")
     
+    @testattr(stddist_base = True)
+    def test_unsupported_signature(self):
+        cpath = "ExtFunctionTests.Evaluator_Multiple_Add"
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"enable_external_evaluator":True}, compiler_log_level="d:log.txt")
+        
+        matches = 0
+        with open("log.txt") as f:
+            res = fnmatch.filter(f, "*is not supported. Disabling use of the evaluator*")
+            matches = len(res)
+        
+        assert matches == 1, "Does not seem to disabling the evaluator"
+
+    
 class TestExternalStatic:
 
     @classmethod

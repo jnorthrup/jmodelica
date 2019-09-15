@@ -34,6 +34,28 @@ model Evaluator_Add
  Real d = add2(a,b);
 end Evaluator_Add;
 
+model Evaluator_Multiple_Add
+ function add
+     input Real a;
+     input Real b;
+     input Real c;
+     input Real d;
+     input Real e;
+     input Real f;
+     input Real g;
+     input Real h;
+     input Real i;
+     output Real o;
+
+     external "C" o=multiple_add(a,b,c,d,e,f,g,h,i) annotation(Library="addNumbersShared",
+                             Include="#include \"addNumbers.h\"");
+ end add;
+ 
+ constant Real a = 1;
+ constant Real b = 2;
+ Real c = add(a,b,a,b,a,b,a,b,a);
+end Evaluator_Multiple_Add;
+
 model ExtFunctionTest1
  Real a(start=1) = 1;
  Real b(start=2) = 2;
