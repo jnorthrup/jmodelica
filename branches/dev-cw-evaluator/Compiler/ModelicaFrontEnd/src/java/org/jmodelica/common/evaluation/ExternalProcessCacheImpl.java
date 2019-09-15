@@ -100,6 +100,17 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
         add("ModelicaStrings_skipWhiteSpace");
     }};
     
+    private ArrayList<String> supportedSignatures = new ArrayList<String>() {{
+        add("d+d,d,");
+        add("d+i,");
+        add("d+i,d,d,");
+        add("s+s,i,i,");
+        add("i+s,");
+        add("i+s,i,");
+        add("void+i,d,d,*R[d,d,d,d,d,d,d,d,d,d,d,],");
+        add("void+d,d,*d,");
+    }};
+    
     public boolean canUseEvaluator(E ext, ArrayList<String> arguments) {
         if (!(ext.myOptions().getBooleanOption("enable_external_evaluator"))) {
             return false;
@@ -124,14 +135,16 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
             }
         }
         
+        if (!supportedSignatures.contains(outputArguments+"+"+inputArguments)) {
+            mc.log().debug("The function signature, outputs '" + outputArguments + "', inputs '" + inputArguments + "', is not supported. Disabling use of the evaluator...");
+            return false;
+        }
+        
         arguments.add(sharedLibrary);
         arguments.add(functionName);
         arguments.add(outputArguments);
         arguments.add(inputArguments);
-        /* TODO:
-         * Verify that the actual inputs/outputs are supported (not sure how to best do that)!
-         */
-        
+
         return true;
     }
     
