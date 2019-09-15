@@ -89,6 +89,20 @@ class TestEvaluator:
         
         assert matches == 1, "Does not seem to disabling the evaluator"
 
+    @testattr(stddist_base = True)
+    def test_unknown_shared_library(self):
+        cpath = "ExtFunctionTests.Evaluator_Unknown_Shared"
+        try:
+            fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"enable_external_evaluator":True}, compiler_log_level="d:log_unknown_shared.txt")
+        except: #The compilation will fail, the interesting parts will though still be contained in the log file
+            pass
+        
+        matches = 0
+        with open("log_unknown_shared.txt") as f:
+            res = fnmatch.filter(f, "Could not find a shared library containing*")
+            matches = len(res)
+        
+        assert matches == 1, "Seems to have found an unknown shared library"
     
 class TestExternalStatic:
 

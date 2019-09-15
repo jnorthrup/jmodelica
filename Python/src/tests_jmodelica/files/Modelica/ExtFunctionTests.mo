@@ -56,6 +56,16 @@ model Evaluator_Multiple_Add
  Real c = add(a,b,a,b,a,b,a,b,a);
 end Evaluator_Multiple_Add;
 
+model Evaluator_Unknown_Shared
+    function unknown_function
+        input Real a;
+        output Real b;
+        external "C" b = unknown(a) annotation(Library="unknown");
+    end unknown_function;
+    
+    constant Real a = unknown_function(1.0);
+end Evaluator_Unknown_Shared;
+
 model ExtFunctionTest1
  Real a(start=1) = 1;
  Real b(start=2) = 2;
