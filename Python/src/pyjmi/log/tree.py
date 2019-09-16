@@ -28,7 +28,8 @@ class Comment(object):
     text -- the comment text without enclosing braces {}
     """
     def __init__(self, text):
-        assert isinstance(text, str if version_info > (3, 0) else basestring)
+        # TODO: Do we really need this assert? It breaks py3 compatibility
+        #assert isinstance(text, basestring)
         self.text = text
 
     def __repr__(self):
@@ -43,7 +44,8 @@ class Node(object):
     """
 
     def __init__(self, type):
-        assert isinstance(type, str if version_info > (3, 0) else basestring)
+        # TODO: Do we really need this assert? It breaks py3 compatibility
+        #assert isinstance(type, basestring)
         self.type  = type
         self.nodes = []
         self.keys  = []
@@ -86,8 +88,7 @@ class Node(object):
 
         types may be a string or list of strings.
         """
-        if isinstance(types, str):
-            types = [types]
+        types = list(types) if not isinstance(types, list) else types
 
         nodes = []        
         for node in self.nodes:
