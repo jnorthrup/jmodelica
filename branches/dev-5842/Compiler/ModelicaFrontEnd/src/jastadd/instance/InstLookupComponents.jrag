@@ -22,6 +22,48 @@ aspect InstLookupComponents {
     class InstClassDecl     implements InstLookupResult.Item {}
     interface InstCallable  extends    InstLookupResult.Item {}
 
+        /**
+         * Indicates that the target was not found.
+         */
+        public static <T extends Item> InstLookupResult<T> InstLookupResult.notFound() {
+            return (InstLookupResult<T>) NOT_FOUND;
+        }
+
+        /**
+         * Indicates that the target was found.
+         * 
+         * Includes the found class or component.
+         */
+        public static <T extends Item> InstLookupResult<T> InstLookupResult.found(T target) {
+            return new Found(target);
+        }
+
+        /**
+         * Indicates that the target was found, but not accessible due to a constrainedby clause.
+         * 
+         * Includes the declaration with the limiting constrainedby clause.
+         */
+        public static <T extends Item> InstLookupResult<T> InstLookupResult.constrained(T target, InstNode constr) {
+            return new Constrained(target, constr);
+        }
+
+        /**
+         * Indicates that the target was found, but not accessible due to a constrainedby clause.
+         * 
+         * Includes the declaration with the limiting constrainedby clause.
+         */
+        public static <T extends Item> InstLookupResult<T> InstLookupResult.constrained(InstLookupResult<T> res, InstNode constr) {
+            return new Constrained(res.target(), constr);
+        }
+        
+        /**
+         * Indicates that the target was found as an outer, target() returns the corresponding inner.
+         */
+        public static InstLookupResult<InstComponentDecl> InstLookupResult.outer(InstComponentDecl outer) {
+            return new Outer(outer);
+        }
+
+
     /**
      * Result class for lookups in the instance tree.
      * 
@@ -32,49 +74,9 @@ aspect InstLookupComponents {
         public interface Item {
             public InstLookupResult<InstComponentDecl> memberInstComponent(String name);
             public InstCallable asCallable();
+            public InstNode asInstNode();
         }
         
-        /**
-         * Indicates that the target was not found.
-         */
-        public static <T extends Item> InstLookupResult<T> notFound() {
-            return (InstLookupResult<T>) NOT_FOUND;
-        }
-
-        /**
-         * Indicates that the target was found.
-         * 
-         * Includes the found class or component.
-         */
-        public static <T extends Item> InstLookupResult<T> found(T target) {
-            return new Found(target);
-        }
-
-        /**
-         * Indicates that the target was found, but not accessible due to a constrainedby clause.
-         * 
-         * Includes the declaration with the limiting constrainedby clause.
-         */
-        public static <T extends Item> InstLookupResult<T> constrained(T target, InstNode constr) {
-            return new Constrained(target, constr);
-        }
-
-        /**
-         * Indicates that the target was found, but not accessible due to a constrainedby clause.
-         * 
-         * Includes the declaration with the limiting constrainedby clause.
-         */
-        public static <T extends Item> InstLookupResult<T> constrained(InstLookupResult<T> res, InstNode constr) {
-            return new Constrained(res.target(), constr);
-        }
-        
-        /**
-         * Indicates that the target was found as an outer, target() returns the corresponding inner.
-         */
-        public static InstLookupResult<InstComponentDecl> outer(InstComponentDecl outer) {
-            return new Outer(outer);
-        }
-
         /**
          * Did the lookup succeed?
          */
