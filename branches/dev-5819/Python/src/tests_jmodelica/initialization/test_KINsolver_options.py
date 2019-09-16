@@ -341,13 +341,3 @@ class TestInitOptions20:
         expected = N.array([N.sqrt(11), 5. ])
         err_msg = "Arrays are not almost equal:\nEXPECTED: {}\nACTUAL: {}".format(expected, result)
         N.testing.assert_array_almost_equal(result, expected, err_msg=err_msg)
-        
-    
-        
-        
-        
-        
-        
-        
-        
-
