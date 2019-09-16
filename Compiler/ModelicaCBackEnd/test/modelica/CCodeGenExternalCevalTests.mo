@@ -157,13 +157,13 @@ end f;
 equation
 	(x1,x2,x3,x4,x5) = f({1},{2},{true},{"s"},{E.A});
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Array",
-            description="Test code gen for external C functions evaluation. Arrays.",
-            variability_propagation=false,
-            inline_functions="none",
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Array",
+        description="Test code gen for external C functions evaluation. Arrays.",
+        variability_propagation=false,
+        inline_functions="none",
+        template="
 $ECE_external_includes$
 $ECE_record_definitions$
 $ECE_decl$
@@ -184,7 +184,7 @@ $ECE_calc_free$
 ---
 $ECE_free$
 ",
-            generatedCode="
+        generatedCode="
 ---
 
 ---
@@ -295,7 +295,7 @@ $ECE_free$
             JMI_ARRAY_INIT_1(HEAP, jmi_int_t, jmi_int_array_t, tmp_15, jmi_array_size(b5_a, 0), 1, jmi_array_size(b5_a, 0))
             jmi_copy_matrix_to_int(b5_a, b5_a->var, tmp_15->var);
             tmp_16 = (int)f_arg19;
-            f(a1_a->var, tmp_1, tmp_2->var, tmp_3, tmp_4->var, tmp_5, a4_a->var, tmp_6, tmp_7->var, tmp_8, b1_a->var, tmp_9, tmp_10->var, tmp_11, tmp_12->var, tmp_13, b4_a->var, tmp_14, tmp_15->var, tmp_16);
+            f(a1_a->var, (size_t) tmp_1, tmp_2->var, (size_t) tmp_3, tmp_4->var, (size_t) tmp_5, a4_a->var, (size_t) tmp_6, tmp_7->var, (size_t) tmp_8, b1_a->var, (size_t) tmp_9, tmp_10->var, (size_t) tmp_11, tmp_12->var, (size_t) tmp_13, b4_a->var, (size_t) tmp_14, tmp_15->var, (size_t) tmp_16);
             jmi_copy_matrix_from_int(b2_a, tmp_10->var, b2_a->var);
             jmi_copy_matrix_from_int(b3_a, tmp_12->var, b3_a->var);
             jmi_copy_matrix_from_int(b5_a, tmp_15->var, b5_a->var);
@@ -310,7 +310,6 @@ $ECE_free$
 ---
 
 ---
-
 ")})));
 end Array;
 
@@ -381,13 +380,13 @@ model ExtObj1
     Obj3 o3 = Obj3(o1,{o2,o2});
     Real x = use2(o2);
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="ExtObj1",
-            description="Test code gen for external C functions evaluation. External objects.",
-            variability_propagation=false,
-            inline_functions="none",
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="ExtObj1",
+        description="Test code gen for external C functions evaluation. External objects.",
+        variability_propagation=false,
+        inline_functions="none",
+        template="
 $ECE_external_includes$
 $ECE_record_definitions$
 $ECE_decl$
@@ -408,7 +407,7 @@ $ECE_calc_free$
 ---
 $ECE_free$
 ",
-            generatedCode="
+        generatedCode="
 #include \"extObjects.h\"
 
 
@@ -447,7 +446,7 @@ $ECE_free$
         jmi_copy_matrix_to_int(tmp_6_arg3, tmp_6_arg3->var, tmp_3->var);
         tmp_4 = (int)tmp_6_arg5;
         tmp_5 = (double)tmp_6_arg6;
-        my_constructor2(tmp_6_arg0->var, tmp_2->var, &o2_v, tmp_3->var, tmp_6_arg4->var, tmp_4, tmp_5);
+        my_constructor2(tmp_6_arg0->var, tmp_2->var, &o2_v, tmp_3->var, tmp_6_arg4->var, (size_t) tmp_4, tmp_5);
 
 ---
 
@@ -467,20 +466,19 @@ $ECE_free$
 
 ---
         destructor(o2_v);
-
 ")})));
 end ExtObj1;
 
 model ExtObj2
     extends ExtObj1(x=use3(o3));
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="ExtObj2",
-            description="Test code gen for external C functions evaluation. External objects.",
-            variability_propagation=false,
-            inline_functions="none",
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="ExtObj2",
+        description="Test code gen for external C functions evaluation. External objects.",
+        variability_propagation=false,
+        inline_functions="none",
+        template="
 $ECE_external_includes$
 $ECE_record_definitions$
 $ECE_decl$
@@ -501,7 +499,7 @@ $ECE_calc_free$
 ---
 $ECE_free$
 ",
-            generatedCode="
+        generatedCode="
 #include \"extObjects.h\"
 
 
@@ -561,7 +559,7 @@ $ECE_free$
             jmi_copy_matrix_to_int(tmp_13_arg3, tmp_13_arg3->var, tmp_10->var);
             tmp_11 = (int)tmp_13_arg5;
             tmp_12 = (double)tmp_13_arg6;
-            my_constructor2(tmp_13_arg0->var, tmp_9->var, &jmi_array_ref_1(tmp_2_arg1, tmp_7), tmp_10->var, tmp_13_arg4->var, tmp_11, tmp_12);
+            my_constructor2(tmp_13_arg0->var, tmp_9->var, &jmi_array_ref_1(tmp_2_arg1, tmp_7), tmp_10->var, tmp_13_arg4->var, (size_t) tmp_11, tmp_12);
         }
         my_constructor3(tmp_2_arg0, tmp_2_arg1->var, &o3_v);
 
@@ -587,7 +585,6 @@ $ECE_free$
 
 ---
         destructor(o3_v);
-
 ")})));
 end ExtObj2;
 
