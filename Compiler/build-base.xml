@@ -645,7 +645,8 @@
                     packagenames="${javadoc.packages}" 
                     excludepackagenames="${test_helper_packages}" 
                     classpath="${thirdparty_jars_build}"
-                    additionalparam="--no-module-directories" />
+                    additionalparam="--no-module-directories"
+                    failonerror="true" />
             </then>
         </if>
     </target>
