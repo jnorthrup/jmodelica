@@ -19,6 +19,7 @@ Tree representation for the new JModelica FMU log format
 
 Each node is represented as a Node, Comment, or leaf (other types)
 """
+from sys import version_info
 
 class Comment(object):
     """Log comment node.
@@ -27,7 +28,7 @@ class Comment(object):
     text -- the comment text without enclosing braces {}
     """
     def __init__(self, text):
-        assert isinstance(text, str)
+        assert isinstance(text, str if version_info > (3, 0) else basestring)
         self.text = text
 
     def __repr__(self):
@@ -42,7 +43,7 @@ class Node(object):
     """
 
     def __init__(self, type):
-        assert isinstance(type, str)
+        assert isinstance(type, str if version_info > (3, 0) else basestring)
         self.type  = type
         self.nodes = []
         self.keys  = []
