@@ -1497,6 +1497,9 @@ equation
  c1.x = c2.x;
  c2.x = c3.x;
  OperatorRecordTests.Cplx.'-'.sub(OperatorRecordTests.Cplx.'-'.sub(OperatorRecordTests.Cplx.'-'.neg(c1.y), c2.y), c3.y) = OperatorRecordTests.Cplx.'0'();
+ c1.y = OperatorRecordTests.Cplx.'0'();
+ c2.y = OperatorRecordTests.Cplx.'0'();
+ c3.y = OperatorRecordTests.Cplx.'0'();
 
 public
  function OperatorRecordTests.Cplx.'0'
@@ -1713,6 +1716,8 @@ end OperatorRecordTests.OperatorRecordConnect3;
 fclass OperatorRecordTests.OperatorRecordConnect4
  potential OperatorRecordTests.Cplx c.x;
  flow OperatorRecordTests.Cplx c.y;
+equation
+ c.y = OperatorRecordTests.Cplx.'0'();
 
 public
  function OperatorRecordTests.Cplx.'0'

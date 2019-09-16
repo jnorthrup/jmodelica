@@ -34,8 +34,9 @@ public abstract class AbstractModelicaScanner<T> extends beaver.Scanner {
     }
 
 	public int[] getLineBreakMap() {
-		if (lineBreakMap.length > maxLineBreakLine + 1)
-			lineBreakMap = Arrays.copyOf(lineBreakMap, maxLineBreakLine + 1);
+		if (lineBreakMap.length > maxLineBreakLine + 1) {
+            lineBreakMap = Arrays.copyOf(lineBreakMap, maxLineBreakLine + 1);
+        }
 		return lineBreakMap;
 	}
 
@@ -67,9 +68,11 @@ public abstract class AbstractModelicaScanner<T> extends beaver.Scanner {
 		for (int i = 0; i < text.length(); i += 1) {
 			switch (text.charAt(i)) {
 			case '\r':
-				if (i < text.length() - 1 && text.charAt(i + 1) == '\n')
-					++i;
-			case '\n':
+				if (i < text.length() - 1 && text.charAt(i + 1) == '\n') {
+                    ++i;
+                }
+                //$FALL-THROUGH$
+            case '\n':
 				addLineBreak(++line, matchOffset() + i + 1);
 				++numberOfLineBreaksAdded;
 			}
@@ -78,11 +81,13 @@ public abstract class AbstractModelicaScanner<T> extends beaver.Scanner {
 	}
 
 	private void addLineBreak(int line, int offset) {
-		if (lineBreakMap.length <= line) 
-			lineBreakMap = Arrays.copyOf(lineBreakMap, 4 * lineBreakMap.length);
+		if (lineBreakMap.length <= line) {
+            lineBreakMap = Arrays.copyOf(lineBreakMap, 4 * lineBreakMap.length);
+        }
 		lineBreakMap[line] = offset;
-		if (line > maxLineBreakLine)
-			maxLineBreakLine = line;
+		if (line > maxLineBreakLine) {
+            maxLineBreakLine = line;
+        }
 	}
 
 	protected void addLineBreak() {
@@ -156,10 +161,11 @@ public abstract class AbstractModelicaScanner<T> extends beaver.Scanner {
 
 	protected void addFormattingInformation(FormattingType type, String data, int numberOfLineBreaks) {
 		int endColumn;
-		if (numberOfLineBreaks > 0)
-			endColumn = data.length() - Math.max(data.lastIndexOf('\n'), data.lastIndexOf('\r')) - 1;
-		else
-			endColumn = matchColumn() + matchLength();
+		if (numberOfLineBreaks > 0) {
+            endColumn = data.length() - Math.max(data.lastIndexOf('\n'), data.lastIndexOf('\r')) - 1;
+        } else {
+            endColumn = matchColumn() + matchLength();
+        }
 		formattingRecorder.addItem(type, data, matchLine() + 1, matchColumn() + 1, matchLine() + numberOfLineBreaks + 1, endColumn);
 	}
 

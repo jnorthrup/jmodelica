@@ -9,7 +9,6 @@
         <listEntry value="1"/>
     </listAttribute>
     <mapAttribute key="org.eclipse.debug.core.environmentVariables">
-        <mapEntry key="ANT_HOME" value="C:\Users\MarkusOlsson\.p2\pool\plugins\org.apache.ant_1.10.5.v20180808-0324"/>
         <mapEntry key="target" value="${workspace_loc:/JModelica/tools/eclipse/antbuild}"/>
     </mapAttribute>
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_CLASSPATH_ONLY_JAR" value="false"/>
