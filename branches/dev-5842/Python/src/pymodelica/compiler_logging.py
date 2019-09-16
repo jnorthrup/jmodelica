@@ -128,7 +128,7 @@ class KeepLastStream():
         self.last = self.stream.read(num)
         return self.last
     
-    def close():
+    def close(self):
         """
         Closes the underlying stream.
         """
