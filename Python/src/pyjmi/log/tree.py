@@ -28,8 +28,7 @@ class Comment(object):
     text -- the comment text without enclosing braces {}
     """
     def __init__(self, text):
-        # TODO: Do we really need this assert? It breaks py3 compatibility
-        #assert isinstance(text, basestring)
+        assert isinstance(text, str if version_info > (3, 0) else basestring)
         self.text = text
 
     def __repr__(self):
@@ -43,10 +42,9 @@ class Node(object):
     nodes -- a list of child nodes, in order
     """
 
-    def __init__(self, type):
-        # TODO: Do we really need this assert? It breaks py3 compatibility
-        #assert isinstance(type, basestring)
-        self.type  = type
+    def __init__(self, node_type):
+        assert isinstance(node_type, str if version_info > (3, 0) else basestring)
+        self.type  = node_type
         self.nodes = []
         self.keys  = []
         self.dict  = {}
