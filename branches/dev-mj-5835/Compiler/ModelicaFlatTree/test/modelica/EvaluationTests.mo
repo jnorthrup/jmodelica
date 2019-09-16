@@ -4721,6 +4721,384 @@ end EvaluationTests.StringConvert.StringConvertWithParam2;
 ")})));
 end StringConvertWithParam2;
 
+model StringRealformatSpecifier_f
+    constant Real x = 1.23456789;
+    constant String s = String(x, format = "1.3f");
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="StringRealformatSpecifier_f",
+        description="String() operator,  Real, format using f specifier",
+        flatModel="
+fclass EvaluationTests.StringConvert.StringRealformatSpecifier_f
+ constant Real x = 1.23456789;
+ constant String s = \"1.235\";
+end EvaluationTests.StringConvert.StringRealformatSpecifier_f;
+")})));
+end StringRealformatSpecifier_f;
+
+model StringIntegerformatSpecifier_f
+    constant Integer x = 1234;
+    constant String s = String(x, format = "1.3f");
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="StringIntegerformatSpecifier_f",
+        description="String() operator,  Integer, format using f specifier",
+        flatModel="
+fclass EvaluationTests.StringConvert.StringIntegerformatSpecifier_f
+ constant Integer x = 1234;
+ constant String s = \"1234.000\";
+end EvaluationTests.StringConvert.StringIntegerformatSpecifier_f;
+")})));
+end StringIntegerformatSpecifier_f;
+
+model StringRealformatSpecifier_e
+    constant Real x = 1.23456789;
+    constant String s = String(x, format = "1.3e");
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="StringRealformatSpecifier_e",
+        description="String() operator,  Real, format using e specifier",
+        flatModel="
+fclass EvaluationTests.StringConvert.StringRealformatSpecifier_e
+ constant Real x = 1.23456789;
+ constant String s = \"1.235e+00\";
+end EvaluationTests.StringConvert.StringRealformatSpecifier_e;
+")})));
+end StringRealformatSpecifier_e;
+
+model StringIntegerformatSpecifier_e
+    constant Integer x = 1234;
+    constant String s = String(x, format = "1.3e");
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="StringIntegerformatSpecifier_e",
+        description="String() operator, Integer, format using e specifier",
+        flatModel="
+fclass EvaluationTests.StringConvert.StringIntegerformatSpecifier_e
+ constant Integer x = 1234;
+ constant String s = \"1.234e+03\";
+end EvaluationTests.StringConvert.StringIntegerformatSpecifier_e;
+")})));
+end StringIntegerformatSpecifier_e;
+
+model StringRealformatSpecifier_E
+    constant Real x = 1.23456789;
+    constant String s = String(x, format = "1.3E");
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="StringRealformatSpecifier_E",
+        description="String() operator,  Real, format using E specifier",
+        flatModel="
+fclass EvaluationTests.StringConvert.StringRealformatSpecifier_E
+ constant Real x = 1.23456789;
+ constant String s = \"1.235E+00\";
+end EvaluationTests.StringConvert.StringRealformatSpecifier_E;
+")})));
+end StringRealformatSpecifier_E;
+
+model StringIntegerformatSpecifier_E
+    constant Integer x = 1234;
+    constant String s = String(x, format = "1.3E");
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="StringIntegerformatSpecifier_E",
+        description="String() operator,  Integer, format using E specifier",
+        flatModel="
+fclass EvaluationTests.StringConvert.StringIntegerformatSpecifier_E
+ constant Integer x = 1234;
+ constant String s = \"1.234E+03\";
+end EvaluationTests.StringConvert.StringIntegerformatSpecifier_E;
+")})));
+end StringIntegerformatSpecifier_E;
+
+model StringRealformatSpecifier_g
+    constant Real x = 1.23456789;
+    constant String s = String(x, format = "1.3g");
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="StringRealformatSpecifier_g",
+        description="String() operator, Real, format using g specifier",
+        flatModel="
+fclass EvaluationTests.StringConvert.StringRealformatSpecifier_g
+ constant Real x = 1.23456789;
+ constant String s = \"1.23\";
+end EvaluationTests.StringConvert.StringRealformatSpecifier_g;
+")})));
+end StringRealformatSpecifier_g;
+
+model StringIntegerformatSpecifier_g
+    constant Integer x = 1234;
+    constant String s = String(x, format = "1.3g");
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="StringIntegerformatSpecifier_g",
+        description="String() operator,  Integer, format using g specifier",
+        flatModel="
+fclass EvaluationTests.StringConvert.StringIntegerformatSpecifier_g
+ constant Integer x = 1234;
+ constant String s = \"1.23e+03\";
+end EvaluationTests.StringConvert.StringIntegerformatSpecifier_g;
+")})));
+end StringIntegerformatSpecifier_g;
+
+model StringRealformatSpecifier_G
+    constant Real x = 1.23456789;
+    constant String s = String(x, format = "1.3G");
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="StringRealformatSpecifier_G",
+        description="String() operator, Real, format using G specifier",
+        flatModel="
+fclass EvaluationTests.StringConvert.StringRealformatSpecifier_G
+ constant Real x = 1.23456789;
+ constant String s = \"1.23\";
+end EvaluationTests.StringConvert.StringRealformatSpecifier_G;
+")})));
+end StringRealformatSpecifier_G;
+
+model StringIntegerformatSpecifier_G
+    constant Integer x = 1234;
+    constant String s = String(x, format = "1.3G");
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="StringIntegerformatSpecifier_G",
+        description="String() operator,  Integer, format using G specifier",
+        flatModel="
+fclass EvaluationTests.StringConvert.StringIntegerformatSpecifier_G
+ constant Integer x = 1234;
+ constant String s = \"1.23E+03\";
+end EvaluationTests.StringConvert.StringIntegerformatSpecifier_G;
+")})));
+end StringIntegerformatSpecifier_G;
+
+model StringRealformatSpecifier_d
+    constant Real x = 1.23456789;
+    constant String s = String(x, format = "3d");
+
+annotation(__JModelica(UnitTesting(tests={
+      ErrorTestCase(
+            name="StringRealformatSpecifier_d",
+            description="String() operator, Real, format using d specifier",
+            errorMessage="
+Error at line 3, column 25, in file '...':
+  Could not evaluate binding expression for constant 's': 'String(x, \"3d\")'
+    Cannot The format '%3d' requires value of Integer type but Real is provided CValueReal (1.23456789)
+")})));
+end StringRealformatSpecifier_d;
+
+model StringIntegerformatSpecifier_d
+    constant Integer x = 1234;
+    constant String s = String(x, format = "3d");
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="StringIntegerformatSpecifier_d",
+        description="String() operator,  Integer, format using d specifier",
+        flatModel="
+fclass EvaluationTests.StringConvert.StringIntegerformatSpecifier_d
+ constant Integer x = 1234;
+ constant String s = \"1234\";
+end EvaluationTests.StringConvert.StringIntegerformatSpecifier_d;
+")})));
+end StringIntegerformatSpecifier_d;
+
+model StringRealformatSpecifier_i
+    constant Real x = 1.23456789;
+    constant String s = String(x, format = "3i");
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="StringRealformatSpecifier_i",
+        description="String() operator, Real, format using i specifier",
+        errorMessage="
+Error at line 3, column 25, in file '...':
+  Could not evaluate binding expression for constant 's': 'String(x, \"3i\")'
+    Cannot The format '%3i' requires value of Integer type but Real is provided CValueReal (1.23456789)
+")})));
+end StringRealformatSpecifier_i;
+
+model StringIntegerformatSpecifier_i
+    constant Integer x = 1234;
+    constant String s = String(x, format = "3i");
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="StringIntegerformatSpecifier_i",
+        description="String() operator,  Integer, format using i specifier",
+        flatModel="
+fclass EvaluationTests.StringConvert.StringIntegerformatSpecifier_i
+ constant Integer x = 1234;
+ constant String s = \"1234\";
+end EvaluationTests.StringConvert.StringIntegerformatSpecifier_i;
+")})));
+end StringIntegerformatSpecifier_i;
+
+model StringRealformatSpecifier_o
+    constant Real x = 1.23456789;
+    constant String s = String(x, format = "3o");
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="StringRealformatSpecifier_o",
+        description="String() operator, Real, format using o specifier",
+        errorMessage="
+Error at line 3, column 25, in file '...':
+  Could not evaluate binding expression for constant 's': 'String(x, \"3o\")'
+    Cannot The format '%3o' requires value of Integer type but Real is provided CValueReal (1.23456789)
+")})));
+end StringRealformatSpecifier_o;
+
+model StringIntegerformatSpecifier_o
+    constant Integer x = 1234;
+    constant String s = String(x, format = "3o");
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="StringIntegerformatSpecifier_o",
+        description="String() operator,  Integer, format using o specifier",
+        flatModel="
+fclass EvaluationTests.StringConvert.StringIntegerformatSpecifier_o
+ constant Integer x = 1234;
+ constant String s = \"2322\";
+end EvaluationTests.StringConvert.StringIntegerformatSpecifier_o;
+")})));
+end StringIntegerformatSpecifier_o;
+
+model StringRealformatSpecifier_x
+    constant Real x = 1.23456789;
+    constant String s = String(x, format = "3x");
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="StringRealformatSpecifier_x",
+        description="String() operator, Real, format using x specifier",
+        errorMessage="
+Error at line 3, column 25, in file '...':
+  Could not evaluate binding expression for constant 's': 'String(x, \"3x\")'
+    Cannot The format '%3x' requires value of Integer type but Real is provided CValueReal (1.23456789)
+")})));
+end StringRealformatSpecifier_x;
+
+model StringIntegerformatSpecifier_x
+    constant Integer x = 1234;
+    constant String s = String(x, format = "3x");
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="StringIntegerformatSpecifier_x",
+        description="String() operator,  Integer, format using x specifier",
+        flatModel="
+fclass EvaluationTests.StringConvert.StringIntegerformatSpecifier_x
+ constant Integer x = 1234;
+ constant String s = \"4d2\";
+end EvaluationTests.StringConvert.StringIntegerformatSpecifier_x;
+")})));
+end StringIntegerformatSpecifier_x;
+
+model StringRealformatSpecifier_X
+    constant Real x = 1.23456789;
+    constant String s = String(x, format = "3X");
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="StringRealformatSpecifier_X",
+        description="String() operator, Real, format using X specifier",
+        errorMessage="
+Error at line 3, column 25, in file '...':
+  Could not evaluate binding expression for constant 's': 'String(x, \"3X\")'
+    Cannot The format '%3X' requires value of Integer type but Real is provided CValueReal (1.23456789)
+")})));
+end StringRealformatSpecifier_X;
+
+model StringIntegerformatSpecifier_X
+    constant Integer x = 1234;
+    constant String s = String(x, format = "3X");
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="StringIntegerformatSpecifier_X",
+        description="String() operator,  Integer, format using X specifier",
+        flatModel="
+fclass EvaluationTests.StringConvert.StringIntegerformatSpecifier_X
+ constant Integer x = 1234;
+ constant String s = \"4D2\";
+end EvaluationTests.StringConvert.StringIntegerformatSpecifier_X;
+")})));
+end StringIntegerformatSpecifier_X;
+
+model StringRealformatSpecifier_u
+    constant Real x = 1.23456789;
+    constant String s = String(x, format = "3u");
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="StringRealformatSpecifier_u",
+        description="String() operator, Real, format using u specifier",
+        errorMessage="
+Error at line 3, column 25, in file '...':
+  Could not evaluate binding expression for constant 's': 'String(x, \"3u\")'
+    Cannot The format '%3u' requires value of Integer type but Real is provided CValueReal (1.23456789)
+")})));
+end StringRealformatSpecifier_u;
+
+model StringIntegerformatSpecifier_u
+    constant Integer x = -1234;
+    constant String s = String(x, format = "3u");
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="StringIntegerformatSpecifier_u",
+        description="String() operator,  Integer, format using u specifier",
+        flatModel="
+fclass EvaluationTests.StringConvert.StringIntegerformatSpecifier_u
+ constant Integer x = -1234;
+ constant String s = \"4294966062\";
+end EvaluationTests.StringConvert.StringIntegerformatSpecifier_u;
+")})));
+end StringIntegerformatSpecifier_u;
+
+model StringRealformatSpecifier_c
+    constant Real x = 1.23456789;
+    constant String s = String(x, format = "3c");
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="StringRealformatSpecifier_c",
+        description="String() operator, Real, format using c specifier",
+        errorMessage="
+Error at line 3, column 25, in file '...':
+  Could not evaluate binding expression for constant 's': 'String(x, \"3c\")'
+    Cannot The format '%3c' requires value of Integer type but Real is provided CValueReal (1.23456789)
+")})));
+
+end StringRealformatSpecifier_c;
+
+model StringIntegerformatSpecifier_c
+    constant Integer x = 123;
+    constant String s = String(x, format = "3c");
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="StringIntegerformatSpecifier_c",
+        description="String() operator,  Integer, format using c specifier",
+        flatModel="
+fclass EvaluationTests.StringConvert.StringIntegerformatSpecifier_c
+ constant Integer x = 123;
+ constant String s = \"  {\";
+end EvaluationTests.StringConvert.StringIntegerformatSpecifier_c;
+")})));
+end StringIntegerformatSpecifier_c;
+
 end StringConvert;
 
 end EvaluationTests;
