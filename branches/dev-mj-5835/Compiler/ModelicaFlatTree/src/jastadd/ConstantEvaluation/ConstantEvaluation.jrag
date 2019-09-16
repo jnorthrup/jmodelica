@@ -2805,7 +2805,7 @@ aspect ConstantEvaluation {
         boolean mustBeInteger = formatChar == 'd' || formatChar == 'i' || formatChar == 'o' || 
             formatChar == 'x' || formatChar == 'X' || formatChar == 'u' || formatChar == 'c';
         if (mustBeInteger && isReal) {
-            throw new ConstantEvaluationException(cval, "format the resulting value. The format '"+ format + "' requires value of Integer type but Real is provided ");
+            throw new ConstantEvaluationException(cval, "format the resulting value. The format '"+ format + "' requires value of Integer type but Real value is provided. ");
         }
 
         if (getValue().type().isInteger()) {
@@ -2828,10 +2828,11 @@ aspect ConstantEvaluation {
         
         try {
             return new CValueString(String.format((Locale) null, format, value));
-        } catch (UnknownFormatConversionException e) {
+        } catch (java.util.IllegalFormatException e) {
             throw new ConstantEvaluationException(cval, 
                     "format the resulting value. " + format + " is not a supported valid format string");
         }
+    }
     }
     eq FGetInstanceName.cevalCalc(VariableEvaluator evaluator) = new CValueString(calcInstanceName());
 

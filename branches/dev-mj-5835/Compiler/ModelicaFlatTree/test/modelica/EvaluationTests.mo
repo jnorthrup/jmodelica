@@ -4892,7 +4892,7 @@ annotation(__JModelica(UnitTesting(tests={
             errorMessage="
 Error at line 3, column 25, in file '...':
   Could not evaluate binding expression for constant 's': 'String(x, \"3d\")'
-    Cannot format the resulting value. The format '%3d' requires value of Integer type but Real is provided CValueReal (1.23456789)
+    Cannot format the resulting value. The format '%3d' requires value of Integer type but Real value is provided. CValueReal (1.23456789)
 ")})));
 end StringRealformatSpecifier_d;
 
@@ -4923,7 +4923,7 @@ annotation(__JModelica(UnitTesting(tests={
         errorMessage="
 Error at line 3, column 25, in file '...':
   Could not evaluate binding expression for constant 's': 'String(x, \"3i\")'
-    Cannot format the resulting value. The format '%3i' requires value of Integer type but Real is provided CValueReal (1.23456789)
+    Cannot format the resulting value. The format '%3i' requires value of Integer type but Real value is provided. CValueReal (1.23456789)
 ")})));
 end StringRealformatSpecifier_i;
 
@@ -4954,7 +4954,7 @@ annotation(__JModelica(UnitTesting(tests={
         errorMessage="
 Error at line 3, column 25, in file '...':
   Could not evaluate binding expression for constant 's': 'String(x, \"3o\")'
-    Cannot format the resulting value. The format '%3o' requires value of Integer type but Real is provided CValueReal (1.23456789)
+    Cannot format the resulting value. The format '%3o' requires value of Integer type but Real value is provided. CValueReal (1.23456789)
 ")})));
 end StringRealformatSpecifier_o;
 
@@ -4985,7 +4985,7 @@ annotation(__JModelica(UnitTesting(tests={
         errorMessage="
 Error at line 3, column 25, in file '...':
   Could not evaluate binding expression for constant 's': 'String(x, \"3x\")'
-    Cannot format the resulting value. The format '%3x' requires value of Integer type but Real is provided CValueReal (1.23456789)
+    Cannot format the resulting value. The format '%3x' requires value of Integer type but Real value is provided. CValueReal (1.23456789)
 ")})));
 end StringRealformatSpecifier_x;
 
@@ -5016,7 +5016,7 @@ annotation(__JModelica(UnitTesting(tests={
         errorMessage="
 Error at line 3, column 25, in file '...':
   Could not evaluate binding expression for constant 's': 'String(x, \"3X\")'
-    Cannot format the resulting value. The format '%3X' requires value of Integer type but Real is provided CValueReal (1.23456789)
+    Cannot format the resulting value. The format '%3X' requires value of Integer type but Real value is provided. CValueReal (1.23456789)
 ")})));
 end StringRealformatSpecifier_X;
 
@@ -5047,7 +5047,7 @@ annotation(__JModelica(UnitTesting(tests={
         errorMessage="
 Error at line 3, column 25, in file '...':
   Could not evaluate binding expression for constant 's': 'String(x, \"3u\")'
-    Cannot format the resulting value. The format '%3u' requires value of Integer type but Real is provided CValueReal (1.23456789)
+    Cannot format the resulting value. The format '%3u' requires value of Integer type but Real value is provided. CValueReal (1.23456789)
 ")})));
 end StringRealformatSpecifier_u;
 
@@ -5078,7 +5078,7 @@ annotation(__JModelica(UnitTesting(tests={
         errorMessage="
 Error at line 3, column 25, in file '...':
   Could not evaluate binding expression for constant 's': 'String(x, \"3c\")'
-    Cannot format the resulting value. The format '%3c' requires value of Integer type but Real is provided CValueReal (1.23456789)
+    Cannot format the resulting value. The format '%3c' requires value of Integer type but Real value is provided. CValueReal (1.23456789)
 ")})));
 
 end StringRealformatSpecifier_c;
