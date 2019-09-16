@@ -4892,7 +4892,7 @@ annotation(__JModelica(UnitTesting(tests={
             errorMessage="
 Error at line 3, column 25, in file '...':
   Could not evaluate binding expression for constant 's': 'String(x, \"3d\")'
-    Cannot The format '%3d' requires value of Integer type but Real is provided CValueReal (1.23456789)
+    Cannot format the resulting value. The format '%3d' requires value of Integer type but Real is provided CValueReal (1.23456789)
 ")})));
 end StringRealformatSpecifier_d;
 
@@ -4923,7 +4923,7 @@ annotation(__JModelica(UnitTesting(tests={
         errorMessage="
 Error at line 3, column 25, in file '...':
   Could not evaluate binding expression for constant 's': 'String(x, \"3i\")'
-    Cannot The format '%3i' requires value of Integer type but Real is provided CValueReal (1.23456789)
+    Cannot format the resulting value. The format '%3i' requires value of Integer type but Real is provided CValueReal (1.23456789)
 ")})));
 end StringRealformatSpecifier_i;
 
@@ -4954,7 +4954,7 @@ annotation(__JModelica(UnitTesting(tests={
         errorMessage="
 Error at line 3, column 25, in file '...':
   Could not evaluate binding expression for constant 's': 'String(x, \"3o\")'
-    Cannot The format '%3o' requires value of Integer type but Real is provided CValueReal (1.23456789)
+    Cannot format the resulting value. The format '%3o' requires value of Integer type but Real is provided CValueReal (1.23456789)
 ")})));
 end StringRealformatSpecifier_o;
 
@@ -4985,7 +4985,7 @@ annotation(__JModelica(UnitTesting(tests={
         errorMessage="
 Error at line 3, column 25, in file '...':
   Could not evaluate binding expression for constant 's': 'String(x, \"3x\")'
-    Cannot The format '%3x' requires value of Integer type but Real is provided CValueReal (1.23456789)
+    Cannot format the resulting value. The format '%3x' requires value of Integer type but Real is provided CValueReal (1.23456789)
 ")})));
 end StringRealformatSpecifier_x;
 
@@ -5016,7 +5016,7 @@ annotation(__JModelica(UnitTesting(tests={
         errorMessage="
 Error at line 3, column 25, in file '...':
   Could not evaluate binding expression for constant 's': 'String(x, \"3X\")'
-    Cannot The format '%3X' requires value of Integer type but Real is provided CValueReal (1.23456789)
+    Cannot format the resulting value. The format '%3X' requires value of Integer type but Real is provided CValueReal (1.23456789)
 ")})));
 end StringRealformatSpecifier_X;
 
@@ -5047,7 +5047,7 @@ annotation(__JModelica(UnitTesting(tests={
         errorMessage="
 Error at line 3, column 25, in file '...':
   Could not evaluate binding expression for constant 's': 'String(x, \"3u\")'
-    Cannot The format '%3u' requires value of Integer type but Real is provided CValueReal (1.23456789)
+    Cannot format the resulting value. The format '%3u' requires value of Integer type but Real is provided CValueReal (1.23456789)
 ")})));
 end StringRealformatSpecifier_u;
 
@@ -5078,7 +5078,7 @@ annotation(__JModelica(UnitTesting(tests={
         errorMessage="
 Error at line 3, column 25, in file '...':
   Could not evaluate binding expression for constant 's': 'String(x, \"3c\")'
-    Cannot The format '%3c' requires value of Integer type but Real is provided CValueReal (1.23456789)
+    Cannot format the resulting value. The format '%3c' requires value of Integer type but Real is provided CValueReal (1.23456789)
 ")})));
 
 end StringRealformatSpecifier_c;
@@ -5098,6 +5098,21 @@ fclass EvaluationTests.StringConvert.StringIntegerformatSpecifier_c
 end EvaluationTests.StringConvert.StringIntegerformatSpecifier_c;
 ")})));
 end StringIntegerformatSpecifier_c;
+
+model StringIncorrectformat
+    constant Integer x = 1234;
+    constant String s = String(x, format = "*.1.3c");
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="StringIncorrectformat",
+        description="String() operator, Real, format using c specifier",
+        errorMessage="
+Error at line 3, column 25, in file '...':
+  Could not evaluate binding expression for constant 's': 'String(x, \"*.1.3c\")'
+    Cannot format the resulting value. %*.1.3c is not a supported valid format stringCValueInteger (1234)
+")})));
+end StringIncorrectformat;
 
 end StringConvert;
 

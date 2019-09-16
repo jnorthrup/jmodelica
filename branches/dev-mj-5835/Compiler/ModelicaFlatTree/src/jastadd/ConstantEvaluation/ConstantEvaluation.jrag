@@ -2805,27 +2805,33 @@ aspect ConstantEvaluation {
         boolean mustBeInteger = formatChar == 'd' || formatChar == 'i' || formatChar == 'o' || 
             formatChar == 'x' || formatChar == 'X' || formatChar == 'u' || formatChar == 'c';
         if (mustBeInteger && isReal) {
-            throw new ConstantEvaluationException(cval, "The format '"+ format + "' requires value of Integer type but Real is provided ");
+            throw new ConstantEvaluationException(cval, "format the resulting value. The format '"+ format + "' requires value of Integer type but Real is provided ");
         }
 
         if (getValue().type().isInteger()) {
             // Java formatter do not convert types
-            final boolean convertToFloat = formatChar == 'e' || formatChar == 'E' || formatChar == 'f' || formatChar == 'g' || formatChar == 'G';
+            final boolean convertToFloat = formatChar == 'e' || formatChar == 'E' || 
+                    formatChar == 'f' || formatChar == 'g' || formatChar == 'G';
             if (convertToFloat) {
                 return new CValueString(String.format((Locale) null, format, cval.realValue()));
             }
             if (formatChar == 'u') {
-                String formatCorrect = format.substring(0, format.length() -1) + "s";
+                String formatCorrect = format.substring(0, format.length()-1) + "s";
                 return new CValueString(String.format((Locale) null, formatCorrect, Integer.toUnsignedLong(cval.intValue())));
             }
 
             if (formatChar == 'i') {
-                String formatCorrect = format.substring(0, format.length() -1) + "d";
+                String formatCorrect = format.substring(0, format.length()-1) + "d";
             	return new CValueString(String.format((Locale) null, formatCorrect, cval.intValue()));
             }
         }
-      
-        return new CValueString(String.format((Locale) null, format, value));
+        
+        try {
+            return new CValueString(String.format((Locale) null, format, value));
+        } catch (UnknownFormatConversionException e) {
+            throw new ConstantEvaluationException(cval, 
+                    "format the resulting value. " + format + " is not a supported valid format string");
+        }
     }
     eq FGetInstanceName.cevalCalc(VariableEvaluator evaluator) = new CValueString(calcInstanceName());
 
