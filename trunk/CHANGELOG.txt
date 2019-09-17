@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+# Fixed ; Minor ; Compiler; #5835
+Format string argument to the String function is now useable.
+
 # Change ; Minor ; Compiler; #5830
 ParseHandler now have a target for Subscript.
 
