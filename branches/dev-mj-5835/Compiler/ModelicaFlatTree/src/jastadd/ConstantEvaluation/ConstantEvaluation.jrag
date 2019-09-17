@@ -2833,7 +2833,6 @@ aspect ConstantEvaluation {
                     "format the resulting value. " + format + " is not a supported valid format string");
         }
     }
-    }
     eq FGetInstanceName.cevalCalc(VariableEvaluator evaluator) = new CValueString(calcInstanceName());
 
     /**
