@@ -25,13 +25,23 @@ if(NOT TOP_SRC)
     message(STATUS "TOP_SRC was not defined, using ${TOP_SRC}")
 endif()
 
-
 set(EvaluatorSources
-
     jmi_evaluator.c
 )
+
+set(EvaluatorSourcesUtil
+    jmi_evaluator_util.c
+    jmi_evaluator_util.h
+)
+
+#Build jmi_evaluator_util library
+add_library(jmi_evaluator_util STATIC ${EvaluatorSourcesUtil})
+if(NOT MSVC)
+    set_target_properties(jmi_evaluator_util PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -O2")
+endif()
+
 #Build evaluator executable
-set (EVALUATOR_LIBS ${EVALUATOR_LIBS} jmi ModelicaExternalC)
+set (EVALUATOR_LIBS ${EVALUATOR_LIBS} jmi_evaluator_util jmi ModelicaExternalC)
 
 include_directories(${STANDARD_HEADER_SRC})
 add_executable(jmi_evaluator ${EvaluatorSources})
@@ -45,3 +55,9 @@ target_link_libraries (jmi_evaluator  ${EVALUATOR_LIBS})
 
 #Install the libraries
 install(TARGETS jmi_evaluator DESTINATION "${RTLIB_BIN_DIR}")
+install(TARGETS jmi_evaluator_util DESTINATION "${RTLIB_LIB_DIR}")
+
+#Install header files
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
+        DESTINATION "${RTLIB_INCLUDE_DIR}"
+        FILES_MATCHING PATTERN "*.h")
