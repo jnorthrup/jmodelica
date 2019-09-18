@@ -648,10 +648,7 @@
                     </then>
                 </if>
 
-                <echo message="ant.java.version = ${ant.java.version}" />
-                <echo message="javadoc_additional_params = ${javadoc_additional_params}" />
-
-            	<!-- The javadoc directory is sometimes unusable, unclear why.
+                <!-- The javadoc directory is sometimes unusable, unclear why.
                      It is recreated by the javadoc task. -->
                 <delete dir="${javadoc_output}" />
                 <javadoc 
