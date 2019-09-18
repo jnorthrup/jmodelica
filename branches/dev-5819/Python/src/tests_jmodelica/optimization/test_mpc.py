@@ -182,7 +182,7 @@ class TestMPCClass(object):
                 largest_delta_quad = delta
             prev_value = value
 
-        N.testing.assertTrue(largest_delta_quad<largest_delta)
+        assert largest_delta_quad<largest_delta, "Value {} is not less than {}".format(largest_delta_quad, largest_delta)
         
     @testattr(casadi_base = True)
     def test_du_bounds(self):
@@ -230,7 +230,7 @@ class TestMPCClass(object):
                 largest_delta = delta
             prev_value = value
             
-        N.testing.assertTrue(largest_delta<5)
+        assert largest_delta<5, "Value {} is not less than {}".format(largest_delta, 5)
         
     @testattr(casadi_base = True)
     def test_softening_bounds(self):
@@ -269,7 +269,7 @@ class TestMPCClass(object):
         # succeeds
         MPC_object.update_state({'_start_c': self.c_0_A, '_start_T': 355})
         MPC_object.sample()
-        N.testing.assertTrue('Solve_Succeeded', MPC_object.collocator.
+        N.testing.assert_('Solve_Succeeded', MPC_object.collocator.
                                         solver_object.getStat('return_status'))
 
     #~ @testattr(casadi_base = True)
@@ -356,7 +356,7 @@ class TestMPCClass(object):
 
         # Assert that problem was infeasible and that the returned input is
         # the next input from the last succesful optimization
-        N.testing.assertTrue('Infeasible_Problem_Detected', MPC_object.collocator.solver_object.getStat('return_status'))
+        N.testing.assert_('Infeasible_Problem_Detected', MPC_object.collocator.solver_object.getStat('return_status'))
  
         N.testing.assert_almost_equal(u_k2[1](0)[0], result1['Tc'][4],decimal=10)
         
@@ -364,13 +364,14 @@ class TestMPCClass(object):
         # optimization 
         result2 = MPC_object.get_results_this_sample()
 
-        N.testing.assertTrue(result1==result2)
+        assert result1==result2, "UNEQUAL VALUES. result1={}\nresult2={}".format(result1, result2)
         
         # Assert that problem was infeasible yet again and that the returned 
         # input is the next (third) input from the last succesful optimization
         MPC_object.update_state({'_start_c': 900, '_start_T': 400})
         u_k3 = MPC_object.sample()
-        N.testing.assertTrue('Infeasible_Problem_Detected', MPC_object.collocator.
+        
+        N.testing.assert_('Infeasible_Problem_Detected', MPC_object.collocator.
                                         solver_object.getStat('return_status'))
  
         N.testing.assert_almost_equal(u_k3[1](0)[0], result1['Tc'][7],decimal=10)
@@ -643,13 +644,13 @@ class TestMPCClass(object):
         MPC_object.update_state()
         u_k2 = MPC_object.sample()
 
-        N.testing.assertTrue(MPC_object.collocator.warm_start)
+        N.testing.assert_(MPC_object.collocator.warm_start)
         wsip =\
          MPC_object.collocator.solver_object.getOption('warm_start_init_point')
         mu_init = MPC_object.collocator.solver_object.getOption('mu_init')
         prl = MPC_object.collocator.solver_object.getOption('print_level')
 
-        N.testing.assertTrue(wsip == 'yes')
+        N.testing.assert_(wsip == 'yes')
         N.testing.assert_equal(mu_init, 1e-3)
         N.testing.assert_equal(prl,  0)
         
