@@ -81,7 +81,7 @@ class ParameterChanges(object):
         return None
       
       
-class RealTimeBase(object, with_metaclass(metaclass=ABCMeta)):
+class RealTimeBase(object, with_metaclass(ABCMeta)):
     
     def __init__(self, dt, t_final, start_values, output_names, 
                  input_names, par_changes = ParameterChanges(), noise=0):
