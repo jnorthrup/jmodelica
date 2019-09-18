@@ -121,6 +121,11 @@ aspect EquationSolve {
                 }
             }
             
+            if (activeTerms.isEmpty()) {
+                return new FNoExp();
+            }
+                
+            
             // Compute new expressions for the inactive and active terms
             FExp inactiveTerm = computeInactiveSolution(inactiveTerms);
             FExp activeTerm = computeActiveSolution(activeTerms, var,
