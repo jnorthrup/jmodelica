@@ -635,7 +635,23 @@
         <if>
             <isset property="javadoc.packages"/>
             <then>
-                <!-- The javadoc directory is sometimes unusable, unclear why.
+
+                <!-- We need to add this to builds with Java v9 or greater -->
+                <var name="javadoc_additional_params" value="--no-module-directories"/>
+                <if>
+                    <or>
+                        <equals arg1="${ant.java.version}" arg2="1.7" />
+                        <equals arg1="${ant.java.version}" arg2="1.8" />
+                    </or>
+                    <then>
+                        <var name="javadoc_additional_params" value=""/>
+                    </then>
+                </if>
+
+                <echo message="ant.java.version = ${ant.java.version}" />
+                <echo message="javadoc_additional_params = ${javadoc_additional_params}" />
+
+            	<!-- The javadoc directory is sometimes unusable, unclear why.
                      It is recreated by the javadoc task. -->
                 <delete dir="${javadoc_output}" />
                 <javadoc 
@@ -645,6 +661,7 @@
                     packagenames="${javadoc.packages}" 
                     excludepackagenames="${test_helper_packages}" 
                     classpath="${thirdparty_jars_build}"
+                	additionalparam="${javadoc_additional_params}"
                     failonerror="true" />
             </then>
         </if>
