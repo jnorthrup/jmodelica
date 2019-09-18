@@ -74,14 +74,14 @@ def test_op_structure():
     ext_data = GB.options['external_data']
     # input data
     for inp in list(inputs.keys()):
-		evaluated_input = ext_data.eliminated[inp].eval(time)
-		N.array_equal(inputs[inp], evaluated_input)
+        evaluated_input = ext_data.eliminated[inp].eval(time)
+        N.array_equal(inputs[inp], evaluated_input)
     # measurement data
     for meas in list(measurements.keys()):
-		evaluated_meas = ext_data.eliminated['GreyBox_measured_'+meas].eval(time)
-		N.array_equal(measurements[meas], evaluated_meas)
-		
-	# Assert objective and objective integrand
+        evaluated_meas = ext_data.eliminated['GreyBox_measured_'+meas].eval(time)
+        N.array_equal(measurements[meas], evaluated_meas)
+        
+    # Assert objective and objective integrand
     assert strnorm(GB.op.getObjectiveIntegrand().getDescription()) == strnorm('(((0.499*sq((E-GreyBox_measured_E)))/GreyBox_r_E)+((0.499*sq((P-GreyBox_measured_P)))/GreyBox_r_P))')
     assert strnorm(GB.op.getObjective().getDescription()) == strnorm('((((500*log(GreyBox_r_E))+(sq((E(0.000000)-133.837))/GreyBox_r_E))+(500*log(GreyBox_r_P)))+(sq((P(0.000000)-138))/GreyBox_r_P))')
 
@@ -123,10 +123,10 @@ def test_op_structure_sum():
     # Assert external data
     ext_data = GB.options['external_data']
     for inp in list(inputs.keys()):
-		evaluated_input = ext_data.eliminated[inp].eval(time)
-		N.array_equal(inputs[inp], evaluated_input)
+        evaluated_input = ext_data.eliminated[inp].eval(time)
+        N.array_equal(inputs[inp], evaluated_input)
 
-   	# Assert objective and objective integrand
+       # Assert objective and objective integrand
     assert strnorm(GB.op.getObjectiveIntegrand().getDescription()) == strnorm('0')
     print(strnorm(GB.op.getObjective().getDescription()))
     assert strnorm(GB.op.getObjective().getDescription()) == strnorm('((((((((sq((E(0.000000)-133.837))/GreyBox_r_E)+(sq((E(2.004008)-132.493))/GreyBox_r_E))+(sq((E(4.008016)-129.124))/GreyBox_r_E))+(3*log(GreyBox_r_E)))+(sq((P(0.000000)-138))/GreyBox_r_P))+(sq((P(2.004008)-141.156))/GreyBox_r_P))+(sq((P(4.008016)-132.906))/GreyBox_r_P))+(3*log(GreyBox_r_P)))')
@@ -172,8 +172,8 @@ def test_identification_object():
     assert len(nullModelFree.difference(idFree)) == 0
     
     for par in nullModelFree:
-		assert identification.greybox.op.getVariable(par).getAttribute('free').getValue() == 1.0
-		
+        assert identification.greybox.op.getVariable(par).getAttribute('free').getValue() == 1.0
+        
     #Assert value of free variables
     res = identification.result
     N.testing.assert_allclose(res.final('GreyBox_r_E'), 99.999995739422701, 1e-3)
@@ -195,7 +195,7 @@ def test_nonuniform_element_length():
     
     # remove every third measurement to get nonuniform distribution of measurements
     for var in list(measurements.keys()):
-		measurements[var] = N.delete(measurements[var], slice(None, None, 3))
+        measurements[var] = N.delete(measurements[var], slice(None, None, 3))
     
     time = N.delete(time, slice(None, None, 3))  
 
@@ -281,7 +281,7 @@ def test_compare():
     
     #Assert that parameters are really free
     for par in freeParam1:
-		assert identification.greybox.op.getVariable(par).getAttribute('free').getValue() == 1.0
+        assert identification.greybox.op.getVariable(par).getAttribute('free').getValue() == 1.0
     
     
     # Optimize with 'A4' added to free variables
@@ -296,7 +296,7 @@ def test_compare():
     
     #Assert that parameters are really free
     for par in freeParam2:
-		assert identification.greybox.op.getVariable(par).getAttribute('free').getValue() == 1.0
+        assert identification.greybox.op.getVariable(par).getAttribute('free').getValue() == 1.0
     
     # Assert that 'TD' is no longer free
     assert identification.greybox.op.getVariable('TD').getAttribute('free').getValue() == 0.0
@@ -316,14 +316,14 @@ def test_compare():
 
 @testattr(casadi_base = True)
 def test_risk_calculation():
-	
+    
     idObj = Identification([],[],[],0)
     
     assert abs(idObj.calculate_risk(500, 5, 3) - 0.0) < 1e-6
     assert abs(idObj.calculate_risk(5, 5, 3) - 0.80070068201586642) < 1e-6
 
 def get_test_data():
-	
+    
     return OrderedDict([('measurements', OrderedDict([('E', N.array([ 133.83652165,  132.49324086,  129.12398945,  124.58144881,
         123.86837942,  122.8498228 ,  120.6938312 ,  119.34490856,
         117.04370551,  116.74414273,  115.6417485 ,  114.50741678,
