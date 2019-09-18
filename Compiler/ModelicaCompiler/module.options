@@ -457,7 +457,7 @@ STRING compiler_version compiler internal "compiler_version_file_not_read"
 "The version string for the compiler. Uses default value during unit testing."
 
 ********************************************************************************
-BOOLEAN enable_external_evaluator compiler experimental true
+BOOLEAN external_constant_dynamic_evaluator compiler experimental true
 
 "If enabled, the external function will be evaluated using a pre-compiled
 program (instead of generating and compiling one), if possible."

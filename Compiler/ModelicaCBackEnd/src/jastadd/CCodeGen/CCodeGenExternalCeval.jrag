@@ -289,49 +289,43 @@ aspect CCodeGenExternalCeval {
         return functionArgs;
     }
     
-    syn String FExternalStmt.convertFtypeToExternalString(FType arg, boolean useSeparator) {
-        String input = "";
-        if (arg.isReal()) {
-            input = input.concat("d");
-        } else if (arg.isInteger() || arg.isEnum() || arg.isBoolean()) {
-            input = input.concat("i");
-        } else if (arg.isString()) {
-            input = input.concat("s");
-        } else if (arg.isRecord()) {
-            input = input.concat("R[");
-            for (FRecordComponentType rType: ((FRecordType)arg).getComponents()) {
-                input = input.concat(convertFtypeToExternalString(rType.getFType(), true));
-            }
-            input = input.concat("]");
+    syn String FType.cMappedTypeString() = "e";
+    eq FArrayType.cMappedTypeString() = getFPrimitiveType().cMappedTypeString() + "v";
+    eq FIntegerType.cMappedTypeString() = "i";
+    eq FEnumType.cMappedTypeString() = "i";
+    eq FBooleanType.cMappedTypeString() = "i";
+    eq FRealType.cMappedTypeString() = "d";
+    eq FStringType.cMappedTypeString() = "s";
+    eq FRecordType.cMappedTypeString() {
+        String o = "R[";
+        for (FRecordComponentType rType: getComponents()) {
+                o = o.concat(rType.getFType().cMappedTypeString());
+                o = o.concat(",");
         }
-        if (arg.isArray()) {
-            input = input.concat("v");
-        }
-        if (useSeparator) {
-            input = input.concat(",");
-        }
-        return input;
+        return o.concat("]");
     }
     
     syn String FExternalStmt.functionArgsSerialized(boolean returnVar) {
         boolean skippedReturnVar = false;
+        final boolean hasReturnVar = hasReturnVar();
+        
         String input = "";
         for (ExternalArgument var : functionArgsToSerialize()) {
             if (returnVar) {
-                if (hasReturnVar()) {
-                    return convertFtypeToExternalString(var.type(), false);
+                if (hasReturnVar) {
+                    return var.type().cMappedTypeString();
                 } else {
                     return "void";
                 }
             }
-            if (hasReturnVar() && skippedReturnVar != true) { 
+            if (hasReturnVar && !skippedReturnVar) { 
                 skippedReturnVar = true;
                 continue; 
             }
             if (var.isOutput()) {
                input = input.concat("*");
             }
-            input = input.concat(convertFtypeToExternalString(var.type(), true));
+            input += var.type().cMappedTypeString() + ",";
         }
         return input;
     }

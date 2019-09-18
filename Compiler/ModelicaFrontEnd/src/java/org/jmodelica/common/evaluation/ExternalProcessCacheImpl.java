@@ -7,8 +7,10 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Compiler;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache.External;
@@ -44,41 +46,40 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
         return mc.log();
     }
     
-    private String getSharedLibrary(External<K> ext) {
-        /* Messy messy... Please fix me...*/
-        String sharedLib = "";
-        final String extName = ext.getName();
-        String platform = CCompilerDelegator.reduceBits(EnvironmentUtils.getJavaPlatform(),
+    private String getPlatform() {
+        return CCompilerDelegator.reduceBits(EnvironmentUtils.getJavaPlatform(), 
                 mc.getCCompiler().getTargetPlatforms());
-        File f = new File(ext.libraryDirectory(), platform);
-        String libLoc = f.isDirectory() ? f.getPath() : ext.libraryDirectory();
-        if (libLoc != null) {
-            File dir = new File(libLoc);
-            File[] matches = dir.listFiles(new FilenameFilter()
-            {
-              public boolean accept(File dir, String name)
-              {
-                 return name.contains(extName) && name.endsWith(SystemUtil.sharedLibraryExtension());
-              }
-            });
-            for(File file : matches) {
-                sharedLib = file.toString();
+    }
+    
+    private String getSharedLibrary(External<K> ext) {
+        String sharedLib = "";
+        String extLibrary = "";
+        
+        if (ext.library().length == 1) {
+            extLibrary = ext.library()[0];
+        } else {
+            return sharedLib;
+        }
+        
+        HashSet<String> externalLibraryDirectories = new HashSet<String>();
+        externalLibraryDirectories.add(ext.libraryDirectory());
+        Set<String> expandedLibDirs = mc.getCCompiler().expandCompilerSpecificLibraryPaths(mc.log(), ext.myOptions(), 
+                                                   externalLibraryDirectories, getPlatform());
+        
+        for (String dir : expandedLibDirs) {
+            File testlib1 = new File(dir, extLibrary + SystemUtil.sharedLibraryExtension());
+            File testlib2 = new File(dir, "lib" + extLibrary + SystemUtil.sharedLibraryExtension());
+            
+            if (testlib1.exists() && !testlib1.isDirectory()) {
+                sharedLib = testlib1.toString();
                 break;
             }
-            if (sharedLib.equals("")) {
-                for (String lib : ext.library()) {
-                    File tmp = new File(libLoc, lib.concat(SystemUtil.sharedLibraryExtension()));
-                    if (tmp.exists() && !tmp.isDirectory()) {
-                        sharedLib = tmp.toString();
-                    } else {
-                        File tmpWithLib = new File(libLoc, "lib"+lib.concat(SystemUtil.sharedLibraryExtension()));
-                        if (tmpWithLib.exists() && !tmpWithLib.isDirectory()) {
-                            sharedLib = tmpWithLib.toString();
-                        }
-                    }
-                }
+            if (testlib2.exists() && !testlib2.isDirectory()) {
+                sharedLib = testlib2.toString();
+                break;
             }
         }
+        
         return sharedLib;
     }
     
@@ -94,13 +95,13 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
         return ext.functionArgsSerialized(false);
     }
     
-    private ArrayList<String> builtinExternalFunctions = new ArrayList<String>() {{
+    private static ArrayList<String> builtinExternalFunctions = new ArrayList<String>() {{
         add("ModelicaStrings_substring");
         add("ModelicaStrings_length");
         add("ModelicaStrings_skipWhiteSpace");
     }};
     
-    private ArrayList<String> supportedSignatures = new ArrayList<String>() {{
+    private static ArrayList<String> supportedSignatures = new ArrayList<String>() {{
         add("d+d,d,");
         add("d+i,");
         add("d+i,d,d,");
@@ -112,7 +113,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
     }};
     
     public boolean canUseEvaluator(E ext, ArrayList<String> arguments) {
-        if (!(ext.myOptions().getBooleanOption("enable_external_evaluator"))) {
+        if (!(ext.myOptions().getBooleanOption("external_constant_dynamic_evaluator"))) {
             return false;
         }
         
@@ -162,8 +163,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                 String debugMsg = "";
                 if (canUseEvaluator(ext, arguments)) {
                     String jmHome = System.getenv("JMODELICA_HOME");
-                    String platform = CCompilerDelegator.reduceBits(EnvironmentUtils.getJavaPlatform(),mc.getCCompiler().getTargetPlatforms());
-                    String bits = platform.contains("64") && SystemUtil.isWindows() ? "64" : "";
+                    String bits = getPlatform().contains("64") && SystemUtil.isWindows() ? "64" : "";
                     executable = jmHome + File.separator + "bin" + bits + File.separator + "jmi_evaluator" + SystemUtil.executableExtension();
                     
                     arguments.add(0, executable); /* Needs to be first */
@@ -348,19 +348,14 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                 new File(executable).delete();
             }
         }
-        
-        public ProcessBuilder _createProcessBuilder(External<K> ext) {
+
+        private ProcessBuilder createProcessBuilder(External<K> ext) {
             ProcessBuilder pb;
             if (arguments == null) {
                 pb = new ProcessBuilder(executable);
             } else {
                 pb = new ProcessBuilder(arguments);
             }
-            return pb;
-        }
-
-        private ProcessBuilder createProcessBuilder(External<K> ext) {
-            ProcessBuilder pb = _createProcessBuilder(ext);
             Map<String, String> env = pb.environment();
             if (env.keySet().contains("Path")) {
                 env.put("PATH", env.get("Path"));
