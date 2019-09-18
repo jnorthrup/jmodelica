@@ -1,51 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "jmi.h"
-#include "jmi_dyn_mem.h"
-#include "ModelicaUtilities.h"
-#include <fcntl.h>
-
-#ifdef _WIN32
-    #include <windows.h>
-#else
-    #define _GNU_SOURCE
-    #define __stdcall 
-    #include <dlfcn.h>
-    #ifdef __APPLE__
-        #include <limits.h>
-    #else
-        #include <linux/limits.h>
-        #include <limits.h>
-    #endif
-#endif
+#include "jmi_evaluator_util.h"
 
 /* Builtins */
 extern const char* ModelicaStrings_substring(const char*, int, int);
 extern const char* ModelicaStrings_length(const char*);
 extern const char* ModelicaStrings_skipWhiteSpace(const char*, int);
-
-#define ERROR_LOAD_DLL 3
-#define ERROR_LOAD_FUNCTION 4
-#define ERROR_OUTPUT_ARGS_NOT_SPECIFIED 5
-#define ERROR_INPUT_ARGS_NOT_SPECIFIED 6
-#define ERROR_NOT_SUPPORTED_INPUT_ARGS 7
-#define ERROR_NOT_SUPPORTED_OUTPUT_ARGS 8
-
-#define ERROR_LOAD_DLL_MSG "Error loading the DLL\n"
-#define ERROR_LOAD_FUNCTION_MSG "Error loading the function\n"
-#define ERROR_OUTPUT_ARGS_NOT_SPECIFIED_MSG "Error, the output arguments are not specified\n"
-#define ERROR_INPUT_ARGS_NOT_SPECIFIED_MSG "Error, the input arguments are not specified\n"
-#define ERROR_NOT_SUPPORTED_INPUT_ARGS_MSG "Error, the listed input arguments are not supported\n"
-#define ERROR_NOT_SUPPORTED_OUTPUT_ARGS_MSG "Error, the listed output arguments are not supported\n"
-
-
-/* Manual debugging */
-#define JMCEVAL_DEBUG 0
-#define JMCEVAL_DBGP(x) if (JMCEVAL_DEBUG) { printf(x); fflush(stdout);}
-
-/* Format specifier when printing jmi_real_t */
-#define JMCEVAL_realFormat "%.16f"
 
 /* Record definitions */
 typedef struct R_ddddddddddd_ R_ddddddddddd;
@@ -63,120 +21,6 @@ struct R_ddddddddddd_ {
     double member_10;
 };
 JMI_ARRAY_TYPE(R_ddddddddddd, R_ddddddddddd_a)
-
-
-/* Parses ND dimensions into dimension buffer d*/
-#define JMCEVAL_parseArrayDims(ND) \
-    for (di = 0; di < ND; di++) { scanf("%d",&d[di]); }
-
-/* Parse/print basic types */
-double JMCEVAL_parseReal() {
-    /* Char buffer when reading jmi_real_t. This is necessary
-       since "%lf" is not allowed in c89. */
-    char buff[32];
-    JMCEVAL_DBGP("Parse number: "); 
-    scanf("%s",buff);
-    return strtod(buff, 0);
-}
-
-void JMCEVAL_printReal(double x) {
-    printf(JMCEVAL_realFormat, x); \
-    printf("\n"); \
-    fflush(stdout); \
-}
-
-char* JMCEVAL_parseString() {
-    int d[1];
-    char* str;
-    size_t si,di;
-    JMCEVAL_parseArrayDims(1);
-    getchar();
-    str = ModelicaAllocateString(d[0]);
-    JMCEVAL_DBGP("Parse string: ");
-    for (si = 0; si < d[0]; si++) str[si] = getchar();
-    str[d[0]] = '\0';
-    return str;
-}
-
-void JMCEVAL_printString(const char* str) {
-    printf("%u\n%s\n", (unsigned)strlen(str), str);
-    fflush(stdout);
-}
-
-#define JMCEVAL_parseInteger()  JMCEVAL_parseReal()
-#define JMCEVAL_parseBoolean()  JMCEVAL_parseInteger()
-#define JMCEVAL_parseEnum()     JMCEVAL_parseInteger()
-#define JMCEVAL_printInteger(X) JMCEVAL_printReal(X)
-#define JMCEVAL_printBoolean(X) JMCEVAL_printInteger(X)
-#define JMCEVAL_printEnum(X)    JMCEVAL_printInteger(X)
-#define JMCEVAL_parse(TYPE, X)  X = JMCEVAL_parse##TYPE()
-#define JMCEVAL_print(TYPE, X)  JMCEVAL_print##TYPE(X)
-
-/* Parse/print arrays */
-#define JMCEVAL_parseArray(TYPE,ARR) for (vi = 1; vi <= ARR->num_elems; vi++) { JMCEVAL_parse(TYPE, jmi_array_ref_1(ARR,vi)); }
-#define JMCEVAL_printArray(TYPE,ARR) for (vi = 1; vi <= ARR->num_elems; vi++) { JMCEVAL_print(TYPE, jmi_array_val_1(ARR,vi)); }
-
-/* Used by ModelicaUtilities */
-void jmi_global_log(int warning, const char* name, const char* fmt, const char* value)
-{
-    printf("LOG\n");
-    JMCEVAL_printInteger((double)warning);
-    JMCEVAL_printString(name);
-    JMCEVAL_printString(fmt);
-    JMCEVAL_printString(value);
-}
-
-jmp_buf jmceval_try_location;
-
-#define JMCEVAL_try() (setjmp(jmceval_try_location) == 0)
-
-void jmi_throw()
-{
-    longjmp(jmceval_try_location, 1);
-}
-
-jmi_dynamic_function_memory_t* dyn_fcn_mem = NULL;
-
-jmi_dynamic_function_memory_t* jmi_dynamic_function_memory() {
-    if (dyn_fcn_mem == NULL) { dyn_fcn_mem = jmi_dynamic_function_pool_create(1024*1024); }
-    return dyn_fcn_mem;
-}
-
-void* jmi_global_calloc(size_t n, size_t s)
-{
-    return jmi_dynamic_function_pool_direct_alloc(dyn_fcn_mem, n*s, 1);
-}
-
-void JMCEVAL_setup() {
-#ifdef _WIN32
-    /* Prevent win from translating \n to \r\n */
-    _setmode(fileno(stdout), _O_BINARY);
-#endif
-}
-
-int JMCEVAL_cont(const char* word) {
-    char l[10];
-    char* s = fgets(l, 10, stdin);
-    if (strlen(s) == 1) {
-        s = fgets(l, 10, stdin); /* Extra call to fix stray newline */
-    }
-    if (s == NULL) {
-        exit(2);
-    }
-    if (strlen(s) == strlen(word)) {
-        return strncmp(l, word, strlen(word)) == 0;
-    }
-    return 0;
-}
-
-void JMCEVAL_check(const char* str) {
-    printf("%s\n",str);
-    fflush(stdout);
-}
-
-void JMCEVAL_failed() {
-    JMCEVAL_check("ABORT");
-}
 
 typedef const char* (__stdcall *f_s_sii)(const char*, int, int);
 typedef double (__stdcall *f_d_dd)(double, double);
@@ -538,7 +382,6 @@ int main(int argc, const char* argv[])
     } else {
         JMCEVAL_failed();
     }
-    jmi_dynamic_function_pool_destroy(dyn_fcn_mem);
     JMCEVAL_check("END");
     return 0;
 }
