@@ -358,8 +358,10 @@ ORIG_PYTHON_HOME=$PYTHON_HOME_ABS
    
 PYTHON_DISTRO_CHECK([PYTHON64_HOME], [PYTHON64_HOME_ABS], [PYTHON64_LIB], [PYTHON64_INCLUDE], [CMAKE_PYTHON64_LIB], [CMAKE_PYTHON64_INCLUDE], [64bit])
 AM_CONDITIONAL([WITH_PYTHON64], [test "x$PYTHON64_HOME" != x])
-# Since we always build 32bit together with 64bit we put this in a conditional for setting proper flags to assimulo and pyfmi
-AM_CONDITIONAL([BUILD_WITH_PYTHON32],[WITH_PYTHON64])
+
+# Since we always build JM 32bit together with 64bit we put this in a conditional for setting proper flags to assimulo and pyfmi
+# therefore BUILD_WITH_PYTHON32 is true only when PYTHON64_HOME is set
+AM_CONDITIONAL([BUILD_WITH_PYTHON32], [test "x$PYTHON64_HOME" != x])
 
 AC_SUBST(ORIG_PATH)
 ORIG_PATH=$PATH
