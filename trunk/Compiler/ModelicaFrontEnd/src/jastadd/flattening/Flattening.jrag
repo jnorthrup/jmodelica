@@ -2161,8 +2161,13 @@ aspect Flattening {
     eq InstBuiltIn.isBuiltIn()                   = true;
     syn boolean InstBuiltInClassDecl.isBuiltIn() = true;
     syn boolean SrcBuiltInClassDecl.isBuiltIn()  = true;
-    syn boolean SrcClassDecl.isBuiltIn()         = ((SourceRoot) root()).getProgram().getBuiltInTypes().hasChild(this)
-            || ((SourceRoot) root()).getProgram().getBuiltInFunctions().hasChild(this);
+    syn boolean SrcClassDecl.isBuiltIn()         = root().asSourceRoot().getProgram().getBuiltInTypes().hasChild(this)
+            || root().asSourceRoot().getProgram().getBuiltInFunctions().hasChild(this);
+    
+    syn SourceRoot Root.asSourceRoot() {
+        throw new UnsupportedOperationException("Method not implemented for class " + getClass().getSimpleName() + "!");
+    }
+    eq SourceRoot.asSourceRoot() = this;
     
     public boolean List.hasChild(ASTNode node) {
         for(ASTNode child : children) {
