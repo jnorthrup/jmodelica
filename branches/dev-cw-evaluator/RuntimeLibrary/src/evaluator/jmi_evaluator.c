@@ -2,8 +2,8 @@
 
 /* Builtins */
 extern const char* ModelicaStrings_substring(const char*, int, int);
-extern const char* ModelicaStrings_length(const char*);
-extern const char* ModelicaStrings_skipWhiteSpace(const char*, int);
+extern int ModelicaStrings_length(const char*);
+extern int ModelicaStrings_skipWhiteSpace(const char*, int);
 
 /* Record definitions */
 typedef struct R_ddddddddddd_ R_ddddddddddd;
