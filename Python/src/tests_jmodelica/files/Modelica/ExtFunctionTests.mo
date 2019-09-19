@@ -1,5 +1,70 @@
 package ExtFunctionTests
 
+model Evaluator_Double
+    function d_i
+     input Integer a;
+     output Real b;
+
+     external "C" b=f_d_i(a) annotation(Library="evaluatorTestsShared",
+                             Include="#include \"evaluatorTests.h\"");
+    end d_i;
+    
+    function d_idd
+     input Integer a;
+     input Real b;
+     input Real c;
+     output Real d;
+
+     external "C" d=f_d_idd(a,b,c) annotation(Library="evaluatorTestsShared",
+                             Include="#include \"evaluatorTests.h\"");
+    end d_idd;
+    
+    
+    Real c = d_i(1);
+    Real d = d_idd(1, 2.0, 3.0);
+end Evaluator_Double;
+
+model Evaluator_Integer
+    function i_ii
+     input Integer a;
+     input Integer b;
+     output Integer c;
+
+     external "C" c=f_i_ii(a,b) annotation(Library="evaluatorTestsShared",
+                             Include="#include \"evaluatorTests.h\"");
+    end i_ii;
+    
+    Integer c = i_ii(1,2);
+end Evaluator_Integer;
+
+model Evaluator_Record
+    record R
+        Real x0;
+        Real x1;
+        Real x2;
+        Real x3;
+        Real x4;
+        Real x5;
+        Real x6;
+        Real x7;
+        Real x8;
+        Real x9;
+        Real x10;
+    end R;
+    function iddpR_ddddddddddd_
+     input Integer a;
+     input Real b;
+     input Real c;
+     output R d;
+
+     external "C" f___iddpR_ddddddddddd_(a,b,c,d) annotation(Library="evaluatorTestsShared",
+                             Include="#include \"evaluatorTests.h\"");
+    end iddpR_ddddddddddd_;
+    
+    R c = iddpR_ddddddddddd_(1,2.0,3.0);
+end Evaluator_Record;
+
+
 model Evaluator_Substring
     constant String full="Yy00";
     constant String sub=Modelica.Utilities.Strings.substring(full,1,1);

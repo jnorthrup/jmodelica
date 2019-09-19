@@ -104,6 +104,65 @@ class TestEvaluator:
         
         assert matches == 1, "Seems to have found an unknown shared library"
     
+    @testattr(stddist_base = True)
+    def test_double_return(self):
+        cpath = "ExtFunctionTests.Evaluator_Double"
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_dynamic_evaluator":True}, compiler_log_level="d:log.txt")
+        
+        nbr_of_evaluator_calls = 0
+        with open("log.txt") as f:
+            res = fnmatch.filter(f, "Succesfully connected external function '*' to the evaluator*")
+            nbr_of_evaluator_calls = len(res)
+        
+        assert nbr_of_evaluator_calls == 2, "Wrong number of external function calls, check log."
+        
+        model = load_fmu(fmu_name)
+        
+        assert model.get("c") == 3.0, model.get("c")
+        assert model.get("d") == 9.0, model.get("d")
+    
+    @testattr(stddist_base = True)
+    def test_integer_return(self):
+        cpath = "ExtFunctionTests.Evaluator_Integer"
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_dynamic_evaluator":True}, compiler_log_level="d:log.txt")
+        
+        nbr_of_evaluator_calls = 0
+        with open("log.txt") as f:
+            res = fnmatch.filter(f, "Succesfully connected external function '*' to the evaluator*")
+            nbr_of_evaluator_calls = len(res)
+        
+        assert nbr_of_evaluator_calls == 1, "Wrong number of external function calls, check log."
+        
+        model = load_fmu(fmu_name)
+        
+        assert model.get("c") == 3.0, model.get("c")
+    
+    @testattr(stddist_base = True)
+    def test_record(self):
+        cpath = "ExtFunctionTests.Evaluator_Record"
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_dynamic_evaluator":True}, compiler_log_level="d:log.txt")
+        
+        nbr_of_evaluator_calls = 0
+        with open("log.txt") as f:
+            res = fnmatch.filter(f, "Succesfully connected external function '*' to the evaluator*")
+            nbr_of_evaluator_calls = len(res)
+        
+        assert nbr_of_evaluator_calls == 1, "Wrong number of external function calls, check log."
+        
+        model = load_fmu(fmu_name)
+        
+        assert model.get("c.x0") == 1.0, model.get("c.x0")
+        assert model.get("c.x1") == 2.0, model.get("c.x1")
+        assert model.get("c.x2") == 3.0, model.get("c.x2")
+        assert model.get("c.x3") == 3.0, model.get("c.x3")
+        assert model.get("c.x4") == 4.0, model.get("c.x4")
+        assert model.get("c.x5") == 5.0, model.get("c.x5")
+        assert model.get("c.x6") == 6.0, model.get("c.x6")
+        assert model.get("c.x7") == 7.0, model.get("c.x7")
+        assert model.get("c.x8") == 8.0, model.get("c.x8")
+        assert model.get("c.x9") == 9.0, model.get("c.x9")
+        assert model.get("c.x10") == 10.0, model.get("c.x10")
+    
 class TestExternalStatic:
 
     @classmethod
