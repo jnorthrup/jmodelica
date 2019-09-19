@@ -55,7 +55,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
         String sharedLib = "";
         String extLibrary = "";
         
-        if (ext.library().length == 1) {
+        if (ext.library() != null && ext.library().length == 1) {
             extLibrary = ext.library()[0];
         } else {
             return sharedLib;
