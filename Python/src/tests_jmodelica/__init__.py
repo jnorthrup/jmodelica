@@ -75,7 +75,9 @@ def get_files_path():
                                " JMODELICA_HOME environment" \
                                " variable."
     pycompiler = platform.python_compiler()
-    if "64 bit" in pycompiler and "win" in sys.platform:
+    if sys.version_info > (3, 0):
+        return os.path.join(jmhome, 'Python', 'tests_jmodelica', 'files')
+    elif "64 bit" in pycompiler and "win" in sys.platform:
         return os.path.join(jmhome, 'Python_64', 'tests_jmodelica', 'files')
     else:
         return os.path.join(jmhome, 'Python', 'tests_jmodelica', 'files')
