@@ -290,7 +290,7 @@ if WITH_OPENMP
 	*-mingw*) \
 	python setup.py install --with_openmp=True --superlu-home=$(abs_builddir)/superlu_build$(DEP_SUFFIX)/ --sundials-home=$(SUNDIALS_HOME)$(DEP_SUFFIX) --sundials-with-superlu=True --blas-home=$(abs_builddir)/blas_install$(DEP_SUFFIX)/ --lapack-home=$(abs_builddir)/lapack_install$(DEP_SUFFIX)/ $(BUILD_WITH_PYTHON32_ARG) $(NUMPY_NO_MSVCR_ARG) --prefix=$(assimulo_install_dir) ;; \
 	*) \
-	python setup.py install --with_openmp=True --superlu-home=$(abs_builddir)/superlu_build$(DEP_SUFFIX)/ --sundials-home=$(SUNDIALS_HOME)$(DEP_SUFFIX) --sundials-with-superlu=True --blas-home=$(abs_builddir)/blas_install$(DEP_SUFFIX)/ --lapack-home=$(abs_builddir)/lapack_install$(DEP_SUFFIX)/ --prefix=$(assimulo_install_dir) ;; \
+	python setup.py install --with_openmp=True --superlu-home=$(abs_builddir)/superlu_build/ --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --prefix=$(assimulo_install_dir) ;; \
 	esac
 if JM_WIN64
 if WITH_PYTHON64
@@ -357,7 +357,7 @@ endif
 	*-mingw*) \
 	python setup.py install --fmil-home=$(abs_builddir)/FMIL_install$(DEP_SUFFIX)/ $(BUILD_WITH_PYTHON32_ARG) $(NUMPY_NO_MSVCR_ARG) --prefix=$(pyfmi_install_dir) ;; \
 	*) \
-	python setup.py install --fmil-home=$(abs_builddir)/FMIL_install$(DEP_SUFFIX)/ --prefix=$(pyfmi_install_dir) ;; \
+	python setup.py install --fmil-home=$(abs_builddir)/FMIL_install/ --prefix=$(pyfmi_install_dir) ;; \
 	esac
 	rm -rf build
 if JM_WIN64
