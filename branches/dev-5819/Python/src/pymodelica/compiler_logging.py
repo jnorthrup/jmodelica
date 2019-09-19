@@ -45,7 +45,7 @@ class LogErrorParser(xml.sax.ContentHandler):
                 self.state == 'exception' or self.state == 'unit':
             if name == 'value':
                 self.attribute = attrs['name'].encode('utf-8')
-                self.node[self.attribute] = '';
+                self.node[self.attribute] = ''
         else:
             if name == "Error":
                 self.state = 'error'
@@ -77,17 +77,17 @@ class LogErrorParser(xml.sax.ContentHandler):
     
     def characters(self, content):
         if self.node is not None and self.attribute is not None:
-            self.node[self.attribute] += content;
+            self.node[self.attribute] += content
     
     def _construct_problem_node(self, node):
         if node['type'] == 'exception':
-            return CompilationException(node['kind'], node['message'], node['stacktrace'])
+            return CompilationException(node[b'kind'], node[b'message'], node[b'stacktrace'])
         elif node['type'] == 'error':
-            return CompilationError(node['identifier'], node['kind'], node['file'], node['line'], \
-                node['column'], node['message'])
+            return CompilationError(node[b'identifier'], node[b'kind'], node[b'file'], node[b'line'], \
+                node[b'column'], node[b'message'])
         elif node['type'] == 'warning':
-            return CompilationWarning(node['identifier'], node['kind'], node['file'], node['line'], \
-                node['column'], node['message'])
+            return CompilationWarning(node[b'identifier'], node[b'kind'], node[b'file'], node[b'line'], \
+                node[b'column'], node[b'message'])
 
 class KeepLastStream():
     """
@@ -111,6 +111,9 @@ class KeepLastStream():
         """
         if self.last is not None:
             # Count the number of lines in the previous contents
+            # apparently self.last is of class 'bytes' in py3
+            # compared to class 'str' in py2
+            self.last = self.last.decode('utf-8')
             self.line += self.last.count('\n')
             # Get the two last lines
             lines = self.last.rsplit('\n', 2)
