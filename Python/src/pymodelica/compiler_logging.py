@@ -69,7 +69,7 @@ class LogErrorParser(xml.sax.ContentHandler):
             self.state = None
             self.node = None
         elif self.state == 'unit' and name == "CompilationUnit":
-            self.result.name = self.node['file']
+            self.result.name = self.node[b'file']
             self.state = None
             self.node = None
         elif name == 'value':
@@ -262,7 +262,7 @@ class CompilerLogHandler:
         
             A LogHandlerThread object.
         """
-        return LogHandlerThread(stream);
+        return LogHandlerThread(stream)
     
     def start(self, stream):
         """

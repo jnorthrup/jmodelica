@@ -371,11 +371,11 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
         si = None
     process = Popen(cmd, stderr=PIPE, startupinfo=si)
     log = CompilerLogHandler()
-    log.start(process.stderr);
+    log.start(process.stderr)
     try:
-        process.wait();
+        process.wait()
     finally:
-        return log.end();
+        return log.end()
 
 def _gen_compiler_options(compiler_options):
     """
