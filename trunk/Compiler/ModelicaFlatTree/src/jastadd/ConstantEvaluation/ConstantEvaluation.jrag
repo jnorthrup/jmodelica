@@ -2817,7 +2817,8 @@ aspect ConstantEvaluation {
             }
             if (formatChar == 'u') {
                 String formatCorrect = format.substring(0, format.length()-1) + "s";
-                return new CValueString(String.format((Locale) null, formatCorrect, Integer.toUnsignedLong(cval.intValue())));
+                long unsigned = ((long) cval.intValue()) & 0xffffffffL); // Java 8 Integer.toUnsignedLong()
+                return new CValueString(String.format((Locale) null, formatCorrect, unsigned);
             }
 
             if (formatChar == 'i') {
