@@ -37,6 +37,11 @@ install(CODE "file(MAKE_DIRECTORY  $ENV{DESTDIR}${TEST_LIBRARY_INSTALL_DIR})")
 include_directories(Include)
 include_directories(${TOP_SRC}/RuntimeLibrary/src/jmi)
 
+set(EVALUATORTESTS_Sources
+    src/evaluatorTests.c
+    Include/evaluatorTests.h
+)
+
 set(ADDNUMBERS_Sources
     src/addNumbers.c
     Include/addNumbers.h
@@ -67,6 +72,12 @@ if(NOT MSVC)
     set(EXTERNALFUNCTIONSFORTRAN_Sources
         src/externalFunctionsFortran.f
     )
+endif()
+
+#Build evaluatorTests library
+add_library(evaluatorTestsShared SHARED ${EVALUATORTESTS_Sources})
+if(NOT MSVC)
+    set_target_properties(evaluatorTestsShared PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -O2")
 endif()
 
 #Build addNumbers library
@@ -107,6 +118,7 @@ if(NOT MSVC)
 endif()
 
 #Install the libraries
+install(TARGETS evaluatorTestsShared DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
 install(TARGETS addNumbers DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
 install(TARGETS addNumbersShared DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
 install(TARGETS arrayFunctions DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
