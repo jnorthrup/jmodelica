@@ -90,11 +90,13 @@ aspect AnnotationAPI {
     public class FAbstractEquation implements FAttributeListAnnotationNode.FAttributeList {}
     public class FClass            implements FAttributeListAnnotationNode.FAttributeList {}
     public class FAttribute        implements FAttributeListAnnotationNode.FAttributeList {}
+    public class FExternalStmt     implements FAttributeListAnnotationNode.FAttributeList {}
     
     eq FFunctionDecl.annotation(InstContext instContext)     = new FAttributeListAnnotationNode(this, instContext);
     eq FVariable.annotation(InstContext instContext)         = new FAttributeListAnnotationNode(this, instContext);
     eq FAbstractEquation.annotation(InstContext instContext) = new FAttributeListAnnotationNode(this, instContext);
     eq FClass.annotation(InstContext instContext)            = new FAttributeListAnnotationNode(this, instContext);
+    eq FExternalStmt.annotation(InstContext instContext)     = new FAttributeListAnnotationNode(this, instContext);
 
     eq InstExternal.annotation() = annotation(annotationExpEvaluator());
     eq InstNode    .annotation() = annotation(annotationExpEvaluator());
