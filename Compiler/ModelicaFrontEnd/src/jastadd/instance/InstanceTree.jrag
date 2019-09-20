@@ -1767,8 +1767,7 @@ aspect InstanceTreeConstruction {
         hasFArraySubscripts() || 
         hasInstClassModification() || 
         getSrcClassDecl().hasSrcTypePrefix() || 
-        !filteredEnvironment().isEmpty() ||
-        inExternalObject();
+        !filteredEnvironment().isEmpty();
     eq InstReplacingShortClassDecl.shouldBeExpanded() =
         super.shouldBeExpanded() || 
         (hasInstConstrainingClass() && getInstConstrainingClass().hasInstClassModification()) || 
@@ -2758,15 +2757,17 @@ aspect InstArrays {
 	 * given on the declaration's class (in the case of short
 	 * class declarations).
 	 */
-    syn lazy Opt<FArraySubscripts> InstComponentDecl.getFArraySubscriptsOpt() {
+	syn lazy FArraySubscripts InstComponentDecl.getFArraySubscripts() {
 	    if (myFSubscripts().isEmpty())
-            return Opt.EMPTY;
+	        return null;
         List<FSubscript> list = new List<FSubscript>();
         for (Subscript s : myFSubscripts()) { 
             list.add(s.deferredCopy());
         }
-        return new Opt(new FArrayExpSubscripts(list));
+        return new FArrayExpSubscripts(list);
 	}
+	
+	syn boolean InstComponentDecl.hasFArraySubscripts() = getFArraySubscripts()!=null;
 	
 }
 

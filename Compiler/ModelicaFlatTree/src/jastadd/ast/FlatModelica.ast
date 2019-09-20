@@ -85,7 +85,7 @@ abstract FAbstractVariable : BaseNode;
  * A flat variable in a function.
  */
 FFunctionVariable : FAbstractVariable ::= <VisibilityType:VisibilityType>
-                                          <CausalityConnectorPrefix:CausalityConnectorPrefix>
+                                          <TypePrefixInputOutput:TypePrefixInputOutput>
                                           FAttribute*
                                           Type:FType
                                           [BindingExp:FExp]
@@ -109,7 +109,7 @@ UnknownFVariable : FAbstractVariable;
  */
 abstract FVariable : FAbstractVariable ::= <VisibilityType:VisibilityType>
                                            <TypePrefixVariability:TypePrefixVariability>
-                                           <CausalityConnectorPrefix:CausalityConnectorPrefix>
+                                           <TypePrefixInputOutput:TypePrefixInputOutput>
                                            FAttribute*
                                            <DerivedType>
                                            [BindingExp:FExp]

@@ -150,7 +150,6 @@ aspect InstLookupClasses {
 
     inh InstLookupResult<InstClassDecl> InstAccess.lookupInstClassFromTop(String name);
     inh InstLookupResult<InstClassDecl> InstNode.lookupInstClassFromTop(String name);
-    inh InstLookupResult<InstClassDecl> InstImport.lookupInstClassFromTop(String name);
     eq InstRoot.getChild().lookupInstClassFromTop(String name) = genericLookupInstClass(name);
     eq Root.getChild().lookupInstClassFromTop(String name)     = InstLookupResult.notFound();
 
@@ -257,7 +256,7 @@ aspect InstLookupClasses {
 
 
     syn lazy HashMap<String,SrcLibNode> InstProgramRoot.libraryMap() {
-        Program prog = root().asSourceRoot().getProgram();
+        Program prog = ((SourceRoot) root()).getProgram();
         HashMap<String,SrcLibNode> map = new HashMap<String,SrcLibNode>(prog.getNumSrcLibNode() * 4 / 3 + 1);
         for (SrcLibNode ln : prog.getSrcLibNodes()) {
             if (!map.containsKey(ln.name())) {
@@ -612,10 +611,11 @@ aspect InstLookupClasses {
 
 aspect InstLookupImport {
 
-    eq InstImport.getPackageName().lookupInstClass(String name) = lookupInstClassFromTop(name);
-
     syn lazy InstClassDecl InstImport.getImportedClass() {
-        return getPackageName().myInstClassDecl();
+        // Use simple lookup: only classes which are not inherited can be
+        // imported. 
+        return ((SourceRoot)root()).getProgram().getInstProgramRoot().
+            simpleLookupInstClassDecl(getPackageNameNoTransform().name());
     }
 
     syn InstLookupResult<InstClassDecl> InstImport.lookupInstClassInImport(String name) {
@@ -668,12 +668,11 @@ aspect SimpleInstClassLookup {
 
     public InstClassDecl InstNode.simpleLookupInstClassDeclRecursive(String name) {
         String[] parts = name.split("\\.", 2);
-        InstClassDecl icd = findMatching(allInstClassDecls(), parts[0]);
-        if (icd != null) {
+        InstClassDecl icd = findMatching(getInstClassDecls(), parts[0]);
+        if (icd != null)
             return icd = (parts.length == 1) ? icd : icd.actualInstClass().simpleLookupInstClassDeclRecursive(parts[1]);
-        } else {
+        else
             return unknownInstClassDecl();
-        }
     }
 
     public InstClassDecl InstProgramRoot.simpleLookupInstClassDeclRecursive(String name) {
@@ -681,15 +680,13 @@ aspect SimpleInstClassLookup {
         InstClassDecl icd = findMatching(getInstClassDecls(), parts[0]);
         if (icd == null) {
             InstLookupResult<InstClassDecl> result = lookupLibrary(parts[0]);
-            if (result.successful()) {
+            if (result.successful())
                 icd = result.target();
-            }
         }
-        if (icd != null) {
+        if (icd != null)
             return icd = (parts.length == 1) ? icd : icd.actualInstClass().simpleLookupInstClassDeclRecursive(parts[1]);
-        } else {
+        else
             return unknownInstClassDecl();
-        }
     }
 
     /**

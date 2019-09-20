@@ -889,7 +889,7 @@ aspect CCodeGenExpressions {
                 if (hasSignificantDigits()) {
                     p.print(getSignificantDigits(), str, indent);
                 } else {
-                    str.print(DEFAULT_PRECISION);
+                    str.print(significantDigits());
                 }
             }
             if (hasMinimumLength()) {
@@ -972,7 +972,7 @@ aspect CCodeGenExpressions {
                 if (hasSignificantDigits()) {
                     p.print(getSignificantDigits(), str, indent);
                 } else {
-                    str.print(DEFAULT_PRECISION);
+                    str.print(significantDigits());
                 }
             }
         }
@@ -1072,16 +1072,9 @@ aspect CCodeGenExpressions {
     }
     syn lazy int FStringAddExp.maxStringLength_C() = Math.min(getLeft().maxStringLength_C() + getRight().maxStringLength_C(), MAX_STRING_LENGTH_C);
     eq FStringLitExp.maxStringLength_C()           = stringUtf8().length;
-    eq FStringExp.maxStringLength_C() {
-        // TODO: if there is a format arg, there is no significantDigits
-        // TODO: handle case where arguments are variables (use MAX_STRING_LENGTH_C?)
-        VariableEvaluator ev = defaultVariableEvaluator();
-        if (hasFormat()) {
-            return type().maxNumericStringLength_C(significantDigits(ev));
-        } else {
-            return Math.max(getValue().type().maxStringLength_C(significantDigits(ev)), minimumLength(ev));
-        }
-    }
+    eq FStringExp.maxStringLength_C()              =
+            hasFormat() ? type().maxNumericStringLength_C(significantDigits()) :
+            Math.max(getValue().type().maxStringLength_C(significantDigits()), minimumLength());
     
     /**
      * The maximum length string representations of values of this type can have in C.

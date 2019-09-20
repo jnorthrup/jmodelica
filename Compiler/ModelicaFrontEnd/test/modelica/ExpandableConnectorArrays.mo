@@ -393,11 +393,6 @@ fclass ExpandableConnectorArrays.CompositeConnectors
  potential Real c5.a;
  flow Real c5.b;
 equation
- c1.b = 0.0;
- c2.b = 0.0;
- c3.b = 0.0;
- c4.b = 0.0;
- c5.b = 0.0;
  c1.a = ec1[1].x.a;
  ec1[1].x.a = ec2[1].x.a;
  ec2[1].x.a = ec3[1].x.a;
@@ -656,10 +651,6 @@ fclass ExpandableConnectorArrays.ConnectorSlice
  potential Real c[4].p;
  flow Real c[4].f;
 equation
- c[1].f = 0.0;
- c[2].f = 0.0;
- c[3].f = 0.0;
- c[4].f = 0.0;
  - c[1].f - c[3].f - ec1[1].a.f - ec2[1].a.f - ec3[1].a.f = 0.0;
  c[1].p = c[3].p;
  c[3].p = ec1[1].a.p;

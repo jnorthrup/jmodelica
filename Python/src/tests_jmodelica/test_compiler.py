@@ -399,23 +399,6 @@ class Test_Compiler_functions:
                diag_name+" was not created."
         os.remove(fmuname)
         shutil.rmtree(diag_name)
-
-    @testattr(stddist_base = True)
-    def test_dynamic_state_html_diagnostics(self):
-        """
-        Test that generate_html_diagnostics works with a model with dynamic states, see #5839
-        """
-
-        fmuname = compile_fmu("ThreeDSOneEq", os.path.join(get_files_path(), 'Modelica', 'ThreeDSOneEq.mo'), compiler_options={'generate_html_diagnostics':True})
-        (diag_name, _) = os.path.splitext(fmuname)
-        diag_name += '_html_diagnostics'
-
-        assert os.access(fmuname, os.F_OK) == True, \
-               fmuname+" was not created."
-        assert os.access(diag_name, os.F_OK) == True, \
-               diag_name+" was not created."
-        os.remove(fmuname)
-        shutil.rmtree(diag_name)
     
 
     @testattr(stddist_base = True)

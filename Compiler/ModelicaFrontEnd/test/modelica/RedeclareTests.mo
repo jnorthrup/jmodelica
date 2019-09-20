@@ -7244,8 +7244,6 @@ annotation(__JModelica(UnitTesting(tests={
         flatModel="
 fclass RedeclareTests.Prefix.RedeclarePrefix9
  flow Real c.x;
-equation
- c.x = 0.0;
 end RedeclareTests.Prefix.RedeclarePrefix9;
 ")})));
 end RedeclarePrefix9;
@@ -7271,8 +7269,6 @@ fclass RedeclareTests.Prefix.RedeclarePrefix10
  flow Real c2.x;
 equation
  - c1.x - c2.x = 0.0;
- c1.x = 0.0;
- c2.x = 0.0;
 end RedeclareTests.Prefix.RedeclarePrefix10;
 ")})));
 end RedeclarePrefix10;

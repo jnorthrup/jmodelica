@@ -374,21 +374,17 @@ aspect FlatTypeCheck {
                 CValueArray arr = (CValueArray) val;
                 for (Index i : arr.indices()) {
                     CValue cell = arr.getCell(i);
-                    if (hasZeroNominal(owner, cell)) {
+                    if (cell.hasRealValue() && cell.realValue() == 0.0) {
                         NOMINAL_ELEMENT_EQUAL_TO_ZERO.invoke(this, owner.kindDescription(), owner.name(), valMod, i);
                         break;
                     }
                 }
             } else {
-                if (hasZeroNominal(owner, val)) {
+                if (val.hasRealValue() && val.realValue() == 0.0) {
                     NOMINAL_EQUAL_TO_ZERO.invoke(this, owner.kindDescription(), owner.name(), valMod);
                 }
             }
         } catch (ConstantEvaluationException e) {}
-    }
-    
-    public boolean InstComponentModification.hasZeroNominal(InstNode owner, CValue val) {
-        return val.hasRealValue() && val.realValue() == 0.0;
     }
 
     syn String InstNode.kindDescription() {
