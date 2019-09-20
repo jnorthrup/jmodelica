@@ -15,6 +15,7 @@ void* jmi_global_calloc(size_t n, size_t s) {
 extern const char* ModelicaStrings_substring(const char*, int, int);
 extern int ModelicaStrings_length(const char*);
 extern int ModelicaStrings_skipWhiteSpace(const char*, int);
+extern int ModelicaStrings_compare(const char*, const char*, int);
 
 /* Record definitions */
 typedef struct R_ddddddddddd_ R_ddddddddddd;
@@ -40,6 +41,7 @@ typedef double(__stdcall *f_d_idd)(int, double, double);
 typedef int (__stdcall *f_i_ii)(int, int);
 typedef int (__stdcall *f_i_s)(const char*);
 typedef int (__stdcall *f_i_si)(const char*, int);
+typedef int (__stdcall *f_i_ssi)(const char*, const char*, int);
 typedef void(__stdcall *f___iddpR_ddddddddddd_)(int, double, double, R_ddddddddddd**);
 typedef void(__stdcall *f___ddpd)(double, double, double*);
 typedef void (*generic_funcptr)(void);
@@ -219,6 +221,27 @@ void jmi_call_integer_fcn_si(generic_funcptr fcn, double *out) {
     }
 }
 
+void jmi_call_integer_fcn_ssi(generic_funcptr fcn, double *out) {
+    JMI_DEF(STR, arg_0)
+    JMI_DEF(STR, arg_1)
+    JMI_DEF(INT, arg_2)
+    JMI_DEF(INT_EXT, tmp_2)
+
+    JMCEVAL_parse(String, arg_0);
+    JMCEVAL_parse(String, arg_1);
+    JMCEVAL_parse(Integer, arg_2);
+
+    JMCEVAL_check("CALC");
+    if (JMCEVAL_try()) {
+        /* Calc phase */
+        tmp_2 = (int)arg_2;
+        *out = ((f_i_ssi)fcn)(arg_0, arg_1, tmp_2);
+    }
+    else {
+        JMCEVAL_failed();
+    }
+}
+
 void jmi_call_integer_fcn(generic_funcptr fcn, const char* inputs) {
     JMI_DEF(INT, i_output)
     JMCEVAL_parse(Integer, i_output);
@@ -227,6 +250,8 @@ void jmi_call_integer_fcn(generic_funcptr fcn, const char* inputs) {
         jmi_call_integer_fcn_s(fcn, &i_output);
     } else if (strcmp(inputs, "s,i,") == 0) {
         jmi_call_integer_fcn_si(fcn, &i_output);
+    } else if (strcmp(inputs, "s,s,i,") == 0) {
+        jmi_call_integer_fcn_ssi(fcn, &i_output);
     } else {
         printf(ERROR_NOT_SUPPORTED_INPUT_ARGS_MSG);
         exit(ERROR_NOT_SUPPORTED_INPUT_ARGS);
@@ -307,6 +332,8 @@ int main(int argc, const char* argv[])
         funci = (generic_funcptr)ModelicaStrings_length;
     } else if (strcmp(argv[2], "ModelicaStrings_skipWhiteSpace") == 0) {
         funci = (generic_funcptr)ModelicaStrings_skipWhiteSpace;
+    } else if (strcmp(argv[2], "ModelicaStrings_compare") == 0) {
+        funci = (generic_funcptr)ModelicaStrings_compare;
     }
 
     if (funci == NULL) {
