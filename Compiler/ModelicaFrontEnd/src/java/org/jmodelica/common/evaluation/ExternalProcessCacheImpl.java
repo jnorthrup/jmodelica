@@ -108,6 +108,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
         add("s+s,i,i,");
         add("i+s,");
         add("i+s,i,");
+        add("i+i,i,");
         add("void+i,d,d,*R[d,d,d,d,d,d,d,d,d,d,d,],");
         add("void+d,d,*d,");
     }};
