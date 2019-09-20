@@ -637,16 +637,12 @@
             <then>
 
                 <!-- We need to add this to builds with Java v9 or greater -->
-                <var name="javadoc_additional_params" value="--no-module-directories"/>
-                <if>
+                <condition property="javadoc_additional_params" value="" else="--no-module-directories">
                     <or>
                         <equals arg1="${ant.java.version}" arg2="1.7" />
                         <equals arg1="${ant.java.version}" arg2="1.8" />
                     </or>
-                    <then>
-                        <var name="javadoc_additional_params" value=""/>
-                    </then>
-                </if>
+                </condition>
 
                 <!-- The javadoc directory is sometimes unusable, unclear why.
                      It is recreated by the javadoc task. -->
