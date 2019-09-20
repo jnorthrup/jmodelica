@@ -775,7 +775,7 @@ aspect Flattening {
         SrcClassDecl scd = myTopSrcClassDecl();
         stmt.setLibTopPackagePath(scd == null ? "" : scd.myLibRootPath().toAbsolutePath().toString()); // scd is null for builtins
         stmt.setFExternalLanguage(hasFExternalLanguage() ? 
-                getFExternalLanguage().treeCopyNoTransform() : 
+                getFExternalLanguage().treeCopy() : 
                 new FCExternalLanguage());
         stmt.extractLibrary(this);
         contribute(stmt);
