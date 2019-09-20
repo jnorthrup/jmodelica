@@ -84,8 +84,7 @@ void JMCEVAL_failed() {
     JMCEVAL_check("ABORT");
 }
 
-/* Used by ModelicaUtilities */
-void jmi_global_log(int warning, const char* name, const char* fmt, const char* value) {
+void _jmi_global_log(int warning, const char* name, const char* fmt, const char* value) {
     printf("LOG\n");
     JMCEVAL_printInteger((double)warning);
     JMCEVAL_printString(name);
@@ -99,7 +98,7 @@ int JMCEVAL_try() {
     return setjmp(jmceval_try_location) == 0;
 }
 
-void jmi_throw() {
+void _jmi_throw() {
     longjmp(jmceval_try_location, 1);
 }
 
@@ -110,6 +109,6 @@ jmi_dynamic_function_memory_t* jmi_dynamic_function_memory() {
     return dyn_fcn_mem;
 }
 
-void* jmi_global_calloc(size_t n, size_t s) {
+void* _jmi_global_calloc(size_t n, size_t s) {
     return jmi_dynamic_function_pool_direct_alloc(dyn_fcn_mem, n*s, 1);
 }

@@ -1,5 +1,16 @@
 #include "jmi_evaluator_util.h"
 
+/* Must be defined here in order to override the methods from jmi_global.c */
+void jmi_global_log(int warning, const char* name, const char* fmt, const char* value) {
+    _jmi_global_log(warning, name, fmt, value);
+}
+void jmi_throw() {
+    _jmi_throw();
+}
+void* jmi_global_calloc(size_t n, size_t s) {
+    return _jmi_global_calloc(n,s);
+}
+
 /* Builtins */
 extern const char* ModelicaStrings_substring(const char*, int, int);
 extern int ModelicaStrings_length(const char*);

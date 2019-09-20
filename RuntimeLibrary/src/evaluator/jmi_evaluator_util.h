@@ -76,10 +76,10 @@ void JMCEVAL_setup();
 int JMCEVAL_cont(const char* word);
 void JMCEVAL_check(const char* str);
 void JMCEVAL_failed();
-void jmi_global_log(int warning, const char* name, const char* fmt, const char* value);
-void jmi_throw();
+void _jmi_global_log(int warning, const char* name, const char* fmt, const char* value);
+void _jmi_throw();
 int JMCEVAL_try();
-void* jmi_global_calloc(size_t n, size_t s);
+void* _jmi_global_calloc(size_t n, size_t s);
 jmi_dynamic_function_memory_t* jmi_dynamic_function_memory();
 
 #define JMCEVAL_parseInteger()  JMCEVAL_parseReal()
