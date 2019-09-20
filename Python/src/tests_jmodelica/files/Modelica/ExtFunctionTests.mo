@@ -72,6 +72,8 @@ model Evaluator_Substring
     constant String string2 = Modelica.Utilities.Strings.substring(string1,9,12); // string2 = \"line\"
     constant Integer len = Modelica.Utilities.Strings.length(string1);
     constant Integer start = Modelica.Utilities.Strings.Advanced.skipWhiteSpace("   Hello", 1);
+    constant Boolean not_equal = Modelica.Utilities.Strings.isEqual("Temp", "test", true);
+    constant Boolean equal = Modelica.Utilities.Strings.isEqual("Temp", "Temp", true);
 end Evaluator_Substring;
 
 model Evaluator_Add

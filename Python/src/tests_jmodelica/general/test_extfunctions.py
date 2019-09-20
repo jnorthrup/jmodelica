@@ -51,7 +51,7 @@ class TestEvaluator:
             res = fnmatch.filter(f, "Succesfully connected external function '*' to the evaluator*")
             nbr_of_evaluator_calls = len(res)
         
-        assert nbr_of_evaluator_calls == 3, "Wrong number of external function calls, check log."
+        assert nbr_of_evaluator_calls == 4, "Wrong number of external function calls, check log."
         
         model = load_fmu(fmu_name)
         
@@ -59,6 +59,8 @@ class TestEvaluator:
         assert model.get("string2")[0] == "line", model.get("string2")
         assert model.get("len") == 16, model.get("len")
         assert model.get("start") == 4, model.get("start")
+        assert not model.get("not_equal"), model.get("not_equal")
+        assert model.get("equal"), model.get("equal")
     
     @testattr(stddist_base = True)
     def test_add(self):

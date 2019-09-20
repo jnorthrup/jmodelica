@@ -99,6 +99,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
         add("ModelicaStrings_substring");
         add("ModelicaStrings_length");
         add("ModelicaStrings_skipWhiteSpace");
+        add("ModelicaStrings_compare");
     }};
     
     private static ArrayList<String> supportedSignatures = new ArrayList<String>() {{
@@ -108,6 +109,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
         add("s+s,i,i,");
         add("i+s,");
         add("i+s,i,");
+        add("i+s,s,i,");
         add("i+i,i,");
         add("void+i,d,d,*R[d,d,d,d,d,d,d,d,d,d,d,],");
         add("void+d,d,*d,");
