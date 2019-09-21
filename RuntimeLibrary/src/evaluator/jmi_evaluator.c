@@ -187,7 +187,7 @@ void jmi_call_double_fcn(generic_funcptr fcn, const char* inputs) {
     JMCEVAL_print(Real, d_output);
 }
 
-void jmi_call_integer_fcn_s(generic_funcptr fcn, double *out) {
+void jmi_call_integer_fcn_s(generic_funcptr fcn, int *out) {
     JMI_DEF(STR, arg_0)
 
     JMCEVAL_parse(String, arg_0);
@@ -202,7 +202,7 @@ void jmi_call_integer_fcn_s(generic_funcptr fcn, double *out) {
     }
 }
 
-void jmi_call_integer_fcn_si(generic_funcptr fcn, double *out) {
+void jmi_call_integer_fcn_si(generic_funcptr fcn, int *out) {
     JMI_DEF(STR, arg_0)
     JMI_DEF(INT, arg_1)
     JMI_DEF(INT_EXT, tmp_1)
@@ -221,7 +221,7 @@ void jmi_call_integer_fcn_si(generic_funcptr fcn, double *out) {
     }
 }
 
-void jmi_call_integer_fcn_ssi(generic_funcptr fcn, double *out) {
+void jmi_call_integer_fcn_ssi(generic_funcptr fcn, int *out) {
     JMI_DEF(STR, arg_0)
     JMI_DEF(STR, arg_1)
     JMI_DEF(INT, arg_2)
@@ -244,18 +244,23 @@ void jmi_call_integer_fcn_ssi(generic_funcptr fcn, double *out) {
 
 void jmi_call_integer_fcn(generic_funcptr fcn, const char* inputs) {
     JMI_DEF(INT, i_output)
+    JMI_DEF(INT_EXT, tmp_output)
     JMCEVAL_parse(Integer, i_output);
+    
+    tmp_output = (int)i_output;
 
     if (strcmp(inputs, "s,") == 0) {
-        jmi_call_integer_fcn_s(fcn, &i_output);
+        jmi_call_integer_fcn_s(fcn, &tmp_output);
     } else if (strcmp(inputs, "s,i,") == 0) {
-        jmi_call_integer_fcn_si(fcn, &i_output);
+        jmi_call_integer_fcn_si(fcn, &tmp_output);
     } else if (strcmp(inputs, "s,s,i,") == 0) {
-        jmi_call_integer_fcn_ssi(fcn, &i_output);
+        jmi_call_integer_fcn_ssi(fcn, &tmp_output);
     } else {
         printf(ERROR_NOT_SUPPORTED_INPUT_ARGS_MSG);
         exit(ERROR_NOT_SUPPORTED_INPUT_ARGS);
     }
+    
+    i_output = (double)tmp_output;
 
     JMCEVAL_check("DONE");
     JMCEVAL_print(Integer, i_output);
