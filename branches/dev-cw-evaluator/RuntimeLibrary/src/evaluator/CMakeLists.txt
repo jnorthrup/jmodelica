@@ -54,8 +54,10 @@ endif()
 target_link_libraries (jmi_evaluator  ${EVALUATOR_LIBS})
 
 #Install the libraries
-install(TARGETS jmi_evaluator DESTINATION "${RTLIB_BIN_DIR}")
-install(TARGETS jmi_evaluator_util DESTINATION "${RTLIB_LIB_DIR}")
+if (NOT MSVC)
+    install(TARGETS jmi_evaluator DESTINATION "${RTLIB_BIN_DIR}")
+    install(TARGETS jmi_evaluator_util DESTINATION "${RTLIB_LIB_DIR}")
+endif()
 
 #Install header files
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
