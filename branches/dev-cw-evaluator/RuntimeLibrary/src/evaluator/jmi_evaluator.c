@@ -34,16 +34,18 @@ struct R_ddddddddddd_ {
 };
 JMI_ARRAY_TYPE(R_ddddddddddd, R_ddddddddddd_a)
 
-typedef const char* (__stdcall *f_s_sii)(const char*, int, int);
-typedef double (__stdcall *f_d_dd)(double, double);
-typedef double (__stdcall *f_d_i)(int);
-typedef double(__stdcall *f_d_idd)(int, double, double);
-typedef int (__stdcall *f_i_ii)(int, int);
-typedef int (__stdcall *f_i_s)(const char*);
-typedef int (__stdcall *f_i_si)(const char*, int);
-typedef int (__stdcall *f_i_ssi)(const char*, const char*, int);
-typedef void(__stdcall *f___iddpR_ddddddddddd_)(int, double, double, R_ddddddddddd**);
-typedef void(__stdcall *f___ddpd)(double, double, double*);
+#define JMI_EVAL_CALLING_CONVENTION
+
+typedef const char* (JMI_EVAL_CALLING_CONVENTION *f_s_sii)(const char*, int, int);
+typedef double (JMI_EVAL_CALLING_CONVENTION *f_d_dd)(double, double);
+typedef double (JMI_EVAL_CALLING_CONVENTION *f_d_i)(int);
+typedef double(JMI_EVAL_CALLING_CONVENTION *f_d_idd)(int, double, double);
+typedef int (JMI_EVAL_CALLING_CONVENTION *f_i_ii)(int, int);
+typedef int (JMI_EVAL_CALLING_CONVENTION *f_i_s)(const char*);
+typedef int (JMI_EVAL_CALLING_CONVENTION *f_i_si)(const char*, int);
+typedef int (JMI_EVAL_CALLING_CONVENTION *f_i_ssi)(const char*, const char*, int);
+typedef void(JMI_EVAL_CALLING_CONVENTION *f___iddpR_ddddddddddd_)(int, double, double, R_ddddddddddd**);
+typedef void(JMI_EVAL_CALLING_CONVENTION *f___ddpd)(double, double, double*);
 typedef void (*generic_funcptr)(void);
 
 void jmi_call_void_fcn_ddpd(generic_funcptr fcn) { 
