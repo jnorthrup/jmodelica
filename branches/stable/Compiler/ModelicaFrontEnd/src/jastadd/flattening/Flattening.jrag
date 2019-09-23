@@ -778,6 +778,7 @@ aspect Flattening {
                 (FExternalLanguage) getFExternalLanguage().fullCopy() : 
                 new FCExternalLanguage());
         stmt.extractLibrary(this);
+        contribute(stmt);
         if (hasInstExternalCall()) {
             InstExternalCall call = getInstExternalCall();
             if (call.hasReturnVar()) {
@@ -831,6 +832,7 @@ aspect Flattening {
         FExternalStmt stmt = new FExternalStmt(getFExternalLanguage().treeCopy(), ret, getName(), args, getLibTopPackagePath());
         stmt.extractLibrary(this);
         sl.add(stmt);
+        contribute(stmt);
         return false;
     }
     
@@ -2155,23 +2157,20 @@ aspect Flattening {
     public void InstClassRedeclare.collectAttributes(Flattener f,
             List<FAttribute> attrs, AttributeExpRetriever aer, boolean cls) {}
 
-    syn boolean InstComponentDecl.isBuiltIn() = false;
-    eq InstBuiltIn.isBuiltIn()                = true;
-    syn boolean InstBuiltInClassDecl.isBuiltIn()                = true;
-    syn boolean SrcBuiltInClassDecl.isBuiltIn()       = true;
-    syn boolean SrcClassDecl.isBuiltIn() = ((SourceRoot) root()).getProgram().getBuiltInTypes().hasChild(this)
-            || ((SourceRoot) root()).getProgram().getBuiltInFunctions().hasChild(this);
+    syn boolean InstComponentDecl.isBuiltIn()    = false;
+    eq InstBuiltIn.isBuiltIn()                   = true;
+    syn boolean InstBuiltInClassDecl.isBuiltIn() = true;
+    syn boolean SrcBuiltInClassDecl.isBuiltIn()  = true;
+    inh boolean SrcClassDecl.isBuiltIn();
+    eq Root.getChild().isBuiltIn() = false;
+    eq Program.getBuiltInType().isBuiltIn() = true;
+    eq Program.getBuiltInFunction().isBuiltIn() = true;
     
-    public boolean List.hasChild(ASTNode node) {
-        for(ASTNode child : children) {
-            if(child == node) {
-                return true;
-            }
-        }
-        return false;
+    syn SourceRoot Root.asSourceRoot() {
+        throw new UnsupportedOperationException("Method not implemented for class " + getClass().getSimpleName() + "!");
     }
+    eq SourceRoot.asSourceRoot() = this;
     
-
     public void InstComponentModification.collectAttributes(Flattener f,
             List<FAttribute> attrs, AttributeExpRetriever aer, boolean cls) {
         if (hasInstModification()) {
@@ -3435,6 +3434,12 @@ aspect AttributeContributor {
         protected void contribute(Flattener f, InstNode src, FClass dest) {}
 
         /**
+         * This method is called during flattening of external statements. All
+         * expressions that are added must be flattened.
+         */
+        protected void contribute(AnnotationNode src, FExternalStmt dest) {}
+
+        /**
          * This method is called in order to determine if an attribute should
          * be considered as active. Return true if the attributes that was
          * added earlier alters the models behaviour.
@@ -3522,6 +3527,24 @@ aspect AttributeContributor {
             for (AttributeContributor contributor : attributeContributors())
                 contributor.contribute(f, this, fClass);
             return fClass;
+        }
+    }
+    
+    public class InstExternal {
+        public FExternalStmt contribute(FExternalStmt stmt) {
+            for (AttributeContributor contributor : attributeContributors()) {
+                contributor.contribute(annotation(), stmt);
+            }
+            return stmt;
+        }
+    }
+    
+    public class FExternalStmt {
+        public FExternalStmt contribute(FExternalStmt stmt) {
+            for (AttributeContributor contributor : attributeContributors()) {
+                contributor.contribute(annotation(), stmt);
+            }
+            return stmt;
         }
     }
     

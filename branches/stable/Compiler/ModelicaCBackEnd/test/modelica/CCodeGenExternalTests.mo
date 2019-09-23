@@ -1147,16 +1147,16 @@ model ExternalArray1
         b_out = f(a_in);
 
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="ExternalArray1",
-            description="External C function (undeclared) with one dim array input, scalar output.",
-            variability_propagation=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="ExternalArray1",
+        description="External C function (undeclared) with one dim array input, scalar output.",
+        variability_propagation=false,
+        template="
 $C_function_headers$
 $C_functions$
 ",
-            generatedCode="
+        generatedCode="
 void func_CCodeGenExternalTests_ExternalArray1_f_def0(jmi_array_t* a_a, jmi_real_t* b_o);
 jmi_real_t func_CCodeGenExternalTests_ExternalArray1_f_exp0(jmi_array_t* a_a);
 
@@ -1164,7 +1164,7 @@ void func_CCodeGenExternalTests_ExternalArray1_f_def0(jmi_array_t* a_a, jmi_real
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, b_v)
     extern double f(double*, size_t);
-    b_v = f(a_a->var, jmi_array_size(a_a, 0));
+    b_v = f(a_a->var, (size_t) jmi_array_size(a_a, 0));
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -1175,7 +1175,6 @@ jmi_real_t func_CCodeGenExternalTests_ExternalArray1_f_exp0(jmi_array_t* a_a) {
     func_CCodeGenExternalTests_ExternalArray1_f_def0(a_a, &b_v);
     return b_v;
 }
-
 
 ")})));
 end ExternalArray1;
@@ -1191,16 +1190,16 @@ model ExternalArray2
     equation
         b_out = f(a_in);
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="ExternalArray2",
-            description="External C function (undeclared) with two dim array input, scalar output.",
-            variability_propagation=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="ExternalArray2",
+        description="External C function (undeclared) with two dim array input, scalar output.",
+        variability_propagation=false,
+        template="
 $C_function_headers$
 $C_functions$
 ",
-            generatedCode="
+        generatedCode="
 void func_CCodeGenExternalTests_ExternalArray2_f_def0(jmi_array_t* a_a, jmi_real_t* b_o);
 jmi_real_t func_CCodeGenExternalTests_ExternalArray2_f_exp0(jmi_array_t* a_a);
 
@@ -1208,7 +1207,7 @@ void func_CCodeGenExternalTests_ExternalArray2_f_def0(jmi_array_t* a_a, jmi_real
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, b_v)
     extern double f(double*, size_t, size_t);
-    b_v = f(a_a->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1));
+    b_v = f(a_a->var, (size_t) jmi_array_size(a_a, 0), (size_t) jmi_array_size(a_a, 1));
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -1219,7 +1218,6 @@ jmi_real_t func_CCodeGenExternalTests_ExternalArray2_f_exp0(jmi_array_t* a_a) {
     func_CCodeGenExternalTests_ExternalArray2_f_def0(a_a, &b_v);
     return b_v;
 }
-
 
 ")})));
 end ExternalArray2;
@@ -1236,16 +1234,16 @@ model ExternalArray3
         a_in = {{1,1},{2,2}};
         b_out = f(a_in);
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="ExternalArray3",
-            description="External C function (undeclared) with two dim and unknown no of elements array input, scalar output.",
-            variability_propagation=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="ExternalArray3",
+        description="External C function (undeclared) with two dim and unknown no of elements array input, scalar output.",
+        variability_propagation=false,
+        template="
 $C_function_headers$
 $C_functions$
 ",
-            generatedCode="
+        generatedCode="
 void func_CCodeGenExternalTests_ExternalArray3_f_def0(jmi_array_t* a_a, jmi_real_t* b_o);
 jmi_real_t func_CCodeGenExternalTests_ExternalArray3_f_exp0(jmi_array_t* a_a);
 
@@ -1253,7 +1251,7 @@ void func_CCodeGenExternalTests_ExternalArray3_f_def0(jmi_array_t* a_a, jmi_real
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, b_v)
     extern double f(double*, size_t, size_t);
-    b_v = f(a_a->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1));
+    b_v = f(a_a->var, (size_t) jmi_array_size(a_a, 0), (size_t) jmi_array_size(a_a, 1));
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -1264,7 +1262,6 @@ jmi_real_t func_CCodeGenExternalTests_ExternalArray3_f_exp0(jmi_array_t* a_a) {
     func_CCodeGenExternalTests_ExternalArray3_f_def0(a_a, &b_v);
     return b_v;
 }
-
 
 ")})));
 end ExternalArray3;
@@ -1282,16 +1279,16 @@ model ExternalArray4
         a_in[2] = 2;
         b_out = f(a_in);
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="ExternalArray4",
-            description="External C function (undeclared) with one dim array input, one dim array output.",
-            variability_propagation=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="ExternalArray4",
+        description="External C function (undeclared) with one dim array input, one dim array output.",
+        variability_propagation=false,
+        template="
 $C_function_headers$
 $C_functions$
 ",
-            generatedCode="
+        generatedCode="
 void func_CCodeGenExternalTests_ExternalArray4_f_def0(jmi_array_t* a_a, jmi_array_t* b_a);
 
 void func_CCodeGenExternalTests_ExternalArray4_f_def0(jmi_array_t* a_a, jmi_array_t* b_a) {
@@ -1302,11 +1299,10 @@ void func_CCodeGenExternalTests_ExternalArray4_f_def0(jmi_array_t* a_a, jmi_arra
         JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, b_an, 2, 1, 2)
         b_a = b_an;
     }
-    f(a_a->var, jmi_array_size(a_a, 0), b_a->var, jmi_array_size(b_a, 0));
+    f(a_a->var, (size_t) jmi_array_size(a_a, 0), b_a->var, (size_t) jmi_array_size(b_a, 0));
     JMI_DYNAMIC_FREE()
     return;
 }
-
 
 ")})));
 end ExternalArray4;
@@ -1323,16 +1319,16 @@ model ExternalArray5
         a_in = {{1,1},{2,2}};
         b_out = f(a_in);
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="ExternalArray5",
-            description="External C function (undeclared) with two dim array input, two dim array output.",
-            variability_propagation=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="ExternalArray5",
+        description="External C function (undeclared) with two dim array input, two dim array output.",
+        variability_propagation=false,
+        template="
 $C_function_headers$
 $C_functions$
 ",
-            generatedCode="
+        generatedCode="
 void func_CCodeGenExternalTests_ExternalArray5_f_def0(jmi_array_t* a_a, jmi_array_t* b_a);
 
 void func_CCodeGenExternalTests_ExternalArray5_f_def0(jmi_array_t* a_a, jmi_array_t* b_a) {
@@ -1343,11 +1339,10 @@ void func_CCodeGenExternalTests_ExternalArray5_f_def0(jmi_array_t* a_a, jmi_arra
         JMI_ARRAY_INIT_2(STACK, jmi_real_t, jmi_array_t, b_an, 4, 2, 2, 2)
         b_a = b_an;
     }
-    f(a_a->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1), b_a->var, jmi_array_size(b_a, 0), jmi_array_size(b_a, 1));
+    f(a_a->var, (size_t) jmi_array_size(a_a, 0), (size_t) jmi_array_size(a_a, 1), b_a->var, (size_t) jmi_array_size(b_a, 0), (size_t) jmi_array_size(b_a, 1));
     JMI_DYNAMIC_FREE()
     return;
 }
-
 
 ")})));
 end ExternalArray5;
@@ -1364,16 +1359,16 @@ model ExternalArray6
         a_in = {{1,1},{2,2}};
         b_out = f(a_in);
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="ExternalArray6",
-            description="External C function (undeclared) with two dim and unknown no of elements array input, two dim array output.",
-            variability_propagation=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="ExternalArray6",
+        description="External C function (undeclared) with two dim and unknown no of elements array input, two dim array output.",
+        variability_propagation=false,
+        template="
 $C_function_headers$
 $C_functions$
 ",
-            generatedCode="
+        generatedCode="
 void func_CCodeGenExternalTests_ExternalArray6_f_def0(jmi_array_t* a_a, jmi_array_t* b_a);
 
 void func_CCodeGenExternalTests_ExternalArray6_f_def0(jmi_array_t* a_a, jmi_array_t* b_a) {
@@ -1384,11 +1379,10 @@ void func_CCodeGenExternalTests_ExternalArray6_f_def0(jmi_array_t* a_a, jmi_arra
         JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, b_an, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
         b_a = b_an;
     }
-    f(a_a->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1), b_a->var, jmi_array_size(b_a, 0), jmi_array_size(b_a, 1));
+    f(a_a->var, (size_t) jmi_array_size(a_a, 0), (size_t) jmi_array_size(a_a, 1), b_a->var, (size_t) jmi_array_size(b_a, 0), (size_t) jmi_array_size(b_a, 1));
     JMI_DYNAMIC_FREE()
     return;
 }
-
 
 ")})));
 end ExternalArray6;
@@ -1404,16 +1398,16 @@ model IntegerExternalArray1
     equation
         b_out = f(a_in);
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="IntegerExternalArray1",
-            description="External C function (undeclared) with one dim Integer array input, scalar Real output.",
-            variability_propagation=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="IntegerExternalArray1",
+        description="External C function (undeclared) with one dim Integer array input, scalar Real output.",
+        variability_propagation=false,
+        template="
 $C_function_headers$
 $C_functions$
 ",
-            generatedCode="
+        generatedCode="
 void func_CCodeGenExternalTests_IntegerExternalArray1_f_def0(jmi_array_t* a_a, jmi_real_t* b_o);
 jmi_real_t func_CCodeGenExternalTests_IntegerExternalArray1_f_exp0(jmi_array_t* a_a);
 
@@ -1424,7 +1418,7 @@ void func_CCodeGenExternalTests_IntegerExternalArray1_f_def0(jmi_array_t* a_a, j
     extern double f(int*, size_t);
     JMI_ARRAY_INIT_1(HEAP, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(a_a, 0), 1, jmi_array_size(a_a, 0))
     jmi_copy_matrix_to_int(a_a, a_a->var, tmp_1->var);
-    b_v = f(tmp_1->var, jmi_array_size(a_a, 0));
+    b_v = f(tmp_1->var, (size_t) jmi_array_size(a_a, 0));
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -1435,7 +1429,6 @@ jmi_real_t func_CCodeGenExternalTests_IntegerExternalArray1_f_exp0(jmi_array_t* 
     func_CCodeGenExternalTests_IntegerExternalArray1_f_def0(a_a, &b_v);
     return b_v;
 }
-
 
 ")})));
 end IntegerExternalArray1;
@@ -1451,16 +1444,16 @@ model IntegerExternalArray2
     equation
         b_out = f(a_in);    
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="IntegerExternalArray2",
-            description="External C function (undeclared) with two dim Integer array input, scalar Real output.",
-            variability_propagation=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="IntegerExternalArray2",
+        description="External C function (undeclared) with two dim Integer array input, scalar Real output.",
+        variability_propagation=false,
+        template="
 $C_function_headers$
 $C_functions$
 ",
-            generatedCode="
+        generatedCode="
 void func_CCodeGenExternalTests_IntegerExternalArray2_f_def0(jmi_array_t* a_a, jmi_real_t* b_o);
 jmi_real_t func_CCodeGenExternalTests_IntegerExternalArray2_f_exp0(jmi_array_t* a_a);
 
@@ -1471,7 +1464,7 @@ void func_CCodeGenExternalTests_IntegerExternalArray2_f_def0(jmi_array_t* a_a, j
     extern double f(int*, size_t, size_t);
     JMI_ARRAY_INIT_2(HEAP, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
     jmi_copy_matrix_to_int(a_a, a_a->var, tmp_1->var);
-    b_v = f(tmp_1->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1));
+    b_v = f(tmp_1->var, (size_t) jmi_array_size(a_a, 0), (size_t) jmi_array_size(a_a, 1));
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -1482,7 +1475,6 @@ jmi_real_t func_CCodeGenExternalTests_IntegerExternalArray2_f_exp0(jmi_array_t* 
     func_CCodeGenExternalTests_IntegerExternalArray2_f_def0(a_a, &b_v);
     return b_v;
 }
-
 
 ")})));
 end IntegerExternalArray2;
@@ -1498,16 +1490,16 @@ model IntegerExternalArray3
     equation
         b_out = f(a_in);
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="IntegerExternalArray3",
-            description="External C function (undeclared) with one scalar Real input, one dim array Integer output.",
-            variability_propagation=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="IntegerExternalArray3",
+        description="External C function (undeclared) with one scalar Real input, one dim array Integer output.",
+        variability_propagation=false,
+        template="
 $C_function_headers$
 $C_functions$
 ",
-            generatedCode="
+        generatedCode="
 void func_CCodeGenExternalTests_IntegerExternalArray3_f_def0(jmi_real_t a_v, jmi_array_t* b_a);
 
 void func_CCodeGenExternalTests_IntegerExternalArray3_f_def0(jmi_real_t a_v, jmi_array_t* b_a) {
@@ -1521,12 +1513,11 @@ void func_CCodeGenExternalTests_IntegerExternalArray3_f_def0(jmi_real_t a_v, jmi
     }
     JMI_ARRAY_INIT_1(HEAP, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(b_a, 0), 1, jmi_array_size(b_a, 0))
     jmi_copy_matrix_to_int(b_a, b_a->var, tmp_1->var);
-    f(a_v, tmp_1->var, jmi_array_size(b_a, 0));
+    f(a_v, tmp_1->var, (size_t) jmi_array_size(b_a, 0));
     jmi_copy_matrix_from_int(b_a, tmp_1->var, b_a->var);
     JMI_DYNAMIC_FREE()
     return;
 }
-
 
 ")})));
 end IntegerExternalArray3;
@@ -1543,16 +1534,16 @@ model IntegerExternalArray4
         a_in = {{1,1},{2,2}};
         b_out = f(a_in);    
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="IntegerExternalArray4",
-            description="External C function (undeclared) with one 2-dim Integer array input, one 2-dim Integer array output.",
-            variability_propagation=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="IntegerExternalArray4",
+        description="External C function (undeclared) with one 2-dim Integer array input, one 2-dim Integer array output.",
+        variability_propagation=false,
+        template="
 $C_function_headers$
 $C_functions$
 ",
-            generatedCode="
+        generatedCode="
 void func_CCodeGenExternalTests_IntegerExternalArray4_f_def0(jmi_array_t* a_a, jmi_array_t* b_a);
 
 void func_CCodeGenExternalTests_IntegerExternalArray4_f_def0(jmi_array_t* a_a, jmi_array_t* b_a) {
@@ -1569,12 +1560,11 @@ void func_CCodeGenExternalTests_IntegerExternalArray4_f_def0(jmi_array_t* a_a, j
     jmi_copy_matrix_to_int(a_a, a_a->var, tmp_1->var);
     JMI_ARRAY_INIT_2(HEAP, jmi_int_t, jmi_int_array_t, tmp_2, jmi_array_size(b_a, 0) * jmi_array_size(b_a, 1), 2, jmi_array_size(b_a, 0), jmi_array_size(b_a, 1))
     jmi_copy_matrix_to_int(b_a, b_a->var, tmp_2->var);
-    f(tmp_1->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1), tmp_2->var, jmi_array_size(b_a, 0), jmi_array_size(b_a, 1));
+    f(tmp_1->var, (size_t) jmi_array_size(a_a, 0), (size_t) jmi_array_size(a_a, 1), tmp_2->var, (size_t) jmi_array_size(b_a, 0), (size_t) jmi_array_size(b_a, 1));
     jmi_copy_matrix_from_int(b_a, tmp_2->var, b_a->var);
     JMI_DYNAMIC_FREE()
     return;
 }
-
 
 ")})));
 end IntegerExternalArray4;
