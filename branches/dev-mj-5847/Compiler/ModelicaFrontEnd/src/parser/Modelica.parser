@@ -22,6 +22,8 @@
 %goal argument;
 %goal access_scalar;
 %goal subscript;
+%typeof function_call_list = "SrcFunctionCallList";
+%goal function_call_list;
 
 %header {:
  package $PARSER_PACKAGE$;
@@ -1515,6 +1517,17 @@ SrcExp primary =
   | TIME                {: return new SrcTimeExp(); :}
   | END                 {: return new SrcEndExp(); :} 
   ;
+
+List function_calls =
+    function_call SEMICOLON                       {: return new List().add(function_call); :}
+  | function_call SEMICOLON function_calls {: return function_calls.add(function_call); :}
+  ;
+
+SrcFunctionCallList function_call_list
+    = function_calls
+    {:
+        return new SrcFunctionCallList(function_calls);
+    :}
 
 SrcFunctionCall function_call 
     = access

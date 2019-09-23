@@ -180,6 +180,10 @@ aspect Parsers {
         return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.subscript;
     }
 
+    public short ParserHandler.functionCallListGoal() {
+        return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.function_call_list;
+    }
+
     public SourceRoot ParserHandler.parseFile(UtilInterface uif, LoadInfo loadInfo) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
         parseListener.fileParsed(loadInfo);
@@ -288,6 +292,26 @@ aspect Parsers {
             scanner.getFormattingRecorder().postParsing(elem);
         }
         return elem;
+    }
+
+    private SrcFunctionCallList ParserHandler.parseFunctionCallList(Reader r, Path path)
+            throws ParserException, beaver.Parser.Exception, IOException {
+        LoadInfo fileloadInfo = LoadInfo.create(path);
+        AbstractModelicaScanner<ASTNode<?>> scanner = createModelicaScanner(r);
+        beaver.Parser parser = createModelicaParser(scanner, fileloadInfo);
+        SrcFunctionCallList elem = (SrcFunctionCallList) parser.parse(scanner, functionCallListGoal());
+        scanner.getFormattingRecorder().postParsing(elem);
+        return elem;
+    }
+    
+    public SrcFunctionCallList ParserHandler.parseFunctionCallList(String code, Path path)
+            throws ParserException, beaver.Parser.Exception, IOException {
+        return parseFunctionCallList(new StringReader(code), path);
+    }
+    
+    public SrcFunctionCallList ParserHandler.parseFunctionCallList(Path path)
+            throws ParserException, beaver.Parser.Exception, IOException {
+        return parseFunctionCallList(fileReader(null, path.toFile()), path);
     }
 
     public SrcAbstractEquation ParserHandler.parseAbstractEquation(String code, LoadInfo parentLoadInfo)
