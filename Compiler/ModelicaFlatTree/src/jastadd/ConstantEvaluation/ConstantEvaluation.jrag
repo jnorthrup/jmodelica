@@ -2791,13 +2791,48 @@ aspect ConstantEvaluation {
         if (getValue().isArray() || !getValue().type().isPrimitive()) {
             return CValue.UNKNOWN;
         }
+        
         CValue cval = getValue().ceval(evaluator);
-        if (getValue().type().isReal()) {
+        boolean isReal = getValue().type().isReal();
+        if (isReal) {
             cval = cval.convertReal();
         }
         Object value = cval.objectValue();
-        String format = formatString(evaluator);
-        return new CValueString(String.format((Locale) null, format, value));
+        final String format = formatString(evaluator);
+        char formatChar = format.charAt(format.length() - 1);
+        
+        // Modelica allows Integer to Real conversion for formatting but not the other direction
+        boolean mustBeInteger = formatChar == 'd' || formatChar == 'i' || formatChar == 'o' || 
+            formatChar == 'x' || formatChar == 'X' || formatChar == 'u' || formatChar == 'c';
+        if (mustBeInteger && isReal) {
+            throw new ConstantEvaluationException(cval, "format the resulting value. The format '"+ format + "' requires value of Integer type but Real value is provided. ");
+        }
+
+        if (getValue().type().isInteger()) {
+            // Java formatter do not convert types
+            final boolean convertToFloat = formatChar == 'e' || formatChar == 'E' || 
+                    formatChar == 'f' || formatChar == 'g' || formatChar == 'G';
+            if (convertToFloat) {
+                return new CValueString(String.format((Locale) null, format, cval.realValue()));
+            }
+            if (formatChar == 'u') {
+                String formatCorrect = format.substring(0, format.length()-1) + "s";
+                long unsigned = ((long) cval.intValue()) & 0xffffffffL; // Java 8 Integer.toUnsignedLong
+                return new CValueString(String.format((Locale) null, formatCorrect, unsigned));
+            }
+
+            if (formatChar == 'i') {
+                String formatCorrect = format.substring(0, format.length()-1) + "d";
+            	return new CValueString(String.format((Locale) null, formatCorrect, cval.intValue()));
+            }
+        }
+        
+        try {
+            return new CValueString(String.format((Locale) null, format, value));
+        } catch (java.util.IllegalFormatException e) {
+            throw new ConstantEvaluationException(cval, 
+                    "format the resulting value. " + format + " is not a supported valid format string");
+        }
     }
     eq FGetInstanceName.cevalCalc(VariableEvaluator evaluator) = new CValueString(calcInstanceName());
 
