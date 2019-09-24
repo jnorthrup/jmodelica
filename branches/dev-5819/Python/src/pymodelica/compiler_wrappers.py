@@ -23,13 +23,10 @@ import jpype
 import pymodelica as pym
 from .compiler_interface import *
 from .compiler_logging import CompilerLogHandler, LogHandlerThread
+import pymodelica.common
 from pymodelica.common.core import list_to_string
 from .compiler_exceptions import *
 from sys import version_info
-
-# import python_3_flag from pyfmi
-from pyfmi import common
-
 
 class ModelicaCompiler(object):
     """ 
