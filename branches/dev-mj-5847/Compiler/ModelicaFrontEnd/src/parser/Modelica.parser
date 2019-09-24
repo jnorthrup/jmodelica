@@ -1520,7 +1520,7 @@ SrcExp primary =
 
 List function_calls =
     function_call SEMICOLON                       {: return new List().add(function_call); :}
-  | function_calls SEMICOLON function_call {: return function_calls.add(function_call); :}
+  | function_calls function_call SEMICOLON {: return function_calls.add(function_call); :}
   ;
 
 SrcFunctionCallList function_call_list
