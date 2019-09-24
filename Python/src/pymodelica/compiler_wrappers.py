@@ -324,7 +324,7 @@ class ModelicaCompiler(object):
     def set_target_platforms(self, platforms):
         if isinstance(platforms, str):
             platforms = [platforms]
-        self._compiler.targetPlatforms = platforms
+        self._compiler.setTargetPlatforms(platforms)
         
     def compile_Unit(self, class_name, file_name, target, version, compile_to):
         """
