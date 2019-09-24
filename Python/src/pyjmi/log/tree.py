@@ -20,7 +20,7 @@ Tree representation for the new JModelica FMU log format
 Each node is represented as a Node, Comment, or leaf (other types)
 """
 from sys import version_info
-from pyfmi import common
+import pyjmi.common
 class Comment(object):
     """Log comment node.
 
