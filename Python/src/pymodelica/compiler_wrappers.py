@@ -23,7 +23,7 @@ import jpype
 import pymodelica as pym
 from .compiler_interface import *
 from .compiler_logging import CompilerLogHandler, LogHandlerThread
-import pymodelica.common import python3_flag
+from pymodelica.common import python3_flag
 from pymodelica.common.core import list_to_string
 from .compiler_exceptions import *
 
