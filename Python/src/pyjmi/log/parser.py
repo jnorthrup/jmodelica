@@ -22,6 +22,7 @@ from xml import sax
 import re
 import numpy as np
 from .tree import *
+from pyjmi.common import python3_flag
 
 
 ## Leaf parser ##
@@ -52,8 +53,8 @@ def parse_value(text):
             text = text[1:-1].replace('""','"')
         else:
             assert '"' not in text            
-#        return text
-        return text.encode('ascii', 'xmlcharrefreplace') # avoid printing all strings as u'...'
+        # for python 2 we need to avoid printing all strings as u'...'
+        return text if python3_flag else text.encode('ascii', 'xmlcharrefreplace')
 
 def parse_vector(text):
     text = text.strip()
