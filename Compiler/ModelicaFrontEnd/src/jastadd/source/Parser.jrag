@@ -294,26 +294,6 @@ aspect Parsers {
         return elem;
     }
 
-    private SrcFunctionCallList ParserHandler.parseFunctionCallList(Reader r, Path path)
-            throws ParserException, beaver.Parser.Exception, IOException {
-        LoadInfo fileloadInfo = LoadInfo.create(path);
-        AbstractModelicaScanner<ASTNode<?>> scanner = createModelicaScanner(r);
-        beaver.Parser parser = createModelicaParser(scanner, fileloadInfo);
-        SrcFunctionCallList elem = (SrcFunctionCallList) parser.parse(scanner, functionCallListGoal());
-        scanner.getFormattingRecorder().postParsing(elem);
-        return elem;
-    }
-    
-    public SrcFunctionCallList ParserHandler.parseFunctionCallList(String code, Path path)
-            throws ParserException, beaver.Parser.Exception, IOException {
-        return parseFunctionCallList(new StringReader(code), path);
-    }
-    
-    public SrcFunctionCallList ParserHandler.parseFunctionCallList(Path path)
-            throws ParserException, beaver.Parser.Exception, IOException {
-        return parseFunctionCallList(fileReader(null, path.toFile()), path);
-    }
-
     public SrcAbstractEquation ParserHandler.parseAbstractEquation(String code, LoadInfo parentLoadInfo)
             throws ParserException, beaver.Parser.Exception, IOException {
         return parseAbstractEquation(code, parentLoadInfo, false);
