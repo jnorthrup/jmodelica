@@ -1178,9 +1178,18 @@ abstract public class TestAnnotationizerHelper {
         protected void callMethod(Object o) throws Exception {
             checkData(data);
             methodName = data[0].toString();
-            arguments = (data.length == 1) ? new Object[0] : (Object[]) data[1];
+            arguments = arguments();
             Method method = o.getClass().getMethod(methodName, TestCase.unwrapClasses(arguments));
             methodResult = method.invoke(o, arguments).toString();
+        }
+        
+        private Object[] arguments() {
+            if (data.length > 1) {
+                if (data[1] != null) {
+                    return (Object[]) data[1];
+                }
+            }
+            return new Object[0];
         }
         
         /**
