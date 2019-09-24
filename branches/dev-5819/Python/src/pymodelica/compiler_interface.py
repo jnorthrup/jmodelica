@@ -29,7 +29,7 @@ _jm_home = pym.environ['JMODELICA_HOME']
 #start JVM
 # note that startJVM() fails after shutdownJVM(), hence, only one start
 if not jpype.isJVMStarted():
-    _jvm_args = str.split(pym.environ['JVM_ARGS'],' ')
+    _jvm_args = pym.environ['JVM_ARGS'].split(' ')
     _jvm_class_path = pym.environ['COMPILER_JARS']
     _jvm_ext_dirs = pym.environ['BEAVER_PATH']
     jpype.startJVM(pym.environ['JPYPE_JVM'], 

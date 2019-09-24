@@ -27,6 +27,9 @@ from pymodelica.common.core import list_to_string
 from .compiler_exceptions import *
 from sys import version_info
 
+# import python_3_flag from pyfmi
+from pyfmi import common
+
 
 class ModelicaCompiler(object):
     """ 
@@ -40,12 +43,7 @@ class ModelicaCompiler(object):
         Create a Modelica compiler. The compiler can be used to compile pure 
         Modelica models. A compiler instance can be used multiple times.
         """
-        if version_info > (3, 0):
-            self._is_python3 = True
-            self._java_exception = jpype.JException
-        else:
-            self._is_python3 = False
-            self._java_exception = jpype.JavaException
+        self._java_exception = jpype.JException if python3_flag else jpype.JavaException
         
         try:
             options = ModelicaCompilerInterface.createOptions()
@@ -528,17 +526,8 @@ class ModelicaCompiler(object):
             # Due to differences in jpype between 0.6.2 and 0.7.0
             #  we need to compare the raised exception with the reference exception
             #  in different ways.
-            return type(raised_ex) is ref_ex if self._is_python3 else raised_ex.javaClass() is ref_ex
+            return type(raised_ex) is ref_ex if python3_flag else raised_ex.javaClass() is ref_ex
 
-        #print("ex.message() = {}".format(ex.message()))
-        #print("ex.args = {}".format(ex.args))
-        #print("ex.stacktrace() = {}".format(ex.stacktrace()))
-        #print("str(ex) = {}".format(str(ex)))
-        #import sys; sys.exit()
-        #raise ex
-        #ex.message=ex.message()
-        #raise ex doesnt work because they are different in py2 and py3
-        #raise ex
         if _py_handle_exception(ex, CompilerException):
             arraylist = ex.__javaobject__.getProblems()
             itr = arraylist.iterator()
