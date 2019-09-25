@@ -60,7 +60,7 @@ class Node(object):
 
     def __repr__(self):
         return ('<' + self.type + ' node with ' + repr(len(self.nodes))
-                + ' subnodes, and named subnodes ' + repr(list(self.dict.keys())) + '>')
+                + ' subnodes, and named subnodes ' + repr(list(map(str, self.dict.keys()))) + '>')
 
 
     def __iter__(self):
@@ -86,7 +86,7 @@ class Node(object):
         """
         if isinstance(types, str if python3_flag else basestring):
             types = [types]
-
+        
         nodes = []        
         for node in self.nodes:
             if isinstance(node, Node):
