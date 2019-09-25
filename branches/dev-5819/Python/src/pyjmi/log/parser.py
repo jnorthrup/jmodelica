@@ -57,11 +57,12 @@ def parse_value(text):
         return text if python3_flag else text.encode('ascii', 'xmlcharrefreplace')
 
 def parse_vector(text):
+    
     text = text.strip()
     if text == "":
         return np.zeros(0)
     parts = comma_pattern.split(text)
-    parts = parts[1::2]
+    parts = filter(None, map(str, parts))
     return np.asarray([parse_value(part) for part in parts])
 
 def parse_matrix(text):
