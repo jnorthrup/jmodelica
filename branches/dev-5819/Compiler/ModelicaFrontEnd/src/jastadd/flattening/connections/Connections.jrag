@@ -81,8 +81,8 @@ aspect Connections {
 
     protected FExp FInStream.expandInStreamExp() {
         // Always create expression from the connection set where the variable is an inside connector. 
-        String name = getFExp().asCommonAccess().name();
-        ConnectionSet cs = myFClass().getConnectionSetManager().getStreamConnectionSet(name, false);
+        FAccess name = getFExp().asCommonAccess().asFAccess();
+        ConnectionSet cs = myFClass().getConnectionSetManager().getStreamConnectionSet(name.name(), false);
         return cs.expandInStreamExp(name);
     }
 
@@ -469,7 +469,7 @@ aspect Connections {
 		 * 
 		 * @param name  the name of the variable to generate name for
 		 */
-		public FExp expandInStreamExp(String name) {
+		public FExp expandInStreamExp(FAccess name) {
 			throw new UnsupportedOperationException();
 		}
 		
@@ -536,7 +536,9 @@ aspect Connections {
 
         public void generateEquations(Flattener f) {
             ConnectionSetEntry fst = first();
-            if (size() == 1 && fst.isInside() && fst.getVar().isTopLevelInputOutput()) {
+            InstComponentDecl fstVar = fst.getVar();
+            if (size() == 1 && fst.isInside() && fstVar.isTopLevelCausalOrConnector()
+                    && (fstVar.isInput() || fstVar.isOutput() || fstVar.useCausalPorts())) {
                 return;
             }
             FExp e = null;
@@ -549,6 +551,8 @@ aspect Connections {
 	}
 
     public class StreamConnectionSet extends ConnectionSet {
+        
+        private static final String inStreamSuffix = "__instream_";
 
         private double nominal = Double.MAX_VALUE;
 
@@ -578,12 +582,26 @@ aspect Connections {
          * 
          * @param name  the name of the variable to generate name for
          */
-        public FExp expandInStreamExp(String name) {
+        @Override
+        public FExp expandInStreamExp(FAccess access) {
+            String name = access.name();
             ConnectionSetEntry e = getConnectionSetEntry(name, false);
-            FExp exp = expandInStreamExp(e, name, new FAccessExp(name));
+            if (access.useCausalPorts()) {
+                AnnotationNode instreamAnnotation = access.myFV().annotation().vendorNode().forPath("internal/instream");
+                if (instreamAnnotation.exists()) {
+                    String instreamName = instreamAnnotation.ceval().stringValue();
+                    access = nameWithSubscripts(instreamName, name);
+                }
+            }
+            FExp exp = expandInStreamExp(e, name, new FAccessExp(access));
             exp.enableStreamsRewrite();
             return exp;
         }
+        
+        public FAccess nameWithSubscripts(String name, String access) {
+            String subscripts = (access.endsWith("]")) ? access.substring(access.lastIndexOf("[")) : "";
+            return new FAccessString(name + subscripts);
+       }
 
         /**
          * Create an expression for the inStream() of the given entry.

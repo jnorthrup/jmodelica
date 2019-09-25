@@ -745,7 +745,7 @@ aspect GenerateEventIndicators {
                 new FAccessFull(exp.calcIndicatorVarName()));
 
         if (output) {
-            v.setTypePrefixInputOutput(TypePrefixInputOutput.OUTPUT);
+            v.setCausalityConnectorPrefix(CausalityConnectorPrefix.OUTPUT);
         }
 
         exp.myFClass().addFVariable(v);

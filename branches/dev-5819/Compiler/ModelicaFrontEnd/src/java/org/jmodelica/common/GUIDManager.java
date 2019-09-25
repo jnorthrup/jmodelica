@@ -34,6 +34,7 @@ public class GUIDManager {
 
     private final List<Openable> dependentFiles = new ArrayList<>();
     private Openable source;
+    private boolean hasProcessedFiles;
 
 
     public GUIDManager(String vendorName, String compilerVersion) {
@@ -43,23 +44,23 @@ public class GUIDManager {
     }
 
     public String getGuidToken() {
-        return guidToken.getString();
+        return guidToken.getStringOrValue(hasProcessedFiles);
     }
 
     public String getDateToken() {
-        return dateToken.getString();
+        return dateToken.getStringOrValue(hasProcessedFiles);
     }
 
     public String getGenerationToolToken() {
-        return generationToolToken.getString();
+        return generationToolToken.getStringOrValue(hasProcessedFiles);
     }
 
     public String getToolNameToken() {
-        return toolNameToken.getString();
+        return toolNameToken.getStringOrValue(hasProcessedFiles);
     }
     
     public String getCompilerVersionToken() {
-        return versionToken.getString();
+        return versionToken.getStringOrValue(hasProcessedFiles);
     }
 
     public void setSourceFile(File source) {
@@ -112,6 +113,7 @@ public class GUIDManager {
     public void processDependentFiles() {
         guidToken.setValue(getGuid());
         dateToken.setValue(getDate());
+        hasProcessedFiles = true;
         
         for (final Openable openable : dependentFiles) {
             try {
@@ -173,6 +175,10 @@ public class GUIDManager {
         
         public String getValue() {
             return value;
+        }
+        
+        public String getStringOrValue(boolean getValue) {
+            return getValue ? getValue() : getString();
         }
         
         public void setValue(String value) {

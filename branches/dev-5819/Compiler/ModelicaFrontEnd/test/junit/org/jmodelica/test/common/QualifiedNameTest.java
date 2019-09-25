@@ -1,8 +1,8 @@
 package org.jmodelica.test.common;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.jmodelica.util.QualifiedName;
 import org.jmodelica.util.exceptions.NameFormatException;
@@ -78,26 +78,26 @@ public class QualifiedNameTest {
 
     @Test(expected=NameFormatException.class)
     public void missplacedQuote() {
-        new QualifiedName("first.secon'd.third'");
+        new QualifiedName("first.secon'd.third'").toString();
     }
 
     @Test(expected=NameFormatException.class)
     public void unmatchedQuotes() {
-        new QualifiedName("first.'unclosedPart");
+        new QualifiedName("first.'unclosedPart").toString();
     }
 
     @Test(expected=NameFormatException.class)
     public void emptyNames() {
-        new QualifiedName("first...last");
+        new QualifiedName("first...last").toString();
     }
 
     @Test(expected=NameFormatException.class)
     public void emptyNamesQuoted()  {
-        new QualifiedName("first...'last'");
+        new QualifiedName("first...'last'").toString();
     }
 
     @Test(expected=NameFormatException.class)
     public void noName()  {
-        new QualifiedName("");
+        new QualifiedName("").toString();
     }
 }

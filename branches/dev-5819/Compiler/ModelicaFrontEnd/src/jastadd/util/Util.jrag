@@ -1419,9 +1419,9 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component is part of a component that is declared input or output on the top level.
      */
-    syn boolean InstComponentDecl.isTopLevelInputOutput() = false;
-    eq InstAssignable.isTopLevelInputOutput() = isTopLevel() && !inExpandableConnector() && 
-            (isInput() || isOutput() || isConnectorVariable()) && !isProtected() && isPublicVar();
+    syn boolean InstComponentDecl.isTopLevelCausalOrConnector() = false;
+    eq InstAssignable.isTopLevelCausalOrConnector() = isTopLevel() && !inExpandableConnector() && 
+            (isInput() || isOutput() || isConnectorVariable()) && isPublicVar();
 
     syn boolean InstComponentDecl.isTopLevel() = isInTopLevel();
 
@@ -1582,7 +1582,7 @@ aspect ClassDeclMethods {
     eq SrcLibNode.getChild().isLib() = true;
     eq SrcFullClassDecl.getChild().isLib() = false;
 
-    syn boolean SrcClassDecl.isLibNode() = false;
+    syn boolean SrcBaseNode.isLibNode() = false;
     eq SrcLibNode.isLibNode()            = true;
 }
 
@@ -1619,6 +1619,9 @@ aspect MultiDeclMethods {
         public void flattenFunction(Flattener f);
     }
     
+    syn InstClassDecl InstNode.asInstClassDecl() {
+        throw new UnsupportedOperationException();
+    }
     syn InstClassDecl InstClassDecl.asInstClassDecl() = this;
     syn InstClassDecl InstPartialFunction.asInstClassDecl()  = unknownInstClassDecl();
     
@@ -1628,8 +1631,7 @@ aspect MultiDeclMethods {
     syn InstClassDecl InstClassDecl.actualInstClassDecl()       = actualInstClass();
     syn InstClassDecl InstPartialFunction.actualInstClassDecl() = myInstClass().actualInstClass();
     
-    syn InstNode InstClassDecl.asInstNode() = this;
-    syn InstNode InstPartialFunction.asInstNode()  = this;
+    syn InstNode InstNode.asInstNode() = this;
     
     syn InstCallable InstFunctionCall.myInstCallable() = getName().myInstCallable();
     
@@ -2045,117 +2047,4 @@ aspect DebugHelpers {
 		 return false;
 	}
 
-}
-
-aspect UtilInterface {
-    
-    private UtilInterface Root.utilInterface = null;
-    
-    public void Root.setUtilInterface(UtilInterface utilInterface) {
-        if (this.utilInterface != null || utilInterface == null) {
-            throw new UnsupportedOperationException();
-        }
-        this.utilInterface = utilInterface;
-    }
-    
-    public UtilInterface Root.getUtilInterface() {
-        return utilInterface;
-    }
-    
-    /**
-     * Provides easy access to non-ast utils via the AST root.
-     */
-    public class UtilInterface {
-        
-        private ModelicaCompiler mc;
-        private OptionRegistry options;
-        private IErrorHandler eh;
-        private ExternalFunctionCache efc;
-        private GUIDManager guidManager;
-        private File compilationOutputPath;
-        
-        protected UtilInterface(ModelicaCompiler mc, OptionRegistry options, IErrorHandler eh, ExternalFunctionCache efc, File compilationOutputPath) {
-            this.mc = mc;
-            this.options = options;
-            this.eh = eh;
-            this.efc = efc;
-            this.compilationOutputPath = compilationOutputPath;
-            guidManager = new GUIDManager(ASTNode.vendorName(), options.getStringOption("compiler_version"));
-        }
-        
-        public ModelicaCompiler getModelicaCompiler() {
-            return mc;
-        }
-        
-        public OptionRegistry getOptionRegistry() {
-            return options;
-        }
-        
-        public IErrorHandler getErrorHandler() {
-            return eh;
-        }
-        
-        public ExternalFunctionCache getExternalFunctionCache() {
-            return efc;
-        }
-        
-        public GUIDManager getGuidManager() {
-            return guidManager;
-        }
-        
-        public File getCompilationOutputPath() {
-            return compilationOutputPath;
-        }
-        
-        public void setCompilationOutputPath(File compilationOutputPath) {
-            this.compilationOutputPath = compilationOutputPath;
-        }
-    }
-    
-    UtilInterface ModelicaCompiler.createUtilInterface() {
-        return UtilInterface.create(this);
-    }
-    
-    public static UtilInterface UtilInterface.create(ModelicaCompiler mc) {
-        return create(mc, mc.getOptions(), mc.getErrorHandler(), mc.getExternalFunctionCache(), null);
-    }
-    
-    public static UtilInterface UtilInterface.create(UtilInterface other) {
-        return create(other.getModelicaCompiler(), other.getOptionRegistry().copy(), 
-                other.getErrorHandler(), other.getExternalFunctionCache(), other.getCompilationOutputPath());
-    }
-    
-    public static UtilInterface UtilInterface.create(OptionRegistry options) {
-        return create(null, options, new DefaultErrorHandler(), null, null);
-    }
-    
-    public static UtilInterface UtilInterface.create(OptionRegistry options, IErrorHandler eh) {
-        return create(null, options, eh, null, null);
-    }
-    
-    private static UtilInterface UtilInterface.create(ModelicaCompiler mc, OptionRegistry options,
-            IErrorHandler eh, ExternalFunctionCache efc, File path) {
-        return new UtilInterface(mc, options, eh, efc, path);
-    }
-    
-    public void Root.transferRoot(Root other) {
-        other.getUtilInterface().transferRoot(this);
-    }
-    
-    public void UtilInterface.transferRoot(Root root) {
-        clean();
-        root.setUtilInterface(UtilInterface.create(this));
-    }
-    
-    public void UtilInterface.tearDown() {
-        clean();
-    }
-    
-    public void UtilInterface.clean() {
-        ExternalFunctionCache efc = getExternalFunctionCache();
-        if (efc != null) {
-            efc.destroyProcesses();
-        }
-    }
-    
 }

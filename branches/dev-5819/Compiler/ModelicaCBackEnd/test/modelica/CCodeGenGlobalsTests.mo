@@ -477,18 +477,18 @@ model GlobalConstantScalar1
     
     Real y = f1(time) + f2(time);
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="GlobalConstantScalar1",
-            description="Constants in external calls",
-            variability_propagation=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="GlobalConstantScalar1",
+        description="Constants in external calls",
+        variability_propagation=false,
+        template="
 $C_global_temps$
 $C_model_init_eval_independent_globals$
 $C_function_headers$
 $C_functions$
 ",
-            generatedCode="
+        generatedCode="
     jmi_real_t CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f1_c;
     jmi_array_t* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f1_d;
     jmi_real_t CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_c;
@@ -554,7 +554,7 @@ void func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_def1(jmi
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, y_v)
     extern double f2(double, double, double*, size_t);
-    y_v = f2(x_v, JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_c), JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_d)->var, jmi_array_size(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_d), 0));
+    y_v = f2(x_v, JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_c), JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_d)->var, (size_t) jmi_array_size(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_d), 0));
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -1436,7 +1436,7 @@ void func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_E
     JMI_DYNAMIC_INIT()
     JMI_DEF(EXO, eo_v)
     extern void* constructor(double*, size_t);
-    eo_v = constructor(x_a->var, jmi_array_size(x_a, 0));
+    eo_v = constructor(x_a->var, (size_t) jmi_array_size(x_a, 0));
     JMI_RET(GEN, eo_o, eo_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -1450,7 +1450,6 @@ jmi_extobj_t func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObj
 
 
     func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_EO_destructor_def1(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_eo));
-
 ")})));
 end GlobalConstantExternalObject1;
 

@@ -1138,22 +1138,7 @@ aspect FlatPrettyPrint {
         }
         getParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";" + str.getLineEnder());
     
-        boolean wroteEquation = false;
-        for (FAbstractEquation e : getFAbstractEquations()) {
-            if (e instanceof FAlgorithm) {
-                p.print(e, str, indent);
-                wroteEquation = false;
-            } else {
-                if (!e.isIgnored()) {
-                    if (!wroteEquation) {
-                        str.println(indent, "equation");
-                        wroteEquation = true;
-                    }
-                    p.print(e, str, nextInd);
-                    str.println(";");
-                }
-            }
-        }
+        prettyPrintEquations(p, str, indent);
         
         if (getNumFFunctionDecl() > 0 || getNumFRecordDecl() > 0 || 
                 getNumFEnumDecl() > 0 || getNumFDerivedType() > 0) {
@@ -1168,6 +1153,30 @@ aspect FlatPrettyPrint {
         getFAttributeList().prettyPrintFAnnotationAttributeList(str, p, indent, ";" + str.getLineEnder());
 
         str.println(indent, "end ", name(), ";");
+    }
+    
+    public void FClass.prettyPrintEquations(Printer p, CodeStream str, String indent) {
+        boolean wroteEquation = false;
+        String nextInd = p.indent(indent);
+        for (FAbstractEquation e : equationsForPrinting()) {
+            if (e instanceof FAlgorithm) {
+                p.print(e, str, indent);
+                wroteEquation = false;
+            } else {
+                if (!e.isIgnored()) {
+                    if (!wroteEquation) {
+                        str.println(indent, "equation");
+                        wroteEquation = true;
+                    }
+                    p.print(e, str, nextInd);
+                    str.println(";");
+                }
+            }
+        }
+    }
+    
+    public Iterable<FAbstractEquation> FClass.equationsForPrinting() {
+        return getFAbstractEquations();
     }
 
 	syn String FVariable.prettyPrintType() = 
@@ -1188,8 +1197,8 @@ aspect FlatPrettyPrint {
         
         str.print(getTypePrefixVariability());
         
-        if (!getTypePrefixInputOutput().isNone()) {
-            str.print(getTypePrefixInputOutput(), " ");
+        if (!getCausalityConnectorPrefix().isNone()) {
+            str.print(getCausalityConnectorPrefix(), " ");
         }
         
         str.print(prettyPrintType(), " ", displayName());
@@ -1317,8 +1326,12 @@ aspect FlatPrettyPrint {
     }
 
     public void FDerivedType.prettyPrint(Printer p, CodeStream str, String indent) {
+        prettyPrintWithName(p, str, indent, getName());
+    }
+    
+    private void FDerivedType.prettyPrintWithName(Printer p, CodeStream str, String indent, String name) {
         if (!getBaseType().isEnum()) {
-            str.print(indent, "type ", getName(), " = ", getBaseType());
+            str.print(indent, "type ", name, " = ", getBaseType());
             getFAttributeList().prettyPrintFAttributeList(str, p);
             str.println(";");
         }
@@ -1348,8 +1361,8 @@ aspect FlatPrettyPrint {
     }
 
     public void FFunctionVariable.prettyPrint(Printer p, CodeStream str, String indent) {
-        if (!getTypePrefixInputOutput().isNone()) {
-            str.print(getTypePrefixInputOutput(), " ");
+        if (!getCausalityConnectorPrefix().isNone()) {
+            str.print(getCausalityConnectorPrefix(), " ");
         }
         str.print(getType().scalarType());
         if (isArray()) {
@@ -2143,8 +2156,8 @@ aspect PrettyPrint_MC {
 
     public void FVariable.prettyPrint_MC(Printer p, CodeStream str, String indent) {
         str.print(indent, getTypePrefixVariability());
-        if (!getTypePrefixInputOutput().isNone()) {
-            str.print(getTypePrefixInputOutput(), " ");
+        if (!getCausalityConnectorPrefix().isNone()) {
+            str.print(getCausalityConnectorPrefix(), " ");
         }
         
         str.print(prettyPrintType(), " ", nameUnderscore());
@@ -2202,22 +2215,7 @@ aspect PrettyPrint_MC {
         }
         getParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";" + str.getLineEnder());
     */
-        boolean wroteEquation = false;
-        for (FAbstractEquation e : getFAbstractEquations()) {
-            if (e instanceof FAlgorithm) {
-                p.print(e, str, indent);
-                wroteEquation = false;
-            } else {
-                if (!e.isIgnored()) {
-                    if (!wroteEquation) {
-                        str.println(indent, "equation");
-                        wroteEquation = true;
-                    }
-                    p.print(e, str, nextInd);
-                    str.println(";");
-                }
-            }
-        }
+        prettyPrintEquations(p, str, indent);
                 
         str.println(indent, "end ", nameUnderscore(), ";");
     }
