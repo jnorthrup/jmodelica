@@ -276,10 +276,11 @@ public class ModelicaCompiler implements LogContainer {
      * Calls the hook to be called after the error checks on the instantiated 
      * model are finished without errors.
      */
-    private void hookModelInstantiatied(InstClassDecl icd) {
+    private void hookModelInstantiated(InstClassDecl icd) {
         for (CompilationHooks hooks : hooksList) {
-            hooks.modelInstantiatied(this, icd);
+            hooks.modelInstantiated(this, icd);
         }
+        icd.root().getUtilInterface().modelInstantiated(icd);
     }
     
     /**
@@ -346,6 +347,7 @@ public class ModelicaCompiler implements LogContainer {
         for (CompilationHooks hooks : hooksList) {
             hooks.packFmu(this, fc, dir);
         }
+        fc.root().getUtilInterface().packFmu(fc);
     }
     
     /**
@@ -355,6 +357,7 @@ public class ModelicaCompiler implements LogContainer {
         for (CompilationHooks hooks : hooksList) {
             hooks.fmuPacked(this, fc, path);
         }
+        fc.root().getUtilInterface().fmuPacked(fc, path);
     }
     
     public String getStringOption(String key) throws UnknownOptionException {
@@ -1149,7 +1152,7 @@ public class ModelicaCompiler implements LogContainer {
             handleCompilerWarnings(sr.collectWarnings());
         }
         
-        hookModelInstantiatied(icd);
+        hookModelInstantiated(icd);
         ASTNode.endStep("instantiateModel()");
         
         return icd;
@@ -1622,11 +1625,12 @@ public class ModelicaCompiler implements LogContainer {
             this(type, makeFileFlag, suffix, xmlGenerator, ErrorCheckType.COMPILE);
         }
         
-        public Templates getTemplates(AbstractOptionRegistry options) {
+        public Templates getTemplates(OptionRegistry options) {
             return new Templates(type, options);
         }
         
-        public String createExtraCFlagsString(AbstractOptionRegistry options, String fileName) {
+        public String createExtraCFlagsString(AbstractOptionRegistry abstractOptions, String fileName) {
+            OptionRegistry options = (OptionRegistry) abstractOptions;
             
             if (suffix == null) {
                 return "";
@@ -2351,7 +2355,7 @@ public class Templates {
     };
 
 
-    public Templates(ModelicaCompiler.TargetType type, AbstractOptionRegistry options) {
+    public Templates(ModelicaCompiler.TargetType type, OptionRegistry options) {
         switch (type) {
         case FMUME10:
             templates = new String[] { null, "fmi1_me_modelica_template.c" };
@@ -2483,7 +2487,7 @@ public class Templates {
     private static LinkedHashSet<String> C_SOURCE_TEMPLATES;    
     
     public abstract static class TemplateContributor {
-        public void addTemplates(Templates templates, AbstractOptionRegistry options) { }
+        public void addTemplates(Templates templates, OptionRegistry options) { }
     }
 
     public static <T extends TemplateContributor> T addContributor(T contributor) {
@@ -2531,7 +2535,7 @@ private static final Templates.TemplateContributor ModelicaCompiler.BASIC_TEMPLA
     Templates.addContributor(new Templates.TemplateContributor() {
 
         @Override
-        public void addTemplates(Templates templates, AbstractOptionRegistry options) {
+        public void addTemplates(Templates templates, OptionRegistry options) {
             templates.addCHeaderTemplates("base");
             templates.addCSourceTemplates("base", "init_independent", "init_dependent", "equ_init", "equ", "funcs");
         }
@@ -2627,7 +2631,7 @@ public interface CompilationHooks {
      * 
      * Since the instance tree is built lazily, this step can not be broken up.
      */
-    void modelInstantiatied(ModelicaCompiler instance, InstClassDecl icd);
+    void modelInstantiated(ModelicaCompiler instance, InstClassDecl icd);
     
     /**
      * Called after the model is flattened.
@@ -2693,7 +2697,7 @@ public abstract class CompilationHooksImpl implements CompilationHooks {
     @Override
     public void modelTransformed(ModelicaCompiler instance, FClass fc) {}
     @Override
-    public void modelInstantiatied(ModelicaCompiler instance, InstClassDecl icd) {}
+    public void modelInstantiated(ModelicaCompiler instance, InstClassDecl icd) {}
     @Override
     public void modelFlattened(ModelicaCompiler instance, FClass fc) {}
     @Override

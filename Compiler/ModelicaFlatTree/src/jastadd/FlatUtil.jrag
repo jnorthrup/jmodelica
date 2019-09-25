@@ -706,6 +706,35 @@ aspect FlatNames {
         return res;
     }
     
+    
+    public abstract FAccess FAccess.copyAndAddSuffix(String suffix);
+    
+    public FAccessString FAccessEmpty.copyAndAddSuffix(String suffix) {
+        throw new UnsupportedOperationException();
+    }
+    
+    public FAccessString FAccessString.copyAndAddSuffix(String suffix) {
+        String name = getName();
+        String end = "";
+        if (name.endsWith("'")) {
+            name = name.substring(0, name.length() - 1);
+            end = "'";
+        }
+        return new FAccessString(name + suffix + end);
+    }
+    
+    public FAccessFull FAccessFull.copyAndAddSuffix(String suffix) {
+        FAccessFull res = fullCopy();
+        String name = res.getFAccessPart(0).getName();
+        String end = "";
+        if (name.endsWith("'")) {
+            name = name.substring(0, name.length() - 1);
+            end = "'";
+        }
+        res.getFAccessPart(0).setName(name + suffix + end);
+        return res;
+    }
+    
     /**
      * Create a copy of the name, with an FSubscript added to the last part.
      */
@@ -1111,9 +1140,6 @@ aspect FlatFunctionUtils {
     
     syn boolean FFunctionCall.isPartialFunctionCall() = false;
     eq FPartialFunctionCall.isPartialFunctionCall()   = true;
-     
-     syn boolean FFunctionVariable.isInput()  = getTypePrefixInputOutput().inputCausality();
-     syn boolean FFunctionVariable.isOutput() = getTypePrefixInputOutput().outputCausality();
      
      /**
       * Returns a list of all InstComponentDecls declared as "input".
@@ -1662,16 +1688,6 @@ aspect FlatFunctionUtils {
      }
      
 
-    public String FClass.nextTempFuncName() {
-        String name;
-        do {
-            name = "temp_" + nextTempFuncIndex++;
-        } while (lookupFunc(name) != null);
-        return name;
-    }
-    private int FClass.nextTempFuncIndex = 1;
-
-
     /**
      * Creates new temporary variables with the given name.
      * 
@@ -1967,8 +1983,8 @@ aspect AttributeUtil {
     syn boolean FClass.containsActiveAnnotations() {
         if (getNumFAttribute() == 0)
             return false;
-        for (AttributeContributer contributer : attributeContributers())
-            if (contributer.containsActiveAttributes(this))
+        for (AttributeContributor contributor : attributeContributors())
+            if (contributor.containsActiveAttributes(this))
                 return true;
         return false;
     }
@@ -1979,8 +1995,8 @@ aspect AttributeUtil {
     syn boolean FVariable.containsActiveAnnotations() {
         if (getNumFAttribute() == 0)
             return false;
-        for (AttributeContributer contributer : attributeContributers())
-            if (contributer.containsActiveAttributes(this))
+        for (AttributeContributor contributor : attributeContributors())
+            if (contributor.containsActiveAttributes(this))
                 return true;
         return false;
     }
@@ -1991,8 +2007,8 @@ aspect AttributeUtil {
     syn boolean FAbstractEquation.containsActiveAnnotations() {
         if (getNumFAttribute() == 0)
             return false;
-        for (AttributeContributer contributer : attributeContributers())
-            if (contributer.containsActiveAttributes(this))
+        for (AttributeContributor contributor : attributeContributors())
+            if (contributor.containsActiveAttributes(this))
                 return true;
         return false;
     }
@@ -2003,8 +2019,8 @@ aspect AttributeUtil {
     syn boolean FFunctionDecl.containsActiveAnnotations() {
         if (getNumFAttribute() == 0)
             return false;
-        for (AttributeContributer contributer : attributeContributers())
-            if (contributer.containsActiveAttributes(this))
+        for (AttributeContributor contributor : attributeContributors())
+            if (contributor.containsActiveAttributes(this))
                 return true;
         return false;
     }
