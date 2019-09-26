@@ -112,3 +112,8 @@ jmi_dynamic_function_memory_t* jmi_dynamic_function_memory() {
 void* _jmi_global_calloc(size_t n, size_t s) {
     return jmi_dynamic_function_pool_direct_alloc(dyn_fcn_mem, n*s, 1);
 }
+
+
+void _jmi_dynamic_function_pool_destroy() {
+    jmi_dynamic_function_pool_destroy(dyn_fcn_mem);
+}
