@@ -1,7 +1,7 @@
 #!/usr/bin/env python 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2013 Modelon AB
+# Copyright (C) 2019 Modelon AB
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -52,6 +52,7 @@ class TestInitOptions:
         """
         test if model options are correctly initialized
         """
+        self.setUp()
         nose.tools.assert_true(self.model.get('_enforce_bounds'))
         nose.tools.assert_equals(self.model.get('_iteration_variable_scaling'), 1)
         nose.tools.assert_equals(self.model.get('_residual_equation_scaling'), 1)
@@ -64,6 +65,7 @@ class TestInitOptions:
         """
         test if user can set variable scaling.
         """
+        self.setUp()
         self.model.set('_iteration_variable_scaling', 0)
         self.model.initialize()
         extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
@@ -77,6 +79,7 @@ class TestInitOptions:
         """
         test if user can set variable scaling.
         """
+        self.setUp()
         self.model.set('_residual_equation_scaling',1)
         self.model.initialize()
         extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
@@ -108,6 +111,7 @@ class TestInitOptions:
         """
         test if maxiterations works. error propagation is tested.
         """
+        self.setUp()
         #Test with too few iterations
         self.model.set('_nle_solver_max_iter', 3)
         nose.tools.assert_raises(FMUException, self.model.initialize)
@@ -118,10 +122,11 @@ class TestInitOptions:
         nose.tools.assert_equals(self.model.initialize(), None)
     
     @testattr(stddist_full = True)    
-    def test_debbug_file(self):
+    def test_debug_file(self):
         """
         That the correct amount of debug info is created.
         """
+        self.setUp()
         self.model.set_debug_logging(True)
         self.model.set('_log_level',1)
         self.model.initialize()
@@ -175,7 +180,7 @@ class TestInitOptions:
         """
         That the correct solution is stored in the debug file.
         """
-        
+        self.setUp()
         self.model.initialize()
         extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
         log = parse_jmi_log(self.log_file_name)
@@ -212,6 +217,7 @@ class TestInitOptions20:
         """
         test if model options are correctly initialized
         """
+        self.setUp()
         nose.tools.assert_true(self.model.get('_enforce_bounds'))
         nose.tools.assert_equals(self.model.get('_iteration_variable_scaling'), 1)
         nose.tools.assert_equals(self.model.get('_residual_equation_scaling'), 1)
@@ -239,11 +245,12 @@ class TestInitOptions20:
         """
         test if user can set variable scaling.
         """
+        self.setUp()
         self.model.set('_residual_equation_scaling',1)
         self.model.initialize()
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        result = solves[0].block_solves[0].iterations[0].residual_scaling
+        result = solves[1].block_solves[0].iterations[0].residual_scaling
         expected = N.array([1., 1.])
         err_msg = "Arrays are supposed to be different but are actually equal. Result={}\nExpected={}".format(result, expected)
         assert not N.allclose(result, expected), err_msg
@@ -285,6 +292,7 @@ class TestInitOptions20:
         """
         That the correct amount of debug info is created.
         """
+        self.setUp('test_KINsolver_options_log_ll1.txt')
         self.model.set_debug_logging(True)
         self.model.set('_log_level',1)
         self.model.initialize()
@@ -332,7 +340,7 @@ class TestInitOptions20:
         """
         That the correct solution is stored in the debug file.
         """
-        
+        self.setUp()
         self.model.initialize()
         extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
         log = parse_jmi_log(self.log_file_name)
