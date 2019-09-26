@@ -775,7 +775,7 @@ aspect Flattening {
         SrcClassDecl scd = myTopSrcClassDecl();
         stmt.setLibTopPackagePath(scd == null ? "" : scd.myLibRootPath().toAbsolutePath().toString()); // scd is null for builtins
         stmt.setFExternalLanguage(hasFExternalLanguage() ? 
-                (FExternalLanguage) getFExternalLanguage().fullCopy() : 
+                getFExternalLanguage().treeCopy() : 
                 new FCExternalLanguage());
         stmt.extractLibrary(this);
         contribute(stmt);
@@ -829,7 +829,7 @@ aspect Flattening {
                 new Opt<>(getReturnVar().flatten(f).asCommonAccessExp()) : 
                 new Opt<CommonAccessExp>();
                 
-        FExternalStmt stmt = new FExternalStmt(getFExternalLanguage().treeCopy(), ret, getName(), args, getLibTopPackagePath());
+        FExternalStmt stmt = new FExternalStmt(getFExternalLanguage().treeCopy(), ret, getName(), args, getLibTopPackagePath(), new List<FAttribute>());
         stmt.extractLibrary(this);
         sl.add(stmt);
         contribute(stmt);
@@ -3398,8 +3398,8 @@ aspect AttributeContributor {
     
     /**
      * Class used during instantiation of equations and flattening of variables
-     * to delecate to different contributors. This class is subtyped for each
-     * contributor!
+     * to delegate to different contributors. This class is subtyped for each
+     * contributor.
      */
     public abstract class AttributeContributor {
         private final String name;

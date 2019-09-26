@@ -40,7 +40,7 @@ aspect PredefinedTypes {
      * as regular classes, in order to reuse the name and type lookup mechanisms.
      * Some differences apply however. The types of predefined types must
      * be looked up only amongst the built-in types. Also, there are no 
-     * component accesses that needs to be looked up predefined types.
+     * component accesses that need to be looked up for predefined types.
      * The predefined types are defined in the (list) non terminal attribute
      * PredefinedType.
      */
