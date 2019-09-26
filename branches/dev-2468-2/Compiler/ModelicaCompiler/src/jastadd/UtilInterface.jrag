@@ -73,22 +73,6 @@ aspect UtilInterface {
         private GUIDManager guidManager;
         private File compilationOutputPath;
         
-        protected UtilInterface(ModelicaCompiler mc, OptionRegistry options, IErrorHandler eh, ExternalFunctionCache efc, File compilationOutputPath) {
-            this.mc = mc;
-            this.options = options;
-            this.eh = eh;
-            this.efc = efc;
-            this.compilationOutputPath = compilationOutputPath;
-            guidManager = new GUIDManager(ASTNode.vendorName(), options.getStringOption("compiler_version"));
-            
-            interfacers = new LinkedList<>();
-            for (UtilInterface.Registrant registrant : registrants) {
-                if (registrant.enabled(this)) {
-                    interfacers.add(registrant.getInterfacer(this));
-                }
-            }
-        }
-        
         public ModelicaCompiler getModelicaCompiler() {
             return mc;
         }
@@ -122,10 +106,34 @@ aspect UtilInterface {
         return UtilInterface.create(this);
     }
     
+    public static ModelicaCompiler ModelicaCompiler.create(UtilInterface uif) {
+        return new ModelicaCompiler(uif);
+    }
+    public ModelicaCompiler.ModelicaCompiler(UtilInterface uif) {
+        this.options = uif.getOptionRegistry();
+        this.errorHandler = uif.getErrorHandler();
+        this.externalFunctionCache = uif.getExternalFunctionCache();
+    }
     public static UtilInterface UtilInterface.create(ModelicaCompiler mc) {
         return new UtilInterface(mc, mc.getOptions(), mc.getErrorHandler(), mc.getExternalFunctionCache(), null);
     }
     
+    protected UtilInterface.UtilInterface(ModelicaCompiler mc, OptionRegistry options, IErrorHandler eh, ExternalFunctionCache efc, File compilationOutputPath) {
+        this.mc = mc;
+        this.options = options;
+        this.eh = eh;
+        this.efc = efc;
+        this.compilationOutputPath = compilationOutputPath;
+        guidManager = new GUIDManager(ASTNode.vendorName(), options.getStringOption("compiler_version"));
+        
+        interfacers = new LinkedList<>();
+        for (UtilInterface.Registrant registrant : registrants) {
+            if (registrant.enabled(this)) {
+                interfacers.add(registrant.getInterfacer(this));
+            }
+        }
+    }
+        
     public static UtilInterface UtilInterface.create(OptionRegistry options) {
         return new UtilInterface(null, options, new DefaultErrorHandler(), null, null);
     }

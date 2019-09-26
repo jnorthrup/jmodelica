@@ -572,7 +572,9 @@ abstract public class TestCase implements GenericTestCase {
             fail(exception);
 
         // Create a mock compiler to notify compilation listeners.
-        ModelicaCompiler.notifyCompilationStart(new ModelicaCompiler(uif.getOptionRegistry()));
+        ModelicaCompiler mc = ModelicaCompiler.create(uif);
+        uif = uif.create(mc);
+        ModelicaCompiler.notifyCompilationStart(mc);
 
         // Parse
         SourceRoot sr;
