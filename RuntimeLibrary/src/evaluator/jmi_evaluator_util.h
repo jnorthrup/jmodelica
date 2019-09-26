@@ -81,6 +81,7 @@ void _jmi_throw();
 int JMCEVAL_try();
 void* _jmi_global_calloc(size_t n, size_t s);
 jmi_dynamic_function_memory_t* jmi_dynamic_function_memory();
+void _jmi_dynamic_function_pool_destroy();
 
 #define JMCEVAL_parseInteger()  JMCEVAL_parseReal()
 #define JMCEVAL_parseBoolean()  JMCEVAL_parseInteger()

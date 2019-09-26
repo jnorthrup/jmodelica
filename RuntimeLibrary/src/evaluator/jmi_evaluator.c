@@ -48,6 +48,7 @@ typedef void(JMI_EVAL_CALLING_CONVENTION *f___iddpR_ddddddddddd_)(int, double, d
 typedef void(JMI_EVAL_CALLING_CONVENTION *f___ddpd)(double, double, double*);
 typedef void (*generic_funcptr)(void);
 
+
 void jmi_call_void_fcn_ddpd(generic_funcptr fcn) { 
     JMI_DEF(REA, arg_0)
     JMI_DEF(REA, arg_1)
@@ -427,6 +428,7 @@ int main(int argc, const char* argv[])
     } else {
         JMCEVAL_failed();
     }
+    _jmi_dynamic_function_pool_destroy();
     JMCEVAL_check("END");
     return 0;
 }

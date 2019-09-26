@@ -79,6 +79,7 @@ $ECE_setup_free$
     } else {
         JMCEVAL_failed();
     }
+    _jmi_dynamic_function_pool_destroy();
     JMCEVAL_check("END");
     return 0;
 }
