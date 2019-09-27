@@ -84,15 +84,11 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
     }
     
     private String getOutputArguments(E ext) {
-        String output = ext.functionArgsSerialized(true);
-        if (output.equals("")) {
-            return "void";
-        }
-        return output;
+        return ext.functionReturnArgSerialized();
     }
     
     private String getInputArguments(E ext) {
-        return ext.functionArgsSerialized(false);
+        return ext.functionArgsSerialized();
     }
     
     private static ArrayList<String> builtinExternalFunctions = new ArrayList<String>() {{
@@ -116,7 +112,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
     }};
     
     public boolean canUseEvaluator(E ext, ArrayList<String> arguments) {
-        if (!(ext.myOptions().getBooleanOption("external_constant_dynamic_evaluator"))) {
+        if (!(ext.myOptions().getBooleanOption("external_constant_evaluation_dynamic"))) {
             return false;
         }
         
@@ -164,6 +160,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                 String executable = null;
                 ArrayList<String> arguments = new ArrayList<String>();
                 String debugMsg = "";
+                ExternalFunctionExecutable extFunctionExecutable;
                 if (canUseEvaluator(ext, arguments)) {
                     String jmHome = System.getenv("JMODELICA_HOME");
                     String bits = getPlatform().contains("64") && SystemUtil.isWindows() ? "64" : "";
@@ -171,18 +168,23 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                     
                     arguments.add(0, executable); /* Needs to be first */
                     
+                    extFunctionExecutable = new DynamicExternalFunctionExecutable(arguments);
+                    
                     debugMsg = "Succesfully connected external function '" + ext.getName() + "' to the evaluator '"
                             + executable + "' with outputs: '" + getOutputArguments(ext) + "' and inputs: '" + getInputArguments(ext) + "'";
                 } else {
                     executable = mc.compileExternal(ext);
+                    
+                    extFunctionExecutable = new CompiledExternalFunctionExecutable(executable);
+                    
                     debugMsg = "Succesfully compiled external function '" + ext.getName() + "' to executable '"
                             + executable + "' code for evaluation";
                 }
-                arguments = arguments.size() == 0 ? null : arguments; /* Can likely be made better...*/
+                
                 if (ext.shouldCacheProcess()) {
-                    ef = new MappedExternalFunction(ext, executable, arguments);
+                    ef = new MappedExternalFunction(ext, extFunctionExecutable);
                 } else {
-                    ef = new CompiledExternalFunction(ext, executable, arguments);
+                    ef = new CompiledExternalFunction(ext, extFunctionExecutable);
                 }
                 time = System.currentTimeMillis() - time;
                 mc.log().debug(debugMsg +", time: " + time + "ms");
@@ -228,6 +230,49 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
     public static String failedEvalMsg(String name, String msg) {
         return "Failed to evaluate external function '" + name + "', " + msg;
     }
+    
+    private abstract class ExternalFunctionExecutable {
+        
+        public abstract ProcessBuilder createProcessBuilder();
+        
+        public abstract void remove();
+    }
+    
+    private class CompiledExternalFunctionExecutable extends ExternalFunctionExecutable {
+        protected String executable;
+        
+        public CompiledExternalFunctionExecutable(String executable) {
+            this.executable = executable;
+        }
+        
+        @Override
+        public ProcessBuilder createProcessBuilder() {
+            return new ProcessBuilder(executable);
+        }
+        
+        @Override
+        public void remove() {
+            new File(executable).delete();
+        }
+    }
+    
+    
+    private class DynamicExternalFunctionExecutable extends ExternalFunctionExecutable {
+        protected ArrayList<String> executable;
+        
+        public DynamicExternalFunctionExecutable(ArrayList<String> executable) {
+            this.executable = executable;
+        }
+        
+        @Override
+        public ProcessBuilder createProcessBuilder() {
+            return new ProcessBuilder(executable);
+        }
+        @Override
+        public void remove() {
+            // Do not remove the dynamic executable
+        }
+    }
 
     private class FailedExternalFunction implements ExternalFunction<K, V> {
         private String msg;
@@ -266,14 +311,12 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
      * Represents an external function that has been compiled successfully.
      */
     private class CompiledExternalFunction implements ExternalFunction<K, V> {
-        protected String executable;
-        protected ArrayList<String> arguments;
+        protected ExternalFunctionExecutable extFunctionExecutable;
         protected ProcessBuilder processBuilder;
         private String msg;
 
-        public CompiledExternalFunction(External<K> ext, String executable, ArrayList<String> arguments) {
-            this.executable = executable;
-            this.arguments = arguments;
+        public CompiledExternalFunction(External<K> ext, ExternalFunctionExecutable extFunctionExecutable) {
+            this.extFunctionExecutable = extFunctionExecutable;
             this.processBuilder = createProcessBuilder(ext);
             this.msg = "Succesfully compiled external function '" + ext.getName() + "'";
         }
@@ -347,18 +390,11 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
 
         @Override
         public void remove() {
-            if (arguments == null) {
-                new File(executable).delete();
-            }
+            extFunctionExecutable.remove();
         }
 
         private ProcessBuilder createProcessBuilder(External<K> ext) {
-            ProcessBuilder pb;
-            if (arguments == null) {
-                pb = new ProcessBuilder(executable);
-            } else {
-                pb = new ProcessBuilder(arguments);
-            }
+            ProcessBuilder pb = extFunctionExecutable.createProcessBuilder();
             Map<String, String> env = pb.environment();
             if (env.keySet().contains("Path")) {
                 env.put("PATH", env.get("Path"));
@@ -402,8 +438,8 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
 
         private final int externalConstantEvaluationMaxProc;
 
-        public MappedExternalFunction(External<K> ext, String executable, ArrayList<String> arguments) {
-            super(ext, executable, arguments);
+        public MappedExternalFunction(External<K> ext, ExternalFunctionExecutable extFunctionExecutable) {
+            super(ext, extFunctionExecutable);
             externalConstantEvaluationMaxProc = ext.myOptions()
                     .getIntegerOption("external_constant_evaluation_max_proc");
         }

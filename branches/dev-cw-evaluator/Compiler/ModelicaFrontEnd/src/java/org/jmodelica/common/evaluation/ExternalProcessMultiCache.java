@@ -33,11 +33,13 @@ public class ExternalProcessMultiCache<K extends ExternalProcessMultiCache.Varia
         public Iterable<K> externalObjectsToSerialize();
 
         public Iterable<K> functionArgsToSerialize();
-        
-        public String functionArgsSerialized(boolean returnVar);
+
+        public String functionArgsSerialized();
+
+        public String functionReturnArgSerialized();
 
         public Iterable<K> varsToDeserialize();
-        
+
         public String[] library();
     }
 

@@ -224,7 +224,13 @@ public class ExternalProcessCacheTest {
         }
         
         @Override
-        public String functionArgsSerialized(boolean returnVar) {
+        public String functionArgsSerialized() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        
+        @Override
+        public String functionReturnArgSerialized() {
             // TODO Auto-generated method stub
             return null;
         }

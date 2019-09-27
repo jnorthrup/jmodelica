@@ -289,42 +289,51 @@ aspect CCodeGenExternalCeval {
         return functionArgs;
     }
     
-    syn String FType.cMappedTypeString() = "e";
-    eq FArrayType.cMappedTypeString() = getFPrimitiveType().cMappedTypeString() + "v";
-    eq FIntegerType.cMappedTypeString() = "i";
-    eq FEnumType.cMappedTypeString() = "i";
-    eq FBooleanType.cMappedTypeString() = "i";
-    eq FRealType.cMappedTypeString() = "d";
-    eq FStringType.cMappedTypeString() = "s";
-    eq FRecordType.cMappedTypeString() {
+
+    syn String FType.cMappedTypeString() = cMappedTypeStringScalar() + (isArray() ? "v" : "");
+
+    syn String FType.cMappedTypeStringScalar() {
+        throw new InternalCompilerError("cMappedTypeStringScalar() is not supported for class type " + getClass().getSimpleName());
+    }
+    eq FArrayType.cMappedTypeStringScalar() = getFPrimitiveType().cMappedTypeStringScalar();
+    eq FIntegerType.cMappedTypeStringScalar() = "i";
+    eq FEnumType.cMappedTypeStringScalar() = "i";
+    eq FBooleanType.cMappedTypeStringScalar() = "i";
+    eq FRealType.cMappedTypeStringScalar() = "d";
+    eq FStringType.cMappedTypeStringScalar() = "s";
+    eq FRecordType.cMappedTypeStringScalar() {
         String o = "R[";
         for (FRecordComponentType rType: getComponents()) {
-                o = o.concat(rType.getFType().cMappedTypeString());
+                o = o.concat(rType.getFType().cMappedTypeStringScalar());
                 o = o.concat(",");
         }
         return o.concat("]");
     }
     
-    syn String FExternalStmt.functionArgsSerialized(boolean returnVar) {
-        boolean skippedReturnVar = false;
+    syn String FExternalStmt.functionReturnArgSerialized() {
+        if (hasReturnVar()) {
+            ExternalArgument var = functionArgsToSerialize().iterator().next();
+            return var.type().cMappedTypeString();
+        } else {
+            return "void";
+        }
+    }
+    
+    syn String FExternalStmt.functionArgsSerialized() {
         final boolean hasReturnVar = hasReturnVar();
+        boolean skippedReturnVar = false;
         
         String input = "";
         for (ExternalArgument var : functionArgsToSerialize()) {
-            if (returnVar) {
-                if (hasReturnVar) {
-                    return var.type().cMappedTypeString();
-                } else {
-                    return "void";
-                }
-            }
             if (hasReturnVar && !skippedReturnVar) { 
                 skippedReturnVar = true;
                 continue; 
             }
+            
             if (var.isOutput()) {
                input = input.concat("*");
             }
+            
             input += var.type().cMappedTypeString() + ",";
         }
         return input;
