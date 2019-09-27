@@ -230,6 +230,7 @@ class TestInitOptions20:
         """
         test if user can set variable scaling.
         """
+        self.setUp()
         self.model.set('_iteration_variable_scaling', 0)
         self.model.initialize()
         extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
@@ -250,7 +251,7 @@ class TestInitOptions20:
         self.model.initialize()
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        result = solves[1].block_solves[0].iterations[0].residual_scaling
+        result = solves[0].block_solves[0].iterations[0].residual_scaling
         expected = N.array([1., 1.])
         err_msg = "Arrays are supposed to be different but are actually equal. Result={}\nExpected={}".format(result, expected)
         assert not N.allclose(result, expected), err_msg
