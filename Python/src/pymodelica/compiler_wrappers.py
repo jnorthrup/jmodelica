@@ -389,8 +389,8 @@ class ModelicaCompiler(object):
         
             CompilerError if one or more error is found during compilation.
             
-            IOError if the model file is not found, can not be read or any other 
-            IO related error.
+            OSError if the model file is not found, can not be read or any other 
+            OS related error.
             
             Exception if there are general errors related to the parsing of the 
             model.
@@ -470,8 +470,8 @@ class ModelicaCompiler(object):
             
             ModelicaClassNotFoundError if the model class is not found.
             
-            IOError if the model file is not found, can not be read or any 
-            other IO related error.
+            OSError if the model file is not found, can not be read or any 
+            other OS related error.
             
             JError if there was a runtime exception thrown by the underlying 
             Java classes.
@@ -501,8 +501,8 @@ class ModelicaCompiler(object):
 
         Raises::
         
-            IOError if the model file is not found, can not be read or any other 
-            IO related error.
+            OSError if the model file is not found, can not be read or any other 
+            OS related error.
                 
             JError if there was a runtime exception thrown by the underlying 
             Java classes.
@@ -565,12 +565,12 @@ class ModelicaCompiler(object):
                 str(ex.__javaobject__.getMessage()))
         
         if _py_handle_exception(ex, jpype.java.io.FileNotFoundException):
-            raise IOError(
+            raise OSError(
                 '\nMessage: '+ex.message().encode('utf-8')+\
                 '\nStacktrace: '+ex.stacktrace().encode('utf-8'))
         
         if _py_handle_exception(ex, jpype.java.io.IOException):
-            raise IOError(
+            raise OSError(
                 '\nMessage: '+str(ex.message().encode('utf-8'))+\
                 '\nStacktrace: '+str(ex.stacktrace().encode('utf-8')))
         
