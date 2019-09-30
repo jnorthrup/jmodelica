@@ -238,6 +238,9 @@ aspect AnnotationAPI {
         myTargetInstClassDecl().addAnnotationToEvaluator(list, this);
         return list;
     }
+    eq InstLibNode.annotations() {
+        return resolveLib().annotations();
+    }
 
     syn ArrayList<SrcExp> InstNode.annotationExps() {
         ArrayList<SrcExp> exps = new ArrayList<>();
