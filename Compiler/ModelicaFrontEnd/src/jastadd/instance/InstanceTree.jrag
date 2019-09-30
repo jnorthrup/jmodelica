@@ -1803,38 +1803,38 @@ aspect InstanceTreeConstruction {
     }
 
     public List<InstComponentDecl> InstSimpleShortClassDecl.getInstComponentDeclList() {
-        return actualInstClass().getInstComponentDeclList();
+        throw new UnsupportedOperationException();
     }
     public List<InstComponentDecl> InstLibNode.getInstComponentDeclList() {
-        return actualInstClass().getInstComponentDeclList();
+        throw new UnsupportedOperationException();
     }
 
     public List<InstClassDecl> InstSimpleShortClassDecl.getInstClassDeclList() {
-        return actualInstClass().getInstClassDeclList();
+        throw new UnsupportedOperationException();
     }
     public List<InstClassDecl> InstLibNode.getInstClassDeclList() {
-        return actualInstClass().getInstClassDeclList();
+        throw new UnsupportedOperationException();
     }
 
     public List<InstExtends> InstSimpleShortClassDecl.getInstExtendsList() {
-        return actualInstClass().getInstExtendsList();
+        throw new UnsupportedOperationException();
     }
     public List<InstExtends> InstLibNode.getInstExtendsList() {
-        return actualInstClass().getInstExtendsList();
+        throw new UnsupportedOperationException();
     }
 
     public List<InstImport> InstSimpleShortClassDecl.getInstImportList() {
-        return actualInstClass().getInstImportList();
+        throw new UnsupportedOperationException();
     }
     public List<InstImport> InstLibNode.getInstImportList() {
-        return actualInstClass().getInstImportList();
+        throw new UnsupportedOperationException();
     }
 
     public List<InstClassDecl> InstSimpleShortClassDecl.getRedeclaredInstClassDeclList() {
-        return actualInstClass().getRedeclaredInstClassDeclList();
+        throw new UnsupportedOperationException();
     }
     public List<InstClassDecl> InstLibNode.getRedeclaredInstClassDeclList() {
-        return actualInstClass().getRedeclaredInstClassDeclList();
+        throw new UnsupportedOperationException();
     }
 
 }
