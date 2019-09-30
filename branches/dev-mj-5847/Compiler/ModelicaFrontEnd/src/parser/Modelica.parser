@@ -23,6 +23,7 @@
 %goal access_scalar;
 %goal subscript;
 %typeof function_call_list = "SrcFunctionCallList";
+%typeof function_call_vector = "List";
 %goal function_call_list;
 
 %header {:
@@ -1520,13 +1521,18 @@ SrcExp primary =
 
 List function_calls =
     function_call SEMICOLON                       {: return new List().add(function_call); :}
-  | function_calls function_call SEMICOLON {: return function_calls.add(function_call); :}
+  | function_calls function_call SEMICOLON        {: return function_calls.add(function_call); :}
+  ;
+
+List function_call_vector =
+    function_call                                 {: return new List().add(function_call); :}
+  | function_call_vector COMMA function_call      {: return function_call_vector.add(function_call); :}
   ;
 
 SrcFunctionCallList function_call_list
-    = LBRACE function_calls RBRACE
+    = LBRACE function_call_vector RBRACE
     {:
-        return new SrcFunctionCallList(function_calls);
+        return new SrcFunctionCallList(function_call_vector);
     :}
     | function_calls
     {:
