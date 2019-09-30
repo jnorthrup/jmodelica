@@ -113,10 +113,9 @@ class KeepLastStream():
             # Count the number of lines in the previous contents
             # apparently self.last is of class 'bytes' in py3
             # compared to class 'str' in py2
-            self.last = self.last.decode('utf-8')
-            self.line += self.last.count('\n')
+            self.line += str(self.last.decode('utf-8')).count('\n')
             # Get the two last lines
-            lines = self.last.rsplit('\n', 2)
+            lines = str(self.last.decode('utf-8')).rsplit('\n', 2)
             # Update lastLine and secondLastLine depending on how many
             # rows we got
             if len(lines) == 1:
@@ -144,7 +143,7 @@ class KeepLastStream():
         dump_file = tempfile.NamedTemporaryFile(prefix='JM_LOG_DUMP_', delete=False)
         dump_file.write(self.last)
         
-        lines = self.last.split('\n')
+        lines = str(self.last.decode('utf-8')).split('\n')
         lines[0] = self.lastLine + lines[0]
         
         # Add lines before...
@@ -156,7 +155,7 @@ class KeepLastStream():
             more = self.stream.read()
             dump_file.write(more)
             while localLine + 2 >= len(lines) and more:
-                pos = more.find('\n')
+                pos = str(more.decode('utf-8')).find('\n')
                 if pos == -1:
                     lines[-1] = lines[-1] + more
                     more = self.stream.read()
@@ -190,12 +189,14 @@ class KeepLastStream():
                 % (lines[localLine][column], os.linesep, message)
         
         # Discard remaining data.
-        data = self.stream.read()
-        dump_file.write(data)
-        while data is None or data != '':
+        # Check if not already closed since later versions of xmlreader closes it by itself
+        if not self.stream.closed:
             data = self.stream.read()
             dump_file.write(data)
-        dump_file.close()
+            while data is None or data != '':
+                data = self.stream.read()
+                dump_file.write(data)
+            dump_file.close()
         
         message += "%sDump of the log has been saved in %s" % (os.linesep, dump_file.name)
         return message
