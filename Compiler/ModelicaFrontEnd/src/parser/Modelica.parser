@@ -1524,10 +1524,21 @@ List function_calls =
   ;
 
 SrcFunctionCallList function_call_list
-    = function_calls
+    = LBRACE function_calls RBRACE
     {:
         return new SrcFunctionCallList(function_calls);
     :}
+    | function_calls
+    {:
+        return new SrcFunctionCallList(function_calls);
+    :}
+    | function_call
+    {:
+        List l = new List().add(function_call);
+        return new SrcFunctionCallList(l);
+    :}
+    ;
+
 
 SrcFunctionCall function_call 
     = access
