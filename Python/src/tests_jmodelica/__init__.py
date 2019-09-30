@@ -26,6 +26,7 @@ import sys
 import os, os.path
 import shutil
 import platform
+from pyjmi.common import python3_flag
 
 __all__ = ['general', 'initialization', 'optimization', 'simulation', 
            'test_compiler', 'test_core', 'test_examples_casadi',
@@ -75,7 +76,7 @@ def get_files_path():
                                " JMODELICA_HOME environment" \
                                " variable."
     pycompiler = platform.python_compiler()
-    if sys.version_info > (3, 0):
+    if python3_flag:
         return os.path.join(jmhome, 'Python', 'tests_jmodelica', 'files')
     elif "64 bit" in pycompiler and "win" in sys.platform:
         return os.path.join(jmhome, 'Python_64', 'tests_jmodelica', 'files')

@@ -44,7 +44,7 @@ class LogErrorParser(xml.sax.ContentHandler):
         if self.state == 'error' or self.state == 'warning' or \
                 self.state == 'exception' or self.state == 'unit':
             if name == 'value':
-                self.attribute = attrs['name'].encode('utf-8')
+                self.attribute = str(attrs['name'])
                 self.node[self.attribute] = ''
         else:
             if name == "Error":
@@ -69,7 +69,7 @@ class LogErrorParser(xml.sax.ContentHandler):
             self.state = None
             self.node = None
         elif self.state == 'unit' and name == "CompilationUnit":
-            self.result.name = self.node[b'file']
+            self.result.name = self.node['file']
             self.state = None
             self.node = None
         elif name == 'value':
@@ -81,13 +81,13 @@ class LogErrorParser(xml.sax.ContentHandler):
     
     def _construct_problem_node(self, node):
         if node['type'] == 'exception':
-            return CompilationException(node[b'kind'], node[b'message'], node[b'stacktrace'])
+            return CompilationException(node['kind'], node['message'], node['stacktrace'])
         elif node['type'] == 'error':
-            return CompilationError(node[b'identifier'], node[b'kind'], node[b'file'], node[b'line'], \
-                node[b'column'], node[b'message'])
+            return CompilationError(node['identifier'], node['kind'], node['file'], node['line'], \
+                node['column'], node['message'])
         elif node['type'] == 'warning':
-            return CompilationWarning(node[b'identifier'], node[b'kind'], node[b'file'], node[b'line'], \
-                node[b'column'], node[b'message'])
+            return CompilationWarning(node['identifier'], node['kind'], node['file'], node['line'], \
+                node['column'], node['message'])
 
 class KeepLastStream():
     """
