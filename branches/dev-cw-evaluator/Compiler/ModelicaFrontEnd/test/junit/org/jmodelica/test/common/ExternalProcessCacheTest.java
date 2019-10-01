@@ -8,6 +8,7 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import org.jmodelica.common.evaluation.Compiler;
 import org.jmodelica.common.evaluation.ExternalFunction;
 import org.jmodelica.common.evaluation.ExternalProcessCache;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache;
@@ -107,15 +108,9 @@ public class ExternalProcessCacheTest {
             log.info("Called tearDown()");
         }
 
-        @Override
-        public ExternalFunction<K,V> failedEval(External<?> ext, String msg, boolean log) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-        
     }
 
-    class CompilerMock implements ExternalProcessMultiCache.Compiler<VariableMock, ExternalMock> {
+    class CompilerMock implements Compiler<VariableMock, ExternalMock> {
 
         @Override
         public ModelicaLogger log() {

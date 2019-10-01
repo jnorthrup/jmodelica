@@ -25,10 +25,12 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.jmodelica.common.evaluation.Compiler;
 import org.jmodelica.common.evaluation.ExternalFunction;
 import org.jmodelica.common.evaluation.ExternalProcessCache;
 import org.jmodelica.common.evaluation.ExternalProcessCacheImpl;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache;
+import org.jmodelica.common.evaluation.FailedExternalFunction;
 import org.jmodelica.common.evaluation.ProcessCommunicator;
 
 aspect ExternalConstantEvaluation {
@@ -48,7 +50,7 @@ aspect ExternalConstantEvaluation {
     
     class ModelicaCompiler {}
     
-    ModelicaCompiler   implements ExternalProcessMultiCache.Compiler<ExternalArgument, FExternalStmt>;
+    ModelicaCompiler   implements Compiler<ExternalArgument, FExternalStmt>;
     FExternalStmt      implements ExternalProcessMultiCache.External<ExternalArgument>;
     ExternalArgument   extends    ExternalProcessMultiCache.Variable<CValue,FType>;
     CValue             implements ExternalProcessMultiCache.Value;
@@ -171,8 +173,9 @@ aspect ExternalConstantEvaluation {
     public ExternalFunction<ExternalArgument, CValue> FExternalStmt.myExternalFunction() {
         ExternalFunctionCache efc = root().getUtilInterface().getExternalFunctionCache();
         if (efc == null) {
-            return new ExternalProcessCacheImpl<>(root().getUtilInterface().getModelicaCompiler())
-                .failedEval(this, "external function cache unavailable", false);
+            return FailedExternalFunction.<ExternalArgument, CValue, FType, FExternalStmt>failedEval(
+                    root().getUtilInterface().getModelicaCompiler(), 
+                    this, "external function cache unavailable", false);
         }
         return efc.getExternalProcessCache(getLibTopPackagePath()).getExternalFunction(this);
     }
@@ -207,7 +210,7 @@ aspect ExternalConstantEvaluation {
         }
         
         if (error != null) {
-            throw new ConstantEvaluationException(null, ExternalProcessCacheImpl.failedEvalMsg(getName(), error));
+            throw new ConstantEvaluationException(null, FailedExternalFunction.failedEvalMsg(getName(), error));
         }
         
         for (ExternalArgument output : varsToDeserialize()) {
