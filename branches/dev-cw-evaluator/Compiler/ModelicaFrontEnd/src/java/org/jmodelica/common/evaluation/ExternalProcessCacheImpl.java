@@ -32,9 +32,9 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
      */
     private final LinkedHashSet<ExternalFunction<K, V>> livingCachedExternals = new LinkedHashSet<ExternalFunction<K, V>>();
 
-    private final Compiler<K, E> mc;
+    private final ExternalFunctionCompiler<K, E> mc;
 
-    public ExternalProcessCacheImpl(Compiler<K, E> mc) {
+    public ExternalProcessCacheImpl(ExternalFunctionCompiler<K, E> mc) {
         this.mc = mc;
     }
 
@@ -151,14 +151,14 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                     
                     arguments.add(0, executable); /* Needs to be first */
                     
-                    extFunctionExecutable = new DynamicExternalFunctionExecutable(arguments);
+                    extFunctionExecutable = new ExternalFunctionExecutableDynamic(arguments);
                     
                     debugMsg = "Succesfully connected external function '" + ext.getName() + "' to the evaluator '"
                             + executable + "' with outputs: '" + ext.functionReturnArgSerialized() + "' and inputs: '" + ext.functionArgsSerialized() + "'";
                 } else {
                     executable = mc.compileExternal(ext);
                     
-                    extFunctionExecutable = new CompiledExternalFunctionExecutable(executable);
+                    extFunctionExecutable = new ExternalFunctionExecutableGenerated(executable);
                     
                     debugMsg = "Succesfully compiled external function '" + ext.getName() + "' to executable '"
                             + executable + "' code for evaluation";
@@ -167,7 +167,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                 if (ext.processLimit() > 0) {
                     ef = new MappedExternalFunction<K,V,T,E>(mc, ext, extFunctionExecutable, livingCachedExternals);
                 } else {
-                    ef = new CompiledExternalFunction<K,V,T,E>(mc, ext, extFunctionExecutable);
+                    ef = new ExternalFunctionImpl<K,V,T,E>(mc, ext, extFunctionExecutable);
                 }
                 time = System.currentTimeMillis() - time;
                 mc.log().debug(debugMsg +", time: " + time + "ms");
