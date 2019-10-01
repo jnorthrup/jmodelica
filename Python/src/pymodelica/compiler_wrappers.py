@@ -566,8 +566,8 @@ class ModelicaCompiler(object):
         
         if _py_handle_exception(ex, jpype.java.io.FileNotFoundException):
             raise OSError(
-                '\nMessage: '+ex.message().encode('utf-8')+\
-                '\nStacktrace: '+ex.stacktrace().encode('utf-8'))
+                '\nMessage: '+str(ex.message().encode('utf-8'))+\
+                '\nStacktrace: '+str(ex.stacktrace().encode('utf-8')))
         
         if _py_handle_exception(ex, jpype.java.io.IOException):
             raise OSError(

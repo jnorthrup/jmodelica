@@ -321,7 +321,7 @@ class CompilerLogHandler:
             raise ModelicaClassNotFoundError(exception.message)
         
         if exception.kind == 'java.io.FileNotFoundException':
-            raise IOError(exception.message)
+            raise OSError(exception.message)
         
         if exception.kind == 'org.jmodelica.util.logging.IllegalLogStringException':
             raise IllegalLogStringError(exception.message)
@@ -339,7 +339,7 @@ class CompilerLogHandler:
             raise PackingFailedError(exception.message)
         
         if exception.kind == 'xml.sax.SAXParseException':
-            raise IOError(exception.message)
+            raise OSError(exception.message)
 
         if exception.kind == 'org.jmodelica.util.exceptions.IllegalCompilerArgumentException':
             raise IllegalCompilerArgumentError(exception.message)
