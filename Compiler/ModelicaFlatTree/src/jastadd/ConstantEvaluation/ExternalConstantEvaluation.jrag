@@ -88,9 +88,12 @@ aspect ExternalConstantEvaluation {
     /**
      * Check if this external function should be cached as a live process.
      */
-    syn boolean FExternalStmt.shouldCacheProcess() {
-        return myOptions().getIntegerOption("external_constant_evaluation_max_proc") > 0;
-    }
+    syn int FExternalStmt.processLimit() =
+            myOptions().external_constant_evaluation_max_proc.getValue();
+    
+    syn boolean FExternalStmt.dynamicEvaluatorEnabled() = 
+            myOptions().external_constant_evaluation_dynamic.getValue()
+            && !externalObjectsToSerialize().iterator().hasNext();
     
     /**
      * Returns a single scalar external object which can be cached. If there is not exactly

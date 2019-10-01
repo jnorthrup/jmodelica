@@ -22,7 +22,9 @@ public class ExternalProcessMultiCache<K extends ExternalProcessMultiCache.Varia
     public interface External<K> {
         public String getName();
 
-        public boolean shouldCacheProcess();
+        public int processLimit();
+
+        public boolean dynamicEvaluatorEnabled();
 
         public AbstractOptionRegistry myOptions();
 

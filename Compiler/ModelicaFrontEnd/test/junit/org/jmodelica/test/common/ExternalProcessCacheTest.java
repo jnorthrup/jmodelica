@@ -8,15 +8,15 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.jmodelica.common.evaluation.ExternalProcessCache;
 import org.jmodelica.common.evaluation.ExternalFunction;
+import org.jmodelica.common.evaluation.ExternalProcessCache;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache;
-import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Variable;
-import org.jmodelica.common.options.AbstractOptionRegistry;
-import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Value;
-import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Type;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache.External;
+import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Type;
+import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Value;
+import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Variable;
 import org.jmodelica.common.evaluation.ProcessCommunicator;
+import org.jmodelica.common.options.AbstractOptionRegistry;
 import org.jmodelica.util.ccompiler.CCompilerDelegator;
 import org.jmodelica.util.exceptions.CcodeCompilationException;
 import org.jmodelica.util.logging.ModelicaLogger;
@@ -188,8 +188,13 @@ public class ExternalProcessCacheTest {
         }
 
         @Override
-        public boolean shouldCacheProcess() {
+        public int processLimit() {
             // TODO Auto-generated method stub
+            return 0;
+        }
+
+        @Override
+        public boolean dynamicEvaluatorEnabled() {
             return false;
         }
 

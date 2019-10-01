@@ -1265,7 +1265,7 @@ public class ModelicaCompiler implements LogContainer {
         
         /* Temporary fix to problems with long compilation times due to later evaluations */
         getExternalFunctionCache().tearDown();
-        options.setIntegerOption("external_constant_evaluation", 0);
+        options.external_constant_evaluation.setValue(0);
         
         hookModelTransformed(fc);
         hookCheckAbort();
