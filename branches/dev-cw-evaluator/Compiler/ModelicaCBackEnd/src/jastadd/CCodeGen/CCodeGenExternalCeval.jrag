@@ -247,8 +247,15 @@ aspect CCodeGenExternalCeval {
     syn Collection<ExternalArgument> FExternalStmt.varsToSerialize() {
         Collection<ExternalArgument> res = new LinkedHashSet<>();
         if (hasReturnVar()) {
-            res.add(getReturnVar().externalArgument());
+            res.add(returnVarToSerialize());
         }
+        res.addAll(argVarsToSerialize());
+        return res;
+    }
+    
+    syn ExternalArgument FExternalStmt.returnVarToSerialize() = getReturnVar().externalArgument();
+    syn Collection<ExternalArgument> FExternalStmt.argVarsToSerialize() {
+        Collection<ExternalArgument> res = new LinkedHashSet<>();
         for (FExp e : getArgs()) {
             res.add(e.externalArgument());
         }
@@ -312,28 +319,18 @@ aspect CCodeGenExternalCeval {
     
     syn String FExternalStmt.functionReturnArgSerialized() {
         if (hasReturnVar()) {
-            ExternalArgument var = functionArgsToSerialize().iterator().next();
-            return var.type().cMappedTypeString();
+            return returnVarToSerialize().type().cMappedTypeString();
         } else {
             return "void";
         }
     }
     
     syn String FExternalStmt.functionArgsSerialized() {
-        final boolean hasReturnVar = hasReturnVar();
-        boolean skippedReturnVar = false;
-        
         String input = "";
-        for (ExternalArgument var : functionArgsToSerialize()) {
-            if (hasReturnVar && !skippedReturnVar) { 
-                skippedReturnVar = true;
-                continue; 
-            }
-            
+        for (ExternalArgument var : argVarsToSerialize()) {
             if (var.isOutput()) {
                input = input.concat("*");
             }
-            
             input += var.type().cMappedTypeString() + ",";
         }
         return input;
