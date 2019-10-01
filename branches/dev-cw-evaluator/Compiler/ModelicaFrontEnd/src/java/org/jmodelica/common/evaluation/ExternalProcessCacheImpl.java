@@ -2,7 +2,6 @@ package org.jmodelica.common.evaluation;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -29,14 +28,14 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
     /**
      * Maps external functions names to compiled executables.
      */
-    private Map<String, ExternalFunction<K, V>> cachedExternals = new HashMap<String, ExternalFunction<K, V>>();
+    private final Map<String, ExternalFunction<K, V>> cachedExternals = new HashMap<String, ExternalFunction<K, V>>();
 
     /**
      * Keeps track of all living processes, least recently used first.
      */
-    private LinkedHashSet<ExternalFunction<K, V>> livingCachedExternals = new LinkedHashSet<ExternalFunction<K, V>>();
+    private final LinkedHashSet<ExternalFunction<K, V>> livingCachedExternals = new LinkedHashSet<ExternalFunction<K, V>>();
 
-    private Compiler<K, E> mc;
+    private final Compiler<K, E> mc;
 
     public ExternalProcessCacheImpl(Compiler<K, E> mc) {
         this.mc = mc;
@@ -83,14 +82,6 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
         return sharedLib;
     }
     
-    private String getOutputArguments(E ext) {
-        return ext.functionReturnArgSerialized();
-    }
-    
-    private String getInputArguments(E ext) {
-        return ext.functionArgsSerialized();
-    }
-    
     private static ArrayList<String> builtinExternalFunctions = new ArrayList<String>() {{
         add("ModelicaStrings_substring");
         add("ModelicaStrings_length");
@@ -112,19 +103,14 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
     }};
     
     public boolean canUseEvaluator(E ext, ArrayList<String> arguments) {
-        if (!(ext.myOptions().getBooleanOption("external_constant_evaluation_dynamic"))) {
-            return false;
-        }
-        
-        /* External objects not supported at the moment */
-        for (K eo : ext.externalObjectsToSerialize()) {
+        if (!ext.dynamicEvaluatorEnabled()) {
             return false;
         }
         
         String sharedLibrary = getSharedLibrary(ext);
         String functionName  = ext.getName();
-        String outputArguments = getOutputArguments(ext);
-        String inputArguments  = getInputArguments(ext);
+        String outputArguments = ext.functionReturnArgSerialized();
+        String inputArguments  = ext.functionArgsSerialized();
         
         if (sharedLibrary.equals("")) {
             if (builtinExternalFunctions.contains(functionName)) {
@@ -171,7 +157,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                     extFunctionExecutable = new DynamicExternalFunctionExecutable(arguments);
                     
                     debugMsg = "Succesfully connected external function '" + ext.getName() + "' to the evaluator '"
-                            + executable + "' with outputs: '" + getOutputArguments(ext) + "' and inputs: '" + getInputArguments(ext) + "'";
+                            + executable + "' with outputs: '" + ext.functionReturnArgSerialized() + "' and inputs: '" + ext.functionArgsSerialized() + "'";
                 } else {
                     executable = mc.compileExternal(ext);
                     
@@ -181,7 +167,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                             + executable + "' code for evaluation";
                 }
                 
-                if (ext.shouldCacheProcess()) {
+                if (ext.processLimit() > 0) {
                     ef = new MappedExternalFunction(ext, extFunctionExecutable);
                 } else {
                     ef = new CompiledExternalFunction(ext, extFunctionExecutable);
@@ -367,8 +353,9 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
             }
             com.accept("CALC");
             com.accept("DONE");
-            for (K cvd : ext.varsToDeserialize())
+            for (K cvd : ext.varsToDeserialize()) {
                 values.put(cvd, com.get(cvd.type()));
+            }
             com.accept("READY");
             com.cancelTimer();
         }
@@ -420,10 +407,11 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
             String sep = platform.startsWith("win") ? ";" : ":";
             String var = platform.startsWith("win") ? "PATH" : "LD_LIBRARY_PATH";
             String res = env.get(var);
-            if (res == null)
+            if (res == null) {
                 res = libLoc;
-            else
+            } else {
                 res = res + sep + libLoc;
+            }
             env.put(var, res);
         }
     }
@@ -440,8 +428,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
 
         public MappedExternalFunction(External<K> ext, ExternalFunctionExecutable extFunctionExecutable) {
             super(ext, extFunctionExecutable);
-            externalConstantEvaluationMaxProc = ext.myOptions()
-                    .getIntegerOption("external_constant_evaluation_max_proc");
+            externalConstantEvaluationMaxProc = ext.processLimit();
         }
 
         /**
