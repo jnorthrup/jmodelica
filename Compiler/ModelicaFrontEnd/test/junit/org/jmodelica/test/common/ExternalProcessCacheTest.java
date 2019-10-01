@@ -8,7 +8,7 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.jmodelica.common.evaluation.Compiler;
+import org.jmodelica.common.evaluation.ExternalFunctionCompiler;
 import org.jmodelica.common.evaluation.ExternalFunction;
 import org.jmodelica.common.evaluation.ExternalProcessCache;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache;
@@ -74,7 +74,7 @@ public class ExternalProcessCacheTest {
 
     class ExternalProcessCacheMock<K extends Variable<V,T>, V extends Value, T extends Type<V>, E extends External<K>> extends ExternalProcessMultiCache<K,V,T,E> {
 
-        public ExternalProcessCacheMock(Compiler<K,E> mc) {
+        public ExternalProcessCacheMock(ExternalFunctionCompiler<K,E> mc) {
             super(mc);
         }
 
@@ -110,7 +110,7 @@ public class ExternalProcessCacheTest {
 
     }
 
-    class CompilerMock implements Compiler<VariableMock, ExternalMock> {
+    class CompilerMock implements ExternalFunctionCompiler<VariableMock, ExternalMock> {
 
         @Override
         public ModelicaLogger log() {

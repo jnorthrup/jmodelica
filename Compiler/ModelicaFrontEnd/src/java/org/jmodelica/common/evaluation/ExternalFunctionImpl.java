@@ -14,13 +14,13 @@ import org.jmodelica.util.ccompiler.CCompilerDelegator;
 /**
  * Represents an external function that has been compiled successfully.
  */
-class CompiledExternalFunction<K extends Variable<V, T>, V extends Value, T extends Type<V>, E extends External<K>> implements ExternalFunction<K, V> {
-    Compiler<K, E> compiler;
+class ExternalFunctionImpl<K extends Variable<V, T>, V extends Value, T extends Type<V>, E extends External<K>> implements ExternalFunction<K, V> {
+    ExternalFunctionCompiler<K, E> compiler;
     ExternalFunctionExecutable extFunctionExecutable;
     ProcessBuilder processBuilder;
     private String msg;
 
-    public CompiledExternalFunction(Compiler<K, E> compiler, External<K> ext, ExternalFunctionExecutable extFunctionExecutable) {
+    public ExternalFunctionImpl(ExternalFunctionCompiler<K, E> compiler, External<K> ext, ExternalFunctionExecutable extFunctionExecutable) {
         this.compiler = compiler;
         this.extFunctionExecutable = extFunctionExecutable;
         this.processBuilder = createProcessBuilder(ext);

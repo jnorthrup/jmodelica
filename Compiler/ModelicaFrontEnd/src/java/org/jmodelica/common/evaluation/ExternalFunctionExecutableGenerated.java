@@ -2,10 +2,10 @@ package org.jmodelica.common.evaluation;
 
 import java.io.File;
 
-class CompiledExternalFunctionExecutable extends ExternalFunctionExecutable {
+class ExternalFunctionExecutableGenerated extends ExternalFunctionExecutable {
     private String executable;
     
-    public CompiledExternalFunctionExecutable(String executable) {
+    public ExternalFunctionExecutableGenerated(String executable) {
         this.executable = executable;
     }
     

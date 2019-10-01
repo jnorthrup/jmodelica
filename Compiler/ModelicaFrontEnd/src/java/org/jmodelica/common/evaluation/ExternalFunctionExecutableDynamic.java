@@ -2,10 +2,10 @@ package org.jmodelica.common.evaluation;
 
 import java.util.ArrayList;
 
-class DynamicExternalFunctionExecutable extends ExternalFunctionExecutable {
+class ExternalFunctionExecutableDynamic extends ExternalFunctionExecutable {
     private ArrayList<String> executable;
     
-    public DynamicExternalFunctionExecutable(ArrayList<String> executable) {
+    public ExternalFunctionExecutableDynamic(ArrayList<String> executable) {
         this.executable = executable;
     }
     

@@ -53,9 +53,9 @@ public class ExternalProcessMultiCache<K extends ExternalProcessMultiCache.Varia
 
     private Map<String, ExternalProcessCache<K, V, T, E>> map = new LinkedHashMap<>();
 
-    private Compiler<K, E> mc;
+    private ExternalFunctionCompiler<K, E> mc;
 
-    public ExternalProcessMultiCache(Compiler<K, E> mc) {
+    public ExternalProcessMultiCache(ExternalFunctionCompiler<K, E> mc) {
         this.mc = mc;
     }
 

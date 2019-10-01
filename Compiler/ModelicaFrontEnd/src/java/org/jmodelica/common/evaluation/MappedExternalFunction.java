@@ -15,14 +15,14 @@ import org.jmodelica.util.values.ConstantEvaluationException;
  * A CompiledExternalFunction which can cache several processes with external
  * object constructor only called once.
  */
-class MappedExternalFunction<K extends Variable<V, T>, V extends Value, T extends Type<V>, E extends External<K>> extends CompiledExternalFunction<K,V,T,E> {
+class MappedExternalFunction<K extends Variable<V, T>, V extends Value, T extends Type<V>, E extends External<K>> extends ExternalFunctionImpl<K,V,T,E> {
 
     private Map<String, ExternalFunction<K, V>> lives = new HashMap<>();
 
     private LinkedHashSet<ExternalFunction<K, V>> livingCachedExternals;
     private final int externalConstantEvaluationMaxProc;
 
-    public MappedExternalFunction(Compiler<K,E> compiler, External<K> ext, ExternalFunctionExecutable extFunctionExecutable, LinkedHashSet<ExternalFunction<K, V>> livingCachedExternals) {
+    public MappedExternalFunction(ExternalFunctionCompiler<K,E> compiler, External<K> ext, ExternalFunctionExecutable extFunctionExecutable, LinkedHashSet<ExternalFunction<K, V>> livingCachedExternals) {
         super(compiler, ext, extFunctionExecutable);
         this.livingCachedExternals = livingCachedExternals;
         externalConstantEvaluationMaxProc = ext.processLimit();
