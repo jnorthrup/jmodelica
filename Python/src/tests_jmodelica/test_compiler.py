@@ -479,6 +479,16 @@ class Test_Compiler_functions:
         assert 'sources/' in includedFiles, 'Source files should be present when copy_source_files_to_fmu is set to true'
         assert 'sources/BouncingBall.c' in includedFiles, 'Source files should be present when copy_source_files_to_fmu is set to true'
 
+    @testattr(stddist_full = True)
+    def test_exception_at_non_existing_file(self):
+        """Test that exception is raised when specified file name does not exist"""
+        model_name = 'BouncingBall'
+        file_name = "NonExistantFile"
+        try:
+            compile_fmu(model_name, file_name = file_name)
+        except OSError as e:
+            assert str(e) == 'NonExistantFile (The system cannot find the file specified)'
+    
     def assert_compiler_option_missing(self, option_name, exception) :
         """
             Tests that an option is missing, deducing it from an exception message.
