@@ -186,7 +186,9 @@ aspect EquationSolve {
                     activeFactors.add(((FNegExp)ee).getFExp());
                     negatedFactor = true;
                 } else if (ee.nbrUses(var.name())==0) {
-                    if (!nominalAllowsDivision(ee, var, tol)) {
+                    if (ee.variability().constantVariability() &&
+                            Math.abs(ee.ceval().realValue()) *
+                            ee.dynamicFExp(var.nominal()).ceval().realValue() < tol) {
                         return new FNoExp();
                     }
                     inactiveFactors.add(ee);
@@ -209,21 +211,6 @@ aspect EquationSolve {
             return new FNoExp();
         }
         return FExp.createBalancedBinaryTree(new FAddExp(), parts);
-    }
-    
-    /**
-     * Check if nominal values allow the variable to be divided by the factor.
-     */
-    private static Boolean FEquation.nominalAllowsDivision(FExp factor, FVariable var, double tol) {
-        if (factor.variability().constantVariability()) {
-            FExp nominal = factor.dynamicFExp(var.nominal());
-            if (nominal.variability().constantVariability() &&
-                    Math.abs(factor.ceval().realValue()) *
-                    nominal.ceval().realValue() < tol) {
-                return false;
-            }
-        }
-        return true;
     }
     
     private static FExp FEquation.computeInactiveFactorSolution(Collection<FExp> exps) {

@@ -307,7 +307,6 @@ assimulo_build_dir64 = $(abs_builddir)/Assimulo_build64
 pymodelica_build_dir64 = $(abs_builddir)/pymodelica_build64
 pyfmi_build_dir64 = $(abs_builddir)/PyFMI_build64
 pyjmi_build_dir64 = $(abs_builddir)/PyJMI_build64
-assimulo_src_dir = $(abs_top_srcdir)/external/Assimulo
 bindistdir = JModelica.org-$(VERSION)-bin
 MC_INTERFACE = $(abs_top_srcdir)/ModelicaCasADiInterface
 MC_SRC = $(JAVA_CASADI_BASE_DIR)/ModelicaCompilerCasADi
@@ -361,7 +360,7 @@ ant_output_jars = \
 	$(JAVA_BUILD_DIR)/bin/OptimicaCompiler.jar \
 	$(JAVA_BUILD_DIR)/bin/separateProcess.jar
 
-ant_output_options = $(JAVA_BUILD_DIR)/src/build/DefaultOptions.xml
+ant_output_options=$(JAVA_BUILD_DIR)/src/build/DefaultOptions.xml
 BEAVER_INSTALL_DIR = $(DESTDIR)$(prefix)/ThirdParty/Beaver
 BEAVER_SOURCE = $(abs_top_srcdir)/Compiler/ModelicaFrontEnd/ThirdParty/Beaver
 all: config.h
@@ -878,15 +877,15 @@ install_casadi: casadi
 @COMPILE_WITH_IPOPT_TRUE@	cd $(abs_builddir)/ThirdParty/CasADi; \
 @COMPILE_WITH_IPOPT_TRUE@	make -f Makefile install "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR)" "IPOPT_HOME=$(IPOPT_HOME)"
 @COMPILE_WITH_IPOPT_TRUE@	mkdir -p $(DESTDIR)$(prefix)/Python/
-@COMPILE_WITH_IPOPT_TRUE@	cp -r $(CASADI_PYTHON_INST_DIR)/casadi $(DESTDIR)$(prefix)/Python/
-@COMPILE_WITH_IPOPT_TRUE@	cp $(CASADI_BUILD_DIR)/swig/casadi_core.py $(DESTDIR)$(prefix)/Python/casadi
+@COMPILE_WITH_IPOPT_TRUE@	cp -r $(abs_builddir)/casadi_install/casadi $(DESTDIR)$(prefix)/Python/
+@COMPILE_WITH_IPOPT_TRUE@	cp $(abs_builddir)/casadi_build/swig/casadi_core.py $(DESTDIR)$(prefix)/Python/casadi
 @COMPILE_WITH_IPOPT64_TRUE@	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
 @COMPILE_WITH_IPOPT64_TRUE@	export PYTHONHOME=$(PYTHON64_HOME);  
 @COMPILE_WITH_IPOPT64_TRUE@	cd $(abs_builddir)/ThirdParty/CasADi; \
 @COMPILE_WITH_IPOPT64_TRUE@	make -f Makefile install "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR64)" "IPOPT_HOME=$(IPOPT64_HOME)"
 @COMPILE_WITH_IPOPT64_TRUE@	mkdir -p $(DESTDIR)$(prefix)/Python/
-@COMPILE_WITH_IPOPT64_TRUE@	cp -r $(CASADI_PYTHON_INST_DIR64)/casadi $(DESTDIR)$(prefix)/Python_64/
-@COMPILE_WITH_IPOPT64_TRUE@	cp $(CASADI_BUILD_DIR64)/swig/casadi_core.py $(DESTDIR)$(prefix)/Python_64/casadi
+@COMPILE_WITH_IPOPT64_TRUE@	cp -r $(abs_builddir)/casadi_install64/casadi $(DESTDIR)$(prefix)/Python_64/
+@COMPILE_WITH_IPOPT64_TRUE@	cp $(abs_builddir)/casadi_build64/swig/casadi_core.py $(DESTDIR)$(prefix)/Python_64/casadi
 @COMPILE_WITH_IPOPT64_TRUE@	export PYTHONHOME=$(ORIG_PYTHON_HOME); \
 @COMPILE_WITH_IPOPT64_TRUE@	export PATH="$(ORIG_PATH)";
 
@@ -1019,7 +1018,7 @@ modelicacasadi_wrapper: $(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar $(OC_CASADI_
 
 build-python-packages:
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	mkdir -p $(assimulo_build_dir); \
-@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	cd $(assimulo_src_dir)/..; \
+@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	cd $(abs_top_srcdir)/external; \
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir); \
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	cd $(assimulo_build_dir)/Assimulo; \
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	case $(build) in \
@@ -1031,7 +1030,7 @@ build-python-packages:
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	python setup.py install --with_openmp=True --superlu-home=$(abs_builddir)/superlu_build/ --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --prefix=$(assimulo_install_dir) ;; \
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	esac
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@@WITH_PYTHON64_TRUE@	mkdir -p $(assimulo_build_dir64); \
-@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@@WITH_PYTHON64_TRUE@	cd $(assimulo_src_dir)/..; \
+@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@@WITH_PYTHON64_TRUE@	cd $(abs_top_srcdir)/external; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@@WITH_PYTHON64_TRUE@	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir64); \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@@WITH_PYTHON64_TRUE@	cd $(assimulo_build_dir)/Assimulo; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@@WITH_PYTHON64_TRUE@	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
@@ -1040,7 +1039,7 @@ build-python-packages:
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@@WITH_PYTHON64_TRUE@	export PATH="$(ORIG_PATH)"; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@@WITH_PYTHON64_TRUE@	export PYTHONHOME=$(ORIG_PYTHON_HOME)
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_FALSE@	mkdir -p $(assimulo_build_dir); \
-@PYTHON_ENABLED_TRUE@@WITH_OPENMP_FALSE@	cd $(assimulo_src_dir)/..; \
+@PYTHON_ENABLED_TRUE@@WITH_OPENMP_FALSE@	cd $(abs_top_srcdir)/external; \
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_FALSE@	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir); \
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_FALSE@	cd $(assimulo_build_dir)/Assimulo; \
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_FALSE@	case $(build) in \
@@ -1052,7 +1051,7 @@ build-python-packages:
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_FALSE@	python setup.py install --sundials-home=$(SUNDIALS_HOME) --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --prefix=$(assimulo_install_dir) ;; \
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_FALSE@	esac
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_FALSE@@WITH_PYTHON64_TRUE@	mkdir -p $(assimulo_build_dir64); \
-@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_FALSE@@WITH_PYTHON64_TRUE@	cd $(assimulo_src_dir)/..; \
+@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_FALSE@@WITH_PYTHON64_TRUE@	cd $(abs_top_srcdir)/external; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_FALSE@@WITH_PYTHON64_TRUE@	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir64); \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_FALSE@@WITH_PYTHON64_TRUE@	cd $(assimulo_build_dir64)/Assimulo; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_FALSE@@WITH_PYTHON64_TRUE@	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
@@ -1192,12 +1191,8 @@ install-python-packages: build-python-packages install-python-tests
 @PYTHON_ENABLED_TRUE@	[ -e $(DESTDIR)$(prefix)/bin/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(DESTDIR)$(prefix)/bin/jm_ipython.sh
 @PYTHON_ENABLED_TRUE@	chmod ugo+x $(DESTDIR)$(prefix)/bin/jm_*.sh
 
-all-local: build-python-packages build-compiler $(abs_builddir)/version.txt build-extra
-
-$(abs_builddir)/version.txt: TODO-always-trigger
-	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) https://svn.jmodelica.org > $(@)
-
-build-extra: TODO-always-trigger
+all-local: build-python-packages build-compiler
+	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) https://svn.jmodelica.org > $(abs_builddir)/version.txt
 	if [ "$(BUILD_EXTRA)" ]; then exec "$(BUILD_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
 install-exec-local: install-python-packages install-compiler install-modules
@@ -1260,23 +1255,23 @@ install-exec-local: install-python-packages install-compiler install-modules
 	cp  $(abs_builddir)/version.txt $(DESTDIR)$(prefix)
 	if [ "$(INSTALL_EXTRA)" ]; then exec "$(INSTALL_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
-install-compiler: $(ant_output_jars) $(ant_output_options)
+install-compiler: $(ant_output_jars) $(ant_output_options) TODO-always-trigger
 @HAVE_ANT_TRUE@	mkdir -p $(DESTDIR)$(prefix)/lib/
 @HAVE_ANT_TRUE@	install -t $(DESTDIR)$(prefix)/lib/ $(ant_output_jars)
 @HAVE_ANT_TRUE@	install -t $(DESTDIR)$(prefix)/ $(ant_output_options)
 
+# Dummy target used to always trigger rebuilds. Used to enable references to
+# outputs from phony targets as real targets. For example ant output.
+TODO-always-trigger: ;
+
 $(ant_output_jars) $(ant_output_options): build-compiler
 
-build-compiler: TODO-always-trigger
+build-compiler:
 @HAVE_ANT_TRUE@	mkdir -p $(JAVA_BUILD_DIR)
 @HAVE_ANT_TRUE@	cd $(JAVA_BUILD_DIR); \
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) -f "$(JAVA_MC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
 @HAVE_ANT_TRUE@	cd $(JAVA_BUILD_DIR); \
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) -f "$(JAVA_OC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
-
-# Dummy target used to always trigger rebuilds. Used to enable references to
-# outputs from phony targets as real targets. For example ant output.
-TODO-always-trigger: ;
 
 install-modules: install-modules-ModelicaFrontEnd
 

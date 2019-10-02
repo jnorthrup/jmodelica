@@ -1767,8 +1767,7 @@ aspect InstanceTreeConstruction {
         hasFArraySubscripts() || 
         hasInstClassModification() || 
         getSrcClassDecl().hasSrcTypePrefix() || 
-        !filteredEnvironment().isEmpty() ||
-        inExternalObject();
+        !filteredEnvironment().isEmpty();
     eq InstReplacingShortClassDecl.shouldBeExpanded() =
         super.shouldBeExpanded() || 
         (hasInstConstrainingClass() && getInstConstrainingClass().hasInstClassModification()) || 
@@ -1806,35 +1805,35 @@ aspect InstanceTreeConstruction {
         throw new UnsupportedOperationException();
     }
     public List<InstComponentDecl> InstLibNode.getInstComponentDeclList() {
-        return resolveLib().getInstComponentDeclList();
+        throw new UnsupportedOperationException();
     }
 
     public List<InstClassDecl> InstSimpleShortClassDecl.getInstClassDeclList() {
         throw new UnsupportedOperationException();
     }
     public List<InstClassDecl> InstLibNode.getInstClassDeclList() {
-        return resolveLib().getInstClassDeclList();
+        throw new UnsupportedOperationException();
     }
 
     public List<InstExtends> InstSimpleShortClassDecl.getInstExtendsList() {
         throw new UnsupportedOperationException();
     }
     public List<InstExtends> InstLibNode.getInstExtendsList() {
-        return resolveLib().getInstExtendsList();
+        throw new UnsupportedOperationException();
     }
 
     public List<InstImport> InstSimpleShortClassDecl.getInstImportList() {
         throw new UnsupportedOperationException();
     }
     public List<InstImport> InstLibNode.getInstImportList() {
-        return resolveLib().getInstImportList();
+        throw new UnsupportedOperationException();
     }
 
     public List<InstClassDecl> InstSimpleShortClassDecl.getRedeclaredInstClassDeclList() {
         throw new UnsupportedOperationException();
     }
     public List<InstClassDecl> InstLibNode.getRedeclaredInstClassDeclList() {
-        return actualInstClass().getRedeclaredInstClassDeclList();
+        throw new UnsupportedOperationException();
     }
 
 }
@@ -2758,15 +2757,17 @@ aspect InstArrays {
 	 * given on the declaration's class (in the case of short
 	 * class declarations).
 	 */
-    syn lazy Opt<FArraySubscripts> InstComponentDecl.getFArraySubscriptsOpt() {
+	syn lazy FArraySubscripts InstComponentDecl.getFArraySubscripts() {
 	    if (myFSubscripts().isEmpty())
-            return Opt.EMPTY;
+	        return null;
         List<FSubscript> list = new List<FSubscript>();
         for (Subscript s : myFSubscripts()) { 
             list.add(s.deferredCopy());
         }
-        return new Opt(new FArrayExpSubscripts(list));
+        return new FArrayExpSubscripts(list);
 	}
+	
+	syn boolean InstComponentDecl.hasFArraySubscripts() = getFArraySubscripts()!=null;
 	
 }
 

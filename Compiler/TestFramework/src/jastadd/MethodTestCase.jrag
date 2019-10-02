@@ -88,11 +88,9 @@ public abstract class MethodTestCase extends TestCase {
      * the result to the expected result.
      */
     protected void testMethod(Object o) {
-        String test = getMethodReturn(o, getMethodName(), arguments).toString();
-        if (getOutput() != null) {
+            String test = getMethodReturn(o, getMethodName(), arguments).toString();
             String correct = filter(getOutput());
             compareResult("Method result does not match expected.", correct, test);
-        }
     }
 
     /**

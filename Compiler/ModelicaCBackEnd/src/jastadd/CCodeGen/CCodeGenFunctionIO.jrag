@@ -16,6 +16,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 aspect CCodeGenFunctionIO {
     
+    public class CPrettyPrinter {
+        @Override
+        public void printIODecl(FExp n, CodeStream str, String indent) {
+            n.genTempInputDecl_C(this, str, indent);
+        }
+        @Override
+        public void printIOPre(FExp n, CodeStream str, String indent) {
+            n.genTempInputAssigns_C(this, str, indent);
+        }
+        @Override
+        public void printIOExec(FExp n, CodeStream str, String indent) {
+            n.genArgument(ExecStep, str, indent);
+        }
+    }
+    
     syn boolean FAccessExp.alsoInRHS() {
         FAbstractFunctionCall call = myFunctionCall();
         FAbstractVariable var = myFV();

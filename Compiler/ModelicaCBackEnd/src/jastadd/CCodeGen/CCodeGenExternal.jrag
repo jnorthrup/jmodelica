@@ -150,10 +150,4 @@ aspect CCodeGenExternal {
         super.genExternalCFuncArgs(p, str, indent, cgc);
     }
     
-    @Override
-    public void FSizeExp.genExternalCFuncArgs(CodePrinter p, CodeStream str, String indent, CodeGenContext cgc) {
-        str.print("(size_t) ");
-        super.genExternalCFuncArgs(p, str, indent, cgc);
-    }
-    
 }

@@ -22,48 +22,6 @@ aspect InstLookupComponents {
     class InstClassDecl     implements InstLookupResult.Item {}
     interface InstCallable  extends    InstLookupResult.Item {}
 
-        /**
-         * Indicates that the target was not found.
-         */
-        public static <T extends Item> InstLookupResult<T> InstLookupResult.notFound() {
-            return NOT_FOUND;
-        }
-
-        /**
-         * Indicates that the target was found.
-         * 
-         * Includes the found class or component.
-         */
-        public static <T extends Item> InstLookupResult<T> InstLookupResult.found(T target) {
-            return new Found(target);
-        }
-
-        /**
-         * Indicates that the target was found, but not accessible due to a constrainedby clause.
-         * 
-         * Includes the declaration with the limiting constrainedby clause.
-         */
-        public static <T extends Item> InstLookupResult<T> InstLookupResult.constrained(T target, InstNode constr) {
-            return new Constrained(target, constr);
-        }
-
-        /**
-         * Indicates that the target was found, but not accessible due to a constrainedby clause.
-         * 
-         * Includes the declaration with the limiting constrainedby clause.
-         */
-        public static <T extends Item> InstLookupResult<T> InstLookupResult.constrained(InstLookupResult<T> res, InstNode constr) {
-            return new Constrained(res.target(), constr);
-        }
-        
-        /**
-         * Indicates that the target was found as an outer, target() returns the corresponding inner.
-         */
-        public static InstLookupResult<InstComponentDecl> InstLookupResult.outer(InstComponentDecl outer) {
-            return new Outer(outer);
-        }
-
-
     /**
      * Result class for lookups in the instance tree.
      * 
@@ -74,9 +32,49 @@ aspect InstLookupComponents {
         public interface Item {
             public InstLookupResult<InstComponentDecl> memberInstComponent(String name);
             public InstCallable asCallable();
-            public InstNode asInstNode();
         }
         
+        /**
+         * Indicates that the target was not found.
+         */
+        public static <T extends Item> InstLookupResult<T> notFound() {
+            return (InstLookupResult<T>) NOT_FOUND;
+        }
+
+        /**
+         * Indicates that the target was found.
+         * 
+         * Includes the found class or component.
+         */
+        public static <T extends Item> InstLookupResult<T> found(T target) {
+            return new Found(target);
+        }
+
+        /**
+         * Indicates that the target was found, but not accessible due to a constrainedby clause.
+         * 
+         * Includes the declaration with the limiting constrainedby clause.
+         */
+        public static <T extends Item> InstLookupResult<T> constrained(T target, InstNode constr) {
+            return new Constrained(target, constr);
+        }
+
+        /**
+         * Indicates that the target was found, but not accessible due to a constrainedby clause.
+         * 
+         * Includes the declaration with the limiting constrainedby clause.
+         */
+        public static <T extends Item> InstLookupResult<T> constrained(InstLookupResult<T> res, InstNode constr) {
+            return new Constrained(res.target(), constr);
+        }
+        
+        /**
+         * Indicates that the target was found as an outer, target() returns the corresponding inner.
+         */
+        public static InstLookupResult<InstComponentDecl> outer(InstComponentDecl outer) {
+            return new Outer(outer);
+        }
+
         /**
          * Did the lookup succeed?
          */
@@ -660,7 +658,7 @@ aspect InstLookupComponents {
     syn InstLookupResult<InstComponentDecl> InstNode.memberInstComponent(String name) { 
         if (isArray()) {
             return arrayMemberInstComponent(name, ndims());
-        } else {
+        } else {    
             return memberInstComponentCached(name);
         }
     }
@@ -742,9 +740,11 @@ aspect InstLookupComponents {
     syn InstLookupResult<InstComponentDecl> InstImport.lookupInstConstantInImport(String name) {
         // Assume import points to a single (constant) component
         if (name.equals(name())) {
-            InstComponentDecl target = getPackageName().myInstComponentDecl();
-            if (!target.isUnknown() && target.getSrcComponentDecl().isConstant()) {
-                return InstLookupResult.found(target);
+            String className = getPackageName().enclosingName();
+            if (!className.equals("")) {
+                InstClassDecl icd = ((SourceRoot)root()).getProgram().getInstProgramRoot().
+                   simpleLookupInstClassDecl(className);
+                return icd.memberInstConstant(getPackageName().getLastInstAccess().name());
             }
         }
         return InstLookupResult.notFound();
@@ -756,14 +756,9 @@ aspect InstLookupComponents {
 
     // This is needed since the member components of InstPrimitive:s (which are attributes)
     // are not instantiated
-    eq InstPrimitive.memberInstComponent(String name) = myInstClass().memberInstComponent(name);
-    eq InstExtends.memberInstComponent(String name) {
-        InstClassDecl myInstClass = myInstClass();
-        if (myInstClass.isUnknown()) {
-            return InstLookupResult.<InstComponentDecl>notFound();
-        }
-        return (extendsPrimitive() ? myInstClass().memberInstComponent(name) : super.memberInstComponent(name));
-    }
+    eq InstPrimitive.memberInstComponent(String name)      = myInstClass().memberInstComponent(name);
+    eq InstExtends.memberInstComponent(String name)   = 
+        extendsPrimitive() ? myInstClass().memberInstComponent(name) : super.memberInstComponent(name);
 
     eq InstComponentDecl.matches(String str) = name().equals(str);
     eq InstForIndex.matches(String str)      = getInstPrimitive().matches(str);

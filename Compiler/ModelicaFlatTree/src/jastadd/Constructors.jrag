@@ -17,7 +17,7 @@
 import java.util.ArrayList;
 import java.util.Collection;
 import org.jmodelica.common.ast.prefixes.EquationType;
-import org.jmodelica.common.ast.prefixes.CausalityConnectorPrefix;
+import org.jmodelica.common.ast.prefixes.TypePrefixInputOutput;
 import org.jmodelica.common.ast.prefixes.VisibilityType;
 
 aspect Constructors {
@@ -504,7 +504,7 @@ aspect Constructors {
 	 */
 	public FRealVariable.FRealVariable(VisibilityType vt, 
 			TypePrefixVariability variability, FAccess name) {
-		this(vt, variability, CausalityConnectorPrefix.NONE, new List(), (String) null, new Opt(), new Opt(), name);
+		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
     /**
@@ -512,7 +512,7 @@ aspect Constructors {
      */
     public FDerivativeVariable.FDerivativeVariable(VisibilityType vt, 
             TypePrefixVariability variability, FAccess name, int order) {
-        this(vt, variability, CausalityConnectorPrefix.NONE, new List(), (String) null, new Opt(), new Opt(), name, order);
+        this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, order);
     }
 
     /**
@@ -520,7 +520,7 @@ aspect Constructors {
      */
     public FDummyDerivativeVariable.FDummyDerivativeVariable(VisibilityType vt, 
             TypePrefixVariability variability, FAccess name, int order) {
-        this(vt, variability, CausalityConnectorPrefix.NONE, new List(), (String) null, new Opt(), new Opt(), name, order);
+        this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, order);
     }
 
 	/**
@@ -528,7 +528,7 @@ aspect Constructors {
 	 */
 	public FPreRealVariable.FPreRealVariable(FRealVariable fv) {
 		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
-				CausalityConnectorPrefix.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
+				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
 				new Opt(), new Opt(), fv.getFAccess().fullCopy());
 	}
 	
@@ -537,7 +537,7 @@ aspect Constructors {
 	 */
 	public FIntegerVariable.FIntegerVariable(VisibilityType vt, 
 			TypePrefixVariability variability, FAccess name) {
-		this(vt, variability, CausalityConnectorPrefix.NONE, new List(), (String) null, new Opt(), new Opt(), name);
+		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
 	/**
@@ -545,7 +545,7 @@ aspect Constructors {
 	 */
 	public FPreIntegerVariable.FPreIntegerVariable(FIntegerVariable fv) {
 		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
-				CausalityConnectorPrefix.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
+				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
 				new Opt(), new Opt(), fv.getFAccess().fullCopy());
 	}
 	
@@ -554,7 +554,7 @@ aspect Constructors {
 	 */
 	public FEnumVariable.FEnumVariable(VisibilityType vt, 
 			TypePrefixVariability variability, FAccess name, FAccess enumName) {
-		this(vt, variability, CausalityConnectorPrefix.NONE, new List(), (String) null, new Opt(), new Opt(), name, enumName);
+		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, enumName);
 	}
 	
 	/**
@@ -562,7 +562,7 @@ aspect Constructors {
 	 */
 	public FPreEnumVariable.FPreEnumVariable(FEnumVariable fv) {
 		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
-				CausalityConnectorPrefix.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
+				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
 				new Opt(), new Opt(), fv.getFAccess().fullCopy(), fv.getEnum().fullCopy());
 	}
 	
@@ -571,7 +571,7 @@ aspect Constructors {
 	 */
 	public FBooleanVariable.FBooleanVariable(VisibilityType vt, 
 			TypePrefixVariability variability, FAccess name) {
-		this(vt, variability, CausalityConnectorPrefix.NONE, new List(), (String) null, new Opt(), new Opt(), name);
+		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
 	/**
@@ -579,7 +579,7 @@ aspect Constructors {
 	 */
 	public FPreBooleanVariable.FPreBooleanVariable(FBooleanVariable fv) {
 		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
-				CausalityConnectorPrefix.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
+				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
 				new Opt(), new Opt(), fv.getFAccess().fullCopy());
 	}
 	
@@ -588,7 +588,7 @@ aspect Constructors {
 	 */
 	public FStringVariable.FStringVariable(VisibilityType vt, 
 			TypePrefixVariability variability, FAccess name) {
-		this(vt, variability, CausalityConnectorPrefix.NONE, new List(), (String) null, new Opt(), new Opt(), name);
+		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
 	/**
@@ -596,7 +596,7 @@ aspect Constructors {
 	 */
 	public FPreStringVariable.FPreStringVariable(FStringVariable fv) {
 		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
-				CausalityConnectorPrefix.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
+				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
 				new Opt(), new Opt(), fv.getFAccess().fullCopy());
 	}
 	
@@ -605,7 +605,7 @@ aspect Constructors {
 	 */
 	public FRecordVariable.FRecordVariable(VisibilityType vt, 
 			TypePrefixVariability variability, FAccess name, FRecordAccess record) {
-		this(vt, variability, CausalityConnectorPrefix.NONE, new List(), (String) null, new Opt(), new Opt(), name, record);
+		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, record);
 	}
 	
     /**
@@ -613,21 +613,21 @@ aspect Constructors {
      */
     public FExternalObjectVariable.FExternalObjectVariable(VisibilityType vt, 
             TypePrefixVariability variability, FAccess name, CommonAccess constructorName) {
-        this(vt, variability, CausalityConnectorPrefix.NONE, new List(), (String) null, new Opt(), new Opt(), name, constructorName);
+        this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, constructorName);
     }
 
     /**
      * Constructs a new dynamic state variable
      */
     public FDynamicStateVariable.FDynamicStateVariable(DynamicStateSet set, int number) {
-        this(VisibilityType.PUBLIC, Variability.CONTINUOUS, CausalityConnectorPrefix.NONE, new List(), (String)null, new Opt(), new Opt(), new FAccessFull("_ds." + set.id() + ".s" + number), set, number);
+        this(VisibilityType.PUBLIC, Variability.CONTINUOUS, TypePrefixInputOutput.NONE, new List(), (String)null, new Opt(), new Opt(), new FAccessFull("_ds." + set.id() + ".s" + number), set, number);
     }
 
     /**
      * Constructs a new dynamic state variable
      */
     public FDynamicAlgebraicVariable.FDynamicAlgebraicVariable(DynamicStateSet set, int number) {
-        this(VisibilityType.PUBLIC, Variability.CONTINUOUS, CausalityConnectorPrefix.NONE, new List(), (String)null, new Opt(), new Opt(), new FAccessFull("_ds." + set.id() + ".a" + number), set, number);
+        this(VisibilityType.PUBLIC, Variability.CONTINUOUS, TypePrefixInputOutput.NONE, new List(), (String)null, new Opt(), new Opt(), new FAccessFull("_ds." + set.id() + ".a" + number), set, number);
     }
     
 	/**
@@ -749,20 +749,20 @@ aspect Constructors {
      * Create an FFunctionVariable with the given name and type. 
      */
     public FFunctionVariable.FFunctionVariable(VisibilityType vt, FType type, String name) {
-        this(vt, CausalityConnectorPrefix.NONE, new List<FAttribute>(), type, new Opt(), new FAccessString(name), 0);
+        this(vt, TypePrefixInputOutput.NONE, new List<FAttribute>(), type, new Opt(), new FAccessString(name), 0);
     }
     
     /**
      * Create an FFunctionVariable with the given name, type and input/output prefix. 
      */
-    public FFunctionVariable.FFunctionVariable(VisibilityType vt, FType type, String name, CausalityConnectorPrefix inputOutput) {
+    public FFunctionVariable.FFunctionVariable(VisibilityType vt, FType type, String name, TypePrefixInputOutput inputOutput) {
         this(vt, inputOutput, new List<FAttribute>(), type, new Opt<FExp>(), new FAccessString(name), 0);
     }
     
     /**
      * Create an FFunctionVariable with everything but order and attributes given.
      */
-    public FFunctionVariable.FFunctionVariable(VisibilityType vt, CausalityConnectorPrefix inputOutput, FType type, Opt<FExp> bindingExp, FAccess name) {
+    public FFunctionVariable.FFunctionVariable(VisibilityType vt, TypePrefixInputOutput inputOutput, FType type, Opt<FExp> bindingExp, FAccess name) {
         this(vt, inputOutput, new List<FAttribute>(), type, bindingExp, name, 0);
     }
     

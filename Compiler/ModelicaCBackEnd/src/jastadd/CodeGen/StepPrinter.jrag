@@ -139,15 +139,9 @@ aspect StepPrinter {
     }
     
     public abstract class CodePrinter {
-        public void printIODecl(FExp n, CodeStream str, String indent) {
-            n.genTempInputDecl_C(this, str, indent);
-        }
-        public void printIOPre(FExp n, CodeStream str, String indent) {
-            n.genTempInputAssigns_C(this, str, indent);
-        }
-        public void printIOExec(FExp n, CodeStream str, String indent) {
-            n.genArgument(ExecStep, str, indent);
-        }
+        public abstract void printIODecl(FExp n, CodeStream str, String indent);
+        public abstract void printIOPre(FExp n, CodeStream str, String indent);
+        public abstract void printIOExec(FExp n, CodeStream str, String indent);
     }
     
     public void ASTNode.genTempArg(CodePrinter.StepPrinter p, CodeStream str, String indent) {

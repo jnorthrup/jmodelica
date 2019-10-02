@@ -635,7 +635,6 @@
         <if>
             <isset property="javadoc.packages"/>
             <then>
-
                 <!-- We need to add this to builds with Java v9 or greater -->
                 <condition property="javadoc_additional_params" value="" else="--no-module-directories">
                     <or>
@@ -654,8 +653,7 @@
                     packagenames="${javadoc.packages}" 
                     excludepackagenames="${test_helper_packages}" 
                     classpath="${thirdparty_jars_build}"
-                	additionalparam="${javadoc_additional_params}"
-                    failonerror="true" />
+                    additionalparam="${javadoc_additional_params}" />
             </then>
         </if>
     </target>

@@ -73,9 +73,13 @@ def run_demo(with_plots=True):
     
     # Load model
     model = load_fmu(os.path.join(curr_dir, 'files', 'FMUs', 'Furuta.fmu'))
-
+    
+    # Create options object and set verbosity to zero to disable printouts
+    opts = model.simulate_options()
+    opts['CVode_options']['verbosity'] = 0
+    
     # Simulate model response with nominal parameters
-    res = model.simulate(start_time=0., final_time=40)
+    res = model.simulate(start_time=0., final_time=40, options=opts)
     
     # Load simulation result
     phi_sim = res['armJoint.phi']
@@ -131,9 +135,13 @@ def run_demo(with_plots=True):
     # Set optimal parameter values into the model
     model.set('armFriction', armFrictionCoefficient_opt)
     model.set('pendulumFriction', pendulumFrictionCoefficient_opt)
-
+    
+    # Create options object and set verbosity to zero to disable printouts
+    opts = model.simulate_options()
+    opts['CVode_options']['verbosity'] = 0
+    
     # Simulate model response with optimal parameter values
-    res = model.simulate(start_time=0., final_time=40)
+    res = model.simulate(start_time=0., final_time=40, options=opts)
     
     # Load optimal simulation result
     phi_opt = res['armJoint.phi']
