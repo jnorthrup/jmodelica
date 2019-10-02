@@ -44,7 +44,7 @@ class TestEvaluator:
     @testattr(stddist_base = True)
     def test_builtin_substring(self):
         cpath = "ExtFunctionTests.Evaluator_Substring"
-        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_dynamic_evaluator":True}, compiler_log_level="d:log.txt")
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_evaluation_dynamic":True}, compiler_log_level="d:log.txt")
         
         nbr_of_evaluator_calls = 0
         with open("log.txt") as f:
@@ -65,7 +65,7 @@ class TestEvaluator:
     @testattr(stddist_base = True)
     def test_add(self):
         cpath = "ExtFunctionTests.Evaluator_Add"
-        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_dynamic_evaluator":True}, compiler_log_level="d:log.txt")
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_evaluation_dynamic":True}, compiler_log_level="d:log.txt")
         
         nbr_of_evaluator_calls = 0
         with open("log.txt") as f:
@@ -82,7 +82,7 @@ class TestEvaluator:
     @testattr(stddist_base = True)
     def test_unsupported_signature(self):
         cpath = "ExtFunctionTests.Evaluator_Multiple_Add"
-        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_dynamic_evaluator":True}, compiler_log_level="d:log.txt")
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_evaluation_dynamic":True}, compiler_log_level="d:log.txt")
         
         matches = 0
         with open("log.txt") as f:
@@ -95,7 +95,7 @@ class TestEvaluator:
     def test_unknown_shared_library(self):
         cpath = "ExtFunctionTests.Evaluator_Unknown_Shared"
         try:
-            fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_dynamic_evaluator":True}, compiler_log_level="d:log_unknown_shared.txt")
+            fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_evaluation_dynamic":True}, compiler_log_level="d:log_unknown_shared.txt")
         except: #The compilation will fail, the interesting parts will though still be contained in the log file
             pass
         
@@ -109,7 +109,7 @@ class TestEvaluator:
     @testattr(stddist_base = True)
     def test_double_return(self):
         cpath = "ExtFunctionTests.Evaluator_Double"
-        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_dynamic_evaluator":True}, compiler_log_level="d:log.txt")
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_evaluation_dynamic":True}, compiler_log_level="d:log.txt")
         
         nbr_of_evaluator_calls = 0
         with open("log.txt") as f:
@@ -126,7 +126,7 @@ class TestEvaluator:
     @testattr(stddist_base = True)
     def test_integer_return(self):
         cpath = "ExtFunctionTests.Evaluator_Integer"
-        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_dynamic_evaluator":True}, compiler_log_level="d:log.txt")
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_evaluation_dynamic":True}, compiler_log_level="d:log.txt")
         
         nbr_of_evaluator_calls = 0
         with open("log.txt") as f:
@@ -142,7 +142,7 @@ class TestEvaluator:
     @testattr(stddist_base = True)
     def test_record(self):
         cpath = "ExtFunctionTests.Evaluator_Record"
-        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_dynamic_evaluator":True}, compiler_log_level="d:log.txt")
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_evaluation_dynamic":True}, compiler_log_level="d:log.txt")
         
         nbr_of_evaluator_calls = 0
         with open("log.txt") as f:
