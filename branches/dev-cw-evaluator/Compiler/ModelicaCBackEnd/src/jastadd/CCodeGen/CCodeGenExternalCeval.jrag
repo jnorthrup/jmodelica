@@ -394,6 +394,21 @@ aspect CCodeGenExternalCeval {
             }
         }
     }
+    
+    public String FClass.externalCTypes() {
+        StringBuilder sb = new StringBuilder();
+        for (FExternalStmt stmt : myExternals()) {
+            if (stmt.dynamicEvaluatorEnabled()) {
+                sb.append(stmt.getName());
+                sb.append("\n");
+	            sb.append(stmt.functionReturnArgSerialized());
+	            sb.append("\n");
+	            sb.append(stmt.functionArgsSerialized());
+	            sb.append("\n");
+	        }
+        }
+        return sb.toString();
+    }
 
     public String FClass.externalDependencies() {
         StringBuilder sb = new StringBuilder();
