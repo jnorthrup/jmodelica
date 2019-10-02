@@ -60,7 +60,7 @@ class Node(object):
 
     def __repr__(self):
         return ('<' + self.type + ' node with ' + repr(len(self.nodes))
-                + ' subnodes, and named subnodes ' + repr(list(map(str, self.dict.keys()))) + '>')
+                + ' subnodes, and named subnodes ' + repr(list(self.dict.keys())) + '>')
 
 
     def __iter__(self):
