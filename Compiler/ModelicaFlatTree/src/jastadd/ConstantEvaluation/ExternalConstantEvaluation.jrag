@@ -50,7 +50,7 @@ aspect ExternalConstantEvaluation {
     
     class ModelicaCompiler {}
     
-    ModelicaCompiler   implements Compiler<ExternalArgument, FExternalStmt>;
+    ModelicaCompiler   implements ExternalFunctionCompiler<ExternalArgument, FExternalStmt>;
     FExternalStmt      implements ExternalProcessMultiCache.External<ExternalArgument>;
     ExternalArgument   extends    ExternalProcessMultiCache.Variable<CValue,FType>;
     CValue             implements ExternalProcessMultiCache.Value;
