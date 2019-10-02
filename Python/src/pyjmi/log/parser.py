@@ -110,6 +110,9 @@ class ContentHandler(sax.ContentHandler):
         self.create_comment()
         
         key = attrs.get('name')
+        # convert to string if key is not None
+        # because Python 2.x returns unicode while Python 3.x does not
+        key = key if not key else str(key)
 
         self.chars = []
         self.leafkey = self.leafparser = None
