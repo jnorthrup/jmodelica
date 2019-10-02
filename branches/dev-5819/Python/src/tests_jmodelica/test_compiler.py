@@ -487,7 +487,9 @@ class Test_Compiler_functions:
         try:
             compile_fmu(model_name, file_name = file_name)
         except OSError as e:
-            assert str(e) == 'NonExistantFile (The system cannot find the file specified)'
+            expected_msg = 'NonExistantFile (The system cannot find the file specified)'
+            err_msg = "EXPECTED: OSError: {}\nRECEIVED: {}: {}\n".format(expected_msg, e.__name__, str(e))
+            assert str(e) == expected_msg, err_msg
     
     def assert_compiler_option_missing(self, option_name, exception) :
         """
