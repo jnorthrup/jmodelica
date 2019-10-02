@@ -17,6 +17,42 @@
 
 package CCodeGenExternalCevalTests
 
+model ExtDynFcn1
+        type E = enumeration(A,B);
+    function f
+        input Real a1;
+        input Integer a2;
+        input Boolean a3;
+        input String a4;
+        input E a5;
+        output Real b1;
+        output Integer b2;
+        output Boolean b3;
+        output String b4;
+        output E b5;
+        external;
+    end f;
+    
+    Real x1;
+    Integer x2;
+    Boolean x3;
+    String x4;
+    E x5;
+equation
+    (x1,x2,x3,x4,x5) = f(1,2,true,"s",E.A);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="ExtDynFcn1",
+            methodName="externalCTypes",
+            description="Verifies that external objects are not handled by the dynamic evaluator",
+            methodResult="
+f
+void
+d,i,i,s,i,*d,*i,*i,*s,*i,
+")})));
+end ExtDynFcn1;
+
 model Scalar
     type E = enumeration(A,B);
     function f
@@ -790,6 +826,27 @@ Library
 Library2b
 ")})));
 end ExtObj5;
+
+model ExtDynObj1
+    function use1
+        input  Os.Obj1 o1;
+        output Real x;
+        external annotation(Library="extObjectsUse", Include="#include \"extObjectsUse.h\"",
+            LibraryDirectory="modelica://Library2", IncludeDirectory="Include2");
+    end use1;
+
+    Os.Obj1 o1 = Os.Obj1(3.13, 3, true, "A message");
+    Real x = use1(o1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="ExtDynObj1",
+            methodName="externalCTypes",
+            description="Verifies that external objects are not handled by the dynamic evaluator",
+            methodResult="
+")})));
+end ExtDynObj1;
+
 
 model Dgelsx
     function dgelsx
