@@ -1,6 +1,8 @@
 ================= Unreleased ==================
-# Change ; Minor ; Compiler; #5830
-ParseHandler now have a target for Subscript.
+# Feature ; Minor ; Compiler; #5837
+Added a pre-compiled evaluator used for evaluating external functions
+during the compilation (for performance). Activated by the option 
+"external_constant_evaluation_dynamic"
 
 # Change ; Major ; PyFMI ; #5826
 Updated JModelica external to PyFMI 2.5.4
