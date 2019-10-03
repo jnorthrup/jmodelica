@@ -474,7 +474,7 @@ aspect Library {
         // the default file system.
         // We should figure out if using a non-file name is really needed as load description,
         // and if not - get rid of otherDesc.
-        private Path path;
+        private final Path path;
         private final String otherDesc;
 
         @Deprecated
