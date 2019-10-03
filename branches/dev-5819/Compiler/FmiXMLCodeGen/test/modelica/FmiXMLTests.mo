@@ -2499,4 +2499,47 @@ $modelVariables$
 ")})));
 end Start5;
 
+model ParametricAttributes1
+    parameter Real p = 1;
+    input Real x1(min=p, max=p, nominal=p);
+    Real x2(min=p, max=p, nominal=p);
+    output Real x3(min=p, max=p, nominal=p);
+equation
+    der(x2) = x1;
+    x3 = x2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="ParametricAttributes1",
+            description="",
+            fmi_version="2.0",
+            template="
+$modelVariables$
+",
+            generatedCode="
+<ModelVariables>
+    <!-- Variable with index #1 -->
+    <ScalarVariable name=\"p\" valueReference=\"0\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"1.0\" />
+    </ScalarVariable>
+    <!-- Variable with index #2 -->
+    <ScalarVariable name=\"x1\" valueReference=\"3\" causality=\"input\" variability=\"continuous\">
+        <Real relativeQuantity=\"false\" min=\"1.0\" max=\"1.0\" nominal=\"1.0\" start=\"0.0\" />
+    </ScalarVariable>
+    <!-- Variable with index #3 -->
+    <ScalarVariable name=\"x2\" valueReference=\"2\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" min=\"1.0\" max=\"1.0\" nominal=\"1.0\" />
+    </ScalarVariable>
+    <!-- Variable with index #4 -->
+    <ScalarVariable name=\"der(x2)\" valueReference=\"1\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"3\" />
+    </ScalarVariable>
+    <!-- Variable with index #5 -->
+    <ScalarVariable name=\"x3\" valueReference=\"4\" causality=\"output\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+</ModelVariables>
+")})));
+end ParametricAttributes1;
+
 end FmiXMLTests;

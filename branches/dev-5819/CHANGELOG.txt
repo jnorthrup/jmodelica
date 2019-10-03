@@ -1,4 +1,9 @@
 ================= Unreleased ==================
+# Fixed ; Minor ; Compiler; #5844
+Improved attribute evaluation robustness for some cases. Parametric 
+attributes are now only generated in model description for inputs
+and states.
+
 # Fixed ; Minor ; Compiler; #5835
 Format string argument to the String function is now useable.
 

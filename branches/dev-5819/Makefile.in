@@ -882,15 +882,15 @@ install_casadi: casadi
 @COMPILE_WITH_IPOPT_TRUE@	cd $(abs_builddir)/ThirdParty/CasADi; \
 @COMPILE_WITH_IPOPT_TRUE@	make -f Makefile install "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR)" "IPOPT_HOME=$(IPOPT_HOME)"
 @COMPILE_WITH_IPOPT_TRUE@	mkdir -p $(DESTDIR)$(prefix)/Python/
-@COMPILE_WITH_IPOPT_TRUE@	cp -r $(abs_builddir)/casadi_install/casadi $(DESTDIR)$(prefix)/Python/
-@COMPILE_WITH_IPOPT_TRUE@	cp $(abs_builddir)/casadi_build/swig/casadi_core.py $(DESTDIR)$(prefix)/Python/casadi
+@COMPILE_WITH_IPOPT_TRUE@	cp -r $(CASADI_PYTHON_INST_DIR)/casadi $(DESTDIR)$(prefix)/Python/
+@COMPILE_WITH_IPOPT_TRUE@	cp $(CASADI_BUILD_DIR)/swig/casadi_core.py $(DESTDIR)$(prefix)/Python/casadi
 @COMPILE_WITH_IPOPT64_TRUE@	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
 @COMPILE_WITH_IPOPT64_TRUE@	export PYTHONHOME=$(PYTHON64_HOME);  
 @COMPILE_WITH_IPOPT64_TRUE@	cd $(abs_builddir)/ThirdParty/CasADi; \
 @COMPILE_WITH_IPOPT64_TRUE@	make -f Makefile install "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR64)" "IPOPT_HOME=$(IPOPT64_HOME)"
 @COMPILE_WITH_IPOPT64_TRUE@	mkdir -p $(DESTDIR)$(prefix)/Python/
-@COMPILE_WITH_IPOPT64_TRUE@	cp -r $(abs_builddir)/casadi_install64/casadi $(DESTDIR)$(prefix)/Python_64/
-@COMPILE_WITH_IPOPT64_TRUE@	cp $(abs_builddir)/casadi_build64/swig/casadi_core.py $(DESTDIR)$(prefix)/Python_64/casadi
+@COMPILE_WITH_IPOPT64_TRUE@	cp -r $(CASADI_PYTHON_INST_DIR64)/casadi $(DESTDIR)$(prefix)/Python_64/
+@COMPILE_WITH_IPOPT64_TRUE@	cp $(CASADI_BUILD_DIR64)/swig/casadi_core.py $(DESTDIR)$(prefix)/Python_64/casadi
 @COMPILE_WITH_IPOPT64_TRUE@	export PYTHONHOME=$(ORIG_PYTHON_HOME); \
 @COMPILE_WITH_IPOPT64_TRUE@	export PATH="$(ORIG_PATH)";
 
@@ -1196,8 +1196,12 @@ install-python-packages: build-python-packages install-python-tests
 @PYTHON_ENABLED_TRUE@	[ -e $(DESTDIR)$(prefix)/bin/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(DESTDIR)$(prefix)/bin/jm_ipython.sh
 @PYTHON_ENABLED_TRUE@	chmod ugo+x $(DESTDIR)$(prefix)/bin/jm_*.sh
 
-all-local: build-python-packages build-compiler
-	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) https://svn.jmodelica.org > $(abs_builddir)/version.txt
+all-local: build-python-packages build-compiler $(abs_builddir)/version.txt build-extra
+
+$(abs_builddir)/version.txt: TODO-always-trigger
+	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) https://svn.jmodelica.org > $(@)
+
+build-extra: TODO-always-trigger
 	if [ "$(BUILD_EXTRA)" ]; then exec "$(BUILD_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
 install-exec-local: install-python-packages install-compiler install-modules
@@ -1260,23 +1264,23 @@ install-exec-local: install-python-packages install-compiler install-modules
 	cp  $(abs_builddir)/version.txt $(DESTDIR)$(prefix)
 	if [ "$(INSTALL_EXTRA)" ]; then exec "$(INSTALL_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
-install-compiler: $(ant_output_jars) $(ant_output_options) TODO-always-trigger
+install-compiler: $(ant_output_jars) $(ant_output_options)
 @HAVE_ANT_TRUE@	mkdir -p $(DESTDIR)$(prefix)/lib/
 @HAVE_ANT_TRUE@	install -t $(DESTDIR)$(prefix)/lib/ $(ant_output_jars)
 @HAVE_ANT_TRUE@	install -t $(DESTDIR)$(prefix)/ $(ant_output_options)
 
-# Dummy target used to always trigger rebuilds. Used to enable references to
-# outputs from phony targets as real targets. For example ant output.
-TODO-always-trigger: ;
-
 $(ant_output_jars) $(ant_output_options): build-compiler
 
-build-compiler:
+build-compiler: TODO-always-trigger
 @HAVE_ANT_TRUE@	mkdir -p $(JAVA_BUILD_DIR)
 @HAVE_ANT_TRUE@	cd $(JAVA_BUILD_DIR); \
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) -f "$(JAVA_MC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
 @HAVE_ANT_TRUE@	cd $(JAVA_BUILD_DIR); \
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) -f "$(JAVA_OC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(JAVA_BUILD_DIR)"
+
+# Dummy target used to always trigger rebuilds. Used to enable references to
+# outputs from phony targets as real targets. For example ant output.
+TODO-always-trigger: ;
 
 install-modules: install-modules-ModelicaFrontEnd
 
