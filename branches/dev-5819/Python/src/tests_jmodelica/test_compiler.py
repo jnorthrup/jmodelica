@@ -484,10 +484,14 @@ class Test_Compiler_functions:
         """Test that exception is raised when specified file name does not exist"""
         model_name = 'BouncingBall'
         file_name = "NonExistantFile"
+        if sys.platform == 'linux':
+            platform_specific_msg = "No such file or directory"
+        else:
+            platform_specific_msg = "The system cannot find the file specified"
         try:
             compile_fmu(model_name, file_name = file_name)
         except OSError as e:
-            expected_msg = 'NonExistantFile (The system cannot find the file specified)'
+            expected_msg = 'NonExistantFile ({})'.format(platform_specific_msg)
             err_msg = "EXPECTED: OSError: {}\nRECEIVED: {}: {}\n".format(expected_msg, type(e).__name__, str(e))
             assert str(e) == expected_msg, err_msg
     
