@@ -1688,16 +1688,6 @@ aspect FlatFunctionUtils {
      }
      
 
-    public String FClass.nextTempFuncName() {
-        String name;
-        do {
-            name = "temp_" + nextTempFuncIndex++;
-        } while (lookupFunc(name) != null);
-        return name;
-    }
-    private int FClass.nextTempFuncIndex = 1;
-
-
     /**
      * Creates new temporary variables with the given name.
      * 

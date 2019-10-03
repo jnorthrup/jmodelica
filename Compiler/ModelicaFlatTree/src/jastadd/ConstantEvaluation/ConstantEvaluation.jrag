@@ -4988,7 +4988,7 @@ aspect VariableEvaluator {
     
     public class VariableEvaluator {
         public static final VariableEvaluator instance = new VariableEvaluator(true);
-        private boolean externalEvaluationEnabled;
+        private final boolean externalEvaluationEnabled;
         
         public VariableEvaluator(boolean externalEvaluationEnabled) {
             this.externalEvaluationEnabled = externalEvaluationEnabled;
