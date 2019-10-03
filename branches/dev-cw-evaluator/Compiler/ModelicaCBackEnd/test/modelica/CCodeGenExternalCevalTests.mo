@@ -45,13 +45,83 @@ equation
         FClassMethodTestCase(
             name="ExtDynFcn1",
             methodName="externalCTypes",
-            description="Verifies that external objects are not handled by the dynamic evaluator",
+            description="Test that the different primitive types generates the correct C mapping",
             methodResult="
 f
 void
 d,i,i,s,i,*d,*i,*i,*s,*i,
 ")})));
 end ExtDynFcn1;
+
+model ExtDynFcn2
+type E = enumeration(A,B);
+function f
+    input Real[:] a1;
+    input Integer[:] a2;
+    input Boolean[:] a3;
+    input String[:] a4;
+    input E[:] a5;
+    output Real[size(a1,1)] b1;
+    output Integer[size(a2,1)] b2;
+    output Boolean[size(a3,1)] b3;
+    output String[size(a4,1)] b4;
+    output E[size(a5,1)] b5;
+    external;
+end f;
+    Real[1] x1;
+    Integer[1] x2;
+    Boolean[1] x3;
+    String[1] x4;
+    E[1] x5;
+equation
+	(x1,x2,x3,x4,x5) = f({1},{2},{true},{"s"},{E.A});
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="ExtDynFcn2",
+            methodName="externalCTypes",
+            description="Test that the different primitive types (arrays of) generates the correct C mapping",
+            methodResult="
+f
+void
+dv,i,iv,i,iv,i,sv,i,iv,i,*dv,i,*iv,i,*iv,i,*sv,i,*iv,i,
+")})));
+end ExtDynFcn2;
+
+model ExtDynFcn3
+    type E = enumeration(A,B);
+    record R
+        Real a1;
+        Integer a2;
+        Boolean a3;
+        String a4;
+        E a5;
+        R2 r2;
+    end R;
+    record R2
+        Real x;
+    end R2;
+    
+    function f
+        input R a;
+        output R b;
+        external f(a,b);
+    end f;
+    
+    R r = f(R(1,2,true,"s",E.A, R2(3)));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="ExtDynFcn3",
+            methodName="externalCTypes",
+            description="Test that records generates the correct C mapping",
+            methodResult="
+f
+void
+R[d,i,i,s,i,R[d,],],*R[d,i,i,s,i,R[d,],],
+")})));
+end ExtDynFcn3;
+
 
 model Scalar
     type E = enumeration(A,B);
