@@ -1351,26 +1351,34 @@ aspect CCodeGenExpressions {
         p.printVarDecls(getFExp(), str, indent);
         p.printVarDecls(myMaxDelayExp(), str, indent);
     }
-    
+
     /**
-     * Generate the initialization of delay blocks.
+     * Generates the first part of a delay_init call
      */
-    public void FDelayExp.genInit_C(CodePrinter p, CodeStream str, String indent) {
-        FExp maxDelayExp = myMaxDelayExp();
-        boolean fixed = isTimeEventGenerating();
-        p.printPreSteps(getFExp(), str, indent);
+	private void FDelayExp.genInit_C_Header(CodePrinter p, CodeStream str, String indent, FExp maxDelayExp, boolean fixed,
+			int delayIndex) {
+		p.printPreSteps(getFExp(), str, indent);
         p.printPreSteps(maxDelayExp, str, indent);
-        
-        str.format("%sjmi_delay_init(jmi, %d, ", indent, myDelayIndex());
+        str.format("%sjmi_delay_init(jmi, %d, ", indent, delayIndex);
         str.print(boolValue_C(fixed)); // jmi_boolean fixed
         str.print(", "); 
         str.print(boolValue_C(!generatesEventInDAE())); // jmi_boolean no_event
         str.print(", "); 
         p.print(fixed ? getDelay() : maxDelayExp, str, indent); // jmi_real_t max_delay
-        str.print(", "); 
-        p.print(getFExp(), str, indent); // jmi_real_t y0
-        str.println(");");
-        
+        str.print(", ");
+	}
+    
+    /**
+     * Generate the initialization of delay blocks.
+     */
+    public void FDelayExp.genInit_C(CodePrinter p, CodeStream str, String indent) {
+		FExp maxDelayExp = myMaxDelayExp();
+        boolean fixed = isTimeEventGenerating();
+
+		genInit_C_Header(p, str, indent, maxDelayExp, fixed, myDelayIndex()); 
+		p.print(getFExp(), str, indent); // jmi_real_t y0
+		str.println(");");
+
         p.printPostSteps(getFExp(), str, indent);
         p.printPostSteps(maxDelayExp, str, indent);
     }
