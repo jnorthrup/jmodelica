@@ -484,7 +484,8 @@ class Test_Compiler_functions:
         """Test that exception is raised when specified file name does not exist"""
         model_name = 'BouncingBall'
         file_name = "NonExistantFile"
-        if sys.platform == 'linux':
+        if 'linux' in sys.platform:
+            # note with CentOS 7.4  sys.platform==linux2
             platform_specific_msg = "No such file or directory"
         else:
             platform_specific_msg = "The system cannot find the file specified"
