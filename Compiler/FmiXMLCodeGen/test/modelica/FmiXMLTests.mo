@@ -2542,4 +2542,31 @@ $modelVariables$
 ")})));
 end ParametricAttributes1;
 
+
+model NegativeNominal1
+    Real x1(nominal=-1);   // Negative integer nominal
+    Real x2(nominal=-1.0); // Negative real nominal
+equation
+    x1 = time;
+    x2 = time;
+annotation(__JModelica(UnitTesting(tests={
+    FmiXMLCodeGenTestCase(
+        description="Nominals are always non-negative in FMI",
+        fmi_version="2.0",
+        template="
+$modelVariables$
+",      generatedCode="
+<ModelVariables>
+    <!-- Variable with index #1 -->
+    <ScalarVariable name=\"x1\" valueReference=\"0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" nominal=\"1\" />
+    </ScalarVariable>
+    <!-- Variable with index #2 -->
+    <ScalarVariable name=\"x2\" valueReference=\"0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" nominal=\"1.0\" />
+    </ScalarVariable>
+</ModelVariables>
+")})));
+end NegativeNominal1;
+
 end FmiXMLTests;
