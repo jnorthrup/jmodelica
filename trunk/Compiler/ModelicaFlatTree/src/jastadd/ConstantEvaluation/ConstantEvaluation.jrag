@@ -4632,6 +4632,19 @@ aspect ConstantEvaluation {
 
     eq CValueUnknown.lt(CValue v1, CValue v2) = CValue.UNKNOWN;
 
+    
+    public CValue CValue.absoluteValue() {
+        return this;
+    }
+    @Override
+    public CValue CValueReal.absoluteValue() {
+        return new CValueReal(Math.abs(realValue()));
+    }
+    @Override
+    public CValue CValueInteger.absoluteValue() {
+        return new CValueInteger(Math.abs(intValue()));
+    }
+    
 }
 
 aspect ArrayConstantEvaluation {

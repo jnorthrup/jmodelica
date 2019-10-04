@@ -216,7 +216,11 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
             if (attributeExp.variability().constantVariability() ||
                     variable.isInput() || variable.isDifferentiatedVariable()) {
                 try {
-                    String value = attributeExp.ceval().xmlValue();
+                    CValue cvalue = attributeExp.ceval();
+                    if (name.equals("nominal")) {
+                        cvalue = cvalue.absoluteValue();
+                    }
+                    String value = cvalue.xmlValue();
                     generateAttribute(name, value, printer);
                 } catch (ConstantEvaluationException e) {
                     throw new InternalCompilerError("Exception when generating xml attribute '" +
