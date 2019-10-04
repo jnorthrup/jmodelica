@@ -1326,8 +1326,12 @@ aspect FlatPrettyPrint {
     }
 
     public void FDerivedType.prettyPrint(Printer p, CodeStream str, String indent) {
+        prettyPrintWithName(p, str, indent, getName());
+    }
+    
+    private void FDerivedType.prettyPrintWithName(Printer p, CodeStream str, String indent, String name) {
         if (!getBaseType().isEnum()) {
-            str.print(indent, "type ", getName(), " = ", getBaseType());
+            str.print(indent, "type ", name, " = ", getBaseType());
             getFAttributeList().prettyPrintFAttributeList(str, p);
             str.println(";");
         }
