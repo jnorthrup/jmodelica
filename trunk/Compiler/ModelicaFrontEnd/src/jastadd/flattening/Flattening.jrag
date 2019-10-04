@@ -2458,7 +2458,7 @@ aspect FlatExpressions {
     public void Index.setValues(Iterable<? extends CommonForIndex> forIndices) {
         int i = 0;
         for (CommonForIndex fi : forIndices) {
-            fi.setEvaluationValue(new CValueInteger(index[i++]));
+            fi.setEvaluationValue(CValueInteger.valueOf(index[i++]));
         }
     }
     

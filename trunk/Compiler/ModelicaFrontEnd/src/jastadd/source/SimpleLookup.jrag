@@ -86,7 +86,7 @@ aspect SimpleLookup {
     /**
      * Lookup the class referenced by the QualifiedName. 
      * Lookup is both uncached and only among the class members and imported.
-     * This method is intended as a entry point
+     * This method is intended as an entry point
      */
      public SrcClassDecl SrcClassDecl.LookupMyMembers(QualifiedName qName) {
         SrcClassDecl cd = this;
@@ -104,7 +104,7 @@ aspect SimpleLookup {
     /**
      * Lookup the class referenced by the QualifiedName. The QualifiedName
      * determines if the lookup is in relative or global scope.
-     * This method is intended as a entry point
+     * This method is intended as an entry point
      *
      */
     public SrcClassDecl SrcClassDecl.simpleLookupClass(QualifiedName qName) {
@@ -160,10 +160,10 @@ aspect SimpleLookup {
 
     public abstract class ResolvedAccess {
 
-        private SrcClassDecl classDecl;
-        private SrcComponentDecl componentDecl;
-        private String context;
-        private boolean isProtected;
+        private final SrcClassDecl classDecl;
+        private final SrcComponentDecl componentDecl;
+        private final String context;
+        private final boolean isProtected;
         
         public ResolvedAccess(SrcClassDecl classDecl, SrcComponentDecl componentDecl, String context, boolean isProtected) {
             this.classDecl = classDecl;
