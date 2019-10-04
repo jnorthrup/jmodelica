@@ -19391,7 +19391,7 @@ if test "${PYTHON_HOME}"; then :
           PYTHON_HOME_ABS="`cd ${PYTHON_HOME}; pwd`"
           { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python  installation ${PYTHON_HOME_ABS}" >&5
 $as_echo "Using Python  installation ${PYTHON_HOME_ABS}" >&6; }
-          CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=${PYTHON_HOME_ABS}/libs/libpython27.a"
+          CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=${PYTHON_HOME_ABS}/libs/libpython37.a"
           CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON_HOME_ABS}/include"
 
 else
@@ -19430,7 +19430,7 @@ if test "${PYTHON64_HOME}"; then :
           PYTHON64_HOME_ABS="`cd ${PYTHON64_HOME}; pwd`"
           { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python 64bit installation ${PYTHON64_HOME_ABS}" >&5
 $as_echo "Using Python 64bit installation ${PYTHON64_HOME_ABS}" >&6; }
-          CMAKE_PYTHON64_LIB="-DPYTHON_LIBRARY=${PYTHON64_HOME_ABS}/libs/libpython27.a"
+          CMAKE_PYTHON64_LIB="-DPYTHON_LIBRARY=${PYTHON64_HOME_ABS}/libs/libpython37.a"
           CMAKE_PYTHON64_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON64_HOME_ABS}/include"
 
 else
@@ -19465,6 +19465,7 @@ else
   WITH_PYTHON64_TRUE='#'
   WITH_PYTHON64_FALSE=
 fi
+
 
 # Since we always build JM 32bit together with 64bit we put this in a conditional for setting proper flags to assimulo and pyfmi
 # therefore BUILD_WITH_PYTHON32 is true only when PYTHON64_HOME is set
