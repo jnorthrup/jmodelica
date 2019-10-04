@@ -347,7 +347,7 @@ public class ModelicaCompiler implements LogContainer {
         for (CompilationHooks hooks : hooksList) {
             hooks.packFmu(this, fc, dir);
         }
-        fc.root().getUtilInterface().packFmu(fc);
+        fc.root().getUtilInterface().packFmu(fc, dir.toPath());
     }
     
     /**
@@ -357,7 +357,7 @@ public class ModelicaCompiler implements LogContainer {
         for (CompilationHooks hooks : hooksList) {
             hooks.fmuPacked(this, fc, path);
         }
-        fc.root().getUtilInterface().fmuPacked(fc, path);
+        fc.root().getUtilInterface().fmuPacked(fc, path.toPath());
     }
     
     public String getStringOption(String key) throws UnknownOptionException {
@@ -837,7 +837,7 @@ public class ModelicaCompiler implements LogContainer {
              * Package unit.
              */
             ASTNode.beginStep("packUnit()");
-            File unitPath = packUnit(className, target, fc);
+            Path unitPath = packUnit(className, target, fc);
             unit = log.logCompiledUnit(unitPath, warnings, fc.numberOfComponents());
             ASTNode.endStep("packUnit()");
 
@@ -2206,29 +2206,24 @@ public class ModelicaCompiler implements LogContainer {
     /**
      * Packs an FMU (helper function for {@link #compileUnit()}).
      */
-    protected File ModelicaCompiler.packUnit(String className,
+    protected Path ModelicaCompiler.packUnit(String className,
             TargetObject target, FClass fClass) throws PackingFailedException {
 
-        File unitFile = fClass.root().getUtilInterface().getCompilationOutputPath();
+        Path unitFile = fClass.root().getUtilInterface().getCompilationOutputPath().toPath();
 
         hookPackFmu(fClass, outDir);
+        hookCheckAbort();
         try {
-            hookCheckAbort();
             copySourceFiles(fClass, sourceDir, outDir);
-
-            OutputStream dest = new BufferedOutputStream(new FileOutputStream(unitFile));
-            ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
-            out.setMethod(ZipOutputStream.DEFLATED);
-
-            zipDir(outDir, out);
-            out.close();
-        } catch (CompilationAbortedException e) {
-            throw e;
+            try (ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(unitFile)))) {
+                out.setMethod(ZipOutputStream.DEFLATED);
+                zipDir(outDir, out);
+            }
         } catch (Exception e) {
             throw new PackingFailedException(String.format("Could not write to '%s'.", unitFile), e);
         }
 
-        hookFmuPacked(fClass, unitFile.getAbsoluteFile());
+        hookFmuPacked(fClass, unitFile.toAbsolutePath().toFile());
         return unitFile;
     }
 
