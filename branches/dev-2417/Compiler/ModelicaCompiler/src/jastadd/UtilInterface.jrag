@@ -1,0 +1,176 @@
+aspect UtilInterface {
+    
+    private UtilInterface Root.utilInterface = null;
+    
+    public void Root.setUtilInterface(UtilInterface utilInterface) {
+        if (this.utilInterface != null || utilInterface == null) {
+            throw new UnsupportedOperationException();
+        }
+        this.utilInterface = utilInterface;
+    }
+    
+    public UtilInterface Root.getUtilInterface() {
+        return utilInterface;
+    }
+    
+    
+    /**
+     * Provides easy access to non-ast utils via the AST root.
+     */
+    public class UtilInterface {
+        
+        /**
+         * Registers interfacers when UtilInterface is created.
+         */
+        interface Registrant {
+            boolean enabled(UtilInterface uif);
+            Interfacer getInterfacer(UtilInterface uif);
+        }
+        
+        /**
+         * Hooks for different steps in the compilation. Can keep states as opposed to the 
+         * CompilationHooks in ModelicaCompiler.
+         */
+        static abstract class Interfacer {
+            /**
+             * Called after model has been instantiated.
+             */
+            public void modelInstantiated(InstClassDecl icd) {}
+            
+            /**
+             * Called after code has been compiled.
+             */
+            public void packFmu(FClass fc) {}
+            
+            /**
+             * Called after code has been compiled.
+             */
+            public void fmuPacked(FClass fc, File path) {}
+            
+            /**
+             * Called at each transfer and on tearDown.
+             */
+            public void clean() {}
+            
+            /**
+             * Called at end of compilation.
+             */
+            public void tearDown() {}
+        }
+        
+        private static LinkedList<Registrant> registrants = new LinkedList<>();
+        private static Registrant addRegistrant(Registrant registrant) {
+            registrants.add(registrant);
+            return registrant;
+        }
+        
+        private LinkedList<Interfacer> interfacers;
+        
+        private ModelicaCompiler mc;
+        private OptionRegistry options;
+        private IErrorHandler eh;
+        private ExternalFunctionCache efc;
+        private GUIDManager guidManager;
+        private File compilationOutputPath;
+        
+        protected UtilInterface(ModelicaCompiler mc, OptionRegistry options, IErrorHandler eh, ExternalFunctionCache efc, File compilationOutputPath) {
+            this.mc = mc;
+            this.options = options;
+            this.eh = eh;
+            this.efc = efc;
+            this.compilationOutputPath = compilationOutputPath;
+            guidManager = new GUIDManager(ASTNode.vendorName(), options.getStringOption("compiler_version"));
+            
+            interfacers = new LinkedList<>();
+            for (UtilInterface.Registrant registrant : registrants) {
+                if (registrant.enabled(this)) {
+                    interfacers.add(registrant.getInterfacer(this));
+                }
+            }
+        }
+        
+        public ModelicaCompiler getModelicaCompiler() {
+            return mc;
+        }
+        
+        public OptionRegistry getOptionRegistry() {
+            return options;
+        }
+        
+        public IErrorHandler getErrorHandler() {
+            return eh;
+        }
+        
+        public ExternalFunctionCache getExternalFunctionCache() {
+            return efc;
+        }
+        
+        public GUIDManager getGuidManager() {
+            return guidManager;
+        }
+        
+        public File getCompilationOutputPath() {
+            return compilationOutputPath;
+        }
+        
+        public void setCompilationOutputPath(File compilationOutputPath) {
+            this.compilationOutputPath = compilationOutputPath;
+        }
+    }
+    
+    UtilInterface ModelicaCompiler.createUtilInterface() {
+        return UtilInterface.create(this);
+    }
+    
+    public static UtilInterface UtilInterface.create(ModelicaCompiler mc) {
+        return new UtilInterface(mc, mc.getOptions(), mc.getErrorHandler(), mc.getExternalFunctionCache(), null);
+    }
+    
+    public static UtilInterface UtilInterface.create(OptionRegistry options) {
+        return new UtilInterface(null, options, new DefaultErrorHandler(), null, null);
+    }
+    
+    public void Root.transferRoot(Root other) {
+        other.getUtilInterface().transferRoot(this);
+    }
+    
+    public void UtilInterface.transferRoot(Root root) {
+        clean();
+        root.setUtilInterface(this);
+    }
+    
+    public void UtilInterface.modelInstantiated(InstClassDecl icd) {
+        for (Interfacer interfacer : interfacers) {
+            interfacer.modelInstantiated(icd);
+        }
+    }
+    
+    public void UtilInterface.packFmu(FClass fc) {
+        for (Interfacer interfacer : interfacers) {
+            interfacer.packFmu(fc);
+        }
+    }
+    
+    public void UtilInterface.fmuPacked(FClass fc, File path) {
+        for (Interfacer interfacer : interfacers) {
+            interfacer.fmuPacked(fc, path);
+        }
+    }
+    
+    public void UtilInterface.tearDown() {
+        clean();
+        for (Interfacer interfacer : interfacers) {
+            interfacer.tearDown();
+        }
+    }
+    
+    public void UtilInterface.clean() {
+        ExternalFunctionCache efc = getExternalFunctionCache();
+        if (efc != null) {
+            efc.destroyProcesses();
+        }
+        for (Interfacer interfacer : interfacers) {
+            interfacer.clean();
+        }
+    }
+}
