@@ -810,15 +810,7 @@ public class ModelicaCompiler implements LogContainer {
             /*
              * Compile mo-file and generate code for all templates that are not null.
              */
-            String flatName = null;
-            if (!Files.isDirectory(compileTo)) {
-                flatName = compileTo.getFileName().toString();
-                int i = flatName.lastIndexOf('.');
-                if (i > 0) {
-                    flatName = flatName.substring(0, i);
-                }
-            }
-            FClass fc = compileModel(fileName, className, target, flatName, compileTo);
+            FClass fc = compileModel(fileName, className, target, compileTo);
 
             if (!target.getCodeGenFlag()) {
                 /*
@@ -831,7 +823,7 @@ public class ModelicaCompiler implements LogContainer {
              * Compile C code if the Makefile flag is not null.
              */
             hookCheckAbort();
-            doCompileCCode(target, fc, className, flatName);
+            doCompileCCode(target, fc);
 
             /*
              * Package unit.
@@ -1958,8 +1950,6 @@ public class ModelicaCompiler implements LogContainer {
      *            The name of the class in the model file to compile.
      * @param target
      *            The target object for the compiler.
-     * @param flatName
-     *            Name of the unit/flat model supplied by the user, if any.
      * 
      * @return A flat representation of the class specified by <code>cl</code>.
      *            Returns null for some targets.
@@ -1981,9 +1971,9 @@ public class ModelicaCompiler implements LogContainer {
      *             found.
      * @deprecated Use {@link #compileModel(Path[], String, TargetObject, String, Path)} instead
      */
-    public FClass ModelicaCompiler.compileModel(String files[], String cl, TargetObject target, String flatName, String compileTo)
+    public FClass ModelicaCompiler.compileModel(String files[], String cl, TargetObject target, String compileTo)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-        return compileModel(stringsToPaths(files), cl, target, flatName, compileTo == null ? null : Paths.get(compileTo));
+        return compileModel(stringsToPaths(files), cl, target, compileTo == null ? null : Paths.get(compileTo));
     }
     
     /**
@@ -1997,8 +1987,6 @@ public class ModelicaCompiler implements LogContainer {
      *            The name of the class in the model file to compile.
      * @param target
      *            The target object for the compiler.
-     * @param flatName
-     *            Name of the unit/flat model supplied by the user, if any.
      * 
      * @return A flat representation of the class specified by <code>cl</code>.
      *            Returns null for some targets.
@@ -2020,24 +2008,24 @@ public class ModelicaCompiler implements LogContainer {
      *             found.
      * @deprecated Use {@link #compileModel(Path[], String, TargetObject, String, Path)} instead
      */
-     public FClass ModelicaCompiler.compileModel(Path files[], String cl, TargetObject target, String flatName, Path compileTo)
+     public FClass ModelicaCompiler.compileModel(Path files[], String cl, TargetObject target, Path compileTo)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
         boolean doTearDown = true;
         try {
             doTearDown = trySetUp();
-            return doCompileModel(files, cl, target, flatName, compileTo);
+            return doCompileModel(files, cl, target, compileTo);
         } finally {
             tryTearDown(doTearDown);
         }
     }
     
-    public FClass ModelicaCompiler.doCompileModel(String name[], String cl, TargetObject target, String flatName, String compileTo)
+    public FClass ModelicaCompiler.doCompileModel(String name[], String cl, TargetObject target, String compileTo)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-        return doCompileModel(stringsToPaths(name), cl, target, flatName, compileTo == null ? null : Paths.get(compileTo));
+        return doCompileModel(stringsToPaths(name), cl, target, compileTo == null ? null : Paths.get(compileTo));
     }
     
     
-    public FClass ModelicaCompiler.doCompileModel(Path name[], String cl, TargetObject target, String flatName, Path compileTo)
+    public FClass ModelicaCompiler.doCompileModel(Path name[], String cl, TargetObject target, Path compileTo)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
         if (target.equals(TargetObject.PARSE)) {
             parseFiles(name);
@@ -2060,11 +2048,13 @@ public class ModelicaCompiler implements LogContainer {
         try {
             // compute instance tree
             InstClassDecl icl = instantiateModel(name, cl, target);
-            
+            UtilInterface util = icl.root().getUtilInterface();
             if (compileTo != null) {
                 File unitFile = makePackagingDirs(cl, compileTo.toFile(), target);
-                icl.root().getUtilInterface().setCompilationOutputPath(unitFile);
+                util.setCompilationOutputPath(unitFile);
             }
+            
+            String flatName = computeFlatName(compileTo, util);
             
             // flattening
             // Throw away source and instance trees when they are not needed any more
@@ -2241,10 +2231,10 @@ public class ModelicaCompiler implements LogContainer {
         }
     }
 
-    private void ModelicaCompiler.doCompileCCode(TargetObject target,  FClass fc, String className, String flatName) {
+    private void ModelicaCompiler.doCompileCCode(TargetObject target,  FClass fc) {
         if (target.getMakeFileFlag() != null) {
                 ASTNode.beginStep("compileCCode()");
-                String cFileName = (flatName != null) ? flatName : FClass.convertClassNameToUnderscore(className);
+                String cFileName = fc.nameUnderscore();
                 CCompilerDelegator ccompiler = getCCompiler();
                 CCompilerArguments ccArgs = new CCompilerArguments(cFileName, fc.myOptions(), target, fc.externalLibraries(), fc.externalLibraryDirectories(), 
                         fc.externalIncludeDirectories());
@@ -2286,6 +2276,18 @@ public class ModelicaCompiler implements LogContainer {
             throws FileNotFoundException {
         templates.generateCFiles(this, fc, createCGenerator(fc), sourceDir, name);
         templates.generateXMLFiles(this, fc, target.getXMLGenerator(fc), outDir, "modelDescription");
+    }
+    
+    private String ModelicaCompiler.computeFlatName(Path compileTo, UtilInterface util) {
+        String flatName = null;
+        if (!Files.isDirectory(compileTo)) {
+            flatName = compileTo.getFileName().toString();
+            int i = flatName.lastIndexOf('.');
+            if (i > 0) {
+                flatName = flatName.substring(0, i);
+            }
+        }
+        return flatName;
     }
 
 }
