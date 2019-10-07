@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+# Fixed ; Minor ; Compiler ; #5855
+Nominal are now always positive in the FMI model description.
+
 # Fixed ; Minor ; Compiler; #5844
 Improved attribute evaluation robustness for some cases. Parametric 
 attributes are now only generated in model description for inputs
