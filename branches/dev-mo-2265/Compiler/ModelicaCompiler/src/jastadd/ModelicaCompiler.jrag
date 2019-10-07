@@ -1368,12 +1368,11 @@ public class ModelicaCompiler implements LogContainer {
     public void doGenerateCode(FClass fc, TargetObject target) throws FileNotFoundException {
         ASTNode.beginStep("generateCode()");
         log.info("Generating code...");
-        String name = fc.nameUnderscore();
         
+        String name = fc.nameUnderscore();
         Templates templates = target.getTemplates(getOptions());
-    
-        templates.generateCFiles(this, fc, createCGenerator(fc), sourceDir, name);
-        templates.generateXMLFiles(this, fc, target.getXMLGenerator(fc), outDir, "modelDescription");
+        
+        generateAllFiles(fc, target, templates, name);
         hookCodeGenerated(fc, outDir);
         
         fc.guidManager().setSourceFile(new File(outDir, "modelDescription.xml"));
@@ -2281,6 +2280,12 @@ public class ModelicaCompiler implements LogContainer {
             }
         }
         return dest;
+    }
+    
+    private void ModelicaCompiler.generateAllFiles(FClass fc, TargetObject target, Templates templates, String name)
+            throws FileNotFoundException {
+        templates.generateCFiles(this, fc, createCGenerator(fc), sourceDir, name);
+        templates.generateXMLFiles(this, fc, target.getXMLGenerator(fc), outDir, "modelDescription");
     }
 
 }
