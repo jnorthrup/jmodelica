@@ -125,7 +125,7 @@ LIB_COMMON   = $(LIB_SUNDIALS) $(LIB_MINPACK) $(LIB_STD)
 LIBS_FMUME10 = -lfmi1_me $(LIBS_FMU_STD) $(LIB_COMMON)
 LIBS_FMUCS10 = -lfmi1_cs -lfmi1_me $(LIBS_FMU_STD) $(LIB_COMMON) -l:libsundials_cvode.a
 LIBS_FMU20   = -lfmi2 $(LIBS_FMU_STD) $(LIB_COMMON) -l:libsundials_cvode.a
-LIBS_CEVAL   = -ljmi_evaluator_util $(LIBS_FMU_STD)
+LIBS_CEVAL   = $(LIBS_FMU_STD)
 
 # Include paths for compilation
 INCL = -I$(RUNTIMELIBRARY_INC_DIR) -I$(STANDARD_HEADER_INC_DIR) $(EXT_INC_DIRS) -I$(SUNDIALS_INC_DIR)

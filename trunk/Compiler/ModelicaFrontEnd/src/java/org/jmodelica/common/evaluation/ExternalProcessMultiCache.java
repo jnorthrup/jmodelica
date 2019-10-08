@@ -1,20 +1,28 @@
 package org.jmodelica.common.evaluation;
 
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.jmodelica.common.LogContainer;
 import org.jmodelica.common.options.AbstractOptionRegistry;
+import org.jmodelica.util.ccompiler.CCompilerDelegator;
+import org.jmodelica.util.exceptions.CcodeCompilationException;
 
 public class ExternalProcessMultiCache<K extends ExternalProcessMultiCache.Variable<V, T>, V extends ExternalProcessMultiCache.Value, T extends ExternalProcessMultiCache.Type<V>, E extends ExternalProcessMultiCache.External<K>> {
+
+    public interface Compiler<K, E extends External<K>> extends LogContainer {
+        public String compileExternal(E ext) throws FileNotFoundException, CcodeCompilationException;
+
+        public CCompilerDelegator getCCompiler();
+    }
 
     public interface External<K> {
         public String getName();
 
-        public int processLimit();
-
-        public boolean dynamicEvaluatorEnabled();
+        public boolean shouldCacheProcess();
 
         public AbstractOptionRegistry myOptions();
 
@@ -26,13 +34,7 @@ public class ExternalProcessMultiCache<K extends ExternalProcessMultiCache.Varia
 
         public Iterable<K> functionArgsToSerialize();
 
-        public String functionArgsSerialized();
-
-        public String functionReturnArgSerialized();
-
         public Iterable<K> varsToDeserialize();
-
-        public String[] library();
     }
 
     public interface Variable<V extends Value, T extends Type<V>> {
@@ -53,9 +55,9 @@ public class ExternalProcessMultiCache<K extends ExternalProcessMultiCache.Varia
 
     private Map<String, ExternalProcessCache<K, V, T, E>> map = new LinkedHashMap<>();
 
-    private ExternalFunctionCompiler<K, E> mc;
+    private Compiler<K, E> mc;
 
-    public ExternalProcessMultiCache(ExternalFunctionCompiler<K, E> mc) {
+    public ExternalProcessMultiCache(Compiler<K, E> mc) {
         this.mc = mc;
     }
 

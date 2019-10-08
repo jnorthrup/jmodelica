@@ -201,10 +201,8 @@ if (${BUILD_JMI_LIB})
     include_directories(${TOP_SRC}/RuntimeLibrary/src/jmi)
 
     #Install the libraries
-    if (NOT MSVC)
-        install(TARGETS jmi
-            DESTINATION "${RTLIB_LIB_DIR}")
-    endif()
+    install(TARGETS jmi
+        DESTINATION "${RTLIB_LIB_DIR}")
 
     #Install header files
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
@@ -248,10 +246,8 @@ if (${BUILD_MSL_EXTERNAL_LIBS})
     endif()
 
     #Install the libraries
-    if (NOT MSVC)
-        install(TARGETS ModelicaExternalC ModelicaStandardTables ModelicaIO ModelicaMatIO zlib
-            DESTINATION "${RTLIB_LIB_DIR}")
-    endif()
+    install(TARGETS ModelicaExternalC ModelicaStandardTables ModelicaIO ModelicaMatIO zlib
+        DESTINATION "${RTLIB_LIB_DIR}")
 
     install(DIRECTORY "${MSLCSOURCES}/"
         DESTINATION "${RTLIB_INCLUDE_DIR}"

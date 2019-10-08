@@ -48,9 +48,7 @@ if(NOT MSVC)
 endif()
 
 #Install the libraries
-if (NOT MSVC)
-    install(TARGETS fmi2 DESTINATION "${RTLIB_LIB_DIR}")
-endif()
+install(TARGETS fmi2 DESTINATION "${RTLIB_LIB_DIR}")
 
 #Install header files
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
