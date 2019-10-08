@@ -228,18 +228,22 @@ equation
             name="StreamTest6",
             description="Using actualStream() on array of stream variables.",
             eliminate_alias_variables=false,
+            variability_propagation=false,
             flatModel="
 fclass StreamTests.StreamTest6
  flow Real d.a;
  stream Real d.b[1];
  stream Real d.b[2];
  potential Real d.c;
- constant Real f[1] = 1;
- constant Real f[2] = 2;
+ Real f[1];
+ Real f[2];
 equation
- 1.0 = d.b[1];
- 2.0 = d.b[2];
+ f[1] = d.b[1];
+ f[2] = d.b[2];
+ f[1] = 1;
+ f[2] = 2;
  d.c = 0;
+ d.a = 0.0;
 end StreamTests.StreamTest6;
 ")})));
 end StreamTest6;
@@ -269,6 +273,7 @@ equation
             name="StreamTest7",
             description="",
             eliminate_alias_variables=false,
+            variability_propagation=false,
             flatModel="
 fclass StreamTests.StreamTest7
  Real f.e.a;
@@ -285,6 +290,7 @@ equation
  f.e.a - g.a = 0.0;
  g.b = f.e.b;
  f.e.c = g.c;
+ g.a = 0.0;
 end StreamTests.StreamTest7;
 ")})));
 end StreamTest7;
@@ -594,6 +600,7 @@ equation
  a.c.f - c.f = 0.0;
  a.c.p = c.p;
  c.s = a.c.s;
+ c.f = 0.0;
  a.c.p = 2;
  a.c.s = 1;
  x1 = c.s;
@@ -798,6 +805,7 @@ equation
  a1.c.p = a2.c.p;
  a2.c.p = c.p;
  c.s = (_stream_positiveMax_1 * a1.c.s + _stream_positiveMax_2 * a2.c.s) / (_stream_positiveMax_1 + _stream_positiveMax_2);
+ c.f = 0.0;
  a1.c.p = 4;
  a1.c.f = time;
  a1.c.s = 1;
@@ -876,6 +884,8 @@ equation
  c1.p = c2.p;
  c1.s = (_stream_positiveMax_1 * a.c.s + _stream_positiveMax_2 * c2.s) / (_stream_positiveMax_1 + _stream_positiveMax_2);
  c2.s = (_stream_positiveMax_3 * a.c.s + _stream_positiveMax_4 * c1.s) / (_stream_positiveMax_3 + _stream_positiveMax_4);
+ c1.f = 0.0;
+ c2.f = 0.0;
  a.c.p = 2;
  a.c.s = 1;
  x1 = (_stream_positiveMax_5 * c1.s + _stream_positiveMax_6 * c2.s) / (_stream_positiveMax_5 + _stream_positiveMax_6);
@@ -1075,6 +1085,8 @@ equation
  c1.p = c2.p;
  c1.s = (_stream_positiveMax_1 * a1.c.s + _stream_positiveMax_2 * a2.c.s + _stream_positiveMax_3 * c2.s) / (_stream_positiveMax_1 + _stream_positiveMax_2 + _stream_positiveMax_3);
  c2.s = (_stream_positiveMax_4 * a1.c.s + _stream_positiveMax_5 * a2.c.s + _stream_positiveMax_6 * c1.s) / (_stream_positiveMax_4 + _stream_positiveMax_5 + _stream_positiveMax_6);
+ c1.f = 0.0;
+ c2.f = 0.0;
  a1.c.p = 4;
  a1.c.f = time;
  a1.c.s = 1;
@@ -1162,6 +1174,8 @@ equation
  c1.p = c2.p;
  c1.s = (_stream_positiveMax_1 * a2.c.s + _stream_positiveMax_2 * c2.s) / (_stream_positiveMax_1 + _stream_positiveMax_2);
  c2.s = a2.c.s;
+ c1.f = 0.0;
+ c2.f = 0.0;
  a1.c.p = 4;
  a1.c.f = time + 1;
  a1.c.s = 1;
@@ -1227,6 +1241,8 @@ equation
  c1.p = c2.p;
  c1.s = a2.c.s;
  c2.s = a2.c.s;
+ c1.f = 0.0;
+ c2.f = 0.0;
  a1.c.p = 4;
  a1.c.f = time + 1;
  a1.c.s = 1;
@@ -1284,6 +1300,8 @@ equation
  c1.p = c2.p;
  c1.s = c2.s;
  c2.s = 0.0;
+ c1.f = 0.0;
+ c2.f = 0.0;
  a1.c.p = 4;
  a1.c.f = time + 1;
  a1.c.s = 1;
@@ -1943,6 +1961,8 @@ equation
  c1.p = c2.p;
  c1.s = (_stream_positiveMax_1 * a1.c.s + _stream_positiveMax_2 * a2.c.s + _stream_positiveMax_3 * c2.s) / (_stream_positiveMax_1 + _stream_positiveMax_2 + _stream_positiveMax_3);
  c2.s = (_stream_positiveMax_4 * a1.c.s + _stream_positiveMax_5 * a2.c.s + _stream_positiveMax_6 * c1.s) / (_stream_positiveMax_4 + _stream_positiveMax_5 + _stream_positiveMax_6);
+ c1.f = 0.0;
+ c2.f = 0.0;
  a1.c.p = 4;
  a1.c.f = 1;
  a1.c.s = 1;
@@ -2080,6 +2100,10 @@ equation
  c1[2].p = c2[2].p;
  c1[2].s = (_stream_positiveMax_7 * a1[2].c.s + _stream_positiveMax_8 * a2[2].c.s + _stream_positiveMax_9 * c2[2].s) / (_stream_positiveMax_7 + _stream_positiveMax_8 + _stream_positiveMax_9);
  c2[2].s = (_stream_positiveMax_10 * a1[2].c.s + _stream_positiveMax_11 * a2[2].c.s + _stream_positiveMax_12 * c1[2].s) / (_stream_positiveMax_10 + _stream_positiveMax_11 + _stream_positiveMax_12);
+ c1[1].f = 0.0;
+ c1[2].f = 0.0;
+ c2[1].f = 0.0;
+ c2[2].f = 0.0;
  a1[1].c.p = 3;
  a1[1].c.f = 1;
  a1[1].c.s = 1;

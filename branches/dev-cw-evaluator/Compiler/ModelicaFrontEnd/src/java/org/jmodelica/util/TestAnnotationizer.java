@@ -158,14 +158,12 @@ public class TestAnnotationizer {
         }
         @SuppressWarnings("resource")
         BufferedReader in = cont ? new BufferedReader(new InputStreamReader(System.in)) : null;
-        String packageName = getPackageName(filePath);
         while (cont) {
             if (hasInputFilePath) {
                 String line = inputFileScanner.nextLine();
                 String[] parts = line.split(",");
                 filePath = parts[0];
-                packageName = getPackageName(filePath);
-                modelName = packageName + "." + parts[1];
+                modelName = getPackageName(filePath) + "." + parts[1];
             } else if (all_models) {
                 modelName = allModelsIterator.next();
             } else if (modelName == null) {
@@ -176,12 +174,12 @@ public class TestAnnotationizer {
                     System.out.println("Empty modelname given, exiting.");
                     System.exit(0);
                 }
-                modelName = composeModelName(packageName, given);
+                modelName = composeModelName(getPackageName(filePath), given);
             }
             
-            if (inputlang == Lang.none)
+            if (inputlang == Lang.none) {
                 lang = filePath.contains("Optimica") ? Lang.optimica : Lang.modelica;
-            else {
+            } else {
                 lang = inputlang;
             }
             boolean optimica = lang == Lang.optimica;
@@ -294,12 +292,13 @@ public class TestAnnotationizer {
 	}
 
 	private static String composeModelName(String extracted, String entered) {
-		if (entered == null)
-			return extracted;
-		else if (entered.contains("."))
-			return entered;
-		else
-			return extracted + "." + entered;
+		if (entered == null) {
+            return extracted;
+        } else if (entered.contains(".")) {
+            return entered;
+        } else {
+            return extracted + "." + entered;
+        }
 	}
 
 	private static String getPackageName(String filePath) {

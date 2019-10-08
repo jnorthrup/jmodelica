@@ -4,6 +4,20 @@ Added a pre-compiled evaluator used for evaluating external functions
 during the compilation (for performance). Activated by the option 
 "external_constant_evaluation_dynamic"
 
+# Fixed ; Minor ; Compiler ; #5855
+Nominal are now always positive in the FMI model description.
+
+# Fixed ; Minor ; Compiler; #5844
+Improved attribute evaluation robustness for some cases. Parametric 
+attributes are now only generated in model description for inputs
+and states.
+
+# Fixed ; Minor ; Compiler; #5835
+Format string argument to the String function is now useable.
+
+# Change ; Minor ; Compiler; #5830
+ParseHandler now have a target for Subscript.
+
 # Change ; Major ; PyFMI ; #5826
 Updated JModelica external to PyFMI 2.5.4
 

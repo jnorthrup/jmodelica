@@ -70,7 +70,7 @@ aspect OptimicaFlatAPI {
 	 */
 	syn CValue FVariable.initialGuessAttributeCValue()   = CValue.UNKNOWN;
 	eq FRealVariable.initialGuessAttributeCValue()       = attributeCValueReal(FAttribute.INITIAL_GUESS, 0.0);
-	eq FDerivativeVariable.initialGuessAttributeCValue() = new CValueReal(0.0);
+	eq FDerivativeVariable.initialGuessAttributeCValue() = CValueReal.valueOf(0.0);
 	eq FIntegerVariable.initialGuessAttributeCValue()    = attributeCValueInteger(FAttribute.INITIAL_GUESS, 0);
 	eq FBooleanVariable.initialGuessAttributeCValue()    = attributeCValueBoolean(FAttribute.INITIAL_GUESS, false);
 	eq FStringVariable.initialGuessAttributeCValue()     = attributeCValueString(FAttribute.INITIAL_GUESS);
@@ -156,7 +156,7 @@ aspect OptimicaFlatAPI {
 	 */
 	syn CValue FOptClass.startTimeAttributeCValue() =
 		startTimeAttributeSet()? startTimeAttributeExp().ceval():
-			new CValueReal(0.0);
+			CValueReal.valueOf(0.0);
 		
 	/**
 	 * Get the startTime attribute value.
@@ -210,7 +210,7 @@ aspect OptimicaFlatAPI {
 	 */
 	syn CValue FOptClass.startTimeFreeAttributeCValue() =
 		startTimeFreeAttributeSet()? startTimeFreeAttributeExp().ceval():
-			new CValueBoolean(false);
+			CValueBoolean.FALSE;
 		
 	/**
 	 * Get the free attribute value for startTime.
@@ -264,7 +264,7 @@ aspect OptimicaFlatAPI {
 	 */
 	syn CValue FOptClass.startTimeInitialGuessAttributeCValue() =
 		startTimeInitialGuessAttributeSet()? startTimeInitialGuessAttributeExp().ceval():
-			new CValueReal(0.0);
+			CValueReal.valueOf(0.0);
 		
 	/**
 	 * Get the initialGuess attribute value for startTime.
@@ -310,7 +310,7 @@ aspect OptimicaFlatAPI {
 	 */
 	syn CValue FOptClass.finalTimeAttributeCValue() =
 		finalTimeAttributeSet()? finalTimeAttributeExp().ceval():
-			new CValueReal(1.0);
+			CValueReal.valueOf(1.0);
 		
 	/**
 	 * Get the finalTime attribute value.
@@ -356,7 +356,7 @@ aspect OptimicaFlatAPI {
 	 */
 	syn CValue FOptClass.staticAttributeCValue() =
 		staticAttributeSet()? staticAttributeExp().ceval():
-			new CValueBoolean(false);
+			CValueBoolean.FALSE;
 		
 	/**
 	 * Get the static attribute value.
@@ -410,7 +410,7 @@ aspect OptimicaFlatAPI {
 	 */
 	syn CValue FOptClass.finalTimeFreeAttributeCValue() =
 		finalTimeFreeAttributeSet()? finalTimeFreeAttributeExp().ceval():
-			new CValueBoolean(false);
+			CValueBoolean.FALSE;
 
 	/**
 	 * Get the free attribute value for finalTime.
@@ -464,7 +464,7 @@ aspect OptimicaFlatAPI {
 	 */
 	syn CValue FOptClass.finalTimeInitialGuessAttributeCValue() =
 		finalTimeInitialGuessAttributeSet()? finalTimeInitialGuessAttributeExp().ceval():
-			new CValueReal(1.0);
+			CValueReal.valueOf(1.0);
 		
 	/**
 	 * Get the initialGuess attribute value for finalTime.

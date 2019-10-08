@@ -1767,7 +1767,8 @@ aspect InstanceTreeConstruction {
         hasFArraySubscripts() || 
         hasInstClassModification() || 
         getSrcClassDecl().hasSrcTypePrefix() || 
-        !filteredEnvironment().isEmpty();
+        !filteredEnvironment().isEmpty() ||
+        inExternalObject();
     eq InstReplacingShortClassDecl.shouldBeExpanded() =
         super.shouldBeExpanded() || 
         (hasInstConstrainingClass() && getInstConstrainingClass().hasInstClassModification()) || 
@@ -1805,35 +1806,35 @@ aspect InstanceTreeConstruction {
         throw new UnsupportedOperationException();
     }
     public List<InstComponentDecl> InstLibNode.getInstComponentDeclList() {
-        throw new UnsupportedOperationException();
+        return resolveLib().getInstComponentDeclList();
     }
 
     public List<InstClassDecl> InstSimpleShortClassDecl.getInstClassDeclList() {
         throw new UnsupportedOperationException();
     }
     public List<InstClassDecl> InstLibNode.getInstClassDeclList() {
-        throw new UnsupportedOperationException();
+        return resolveLib().getInstClassDeclList();
     }
 
     public List<InstExtends> InstSimpleShortClassDecl.getInstExtendsList() {
         throw new UnsupportedOperationException();
     }
     public List<InstExtends> InstLibNode.getInstExtendsList() {
-        throw new UnsupportedOperationException();
+        return resolveLib().getInstExtendsList();
     }
 
     public List<InstImport> InstSimpleShortClassDecl.getInstImportList() {
         throw new UnsupportedOperationException();
     }
     public List<InstImport> InstLibNode.getInstImportList() {
-        throw new UnsupportedOperationException();
+        return resolveLib().getInstImportList();
     }
 
     public List<InstClassDecl> InstSimpleShortClassDecl.getRedeclaredInstClassDeclList() {
         throw new UnsupportedOperationException();
     }
     public List<InstClassDecl> InstLibNode.getRedeclaredInstClassDeclList() {
-        throw new UnsupportedOperationException();
+        return actualInstClass().getRedeclaredInstClassDeclList();
     }
 
 }

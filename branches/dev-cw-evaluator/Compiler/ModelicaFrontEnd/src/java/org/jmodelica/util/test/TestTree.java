@@ -40,8 +40,9 @@ public class TestTree implements GenericTestTreeNode, Iterable<GenericTestTreeNo
     }
 
     public TestTree exit() {
-        if (children.isEmpty() && parent != null) 
+        if (children.isEmpty() && parent != null) {
             parent.children.remove(parentIndex);
+        }
         return parent;
     }
 
@@ -52,6 +53,11 @@ public class TestTree implements GenericTestTreeNode, Iterable<GenericTestTreeNo
     @Override
     public String getName() {
         return name;
+    }
+    
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 
     public int numChildren() {

@@ -65,6 +65,9 @@ aspect Types {
     syn boolean InstNode.isPrimitiveType() = false;
     eq InstPrimitive.isPrimitiveType()     = true;
     eq InstClassDecl.isPrimitiveType()     = isPrimitive();
+    
+    syn boolean SrcBaseNode.isPrimitiveType() = false;
+    eq SrcClassDecl.isPrimitiveType()         = isPrimitive();
 
     public static String InstNode.subTypeMessage(String name, String message) {
         if (name == null) {
