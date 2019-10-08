@@ -1078,8 +1078,8 @@ equation
 	StringCompare("medium      ", String(enumVar, minimumLength=12));
 	StringCompare("      medium", String(enumVar, minimumLength=12, leftJustified=false));
 
-    StringCompare("42",           String(intVar, format="%d"));
-    StringCompare("3.1400000",    String(realVar, format="%f"));
+    StringCompare("42",           String(intVar, format="d"));
+    StringCompare("3.1400000",    String(realVar, format="f"));
 
 annotation(__JModelica(UnitTesting(tests={
     CCodeGenTestCase(
@@ -16040,7 +16040,7 @@ model StringOperations9
         + String(b, minimumLength=i, leftJustified=b);
     end f;
     
-    Real y = f(-time, 3, true, "%g");
+    Real y = f(-time, 3, true, "g");
 
 annotation(__JModelica(UnitTesting(tests={
     CCodeGenTestCase(
@@ -16055,23 +16055,31 @@ void func_CCodeGenTests_StringOperations9_f_def0(jmi_real_t x_v, jmi_real_t i_v,
     JMI_DEF(REA, y_v)
     JMI_DEF(STR, s_v)
     JMI_DEF_STR_DYNA(tmp_1)
+    JMI_DEF_STR_DYNA(tmp_2)
+    JMI_DEF_STR_DYNA(tmp_3)
     JMI_INI(STR, s_v)
-    JMI_INI_STR_DYNA(tmp_1, jmi_max(7 + 1.0, i_v) + jmi_max(7 + i_v, 2.0) + jmi_max(7 + i_v, i_v) + jmi_max(7 + i_v, i_v) + 7 + i_v + 7 + 6 + 16 + jmi_max(10, 2.0) + jmi_max(10, i_v) + jmi_max(10, i_v) + 16 + jmi_max(5, 2.0) + jmi_max(5, i_v) + jmi_max(5, i_v))
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) i_v, (int) 1.0, x_v);
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) 2.0, (int) i_v, x_v);
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(JMI_FALSE, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) i_v, (int) i_v, x_v);
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) i_v, (int) i_v, x_v);
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-.*g\", \"%.*g\"), (int) i_v, x_v);
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%-.*g\", (int) 6, x_v);
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), fmt_v, x_v);
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*d\", \"%*d\"), (int) 2.0, (int) i_v);
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(JMI_TRUE, JMI_TRUE, \"%-*d\", \"%*d\"), (int) i_v, (int) i_v);
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*d\", \"%*d\"), (int) i_v, (int) i_v);
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), fmt_v, (int) i_v);
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*s\", \"%*s\"), (int) 2.0, COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(JMI_TRUE, JMI_TRUE, \"%-*s\", \"%*s\"), (int) i_v, COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*s\", \"%*s\"), (int) i_v, COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
-    JMI_ASG(STR, s_v, tmp_1)
+    JMI_INI_STR_DYNA(tmp_1, 1 + JMI_LEN(fmt_v))
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", \"%\");
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", fmt_v);
+    JMI_INI_STR_DYNA(tmp_2, 1 + JMI_LEN(fmt_v))
+    snprintf(JMI_STR_END(tmp_2), JMI_STR_LEFT(tmp_2), \"%s\", \"%\");
+    snprintf(JMI_STR_END(tmp_2), JMI_STR_LEFT(tmp_2), \"%s\", fmt_v);
+    JMI_INI_STR_DYNA(tmp_3, jmi_max(7 + 1.0, i_v) + jmi_max(7 + i_v, 2.0) + jmi_max(7 + i_v, i_v) + jmi_max(7 + i_v, i_v) + 7 + i_v + 7 + 6 + 16 + jmi_max(10, 2.0) + jmi_max(10, i_v) + jmi_max(10, i_v) + 16 + jmi_max(5, 2.0) + jmi_max(5, i_v) + jmi_max(5, i_v))
+    snprintf(JMI_STR_END(tmp_3), JMI_STR_LEFT(tmp_3), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) i_v, (int) 1.0, x_v);
+    snprintf(JMI_STR_END(tmp_3), JMI_STR_LEFT(tmp_3), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) 2.0, (int) i_v, x_v);
+    snprintf(JMI_STR_END(tmp_3), JMI_STR_LEFT(tmp_3), COND_EXP_EQ(JMI_FALSE, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) i_v, (int) i_v, x_v);
+    snprintf(JMI_STR_END(tmp_3), JMI_STR_LEFT(tmp_3), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) i_v, (int) i_v, x_v);
+    snprintf(JMI_STR_END(tmp_3), JMI_STR_LEFT(tmp_3), COND_EXP_EQ(b_v, JMI_TRUE, \"%-.*g\", \"%.*g\"), (int) i_v, x_v);
+    snprintf(JMI_STR_END(tmp_3), JMI_STR_LEFT(tmp_3), \"%-.*g\", (int) 6, x_v);
+    snprintf(JMI_STR_END(tmp_3), JMI_STR_LEFT(tmp_3), tmp_1, x_v);
+    snprintf(JMI_STR_END(tmp_3), JMI_STR_LEFT(tmp_3), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*d\", \"%*d\"), (int) 2.0, (int) i_v);
+    snprintf(JMI_STR_END(tmp_3), JMI_STR_LEFT(tmp_3), COND_EXP_EQ(JMI_TRUE, JMI_TRUE, \"%-*d\", \"%*d\"), (int) i_v, (int) i_v);
+    snprintf(JMI_STR_END(tmp_3), JMI_STR_LEFT(tmp_3), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*d\", \"%*d\"), (int) i_v, (int) i_v);
+    snprintf(JMI_STR_END(tmp_3), JMI_STR_LEFT(tmp_3), tmp_2, (int) i_v);
+    snprintf(JMI_STR_END(tmp_3), JMI_STR_LEFT(tmp_3), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*s\", \"%*s\"), (int) 2.0, COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
+    snprintf(JMI_STR_END(tmp_3), JMI_STR_LEFT(tmp_3), COND_EXP_EQ(JMI_TRUE, JMI_TRUE, \"%-*s\", \"%*s\"), (int) i_v, COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
+    snprintf(JMI_STR_END(tmp_3), JMI_STR_LEFT(tmp_3), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*s\", \"%*s\"), (int) i_v, COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
+    JMI_ASG(STR, s_v, tmp_3)
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;

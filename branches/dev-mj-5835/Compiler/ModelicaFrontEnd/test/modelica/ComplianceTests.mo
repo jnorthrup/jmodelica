@@ -526,26 +526,33 @@ end ComplianceTests.HybridFMU2;
 end HybridFMU2;
 
 model StringOperator1
+    function f
+        input Real x;
+        input String f;
+        output String o;
+    algorithm
+        o := String(x, format=f);
+    end f;
+    
     Integer len = if time < 0 then 4 else 3;
     Integer digits = if time < 0 then 5 else 2;
+    String s = f(time, "g");
 equation
     assert(time>2.0, String(time, significantDigits=digits, minimumLength=len, leftJustified=time<1));
+    assert(time>2.0, String(time, format=String(len)+"."+String(digits)+"f"));
     annotation(__JModelica(UnitTesting(tests={
         ComplianceErrorTestCase(
             name="StringOperator1",
-            description="Test compliance warnings for non fixed string operator arguments (significantDigits, minimumLength, leftJustified)",
+            description="Test compliance warnings for non fixed string operator format argument",
             errorMessage="
-3 errors found:
-
-Compliance error at line 5, column 53, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', UNSUPPORTED_NON_FIXED_STRING_ARGUMENT:
-  significantDigits with higher than parameter variability is not supported
-
-Compliance error at line 5, column 75, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', UNSUPPORTED_NON_FIXED_STRING_ARGUMENT:
-  minimumLength with higher than parameter variability is not supported
-
-Compliance error at line 5, column 94, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', UNSUPPORTED_NON_FIXED_STRING_ARGUMENT:
-  leftJustified with higher than parameter variability is not supported
-")})));
+2 errors found:
+  
+Compliance error at line 7, column 31, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', UNSUPPORTED_NON_FIXED_STRING_ARGUMENT:
+ Argument format of String operator is only supported as parameter expression.
+  
+Compliance error at line 15, column 42, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', UNSUPPORTED_NON_FIXED_STRING_ARGUMENT:
+ Argument format of String operator is only supported as parameter expression.
+   ")})));
 end StringOperator1;
 
 
