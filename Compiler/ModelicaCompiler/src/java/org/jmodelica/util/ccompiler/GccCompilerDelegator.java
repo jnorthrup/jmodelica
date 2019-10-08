@@ -25,7 +25,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jmodelica.common.options.AbstractOptionRegistry;
 import org.jmodelica.util.EnvironmentUtils;
 import org.jmodelica.util.exceptions.CcodeCompilationException;
 import org.jmodelica.util.logging.ModelicaLogger;
@@ -106,12 +105,6 @@ public class GccCompilerDelegator extends CCompilerDelegator {
             vars.put("CXX", new File(mingw_bin, "g++").getPath());
             vars.put("AR", new File(mingw_bin, "ar").getPath());
         }
-    }
-    
-    @Override
-    public Set<String> expandCompilerSpecificLibraryPaths(ModelicaLogger log, AbstractOptionRegistry options, Set<String> extLibDirs, String platform) {
-        Set<String> expandedLibDirs = expandLibraries(extLibDirs, platform, "gcc" + compilerVersionNumber());
-        return expandedLibDirs;
     }
     
     /**
