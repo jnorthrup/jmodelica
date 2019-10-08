@@ -1594,11 +1594,8 @@ List arg_list =
   ;
   
 List arg_list_p = 
-  emptyArray                            {: return new List().add(emptyArray); :}
   function_argument_exp                   {: return new List().add(function_argument_exp); :}
   | arg_list_p COMMA function_argument_exp  {: return arg_list_p.add(function_argument_exp); :}
-  | arg_list_p COMMA emptyArray 
-                 {: return arg_list_p.add(emptyArray); :}
   ;
   
 SrcComment comment = 
@@ -1726,18 +1723,3 @@ SrcFunctionCallList function_call_list
         return new SrcFunctionCallList(function_calls_stmt);
     :}
     ;
-
-SrcArrayConstructor emptyArray =
-  LBRACE RBRACE
-                 {:
-                      return new SrcArrayConstructor(
-                      new SrcFunctionArguments(new List(), new List())
-                    );
-                 :}
-  | LBRACE emptyArray RBRACE
-                 {:   
-                      return new SrcArrayConstructor(
-                      new SrcFunctionArguments(new List().add(emptyArray), new List())
-                    );
-                 :}
-  ;
