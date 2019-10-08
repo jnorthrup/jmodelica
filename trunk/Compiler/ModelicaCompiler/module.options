@@ -137,6 +137,13 @@ external objects during compilation.If less than 1, no processes will be kept
 alive, i.e. this feature is turned off."
 
 ********************************************************************************
+BOOLEAN external_constant_evaluation_dynamic compiler experimental false
+
+"If enabled, calls to external functions will be evaluated during compilation 
+using a pre-compiled program (instead of generating and compiling one), if 
+possible."
+
+********************************************************************************
 BOOLEAN halt_on_warning compiler user false
 
 "If enabled, compilation warnings will cause compilation to abort."
@@ -457,4 +464,3 @@ STRING compiler_version compiler internal "compiler_version_file_not_read"
 "The version string for the compiler. Uses default value during unit testing."
 
 ********************************************************************************
-

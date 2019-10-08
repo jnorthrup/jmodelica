@@ -247,8 +247,15 @@ aspect CCodeGenExternalCeval {
     syn Collection<ExternalArgument> FExternalStmt.varsToSerialize() {
         Collection<ExternalArgument> res = new LinkedHashSet<>();
         if (hasReturnVar()) {
-            res.add(getReturnVar().externalArgument());
+            res.add(returnVarToSerialize());
         }
+        res.addAll(argVarsToSerialize());
+        return res;
+    }
+    
+    syn ExternalArgument FExternalStmt.returnVarToSerialize() = getReturnVar().externalArgument();
+    syn Collection<ExternalArgument> FExternalStmt.argVarsToSerialize() {
+        Collection<ExternalArgument> res = new LinkedHashSet<>();
         for (FExp e : getArgs()) {
             res.add(e.externalArgument());
         }
@@ -287,6 +294,46 @@ aspect CCodeGenExternalCeval {
             }
         }
         return functionArgs;
+    }
+    
+
+    syn String FType.cMappedTypeString() = cMappedTypeStringScalar() + (isArray() ? "v" : "");
+
+    syn String FType.cMappedTypeStringScalar() {
+        throw new InternalCompilerError("cMappedTypeStringScalar() is not supported for class type " + getClass().getSimpleName());
+    }
+    eq FArrayType.cMappedTypeStringScalar() = getFPrimitiveType().cMappedTypeStringScalar();
+    eq FIntegerType.cMappedTypeStringScalar() = "i";
+    eq FEnumType.cMappedTypeStringScalar() = "i";
+    eq FBooleanType.cMappedTypeStringScalar() = "i";
+    eq FRealType.cMappedTypeStringScalar() = "d";
+    eq FStringType.cMappedTypeStringScalar() = "s";
+    eq FRecordType.cMappedTypeStringScalar() {
+        String o = "R[";
+        for (FRecordComponentType rType: getComponents()) {
+                o = o.concat(rType.getFType().cMappedTypeStringScalar());
+                o = o.concat(",");
+        }
+        return o.concat("]");
+    }
+    
+    syn String FExternalStmt.functionReturnArgSerialized() {
+        if (hasReturnVar()) {
+            return returnVarToSerialize().type().cMappedTypeString();
+        } else {
+            return "void";
+        }
+    }
+    
+    syn String FExternalStmt.functionArgsSerialized() {
+        String input = "";
+        for (ExternalArgument var : argVarsToSerialize()) {
+            if (var.isOutput()) {
+               input = input.concat("*");
+            }
+            input += var.type().cMappedTypeString() + ",";
+        }
+        return input;
     }
     
     /**
@@ -346,6 +393,21 @@ aspect CCodeGenExternalCeval {
                 t.setParent(null);
             }
         }
+    }
+    
+    public String FClass.externalCTypes() {
+        StringBuilder sb = new StringBuilder();
+        for (FExternalStmt stmt : myExternals()) {
+            if (stmt.dynamicEvaluatorEnabled()) {
+                sb.append(stmt.getName());
+                sb.append("\n");
+	            sb.append(stmt.functionReturnArgSerialized());
+	            sb.append("\n");
+	            sb.append(stmt.functionArgsSerialized());
+	            sb.append("\n");
+	        }
+        }
+        return sb.toString();
     }
 
     public String FClass.externalDependencies() {

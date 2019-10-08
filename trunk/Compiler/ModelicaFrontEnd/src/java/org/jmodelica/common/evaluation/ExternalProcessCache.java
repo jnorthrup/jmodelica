@@ -23,8 +23,6 @@ public abstract class ExternalProcessCache<K extends Variable<V, T>, V extends V
     public abstract void destroyProcesses();
 
     protected abstract void tearDown();
-
-    public abstract ExternalFunction<K, V> failedEval(External<?> ext, String msg, boolean log);
     
 
 }
