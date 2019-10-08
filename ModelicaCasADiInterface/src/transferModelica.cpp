@@ -173,7 +173,7 @@ namespace ModelicaCasADi
             new_JArray<java::lang::String>(strings, modelFiles.size()),
             StringFromUTF(modelName.c_str()));
 
-        std::string identfier = env->toString(fclass.nameUnderscore().this$);
+        std::string identfier = env->toPyUnicode(fclass.nameUnderscore().this$);
         // Initialize the model with the model identfier.
         m->initializeModel(identfier);
         /***** ModelicaCasADi::Model *****/

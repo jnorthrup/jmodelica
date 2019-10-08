@@ -171,7 +171,7 @@ namespace ModelicaCasADi
                 new_JArray<java::lang::String>(strings, modelFiles.size()),
                 StringFromUTF(modelName.c_str())).this$);
 
-            std::string identfier = env->toString(fclass.nameUnderscore().this$);
+            std::string identfier = env->toPyUnicode(fclass.nameUnderscore().this$);
             std::string option = "normalize_minimum_time_problems";
             bool normalizedTime = fclass.myOptions().getBooleanOption(StringFromUTF(option.c_str()));
 
