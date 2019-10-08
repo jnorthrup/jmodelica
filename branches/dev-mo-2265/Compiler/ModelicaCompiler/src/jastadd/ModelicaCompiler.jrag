@@ -2197,11 +2197,17 @@ public class ModelicaCompiler implements LogContainer {
      */
     protected Path ModelicaCompiler.packUnit(String className,
             TargetObject target, FClass fClass) throws PackingFailedException {
-
         Path unitFile = fClass.root().getUtilInterface().getCompilationOutputPath().toPath();
-
+        
         hookPackFmu(fClass, outDir);
         hookCheckAbort();
+        packUnit(className, target, fClass, unitFile);
+        hookFmuPacked(fClass, unitFile.toAbsolutePath().toFile());
+        
+        return unitFile;
+    }
+    
+    private void ModelicaCompiler.packUnit(String className, TargetObject target, FClass fClass, Path unitFile) {
         try {
             copySourceFiles(fClass, sourceDir, outDir);
             try (ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(unitFile)))) {
@@ -2211,9 +2217,6 @@ public class ModelicaCompiler implements LogContainer {
         } catch (Exception e) {
             throw new PackingFailedException(String.format("Could not write to '%s'.", unitFile), e);
         }
-
-        hookFmuPacked(fClass, unitFile.toAbsolutePath().toFile());
-        return unitFile;
     }
 
     /**
