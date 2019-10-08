@@ -46,6 +46,7 @@ equation
             name="ExtDynFcn1",
             methodName="externalCTypes",
             description="Test that the different primitive types generates the correct C mapping",
+            external_constant_evaluation_dynamic=true,
             methodResult="
 f
 void
@@ -81,6 +82,7 @@ equation
             name="ExtDynFcn2",
             methodName="externalCTypes",
             description="Test that the different primitive types (arrays of) generates the correct C mapping",
+            external_constant_evaluation_dynamic=true,
             methodResult="
 f
 void
@@ -115,6 +117,7 @@ model ExtDynFcn3
             name="ExtDynFcn3",
             methodName="externalCTypes",
             description="Test that records generates the correct C mapping",
+            external_constant_evaluation_dynamic=true,
             methodResult="
 f
 void
