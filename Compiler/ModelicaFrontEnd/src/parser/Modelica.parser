@@ -22,8 +22,6 @@
 %goal argument;
 %goal access_scalar;
 %goal subscript;
-%typeof function_call_list = "SrcFunctionCallList";
-%typeof function_calls_vector = "List";
 %goal function_call_list;
 
 %header {:
