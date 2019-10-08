@@ -335,13 +335,13 @@ aspect ExternalProcessCommunication {
         return res;
     }
     public CValue FRealType.deserializeScalar(ProcessCommunicator com) throws IOException {
-        return new CValueReal(com.deserializeReal());
+        return CValueReal.valueOf(com.deserializeReal());
     }
     public CValue FIntegerType.deserializeScalar(ProcessCommunicator com) throws IOException {
-        return new CValueInteger((int) com.deserializeReal());
+        return CValueInteger.valueOf((int) com.deserializeReal());
     }
     public CValue FBooleanType.deserializeScalar(ProcessCommunicator com) throws IOException {
-        return new CValueBoolean(com.deserializeReal() != 0);
+        return CValueBoolean.valueOf(com.deserializeReal() != 0);
     }
     public CValue FStringType.deserializeScalar(ProcessCommunicator com) throws IOException {
         return new CValueString(com.deserializeString());

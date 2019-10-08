@@ -775,9 +775,10 @@ aspect Flattening {
         SrcClassDecl scd = myTopSrcClassDecl();
         stmt.setLibTopPackagePath(scd == null ? "" : scd.myLibRootPath().toAbsolutePath().toString()); // scd is null for builtins
         stmt.setFExternalLanguage(hasFExternalLanguage() ? 
-                (FExternalLanguage) getFExternalLanguage().fullCopy() : 
+                getFExternalLanguage().treeCopy() : 
                 new FCExternalLanguage());
         stmt.extractLibrary(this);
+        contribute(stmt);
         if (hasInstExternalCall()) {
             InstExternalCall call = getInstExternalCall();
             if (call.hasReturnVar()) {
@@ -828,9 +829,10 @@ aspect Flattening {
                 new Opt<>(getReturnVar().flatten(f).asCommonAccessExp()) : 
                 new Opt<CommonAccessExp>();
                 
-        FExternalStmt stmt = new FExternalStmt(getFExternalLanguage().treeCopy(), ret, getName(), args, getLibTopPackagePath());
+        FExternalStmt stmt = new FExternalStmt(getFExternalLanguage().treeCopy(), ret, getName(), args, getLibTopPackagePath(), new List<FAttribute>());
         stmt.extractLibrary(this);
         sl.add(stmt);
+        contribute(stmt);
         return false;
     }
     
@@ -1237,9 +1239,28 @@ aspect Flattening {
             } else {
                 f.addFVariable(fv);
             }
+            if (fv.getCausalityConnectorPrefix().isStream() && useCausalPorts()) {
+                FVariable inStream = fv.treeCopy();
+                FAccess inStreamAccess = createInStreamAccess(inStream.getFAccess());
+                inStream.setFAccess(inStreamAccess);
+                inStream.setCausalityConnectorPrefix(CausalityConnectorPrefix.INSTREAM);
+                fv.annotation().vendorNode().forPath("internal/instream").setValue(new FStringLitExp(inStreamAccess.name()));
+                f.addFVariable(inStream);
+            }
             flattenMyType(f);
             clearModificationLevel(oldLevels);
         }
+    }
+    
+    inh FAccess InstAssignable.createInStreamAccess(FAccess streamAccess);
+    eq InstClassDecl.getChild().createInStreamAccess(FAccess streamAccess) {
+        FAccess result = streamAccess.copyAndAddSuffix("__instream_");
+        int i = 2;
+        while (componentExists(new QualifiedName(result.name()))) {
+            result = streamAccess.copyAndAddSuffix("__instream_" + i);
+            i++;
+        }
+        return result;
     }
     
     public void ASTNode.flattenAssertExternal(Flattener f) {
@@ -2136,9 +2157,20 @@ aspect Flattening {
     public void InstClassRedeclare.collectAttributes(Flattener f,
             List<FAttribute> attrs, AttributeExpRetriever aer, boolean cls) {}
 
-    syn boolean InstComponentDecl.isBuiltIn() = false;
-    eq InstBuiltIn.isBuiltIn()                = true;
-
+    syn boolean InstComponentDecl.isBuiltIn()    = false;
+    eq InstBuiltIn.isBuiltIn()                   = true;
+    syn boolean InstBuiltInClassDecl.isBuiltIn() = true;
+    syn boolean SrcBuiltInClassDecl.isBuiltIn()  = true;
+    inh boolean SrcClassDecl.isBuiltIn();
+    eq Root.getChild().isBuiltIn() = false;
+    eq Program.getBuiltInType().isBuiltIn() = true;
+    eq Program.getBuiltInFunction().isBuiltIn() = true;
+    
+    syn SourceRoot Root.asSourceRoot() {
+        throw new UnsupportedOperationException("Method not implemented for class " + getClass().getSimpleName() + "!");
+    }
+    eq SourceRoot.asSourceRoot() = this;
+    
     public void InstComponentModification.collectAttributes(Flattener f,
             List<FAttribute> attrs, AttributeExpRetriever aer, boolean cls) {
         if (hasInstModification()) {
@@ -2426,7 +2458,7 @@ aspect FlatExpressions {
     public void Index.setValues(Iterable<? extends CommonForIndex> forIndices) {
         int i = 0;
         for (CommonForIndex fi : forIndices) {
-            fi.setEvaluationValue(new CValueInteger(index[i++]));
+            fi.setEvaluationValue(CValueInteger.valueOf(index[i++]));
         }
     }
     
@@ -3366,8 +3398,8 @@ aspect AttributeContributor {
     
     /**
      * Class used during instantiation of equations and flattening of variables
-     * to delecate to different contributors. This class is subtyped for each
-     * contributor!
+     * to delegate to different contributors. This class is subtyped for each
+     * contributor.
      */
     public abstract class AttributeContributor {
         private final String name;
@@ -3400,6 +3432,12 @@ aspect AttributeContributor {
          * expressions that are added must be flattened.
          */
         protected void contribute(Flattener f, InstNode src, FClass dest) {}
+
+        /**
+         * This method is called during flattening of external statements. All
+         * expressions that are added must be flattened.
+         */
+        protected void contribute(AnnotationNode src, FExternalStmt dest) {}
 
         /**
          * This method is called in order to determine if an attribute should
@@ -3489,6 +3527,24 @@ aspect AttributeContributor {
             for (AttributeContributor contributor : attributeContributors())
                 contributor.contribute(f, this, fClass);
             return fClass;
+        }
+    }
+    
+    public class InstExternal {
+        public FExternalStmt contribute(FExternalStmt stmt) {
+            for (AttributeContributor contributor : attributeContributors()) {
+                contributor.contribute(annotation(), stmt);
+            }
+            return stmt;
+        }
+    }
+    
+    public class FExternalStmt {
+        public FExternalStmt contribute(FExternalStmt stmt) {
+            for (AttributeContributor contributor : attributeContributors()) {
+                contributor.contribute(annotation(), stmt);
+            }
+            return stmt;
         }
     }
     

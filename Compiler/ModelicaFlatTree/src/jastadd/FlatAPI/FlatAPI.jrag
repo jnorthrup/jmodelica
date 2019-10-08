@@ -34,6 +34,7 @@ import java.security.NoSuchAlgorithmException;
 
 import org.jmodelica.common.GUIDManager;
 import org.jmodelica.util.streams.StreamGobbler;
+import org.jmodelica.common.ast.prefixes.CausalityConnectorPrefix.CausalPortsEvaluator;
 
 aspect FlatAPI {
 
@@ -2366,6 +2367,8 @@ aspect FlatAPI {
     inh FClass FAccess.myFClass();
     inh FClass FFunctionDecl.myFClass();
     inh FClass FRecordDecl.myFClass();
+    inh FClass FDerivedType.myFClass();
+    inh FClass FEnumDecl.myFClass();
     inh FClass FAlgorithm.myFClass();
     inh FClass FAbstractEquation.myFClass();
     inh FClass FStatement.myFClass();
@@ -3162,10 +3165,14 @@ aspect FlatEnumerations {
 aspect FlatCausality {
     
     syn boolean FAbstractVariable.isInput() = false;
-    eq FVariable.isInput() = getCausalityConnectorPrefix().inputCausality();
     syn boolean FAbstractVariable.isOutput() = false;
-    eq FVariable.isOutput() = getCausalityConnectorPrefix().outputCausality();
-      
+    eq FVariable.isInput()          = getCausalityConnectorPrefix().inputCausality (this);
+    eq FVariable.isOutput()         = getCausalityConnectorPrefix().outputCausality(this);
+    eq FFunctionVariable.isInput()  = getCausalityConnectorPrefix().inputCausality (this);
+    eq FFunctionVariable.isOutput() = getCausalityConnectorPrefix().outputCausality(this);
+    
+    ASTNode implements CausalPortsEvaluator;
+    syn boolean ASTNode.useCausalPorts() = myOptions().causal_ports.getValue();
 }
 
 aspect FlatTypes {
