@@ -16261,6 +16261,57 @@ void func_CCodeGenTests_StringOperations11_f1_def1(jmi_string_array_t* s_a, jmi_
 ")})));
 end StringOperations11;
 
+
+model StringOperations12
+    type E = enumeration(Alice, Bob, Eve);
+
+    function f
+        input Integer x;
+        input E e;
+        output Real y;
+    protected
+        String s;
+    algorithm
+        s := String(x, format="7u") + 
+             String(x, format="-3d") + 
+             String(e);
+        y := x + .5;
+    end f;
+    
+    Real y = f(integer(time), if time < 1 then E.Alice else E.Eve);
+
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="StringOperations12",
+        description="Check that integer-typed format strings generate the correct casts",
+        template="$C_functions$",
+        generatedCode="
+void func_CCodeGenTests_StringOperations12_f_def0(jmi_real_t x_v, jmi_real_t e_v, jmi_real_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    JMI_DEF(STR, s_v)
+    JMI_DEF_STR_STAT(tmp_1, 37)
+    JMI_INI(STR, s_v)
+    JMI_INI_STR_STAT(tmp_1)
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%7u\", (unsigned int) x_v);
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%-3d\", (int) x_v);
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%-s\", E_0_e[(int) e_v]);
+    JMI_ASG(STR, s_v, tmp_1)
+    y_v = x_v + 0.5;
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenTests_StringOperations12_f_exp0(jmi_real_t x_v, jmi_real_t e_v) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenTests_StringOperations12_f_def0(x_v, e_v, &y_v);
+    return y_v;
+}
+
+")})));
+end StringOperations12;
+
 package TestTerminate
 
 model TestTerminate1

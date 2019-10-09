@@ -536,23 +536,33 @@ model StringOperator1
     
     Integer len = if time < 0 then 4 else 3;
     Integer digits = if time < 0 then 5 else 2;
-    String s = f(time, "g");
+    String s1 = String(time, format = fmt1);
+    String s2 = String(time, format = fmt2);
+    String s3 = f(time, "g");
+    parameter String fmt1 = if selFmt1 == 1 then "u" else "g";
+    parameter String fmt2 = "f";
+    parameter Integer selFmt1(fixed = false);
+initial equation
+    selFmt1 = if len == 4 then 1 else 2;
 equation
     assert(time>2.0, String(time, significantDigits=digits, minimumLength=len, leftJustified=time<1));
     assert(time>2.0, String(time, format=String(len)+"."+String(digits)+"f"));
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="StringOperator1",
-            description="Test compliance warnings for non fixed string operator format argument",
-            errorMessage="
-2 errors found:
-  
-Compliance error at line 7, column 31, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', UNSUPPORTED_NON_FIXED_STRING_ARGUMENT:
- Argument format of String operator is only supported as parameter expression.
-  
-Compliance error at line 15, column 42, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', UNSUPPORTED_NON_FIXED_STRING_ARGUMENT:
- Argument format of String operator is only supported as parameter expression.
-   ")})));
+annotation(__JModelica(UnitTesting(tests={
+    ComplianceErrorTestCase(
+        name="StringOperator1",
+        description="Test compliance warnings for non fixed string operator format argument",
+        errorMessage="
+
+
+Compliance error at line 7, column 31, in file '...', UNSUPPORTED_NON_FIXED_STRING_ARGUMENT:
+  Argument format of String operator is only supported as a fixed parameter expression.
+
+Compliance error at line 15, column 5, in file '...':
+  Parameters with fixed=false can not be used as structural parameters
+
+Compliance error at line 22, column 42, in file '...', UNSUPPORTED_NON_FIXED_STRING_ARGUMENT:
+  Argument format of String operator is only supported as a fixed parameter expression.
+")})));
 end StringOperator1;
 
 
