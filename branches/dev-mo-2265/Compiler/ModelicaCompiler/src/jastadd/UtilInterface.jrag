@@ -71,9 +71,9 @@ aspect UtilInterface {
         private IErrorHandler eh;
         private ExternalFunctionCache efc;
         private GUIDManager guidManager;
-        private File compilationOutputPath;
+        private Path compilationOutputPath;
         
-        protected UtilInterface(ModelicaCompiler mc, OptionRegistry options, IErrorHandler eh, ExternalFunctionCache efc, File compilationOutputPath) {
+        protected UtilInterface(ModelicaCompiler mc, OptionRegistry options, IErrorHandler eh, ExternalFunctionCache efc, Path compilationOutputPath) {
             this.mc = mc;
             this.options = options;
             this.eh = eh;
@@ -109,11 +109,11 @@ aspect UtilInterface {
             return guidManager;
         }
         
-        public File getCompilationOutputPath() {
+        public Path getCompilationOutputPath() {
             return compilationOutputPath;
         }
         
-        public void setCompilationOutputPath(File compilationOutputPath) {
+        public void setCompilationOutputPath(Path compilationOutputPath) {
             this.compilationOutputPath = compilationOutputPath;
         }
     }

@@ -2019,11 +2019,6 @@ public class ModelicaCompiler implements LogContainer {
         }
     }
     
-    public FClass ModelicaCompiler.doCompileModel(String name[], String cl, TargetObject target, String compileTo)
-          throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-        return doCompileModel(stringsToPaths(name), cl, target, compileTo == null ? null : Paths.get(compileTo));
-    }
-    
     
     public FClass ModelicaCompiler.doCompileModel(Path name[], String cl, TargetObject target, Path compileTo)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
@@ -2050,7 +2045,7 @@ public class ModelicaCompiler implements LogContainer {
             InstClassDecl icl = instantiateModel(name, cl, target);
             UtilInterface util = icl.root().getUtilInterface();
             if (compileTo != null) {
-                File unitFile = makePackagingDirs(cl, compileTo.toFile(), target);
+                Path unitFile = makePackagingDirs(cl, compileTo, target);
                 util.setCompilationOutputPath(unitFile);
             }
             
@@ -2197,7 +2192,7 @@ public class ModelicaCompiler implements LogContainer {
      */
     protected Path ModelicaCompiler.packUnit(String className,
             TargetObject target, FClass fClass) throws PackingFailedException {
-        Path unitFile = fClass.root().getUtilInterface().getCompilationOutputPath().toPath();
+        Path unitFile = fClass.root().getUtilInterface().getCompilationOutputPath();
         
         hookPackFmu(fClass, outDir);
         hookCheckAbort();
@@ -2250,7 +2245,7 @@ public class ModelicaCompiler implements LogContainer {
 
     /**
      * Calculates the destination directory for a packaged unit. If the specified destination is a file its directory
-     * is chosen as destination. If the destination does not exist, it is created (using {@link File#mkdirs()}).
+     * is chosen as destination. If the destination does not exist, it is created (using {@link Filed#createDirectories()}).
      * 
      * @param className
      *          The qualified name of the class for to create a unit for.
@@ -2259,17 +2254,18 @@ public class ModelicaCompiler implements LogContainer {
      * @param target
      *          A {@link TargetObject} containing information about the target.
      * @return
-     *          the path to the destination directory of the packaged unit.
+     *          the path to the destination file of the packaged unit.
      */ 
-    private File ModelicaCompiler.makePackagingDirs(String className, File destination, TargetObject target) {
-        File dest = new File(destination.getAbsolutePath());
-        if (dest.isDirectory()) { 
+    private Path ModelicaCompiler.makePackagingDirs(String className, Path destination, TargetObject target)
+            throws IOException {
+        Path dest = destination.toAbsolutePath();
+        if (Files.isDirectory(dest)) { 
             String mangledName = FClass.convertClassNameToUnderscore(className);
-            dest = new File(dest, mangledName + "." + target.getUnitSuffix());
+            dest = dest.resolve(mangledName + "." + target.getUnitSuffix());
         } else {
-            File destDir = dest.getParentFile();
-            if (destDir != null && !destDir.isDirectory()) {
-                dest.getParentFile().mkdirs();
+            Path destDir = dest.getParent();
+            if (destDir != null && !Files.isDirectory(destDir)) {
+                Files.createDirectories(dest.getParent());
             }
         }
         return dest;
@@ -2283,7 +2279,7 @@ public class ModelicaCompiler implements LogContainer {
     
     private String ModelicaCompiler.computeFlatName(Path compileTo, UtilInterface util) {
         String flatName = null;
-        if (!Files.isDirectory(compileTo)) {
+        if (compileTo != null && !Files.isDirectory(compileTo)) {
             flatName = compileTo.getFileName().toString();
             int i = flatName.lastIndexOf('.');
             if (i > 0) {
