@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "java/util/Iterator.h"
 #include "java/lang/String.h"
 #include <string>
+#define PYTHON
 #include "JCCEnv.h"
 
 #include "CompilerOptionsWrapper.hpp"
