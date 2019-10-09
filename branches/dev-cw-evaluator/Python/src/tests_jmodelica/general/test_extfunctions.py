@@ -25,7 +25,7 @@ import fnmatch
 
 from pymodelica import compile_fmu
 from pymodelica.common.core import get_platform_dir, create_temp_dir
-from pyfmi import load_fmu
+from pyfmi import load_fmu, FMUModelME2
 from pyfmi.fmi import FMUException
 from tests_jmodelica import testattr, get_files_path
 from tests_jmodelica.general.base_simul import *
@@ -65,7 +65,7 @@ class TestEvaluator:
     @testattr(stddist_base = True)
     def test_add(self):
         cpath = "ExtFunctionTests.Evaluator_Add"
-        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_evaluation_dynamic":True}, compiler_log_level="d:log.txt")
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_evaluation_dynamic":True}, version=2.0, compiler_log_level="d:log.txt")
         
         nbr_of_evaluator_calls = 0
         with open("log.txt") as f:
@@ -74,10 +74,10 @@ class TestEvaluator:
         
         assert nbr_of_evaluator_calls == 2, "Wrong number of external function calls, check log."
         
-        model = load_fmu(fmu_name)
+        model = FMUModelME2(fmu_name, _connect_dll=False)
         
-        assert model.get("c") == 3, model.get("c")
-        assert model.get("d") == 3, model.get("d")
+        assert model.get_variable_start("c") == 3, model.get_variable_start("c")
+        assert model.get_variable_start("d") == 3, model.get_variable_start("d")
     
     @testattr(stddist_base = True)
     def test_unsupported_signature(self):
@@ -109,7 +109,7 @@ class TestEvaluator:
     @testattr(stddist_base = True)
     def test_double_return(self):
         cpath = "ExtFunctionTests.Evaluator_Double"
-        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_evaluation_dynamic":True}, compiler_log_level="d:log.txt")
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_evaluation_dynamic":True}, version=2.0, compiler_log_level="d:log.txt")
         
         nbr_of_evaluator_calls = 0
         with open("log.txt") as f:
@@ -118,15 +118,15 @@ class TestEvaluator:
         
         assert nbr_of_evaluator_calls == 2, "Wrong number of external function calls, check log."
         
-        model = load_fmu(fmu_name)
+        model = FMUModelME2(fmu_name, _connect_dll=False)
         
-        assert model.get("c") == 3.0, model.get("c")
-        assert model.get("d") == 9.0, model.get("d")
+        assert model.get_variable_start("c") == 3.0, model.get_variable_start("c")
+        assert model.get_variable_start("d") == 9.0, model.get_variable_start("d")
     
     @testattr(stddist_base = True)
     def test_integer_return(self):
         cpath = "ExtFunctionTests.Evaluator_Integer"
-        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_evaluation_dynamic":True}, compiler_log_level="d:log.txt")
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_evaluation_dynamic":True}, version=2.0, compiler_log_level="d:log.txt")
         
         nbr_of_evaluator_calls = 0
         with open("log.txt") as f:
@@ -135,14 +135,14 @@ class TestEvaluator:
         
         assert nbr_of_evaluator_calls == 1, "Wrong number of external function calls, check log."
         
-        model = load_fmu(fmu_name)
+        model = FMUModelME2(fmu_name, _connect_dll=False)
         
-        assert model.get("c") == 3.0, model.get("c")
+        assert model.get_variable_start("c") == 3.0, model.get_variable_start("c")
     
     @testattr(stddist_base = True)
     def test_record(self):
         cpath = "ExtFunctionTests.Evaluator_Record"
-        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_evaluation_dynamic":True}, compiler_log_level="d:log.txt")
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"external_constant_evaluation_dynamic":True}, version=2.0, compiler_log_level="d:log.txt")
         
         nbr_of_evaluator_calls = 0
         with open("log.txt") as f:
@@ -151,19 +151,19 @@ class TestEvaluator:
         
         assert nbr_of_evaluator_calls == 1, "Wrong number of external function calls, check log."
         
-        model = load_fmu(fmu_name)
+        model = FMUModelME2(fmu_name, _connect_dll=False)
         
-        assert model.get("c.x0") == 1.0, model.get("c.x0")
-        assert model.get("c.x1") == 2.0, model.get("c.x1")
-        assert model.get("c.x2") == 3.0, model.get("c.x2")
-        assert model.get("c.x3") == 3.0, model.get("c.x3")
-        assert model.get("c.x4") == 4.0, model.get("c.x4")
-        assert model.get("c.x5") == 5.0, model.get("c.x5")
-        assert model.get("c.x6") == 6.0, model.get("c.x6")
-        assert model.get("c.x7") == 7.0, model.get("c.x7")
-        assert model.get("c.x8") == 8.0, model.get("c.x8")
-        assert model.get("c.x9") == 9.0, model.get("c.x9")
-        assert model.get("c.x10") == 10.0, model.get("c.x10")
+        assert model.get_variable_start("c.x0") == 1.0, model.get_variable_start("c.x0")
+        assert model.get_variable_start("c.x1") == 2.0, model.get_variable_start("c.x1")
+        assert model.get_variable_start("c.x2") == 3.0, model.get_variable_start("c.x2")
+        assert model.get_variable_start("c.x3") == 3.0, model.get_variable_start("c.x3")
+        assert model.get_variable_start("c.x4") == 4.0, model.get_variable_start("c.x4")
+        assert model.get_variable_start("c.x5") == 5.0, model.get_variable_start("c.x5")
+        assert model.get_variable_start("c.x6") == 6.0, model.get_variable_start("c.x6")
+        assert model.get_variable_start("c.x7") == 7.0, model.get_variable_start("c.x7")
+        assert model.get_variable_start("c.x8") == 8.0, model.get_variable_start("c.x8")
+        assert model.get_variable_start("c.x9") == 9.0, model.get_variable_start("c.x9")
+        assert model.get_variable_start("c.x10") == 10.0, model.get_variable_start("c.x10")
     
 class TestExternalStatic:
 

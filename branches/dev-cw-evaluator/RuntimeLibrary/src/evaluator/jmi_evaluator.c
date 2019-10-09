@@ -245,6 +245,27 @@ void jmi_call_integer_fcn_ssi(generic_funcptr fcn, int *out) {
     }
 }
 
+void jmi_call_integer_fcn_ii(generic_funcptr fcn, int *out) {
+    JMI_DEF(INT, arg_0)
+    JMI_DEF(INT, arg_1)
+    JMI_DEF(INT_EXT, tmp_0)
+    JMI_DEF(INT_EXT, tmp_1)
+
+    JMCEVAL_parse(Integer, arg_0);
+    JMCEVAL_parse(Integer, arg_1);
+
+    JMCEVAL_check("CALC");
+    if (JMCEVAL_try()) {
+        /* Calc phase */
+        tmp_0 = (int)arg_0;
+        tmp_1 = (int)arg_1;
+        *out = ((f_i_ii)fcn)(arg_0, arg_1);
+    }
+    else {
+        JMCEVAL_failed();
+    }
+}
+
 void jmi_call_integer_fcn(generic_funcptr fcn, const char* inputs) {
     JMI_DEF(INT, i_output)
     JMI_DEF(INT_EXT, tmp_output)
@@ -258,6 +279,8 @@ void jmi_call_integer_fcn(generic_funcptr fcn, const char* inputs) {
         jmi_call_integer_fcn_si(fcn, &tmp_output);
     } else if (strcmp(inputs, "s,s,i,") == 0) {
         jmi_call_integer_fcn_ssi(fcn, &tmp_output);
+    } else if (strcmp(inputs, "i,i,") == 0) {
+        jmi_call_integer_fcn_ii(fcn, &tmp_output);
     } else {
         printf(ERROR_NOT_SUPPORTED_INPUT_ARGS_MSG);
         exit(ERROR_NOT_SUPPORTED_INPUT_ARGS);

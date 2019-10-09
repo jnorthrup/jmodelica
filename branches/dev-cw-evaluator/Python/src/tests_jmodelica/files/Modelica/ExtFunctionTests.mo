@@ -34,7 +34,7 @@ model Evaluator_Integer
                              Include="#include \"evaluatorTests.h\"");
     end i_ii;
     
-    Integer c = i_ii(1,2);
+    constant Integer c = i_ii(1,2);
 end Evaluator_Integer;
 
 model Evaluator_Record
@@ -61,7 +61,7 @@ model Evaluator_Record
                              Include="#include \"evaluatorTests.h\"");
     end iddpR_ddddddddddd_;
     
-    R c = iddpR_ddddddddddd_(1,2.0,3.0);
+    constant R c = iddpR_ddddddddddd_(1,2.0,3.0);
 end Evaluator_Record;
 
 
