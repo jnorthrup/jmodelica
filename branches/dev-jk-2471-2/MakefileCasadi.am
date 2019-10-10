@@ -12,41 +12,6 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-casadi:
-if COMPILE_WITH_IPOPT
-	cd $(abs_builddir)/ThirdParty/CasADi; \
-	make -f Makefile  "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR)" "IPOPT_HOME=$(IPOPT_HOME)" "CASADI_PYTHON_INST_DIR=${CASADI_PYTHON_INST_DIR}" "CASADI_INST_DIR=${CASADI_INST_DIR}" "CASADI_PLUGIN_INST_DIR=${CASADI_PLUGIN_INST_DIR}" "CMAKE_CASADI_ARGS=${CMAKE_CASADI_ARGS}" "CMAKE_CASADI_COMPILER_ARGS=${CMAKE_CASADI_COMPILER_ARGS}" "CMAKE_CASADI_CXX_FLAG=${CMAKE_CASADI_CXX_FLAG}" "CMAKE_PYTHON_LIB=${CMAKE_PYTHON_LIB}"
-endif
-if COMPILE_WITH_IPOPT64
-	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
-	export PYTHONHOME=$(PYTHON64_HOME); \
-	cd $(abs_builddir)/ThirdParty/CasADi; \
-	make -f Makefile  "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR64)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR64)" "IPOPT_HOME=$(IPOPT64_HOME)" "CASADI_PYTHON_INST_DIR=${CASADI_PYTHON_INST_DIR64}" "CASADI_INST_DIR=${CASADI_INST_DIR64}" "CASADI_PLUGIN_INST_DIR=${CASADI_PLUGIN_INST_DIR64}" "CMAKE_CASADI_ARGS=${CMAKE_CASADI_ARGS64}" "CMAKE_CASADI_COMPILER_ARGS=${CMAKE_CASADI_COMPILER_ARGS64}" "CMAKE_CASADI_CXX_FLAG=${CMAKE_CASADI_CXX_FLAG64}" "CMAKE_PYTHON_LIB=${CMAKE_PYTHON64_LIB}" "CMAKE_PYTHON_INCLUDE=${CMAKE_PYTHON64_INCLUDE}"
-	export PYTHONHOME=$(ORIG_PYTHON_HOME); \
-	export PATH="$(ORIG_PATH)";
-endif
-
-install_casadi: casadi
-if COMPILE_WITH_IPOPT
-	cd $(abs_builddir)/ThirdParty/CasADi; \
-	make -f Makefile install "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR)" "IPOPT_HOME=$(IPOPT_HOME)"
-	mkdir -p $(DESTDIR)$(prefix)/Python/
-	cp -r $(CASADI_PYTHON_INST_DIR)/casadi $(DESTDIR)$(prefix)/Python/
-	## temp fix
-	cp $(CASADI_BUILD_DIR)/swig/casadi_core.py $(DESTDIR)$(prefix)/Python/casadi
-endif
-if COMPILE_WITH_IPOPT64  
-	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
-	export PYTHONHOME=$(PYTHON64_HOME);  
-	cd $(abs_builddir)/ThirdParty/CasADi; \
-	make -f Makefile install "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR64)" "IPOPT_HOME=$(IPOPT64_HOME)"
-	mkdir -p $(DESTDIR)$(prefix)/Python/
-	cp -r $(CASADI_PYTHON_INST_DIR64)/casadi $(DESTDIR)$(prefix)/Python_64/
-	## temp fix
-	cp $(CASADI_BUILD_DIR64)/swig/casadi_core.py $(DESTDIR)$(prefix)/Python_64/casadi
-	export PYTHONHOME=$(ORIG_PYTHON_HOME); \
-	export PATH="$(ORIG_PATH)";
-endif
 ## Install for CasADiInterface, Variables and targets. 
 ## MC_interface installs the system with Python. 
 ## If C++ compilation/tests are wanted there is the target MC_interface_cplusplus
@@ -83,6 +48,44 @@ CMAKE_CASADI_CXX_FLAG=-m32
 CMAKE_CASADI_COMPILER_ARGS=-m32 -mincoming-stack-boundary=2
 CMAKE_CASADI_CXX_FLAG64=-m64
 CMAKE_CASADI_COMPILER_ARGS64=-m64 -fpermissive
+
+.PHONY: modelicacasadi_wrapper ifcasadi install_modelicacasadi_transfer install_modelicacasadi_wrapper
+
+casadi:
+if COMPILE_WITH_IPOPT
+	cd $(abs_builddir)/ThirdParty/CasADi; \
+	make -f Makefile  "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR)" "IPOPT_HOME=$(IPOPT_HOME)" "CASADI_PYTHON_INST_DIR=${CASADI_PYTHON_INST_DIR}" "CASADI_INST_DIR=${CASADI_INST_DIR}" "CASADI_PLUGIN_INST_DIR=${CASADI_PLUGIN_INST_DIR}" "CMAKE_CASADI_ARGS=${CMAKE_CASADI_ARGS}" "CMAKE_CASADI_COMPILER_ARGS=${CMAKE_CASADI_COMPILER_ARGS}" "CMAKE_CASADI_CXX_FLAG=${CMAKE_CASADI_CXX_FLAG}" "CMAKE_PYTHON_LIB=${CMAKE_PYTHON_LIB}"
+endif
+if COMPILE_WITH_IPOPT64
+	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
+	export PYTHONHOME=$(PYTHON64_HOME); \
+	cd $(abs_builddir)/ThirdParty/CasADi; \
+	make -f Makefile  "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR64)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR64)" "IPOPT_HOME=$(IPOPT64_HOME)" "CASADI_PYTHON_INST_DIR=${CASADI_PYTHON_INST_DIR64}" "CASADI_INST_DIR=${CASADI_INST_DIR64}" "CASADI_PLUGIN_INST_DIR=${CASADI_PLUGIN_INST_DIR64}" "CMAKE_CASADI_ARGS=${CMAKE_CASADI_ARGS64}" "CMAKE_CASADI_COMPILER_ARGS=${CMAKE_CASADI_COMPILER_ARGS64}" "CMAKE_CASADI_CXX_FLAG=${CMAKE_CASADI_CXX_FLAG64}" "CMAKE_PYTHON_LIB=${CMAKE_PYTHON64_LIB}" "CMAKE_PYTHON_INCLUDE=${CMAKE_PYTHON64_INCLUDE}"
+	export PYTHONHOME=$(ORIG_PYTHON_HOME); \
+	export PATH="$(ORIG_PATH)";
+endif
+
+install_casadi: casadi
+if COMPILE_WITH_IPOPT
+	cd $(abs_builddir)/ThirdParty/CasADi; \
+	make -f Makefile install "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR)" "IPOPT_HOME=$(IPOPT_HOME)"
+	mkdir -p $(DESTDIR)$(prefix)/Python/
+	cp -r $(CASADI_PYTHON_INST_DIR)/casadi $(DESTDIR)$(prefix)/Python/
+	## temp fix
+	cp $(CASADI_BUILD_DIR)/swig/casadi_core.py $(DESTDIR)$(prefix)/Python/casadi
+endif
+if COMPILE_WITH_IPOPT64  
+	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
+	export PYTHONHOME=$(PYTHON64_HOME);  
+	cd $(abs_builddir)/ThirdParty/CasADi; \
+	make -f Makefile install "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR64)" "IPOPT_HOME=$(IPOPT64_HOME)"
+	mkdir -p $(DESTDIR)$(prefix)/Python/
+	cp -r $(CASADI_PYTHON_INST_DIR64)/casadi $(DESTDIR)$(prefix)/Python_64/
+	## temp fix
+	cp $(CASADI_BUILD_DIR64)/swig/casadi_core.py $(DESTDIR)$(prefix)/Python_64/casadi
+	export PYTHONHOME=$(ORIG_PYTHON_HOME); \
+	export PATH="$(ORIG_PATH)";
+endif
 
 casadi_interface: install_casadi_interface
 build_casadi_interface: casadi modelicacasadi_wrapper
@@ -244,5 +247,3 @@ if HAVE_ANT
 	$(ANT_OPTS) $(ANT) clean ; rm -rf $(OC_CASADI_BUILD)/src/cpp-generated $(OC_CASADI_BUILD)/src/generated/optimica/java/ifcasadi 
 endif
 	
-
-.PHONY: modelicacasadi_wrapper ifcasadi install_modelicacasadi_transfer install_modelicacasadi_wrapper

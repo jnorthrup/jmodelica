@@ -878,6 +878,8 @@ uninstall-am:
 	ps ps-am tags tags-recursive uninstall uninstall-am
 
 
+.PHONY: modelicacasadi_wrapper ifcasadi install_modelicacasadi_transfer install_modelicacasadi_wrapper
+
 casadi:
 @COMPILE_WITH_IPOPT_TRUE@	cd $(abs_builddir)/ThirdParty/CasADi; \
 @COMPILE_WITH_IPOPT_TRUE@	make -f Makefile  "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR)" "IPOPT_HOME=$(IPOPT_HOME)" "CASADI_PYTHON_INST_DIR=${CASADI_PYTHON_INST_DIR}" "CASADI_INST_DIR=${CASADI_INST_DIR}" "CASADI_PLUGIN_INST_DIR=${CASADI_PLUGIN_INST_DIR}" "CMAKE_CASADI_ARGS=${CMAKE_CASADI_ARGS}" "CMAKE_CASADI_COMPILER_ARGS=${CMAKE_CASADI_COMPILER_ARGS}" "CMAKE_CASADI_CXX_FLAG=${CMAKE_CASADI_CXX_FLAG}" "CMAKE_PYTHON_LIB=${CMAKE_PYTHON_LIB}"
@@ -1040,8 +1042,6 @@ clean-casadi-interface:
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean ; rm -rf $(MC_CASADI_BUILD)/src/cpp-generated $(MC_CASADI_BUILD)/src/generated/modelica/java/ifcasadi 
 @HAVE_ANT_TRUE@	cd $(JAVA_CASADI_BUILD_DIR)/OptimicaCompilerCasADi; \
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean ; rm -rf $(OC_CASADI_BUILD)/src/cpp-generated $(OC_CASADI_BUILD)/src/generated/optimica/java/ifcasadi 
-
-.PHONY: modelicacasadi_wrapper ifcasadi install_modelicacasadi_transfer install_modelicacasadi_wrapper
 
 build-python-packages:
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	mkdir -p $(assimulo_build_dir); \
