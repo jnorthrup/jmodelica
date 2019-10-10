@@ -1,5 +1,138 @@
 package ExtFunctionTests
 
+model Evaluator_Double
+    function d_i
+     input Integer a;
+     output Real b;
+
+     external "C" b=f_d_i(a) annotation(Library="evaluatorTestsShared",
+                             Include="#include \"evaluatorTests.h\"");
+    end d_i;
+    
+    function d_idd
+     input Integer a;
+     input Real b;
+     input Real c;
+     output Real d;
+
+     external "C" d=f_d_idd(a,b,c) annotation(Library="evaluatorTestsShared",
+                             Include="#include \"evaluatorTests.h\"");
+    end d_idd;
+    
+    
+    Real c = d_i(1);
+    Real d = d_idd(1, 2.0, 3.0);
+end Evaluator_Double;
+
+model Evaluator_Integer
+    function i_ii
+     input Integer a;
+     input Integer b;
+     output Integer c;
+
+     external "C" c=f_i_ii(a,b) annotation(Library="evaluatorTestsShared",
+                             Include="#include \"evaluatorTests.h\"");
+    end i_ii;
+    
+    constant Integer c = i_ii(1,2);
+end Evaluator_Integer;
+
+model Evaluator_Record
+    record R
+        Real x0;
+        Real x1;
+        Real x2;
+        Real x3;
+        Real x4;
+        Real x5;
+        Real x6;
+        Real x7;
+        Real x8;
+        Real x9;
+        Real x10;
+    end R;
+    function iddpR_ddddddddddd_
+     input Integer a;
+     input Real b;
+     input Real c;
+     output R d;
+
+     external "C" f___iddpR_ddddddddddd_(a,b,c,d) annotation(Library="evaluatorTestsShared",
+                             Include="#include \"evaluatorTests.h\"");
+    end iddpR_ddddddddddd_;
+    
+    constant R c = iddpR_ddddddddddd_(1,2.0,3.0);
+end Evaluator_Record;
+
+
+model Evaluator_Substring
+    constant String full="Yy00";
+    constant String sub=Modelica.Utilities.Strings.substring(full,1,1);
+    constant String string1 = "This is line 111";
+    constant String string2 = Modelica.Utilities.Strings.substring(string1,9,12); // string2 = \"line\"
+    constant Integer len = Modelica.Utilities.Strings.length(string1);
+    constant Integer start = Modelica.Utilities.Strings.Advanced.skipWhiteSpace("   Hello", 1);
+    constant Boolean not_equal = Modelica.Utilities.Strings.isEqual("Temp", "test", true);
+    constant Boolean equal = Modelica.Utilities.Strings.isEqual("Temp", "Temp", true);
+end Evaluator_Substring;
+
+model Evaluator_Add
+ function add1
+     input Real a;
+     input Real b;
+     output Real c;
+
+     external "C" c=add(a,b) annotation(Library="addNumbersShared",
+                             Include="#include \"addNumbers.h\"");
+ end add1;
+ 
+ function add2
+     input Real a;
+     input Real b;
+     output Real c;
+
+     external "C" add_output(a,b,c) annotation(Library="addNumbersShared",
+                             Include="#include \"addNumbers.h\"");
+ end add2;
+
+ constant Real a = 1;
+ constant Real b = 2;
+ Real c = add1(a,b);
+ Real d = add2(a,b);
+end Evaluator_Add;
+
+model Evaluator_Multiple_Add
+ function add
+     input Real a;
+     input Real b;
+     input Real c;
+     input Real d;
+     input Real e;
+     input Real f;
+     input Real g;
+     input Real h;
+     input Real i;
+     output Real o;
+
+     external "C" o=multiple_add(a,b,c,d,e,f,g,h,i) annotation(Library="addNumbersShared",
+                             Include="#include \"addNumbers.h\"");
+ end add;
+ 
+ constant Real a = 1;
+ constant Real b = 2;
+ Real c = add(a,b,a,b,a,b,a,b,a);
+end Evaluator_Multiple_Add;
+
+model Evaluator_Unknown_Shared
+    function unknown_function
+        input Real a;
+        output Real b;
+        external "C" b = unknown(a) annotation(Library="unknown");
+    end unknown_function;
+    
+    constant Real a = unknown_function(1.0);
+end Evaluator_Unknown_Shared;
+
 model ExtFunctionTest1
  Real a(start=1) = 1;
  Real b(start=2) = 2;
