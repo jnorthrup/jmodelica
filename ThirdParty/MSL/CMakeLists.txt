@@ -22,7 +22,7 @@ set(MSLRESOURCES ${MSL_DIR}/Modelica/Resources/Library)
 set(JMI_JMODELICA_SRC_DIR ${TOP_SRC}/RuntimeLibrary)
 
 # Source files for ModelicaExternalC
-set(MODELICAEXTERNALCSources
+set(MODELICAEXTERNALC_SOURCES
     ${JMI_JMODELICA_SRC_DIR}/src/jmi/jmi_global.h
     ${JMI_JMODELICA_SRC_DIR}/src/jmi/ModelicaUtilities.h
     
@@ -33,6 +33,12 @@ set(MODELICAEXTERNALCSources
     ${MSLCSOURCES}/ModelicaStrings.c
     ${MSLCSOURCES}/ModelicaRandom.c
     ${MSLCSOURCES}/ModelicaFFT.c
+)
+
+# Source files for ModelicaStandardTables
+set(MODELICASTDTABLE_SOURCES
+    ${MSLCSOURCES}/ModelicaStandardTables.c
+    ${MSLCSOURCES}/ModelicaStandardTablesUsertab.c
 )
 
 # Source files for Zlib
@@ -53,8 +59,6 @@ set(ZLIB_SOURCES
     ${MSLCSOURCES}/zlib/uncompr.c
     ${MSLCSOURCES}/zlib/zutil.c
 )
-
-
 
 if(NOT MSVC)
 else()
@@ -96,14 +100,14 @@ endif()
 #Build ModelicaExternalC library
 include_directories(${MSLCSOURCES})
 include_directories(${MSLCSOURCES}/zlib)
-add_library(ModelicaExternalC STATIC ${MODELICAEXTERNALCSources})
+add_library(ModelicaExternalC STATIC ${MODELICAEXTERNALC_SOURCES})
 if(NOT MSVC)
     set_target_properties(ModelicaExternalC PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic")
 endif()
 
 #Build ModelicaStandardTables library
 add_definitions("-DDUMMY_FUNCTION_USERTAB -DHAVE_ZLIB")
-add_library(ModelicaStandardTables STATIC ${MSLCSOURCES}/ModelicaStandardTables.c)
+add_library(ModelicaStandardTables STATIC ${MODELICASTDTABLE_SOURCES})
 if(NOT MSVC)
     set_target_properties(ModelicaStandardTables PROPERTIES COMPILE_FLAGS "-Wall -g")
 endif()
