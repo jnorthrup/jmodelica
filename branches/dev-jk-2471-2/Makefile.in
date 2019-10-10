@@ -28,6 +28,20 @@
 #    You should have received a copy of the Common Public License
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
+
+# 
+#    Copyright (C) 2009 Modelon AB
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the Common Public License as published by
+#    IBM, version 1.0 of the License.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY. See the Common Public License for more details.
+#
+#    You should have received a copy of the Common Public License
+#    along with this program.  If not, see
+#     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -48,13 +62,13 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 @PYTHON_ENABLED_TRUE@am__append_1 = Python
-subdir = .
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
-	$(srcdir)/jm_tests.in \
+	$(srcdir)/Makefile.in $(srcdir)/MakefileCasadi.am \
+	$(srcdir)/config.h.in $(srcdir)/jm_tests.in \
 	$(top_srcdir)/Python/src/required_defaults.py.in \
 	$(top_srcdir)/configure INSTALL config.guess config.sub \
 	depcomp install-sh ltmain.sh missing
+subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
@@ -370,7 +384,7 @@ all: config.h
 .SUFFIXES:
 am--refresh:
 	@:
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(srcdir)/MakefileCasadi.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -1017,6 +1031,18 @@ modelicacasadi_wrapper: $(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar $(OC_CASADI_
 @COMPILE_WITH_IPOPT64_TRUE@	echo "from modelica_casadi_transfer_wrapper import *" >> $(DESTDIR)$(prefix)/Python_64/modelicacasadi_transfer/__init__.py
 @COMPILE_WITH_IPOPT64_TRUE@	cp $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py $(DESTDIR)$(prefix)/Python_64/modelicacasadi_transfer
 
+clean-casadi-interface: 
+	rm -rf $(MC_BUILD)
+	rm -rf $(MC_BUILD64)
+#	rm -rf $(DESTDIR)$(prefix)/Python/casadi
+#	rm -rf $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
+@HAVE_ANT_TRUE@	cd $(JAVA_CASADI_BUILD_DIR)/ModelicaCompilerCasADi; \
+@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean ; rm -rf $(MC_CASADI_BUILD)/src/cpp-generated $(MC_CASADI_BUILD)/src/generated/modelica/java/ifcasadi 
+@HAVE_ANT_TRUE@	cd $(JAVA_CASADI_BUILD_DIR)/OptimicaCompilerCasADi; \
+@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean ; rm -rf $(OC_CASADI_BUILD)/src/cpp-generated $(OC_CASADI_BUILD)/src/generated/optimica/java/ifcasadi 
+
+.PHONY: modelicacasadi_wrapper ifcasadi install_modelicacasadi_transfer install_modelicacasadi_wrapper
+
 build-python-packages:
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	mkdir -p $(assimulo_build_dir); \
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	cd $(assimulo_src_dir)/..; \
@@ -1322,16 +1348,6 @@ test: install
 
 clean-local: clean-frontends clean-python-packages clean-casadi-interface
 
-clean-casadi-interface: 
-	rm -rf $(MC_BUILD)
-	rm -rf $(MC_BUILD64)
-#	rm -rf $(DESTDIR)$(prefix)/Python/casadi
-#	rm -rf $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
-@HAVE_ANT_TRUE@	cd $(JAVA_CASADI_BUILD_DIR)/ModelicaCompilerCasADi; \
-@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean ; rm -rf $(MC_CASADI_BUILD)/src/cpp-generated $(MC_CASADI_BUILD)/src/generated/modelica/java/ifcasadi 
-@HAVE_ANT_TRUE@	cd $(JAVA_CASADI_BUILD_DIR)/OptimicaCompilerCasADi; \
-@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean ; rm -rf $(OC_CASADI_BUILD)/src/cpp-generated $(OC_CASADI_BUILD)/src/generated/optimica/java/ifcasadi 
-
 clean-python-packages:
 @PYTHON_ENABLED_TRUE@	if [ -d $(assimulo_build_dir)/Assimulo ]; then \
 @PYTHON_ENABLED_TRUE@		cd $(assimulo_build_dir)/Assimulo; \
@@ -1361,8 +1377,6 @@ docs:
 	cd $(abs_top_srcdir); doxygen doc/ModelicaCompiler/modelica_compiler_doxydoc.conf
 	cd $(abs_top_srcdir); doxygen doc/OptimicaCompiler/optimica_compiler_doxydoc.conf
 	make -C $(abs_top_srcdir)/doc/PyJMI html
-
-.PHONY: modelicacasadi_wrapper ifcasadi install_modelicacasadi_transfer install_modelicacasadi_wrapper
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
