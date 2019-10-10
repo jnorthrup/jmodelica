@@ -48,7 +48,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Equations.hpp"
 #include "FlatEquations.hpp"
 #include "BLT.hpp"
-
+#include "utils.hpp"
 #include "initjcc.h" // for env
 #include "JCCEnv.h"
 
@@ -313,7 +313,7 @@ static std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> > createModelE
     for (int i = 0; i < equationList.size(); ++i) {
         AbstractEquation eq = AbstractEquation(equationList.get(i).this$);
         if (eq.isIgnoredForCasADi()) {
-            char *str = env->toPyUnicode(eq.this$);
+            char *str = jobjectoToString(eq.this$);
             std::cerr << "Warning: Ignored equation:\n" << str << std::endl;
             delete[] str;
 
@@ -447,7 +447,7 @@ void transferCommentForVariable(ModelicaCasADi::Ref<ModelicaCasADi::Variable> va
 {
     if(fv.hasFStringComment()) {
         Comment comment = Comment(fv.getFStringComment().this$);
-        var->setAttribute("comment", casadi::MX::sym(env->toPyUnicode(comment.getComment().this$)));
+        var->setAttribute("comment", casadi::MX::sym(jobjectoToString(comment.getComment().this$)));
     }
 }
 
@@ -465,7 +465,7 @@ void transferFAttributeListForVariable(ModelicaCasADi::Ref<ModelicaCasADi::Varia
     Attribute attr;
     for (int i = 0; i < attributeList.getNumChild(); ++i) {
         attr = Attribute(attributeList.getChild(i).this$);
-        std::string name = env->toPyUnicode(attr.name().this$);
+        std::string name = jobjectoToString(attr.name().this$);
         if (name != "stateSelect" && name.find("__") != 0) {
             // Don't transfer stateSelect attribute, since enumerations are not supported
             var->setAttribute(name, toMX(attr.getValue()));
@@ -560,12 +560,12 @@ void transferDerivedType(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, DerivedT
 {
     List attributeList = derivedType.getFAttributes();
     Attribute  attr;
-    std::string typeName = env->toPyUnicode(derivedType.getName().this$);
-    std::string baseTypeName = env->toPyUnicode((Type(derivedType.getBaseType().this$)).toPyUnicode().this$);
+    std::string typeName = jobjectoToString(derivedType.getName().this$);
+    std::string baseTypeName = jobjectoToString((Type(derivedType.getBaseType().this$)).toString().this$);
     ModelicaCasADi::Ref<ModelicaCasADi::UserType> userType = new ModelicaCasADi::UserType(typeName, getBaseTypeForDerivedType(m, baseTypeName));
     for (int i = 0; i < attributeList.getNumChild(); ++i) {
         attr = Attribute(attributeList.getChild(i).this$);
-        userType->setAttribute(env->toPyUnicode(attr.name().this$), toMX(attr.getValue()));
+        userType->setAttribute(jobjectoToString(attr.name().this$), toMX(attr.getValue()));
     }
     m->addNewVariableType(userType);
 }
@@ -606,8 +606,8 @@ template <class FVar>
 ModelicaCasADi::Ref<ModelicaCasADi::UserType> getUserType(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv)
 {
     ModelicaCasADi::Ref<ModelicaCasADi::UserType> userType;
-    if (!std::string(env->toPyUnicode(fv.getDerivedType().this$)).empty()) {
-        userType = (ModelicaCasADi::UserType*) m->getVariableType(env->toPyUnicode(fv.getDerivedType().this$)).getNode();
+    if (!std::string(jobjectoToString(fv.getDerivedType().this$)).empty()) {
+        userType = (ModelicaCasADi::UserType*) m->getVariableType(jobjectoToString(fv.getDerivedType().this$)).getNode();
         if(userType.getNode() == NULL) {
             throw std::runtime_error("Variable's derived type not present in Model when Variable transferred");
         }
@@ -692,7 +692,7 @@ void handleAliasVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, ModelicaC
         return;
     }
     
-    std::string aliasName = env->toPyUnicode(fv.alias().name().this$);
+    std::string aliasName = jobjectoToString(fv.alias().name().this$);
     ModelicaCasADi::Ref<ModelicaCasADi::Variable> aliasVariable = m->getVariable(aliasName);
     if (aliasVariable == NULL) {
         throw std::runtime_error("Tried to transfer alias variable `" + var->getName() + "` before its model variable `" + aliasName + "`");
@@ -724,7 +724,7 @@ static void transferVariables(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, Arr
     for (int i = 0; i < vars.size(); i++) {
         FVar var = FVar(vars.get(i).this$);
         if (var.type().isEnum()) {
-            char *str = env->toPyUnicode(var.this$);
+            char *str = jobjectoToString(var.this$);
             std::cerr << "Warning: Ignored enumeration typed variable:\n" << str << std::endl;
             delete[] str;
         }
