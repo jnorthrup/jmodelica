@@ -365,6 +365,8 @@ class TestLocalDAECollocator(object):
         opts = model.simulate_options()
         opts["CVode_options"]["rtol"] = 1e-6
         opts["CVode_options"]["atol"] = 1e-8 * model.nominal_continuous_states
+        opts["CVode_options"]["maxh"] = 0.0
+        opts["ncp"] = 0
         init_res = model.simulate(final_time=300, input=('Tc', u_traj),
                                   options=opts)
         
@@ -2124,6 +2126,8 @@ class TestLocalDAECollocator(object):
         opts = model.simulate_options()
         opts["CVode_options"]["rtol"] = 1e-6
         opts["CVode_options"]["atol"] = 1e-8 * model.nominal_continuous_states
+        opts["CVode_options"]["maxh"] = 0.0
+        opts["ncp"] = 0
         res = model.simulate(start_time=0., final_time=150., input=opt_input,
                              options=opts)
         N.testing.assert_allclose([res.final("T"), res.final("c")],
