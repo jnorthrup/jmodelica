@@ -30,7 +30,7 @@ aspect FExpToCasADi {
             TargetObject target = createTargetObject("nocodegen", null);
             target.setDefaultOptions(options);
             try {
-                return compileModel(name, cl, target, null, null);
+                return compileModel(name, cl, target, null);
             } finally {
                 options.copyAllOptions(tempOptions);
             }
