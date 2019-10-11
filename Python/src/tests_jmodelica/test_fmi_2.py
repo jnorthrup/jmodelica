@@ -987,7 +987,6 @@ class Test_FMUModelME2:
         opts=coupled.simulate_options()
         assert opts['initialize']
         assert opts['with_jacobian'] == "Default"
-        assert opts['ncp'] == 0
 
         #Test the result file
         res=coupled.simulate(options={"result_handling":"file"})
