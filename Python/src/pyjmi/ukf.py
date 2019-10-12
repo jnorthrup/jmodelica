@@ -367,6 +367,8 @@ class UKF:
                 opt = model.simulate_options()
                 opt['CVode_options']['atol'] = 1e-8
                 opt['CVode_options']['rtol'] = 1e-6
+                opt['CVode_options']['maxh'] = 0.0
+                opt['ncp'] = 0
                 print 'Simulating sigma-point '+str(i+1)+' out of '+str(sigma.shape[1])+' :'
                 try:
                     result = model.simulate(start_time = currTime, final_time = currTime + h, options = opt, input = u)
