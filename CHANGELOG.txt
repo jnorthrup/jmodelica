@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+# Change ; Major ; PyFMI ; #5854
+Updated JModelica external to PyFMI 2.5.5
+
 # Feature ; Minor ; Compiler; #5837
 Added a pre-compiled evaluator used for evaluating external functions
 during the compilation (for performance). Activated by the option 
