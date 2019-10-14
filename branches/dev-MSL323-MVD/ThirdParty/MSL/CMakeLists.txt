@@ -35,16 +35,16 @@ set(MODELICAEXTERNALC_SOURCES
     ${MSLCSOURCES}/ModelicaFFT.c
 )
 
-# Source files for ModelicaMatIO
-set(MODELICAMATIO_SOURCES
-    ${MSLCSOURCES}/ModelicaMatIO.c
-    ${MSLCSOURCES}/snprintf.c
-)
-
 # Source files for ModelicaStandardTables
 set(MODELICASTDTABLE_SOURCES
     ${MSLCSOURCES}/ModelicaStandardTables.c
     ${MSLCSOURCES}/ModelicaStandardTablesUsertab.c
+)
+
+# Source files for ModelicaMatIO
+set(MODELICAMATIO_SOURCES
+    ${MSLCSOURCES}/ModelicaMatIO.c
+    ${MSLCSOURCES}/snprintf.c
 )
 
 # Source files for Zlib
