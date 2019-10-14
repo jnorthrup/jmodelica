@@ -35,6 +35,12 @@ set(MODELICAEXTERNALC_SOURCES
     ${MSLCSOURCES}/ModelicaFFT.c
 )
 
+# Source files for ModelicaMatIO
+set(MODELICAMATIO_SOURCES
+    ${MSLCSOURCES}/ModelicaMatIO.c
+    ${MSLCSOURCES}/snprintf.c
+)
+
 # Source files for ModelicaStandardTables
 set(MODELICASTDTABLE_SOURCES
     ${MSLCSOURCES}/ModelicaStandardTables.c
@@ -119,7 +125,7 @@ if(NOT MSVC)
 endif()
 
 #Build ModelicaMatIO library
-add_library(ModelicaMatIO STATIC ${MSLCSOURCES}/ModelicaMatIO.c)
+add_library(ModelicaMatIO STATIC ${MODELICAMATIO_SOURCES})
 if(NOT MSVC)
     set_target_properties(ModelicaMatIO PROPERTIES COMPILE_FLAGS "-Wall -g")
 endif()
