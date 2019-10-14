@@ -209,6 +209,8 @@ function python_tests() {
       ;;
     n)
       if [[ "${NO_BUILD_JMODELICA}" != "1" ]]; then
+        echo "OUTPUT=${OUTPUT}"
+        echo "NO_BUILD_JMODELICA=${NO_BUILD_JMODELICA}"
         echo Building...
       fi
       if build_jmodelica | log > /dev/null; then
