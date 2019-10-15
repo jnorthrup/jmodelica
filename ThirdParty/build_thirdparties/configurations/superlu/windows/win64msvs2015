@@ -22,3 +22,4 @@ include $(mkfile_dir)/win
 SUPERLU_EXTRA_CFLAGS=EXTRA_CFLAGS=-m64
 SUPERLU_BUILD_DIR=${BUILD_DIR}/superlu_build64
 SUPERLU_INSTALL_DIR=${BUILD_DIR}/superlu_install64
+GENERATOR="Visual Studio 14 2015 Win64"
