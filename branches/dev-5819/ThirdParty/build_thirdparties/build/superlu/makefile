@@ -19,7 +19,12 @@
 include default_config
 include $(USER_CONFIG)
 
-.PHONY: install
+.PHONY: install install_cmake
+
+install_cmake: $(SUPERLU_BUILD_DIR)
+	cd $(SUPERLU_BUILD_DIR) && cmake -G $(GENERATOR) $(SUPERLU_BUILD_DIR) -DSUPERLU_INSTALL_DIR=$(SUPERLU_INSTALL_DIR) ; \
+	cmake --build . --config Release ; \
+	cmake --build . --target install --config Release
 
 install: $(SUPERLU_BUILD_DIR)
 	cd $(SUPERLU_BUILD_DIR) && make blaslib $(SUPERLU_EXTRA_CFLAGS) DESTDIR= && make superlulib $(SUPERLU_EXTRA_CFLAGS) DESTDIR=; \
