@@ -397,11 +397,17 @@ function nose_test() {
 }
 
 function ant_test() {
-  if [[ "$1" == "Modelica" ]]; then
-    ant -f ${MC_ANT_ARGS} -Dtarget=${BUILD} ${CLEAN_JUNIT} test
-  else
-    ant -f ${OC_ANT_ARGS} -Dtarget=${BUILD} ${CLEAN_JUNIT} test
-  fi
+  echo "MC_ANT_ARGS=${MC_ANT_ARGS}"
+  echo "OC_ANT_ARGS=${OC_ANT_ARGS}"
+  echo "BUILD=${BUILD}"
+  echo "CLEAN_JUNIT=${CLEAN_JUNIT}"
+    if [[ "$1" == "Modelica" ]]; then
+        ant -f ${MC_ANT_ARGS} -Dtarget=${BUILD} ${CLEAN_JUNIT} test
+    else
+        ant -f ${OC_ANT_ARGS} -Dtarget=${BUILD} ${CLEAN_JUNIT} test
+    fi
+  echo "about to ls"
+  ls -la ${BUILD}
 }
 
 function build_jmodelica() {
@@ -443,6 +449,7 @@ function read_args() {
   TESTS=
   TESTS64=
   ARG_TYPE=flag
+  echo "DEFAULT_ARGS=${DEFAULT_ARGS}"
   for a in ${DEFAULT_ARGS} "$@"; do
     if [[ "$(echo $a | head -c1)" == "-" ]]; then
       ARG_TYPE=flag
@@ -615,8 +622,10 @@ done
 export JAVA_HOME JMODELICA_HOME IPOPT_HOME PYTHONPATH LD_LIBRARY_PATH ANT_OPTS SUNDIALS_HOME
 TIME=$(date +%s)
 
+echo "before read_args"
+echo "args $@"
 read_args "$@"
-
+echo "after read_args"
 if [[ $ERROR_ON_TEST_FAIL == 1 ]]; then
     if [[ -z $XML_RES_PATH ]]; then
         echo "-e needs -x"
