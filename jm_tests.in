@@ -635,6 +635,7 @@ fi
 
 if [ "${LOG}" == 1 ]; then
   echo "Log of jm_tests $(date):" > "${LOGFILE}"
+  echo "Finished writing log..."
 fi
 
 ANY_ON=0
@@ -655,6 +656,7 @@ fi
 res=0
 for a in ${tests}; do
   if [[ "${test[${!a}]}" == 1 ]]; then
+    echo "going with ${a}_tests"
     ${a}_tests || res=1
   fi
 done
