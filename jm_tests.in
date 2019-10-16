@@ -171,6 +171,7 @@ function modelica_tests() {
 }
 
 function optimica_tests() {
+  echo "in optimica_tests()"
   junit_test Optimica
 }
 
@@ -341,6 +342,8 @@ function filter_python_separate() {
 function junit_test() {
   print_name $1
   cd ${BUILD}/java
+  echo "doing ls..."
+  ls -la
   res=0
   case ${OUTPUT} in
     v) junit_test_v $1 || res=1 ;;
@@ -384,6 +387,7 @@ function junit_test_q() {
 }
 
 function junit_test_n() {
+    echo "in junit_test_n"
     res=0
     ant_test $1 \
         | log \
@@ -622,6 +626,7 @@ done
 export JAVA_HOME JMODELICA_HOME IPOPT_HOME PYTHONPATH LD_LIBRARY_PATH ANT_OPTS SUNDIALS_HOME
 TIME=$(date +%s)
 
+echo "TIME = ${TIME}"
 echo "before read_args"
 echo "args $@"
 read_args "$@"
