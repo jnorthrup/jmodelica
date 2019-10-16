@@ -29,6 +29,13 @@ if(NOT SUPERLU_INSTALL_DIR)
 set(SUPERLU_INSTALL_DIR )
 endif(NOT SUPERLU_INSTALL_DIR)
 
+if(MSVC)
+    ADD_DEFINITIONS(/D __OPENMP)
+    set(SUPERLU_SUFFIX _OPENMP)
+else()
+    set(SUPERLU_SUFFIX )
+endif()
+
 if(NOT USE_CBLAS)
     find_package(BLAS REQUIRED)
     if (BLAS_FOUND)
@@ -41,8 +48,6 @@ else()
     set(BLAS_LIBRARIES superlu_cblas)
 endif(NOT USE_CBLAS)
 
-if(MSVC)
-    ADD_DEFINITIONS(/D __OPENMP)
-endif()
+
 add_subdirectory(src)
 

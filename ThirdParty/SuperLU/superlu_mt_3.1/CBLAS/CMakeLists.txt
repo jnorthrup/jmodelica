@@ -21,19 +21,19 @@ if(NOT CBLAS_PRECISIONS)
 endif(NOT CBLAS_PRECISIONS)
 string(TOUPPER "${CBLAS_PRECISIONS}" CBLAS_PRECISIONS)
 
-set(SBLAS1 isamax.c sasum.c saxpy.c scopy.c sdot.c snrm2.c srot.c sscal.c sswap.c)
+set(SBLAS1 isamax.c sasum.c saxpy.c scopy.c sdot.c snrm2.c srot.c sscal.c)
 set(SBLAS2 sgemv.c ssymv.c strsv.c sger.c ssyr2.c)
 set(SINGLE_SRCS ${SBLAS1} ${SBLAS2})
 
-set(DBLAS1 idamax.c dasum.c daxpy.c dcopy.c ddot.c dnrm2.c drot.c dscal.c dswap.c)
+set(DBLAS1 idamax.c dasum.c daxpy.c dcopy.c ddot.c dnrm2.c drot.c dscal.c)
 set(DBLAS2 dgemv.c dsymv.c dtrsv.c dger.c dsyr2.c)
 set(DOUBLE_SRCS ${DBLAS1} ${DBLAS2})
 
-set(CBLAS1 icamax.c scasum.c caxpy.c ccopy.c scnrm2.c cscal.c cswap.c )
+set(CBLAS1 icamax.c scasum.c caxpy.c ccopy.c scnrm2.c cscal.c )
 set(CBLAS2 cgemv.c chemv.c ctrsv.c cgerc.c cher2.c )
 set(COMPLEX_SRCS ${CBLAS1} ${CBLAS2})
 
-set(ZBLAS1 izamax.c dzasum.c zaxpy.c zcopy.c dznrm2.c zscal.c dcabs1.c zswap.c )
+set(ZBLAS1 izamax.c dzasum.c zaxpy.c zcopy.c dznrm2.c zscal.c dcabs1.c )
 set(ZBLAS2 zgemv.c zhemv.c ztrsv.c zgerc.c zher2.c )
 set(COMPLEX16_SRCS ${ZBLAS1} ${ZBLAS2})
 
@@ -41,4 +41,8 @@ foreach(precision ${CBLAS_PRECISIONS})
   set(CBLAS_SRCS ${CBLAS_SRCS} ${${precision}_SRCS})
 endforeach(precision ${CBLAS_PRECISIONS})
 
-add_library(superlu_cblas ${CBLAS_SRCS})
+add_library(blas${SUPERLU_SUFFIX} STATIC ${CBLAS_SRCS})
+install(TARGETS blas${SUPERLU_SUFFIX}
+  RUNTIME DESTINATION ${SUPERLU_INSTALL_DIR}/bin
+  LIBRARY DESTINATION ${SUPERLU_INSTALL_DIR}/lib
+  ARCHIVE DESTINATION ${SUPERLU_INSTALL_DIR}/lib)
