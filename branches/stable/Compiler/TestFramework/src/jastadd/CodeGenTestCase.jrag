@@ -43,7 +43,7 @@ public abstract class CodeGenTestCase extends TestCase {
         String correct = filter(getGeneratedCode());
         
         GUIDManager guidManager = fc.guidManager();
-        StringBuilder actual = new StringBuilder();
+        ByteArrayOutputStream actual = new ByteArrayOutputStream();
         guidManager.setSourceString(test);
         guidManager.addDependentString(test, actual);
         guidManager.processDependentFiles();

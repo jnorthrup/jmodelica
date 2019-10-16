@@ -81,7 +81,7 @@ class Test_CoupledFMUModelME2:
         
         nose.tools.assert_almost_equal(res.final("time"),1.5)
         nose.tools.assert_almost_equal(res.final("First.J1.w"),res.final("Second.J1.w"))
-        nose.tools.assert_almost_equal(res.final("First.J1.w"), 3.2501079, places=3)
+        nose.tools.assert_almost_equal(res.final("First.J1.w"), 3.2501079, places=2)
         
         coupled.reset()
         
@@ -89,7 +89,7 @@ class Test_CoupledFMUModelME2:
         
         nose.tools.assert_almost_equal(res.final("time"),1.5)
         nose.tools.assert_almost_equal(res.final("First.J1.w"),res.final("Second.J1.w"))
-        nose.tools.assert_almost_equal(res.final("First.J1.w"), 3.2501079, places=3)
+        nose.tools.assert_almost_equal(res.final("First.J1.w"), 3.2501079, places=2)
 
     @testattr(stddist_full = True)
     def test_get_set_real(self):

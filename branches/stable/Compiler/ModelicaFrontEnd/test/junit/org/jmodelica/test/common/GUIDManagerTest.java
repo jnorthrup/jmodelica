@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayOutputStream;
+
 import org.jmodelica.common.GUIDManager;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,9 +21,9 @@ public class GUIDManagerTest {
     
     private void test(String source, String[] dependent, String[] expected) {
         guidManager.setSourceString(source);
-        StringBuilder[] output = new StringBuilder[dependent.length];
+        ByteArrayOutputStream[] output = new ByteArrayOutputStream[dependent.length];
         for (int i = 0; i < dependent.length; i++) {
-            output[i] = new StringBuilder();
+            output[i] = new ByteArrayOutputStream();
             guidManager.addDependentString(dependent[i], output[i]);
         }
         guidManager.processDependentFiles();
@@ -46,7 +48,7 @@ public class GUIDManagerTest {
         String input = "guid=" + guidManager.getGuidToken() + ", date=" + guidManager.getDateToken();
         String expected = "guid=277efff8e9f33c422aa6e3fecb8b592";
         guidManager.setSourceString(input);
-        StringBuilder output = new StringBuilder();
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
         guidManager.addDependentString(input, output);
         guidManager.processDependentFiles();
         String actual = output.toString();
