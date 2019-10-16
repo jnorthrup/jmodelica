@@ -37,8 +37,9 @@ $(SUPERLU_BUILD_DIR):
 	tar -c --exclude .svn . | tar x -C $(SUPERLU_BUILD_DIR)
 
 clean: 
-	rm -rf $(SUPERLU_BUILD_DIR)
+	rm -rf $(SUPERLU_BUILD_DIR); \
+	rm -rf $(SUPERLU_INSTALL_DIR)
 
 clean_install: clean install
 
-clean_install_cmake: clean install_msvs
+clean_install_msvs: clean install_msvs
