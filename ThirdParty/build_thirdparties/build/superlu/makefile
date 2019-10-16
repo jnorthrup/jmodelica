@@ -19,9 +19,9 @@
 include default_config
 include $(USER_CONFIG)
 
-.PHONY: install install_cmake
+.PHONY: install install_msvs
 
-install_cmake: $(SUPERLU_BUILD_DIR)
+install_msvs: $(SUPERLU_BUILD_DIR)
 	cd $(SUPERLU_BUILD_DIR) && cmake -G $(GENERATOR) $(SUPERLU_BUILD_DIR) -DSUPERLU_INSTALL_DIR=$(SUPERLU_INSTALL_DIR) -DUSE_CBLAS=ON; \
 	cmake --build . --config Release ; \
 	cmake --build . --target install --config Release
@@ -40,3 +40,5 @@ clean:
 	rm -rf $(SUPERLU_BUILD_DIR)
 
 clean_install: clean install
+
+clean_install_cmake: clean install_msvs
