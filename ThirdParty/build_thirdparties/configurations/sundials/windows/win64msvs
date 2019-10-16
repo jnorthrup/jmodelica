@@ -16,27 +16,14 @@
 #	see <http://www.gnu.org/licenses/> or 
 #	<http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 
-include default_config
-include $(USER_CONFIG)
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+mkfile_dir := $(dir $(mkfile_path))
+include $(mkfile_dir)/win
+SUNDIALS_C_FLAGS=
+SUNDIALS_INSTALL_DIR=${BUILD_DIR}/sundials_install64msvs
+SUNDIALS_BUILD_DIR=${BUILD_DIR}/build_sundials64msvs
+GENERATOR=-G "Visual Studio 14 2015 Win64"
 
-.PHONY: install install_cmake
-
-install_cmake: $(SUPERLU_BUILD_DIR)
-	cd $(SUPERLU_BUILD_DIR) && cmake -G $(GENERATOR) $(SUPERLU_BUILD_DIR) -DSUPERLU_INSTALL_DIR=$(SUPERLU_INSTALL_DIR) -DUSE_CBLAS=ON; \
-	cmake --build . --config Release ; \
-	cmake --build . --target install --config Release
-
-install: $(SUPERLU_BUILD_DIR)
-	cd $(SUPERLU_BUILD_DIR) && make blaslib $(SUPERLU_EXTRA_CFLAGS) DESTDIR= && make superlulib $(SUPERLU_EXTRA_CFLAGS) DESTDIR=; \
-	mkdir -p $(SUPERLU_INSTALL_DIR); \
-	cp -r $(SUPERLU_BUILD_DIR)/* $(SUPERLU_INSTALL_DIR)/
-
-$(SUPERLU_BUILD_DIR):
-	mkdir -p $(SUPERLU_BUILD_DIR); \
-	cd $(SUPERLU_SRC_DIR)/superlu_mt_3.1; \
-	tar -c --exclude .svn . | tar x -C $(SUPERLU_BUILD_DIR)
-
-clean: 
-	rm -rf $(SUPERLU_BUILD_DIR)
-
-clean_install: clean install
+SUPERLU_INSTALL=${BUILD_DIR}/superlu_install64
+SUPERLU_ADDON=-DSUPERLUMT_THREAD_TYPE=OpenMP -DSUPERLUMT_ENABLE=ON -DSUPERLUMT_LIBRARY_DIR=$(SUPERLU_INSTALL)/lib -DSUPERLUMT_INCLUDE_DIR=$(SUPERLU_INSTALL)/include 
+#-DSUPERLUMT_LIBRARY=$(SUPERLU_INSTALL)/lib/superlu_mt_OPEMMP.lib
