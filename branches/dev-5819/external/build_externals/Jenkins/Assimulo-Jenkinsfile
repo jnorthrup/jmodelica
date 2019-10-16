@@ -16,6 +16,13 @@ currentBuild.displayName += " (" + (env.TRIGGER_CAUSE == null ? "MANUAL" : env.T
 // Set discard policy
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: ''))])
 
+node("JMODELICA-SDK-1.13.2 && VisualStudio2015") {
+    checkoutJM("${JM_SVN_PATH}")
+    for (module in ["superlu", "sundials"]) {
+        buildThirdPartyFromMake(null, null, "${pwd()}/build", module, ["64msvs"])
+    }
+
+}
 
 node ('docker') {
     checkoutJM("${JM_SVN_PATH}")
