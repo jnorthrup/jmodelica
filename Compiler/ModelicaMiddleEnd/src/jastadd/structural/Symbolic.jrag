@@ -216,11 +216,14 @@ aspect EquationSolve {
      */
     private static Boolean FEquation.nominalAllowsDivision(FExp factor, FVariable var, double tol) {
         if (factor.variability().constantVariability()) {
-            FExp nominal = factor.dynamicFExp(var.nominal());
-            if (nominal.variability().constantVariability() &&
-                    Math.abs(factor.ceval().realValue()) *
-                    nominal.ceval().realValue() < tol) {
-                return false;
+            FExp varNominalExp = factor.dynamicFExp(var.nominal());
+            if (varNominalExp.variability().constantVariability()) {
+                double factorNominal = Math.abs(factor.ceval().realValue());
+                double varNominal    = varNominalExp.ceval().realValue();
+                double totalNominal  = factorNominal * varNominal;
+                if (totalNominal < tol) {
+                    return false;
+                }
             }
         }
         return true;

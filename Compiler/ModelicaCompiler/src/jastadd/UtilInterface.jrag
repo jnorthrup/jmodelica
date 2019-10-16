@@ -40,12 +40,12 @@ aspect UtilInterface {
             /**
              * Called after code has been compiled.
              */
-            public void packFmu(FClass fc) {}
+            public void packFmu(FClass fc, Path outDir) {}
             
             /**
              * Called after code has been compiled.
              */
-            public void fmuPacked(FClass fc, File path) {}
+            public void fmuPacked(FClass fc, Path outDir) {}
             
             /**
              * Called at each transfer and on tearDown.
@@ -71,9 +71,9 @@ aspect UtilInterface {
         private IErrorHandler eh;
         private ExternalFunctionCache efc;
         private GUIDManager guidManager;
-        private File compilationOutputPath;
+        private Path compilationOutputPath;
         
-        protected UtilInterface(ModelicaCompiler mc, OptionRegistry options, IErrorHandler eh, ExternalFunctionCache efc, File compilationOutputPath) {
+        protected UtilInterface(ModelicaCompiler mc, OptionRegistry options, IErrorHandler eh, ExternalFunctionCache efc, Path compilationOutputPath) {
             this.mc = mc;
             this.options = options;
             this.eh = eh;
@@ -109,11 +109,11 @@ aspect UtilInterface {
             return guidManager;
         }
         
-        public File getCompilationOutputPath() {
+        public Path getCompilationOutputPath() {
             return compilationOutputPath;
         }
         
-        public void setCompilationOutputPath(File compilationOutputPath) {
+        public void setCompilationOutputPath(Path compilationOutputPath) {
             this.compilationOutputPath = compilationOutputPath;
         }
     }
@@ -145,15 +145,15 @@ aspect UtilInterface {
         }
     }
     
-    public void UtilInterface.packFmu(FClass fc) {
+    public void UtilInterface.packFmu(FClass fc, Path outDir) {
         for (Interfacer interfacer : interfacers) {
-            interfacer.packFmu(fc);
+            interfacer.packFmu(fc, outDir);
         }
     }
     
-    public void UtilInterface.fmuPacked(FClass fc, File path) {
+    public void UtilInterface.fmuPacked(FClass fc, Path outDir) {
         for (Interfacer interfacer : interfacers) {
-            interfacer.fmuPacked(fc, path);
+            interfacer.fmuPacked(fc, outDir);
         }
     }
     

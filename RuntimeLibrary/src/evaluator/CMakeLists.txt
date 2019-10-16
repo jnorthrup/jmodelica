@@ -25,38 +25,41 @@ if(NOT TOP_SRC)
     message(STATUS "TOP_SRC was not defined, using ${TOP_SRC}")
 endif()
 
-set(STANDARD_HEADER_SRC ${TOP_SRC}/ThirdParty/FMI/2.0)
-message(STATUS STANDARD_HEADER_SRC=${STANDARD_HEADER_SRC})
-
-set(FMISources
-    
-    ${STANDARD_HEADER_SRC}/fmi2FunctionTypes.h
-    ${STANDARD_HEADER_SRC}/fmi2TypesPlatform.h
-    ${STANDARD_HEADER_SRC}/fmi2Functions.h
-    
-    fmi2_me.h
-    fmi2_cs.h
-    
-	fmi2_me.c
-    fmi2_cs.c
+set(EvaluatorSources
+    jmi_evaluator.c
 )
-#Build fmi2 library
-include_directories(${STANDARD_HEADER_SRC})
-add_library(fmi2 STATIC ${FMISources})
+
+set(EvaluatorSourcesUtil
+    jmi_evaluator_util.c
+    jmi_evaluator_util.h
+)
+
+#Build jmi_evaluator_util library
+add_library(jmi_evaluator_util STATIC ${EvaluatorSourcesUtil})
 if(NOT MSVC)
-    set_target_properties(fmi2 PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -O2")
+    set_target_properties(jmi_evaluator_util PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -O2")
 endif()
+
+#Build evaluator executable
+set (EVALUATOR_LIBS ${EVALUATOR_LIBS} jmi_evaluator_util jmi ModelicaExternalC)
+
+include_directories(${STANDARD_HEADER_SRC})
+add_executable(jmi_evaluator ${EvaluatorSources})
+if(NOT MSVC)
+    set_target_properties(jmi_evaluator PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -O2")
+    IF (NOT WIN32)
+        set (EVALUATOR_LIBS ${EVALUATOR_LIBS} dl)
+    endif()
+endif()
+target_link_libraries (jmi_evaluator  ${EVALUATOR_LIBS})
 
 #Install the libraries
 if (NOT MSVC)
-    install(TARGETS fmi2 DESTINATION "${RTLIB_LIB_DIR}")
+    install(TARGETS jmi_evaluator DESTINATION "${RTLIB_BIN_DIR}")
+    install(TARGETS jmi_evaluator_util DESTINATION "${RTLIB_LIB_DIR}")
 endif()
 
 #Install header files
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
-    DESTINATION "${RTLIB_INCLUDE_DIR}"
-    FILES_MATCHING PATTERN "*.h")
-    
-install(DIRECTORY "${STANDARD_HEADER_SRC}"
-    DESTINATION "${JMODELICA_INSTALL_DIR}/ThirdParty/FMI"
-    FILES_MATCHING PATTERN "*.h")
+        DESTINATION "${RTLIB_INCLUDE_DIR}"
+        FILES_MATCHING PATTERN "*.h")
