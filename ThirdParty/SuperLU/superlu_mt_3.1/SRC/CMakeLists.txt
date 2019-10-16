@@ -127,6 +127,7 @@ set(SUPERLU_INCLUDE_FILES
   slu_mt_sdefs.h
   slu_mt_util.h
   slu_mt_zdefs.h
+  slu_mt_machines.h
   supermatrix.h
   )
   
