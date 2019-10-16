@@ -37,3 +37,5 @@ clean:
 	rm -rf $(SUNDIALS_BUILD_DIR)
 
 clean_install: clean install
+
+clean_install_msvs: clean install_msvs
