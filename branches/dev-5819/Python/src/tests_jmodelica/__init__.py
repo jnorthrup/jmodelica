@@ -63,7 +63,8 @@ def testattr(**kwargs):
     
     """
     def wrap(func):
-        func.__dict__.update(kwargs)
+        for key, value in kwargs.items():
+            setattr(func, key, value)
         return func
     return wrap
 
