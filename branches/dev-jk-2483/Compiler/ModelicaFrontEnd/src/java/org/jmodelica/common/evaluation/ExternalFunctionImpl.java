@@ -44,7 +44,7 @@ class ExternalFunctionImpl<K extends Variable<V, T>, V extends Value, T extends 
             com = createProcessCommunicator();
             setup(ext, values, timeout, com);
             evaluate(ext, values, timeout, com);
-            return teardown(timeout, com);
+            return com.teardown(timeout);
         } finally {
             if (com != null) {
                 com.destroy();
@@ -78,16 +78,6 @@ class ExternalFunctionImpl<K extends Variable<V, T>, V extends Value, T extends 
         }
         com.accept("READY");
         com.cancelTimer();
-    }
-
-    public int teardown(int timeout, ProcessCommunicator<V, T> com) throws IOException {
-        com.startTimer(timeout);
-        com.check("EXIT");
-        com.accept("END");
-        int result = com.end();
-        com.cancelTimer();
-        // log().debug("SUCCESS TEARDOWN");
-        return result;
     }
 
     @Override

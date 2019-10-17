@@ -16,6 +16,15 @@ class ExternalFunctionExecutableGenerated extends ExternalFunctionExecutable {
     
     @Override
     public void remove() {
-        new File(executable).delete();
+        File file = new File(executable);
+        boolean success = file.delete();
+        if (!success) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                // Ignore
+            }
+            success = file.delete();
+        }
     }
 }

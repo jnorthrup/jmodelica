@@ -88,6 +88,11 @@ class LiveExternalFunction<K extends Variable<V, T>, V extends Value, T extends 
     public void destroyProcess() {
         if (com != null) {
             livingCachedExternals.remove(this);
+            try {
+                com.teardown(100);
+            } catch (IOException e) {
+                // Do nothing?
+            }
             com.destroy();
             com = null;
         }
