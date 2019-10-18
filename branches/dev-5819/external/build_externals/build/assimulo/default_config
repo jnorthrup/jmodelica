@@ -8,6 +8,7 @@ SUPERLU_HOME=$(BUILD_DIR)/superlu_install
 SUNDIALS_HOME=$(BUILD_DIR)/sundials_install
 BLAS_HOME=$(BUILD_DIR)/blas_install
 LAPACK_HOME=$(BUILD_DIR)/lapack_install
+MKL_HOME=
 INSTALL_DIR_FOLDER=${SDK_HOME}/install/Python
 PLATFORM_SITE_PACKAGES=Lib/site-packages
 BITNESS=64
