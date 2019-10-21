@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -79,25 +81,25 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
         return sharedLib;
     }
     
-    private static ArrayList<String> builtinExternalFunctions = new ArrayList<String>() {{
-        add("ModelicaStrings_substring");
-        add("ModelicaStrings_length");
-        add("ModelicaStrings_skipWhiteSpace");
-        add("ModelicaStrings_compare");
-    }};
+    private static Collection<String> builtinExternalFunctions = Arrays.asList(
+        "ModelicaStrings_substring",
+        "ModelicaStrings_length",
+        "ModelicaStrings_skipWhiteSpace",
+        "ModelicaStrings_compare"
+    );
     
-    private static ArrayList<String> supportedSignatures = new ArrayList<String>() {{
-        add("d+d,d,");
-        add("d+i,");
-        add("d+i,d,d,");
-        add("s+s,i,i,");
-        add("i+s,");
-        add("i+s,i,");
-        add("i+s,s,i,");
-        add("i+i,i,");
-        add("void+i,d,d,*R[d,d,d,d,d,d,d,d,d,d,d,],");
-        add("void+d,d,*d,");
-    }};
+    private static Collection<String> supportedSignatures = Arrays.asList(
+        "d+d,d,",
+        "d+i,",
+        "d+i,d,d,",
+        "s+s,i,i,",
+        "i+s,",
+        "i+s,i,",
+        "i+s,s,i,",
+        "i+i,i,",
+        "void+i,d,d,*R[d,d,d,d,d,d,d,d,d,d,d,],",
+        "void+d,d,*d,"
+    );
     
     public boolean canUseEvaluator(E ext, ArrayList<String> arguments) {
         if (!ext.dynamicEvaluatorEnabled()) {
