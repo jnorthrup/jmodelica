@@ -352,7 +352,7 @@ CMAKE_CASADI_COMPILER_ARGS = -m32 -mincoming-stack-boundary=2
 CMAKE_CASADI_CXX_FLAG64 = -m64
 CMAKE_CASADI_COMPILER_ARGS64 = -m64 -fpermissive
 @BUILD_WITH_PYTHON32_FALSE@BUILD_WITH_PYTHON32_ARG = 
-@BUILD_WITH_PYTHON32_TRUE@BUILD_WITH_PYTHON32_ARG = --force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" 
+@BUILD_WITH_PYTHON32_TRUE@BUILD_WITH_PYTHON32_ARG = --force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2"
 @BUILD_WITH_PYTHON32_FALSE@DEP_SUFFIX = 64
 @BUILD_WITH_PYTHON32_TRUE@DEP_SUFFIX = 
 @BUILD_WITH_PYTHON32_FALSE@TMP_CASADI_BUILD_DIR = $(CASADI_BUILD_DIR64)
@@ -361,6 +361,8 @@ CMAKE_CASADI_COMPILER_ARGS64 = -m64 -fpermissive
 @BUILD_WITH_PYTHON32_TRUE@TMP_SWIGCHECK_BUILD_DIR = $(SWIGCHECK_BUILD_DIR)
 @BUILD_WITH_PYTHON32_FALSE@TMP_CMAKE_CASADI_CXX_FLAG = $(CMAKE_CASADI_CXX_FLAG64)
 @BUILD_WITH_PYTHON32_TRUE@TMP_CMAKE_CASADI_CXX_FLAG = $(CMAKE_CASADI_CXX_FLAG)
+@BUILD_WITH_PYTHON32_FALSE@TMP_CMAKE_CASADI_ARGS = $(CMAKE_CASADI_ARGS64)
+@BUILD_WITH_PYTHON32_TRUE@TMP_CMAKE_CASADI_ARGS = $(CMAKE_CASADI_ARGS)
 @BUILD_WITH_PYTHON32_FALSE@TMP_CMAKE_CASADI_COMPILER_ARGS = $(CMAKE_CASADI_COMPILER_ARGS64)
 @BUILD_WITH_PYTHON32_TRUE@TMP_CMAKE_CASADI_COMPILER_ARGS = $(CMAKE_CASADI_COMPILER_ARGS)
 
@@ -375,13 +377,10 @@ CMAKE_CASADI_COMPILER_ARGS64 = -m64 -fpermissive
 @BUILD_WITH_PYTHON32_TRUE@TMP_MC_LIB = $(MC_LIB)
 @BUILD_WITH_PYTHON32_FALSE@TMP_MC_BUILD = $(MC_BUILD64)
 @BUILD_WITH_PYTHON32_TRUE@TMP_MC_BUILD = $(MC_BUILD)
-
-#CMAKE_PYTHON_INCLUDE=$(CMAKE_PYTHON64_INCLUDE)
-#CMAKE_PYTHON_LIB=$(CMAKE_PYTHON_LIB64)
-@BUILD_WITH_PYTHON32_FALSE@TMP_CMAKE_CASADI_ARGS = $(CMAKE_CASADI_ARGS64)
-@BUILD_WITH_PYTHON32_TRUE@TMP_CMAKE_CASADI_ARGS = $(CMAKE_CASADI_ARGS)
 @NUMPY_NO_MSVCR_FALSE@NUMPY_NO_MSVCR_ARG = 
 @NUMPY_NO_MSVCR_TRUE@NUMPY_NO_MSVCR_ARG = --no-msvcr="true"
+@BUILD_WITH_PYTHON32_FALSE@ASSIMULO_CONFIG = win64_msys_py3
+@BUILD_WITH_PYTHON32_TRUE@ASSIMULO_CONFIG = win32_msys_py2
 
 # Hooks for extra build or install actions. Must be empty or the path of a shell script to execute. 
 # Both scripts will get the source directory as the first argument and the install directory as the second.
@@ -928,7 +927,7 @@ install_casadi: casadi
 @COMPILE_WITH_IPOPT64_TRUE@	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
 @COMPILE_WITH_IPOPT64_TRUE@	export PYTHONHOME=$(PYTHON64_HOME);  
 @COMPILE_WITH_IPOPT64_TRUE@	cd $(abs_builddir)/ThirdParty/CasADi; \
-@COMPILE_WITH_IPOPT64_TRUE@	make -f Makefile install "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR64)" "IPOPT_HOME=$(IPOPT64_HOME)"
+@COMPILE_WITH_IPOPT64_TRUE@	make -f Makefile install "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR64)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR64)" "IPOPT_HOME=$(IPOPT64_HOME)"
 @COMPILE_WITH_IPOPT64_TRUE@	mkdir -p $(DESTDIR)$(prefix)/Python/
 @COMPILE_WITH_IPOPT64_TRUE@	cp -r $(CASADI_PYTHON_INST_DIR64)/casadi $(DESTDIR)$(prefix)/Python_64/
 @COMPILE_WITH_IPOPT64_TRUE@	cp $(CASADI_BUILD_DIR64)/swig/casadi_core.py $(DESTDIR)$(prefix)/Python_64/casadi
@@ -1063,7 +1062,7 @@ modelicacasadi_wrapper: $(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar $(OC_CASADI_
 @COMPILE_WITH_IPOPT64_TRUE@	cp $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py $(DESTDIR)$(prefix)/Python_64/modelicacasadi_transfer
 
 clean-casadi-interface: 
-	rm -rf $(MC_BUILD)
+	rm -rf $(TMP_MC_BUILD)
 	rm -rf $(MC_BUILD64)
 #	rm -rf $(DESTDIR)$(prefix)/Python/casadi
 #	rm -rf $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
@@ -1074,21 +1073,19 @@ clean-casadi-interface:
 
 build-python-packages:
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	mkdir -p $(assimulo_build_dir); \
-@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	cd $(assimulo_src_dir)/..; \
-@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir); \
-@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	cd $(assimulo_build_dir)/Assimulo; \
+@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	cd $(assimulo_src_dir)/../build_externals/build/assimulo; \
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	case $(build) in \
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	*-cygwin*) \
-@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	python setup.py install --with_openmp=True --superlu-home=$(abs_builddir)/superlu_build$(DEP_SUFFIX)/ --sundials-home=$(SUNDIALS_HOME)$(DEP_SUFFIX) --sundials-with-superlu=True --blas-home=$(abs_builddir)/blas_install$(DEP_SUFFIX)/ --lapack-home=$(abs_builddir)/lapack_install$(DEP_SUFFIX)/ $(BUILD_WITH_PYTHON32_ARG) --prefix=$(assimulo_install_dir) ;; \
+@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	make install USER_CONFIG=../../configurations/Assimulo/windows/win32_cygwin_py2 JM_HOME=$(abs_top_srcdir) BUILD_DIR=$(abs_builddir);; \
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	*-mingw*) \
-@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	python setup.py install --with_openmp=True --superlu-home=$(abs_builddir)/superlu_build$(DEP_SUFFIX)/ --sundials-home=$(SUNDIALS_HOME)$(DEP_SUFFIX) --sundials-with-superlu=True --blas-home=$(abs_builddir)/blas_install$(DEP_SUFFIX)/ --lapack-home=$(abs_builddir)/lapack_install$(DEP_SUFFIX)/ $(BUILD_WITH_PYTHON32_ARG) $(NUMPY_NO_MSVCR_ARG) --prefix=$(assimulo_install_dir) ;; \
+@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	make install USER_CONFIG=../../configurations/Assimulo/windows/$(ASSIMULO_CONFIG) JM_HOME=$(abs_top_srcdir) BUILD_DIR=$(abs_builddir) ;; \
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	*) \
-@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	python setup.py install --with_openmp=True --superlu-home=$(abs_builddir)/superlu_build/ --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --prefix=$(assimulo_install_dir) ;; \
+@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	make install USER_CONFIG=../../configurations/Assimulo/unix/config JM_HOME=$(abs_top_srcdir) BUILD_DIR=$(abs_builddir);; \
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	esac
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@@WITH_PYTHON64_TRUE@	mkdir -p $(assimulo_build_dir64); \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@@WITH_PYTHON64_TRUE@	cd $(assimulo_src_dir)/..; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@@WITH_PYTHON64_TRUE@	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir64); \
-@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@@WITH_PYTHON64_TRUE@	cd $(assimulo_build_dir)/Assimulo; \
+@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@@WITH_PYTHON64_TRUE@	cd $(assimulo_build_dir64)/Assimulo; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@@WITH_PYTHON64_TRUE@	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@@WITH_PYTHON64_TRUE@	export PYTHONHOME=$(PYTHON64_HOME); \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@@WITH_PYTHON64_TRUE@	python setup.py install --with_openmp=True --superlu-home=$(abs_builddir)/superlu_build64/ --sundials-home=$(SUNDIALS_HOME)64 --sundials-with-superlu=True --blas-home=$(abs_builddir)/blas_install64/ --lapack-home=$(abs_builddir)/lapack_install64/ --force-32bit="false" $(NUMPY_NO_MSVCR_ARG) --prefix=$(assimulo_install_dir64); \
@@ -1186,13 +1183,6 @@ install-python-packages: build-python-packages install-python-tests
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	mkdir -p $(DESTDIR)$(prefix)/Python_64
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	cp Python/src/required_defaults.py $(DESTDIR)$(prefix)/Python_64/
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(DESTDIR)$(prefix)/Python_64
-@PYTHON_ENABLED_TRUE@	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.7 Lib; do \
-@PYTHON_ENABLED_TRUE@	if [ -e $(assimulo_install_dir)/$${pkgdir}/site-packages/ ]; \
-@PYTHON_ENABLED_TRUE@	then \
-@PYTHON_ENABLED_TRUE@	cd $(assimulo_install_dir)/$${pkgdir}/site-packages/; \
-@PYTHON_ENABLED_TRUE@	find assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
-@PYTHON_ENABLED_TRUE@	fi; \
-@PYTHON_ENABLED_TRUE@	done
 @PYTHON_ENABLED_TRUE@	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.7 Lib; do \
 @PYTHON_ENABLED_TRUE@	if [ -e $(pymodelica_install_dir)/$${pkgdir}/site-packages/ ]; \
 @PYTHON_ENABLED_TRUE@	then \

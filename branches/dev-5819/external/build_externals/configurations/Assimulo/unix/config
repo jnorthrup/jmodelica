@@ -1,0 +1,14 @@
+-with_openmp=True --superlu-home=$(abs_builddir)/superlu_build/ --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --prefix=$(assimulo_install_dir)
+
+BITNESS=64
+FORCE_32_BIT=false
+EXTRA_SETUP_ARGS=--with_openmp=True 
+
+SUPERLU_HOME=$(BUILD_DIR)/superlu_install
+SUNDIALS_HOME=$(BUILD_DIR)/sundials_install
+BLAS_HOME=$(BUILD_DIR)/blas_install
+LAPACK_HOME=$(BUILD_DIR)/lapack_install
+INSTALL_DIR_FOLDER=${SDK_HOME}/install/Python_64
+
+BUILD_SETUP_EXTRA=
+PYTHONHOME=$(SDK_HOME)/Python37/

@@ -54,34 +54,34 @@ endif
 
 
 if BUILD_WITH_PYTHON32
-BUILD_WITH_PYTHON32_ARG=--force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" 
+BUILD_WITH_PYTHON32_ARG=--force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2"
+ASSIMULO_CONFIG=win32_msys_py2
 DEP_SUFFIX=
 else
 BUILD_WITH_PYTHON32_ARG=
 DEP_SUFFIX=64
+ASSIMULO_CONFIG=win64_msys_py3
 endif
 
 build-python-packages:
 if PYTHON_ENABLED
 if WITH_OPENMP
 	mkdir -p $(assimulo_build_dir); \
-	cd $(assimulo_src_dir)/..; \
-	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir); \
-	cd $(assimulo_build_dir)/Assimulo; \
+	cd $(assimulo_src_dir)/../build_externals/build/assimulo; \
 	case $(build) in \
 	*-cygwin*) \
-	python setup.py install --with_openmp=True --superlu-home=$(abs_builddir)/superlu_build$(DEP_SUFFIX)/ --sundials-home=$(SUNDIALS_HOME)$(DEP_SUFFIX) --sundials-with-superlu=True --blas-home=$(abs_builddir)/blas_install$(DEP_SUFFIX)/ --lapack-home=$(abs_builddir)/lapack_install$(DEP_SUFFIX)/ $(BUILD_WITH_PYTHON32_ARG) --prefix=$(assimulo_install_dir) ;; \
+	make install USER_CONFIG=../../configurations/Assimulo/windows/win32_cygwin_py2 JM_HOME=$(abs_top_srcdir) BUILD_DIR=$(abs_builddir);; \
 	*-mingw*) \
-	python setup.py install --with_openmp=True --superlu-home=$(abs_builddir)/superlu_build$(DEP_SUFFIX)/ --sundials-home=$(SUNDIALS_HOME)$(DEP_SUFFIX) --sundials-with-superlu=True --blas-home=$(abs_builddir)/blas_install$(DEP_SUFFIX)/ --lapack-home=$(abs_builddir)/lapack_install$(DEP_SUFFIX)/ $(BUILD_WITH_PYTHON32_ARG) $(NUMPY_NO_MSVCR_ARG) --prefix=$(assimulo_install_dir) ;; \
+	make install USER_CONFIG=../../configurations/Assimulo/windows/$(ASSIMULO_CONFIG) JM_HOME=$(abs_top_srcdir) BUILD_DIR=$(abs_builddir) ;; \
 	*) \
-	python setup.py install --with_openmp=True --superlu-home=$(abs_builddir)/superlu_build/ --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --prefix=$(assimulo_install_dir) ;; \
+	make install USER_CONFIG=../../configurations/Assimulo/unix/config JM_HOME=$(abs_top_srcdir) BUILD_DIR=$(abs_builddir);; \
 	esac
 if JM_WIN64
 if WITH_PYTHON64
 	mkdir -p $(assimulo_build_dir64); \
 	cd $(assimulo_src_dir)/..; \
 	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir64); \
-	cd $(assimulo_build_dir)/Assimulo; \
+	cd $(assimulo_build_dir64)/Assimulo; \
 	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
 	export PYTHONHOME=$(PYTHON64_HOME); \
 	python setup.py install --with_openmp=True --superlu-home=$(abs_builddir)/superlu_build64/ --sundials-home=$(SUNDIALS_HOME)64 --sundials-with-superlu=True --blas-home=$(abs_builddir)/blas_install64/ --lapack-home=$(abs_builddir)/lapack_install64/ --force-32bit="false" $(NUMPY_NO_MSVCR_ARG) --prefix=$(assimulo_install_dir64); \
@@ -212,13 +212,6 @@ if WITH_PYTHON64
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(DESTDIR)$(prefix)/Python_64
 endif
 endif
-	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.7 Lib; do \
-	if [ -e $(assimulo_install_dir)/$${pkgdir}/site-packages/ ]; \
-	then \
-	cd $(assimulo_install_dir)/$${pkgdir}/site-packages/; \
-	find assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
-	fi; \
-	done
 	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.7 Lib; do \
 	if [ -e $(pymodelica_install_dir)/$${pkgdir}/site-packages/ ]; \
 	then \
