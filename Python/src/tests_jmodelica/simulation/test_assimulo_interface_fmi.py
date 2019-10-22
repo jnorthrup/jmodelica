@@ -26,6 +26,7 @@ from pymodelica.compiler import compile_fmu
 from pyfmi.fmi import FMUModel, load_fmu, FMUException, TimeLimitExceeded
 from pyfmi.common.io import ResultDymolaTextual
 from tests_jmodelica import testattr, get_files_path
+from pyfmi.common import python3_flag
 
 try:
     from pyfmi.simulation.assimulo_interface import FMIODE
@@ -1928,7 +1929,11 @@ class Test_FMI_ODE:
         """
         This tests a simulation with an event of terminate simulation.
         """
-        model = load_fmu('Robot.fmu', path_to_fmus_me1)
+        # Robot.fmu will not load with Python 3
+        if python3_flag:
+            model = load_fmu('RobotPy3.fmu', path_to_fmus_me1)
+        else:
+            model = load_fmu('Robot.fmu', path_to_fmus_me1)
         
         res = model.simulate(final_time=2.0)
         solver = res.solver
