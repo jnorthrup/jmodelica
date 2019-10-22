@@ -27,6 +27,6 @@ SUNDIALS_HOME=$(BUILD_DIR)/sundials_install$(BITNESS)
 BLAS_HOME=$(BUILD_DIR)/blas_install$(BITNESS)
 LAPACK_HOME=$(BUILD_DIR)/lapack_install$(BITNESS)
 INSTALL_DIR_FOLDER=${WORKSPACE}/install/Python
-PREINSTALL_DIR=$(ARTIFACTS)/Assimulo
+PREINSTALL_DIR=$(ARTIFACTS)/assimulo
 
 BUILD_SETUP_EXTRA=build_ext --compiler=msvc --fcompiler=intelvem
