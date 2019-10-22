@@ -748,13 +748,13 @@ class Test_Relations:
         opts["CVode_options"]["maxh"] = 0.001
         res = model.simulate(final_time=3.5, input=input_object,options=opts)
         
-        N.testing.assert_almost_equal(N.interp(0.75,res["time"],res["y"]),0.5,places=2)
-        N.testing.assert_almost_equal(N.interp(2.25,res["time"],res["y"]),0.5,places=2)
-        nose.tools.assert_not_almost_equal(N.interp(0.25,res["time"],res["y"]),0.5,places=2)
-        nose.tools.assert_not_almost_equal(N.interp(2.75,res["time"],res["y"]),0.5,places=2)
-        nose.tools.assert_not_almost_equal(N.interp(0.75,res["time"],res["x"]),0.5,places=2)
-        nose.tools.assert_not_almost_equal(N.interp(2.25,res["time"],res["x"]),0.5,places=2)
-        N.testing.assert_almost_equal(N.interp(1.5,res["time"],res["y"]),0.5,places=2)
+        N.testing.assert_almost_equal(N.interp(0.75,res["time"],res["y"]),0.5,2)
+        N.testing.assert_almost_equal(N.interp(2.25,res["time"],res["y"]),0.5,2)
+        nose.tools.assert_not_almost_equal(N.interp(0.25,res["time"],res["y"]),0.5,2)
+        nose.tools.assert_not_almost_equal(N.interp(2.75,res["time"],res["y"]),0.5,2)
+        nose.tools.assert_not_almost_equal(N.interp(0.75,res["time"],res["x"]),0.5,2)
+        nose.tools.assert_not_almost_equal(N.interp(2.25,res["time"],res["x"]),0.5,2)
+        N.testing.assert_almost_equal(N.interp(1.5,res["time"],res["y"]),0.5,2)
         
     @testattr(stddist_full = True)
     def test_relation_leinv(self):
@@ -763,13 +763,13 @@ class Test_Relations:
         opts["CVode_options"]["maxh"] = 0.001
         res = model.simulate(final_time=3.5, input=input_object,options=opts)
         
-        N.testing.assert_almost_equal(N.interp(0.75,res["time"],res["y"]),0.5,places=2)
-        N.testing.assert_almost_equal(N.interp(2.25,res["time"],res["y"]),0.5,places=2)
-        nose.tools.assert_not_almost_equal(N.interp(0.25,res["time"],res["y"]),0.5,places=2)
-        nose.tools.assert_not_almost_equal(N.interp(2.75,res["time"],res["y"]),0.5,places=2)
-        nose.tools.assert_not_almost_equal(N.interp(0.75,res["time"],res["x"]),0.5,places=2)
-        nose.tools.assert_not_almost_equal(N.interp(2.25,res["time"],res["x"]),0.5,places=2)
-        N.testing.assert_almost_equal(N.interp(1.5,res["time"],res["y"]),0.5,places=2)
+        N.testing.assert_almost_equal(N.interp(0.75,res["time"],res["y"]),0.5,2)
+        N.testing.assert_almost_equal(N.interp(2.25,res["time"],res["y"]),0.5,2)
+        nose.tools.assert_not_almost_equal(N.interp(0.25,res["time"],res["y"]),0.5,2)
+        nose.tools.assert_not_almost_equal(N.interp(2.75,res["time"],res["y"]),0.5,2)
+        nose.tools.assert_not_almost_equal(N.interp(0.75,res["time"],res["x"]),0.5,2)
+        nose.tools.assert_not_almost_equal(N.interp(2.25,res["time"],res["x"]),0.5,2)
+        N.testing.assert_almost_equal(N.interp(1.5,res["time"],res["y"]),0.5,2)
         
     @testattr(stddist_full = True)
     def test_relation_ge(self):
@@ -778,13 +778,13 @@ class Test_Relations:
         opts["CVode_options"]["maxh"] = 0.001
         res = model.simulate(final_time=3.5, input=input_object,options=opts)
         
-        N.testing.assert_almost_equal(N.interp(0.75,res["time"],res["y"]),0.5,places=2)
-        N.testing.assert_almost_equal(N.interp(2.25,res["time"],res["y"]),0.5,places=2)
-        nose.tools.assert_not_almost_equal(N.interp(0.25,res["time"],res["y"]),0.5,places=2)
-        nose.tools.assert_not_almost_equal(N.interp(2.75,res["time"],res["y"]),0.5,places=2)
-        nose.tools.assert_not_almost_equal(N.interp(0.75,res["time"],res["x"]),0.5,places=2)
-        nose.tools.assert_not_almost_equal(N.interp(2.25,res["time"],res["x"]),0.5,places=2)
-        N.testing.assert_almost_equal(N.interp(1.5,res["time"],res["y"]),0.5,places=2)
+        N.testing.assert_almost_equal(N.interp(0.75,res["time"],res["y"]),0.5,2)
+        N.testing.assert_almost_equal(N.interp(2.25,res["time"],res["y"]),0.5,2)
+        nose.tools.assert_not_almost_equal(N.interp(0.25,res["time"],res["y"]),0.5,2)
+        nose.tools.assert_not_almost_equal(N.interp(2.75,res["time"],res["y"]),0.5,2)
+        nose.tools.assert_not_almost_equal(N.interp(0.75,res["time"],res["x"]),0.5,2)
+        nose.tools.assert_not_almost_equal(N.interp(2.25,res["time"],res["x"]),0.5,2)
+        N.testing.assert_almost_equal(N.interp(1.5,res["time"],res["y"]),0.5,2)
         
     @testattr(stddist_full = True)
     def test_relation_geinv(self):
@@ -793,13 +793,13 @@ class Test_Relations:
         opts["CVode_options"]["maxh"] = 0.001
         res = model.simulate(final_time=3.5, input=input_object,options=opts)
         
-        N.testing.assert_almost_equal(N.interp(0.75,res["time"],res["y"]),0.5,places=2)
-        N.testing.assert_almost_equal(N.interp(2.25,res["time"],res["y"]),0.5,places=2)
-        nose.tools.assert_not_almost_equal(N.interp(0.25,res["time"],res["y"]),0.5,places=2)
-        nose.tools.assert_not_almost_equal(N.interp(2.75,res["time"],res["y"]),0.5,places=2)
-        nose.tools.assert_not_almost_equal(N.interp(0.75,res["time"],res["x"]),0.5,places=2)
-        nose.tools.assert_not_almost_equal(N.interp(2.25,res["time"],res["x"]),0.5,places=2)
-        N.testing.assert_almost_equal(N.interp(1.5,res["time"],res["y"]),0.5,places=2)
+        N.testing.assert_almost_equal(N.interp(0.75,res["time"],res["y"]),0.5,2)
+        N.testing.assert_almost_equal(N.interp(2.25,res["time"],res["y"]),0.5,2)
+        nose.tools.assert_not_almost_equal(N.interp(0.25,res["time"],res["y"]),0.5,2)
+        nose.tools.assert_not_almost_equal(N.interp(2.75,res["time"],res["y"]),0.5,2)
+        nose.tools.assert_not_almost_equal(N.interp(0.75,res["time"],res["x"]),0.5,2)
+        nose.tools.assert_not_almost_equal(N.interp(2.25,res["time"],res["x"]),0.5,2)
+        N.testing.assert_almost_equal(N.interp(1.5,res["time"],res["y"]),0.5,2)
         
     @testattr(stddist_full = True)
     def test_relation_leinit(self):
@@ -807,8 +807,8 @@ class Test_Relations:
         
         res = model.simulate(final_time=0.1)
         
-        N.testing.assert_almost_equal(res.initial("x"),1.0,places=3)
-        N.testing.assert_almost_equal(res.initial("y"),0.0,places=3)
+        N.testing.assert_almost_equal(res.initial("x"),1.0,3)
+        N.testing.assert_almost_equal(res.initial("y"),0.0,3)
         
     @testattr(stddist_full = True)
     def test_relation_geinit(self):
@@ -816,8 +816,8 @@ class Test_Relations:
         
         res = model.simulate(final_time=0.1)
         
-        N.testing.assert_almost_equal(res.initial("x"),0.0,places=3)
-        N.testing.assert_almost_equal(res.initial("y"),1.0,places=3)
+        N.testing.assert_almost_equal(res.initial("x"),0.0,3)
+        N.testing.assert_almost_equal(res.initial("y"),1.0,3)
 
     @testattr(stddist_full = True)
     def test_relation_op_1(self):
@@ -825,14 +825,14 @@ class Test_Relations:
         
         res = model.simulate(final_time=10)
         
-        N.testing.assert_almost_equal(N.interp(3.00,res["time"],res["der(v1)"]),1.0,places=3)
-        N.testing.assert_almost_equal(N.interp(3.40,res["time"],res["der(v1)"]),0.0,places=3)
-        N.testing.assert_almost_equal(N.interp(8.00,res["time"],res["der(v1)"]),0.0,places=3)
-        N.testing.assert_almost_equal(N.interp(8.25,res["time"],res["der(v1)"]),1.0,places=3)
-        N.testing.assert_almost_equal(N.interp(4.00,res["time"],res["der(v2)"]),1.0,places=3)
-        N.testing.assert_almost_equal(N.interp(4.20,res["time"],res["der(v2)"]),0.0,places=3)
-        N.testing.assert_almost_equal(N.interp(7.00,res["time"],res["der(v2)"]),0.0,places=3)
-        N.testing.assert_almost_equal(N.interp(7.20,res["time"],res["der(v2)"]),1.0,places=3)
+        N.testing.assert_almost_equal(N.interp(3.00,res["time"],res["der(v1)"]),1.0,3)
+        N.testing.assert_almost_equal(N.interp(3.40,res["time"],res["der(v1)"]),0.0,3)
+        N.testing.assert_almost_equal(N.interp(8.00,res["time"],res["der(v1)"]),0.0,3)
+        N.testing.assert_almost_equal(N.interp(8.25,res["time"],res["der(v1)"]),1.0,3)
+        N.testing.assert_almost_equal(N.interp(4.00,res["time"],res["der(v2)"]),1.0,3)
+        N.testing.assert_almost_equal(N.interp(4.20,res["time"],res["der(v2)"]),0.0,3)
+        N.testing.assert_almost_equal(N.interp(7.00,res["time"],res["der(v2)"]),0.0,3)
+        N.testing.assert_almost_equal(N.interp(7.20,res["time"],res["der(v2)"]),1.0,3)
 
 class Test_NonLinear_Systems:
     
@@ -915,7 +915,7 @@ class Test_NonLinear_Systems:
         fprime = lambda y: -200*y;
 
         for i,iv in enumerate(ivs):
-            N.testing.assert_almost_equal(fprime(iv) ,df[i], places=12)  
+            N.testing.assert_almost_equal(fprime(iv) ,df[i], 12)  
             
     @testattr(stddist_base = True)
     def test_Brent_double_root1(self):
@@ -1938,7 +1938,7 @@ class Test_FMI_ODE:
         res = model.simulate(final_time=2.0)
         solver = res.solver
         
-        N.testing.assert_almost_equal(solver.t, 1.856045, places=3)    
+        N.testing.assert_almost_equal(solver.t, 1.856045, 3)    
         
     @testattr(windows_full = True)
     def test_typeDefinitions_simulation(self):
@@ -1950,7 +1950,7 @@ class Test_FMI_ODE:
         res = model.simulate(final_time=2.0)
         solver = res.solver
         
-        N.testing.assert_almost_equal(solver.t, 1.856045, places=3)        
+        N.testing.assert_almost_equal(solver.t, 1.856045, 3)        
 
     @testattr(noncompliantfmi = True)
     def test_assert_raises_sensitivity_parameters(self):
