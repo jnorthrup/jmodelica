@@ -285,7 +285,10 @@ class SimulationTest(_BaseSimOptTest):
         """
         
         if not cvode_options:
-            cvode_options = {'atol':self.abs_tol,'rtol':self.rel_tol}
+            cvode_options = {'atol':self.abs_tol,'rtol':self.rel_tol, 'maxh':0.0}
+        else:
+            if not 'maxh' in cvode_options:
+                cvode_options['maxh'] = 0.0
         
         if isinstance(self.model, FMUModelME1) or isinstance(self.model, FMUModelME2):
             res = self.model.simulate(start_time=self.start_time,

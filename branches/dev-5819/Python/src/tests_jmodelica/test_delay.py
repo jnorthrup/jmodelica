@@ -37,7 +37,9 @@ def compile_and_load(class_name, filename=path_to_delay_mo):
 
 def simulate(fmu, final_time, maxh = None):
     opts = fmu.simulate_options()      
-    opts['solver'] = 'CVode'           
+    opts['solver'] = 'CVode'
+    opts['ncp'] = 0
+    opts['CVode_options']['maxh'] = 0.0
     if maxh is not None:
         opts['CVode_options']['maxh'] = maxh
 

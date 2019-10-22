@@ -347,7 +347,7 @@ public class ModelicaCompiler implements LogContainer {
         for (CompilationHooks hooks : hooksList) {
             hooks.packFmu(this, fc, dir);
         }
-        fc.root().getUtilInterface().packFmu(fc);
+        fc.root().getUtilInterface().packFmu(fc, dir.toPath());
     }
     
     /**
@@ -357,7 +357,7 @@ public class ModelicaCompiler implements LogContainer {
         for (CompilationHooks hooks : hooksList) {
             hooks.fmuPacked(this, fc, path);
         }
-        fc.root().getUtilInterface().fmuPacked(fc, path);
+        fc.root().getUtilInterface().fmuPacked(fc, path.toPath());
     }
     
     public String getStringOption(String key) throws UnknownOptionException {
@@ -810,15 +810,7 @@ public class ModelicaCompiler implements LogContainer {
             /*
              * Compile mo-file and generate code for all templates that are not null.
              */
-            String flatName = null;
-            if (!Files.isDirectory(compileTo)) {
-                flatName = compileTo.getFileName().toString();
-                int i = flatName.lastIndexOf('.');
-                if (i > 0) {
-                    flatName = flatName.substring(0, i);
-                }
-            }
-            FClass fc = compileModel(fileName, className, target, flatName, compileTo);
+            FClass fc = compileModel(fileName, className, target, compileTo);
 
             if (!target.getCodeGenFlag()) {
                 /*
@@ -831,13 +823,13 @@ public class ModelicaCompiler implements LogContainer {
              * Compile C code if the Makefile flag is not null.
              */
             hookCheckAbort();
-            doCompileCCode(target, fc, className, flatName);
+            doCompileCCode(target, fc);
 
             /*
              * Package unit.
              */
             ASTNode.beginStep("packUnit()");
-            File unitPath = packUnit(className, target, fc);
+            Path unitPath = packUnit(className, target, fc);
             unit = log.logCompiledUnit(unitPath, warnings, fc.numberOfComponents());
             ASTNode.endStep("packUnit()");
 
@@ -1265,7 +1257,7 @@ public class ModelicaCompiler implements LogContainer {
         
         /* Temporary fix to problems with long compilation times due to later evaluations */
         getExternalFunctionCache().tearDown();
-        options.setIntegerOption("external_constant_evaluation", 0);
+        options.external_constant_evaluation.setValue(0);
         
         hookModelTransformed(fc);
         hookCheckAbort();
@@ -1368,12 +1360,11 @@ public class ModelicaCompiler implements LogContainer {
     public void doGenerateCode(FClass fc, TargetObject target) throws FileNotFoundException {
         ASTNode.beginStep("generateCode()");
         log.info("Generating code...");
-        String name = fc.nameUnderscore();
         
+        String name = fc.nameUnderscore();
         Templates templates = target.getTemplates(getOptions());
-    
-        templates.generateCFiles(this, fc, createCGenerator(fc), sourceDir, name);
-        templates.generateXMLFiles(this, fc, target.getXMLGenerator(fc), outDir, "modelDescription");
+        
+        generateAllFiles(fc, target, templates, name);
         hookCodeGenerated(fc, outDir);
         
         fc.guidManager().setSourceFile(new File(outDir, "modelDescription.xml"));
@@ -1959,8 +1950,6 @@ public class ModelicaCompiler implements LogContainer {
      *            The name of the class in the model file to compile.
      * @param target
      *            The target object for the compiler.
-     * @param flatName
-     *            Name of the unit/flat model supplied by the user, if any.
      * 
      * @return A flat representation of the class specified by <code>cl</code>.
      *            Returns null for some targets.
@@ -1982,9 +1971,9 @@ public class ModelicaCompiler implements LogContainer {
      *             found.
      * @deprecated Use {@link #compileModel(Path[], String, TargetObject, String, Path)} instead
      */
-    public FClass ModelicaCompiler.compileModel(String files[], String cl, TargetObject target, String flatName, String compileTo)
+    public FClass ModelicaCompiler.compileModel(String files[], String cl, TargetObject target, String compileTo)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-        return compileModel(stringsToPaths(files), cl, target, flatName, compileTo == null ? null : Paths.get(compileTo));
+        return compileModel(stringsToPaths(files), cl, target, compileTo == null ? null : Paths.get(compileTo));
     }
     
     /**
@@ -1998,8 +1987,6 @@ public class ModelicaCompiler implements LogContainer {
      *            The name of the class in the model file to compile.
      * @param target
      *            The target object for the compiler.
-     * @param flatName
-     *            Name of the unit/flat model supplied by the user, if any.
      * 
      * @return A flat representation of the class specified by <code>cl</code>.
      *            Returns null for some targets.
@@ -2021,24 +2008,19 @@ public class ModelicaCompiler implements LogContainer {
      *             found.
      * @deprecated Use {@link #compileModel(Path[], String, TargetObject, String, Path)} instead
      */
-     public FClass ModelicaCompiler.compileModel(Path files[], String cl, TargetObject target, String flatName, Path compileTo)
+     public FClass ModelicaCompiler.compileModel(Path files[], String cl, TargetObject target, Path compileTo)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
         boolean doTearDown = true;
         try {
             doTearDown = trySetUp();
-            return doCompileModel(files, cl, target, flatName, compileTo);
+            return doCompileModel(files, cl, target, compileTo);
         } finally {
             tryTearDown(doTearDown);
         }
     }
     
-    public FClass ModelicaCompiler.doCompileModel(String name[], String cl, TargetObject target, String flatName, String compileTo)
-          throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-        return doCompileModel(stringsToPaths(name), cl, target, flatName, compileTo == null ? null : Paths.get(compileTo));
-    }
     
-    
-    public FClass ModelicaCompiler.doCompileModel(Path name[], String cl, TargetObject target, String flatName, Path compileTo)
+    public FClass ModelicaCompiler.doCompileModel(Path name[], String cl, TargetObject target, Path compileTo)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
         if (target.equals(TargetObject.PARSE)) {
             parseFiles(name);
@@ -2061,10 +2043,12 @@ public class ModelicaCompiler implements LogContainer {
         try {
             // compute instance tree
             InstClassDecl icl = instantiateModel(name, cl, target);
-            
+            UtilInterface util = icl.root().getUtilInterface();
+            String flatName = null;
             if (compileTo != null) {
-                File unitFile = makePackagingDirs(cl, compileTo.toFile(), target);
-                icl.root().getUtilInterface().setCompilationOutputPath(unitFile);
+                Path unitFile = makePackagingDirs(cl, compileTo, target);
+                util.setCompilationOutputPath(unitFile);
+                flatName = computeFlatName(compileTo, util);
             }
             
             // flattening
@@ -2206,30 +2190,28 @@ public class ModelicaCompiler implements LogContainer {
     /**
      * Packs an FMU (helper function for {@link #compileUnit()}).
      */
-    protected File ModelicaCompiler.packUnit(String className,
+    protected Path ModelicaCompiler.packUnit(String className,
             TargetObject target, FClass fClass) throws PackingFailedException {
-
-        File unitFile = fClass.root().getUtilInterface().getCompilationOutputPath();
-
+        Path unitFile = fClass.root().getUtilInterface().getCompilationOutputPath();
+        
         hookPackFmu(fClass, outDir);
+        hookCheckAbort();
+        packUnit(className, target, fClass, unitFile);
+        hookFmuPacked(fClass, unitFile.toAbsolutePath().toFile());
+        
+        return unitFile;
+    }
+    
+    private void ModelicaCompiler.packUnit(String className, TargetObject target, FClass fClass, Path unitFile) {
         try {
-            hookCheckAbort();
             copySourceFiles(fClass, sourceDir, outDir);
-
-            OutputStream dest = new BufferedOutputStream(new FileOutputStream(unitFile));
-            ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
-            out.setMethod(ZipOutputStream.DEFLATED);
-
-            zipDir(outDir, out);
-            out.close();
-        } catch (CompilationAbortedException e) {
-            throw e;
+            try (ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(unitFile)))) {
+                out.setMethod(ZipOutputStream.DEFLATED);
+                zipDir(outDir, out);
+            }
         } catch (Exception e) {
             throw new PackingFailedException(String.format("Could not write to '%s'.", unitFile), e);
         }
-
-        hookFmuPacked(fClass, unitFile.getAbsoluteFile());
-        return unitFile;
     }
 
     /**
@@ -2247,10 +2229,10 @@ public class ModelicaCompiler implements LogContainer {
         }
     }
 
-    private void ModelicaCompiler.doCompileCCode(TargetObject target,  FClass fc, String className, String flatName) {
+    private void ModelicaCompiler.doCompileCCode(TargetObject target,  FClass fc) {
         if (target.getMakeFileFlag() != null) {
                 ASTNode.beginStep("compileCCode()");
-                String cFileName = (flatName != null) ? flatName : FClass.convertClassNameToUnderscore(className);
+                String cFileName = fc.nameUnderscore();
                 CCompilerDelegator ccompiler = getCCompiler();
                 CCompilerArguments ccArgs = new CCompilerArguments(cFileName, fc.myOptions(), target, fc.externalLibraries(), fc.externalLibraryDirectories(), 
                         fc.externalIncludeDirectories());
@@ -2263,7 +2245,7 @@ public class ModelicaCompiler implements LogContainer {
 
     /**
      * Calculates the destination directory for a packaged unit. If the specified destination is a file its directory
-     * is chosen as destination. If the destination does not exist, it is created (using {@link File#mkdirs()}).
+     * is chosen as destination. If the destination does not exist, it is created (using {@link Filed#createDirectories()}).
      * 
      * @param className
      *          The qualified name of the class for to create a unit for.
@@ -2272,20 +2254,39 @@ public class ModelicaCompiler implements LogContainer {
      * @param target
      *          A {@link TargetObject} containing information about the target.
      * @return
-     *          the path to the destination directory of the packaged unit.
+     *          the path to the destination file of the packaged unit.
      */ 
-    private File ModelicaCompiler.makePackagingDirs(String className, File destination, TargetObject target) {
-        File dest = new File(destination.getAbsolutePath());
-        if (dest.isDirectory()) { 
+    private Path ModelicaCompiler.makePackagingDirs(String className, Path destination, TargetObject target)
+            throws IOException {
+        Path dest = destination.toAbsolutePath();
+        if (Files.isDirectory(dest)) { 
             String mangledName = FClass.convertClassNameToUnderscore(className);
-            dest = new File(dest, mangledName + "." + target.getUnitSuffix());
+            dest = dest.resolve(mangledName + "." + target.getUnitSuffix());
         } else {
-            File destDir = dest.getParentFile();
-            if (destDir != null && !destDir.isDirectory()) {
-                dest.getParentFile().mkdirs();
+            Path destDir = dest.getParent();
+            if (destDir != null && !Files.isDirectory(destDir)) {
+                Files.createDirectories(dest.getParent());
             }
         }
         return dest;
+    }
+    
+    private void ModelicaCompiler.generateAllFiles(FClass fc, TargetObject target, Templates templates, String name)
+            throws FileNotFoundException {
+        templates.generateCFiles(this, fc, createCGenerator(fc), sourceDir, name);
+        templates.generateXMLFiles(this, fc, target.getXMLGenerator(fc), outDir, "modelDescription");
+    }
+    
+    private String ModelicaCompiler.computeFlatName(Path compileTo, UtilInterface util) {
+        String flatName = null;
+        if (!Files.isDirectory(compileTo)) {
+            flatName = compileTo.getFileName().toString();
+            int i = flatName.lastIndexOf('.');
+            if (i > 0) {
+                flatName = flatName.substring(0, i);
+            }
+        }
+        return flatName;
     }
 
 }

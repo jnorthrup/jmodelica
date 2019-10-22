@@ -2013,6 +2013,8 @@ class Test_FMI_ODE:
         opts = bounce.simulate_options()
         opts["CVode_options"]["rtol"] = 1e-4
         opts["CVode_options"]["atol"] = 1e-6
+        opts["CVode_options"]["maxh"] = 0.0
+        opts["ncp"] = 0
         res = bounce.simulate(start_time=2.,final_time=5.,options=opts)
 
         N.testing.assert_almost_equal(res.initial('h'),1.000000,5)
@@ -2031,6 +2033,8 @@ class Test_FMI_ODE:
         opts = bounce.simulate_options()
         opts["CVode_options"]["rtol"] = 1e-4
         opts["CVode_options"]["atol"] = 1e-6
+        opts["CVode_options"]["maxh"] = 0.0
+        opts["ncp"] = 0
         res = bounce.simulate(final_time=3., options=opts)
         
         N.testing.assert_almost_equal(res.initial('h'),1.000000,5)
@@ -2044,6 +2048,8 @@ class Test_FMI_ODE:
         opt['initialize']=False
         opt["CVode_options"]["rtol"] = 1e-4
         opt["CVode_options"]["atol"] = 1e-6
+        opt["CVode_options"]["maxh"] = 0.0
+        opt["ncp"] = 0
         res = bounce.simulate(final_time=3., options=opt)
         
         N.testing.assert_almost_equal(res.initial('h'),1.000000,5)
@@ -2070,6 +2076,8 @@ class Test_FMI_ODE:
         opts = bounce.simulate_options()
         opts["CVode_options"]["rtol"] = 1e-4
         opts["CVode_options"]["atol"] = 1e-6
+        opts["CVode_options"]["maxh"] = 0.0
+        opts["ncp"] = 0
         res = bounce.simulate(final_time=3., options=opts)
 
         N.testing.assert_almost_equal(res.solver.rtol, 1e-4, 6)
@@ -2081,9 +2089,8 @@ class Test_FMI_ODE:
         
         #Writing continuous
         bounce = load_fmu('bouncingBall.fmu', path_to_fmus_me1)
-        #bounce.initialize(options={'initialize':False})
         res = bounce.simulate(final_time=3.,
-            options={'initialize':True,'CVode_options':{'iter':'FixedPoint','rtol':1e-6,'atol':1e-6}})
+            options={'initialize':True,'ncp':0, 'CVode_options':{'maxh':0.0, 'iter':'FixedPoint','rtol':1e-6,'atol':1e-6}})
     
         N.testing.assert_almost_equal(res.solver.rtol, 0.00000100, 7)
         assert res.solver.iter == 'FixedPoint'
@@ -2103,15 +2110,15 @@ class Test_FMI_ODE:
         opts = bounce.simulate_options()
         opts["CVode_options"]["rtol"] = 1e-4
         opts["CVode_options"]["atol"] = 1e-6
-        #bounce.initialize()
+        opts["CVode_options"]["maxh"] = 0.0
+        opts["ncp"] = 0
         res = bounce.simulate(final_time=3., options=opts)
         
         N.testing.assert_almost_equal(res.initial('h'),1.000000,5)
         N.testing.assert_almost_equal(res.final('h'),-0.9804523,5)
         
         bounce.reset()
-        #bounce.initialize()
-        
+
         N.testing.assert_almost_equal(bounce.get('h'), 1.00000,5)
         
         res = bounce.simulate(final_time=3.,options=opts)

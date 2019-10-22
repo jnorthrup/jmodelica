@@ -44,269 +44,22 @@ assimulo_src_dir=$(abs_top_srcdir)/external/Assimulo
 
 bindistdir=JModelica.org-$(VERSION)-bin
 
-casadi:
-if COMPILE_WITH_IPOPT
-	cd $(abs_builddir)/ThirdParty/CasADi; \
-	make -f Makefile  "SWIGCHECK_BUILD_DIR=$(TMP_SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(TMP_CASADI_BUILD_DIR)" "IPOPT_HOME=$(IPOPT_HOME)" "CASADI_PYTHON_INST_DIR=${TMP_CASADI_PYTHON_INST_DIR}" "CASADI_INST_DIR=${TMP_CASADI_INST_DIR}" "CASADI_PLUGIN_INST_DIR=${TMP_CASADI_PLUGIN_INST_DIR}" "CMAKE_CASADI_ARGS=${TMP_CMAKE_CASADI_ARGS}" "CMAKE_CASADI_COMPILER_ARGS=${TMP_CMAKE_CASADI_COMPILER_ARGS}" "CMAKE_CASADI_CXX_FLAG=${TMP_CMAKE_CASADI_CXX_FLAG}" "CMAKE_PYTHON_LIB=${CMAKE_PYTHON_LIB}"
-endif
-if COMPILE_WITH_IPOPT64
-	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
-	export PYTHONHOME=$(PYTHON64_HOME); \
-	cd $(abs_builddir)/ThirdParty/CasADi; \
-	make -f Makefile  "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR64)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR64)" "IPOPT_HOME=$(IPOPT64_HOME)" "CASADI_PYTHON_INST_DIR=${CASADI_PYTHON_INST_DIR64}" "CASADI_INST_DIR=${CASADI_INST_DIR64}" "CASADI_PLUGIN_INST_DIR=${CASADI_PLUGIN_INST_DIR64}" "CMAKE_CASADI_ARGS=${CMAKE_CASADI_ARGS64}" "CMAKE_CASADI_COMPILER_ARGS=${CMAKE_CASADI_COMPILER_ARGS64}" "CMAKE_CASADI_CXX_FLAG=${CMAKE_CASADI_CXX_FLAG64}" "CMAKE_PYTHON_LIB=${CMAKE_PYTHON64_LIB}" "CMAKE_PYTHON_INCLUDE=${CMAKE_PYTHON64_INCLUDE}"
-	export PYTHONHOME=$(ORIG_PYTHON_HOME); \
-	export PATH="$(ORIG_PATH)";
-endif
+include MakefileCasadi.am
 
-install_casadi: casadi
-if COMPILE_WITH_IPOPT
-	cd $(abs_builddir)/ThirdParty/CasADi; \
-	make -f Makefile install "SWIGCHECK_BUILD_DIR=$(TMP_SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(TMP_CASADI_BUILD_DIR)" "IPOPT_HOME=$(IPOPT_HOME)"
-	mkdir -p $(DESTDIR)$(prefix)/Python/
-	cp -r $(TMP_CASADI_PYTHON_INST_DIR)/casadi $(DESTDIR)$(prefix)/Python/
-	## temp fix
-	cp $(TMP_CASADI_BUILD_DIR)/swig/casadi_core.py $(DESTDIR)$(prefix)/Python/casadi
-endif
-if COMPILE_WITH_IPOPT64  
-	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
-	export PYTHONHOME=$(PYTHON64_HOME);  
-	cd $(abs_builddir)/ThirdParty/CasADi; \
-	make -f Makefile install "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR64)" "IPOPT_HOME=$(IPOPT64_HOME)"
-	mkdir -p $(DESTDIR)$(prefix)/Python/
-	cp -r $(CASADI_PYTHON_INST_DIR64)/casadi $(DESTDIR)$(prefix)/Python_64/
-	## temp fix
-	cp $(CASADI_BUILD_DIR64)/swig/casadi_core.py $(DESTDIR)$(prefix)/Python_64/casadi
-	export PYTHONHOME=$(ORIG_PYTHON_HOME); \
-	export PATH="$(ORIG_PATH)";
-endif
-## Install for CasADiInterface, Variables and targets. 
-## MC_interface installs the system with Python. 
-## If C++ compilation/tests are wanted there is the target MC_interface_cplusplus
-
-MC_INTERFACE=$(abs_top_srcdir)/ModelicaCasADiInterface
-
-CASADI_HOME=$(abs_top_srcdir)/ThirdParty/CasADi/CasADi
-MC_SRC=$(JAVA_CASADI_BASE_DIR)/ModelicaCompilerCasADi
-OC_SRC=$(JAVA_CASADI_BASE_DIR)/OptimicaCompilerCasADi
-MC_SRC_SWIG=$(abs_top_srcdir)/Compiler/ModelicaCompilerCasADi/src/swig
-
-MC_CASADI_BUILD=$(abs_builddir)/ModelicaCompilerCasADi
-OC_CASADI_BUILD=$(abs_builddir)/OptimicaCompilerCasADi
-
-# The modelica casadi interface is built into a build folder
-MC_BUILD=$(abs_builddir)/ModelicaCasADiInterfaceBuild
-MC_BUILD64=$(abs_builddir)/ModelicaCasADiInterfaceBuild64
-# Jars from the modified modelica and optimica compilers are put into the JModelica folder
-MC_COMPILERS_DIR=$(MC_BUILD)/JModelica.org
-MC_LIB=$(DESTDIR)$(prefix)/lib/casadi_interface
-MC_LIB64=$(DESTDIR)$(prefix)/lib/casadi_interface64
-
-CASADI_BUILD_DIR=$(abs_builddir)/casadi_build
-CASADI_BUILD_DIR64=$(abs_builddir)/casadi_build64
-SWIGCHECK_BUILD_DIR=$(abs_builddir)/swig_check
-SWIGCHECK_BUILD_DIR64=$(abs_builddir)/swig_check64
-CASADI_PYTHON_INST_DIR=$(abs_builddir)/casadi_install
-CASADI_INST_DIR=$(prefix)/ThirdParty/CasADi
-CASADI_PLUGIN_INST_DIR=$(CASADI_INST_DIR)/lib
-CASADI_PYTHON_INST_DIR64=$(abs_builddir)/casadi_install64
-CASADI_INST_DIR64=$(prefix)/ThirdParty/CasADi64
-CASADI_PLUGIN_INST_DIR64=$(CASADI_INST_DIR64)/lib
-CMAKE_CASADI_CXX_FLAG=-m32
-CMAKE_CASADI_COMPILER_ARGS=-m32 -mincoming-stack-boundary=2
-CMAKE_CASADI_CXX_FLAG64=-m64
-CMAKE_CASADI_COMPILER_ARGS64=-m64 -fpermissive
-
-
-if BUILD_WITH_PYTHON32
-BUILD_WITH_PYTHON32_ARG=--force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" 
-DEP_SUFFIX=
-TMP_CASADI_BUILD_DIR=$(CASADI_BUILD_DIR)
-TMP_SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)
-TMP_CMAKE_CASADI_CXX_FLAG=$(CMAKE_CASADI_CXX_FLAG)
-TMP_CMAKE_CASADI_COMPILER_ARGS=$(CMAKE_CASADI_COMPILER_ARGS)
-
-TMP_CASADI_INST_DIR=$(CASADI_INST_DIR)
-TMP_CASADI_PLUGIN_INST_DIR=$(CASADI_PLUGIN_INST_DIR)
-TMP_CASADI_PYTHON_INST_DIR=$(CASADI_PYTHON_INST_DIR)
-TMP_MC_LIB=$(MC_LIB)
-TMP_MC_BUILD=$(MC_BUILD)
-TMP_CMAKE_CASADI_ARGS=$(CMAKE_CASADI_ARGS)
-else
-BUILD_WITH_PYTHON32_ARG=
-DEP_SUFFIX=64
-TMP_CASADI_BUILD_DIR=$(CASADI_BUILD_DIR64)
-TMP_SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR64)
-TMP_CMAKE_CASADI_CXX_FLAG=$(CMAKE_CASADI_CXX_FLAG64)
-TMP_CMAKE_CASADI_COMPILER_ARGS=$(CMAKE_CASADI_COMPILER_ARGS64)
-
-# note we set directories to those without 64bit suffix
-TMP_CASADI_INST_DIR=$(CASADI_INST_DIR)
-TMP_CASADI_PLUGIN_INST_DIR=$(CASADI_PLUGIN_INST_DIR)
-TMP_CASADI_PYTHON_INST_DIR=$(CASADI_PYTHON_INST_DIR)
-TMP_MC_LIB=$(MC_LIB64)
-TMP_MC_BUILD=$(MC_BUILD64)
-
-
-#CMAKE_PYTHON_INCLUDE=$(CMAKE_PYTHON64_INCLUDE)
-#CMAKE_PYTHON_LIB=$(CMAKE_PYTHON_LIB64)
-TMP_CMAKE_CASADI_ARGS=$(CMAKE_CASADI_ARGS64)
-endif
-
-
-casadi_interface: install_casadi_interface
-build_casadi_interface: casadi modelicacasadi_wrapper
-install_casadi_interface: install_casadi $(TMP_MC_LIB) $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/modelica_casadi_transfer_wrapper.py
-	if [ "$(INSTALL_EXTRA_CASADI)" ]; then exec "$(INSTALL_EXTRA_CASADI)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
-
-ifcasadi: casadi
-if COMPILE_WITH_IPOPT
-	mkdir -p $(TMP_MC_BUILD)/ifcasadi; \
-	cd $(TMP_MC_BUILD)/ifcasadi; \
-	case $(build) in \
-	*-cygwin*|*-mingw*) \
-	cmake $(MC_SRC_SWIG) -G "MSYS Makefiles" -DCMAKE_CXX_COMPILER_ARG1="$(TMP_CMAKE_CASADI_CXX_FLAG)" -DCMAKE_CXX_FLAGS="$(TMP_CMAKE_CASADI_CXX_FLAG)" \
-	    -DIFCASADI_OUTDIR="$(MC_CASADI_BUILD)" -DCASADI_HOME="$(CASADI_HOME)" -DCASADI_BUILD_DIR="$(TMP_CASADI_BUILD_DIR)";; \
-	*) \
-	cmake $(MC_SRC_SWIG) \
-	    -DIFCASADI_OUTDIR="$(MC_CASADI_BUILD)" -DCASADI_HOME="$(CASADI_HOME)" -DCASADI_BUILD_DIR="$(TMP_CASADI_BUILD_DIR)";; \
-	esac 
-	cd $(TMP_MC_BUILD)/ifcasadi;  make
-endif
-if COMPILE_WITH_IPOPT64
-	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}";
-	export PYTHONHOME=$(PYTHON64_HOME);
-	mkdir -p $(MC_BUILD64)/ifcasadi; \
-	cd $(MC_BUILD64)/ifcasadi; \
-	cmake $(MC_SRC_SWIG) -G "MSYS Makefiles" -DCMAKE_CXX_COMPILER_ARG1="-m64" -DCMAKE_CXX_FLAGS="-m64" \
-	    -DIFCASADI_OUTDIR="$(MC_CASADI_BUILD)" -DCASADI_HOME="$(CASADI_HOME)" -DCASADI_BUILD_DIR="$(CASADI_BUILD_DIR64)"; \
-	cd $(MC_BUILD64)/ifcasadi;  make
-	export PYTHONHOME=$(ORIG_PYTHON_HOME); \
-	export PATH="$(ORIG_PATH)";
-endif
-
-$(TMP_MC_LIB): $(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar $(OC_CASADI_BUILD)/bin/OptimicaCompiler.jar $(MC_CASADI_BUILD)/bin/util.jar ifcasadi
-if COMPILE_WITH_IPOPT
-	rm -rf $(TMP_MC_LIB)
-	mkdir -p $(TMP_MC_LIB)
-	cp $(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar $(TMP_MC_LIB)
-	cp $(OC_CASADI_BUILD)/bin/OptimicaCompiler.jar $(TMP_MC_LIB)
-	cp $(MC_CASADI_BUILD)/bin/util.jar $(TMP_MC_LIB)
-	case $(build) in \
-	*-cygwin*) \
-	cp $(TMP_MC_BUILD)/ifcasadi/ifcasadi.dll $(TMP_MC_LIB) ;; \
-	*-mingw*) \
-	cp $(TMP_MC_BUILD)/ifcasadi/ifcasadi.dll $(TMP_MC_LIB) ;; \
-	*) \
-	cp $(TMP_MC_BUILD)/ifcasadi/libifcasadi.so $(TMP_MC_LIB) ;; \
-	esac
-endif
-if COMPILE_WITH_IPOPT64
-	rm -rf $(MC_LIB64)
-	mkdir -p $(MC_LIB64)
-	cp $(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar $(MC_LIB64)
-	cp $(OC_CASADI_BUILD)/bin/OptimicaCompiler.jar $(MC_LIB64)
-	cp $(MC_CASADI_BUILD)/bin/util.jar $(MC_LIB64)
-	cp $(MC_BUILD64)/ifcasadi/ifcasadi.dll $(MC_LIB64)
-endif
-
-mc_modelica: ifcasadi
-	cd $(MC_CASADI_BUILD); $(ANT_OPTS) $(ANT) -f "$(JAVA_MC_CASADI_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(MC_CASADI_BUILD)"
-
-mc_optimica: ifcasadi
-	mkdir -p $(OC_CASADI_BUILD)/src/generated/optimica/java
-	cp -pr $(MC_CASADI_BUILD)/src/generated/modelica/java/ifcasadi $(OC_CASADI_BUILD)/src/generated/optimica/java
-	cd $(OC_CASADI_BUILD); $(ANT_OPTS) $(ANT) -f "$(JAVA_OC_CASADI_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)" "-Dtarget=$(OC_CASADI_BUILD)"
-
-$(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar: mc_modelica
-$(MC_CASADI_BUILD)/bin/util.jar:             mc_modelica
-$(MC_CASADI_BUILD)/bin/separateProcess.jar:  mc_modelica
-
-$(OC_CASADI_BUILD)/bin/OptimicaCompiler.jar: mc_optimica
-$(OC_CASADI_BUILD)/bin/util.jar:             mc_optimica
-$(OC_CASADI_BUILD)/bin/separateProcess.jar:  mc_optimica
-
-$(TMP_MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py: modelicacasadi_wrapper
-
-
-modelicacasadi_wrapper: $(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar $(OC_CASADI_BUILD)/bin/OptimicaCompiler.jar $(MC_CASADI_BUILD)/bin/util.jar ifcasadi # $(TMP_MC_LIB)
-if COMPILE_WITH_IPOPT
-	mkdir -p $(TMP_MC_BUILD)/modelicacasadi_wrapper; \
-	cd $(TMP_MC_BUILD)/modelicacasadi_wrapper; \
-	case $(build) in \
-	*-cygwin*|*-mingw*) \
-	cmake $(MC_INTERFACE) -G "MSYS Makefiles" -DCMAKE_CXX_COMPILER_ARG1="$(TMP_CMAKE_CASADI_CXX_FLAG)" -DCMAKE_CXX_FLAGS="$(TMP_CMAKE_CASADI_CXX_FLAG)" \
-	    -DMC_BUILD="$(TMP_MC_BUILD)" -DIPOPT_HOME="$(IPOPT_HOME)" -DCASADI_BUILD_DIR="$(TMP_CASADI_BUILD_DIR)" \
-	    -DIFCASADI_JAR_BASE="$(JAVA_CASADI_BUILD_DIR)" -DCASADI_HOME="$(CASADI_HOME)" \
-	    "$(CMAKE_PYTHON_LIB)" "$(CMAKE_PYTHON_INCLUDE)" ;; \
-	*) \
-	cmake $(MC_INTERFACE) \
-	    -DMC_BUILD="$(TMP_MC_BUILD)" -DIPOPT_HOME="$(IPOPT_HOME)" -DCASADI_BUILD_DIR="$(TMP_CASADI_BUILD_DIR)" \
-	    -DIFCASADI_JAR_BASE="$(JAVA_CASADI_BUILD_DIR)" -DCASADI_HOME="$(CASADI_HOME)" \
-	    "$(CMAKE_PYTHON_LIB)" "$(CMAKE_PYTHON_INCLUDE)" ;; \
-	esac 
-	cd $(TMP_MC_BUILD)/modelicacasadi_wrapper;  make modelicacasadi_wrapper
-endif
-if COMPILE_WITH_IPOPT64
-	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
-	export PYTHONHOME=$(PYTHON64_HOME); \
-	mkdir -p $(MC_BUILD64)/modelicacasadi_wrapper; \
-	cd $(MC_BUILD64)/modelicacasadi_wrapper; \
-	cmake $(MC_INTERFACE) -G "MSYS Makefiles" -DCMAKE_CXX_COMPILER_ARG1="-m64" -DCMAKE_CXX_FLAGS="-m64" \
-	    -DMC_BUILD="$(MC_BUILD64)" -DIPOPT_HOME="$(IPOPT64_HOME)" -DCASADI_BUILD_DIR="$(CASADI_BUILD_DIR64)" \
-	    -DIFCASADI_JAR_BASE="$(JAVA_CASADI_BUILD_DIR)" -DCASADI_HOME="$(CASADI_HOME)" \
-	    "$(CMAKE_PYTHON64_LIB)" "$(CMAKE_PYTHON64_INCLUDE)"; \
-	cd $(MC_BUILD64)/modelicacasadi_wrapper;  make modelicacasadi_wrapper
-	export PYTHONHOME=$(ORIG_PYTHON_HOME);
-	export PATH="$(ORIG_PATH)";
-endif
-
- $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py: install_modelicacasadi_transfer
- $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/modelica_casadi_transfer_wrapper.py: install_modelicacasadi_transfer
- 
- $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py: install_modelicacasadi_wrapper
- 
- install_modelicacasadi_wrapper: $(TMP_MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py
-if COMPILE_WITH_IPOPT
-	mkdir -p $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper
-	cp $(TMP_MC_BUILD)/modelicacasadi_wrapper/swig/*modelicacasadi_wrapper* $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper 
-	rm -f $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
-	touch $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
-	echo "from modelicacasadi_wrapper import *" >> $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
-endif
-if COMPILE_WITH_IPOPT64
-	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
-	export PYTHONHOME=$(PYTHON64_HOME);
-	mkdir -p $(DESTDIR)$(prefix)/Python_64/modelicacasadi_wrapper
-	cp $(MC_BUILD64)/modelicacasadi_wrapper/swig/*modelicacasadi_wrapper* $(DESTDIR)$(prefix)/Python_64/modelicacasadi_wrapper 
-	rm -f $(DESTDIR)$(prefix)/Python_64/modelicacasadi_wrapper/__init__.py
-	touch $(DESTDIR)$(prefix)/Python_64/modelicacasadi_wrapper/__init__.py
-	echo "from modelicacasadi_wrapper import *" >> $(DESTDIR)$(prefix)/Python_64/modelicacasadi_wrapper/__init__.py
-	export PYTHONHOME=$(ORIG_PYTHON_HOME)
-	export PATH="$(ORIG_PATH)"
-endif
-
- install_modelicacasadi_transfer: $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py 
-if COMPILE_WITH_IPOPT
-	mkdir -p $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
-	rm -f $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
-	touch $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
-	echo "from modelica_casadi_transfer_wrapper import *" >> $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
-	cp $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
-endif
-if COMPILE_WITH_IPOPT64    
-	mkdir -p $(DESTDIR)$(prefix)/Python_64/modelicacasadi_transfer
-	rm -f $(DESTDIR)$(prefix)/Python_64/modelicacasadi_transfer/__init__.py
-	touch $(DESTDIR)$(prefix)/Python_64/modelicacasadi_transfer/__init__.py
-	echo "from modelica_casadi_transfer_wrapper import *" >> $(DESTDIR)$(prefix)/Python_64/modelicacasadi_transfer/__init__.py
-	cp $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py $(DESTDIR)$(prefix)/Python_64/modelicacasadi_transfer
-endif
-        
 if NUMPY_NO_MSVCR
 NUMPY_NO_MSVCR_ARG=--no-msvcr="true"
 else
 NUMPY_NO_MSVCR_ARG=
 endif
 
+
+if BUILD_WITH_PYTHON32
+BUILD_WITH_PYTHON32_ARG=--force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" 
+DEP_SUFFIX=
+else
+BUILD_WITH_PYTHON32_ARG=
+DEP_SUFFIX=64
+endif
 
 build-python-packages:
 if PYTHON_ENABLED
@@ -690,18 +443,6 @@ test: install
 	$(prefix)/jm_tests -i
 
 clean-local: clean-frontends clean-python-packages clean-casadi-interface
-
-clean-casadi-interface: 
-	rm -rf $(MC_BUILD)
-	rm -rf $(MC_BUILD64)
-#	rm -rf $(DESTDIR)$(prefix)/Python/casadi
-#	rm -rf $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
-if HAVE_ANT
-	cd $(JAVA_CASADI_BUILD_DIR)/ModelicaCompilerCasADi; \
-	$(ANT_OPTS) $(ANT) clean ; rm -rf $(MC_CASADI_BUILD)/src/cpp-generated $(MC_CASADI_BUILD)/src/generated/modelica/java/ifcasadi 
-	cd $(JAVA_CASADI_BUILD_DIR)/OptimicaCompilerCasADi; \
-	$(ANT_OPTS) $(ANT) clean ; rm -rf $(OC_CASADI_BUILD)/src/cpp-generated $(OC_CASADI_BUILD)/src/generated/optimica/java/ifcasadi 
-endif
 	
 clean-python-packages:
 if PYTHON_ENABLED
@@ -737,5 +478,3 @@ docs:
 	cd $(abs_top_srcdir); doxygen doc/OptimicaCompiler/optimica_compiler_doxydoc.conf
 	make -C $(abs_top_srcdir)/doc/PyJMI html
 
-
-.PHONY: modelicacasadi_wrapper ifcasadi install_modelicacasadi_transfer install_modelicacasadi_wrapper
