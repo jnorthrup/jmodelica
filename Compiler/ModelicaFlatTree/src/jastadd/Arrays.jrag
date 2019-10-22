@@ -4313,7 +4313,7 @@ aspect ArrayHelpers {
 			int[] ii = translate(i).index();
 			for (CommonForIndex fi : forIndices) {
 				indexMap.put(fi.name(), new FIntegerLitExp(ii[j]));
-				fi.setEvaluationValue(new CValueInteger(ii[j]));
+				fi.setEvaluationValue(CValueInteger.valueOf(ii[j]));
 				j++;
 			}
 		}

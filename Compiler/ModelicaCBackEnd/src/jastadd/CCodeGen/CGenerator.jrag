@@ -21,6 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import java.io.*;
 
+aspect CGenerator {
+
 public class CGenerator extends GenericGenerator {
     
     protected static final String INDENT = "    ";
@@ -1245,7 +1247,7 @@ public class CGenerator extends GenericGenerator {
         }
         
         public void generate(CodeStream genPrinter) {
-            genPrinter.print(fclass.myDelayExps().size());
+			genPrinter.print(fclass.numberOfDelaysInCCode());
         }
     }
     
@@ -1303,20 +1305,7 @@ public class CGenerator extends GenericGenerator {
         }
         
         public void generate(CodeStream genPrinter) {
-            CodePrinter p = ASTNode.printer_C;
-            String indent = p.indent("");
-            for (FDelayExp d : fclass.myDelayExps()) {
-                d.genInitVarDecls_C(p, genPrinter, indent);
-            }
-            for (FSpatialDistExp d : fclass.mySpatialDistExps()) {
-                d.genInitVarDecls_C(p, genPrinter, indent);
-            }
-            for (FDelayExp d : fclass.myDelayExps()) {
-                d.genInit_C(p, genPrinter, indent);
-            }
-            for (FSpatialDistExp d : fclass.mySpatialDistExps()) {
-                d.genInit_C(p, genPrinter, indent);
-            }
+        	fclass.genDelayInit_C(genPrinter);
         }
     }
     
@@ -1576,4 +1565,7 @@ public class ExternCEvalGenerator extends CGenerator {
             if (t instanceof ExternalCEvalTag)
                 ((ExternalCEvalTag)t).setExt(ext, cgc, tempMap);
     }
+}
+
+	syn int FClass.numberOfDelaysInCCode() = myDelayExps().size(); // Hook to facilitate extensions
 }

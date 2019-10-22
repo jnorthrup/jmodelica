@@ -33,7 +33,7 @@ model ParametricNominal1
     annotation(__JModelica(UnitTesting(tests={
         FClassMethodTestCase(
             name="ParametricNominal1",
-            description="",
+            description="Test that parametric nominal that cannot be evaluated does not lead to exception during equation solving. Instead we handle it as if there was no nominal set.",
             methodName="printDAEBLT",
             methodResult="
 --- Torn system (Block 1) of 1 iteration variables and 1 solved variables ---

@@ -54,8 +54,10 @@ install(CODE "file(MAKE_DIRECTORY $ENV{DESTDIR}${RTLIB_INCLUDE_DIR})")
 # Add spaces around CMAKE_C_FLAGS so that we can check for " -m64 " with spaces around it
 if(" ${CMAKE_C_FLAGS} " MATCHES " -m64 ")
     set(RTLIB_LIB_DIR ${JMODELICA_INSTALL_DIR}/lib/RuntimeLibrary64)
+    set(RTLIB_BIN_DIR ${JMODELICA_INSTALL_DIR}/bin64)
 else()
     set(RTLIB_LIB_DIR ${JMODELICA_INSTALL_DIR}/lib/RuntimeLibrary)
+    set(RTLIB_BIN_DIR ${JMODELICA_INSTALL_DIR}/bin)
 endif()
 install(CODE "file(MAKE_DIRECTORY $ENV{DESTDIR}${RTLIB_LIB_DIR})")
 
@@ -90,6 +92,9 @@ add_subdirectory(src/fmi1_cs)
 include_directories(src/jmi/module_include)
 add_subdirectory(src/modules)
 
+#Add evaluator
+include_directories(src/evaluator)
+add_subdirectory(src/evaluator)
 
 if(EXTRA_RUNTIME_MODULES)
     set(index 1)
