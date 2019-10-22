@@ -58,7 +58,14 @@ def input_linear(t):
         
 input_object = (["u"],input_linear)
 
-class Test_When:
+class AssertWithMessage:
+    def __init__(self):
+        self.message = ""
+    def assert_equal_msg(self, actual, desired):
+        err_msg = "\nACTUAL: {}\nDESIRED: {}".format(actual, desired)
+        assert actual == desired, err_msg
+
+class Test_When(AssertWithMessage):
     @classmethod
     def setUpClass(cls):
         file_name = os.path.join(get_files_path(), 'Modelica', 'WhenTests.mo')
@@ -71,11 +78,11 @@ class Test_When:
         
         res = model.simulate(final_time=3.5)
         
-        assert res.final("nextTime") == 4.0
-        assert res.final("nextTime2") == 3.0
-        assert res.final("nextTime3") == 8.0
+        self.assert_equal_msg(res.final("nextTime"), 4.0)
+        self.assert_equal_msg(res.final("nextTime2"), 3.0)
+        self.assert_equal_msg(res.final("nextTime3"), 8.0)
         
-class Test_Sparse_Linear_Block:
+class Test_Sparse_Linear_Block(AssertWithMessage):
     @classmethod
     def setUpClass(cls):
 
@@ -97,7 +104,7 @@ class Test_Sparse_Linear_Block:
         res2 = model.simulate()
         
         #Assert that sparse handling has no impact on the number of steps
-        assert res1.solver.statistics["nsteps"] == res2.solver.statistics["nsteps"]
+        self.assert_equal_msg(res2.solver.statistics["nsteps"], res1.solver.statistics["nsteps"])
         N.testing.assert_almost_equal(res1.final("J1.w"), res2.final("J1.w"), 3)
         
     @testattr(stddist_base = True)
@@ -107,7 +114,7 @@ class Test_Sparse_Linear_Block:
         fmu_name = compile_fmu("LinearTest.TwoTornSystems1", file_name, version=1.0,
                         compiler_options={"generate_sparse_block_jacobian_threshold": 0})
 
-class Test_Time_Events_FMU10:
+class Test_Time_Events_FMU10(AssertWithMessage):
     @classmethod
     def setUpClass(cls):
         """
@@ -143,7 +150,7 @@ class Test_Time_Events_FMU10:
         model.initialize()
         ev = model.get_event_info()
         print(ev.nextEventTime)
-        assert ev.nextEventTime == 1
+        self.assert_equal_msg(ev.nextEventTime, 1)
         
     @testattr(stddist_full = True)
     def test_time_event_basic_2(self):
@@ -151,8 +158,8 @@ class Test_Time_Events_FMU10:
         model.initialize()
         ev = model.get_event_info()
         print(ev.nextEventTime)
-        assert ev.nextEventTime == 2
-        assert ev.nextEventTime == model.get("p")
+        self.assert_equal_msg(ev.nextEventTime, 2)
+        self.assert_equal_msg(ev.nextEventTime, model.get("p"))
         
     @testattr(stddist_full = True)
     def test_time_event_basic_3(self):
@@ -160,7 +167,7 @@ class Test_Time_Events_FMU10:
         model.initialize()
         ev = model.get_event_info()
         print(ev.nextEventTime)
-        assert ev.nextEventTime == 1.5
+        self.assert_equal_msg(ev.nextEventTime, 1.5)
         
     @testattr(stddist_full = True)
     def test_time_event_basic_4(self):
@@ -168,15 +175,15 @@ class Test_Time_Events_FMU10:
         
         model.initialize()
         ev = model.get_event_info()
-        assert ev.upcomingTimeEvent == False
-        assert model.get("x")== 2
+        self.assert_equal_msg(ev.upcomingTimeEvent, False)
+        self.assert_equal_msg(model.get("x"), 2)
         
         model.reset()
         model.time = 1
         model.initialize()
         
-        assert ev.upcomingTimeEvent == False
-        assert model.get("x") == 1
+        self.assert_equal_msg(ev.upcomingTimeEvent, False)
+        self.assert_equal_msg(model.get("x"), 1)
         
     @testattr(stddist_base = True)
     def test_time_event_advanced1(self):
@@ -184,12 +191,12 @@ class Test_Time_Events_FMU10:
         model.initialize()
         ev = model.get_event_info()
         print(ev.nextEventTime)
-        assert ev.nextEventTime == 0.5
+        self.assert_equal_msg(ev.nextEventTime, 0.5)
         
         model.simulate(options={"initialize":False})
         
         print("i (should be 2): ", model.get("i")) 
-        assert model.get("i") == 2
+        self.assert_equal_msg(model.get("i"), 2)
         
     @testattr(stddist_base = True)
     def test_time_event_advanced2(self):
@@ -197,12 +204,12 @@ class Test_Time_Events_FMU10:
         model.initialize()
         ev = model.get_event_info()
         print(ev.nextEventTime)
-        assert ev.nextEventTime == 0.5
+        self.assert_equal_msg(ev.nextEventTime, 0.5)
         
         model.simulate(options={"initialize":False})
         
         print("i (should be 2): ", model.get("i")) 
-        assert model.get("i") == 2
+        self.assert_equal_msg(model.get("i"), 2)
         
     @testattr(stddist_base = True)
     def test_time_event_advanced3(self):
@@ -210,14 +217,14 @@ class Test_Time_Events_FMU10:
         model.initialize()
         ev = model.get_event_info()
         print(ev.nextEventTime)
-        assert ev.nextEventTime == 0.5
+        self.assert_equal_msg(ev.nextEventTime, 0.5)
         
         model.simulate(options={"initialize":False})
         
         print("i (should be 2): ", model.get("i")) 
         print("j (should be 1): ", model.get("j")) 
-        assert model.get("i") == 2
-        assert model.get("j") == 1
+        self.assert_equal_msg(model.get("i"), 2)
+        self.assert_equal_msg(model.get("j"), 1)
         
     @testattr(stddist_base = True)
     def test_time_event_advanced4(self):
@@ -225,14 +232,14 @@ class Test_Time_Events_FMU10:
         model.initialize()
         ev = model.get_event_info()
         print(ev.nextEventTime)
-        assert ev.nextEventTime == 0.5
+        self.assert_equal_msg(ev.nextEventTime, 0.5)
         
         model.simulate(options={"initialize":False})
         
         print("i (should be 1): ", model.get("i")) 
         print("j (should be 1): ", model.get("j")) 
-        assert model.get("i") == 1
-        assert model.get("j") == 1
+        self.assert_equal_msg(model.get("i"), 1)
+        self.assert_equal_msg(model.get("j"), 1)
         
     @testattr(stddist_full = True)
     def test_time_event_mixed1(self):
@@ -240,15 +247,15 @@ class Test_Time_Events_FMU10:
         model.initialize()
         ev = model.get_event_info()
         print(ev.nextEventTime)
-        assert ev.nextEventTime == 1.5
+        self.assert_equal_msg(ev.nextEventTime , 1.5)
         
         res = model.simulate(final_time=4, options={"initialize":False})
         
         print("x: ", res["x"])
         print("dx: ", res["der(x)"])
         
-        assert res.solver.statistics["ntimeevents"] == 2
-        assert res.solver.statistics["nstateevents"] == 2
+        self.assert_equal_msg(res.solver.statistics["ntimeevents"], 2)
+        self.assert_equal_msg(res.solver.statistics["nstateevents"], 2)
 
     """                 """
     """ Sampling tests. """
@@ -260,8 +267,8 @@ class Test_Time_Events_FMU10:
     def test_time_event_sampling1(self):
         model = load_fmu("TimeEvents_TestSampling1.fmu")
         model.initialize()
-        res = model.simulate(0, 1e3, options={"initialize":False});
-        assert res.solver.statistics["ntimeevents"] == 1e4
+        res = model.simulate(0, 1e3, options={"initialize":False})
+        self.assert_equal_msg(res.solver.statistics["ntimeevents"], 1e4)
 
     """ Only small interval. """
 
@@ -269,8 +276,8 @@ class Test_Time_Events_FMU10:
     def test_time_event_sampling2(self):
         model = load_fmu("TimeEvents_TestSampling2.fmu")
         model.initialize()
-        res = model.simulate(0,1e-6, options={"initialize":False});
-        assert res.solver.statistics["ntimeevents"] == 1e4
+        res = model.simulate(0,1e-6, options={"initialize":False})
+       	self.assert_equal_msg(res.solver.statistics["ntimeevents"], 1e4)
 
     """ Only big interval. """
 
@@ -278,8 +285,8 @@ class Test_Time_Events_FMU10:
     def test_time_event_sampling3(self):
         model = load_fmu("TimeEvents_TestSampling3.fmu")
         model.initialize()
-        res = model.simulate(0,1e64, options={"initialize":False});
-        assert res.solver.statistics["ntimeevents"] == 1e4
+        res = model.simulate(0,1e64, options={"initialize":False})
+        self.assert_equal_msg(res.solver.statistics["ntimeevents"], 1e4)
 
     """ Basic test using offset. """
 
@@ -287,8 +294,8 @@ class Test_Time_Events_FMU10:
     def test_time_event_sampling4(self):
         model = load_fmu("TimeEvents_TestSampling4.fmu")
         model.initialize()
-        res = model.simulate(0,2e-6, options={"initialize":False});
-        assert res.solver.statistics["ntimeevents"] == (1e4)+1
+        res = model.simulate(0,2e-6, options={"initialize":False})
+        self.assert_equal_msg(res.solver.statistics["ntimeevents"], (1e4)+1)
 
     """ Big interval, small offset. """
 
@@ -296,8 +303,8 @@ class Test_Time_Events_FMU10:
     def test_time_event_sampling5(self):
         model = load_fmu("TimeEvents_TestSampling5.fmu")
         model.initialize()
-        res = model.simulate(0,1e64, options={"initialize":False});
-        assert res.solver.statistics["ntimeevents"] == 1e4
+        res = model.simulate(0,1e64, options={"initialize":False})
+        self.assert_equal_msg(res.solver.statistics["ntimeevents"], 1e4)
 
     """ Big interval and offset. """
 
@@ -305,15 +312,15 @@ class Test_Time_Events_FMU10:
     def test_time_event_sampling6(self):
         model = load_fmu("TimeEvents_TestSampling6.fmu")
         model.initialize()
-        res = model.simulate(0,1e64, options={"initialize":False});
-        assert res.solver.statistics["ntimeevents"] == 1e4
+        res = model.simulate(0,1e64, options={"initialize":False})
+        self.assert_equal_msg(res.solver.statistics["ntimeevents"], 1e4)
 
     @testattr(sample = True)
     def test_time_event_sampling7(self):
         model = load_fmu("TimeEvents_TestSampling7.fmu")
         model.initialize()
-        res = model.simulate(0,1e5, options={"initialize":False});
-        assert res.solver.statistics["ntimeevents"] == 1e4
+        res = model.simulate(0,1e5, options={"initialize":False})
+        self.assert_equal_msg(res.solver.statistics["ntimeevents"], 1e4)
 
     """ Test 8 verifies that sampling raises an exception when a too small step is required. """
 
@@ -329,7 +336,7 @@ class Test_Time_Events_FMU10:
         model = load_fmu("TimeEvents_TestSampling9.fmu")
         model.initialize()
         res = model.simulate(0,1, options={"initialize":False})
-        assert res.solver.statistics["ntimeevents"] == 10
+       	self.assert_equal_msg(res.solver.statistics["ntimeevents"], 10)
 
     @testattr(stddist_base = True)
     def test_time_event_state_event_after_time_event(self):
@@ -339,7 +346,7 @@ class Test_Time_Events_FMU10:
         opts["CVode_options"]["rtol"] = 1e-4
         res = model.simulate(0,1, options=opts)
         N.testing.assert_almost_equal(model.get("s"), 2.8)
-        assert res.solver.statistics["ntimeevents"] == 2      
+        self.assert_equal_msg(res.solver.statistics["ntimeevents"], 2)
 
 class Test_Time_Events_FMU20:
     @classmethod
