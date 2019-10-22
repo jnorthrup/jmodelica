@@ -1352,27 +1352,59 @@ aspect CCodeGenExpressions {
         p.printVarDecls(myMaxDelayExp(), str, indent);
     }
     
-    /**
-     * Generate the initialization of delay blocks.
-     */
-    public void FDelayExp.genInit_C(CodePrinter p, CodeStream str, String indent) {
-        FExp maxDelayExp = myMaxDelayExp();
+    private void FClass.genDelayInitVarDecls_C(CodePrinter p, CodeStream str, String indent) { // Hook to facilitate extensions
+        for (FDelayExp d : myDelayExps()) {
+            d.genInitVarDecls_C(p, str, indent);
+        }
+        for (FSpatialDistExp d : mySpatialDistExps()) {
+            d.genInitVarDecls_C(p, str, indent);
+        }
+    }
+
+    private void FClass.genDelayInitAssignments_C(CodePrinter p, CodeStream str, String indent) { // Hook to facilitate extensions
+        for (FDelayExp d : myDelayExps()) {
+            d.genInit_C(p, str, indent);
+        }
+        for (FSpatialDistExp d : mySpatialDistExps()) {
+            d.genInit_C(p, str, indent);
+        }
+    }
+    
+    public void FClass.genDelayInit_C(CodeStream genPrinter) { 
+        CodePrinter p = ASTNode.printer_C;
+        String indent = p.indent("");
+        genDelayInitVarDecls_C(p, genPrinter, indent);
+        genDelayInitAssignments_C(p, genPrinter, indent);
+    }
+
+    private void FDelayExp.prepareInit_C(CodePrinter p, CodeStream str, String indent, int delayIndex) {
+		FExp maxDelayExp = myMaxDelayExp();
         boolean fixed = isTimeEventGenerating();
-        p.printPreSteps(getFExp(), str, indent);
+		p.printPreSteps(getFExp(), str, indent);
         p.printPreSteps(maxDelayExp, str, indent);
-        
-        str.format("%sjmi_delay_init(jmi, %d, ", indent, myDelayIndex());
+        str.format("%sjmi_delay_init(jmi, %d, ", indent, delayIndex);
         str.print(boolValue_C(fixed)); // jmi_boolean fixed
         str.print(", "); 
         str.print(boolValue_C(!generatesEventInDAE())); // jmi_boolean no_event
         str.print(", "); 
         p.print(fixed ? getDelay() : maxDelayExp, str, indent); // jmi_real_t max_delay
-        str.print(", "); 
-        p.print(getFExp(), str, indent); // jmi_real_t y0
-        str.println(");");
-        
+        str.print(", ");
+
+    }
+
+    private void FDelayExp.finalizeInit_C(CodePrinter p, CodeStream str, String indent) {
+		str.println(");");
         p.printPostSteps(getFExp(), str, indent);
-        p.printPostSteps(maxDelayExp, str, indent);
+        p.printPostSteps(myMaxDelayExp(), str, indent);
+    }
+    
+    /**
+     * Generate the initialization of delay blocks.
+     */
+    public void FDelayExp.genInit_C(CodePrinter p, CodeStream str, String indent) {
+		prepareInit_C(p, str, indent, myDelayIndex());
+		p.print(getFExp(), str, indent); // jmi_real_t y0
+		finalizeInit_C(p, str, indent);
     }
     syn FExp FDelayExp.myMaxDelayExp() = hasMax() ? getMax() : getDelay();
 
