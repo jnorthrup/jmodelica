@@ -28,6 +28,7 @@ $(PREINSTALL_DIR):
 
 install: folder
 	@echo "makefile: Got PREINSTALL_DIR=$(PREINSTALL_DIR)"
+	mkdir -p $(INSTALL_DIR_FOLDER)
 	cd $(PREINSTALL_DIR); \
 	find $(PREINSTALL_DIR) -type d -name assimulo -exec cp -r {} $(INSTALL_DIR_FOLDER)/ \;
 	rm -rf $(TARGET_BUILD_DIR) $(PREINSTALL_DIR)
