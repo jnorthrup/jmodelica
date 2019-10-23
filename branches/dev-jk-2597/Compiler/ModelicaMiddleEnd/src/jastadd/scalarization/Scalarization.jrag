@@ -923,7 +923,11 @@ aspect Scalarization {
     public FTempAccessExp FExp.tempExp(String name, FArraySubscripts fas) {
         FTempAccessExp res;
         if (inFunction()) {
-            res = new FTempAccessExp(new FAccessFull(name, fas));
+            if (fas == null) {
+                res = new FTempAccessExp(new FAccessFull(name));
+            } else {
+                res = new FTempAccessExp(new FAccessFull(name, fas));
+            }
         } else {
             if (fas == null) {
                 res = new FTempAccessExp(new FAccessString(name));
