@@ -31,7 +31,6 @@ install: folder
 	mkdir -p $(INSTALL_DIR_FOLDER)
 	cd $(PREINSTALL_DIR); \
 	find $(PREINSTALL_DIR) -type d -name assimulo -exec cp -r {} $(INSTALL_DIR_FOLDER)/ \;
-	rm -rf $(TARGET_BUILD_DIR) $(PREINSTALL_DIR)
 
 wheel: $(INSTALL_DIR_FOLDER)/wheel
 
@@ -44,10 +43,10 @@ $(INSTALL_DIR_FOLDER)/wheel:
 	cd $(TARGET_BUILD_DIR); \
 	$(PYTHONHOME)python setup.py $(BUILD_SETUP_EXTRA) bdist_wheel --superlu-home=$(SUPERLU_HOME) --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(BLAS_HOME) --lapack-home=$(LAPACK_HOME) --mkl-home=$(MKL_HOME) $(EXTRA_SETUP_ARGS); \
 	find -type f -name Assimulo*.whl -exec cp {} $@/ \;
-	rm -rf $(TARGET_BUILD_DIR)
 
 clean:
-	rm -rf $(BUILD_DIR)
+    @$(eval TARGET_BUILD_DIR=$(BUILD_DIR)/Assimulo_build$(BITNESS))
+	rm -rf $(TARGET_BUILD_DIR) $(INSTALL_DIR_FOLDER)
 
 #
 #	Copyright (C) 2018 Modelon AB
