@@ -915,8 +915,9 @@ aspect FunctionScalarization {
     }
     
     public void FAccessExp.addArrayUsesToIndexMap(Scalarizer s, FExp[] names) {
-        if (!hasFArraySubscripts() && isArray())
+        if (!hasFArraySubscripts() && myFV().isArray()) {
             indexNames = names;
+        }
         super.addArrayUsesToIndexMap(s, names);
     }
     
