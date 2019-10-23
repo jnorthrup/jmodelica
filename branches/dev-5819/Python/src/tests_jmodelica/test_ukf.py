@@ -279,13 +279,13 @@ class Test_AlgorithmMethods_UKF:
             self.ukf.mes, self.ukf.Wm, self.ukf.Wc)
         
         #Assert predicted mean and measurement
-        N.testing.assert_allclose(xp, [[1.00988634], [0.0172094]])
-        N.testing.assert_allclose(yp, N.array([[1.00988634]]))
+        N.testing.assert_allclose(xp, [[1.00988634], [0.0172094]], rtol=1e-6)
+        N.testing.assert_allclose(yp, N.array([[1.00988634]]), rtol=1e-6)
         
         #Assert covariance and gain
-        N.testing.assert_allclose(K, [[0.99995099], [0.00497003]])
+        N.testing.assert_allclose(K, [[0.99995099], [0.00497003]], rtol=1e-6)
         N.testing.assert_allclose(P, [[1.00099995e-01, 4.97003235e-07],
-                              [4.97003235e-07, 1.00115269e+00]])
+                              [4.97003235e-07, 1.00115269e+00]], rtol=1e-6)
     
     def test_predict_public(self):
         #Have a constant input of 0.1 over the sample interval
@@ -294,10 +294,10 @@ class Test_AlgorithmMethods_UKF:
         known_values = {}
         self.ukf.predict(u, known_values)
         #Assert predicted mean and measurement
-        N.testing.assert_allclose(self.ukf.xp, [[1.00988634], [0.0172094]])
-        N.testing.assert_allclose(self.ukf.yp, [[1.00988634]])
+        N.testing.assert_allclose(self.ukf.xp, [[1.00988634], [0.0172094]], rtol=1e-6)
+        N.testing.assert_allclose(self.ukf.yp, [[1.00988634]], rtol=1e-6)
         
         #Assert covariance and gain
-        N.testing.assert_allclose(self.ukf.K, [[0.99995099], [0.00497003]])
+        N.testing.assert_allclose(self.ukf.K, [[0.99995099], [0.00497003]], rtol=1e-6)
         N.testing.assert_allclose(self.ukf.P, [[1.00099995e-01, 4.97003235e-07],
-                                       [4.97003235e-07, 1.00115269e+00]])
+                                       [4.97003235e-07, 1.00115269e+00]], rtol=1e-6)
