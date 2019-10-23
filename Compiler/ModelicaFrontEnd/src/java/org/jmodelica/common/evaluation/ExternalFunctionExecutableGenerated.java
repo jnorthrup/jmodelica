@@ -16,6 +16,17 @@ class ExternalFunctionExecutableGenerated extends ExternalFunctionExecutable {
     
     @Override
     public void remove() {
-        new File(executable).delete();
+        File file = new File(executable);
+        boolean success = file.delete();
+        // The first attempt to delete may fail if the process has not terminated yet.
+        // Possibly not necessary since LiveExternalFunction.destroyProcess() now calls ProcessCommunicator.teardown().
+        if (!success) {
+            try {
+                Thread.sleep(10); // Sleep some arbitrary duration to give the process time to die.
+            } catch (InterruptedException e) {
+                // Ignore
+            }
+            success = file.delete();
+        }
     }
 }
