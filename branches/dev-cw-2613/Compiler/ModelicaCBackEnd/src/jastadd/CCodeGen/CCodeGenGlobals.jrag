@@ -544,7 +544,10 @@ aspect CCodeGenGlobalVariables {
         if (isConstructorCall()) {
             String strName = v.type().name() + ".destructor";
             FCallable c = getName().lookupFCallable(strName);
+            str.formatln("%sif (%s != NULL) {", indent, FExp.global_C(v.nameUnderscore()));
             str.print(indent, c.funcNameUnderscore(C_SUFFIX_DEF), "(", FExp.global_C(v.nameUnderscore()), ");\n");
+            str.formatln("%s%s = NULL;", p.indent(indent), FExp.global_C(v.nameUnderscore()));
+            str.formatln("%s}", indent);
         }
     }
 }
