@@ -631,6 +631,7 @@ echo "before read_args"
 echo "args $@"
 read_args "$@"
 echo "after read_args"
+echo "Writing to LOGFILE=${LOGFILE}"
 if [[ $ERROR_ON_TEST_FAIL == 1 ]]; then
     if [[ -z $XML_RES_PATH ]]; then
         echo "-e needs -x"
