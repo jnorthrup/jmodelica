@@ -71,6 +71,7 @@ public abstract class PipeLogger extends ModelicaLogger {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected void finalize() throws Throwable {
         close();
