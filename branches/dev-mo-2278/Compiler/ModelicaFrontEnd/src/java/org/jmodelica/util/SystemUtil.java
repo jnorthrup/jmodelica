@@ -71,6 +71,16 @@ public final class SystemUtil {
     public static String executableExtension() {
         return isLinux() ? "" : ".exe";
     }
+    
+    public static String sharedLibraryExtension() {
+        if (isWindows()) {
+            return ".dll";
+        } else if (isLinux()) {
+            return ".so";
+        } else {
+            return ".dylib";
+        }
+    }
 
     /**
      * @param fileName The string to which to append the relevant file extension.

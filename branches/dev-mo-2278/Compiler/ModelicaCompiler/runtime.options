@@ -220,7 +220,7 @@ BOOLEAN block_jacobian_check runtime debug false
 
 "Compares the analytic block jacobians with the finite difference block 
 jacobians during block evaluation. An error is given if the relative error is 
-to big."
+too big."
 
 ********************************************************************************
 REAL block_jacobian_check_tol runtime debug 1.0E-6 1e-12 1.0

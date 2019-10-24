@@ -1583,7 +1583,11 @@ aspect ClassDeclMethods {
     eq SrcFullClassDecl.getChild().isLib() = false;
 
     syn boolean SrcBaseNode.isLibNode() = false;
-    eq SrcLibNode.isLibNode()            = true;
+    eq SrcLibNode.isLibNode()           = true;
+    syn SrcLibNode SrcBaseNode.asSrcLibNode() {
+        throw new UnsupportedOperationException();
+    }
+    syn SrcLibNode SrcLibNode.asSrcLibNode() = this;
 }
 
 

@@ -8,15 +8,16 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.jmodelica.common.evaluation.ExternalProcessCache;
+import org.jmodelica.common.evaluation.ExternalFunctionCompiler;
 import org.jmodelica.common.evaluation.ExternalFunction;
+import org.jmodelica.common.evaluation.ExternalProcessCache;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache;
-import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Variable;
-import org.jmodelica.common.options.AbstractOptionRegistry;
-import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Value;
-import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Type;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache.External;
+import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Type;
+import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Value;
+import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Variable;
 import org.jmodelica.common.evaluation.ProcessCommunicator;
+import org.jmodelica.common.options.AbstractOptionRegistry;
 import org.jmodelica.util.ccompiler.CCompilerDelegator;
 import org.jmodelica.util.exceptions.CcodeCompilationException;
 import org.jmodelica.util.logging.ModelicaLogger;
@@ -73,7 +74,7 @@ public class ExternalProcessCacheTest {
 
     class ExternalProcessCacheMock<K extends Variable<V,T>, V extends Value, T extends Type<V>, E extends External<K>> extends ExternalProcessMultiCache<K,V,T,E> {
 
-        public ExternalProcessCacheMock(Compiler<K,E> mc) {
+        public ExternalProcessCacheMock(ExternalFunctionCompiler<K,E> mc) {
             super(mc);
         }
 
@@ -107,15 +108,9 @@ public class ExternalProcessCacheTest {
             log.info("Called tearDown()");
         }
 
-        @Override
-        public ExternalFunction<K,V> failedEval(External<?> ext, String msg, boolean log) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-        
     }
 
-    class CompilerMock implements ExternalProcessMultiCache.Compiler<VariableMock, ExternalMock> {
+    class CompilerMock implements ExternalFunctionCompiler<VariableMock, ExternalMock> {
 
         @Override
         public ModelicaLogger log() {
@@ -188,8 +183,13 @@ public class ExternalProcessCacheTest {
         }
 
         @Override
-        public boolean shouldCacheProcess() {
+        public int processLimit() {
             // TODO Auto-generated method stub
+            return 0;
+        }
+
+        @Override
+        public boolean dynamicEvaluatorEnabled() {
             return false;
         }
 
@@ -222,9 +222,27 @@ public class ExternalProcessCacheTest {
             // TODO Auto-generated method stub
             return null;
         }
+        
+        @Override
+        public String functionArgsSerialized() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        
+        @Override
+        public String functionReturnArgSerialized() {
+            // TODO Auto-generated method stub
+            return null;
+        }
 
         @Override
         public Iterable<VariableMock> varsToDeserialize() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        
+        @Override
+        public String[] library() {
             // TODO Auto-generated method stub
             return null;
         }

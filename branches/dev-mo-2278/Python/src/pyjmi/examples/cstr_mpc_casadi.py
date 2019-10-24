@@ -85,7 +85,12 @@ def run_demo(with_plots=True):
     sim_model.set('_start_c', c_0_A)
     sim_model.set('_start_T', T_0_A)
     sim_model.set('Tc', 280)
-    init_res = sim_model.simulate(start_time=0., final_time=150)
+    
+    opts = sim_model.simulate_options()
+    opts["CVode_options"]["maxh"] = 0.0
+    opts["ncp"] = 0
+    
+    init_res = sim_model.simulate(start_time=0., final_time=150, options=opts)
 
     ### 2. Define the optimal control problem and solve it using the MPC class
     # Compile and load optimization problem
@@ -158,7 +163,7 @@ def run_demo(with_plots=True):
         sim_model.set(x_k.keys(), x_k.values())
         sim_res = sim_model.simulate(start_time=k*sample_period, 
                                      final_time=(k+1)*sample_period, 
-                                     input=u_k)
+                                     input=u_k, options=opts)
 
         # Extract state at end of sample_period from sim_res and add Gaussian
         # noise with mean 0 and standard deviation 0.005*(state_current_value)
