@@ -406,9 +406,9 @@ function ant_test() {
   echo "BUILD=${BUILD}"
   echo "CLEAN_JUNIT=${CLEAN_JUNIT}"
     if [[ "$1" == "Modelica" ]]; then
-        ant -f ${MC_ANT_ARGS} -Dtarget=${BUILD} ${CLEAN_JUNIT} test
+        ant ${ANT_OPTS} -f ${MC_ANT_ARGS} -Dtarget=${BUILD} ${CLEAN_JUNIT} test
     else
-        ant -f ${OC_ANT_ARGS} -Dtarget=${BUILD} ${CLEAN_JUNIT} test
+        ant ${ANT_OPTS} -f ${OC_ANT_ARGS} -Dtarget=${BUILD} ${CLEAN_JUNIT} test
     fi
   echo "about to ls"
   ls -la ${BUILD}
