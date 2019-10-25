@@ -911,27 +911,31 @@ aspect Scalarization {
     }
 
     public FTempAccessExp FExp.tempExp(String name, Index i) {
-        FTempAccessExp res;
+        FAccess access;
         if (inFunction()) {
-            res = new FTempAccessExp(new FAccessFull(name, i.createFArraySubscripts()));
+            access = new FAccessFull(name, i.createFArraySubscripts());
         } else {
-            res = new FTempAccessExp(new FAccessString(name + i));
+            access = new FAccessString(name + i);
         }
-        return (FTempAccessExp) dynamicFExp(res);
+        return (FTempAccessExp) dynamicFExp(new FTempAccessExp(access));
     }
 
     public FTempAccessExp FExp.tempExp(String name, FArraySubscripts fas) {
-        FTempAccessExp res;
+        FAccess access;
         if (inFunction()) {
-            res = new FTempAccessExp(new FAccessFull(name, fas));
+            if (fas == null) {
+                access = new FAccessFull(name);
+            } else {
+                access = new FAccessFull(name, fas);
+            }
         } else {
             if (fas == null) {
-                res = new FTempAccessExp(new FAccessString(name));
+                access = new FAccessString(name);
             } else {
-                res = new FTempAccessExp(new FAccessString(name + fas));
+                access = new FAccessString(name + fas);
             }
         }
-        return (FTempAccessExp) dynamicFExp(res);
+        return (FTempAccessExp) dynamicFExp(new FTempAccessExp(access));
     }
 
     /**
