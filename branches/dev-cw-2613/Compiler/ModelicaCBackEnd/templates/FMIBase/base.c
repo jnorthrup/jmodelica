@@ -182,7 +182,7 @@ $C_dynamic_state_add_call$
     return 0;
 }
 
-int jmi_destruct_external_objs(jmi_t* jmi) {
+int model_destruct_external_objects(jmi_t* jmi) {
 $C_destruct_external_object$
     return 0;
 }

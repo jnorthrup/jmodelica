@@ -511,7 +511,7 @@ int jmi_new(jmi_t** jmi, jmi_callbacks_t* jmi_callbacks);
  * @param jmi A pointer to the jmi_t struct to clean up.
  * @return Error code.
  */
-int jmi_destruct_external_objs(jmi_t* jmi);
+int model_destruct_external_objects(jmi_t* jmi);
 
 /**
  * \brief Get the name of the model that produced this FMU.
@@ -636,7 +636,7 @@ int jmi_init_delay_blocks(jmi_t* jmi);
 /** 
  * \brief Destroys external objects
  */
-int jmi_destruct_external_objects(jmi_t* jmi);
+int model_destruct_external_objects(jmi_t* jmi);
 
 /* Sample delay blocks
  * Called after each completed integrator step and event iteration.
