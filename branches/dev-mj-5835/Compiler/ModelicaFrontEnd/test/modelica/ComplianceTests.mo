@@ -566,6 +566,21 @@ Compliance error at line 22, column 42, in file '...', UNSUPPORTED_NON_FIXED_STR
 end StringOperator1;
 
 
+model StringOperator2
+    String s = String(time, format="%f");
+
+annotation(__JModelica(UnitTesting(tests={
+    WarningTestCase(
+        name="StringOperator2",
+        description="Test warning for supplying the initial % of format specifier",
+        errorMessage="
+
+
+Warning at line 2, column 16, in file '...', INVALID_FORMAT_STRING:
+  The format string argument should not include the initial '%': \"%f\".
+")})));
+end StringOperator2;
+
 
 package UnknownArraySizes
 /* Tests compliance errors for array exps 

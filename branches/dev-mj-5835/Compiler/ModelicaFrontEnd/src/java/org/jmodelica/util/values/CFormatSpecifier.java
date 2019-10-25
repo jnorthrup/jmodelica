@@ -71,7 +71,7 @@ public class CFormatSpecifier {
     public final String conversion;
 
     private static final String SYNTAX_TAG        = "(%|)";
-    private static final String SYNTAX_FLAGS      = "([-+ 0#]|)";
+    private static final String SYNTAX_FLAGS      = "([-+ 0#]*)";
     private static final String SYNTAX_WIDTH      = "([1-9][0-9]*)?";
     private static final String SYNTAX_PRECISION  = "(\\.([1-9][0-9]*))?";
     private static final String SYNTAX_LENGTH     = "(hh|h|l|ll|L|z|j|t|)";
@@ -170,9 +170,20 @@ public class CFormatSpecifier {
     }
 
     public boolean isValid() {
-        return  !parsingFailed && 
-                !initialPercent && 
-                length.isEmpty();
+        return !parsingFailed && 
+               length.isEmpty();
+    }
+
+    public boolean hasProblem() {
+        return hasError() || hasWarning();
+    }
+
+    public boolean hasError() {
+        return !isValid();
+    }
+
+    public boolean hasWarning() {
+        return initialPercent;
     }
 
     public String errorMessage() {
