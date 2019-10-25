@@ -455,6 +455,7 @@ function read_args() {
   ARG_TYPE=flag
   echo "DEFAULT_ARGS=${DEFAULT_ARGS}"
   for a in ${DEFAULT_ARGS} "$@"; do
+    echo a=$a
     if [[ "$(echo $a | head -c1)" == "-" ]]; then
       ARG_TYPE=flag
     fi
@@ -498,6 +499,7 @@ function read_args() {
     esac
     if [[ ${FLAG} == 1 ]]; then
       for b in $(echo "" ${a}|sed 's!\(.\)!\1 !g'); do
+        echo b=${b}
         case ${b} in
           -)
             ;;
