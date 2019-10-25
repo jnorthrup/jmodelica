@@ -21,27 +21,27 @@ aspect VariabilityPropagation {
      * Checks if equation is eligible for var. prop.
      */
     syn boolean FAbstractEquation.canPropagate(FClass.VariabilityPropagator propagator) =
-            canPropagateContext(propagator) && !containsActiveAnnotations();
+            canPropagateContext(propagator, false) && !containsActiveAnnotations();
     eq FEquation.canPropagate(FClass.VariabilityPropagator propagator) = 
             super.canPropagate(propagator) && propagator.canPropagate(this);
     eq FFunctionCallEquation.canPropagate(FClass.VariabilityPropagator propagator) {
         getCall().flushAllRecursive();
         return super.canPropagate(propagator) && propagator.variables(this).size() > 0 && numScalarEquations() > 0 && 
                 ((propagator.variables(this).size() == numScalarEquations() && getCall().variability().parameterOrLess()) 
-                        || potentialPartialVariability().knownParameterOrLess());
+                        || (potentialPartialVariability().knownParameterOrLess() && canPropagateContext(propagator, true)));
     }
     eq FAlgorithm.canPropagate(FClass.VariabilityPropagator propagator) = 
             propagator.propagateAlgorithms() &&
             super.canPropagate(propagator) && propagator.variables(this).size() > 0 &&
             propagator.variables(this).size() == numScalarEquations() && variabilityRHS().parameterOrLess();
 
-    inh boolean FAbstractEquation   .canPropagateContext(FClass.VariabilityPropagator propagator);
-    eq Root  .getChild()            .canPropagateContext(FClass.VariabilityPropagator propagator) = false;
-    eq FClass.getFAbstractEquation().canPropagateContext(FClass.VariabilityPropagator propagator) = true;
-    eq FClass.getFInitialEquation() .canPropagateContext(FClass.VariabilityPropagator propagator) =
+    inh boolean FAbstractEquation   .canPropagateContext(FClass.VariabilityPropagator propagator, boolean partial);
+    eq Root  .getChild()            .canPropagateContext(FClass.VariabilityPropagator propagator, boolean partial) = false;
+    eq FClass.getFAbstractEquation().canPropagateContext(FClass.VariabilityPropagator propagator, boolean partial) = true;
+    eq FClass.getFInitialEquation() .canPropagateContext(FClass.VariabilityPropagator propagator, boolean partial) =
             propagator.propagateInitial();
-    eq FIfWhenElseEquation.getChild().canPropagateContext(FClass.VariabilityPropagator propagator) =
-            isTempAssign() && canPropagateContext(propagator);
+    eq FIfWhenElseEquation.getChild().canPropagateContext(FClass.VariabilityPropagator propagator, boolean partial) =
+            isTempAssign() && !partial && canPropagateContext(propagator, partial);
 
     /**
      * If any arg is constant return constant. Otherwise returns combined variability.

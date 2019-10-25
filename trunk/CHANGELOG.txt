@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+# Fixed ; Minor ; Compiler; #5864
+Fixed bug where partial variability propagation lead to unbalanced equation systems.
+
 # Fixed ; Minor ; Compiler ; #5862
 Fixed bug where empty array subscripts added during scalarization lead to c-compilation error.
 
