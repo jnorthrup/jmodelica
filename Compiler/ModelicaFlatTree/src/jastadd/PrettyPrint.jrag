@@ -1405,15 +1405,14 @@ aspect FlatPrettyPrint {
     }
     
     public void FArraySubscripts.prettyPrint(Printer p, CodeStream str, String indent) {
-		if (numSubscript()>0) {
-			str.print("[");
-			for (int i=0;i<numSubscript();i++) {
-				subscript(i).prettyPrint(p, str, indent);
-				if (i<numSubscript()-1)
-					str.print(",");
-			}
-			str.print("]");
-		}
+        str.print("[");
+        for (int i = 0; i < numSubscript(); i++) {
+            subscript(i).prettyPrint(p, str, indent);
+            if (i < numSubscript() - 1) {
+                str.print(",");
+            }
+        }
+        str.print("]");
 	}
 
 	public void FColonSubscript.prettyPrint(Printer p, CodeStream str, String indent) {
