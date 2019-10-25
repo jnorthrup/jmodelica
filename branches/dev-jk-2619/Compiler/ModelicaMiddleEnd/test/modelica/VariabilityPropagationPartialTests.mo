@@ -1026,8 +1026,7 @@ end VariabilityPropagationPartialTests.PartiallyKnownDiscrete1;
         end f;
         
         
-        R r = if time > 1 then f(c,time) else f(time,c);
-        Real c = 1;
+        R r = if time > 1 then f(1,time) else f(time,1);
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
@@ -1037,20 +1036,19 @@ end VariabilityPropagationPartialTests.PartiallyKnownDiscrete1;
 fclass VariabilityPropagationPartialTests.PartiallyKnownTempAssign1
  Real r.x1;
  Real r.x2;
- constant Real c = 1;
  Real temp_1.x1;
  Real temp_1.x2;
  Real temp_2.x1;
  Real temp_2.x2;
 equation
  if time > 1 then
-  (VariabilityPropagationPartialTests.PartiallyKnownTempAssign1.R(temp_1.x1, temp_1.x2)) = VariabilityPropagationPartialTests.PartiallyKnownTempAssign1.f(1.0, time);
+  (VariabilityPropagationPartialTests.PartiallyKnownTempAssign1.R(temp_1.x1, temp_1.x2)) = VariabilityPropagationPartialTests.PartiallyKnownTempAssign1.f(1, time);
  else
   temp_1.x1 = 0.0;
   temp_1.x2 = 0.0;
  end if;
  if not time > 1 then
-  (VariabilityPropagationPartialTests.PartiallyKnownTempAssign1.R(temp_2.x1, temp_2.x2)) = VariabilityPropagationPartialTests.PartiallyKnownTempAssign1.f(time, 1.0);
+  (VariabilityPropagationPartialTests.PartiallyKnownTempAssign1.R(temp_2.x1, temp_2.x2)) = VariabilityPropagationPartialTests.PartiallyKnownTempAssign1.f(time, 1);
  else
   temp_2.x1 = 0.0;
   temp_2.x2 = 0.0;

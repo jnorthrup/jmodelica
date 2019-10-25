@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+# Fixed ; Minor ; Compiler; #5864
+Fixed bug where partial variability propagation lead to unbalanced equation systems.
+
 # Feature ; Minor ; Compiler; #5837
 Added a pre-compiled evaluator used for evaluating external functions
 during the compilation (for performance). Activated by the option 
