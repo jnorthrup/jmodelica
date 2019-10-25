@@ -628,6 +628,7 @@ TIME=$(date +%s)
 
 echo "TIME = ${TIME}"
 echo "before read_args"
+echo "PATH=${PATH}"
 echo "args $@"
 read_args "$@"
 echo "after read_args"
