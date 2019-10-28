@@ -502,6 +502,7 @@ function read_args() {
       echo "In flag == 1"
       echo "" ${a}|sed 's!\(.\)!\1 !g'
       for b in $(echo "" ${a}|sed 's!\(.\)!\1 !g'); do
+        HAVE_READ_ARGS=1
         echo b=${b}
         case ${b} in
           -)
@@ -615,6 +616,8 @@ function read_args() {
             ;;
         esac
       done
+    else
+      HAVE_READ_ARGS=1
     fi
   done
 }
@@ -633,9 +636,14 @@ TIME=$(date +%s)
 
 echo "TIME = ${TIME}"
 echo "before read_args"
+HAVE_READ_ARGS=0
 echo "PATH=${PATH}"
 echo "args $@"
 read_args "$@"
+if [[ $HAVE_READ_ARGS == 0 ]]; then
+echo "Reading args to jm_tests failed, retrying..."
+read_args "$@"
+fi
 echo "after read_args"
 echo "Writing to LOGFILE=${LOGFILE}"
 if [[ $ERROR_ON_TEST_FAIL == 1 ]]; then
