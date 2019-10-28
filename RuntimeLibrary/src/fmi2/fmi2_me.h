@@ -465,13 +465,6 @@ fmi2Status fmi2_get_nominals_of_continuous_states(fmi2Component c,
                                                   fmi2Real x_nominal[], 
                                                   size_t nx);
 
- /* @} */
-
-/**
- * The Global Unique IDentifier is used to check that the XML file is compatible with the C functions.
- */
-extern const char *C_GUID;
-
 /**
  * \brief Instantiates the ME FMU, helper function for fmi2_instantiate.
  * 

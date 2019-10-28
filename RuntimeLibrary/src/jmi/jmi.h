@@ -506,6 +506,15 @@ struct jmi_model_t {
 int jmi_new(jmi_t** jmi, jmi_callbacks_t* jmi_callbacks);
 
 /**
+ * \brief Get the guid of the model.
+ *
+ * Typically this function is defined in the generated code.
+ *
+ * @return The guid of the model.
+ */
+const char *model_guid();
+
+/**
  * Clean up after a completed simulation.
  *
  * @param jmi A pointer to the jmi_t struct to clean up.
