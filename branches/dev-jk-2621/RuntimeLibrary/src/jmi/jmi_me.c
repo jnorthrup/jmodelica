@@ -48,7 +48,7 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
 
 
     /* Check if the GUID is correct.*/
-    if (strcmp(GUID, C_GUID) != 0) {
+    if (strcmp(GUID, model_guid()) != 0) {
         jmi_log_node(jmi_->log, logError, "ModelDescriptionFileInconsistency","The model and the description file are not consistent to each other.");
         jmi_delete(jmi_);
         return -1;

@@ -40,11 +40,6 @@ struct jmi_event_info_t {
 };
 
 /**
- * The Global Unique IDentifier is used to check that the XML file is compatible with the C functions.
- */
-extern const char *C_GUID;
-
-/**
  * Map between runtime option names and value references for the associated parameters - name table.
  *
  * Table is null-terminated.

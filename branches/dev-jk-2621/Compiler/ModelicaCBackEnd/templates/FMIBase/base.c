@@ -81,7 +81,9 @@ static const int Scaling_method = $C_DAE_scaling_method$;
 
 static const int Homotopy_block = $C_DAE_INIT_homotopy_block$;
 
-const char *C_GUID = $C_guid$;
+const char *model_guid() {
+    return $C_guid$;
+}
 
 $C_DAE_output_vrefs$
 
