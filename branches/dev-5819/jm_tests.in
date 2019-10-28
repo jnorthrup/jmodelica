@@ -499,9 +499,11 @@ function read_args() {
         ;;
     esac
     if [[ ${FLAG} == 1 ]]; then
-      echo "In flag == 1"
-      echo "" ${a}|sed 's!\(.\)!\1 !g'
-      for b in $(echo "" ${a}|sed 's!\(.\)!\1 !g'); do
+      echo "In flag == 1 with a=${a}"
+      a_split=""
+      for ((i=0; i<${#a}; i++)); do a_split="$a_split ${s:$i:1}"; done
+      echo a_split="$a_split"
+      for b in a_split; do
         HAVE_READ_ARGS=1
         echo b=${b}
         case ${b} in
