@@ -883,7 +883,7 @@ aspect CCodeGenExpressions {
         }
     }
 
-    protected Iterable<ASTNode> FStringExp.childrenToGenFor_C() {
+    private Iterable<ASTNode> FStringExp.childrenToGenFor_C() {
         // We want to generate for NTA CFormat but not for child Format.
         return new TransformerIterable<ASTNode, ASTNode>(this) {
             private ASTNode fmt = getFormatOpt();
@@ -1022,10 +1022,16 @@ aspect CCodeGenExpressions {
             p.print(this, str, indent);
             str.print(", JMI_TRUE, \"true\", \"false\")");
         } else {
-            if (format != null && format.expectedType.isUnsigned()) {
-                str.print("(unsigned int) ");
-            } else if ((format == null) ? t.isInteger() : format.expectedType.isInteger()) {
-                str.print("(int) ");
+            if (format != null) {
+                if (format.expectedType.isUnsigned()) {
+                    str.print("(unsigned int) ");
+                } else if (format.expectedType.isInteger()) {
+                    str.print("(int) ");
+                }
+            } else {
+                if (t.isInteger()) {
+                    str.print("(int) ");
+                }
             }
             p.print(this, str, indent);
         }
@@ -1038,7 +1044,9 @@ aspect CCodeGenExpressions {
             // This depends on non-parameters being evaluatable.
             format = formatSpecifier();
         } catch (ConstantEvaluationException e) {
-            // Assume that we don't have a format that converts real -> integer.
+            // Assume that we don't have a format that converts real -> integer, 
+            // and just go by the type.
+            format = null;
         }
         getValue().genStringParts_C(p, str, indent, format);
     }

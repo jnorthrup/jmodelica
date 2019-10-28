@@ -3,6 +3,7 @@ package org.jmodelica.test.common;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 
 import org.jmodelica.util.values.CFormatSpecifier;
 import org.jmodelica.util.values.CFormatSpecifier.ValueType;
@@ -34,7 +35,7 @@ public class TestCFormatSpecifier {
         assertFalse(fmt.hasProblem());
         assertFalse(fmt.hasError());
         assertFalse(fmt.hasWarning());
-        assertEquals(fmt.errorMessage(), null);
+        assertNull(fmt.errorMessage());
     }
 
     private static final String COMPLEX_VALID_REAL = "- 3.4E";
@@ -61,7 +62,7 @@ public class TestCFormatSpecifier {
         assertFalse(fmt.hasProblem());
         assertFalse(fmt.hasError());
         assertFalse(fmt.hasWarning());
-        assertEquals(fmt.errorMessage(), null);
+        assertNull(fmt.errorMessage());
     }
 
     private static final String COMPLEX_REAL_WITH_LENGTH = "+05.2lg";
@@ -174,7 +175,7 @@ public class TestCFormatSpecifier {
         assertFalse(fmt.hasProblem());
         assertFalse(fmt.hasError());
         assertFalse(fmt.hasWarning());
-        assertEquals(fmt.errorMessage(), null);
+        assertNull(fmt.errorMessage());
     }
 
     private static final String SIMPLE_UNSIGNED_INTEGER = "u";
@@ -201,7 +202,7 @@ public class TestCFormatSpecifier {
         assertFalse(fmt.hasProblem());
         assertFalse(fmt.hasError());
         assertFalse(fmt.hasWarning());
-        assertEquals(fmt.errorMessage(), null);
+        assertNull(fmt.errorMessage());
     }
 
     private static final String SIMPLE_STRING = "s";
@@ -228,7 +229,7 @@ public class TestCFormatSpecifier {
         assertFalse(fmt.hasProblem());
         assertFalse(fmt.hasError());
         assertFalse(fmt.hasWarning());
-        assertEquals(fmt.errorMessage(), null);
+        assertNull(fmt.errorMessage());
     }
 
     private static final String SIMPLE_CHAR = "c";

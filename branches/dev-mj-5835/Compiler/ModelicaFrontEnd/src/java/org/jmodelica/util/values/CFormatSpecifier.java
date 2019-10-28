@@ -7,7 +7,8 @@ import static org.jmodelica.util.values.CFormatSpecifier.ValueType.*;
 /**
  * Describes a printf-style format specifier, parsed and separated into fields.
  * 
- * All int fields use a negative value to denote that it was not given.
+ * For the fields with and precision, a negative value means that is was not given when 
+ * constructing the specifier.
  */
 public class CFormatSpecifier {
 

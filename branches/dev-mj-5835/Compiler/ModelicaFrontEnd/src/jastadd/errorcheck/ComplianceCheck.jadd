@@ -283,14 +283,14 @@ aspect ComplianceCheck {
 
     public static final SimpleProblemProducer ASTNode.UNSUPPORTED_NON_FIXED_STRING_ARGUMENT =
             new SimpleErrorProducer("UNSUPPORTED_NON_FIXED_STRING_ARGUMENT", ProblemKind.COMPLIANCE, 
-                    "Argument %s of String operator is only supported as a fixed parameter expression.");
+                    "Argument format of String operator is only supported as a fixed parameter expression.");
 
     public void FStringExp.complianceCheck(ErrorCheckType checkType) {
         super.complianceCheck(checkType);
         if (hasFormat()) {
             getFormat().markAsStructuralParameter(checkType);
             if (!getFormat().variability().parameterOrLess())
-                UNSUPPORTED_NON_FIXED_STRING_ARGUMENT.invoke(getFormat(), "format");
+                UNSUPPORTED_NON_FIXED_STRING_ARGUMENT.invoke(getFormat());
         }
     }
 

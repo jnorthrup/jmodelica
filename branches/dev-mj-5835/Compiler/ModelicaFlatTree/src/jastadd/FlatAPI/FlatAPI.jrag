@@ -4472,7 +4472,6 @@ aspect ExpressionGeneralisation {
     syn lazy Opt<FExp> FStringExp.getCFormatOpt() {
         // TODO: To save memory, this could be solved in the C code generation instead.
         if (hasFormat()) {
-            boolean hasPercent = formatSpecifier().initialPercent;
             FExp fmt = getFormat();
             FExp exp = fmt.treeCopy();
             if (!formatSpecifier().initialPercent) {
