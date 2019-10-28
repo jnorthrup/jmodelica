@@ -463,6 +463,7 @@ function read_args() {
     case ${ARG_TYPE} in
       flag)
         FLAG=1
+        echo FLAG=$FLAG
         ;;
       tag)
         TAGS="${TAGS} -a ${a}"
@@ -498,6 +499,8 @@ function read_args() {
         ;;
     esac
     if [[ ${FLAG} == 1 ]]; then
+      echo "In flag == 1"
+      echo "" ${a}|sed 's!\(.\)!\1 !g'
       for b in $(echo "" ${a}|sed 's!\(.\)!\1 !g'); do
         echo b=${b}
         case ${b} in
