@@ -34,7 +34,7 @@ except (NameError, ImportError):
 
 def check_result(results, ref):
     for key in ref:
-        assert abs(ref[key] - results[key][-1]) < 1e-3, abs(ref[key] - results[key][-1])
+        assert abs(ref[key] - results[key][-1]) < 1e-2, abs(ref[key] - results[key][-1])
         
 
 @testattr(casadi_base = True)

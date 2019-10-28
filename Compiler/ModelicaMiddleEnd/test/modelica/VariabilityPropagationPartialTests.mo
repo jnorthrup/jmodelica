@@ -1012,5 +1012,70 @@ end VariabilityPropagationPartialTests.PartiallyKnownDiscrete1;
 ")})));
     end PartiallyKnownDiscrete1;
 
+    model PartiallyKnownTempAssign1
+        record R
+            Real x1;
+            Real x2;
+        end R;
+        function f
+            input Real x1;
+            input Real x2;
+            output R r = R(x1,x2);
+        algorithm
+            annotation(Inline=false);
+        end f;
+        
+        
+        R r = if time > 1 then f(1,time) else f(time,1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="PartiallyKnownTempAssign1",
+            description="Partial evaluation of if equation assigning temporaries",
+            flatModel="
+fclass VariabilityPropagationPartialTests.PartiallyKnownTempAssign1
+ Real r.x1;
+ Real r.x2;
+ Real temp_1.x1;
+ Real temp_1.x2;
+ Real temp_2.x1;
+ Real temp_2.x2;
+equation
+ if time > 1 then
+  (VariabilityPropagationPartialTests.PartiallyKnownTempAssign1.R(temp_1.x1, temp_1.x2)) = VariabilityPropagationPartialTests.PartiallyKnownTempAssign1.f(1, time);
+ else
+  temp_1.x1 = 0.0;
+  temp_1.x2 = 0.0;
+ end if;
+ if not time > 1 then
+  (VariabilityPropagationPartialTests.PartiallyKnownTempAssign1.R(temp_2.x1, temp_2.x2)) = VariabilityPropagationPartialTests.PartiallyKnownTempAssign1.f(time, 1);
+ else
+  temp_2.x1 = 0.0;
+  temp_2.x2 = 0.0;
+ end if;
+ r.x1 = if time > 1 then temp_1.x1 else temp_2.x1;
+ r.x2 = if time > 1 then temp_1.x2 else temp_2.x2;
+
+public
+ function VariabilityPropagationPartialTests.PartiallyKnownTempAssign1.f
+  input Real x1;
+  input Real x2;
+  output VariabilityPropagationPartialTests.PartiallyKnownTempAssign1.R r;
+ algorithm
+  r.x1 := x1;
+  r.x2 := x2;
+  return;
+ annotation(Inline = false);
+ end VariabilityPropagationPartialTests.PartiallyKnownTempAssign1.f;
+
+ record VariabilityPropagationPartialTests.PartiallyKnownTempAssign1.R
+  Real x1;
+  Real x2;
+ end VariabilityPropagationPartialTests.PartiallyKnownTempAssign1.R;
+
+end VariabilityPropagationPartialTests.PartiallyKnownTempAssign1;
+")})));
+    end PartiallyKnownTempAssign1;
+
 
 end VariabilityPropagationPartialTests;

@@ -48,8 +48,9 @@ public class ProcessCommunicator<V extends Value, T extends Type<V>> {
 
     private String getLine() throws IOException {
         String line = buffLine;
-        if (line == null)
+        if (line == null) {
             line = in.readLine();
+        }
         if (line == null) {
             if (timeOutHappened) {
                 throw new IOException(String.format("Evaluation timed out, time limit set to %d ms by option %s",
@@ -109,10 +110,11 @@ public class ProcessCommunicator<V extends Value, T extends Type<V>> {
             String name = deserializeString();
             String format = deserializeString();
             String value = deserializeString();
-            if (warning != 0)
+            if (warning != 0) {
                 mc.log().warning("%s: " + format, name, value);
-            else
+            } else {
                 mc.log().verbose("%s: " + format, name, value);
+            }
             line = getLine();
         }
         buffLine(line);
@@ -132,6 +134,15 @@ public class ProcessCommunicator<V extends Value, T extends Type<V>> {
         public AbortConstantEvaluationException(String string) {
             super(null, string);
         }
+    }
+
+    public int teardown(int timeout) throws IOException {
+        startTimer(timeout);
+        check("EXIT");
+        accept("END");
+        int result = end();
+        cancelTimer();
+        return result;
     }
 
     /**

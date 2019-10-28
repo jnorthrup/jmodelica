@@ -940,4 +940,80 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end RecordArray13;
 
+model RecordArray14
+    record R
+        Real x = 1;
+    end R;
+    
+    function f
+        input Integer n;
+        Real[n] xs;
+        R[n] rs;
+        output Real y;
+    algorithm
+        xs := rs.x;
+        y := sum(xs);
+        annotation(Inline=false);
+    end f;
+
+    Real y = f(integer(time));
+    
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="RecordArray14",
+        description="Test for bug in #5862",
+        template="$C_functions$",
+        generatedCode="
+void func_CCodeGenArrayTests_RecordArray14_f_def0(jmi_real_t n_v, jmi_real_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, xs_a, -1, 1)
+    JMI_ARR(HEAP, R_0_r, R_0_ra, rs_a, -1, 1)
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_1_max)
+    JMI_DEF(REA, y_v)
+    JMI_DEF(REA, temp_1_v)
+    jmi_real_t i1_0i;
+    jmi_int_t i1_0ie;
+    jmi_int_t i1_0in;
+    jmi_real_t i1_1i;
+    jmi_int_t i1_1ie;
+    jmi_int_t i1_1in;
+    jmi_real_t i1_2i;
+    jmi_int_t i1_2ie;
+    jmi_int_t i1_2in;
+    JMI_ARRAY_INIT_1(HEAP, jmi_real_t, jmi_array_t, xs_a, n_v, 1, n_v)
+    JMI_ARRAY_INIT_1(HEAP, R_0_r, R_0_ra, rs_a, n_v, 1, n_v)
+    tmp_1_max = n_v + 1;
+    for (tmp_1 = 1; tmp_1 < tmp_1_max; tmp_1++) {
+    }
+    i1_0in = 0;
+    i1_0ie = floor((n_v) - (1));
+    for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
+        jmi_array_rec_1(rs_a, i1_0i)->x = 1;
+    }
+    i1_1in = 0;
+    i1_1ie = floor((n_v) - (1));
+    for (i1_1i = 1; i1_1in <= i1_1ie; i1_1i = 1 + (++i1_1in)) {
+        jmi_array_ref_1(xs_a, i1_1i) = jmi_array_rec_1(rs_a, i1_1i)->x;
+    }
+    temp_1_v = 0.0;
+    i1_2in = 0;
+    i1_2ie = floor((n_v) - (1));
+    for (i1_2i = 1; i1_2in <= i1_2ie; i1_2i = 1 + (++i1_2in)) {
+        temp_1_v = temp_1_v + jmi_array_val_1(xs_a, i1_2i);
+    }
+    y_v = temp_1_v;
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenArrayTests_RecordArray14_f_exp0(jmi_real_t n_v) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenArrayTests_RecordArray14_f_def0(n_v, &y_v);
+    return y_v;
+}
+")})));
+end RecordArray14;
+
 end CCodeGenArrayTests;

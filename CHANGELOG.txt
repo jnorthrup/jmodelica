@@ -1,4 +1,18 @@
 ================= Unreleased ==================
+# Fixed ; Minor ; Compiler; #5864
+Fixed bug where partial variability propagation lead to unbalanced equation systems.
+
+# Fixed ; Minor ; Compiler ; #5862
+Fixed bug where empty array subscripts added during scalarization lead to c-compilation error.
+
+# Feature ; Minor ; Compiler; #5837
+Added a pre-compiled evaluator used for evaluating external functions
+during the compilation (for performance). Activated by the option 
+"external_constant_evaluation_dynamic"
+
+# Fixed ; Minor ; Compiler ; #5855
+Nominal are now always positive in the FMI model description.
+
 # Fixed ; Minor ; Compiler; #5844
 Improved attribute evaluation robustness for some cases. Parametric 
 attributes are now only generated in model description for inputs

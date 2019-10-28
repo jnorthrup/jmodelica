@@ -1058,7 +1058,7 @@ aspect ExpandableConnectors {
     public boolean FExpSubscript.calculateExpandableConnectorSize(MutableSize s, int i, int len) {
         CValue val = ceval();
         if (ndims() > 0) 
-            val = val.reduce(INT_MAX_OP, new CValueInteger(1));
+            val = val.reduce(INT_MAX_OP, CValueInteger.valueOf(1));
         s.set(i, val.intValue());
         return ndims() == 0 || size().get(0) == len;
     }

@@ -48,8 +48,8 @@ def run_demo(with_plots=True):
     u = res['u']
     t = res['time']
     
-    assert N.abs(res.final('x') - 3.5297217)    < 1e-3
-    assert N.abs(res.final('u') - (-0.2836621)) < 1e-3
+    assert N.abs(res.final('x') - 3.5297217)    < 1e-2, N.abs(res.final('x') - 3.5297217)
+    assert N.abs(res.final('u') - (-0.2836621)) < 1e-2, N.abs(res.final('u') - (-0.2836621))
 
     if with_plots:
         fig = p.figure()
