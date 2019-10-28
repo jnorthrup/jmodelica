@@ -2,7 +2,9 @@ package org.jmodelica.util.files;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -154,6 +156,20 @@ public final class FileUtil {
         }
         return names;
     }
+    
+    /**
+     * @return A collection of all files in {@code dir} matching the {@code glob}
+     *         pattern
+     */
+    public static Collection<Path> getMatching(Path dir, String glob) throws IOException {
+        Collection<Path> res = new ArrayList<>();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, glob)) {
+            for (Path path : stream) {
+                res.add(path);
+            }
+        }
+        return res;
+    }
 
     /**
      * Copies a file from one location to another.
@@ -233,9 +249,49 @@ public final class FileUtil {
      * @throws IOException
      *             if there was any error copying the files.
      */
-    public static void copyRecursive(Collection<File> files, File destination, boolean replace) throws IOException {
+    public static void copyRecursive(Iterable<File> files, File destination, boolean replace) throws IOException {
         for (File file : files) {
             copyRecursive(file, destination, replace);
+        }
+    }
+    
+    /**
+     * Copies file to a directory. Contents of directories is copied recursively.
+     * 
+     * @param sourceFile
+     *            The file to copy.
+     * @param destDir
+     *            The destination directory.
+     * @throws IOException
+     *             if there was any error copying the files.
+     */
+    public static void copyRecursive(Path sourceFile, Path destDir) throws IOException {
+        Path outFile = destDir.resolve(sourceFile.getFileName());
+        if (Files.isDirectory(sourceFile)) {
+            if (!Files.exists(outFile)) {
+                Files.createDirectory(outFile);
+            }
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(sourceFile)) {
+                copyRecursive(stream, outFile);
+            }
+        } else {
+            Files.copy(sourceFile, outFile, StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+    
+    /**
+     * Copies several files to a directory.
+     * 
+     * @param sourceFiles
+     *            The files to copy.
+     * @param destDir
+     *            The destination directory.
+     * @throws IOException
+     *             if there was any error copying the files.
+     */
+    public static void copyRecursive(Iterable<Path> sourceFiles, Path destDir) throws IOException {
+        for (Path file : sourceFiles) {
+            copyRecursive(file, destDir);
         }
     }
 

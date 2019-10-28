@@ -39,6 +39,7 @@ import org.jmodelica.util.xml.XMLPrinter;
  * <p>Use {@link org.jmodelica.modelica.compiler.generated.OptionRegistry#buildOptions()}
  * to get an option registry populated with all available options.
  */
+@SuppressWarnings("javadoc")
 public abstract class AbstractOptionRegistry {
 
     public abstract static class Default<T> {

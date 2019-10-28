@@ -496,7 +496,9 @@ aspect FunctionScalarization {
             } else {
                 List<FSubscript> subs = new List<FSubscript>();
                 subs.add(new FIntegerSubscript(i+1));
-                subs.addAll(names.createFArraySubscripts().copyAsFArrayExpSubscripts().getFSubscriptListNoTransform());
+                if (names.hasNames()) {
+                    subs.addAll(names.createFArraySubscripts().copyAsFArrayExpSubscripts().getFSubscriptListNoTransform());
+                }
                 left = tempExp(new FArrayExpSubscripts(subs));
                 right.createArrayTemporaries(s);
                 right.addArrayUsesToIndexMap(s);
@@ -915,8 +917,9 @@ aspect FunctionScalarization {
     }
     
     public void FAccessExp.addArrayUsesToIndexMap(Scalarizer s, FExp[] names) {
-        if (!hasFArraySubscripts() && isArray())
+        if (!hasFArraySubscripts() && myFV().isArray()) {
             indexNames = names;
+        }
         super.addArrayUsesToIndexMap(s, names);
     }
     
@@ -1211,16 +1214,20 @@ aspect FunctionScalarizationHelpers {
         /**
          * Creates a new FArraySubscripts with uses of the <code>d1</code> to <code>d2</code> names
          * in the top layer as subscripts. When out of names, adds 1s.
+         *
+         * Returns null if d1 == d2.
          */
         public FArrayExpSubscripts createFArraySubscripts(int d1, int d2) {
-            if (d1 < 0)
-                throw new UnsupportedOperationException();
+            if (d1 == d2) {
+                return null;
+            }
             FArrayExpSubscripts fas = new FArrayExpSubscripts();
             for (int i = d1; i < d2; ++i) {
-                if (i < topLayer().length)
+                if (i < topLayer().length) {
                     fas.addFSubscript(new FExpSubscript(new FTempAccessExp(new FAccessFull(topLayer()[i]))));
-                else
+                } else {
                     fas.addFSubscript(new FIntegerSubscript(1));
+                }
             }
             return fas;
         }
@@ -1228,6 +1235,7 @@ aspect FunctionScalarizationHelpers {
         /**
          * Creates a new FArraySubscripts with uses of the <code>d</code> 
          * first names in the top layer as subscripts. When out of names, adds 1s.
+         * Returns null if d == 0.
          */
         public FArrayExpSubscripts createFArraySubscripts(int d) {
             return createFArraySubscripts(0, d);
@@ -1235,6 +1243,7 @@ aspect FunctionScalarizationHelpers {
         
         /**
          * Creates a new FArraySubscripts with uses of all the names in the top layer.
+         * Returns null if no names available.
          */
         public FArrayExpSubscripts createFArraySubscripts() {
             return createFArraySubscripts(topLayer().length);

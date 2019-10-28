@@ -25,10 +25,12 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.jmodelica.common.evaluation.ExternalFunctionCompiler;
 import org.jmodelica.common.evaluation.ExternalFunction;
 import org.jmodelica.common.evaluation.ExternalProcessCache;
 import org.jmodelica.common.evaluation.ExternalProcessCacheImpl;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache;
+import org.jmodelica.common.evaluation.FailedExternalFunction;
 import org.jmodelica.common.evaluation.ProcessCommunicator;
 
 aspect ExternalConstantEvaluation {
@@ -48,7 +50,7 @@ aspect ExternalConstantEvaluation {
     
     class ModelicaCompiler {}
     
-    ModelicaCompiler   implements ExternalProcessMultiCache.Compiler<ExternalArgument, FExternalStmt>;
+    ModelicaCompiler   implements ExternalFunctionCompiler<ExternalArgument, FExternalStmt>;
     FExternalStmt      implements ExternalProcessMultiCache.External<ExternalArgument>;
     ExternalArgument   extends    ExternalProcessMultiCache.Variable<CValue,FType>;
     CValue             implements ExternalProcessMultiCache.Value;
@@ -88,9 +90,12 @@ aspect ExternalConstantEvaluation {
     /**
      * Check if this external function should be cached as a live process.
      */
-    syn boolean FExternalStmt.shouldCacheProcess() {
-        return myOptions().getIntegerOption("external_constant_evaluation_max_proc") > 0;
-    }
+    syn int FExternalStmt.processLimit() =
+            myOptions().external_constant_evaluation_max_proc.getValue();
+    
+    syn boolean FExternalStmt.dynamicEvaluatorEnabled() = 
+            myOptions().external_constant_evaluation_dynamic.getValue()
+            && !externalObjectsToSerialize().iterator().hasNext();
     
     /**
      * Returns a single scalar external object which can be cached. If there is not exactly
@@ -168,8 +173,9 @@ aspect ExternalConstantEvaluation {
     public ExternalFunction<ExternalArgument, CValue> FExternalStmt.myExternalFunction() {
         ExternalFunctionCache efc = root().getUtilInterface().getExternalFunctionCache();
         if (efc == null) {
-            return new ExternalProcessCacheImpl<>(root().getUtilInterface().getModelicaCompiler())
-                .failedEval(this, "external function cache unavailable", false);
+            return FailedExternalFunction.<ExternalArgument, CValue, FType, FExternalStmt>failedEval(
+                    root().getUtilInterface().getModelicaCompiler(), 
+                    this, "external function cache unavailable", false);
         }
         return efc.getExternalProcessCache(getLibTopPackagePath()).getExternalFunction(this);
     }
@@ -204,7 +210,7 @@ aspect ExternalConstantEvaluation {
         }
         
         if (error != null) {
-            throw new ConstantEvaluationException(null, ExternalProcessCacheImpl.failedEvalMsg(getName(), error));
+            throw new ConstantEvaluationException(null, FailedExternalFunction.failedEvalMsg(getName(), error));
         }
         
         for (ExternalArgument output : varsToDeserialize()) {
@@ -329,13 +335,13 @@ aspect ExternalProcessCommunication {
         return res;
     }
     public CValue FRealType.deserializeScalar(ProcessCommunicator com) throws IOException {
-        return new CValueReal(com.deserializeReal());
+        return CValueReal.valueOf(com.deserializeReal());
     }
     public CValue FIntegerType.deserializeScalar(ProcessCommunicator com) throws IOException {
-        return new CValueInteger((int) com.deserializeReal());
+        return CValueInteger.valueOf((int) com.deserializeReal());
     }
     public CValue FBooleanType.deserializeScalar(ProcessCommunicator com) throws IOException {
-        return new CValueBoolean(com.deserializeReal() != 0);
+        return CValueBoolean.valueOf(com.deserializeReal() != 0);
     }
     public CValue FStringType.deserializeScalar(ProcessCommunicator com) throws IOException {
         return new CValueString(com.deserializeString());

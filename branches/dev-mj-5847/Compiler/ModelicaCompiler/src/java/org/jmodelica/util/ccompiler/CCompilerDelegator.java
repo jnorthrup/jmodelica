@@ -350,5 +350,8 @@ public abstract class CCompilerDelegator {
             }
         };
     }
+
+    public abstract Set<String> expandCompilerSpecificLibraryPaths(ModelicaLogger log, AbstractOptionRegistry options,
+            Set<String> extLibDirs, String platform);
 }
 
