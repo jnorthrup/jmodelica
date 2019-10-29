@@ -67,11 +67,6 @@ aspect OptimicaParsers {
     refine Parsers public short ParserHandler.subscriptGoal() {
         return org.jmodelica.optimica.parser.ModelicaParser.AltGoals.subscript;
     }
-    
-    refine Parsers public short ParserHandler.functionCallListGoal() {
-        return org.jmodelica.optimica.parser.ModelicaParser.AltGoals.function_call_list;
-    }
-
 
     public beaver.Parser ParserHandler.createOptimicaParser(AbstractModelicaScanner<ASTNode<?>> scanner, LoadInfo loadInfo) {
         org.jmodelica.optimica.parser.OptimicaParser parser = new org.jmodelica.optimica.parser.OptimicaParser();

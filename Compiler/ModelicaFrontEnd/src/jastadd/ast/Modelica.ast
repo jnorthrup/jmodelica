@@ -276,8 +276,6 @@ SrcWhenClause          : SrcIfWhenClause;
 SrcForStmt             : SrcStatement ::= SrcForIndex* SrcStatement*;
 SrcWhileStmt           : SrcStatement ::= Test:SrcExp SrcWhileStmt:SrcStatement*;
 
-SrcFunctionCallList    ::= ConvertRules:SrcFunctionCall*;
-
 SrcParExp    : SrcExp ::= SrcExp;
 SrcIfExp     : SrcExp ::= SrcIfExp:SrcExp ThenExp:SrcExp ElseExp:SrcExp;
 
