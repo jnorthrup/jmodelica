@@ -70,12 +70,13 @@ if WITH_OPENMP
 	cd $(assimulo_src_dir)/../build_externals/build/assimulo; \
 	case $(build) in \
 	*-cygwin*) \
-	make install USER_CONFIG=../../configurations/Assimulo/windows/win32_cygwin_py2 JM_HOME=$(abs_top_srcdir) BUILD_DIR=$(abs_builddir);; \
+	ASSIMULO_USER_CONFIG=../../configurations/Assimulo/windows/win32_cygwin_py2;; \
 	*-mingw*) \
-	make install USER_CONFIG=../../configurations/Assimulo/windows/$(ASSIMULO_CONFIG) JM_HOME=$(abs_top_srcdir) BUILD_DIR=$(abs_builddir) ;; \
+	ASSIMULO_USER_CONFIG=../../configurations/Assimulo/windows/$(ASSIMULO_CONFIG);; \
 	*) \
-	make install USER_CONFIG=../../configurations/Assimulo/unix/config JM_HOME=$(abs_top_srcdir) BUILD_DIR=$(abs_builddir);; \
+	ASSIMULO_USER_CONFIG=../../configurations/Assimulo/unix/config;; \
 	esac
+    make install USER_CONFIG=$(ASSIMULO_USER_CONFIG) JM_HOME=$(abs_top_srcdir) BUILD_DIR=$(abs_builddir)
 if JM_WIN64
 if WITH_PYTHON64
 	mkdir -p $(assimulo_build_dir64); \
