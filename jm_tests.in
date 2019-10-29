@@ -183,12 +183,8 @@ function find_python_tests() {
 }
 
 function python_tests() {
-  if [ "${KEEP_PYTHON}" == 1 ]; then
-    TEST_DIR="$(pwd)/tests_$(date "+%F_%H-%M-%S")"
-    mkdir ${TEST_DIR}
-  else
-    TEST_DIR=$(mktemp -dq /tmp/jm_tests.XXXXXX)
-  fi 
+  TEST_DIR="$(pwd)/tests_$(date "+%F_%H-%M-%S")"
+  mkdir ${TEST_DIR}
   print_name Python
   res=0
   echo "in python_tests OUTPUT=${OUTPUT}"
