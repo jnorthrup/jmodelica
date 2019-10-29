@@ -69,7 +69,7 @@ aspect OptimicaParsers {
     }
     
     refine Parsers public short ParserHandler.functionCallListGoal() {
-        return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.function_call_list;
+        return org.jmodelica.optimica.parser.ModelicaParser.AltGoals.function_call_list;
     }
 
 
