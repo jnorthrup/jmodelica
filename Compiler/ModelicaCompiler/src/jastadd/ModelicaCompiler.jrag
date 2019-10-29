@@ -2044,12 +2044,12 @@ public class ModelicaCompiler implements LogContainer {
             // compute instance tree
             InstClassDecl icl = instantiateModel(name, cl, target);
             UtilInterface util = icl.root().getUtilInterface();
+            String flatName = null;
             if (compileTo != null) {
                 Path unitFile = makePackagingDirs(cl, compileTo, target);
                 util.setCompilationOutputPath(unitFile);
+                flatName = computeFlatName(compileTo, util);
             }
-            
-            String flatName = computeFlatName(compileTo, util);
             
             // flattening
             // Throw away source and instance trees when they are not needed any more
@@ -2279,7 +2279,7 @@ public class ModelicaCompiler implements LogContainer {
     
     private String ModelicaCompiler.computeFlatName(Path compileTo, UtilInterface util) {
         String flatName = null;
-        if (compileTo != null && !Files.isDirectory(compileTo)) {
+        if (!Files.isDirectory(compileTo)) {
             flatName = compileTo.getFileName().toString();
             int i = flatName.lastIndexOf('.');
             if (i > 0) {
