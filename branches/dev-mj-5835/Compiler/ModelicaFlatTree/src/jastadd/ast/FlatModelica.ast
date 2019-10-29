@@ -698,7 +698,7 @@ FWhileStmt : FStatement ::= Test:FExp WhileStmt:FStatement*;
  *
  * LibTopPackagePath is the file path of the package file of the library that this external statement originated from.
  */
-FExternalStmt : FStatement ::= FExternalLanguage [ReturnVar:CommonAccessExp] <Name> Arg:FExp* <LibTopPackagePath>;
+FExternalStmt : FStatement ::= FExternalLanguage [ReturnVar:CommonAccessExp] <Name> Arg:FExp* <LibTopPackagePath> FAttribute*;
 
 /**
  * A language specification for an external function.

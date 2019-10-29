@@ -273,11 +273,13 @@ public class CompilerInstance {
         /**
          * {@link org.jmodelica.modelica.compiler.ModelicaCompiler ModelicaCompiler}.
          */
+        @SuppressWarnings("javadoc")
         MODELICA("org.jmodelica.modelica.compiler.ModelicaCompiler"),
 
         /**
          * {@link org.jmodelica.optimica.compiler.OptimicaCompiler OptimicaCompiler}.
          */
+        @SuppressWarnings("javadoc")
         OPTIMICA("org.jmodelica.optimica.compiler.OptimicaCompiler");
 
         private final String className;

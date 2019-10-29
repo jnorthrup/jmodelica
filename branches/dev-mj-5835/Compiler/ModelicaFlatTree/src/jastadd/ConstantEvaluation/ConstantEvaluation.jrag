@@ -81,6 +81,7 @@ aspect ConstantEvaluation {
         /**
          * Copy this constant value.
          */
+        @Override
         public CValue clone() {
             try {
                 return (CValue) super.clone();
@@ -118,21 +119,21 @@ aspect ConstantEvaluation {
          * Convert to CValueInteger, default implementation.
          */
         public CValue convertInteger() {
-            return new CValueInteger(intValue());
+            return CValueInteger.valueOf(intValue());
         }
 
         /**
          * Convert to CValueReal, default implementation.
          */
         public CValue convertReal() {
-            return new CValueReal(realValue());
+            return CValueReal.valueOf(realValue());
         }
 
         /**
          * Convert to CValueBoolean, default implementation.
          */
         public CValue convertBoolean() {
-            return new CValueBoolean(booleanValue());
+            return CValueBoolean.valueOf(booleanValue());
         }
 
         /**
@@ -300,15 +301,19 @@ aspect ConstantEvaluation {
      * Constant integer value.
      */
     public class CValueInteger extends CValue {
-        private int value;
+        private final int value;
         
-        /** 
-         * Constructor.
-         * 
-  	     * @param i Integer value.
-         */
-        public CValueInteger(int i) { 
+        private CValueInteger(int i) { 
         	this.value = i; 
+        }
+        
+        private static final CValueInteger ZERO = new CValueInteger(0);
+        
+        public static CValueInteger valueOf(int i) {
+            if (i == 0) {
+                return ZERO;
+            }
+            return new CValueInteger(i);
         }
 
         /**
@@ -421,21 +426,35 @@ aspect ConstantEvaluation {
         public boolean hasStringValue() {
             return true;
         }
+        
+        @Override
+        public CValueInteger clone() {
+            return this;
+        }        
     }
     
 	/**
 	 * Constant real value.
 	 */      
     public class CValueReal extends CValue {
-        private double value;
+        private final double value;
         
         /**
          * Constructor.
          * 
          * @param d Double value.
          */
-        public CValueReal(double d) { 
+        private CValueReal(double d) { 
         	this.value = d; 
+        }
+        
+        private static final CValueReal ZERO = new CValueReal(0.0);
+        
+        public static CValueReal valueOf(double d) {
+            if (d == 0.0 && (Double.doubleToLongBits(d) & 0x8000000000000000L) == 0L) {
+                return ZERO;
+            }
+            return new CValueReal(d);
         }
 
         /**
@@ -549,6 +568,12 @@ aspect ConstantEvaluation {
         public boolean hasStringValue() {
             return true;
         }
+        
+        @Override
+        public CValueReal clone() {
+            return this;
+        }        
+        
     }
     
 	/**
@@ -561,15 +586,19 @@ aspect ConstantEvaluation {
     	/** A CValueBolean with the value <code>true</code>, for conveniance. */
     	public static final CValueBoolean TRUE  = new CValueBoolean(true);
     	
-        private boolean value;
+        private final boolean value;
 
         /**
          * Constructor.
          * 
          * @param b Boolean value.
          */
-        public CValueBoolean(boolean b) { 
-        	this.value = b; 
+        private CValueBoolean(boolean b) { 
+            this.value = b; 
+        }
+        
+        public static CValueBoolean valueOf(boolean b) {
+            return b ? TRUE : FALSE;
         }
 
         /**
@@ -651,13 +680,18 @@ aspect ConstantEvaluation {
         public boolean hasStringValue() {
             return true;
         }
+        
+        @Override
+        public CValueBoolean clone() {
+            return this;
+        }
     }
 
 	/**
 	 * Constant string value.
 	 */
     public class CValueString extends CValue {
-        private String value;
+        private final String value;
         
         /**
          * Constructor.
@@ -717,6 +751,12 @@ aspect ConstantEvaluation {
         public boolean hasStringValue() {
             return true;
         }
+        
+        @Override
+        public CValueString clone() {
+            return this;
+        }        
+        
       }
     
 	/**
@@ -1615,9 +1655,9 @@ aspect ConstantEvaluation {
      */
     public class CValueEnum extends CValue {
 
-        private FEnumType type;
-        private String value;
-        private int index;
+        private final FEnumType type;
+        private final String value;
+        private final int index;
 
         /**
          * Create a new constant value for enumeration literal.
@@ -1628,11 +1668,14 @@ aspect ConstantEvaluation {
         public CValueEnum(FType type, String value) {
             this.type = (FEnumType) type;
             this.value = value;
-            index = 0;
+            int temp_index = 0;
             int n = this.type.getNumFEnumLiteralType();
-            for (int i = 0; i < n && index == 0; i++)
-                if (this.type.getFEnumLiteralType(i).getName().equals(value))
-                    index = i + 1;
+            for (int i = 0; i < n && temp_index == 0; i++) {
+                if (this.type.getFEnumLiteralType(i).getName().equals(value)) {
+                    temp_index = i + 1;
+                }
+            }
+            index = temp_index;
         }
 
         /**
@@ -1706,6 +1749,7 @@ aspect ConstantEvaluation {
          *  
          *  @return an CommonAccessExp pointing to the literal in the FEnumDecl.
          */
+        @Override
         public FExp buildLiteral() {
             return type.createLiteral(index);
         }
@@ -1720,6 +1764,7 @@ aspect ConstantEvaluation {
             return true;
         }
 
+        @Override
         public CValue constrainWithin(CValue min, CValue max) {
             if (!min.isUnknown() && min.intValue() > index)
                 return min;
@@ -1727,6 +1772,11 @@ aspect ConstantEvaluation {
                 return max;
             return this;
         }
+        
+       @Override
+       public CValueEnum clone() {
+           return this;
+       } 
 
     }
 
@@ -1747,11 +1797,11 @@ aspect ConstantEvaluation {
 
     public CValue FType.zeroCValueScalar()        { return CValue.UNKNOWN; }
     public CValue FArrayType.zeroCValueScalar()   { return getFPrimitiveType().zeroCValueScalar(); }
-    public CValue FRealType.zeroCValueScalar()    { return new CValueReal(0.0); }
-    public CValue FIntegerType.zeroCValueScalar() { return new CValueInteger(0); }
+    public CValue FRealType.zeroCValueScalar()    { return CValueReal.valueOf(0.0); }
+    public CValue FIntegerType.zeroCValueScalar() { return CValueInteger.valueOf(0); }
     public CValue FEnumType.zeroCValueScalar()    { return new CValueEnum(this, 1); }
     public CValue FStringType.zeroCValueScalar()  { return new CValueString(""); }
-    public CValue FBooleanType.zeroCValueScalar() { return new CValueBoolean(false); }
+    public CValue FBooleanType.zeroCValueScalar() { return CValueBoolean.FALSE; }
     
     public CValue FType.createCValue(int v) {
         if (isArray()) {
@@ -1764,8 +1814,8 @@ aspect ConstantEvaluation {
         }
     }
     
-    public CValue FType.createCValueScalar(int v)     { return new CValueInteger(v); }
-    public CValue FRealType.createCValueScalar(int v) { return new CValueReal(v); }
+    public CValue FType.createCValueScalar(int v)     { return CValueInteger.valueOf(v); }
+    public CValue FRealType.createCValueScalar(int v) { return CValueReal.valueOf(v); }
 
     public CValue FType.convert(CValue v)        { return v; }
     public CValue FRealType.convert(CValue v)    { return v.convertReal(); }
@@ -1774,9 +1824,9 @@ aspect ConstantEvaluation {
     public CValue FBooleanType.convert(CValue v) { return v.convertBoolean(); }
 
     public CValue FType.limitCValueScalar(boolean high)        { return CValue.UNSUPPORTED; }
-    public CValue FRealType.limitCValueScalar(boolean high)    { return new CValueReal(      high ? Double.MAX_VALUE  : -Double.MAX_VALUE); }
-    public CValue FIntegerType.limitCValueScalar(boolean high) { return new CValueInteger(   high ? Integer.MAX_VALUE : Integer.MIN_VALUE); }
-    public CValue FBooleanType.limitCValueScalar(boolean high) { return new CValueBoolean(   high ? true : false); }
+    public CValue FRealType.limitCValueScalar(boolean high)    { return CValueReal.valueOf(      high ? Double.MAX_VALUE  : -Double.MAX_VALUE); }
+    public CValue FIntegerType.limitCValueScalar(boolean high) { return CValueInteger.valueOf(   high ? Integer.MAX_VALUE : Integer.MIN_VALUE); }
+    public CValue FBooleanType.limitCValueScalar(boolean high) { return CValueBoolean.valueOf(high); }
     public CValue FEnumType.limitCValueScalar(boolean high)    { return new CValueEnum(this, high ? getNumFEnumLiteralType() : 1); }
 
     public boolean CValue.isZero()        { return false; }
@@ -2388,7 +2438,7 @@ aspect ConstantEvaluation {
           return super.cevalCalc(evaluator);
         
         FType t = type();
-        CValue sum = new CValueInteger(0);
+        CValue sum = CValueInteger.valueOf(0);
         CValueArray l = getLeft().ceval(evaluator).array();
         CValueArray r = getRight().ceval(evaluator).array();
         for (Index i : l.indices())
@@ -2482,7 +2532,7 @@ aspect ConstantEvaluation {
     }
     
     eq FEndExp.cevalCalc(VariableEvaluator evaluator) = mySize().ceval(evaluator, 0);
-    eq FNdimsExp.cevalCalc(VariableEvaluator evaluator) = new CValueInteger(getFExp().ndims());
+    eq FNdimsExp.cevalCalc(VariableEvaluator evaluator) = CValueInteger.valueOf(getFExp().ndims());
     
     eq FSubscriptedExp.cevalCalc(VariableEvaluator evaluator) {
         Index i = getFArraySubscripts().createIndex(evaluator);
@@ -2491,7 +2541,7 @@ aspect ConstantEvaluation {
 
     eq FCardinality.cevalCalc(VariableEvaluator evaluator) {
         final int v = getFExp().cardinalityValue();
-        return (v <= 0) ? CValue.UNKNOWN : new CValueInteger(v);
+        return (v <= 0) ? CValue.UNKNOWN : CValueInteger.valueOf(v);
     }
 
     eq FDecouple.cevalCalc(VariableEvaluator evaluator) = getFExp().ceval(evaluator);
@@ -2501,7 +2551,7 @@ aspect ConstantEvaluation {
     }
     eq FConnBoolOp.cevalCalc(VariableEvaluator evaluator) {
         if (connectionGraph != null && connectionGraph.builtTreesDone()) 
-          return new CValueBoolean(cevalFromGraph());
+          return CValueBoolean.valueOf(cevalFromGraph());
         else
           throw new ConstantEvaluationNotReadyException();
     }
@@ -2548,7 +2598,7 @@ aspect ConstantEvaluation {
     
     public CValue Size.ceval(VariableEvaluator evaluator, int d) {
         int s = get(d);
-        return (s == Size.UNKNOWN) ? CValue.UNKNOWN : new CValueInteger(s);
+        return (s == Size.UNKNOWN) ? CValue.UNKNOWN : CValueInteger.valueOf(s);
     }
 
     eq FMinMaxExp.cevalCalc(VariableEvaluator evaluator) {
@@ -2615,7 +2665,7 @@ aspect ConstantEvaluation {
 
     /** Set the value for initial() to evaluate to. */
     public static void FInitialExp.setIsInitial(boolean value) {
-          evaluationValue = new CValueBoolean(value);
+          evaluationValue = CValueBoolean.valueOf(value);
     }
 
     /** Set if constant evaluation should consider simulation to be during initialization or not. */
@@ -2630,10 +2680,10 @@ aspect ConstantEvaluation {
     eq FMinExp.selectLesser() = true;
     eq FMaxExp.selectLesser() = false;
 
-    eq FRealLitExp.cevalCalc(VariableEvaluator evaluator)         = new CValueReal(getValue());
-    eq FIntegerLitExp.cevalCalc(VariableEvaluator evaluator)      = new CValueInteger(getValue());
-    eq FBooleanLitExpTrue.cevalCalc(VariableEvaluator evaluator)  = new CValueBoolean(true);
-    eq FBooleanLitExpFalse.cevalCalc(VariableEvaluator evaluator) = new CValueBoolean(false);
+    eq FRealLitExp.cevalCalc(VariableEvaluator evaluator)         = CValueReal.valueOf(getValue());
+    eq FIntegerLitExp.cevalCalc(VariableEvaluator evaluator)      = CValueInteger.valueOf(getValue());
+    eq FBooleanLitExpTrue.cevalCalc(VariableEvaluator evaluator)  = CValueBoolean.TRUE;
+    eq FBooleanLitExpFalse.cevalCalc(VariableEvaluator evaluator) = CValueBoolean.FALSE;
     eq FStringLitExp.cevalCalc(VariableEvaluator evaluator)       = new CValueString(unEscape());
     eq FEnumLitExp.cevalCalc(VariableEvaluator evaluator)         = new CValueEnum(type(), getValue());
 
@@ -2690,7 +2740,7 @@ aspect ConstantEvaluation {
     syn CValue CommonAccessExp.cevalUse(VariableEvaluator evaluator) = getAccess().ceval(evaluator);
     eq FAbstractDerExp.cevalUse(VariableEvaluator evaluator) {
         if (getFAccess().variability().discreteOrLess())
-            return new CValueInteger(0);
+            return CValueInteger.valueOf(0);
         FAbstractVariable decl = myFV();
         return decl == null ? CValue.UNKNOWN : evaluator.ceval(decl);
     }
@@ -2707,7 +2757,7 @@ aspect ConstantEvaluation {
     eq InstDot.ceval(VariableEvaluator evaluator, Index i)            = getLastInstAccess().ceval(evaluator, i);
     eq InstGlobalAccess.ceval(VariableEvaluator evaluator, Index i)   = getInstAccess().ceval(evaluator, i);
     eq InstNamedAccess.ceval(VariableEvaluator evaluator, Index i) {
-        CValue res = unknownCValue();
+        CValue res;
         if (myInstComponentDecl().isAssignable()) {
           Index iHere = Index.NULL;
           InstComponentDecl var = myInstComponentDecl();
@@ -2729,9 +2779,11 @@ aspect ConstantEvaluation {
           if (iHere != Index.NULL)
               res = res.getCell(iHere);
         } else if (myInstClassDecl().isEnum()) {
-            res = new CValueInteger(myInstClassDecl().enumLiterals().size());
+            res = CValueInteger.valueOf(myInstClassDecl().enumLiterals().size());
         } else if (myInstClassDecl().isBoolean()) {
-            res = new CValueInteger(2);
+            res = CValueInteger.valueOf(2);
+        } else {
+            res = unknownCValue();
         }
         return res;
     }
@@ -2787,7 +2839,7 @@ aspect ConstantEvaluation {
 
     eq FAbsExp.cevalCalc(VariableEvaluator evaluator)  = type().abs(getFExp().ceval(evaluator));
     eq FSignExp.cevalCalc(VariableEvaluator evaluator) = type().sign(getFExp().ceval(evaluator));
-    eq FSqrtExp.cevalCalc(VariableEvaluator evaluator)  = new CValueReal(StrictMath.sqrt(getFExp().ceval(evaluator).realValue()));
+    eq FSqrtExp.cevalCalc(VariableEvaluator evaluator)  = CValueReal.valueOf(StrictMath.sqrt(getFExp().ceval(evaluator).realValue()));
     eq FEnumIntegerExp.cevalCalc(VariableEvaluator evaluator) = getFExp().ceval(evaluator).convertInteger();
     eq FStringExp.cevalCalc(VariableEvaluator evaluator) {
         if (getValue().isArray() || !getValue().type().isPrimitive()) {
@@ -2874,20 +2926,20 @@ aspect ConstantEvaluation {
     eq FFloorFuncExp.cevalCalc(VariableEvaluator evaluator)       = getX().ceval(evaluator).convertInteger().convertReal();
     eq FIntegerFuncExp.cevalCalc(VariableEvaluator evaluator)     = getX().ceval(evaluator).convertInteger();
 
-    eq FSinExp.cevalCalc(VariableEvaluator evaluator)   = new CValueReal(StrictMath.sin(getFExp().ceval(evaluator).realValue()));
-    eq FCosExp.cevalCalc(VariableEvaluator evaluator)   = new CValueReal(StrictMath.cos(getFExp().ceval(evaluator).realValue()));
-    eq FTanExp.cevalCalc(VariableEvaluator evaluator)   = new CValueReal(StrictMath.tan(getFExp().ceval(evaluator).realValue()));
-    eq FAsinExp.cevalCalc(VariableEvaluator evaluator)  = new CValueReal(StrictMath.asin(getFExp().ceval(evaluator).realValue()));
-    eq FAcosExp.cevalCalc(VariableEvaluator evaluator)  = new CValueReal(StrictMath.acos(getFExp().ceval(evaluator).realValue()));
-    eq FAtanExp.cevalCalc(VariableEvaluator evaluator)  = new CValueReal(StrictMath.atan(getFExp().ceval(evaluator).realValue()));
-    eq FAtan2Exp.cevalCalc(VariableEvaluator evaluator) = new CValueReal(StrictMath.atan2(getFExp().ceval(evaluator).realValue(),
+    eq FSinExp.cevalCalc(VariableEvaluator evaluator)   = CValueReal.valueOf(StrictMath.sin(getFExp().ceval(evaluator).realValue()));
+    eq FCosExp.cevalCalc(VariableEvaluator evaluator)   = CValueReal.valueOf(StrictMath.cos(getFExp().ceval(evaluator).realValue()));
+    eq FTanExp.cevalCalc(VariableEvaluator evaluator)   = CValueReal.valueOf(StrictMath.tan(getFExp().ceval(evaluator).realValue()));
+    eq FAsinExp.cevalCalc(VariableEvaluator evaluator)  = CValueReal.valueOf(StrictMath.asin(getFExp().ceval(evaluator).realValue()));
+    eq FAcosExp.cevalCalc(VariableEvaluator evaluator)  = CValueReal.valueOf(StrictMath.acos(getFExp().ceval(evaluator).realValue()));
+    eq FAtanExp.cevalCalc(VariableEvaluator evaluator)  = CValueReal.valueOf(StrictMath.atan(getFExp().ceval(evaluator).realValue()));
+    eq FAtan2Exp.cevalCalc(VariableEvaluator evaluator) = CValueReal.valueOf(StrictMath.atan2(getFExp().ceval(evaluator).realValue(),
                                                                getY().ceval(evaluator).realValue()));
-    eq FSinhExp.cevalCalc(VariableEvaluator evaluator)  = new CValueReal(StrictMath.sinh(getFExp().ceval(evaluator).realValue()));
-    eq FCoshExp.cevalCalc(VariableEvaluator evaluator)  = new CValueReal(StrictMath.cosh(getFExp().ceval(evaluator).realValue()));
-    eq FTanhExp.cevalCalc(VariableEvaluator evaluator)  = new CValueReal(StrictMath.tanh(getFExp().ceval(evaluator).realValue()));
-    eq FExpExp.cevalCalc(VariableEvaluator evaluator)   = new CValueReal(StrictMath.exp(getFExp().ceval(evaluator).realValue()));
-    eq FLogExp.cevalCalc(VariableEvaluator evaluator)   = new CValueReal(StrictMath.log(getFExp().ceval(evaluator).realValue()));
-    eq FLog10Exp.cevalCalc(VariableEvaluator evaluator) = new CValueReal(StrictMath.log10(getFExp().ceval(evaluator).realValue()));
+    eq FSinhExp.cevalCalc(VariableEvaluator evaluator)  = CValueReal.valueOf(StrictMath.sinh(getFExp().ceval(evaluator).realValue()));
+    eq FCoshExp.cevalCalc(VariableEvaluator evaluator)  = CValueReal.valueOf(StrictMath.cosh(getFExp().ceval(evaluator).realValue()));
+    eq FTanhExp.cevalCalc(VariableEvaluator evaluator)  = CValueReal.valueOf(StrictMath.tanh(getFExp().ceval(evaluator).realValue()));
+    eq FExpExp.cevalCalc(VariableEvaluator evaluator)   = CValueReal.valueOf(StrictMath.exp(getFExp().ceval(evaluator).realValue()));
+    eq FLogExp.cevalCalc(VariableEvaluator evaluator)   = CValueReal.valueOf(StrictMath.log(getFExp().ceval(evaluator).realValue()));
+    eq FLog10Exp.cevalCalc(VariableEvaluator evaluator) = CValueReal.valueOf(StrictMath.log10(getFExp().ceval(evaluator).realValue()));
 
     eq FExInStream.cevalCalc(VariableEvaluator evaluator) {
         int n = 0;
@@ -2916,7 +2968,7 @@ aspect ConstantEvaluation {
                 sum += flow * cont.stream.ceval(evaluator).realValue();
                 div += flow;
             }
-            return new CValueReal(sum / div);
+            return CValueReal.valueOf(sum / div);
         }
     }
 
@@ -2925,7 +2977,7 @@ aspect ConstantEvaluation {
     syn CValue FSubscript.ceval() = ceval(defaultVariableEvaluator());
 	syn CValue FSubscript.ceval(VariableEvaluator evaluator) = CValue.UNSUPPORTED;
 	eq FExpSubscript.ceval(VariableEvaluator evaluator)      = getFExp().ceval(evaluator);
-	eq FIntegerSubscript.ceval(VariableEvaluator evaluator)  = new CValueInteger(getValue());
+	eq FIntegerSubscript.ceval(VariableEvaluator evaluator)  = CValueInteger.valueOf(getValue());
 	
 	syn int FSubscript.value()   = ceval(defaultVariableEvaluator()).intValue();
 	eq FIntegerSubscript.value() = getValue();
@@ -3162,7 +3214,7 @@ aspect ConstantEvaluation {
     syn CValue InstComponentDecl.attributeCValueDefault(String name) = CValue.UNKNOWN;
     eq InstPrimitive.attributeCValueDefault(String name) {
         if (name.equals(FAttribute.FIXED))
-            return new CValueBoolean(isConstant() || isParameter() || isString());
+            return CValueBoolean.valueOf(isConstant() || isParameter() || isString());
         CValue res = attributeCValueDefaultMap().get(name);
         return (res == null) ? CValue.UNKNOWN : res;
     }
@@ -3188,12 +3240,12 @@ aspect ConstantEvaluation {
             real.put(FAttribute.QUANTITY, emptyStr);
             real.put(FAttribute.UNIT, emptyStr);
             real.put(FAttribute.DISPLAY_UNIT, emptyStr);
-            real.put(FAttribute.START, new CValueReal(0.0));
+            real.put(FAttribute.START, CValueReal.valueOf(0.0));
             // TODO: add stateSelect, but how to get type?
             REAL_DEFAULT_ATTRIBUTES = real;
             Map<String,CValue> integer = new HashMap<String,CValue>();
             integer.put(FAttribute.QUANTITY, emptyStr);
-            integer.put(FAttribute.START, new CValueInteger(0));
+            integer.put(FAttribute.START, CValueInteger.valueOf(0));
             INTEGER_DEFAULT_ATTRIBUTES = integer;
             Map<String,CValue> bool = new HashMap<String,CValue>();
             bool.put(FAttribute.QUANTITY, emptyStr);
@@ -4216,14 +4268,14 @@ aspect ConstantEvaluation {
         if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueReal(v1.realValue() + v2.realValue());
+        return CValueReal.valueOf(v1.realValue() + v2.realValue());
     }
 
     eq FIntegerType.add(CValue v1, CValue v2) {
         if (!v1.hasIntValue() || !v2.hasIntValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueInteger(v1.intValue() + v2.intValue());
+        return CValueInteger.valueOf(v1.intValue() + v2.intValue());
     }
 
     eq FStringType.add(CValue v1, CValue v2) {
@@ -4246,14 +4298,14 @@ aspect ConstantEvaluation {
         if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueReal(v1.realValue() - v2.realValue());
+        return CValueReal.valueOf(v1.realValue() - v2.realValue());
     }
 
     eq FIntegerType.sub(CValue v1, CValue v2) {
         if (!v1.hasIntValue() || !v2.hasIntValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueInteger(v1.intValue() - v2.intValue());
+        return CValueInteger.valueOf(v1.intValue() - v2.intValue());
     }
 
     /**
@@ -4269,14 +4321,14 @@ aspect ConstantEvaluation {
         if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueReal(v1.realValue() * v2.realValue());
+        return CValueReal.valueOf(v1.realValue() * v2.realValue());
     }
 
     eq FIntegerType.mul(CValue v1, CValue v2) {
         if (!v1.hasIntValue() || !v2.hasIntValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueInteger(v1.intValue() * v2.intValue());
+        return CValueInteger.valueOf(v1.intValue() * v2.intValue());
     }
 
     /**
@@ -4292,14 +4344,14 @@ aspect ConstantEvaluation {
         if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueReal(v1.realValue() / v2.realValue());
+        return CValueReal.valueOf(v1.realValue() / v2.realValue());
     }
 
     eq FIntegerType.div(CValue v1, CValue v2) {
         if (!v1.isReal() || !v2.isReal()) {
             return CValue.UNKNOWN;
         }
-        return new CValueReal(v1.realValue() / v2.realValue());
+        return CValueReal.valueOf(v1.realValue() / v2.realValue());
     }
 
     /**
@@ -4315,7 +4367,7 @@ aspect ConstantEvaluation {
         if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueReal(java.lang.StrictMath.pow(v1.realValue(), v2.realValue()));
+        return CValueReal.valueOf(java.lang.StrictMath.pow(v1.realValue(), v2.realValue()));
     }
 
     /**
@@ -4325,8 +4377,8 @@ aspect ConstantEvaluation {
      * @return Resulting constant value.
      */
     syn CValue FType.neg(CValue v) = CValue.UNKNOWN;
-    eq FRealType.neg(CValue v) = v.hasRealValue() ? new CValueReal(-v.realValue()) : CValue.UNKNOWN;
-    eq FIntegerType.neg(CValue v) = v.hasIntValue() ? new CValueInteger(-v.intValue()) : CValue.UNKNOWN;
+    eq FRealType.neg(CValue v) = v.hasRealValue() ? CValueReal.valueOf(-v.realValue()) : CValue.UNKNOWN;
+    eq FIntegerType.neg(CValue v) = v.hasIntValue() ? CValueInteger.valueOf(-v.intValue()) : CValue.UNKNOWN;
 
     /**
      * Abs expression for constant values.
@@ -4335,9 +4387,9 @@ aspect ConstantEvaluation {
      * @return Resulting constant value.
      */
     syn CValue FType.abs(CValue v) = CValue.UNKNOWN;
-    eq FRealType.abs(CValue v) = v.hasRealValue() ? new CValueReal(StrictMath.abs(v.realValue())) : CValue.UNKNOWN;
+    eq FRealType.abs(CValue v) = v.hasRealValue() ? CValueReal.valueOf(StrictMath.abs(v.realValue())) : CValue.UNKNOWN;
     eq FIntegerType.abs(CValue v) =
-            v.hasIntValue() ? new CValueInteger(StrictMath.abs(v.intValue())) : CValue.UNKNOWN;
+            v.hasIntValue() ? CValueInteger.valueOf(StrictMath.abs(v.intValue())) : CValue.UNKNOWN;
 
     /**
      * Sign expression for constant values.
@@ -4348,7 +4400,7 @@ aspect ConstantEvaluation {
     syn CValue FType.sign(CValue v) = CValue.UNKNOWN;
 
     eq FIntegerType.sign(CValue v) =
-            v.hasIntValue() ? new CValueInteger((int) StrictMath.signum(v.realValue())) : CValue.UNKNOWN;
+            v.hasIntValue() ? CValueInteger.valueOf((int) StrictMath.signum(v.realValue())) : CValue.UNKNOWN;
 
     /**
      * Ceil expression for constant values.
@@ -4358,10 +4410,10 @@ aspect ConstantEvaluation {
      */
     syn CValue FType.ceil(CValue v) = CValue.UNKNOWN;
 
-    eq FRealType.ceil(CValue v) = v.hasRealValue() ? new CValueReal(StrictMath.ceil(v.realValue())) : CValue.UNKNOWN;
+    eq FRealType.ceil(CValue v) = v.hasRealValue() ? CValueReal.valueOf(StrictMath.ceil(v.realValue())) : CValue.UNKNOWN;
 
     eq FIntegerType.ceil(CValue v) =
-            v.hasIntValue() ? new CValueInteger((int) StrictMath.ceil(v.realValue())) : CValue.UNKNOWN;
+            v.hasIntValue() ? CValueInteger.valueOf((int) StrictMath.ceil(v.realValue())) : CValue.UNKNOWN;
 
     /**
      * Truncation to zero for constant values.
@@ -4398,7 +4450,7 @@ aspect ConstantEvaluation {
         if (!v1.isBoolean() || !v2.isBoolean()) {
             return CValue.UNKNOWN;
         }
-        return new CValueBoolean(v1.booleanValue() && v2.booleanValue());
+        return CValueBoolean.valueOf(v1.booleanValue() && v2.booleanValue());
     }
 
     /**
@@ -4414,7 +4466,7 @@ aspect ConstantEvaluation {
         if (!v1.isBoolean() || !v2.isBoolean()) {
             return CValue.UNKNOWN;
         } 
-        return new CValueBoolean(v1.booleanValue() || v2.booleanValue());
+        return CValueBoolean.valueOf(v1.booleanValue() || v2.booleanValue());
     }
 
     /**
@@ -4424,7 +4476,7 @@ aspect ConstantEvaluation {
      * @return Resulting constant value.
      */
     syn CValue FType.not(CValue v) = CValue.UNKNOWN;
-    eq FBooleanType.not(CValue v) = v.isBoolean() ? new CValueBoolean(!v.booleanValue()) : CValue.UNKNOWN;
+    eq FBooleanType.not(CValue v) = v.isBoolean() ? CValueBoolean.valueOf(!v.booleanValue()) : CValue.UNKNOWN;
 
     /* Machine epsilon */
     public static double FRealType.MACHINE_EPSILON = 2.2204460492503131e-16;
@@ -4449,21 +4501,21 @@ aspect ConstantEvaluation {
         if (!v1.hasIntValue() || !v2.hasIntValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueBoolean(v1.intValue() == v2.intValue());
+        return CValueBoolean.valueOf(v1.intValue() == v2.intValue());
     }
 
     eq FRealType.equ(CValue v1, CValue v2) {
         if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueBoolean(almostZero(v1.realValue() - v2.realValue()));
+        return CValueBoolean.valueOf(almostZero(v1.realValue() - v2.realValue()));
     }
 
     eq FStringType.equ(CValue v1, CValue v2) {
         if (!v1.hasStringValue() || !v2.hasStringValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) == 0);
+        return CValueBoolean.valueOf(v1.stringValue().compareTo(v2.stringValue()) == 0);
     }
 
     eq CValueUnknown.equ(CValue v1, CValue v2) = CValue.UNKNOWN;
@@ -4479,21 +4531,21 @@ aspect ConstantEvaluation {
         if (!v1.hasIntValue() || !v2.hasIntValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueBoolean(v1.intValue() != v2.intValue());
+        return CValueBoolean.valueOf(v1.intValue() != v2.intValue());
     }
 
     eq FRealType.neq(CValue v1, CValue v2) {
         if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueBoolean(v1.realValue() != v2.realValue());
+        return CValueBoolean.valueOf(v1.realValue() != v2.realValue());
     }
 
     eq FStringType.neq(CValue v1, CValue v2) {
         if (!v1.hasStringValue() || !v2.hasStringValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) != 0);
+        return CValueBoolean.valueOf(v1.stringValue().compareTo(v2.stringValue()) != 0);
     }
 
     eq CValueUnknown.neq(CValue v1, CValue v2) = CValue.UNKNOWN;
@@ -4509,21 +4561,21 @@ aspect ConstantEvaluation {
         if (!v1.hasIntValue() || !v2.hasIntValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueBoolean(v1.intValue() >= v2.intValue());
+        return CValueBoolean.valueOf(v1.intValue() >= v2.intValue());
     }
 
     eq FRealType.geq(CValue v1, CValue v2) {
         if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueBoolean(almostGtZero(v1.realValue() - v2.realValue()));
+        return CValueBoolean.valueOf(almostGtZero(v1.realValue() - v2.realValue()));
     }
 
     eq FStringType.geq(CValue v1, CValue v2) {
         if (!v1.hasStringValue() || !v2.hasStringValue()) {
             return CValue.UNKNOWN;
         } 
-        return new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) >= 0);
+        return CValueBoolean.valueOf(v1.stringValue().compareTo(v2.stringValue()) >= 0);
     }
 
     eq CValueUnknown.geq(CValue v1, CValue v2) = CValue.UNKNOWN;
@@ -4539,21 +4591,21 @@ aspect ConstantEvaluation {
         if (!v1.hasIntValue() || !v2.hasIntValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueBoolean(v1.intValue() > v2.intValue());
+        return CValueBoolean.valueOf(v1.intValue() > v2.intValue());
     }
 
     eq FRealType.gt(CValue v1, CValue v2) {
         if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueBoolean(v1.realValue() > v2.realValue());
+        return CValueBoolean.valueOf(v1.realValue() > v2.realValue());
     }
 
     eq FStringType.gt(CValue v1, CValue v2) {
         if (!v1.hasStringValue() || !v2.hasStringValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) > 0);
+        return CValueBoolean.valueOf(v1.stringValue().compareTo(v2.stringValue()) > 0);
     }
 
     eq CValueUnknown.gt(CValue v1, CValue v2) = CValue.UNKNOWN;
@@ -4569,21 +4621,21 @@ aspect ConstantEvaluation {
         if (!v1.hasIntValue() || !v2.hasIntValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueBoolean(v1.intValue() <= v2.intValue());
+        return CValueBoolean.valueOf(v1.intValue() <= v2.intValue());
     }
 
     eq FRealType.leq(CValue v1, CValue v2) {
         if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         } 
-        return new CValueBoolean(almostLtZero(v1.realValue() - v2.realValue()));
+        return CValueBoolean.valueOf(almostLtZero(v1.realValue() - v2.realValue()));
     }
 
     eq FStringType.leq(CValue v1, CValue v2) {
         if (!v1.hasStringValue() || !v2.hasStringValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) <= 0);
+        return CValueBoolean.valueOf(v1.stringValue().compareTo(v2.stringValue()) <= 0);
     }
 
     eq CValueUnknown.leq(CValue v1, CValue v2) = CValue.UNKNOWN;
@@ -4599,25 +4651,38 @@ aspect ConstantEvaluation {
         if (!v1.hasIntValue() || !v2.hasIntValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueBoolean(v1.intValue() < v2.intValue());
+        return CValueBoolean.valueOf(v1.intValue() < v2.intValue());
     }
 
     eq FRealType.lt(CValue v1, CValue v2) {
         if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueBoolean(v1.realValue() < v2.realValue());
+        return CValueBoolean.valueOf(v1.realValue() < v2.realValue());
     }
 
     eq FStringType.lt(CValue v1, CValue v2) {
         if (!v1.hasStringValue() || !v2.hasStringValue()) {
             return CValue.UNKNOWN;
         }
-        return new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) < 0);
+        return CValueBoolean.valueOf(v1.stringValue().compareTo(v2.stringValue()) < 0);
     }
 
     eq CValueUnknown.lt(CValue v1, CValue v2) = CValue.UNKNOWN;
 
+    
+    public CValue CValue.absoluteValue() {
+        return this;
+    }
+    @Override
+    public CValue CValueReal.absoluteValue() {
+        return new CValueReal(Math.abs(realValue()));
+    }
+    @Override
+    public CValue CValueInteger.absoluteValue() {
+        return new CValueInteger(Math.abs(intValue()));
+    }
+    
 }
 
 aspect ArrayConstantEvaluation {
@@ -4876,16 +4941,16 @@ aspect SourceCeval {
     eq SrcAccessExp.ceval()          = new CValueUnknownAccess(getSrcAccess().name());
     eq SrcBooleanLitExpTrue.ceval()  = CValueBoolean.TRUE;
     eq SrcBooleanLitExpFalse.ceval() = CValueBoolean.FALSE;
-    eq SrcIntegerLitExp.ceval()      = new CValueInteger(Integer.parseInt(getUNSIGNED_INTEGER()));
-    eq SrcRealLitExp.ceval()         = new CValueReal(Double.parseDouble(getUNSIGNED_NUMBER()));
+    eq SrcIntegerLitExp.ceval()      = CValueInteger.valueOf(Integer.parseInt(getUNSIGNED_INTEGER()));
+    eq SrcRealLitExp.ceval()         = CValueReal.valueOf(Double.parseDouble(getUNSIGNED_NUMBER()));
     eq SrcArrayConstructor.ceval()   = cevalArray();
     eq SrcMatrix.ceval()             = cevalArray();
     eq SrcNegExp.ceval() {
         CValue value = getSrcExp().ceval();
         if (value.isInteger())
-            return new CValueInteger(-value.intValue());
+            return CValueInteger.valueOf(-value.intValue());
         else if (value.isReal())
-            return new CValueReal(-value.realValue());
+            return CValueReal.valueOf(-value.realValue());
         else
             return CValue.UNKNOWN;
     }
@@ -4974,7 +5039,7 @@ aspect VariableEvaluator {
     
     public class VariableEvaluator {
         public static final VariableEvaluator instance = new VariableEvaluator(true);
-        private boolean externalEvaluationEnabled;
+        private final boolean externalEvaluationEnabled;
         
         public VariableEvaluator(boolean externalEvaluationEnabled) {
             this.externalEvaluationEnabled = externalEvaluationEnabled;
@@ -4999,11 +5064,11 @@ aspect VariableEvaluator {
             return access.cevalUse(this);
         }
         
-        public AlgorithmEvaluator createAlgorithmEvaluator(AbstractOptionRegistry options, Map<CommonVariableDecl, CValue> values) {
+        public AlgorithmEvaluator createAlgorithmEvaluator(OptionRegistry options, Map<CommonVariableDecl, CValue> values) {
             return new AlgorithmEvaluator(externalEvaluationEnabled, options, values);
         }
         
-        public AlgorithmEvaluator createEmptyAlgorithmEvaluator(AbstractOptionRegistry options) {
+        public AlgorithmEvaluator createEmptyAlgorithmEvaluator(OptionRegistry options) {
             return new AlgorithmEvaluator(true, options, Collections.<CommonVariableDecl, CValue>emptyMap());
         }
         
@@ -5069,7 +5134,7 @@ aspect VariableEvaluator {
         }
         
         @Override
-        public AlgorithmEvaluator createAlgorithmEvaluator(AbstractOptionRegistry options, Map<CommonVariableDecl, CValue> values) {
+        public AlgorithmEvaluator createAlgorithmEvaluator(OptionRegistry options, Map<CommonVariableDecl, CValue> values) {
             return new PartialAlgorithmEvaluator(externalEvaluationEnabled(), options, values, this);
         }
         
@@ -5103,7 +5168,7 @@ aspect VariableEvaluator {
         }
         
         @Override
-        public AlgorithmEvaluator createAlgorithmEvaluator(AbstractOptionRegistry options, Map<CommonVariableDecl, CValue> values) {
+        public AlgorithmEvaluator createAlgorithmEvaluator(OptionRegistry options, Map<CommonVariableDecl, CValue> values) {
             if (this.values == null) {
                 this.values = values;
             }
@@ -5197,17 +5262,17 @@ aspect VariableEvaluator {
     
     public class AlgorithmEvaluator extends VariableEvaluator {
         
-        protected Map<CommonVariableDecl, CValue> values;
-        private AbstractOptionRegistry options;
+        protected final Map<CommonVariableDecl, CValue> values;
+        private final OptionRegistry options;
         
-        public AlgorithmEvaluator(boolean evaluateExternalEnabled, AbstractOptionRegistry options, Map<CommonVariableDecl, CValue> values) {
+        public AlgorithmEvaluator(boolean evaluateExternalEnabled, OptionRegistry options, Map<CommonVariableDecl, CValue> values) {
             super(evaluateExternalEnabled);
             this.values  = values;
             this.options = options;
         }
         
         public int externalEvaluation() {
-            return externalEvaluationEnabled() ? options.getIntegerOption("external_constant_evaluation") : 0;
+            return externalEvaluationEnabled() ? options.external_constant_evaluation.getValue() : 0;
         }
         
         @Override
@@ -5271,7 +5336,7 @@ aspect VariableEvaluator {
         protected PartialVariableEvaluator variableEvaluator;
         protected ArrayList<IfEvaluation> ifStack;
         
-        public PartialAlgorithmEvaluator(boolean evaluateExternalEnabled, AbstractOptionRegistry options,
+        public PartialAlgorithmEvaluator(boolean evaluateExternalEnabled, OptionRegistry options,
                 Map<CommonVariableDecl, CValue> values, PartialVariableEvaluator variableEvaluator) {
             super(evaluateExternalEnabled, options, values);
             this.variableEvaluator = variableEvaluator;
@@ -5288,7 +5353,7 @@ aspect VariableEvaluator {
         }
         
         @Override
-        public AlgorithmEvaluator createAlgorithmEvaluator(AbstractOptionRegistry options, Map<CommonVariableDecl, CValue> values) {
+        public AlgorithmEvaluator createAlgorithmEvaluator(OptionRegistry options, Map<CommonVariableDecl, CValue> values) {
             return variableEvaluator.createAlgorithmEvaluator(options, values);
         }
         

@@ -2367,6 +2367,8 @@ aspect FlatAPI {
     inh FClass FAccess.myFClass();
     inh FClass FFunctionDecl.myFClass();
     inh FClass FRecordDecl.myFClass();
+    inh FClass FDerivedType.myFClass();
+    inh FClass FEnumDecl.myFClass();
     inh FClass FAlgorithm.myFClass();
     inh FClass FAbstractEquation.myFClass();
     inh FClass FStatement.myFClass();

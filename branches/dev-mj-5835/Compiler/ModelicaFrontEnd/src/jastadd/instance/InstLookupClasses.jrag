@@ -257,18 +257,19 @@ aspect InstLookupClasses {
 
 
     syn lazy HashMap<String,SrcLibNode> InstProgramRoot.libraryMap() {
-        Program prog = ((SourceRoot) root()).getProgram();
+        Program prog = root().asSourceRoot().getProgram();
         HashMap<String,SrcLibNode> map = new HashMap<String,SrcLibNode>(prog.getNumSrcLibNode() * 4 / 3 + 1);
         for (SrcLibNode ln : prog.getSrcLibNodes()) {
-            if (!map.containsKey(ln.name())) {
-                map.put(ln.name(), ln);
+            String name = ln.name().toLowerCase();
+            if (!map.containsKey(name)) {
+                map.put(name, ln);
             }
         }
         return map;
     }
 
     syn lazy InstLookupResult<InstClassDecl> InstProgramRoot.lookupLibrary(String name) {
-        SrcLibNode ln = libraryMap().get(name);
+        SrcLibNode ln = libraryMap().get(name.toLowerCase());
         if (ln != null) {
             InstClassDecl icd = createInstClassDecl(ln);
             if (icd instanceof InstFullClassDecl || icd instanceof InstLibNode) {

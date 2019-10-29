@@ -144,7 +144,8 @@ public class MemorySpider {
     	
     	private Field field;
     	
-    	public Object perform(Field f, Object o) {
+    	@SuppressWarnings("deprecation")
+        public Object perform(Field f, Object o) {
     		field = f;
     		if (!f.isAccessible())
     			AccessController.doPrivileged(this);
