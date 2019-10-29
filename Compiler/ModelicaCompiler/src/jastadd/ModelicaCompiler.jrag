@@ -562,12 +562,12 @@ public class ModelicaCompiler implements LogContainer {
      * 
      * The dump will be saved in a file named <code>"node_count.txt"</code>.
      */
-    protected void dumpNodeCountFile() 
+    protected void dumpNodeCountFile(Root root)
             throws IOException {
         if (dumpMemoryUse) {
             String file = "node_count.txt";
             log.debug("Dumping node counts to '" + file + "'...");
-            ASTNode.dumpNodeCount(file);
+            root.dumpNodeCount(file);
         }
     }
 
@@ -1222,7 +1222,7 @@ public class ModelicaCompiler implements LogContainer {
         log.info("Flattening model...");
         icd.flattenInstClassDecl(fc);
         dumpMemoryUseFile(fc, "flat", true);
-        dumpNodeCountFile();
+        dumpNodeCountFile(icd.root());
         icd = null;
         ASTNode.endStep("flatten()");
         
@@ -2591,7 +2591,7 @@ public class ModulesSettings {
     }
     
     private static ArrayList<ModuleContributor> CONTRIBUTORS = new ArrayList<>();
-    private static HashMap<Module, String> libraryNames = new HashMap<>();
+    private HashMap<Module, String> libraryNames = new HashMap<>();
     
     public abstract static class ModuleContributor {
         public void addModule(ModulesSettings settings, OptionRegistry options) { }
