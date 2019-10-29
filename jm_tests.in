@@ -192,6 +192,8 @@ function python_tests() {
   print_name Python
   res=0
   case ${OUTPUT} in
+    echo python_test OUTPUT=${OUTPUT}
+    echo python_test TEST_DIR=${TEST_DIR}
     v)
       if build_jmodelica 2>&1 | log; then
         find_python_tests
@@ -264,7 +266,8 @@ function python_tests_v() {
     res=0
     for TEST in ${TESTS}; do
       echo ""
-      echo ${TEST} | sed -e 's!^.*jmodelica.!Running !'
+      echo "Running ${TEST}"
+      # echo ${TEST} | sed -e 's!^.*jmodelica.!Running !'
       nose_test ${TEST} \
       | log \
       || res=1
