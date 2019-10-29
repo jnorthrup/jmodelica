@@ -1605,7 +1605,12 @@ abstract FMinMaxExp : FBuiltInFunctionCall ::= X:FExp [Y:FExp];
 /**
  * String conversion operator.
  */
-FStringExp : FBuiltInFunctionCall ::= Value:FExp [MinimumLength:FExp] [LeftJustified:FExp] [SignificantDigits:FExp] [Format:FExp];
+FStringExp : FBuiltInFunctionCall ::= Value:FExp 
+                                      [MinimumLength:FExp] 
+                                      [LeftJustified:FExp] 
+                                      [SignificantDigits:FExp] 
+                                      [Format:FExp] 
+                                      /[CFormat:FExp]/;
 
 /**
  * Min built-in function.

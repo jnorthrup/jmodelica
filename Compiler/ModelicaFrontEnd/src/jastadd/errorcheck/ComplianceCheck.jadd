@@ -282,26 +282,16 @@ aspect ComplianceCheck {
     }
 
     public static final SimpleProblemProducer ASTNode.UNSUPPORTED_NON_FIXED_STRING_ARGUMENT =
-            new SimpleErrorProducer("UNSUPPORTED_NON_FIXED_STRING_ARGUMENT", ProblemKind.COMPLIANCE, "%s with higher than parameter variability is not supported");
+            new SimpleErrorProducer("UNSUPPORTED_NON_FIXED_STRING_ARGUMENT", ProblemKind.COMPLIANCE, 
+                    "Argument format of String operator is only supported as a fixed parameter expression.");
 
     public void FStringExp.complianceCheck(ErrorCheckType checkType) {
         super.complianceCheck(checkType);
-        boolean func = inFunction();
-        if (!func && hasMinimumLength()) {
-            getMinimumLength().markAsStructuralParameter(checkType);
-            if (!getMinimumLength().variability().parameterOrLess())
-                UNSUPPORTED_NON_FIXED_STRING_ARGUMENT.invoke(getMinimumLength(), "minimumLength");
+        if (hasFormat()) {
+            getFormat().markAsStructuralParameter(checkType);
+            if (!getFormat().variability().parameterOrLess())
+                UNSUPPORTED_NON_FIXED_STRING_ARGUMENT.invoke(getFormat());
         }
-        if (!func && hasLeftJustified()) {
-            getLeftJustified().markAsStructuralParameter(checkType);
-           if (!getLeftJustified().variability().parameterOrLess())
-               UNSUPPORTED_NON_FIXED_STRING_ARGUMENT.invoke(getLeftJustified(), "leftJustified");
-        }
-        if (!func && hasSignificantDigits()) {
-            getSignificantDigits().markAsStructuralParameter(checkType);
-            if (!getSignificantDigits().variability().parameterOrLess())
-                UNSUPPORTED_NON_FIXED_STRING_ARGUMENT.invoke(getSignificantDigits(), "significantDigits");
-       }
     }
 
     public static final SimpleProblemProducer ASTNode.ONLY_FMU_INTEGER_VARIABLES =
