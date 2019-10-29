@@ -191,9 +191,9 @@ function python_tests() {
   fi 
   print_name Python
   res=0
+  echo python_test OUTPUT=${OUTPUT}
+  echo python_test TEST_DIR=${TEST_DIR}
   case ${OUTPUT} in
-    echo python_test OUTPUT=${OUTPUT}
-    echo python_test TEST_DIR=${TEST_DIR}
     v)
       if build_jmodelica 2>&1 | log; then
         find_python_tests
