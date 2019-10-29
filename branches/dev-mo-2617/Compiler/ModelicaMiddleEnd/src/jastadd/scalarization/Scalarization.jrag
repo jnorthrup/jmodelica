@@ -733,6 +733,9 @@ aspect Scalarization {
             } else {
                 fv.setBindingExpOpt(new Opt());
             }
+            if (variability.parameterOrLess()){
+                inputOutput = CausalityConnectorPrefix.NONE;
+            }
             fv.setTypePrefixVariability(variability);
             fv.setCausalityConnectorPrefix(inputOutput);
             List<FAttribute> attrs = new List<FAttribute>();
