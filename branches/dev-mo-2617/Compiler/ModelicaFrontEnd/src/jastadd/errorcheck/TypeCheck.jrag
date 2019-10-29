@@ -199,6 +199,7 @@ aspect FlatTypeCheck {
             new SimpleErrorProducer("NON_FIXED_CONDITIONAL_GUARD", ProblemKind.SEMANTIC,
                     "The guard expression of a conditional component should have parameter or constant variability");
 
+    @Override
     public void InstAssignable.typeCheck(ErrorCheckType checkType) {
         FExp bexp = myBindingInstExp();
         boolean function = inFunction();
@@ -261,21 +262,6 @@ aspect FlatTypeCheck {
                         
                         typeCheckCell(expected, actual, bexp, unknownAllowed);
                     }
-                }
-            }
-        }
-        
-        if (hasConditionalAttribute()) {
-            FExp cond = getConditionalAttribute();
-            if (!cond.type().isUnknown()) {
-                if (!cond.type().isScalar()) 
-                    NON_SCALAR_CONDITIONAL_GUARD.invoke(this);
-                if (!cond.type().isBoolean()) 
-                    NON_BOOLEAN_CONDITIONAL_GUARD.invoke(this);
-                if (!cond.variability().parameterOrLess()) {
-                    NON_FIXED_CONDITIONAL_GUARD.invoke(this);
-                } else {
-                    cond.markAsStructuralParameter(checkType);
                 }
             }
         }

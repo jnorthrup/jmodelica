@@ -3146,7 +3146,7 @@ model ConditionalComponentTest8
 			description="Test flattening of conditional components.",
 			flatModel="
 fclass NameTests.ConditionalComponentTest8
- parameter Boolean b = false /* false */;
+ structural parameter Boolean b = false /* false */;
 
 end NameTests.ConditionalComponentTest8;
 ")})));
@@ -3177,7 +3177,7 @@ model ConditionalComponentTest9
 			description="Test flattening of conditional components.",
 			flatModel="
 fclass NameTests.ConditionalComponentTest9
- parameter Boolean b = false /* false */;
+ structural parameter Boolean b = false /* false */;
 
 end NameTests.ConditionalComponentTest9;
 ")})));
@@ -3379,6 +3379,67 @@ fclass NameTests.ConditionalComponentTest14
 end NameTests.ConditionalComponentTest14;
 ")})));
 end ConditionalComponentTest14;
+
+
+model ConditionalComponentTest15_Err
+    connector C
+        Real x;
+    end C;
+    
+    parameter Integer b[2] = {1,1};
+    C c if b;
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        description="Test of type checking of conditional composite component.",
+        errorMessage="
+2 errors found:
+
+Error at line 7, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
+  The guard expression of a conditional component should be a boolean expression
+
+Error at line 7, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
+  The guard expression of a conditional component should be a scalar expression
+")})));
+end ConditionalComponentTest15_Err;
+
+
+model ConditionalComponentTest16
+    connector C
+        Real x;
+    end C;
+    
+    parameter Boolean b = false;
+    C c if b;
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        description="Flattening conditional composite component",
+        flatModel="
+fclass NameTests.ConditionalComponentTest16
+ structural parameter Boolean b = false /* false */;
+end NameTests.ConditionalComponentTest16;
+")})));
+end ConditionalComponentTest16;
+
+
+model ConditionalComponentTest17
+    connector C
+        Real x;
+    end C;
+    
+    parameter Boolean b = true;
+    C c if b;
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        description="Flattening conditional composite component",
+        flatModel="
+fclass NameTests.ConditionalComponentTest17
+ structural parameter Boolean b = true /* true */;
+ potential Real c.x;
+end NameTests.ConditionalComponentTest17;
+")})));
+end ConditionalComponentTest17;
+
+
 
 model AttributeDot1
   Real x=1;

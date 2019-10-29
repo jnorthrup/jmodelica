@@ -851,8 +851,22 @@ aspect InstanceErrorCheck {
                 if (hasFArraySubscripts()) {
                     getFArraySubscripts().collectErrors(checkType);
                 }
-                if (hasConditionalAttribute())  {
-                    getConditionalAttribute().collectErrors(checkType);
+                if (hasConditionalAttribute()) {
+                    FExp cond = getConditionalAttribute();
+                    cond.collectErrors(checkType);
+                    if (!cond.type().isUnknown()) {
+                        if (!cond.type().isScalar()) {
+                            NON_SCALAR_CONDITIONAL_GUARD.invoke(this);
+                        }
+                        if (!cond.type().isBoolean()) {
+                            NON_BOOLEAN_CONDITIONAL_GUARD.invoke(this);
+                        }
+                        if (!cond.variability().parameterOrLess()) {
+                            NON_FIXED_CONDITIONAL_GUARD.invoke(this);
+                        } else {
+                            cond.markAsStructuralParameter(checkType);
+                        }
+                    }
                 }
                 if (!isDisabled() && hasInstModification()) {
                     getInstModification().collectErrors(checkType);
