@@ -2232,7 +2232,7 @@ public class ModelicaCompiler implements LogContainer {
     private void ModelicaCompiler.doCompileCCode(TargetObject target,  FClass fc) {
         if (target.getMakeFileFlag() != null) {
                 ASTNode.beginStep("compileCCode()");
-                String cFileName = fc.nameUnderscore();
+                String cFileName = cName(fc);
                 CCompilerDelegator ccompiler = getCCompiler();
                 CCompilerArguments ccArgs = new CCompilerArguments(cFileName, fc.myOptions(), target, fc.externalLibraries(), fc.externalLibraryDirectories(), 
                         fc.externalIncludeDirectories());
@@ -2242,6 +2242,10 @@ public class ModelicaCompiler implements LogContainer {
         }
         hookCodeCompiled();
      }
+
+    private String ModelicaCompiler.cName(FClass fc) {
+        return fc.nameUnderscore(); // Hook to facilitate extensions.
+    }
 
     /**
      * Calculates the destination directory for a packaged unit. If the specified destination is a file its directory
