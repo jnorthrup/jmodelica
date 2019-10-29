@@ -22,6 +22,7 @@
 %goal argument;
 %goal access_scalar;
 %goal subscript;
+%goal function_call_list;
 
 %header {:
  package $PARSER_PACKAGE$;
@@ -40,7 +41,6 @@
 :};
 
 %embed {:
-
     /**
      * Error reporting class that creates an error message and delegates reporting the 
      * message to a subclass.
@@ -1697,5 +1697,27 @@ SrcEndDecl end_decl
         String value = (String) END_ID.value;
         String id = value.substring(3, value.length()).trim();
         return new SrcEndDecl(id);
+    :}
+    ;
+
+//Extension 
+List function_calls_stmt =
+    function_call SEMICOLON                   {: return new List().add(function_call); :}
+  | function_calls_stmt function_call SEMICOLON    {: return function_calls_stmt.add(function_call); :}
+  ;
+
+List function_calls_vector =
+    function_call                              {: return new List().add(function_call); :}
+  | function_calls_vector COMMA function_call  {: return function_calls_vector.add(function_call); :}
+  ;
+
+SrcFunctionCallList function_call_list
+    = LBRACE function_calls_vector RBRACE
+    {:
+        return new SrcFunctionCallList(function_calls_vector);
+    :}
+    | function_calls_stmt
+    {:
+        return new SrcFunctionCallList(function_calls_stmt);
     :}
     ;
