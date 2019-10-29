@@ -2173,7 +2173,7 @@ public Set<V> AbstractBiPGraph.lookupVars(Iterable<FAccessExp> set) {
 aspect AugmentingPath {
     
     public abstract class AbstractBiPGraph {
-        private final static Enumerator visitEnumerator = new Enumerator(1);
+        private final Enumerator visitEnumerator = new Enumerator(1);
         public abstract class AugmentingPathAlgorithm<R> {
             private final R TRUE_VALUE;
 
