@@ -45,7 +45,7 @@ class LiveExternalFunction<K extends Variable<V, T>, V extends Value, T extends 
             time = System.currentTimeMillis() - time;
             compiler.log().debug("Finished evaluating live external function, time: " + time + "ms");
         } catch (ProcessCommunicator.AbortConstantEvaluationException e) {
-
+            // TODO What does this mean?
         } catch (ConstantEvaluationException e) {
             destroyProcess();
             throw e;
@@ -88,7 +88,12 @@ class LiveExternalFunction<K extends Variable<V, T>, V extends Value, T extends 
     public void destroyProcess() {
         if (com != null) {
             livingCachedExternals.remove(this);
-            com.destroy();
+            try {
+                com.teardown(100); // TODO Should we check the return value? 
+            } catch (IOException e) {
+                // TODO Do we need to do anything here?
+            }
+            com.destroy(); // TODO Do we still need to call destroy() if teardown is successful?
             com = null;
         }
     }
