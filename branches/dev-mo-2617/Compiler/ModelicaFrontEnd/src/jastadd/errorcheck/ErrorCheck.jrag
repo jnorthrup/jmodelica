@@ -861,7 +861,7 @@ aspect InstanceErrorCheck {
                         if (!cond.type().isBoolean()) {
                             NON_BOOLEAN_CONDITIONAL_GUARD.invoke(this);
                         }
-                        if (!cond.variability().parameterOrLess()) {
+                        if (!cond.variability().fixedParameterOrLess()) {
                             NON_FIXED_CONDITIONAL_GUARD.invoke(this);
                         } else {
                             cond.markAsStructuralParameter(checkType);
