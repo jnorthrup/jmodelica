@@ -173,4 +173,7 @@ aspect UtilInterface {
             interfacer.clean();
         }
     }
+
+    /* Used when unit testing. */
+    public final Map<String, String> UtilInterface.unitTempMap = new HashMap<>();
 }
