@@ -66,7 +66,6 @@ endif
 build-python-packages:
 if PYTHON_ENABLED
 if WITH_OPENMP
-	mkdir -p $(assimulo_build_dir); \
 	cd $(assimulo_src_dir)/../build_externals/build/assimulo; \
 	case $(build) in \
 	*-cygwin*) \
@@ -76,7 +75,7 @@ if WITH_OPENMP
 	*) \
 	ASSIMULO_USER_CONFIG=../../configurations/Assimulo/unix/config;; \
 	esac
-    make install USER_CONFIG=$(ASSIMULO_USER_CONFIG) JM_HOME=$(abs_top_srcdir) BUILD_DIR=$(abs_builddir)
+	make install USER_CONFIG=$(ASSIMULO_USER_CONFIG) JM_HOME=$(abs_top_srcdir) BUILD_DIR=$(abs_builddir)
 if JM_WIN64
 if WITH_PYTHON64
 	mkdir -p $(assimulo_build_dir64); \
