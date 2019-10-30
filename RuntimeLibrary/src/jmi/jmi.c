@@ -606,7 +606,7 @@ int jmi_init_eval_dependent(jmi_t* jmi) {
 }
 
 int jmi_destruct_external_objects(jmi_t* jmi) {
-    return jmi_generic_func(jmi, jmi_destruct_external_objs);
+    return jmi_generic_func(jmi, model_destruct_external_objects);
 }
 
 int jmi_init_delay_blocks(jmi_t* jmi) {
