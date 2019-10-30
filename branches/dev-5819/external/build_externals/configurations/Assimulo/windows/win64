@@ -16,11 +16,9 @@
 #	see <http://www.gnu.org/licenses/> or 
 #	<http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 
-# mkfile_path is the path to this file
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfile_dir := $(dir $(mkfile_path))
 include $(mkfile_dir)/win
-
 BITNESS=64
 FORCE_32_BIT=false
 EXTRA_SETUP_ARGS=--no-msvcr=true --with_openmp=True

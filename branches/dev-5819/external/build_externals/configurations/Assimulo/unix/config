@@ -1,3 +1,5 @@
+-with_openmp=True --superlu-home=$(abs_builddir)/superlu_build/ --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --prefix=$(assimulo_install_dir)
+
 BITNESS=64
 FORCE_32_BIT=false
 EXTRA_SETUP_ARGS=--with_openmp=True 
