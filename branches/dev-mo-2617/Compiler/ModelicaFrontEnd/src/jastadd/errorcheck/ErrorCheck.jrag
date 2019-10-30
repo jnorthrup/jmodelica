@@ -855,10 +855,7 @@ aspect InstanceErrorCheck {
                     FExp cond = getConditionalAttribute();
                     cond.collectErrors(checkType);
                     if (!cond.type().isUnknown()) {
-                        if (!cond.type().isScalar()) {
-                            NON_SCALAR_CONDITIONAL_GUARD.invoke(this);
-                        }
-                        if (!cond.type().isBoolean()) {
+                        if (!cond.type().isScalar() || !cond.type().isBoolean()) {
                             NON_BOOLEAN_CONDITIONAL_GUARD.invoke(this);
                         }
                         if (!cond.variability().fixedParameterOrLess()) {

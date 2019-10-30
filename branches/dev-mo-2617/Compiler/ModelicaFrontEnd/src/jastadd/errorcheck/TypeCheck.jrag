@@ -189,12 +189,9 @@ aspect FlatTypeCheck {
     public static final ErrorProducerUnlessDisabled ASTNode.ARRAY_SIZE_MISMATCH_IN_MODIFICATION_DUE_TO_EACH =
             new ErrorProducerUnlessDisabled("ARRAY_SIZE_MISMATCH_IN_MODIFICATION_DUE_TO_EACH", ProblemKind.SEMANTIC,
                     "Array size mismatch in modification of %s, expected size is (due to 'each') %s and size of binding expression is %s");
-    public static final SimpleProblemProducer ASTNode.NON_SCALAR_CONDITIONAL_GUARD =
-            new SimpleErrorProducer("NON_SCALAR_CONDITIONAL_GUARD", ProblemKind.SEMANTIC,
-                    "The guard expression of a conditional component should be a scalar expression");
     public static final SimpleProblemProducer ASTNode.NON_BOOLEAN_CONDITIONAL_GUARD =
             new SimpleErrorProducer("NON_BOOLEAN_CONDITIONAL_GUARD", ProblemKind.SEMANTIC,
-                    "The guard expression of a conditional component should be a Boolean expression");
+                    "The guard expression of a conditional component should be a scalar Boolean expression");
     public static final SimpleProblemProducer ASTNode.NON_FIXED_CONDITIONAL_GUARD =
             new SimpleErrorProducer("NON_FIXED_CONDITIONAL_GUARD", ProblemKind.SEMANTIC,
                     "The guard expression of a conditional component should have parameter or constant variability");

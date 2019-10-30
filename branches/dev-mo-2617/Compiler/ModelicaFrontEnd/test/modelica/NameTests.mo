@@ -3023,7 +3023,7 @@ annotation(__JModelica(UnitTesting(tests={
 
 
 Error at line 2, column 3, in file '...', NON_BOOLEAN_CONDITIONAL_GUARD:
-  The guard expression of a conditional component should be a Boolean expression
+  The guard expression of a conditional component should be a scalar Boolean expression
 ")})));
 end ConditionalComponentTest1_Err;
 
@@ -3031,15 +3031,15 @@ model ConditionalComponentTest2_Err
   parameter Boolean b[2] = {true,true};
   parameter Real x = 1 if b;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConditionalComponentTest2_Err",
-            description="Test of type checking of conditional components.",
-            errorMessage="
-1 errors found:
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="ConditionalComponentTest2_Err",
+        description="Test of type checking of conditional components.",
+        errorMessage="
 
-Error at line 3, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
-  The guard expression of a conditional component should be a scalar expression
+
+Error at line 3, column 3, in file '...', NON_BOOLEAN_CONDITIONAL_GUARD:
+  The guard expression of a conditional component should be a scalar Boolean expression
 ")})));
 end ConditionalComponentTest2_Err;
 
@@ -3055,10 +3055,7 @@ annotation(__JModelica(UnitTesting(tests={
 
 
 Error at line 3, column 3, in file '...', NON_BOOLEAN_CONDITIONAL_GUARD:
-  The guard expression of a conditional component should be a Boolean expression
-
-Error at line 3, column 3, in file '...', NON_SCALAR_CONDITIONAL_GUARD:
-  The guard expression of a conditional component should be a scalar expression
+  The guard expression of a conditional component should be a scalar Boolean expression
 ")})));
 end ConditionalComponentTest3_Err;
 
@@ -3396,10 +3393,7 @@ annotation(__JModelica(UnitTesting(tests={
 
 
 Error at line 7, column 5, in file '...', NON_BOOLEAN_CONDITIONAL_GUARD:
-  The guard expression of a conditional component should be a Boolean expression
-
-Error at line 7, column 5, in file '...', NON_SCALAR_CONDITIONAL_GUARD:
-  The guard expression of a conditional component should be a scalar expression
+  The guard expression of a conditional component should be a scalar Boolean expression
 ")})));
 end ConditionalComponentTest15_Err;
 
