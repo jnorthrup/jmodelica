@@ -194,7 +194,7 @@ aspect FlatTypeCheck {
                     "The guard expression of a conditional component should be a scalar expression");
     public static final SimpleProblemProducer ASTNode.NON_BOOLEAN_CONDITIONAL_GUARD =
             new SimpleErrorProducer("NON_BOOLEAN_CONDITIONAL_GUARD", ProblemKind.SEMANTIC,
-                    "The guard expression of a conditional component should be a boolean expression");
+                    "The guard expression of a conditional component should be a Boolean expression");
     public static final SimpleProblemProducer ASTNode.NON_FIXED_CONDITIONAL_GUARD =
             new SimpleErrorProducer("NON_FIXED_CONDITIONAL_GUARD", ProblemKind.SEMANTIC,
                     "The guard expression of a conditional component should have parameter or constant variability");

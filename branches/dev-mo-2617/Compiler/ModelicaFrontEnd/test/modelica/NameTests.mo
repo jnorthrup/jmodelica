@@ -3015,15 +3015,15 @@ end IndexLookup2;
 model ConditionalComponentTest1_Err
   parameter Real x = 1 if 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConditionalComponentTest1_Err",
-            description="Test of type checking of conditional components.",
-            errorMessage="
-1 errors found:
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="ConditionalComponentTest1_Err",
+        description="Test of type checking of conditional components.",
+        errorMessage="
 
-Error at line 2, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
-  The guard expression of a conditional component should be a boolean expression
+
+Error at line 2, column 3, in file '...', NON_BOOLEAN_CONDITIONAL_GUARD:
+  The guard expression of a conditional component should be a Boolean expression
 ")})));
 end ConditionalComponentTest1_Err;
 
@@ -3047,17 +3047,17 @@ model ConditionalComponentTest3_Err
   parameter Integer b[2] = {1,1};
   parameter Real x = 1 if b;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConditionalComponentTest3_Err",
-            description="Test of type checking of conditional components.",
-            errorMessage="
-2 errors found:
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="ConditionalComponentTest3_Err",
+        description="Test of type checking of conditional components.",
+        errorMessage="
 
-Error at line 3, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
-  The guard expression of a conditional component should be a boolean expression
 
-Error at line 3, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
+Error at line 3, column 3, in file '...', NON_BOOLEAN_CONDITIONAL_GUARD:
+  The guard expression of a conditional component should be a Boolean expression
+
+Error at line 3, column 3, in file '...', NON_SCALAR_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a scalar expression
 ")})));
 end ConditionalComponentTest3_Err;
@@ -3390,14 +3390,15 @@ model ConditionalComponentTest15_Err
     C c if b;
 annotation(__JModelica(UnitTesting(tests={
     ErrorTestCase(
+        name="ConditionalComponentTest15_Err",
         description="Test of type checking of conditional composite component.",
         errorMessage="
-2 errors found:
 
-Error at line 7, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
-  The guard expression of a conditional component should be a boolean expression
 
-Error at line 7, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
+Error at line 7, column 5, in file '...', NON_BOOLEAN_CONDITIONAL_GUARD:
+  The guard expression of a conditional component should be a Boolean expression
+
+Error at line 7, column 5, in file '...', NON_SCALAR_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a scalar expression
 ")})));
 end ConditionalComponentTest15_Err;
