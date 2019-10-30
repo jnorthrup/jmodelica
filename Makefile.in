@@ -1076,13 +1076,12 @@ build-python-packages:
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	cd $(assimulo_src_dir)/../build_externals/build/assimulo; \
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	case $(build) in \
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	*-cygwin*) \
-@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	ASSIMULO_USER_CONFIG=../../configurations/Assimulo/windows/win32_cygwin_py2;; \
+@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	make install USER_CONFIG=../../configurations/Assimulo/windows/win32_cygwin_py2 JM_HOME=$(abs_top_srcdir) BUILD_DIR=$(abs_builddir);; \
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	*-mingw*) \
-@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	ASSIMULO_USER_CONFIG=../../configurations/Assimulo/windows/$(ASSIMULO_CONFIG);; \
+@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	make install USER_CONFIG=../../configurations/Assimulo/windows/$(ASSIMULO_CONFIG) JM_HOME=$(abs_top_srcdir) BUILD_DIR=$(abs_builddir) ;; \
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	*) \
-@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	ASSIMULO_USER_CONFIG=../../configurations/Assimulo/unix/config;; \
+@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	make install USER_CONFIG=../../configurations/Assimulo/unix/config JM_HOME=$(abs_top_srcdir) BUILD_DIR=$(abs_builddir);; \
 @PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	esac
-@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@	make install USER_CONFIG=$(ASSIMULO_USER_CONFIG) JM_HOME=$(abs_top_srcdir) BUILD_DIR=$(abs_builddir)
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@@WITH_PYTHON64_TRUE@	mkdir -p $(assimulo_build_dir64); \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@@WITH_PYTHON64_TRUE@	cd $(assimulo_src_dir)/..; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_OPENMP_TRUE@@WITH_PYTHON64_TRUE@	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir64); \
