@@ -99,8 +99,8 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         this.mutability = mutability;
         this.parent = parent;
         valueAnnotation_cacheComputed = isImmutable();
-        subNodes_cache = isImmutable() ? Collections.emptyList() : new ArrayList<>();
-        subNodesNameMap_cache = isImmutable() ? Collections.emptyMap() : new HashMap<>();
+        subNodes_cache = isImmutable() ? Collections.<T>emptyList() : new ArrayList<>();
+        subNodesNameMap_cache = isImmutable() ? Collections.<String, T>emptyMap() : new HashMap<>();
         List<String> l = Collections.emptyList();
         List<String> a = new ArrayList<>();
         if (!isImmutable()) {
