@@ -1,13 +1,25 @@
 package org.jmodelica.util.annotations.mock;
 
+import org.jmodelica.util.annotations.AnnotationProvider;
 import org.jmodelica.util.annotations.GenericAnnotationNode;
 import org.jmodelica.util.values.Evaluable;
 
 public class DummyAnnotationNode extends GenericAnnotationNode<DummyAnnotationNode, DummyAnnotProvider, Evaluable> {
 
-    private static DummyAnnotationNode ambiguousNode = new DummyAnnotationNode("Ambiguous", null, null);
+    private static DummyAnnotationNode ambiguousNode = new DummyAnnotationNode(null, null, null, Mutability.IMMUTABLE);
+
+    /** Creates a mutable dummy annotation.
+     * See {@link GenericAnnotationNode#GenericAnnotationNode(String, AnnotationProvider, GenericAnnotationNode)}
+     */
     public DummyAnnotationNode(String name, DummyAnnotProvider node, DummyAnnotationNode parent) {
         super(name, node, parent);
+    }
+
+    /** Creates a dummy annotation.
+     * See {@link GenericAnnotationNode#GenericAnnotationNode(String, AnnotationProvider, GenericAnnotationNode, Mutability)}
+     */
+    public DummyAnnotationNode(String name, DummyAnnotProvider node, DummyAnnotationNode parent, Mutability mutability) {
+        super(name, node, parent, mutability);
     }
 
     /**

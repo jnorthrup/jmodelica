@@ -105,14 +105,24 @@ aspect SrcAnnotations {
      */
     public class SrcAnnotationNode extends GenericAnnotationNode<SrcAnnotationNode, SrcAnnotationProvider, SrcExp> {
         
-        public static final SrcAnnotationNode AMBIGUOUS_ANNOTATION =  new SrcAnnotationNode(null, null, null,
-                SrcAnnotationNode.defaultEvaluator());
+        public static final SrcAnnotationNode AMBIGUOUS_ANNOTATION =  new SrcAnnotationNode(null, null, null, SrcAnnotationNode.defaultEvaluator(), Mutability.IMMUTABLE);
         
         private Evaluator<SrcExp> evaluator;
-        
+
+        /** Creates a mutable source annotation.
+         * See {@link GenericAnnotationNode#GenericAnnotationNode(String, AnnotationProvider, GenericAnnotationNode)}
+         */
         protected SrcAnnotationNode(String name, SrcAnnotationProvider node, SrcAnnotationNode parent,
                 Evaluator<SrcExp> evaluator) {
             super(name, node, parent);
+            this.evaluator = evaluator;
+        }
+
+        /** Creates a source annotation.
+         * See {@link GenericAnnotationNode#GenericAnnotationNode(String, AnnotationProvider, GenericAnnotationNode, Mutability)}
+         */
+        protected SrcAnnotationNode(String name, SrcAnnotationProvider node, SrcAnnotationNode parent, Evaluator<SrcExp> evaluator, Mutability mutability) {
+            super(name, node, parent, mutability);
             this.evaluator = evaluator;
         }
 
