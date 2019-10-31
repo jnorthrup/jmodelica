@@ -1424,7 +1424,7 @@ class Test_FMI_ODE_2:
         
         res = model.simulate(final_time=1.5,options=opts)
         
-        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3, res.final("J1.w")
     
     @testattr(stddist_base = True)
     def test_cc_with_sparse(self):
@@ -1438,7 +1438,7 @@ class Test_FMI_ODE_2:
         
         res = model.simulate(final_time=1.5,options=opts)
         
-        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4, res.final("J1.w")
     
     @testattr(stddist_base = True)
     def test_with_jacobian(self):
@@ -1450,7 +1450,7 @@ class Test_FMI_ODE_2:
         
         res = model.simulate(final_time=1.5,options=opts)
         print res.final("J1.w")
-        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4, res.final("J1.w")
         assert res.solver.statistics["nfcnjacs"] > 0
         
         opts["with_jacobian"] = True
@@ -1458,7 +1458,7 @@ class Test_FMI_ODE_2:
     
         res = model.simulate(final_time=1.5,options=opts)
         print res.final("J1.w")
-        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4, res.final("J1.w")
         assert res.solver.statistics["nfcnjacs"] == 0
         
         opts["CVode_options"]["usejac"] = False
@@ -1466,7 +1466,7 @@ class Test_FMI_ODE_2:
     
         res = model.simulate(final_time=1.5,options=opts)
         print res.final("J1.w")
-        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4, res.final("J1.w")
         assert res.solver.statistics["nfcnjacs"] > 0
         
         opts["with_jacobian"] = False
@@ -1474,7 +1474,7 @@ class Test_FMI_ODE_2:
     
         res = model.simulate(final_time=1.5,options=opts)
         print res.final("J1.w")
-        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4, res.final("J1.w")
         assert res.solver.statistics["nfcnjacs"] > 0
 
     @testattr(stddist_full = True)
@@ -1587,7 +1587,7 @@ class Test_FMI_ODE:
         
         res = model.simulate(final_time=1.5,options=opts)
         
-        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4, res.final("J1.w")
 
     @testattr(stddist_full = True)
     def test_reset_internal_variables(self):
@@ -1623,7 +1623,7 @@ class Test_FMI_ODE:
         
         res = model.simulate(final_time=1.5,options=opts)
         
-        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3, res.final("J1.w")
     
     @testattr(stddist_base = True)
     def test_cc_with_dopri(self):
@@ -1633,7 +1633,7 @@ class Test_FMI_ODE:
         
         res = model.simulate(final_time=1.5,options=opts)
         
-        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3, res.final("J1.w")
         
     @testattr(stddist_base = True)
     def test_cc_with_lsodar(self):
@@ -1644,7 +1644,7 @@ class Test_FMI_ODE:
         
         res = model.simulate(final_time=1.5,options=opts)
         
-        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3, res.final("J1.w")
         
     @testattr(stddist_base = True)
     def test_cc_with_rodas(self):
@@ -1655,7 +1655,7 @@ class Test_FMI_ODE:
         
         res = model.simulate(final_time=1.5,options=opts)
         
-        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3, res.final("J1.w")
         
     @testattr(stddist_base = True)
     def test_cc_with_impliciteuler(self):
