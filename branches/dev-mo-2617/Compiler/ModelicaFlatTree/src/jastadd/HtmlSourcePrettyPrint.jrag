@@ -1,4 +1,7 @@
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.InvalidPathException;
 
 import beaver.Symbol;
 
@@ -275,15 +278,20 @@ aspect HtmlSourcePrettyPrint {
 		}
 	}
 	
-	private static String BaseNode.cropAbsolutePath(String path){
-		String p = path;
-		String dir = System.getProperty("user.dir");
-		try {
-			if (p.substring(0, dir.lastIndexOf("\\")).equals(dir.substring(0, dir.lastIndexOf("\\")))) {
-			   	p = p.substring(dir.lastIndexOf("\\") + 1);
-			}
-		} catch (IndexOutOfBoundsException e) {}
-		return p;
+    private static String BaseNode.cropAbsolutePath(String path) {
+        try {
+            Path p = Paths.get(path);
+            if (p.isAbsolute()) {
+                Path cwd = Paths.get("").toAbsolutePath();
+                if (p.startsWith(cwd)) {
+                    p = cwd.relativize(p);
+                }
+            }
+            return p.toString();
+        } catch (InvalidPathException e) {
+            // Incoming path is invalid, so we can't really process it
+            return path;
+        }
 	}
 	
 	public void FAbstractEquation.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
