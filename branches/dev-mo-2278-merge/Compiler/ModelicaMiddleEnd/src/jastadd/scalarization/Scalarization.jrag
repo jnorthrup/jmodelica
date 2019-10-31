@@ -618,23 +618,23 @@ aspect Scalarization {
      */
     public class ScalarizingVariableInstance {
         
-        private TypePrefixVariability variability; 
+        private final TypePrefixVariability variability; 
         
-        private VisibilityType visibility;
+        private final VisibilityType visibility;
         
         // Binding expression
-        private FExp bExp;
+        private final FExp bExp;
         
         // (Mapped) attributes of this variable
-        private Map<String, FAttribute> mattrs; 
+        private final Map<String, FAttribute> mattrs; 
         
         // Full name of this variable
-        private String name;
+        private final String name;
         
         // input/output prefix of top-level variable
-        private CausalityConnectorPrefix inputOutput;
+        private final CausalityConnectorPrefix inputOutput;
         
-        private Index index;
+        private final Index index;
         
         private ScalarizingVariableInstance(String name, Map<String, FAttribute> mattrs, FExp be,
                 TypePrefixVariability variability, VisibilityType visibility, CausalityConnectorPrefix inputOutput, Index i)  {
@@ -644,7 +644,9 @@ aspect Scalarization {
             this.mattrs = mattrs;
             this.variability = variability;
             this.visibility = visibility;
-            this.inputOutput = inputOutput;
+            /* If we have a record with input/output prefix that contains a parameter,
+             * that parameter should not inherit the input/output prefix */
+            this.inputOutput = variability.parameterOrLess() ? CausalityConnectorPrefix.NONE : inputOutput;
         }
         
         private ScalarizingVariableInstance(String name, List<FAttribute> attrs, FExp be,
@@ -732,9 +734,6 @@ aspect Scalarization {
                 }
             } else {
                 fv.setBindingExpOpt(new Opt());
-            }
-            if (variability.parameterOrLess()){
-                inputOutput = CausalityConnectorPrefix.NONE;
             }
             fv.setTypePrefixVariability(variability);
             fv.setCausalityConnectorPrefix(inputOutput);
