@@ -72,6 +72,9 @@ class Test_CoupledFMUModelME2:
         model_cc_1 = load_fmu(Test_CoupledFMUModelME2.cc_name)
         model_cc_2 = load_fmu(Test_CoupledFMUModelME2.cc_name)
         
+        model_cc_1.set("sin2.phase", 1.57)
+        model_cc_2.set("sin2.phase", 1.57)
+        
         models = [("First", model_cc_1), ("Second", model_cc_2)]
         connections = []
         
@@ -81,7 +84,7 @@ class Test_CoupledFMUModelME2:
         
         nose.tools.assert_almost_equal(res.final("time"),1.5)
         nose.tools.assert_almost_equal(res.final("First.J1.w"),res.final("Second.J1.w"))
-        nose.tools.assert_almost_equal(res.final("First.J1.w"), 3.2501079, places=3)
+        nose.tools.assert_almost_equal(res.final("First.J1.w"), 3.2501079, places=2)
         
         coupled.reset()
         
@@ -89,7 +92,7 @@ class Test_CoupledFMUModelME2:
         
         nose.tools.assert_almost_equal(res.final("time"),1.5)
         nose.tools.assert_almost_equal(res.final("First.J1.w"),res.final("Second.J1.w"))
-        nose.tools.assert_almost_equal(res.final("First.J1.w"), 3.2501079, places=3)
+        nose.tools.assert_almost_equal(res.final("First.J1.w"), 3.2501079, places=2)
 
     @testattr(stddist_full = True)
     def test_get_set_real(self):

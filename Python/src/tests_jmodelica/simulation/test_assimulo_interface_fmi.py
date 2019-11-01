@@ -1422,6 +1422,7 @@ class Test_FMI_ODE_2:
         opts = model.simulate_options()
         opts["solver"] = "Radau5ODE"
         
+        model.set("sin2.phase", 1.57)
         res = model.simulate(final_time=1.5,options=opts)
         
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3, res.final("J1.w")
@@ -1436,6 +1437,7 @@ class Test_FMI_ODE_2:
         opts["CVode_options"]["rtol"] = 1e-7
         opts["CVode_options"]["linear_solver"] = "SPARSE"
         
+        model.set("sin2.phase", 1.57)
         res = model.simulate(final_time=1.5,options=opts)
         
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4, res.final("J1.w")
@@ -1448,6 +1450,7 @@ class Test_FMI_ODE_2:
         opts["CVode_options"]["rtol"] = 1e-7
         assert opts["with_jacobian"] == "Default"
         
+        model.set("sin2.phase", 1.57)
         res = model.simulate(final_time=1.5,options=opts)
         print res.final("J1.w")
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4, res.final("J1.w")
@@ -1455,7 +1458,8 @@ class Test_FMI_ODE_2:
         
         opts["with_jacobian"] = True
         model.reset()
-    
+        
+        model.set("sin2.phase", 1.57)
         res = model.simulate(final_time=1.5,options=opts)
         print res.final("J1.w")
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4, res.final("J1.w")
@@ -1463,7 +1467,8 @@ class Test_FMI_ODE_2:
         
         opts["CVode_options"]["usejac"] = False
         model.reset()
-    
+        
+        model.set("sin2.phase", 1.57)
         res = model.simulate(final_time=1.5,options=opts)
         print res.final("J1.w")
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4, res.final("J1.w")
@@ -1471,7 +1476,8 @@ class Test_FMI_ODE_2:
         
         opts["with_jacobian"] = False
         model.reset()
-    
+        
+        model.set("sin2.phase", 1.57)
         res = model.simulate(final_time=1.5,options=opts)
         print res.final("J1.w")
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4, res.final("J1.w")
@@ -1585,6 +1591,7 @@ class Test_FMI_ODE:
         opts["solver"] = "CVode"
         opts["CVode_options"]["rtol"] = 1e-7
         
+        model.set("sin2.phase", 1.57)
         res = model.simulate(final_time=1.5,options=opts)
         
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4, res.final("J1.w")
@@ -1621,6 +1628,7 @@ class Test_FMI_ODE:
         opts = model.simulate_options()
         opts["solver"] = "Radau5ODE"
         
+        model.set("sin2.phase", 1.57)
         res = model.simulate(final_time=1.5,options=opts)
         
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3, res.final("J1.w")
@@ -1631,6 +1639,7 @@ class Test_FMI_ODE:
         opts = model.simulate_options()
         opts["solver"] = "Dopri5"
         
+        model.set("sin2.phase", 1.57)
         res = model.simulate(final_time=1.5,options=opts)
         
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3, res.final("J1.w")
@@ -1642,6 +1651,7 @@ class Test_FMI_ODE:
         opts["solver"] = "LSODAR"
         opts["LSODAR_options"]["rtol"] = 1e-6
         
+        model.set("sin2.phase", 1.57)
         res = model.simulate(final_time=1.5,options=opts)
         
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3, res.final("J1.w")
@@ -1653,6 +1663,7 @@ class Test_FMI_ODE:
         opts["solver"] = "RodasODE"
         opts["RodasODE_options"]["rtol"] = 1e-6
         
+        model.set("sin2.phase", 1.57)
         res = model.simulate(final_time=1.5,options=opts)
         
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3, res.final("J1.w")
