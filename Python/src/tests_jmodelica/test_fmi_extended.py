@@ -203,12 +203,16 @@ class Test_FMUModelME1Extended:
     @testattr(stddist_full = True)
     def test_version(self):
         rlc  = FMUModelME1Extended(Test_FMUModelME1Extended.rlc_circuit)
-        assert rlc._get_version() == '1.0'
+        rlc_version = rlc._get_version()
+        expected = '1.0'
+        assert rlc_version == expected, "EXPECTED: {}\nACTUAL:{}".format(expected, rlc_version)
 
     @testattr(stddist_full = True)
     def test_valid_platforms(self):
         rlc  = FMUModelME1Extended(Test_FMUModelME1Extended.rlc_circuit)
-        assert rlc._get_types_platform() == 'standard32'
+        rlc_platform = rlc._get_types_platform()
+        expected = 'standard32'
+        assert rlc_platform == expected, "EXPECTED: {}\nACTUAL:{}".format(expected, rlc_platform)
 
     @testattr(stddist_full = True)
     def test_simulation_with_reset_cs_2(self):
