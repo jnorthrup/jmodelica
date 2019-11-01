@@ -3435,6 +3435,23 @@ end NameTests.ConditionalComponentTest17;
 end ConditionalComponentTest17;
 
 
+model ConditionalComponentTest18_Err
+    parameter Boolean b(start = false, fixed = false);
+    Real x if b;
+    Real y if time > 5;
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        description="Checking that conditional guard is a fixed parameter expression.",
+        errorMessage="
+Error at line 3, column 5, in file '...', NON_FIXED_CONDITIONAL_GUARD:
+  The guard expression of a conditional component must be a fixed parameter expression
+Error at line 4, column 5, in file '...', NON_FIXED_CONDITIONAL_GUARD:
+  The guard expression of a conditional component must be a fixed parameter expression
+
+")})));
+end ConditionalComponentTest18_Err;
+
+
 
 model AttributeDot1
   Real x=1;
