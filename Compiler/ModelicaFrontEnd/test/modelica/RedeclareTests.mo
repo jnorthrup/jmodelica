@@ -6618,13 +6618,13 @@ model RedeclareConditional1
     
     A a(use_b = false, redeclare C b);
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclareConditional1",
-            description="Redeclaring inactive conditional as modification",
-            flatModel="
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="Misc_RedeclareConditional1",
+        description="Redeclaring inactive conditional as modification",
+        flatModel="
 fclass RedeclareTests.Misc.RedeclareConditional1
- parameter Boolean a.use_b = false /* false */;
+ structural parameter Boolean a.use_b = false /* false */;
 end RedeclareTests.Misc.RedeclareConditional1;
 ")})));
 end RedeclareConditional1;
@@ -6652,13 +6652,13 @@ model RedeclareConditional2
     
     D d;
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclareConditional2",
-            description="Redeclaring inactive conditional as element",
-            flatModel="
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="Misc_RedeclareConditional2",
+        description="Redeclaring inactive conditional as element",
+        flatModel="
 fclass RedeclareTests.Misc.RedeclareConditional2
- parameter Boolean d.use_b = false /* false */;
+ structural parameter Boolean d.use_b = false /* false */;
 end RedeclareTests.Misc.RedeclareConditional2;
 ")})));
 end RedeclareConditional2;
