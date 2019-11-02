@@ -13651,7 +13651,7 @@ void func_Modelica_Math_Matrices_solve_def0(jmi_array_t* A_a, jmi_array_t* b_a, 
     }
     func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def1(A_a, b_a, x_a, &info_v);
     if (COND_EXP_EQ(info_v, 0.0, JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
-        jmi_assert_failed(\"Solving a linear system of equations with function\\n\\\"Matrices.solve\\\" is not possible, because the system has either\\nno or infinitely many solutions (A is singular).\", JMI_ASSERT_ERROR);
+        jmi_assert_failed("Solving a linear system of equations with function\n\"Matrices.solve\" is not possible, because the system has either\nno or infinitely many solutions (A is singular).", JMI_ASSERT_ERROR);
     }
     JMI_DYNAMIC_FREE()
     return;
@@ -13661,6 +13661,8 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def1(jmi_array_t* A_a, jmi_arr
     JMI_DYNAMIC_INIT()
     JMI_ARR(HEAP, jmi_real_t, jmi_array_t, x_an, -1, 1)
     JMI_DEF(INT, info_v)
+    JMI_DEF(INT, n_v)
+    JMI_DEF(INT, nrhs_v)
     JMI_ARR(HEAP, jmi_real_t, jmi_array_t, Awork_a, -1, 2)
     JMI_DEF(INT, lda_v)
     JMI_DEF(INT, ldb_v)
@@ -13675,11 +13677,12 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def1(jmi_array_t* A_a, jmi_arr
     jmi_int_t i2_2ie;
     jmi_int_t i2_2in;
     JMI_DEF(INT_EXT, tmp_1)
-    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, tmp_2, -1, 2)
-    JMI_DEF(INT_EXT, tmp_3)
-    JMI_ARR(HEAP, jmi_int_t, jmi_int_array_t, tmp_4, -1, 1)
-    JMI_DEF(INT_EXT, tmp_5)
+    JMI_DEF(INT_EXT, tmp_2)
+    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, tmp_3, -1, 2)
+    JMI_DEF(INT_EXT, tmp_4)
+    JMI_ARR(HEAP, jmi_int_t, jmi_int_array_t, tmp_5, -1, 1)
     JMI_DEF(INT_EXT, tmp_6)
+    JMI_DEF(INT_EXT, tmp_7)
     extern void dgesv_(int*, int*, double*, int*, int*, double*, int*, int*);
     if (x_a == NULL) {
         JMI_ARRAY_INIT_1(HEAP, jmi_real_t, jmi_array_t, x_an, jmi_array_size(A_a, 0), 1, jmi_array_size(A_a, 0))
@@ -13690,6 +13693,8 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def1(jmi_array_t* A_a, jmi_arr
     for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
         jmi_array_ref_1(x_a, i1_0i) = jmi_array_val_1(b_a, i1_0i);
     }
+    n_v = jmi_array_size(A_a, 0);
+    nrhs_v = 1;
     JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, Awork_a, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), 2, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     i1_1in = 0;
     i1_1ie = floor((jmi_array_size(A_a, 0)) - (1));
@@ -13703,20 +13708,22 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def1(jmi_array_t* A_a, jmi_arr
     lda_v = jmi_max(1.0, jmi_array_size(A_a, 0));
     ldb_v = jmi_max(1.0, jmi_array_size(b_a, 0));
     JMI_ARRAY_INIT_1(HEAP, jmi_real_t, jmi_array_t, ipiv_a, jmi_array_size(A_a, 0), 1, jmi_array_size(A_a, 0))
-    tmp_1 = (int)1;
-    JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, tmp_2, jmi_array_size(Awork_a, 0) * jmi_array_size(Awork_a, 1), 2, jmi_array_size(Awork_a, 0), jmi_array_size(Awork_a, 1))
-    jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_2->var);
-    tmp_3 = (int)lda_v;
-    JMI_ARRAY_INIT_1(HEAP, jmi_int_t, jmi_int_array_t, tmp_4, jmi_array_size(ipiv_a, 0), 1, jmi_array_size(ipiv_a, 0))
-    jmi_matrix_to_fortran_int(ipiv_a, ipiv_a->var, tmp_4->var);
-    tmp_5 = (int)ldb_v;
-    tmp_6 = (int)info_v;
-    dgesv_(&jmi_array_size(A_a, 0), &tmp_1, tmp_2->var, &tmp_3, tmp_4->var, x_a->var, &tmp_5, &tmp_6);
-    info_v = tmp_6;
+    tmp_1 = (int)n_v;
+    tmp_2 = (int)nrhs_v;
+    JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, tmp_3, jmi_array_size(Awork_a, 0) * jmi_array_size(Awork_a, 1), 2, jmi_array_size(Awork_a, 0), jmi_array_size(Awork_a, 1))
+    jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_3->var);
+    tmp_4 = (int)lda_v;
+    JMI_ARRAY_INIT_1(HEAP, jmi_int_t, jmi_int_array_t, tmp_5, jmi_array_size(ipiv_a, 0), 1, jmi_array_size(ipiv_a, 0))
+    jmi_matrix_to_fortran_int(ipiv_a, ipiv_a->var, tmp_5->var);
+    tmp_6 = (int)ldb_v;
+    tmp_7 = (int)info_v;
+    dgesv_(&tmp_1, &tmp_2, tmp_3->var, &tmp_4, tmp_5->var, x_a->var, &tmp_6, &tmp_7);
+    info_v = tmp_7;
     JMI_RET(GEN, info_o, info_v)
     JMI_DYNAMIC_FREE()
     return;
 }
+
 
 ")})));
 end MathSolve;
@@ -13753,7 +13760,7 @@ void func_Modelica_Math_Matrices_solve2_def0(jmi_array_t* A_a, jmi_array_t* B_a,
     }
     func_Modelica_Math_Matrices_LAPACK_dgesv_def1(A_a, B_a, X_a, &info_v);
     if (COND_EXP_EQ(info_v, 0.0, JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
-        jmi_assert_failed(\"Solving a linear system of equations with function\\n\\\"Matrices.solve2\\\" is not possible, because the system has either\\nno or infinitely many solutions (A is singular).\", JMI_ASSERT_ERROR);
+        jmi_assert_failed("Solving a linear system of equations with function\n\"Matrices.solve2\" is not possible, because the system has either\nno or infinitely many solutions (A is singular).", JMI_ASSERT_ERROR);
     }
     JMI_DYNAMIC_FREE()
     return;
@@ -13763,6 +13770,8 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def1(jmi_array_t* A_a, jmi_array_t
     JMI_DYNAMIC_INIT()
     JMI_ARR(HEAP, jmi_real_t, jmi_array_t, X_an, -1, 2)
     JMI_DEF(INT, info_v)
+    JMI_DEF(INT, n_v)
+    JMI_DEF(INT, nrhs_v)
     JMI_ARR(HEAP, jmi_real_t, jmi_array_t, Awork_a, -1, 2)
     JMI_DEF(INT, lda_v)
     JMI_DEF(INT, ldb_v)
@@ -13779,12 +13788,14 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def1(jmi_array_t* A_a, jmi_array_t
     jmi_real_t i2_3i;
     jmi_int_t i2_3ie;
     jmi_int_t i2_3in;
-    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, tmp_1, -1, 2)
+    JMI_DEF(INT_EXT, tmp_1)
     JMI_DEF(INT_EXT, tmp_2)
-    JMI_ARR(HEAP, jmi_int_t, jmi_int_array_t, tmp_3, -1, 1)
-    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, tmp_4, -1, 2)
-    JMI_DEF(INT_EXT, tmp_5)
-    JMI_DEF(INT_EXT, tmp_6)
+    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, tmp_3, -1, 2)
+    JMI_DEF(INT_EXT, tmp_4)
+    JMI_ARR(HEAP, jmi_int_t, jmi_int_array_t, tmp_5, -1, 1)
+    JMI_ARR(HEAP, jmi_real_t, jmi_array_t, tmp_6, -1, 2)
+    JMI_DEF(INT_EXT, tmp_7)
+    JMI_DEF(INT_EXT, tmp_8)
     extern void dgesv_(int*, int*, double*, int*, int*, double*, int*, int*);
     if (X_a == NULL) {
         JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, X_an, jmi_array_size(A_a, 0) * jmi_array_size(B_a, 1), 2, jmi_array_size(A_a, 0), jmi_array_size(B_a, 1))
@@ -13799,6 +13810,8 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def1(jmi_array_t* A_a, jmi_array_t
             jmi_array_ref_2(X_a, i1_0i, i2_1i) = jmi_array_val_2(B_a, i1_0i, i2_1i);
         }
     }
+    n_v = jmi_array_size(A_a, 0);
+    nrhs_v = jmi_array_size(B_a, 1);
     JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, Awork_a, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), 2, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     i1_2in = 0;
     i1_2ie = floor((jmi_array_size(A_a, 0)) - (1));
@@ -13812,22 +13825,25 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def1(jmi_array_t* A_a, jmi_array_t
     lda_v = jmi_max(1.0, jmi_array_size(A_a, 0));
     ldb_v = jmi_max(1.0, jmi_array_size(B_a, 0));
     JMI_ARRAY_INIT_1(HEAP, jmi_real_t, jmi_array_t, ipiv_a, jmi_array_size(A_a, 0), 1, jmi_array_size(A_a, 0))
-    JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, tmp_1, jmi_array_size(Awork_a, 0) * jmi_array_size(Awork_a, 1), 2, jmi_array_size(Awork_a, 0), jmi_array_size(Awork_a, 1))
-    jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_1->var);
-    tmp_2 = (int)lda_v;
-    JMI_ARRAY_INIT_1(HEAP, jmi_int_t, jmi_int_array_t, tmp_3, jmi_array_size(ipiv_a, 0), 1, jmi_array_size(ipiv_a, 0))
-    jmi_matrix_to_fortran_int(ipiv_a, ipiv_a->var, tmp_3->var);
-    JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, tmp_4, jmi_array_size(X_a, 0) * jmi_array_size(X_a, 1), 2, jmi_array_size(X_a, 0), jmi_array_size(X_a, 1))
-    jmi_matrix_to_fortran_real(X_a, X_a->var, tmp_4->var);
-    tmp_5 = (int)ldb_v;
-    tmp_6 = (int)info_v;
-    dgesv_(&jmi_array_size(A_a, 0), &jmi_array_size(B_a, 1), tmp_1->var, &tmp_2, tmp_3->var, tmp_4->var, &tmp_5, &tmp_6);
-    jmi_matrix_from_fortran_real(X_a, tmp_4->var, X_a->var);
-    info_v = tmp_6;
+    tmp_1 = (int)n_v;
+    tmp_2 = (int)nrhs_v;
+    JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, tmp_3, jmi_array_size(Awork_a, 0) * jmi_array_size(Awork_a, 1), 2, jmi_array_size(Awork_a, 0), jmi_array_size(Awork_a, 1))
+    jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_3->var);
+    tmp_4 = (int)lda_v;
+    JMI_ARRAY_INIT_1(HEAP, jmi_int_t, jmi_int_array_t, tmp_5, jmi_array_size(ipiv_a, 0), 1, jmi_array_size(ipiv_a, 0))
+    jmi_matrix_to_fortran_int(ipiv_a, ipiv_a->var, tmp_5->var);
+    JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, tmp_6, jmi_array_size(X_a, 0) * jmi_array_size(X_a, 1), 2, jmi_array_size(X_a, 0), jmi_array_size(X_a, 1))
+    jmi_matrix_to_fortran_real(X_a, X_a->var, tmp_6->var);
+    tmp_7 = (int)ldb_v;
+    tmp_8 = (int)info_v;
+    dgesv_(&tmp_1, &tmp_2, tmp_3->var, &tmp_4, tmp_5->var, tmp_6->var, &tmp_7, &tmp_8);
+    jmi_matrix_from_fortran_real(X_a, tmp_6->var, X_a->var);
+    info_v = tmp_8;
     JMI_RET(GEN, info_o, info_v)
     JMI_DYNAMIC_FREE()
     return;
 }
+
 
 ")})));
 end MathSolve2;
