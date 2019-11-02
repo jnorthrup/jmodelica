@@ -62,8 +62,8 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     private N node;
     private final T parent;
 
-    private final Collection<T> subNodes_cache;
-    private final Map<String, T> subNodesNameMap_cache;
+    private Collection<T> subNodes_cache;
+    private Map<String, T> subNodesNameMap_cache;
     private boolean nodeWasSet = false;
     private boolean subNodeNodeWasSet = false;
     private T valueAnnotation_cache;
@@ -98,15 +98,19 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     protected GenericAnnotationNode(String name, N node, T parent, Mutability mutability) {
         this.mutability = mutability;
         this.parent = parent;
-        valueAnnotation_cacheComputed = isImmutable();
-        subNodes_cache = isImmutable() ? Collections.unmodifiableList(new ArrayList<T>()) : new ArrayList<T>();
-        subNodesNameMap_cache = isImmutable() ? Collections.unmodifiableMap(new HashMap<String, T>()) : new HashMap<String, T>();
-        if (!isImmutable()) {
+        if (mutability == Mutability.MUTABLE) {
             setNode(name, node);
+        }
+        else {
+            subNodes_cache = Collections.unmodifiableList(new ArrayList<T>());
+            subNodesNameMap_cache = Collections.unmodifiableMap(new HashMap<String, T>());
+            valueAnnotation_cache = self();
+            valueAnnotation_cacheComputed = true;
+            this.name = name;
         }
     }
 
-    private boolean isImmutable() {
+    public boolean isImmutable() {
         return mutability == Mutability.IMMUTABLE;
     }
 
@@ -116,6 +120,12 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     private void computeSubNodesCache() {
         if (isSubNodesCacheFresh()) {
             return;
+        }
+        if (subNodes_cache == null) {
+            subNodes_cache = Collections.emptyList();
+        }
+        if (subNodesNameMap_cache == null) {
+            subNodesNameMap_cache = Collections.emptyMap();
         }
 
         if(!nodeExists() || isAmbiguous()) {
@@ -146,11 +156,8 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
                 createOrSetSubNodeAndAddToCaches(oldNode, oldNode.name(), null, subNodes, subNodesNameMap);
             }
         }
-
-        subNodes_cache.clear();
-        subNodes_cache.addAll(subNodes);
-        subNodesNameMap_cache.clear();
-        subNodesNameMap_cache.putAll(subNodesNameMap);
+        subNodes_cache = subNodes;
+        subNodesNameMap_cache = subNodesNameMap;
         clearNodeWasSetFlags();
     }
 
@@ -255,21 +262,28 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     }
 
     T forPath(String[] paths, int currentIndex) {
-        if (isAmbiguous()) {
-            return ambiguousNode();
-        }
-        if (currentIndex == paths.length) {
+        if (isImmutable() || isAmbiguous() || currentIndex == paths.length) {
             return self();
         }
         computeSubNodesCache();
         T subNode = subNodesNameMap_cache.get(paths[currentIndex]);
         if (subNode == null) {
+            makeEmptySubNodesCacheMutable();
             subNode = createOrSetSubNodeAndAddToCaches(subNode, paths[currentIndex], null, subNodes_cache,
                     subNodesNameMap_cache);
         }
         return subNode.forPath(paths, currentIndex + 1);
     }
 
+    private void makeEmptySubNodesCacheMutable() {
+        if (subNodesNameMap_cache.isEmpty()) {
+            subNodesNameMap_cache = new HashMap<String, T>();
+        }
+        if (subNodes_cache.isEmpty()) {
+            subNodes_cache = new ArrayList<T>();
+        }
+    }
+    
     /**
      * Returns reference to it self, but with correct type! This pattern
      * ensures that all nodes have the same type as T.
@@ -317,7 +331,9 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @return true if this node has sub nodes, otherwise false.
      */
     private boolean hasSubNodes() {
-        computeSubNodesCache();
+    	if (!isImmutable()) {
+            computeSubNodesCache();
+    	}
         return !subNodes_cache.isEmpty();
     }
 
@@ -327,7 +343,9 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @return all sub nodes that {@link #nodeExists()}
      */
     public Iterable<T> subNodes() {
-        computeSubNodesCache();
+    	if (!isImmutable()) {
+            computeSubNodesCache();
+    	}
         return filterExists(subNodes_cache);
     }
 
@@ -349,7 +367,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      *          and it wasn't possible to create.
      */
     public N node() throws AnnotationEditException {
-        if (!hasNode()) {
+        if (!hasNode() && !isImmutable()) {
             if (parent == null) {
                 // This is a null pattern node without hope of creating
                 return null;
@@ -427,7 +445,6 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @param node The new node
      */
     private void setNode(String newName, N node) {
-        verifyMutability();
         // This is an internal method because it does not update the caches in the parent node.
         // it needs to be protected to be accessible from the parent node.
         disconnectFromNode();
@@ -449,7 +466,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @return the value of this node, if it has one, otherwise null
      */
     public V value() {
-        if (!nodeExists() || isAmbiguous()) {
+        if (!nodeExists() || isAmbiguous() || isImmutable()) {
             return null;
         }
         return node().annotationValue();
@@ -464,6 +481,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      *          the node or set the value of the node.
      */
     public void setValue(V newValue) throws AnnotationEditException {
+    	verifyMutability();
         try {
             node().setAnnotationValue(newValue);
         } catch (FailedToSetAnnotationValueException e) {
@@ -480,7 +498,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      */
     public T valueAsAnnotation() {
         if (!valueAnnotation_cacheComputed) {
-            verifyMutability();
+        	verifyMutability();
             valueAnnotation_cacheComputed = true;
             if (isAmbiguous()) {
                 valueAnnotation_cache = ambiguousNode();
@@ -565,7 +583,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @return true if this node does exist.
      */
     public boolean nodeExists() {
-        if (parent() != null) {
+        if (parent() != null && !parent.isImmutable()) {
             asGeneric(parent()).computeSubNodesCache();
         }
         return hasNode();
@@ -927,7 +945,6 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     }
 
     private void setNodeWasSetFlags() {
-        verifyMutability();
         nodeWasSet = true;
         if (parent() != null) {
             asGeneric(parent()).setSubNodeNodeWasSet();
@@ -935,12 +952,10 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     }
 
     private void setSubNodeNodeWasSet() {
-        verifyMutability();
         subNodeNodeWasSet = true;
     }
 
     private void clearNodeWasSetFlags() {
-        verifyMutability();
         nodeWasSet = false;
         subNodeNodeWasSet = false;
     }
