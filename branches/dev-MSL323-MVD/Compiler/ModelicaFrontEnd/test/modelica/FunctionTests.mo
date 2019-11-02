@@ -13623,6 +13623,7 @@ public
   output Real[:] tau;
   output Integer[:] p;
   output Integer info;
+  Integer m;
   Integer lda;
   Integer ncol;
   Real[:] work;
@@ -13638,10 +13639,11 @@ public
   for i1 in 1:size(A, 2) loop
    p[i1] := 0;
   end for;
+  m := size(A, 1);
   lda := max(1, size(A, 1));
   ncol := size(A, 2);
   init work as Real[3 * size(A, 2)];
-  external \"FORTRAN 77\" dgeqpf(size(A, 1), ncol, QR, lda, p, tau, work, info);
+  external "FORTRAN 77" dgeqpf(m, ncol, QR, lda, p, tau, work, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dgeqpf;
 
@@ -13700,8 +13702,8 @@ public
   nrow := size(A, 1);
   ncol := size(A, 2);
   init tau as Real[size(A, 2)];
-  assert(nrow >= ncol, \"\\nInput matrix A[\" + String(nrow) + \",\" + String(ncol) + \"] has more columns as rows.
-This is not allowed when calling Modelica.Matrices.QR(A).\");
+  assert(nrow >= ncol, "\nInput matrix A[" + String(nrow) + "," + String(ncol) + "] has more columns as rows.
+This is not allowed when calling Modelica.Matrices.QR(A).");
   if pivoting then
    (Q, tau, p) := Modelica.Math.Matrices.LAPACK.dgeqpf(A);
   else
@@ -13730,6 +13732,7 @@ This is not allowed when calling Modelica.Matrices.QR(A).\");
   output Real[:] tau;
   output Integer[:] p;
   output Integer info;
+  Integer m;
   Integer lda;
   Integer ncol;
   Real[:] work;
@@ -13745,10 +13748,11 @@ This is not allowed when calling Modelica.Matrices.QR(A).\");
   for i1 in 1:size(A, 2) loop
    p[i1] := 0;
   end for;
+  m := size(A, 1);
   lda := max(1, size(A, 1));
   ncol := size(A, 2);
   init work as Real[3 * size(A, 2)];
-  external \"FORTRAN 77\" dgeqpf(size(A, 1), ncol, QR, lda, p, tau, work, info);
+  external "FORTRAN 77" dgeqpf(m, ncol, QR, lda, p, tau, work, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dgeqpf;
 
@@ -13775,7 +13779,7 @@ This is not allowed when calling Modelica.Matrices.QR(A).\");
   n := size(A, 2);
   lda := max(1, m);
   lwork := 3 * max(1, n);
-  external \"FORTRAN 77\" dgeqrf(m, n, Aout, lda, tau, work, lwork, info);
+  external "FORTRAN 77" dgeqrf(m, n, Aout, lda, tau, work, lwork, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dgeqrf;
 
@@ -13784,6 +13788,9 @@ This is not allowed when calling Modelica.Matrices.QR(A).\");
   input Real[:] tau;
   output Real[:,:] Q;
   output Integer info;
+  Integer m;
+  Integer n;
+  Integer k;
   Integer lda;
   Integer lwork;
   Real[:] work;
@@ -13794,10 +13801,13 @@ This is not allowed when calling Modelica.Matrices.QR(A).\");
     Q[i1,i2] := QR[i1,i2];
    end for;
   end for;
+  m := size(QR, 1);
+  n := size(QR, 2);
+  k := size(tau, 1);
   lda := max(1, size(Q, 1));
   lwork := max(1, min(10, size(QR, 2)) * size(QR, 2));
   init work as Real[max(1, min(10, size(QR, 2)) * size(QR, 2))];
-  external \"FORTRAN 77\" dorgqr(size(QR, 1), size(QR, 2), size(tau, 1), Q, lda, tau, work, lwork, info);
+  external "FORTRAN 77" dorgqr(m, n, k, Q, lda, tau, work, lwork, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dorgqr;
 

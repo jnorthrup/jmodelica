@@ -2226,6 +2226,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
     JMI_ARR(STACK, jmi_real_t, jmi_array_t, dummy_a, 1, 2)
     JMI_DEF(INT, n_v)
     JMI_DEF(INT, lwork_v)
+    JMI_DEF(INT, ldvl_v)
     JMI_ARR(HEAP, jmi_real_t, jmi_array_t, Awork_a, -1, 2)
     JMI_ARR(HEAP, jmi_real_t, jmi_array_t, work_a, -1, 1)
     jmi_real_t i1_0i;
@@ -2244,6 +2245,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
     JMI_ARR(HEAP, jmi_real_t, jmi_array_t, tmp_8, -1, 2)
     JMI_DEF(INT_EXT, tmp_9)
     JMI_DEF(INT_EXT, tmp_10)
+    JMI_DEF(INT_EXT, tmp_11)
     extern void dgeev_(const char*, const char*, int*, double*, int*, double*, double*, double*, int*, double*, int*, double*, int*, int*);
     if (eigenReal_a == NULL) {
         JMI_ARRAY_INIT_1(HEAP, jmi_real_t, jmi_array_t, eigenReal_an, jmi_array_size(A_a, 0), 1, jmi_array_size(A_a, 0))
@@ -2260,6 +2262,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
     JMI_ARRAY_INIT_2(STACK, jmi_real_t, jmi_array_t, dummy_a, 1, 2, 1, 1)
     n_v = jmi_array_size(A_a, 0);
     lwork_v = 12 * n_v;
+    ldvl_v = 1;
     JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, Awork_a, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), 2, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     i1_0in = 0;
     i1_0ie = floor((jmi_array_size(A_a, 0)) - (1));
@@ -2271,26 +2274,28 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
         }
     }
     JMI_ARRAY_INIT_1(HEAP, jmi_real_t, jmi_array_t, work_a, 12 * jmi_array_size(A_a, 0), 1, 12 * jmi_array_size(A_a, 0))
-    JMI_ASG(STR, tmp_1, \"N\")
-    JMI_ASG(STR, tmp_2, \"V\")
+    JMI_ASG(STR, tmp_1, "N")
+    JMI_ASG(STR, tmp_2, "V")
     tmp_3 = (int)n_v;
     JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, tmp_4, jmi_array_size(Awork_a, 0) * jmi_array_size(Awork_a, 1), 2, jmi_array_size(Awork_a, 0), jmi_array_size(Awork_a, 1))
     jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_4->var);
     tmp_5 = (int)n_v;
     JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, tmp_6, jmi_array_size(dummy_a, 0) * jmi_array_size(dummy_a, 1), 2, jmi_array_size(dummy_a, 0), jmi_array_size(dummy_a, 1))
     jmi_matrix_to_fortran_real(dummy_a, dummy_a->var, tmp_6->var);
-    tmp_7 = (int)1;
+    tmp_7 = (int)ldvl_v;
     JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, tmp_8, jmi_array_size(eigenVectors_a, 0) * jmi_array_size(eigenVectors_a, 1), 2, jmi_array_size(eigenVectors_a, 0), jmi_array_size(eigenVectors_a, 1))
     jmi_matrix_to_fortran_real(eigenVectors_a, eigenVectors_a->var, tmp_8->var);
     tmp_9 = (int)n_v;
-    tmp_10 = (int)info_v;
-    dgeev_(tmp_1, tmp_2, &tmp_9, tmp_4->var, &tmp_9, eigenReal_a->var, eigenImag_a->var, tmp_6->var, &tmp_7, tmp_8->var, &tmp_9, work_a->var, &jmi_array_size(work_a, 0), &tmp_10);
+    tmp_10 = (int)lwork_v;
+    tmp_11 = (int)info_v;
+    dgeev_(tmp_1, tmp_2, &tmp_9, tmp_4->var, &tmp_9, eigenReal_a->var, eigenImag_a->var, tmp_6->var, &tmp_7, tmp_8->var, &tmp_9, work_a->var, &tmp_10, &tmp_11);
     jmi_matrix_from_fortran_real(eigenVectors_a, tmp_8->var, eigenVectors_a->var);
-    info_v = tmp_10;
+    info_v = tmp_11;
     JMI_RET(GEN, info_o, info_v)
     JMI_DYNAMIC_FREE()
     return;
 }
+
 
 ")})));
 end StringExternalFortran1;
