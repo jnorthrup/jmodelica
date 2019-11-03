@@ -13651,7 +13651,7 @@ void func_Modelica_Math_Matrices_solve_def0(jmi_array_t* A_a, jmi_array_t* b_a, 
     }
     func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def1(A_a, b_a, x_a, &info_v);
     if (COND_EXP_EQ(info_v, 0.0, JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
-        jmi_assert_failed("Solving a linear system of equations with function\n\"Matrices.solve\" is not possible, because the system has either\nno or infinitely many solutions (A is singular).", JMI_ASSERT_ERROR);
+        jmi_assert_failed(\"Solving a linear system of equations with function\\n\\\"Matrices.solve\\\" is not possible, because the system has either\\nno or infinitely many solutions (A is singular).\", JMI_ASSERT_ERROR);
     }
     JMI_DYNAMIC_FREE()
     return;
@@ -13760,7 +13760,7 @@ void func_Modelica_Math_Matrices_solve2_def0(jmi_array_t* A_a, jmi_array_t* B_a,
     }
     func_Modelica_Math_Matrices_LAPACK_dgesv_def1(A_a, B_a, X_a, &info_v);
     if (COND_EXP_EQ(info_v, 0.0, JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
-        jmi_assert_failed("Solving a linear system of equations with function\n\"Matrices.solve2\" is not possible, because the system has either\nno or infinitely many solutions (A is singular).", JMI_ASSERT_ERROR);
+        jmi_assert_failed(\"Solving a linear system of equations with function\\n\\\"Matrices.solve2\\\" is not possible, because the system has either\\nno or infinitely many solutions (A is singular).\", JMI_ASSERT_ERROR);
     }
     JMI_DYNAMIC_FREE()
     return;
