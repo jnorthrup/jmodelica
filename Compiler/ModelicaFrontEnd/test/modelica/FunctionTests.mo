@@ -13643,7 +13643,7 @@ public
   lda := max(1, size(A, 1));
   ncol := size(A, 2);
   init work as Real[3 * size(A, 2)];
-  external "FORTRAN 77" dgeqpf(m, ncol, QR, lda, p, tau, work, info);
+  external \"FORTRAN 77\" dgeqpf(m, ncol, QR, lda, p, tau, work, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dgeqpf;
 
@@ -13702,8 +13702,8 @@ public
   nrow := size(A, 1);
   ncol := size(A, 2);
   init tau as Real[size(A, 2)];
-  assert(nrow >= ncol, "\nInput matrix A[" + String(nrow) + "," + String(ncol) + "] has more columns as rows.
-This is not allowed when calling Modelica.Matrices.QR(A).");
+  assert(nrow >= ncol, \"\\nInput matrix A[\" + String(nrow) + \",\" + String(ncol) + \"] has more columns as rows.
+This is not allowed when calling Modelica.Matrices.QR(A).\");
   if pivoting then
    (Q, tau, p) := Modelica.Math.Matrices.LAPACK.dgeqpf(A);
   else
@@ -13752,7 +13752,7 @@ This is not allowed when calling Modelica.Matrices.QR(A).");
   lda := max(1, size(A, 1));
   ncol := size(A, 2);
   init work as Real[3 * size(A, 2)];
-  external "FORTRAN 77" dgeqpf(m, ncol, QR, lda, p, tau, work, info);
+  external \"FORTRAN 77\" dgeqpf(m, ncol, QR, lda, p, tau, work, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dgeqpf;
 
@@ -13779,7 +13779,7 @@ This is not allowed when calling Modelica.Matrices.QR(A).");
   n := size(A, 2);
   lda := max(1, m);
   lwork := 3 * max(1, n);
-  external "FORTRAN 77" dgeqrf(m, n, Aout, lda, tau, work, lwork, info);
+  external \"FORTRAN 77\" dgeqrf(m, n, Aout, lda, tau, work, lwork, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dgeqrf;
 
@@ -13807,7 +13807,7 @@ This is not allowed when calling Modelica.Matrices.QR(A).");
   lda := max(1, size(Q, 1));
   lwork := max(1, min(10, size(QR, 2)) * size(QR, 2));
   init work as Real[max(1, min(10, size(QR, 2)) * size(QR, 2))];
-  external "FORTRAN 77" dorgqr(m, n, k, Q, lda, tau, work, lwork, info);
+  external \"FORTRAN 77\" dorgqr(m, n, k, Q, lda, tau, work, lwork, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dorgqr;
 
