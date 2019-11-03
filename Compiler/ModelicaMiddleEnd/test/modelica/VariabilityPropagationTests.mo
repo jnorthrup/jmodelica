@@ -756,9 +756,9 @@ public
  algorithm
   init x as Real[size(b, 1)];
   (x, info) := Modelica.Math.Matrices.LAPACK.dgesv_vec(A, b);
-  assert(info == 0, "Solving a linear system of equations with function
-\"Matrices.solve\" is not possible, because the system has either
-no or infinitely many solutions (A is singular).");
+  assert(info == 0, \"Solving a linear system of equations with function
+\\\"Matrices.solve\\\" is not possible, because the system has either
+no or infinitely many solutions (A is singular).\");
   return;
  end Modelica.Math.Matrices.solve;
 
@@ -789,7 +789,7 @@ no or infinitely many solutions (A is singular).");
   lda := max(1, size(A, 1));
   ldb := max(1, size(b, 1));
   init ipiv as Integer[size(A, 1)];
-  external "FORTRAN 77" dgesv(n, nrhs, Awork, lda, ipiv, x, ldb, info);
+  external \"FORTRAN 77\" dgesv(n, nrhs, Awork, lda, ipiv, x, ldb, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dgesv_vec;
 

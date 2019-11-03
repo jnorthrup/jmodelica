@@ -2274,8 +2274,8 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
         }
     }
     JMI_ARRAY_INIT_1(HEAP, jmi_real_t, jmi_array_t, work_a, 12 * jmi_array_size(A_a, 0), 1, 12 * jmi_array_size(A_a, 0))
-    JMI_ASG(STR, tmp_1, "N")
-    JMI_ASG(STR, tmp_2, "V")
+    JMI_ASG(STR, tmp_1, \"N\")
+    JMI_ASG(STR, tmp_2, \"V\")
     tmp_3 = (int)n_v;
     JMI_ARRAY_INIT_2(HEAP, jmi_real_t, jmi_array_t, tmp_4, jmi_array_size(Awork_a, 0) * jmi_array_size(Awork_a, 1), 2, jmi_array_size(Awork_a, 0), jmi_array_size(Awork_a, 1))
     jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_4->var);
