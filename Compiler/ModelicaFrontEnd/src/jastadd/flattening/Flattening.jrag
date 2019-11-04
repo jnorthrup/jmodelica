@@ -1733,7 +1733,19 @@ aspect Flattening {
             return CausalityConnectorPrefix.NONE;
         }
         if (isConnectorVariable()) {
-            return connectorVariablePrefix();
+            if (isInput()) {
+                return CausalityConnectorPrefix.INPUT;
+            } else if (isOutput()) {
+                return CausalityConnectorPrefix.OUTPUT;
+            } else if (isFlow()) {
+                return CausalityConnectorPrefix.FLOW;
+            } else if (isStream()) {
+                return CausalityConnectorPrefix.STREAM;
+            } else if (!variability().parameterOrLess()) {
+                return CausalityConnectorPrefix.POTENTIAL;
+            } else {
+                return CausalityConnectorPrefix.NONE;
+            }
         } else {
             if (isInput()) {
                 return CausalityConnectorPrefix.INPUT;
@@ -1742,26 +1754,6 @@ aspect Flattening {
             } else {
                 return CausalityConnectorPrefix.NONE;
             }
-        }
-    }
-    
-    /**
-     * Computes the {@link CausalityConnectorPrefix} this variable would have if it
-     * was a connector variable in a top-level connector.
-     */
-    public CausalityConnectorPrefix InstAssignable.connectorVariablePrefix() {
-        if (isInput()) {
-            return CausalityConnectorPrefix.INPUT;
-        } else if (isOutput()) {
-            return CausalityConnectorPrefix.OUTPUT;
-        } else if (isFlow()) {
-            return CausalityConnectorPrefix.FLOW;
-        } else if (isStream()) {
-            return CausalityConnectorPrefix.STREAM;
-        } else if (!variability().parameterOrLess()) {
-            return CausalityConnectorPrefix.POTENTIAL;
-        } else {
-            return CausalityConnectorPrefix.NONE;
         }
     }
 
