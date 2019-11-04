@@ -18,7 +18,8 @@
     <literal>INSTALL.bat</literal> in <literal>OpenOPC</literal> must be run, see
     <xref linkend="opc-sec"/>.</para>
   </section>
-  <section xml:id="opc-sec">
+  
+  <section xml:id="opc-sec"> <!-- remove this section when swithing to Python 3 -->
   <title>Open Platform Communication (OPC)</title>
   <para>OPC, Open Platform Communication, is a series of standards and specifications
   for communication between different platforms maintained by <link
@@ -64,6 +65,12 @@ opc = open_client()</programlisting>
                 <para><link xlink:href="http://www.python.org/">Python
                 2.7.13</link></para>
               </listitem>
+              
+              <!--Replace with this when switching to Python 3 -->
+              <!--listitem>
+                <para><link xlink:href="http://www.python.org/">Python
+                3.7.4</link></para>
+              </listitem -->
 
               <listitem>
                 <para><link xlink:href="http://www.swig.org/">Swig
@@ -123,12 +130,12 @@ opc = open_client()</programlisting>
                 xlink:href="http://casadi.org">CasADi</link></para>
               </listitem>
               
-            <listitem>
+            <listitem> <!-- remove this section when swithing to Python 3 -->
               <para><link xlink:href="http://gray-box.net/download_daawrapper.php?lang=en">Graybox OPC Automation Wrapper
               2.02</link></para>
             </listitem>
             
-            <listitem>
+            <listitem> <!-- remove this section when swithing to Python 3 -->
               <para><link xlink:href="http://openopc.sourceforge.net/">OpenOPC for Python 1.3.1</link></para>
             </listitem>
           </itemizedlist>
@@ -136,6 +143,378 @@ opc = open_client()</programlisting>
 
           <para><emphasis role="bold">Python packages</emphasis></para>
 
+          <!-- Switch to this when moving to Python 3
+        <simplelist type="vert" columns="2">
+           <member>
+<para><link xlink:href="https://github.com/jaraco/zipp">zipp 0.6.0</link></para>
+</member>
+ 
+<member>
+<para><link xlink:href="http://xlwings.org">xlwings 0.15.10</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/pypa/wheel">wheel 0.33.6</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://pypi.org/project/wxPython/">wxPython 4.0.7.post1</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://ipython.org">widgetsnbextension 3.5.1</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/SimonSapin/python-webencodings">webencodings 0.5.1</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/jquast/wcwidth">wcwidth 0.1.7</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://urllib3.readthedocs.io/">urllib3 1.25.3</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://ipython.org">traitlets 4.3.2</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://www.tornadoweb.org/">tornado 6.0.3</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/jupyter/testpath">testpath 0.4.2</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/jupyter/terminado">terminado 0.8.2</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/benjaminp/six">six 1.12.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/irmen/Serpent">serpent 1.28</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/hsoft/send2trash">Send2Trash 1.5.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://www.scipy.org">scipy 1.3.1</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://salib.github.io/SALib/">SALib 1.3.8</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://python-requests.org">requests 2.22.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://jupyter.org">qtconsole 4.5.5</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://pyzmq.readthedocs.org">pyzmq 18.1.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/spyder-ide/pywinpty">pywinpty 0.5.5</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/mhammond/pywin32">pywin32 225</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/enthought/pywin32-ctypes">pywin32-ctypes 0.2.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://pythonhosted.org/pytz">pytz 2019.2</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://pythonnet.github.io/">pythonnet 2.4.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://git.openstack.org/cgit/openstack/python-jenkins">python-jenkins 1.5.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://dateutil.readthedocs.io">python-dateutil 2.8.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/pyserial/pyserial">pyserial 3.4</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://github.com/tobgu/pyrsistent/">pyrsistent 0.15.4</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://pyro4.readthedocs.io">Pyro4 4.76</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/pyparsing/pyparsing/">pyparsing 2.4.2</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://pygments.org/">Pygments 2.4.2</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/clicumu/pyDOE2">pyDOE2 1.2.1</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/giampaolo/psutil">psutil 5.6.3</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/jonathanslenders/python-prompt-toolkit">prompt-toolkit 2.0.9</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/prometheus/client_python">prometheus-client 0.7.1</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://pip.pypa.io/">pip 19.0.3</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://python-pillow.org">Pillow 6.2.1</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/pickleshare/pickleshare">pickleshare 0.7.5</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://docs.openstack.org/pbr/latest/">pbr 5.4.3</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/davidhalter/parso">parso 0.5.1</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://github.com/jgm/pandocfilters">pandocfilters 1.4.2</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://pandas.pydata.org">pandas 0.25.1</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://openpyxl.readthedocs.io">openpyxl 2.6.3</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://www.numpy.org">numpy 1.17.2</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://jupyter.org">notebook 6.0.1</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://readthedocs.org/docs/nose/">nose 1.3.7</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://bitbucket.org/memedough/nose-cov/overview">nose-cov 1.6</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://jupyter.org">nbformat 4.4.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://jupyter.org">nbconvert 5.6.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/SethMMorton/natsort">natsort 6.0.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/formiaczek/multi_key_dict">multi-key-dict 2.0.3</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/erikrose/more-itertools">more_itertools 3.0.5</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://mock.readthedocs.org/en/latest/">mock 3.0.5</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/lepture/mistune">mistune 0.8.4</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://matplotlib.org">matplotlib 3.1.1</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://palletsprojects.com/p/markupsafe/">MarkupSafe 1.1.1</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://lxml.de/">lxml 4.4.1</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/nucleic/kiwi">kiwisolver 1.1.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/jaraco/keyring">keyring 19.1.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://jupyter.org">jupyter 1.0.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://jupyter.org">jupyter-core 4.5.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://jupyter.org">jupyter-console 6.0.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://jupyter.org">jupyter-client 5.3.2</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/Julian/jsonschema">jsonschema 3.0.2</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/jpype-project/jpype">JPype1 0.7.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://jinja.pocoo.org/">Jinja2 2.10.1</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/davidhalter/jedi">jedi 0.15.1</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/phn/jdcal">jdcal 1.4.1</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://lucene.apache.org/pylucene/jcc">jcc 3.5</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://ipython.org">ipywidgets 7.5.1</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://ipython.org">ipython 7.8.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://ipython.org">ipython-genutils 0.2.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://ipython.org">ipykernel 5.1.2</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://importlib-metadata.readthedocs.io/">importlib-metadata 0.23</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/kjd/idna">idna 2.8</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/html5lib/html5lib-python">html5lib 1.0.1</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://bitbucket.org/openpyxl/et_xmlfile">et-xmlfile 1.0.1</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/takluyver/entrypoints">entrypoints 0.3</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/tiran/defusedxml">defusedxml 0.6.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/micheles/decorator">decorator 4.4.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://cython.org/">Cython 0.29.13</link></para>
+</member>
+
+<member>
+<para><link xlink:href="http://github.com/matplotlib/cycler">cycler 0.10.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/nedbat/coveragepy">coverage 4.5.4</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/schlamar/cov-core">cov-core 1.15.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/enthought/comtypes">comtypes 1.1.7</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/tartley/colorama">colorama 0.4.1</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/chardet/chardet">chardet 3.0.4</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://certifi.io/">certifi 2019.9.11</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/mozilla/bleach">bleach 3.1.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://github.com/takluyver/backcall">backcall 0.1.0</link></para>
+</member>
+
+<member>
+<para><link xlink:href="https://www.attrs.org/">attrs 19.1.0</link></para>
+</member>
+</simplelist>
+          -->
+          
 <simplelist type="vert" columns="2">
 <member>
 <para><link xlink:href="http://xlwings.org">xlwings 0.11.4</link></para>
