@@ -618,23 +618,23 @@ aspect Scalarization {
      */
     public class ScalarizingVariableInstance {
         
-        private final TypePrefixVariability variability; 
+        private TypePrefixVariability variability; 
         
-        private final VisibilityType visibility;
+        private VisibilityType visibility;
         
         // Binding expression
-        private final FExp bExp;
+        private FExp bExp;
         
         // (Mapped) attributes of this variable
-        private final Map<String, FAttribute> mattrs; 
+        private Map<String, FAttribute> mattrs; 
         
         // Full name of this variable
-        private final String name;
+        private String name;
         
         // input/output prefix of top-level variable
-        private final CausalityConnectorPrefix inputOutput;
+        private CausalityConnectorPrefix inputOutput;
         
-        private final Index index;
+        private Index index;
         
         private ScalarizingVariableInstance(String name, Map<String, FAttribute> mattrs, FExp be,
                 TypePrefixVariability variability, VisibilityType visibility, CausalityConnectorPrefix inputOutput, Index i)  {
@@ -644,9 +644,7 @@ aspect Scalarization {
             this.mattrs = mattrs;
             this.variability = variability;
             this.visibility = visibility;
-            /* If we have a record with input/output prefix that contains a parameter,
-             * that parameter should not inherit the input/output prefix */
-            this.inputOutput = variability.parameterOrLess() ? CausalityConnectorPrefix.NONE : inputOutput;
+            this.inputOutput = inputOutput;
         }
         
         private ScalarizingVariableInstance(String name, List<FAttribute> attrs, FExp be,

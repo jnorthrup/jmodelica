@@ -173,13 +173,13 @@ model ConditionalError2
     A a if b;
     parameter Boolean b = false;
 
-annotation(__JModelica(UnitTesting(tests={
-    FlatteningTestCase(
-        name="ConditionalError2",
-        description="Check that inactive conditional components aren't error checked in compile mode",
-        flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConditionalError2",
+			description="Check that inactive conditional components aren't error checked in compile mode",
+			flatModel="
 fclass CheckTests.ConditionalError2
- structural parameter Boolean b = false /* false */;
+ parameter Boolean b = false /* false */;
 end CheckTests.ConditionalError2;
 ")})));
 end ConditionalError2;
@@ -202,13 +202,13 @@ model ConditionalError3
     A a if b;
     parameter Boolean b = false;
 
-annotation(__JModelica(UnitTesting(tests={
-    FlatteningTestCase(
-        name="ConditionalError3",
-        description="Check that inactive conditional components aren't searched for used functions and enums when flattening in compile mode",
-        flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConditionalError3",
+			description="Check that inactive conditional components aren't searched for used functions and enums when flattening in compile mode",
+			flatModel="
 fclass CheckTests.ConditionalError3
- structural parameter Boolean b = false /* false */;
+ parameter Boolean b = false /* false */;
 end CheckTests.ConditionalError3;
 ")})));
 end ConditionalError3;

@@ -3100,13 +3100,13 @@ model ConditionalNoErrTest6
 equation
     connect(a.c, c);
 
-annotation(__JModelica(UnitTesting(tests={
-    FlatteningTestCase(
-        name="ConditionalNoErrTest6",
-        description="Ensure that components in conditionaly false components aren't error checked due to connections",
-        flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConditionalNoErrTest6",
+            description="Ensure that components in conditionaly false components aren't error checked due to connections",
+            flatModel="
 fclass ConnectTests.ConditionalNoErrTest6
- structural parameter Boolean on = false /* false */;
+ parameter Boolean on = false /* false */;
  Real c;
 end ConnectTests.ConditionalNoErrTest6;
 ")})));
@@ -3161,9 +3161,9 @@ annotation(__JModelica(UnitTesting(tests={
         description="Check that inactive conditional components in connnectors are handled properly",
         flatModel="
 fclass ConnectTests.ConditionalCompInConnector1
- structural parameter Boolean c1.b = false /* false */;
+ parameter Boolean c1.b = false /* false */;
  potential Real c1.y;
- structural parameter Boolean c2.b = false /* false */;
+ parameter Boolean c2.b = false /* false */;
  potential Real c2.y;
 equation
  c1.y = c2.y;

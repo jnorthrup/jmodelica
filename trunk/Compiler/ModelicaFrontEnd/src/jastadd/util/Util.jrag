@@ -1312,13 +1312,25 @@ aspect ComponentDeclMethods {
     eq SrcBaseClassDecl.hasInnerOrOuter()      = getInner() || getOuter();
     
 
-    syn boolean SrcComponentDecl.isParameter() = myComponentClause().isParameter();
-    syn boolean SrcComponentDecl.isConstant()  = myComponentClause().isConstant();
-    syn boolean SrcComponentDecl.isDiscrete()  = myComponentClause().isDiscrete();
+    /**
+     * Check if this component is declared parameter.
+     */
+    syn boolean SrcComponentDecl.isParameter() = hasSrcTypePrefixVariability() && getSrcTypePrefixVariability().parameterVariability();
     
-    syn boolean SrcComponentClause.isParameter() = hasSrcTypePrefixVariability() && getSrcTypePrefixVariability().parameterVariability();
-    syn boolean SrcComponentClause.isConstant()  = hasSrcTypePrefixVariability() && getSrcTypePrefixVariability().constantVariability();
-    syn boolean SrcComponentClause.isDiscrete()  = hasSrcTypePrefixVariability() && getSrcTypePrefixVariability().discreteVariability();
+    /**
+     * Check if this component is declared constant.
+     */
+    syn boolean SrcComponentDecl.isConstant() = hasSrcTypePrefixVariability() && getSrcTypePrefixVariability().constantVariability();
+    
+    /**
+     * Check if this component clause is declared constant.
+     */
+    syn boolean SrcComponentClause.isConstant() = hasSrcTypePrefixVariability() && getSrcTypePrefixVariability().constantVariability();
+    
+    /**
+     * Check if this component is declared discrete.
+     */
+    syn boolean SrcComponentDecl.isDiscrete() = hasSrcTypePrefixVariability() && getSrcTypePrefixVariability().discreteVariability();
 
     /**
      * Check if this component is an input component.
