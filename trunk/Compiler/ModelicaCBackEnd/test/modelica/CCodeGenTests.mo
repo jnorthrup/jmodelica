@@ -16343,6 +16343,55 @@ jmi_real_t func_CCodeGenTests_StringOperations13_f_exp0(jmi_real_t x_v) {
 ")})));
 end StringOperations13;
 
+
+model StringOperations14
+    function f
+        input Real x;
+        output String s;
+    protected
+        parameter String fmt = "g";
+    algorithm
+        s := String(x, format = fmt);
+    end f;
+    
+    String s = f(time);
+
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="StringOperations14",
+        description="Check that a format string that fails to evaluate does not lead to a crash",
+        template="$C_functions$",
+        generatedCode="
+void func_CCodeGenTests_StringOperations14_f_def0(jmi_real_t x_v, jmi_string_t* s_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(STR, s_v)
+    JMI_DEF(STR, fmt_v)
+    JMI_DEF_STR_DYNA(tmp_1)
+    JMI_DEF_STR_STAT(tmp_2, 16)
+    JMI_INI(STR, s_v)
+    JMI_INI(STR, fmt_v)
+    JMI_ASG(STR, fmt_v, \"g\")
+    JMI_INI_STR_DYNA(tmp_1, 1 + JMI_LEN(fmt_v))
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", \"%\");
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", fmt_v);
+    JMI_INI_STR_STAT(tmp_2)
+    snprintf(JMI_STR_END(tmp_2), JMI_STR_LEFT(tmp_2), tmp_1, x_v);
+    JMI_ASG(STR, s_v, tmp_2)
+    JMI_RET(STR, s_o, s_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_string_t func_CCodeGenTests_StringOperations14_f_exp0(jmi_real_t x_v) {
+    JMI_DEF(STR, s_v)
+    func_CCodeGenTests_StringOperations14_f_def0(x_v, &s_v);
+    return s_v;
+}
+
+")})));
+end StringOperations14;
+
+
 package TestTerminate
 
 model TestTerminate1
