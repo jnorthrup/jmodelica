@@ -1679,7 +1679,7 @@ $C_dae_blocks_residual_functions$
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _x_0 = sin(_time * 10.0);
+    _x_0 = jmi_sin_equation(jmi, _time * 10.0, \"sin(time * 10)\");
     if (jmi->atInitial || jmi->atEvent) {
         _sw(1) = jmi_turn_switch(jmi, _x_0 - (0.7), _sw(1), JMI_REL_LT);
     }
@@ -1701,7 +1701,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 int model_ode_initialize_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _x_0 = sin(_time * 10.0);
+    _x_0 = jmi_sin_equation(jmi, _time * 10.0, \"sin(time * 10)\");
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, _x_0 - (0.7), _sw(0), JMI_REL_GEQ);
     }
