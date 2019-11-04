@@ -1376,6 +1376,7 @@ $C_destruct_external_object$
     jmi_extobj_t CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_eo;
     jmi_extobj_t CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_eo1;
 
+
 jmi_extobj_t jmi_global_tmp_1(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
     jmi_extobj_t tmp_1;
@@ -1388,7 +1389,6 @@ jmi_extobj_t jmi_global_tmp_1(jmi_t* jmi) {
     JMI_DYNAMIC_FREE()
     return tmp_1;
 }
-
 int model_init_eval_independent_globals_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -1449,7 +1449,10 @@ jmi_extobj_t func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObj
 }
 
 
-    func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_EO_destructor_def1(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_eo));
+    if (JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_eo) != NULL) {
+        func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_EO_destructor_def1(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_eo));
+        JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_eo) = NULL;
+    }
 ")})));
 end GlobalConstantExternalObject1;
 

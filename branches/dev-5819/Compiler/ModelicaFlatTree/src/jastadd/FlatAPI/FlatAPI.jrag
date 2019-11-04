@@ -4467,4 +4467,29 @@ aspect ExpressionGeneralisation {
         else
             return unboundCopy();
     }
+
+    /**
+     * The format string including the implicit leading "%", if the format argument is given.
+     */
+    syn lazy Opt<FExp> FStringExp.getCFormatOpt() {
+        // TODO: To save memory, this could be solved in the C code generation instead.
+        if (hasFormat()) {
+            FExp fmt = getFormat();
+            FExp exp = fmt.treeCopy();
+            if (!formatSpecifier().initialPercent) {
+                exp = new FStringAddExp(new FStringLitExp("%"), exp);
+            }
+            if (fmt.variability().fixedParameterOrLess()) {
+                try {
+                    exp.parent = this;
+                    exp = exp.ceval().buildLiteral();
+                } catch (ConstantEvaluationException e) {
+                    // If we can't evaluate, just leave it as is
+                }
+            }
+            return new Opt<FExp>(exp);
+        } else {
+            return new Opt<FExp>();
+        }
+    }
 }
