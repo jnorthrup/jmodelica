@@ -112,6 +112,10 @@ aspect InnerOuterComponents {
     eq InstGeneratedInner.getInstComponentDecl().isGeneratedInner() = true;
     eq BaseNode.getChild().isGeneratedInner()                       = false;
 
+    inh boolean InstComponentDecl.isInGeneratedInner();
+    eq InstGeneratedInner.getInstComponentDecl().isInGeneratedInner() = true;
+    eq InstClassDecl.getChild().isInGeneratedInner()                  = false;
+
 }
 
 aspect InnerOuterClasses {
