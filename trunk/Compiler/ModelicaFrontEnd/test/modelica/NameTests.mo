@@ -3015,15 +3015,15 @@ end IndexLookup2;
 model ConditionalComponentTest1_Err
   parameter Real x = 1 if 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConditionalComponentTest1_Err",
-            description="Test of type checking of conditional components.",
-            errorMessage="
-1 errors found:
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="ConditionalComponentTest1_Err",
+        description="Test of type checking of conditional components.",
+        errorMessage="
 
-Error at line 2, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
-  The guard expression of a conditional component should be a boolean expression
+
+Error at line 2, column 3, in file '...', NON_BOOLEAN_CONDITIONAL_GUARD:
+  The guard expression of a conditional component should be a scalar Boolean expression
 ")})));
 end ConditionalComponentTest1_Err;
 
@@ -3031,15 +3031,15 @@ model ConditionalComponentTest2_Err
   parameter Boolean b[2] = {true,true};
   parameter Real x = 1 if b;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConditionalComponentTest2_Err",
-            description="Test of type checking of conditional components.",
-            errorMessage="
-1 errors found:
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="ConditionalComponentTest2_Err",
+        description="Test of type checking of conditional components.",
+        errorMessage="
 
-Error at line 3, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
-  The guard expression of a conditional component should be a scalar expression
+
+Error at line 3, column 3, in file '...', NON_BOOLEAN_CONDITIONAL_GUARD:
+  The guard expression of a conditional component should be a scalar Boolean expression
 ")})));
 end ConditionalComponentTest2_Err;
 
@@ -3047,18 +3047,15 @@ model ConditionalComponentTest3_Err
   parameter Integer b[2] = {1,1};
   parameter Real x = 1 if b;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConditionalComponentTest3_Err",
-            description="Test of type checking of conditional components.",
-            errorMessage="
-2 errors found:
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="ConditionalComponentTest3_Err",
+        description="Test of type checking of conditional components.",
+        errorMessage="
 
-Error at line 3, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
-  The guard expression of a conditional component should be a boolean expression
 
-Error at line 3, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
-  The guard expression of a conditional component should be a scalar expression
+Error at line 3, column 3, in file '...', NON_BOOLEAN_CONDITIONAL_GUARD:
+  The guard expression of a conditional component should be a scalar Boolean expression
 ")})));
 end ConditionalComponentTest3_Err;
 
@@ -3146,7 +3143,7 @@ model ConditionalComponentTest8
 			description="Test flattening of conditional components.",
 			flatModel="
 fclass NameTests.ConditionalComponentTest8
- parameter Boolean b = false /* false */;
+ structural parameter Boolean b = false /* false */;
 
 end NameTests.ConditionalComponentTest8;
 ")})));
@@ -3177,7 +3174,7 @@ model ConditionalComponentTest9
 			description="Test flattening of conditional components.",
 			flatModel="
 fclass NameTests.ConditionalComponentTest9
- parameter Boolean b = false /* false */;
+ structural parameter Boolean b = false /* false */;
 
 end NameTests.ConditionalComponentTest9;
 ")})));
@@ -3379,6 +3376,82 @@ fclass NameTests.ConditionalComponentTest14
 end NameTests.ConditionalComponentTest14;
 ")})));
 end ConditionalComponentTest14;
+
+
+model ConditionalComponentTest15_Err
+    connector C
+        Real x;
+    end C;
+    
+    parameter Integer b[2] = {1,1};
+    C c if b;
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="ConditionalComponentTest15_Err",
+        description="Test of type checking of conditional composite component.",
+        errorMessage="
+
+
+Error at line 7, column 5, in file '...', NON_BOOLEAN_CONDITIONAL_GUARD:
+  The guard expression of a conditional component should be a scalar Boolean expression
+")})));
+end ConditionalComponentTest15_Err;
+
+
+model ConditionalComponentTest16
+    connector C
+        Real x;
+    end C;
+    
+    parameter Boolean b = false;
+    C c if b;
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        description="Flattening conditional composite component",
+        flatModel="
+fclass NameTests.ConditionalComponentTest16
+ structural parameter Boolean b = false /* false */;
+end NameTests.ConditionalComponentTest16;
+")})));
+end ConditionalComponentTest16;
+
+
+model ConditionalComponentTest17
+    connector C
+        Real x;
+    end C;
+    
+    parameter Boolean b = true;
+    C c if b;
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        description="Flattening conditional composite component",
+        flatModel="
+fclass NameTests.ConditionalComponentTest17
+ structural parameter Boolean b = true /* true */;
+ potential Real c.x;
+end NameTests.ConditionalComponentTest17;
+")})));
+end ConditionalComponentTest17;
+
+
+model ConditionalComponentTest18_Err
+    parameter Boolean b(start = false, fixed = false);
+    Real x if b;
+    Real y if time > 5;
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        description="Checking that conditional guard is a fixed parameter expression.",
+        errorMessage="
+Error at line 3, column 5, in file '...', NON_FIXED_CONDITIONAL_GUARD:
+  The guard expression of a conditional component must be a fixed parameter expression
+Error at line 4, column 5, in file '...', NON_FIXED_CONDITIONAL_GUARD:
+  The guard expression of a conditional component must be a fixed parameter expression
+
+")})));
+end ConditionalComponentTest18_Err;
+
+
 
 model AttributeDot1
   Real x=1;
