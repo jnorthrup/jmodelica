@@ -17,6 +17,264 @@
 
 package CCodeGenTests
 
+model DomainChecks1
+	Real x1 = abs(time);
+	Real x2 = cos(time);
+	Real x3 = sin(time);
+	Real x4 = tan(time);
+	Real x5 = acos(time);
+	Real x6 = asin(time);
+	Real x7 = atan(time);
+	Real x8 = log(time);
+	Real x9 = log10(time);
+	Real x10= exp(time);
+	Real x11= time^10;
+	Real x12= sqrt(time);
+	Real x13= sinh(time);
+	Real x14= cosh(time);
+	Real x15= tanh(time);
+	Real x16= atan2(time, 2*time);
+	Real x17= time / x16;
+	Real x18= sign(time);
+	Real x19= max(time, x16);
+	Real x20= min(time, x16);
+	Real x21= div(time, 2*time);
+
+	function operators
+		input Real t;
+		output Real[16] o;
+	algorithm
+		o[1] := cos(t);
+		o[2] := sin(t);
+		o[3] := acos(t);
+		o[4] := asin(t);
+		o[5] := atan(t);
+		o[6] := log(t);
+		o[7] := log10(t);
+		o[8] := exp(t);
+		o[9] := t^10;
+		o[10]:= sqrt(time);
+		o[11]:= cosh(time);
+		o[12]:= sinh(time);
+		o[13]:= tanh(time);
+		o[14]:= atan2(time, 2*time);
+		o[15]:= t / o[1];
+		o[16]:= div(time, 2*time);
+	end operators;
+	
+	Real o[16] = operators(time);
+	
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="DomainChecks1",
+        description="Test of domain check generation",
+        mathematical_domain_checks=true,
+        inline_functions="none",
+        template="
+$C_ode_derivatives$
+$C_functions$
+",
+        generatedCode="
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_1, 16, 1)
+    _x1_0 = jmi_abs(_time);
+    _x2_1 = jmi_cos_equation(jmi, _time, \"cos(time)\");
+    _x3_2 = jmi_sin_equation(jmi, _time, \"sin(time)\");
+    _x4_3 = jmi_tan_equation(jmi, _time, \"tan(time)\");
+    _x5_4 = jmi_acos_equation(jmi, _time, \"acos(time)\");
+    _x6_5 = jmi_asin_equation(jmi, _time, \"asin(time)\");
+    _x7_6 = jmi_atan_equation(jmi, _time, \"atan(time)\");
+    _x8_7 = jmi_log_equation(jmi, _time, \"log(time)\");
+    _x9_8 = jmi_log10_equation(jmi, _time, \"log10(time)\");
+    _x10_9 = jmi_exp_equation(jmi, _time, \"exp(time)\");
+    _x11_10 = jmi_pow_equation(jmi, _time, 10, \"time ^ 10\");
+    _x12_11 = jmi_sqrt_equation(jmi, _time, \"sqrt(time)\");
+    _x13_12 = jmi_sinh_equation(jmi, _time, \"sinh(time)\");
+    _x14_13 = jmi_cosh_equation(jmi, _time, \"cosh(time)\");
+    _x15_14 = jmi_tanh_equation(jmi, _time, \"tanh(time)\");
+    _x16_15 = jmi_atan2_equation(jmi, _time, 2.0 * _time, \"atan2(time, 2 * time)\");
+    _x17_16 = jmi_divide_equation(jmi, _time, _x16_15, \"time / x16\");
+    _x18_17 = jmi_sign(_time);
+    _x19_18 = jmi_max(_time, _x16_15);
+    _x20_19 = jmi_min(_time, _x16_15);
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, ((long)jmi_divide_equation(jmi, _time, 2.0 * _time, \"div(time, 2 * time)\")) - (pre_temp_2_37), _sw(0), JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch(jmi, ((long)jmi_divide_equation(jmi, _time, 2.0 * _time, \"div(time, 2 * time)\")) - (pre_temp_2_37 + 1.0), _sw(1), JMI_REL_GEQ);
+    }
+    _temp_2_37 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, ((long)jmi_divide_equation(jmi, _time, 2.0 * _time, \"div(time, 2 * time)\")), pre_temp_2_37);
+    pre_temp_2_37 = _temp_2_37;
+    _x21_20 = _temp_2_37;
+    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_1, 16, 1, 16)
+    func_CCodeGenTests_DomainChecks1_operators_def0(_time, tmp_1);
+    memcpy(&_o_1_21, &jmi_array_val_1(tmp_1, 1), 16 * sizeof(jmi_real_t));
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+void func_CCodeGenTests_DomainChecks1_operators_def0(jmi_real_t t_v, jmi_array_t* o_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, o_an, 16, 1)
+    if (o_a == NULL) {
+        JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, o_an, 16, 1, 16)
+        o_a = o_an;
+    }
+    jmi_array_ref_1(o_a, 1) = jmi_cos_function(\"CCodeGenTests.DomainChecks1.operators\", t_v, \"cos(t)\");
+    jmi_array_ref_1(o_a, 2) = jmi_sin_function(\"CCodeGenTests.DomainChecks1.operators\", t_v, \"sin(t)\");
+    jmi_array_ref_1(o_a, 3) = jmi_acos_function(\"CCodeGenTests.DomainChecks1.operators\", t_v, \"acos(t)\");
+    jmi_array_ref_1(o_a, 4) = jmi_asin_function(\"CCodeGenTests.DomainChecks1.operators\", t_v, \"asin(t)\");
+    jmi_array_ref_1(o_a, 5) = jmi_atan_function(\"CCodeGenTests.DomainChecks1.operators\", t_v, \"atan(t)\");
+    jmi_array_ref_1(o_a, 6) = jmi_log_function(\"CCodeGenTests.DomainChecks1.operators\", t_v, \"log(t)\");
+    jmi_array_ref_1(o_a, 7) = jmi_log10_function(\"CCodeGenTests.DomainChecks1.operators\", t_v, \"log10(t)\");
+    jmi_array_ref_1(o_a, 8) = jmi_exp_function(\"CCodeGenTests.DomainChecks1.operators\", t_v, \"exp(t)\");
+    jmi_array_ref_1(o_a, 9) = jmi_pow_function(\"CCodeGenTests.DomainChecks1.operators\", t_v, 10, \"t ^ 10\");
+    jmi_array_ref_1(o_a, 10) = jmi_sqrt_function(\"CCodeGenTests.DomainChecks1.operators\", _time, \"sqrt(time)\");
+    jmi_array_ref_1(o_a, 11) = jmi_cosh_function(\"CCodeGenTests.DomainChecks1.operators\", _time, \"cosh(time)\");
+    jmi_array_ref_1(o_a, 12) = jmi_sinh_function(\"CCodeGenTests.DomainChecks1.operators\", _time, \"sinh(time)\");
+    jmi_array_ref_1(o_a, 13) = jmi_tanh_function(\"CCodeGenTests.DomainChecks1.operators\", _time, \"tanh(time)\");
+    jmi_array_ref_1(o_a, 14) = jmi_atan2_function(\"CCodeGenTests.DomainChecks1.operators\", _time, 2.0 * _time, \"atan2(time, 2 * time)\");
+    jmi_array_ref_1(o_a, 15) = jmi_divide_function(\"CCodeGenTests.DomainChecks1.operators\", t_v, jmi_array_val_1(o_a, 1), \"t / o[1]\");
+    jmi_array_ref_1(o_a, 16) = ((long)jmi_divide_function(\"CCodeGenTests.DomainChecks1.operators\", _time, 2.0 * _time, \"div(time, 2 * time)\"));
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+end DomainChecks1;
+
+model DomainChecks2
+	Real x1 = abs(time);
+	Real x2 = cos(time);
+	Real x3 = sin(time);
+	Real x4 = tan(time);
+	Real x5 = acos(time);
+	Real x6 = asin(time);
+	Real x7 = atan(time);
+	Real x8 = log(time);
+	Real x9 = log10(time);
+	Real x10= exp(time);
+	Real x11= time^10;
+	Real x12= sqrt(time);
+	Real x13= sinh(time);
+	Real x14= cosh(time);
+	Real x15= tanh(time);
+	Real x16= atan2(time, 2*time);
+	Real x17= time / x16;
+	Real x18= sign(time);
+	Real x19= max(time, x16);
+	Real x20= min(time, x16);
+	Real x21= div(time, 2*time);
+
+	function operators
+		input Real t;
+		output Real[16] o;
+	algorithm
+		o[1] := cos(t);
+		o[2] := sin(t);
+		o[3] := acos(t);
+		o[4] := asin(t);
+		o[5] := atan(t);
+		o[6] := log(t);
+		o[7] := log10(t);
+		o[8] := exp(t);
+		o[9] := t^10;
+		o[10]:= sqrt(time);
+		o[11]:= cosh(time);
+		o[12]:= sinh(time);
+		o[13]:= tanh(time);
+		o[14]:= atan2(time, 2*time);
+		o[15]:= t / o[1];
+		o[16]:= div(time, 2*time);
+	end operators;
+	
+	Real o[16] = operators(time);
+	
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="DomainChecks2",
+        description="Test of no domain check generation",
+        mathematical_domain_checks=false,
+        inline_functions="none",
+        template="
+$C_ode_derivatives$
+$C_functions$
+",
+        generatedCode="
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_1, 16, 1)
+    _x1_0 = JMI_ABS(_time);
+    _x2_1 = JMI_COS_EQUATION(jmi, _time, \"cos(time)\");
+    _x3_2 = JMI_SIN_EQUATION(jmi, _time, \"sin(time)\");
+    _x4_3 = JMI_TAN_EQUATION(jmi, _time, \"tan(time)\");
+    _x5_4 = JMI_ACOS_EQUATION(jmi, _time, \"acos(time)\");
+    _x6_5 = JMI_ASIN_EQUATION(jmi, _time, \"asin(time)\");
+    _x7_6 = JMI_ATAN_EQUATION(jmi, _time, \"atan(time)\");
+    _x8_7 = JMI_LOG_EQUATION(jmi, _time, \"log(time)\");
+    _x9_8 = JMI_LOG10_EQUATION(jmi, _time, \"log10(time)\");
+    _x10_9 = JMI_EXP_EQUATION(jmi, _time, \"exp(time)\");
+    _x11_10 = JMI_POW_EQUATION(jmi, _time, 10, \"time ^ 10\");
+    _x12_11 = JMI_SQRT_EQUATION(jmi, _time, \"sqrt(time)\");
+    _x13_12 = JMI_SINH_EQUATION(jmi, _time, \"sinh(time)\");
+    _x14_13 = JMI_COSH_EQUATION(jmi, _time, \"cosh(time)\");
+    _x15_14 = JMI_TANH_EQUATION(jmi, _time, \"tanh(time)\");
+    _x16_15 = JMI_ATAN2_EQUATION(jmi, _time, 2.0 * _time, \"atan2(time, 2 * time)\");
+    _x17_16 = JMI_DIVIDE_EQUATION(jmi, _time, _x16_15, \"time / x16\");
+    _x18_17 = JMI_SIGN(_time);
+    _x19_18 = JMI_MAX(_time, _x16_15);
+    _x20_19 = JMI_MIN(_time, _x16_15);
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, ((long)JMI_DIVIDE_EQUATION(jmi, _time, 2.0 * _time, \"div(time, 2 * time)\")) - (pre_temp_2_37), _sw(0), JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch(jmi, ((long)JMI_DIVIDE_EQUATION(jmi, _time, 2.0 * _time, \"div(time, 2 * time)\")) - (pre_temp_2_37 + 1.0), _sw(1), JMI_REL_GEQ);
+    }
+    _temp_2_37 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, ((long)JMI_DIVIDE_EQUATION(jmi, _time, 2.0 * _time, \"div(time, 2 * time)\")), pre_temp_2_37);
+    pre_temp_2_37 = _temp_2_37;
+    _x21_20 = _temp_2_37;
+    JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_1, 16, 1, 16)
+    func_CCodeGenTests_DomainChecks2_operators_def0(_time, tmp_1);
+    memcpy(&_o_1_21, &jmi_array_val_1(tmp_1, 1), 16 * sizeof(jmi_real_t));
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+void func_CCodeGenTests_DomainChecks2_operators_def0(jmi_real_t t_v, jmi_array_t* o_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STACK, jmi_real_t, jmi_array_t, o_an, 16, 1)
+    if (o_a == NULL) {
+        JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, o_an, 16, 1, 16)
+        o_a = o_an;
+    }
+    jmi_array_ref_1(o_a, 1) = JMI_COS_FUNCTION(\"CCodeGenTests.DomainChecks2.operators\", t_v, \"cos(t)\");
+    jmi_array_ref_1(o_a, 2) = JMI_SIN_FUNCTION(\"CCodeGenTests.DomainChecks2.operators\", t_v, \"sin(t)\");
+    jmi_array_ref_1(o_a, 3) = JMI_ACOS_FUNCTION(\"CCodeGenTests.DomainChecks2.operators\", t_v, \"acos(t)\");
+    jmi_array_ref_1(o_a, 4) = JMI_ASIN_FUNCTION(\"CCodeGenTests.DomainChecks2.operators\", t_v, \"asin(t)\");
+    jmi_array_ref_1(o_a, 5) = JMI_ATAN_FUNCTION(\"CCodeGenTests.DomainChecks2.operators\", t_v, \"atan(t)\");
+    jmi_array_ref_1(o_a, 6) = JMI_LOG_FUNCTION(\"CCodeGenTests.DomainChecks2.operators\", t_v, \"log(t)\");
+    jmi_array_ref_1(o_a, 7) = JMI_LOG10_FUNCTION(\"CCodeGenTests.DomainChecks2.operators\", t_v, \"log10(t)\");
+    jmi_array_ref_1(o_a, 8) = JMI_EXP_FUNCTION(\"CCodeGenTests.DomainChecks2.operators\", t_v, \"exp(t)\");
+    jmi_array_ref_1(o_a, 9) = JMI_POW_FUNCTION(\"CCodeGenTests.DomainChecks2.operators\", t_v, 10, \"t ^ 10\");
+    jmi_array_ref_1(o_a, 10) = JMI_SQRT_FUNCTION(\"CCodeGenTests.DomainChecks2.operators\", _time, \"sqrt(time)\");
+    jmi_array_ref_1(o_a, 11) = JMI_COSH_FUNCTION(\"CCodeGenTests.DomainChecks2.operators\", _time, \"cosh(time)\");
+    jmi_array_ref_1(o_a, 12) = JMI_SINH_FUNCTION(\"CCodeGenTests.DomainChecks2.operators\", _time, \"sinh(time)\");
+    jmi_array_ref_1(o_a, 13) = JMI_TANH_FUNCTION(\"CCodeGenTests.DomainChecks2.operators\", _time, \"tanh(time)\");
+    jmi_array_ref_1(o_a, 14) = JMI_ATAN2_FUNCTION(\"CCodeGenTests.DomainChecks2.operators\", _time, 2.0 * _time, \"atan2(time, 2 * time)\");
+    jmi_array_ref_1(o_a, 15) = JMI_DIVIDE_FUNCTION(\"CCodeGenTests.DomainChecks2.operators\", t_v, jmi_array_val_1(o_a, 1), \"t / o[1]\");
+    jmi_array_ref_1(o_a, 16) = ((long)JMI_DIVIDE_FUNCTION(\"CCodeGenTests.DomainChecks2.operators\", _time, 2.0 * _time, \"div(time, 2 * time)\"));
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+end DomainChecks2;
+
 model CCodeGenTest1
   Real x1(start=0); 
   Real x2(start=1); 
@@ -144,7 +402,7 @@ annotation(__JModelica(UnitTesting(tests={
         template="$C_DAE_equation_residuals$",
         generatedCode="
     (*res)[0] = _y_1 - (_der_x_2);
-    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(_time, jmi_divide_equation(jmi, 3.141592653589793, 2.0, \"3.141592653589793 / 2\"), JMI_TRUE, JMI_FALSE), JMI_TRUE, sin(_time), _x_0)) - (_der_x_2);
+    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(_time, jmi_divide_equation(jmi, 3.141592653589793, 2.0, \"3.141592653589793 / 2\"), JMI_TRUE, JMI_FALSE), JMI_TRUE, jmi_sin_equation(jmi, _time, \"sin(time)\"), _x_0)) - (_der_x_2);
 ")})));
 end CCodeGenTest4;
 
@@ -3468,12 +3726,12 @@ model CFunctionTest23
 equation
     {a, b[1],b[2],c,b[3],d} = F({e, f[1], f[2], g, f[3], h});
     
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="CFunctionTest23",
-            description="memcpy for parts of array (both of input and output)",
-            template="$C_ode_derivatives$",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="CFunctionTest23",
+        description="memcpy for parts of array (both of input and output)",
+        template="$C_ode_derivatives$",
+        generatedCode="
 
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
@@ -3481,11 +3739,11 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_1, 6, 1)
     JMI_ARR(STACK, jmi_real_t, jmi_array_t, tmp_2, 6, 1)
     _e_3 = _time;
-    _f_1_7 = sin(_time - 0.5);
-    _f_2_8 = sin(_time);
-    _g_10 = cos(_time);
-    _f_3_9 = sin(_time + 0.5);
-    _h_11 = - cos(_time);
+    _f_1_7 = jmi_sin_equation(jmi, _time - 0.5, \"sin(time - 0.5)\");
+    _f_2_8 = jmi_sin_equation(jmi, _time, \"sin(time)\");
+    _g_10 = jmi_cos_equation(jmi, _time, \"cos(time)\");
+    _f_3_9 = jmi_sin_equation(jmi, _time + 0.5, \"sin(time + 0.5)\");
+    _h_11 = - jmi_cos_equation(jmi, _time, \"cos(time)\");
     JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_1, 6, 1, 6)
     JMI_ARRAY_INIT_1(STACK, jmi_real_t, jmi_array_t, tmp_2, 6, 1, 6)
     jmi_array_ref_1(tmp_2, 1) = _e_3;
@@ -8524,7 +8782,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _x_0 = x[0];
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = COND_EXP_EQ(LOG_EXP_AND(_temp_1_6, LOG_EXP_NOT(pre_temp_1_6)), JMI_TRUE, sin(_x_0) + 3.0, pre_x_0) - (_x_0);
+            (*res)[0] = COND_EXP_EQ(LOG_EXP_AND(_temp_1_6, LOG_EXP_NOT(pre_temp_1_6)), JMI_TRUE, jmi_sin_equation(jmi, _x_0, \"sin(x)\") + 3.0, pre_x_0) - (_x_0);
         }
     }
     JMI_DYNAMIC_FREE()
@@ -9892,7 +10150,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _z1_2 = x[0];
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = _z1_2 + 2 - (sin(_z1_2) * 3);
+            (*res)[0] = _z1_2 + 2 - (jmi_sin_equation(jmi, _z1_2, \"sin(z1)\") * 3);
         }
     }
     JMI_DYNAMIC_FREE()
@@ -9916,7 +10174,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
             _z1_2 = x[0];
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = _z1_2 + 2 - (sin(_z1_2) * 3);
+            (*res)[0] = _z1_2 + 2 - (jmi_sin_equation(jmi, _z1_2, \"sin(z1)\") * 3);
         }
     }
     JMI_DYNAMIC_FREE()
@@ -10193,7 +10451,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _der_dummy_15 = 1;
-    _u_6 = 2 * sin(_time);
+    _u_6 = 2 * jmi_sin_equation(jmi, _time, \"sin(time)\");
     if (jmi->atInitial || jmi->atEvent) {
         _sw(2) = jmi_turn_switch(jmi, _v_3 - (0.0), _sw(2), JMI_REL_GT);
     }
@@ -10210,7 +10468,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _der_dummy_15 = 1;
-    _u_6 = 2 * sin(_time);
+    _u_6 = 2 * jmi_sin_equation(jmi, _time, \"sin(time)\");
     pre_mode_10 = 2;
     _v_3 = 0.0;
     ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
@@ -10895,7 +11153,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _d_2 = _sw(0);
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = sin(_b_1) * COND_EXP_EQ(_d_2, JMI_TRUE, 1.0, 2.0) - (_a_0);
+            (*res)[0] = jmi_sin_equation(jmi, _b_1, \"sin(b)\") * COND_EXP_EQ(_d_2, JMI_TRUE, 1.0, 2.0) - (_a_0);
             (*res)[1] = 1 - _b_1 - (_a_0);
         }
     }
@@ -10936,7 +11194,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
             _d_2 = _sw(0);
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = sin(_b_1) * COND_EXP_EQ(_d_2, JMI_TRUE, 1.0, 2.0) - (_a_0);
+            (*res)[0] = jmi_sin_equation(jmi, _b_1, \"sin(b)\") * COND_EXP_EQ(_d_2, JMI_TRUE, 1.0, 2.0) - (_a_0);
             (*res)[1] = 1 - _b_1 - (_a_0);
         }
     }
@@ -12133,7 +12391,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _b_1 = x[0];
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = asin(_b_1) - (_a_0);
+            (*res)[0] = jmi_asin_equation(jmi, _b_1, \"asin(b)\") - (_a_0);
         }
     }
     JMI_DYNAMIC_FREE()
@@ -15287,25 +15545,22 @@ equation
     a = f({if b > 0.0 then b else -b});
     b = cos(time);
     
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="TestRelationalOp14",
-            description="Test inline bug which caused exception during code gen (related to switch index)",
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="TestRelationalOp14",
+        description="Test inline bug which caused exception during code gen (related to switch index)",
+        template="
 $C_ode_time_events$
 $C_ode_derivatives$
 ",
-            generatedCode="
-
+        generatedCode="
     jmi_real_t nSamp;
-
-
 
 
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _b_1 = cos(_time);
+    _b_1 = jmi_cos_equation(jmi, _time, \"cos(time)\");
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, _b_1 - (0.0), _sw(0), JMI_REL_GT);
     }
@@ -15327,22 +15582,22 @@ model TestRelationalOp14B
     Real b = cos(time);
     Real c = if b > 0.0 then b else -b;
     
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="TestRelationalOp14B",
-            description="Test inline bug which caused exception during code gen (related to switch index)",
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="TestRelationalOp14B",
+        description="Test inline bug which caused exception during code gen (related to switch index)",
+        template="
 $C_ode_time_events$
 $C_ode_derivatives$
 ",
-            generatedCode="
+        generatedCode="
     jmi_real_t nSamp;
 
 
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _b_1 = cos(_time);
+    _b_1 = jmi_cos_equation(jmi, _time, \"cos(time)\");
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, _b_1 - (0.0), _sw(0), JMI_REL_GT);
     }
@@ -15377,17 +15632,17 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(jmi, sin(_time) - (0.0), _sw(0), JMI_REL_GT);
+        _sw(0) = jmi_turn_switch(jmi, jmi_sin_equation(jmi, _time, \"sin(time)\") - (0.0), _sw(0), JMI_REL_GT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch(jmi, cos(_time) - (0.0), _sw(1), JMI_REL_GT);
+        _sw(1) = jmi_turn_switch(jmi, jmi_cos_equation(jmi, _time, \"cos(time)\") - (0.0), _sw(1), JMI_REL_GT);
     }
     _a_0 = COND_EXP_EQ(LOG_EXP_AND(_sw(0), _sw(1)), JMI_TRUE, 1.0, _time);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(jmi, sin(_time) - (0.0), _sw(0), JMI_REL_GT);
+        _sw(0) = jmi_turn_switch(jmi, jmi_sin_equation(jmi, _time, \"sin(time)\") - (0.0), _sw(0), JMI_REL_GT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(2) = jmi_turn_switch(jmi, cos(_time) - (0.0), _sw(2), JMI_REL_GT);
+        _sw(2) = jmi_turn_switch(jmi, jmi_cos_equation(jmi, _time, \"cos(time)\") - (0.0), _sw(2), JMI_REL_GT);
     }
     _b_1 = COND_EXP_EQ(LOG_EXP_AND(_sw(0), _sw(2)), JMI_TRUE, _time, 1.0);
     JMI_DYNAMIC_FREE()
@@ -15396,9 +15651,9 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    (*res)[0] = sin(_time) - (0.0);
-    (*res)[1] = COND_EXP_EQ(_sw(0), JMI_TRUE, cos(_time) - (0.0), 1.0);
-    (*res)[2] = COND_EXP_EQ(_sw(0), JMI_TRUE, cos(_time) - (0.0), 1.0);
+    (*res)[0] = jmi_sin_equation(jmi, _time, \"sin(time)\") - (0.0);
+    (*res)[1] = COND_EXP_EQ(_sw(0), JMI_TRUE, jmi_cos_equation(jmi, _time, \"cos(time)\") - (0.0), 1.0);
+    (*res)[2] = COND_EXP_EQ(_sw(0), JMI_TRUE, jmi_cos_equation(jmi, _time, \"cos(time)\") - (0.0), 1.0);
     JMI_DYNAMIC_FREE()
     return ef;
 ")})));
@@ -15424,23 +15679,23 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(jmi, sin(_time) - (0.0), _sw(0), JMI_REL_GT);
+        _sw(0) = jmi_turn_switch(jmi, jmi_sin_equation(jmi, _time, \"sin(time)\") - (0.0), _sw(0), JMI_REL_GT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch(jmi, cos(_time) - (0.0), _sw(1), JMI_REL_GT);
+        _sw(1) = jmi_turn_switch(jmi, jmi_cos_equation(jmi, _time, \"cos(time)\") - (0.0), _sw(1), JMI_REL_GT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(2) = jmi_turn_switch(jmi, cos(_time + 0.5) - (0.0), _sw(2), JMI_REL_GT);
+        _sw(2) = jmi_turn_switch(jmi, jmi_cos_equation(jmi, _time + 0.5, \"cos(time + 0.5)\") - (0.0), _sw(2), JMI_REL_GT);
     }
     _a_0 = COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_AND(_sw(0), _sw(1)), _sw(2)), JMI_TRUE, 1.0, _time);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(jmi, sin(_time) - (0.0), _sw(0), JMI_REL_GT);
+        _sw(0) = jmi_turn_switch(jmi, jmi_sin_equation(jmi, _time, \"sin(time)\") - (0.0), _sw(0), JMI_REL_GT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(3) = jmi_turn_switch(jmi, cos(_time) - (0.0), _sw(3), JMI_REL_GT);
+        _sw(3) = jmi_turn_switch(jmi, jmi_cos_equation(jmi, _time, \"cos(time)\") - (0.0), _sw(3), JMI_REL_GT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(4) = jmi_turn_switch(jmi, cos(_time + 0.5) - (0.0), _sw(4), JMI_REL_GT);
+        _sw(4) = jmi_turn_switch(jmi, jmi_cos_equation(jmi, _time + 0.5, \"cos(time + 0.5)\") - (0.0), _sw(4), JMI_REL_GT);
     }
     _b_1 = COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_AND(_sw(0), _sw(3)), _sw(4)), JMI_TRUE, _time, 1.0);
     JMI_DYNAMIC_FREE()
@@ -15449,11 +15704,11 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    (*res)[0] = sin(_time) - (0.0);
-    (*res)[1] = COND_EXP_EQ(_sw(0), JMI_TRUE, cos(_time) - (0.0), 1.0);
-    (*res)[2] = COND_EXP_EQ(LOG_EXP_AND(_sw(0), _sw(1)), JMI_TRUE, cos(_time + 0.5) - (0.0), 1.0);
-    (*res)[3] = COND_EXP_EQ(_sw(0), JMI_TRUE, cos(_time) - (0.0), 1.0);
-    (*res)[4] = COND_EXP_EQ(LOG_EXP_AND(_sw(0), _sw(3)), JMI_TRUE, cos(_time + 0.5) - (0.0), 1.0);
+    (*res)[0] = jmi_sin_equation(jmi, _time, \"sin(time)\") - (0.0);
+    (*res)[1] = COND_EXP_EQ(_sw(0), JMI_TRUE, jmi_cos_equation(jmi, _time, \"cos(time)\") - (0.0), 1.0);
+    (*res)[2] = COND_EXP_EQ(LOG_EXP_AND(_sw(0), _sw(1)), JMI_TRUE, jmi_cos_equation(jmi, _time + 0.5, \"cos(time + 0.5)\") - (0.0), 1.0);
+    (*res)[3] = COND_EXP_EQ(_sw(0), JMI_TRUE, jmi_cos_equation(jmi, _time, \"cos(time)\") - (0.0), 1.0);
+    (*res)[4] = COND_EXP_EQ(LOG_EXP_AND(_sw(0), _sw(3)), JMI_TRUE, jmi_cos_equation(jmi, _time + 0.5, \"cos(time + 0.5)\") - (0.0), 1.0);
     JMI_DYNAMIC_FREE()
     return ef;
 ")})));
@@ -15470,20 +15725,21 @@ equation
         b = false;
     end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="TestRelationalOp17",
-            description="Ensure that switches in DAE isn't eliminated for switch in initDAE'",
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="TestRelationalOp17",
+        description="Ensure that switches in DAE isn't eliminated for switch in initDAE'",
+        template="
 $C_ode_derivatives$
 $C_DAE_event_indicator_residuals$
 $C_DAE_initial_event_indicator_residuals$
 ",
-            generatedCode="
+        generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _x_0 = sin(_time);
+    _x_0 = jmi_sin_equation(jmi, _time, \"sin(time)\");
     if (jmi->atInitial || jmi->atEvent) {
         _sw(1) = jmi_turn_switch(jmi, _x_0 - (-0.5), _sw(1), JMI_REL_LT);
     }
@@ -20068,7 +20324,7 @@ static const int DAE_relations[] = { JMI_REL_GEQ, JMI_REL_GEQ, JMI_REL_GEQ };
 int model_ode_initialize_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _tmp_2 = sin(_time * 100.0);
+    _tmp_2 = jmi_sin_equation(jmi, _time * 100.0, \"sin(time * 100)\");
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, __eventIndicator_1_3, _sw(0), JMI_REL_GEQ);
     }
@@ -20092,7 +20348,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
         _sw(0) = jmi_turn_switch(jmi, __eventIndicator_1_3, _sw(0), JMI_REL_GEQ);
     }
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
-    _tmp_2 = sin(_time * 100.0);
+    _tmp_2 = jmi_sin_equation(jmi, _time * 100.0, \"sin(time * 100)\");
     __eventIndicator_2_4 = jmi_delay_first_event_indicator_exp(jmi, 0, _tmp_2);
     __eventIndicator_3_5 = jmi_delay_second_event_indicator_exp(jmi, 0, _tmp_2);
     _y_1 = jmi_delay_evaluate(jmi, 0, _x_0, _tmp_2);
