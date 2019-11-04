@@ -311,6 +311,21 @@ class TestExternalRecordObj(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base('ExtFunctionTests.mo', 
+            'ExtFunctionTests.GlobalExtFunctionDestruction')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=0.1, time_step=0.01)
+        self.run()
+
+    @testattr(stddist_full = True)
+    def test_result(self):
+        pass #We test that there is no segfault when destroying the FMU object
+
+class TestGlobalExternalRecordObj(SimulationTest):
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('ExtFunctionTests.mo', 
             'ExtFunctionTests.ExtFunctionRecordObj')
 
     @testattr(stddist_full = True)

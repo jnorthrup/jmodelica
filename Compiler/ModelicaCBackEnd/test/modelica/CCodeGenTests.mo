@@ -1078,8 +1078,8 @@ equation
 	StringCompare("medium      ", String(enumVar, minimumLength=12));
 	StringCompare("      medium", String(enumVar, minimumLength=12, leftJustified=false));
 
-    StringCompare("42",           String(intVar, format="%d"));
-    StringCompare("3.1400000",    String(realVar, format="%f"));
+    StringCompare("42",           String(intVar, format="d"));
+    StringCompare("3.1400000",    String(realVar, format="f"));
 
 annotation(__JModelica(UnitTesting(tests={
     CCodeGenTestCase(
@@ -16018,7 +16018,6 @@ model StringOperations9
         input Real x;
         input Integer i;
         input Boolean b;
-        input String fmt;
         output Real y;
         String s;
       algorithm
@@ -16028,19 +16027,17 @@ model StringOperations9
         + String(x, significantDigits=i, minimumLength=i, leftJustified=b)
         + String(x, significantDigits=i, leftJustified=b)
         + String(x)
-        + String(x, format=fmt)
         
         + String(i, minimumLength=2, leftJustified=b)
         + String(i, minimumLength=i, leftJustified=true)
         + String(i, minimumLength=i, leftJustified=b)
-        + String(i, format=fmt)
         
         + String(b, minimumLength=2, leftJustified=b)
         + String(b, minimumLength=i, leftJustified=true)
         + String(b, minimumLength=i, leftJustified=b);
     end f;
     
-    Real y = f(-time, 3, true, "%g");
+    Real y = f(-time, 3, true);
 
 annotation(__JModelica(UnitTesting(tests={
     CCodeGenTestCase(
@@ -16050,24 +16047,22 @@ annotation(__JModelica(UnitTesting(tests={
         variability_propagation=false,
         template="$C_functions$",
         generatedCode="
-void func_CCodeGenTests_StringOperations9_f_def0(jmi_real_t x_v, jmi_real_t i_v, jmi_real_t b_v, jmi_string_t fmt_v, jmi_real_t* y_o) {
+void func_CCodeGenTests_StringOperations9_f_def0(jmi_real_t x_v, jmi_real_t i_v, jmi_real_t b_v, jmi_real_t* y_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, y_v)
     JMI_DEF(STR, s_v)
     JMI_DEF_STR_DYNA(tmp_1)
     JMI_INI(STR, s_v)
-    JMI_INI_STR_DYNA(tmp_1, jmi_max(7 + 1.0, i_v) + jmi_max(7 + i_v, 2.0) + jmi_max(7 + i_v, i_v) + jmi_max(7 + i_v, i_v) + 7 + i_v + 7 + 6 + 16 + jmi_max(10, 2.0) + jmi_max(10, i_v) + jmi_max(10, i_v) + 16 + jmi_max(5, 2.0) + jmi_max(5, i_v) + jmi_max(5, i_v))
+    JMI_INI_STR_DYNA(tmp_1, jmi_max(7 + 1.0, i_v) + jmi_max(7 + i_v, 2.0) + jmi_max(7 + i_v, i_v) + jmi_max(7 + i_v, i_v) + 7 + i_v + 7 + 6 + jmi_max(10, 2.0) + jmi_max(10, i_v) + jmi_max(10, i_v) + jmi_max(5, 2.0) + jmi_max(5, i_v) + jmi_max(5, i_v))
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) i_v, (int) 1.0, x_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) 2.0, (int) i_v, x_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(JMI_FALSE, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) i_v, (int) i_v, x_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) i_v, (int) i_v, x_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-.*g\", \"%.*g\"), (int) i_v, x_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%-.*g\", (int) 6, x_v);
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), fmt_v, x_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*d\", \"%*d\"), (int) 2.0, (int) i_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(JMI_TRUE, JMI_TRUE, \"%-*d\", \"%*d\"), (int) i_v, (int) i_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*d\", \"%*d\"), (int) i_v, (int) i_v);
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), fmt_v, (int) i_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*s\", \"%*s\"), (int) 2.0, COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(JMI_TRUE, JMI_TRUE, \"%-*s\", \"%*s\"), (int) i_v, COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*s\", \"%*s\"), (int) i_v, COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
@@ -16077,9 +16072,9 @@ void func_CCodeGenTests_StringOperations9_f_def0(jmi_real_t x_v, jmi_real_t i_v,
     return;
 }
 
-jmi_real_t func_CCodeGenTests_StringOperations9_f_exp0(jmi_real_t x_v, jmi_real_t i_v, jmi_real_t b_v, jmi_string_t fmt_v) {
+jmi_real_t func_CCodeGenTests_StringOperations9_f_exp0(jmi_real_t x_v, jmi_real_t i_v, jmi_real_t b_v) {
     JMI_DEF(REA, y_v)
-    func_CCodeGenTests_StringOperations9_f_def0(x_v, i_v, b_v, fmt_v, &y_v);
+    func_CCodeGenTests_StringOperations9_f_def0(x_v, i_v, b_v, &y_v);
     return y_v;
 }
 
@@ -16252,6 +16247,101 @@ void func_CCodeGenTests_StringOperations11_f1_def1(jmi_string_array_t* s_a, jmi_
 
 ")})));
 end StringOperations11;
+
+
+model StringOperations12
+    type E = enumeration(Alice, Bob, Eve);
+
+    function f
+        input Integer x;
+        input E e;
+        output Real y;
+    protected
+        String s;
+    algorithm
+        s := String(x, format="7u") + 
+             String(x, format="-3d") + 
+             String(e);
+        y := x + .5;
+    end f;
+    
+    Real y = f(integer(time), if time < 1 then E.Alice else E.Eve);
+
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="StringOperations12",
+        description="Check that integer-typed format strings generate the correct casts",
+        template="$C_functions$",
+        generatedCode="
+void func_CCodeGenTests_StringOperations12_f_def0(jmi_real_t x_v, jmi_real_t e_v, jmi_real_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    JMI_DEF(STR, s_v)
+    JMI_DEF_STR_STAT(tmp_1, 37)
+    JMI_INI(STR, s_v)
+    JMI_INI_STR_STAT(tmp_1)
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%7u\", (unsigned int) x_v);
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%-3d\", (int) x_v);
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%-s\", E_0_e[(int) e_v]);
+    JMI_ASG(STR, s_v, tmp_1)
+    y_v = x_v + 0.5;
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenTests_StringOperations12_f_exp0(jmi_real_t x_v, jmi_real_t e_v) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenTests_StringOperations12_f_def0(x_v, e_v, &y_v);
+    return y_v;
+}
+
+")})));
+end StringOperations12;
+
+
+model StringOperations13
+    function f
+        input Real x;
+        output Real y;
+    protected
+        String s;
+    algorithm
+        s := String(x, format="%g");
+        y := x + .5;
+    end f;
+    
+    Real y = f(time);
+
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="StringOperations13",
+        description="Check that we handle case where initial '%' of format specifier is included in format argument of String()",
+        template="$C_functions$",
+        generatedCode="
+void func_CCodeGenTests_StringOperations13_f_def0(jmi_real_t x_v, jmi_real_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    JMI_DEF(STR, s_v)
+    JMI_DEF_STR_STAT(tmp_1, 16)
+    JMI_INI(STR, s_v)
+    JMI_INI_STR_STAT(tmp_1)
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%g\", x_v);
+    JMI_ASG(STR, s_v, tmp_1)
+    y_v = x_v + 0.5;
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenTests_StringOperations13_f_exp0(jmi_real_t x_v) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenTests_StringOperations13_f_def0(x_v, &y_v);
+    return y_v;
+}
+
+")})));
+end StringOperations13;
 
 package TestTerminate
 

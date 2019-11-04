@@ -1184,4 +1184,44 @@ model MultiUse1
     Real y = f1(1) + f2(1);
 end MultiUse1;
 
+model GlobalExtFunctionDestruction
+    package P
+    record R1
+        R2 r2;
+    end R1;
+    record R2
+        Real x;
+    end R2;
+    
+    model EO
+        extends ExternalObject;
+        function constructor
+            input R1 r1;
+            output EO eo;
+            external "C" eo=eo_constructor_record(r1) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end constructor;
+        function destructor
+            input EO eo;
+            external "C" eo_destructor_record(eo) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end destructor;
+    end EO;
+    
+    function f
+        input EO eo;
+        output Real y;
+        external "C" y=eo_use_record(eo) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+    end f;
+    
+    constant EO eo = EO(R1(R2(3)));
+    end P;
+    
+    function f
+        input Real x;
+        output Real y = x + P.f(P.eo);
+    algorithm
+    end f;
+
+    Real y = f(time);
+end GlobalExtFunctionDestruction;
+
 end ExtFunctionTests;

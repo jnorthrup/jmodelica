@@ -16,6 +16,16 @@ public class ConstantEvaluationException extends RuntimeException {
         this.val = null;
     }
 
+    public ConstantEvaluationException(String msg) {
+        super(msg);
+        this.val = null;
+    }
+
+    public ConstantEvaluationException(String msg, Throwable cause) {
+        super(msg, cause);
+        this.val = null;
+    }
+
     /**
      * Gets the CValue that caused the failure.
      */
