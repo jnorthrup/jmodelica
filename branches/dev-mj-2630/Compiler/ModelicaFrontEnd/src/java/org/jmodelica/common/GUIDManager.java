@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,6 +21,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import org.jmodelica.util.logging.ModelicaLogger;
 
 public class GUIDManager {
 
@@ -84,6 +88,32 @@ public class GUIDManager {
 
     public void addDependentString(String input, ByteArrayOutputStream output) {
         dependentFiles.add(new StringOpenable(input, output));
+    }
+
+    public void createFileMD5(File file, File outDirectory, ModelicaLogger log) throws IOException {
+        MessageDigest md5;
+        try {
+            md5 = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            return;
+        }
+
+        try (final BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line = reader.readLine();
+            while (line != null) {
+                // A naive implementation that is expected to create a digest different from what a command
+                // line tool would create. No lines breaks are included in the digest, and no
+                // character encodings are specified.
+                md5.update(line.getBytes(Charset.forName("UTF-8")));
+                line = reader.readLine();
+            }
+        }
+        try (final FileWriter fw = new FileWriter(outDirectory)) { 
+            String Value = new BigInteger(1,md5.digest()).toString(16);
+            log.debug("CheckSum of " + file.getName() + " :" + Value);
+            fw.write("CheckSum of " + file.getName() + " :" + Value);
+            
+        }
     }
 
     private String getGuid() {

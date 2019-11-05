@@ -2176,7 +2176,12 @@ public class ModelicaCompiler implements LogContainer {
             boolean debugGen = options.getBooleanOption("debug_duplicate_generated");
             SplitFilesCodeStream stream = new SplitFilesCodeStream(outFile, debugGen, header);
             gen.generate(tmpl, stream, header);
+            
             for (File file : stream.files()) {
+                try {
+                    fc.guidManager().createFileMD5(outFile, new File(outDir, outFile.getName()), log);
+                } catch (IOException e) {}
+                
                 log.debug("Generated file '" + file + "'.");
                 if (fc != null) {
                     fc.guidManager().addDependentFile(file);
