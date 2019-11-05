@@ -1138,7 +1138,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
      */
     private static class HomotopyContributor extends SCCContributor {
         
-        private static final Collection<? extends Object> memberSets = Arrays.asList("homotopy");
+        private static final Collection<? extends Object> memberSets = Collections.unmodifiableList(Arrays.asList("homotopy"));
         
         @Override
         public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<E> members(E equation, AbstractBiPGraph<E, V, ?> graph) {
