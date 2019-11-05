@@ -89,6 +89,14 @@ public class GUIDManager {
     public void addDependentString(String input, ByteArrayOutputStream output) {
         dependentFiles.add(new StringOpenable(input, output));
     }
+    
+    public ArrayList<String> filesMd5 = new ArrayList<String>();
+
+    public void writeFileMD5(ModelicaLogger log) {
+        for (String fileMd5 : filesMd5) {
+            log.debug(fileMd5);
+        }
+    }
 
     public void createFileMD5(File file, File outDirectory, ModelicaLogger log) throws IOException {
         MessageDigest md5;
@@ -110,9 +118,8 @@ public class GUIDManager {
         }
         try (final FileWriter fw = new FileWriter(outDirectory)) { 
             String Value = new BigInteger(1,md5.digest()).toString(16);
-            log.debug("CheckSum of " + file.getName() + " :" + Value);
-            fw.write("CheckSum of " + file.getName() + " :" + Value);
-            
+            filesMd5.add("CheckSum of " + file.getName() + " :" + Value);
+            fw.append("CheckSum of " + file.getName() + " :" + Value);
         }
     }
 
