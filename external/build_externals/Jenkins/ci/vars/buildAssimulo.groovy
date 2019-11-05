@@ -1,4 +1,4 @@
-def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, TARGET, bitness=["32", "64"], BLAS_HOME_BASE=null, LAPACK_HOME_BASE=null, SUPERLU_HOME_BASE=null, SUNDIALS_HOME_BASE=null,USER_CONFIG=null,stash=false, archive=true) {
+def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, TARGET, bitness=["32", "64"], BLAS_HOME_BASE=null, LAPACK_HOME_BASE=null, SUPERLU_HOME_BASE=null, SUNDIALS_HOME_BASE=null,USER_CONFIG=null, extra_bat="", stash=false, archive=true) {
     if (JM_CHECKOUT_PATH != null) {
         checkoutJM(${JM_BRANCH})
     }
@@ -30,7 +30,7 @@ def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, TARGET, bitness=["32", "64"]
             
             make clean BUILD_DIR=\${JENKINS_BUILD_DIR}/assimulo* BITNESS=${bit}
             make ${TARGET} USER_CONFIG=${USER_CONFIG} JM_HOME=\${JM_HOME} BUILD_DIR=\${JENKINS_BUILD_DIR} BLAS_HOME=${BLAS_HOME_BASE}${bit} SUNDIALS_HOME=${SUNDIALS_HOME_BASE}${bit} LAPACK_HOME=${LAPACK_HOME_BASE}${bit} SUPERLU_HOME=${SUPERLU_HOME_BASE}${bit} INSTALL_DIR_FOLDER=${INSTALL_PATH_UNIX}/assimulo/${TARGET}/Python_${bit}
-            """);
+            """, extra_bat);
             if ("${TARGET}" == "folder") {
                 runMSYSWithEnv("""\
                 export JM_HOME="\$(pwd)/JModelica/"
