@@ -21,6 +21,19 @@ from assimulo.solvers.sundials import CVodeError
 from pyfmi.fmi import FMUException
 from pymodelica.compiler_exceptions import CompilerError
 
+class TestDomainChecks(SimulationTest):
+    @testattr(stddist_full = True)
+    def test_domain_checks1(self):
+        #Test that the compilation is succesful
+        SimulationTest.setup_class_base('OperatorTests.mo', 
+            'OperatorTests.DomainChecks', options={"mathematical_domain_checks":True})
+
+    @testattr(stddist_full = True)
+    def test_domain_checks2(self):
+        #Test that the compilation is succesful
+        SimulationTest.setup_class_base('OperatorTests.mo', 
+            'OperatorTests.DomainChecks', options={"mathematical_domain_checks":False})
+
 class TestHomotopy(SimulationTest):
     """
     Basic test of Modelica operators.
