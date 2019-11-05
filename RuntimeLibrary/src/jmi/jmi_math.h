@@ -43,6 +43,42 @@
 /* Helper function for logging warnings from the "_equation"- and "_function"-functions */
 void jmi_log_func_or_eq(jmi_t *jmi, const char cathegory_name[], const char func_name[], const char msg[], const char val[]);
 
+/* Macros used together with the domain check option */
+#define JMI_DIVIDE_FUNCTION(name, num, den, msg) ((jmi_real_t)(num)/(jmi_real_t)(den))
+#define JMI_DIVIDE_EQUATION(jmi, num, den, msg)  ((jmi_real_t)(num)/(jmi_real_t)(den))
+#define JMI_EXP_EQUATION(jmi, x, msg)            (exp((jmi_real_t)(x)))
+#define JMI_EXP_FUNCTION(name, x, msg)           (exp((jmi_real_t)(x)))
+#define JMI_TAN_EQUATION(jmi, x, msg)            (tan((jmi_real_t)(x)))
+#define JMI_TAN_FUNCTION(name, x, msg)           (tan((jmi_real_t)(x)))
+#define JMI_ATAN_EQUATION(jmi, x, msg)           (atan((jmi_real_t)(x)))
+#define JMI_ATAN_FUNCTION(name, x, msg)          (atan((jmi_real_t)(x)))
+#define JMI_TANH_EQUATION(jmi, x, msg)           (tanh((jmi_real_t)(x)))
+#define JMI_TANH_FUNCTION(name, x, msg)          (tanh((jmi_real_t)(x)))
+#define JMI_COS_EQUATION(jmi, x, msg)            (cos((jmi_real_t)(x)))
+#define JMI_COS_FUNCTION(name, x, msg)           (cos((jmi_real_t)(x)))
+#define JMI_ACOS_EQUATION(jmi, x, msg)           (acos((jmi_real_t)(x)))
+#define JMI_ACOS_FUNCTION(name, x, msg)          (acos((jmi_real_t)(x)))
+#define JMI_COSH_EQUATION(jmi, x, msg)           (cosh((jmi_real_t)(x)))
+#define JMI_COSH_FUNCTION(name, x, msg)          (cosh((jmi_real_t)(x)))
+#define JMI_SIN_EQUATION(jmi, x, msg)            (sin((jmi_real_t)(x)))
+#define JMI_SIN_FUNCTION(name, x, msg)           (sin((jmi_real_t)(x)))
+#define JMI_ASIN_EQUATION(jmi, x, msg)           (asin((jmi_real_t)(x)))
+#define JMI_ASIN_FUNCTION(name, x, msg)          (asin((jmi_real_t)(x)))
+#define JMI_SINH_EQUATION(jmi, x, msg)           (sinh((jmi_real_t)(x)))
+#define JMI_SINH_FUNCTION(name, x, msg)          (sinh((jmi_real_t)(x)))
+#define JMI_SQRT_EQUATION(jmi, x, msg)           (sqrt((jmi_real_t)(x)))
+#define JMI_SQRT_FUNCTION(name, x, msg)          (sqrt((jmi_real_t)(x)))
+#define JMI_LOG_EQUATION(jmi, x, msg)            (log((jmi_real_t)(x)))
+#define JMI_LOG_FUNCTION(name, x, msg)           (log((jmi_real_t)(x)))
+#define JMI_LOG10_EQUATION(jmi, x, msg)          (log10((jmi_real_t)(x)))
+#define JMI_LOG10_FUNCTION(name, x, msg)         (log10((jmi_real_t)(x)))
+#define JMI_ATAN2_EQUATION(jmi, x, y, msg)       (atan2((jmi_real_t)(x), (jmi_real_t)(y)))
+#define JMI_ATAN2_FUNCTION(name, x, y, msg)      (atan2((jmi_real_t)(x), (jmi_real_t)(y)))
+#define JMI_POW_EQUATION(jmi, x, y, msg)         (pow((jmi_real_t)(x), (jmi_real_t)(y)))
+#define JMI_POW_FUNCTION(name, x, y, msg)        (pow((jmi_real_t)(x), (jmi_real_t)(y)))
+
+jmi_real_t jmi_pow(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t y, const char msg[]);
+
 /**
  * Function for checking if a vector contains NAN values. Returns the
  * index of the NAN (if found) in the parameter index_of_nan
