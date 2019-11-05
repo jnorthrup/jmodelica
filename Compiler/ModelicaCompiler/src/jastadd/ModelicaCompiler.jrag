@@ -2483,9 +2483,9 @@ public class Templates {
     }
    
     private static ArrayList<TemplateContributor> CONTRIBUTORS;
-    private static LinkedHashSet<String> XML_TEMPLATES;
-    private static LinkedHashSet<String> C_HEADER_TEMPLATES;
-    private static LinkedHashSet<String> C_SOURCE_TEMPLATES;    
+    private LinkedHashSet<String> XML_TEMPLATES;
+    private LinkedHashSet<String> C_HEADER_TEMPLATES;
+    private LinkedHashSet<String> C_SOURCE_TEMPLATES;    
     
     public abstract static class TemplateContributor {
         public void addTemplates(Templates templates, OptionRegistry options) { }
