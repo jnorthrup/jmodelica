@@ -400,8 +400,6 @@ aspect MemoryUse {
         return res;
     }
 
-    private Map<Class,Counter> ASTNode.buildNodeCountMap = null;
-
     private static NodeCountExtra[] ASTNode.nodeCountExtra = new NodeCountExtra[] { };
 
     public interface NodeCountExtra {
@@ -412,10 +410,10 @@ aspect MemoryUse {
     /**
      * Output a list of the number of instances of each node class.
      */
-    public void ASTNode.dumpNodeCount(String file)
+    public void ASTNode.dumpNodeCount(String file, UtilInterface util)
             throws IOException {
         ArrayList<Counter> list = new ArrayList<Counter>();
-        list.addAll(buildNodeCountMap.values());
+        list.addAll(util.getBuildNodeCountMap().values());
         Collections.sort(list);
         CodeStream out = new CodeStream(file);
         for (Counter c : list)
@@ -425,15 +423,7 @@ aspect MemoryUse {
         out.close();
     }
 
-    public void ASTNode.buildNodeCount() {
-        Profiler.clear();
-        if (buildNodeCountMap == null)
-            buildNodeCountMap = new HashMap<Class,Counter>();
-        buildNodeCount(buildNodeCountMap);
-        Profiler.clear();
-    }
-
-    private void ASTNode.buildNodeCount(Map<Class,Counter> map) {
+    public void ASTNode.buildNodeCount(Map<Class,Counter> map) {
         addToNodeCount(map, getClass(), Profiler.getNodeSize(this, false), Profiler.getNodeSize(this, true));
         for (NodeCountExtra nce : nodeCountExtra)
             nce.count(this);
