@@ -2179,7 +2179,7 @@ public class ModelicaCompiler implements LogContainer {
             
             for (File file : stream.files()) {
                 try {
-                    fc.guidManager().createFileMD5(outFile, new File(outDir, outFile.getName()), log);
+                    fc.guidManager().createFileMD5(outFile, log);
                 } catch (IOException e) {}
                 
                 log.debug("Generated file '" + file + "'.");
