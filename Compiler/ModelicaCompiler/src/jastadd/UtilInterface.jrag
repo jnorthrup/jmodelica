@@ -1,3 +1,5 @@
+import org.jmodelica.modelica.compiler.ASTNode.Counter;
+
 aspect UtilInterface {
     
     private UtilInterface Root.utilInterface = null;
@@ -57,7 +59,15 @@ aspect UtilInterface {
              */
             public void tearDown() {}
         }
-        
+
+        private Map<Class, Counter> buildNodeCountMap;
+        public Map<Class, Counter> getBuildNodeCountMap() {
+            if (buildNodeCountMap == null) {
+                buildNodeCountMap = new HashMap<>();
+            }
+            return buildNodeCountMap;
+        }
+
         private static LinkedList<Registrant> registrants = new LinkedList<>();
         private static Registrant addRegistrant(Registrant registrant) {
             registrants.add(registrant);

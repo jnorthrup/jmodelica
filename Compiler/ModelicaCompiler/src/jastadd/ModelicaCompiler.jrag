@@ -529,8 +529,8 @@ public class ModelicaCompiler implements LogContainer {
      * @param type   a one-word description of the tree to dump
      * @param count  it node counts should also be generated
      */
-    protected void dumpMemoryUseFile(ASTNode root, String type, boolean count) throws FileNotFoundException {
-        dumpMemoryUseFile(root, type, type, count);
+    protected void dumpMemoryUseFile(ASTNode root, UtilInterface util, String type, boolean count) throws FileNotFoundException {
+        dumpMemoryUseFile(root, util, type, type, count);
     }
 
     /**
@@ -543,7 +543,7 @@ public class ModelicaCompiler implements LogContainer {
      * @param name   the variable part of the file name
      * @param count  it node counts should also be generated
      */
-    protected void dumpMemoryUseFile(ASTNode root, String type, String name, boolean count) 
+    protected void dumpMemoryUseFile(ASTNode root, UtilInterface util, String type, String name, boolean count)
             throws FileNotFoundException {
         if (dumpMemoryUse) {
             String file = "size_" + name + ".txt";
@@ -552,7 +552,7 @@ public class ModelicaCompiler implements LogContainer {
             root.dumpMemoryUse(file, true, -1, dumpMemoryUseMinSize);
             time = Math.round((System.currentTimeMillis() - time) / 1000.0);
             if (count)
-                root.buildNodeCount();
+                root.buildNodeCount(util.getBuildNodeCountMap());
             log.debug(" Dumped tree in " + time + "s");
         }
     }
@@ -567,7 +567,7 @@ public class ModelicaCompiler implements LogContainer {
         if (dumpMemoryUse) {
             String file = "node_count.txt";
             log.debug("Dumping node counts to '" + file + "'...");
-            root.dumpNodeCount(file);
+            root.dumpNodeCount(file, root.getUtilInterface());
         }
     }
 
@@ -1085,7 +1085,7 @@ public class ModelicaCompiler implements LogContainer {
             throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
         // build source tree
         SourceRoot sr = parseModelFromPaths(paths);
-        dumpMemoryUseFile(sr, "source", false);
+        dumpMemoryUseFile(sr, sr.getUtilInterface(), "source", false);
 
         if (options.getBooleanOption("generate_html_diagnostics")) {
             setDiagnosticsGenerator(new DiagnosticsGenerator(cl, options));
@@ -1094,7 +1094,7 @@ public class ModelicaCompiler implements LogContainer {
         // compute instance tree
         InstClassDecl icl = instantiateModel(sr, cl, target);
         
-        dumpMemoryUseFile(sr, "source and instance", "instance", true);
+        dumpMemoryUseFile(sr, sr.getUtilInterface(), "source and instance", "instance", true);
         
         return icl;
     }
@@ -1221,7 +1221,7 @@ public class ModelicaCompiler implements LogContainer {
         ASTNode.beginStep("flatten()");
         log.info("Flattening model...");
         icd.flattenInstClassDecl(fc);
-        dumpMemoryUseFile(fc, "flat", true);
+        dumpMemoryUseFile(fc, fc.root().getUtilInterface(), "flat", true);
         dumpNodeCountFile(icd.root());
         icd = null;
         ASTNode.endStep("flatten()");
@@ -1283,7 +1283,7 @@ public class ModelicaCompiler implements LogContainer {
         
         ASTNode.endStep("prettyPrintFlat()");
         
-        dumpMemoryUseFile(fc, "transformed", false);
+        dumpMemoryUseFile(fc, fc.root().getUtilInterface(), "transformed", false);
         
         if (options.getBooleanOption("write_iteration_variables_to_file")) {
             ASTNode.beginStep("writeIterationVariables()");
@@ -2060,7 +2060,7 @@ public class ModelicaCompiler implements LogContainer {
             // Generate code 
             if (target.getCodeGenFlag()) {
                 generateCode(fc, target);
-                dumpMemoryUseFile(fc, "generated", false);
+                dumpMemoryUseFile(fc, util, "generated", false);
             }
             
             fc.loadResources(new File(outDir, "resources"));
