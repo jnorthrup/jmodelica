@@ -1369,7 +1369,7 @@ public class ModelicaCompiler implements LogContainer {
         
         fc.guidManager().setSourceFile(new File(outDir, "modelDescription.xml"));
         fc.guidManager().processDependentFiles();
-        
+        fc.guidManager().writeFileMD5(log);
         log.debug("... code generated.");
         ASTNode.endStep("generateCode()");
     }
@@ -2176,7 +2176,16 @@ public class ModelicaCompiler implements LogContainer {
             boolean debugGen = options.getBooleanOption("debug_duplicate_generated");
             SplitFilesCodeStream stream = new SplitFilesCodeStream(outFile, debugGen, header);
             gen.generate(tmpl, stream, header);
+            
             for (File file : stream.files()) {
+                try {
+                    fc.guidManager().createFileMD5(outFile, log);
+                } catch (FileNotFoundException e) {
+                    throw e;
+                } catch (IOException e) {
+                    // Should not happen
+                }
+                
                 log.debug("Generated file '" + file + "'.");
                 if (fc != null) {
                     fc.guidManager().addDependentFile(file);
