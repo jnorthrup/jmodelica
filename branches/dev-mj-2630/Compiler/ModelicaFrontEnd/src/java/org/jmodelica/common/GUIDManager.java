@@ -98,7 +98,7 @@ public class GUIDManager {
         }
     }
 
-    public void createFileMD5(File file, File outDirectory, ModelicaLogger log) throws IOException {
+    public void createFileMD5(File file, ModelicaLogger log) throws IOException {
         MessageDigest md5;
         try {
             md5 = MessageDigest.getInstance("MD5");
@@ -116,11 +116,9 @@ public class GUIDManager {
                 line = reader.readLine();
             }
         }
-        try (final FileWriter fw = new FileWriter(outDirectory)) { 
-            String Value = new BigInteger(1,md5.digest()).toString(16);
-            filesMd5.add("CheckSum of " + file.getName() + " :" + Value);
-            fw.append("CheckSum of " + file.getName() + " :" + Value);
-        }
+        
+        String Value = new BigInteger(1,md5.digest()).toString(16);
+        filesMd5.add("CheckSum of " + file.getName() + " :" + Value);
     }
 
     private String getGuid() {

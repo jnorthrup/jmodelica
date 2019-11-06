@@ -2,11 +2,18 @@ package org.jmodelica.test.common;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.Reader;
 
 import org.jmodelica.common.GUIDManager;
+import org.jmodelica.util.logging.Level;
+import org.jmodelica.util.logging.ModelicaLogger;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -115,6 +122,20 @@ public class GUIDManagerTest {
         String expected = "guid=fd3dbec9730101bff92acc820befc34";
         
         assertEquals(ignoreWhitespace(expected), ignoreWhitespace(actual));
+    }
+    
+    @Test 
+    public void checksumOfFilesOnlyWrittenAtDebug() {
+        TestLogger log = new TestLogger(Level.VERBOSE);
+        guidManager.filesMd5.add("DummyHash");
+        guidManager.writeFileMD5(log);
+        assertNull(log.next());
+        
+        log = new TestLogger(Level.DEBUG);
+        guidManager.filesMd5.add("DummyHash");
+        guidManager.writeFileMD5(log);
+        assertEquals("DEBUG: DummyHash", log.next());
+
     }
 
 }
