@@ -20,7 +20,6 @@ $(PREINSTALL_DIR):
 	@$(eval TARGET_BUILD_DIR=$(BUILD_DIR)/Assimulo_build$(BITNESS))
 	mkdir -p $(TARGET_BUILD_DIR)
 	mkdir -p $@
-
 	cd $(ASSIMULO_SRC) && \
 	find . -type f | grep -v -E '/.svn|.pyc' |tar c -T - | tar x -C $(TARGET_BUILD_DIR)
 	cd $(TARGET_BUILD_DIR); \
