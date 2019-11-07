@@ -320,11 +320,11 @@ public class CGenerator extends GenericGenerator {
         }
         
         public void generate(CodeStream genPrinter) {
-        	if (fclass.myOptions().mathematical_domain_checks.getValue()) {
-        		genPrinter.print("   #define MATHEMATICAL_DOMAIN_CHECKS");
-        	}
+            if (fclass.myOptions().mathematical_domain_checks.getValue()) {
+                genPrinter.print("#define MATHEMATICAL_DOMAIN_CHECKS");
+            }
         }
-	}
+    }
     /**
      * C: macros for C variable aliases
      */

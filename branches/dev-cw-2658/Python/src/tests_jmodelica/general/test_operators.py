@@ -24,15 +24,36 @@ from pymodelica.compiler_exceptions import CompilerError
 class TestDomainChecks(SimulationTest):
     @testattr(stddist_full = True)
     def test_domain_checks1(self):
-        #Test that the compilation is succesful
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.DomainChecks', options={"mathematical_domain_checks":True})
-
+            
+        model = load_fmu("OperatorTests_DomainChecks.fmu", log_level=6)
+        
+        target_msg = "Using mathematical functions with domain checks."
+        found_msg = False
+        for msg in model.get_log():
+            print msg
+            if target_msg in msg:
+                found_msg = True
+                break
+        
+        assert found_msg, "Could not find the message '{}' in the log.".format(target_msg)
+        
     @testattr(stddist_full = True)
     def test_domain_checks2(self):
-        #Test that the compilation is succesful
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.DomainChecks', options={"mathematical_domain_checks":False})
+        
+        model = load_fmu("OperatorTests_DomainChecks.fmu", log_level=6)
+        
+        target_msg = "Using mathematical functions without any domain checks, caution is advised."
+        found_msg = False
+        for msg in model.get_log():
+            if target_msg in msg:
+                found_msg = True
+                break
+        
+        assert found_msg, "Could not find the message '{}' in the log.".format(target_msg)
 
 class TestHomotopy(SimulationTest):
     """
