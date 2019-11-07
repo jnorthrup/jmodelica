@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -98,7 +99,7 @@ public class GUIDManager {
         }
     }
 
-    public void createFileMD5(File file, ModelicaLogger log) throws IOException {
+    public void createFileMD5(Reader file, String fileName, ModelicaLogger log) throws IOException {
         MessageDigest md5;
         try {
             md5 = MessageDigest.getInstance("MD5");
@@ -106,7 +107,7 @@ public class GUIDManager {
             return;
         }
 
-        try (final BufferedReader reader = new BufferedReader(new FileReader(file))) {
+        try (final BufferedReader reader = new BufferedReader(file)) {
             String line = reader.readLine();
             while (line != null) {
                 // A naive implementation that is expected to create a digest different from what a command
@@ -118,7 +119,7 @@ public class GUIDManager {
         }
         
         String Value = new BigInteger(1,md5.digest()).toString(16);
-        filesMd5.add("CheckSum of " + file.getName() + " :" + Value);
+        filesMd5.add("Generated file "+ fileName + " with checksum " + Value);
     }
 
     private String getGuid() {
