@@ -6,9 +6,9 @@ import org.jmodelica.util.values.Evaluable;
 
 public class DummyAnnotationNode extends GenericAnnotationNode<DummyAnnotationNode, DummyAnnotProvider, Evaluable> {
 
-    private static DummyAnnotationNode ambiguousNode = new DummyAnnotationNode(null, null, null, Mutability.IMMUTABLE);
+    private static DummyAnnotationNode ambiguousNode = new DummyAnnotationNode(null, null, null, true);
 
-    /** Creates a mutable dummy annotation.
+    /** Creates an unambiguous dummy annotation.
      * See {@link GenericAnnotationNode#GenericAnnotationNode(String, AnnotationProvider, GenericAnnotationNode)}
      */
     public DummyAnnotationNode(String name, DummyAnnotProvider node, DummyAnnotationNode parent) {
@@ -16,10 +16,10 @@ public class DummyAnnotationNode extends GenericAnnotationNode<DummyAnnotationNo
     }
 
     /** Creates a dummy annotation.
-     * See {@link GenericAnnotationNode#GenericAnnotationNode(String, AnnotationProvider, GenericAnnotationNode, Mutability)}
+     * See {@link GenericAnnotationNode#GenericAnnotationNode(String, AnnotationProvider, GenericAnnotationNode, boolean)}
      */
-    public DummyAnnotationNode(String name, DummyAnnotProvider node, DummyAnnotationNode parent, Mutability mutability) {
-        super(name, node, parent, mutability);
+    public DummyAnnotationNode(String name, DummyAnnotProvider node, DummyAnnotationNode parent, boolean ambiguous) {
+        super(name, node, parent, ambiguous);
     }
 
     /**
