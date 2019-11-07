@@ -35,24 +35,21 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FAbsExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        String prefix = "jmi_abs(";
-        str.print(myOptions().mathematical_domain_checks.getValue() ? prefix : prefix.toUpperCase());
+        str.print("JMI_ABS_EQUATION(");
         p.print(getFExp(), str, indent);
         str.print(")");
     }
     
     @Override
     public void FSignExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        String prefix = "jmi_sign(";
-        str.print(myOptions().mathematical_domain_checks.getValue() ? prefix : prefix.toUpperCase());
+        str.print("JMI_SIGN_EQUATION(");
         p.print(getFExp(), str, indent);
         str.print(")");
     }
     
     @Override
     public void FMinMaxExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        String prefix = "jmi_" + builtInName() + "(";
-        str.print(myOptions().mathematical_domain_checks.getValue() ? prefix : prefix.toUpperCase());
+        str.print("JMI_" + builtInName().toUpperCase() + "_EQUATION(");
         p.print(getX(), str, indent);
         str.print(", ");
         p.print(getY(), str, indent);
@@ -420,9 +417,7 @@ aspect CCodeGenExpressions {
 
     protected void RuntimeCallComputation.prettyPrintHead(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, FExp ctx, FExp[] inputs, FExp[] outputs) {
         boolean func = ctx.inFunction();
-        boolean domainCheck = ctx.myOptions().mathematical_domain_checks.getValue();
-        String prefix = "jmi_" + p.guardedFunctionName(ctx) + (func ? "_function(" : "_equation(");
-        str.print(domainCheck ? prefix : prefix.toUpperCase());
+        str.print(("jmi_" + p.guardedFunctionName(ctx) + (func ? "_function(" : "_equation(")).toUpperCase());
         str.print(func ? "\"" + ctx.containingFFunctionDecl().name() + "\", ": "jmi, ");
         p.codePrinter().print(this, str, indent, CFuncParamDirection.INPUT, Arrays.asList(inputs));
         p.codePrinter().print(this, str, indent, CFuncParamDirection.OUTPUT, Arrays.asList(outputs));

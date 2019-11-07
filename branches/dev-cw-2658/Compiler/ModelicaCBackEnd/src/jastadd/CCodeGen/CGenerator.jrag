@@ -309,7 +309,22 @@ public class CGenerator extends GenericGenerator {
         }
     
     }
-
+    
+    /**
+     * C: defines for the C code
+     */
+    public class DAETag_C_defines extends DAETag {
+        
+        public DAETag_C_defines(AbstractGenerator myGenerator, FClass fclass) {
+            super("C_defines", myGenerator, fclass);
+        }
+        
+        public void generate(CodeStream genPrinter) {
+        	if (fclass.myOptions().mathematical_domain_checks.getValue()) {
+        		genPrinter.print("   #define MATHEMATICAL_DOMAIN_CHECKS");
+        	}
+        }
+	}
     /**
      * C: macros for C variable aliases
      */
