@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -93,41 +91,31 @@ public class GUIDManager {
     
     public ArrayList<String> filesMd5 = new ArrayList<String>();
 
-    public void writeFileMD5(ModelicaLogger log) {
+    public void printFileChecksums(ModelicaLogger log) {
         for (String fileMd5 : filesMd5) {
             log.debug(fileMd5);
         }
     }
 
-    public void createFileMD5(Reader file, String fileName, ModelicaLogger log) throws IOException {
-        MessageDigest md5;
-        try {
-            md5 = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            return;
-        }
-
-        try (final BufferedReader reader = new BufferedReader(file)) {
-            String line = reader.readLine();
-            while (line != null) {
-                // A naive implementation that is expected to create a digest different from what a command
-                // line tool would create. No lines breaks are included in the digest, and no
-                // character encodings are specified.
-                md5.update(line.getBytes(Charset.forName("UTF-8")));
-                line = reader.readLine();
-            }
-        }
-        
-        String Value = new BigInteger(1,md5.digest()).toString(16);
-        filesMd5.add("Generated file "+ fileName + " with checksum " + Value);
+    public void computeFileChecksum(Reader file, String fileName, ModelicaLogger log) {
+        String checksum = calculateMD5Checksum(file);
+        filesMd5.add("Generated file "+ fileName + " with checksum " + checksum);
     }
 
     private String getGuid() {
-        String guid;
+        String guid = calculateMD5Checksum(new InputStreamReader(source.openInput()));
+        for (Token token : tokens) {
+            token.resetFoundFirst();
+        }
+
+        return guid;
+    }
+    
+    public String calculateMD5Checksum(Reader r) {
         try {
             final MessageDigest md5 = MessageDigest.getInstance("MD5");
 
-            try (final BufferedReader reader = new BufferedReader(new InputStreamReader(source.openInput()))) {
+            try (final BufferedReader reader = new BufferedReader(r)) {
                 String line = reader.readLine();
                 while (line != null) {
                     // A naive implementation that is expected to create a digest different from what a command
@@ -137,16 +125,11 @@ public class GUIDManager {
                     line = reader.readLine();
                 }
             }
-
-            guid = new BigInteger(1,md5.digest()).toString(16);
+        return new BigInteger(1,md5.digest()).toString(16);
+        
         }  catch (IOException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-        for (Token token : tokens) {
-            token.resetFoundFirst();
-        }
-
-        return guid;
     }
 
     private String getDate() {
