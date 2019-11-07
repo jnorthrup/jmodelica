@@ -125,12 +125,12 @@ public class GUIDManagerTest {
     public void checksumOfFilesOnlyWrittenAtDebug() {
         TestLogger log = new TestLogger(Level.VERBOSE);
         guidManager.filesMd5.add("DummyHash");
-        guidManager.writeFileMD5(log);
+        guidManager.printFileChecksums(log);
         assertNull(log.next());
         
         log = new TestLogger(Level.DEBUG);
         guidManager.filesMd5.add("DummyHash");
-        guidManager.writeFileMD5(log);
+        guidManager.printFileChecksums(log);
         assertEquals("DEBUG: DummyHash", log.next());
     }
 
@@ -139,14 +139,14 @@ public class GUIDManagerTest {
         TestLogger log = new TestLogger(Level.VERBOSE);
         String dummyFile = "This is a dummy c-file /n c-stuff";
         StringReader reader = new StringReader(dummyFile);
-        guidManager.createFileMD5(reader, "dummyfile.c", log);
-        guidManager.writeFileMD5(log);
+        guidManager.computeFileChecksum(reader, "dummyfile.c", log);
+        guidManager.printFileChecksums(log);
         assertNull(log.next());
         
         reader = new StringReader(dummyFile);
         log = new TestLogger(Level.DEBUG);
-        guidManager.createFileMD5(reader, "dummyfile.c", log);
-        guidManager.writeFileMD5(log);
+        guidManager.computeFileChecksum(reader, "dummyfile.c", log);
+        guidManager.printFileChecksums(log);
         assertEquals("DEBUG: Generated file dummyfile.c with checksum fcde3f483c06e4a10bc5b28ec56214f8", log.next());
     }
 }
