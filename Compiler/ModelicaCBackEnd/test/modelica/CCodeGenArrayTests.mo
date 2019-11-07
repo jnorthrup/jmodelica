@@ -48,7 +48,7 @@ void func_CCodeGenArrayTests_VectorLength1_f_def0(jmi_array_t* x_a, jmi_real_t* 
         temp_2_v = temp_2_v + jmi_array_val_1(x_a, i1_0i) * jmi_array_val_1(x_a, i1_0i);
     }
     temp_1_v = temp_2_v;
-    y_v = jmi_sqrt_function(\"CCodeGenArrayTests.VectorLength1.f\", temp_1_v, \"sqrt(temp_1)\");
+    y_v = JMI_SQRT_FUNCTION(\"CCodeGenArrayTests.VectorLength1.f\", temp_1_v, \"sqrt(temp_1)\");
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;

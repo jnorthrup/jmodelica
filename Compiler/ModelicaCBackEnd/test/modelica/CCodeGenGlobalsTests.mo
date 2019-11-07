@@ -1048,7 +1048,7 @@ void func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantForPowInt1_f_def0(j
     i_0in = 0;
     i_0ie = floor((2) - (1));
     for (i_0i = 1; i_0in <= i_0ie; i_0i = 1 + (++i_0in)) {
-        y_v = jmi_pow_function(\"CCodeGenGlobalsTests.GlobalVariables.GlobalConstantForPowInt1.f\", y_v, jmi_array_val_1(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantForPowInt1_f_c), i_0i), \"y ^ global(CCodeGenGlobalsTests.GlobalVariables.GlobalConstantForPowInt1.f.c[i])\");
+        y_v = JMI_POW_FUNCTION(\"CCodeGenGlobalsTests.GlobalVariables.GlobalConstantForPowInt1.f\", y_v, jmi_array_val_1(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantForPowInt1_f_c), i_0i), \"y ^ global(CCodeGenGlobalsTests.GlobalVariables.GlobalConstantForPowInt1.f.c[i])\");
     }
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
