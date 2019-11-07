@@ -24,9 +24,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jmodelica.common.URIResolver;
 import org.jmodelica.common.URIResolver.URIException;
 import org.jmodelica.util.Criteria;
-import org.jmodelica.util.annotations.AnnotationProvider.SubAnnotationPair;
 import org.jmodelica.util.collections.FilteredIterable;
 import org.jmodelica.util.values.ConstValue;
 import org.jmodelica.util.values.ConstantEvaluationException;
@@ -50,28 +50,14 @@ import org.jmodelica.util.values.Evaluable;
 public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N, V>,
         N extends AnnotationProvider<N, V>, V extends Evaluable> {
 
-    public enum Mutability {
-        MUTABLE, IMMUTABLE,
-    }
     /**
      * Vendor name.
      */
     public static final String VENDOR_NAME = "__Modelon";
-
-    private String name;
-    private N node;
-    private final T parent;
-
-    private Collection<T> subNodes_cache;
-    private Map<String, T> subNodesNameMap_cache;
-    private boolean nodeWasSet = false;
-    private boolean subNodeNodeWasSet = false;
-    private T valueAnnotation_cache;
-    private boolean valueAnnotation_cacheComputed;
-    private Mutability mutability;
+    private final AnnotationStateManager state;
 
     /**
-     * Constructor to create a mutable annotation node.<br>
+     * Constructor to create an unambiguous annotation node.<br>
      * <code>name</code> may be null, some nodes simply do not have a name.<br>
      * <code>node</code> may only be null for the instances returned by
      * {@link #ambiguousNode()} and nodes which don't exist yet.
@@ -81,11 +67,14 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @param parent The parent of the node
      */
     protected GenericAnnotationNode(String name, N node, T parent) {
-        this(name, node, parent, Mutability.MUTABLE);
+        this(name, node, parent, false);
     }
 
     /**
      * Constructor to create an annotation node.<br>
+     * An ambiguous node created with this constructor is immutable. 
+     * That is, calling a state changing method on an unambiguous will not have any effect. 
+     * No state change will occur nor will any exception be thrown.
      * <code>name</code> may be null, some nodes simply do not have a name.<br>
      * <code>node</code> may only be null for the instances returned by
      * {@link #ambiguousNode()} and nodes which don't exist yet.
@@ -93,140 +82,40 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @param name Name of the node, optionally null.
      * @param node The node that this annotation node represent.
      * @param parent The parent of the node
-     * @param mutability The mutability of the node, i.e., if it is mutable or immutable.
+     * @param ambiguous The ambiguity of the node.
      */
-    protected GenericAnnotationNode(String name, N node, T parent, Mutability mutability) {
-        this.mutability = mutability;
-        this.parent = parent;
-        if (mutability == Mutability.MUTABLE) {
-            setNode(name, node);
-        }
-        else {
-            subNodes_cache = Collections.unmodifiableList(new ArrayList<T>());
-            subNodesNameMap_cache = Collections.unmodifiableMap(new HashMap<String, T>());
-            valueAnnotation_cache = self();
-            valueAnnotation_cacheComputed = true;
-            this.name = name;
-        }
-    }
-
-    public boolean isImmutable() {
-        return mutability == Mutability.IMMUTABLE;
+    protected GenericAnnotationNode(String name, N node, T parent, boolean ambiguous) {
+    	state = ambiguous ? 
+    			new AmbiguousAnnotationStateManager(name, node, parent) : 
+    			new MutableAnnotationStateManager(name, node, parent);
     }
 
     /**
      * This is an internal method, do not call it.
      */
     private void computeSubNodesCache() {
-        if (isSubNodesCacheFresh()) {
-            return;
-        }
-        if (subNodes_cache == null) {
-            subNodes_cache = Collections.emptyList();
-        }
-        if (subNodesNameMap_cache == null) {
-            subNodesNameMap_cache = Collections.emptyMap();
-        }
-
-        if(!nodeExists() || isAmbiguous()) {
-            return;
-        }
-
-        List<T> subNodes = new ArrayList<T>();
-        Map<String, List<T>> oldNodesMap = constructMapIncludingAmbiguous(subNodes_cache);
-        Map<String, T> subNodesNameMap = new HashMap<String, T>();
-        for (SubAnnotationPair<N> subNodePair : node.annotationSubNodes()) {
-            String subNodeName = subNodePair.getAnnotationName();
-            N subNodeNode = subNodePair.getAnnotationValue();
-            T subNode = null;
-            
-            List<T> oldNodes = oldNodesMap.get(subNodeName);
-            if (oldNodes != null) {
-                subNode = oldNodes.remove(0);
-                if (oldNodes.isEmpty()) {
-                    oldNodesMap.remove(subNodeName);
-                }
-            }
-            createOrSetSubNodeAndAddToCaches(subNode, subNodeName, subNodeNode, subNodes, subNodesNameMap);
-        }
-
-        for(List<T> oldNodes : oldNodesMap.values()) {
-            for(T oldNode: oldNodes) {
-                //TODO move the setting of the node field in the sub node to null to an explicit step
-                createOrSetSubNodeAndAddToCaches(oldNode, oldNode.name(), null, subNodes, subNodesNameMap);
-            }
-        }
-        subNodes_cache = subNodes;
-        subNodesNameMap_cache = subNodesNameMap;
-        clearNodeWasSetFlags();
+        state.computeSubNodesCache();
     }
 
-    private T createOrSetSubNodeAndAddToCaches(T subNode, String subNodeName, N subNodeNode, Collection<T> subNodes, Map<String, T> subNodesNameMap) {
-        if (subNode == null) {
-            subNode = createNode(subNodeName, subNodeNode);
-        } else {
-            asGeneric(subNode).setNode(subNodeName, subNodeNode);
-        }
-        if (subNode != null) {
-            addToCaches(subNodes, subNodesNameMap, subNode);
-        }
-        return subNode;
+    protected boolean isSubNodesCacheFresh() {
+        return state.isSubNodesCacheFresh();
     }
 
-    private void addToCaches(Collection<T> subNodes, Map<String, T> subNodesNameMap, T subNode) {
-        subNodes.add(subNode);
-        updateSubNodesNameMapCache(subNodesNameMap, subNode);
+    protected boolean hasSubNodesCache() {
+        return state.hasSubNodesCache();
     }
-
-    private void updateSubNodesNameMapCache(Map<String, T> subNodesNameMap, T subNode) {
-        T previous = subNodesNameMap.put(subNode.name(), subNode);
-        if (previous != null && previous.hasNode() && subNode.hasNode()) { // subNode goes from not ambiguous to ambiguous
-            subNodesNameMap.put(subNode.name(), ambiguousNode());
-        }
-    }
-
-    private T removeFromSubNodesNameMapCache(T subNode, Collection<T> subNodes, Map<String, T> subNodesNameMap) {
-        T previous = subNodesNameMap.get(subNode.name());
-        if (previous != null) {
-            if (previous == ambiguousNode()) {
-                Map<String, List<T>> oldNodesMap = constructMapIncludingAmbiguous(filterExists(subNodes));
-                List<T> oldNodes = oldNodesMap.get(subNode.name());
-                if(oldNodes.size() == 2) { // subNode goes from ambiguous to not ambiguous
-                    oldNodes.remove(subNode);
-                    subNodesNameMap.put(subNode.name(), oldNodes.get(0));
-                }
-            } else {
-                subNodesNameMap.remove(subNode.name());
-            }
-        }
-        return previous;
-    }
-
     /**
-     * Computes a map that maps between name and node, the list is needed since
-     * there may be multiple nodes with the same name, if that is the case,
-     * then they are put in the list in the order that they are found!
+     * Sets the name and node of this GenericAnnotationNode. This is an internal method,
+     * call {{@link #updateNode(String, AnnotationProvider)} instead.
+     * @param newName The new name
+     * @param node The new node
      */
-    private Map<String, List<T>> constructMapIncludingAmbiguous(Iterable<T> nodes) {
-        if (nodes == null) {
-            return Collections.emptyMap();
-        }
-        Map<String, List<T>> res = new LinkedHashMap<String, List<T>>();
-        for (T node : nodes) {
-            String name = node.name();
-            List<T> withSameName = res.get(name);
-            if (withSameName == null) {
-                withSameName = new ArrayList<T>(Collections.singletonList(node));
-                res.put(name, withSameName);
-            } else if (withSameName.size() == 1) {
-                withSameName = new ArrayList<T>(withSameName);
-                withSameName.add(node);
-                res.put(name, withSameName);
-            } else {
-                withSameName.add(node);
-            }
-        }
-        return res;
+    private void setNode(String newName, N node) {
+        state.setNode(newName, node);
+    }
+
+    private void setSubNodeNodeWasSet() {
+        state.setSubNodeNodeWasSet();
     }
 
     /**
@@ -237,17 +126,11 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @param subNode the subNode to associate the node with
      */
     private void updateSubNode(String newName, N newNode, T subNode) {
-        removeFromSubNodesNameMapCache(subNode, subNodes_cache, subNodesNameMap_cache);
-        asGeneric(subNode).setNode(newName, newNode);
-        updateSubNodesNameMapCache(subNodesNameMap_cache, subNode);
+        state.updateSubNode(newName, newNode, subNode);
     }
 
-    protected boolean isSubNodesCacheFresh() {
-        return !nodeWasSet && !subNodeNodeWasSet;
-    }
-
-    protected boolean hasSubNodesCache() {
-        return subNodes_cache != null;
+    private N createNodeForChild(GenericAnnotationNode<T, N, V> child) throws AnnotationEditException {
+        return state.createNodeForChild(child);
     }
 
     /**
@@ -262,28 +145,9 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     }
 
     T forPath(String[] paths, int currentIndex) {
-        if (isImmutable() || isAmbiguous() || currentIndex == paths.length) {
-            return self();
-        }
-        computeSubNodesCache();
-        T subNode = subNodesNameMap_cache.get(paths[currentIndex]);
-        if (subNode == null) {
-            makeEmptySubNodesCacheMutable();
-            subNode = createOrSetSubNodeAndAddToCaches(subNode, paths[currentIndex], null, subNodes_cache,
-                    subNodesNameMap_cache);
-        }
-        return subNode.forPath(paths, currentIndex + 1);
+        return state.forPath(paths, currentIndex);
     }
 
-    private void makeEmptySubNodesCacheMutable() {
-        if (subNodesNameMap_cache.isEmpty()) {
-            subNodesNameMap_cache = new HashMap<String, T>();
-        }
-        if (subNodes_cache.isEmpty()) {
-            subNodes_cache = new ArrayList<T>();
-        }
-    }
-    
     /**
      * Returns reference to it self, but with correct type! This pattern
      * ensures that all nodes have the same type as T.
@@ -312,30 +176,6 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @return An annotation node representing node
      */
     protected abstract T createNode(N node);
-    
-    private N createNodeForChild(GenericAnnotationNode<T, N, V> child) throws AnnotationEditException {
-        if (child == valueAnnotation_cache) {
-            // Trying to set the value annotation child
-            throw new AnnotationEditException(this, "Not possible to set assign annotation value as annotation yet");
-        }
-        N res = node().addAnnotationSubNode(child.name());
-        if (res == null) {
-            throw new AnnotationEditException(child, "Unable to create sub node");
-        }
-        return res;
-    }
-
-    /**
-     * Method for checking if this node has sub-nodes.
-     * 
-     * @return true if this node has sub nodes, otherwise false.
-     */
-    private boolean hasSubNodes() {
-    	if (!isImmutable()) {
-            computeSubNodesCache();
-    	}
-        return !subNodes_cache.isEmpty();
-    }
 
     /**
      * Provides all sub nodes for this node that {@link #nodeExists()}.
@@ -343,21 +183,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @return all sub nodes that {@link #nodeExists()}
      */
     public Iterable<T> subNodes() {
-    	if (!isImmutable()) {
-            computeSubNodesCache();
-    	}
-        return filterExists(subNodes_cache);
-    }
-
-    private Iterable<T> filterExists(Iterable<T> nodes) {
-        return new FilteredIterable<T>(nodes, new Criteria<T>() {
-
-            @Override
-            public boolean test(T elem) {
-                return elem.nodeExists();
-            }
-
-        });
+        return state.subNodes();
     }
 
     /**
@@ -367,15 +193,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      *          and it wasn't possible to create.
      */
     public N node() throws AnnotationEditException {
-        if (!hasNode() && !isImmutable()) {
-            if (parent == null) {
-                // This is a null pattern node without hope of creating
-                return null;
-            }
-            N node = asGeneric(parent()).createNodeForChild(this);
-            updateNode(name(), node);
-        }
-        return node;
+        return state.node();
     }
 
     /**
@@ -386,7 +204,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @return The underlying node if available
      */
     protected N peekNode() {
-        return node;
+        return state.peekNode();
     }
 
     /**
@@ -396,13 +214,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @return canonical file:// URI or null on failure
      */
     public String resolveURI(String str) throws URIException {
-        if (node == null) {
-            if (parent == null) {
-                return null; // We did our best, we cant do more
-            }
-            return parent.resolveURI(str);
-        }
-        return node.resolveURI(str);
+        return state.resolveURI(str);
     }
     
     /**
@@ -410,17 +222,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @return the name of this annotation node, can be null
      */
     public String name() {
-        return name;
-    }
-
-    /**
-     * Ensures that this node is mutable.
-     * @throws UnsupportedOperationException if this node is immutable
-     */
-    private void verifyMutability() {
-        if (isImmutable()) {
-            throw new UnsupportedOperationException();
-        }
+        return state.name();
     }
 
     /**
@@ -430,31 +232,11 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      */
     @SuppressWarnings("unchecked")
     protected void updateNode(String newName, N node) {
-        verifyMutability();
-        if (parent() != null && !name().equals(newName)) {
-            asGeneric(parent()).updateSubNode(newName, node, (T) this);
-        } else {
-            setNode(newName, node);
-        }
+       state.updateNode(newName, node);
     }
 
     /**
-     * Sets the name and node of this GenericAnnotationNode. This is an internal method,
-     * call {{@link #updateNode(String, AnnotationProvider)} instead.
-     * @param newName The new name
-     * @param node The new node
-     */
-    private void setNode(String newName, N node) {
-        // This is an internal method because it does not update the caches in the parent node.
-        // it needs to be protected to be accessible from the parent node.
-        disconnectFromNode();
-        this.name = newName;
-        this.node = node;
-        setNodeWasSetFlags();
-    }
-
-    /**
-     * 
+     *
      * @return true if this node has a value, otherwise false
      */
     public boolean hasValue() {
@@ -466,10 +248,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @return the value of this node, if it has one, otherwise null
      */
     public V value() {
-        if (!nodeExists() || isAmbiguous() || isImmutable()) {
-            return null;
-        }
-        return node().annotationValue();
+        return state.value();
     }
 
     /**
@@ -481,12 +260,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      *          the node or set the value of the node.
      */
     public void setValue(V newValue) throws AnnotationEditException {
-    	verifyMutability();
-        try {
-            node().setAnnotationValue(newValue);
-        } catch (FailedToSetAnnotationValueException e) {
-            throw new AnnotationEditException(this, e);
-        }
+        state.setValue(newValue);
     }
 
     /**
@@ -497,23 +271,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      *          if it wasn't possible to interpret the value as an annotation.
      */
     public T valueAsAnnotation() {
-        if (!valueAnnotation_cacheComputed) {
-        	verifyMutability();
-            valueAnnotation_cacheComputed = true;
-            if (isAmbiguous()) {
-                valueAnnotation_cache = ambiguousNode();
-            } else if (nodeExists()) {
-                N annotationNode = valueAsProvider();
-                if (hasValue() && annotationNode == null) {
-                    valueAnnotation_cache = null;
-                } else {
-                    valueAnnotation_cache = createNode(annotationNode);
-                }
-            } else {
-                valueAnnotation_cache = null;
-            }
-        }
-        return valueAnnotation_cache;
+        return state.valueAsAnnotation();
     }
 
     /**
@@ -529,7 +287,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     public String toString() {
         StringBuilder sb = new StringBuilder();
         try {
-            toString(sb);
+            state.toString(sb);
         } catch (IOException e) {
             // Not possible, sb.append() does not throw IOException...
         }
@@ -537,29 +295,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     }
 
     public void toString(Appendable out) throws IOException {
-        if (name() != null) {
-            out.append(name());
-        }
-        if (hasSubNodes()) {
-            boolean first = true;
-            for (T subNode : subNodes()) {
-                if (first) {
-                    out.append('(');
-                }
-                if (!first) {
-                    out.append(", ");
-                }
-                first = false;
-                subNode.toString(out);
-            }
-            if (!first) {
-                out.append(')');
-            }
-        }
-        if (hasValue()) {
-            out.append('=');
-            out.append(value().toString());
-        }
+        state.toString(out);
     }
 
     /**
@@ -575,7 +311,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @return true if this node is available.
      */
     protected boolean hasNode() {
-        return isAmbiguous() || node != null;
+        return state.hasNode();
     }
 
     /**
@@ -583,10 +319,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @return true if this node does exist.
      */
     public boolean nodeExists() {
-        if (parent() != null && !parent.isImmutable()) {
-            asGeneric(parent()).computeSubNodesCache();
-        }
-        return hasNode();
+        return state.nodeExists();
     }
 
     /**
@@ -603,7 +336,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @return true if each is set
      */
     public boolean isEach() {
-        return node().isEach();
+    	return state.isEach();
     }
 
     /**
@@ -612,7 +345,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @return true if final is set
      */
     public boolean isFinal() {
-        return node().isFinal();
+    	return state.isFinal();
     }
 
     /**
@@ -621,7 +354,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @return the parent node.
      */
     protected T parent() {
-        return parent;
+        return state.parent();
     }
 
     /**
@@ -932,32 +665,576 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * The backing node is not removed and has to be removed separately. 
      */
     protected void disconnectFromNode() {
-        verifyMutability();
-        if (parent != null) {
-            node = null;
-            setNodeWasSetFlags();
+        state.disconnectFromNode();
+    }
+
+    public abstract class AnnotationStateManager {
+
+        protected abstract void computeSubNodesCache();
+
+        protected abstract boolean isFinal();
+
+		protected abstract boolean isEach();
+
+		protected abstract boolean isSubNodesCacheFresh();
+
+        protected abstract boolean hasSubNodesCache();
+
+        protected abstract void setNode(String newName, N node);
+
+        protected abstract void setSubNodeNodeWasSet();
+
+        protected abstract void updateSubNode(String newName, N newNode, T subNode);
+
+        protected abstract N createNodeForChild(GenericAnnotationNode<T,N,V> child);
+
+        protected abstract T forPath(String[] path, int i);
+
+        protected abstract Iterable<T> subNodes();
+
+        protected abstract N node();
+
+        protected abstract String resolveURI(String str) throws URIResolver.URIException ;
+
+        protected abstract N peekNode();
+
+        protected abstract String name();
+
+        protected abstract void disconnectFromNode();
+
+        protected abstract void updateNode(String newName, N node);
+
+        protected abstract V value();
+
+        protected abstract void setValue(V newValue);
+
+        protected abstract T valueAsAnnotation();
+
+        protected abstract void toString(Appendable out) throws IOException ;
+
+        protected abstract boolean hasNode();
+
+        protected abstract boolean nodeExists();
+
+        protected abstract T parent();
+    }
+
+    public class AmbiguousAnnotationStateManager extends AnnotationStateManager {
+
+        private final String name;
+        private final N node;
+        private final T parent;
+
+        protected AmbiguousAnnotationStateManager(String name, N node, T parent) {
+            this.name = name;
+            this.node = node;
+            this.parent = parent;
         }
-        if (subNodes_cache != null) {
-            for (T t : subNodes_cache) {
-                t.disconnectFromNode();
+
+        @Override
+        protected void computeSubNodesCache() {
+        	// Do nothing
+        }
+
+        @Override
+        protected boolean isSubNodesCacheFresh() {
+            return true;
+        }
+
+        @Override
+        protected boolean hasSubNodesCache() {
+            return true;
+        }
+
+        @Override
+        protected void setNode(String newName, N node) {
+        	// Do nothing
+        }
+
+        @Override
+        protected void setSubNodeNodeWasSet() {
+        	// Do nothing
+        }
+
+        @Override
+        protected void updateSubNode(String newName, N newNode, T subNode) {
+        	// Do nothing
+        }
+
+        @Override
+        protected N createNodeForChild(GenericAnnotationNode<T, N, V> child) {
+            return null;
+        }
+
+        @Override
+        protected T forPath(String[] path, int i) {
+            return self();
+        }
+
+        @Override
+        protected Iterable<T> subNodes() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        protected N node() {
+            return node;
+        }
+
+        @Override
+        protected String resolveURI(String str) throws URIException {
+            return null;
+        }
+
+        @Override
+        protected N peekNode() {
+            return node;
+        }
+
+        @Override
+        protected String name() {
+            return name;
+        }
+
+        @Override
+        protected void disconnectFromNode() {
+        	// Do nothing
+        }
+
+        @Override
+        protected void updateNode(String newName, N node) {
+        	// Do nothing
+        }
+
+        @Override
+        protected V value() {
+            return node().annotationValue();
+        }
+
+        @Override
+        protected void setValue(V newValue) {
+        	// Do nothing
+        }
+
+        @Override
+        protected T valueAsAnnotation() {
+            return null;
+        }
+
+        @Override
+        protected void toString(Appendable out) throws IOException {
+        	// We don't have anything to append
+        }
+
+        @Override
+        protected boolean hasNode() {
+            return true;
+        }
+
+        @Override
+        protected boolean nodeExists() {
+            return true;
+        }
+
+        @Override
+        protected T parent() {
+            return parent;
+        }
+
+		@Override
+		protected boolean isFinal() {
+			return false;
+		}
+
+		@Override
+		protected boolean isEach() {
+			return false;
+		}
+    }
+
+    public class MutableAnnotationStateManager extends AnnotationStateManager {
+
+        private String name;
+        private N node;
+        private final T parent;
+
+        private Collection<T> subNodes_cache;
+        private Map<String, T> subNodesNameMap_cache;
+        private boolean nodeWasSet = false;
+        private boolean subNodeNodeWasSet = false;
+        private T valueAnnotation_cache;
+        private boolean valueAnnotation_cacheComputed = false;
+
+        protected MutableAnnotationStateManager(String name, N node, T parent) {
+            this.parent = parent;
+            setNode(name, node);
+        }
+
+        @Override
+        protected void computeSubNodesCache() {
+            if (isSubNodesCacheFresh()) {
+                return;
+            }
+            if (subNodes_cache == null) {
+                subNodes_cache = Collections.emptyList();
+            }
+            if (subNodesNameMap_cache == null) {
+                subNodesNameMap_cache = Collections.emptyMap();
+            }
+
+            if(!nodeExists() || isAmbiguous()) {
+                return;
+            }
+
+            List<T> subNodes = new ArrayList<T>();
+            Map<String, List<T>> oldNodesMap = constructMapIncludingAmbiguous(subNodes_cache);
+            Map<String, T> subNodesNameMap = new HashMap<String, T>();
+            for (AnnotationProvider.SubAnnotationPair<N> subNodePair : node.annotationSubNodes()) {
+                String subNodeName = subNodePair.getAnnotationName();
+                N subNodeNode = subNodePair.getAnnotationValue();
+                T subNode = null;
+
+                List<T> oldNodes = oldNodesMap.get(subNodeName);
+                if (oldNodes != null) {
+                    subNode = oldNodes.remove(0);
+                    if (oldNodes.isEmpty()) {
+                        oldNodesMap.remove(subNodeName);
+                    }
+                }
+                createOrSetSubNodeAndAddToCaches(subNode, subNodeName, subNodeNode, subNodes, subNodesNameMap);
+            }
+
+            for(List<T> oldNodes : oldNodesMap.values()) {
+                for(T oldNode: oldNodes) {
+                    //TODO move the setting of the node field in the sub node to null to an explicit step
+                    createOrSetSubNodeAndAddToCaches(oldNode, oldNode.name(), null, subNodes, subNodesNameMap);
+                }
+            }
+            subNodes_cache = subNodes;
+            subNodesNameMap_cache = subNodesNameMap;
+            clearNodeWasSetFlags();
+        }
+
+        private T createOrSetSubNodeAndAddToCaches(T subNode, String subNodeName, N subNodeNode, Collection<T> subNodes, Map<String, T> subNodesNameMap) {
+            if (subNode == null) {
+                subNode = createNode(subNodeName, subNodeNode);
+            } else {
+                asGeneric(subNode).setNode(subNodeName, subNodeNode);
+            }
+            if (subNode != null) {
+                addToCaches(subNodes, subNodesNameMap, subNode);
+            }
+            return subNode;
+        }
+
+        private void addToCaches(Collection<T> subNodes, Map<String, T> subNodesNameMap, T subNode) {
+            subNodes.add(subNode);
+            updateSubNodesNameMapCache(subNodesNameMap, subNode);
+        }
+
+        private void updateSubNodesNameMapCache(Map<String, T> subNodesNameMap, T subNode) {
+            T previous = subNodesNameMap.put(subNode.name(), subNode);
+            if (previous != null && previous.hasNode() && subNode.hasNode()) { // subNode goes from not ambiguous to ambiguous
+                subNodesNameMap.put(subNode.name(), ambiguousNode());
             }
         }
-    }
 
-    private void setNodeWasSetFlags() {
-        nodeWasSet = true;
-        if (parent() != null) {
-            asGeneric(parent()).setSubNodeNodeWasSet();
+        private T removeFromSubNodesNameMapCache(T subNode, Collection<T> subNodes, Map<String, T> subNodesNameMap) {
+            T previous = subNodesNameMap.get(subNode.name());
+            if (previous != null) {
+                if (previous == ambiguousNode()) {
+                    Map<String, List<T>> oldNodesMap = constructMapIncludingAmbiguous(filterExists(subNodes));
+                    List<T> oldNodes = oldNodesMap.get(subNode.name());
+                    if(oldNodes.size() == 2) { // subNode goes from ambiguous to not ambiguous
+                        oldNodes.remove(subNode);
+                        subNodesNameMap.put(subNode.name(), oldNodes.get(0));
+                    }
+                } else {
+                    subNodesNameMap.remove(subNode.name());
+                }
+            }
+            return previous;
         }
-    }
 
-    private void setSubNodeNodeWasSet() {
-        subNodeNodeWasSet = true;
-    }
+        /**
+         * Computes a map that maps between name and node, the list is needed since
+         * there may be multiple nodes with the same name, if that is the case,
+         * then they are put in the list in the order that they are found!
+         */
+        private Map<String, List<T>> constructMapIncludingAmbiguous(Iterable<T> nodes) {
+            if (nodes == null) {
+                return Collections.emptyMap();
+            }
+            Map<String, List<T>> res = new LinkedHashMap<String, List<T>>();
+            for (T node : nodes) {
+                String name = node.name();
+                List<T> withSameName = res.get(name);
+                if (withSameName == null) {
+                    withSameName = new ArrayList<T>(Collections.singletonList(node));
+                    res.put(name, withSameName);
+                } else if (withSameName.size() == 1) {
+                    withSameName = new ArrayList<T>(withSameName);
+                    withSameName.add(node);
+                    res.put(name, withSameName);
+                } else {
+                    withSameName.add(node);
+                }
+            }
+            return res;
+        }
 
-    private void clearNodeWasSetFlags() {
-        nodeWasSet = false;
-        subNodeNodeWasSet = false;
+        @Override
+        protected void updateSubNode(String newName, N newNode, T subNode) {
+            removeFromSubNodesNameMapCache(subNode, subNodes_cache, subNodesNameMap_cache);
+            asGeneric(subNode).setNode(newName, newNode);
+            updateSubNodesNameMapCache(subNodesNameMap_cache, subNode);
+        }
+
+        @Override
+        protected boolean isSubNodesCacheFresh() {
+            return !nodeWasSet && !subNodeNodeWasSet;
+        }
+
+        @Override
+        protected boolean hasSubNodesCache() {
+            return subNodes_cache != null;
+        }
+
+        @Override
+        protected T forPath(String[] paths, int currentIndex) {
+            if (isAmbiguous() || currentIndex == paths.length) {
+                return self();
+            }
+            computeSubNodesCache();
+            T subNode = subNodesNameMap_cache.get(paths[currentIndex]);
+            if (subNode == null) {
+                makeEmptySubNodesCacheMutable();
+                subNode = createOrSetSubNodeAndAddToCaches(subNode, paths[currentIndex], null, subNodes_cache,
+                        subNodesNameMap_cache);
+            }
+            return subNode.forPath(paths, currentIndex + 1);
+        }
+
+        private void makeEmptySubNodesCacheMutable() {
+            if (subNodesNameMap_cache.isEmpty()) {
+                subNodesNameMap_cache = new HashMap<String, T>();
+            }
+            if (subNodes_cache.isEmpty()) {
+                subNodes_cache = new ArrayList<T>();
+            }
+        }
+
+        @Override
+        protected N createNodeForChild(GenericAnnotationNode<T, N, V> child) throws AnnotationEditException {
+            if (child == valueAnnotation_cache) {
+                // Trying to set the value annotation child
+                throw new AnnotationEditException(GenericAnnotationNode.this, "Not possible to set assign annotation value as annotation yet");
+            }
+            N res = node().addAnnotationSubNode(child.name());
+            if (res == null) {
+                throw new AnnotationEditException(child, "Unable to create sub node");
+            }
+            return res;
+        }
+
+        private boolean hasSubNodes() {
+            computeSubNodesCache();
+            return !subNodes_cache.isEmpty();
+        }
+
+        @Override
+        protected Iterable<T> subNodes() {
+            computeSubNodesCache();
+            return filterExists(subNodes_cache);
+        }
+
+        private Iterable<T> filterExists(Iterable<T> nodes) {
+            return new FilteredIterable<T>(nodes, new Criteria<T>() {
+
+                @Override
+                public boolean test(T elem) {
+                    return elem.nodeExists();
+                }
+
+            });
+        }
+
+        @Override
+        protected N node() throws AnnotationEditException {
+            if (!hasNode()) {
+                if (parent == null) {
+                    // This is a null pattern node without hope of creating
+                    return null;
+                }
+                N node = asGeneric(parent()).createNodeForChild(GenericAnnotationNode.this);
+                updateNode(name(), node);
+            }
+            return node;
+        }
+
+        @Override
+        protected N peekNode() {
+            return node;
+        }
+
+        @Override
+        protected String resolveURI(String str) throws URIResolver.URIException {
+            if (node == null) {
+                if (parent == null) {
+                    return null; // We did our best, we cant do more
+                }
+                return parent.resolveURI(str);
+            }
+            return node.resolveURI(str);
+        }
+
+        @Override
+        protected String name() {
+            return name;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        protected void updateNode(String newName, N node) {
+            if (parent() != null && !name().equals(newName)) {
+                asGeneric(parent()).updateSubNode(newName, node, (T) GenericAnnotationNode.this);
+            } else {
+                setNode(newName, node);
+            }
+        }
+
+        @Override
+        protected void setNode(String newName, N node) {
+            // This is an internal method because it does not update the caches in the parent node.
+            // it needs to be protected to be accessible from the parent node.
+            disconnectFromNode();
+            this.name = newName;
+            this.node = node;
+            setNodeWasSetFlags();
+        }
+
+        @Override
+        protected V value() {
+            if (!nodeExists() || isAmbiguous()) {
+                return null;
+            }
+            return node().annotationValue();
+        }
+
+        @Override
+        protected void setValue(V newValue) throws AnnotationEditException {
+            try {
+                node().setAnnotationValue(newValue);
+            } catch (FailedToSetAnnotationValueException e) {
+                throw new AnnotationEditException(GenericAnnotationNode.this, e);
+            }
+        }
+
+        @Override
+        protected T valueAsAnnotation() {
+            if (!valueAnnotation_cacheComputed) {
+                valueAnnotation_cacheComputed = true;
+                if (isAmbiguous()) {
+                    valueAnnotation_cache = ambiguousNode();
+                } else if (nodeExists()) {
+                    N annotationNode = valueAsProvider();
+                    if (hasValue() && annotationNode == null) {
+                        valueAnnotation_cache = null;
+                    } else {
+                        valueAnnotation_cache = createNode(annotationNode);
+                    }
+                } else {
+                    valueAnnotation_cache = null;
+                }
+            }
+            return valueAnnotation_cache;
+        }
+
+        @Override
+        protected void toString(Appendable out) throws IOException {
+            if (name() != null) {
+                out.append(name());
+            }
+            if (hasSubNodes()) {
+                boolean first = true;
+                for (T subNode : subNodes()) {
+                    if (first) {
+                        out.append('(');
+                    }
+                    if (!first) {
+                        out.append(", ");
+                    }
+                    first = false;
+                    subNode.toString(out);
+                }
+                if (!first) {
+                    out.append(')');
+                }
+            }
+            if (hasValue()) {
+                out.append('=');
+                out.append(value().toString());
+            }
+        }
+
+        @Override
+        protected boolean hasNode() {
+            return isAmbiguous() || node != null;
+        }
+
+        @Override
+        protected boolean nodeExists() {
+            if (parent() != null) {
+                asGeneric(parent()).computeSubNodesCache();
+            }
+            return hasNode();
+        }
+
+        @Override
+        protected T parent() {
+            return parent;
+        }
+
+        @Override
+        protected void disconnectFromNode() {
+            if (parent != null) {
+                node = null;
+                setNodeWasSetFlags();
+            }
+            if (subNodes_cache != null) {
+                for (T t : subNodes_cache) {
+                    t.disconnectFromNode();
+                }
+            }
+        }
+
+        private void setNodeWasSetFlags() {
+            nodeWasSet = true;
+            if (parent() != null) {
+                asGeneric(parent()).setSubNodeNodeWasSet();
+            }
+        }
+
+        @Override
+        protected void setSubNodeNodeWasSet() {
+            subNodeNodeWasSet = true;
+        }
+
+        private void clearNodeWasSetFlags() {
+            nodeWasSet = false;
+            subNodeNodeWasSet = false;
+        }
+
+		@Override
+		protected boolean isFinal() {
+			return node.isFinal();
+		}
+
+		@Override
+		protected boolean isEach() {
+			return node.isEach();
+		}
+
     }
 
 }
