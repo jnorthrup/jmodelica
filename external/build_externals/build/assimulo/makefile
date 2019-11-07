@@ -44,7 +44,7 @@ $(INSTALL_DIR_FOLDER)/wheel:
 	find -type f -name Assimulo*.whl -exec cp {} $@/ \;
 
 clean:
-	@$(eval TARGET_BUILD_DIR=$(BUILD_DIR)/Assimulo_build$(BITNESS))
+	@$(eval TARGET_BUILD_DIR=$(BUILD_DIR)/Assimulo_build*)
 	rm -rf $(TARGET_BUILD_DIR) $(INSTALL_DIR_FOLDER)
 
 #
