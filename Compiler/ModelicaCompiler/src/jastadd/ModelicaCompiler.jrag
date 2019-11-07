@@ -1370,7 +1370,7 @@ public class ModelicaCompiler implements LogContainer {
         fc.guidManager().setSourceFile(new File(outDir, "modelDescription.xml"));
         fc.guidManager().processDependentFiles();
         log.debug("Checksum for generated files");
-        fc.guidManager().writeFileMD5(log);
+        fc.guidManager().printFileChecksums(log);
         log.debug("... code generated.");
         ASTNode.endStep("generateCode()");
     }
@@ -2181,13 +2181,7 @@ public class ModelicaCompiler implements LogContainer {
             for (File file : stream.files()) {
                 log.debug("Generated file '" + file + "'.");
                 if (fc != null) {
-                    try {
-                        fc.guidManager().createFileMD5(new FileReader(file), file.getName(), log);
-                    } catch (FileNotFoundException e) {
-                        throw e;
-                    } catch (IOException e) {
-                        // Should not happen
-                    }
+                    fc.guidManager().computeFileChecksum(new FileReader(file), file.getName(), log);
                     fc.guidManager().addDependentFile(file);
                 }
             }
