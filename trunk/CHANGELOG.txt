@@ -1,7 +1,4 @@
 ================= Unreleased ==================
-# Change ; Minor ; Compiler; #5870
-Debug log now contains checksums of all generated c-files.
-
 # Fixed ; Minor ; Compiler; #5864
 Fixed bug where partial variability propagation lead to unbalanced equation systems.
 
