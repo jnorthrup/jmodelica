@@ -464,6 +464,8 @@ aspect NodeTypes {
      */
     syn boolean SrcElement.isFullClassDecl() = false;
     eq SrcFullClassDecl.isFullClassDecl()    = true;
+    
+    syn boolean InstClassDecl.isFullClassDecl() = getSrcClassDecl().isFullClassDecl();
 
     syn SrcFullClassDecl SrcElement.asFullClassDecl() {
         throw new UnsupportedOperationException("asFullClassDecl() is not supported for class type " + getClass().getSimpleName());
