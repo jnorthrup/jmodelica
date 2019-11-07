@@ -1,4 +1,4 @@
-def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, TARGET, bitness=["32", "64"], BLAS_HOME_BASE=null, LAPACK_HOME_BASE=null, SUPERLU_HOME_BASE=null, SUNDIALS_HOME_BASE=null,USER_CONFIG=null, extra_bat="", stash=false, archive=true) {
+def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, TARGET, bitness=["32", "64"], build_with_msvs=null, BLAS_HOME_BASE=null, LAPACK_HOME_BASE=null, SUPERLU_HOME_BASE=null, SUNDIALS_HOME_BASE=null,USER_CONFIG=null, extra_bat="", stash=false, archive=true) {
     if (JM_CHECKOUT_PATH != null) {
         checkoutJM(${JM_BRANCH})
     }
@@ -18,17 +18,19 @@ def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, TARGET, bitness=["32", "64"]
     if (SUNDIALS_HOME_BASE == null) {
         SUNDIALS_HOME_BASE="${INSTALL_PATH_UNIX}/sundials_install"
     }
+    if (build_with_msvs) {
+        msvs_suffix="msvs"
+    } else {
+        msvs_suffix=""
+    }
     for (bit in bitness) {
-        stage ("assimulo_${TARGET} ${bit} bit") {
-            if(USER_CONFIG == null) {
-                USER_CONFIG="\${JM_HOME}/external/build_externals/configurations/Assimulo/windows/win${bit}"
-            }
+        stage ("assimulo_${TARGET} ${bit}${msvs_suffix} bit") {
             runMSYSWithEnv("""\
             export JM_HOME="\$(pwd)/JModelica/"
             JENKINS_BUILD_DIR="\$(pwd)/build"
             cd \${JM_HOME}/external/build_externals/build/assimulo
             
-            make clean BUILD_DIR=\${JENKINS_BUILD_DIR}/assimulo* BITNESS=${bit}
+            make clean BUILD_DIR=\${JENKINS_BUILD_DIR}/assimulo
             make ${TARGET} USER_CONFIG=${USER_CONFIG} JM_HOME=\${JM_HOME} BUILD_DIR=\${JENKINS_BUILD_DIR} BLAS_HOME=${BLAS_HOME_BASE}${bit} SUNDIALS_HOME=${SUNDIALS_HOME_BASE}${bit} LAPACK_HOME=${LAPACK_HOME_BASE}${bit} SUPERLU_HOME=${SUPERLU_HOME_BASE}${bit} INSTALL_DIR_FOLDER=${INSTALL_PATH_UNIX}/assimulo/${TARGET}/Python_${bit}
             """, extra_bat);
             if ("${TARGET}" == "folder") {
