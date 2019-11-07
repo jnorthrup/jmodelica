@@ -954,6 +954,9 @@ aspect Names {
     eq InstDot.getLastInstAccess()                = getInstAccess(getNumInstAccessNoTransform() - 1);
     eq InstGlobalAccess.getLastInstAccess()       = getInstAccess().getLastInstAccess();
     
+    
+    syn boolean SrcAccess.isFirstAccess() = this == getTopAccess().getFirstAccess();
+    
     /**
      * Access method for the first SrcAccess of a qualified or
      * unqualified name.
@@ -1031,7 +1034,7 @@ aspect Names {
     syn SrcAccess SrcAccess.getTopAccess() = retrieveTopAccess(this);
     
     inh SrcAccess SrcAccess.retrieveTopAccess(SrcAccess pre);
-    eq ASTNode.getChild().retrieveTopAccess(SrcAccess pre)      = pre;
+    eq BaseNode.getChild().retrieveTopAccess(SrcAccess pre)        = pre;
     eq SrcDot.getChild().retrieveTopAccess(SrcAccess pre)          = retrieveTopAccess(this);
     eq SrcGlobalAccess.getChild().retrieveTopAccess(SrcAccess pre) = retrieveTopAccess(this);
     
