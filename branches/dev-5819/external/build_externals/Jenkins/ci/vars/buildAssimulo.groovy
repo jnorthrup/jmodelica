@@ -31,7 +31,7 @@ def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, TARGET, bitness=["32", "64"]
             cd \${JM_HOME}/external/build_externals/build/assimulo
             
             make clean USER_CONFIG=${USER_CONFIG} BUILD_DIR=\${JENKINS_BUILD_DIR}
-            make ${TARGET} USER_CONFIG=${USER_CONFIG} JM_HOME=\${JM_HOME} BUILD_DIR=\${JENKINS_BUILD_DIR} WORKSPACE=\${WORKSPACE} INSTALL_DIR_FOLDER=${INSTALL_PATH_UNIX}/assimulo/${TARGET}/Python_${bit}
+            make ${TARGET} USER_CONFIG=${USER_CONFIG} JM_HOME=\${JM_HOME} BUILD_DIR=\${JENKINS_BUILD_DIR} WORKSPACE=\${JM_HOME}/.. INSTALL_DIR_FOLDER=${INSTALL_PATH_UNIX}/assimulo/${TARGET}/Python_${bit}
             """, extra_bat);
             if ("${TARGET}" == "folder") {
                 runMSYSWithEnv("""\
