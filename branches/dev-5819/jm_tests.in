@@ -20,7 +20,7 @@ merge_path() {
 # ====== Variables to set ======
 
 # Memory allocation for the ant process
-ANT_OPTS="-Xmx4g"
+ANT_OPTS="-Xmx2g"
 
 # Default tests - run if no tests are chosen
 # Possible values: modelica, optimica, python or combination (e.g. "modelica optimica")
@@ -171,7 +171,6 @@ function modelica_tests() {
 }
 
 function optimica_tests() {
-  echo "in optimica_tests()"
   junit_test Optimica
 }
 
@@ -183,12 +182,14 @@ function find_python_tests() {
 }
 
 function python_tests() {
-  TEST_DIR="$(pwd)/tests_$(date "+%F_%H-%M-%S")"
-  mkdir ${TEST_DIR}
+  if [ "${KEEP_PYTHON}" == 1 ]; then
+    TEST_DIR="$(pwd)/tests_$(date "+%F_%H-%M-%S")"
+    mkdir ${TEST_DIR}
+  else
+    TEST_DIR=$(mktemp -dq /tmp/jm_tests.XXXXXX)
+  fi 
   print_name Python
   res=0
-  echo "in python_tests OUTPUT=${OUTPUT}"
-  echo "in python_tests  TEST_DIR=${TEST_DIR}"
   case ${OUTPUT} in
     v)
       if build_jmodelica 2>&1 | log; then
@@ -208,8 +209,6 @@ function python_tests() {
       ;;
     n)
       if [[ "${NO_BUILD_JMODELICA}" != "1" ]]; then
-        echo "OUTPUT=${OUTPUT}"
-        echo "NO_BUILD_JMODELICA=${NO_BUILD_JMODELICA}"
         echo Building...
       fi
       if build_jmodelica | log > /dev/null; then
@@ -262,8 +261,7 @@ function python_tests_v() {
     res=0
     for TEST in ${TESTS}; do
       echo ""
-      echo "Running ${TEST}"
-      # echo ${TEST} | sed -e 's!^.*jmodelica.!Running !'
+      echo ${TEST} | sed -e 's!^.*jmodelica.!Running !'
       nose_test ${TEST} \
       | log \
       || res=1
@@ -341,8 +339,6 @@ function filter_python_separate() {
 function junit_test() {
   print_name $1
   cd ${BUILD}/java
-  echo "doing ls..."
-  ls -la
   res=0
   case ${OUTPUT} in
     v) junit_test_v $1 || res=1 ;;
@@ -386,7 +382,6 @@ function junit_test_q() {
 }
 
 function junit_test_n() {
-    echo "in junit_test_n"
     res=0
     ant_test $1 \
         | log \
@@ -400,17 +395,11 @@ function nose_test() {
 }
 
 function ant_test() {
-  echo "MC_ANT_ARGS=${MC_ANT_ARGS}"
-  echo "OC_ANT_ARGS=${OC_ANT_ARGS}"
-  echo "BUILD=${BUILD}"
-  echo "CLEAN_JUNIT=${CLEAN_JUNIT}"
-    if [[ "$1" == "Modelica" ]]; then
-        ant -f ${MC_ANT_ARGS} -Dtarget=${BUILD} ${CLEAN_JUNIT} test
-    else
-        ant -f ${OC_ANT_ARGS} -Dtarget=${BUILD} ${CLEAN_JUNIT} test
-    fi
-  echo "about to ls"
-  ls -la ${BUILD}
+  if [[ "$1" == "Modelica" ]]; then
+    ant -f ${MC_ANT_ARGS} -Dtarget=${BUILD} ${CLEAN_JUNIT} test
+  else
+    ant -f ${OC_ANT_ARGS} -Dtarget=${BUILD} ${CLEAN_JUNIT} test
+  fi
 }
 
 function build_jmodelica() {
@@ -452,9 +441,7 @@ function read_args() {
   TESTS=
   TESTS64=
   ARG_TYPE=flag
-  echo "DEFAULT_ARGS=${DEFAULT_ARGS}"
   for a in ${DEFAULT_ARGS} "$@"; do
-    echo a=$a
     if [[ "$(echo $a | head -c1)" == "-" ]]; then
       ARG_TYPE=flag
     fi
@@ -462,7 +449,6 @@ function read_args() {
     case ${ARG_TYPE} in
       flag)
         FLAG=1
-        echo FLAG=$FLAG
         ;;
       tag)
         TAGS="${TAGS} -a ${a}"
@@ -498,13 +484,7 @@ function read_args() {
         ;;
     esac
     if [[ ${FLAG} == 1 ]]; then
-      echo "In flag == 1 with a=${a}"
-      a_split=""
-      for ((i=0; i<${#a}; i++)); do a_split="$a_split ${a:$i:1}"; done
-      echo a_split="$a_split"
-      for b in $a_split; do
-        HAVE_READ_ARGS=1
-        echo b=${b}
+      for b in $(echo "" ${a}|sed 's!\(.\)!\1 !g'); do
         case ${b} in
           -)
             ;;
@@ -617,8 +597,6 @@ function read_args() {
             ;;
         esac
       done
-    else
-      HAVE_READ_ARGS=1
     fi
   done
 }
@@ -635,18 +613,8 @@ done
 export JAVA_HOME JMODELICA_HOME IPOPT_HOME PYTHONPATH LD_LIBRARY_PATH ANT_OPTS SUNDIALS_HOME
 TIME=$(date +%s)
 
-echo "TIME = ${TIME}"
-echo "before read_args"
-HAVE_READ_ARGS=0
-echo "PATH=${PATH}"
-echo "args $@"
 read_args "$@"
-if [[ $HAVE_READ_ARGS == 0 ]]; then
-echo "Reading args to jm_tests failed, retrying..."
-read_args "$@"
-fi
-echo "after read_args"
-echo "Writing to LOGFILE=${LOGFILE}"
+
 if [[ $ERROR_ON_TEST_FAIL == 1 ]]; then
     if [[ -z $XML_RES_PATH ]]; then
         echo "-e needs -x"
@@ -656,7 +624,6 @@ fi
 
 if [ "${LOG}" == 1 ]; then
   echo "Log of jm_tests $(date):" > "${LOGFILE}"
-  echo "Finished writing log..."
 fi
 
 ANY_ON=0
@@ -665,9 +632,6 @@ for a in ${tests}; do
     ANY_ON=1
   fi
 done
-
-echo "ANY_ON=${ANY_ON}"
-echo "DEFAULT_TESTS=${DEFAULT_TESTS}"
 if [[ "${ANY_ON}" == 0 ]]; then
   switch_test_flags ${DEFAULT_TESTS}
 fi
@@ -678,15 +642,8 @@ if [[ ${SYS} == Win ]]; then
 fi
 
 res=0
-
 for a in ${tests}; do
   if [[ "${test[${!a}]}" == 1 ]]; then
-    echo "Printing going with ${a}_tests"
-  fi
-done
-for a in ${tests}; do
-  if [[ "${test[${!a}]}" == 1 ]]; then
-    echo "going with ${a}_tests"
     ${a}_tests || res=1
   fi
 done
