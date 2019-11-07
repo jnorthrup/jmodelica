@@ -412,18 +412,18 @@ aspect MemoryUse {
      */
     public void ASTNode.dumpNodeCount(String file, UtilInterface util)
             throws IOException {
-        ArrayList<Counter> list = new ArrayList<Counter>();
+        ArrayList<ASTNodeCounter> list = new ArrayList<ASTNodeCounter>();
         list.addAll(util.getBuildNodeCountMap().values());
         Collections.sort(list);
         CodeStream out = new CodeStream(file);
-        for (Counter c : list)
+        for (ASTNodeCounter c : list)
             out.println(c);
         for (NodeCountExtra nce : nodeCountExtra)
             nce.printResult(out);
         out.close();
     }
 
-    public void ASTNode.buildNodeCount(Map<Class,Counter> map) {
+    public void ASTNode.buildNodeCount(Map<Class,ASTNodeCounter> map) {
         addToNodeCount(map, getClass(), Profiler.getNodeSize(this, false), Profiler.getNodeSize(this, true));
         for (NodeCountExtra nce : nodeCountExtra)
             nce.count(this);
@@ -432,50 +432,58 @@ aspect MemoryUse {
             n.buildNodeCount(map);
     }
 
-    private void ASTNode.addToNodeCount(Map<Class,Counter> map, Class cls, long local, long deep) {
+    private void ASTNode.addToNodeCount(Map<Class,ASTNodeCounter> map, Class cls, long local, long deep) {
         if (map.containsKey(cls))
             map.get(cls).inc(local, deep);
         else
-            map.put(cls, new Counter(cls.getSimpleName(), local, deep));
+            map.put(cls, new ASTNodeCounter(cls.getSimpleName(), local, deep));
         if (cls != ASTNode.class)
             addToNodeCount(map, cls.getSuperclass(), local, deep);
     }
 
-    public class ASTNode {
-        public static class Counter implements Comparable<Counter> {
-            private int n;
-            private long sizeLocal;
-            private long sizeDeep;
-            private String s;
-            
-            private static int l = 0;
-            private static String fmt = null;
-            
-            public Counter(String name, long local, long deep) {
-                s = name;
-                sizeLocal = 0;
-                sizeDeep = 0;
-                n = 0;
-                if (s.length() > l)
-                    l = s.length();
-                inc(local, deep);
+    public class ASTNodeCounter implements Comparable<ASTNodeCounter> {
+        private int n;
+        private long sizeLocal;
+        private long sizeDeep;
+        private String s;
+        
+        private static int l = 0;
+        private static String fmt = null;
+        
+        public ASTNodeCounter(String name, long local, long deep) {
+            s = name;
+            sizeLocal = 0;
+            sizeDeep = 0;
+            n = 0;
+            if (s.length() > l)
+                l = s.length();
+            inc(local, deep);
+        }
+        
+        public void inc(long local, long deep) {
+            n++;
+            sizeLocal += local;
+            sizeDeep += deep;
+        }
+        
+        public int compareTo(ASTNodeCounter c) {
+            return c.n - n;
+        }
+        
+        public String toString() {
+            if (fmt == null)
+                fmt = "%-" + l + "s : %9d (%8s / %8s)";
+            return String.format(fmt, s, n, ASTNode.formatMem(sizeDeep), ASTNode.formatMem(sizeLocal));
+        }
+    }
+
+    public class UtilInterface {
+        private Map<Class, ASTNodeCounter> buildNodeCountMap;
+        public Map<Class, ASTNodeCounter> getBuildNodeCountMap() {
+            if (buildNodeCountMap == null) {
+                buildNodeCountMap = new HashMap<>();
             }
-            
-            public void inc(long local, long deep) {
-                n++;
-                sizeLocal += local;
-                sizeDeep += deep;
-            }
-            
-            public int compareTo(Counter c) {
-                return c.n - n;
-            }
-            
-            public String toString() {
-                if (fmt == null)
-                    fmt = "%-" + l + "s : %9d (%8s / %8s)";
-                return String.format(fmt, s, n, ASTNode.formatMem(sizeDeep), ASTNode.formatMem(sizeLocal));
-            }
+            return buildNodeCountMap;
         }
     }
 
