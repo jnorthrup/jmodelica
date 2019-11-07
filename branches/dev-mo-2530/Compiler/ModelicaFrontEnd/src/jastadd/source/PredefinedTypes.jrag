@@ -29,6 +29,11 @@ aspect PredefinedTypes {
     inh List SrcFullClassDecl.getPredefinedType();
     eq SourceRoot.getProgram().getPredefinedType() = computePredefinedType();
     eq Root.getChild().getPredefinedType() = null;
+    
+    inh boolean SrcComponentDecl.isAttribute();
+    inh boolean SrcComponentClause.isAttribute();
+    eq SourceRoot.getChild().isAttribute()       = false;
+    eq Program.getPredefinedType().isAttribute() = true;
 
     
     /* The predefined types Real, Integer etc of Modelica are
