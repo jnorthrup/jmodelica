@@ -46,6 +46,9 @@ $(INSTALL_DIR_FOLDER)/wheel:
 clean:
 	@$(eval TARGET_BUILD_DIR=$(BUILD_DIR)/Assimulo_build*)
 	rm -rf $(TARGET_BUILD_DIR) $(INSTALL_DIR_FOLDER)
+	ifeq($(REMOVE_PREINSTALL_DIR), yes)
+		@echo "Removing $(PREINSTALL_DIR)" && rm -rf $(PREINSTALL_DIR)
+	endif
 
 #
 #	Copyright (C) 2018 Modelon AB
