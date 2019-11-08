@@ -559,7 +559,8 @@ public class ModelicaCompiler implements LogContainer {
 
     /**
      * Save a dump of the node class counts of an AST (or several).
-     * 
+     * This only seems to work when using an older jdk version. 
+     * We have verified that it works with jdk 8 but it doesn't seem to work properly with jdk 11.
      * The dump will be saved in a file named <code>"node_count.txt"</code>.
      */
     protected void dumpNodeCountFile(Root root)
