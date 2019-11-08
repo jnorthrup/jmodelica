@@ -529,8 +529,8 @@ public class ModelicaCompiler implements LogContainer {
      * @param type   a one-word description of the tree to dump
      * @param count  it node counts should also be generated
      */
-    protected void dumpMemoryUseFile(ASTNode root, String type, boolean count) throws FileNotFoundException {
-        dumpMemoryUseFile(root, type, type, count);
+    protected void dumpMemoryUseFile(ASTNode root, UtilInterface util, String type, boolean count) throws FileNotFoundException {
+        dumpMemoryUseFile(root, util, type, type, count);
     }
 
     /**
@@ -543,7 +543,7 @@ public class ModelicaCompiler implements LogContainer {
      * @param name   the variable part of the file name
      * @param count  it node counts should also be generated
      */
-    protected void dumpMemoryUseFile(ASTNode root, String type, String name, boolean count) 
+    protected void dumpMemoryUseFile(ASTNode root, UtilInterface util, String type, String name, boolean count)
             throws FileNotFoundException {
         if (dumpMemoryUse) {
             String file = "size_" + name + ".txt";
@@ -552,22 +552,23 @@ public class ModelicaCompiler implements LogContainer {
             root.dumpMemoryUse(file, true, -1, dumpMemoryUseMinSize);
             time = Math.round((System.currentTimeMillis() - time) / 1000.0);
             if (count)
-                root.buildNodeCount();
+                root.buildNodeCount(util.getBuildNodeCountMap());
             log.debug(" Dumped tree in " + time + "s");
         }
     }
 
     /**
      * Save a dump of the node class counts of an AST (or several).
-     * 
+     * This only seems to work when using an older jdk version. 
+     * We have verified that it works with jdk 8 but it doesn't seem to work properly with jdk 11.
      * The dump will be saved in a file named <code>"node_count.txt"</code>.
      */
-    protected void dumpNodeCountFile() 
+    protected void dumpNodeCountFile(Root root)
             throws IOException {
         if (dumpMemoryUse) {
             String file = "node_count.txt";
             log.debug("Dumping node counts to '" + file + "'...");
-            ASTNode.dumpNodeCount(file);
+            root.dumpNodeCount(file, root.getUtilInterface());
         }
     }
 
@@ -1085,7 +1086,7 @@ public class ModelicaCompiler implements LogContainer {
             throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
         // build source tree
         SourceRoot sr = parseModelFromPaths(paths);
-        dumpMemoryUseFile(sr, "source", false);
+        dumpMemoryUseFile(sr, sr.getUtilInterface(), "source", false);
 
         if (options.getBooleanOption("generate_html_diagnostics")) {
             setDiagnosticsGenerator(new DiagnosticsGenerator(cl, options));
@@ -1094,7 +1095,7 @@ public class ModelicaCompiler implements LogContainer {
         // compute instance tree
         InstClassDecl icl = instantiateModel(sr, cl, target);
         
-        dumpMemoryUseFile(sr, "source and instance", "instance", true);
+        dumpMemoryUseFile(sr, sr.getUtilInterface(), "source and instance", "instance", true);
         
         return icl;
     }
@@ -1221,8 +1222,8 @@ public class ModelicaCompiler implements LogContainer {
         ASTNode.beginStep("flatten()");
         log.info("Flattening model...");
         icd.flattenInstClassDecl(fc);
-        dumpMemoryUseFile(fc, "flat", true);
-        dumpNodeCountFile();
+        dumpMemoryUseFile(fc, fc.root().getUtilInterface(), "flat", true);
+        dumpNodeCountFile(icd.root());
         icd = null;
         ASTNode.endStep("flatten()");
         
@@ -1283,7 +1284,7 @@ public class ModelicaCompiler implements LogContainer {
         
         ASTNode.endStep("prettyPrintFlat()");
         
-        dumpMemoryUseFile(fc, "transformed", false);
+        dumpMemoryUseFile(fc, fc.root().getUtilInterface(), "transformed", false);
         
         if (options.getBooleanOption("write_iteration_variables_to_file")) {
             ASTNode.beginStep("writeIterationVariables()");
@@ -2061,7 +2062,7 @@ public class ModelicaCompiler implements LogContainer {
             // Generate code 
             if (target.getCodeGenFlag()) {
                 generateCode(fc, target);
-                dumpMemoryUseFile(fc, "generated", false);
+                dumpMemoryUseFile(fc, util, "generated", false);
             }
             
             fc.loadResources(new File(outDir, "resources"));
@@ -2496,9 +2497,9 @@ public class Templates {
     }
    
     private static ArrayList<TemplateContributor> CONTRIBUTORS;
-    private static LinkedHashSet<String> XML_TEMPLATES;
-    private static LinkedHashSet<String> C_HEADER_TEMPLATES;
-    private static LinkedHashSet<String> C_SOURCE_TEMPLATES;    
+    private LinkedHashSet<String> XML_TEMPLATES;
+    private LinkedHashSet<String> C_HEADER_TEMPLATES;
+    private LinkedHashSet<String> C_SOURCE_TEMPLATES;    
     
     public abstract static class TemplateContributor {
         public void addTemplates(Templates templates, OptionRegistry options) { }
@@ -2604,7 +2605,7 @@ public class ModulesSettings {
     }
     
     private static ArrayList<ModuleContributor> CONTRIBUTORS = new ArrayList<>();
-    private static HashMap<Module, String> libraryNames = new HashMap<>();
+    private HashMap<Module, String> libraryNames = new HashMap<>();
     
     public abstract static class ModuleContributor {
         public void addModule(ModulesSettings settings, OptionRegistry options) { }
