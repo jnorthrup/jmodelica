@@ -818,7 +818,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
 
         @Override
         protected T valueAsAnnotation() {
-            return null;
+            return self();
         }
 
         @Override
