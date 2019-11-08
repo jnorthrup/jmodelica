@@ -146,6 +146,33 @@ void func_CCodeGenTests_DomainChecks1_operators_def0(jmi_real_t t_v, jmi_array_t
 ")})));
 end DomainChecks1;
 
+model DomainChecks2
+	Real x1 = abs(time);
+
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="DomainChecks2",
+        description="Test of domain check generation",
+        mathematical_domain_checks=false,
+        inline_functions="none",
+        template="$C_defines$",
+        generatedCode="")})));
+end DomainChecks2;
+
+model DomainChecks3
+	Real x1 = abs(time);
+
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="DomainChecks3",
+        description="Test of domain check generation",
+        mathematical_domain_checks=true,
+        inline_functions="none",
+        template="$C_defines$",
+        generatedCode="#define MATHEMATICAL_DOMAIN_CHECKS
+")})));
+end DomainChecks3;
+
 model CCodeGenTest1
   Real x1(start=0); 
   Real x2(start=1); 
