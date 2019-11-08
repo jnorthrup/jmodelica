@@ -57,24 +57,17 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     private final AnnotationStateManager state;
 
     /**
-     * Constructor to create an unambiguous annotation node.<br>
-     * <code>name</code> may be null, some nodes simply do not have a name.<br>
-     * <code>node</code> may only be null for the instances returned by
-     * {@link #ambiguousNode()} and nodes which don't exist yet.
-     * 
-     * @param name Name of the node, optionally null.
-     * @param node The node that this annotation node represent.
-     * @param parent The parent of the node
-     */
-    protected GenericAnnotationNode(String name, N node, T parent) {
-        this(name, node, parent, false);
-    }
-
-    /**
-     * Constructor to create an annotation node.<br>
+     * Constructor to create an ambiguous annotation node.<br>
      * An ambiguous node created with this constructor is immutable. 
      * That is, calling a state changing method on an unambiguous will not have any effect. 
      * No state change will occur nor will any exception be thrown.
+     */
+    protected GenericAnnotationNode() {
+    	state = new AmbiguousAnnotationStateManager();
+    }
+
+    /**
+     * Constructor to create an unambiguous annotation node.<br>
      * <code>name</code> may be null, some nodes simply do not have a name.<br>
      * <code>node</code> may only be null for the instances returned by
      * {@link #ambiguousNode()} and nodes which don't exist yet.
@@ -84,10 +77,8 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @param parent The parent of the node
      * @param ambiguous The ambiguity of the node.
      */
-    protected GenericAnnotationNode(String name, N node, T parent, boolean ambiguous) {
-    	state = ambiguous ? 
-    			new AmbiguousAnnotationStateManager(name, node, parent) : 
-    			new MutableAnnotationStateManager(name, node, parent);
+    protected GenericAnnotationNode(String name, N node, T parent) {
+    	state = new MutableAnnotationStateManager(name, node, parent);
     }
 
     /**
@@ -230,7 +221,6 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @param newName The new name
      * @param node The new node
      */
-    @SuppressWarnings("unchecked")
     protected void updateNode(String newName, N node) {
        state.updateNode(newName, node);
     }
@@ -721,15 +711,6 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
 
     public class AmbiguousAnnotationStateManager extends AnnotationStateManager {
 
-        private final String name;
-        private final N node;
-        private final T parent;
-
-        protected AmbiguousAnnotationStateManager(String name, N node, T parent) {
-            this.name = name;
-            this.node = node;
-            this.parent = parent;
-        }
 
         @Override
         protected void computeSubNodesCache() {
@@ -778,7 +759,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
 
         @Override
         protected N node() {
-            return node;
+            return null;
         }
 
         @Override
@@ -788,12 +769,12 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
 
         @Override
         protected N peekNode() {
-            return node;
+            return null;
         }
 
         @Override
         protected String name() {
-            return name;
+            return null;
         }
 
         @Override
@@ -838,7 +819,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
 
         @Override
         protected T parent() {
-            return parent;
+            return null;
         }
 
 		@Override
@@ -882,7 +863,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
                 subNodesNameMap_cache = Collections.emptyMap();
             }
 
-            if(!nodeExists() || isAmbiguous()) {
+            if(!nodeExists()) {
                 return;
             }
 
@@ -1002,7 +983,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
 
         @Override
         protected T forPath(String[] paths, int currentIndex) {
-            if (isAmbiguous() || currentIndex == paths.length) {
+            if (currentIndex == paths.length) {
                 return self();
             }
             computeSubNodesCache();
@@ -1115,7 +1096,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
 
         @Override
         protected V value() {
-            if (!nodeExists() || isAmbiguous()) {
+            if (!nodeExists()) {
                 return null;
             }
             return node().annotationValue();
@@ -1134,9 +1115,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         protected T valueAsAnnotation() {
             if (!valueAnnotation_cacheComputed) {
                 valueAnnotation_cacheComputed = true;
-                if (isAmbiguous()) {
-                    valueAnnotation_cache = ambiguousNode();
-                } else if (nodeExists()) {
+                if (nodeExists()) {
                     N annotationNode = valueAsProvider();
                     if (hasValue() && annotationNode == null) {
                         valueAnnotation_cache = null;
@@ -1179,7 +1158,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
 
         @Override
         protected boolean hasNode() {
-            return isAmbiguous() || node != null;
+            return node != null;
         }
 
         @Override

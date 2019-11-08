@@ -105,24 +105,23 @@ aspect SrcAnnotations {
      */
     public class SrcAnnotationNode extends GenericAnnotationNode<SrcAnnotationNode, SrcAnnotationProvider, SrcExp> {
         
-        public static final SrcAnnotationNode AMBIGUOUS_ANNOTATION =  new SrcAnnotationNode(null, null, null, SrcAnnotationNode.defaultEvaluator(), true);
+        public static final SrcAnnotationNode AMBIGUOUS_ANNOTATION =  new SrcAnnotationNode();
         
         private Evaluator<SrcExp> evaluator;
 
-        /** Creates an unambiguous source annotation.
-         * See {@link GenericAnnotationNode#GenericAnnotationNode(String, AnnotationProvider, GenericAnnotationNode)}
+        /** Creates an ambiguous source annotation.
+         * See {@link GenericAnnotationNode#GenericAnnotationNode()}
          */
-        protected SrcAnnotationNode(String name, SrcAnnotationProvider node, SrcAnnotationNode parent,
-                Evaluator<SrcExp> evaluator) {
-            super(name, node, parent);
-            this.evaluator = evaluator;
+        protected SrcAnnotationNode() {
+            super();
+            this.evaluator = SrcAnnotationNode.defaultEvaluator();
         }
 
-        /** Creates a source annotation.
-         * See {@link GenericAnnotationNode#GenericAnnotationNode(String, AnnotationProvider, GenericAnnotationNode, boolean)}
+        /** Creates a unambiguous source annotation.
+         * See {@link GenericAnnotationNode#GenericAnnotationNode(String, AnnotationProvider, GenericAnnotationNode)}
          */
-        protected SrcAnnotationNode(String name, SrcAnnotationProvider node, SrcAnnotationNode parent, Evaluator<SrcExp> evaluator, boolean ambiguous) {
-            super(name, node, parent, ambiguous);
+        protected SrcAnnotationNode(String name, SrcAnnotationProvider node, SrcAnnotationNode parent, Evaluator<SrcExp> evaluator) {
+            super(name, node, parent);
             this.evaluator = evaluator;
         }
 
