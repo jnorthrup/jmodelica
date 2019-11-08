@@ -400,13 +400,6 @@ aspect MemoryUse {
         return res;
     }
 
-    private static NodeCountExtra[] ASTNode.nodeCountExtra = new NodeCountExtra[] { };
-
-    public interface NodeCountExtra {
-        public void count(ASTNode n);
-        public void printResult(CodeStream out);
-    }
-
     /**
      * Output a list of the number of instances of each node class.
      */
@@ -418,15 +411,11 @@ aspect MemoryUse {
         CodeStream out = new CodeStream(file);
         for (ASTNodeCounter c : list)
             out.println(c);
-        for (NodeCountExtra nce : nodeCountExtra)
-            nce.printResult(out);
         out.close();
     }
 
     public void ASTNode.buildNodeCount(Map<Class,ASTNodeCounter> map) {
         addToNodeCount(map, getClass(), Profiler.getNodeSize(this, false), Profiler.getNodeSize(this, true));
-        for (NodeCountExtra nce : nodeCountExtra)
-            nce.count(this);
         
         for (ASTNode n : profilingChildren())
             n.buildNodeCount(map);
