@@ -1,17 +1,17 @@
 OS=win
 TARGET=assimulo
-BUILD_DIR=${WORKSPACE}/build
+BUILD_DIR=$(WORKSPACE)/build
 BITNESS=64
 PREINSTALL_DIR=$(BUILD_DIR)/Assimulo_install$(BITNESS)
 
-JM_HOME=${WORKSPACE}/src
+JM_HOME=$(WORKSPACE)/src
 ASSIMULO_SRC=$(JM_HOME)/external/Assimulo
 SUPERLU_HOME=$(BUILD_DIR)/superlu_install
 SUNDIALS_HOME=$(BUILD_DIR)/sundials_install
 BLAS_HOME=$(BUILD_DIR)/blas_install
 LAPACK_HOME=$(BUILD_DIR)/lapack_install
 
-INSTALL_DIR_FOLDER=${SDK_HOME}/install/Python
+INSTALL_DIR_FOLDER=$(WORKSPACE)/install/Python
 PLATFORM_SITE_PACKAGES=Lib/site-packages
 
 BUILD_SETUP_EXTRA=
