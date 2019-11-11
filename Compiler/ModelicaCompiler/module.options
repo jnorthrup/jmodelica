@@ -137,7 +137,7 @@ external objects during compilation.If less than 1, no processes will be kept
 alive, i.e. this feature is turned off."
 
 ********************************************************************************
-BOOLEAN external_constant_evaluation_dynamic compiler experimental false
+BOOLEAN external_constant_evaluation_dynamic compiler uncommon true
 
 "If enabled, calls to external functions will be evaluated during compilation 
 using a pre-compiled program (instead of generating and compiling one), if 
