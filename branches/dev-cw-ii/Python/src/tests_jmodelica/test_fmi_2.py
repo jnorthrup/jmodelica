@@ -182,6 +182,14 @@ class Test_FMUModelCS2:
         cls.initialize_solver = compile_fmu("Inputs.DiscChange",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs", version="2.0")
     
     @testattr(stddist_full = True)
+    def test_no_state_solver(self):
+        model = load_fmu(Test_FMUModelCS2.coupled_name)
+        
+        model.set("_cs_solver",2) #Set the no state solver
+
+        nose.tools.assert_raises(Exception, model.initialize)
+    
+    @testattr(stddist_full = True)
     def test_reinitialize_solver(self):
         model = load_fmu(Test_FMUModelCS2.initialize_solver)
         

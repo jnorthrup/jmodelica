@@ -61,27 +61,26 @@ jmi_ode_status_t jmi_ode_no_state_solve(jmi_ode_solver_t* solver, double tend, i
                 "Could not retrieve time derivatives");
         return JMI_ODE_ERROR;
     }
-
-
+    
     /* Check if an event indicator has triggered */
-    if(sizes.event_indicators > 0){
+    if(sizes.event_indicators > 0) {
         flag = problem->ode_callbacks.root_func(tend, NULL, event_indicators, sizes, problem->problem_data);
         
-        if (flag != 0){
+        if (flag != 0) {
             jmi_log_node(problem->log, logError, "NoStateSolver",
                 "Could not retrieve event indicators");
             return JMI_ODE_ERROR;
         }
-    }
 
-    for (k = 0; k < sizes.event_indicators; k++) {
-        if (event_indicators[k]*event_indicators_previous[k] < 0) {
-            zero_crossning_event = 1;
-            break;
+        for (k = 0; k < sizes.event_indicators; k++) {
+            if (event_indicators[k]*event_indicators_previous[k] < 0) {
+                zero_crossning_event = 1;
+                break;
+            }
         }
+        memcpy(event_indicators_previous, event_indicators, sizes.event_indicators * sizeof(jmi_real_t));
     }
-    memcpy(event_indicators_previous, event_indicators, sizes.event_indicators * sizeof(jmi_real_t));
-        
+    
     /* After each step call completed integrator step */
     flag = problem->ode_callbacks.complete_step_func(&step_event, &terminate, problem->problem_data);
     if (flag != 0) {
@@ -92,7 +91,7 @@ jmi_ode_status_t jmi_ode_no_state_solve(jmi_ode_solver_t* solver, double tend, i
         
     /* Handle events */
     if (zero_crossning_event || step_event == TRUE) {
-        jmi_log_node(problem->log, logInfo, "EulerEvent", "An event was detected at <t:%g>", tend);
+        jmi_log_node(problem->log, logInfo, "NoStateSolver", "An event was detected at <t:%g>", tend);
         return JMI_ODE_EVENT;
     }
     

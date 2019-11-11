@@ -96,6 +96,9 @@ class KeepLastStream():
     thrown when the compiler fail to start properly. For example when the
     JVM is unable to allocate enough memory.
     """
+    def close(self):
+        pass
+        
     def __init__(self, stream):
         self.stream = stream
         self.last = None

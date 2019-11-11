@@ -238,6 +238,14 @@ class Test_FMUModelCS1:
         model.set("_cs_solver",1)
         res = model.simulate(final_time=1.0)
         nose.tools.assert_almost_equal(res.final("x"),1.0)
+    
+    @testattr(stddist_full = True)
+    def test_no_state_solver(self):
+        model = load_fmu(Test_FMUModelCS1.rlc_circuit)
+        
+        model.set("_cs_solver",2) #Set the no state solver
+
+        nose.tools.assert_raises(Exception, model.initialize)
 
     @testattr(stddist_full = True)
     def test_input_derivatives(self):

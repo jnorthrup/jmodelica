@@ -298,7 +298,17 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
     
     /* These options for the solver need to be found in a better way. */
     options = jmi_ode_solver_default_options();
-    options.method                  = fmi1_me->jmi.options.cs_solver;
+    if (ode_problem->sizes.states > 0) {
+        options.method                  = fmi1_me->jmi.options.cs_solver;
+        
+        if (options.method == JMI_ODE_NO_STATE) {
+            jmi_log_node(ode_problem->log, logError, "FMIState",
+                "Can only use the 'no state' solver for models without states, please choose another solver.");
+            return fmiError;
+        }
+    } else {
+        options.method                  = JMI_ODE_NO_STATE;
+    }
     options.euler_options.step_size = fmi1_me->jmi.options.cs_step_size;
     options.cvode_options.rel_tol   = fmi1_me->jmi.options.cs_rel_tol;
     options.experimental_mode       = fmi1_me->jmi.options.cs_experimental_mode;
