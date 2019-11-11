@@ -193,8 +193,8 @@ fmi2Status fmi2_cs_instantiate(fmi2Component c,
     ode_sizes.states = jmi->n_real_x;
     ode_sizes.event_indicators = jmi->n_relations;
     fmi2_cs->cs_data = jmi_new_cs_data(c, jmi->n_real_u);
-    fmi2_cs -> ode_problem = jmi_new_ode_problem(&jmi->jmi_callbacks,
-        fmi2_cs->cs_data, ode_callbacks, ode_sizes, jmi->log);
+    fmi2_cs->ode_problem = jmi_new_ode_problem(&jmi->jmi_callbacks,
+    fmi2_cs->cs_data, ode_callbacks, ode_sizes, jmi->log);
     
     return fmi2OK;
 }

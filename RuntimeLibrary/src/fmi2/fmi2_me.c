@@ -275,6 +275,12 @@ fmi2Status fmi2_enter_initialization_mode(fmi2Component c) {
         options = jmi_ode_solver_default_options();
         if (ode_problem->sizes.states > 0) {
             options.method                  = jmi->options.cs_solver;
+            
+            if (options.method == JMI_ODE_NO_STATE) {
+                jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "FMIState",
+                    "Can only use the 'no state' solver for models without states, please choose another solver.");
+                return fmi2Error;
+            }
         } else {
             options.method                  = JMI_ODE_NO_STATE;
         }
