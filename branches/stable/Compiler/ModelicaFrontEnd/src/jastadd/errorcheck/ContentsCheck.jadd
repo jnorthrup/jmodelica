@@ -21,6 +21,7 @@ import org.jmodelica.util.ErrorCheckType;
 
 import org.jmodelica.common.URIResolver;
 import org.jmodelica.common.URIResolver.URIException;
+import org.jmodelica.util.problemHandling.SimpleErrorOrWarningProducer;
 
 aspect ContentCheck {
 
@@ -388,6 +389,22 @@ aspect ContentCheck {
         for (FExp ch : childFExps()) {
             if (!ch.variability().parameterOrLess()) {
                 NON_PARAMETER_SAMPLE_ARGUMENTS.invoke(ch);
+            }
+        }
+    }
+    
+    public static final SimpleErrorOrWarningProducer ASTNode.INVALID_FORMAT_STRING =
+            new SimpleErrorOrWarningProducer("INVALID_FORMAT_STRING", ProblemKind.SEMANTIC, "%s");
+
+    public void FStringExp.contentCheck(ErrorCheckType checkType) {
+        if (hasFormat()) {
+            try {
+                CFormatSpecifier format = formatSpecifier();
+                if (format.hasProblem()) {
+                    INVALID_FORMAT_STRING.invoke(this, format.hasError(), format.errorMessage());
+                }
+            } catch (ConstantEvaluationException e) {
+                // If we can't evaluate it, don't do a static error check of it.
             }
         }
     }

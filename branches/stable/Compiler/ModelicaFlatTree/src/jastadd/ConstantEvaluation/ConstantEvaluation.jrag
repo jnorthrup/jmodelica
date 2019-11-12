@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.IllegalFormatException;
 
 import org.jmodelica.util.BinaryOperation;
 import org.jmodelica.util.StringUtil;
@@ -31,6 +32,7 @@ import org.jmodelica.util.values.Evaluable;
 import org.jmodelica.util.values.ConstantEvaluationException;
 import org.jmodelica.util.values.ConstantEvaluationNotReadyException;
 import org.jmodelica.util.values.FunctionEvaluationException;
+import org.jmodelica.util.values.CFormatSpecifier;
 
 
 /**
@@ -2845,45 +2847,30 @@ aspect ConstantEvaluation {
         }
         
         CValue cval = getValue().ceval(evaluator);
-        boolean isReal = getValue().type().isReal();
-        if (isReal) {
+        final CFormatSpecifier format = formatSpecifier(evaluator);
+        
+        if (!format.isValid()) {
+            throw new ConstantEvaluationException(format.errorMessage());
+        }
+        
+        // Do any necessary type conversions.
+        if (format.expectedType.isReal()) {
             cval = cval.convertReal();
+        } else if (format.expectedType.isInteger()) {
+            cval = cval.convertInteger();
         }
         Object value = cval.objectValue();
-        final String format = formatString(evaluator);
-        char formatChar = format.charAt(format.length() - 1);
-        
-        // Modelica allows Integer to Real conversion for formatting but not the other direction
-        boolean mustBeInteger = formatChar == 'd' || formatChar == 'i' || formatChar == 'o' || 
-            formatChar == 'x' || formatChar == 'X' || formatChar == 'u' || formatChar == 'c';
-        if (mustBeInteger && isReal) {
-            throw new ConstantEvaluationException(cval, "format the resulting value. The format '"+ format + "' requires value of Integer type but Real value is provided. ");
-        }
-
-        if (getValue().type().isInteger()) {
-            // Java formatter do not convert types
-            final boolean convertToFloat = formatChar == 'e' || formatChar == 'E' || 
-                    formatChar == 'f' || formatChar == 'g' || formatChar == 'G';
-            if (convertToFloat) {
-                return new CValueString(String.format((Locale) null, format, cval.realValue()));
-            }
-            if (formatChar == 'u') {
-                String formatCorrect = format.substring(0, format.length()-1) + "s";
-                long unsigned = ((long) cval.intValue()) & 0xffffffffL; // Java 8 Integer.toUnsignedLong
-                return new CValueString(String.format((Locale) null, formatCorrect, unsigned));
-            }
-
-            if (formatChar == 'i') {
-                String formatCorrect = format.substring(0, format.length()-1) + "d";
-            	return new CValueString(String.format((Locale) null, formatCorrect, cval.intValue()));
-            }
+        if (format.expectedType.isUnsigned()) {
+            // Convert to the closest Java equivalent to an unsigned int.
+            // TODO: When we no longer need to support Java 7, use Integer.toUnsignedLong instead.
+            value = Long.valueOf(((Integer) value).longValue() & 0xffffffffL);
         }
         
         try {
-            return new CValueString(String.format((Locale) null, format, value));
-        } catch (java.util.IllegalFormatException e) {
-            throw new ConstantEvaluationException(cval, 
-                    "format the resulting value. " + format + " is not a supported valid format string");
+            return new CValueString(String.format((Locale) null, format.javaFormat, value));
+        } catch (IllegalFormatException e) {
+            throw new ConstantEvaluationException("The format string \"" + format.format + 
+                    "\" and the value " + value + " do not match in the string conversion: " + this, e);
         }
     }
     eq FGetInstanceName.cevalCalc(VariableEvaluator evaluator) = new CValueString(calcInstanceName());
@@ -2896,41 +2883,40 @@ aspect ConstantEvaluation {
         throw new UnsupportedOperationException("The getInstanceName() operator is not allowed in the flat tree.");
     }
 
-    syn String FStringExp.formatString(VariableEvaluator evaluator) {
-        StringBuilder buf = new StringBuilder("%");
+    syn CFormatSpecifier FStringExp.formatSpecifier() = formatSpecifier(defaultVariableEvaluator());
+
+    syn CFormatSpecifier FStringExp.formatSpecifier(VariableEvaluator evaluator) {
         if (hasFormat()) {
-            buf.append(getFormat().ceval(evaluator).stringValue());
+            return CFormatSpecifier.parseFormat(getFormat().ceval(evaluator).stringValue());
         } else {
-            int minLength = minimumLength(evaluator);
-            if (minLength > 0) {
-                if (leftJustified(evaluator)) {
-                    buf.append('-');
-                }
-                buf.append(minLength);
+            FType t = getValue().type();
+            int m = minimumLength(evaluator);
+            boolean l = leftJustified(evaluator);
+            if (t.isReal()) {
+                int s = significantDigits(evaluator);
+                return CFormatSpecifier.realFormat(l, m, s);
+            } else if (t.isInteger()) {
+                return CFormatSpecifier.integerFormat(l, m);
+            } else {
+                return CFormatSpecifier.stringFormat(l, m);
             }
-            if (getValue().type().isReal()) {
-                buf.append('.');
-                buf.append(significantDigits(evaluator));
-            }
-            buf.append(getValue().type().formatSpecifier());
         }
-        return buf.toString();
     }
 
     syn int FStringExp.minimumLength(VariableEvaluator evaluator)     = 
-        hasMinimumLength() ? getMinimumLength().ceval(evaluator).intValue() : 0;
+        hasMinimumLength() ? getMinimumLength().ceval(evaluator).intValue() : 1;
     syn boolean FStringExp.leftJustified(VariableEvaluator evaluator) = 
         hasLeftJustified() ? getLeftJustified().ceval(evaluator).booleanValue() : true;
     syn int FStringExp.significantDigits(VariableEvaluator evaluator) = 
         hasSignificantDigits() ? getSignificantDigits().ceval(evaluator).intValue() : DEFAULT_PRECISION;
-    syn String FType.formatSpecifier() {
+    syn String FType.formatConversion() {
         throw new UnsupportedOperationException();
     }
-    eq FRealType.formatSpecifier()    = "g";
-    eq FIntegerType.formatSpecifier() = "d";
-    eq FBooleanType.formatSpecifier() = "s";
-    eq FEnumType.formatSpecifier()    = "s";
-    eq FStringType.formatSpecifier()  = "s";
+    eq FRealType.formatConversion()    = "g";
+    eq FIntegerType.formatConversion() = "d";
+    eq FBooleanType.formatConversion() = "s";
+    eq FEnumType.formatConversion()    = "s";
+    eq FStringType.formatConversion()  = "s";
     public static final int FStringExp.DEFAULT_PRECISION = 6;
 
     eq FDivFuncExp.cevalCalc(VariableEvaluator evaluator)         = type().truncToZero(type().div(getX().ceval(evaluator), getY().ceval(evaluator)));

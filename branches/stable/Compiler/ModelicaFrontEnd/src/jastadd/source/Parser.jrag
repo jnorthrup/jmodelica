@@ -180,6 +180,10 @@ aspect Parsers {
         return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.subscript;
     }
 
+    public short ParserHandler.functionCallListGoal() {
+        return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.function_call_list;
+    }
+
     public SourceRoot ParserHandler.parseFile(UtilInterface uif, LoadInfo loadInfo) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
         parseListener.fileParsed(loadInfo);

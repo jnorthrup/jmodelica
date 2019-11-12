@@ -1048,7 +1048,7 @@ void func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantForPowInt1_f_def0(j
     i_0in = 0;
     i_0ie = floor((2) - (1));
     for (i_0i = 1; i_0in <= i_0ie; i_0i = 1 + (++i_0in)) {
-        y_v = jmi_pow_function(\"CCodeGenGlobalsTests.GlobalVariables.GlobalConstantForPowInt1.f\", y_v, jmi_array_val_1(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantForPowInt1_f_c), i_0i), \"y ^ global(CCodeGenGlobalsTests.GlobalVariables.GlobalConstantForPowInt1.f.c[i])\");
+        y_v = JMI_POW_FUNCTION(\"CCodeGenGlobalsTests.GlobalVariables.GlobalConstantForPowInt1.f\", y_v, jmi_array_val_1(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantForPowInt1_f_c), i_0i), \"y ^ global(CCodeGenGlobalsTests.GlobalVariables.GlobalConstantForPowInt1.f.c[i])\");
     }
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
@@ -1376,6 +1376,7 @@ $C_destruct_external_object$
     jmi_extobj_t CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_eo;
     jmi_extobj_t CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_eo1;
 
+
 jmi_extobj_t jmi_global_tmp_1(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
     jmi_extobj_t tmp_1;
@@ -1388,7 +1389,6 @@ jmi_extobj_t jmi_global_tmp_1(jmi_t* jmi) {
     JMI_DYNAMIC_FREE()
     return tmp_1;
 }
-
 int model_init_eval_independent_globals_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -1449,7 +1449,10 @@ jmi_extobj_t func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObj
 }
 
 
-    func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_EO_destructor_def1(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_eo));
+    if (JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_eo) != NULL) {
+        func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_EO_destructor_def1(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_eo));
+        JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_eo) = NULL;
+    }
 ")})));
 end GlobalConstantExternalObject1;
 

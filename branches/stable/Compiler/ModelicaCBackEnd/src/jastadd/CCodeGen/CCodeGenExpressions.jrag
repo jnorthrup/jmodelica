@@ -16,6 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import java.util.Arrays;
 import org.jmodelica.common.ccodegen.CFuncParamDirection;
+import org.jmodelica.util.values.CFormatSpecifier;
+import org.jmodelica.util.collections.TransformerIterable;
 
 aspect CCodeGenExpressions {
     /*=========================================================================
@@ -33,8 +35,24 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FAbsExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        str.print("jmi_abs(");
+        str.print("JMI_ABS_EQUATION(");
         p.print(getFExp(), str, indent);
+        str.print(")");
+    }
+    
+    @Override
+    public void FSignExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        str.print("JMI_SIGN_EQUATION(");
+        p.print(getFExp(), str, indent);
+        str.print(")");
+    }
+    
+    @Override
+    public void FMinMaxExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        str.print("JMI_" + builtInName().toUpperCase() + "_EQUATION(");
+        p.print(getX(), str, indent);
+        str.print(", ");
+        p.print(getY(), str, indent);
         str.print(")");
     }
 
@@ -102,16 +120,7 @@ aspect CCodeGenExpressions {
     @Override
     public void FDivFuncExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         str.print("((long)");
-        if (inFunction()) {
-            str.format("jmi_divide_function(\"%s\", ", containingFFunctionDecl().name());
-        } else {
-            str.print("jmi_divide_equation(jmi, ");
-        }
-        p.print(getX(),str,indent);
-        str.print(","); 
-        p.print(getY(),str,indent);
-        str.print(","); 
-        str.print("\""+prettyPrint("")+"\")");
+        prettyPrintGuarded(p.ExecStep, str, indent, getX(), getY());
         str.print(")");
     }
 
@@ -262,15 +271,6 @@ aspect CCodeGenExpressions {
     }
 
     @Override
-    public void FMinMaxExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        str.print("jmi_" + builtInName() + "(");
-        p.print(getX(), str, indent);
-        str.print(", ");
-        p.print(getY(), str, indent);
-        str.print(")");
-    }
-
-    @Override
     public void FNoEventExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         str.print('(');
         p.print(getFExp(), str, indent);
@@ -306,13 +306,6 @@ aspect CCodeGenExpressions {
     @Override
     public void FSemiLinearExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         throw new UnsupportedOperationException("Untransformed semiLinear() expression");
-    }
-
-    @Override
-    public void FSignExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        str.print("jmi_sign(");
-        p.print(getFExp(), str, indent);
-        str.print(")");
     }
 
     @Override
@@ -424,9 +417,7 @@ aspect CCodeGenExpressions {
 
     protected void RuntimeCallComputation.prettyPrintHead(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, FExp ctx, FExp[] inputs, FExp[] outputs) {
         boolean func = ctx.inFunction();
-        str.print("jmi_");
-        str.print(p.guardedFunctionName(ctx));
-        str.print(func ? "_function(" : "_equation(");
+        str.print(("jmi_" + p.guardedFunctionName(ctx) + (func ? "_function(" : "_equation(")).toUpperCase());
         str.print(func ? "\"" + ctx.containingFFunctionDecl().name() + "\", ": "jmi, ");
         p.codePrinter().print(this, str, indent, CFuncParamDirection.INPUT, Arrays.asList(inputs));
         p.codePrinter().print(this, str, indent, CFuncParamDirection.OUTPUT, Arrays.asList(outputs));
@@ -457,6 +448,7 @@ aspect CCodeGenExpressions {
     syn String FExp.guardedFunctionName_C() { throw new UnsupportedOperationException(); }
     eq FDotDivExp.guardedFunctionName_C()           = "divide";
     eq FDotPowExp.guardedFunctionName_C()           = "pow";
+    eq FDivFuncExp.guardedFunctionName_C()          = "divide";
     eq FBuiltInFunctionCall.guardedFunctionName_C() = builtInName();
 
     public abstract void CodePrinter.print(IOComputation ioc, CodeStream str, String indent, CFuncParamDirection direction,
@@ -521,37 +513,12 @@ aspect CCodeGenExpressions {
             prettyPrintGuarded(p.ExecStep, str, indent, getLeft(), getRight());
         }
     }
-
-    @Override
-    public void FExpExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+	
+	@Override
+    public void FMathematicalFunctionCall.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         prettyPrintGuarded(p.ExecStep, str, indent, getFExp());
     }
-
-    @Override
-    public void  FLogExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded(p.ExecStep, str, indent, getFExp());
-    }
-
-    @Override
-    public void  FLog10Exp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded(p.ExecStep, str, indent, getFExp());
-    }
-
-    @Override
-    public void  FSinhExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded(p.ExecStep, str, indent, getFExp());
-    }
-
-    @Override
-    public void  FCoshExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded(p.ExecStep, str, indent, getFExp());
-    }
-
-    @Override
-    public void  FTanExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded(p.ExecStep, str, indent, getFExp());
-    }
-
+    
     @Override
     public void FAtan2Exp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         prettyPrintGuarded(p.ExecStep, str, indent, getFExp(), getY());
@@ -791,7 +758,7 @@ aspect CCodeGenExpressions {
         str.print(indent, "snprintf(JMI_STR_END(", dest, "), JMI_STR_LEFT(", dest, "), ");
         genStringFormat_C(p, str, indent);
         str.print(", ");
-        genStringParts_C(p, str, indent);
+        genStringParts_C(p, str, indent, null);
         str.println(");");
     }
 
@@ -855,13 +822,17 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FStringExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        super.genVarDecls_C(p, str, indent);
+        for (ASTNode ch : childrenToGenFor_C()) {
+            ch.genVarDecls_C(p, str, indent);
+        }
         genTopStringDecl(p, str, indent);
     }
 
     @Override
     public void FStringExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
-        super.genTempVars_C(p, str, indent);
+        for (ASTNode ch : childrenToGenFor_C()) {
+            p.printPreSteps(ch, str, indent);
+        }
         genTopStringInit(p, str, indent);
     }
 
@@ -872,7 +843,19 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FStringExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
-        super.genTempFree_C(p, str, indent);
+        for (ASTNode ch : childrenToGenFor_C()) {
+            ch.genTempFree_C(p, str, indent);
+        }
+    }
+
+    private Iterable<ASTNode> FStringExp.childrenToGenFor_C() {
+        // We want to generate for NTA CFormat but not for child Format.
+        return new TransformerIterable<ASTNode, ASTNode>(this) {
+            private ASTNode fmt = getFormatOpt();
+            protected ASTNode transform(ASTNode a) throws SkipException {
+                return (a == fmt) ? getCFormatOpt() : a;
+            }
+        };
     }
 
     @Override
@@ -946,7 +929,7 @@ aspect CCodeGenExpressions {
     @Override
     public void FStringExp.genStringFormat_C(CodePrinter p, CodeStream str, String indent) {
         if (hasFormat()) {
-            p.print(getFormat(), str, indent);
+            p.print(getCFormat(), str, indent);
         } else {
             if (hasLeftJustified()) {
                 str.print("COND_EXP_EQ(");
@@ -986,11 +969,12 @@ aspect CCodeGenExpressions {
             str.print("*");
         if (getValue().type().isReal())
             str.print(".*");
-        str.print(getValue().type().formatSpecifier());
+        str.print(getValue().type().formatConversion());
         str.print("\"");
     }
 
-    public void FExp.genStringParts_C(CodePrinter p, CodeStream str, String indent) {
+    public void FExp.genStringParts_C(
+            CodePrinter p, CodeStream str, String indent, CFormatSpecifier format) {
         // TODO: This method should dispatch to the type!
         FType t = type();
         if (t.isEnum()) {
@@ -1003,15 +987,33 @@ aspect CCodeGenExpressions {
             p.print(this, str, indent);
             str.print(", JMI_TRUE, \"true\", \"false\")");
         } else {
-            if (t.isInteger())
-                str.print("(int) ");
+            if (format != null) {
+                if (format.expectedType.isUnsigned()) {
+                    str.print("(unsigned int) ");
+                } else if (format.expectedType.isInteger()) {
+                    str.print("(int) ");
+                }
+            } else {
+                if (t.isInteger()) {
+                    str.print("(int) ");
+                }
+            }
             p.print(this, str, indent);
         }
     }
 
     @Override
-    public void FStringExp.genStringParts_C(CodePrinter p, CodeStream str, String indent) {
-        getValue().genStringParts_C(p, str, indent);
+    public void FStringExp.genStringParts_C(
+            CodePrinter p, CodeStream str, String indent, CFormatSpecifier format) {
+        try {
+            // This depends on non-parameters being evaluatable.
+            format = formatSpecifier();
+        } catch (ConstantEvaluationException e) {
+            // Assume that we don't have a format that converts real -> integer, 
+            // and just go by the type.
+            format = null;
+        }
+        getValue().genStringParts_C(p, str, indent, format);
     }
 
     /**

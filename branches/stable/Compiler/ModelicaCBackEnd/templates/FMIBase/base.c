@@ -178,11 +178,14 @@ $C_dynamic_state_add_call$
 
     /* Initialize globals struct */
     (*jmi)->globals = calloc(1, sizeof(jmi_globals_t));
-
+    
+    /* Log specific runtime information */
+    jmi_log_node((*jmi)->log, logInfo, "JMIRuntime", MATHEMATICAL_DOMAIN_CHECKS_MSG);
+    
     return 0;
 }
 
-int jmi_destruct_external_objs(jmi_t* jmi) {
+int model_destruct_external_objects(jmi_t* jmi) {
 $C_destruct_external_object$
     return 0;
 }
