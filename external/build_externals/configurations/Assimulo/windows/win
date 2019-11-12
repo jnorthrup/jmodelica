@@ -19,7 +19,6 @@
 #SHELL := /bin/bash
 #rule:
 # default values
-WORKSPACE=$(SDK_HOME)
 BUILD_DIR=$(WORKSPACE)/build
 JM_HOME=$(WORKSPACE)/src
 BUILD_ENVIRONMENT=$(JM_HOME)/build_environment
