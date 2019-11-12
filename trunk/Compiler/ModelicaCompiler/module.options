@@ -466,8 +466,8 @@ STRING compiler_version compiler internal "compiler_version_file_not_read"
 ********************************************************************************
 BOOLEAN mathematical_domain_checks compiler uncommon true
 
-"If enabled, all mathematical operators will be checked for its correct domain
-and provide log messages when an operator is evaluated outside its correct 
-domain."
+"If enabled, all mathematical operators will be checked for their correct 
+domains and provide log messages when an operator is evaluated outside its 
+correct domain."
 
 ********************************************************************************
