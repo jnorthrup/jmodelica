@@ -1679,7 +1679,7 @@ $C_dae_blocks_residual_functions$
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _x_0 = sin(_time * 10.0);
+    _x_0 = JMI_SIN_EQUATION(jmi, _time * 10.0, \"sin(time * 10)\");
     if (jmi->atInitial || jmi->atEvent) {
         _sw(1) = jmi_turn_switch(jmi, _x_0 - (0.7), _sw(1), JMI_REL_LT);
     }
@@ -1701,7 +1701,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 int model_ode_initialize_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _x_0 = sin(_time * 10.0);
+    _x_0 = JMI_SIN_EQUATION(jmi, _time * 10.0, \"sin(time * 10)\");
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, _x_0 - (0.7), _sw(0), JMI_REL_GEQ);
     }
@@ -2411,7 +2411,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         }
         _x_2 = (tmp_3);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = jmi_divide_equation(jmi, _x_2, 2, \"x / 2\") - (_y_3);
+            (*res)[0] = JMI_DIVIDE_EQUATION(jmi, _x_2, 2, \"x / 2\") - (_y_3);
         }
     }
     JMI_DYNAMIC_FREE()

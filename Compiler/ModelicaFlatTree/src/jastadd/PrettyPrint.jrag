@@ -1860,23 +1860,34 @@ aspect FlatPrettyPrint {
         str.print(")");
     }
 
-	protected static final String FBuiltInFunctionCall.SEP = ", ";
-	
-	/**
-	 * Pretty-print all arguments of function.
-	 * 
-	 * Default implementation prints all direct FExp children (including those in Lists and Opts), 
-	 * separated by {@link #SEP}.
-	 */
-	protected void FBuiltInFunctionCall.prettyPrintArguments(Printer p, CodeStream str, String indent) {
-		String pre = "";
-		for (FExp exp : myArgs()) {
-			str.print(pre);
-			p.print(exp, str, indent);
-			pre = SEP;
-		}
-	}
-	
+    protected static final String FBuiltInFunctionCall.SEP = ", ";
+
+    /**
+     * Pretty-print all arguments of function.
+     * 
+     * Default implementation will in instance tree print the original arguments, and in 
+     * flat tree print all direct FExp children (including those in Lists and Opts), 
+     * in either case separated by {@link #SEP}.
+     */
+    protected void FBuiltInFunctionCall.prettyPrintArguments(Printer p, CodeStream str, String indent) {
+        String pre = "";
+        if (getNumOriginalArg() > 0) {
+            for (InstFunctionArgument arg : getOriginalArgs()) {
+                if (arg.isGiven()) {
+                    str.print(pre);
+                    p.print(arg, str, indent);
+                    pre = SEP;
+                }
+            }
+        } else {
+            for (FExp exp : myArgs()) {
+                str.print(pre);
+                p.print(exp, str, indent);
+                pre = SEP;
+            }
+        }
+    }
+
 	protected void FInfArgsFunctionCall.prettyPrintArguments(Printer p, CodeStream str, String indent) {
 		getFExps().prettyPrintWithSep(p, str, indent, SEP);
 	}

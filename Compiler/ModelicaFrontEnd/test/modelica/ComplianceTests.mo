@@ -526,28 +526,60 @@ end ComplianceTests.HybridFMU2;
 end HybridFMU2;
 
 model StringOperator1
+    function f
+        input Real x;
+        input String f;
+        output String o;
+    algorithm
+        o := String(x, format=f);
+    end f;
+    
     Integer len = if time < 0 then 4 else 3;
     Integer digits = if time < 0 then 5 else 2;
+    String s1 = String(time, format = fmt1);
+    String s2 = String(time, format = fmt2);
+    String s3 = f(time, "g");
+    parameter String fmt1 = if selFmt1 == 1 then "u" else "g";
+    parameter String fmt2 = "f";
+    parameter Integer selFmt1(fixed = false);
+initial equation
+    selFmt1 = if len == 4 then 1 else 2;
 equation
     assert(time>2.0, String(time, significantDigits=digits, minimumLength=len, leftJustified=time<1));
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="StringOperator1",
-            description="Test compliance warnings for non fixed string operator arguments (significantDigits, minimumLength, leftJustified)",
-            errorMessage="
-3 errors found:
+    assert(time>2.0, String(time, format=String(len)+"."+String(digits)+"f"));
+annotation(__JModelica(UnitTesting(tests={
+    ComplianceErrorTestCase(
+        name="StringOperator1",
+        description="Test compliance warnings for non fixed string operator format argument",
+        errorMessage="
 
-Compliance error at line 5, column 53, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', UNSUPPORTED_NON_FIXED_STRING_ARGUMENT:
-  significantDigits with higher than parameter variability is not supported
 
-Compliance error at line 5, column 75, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', UNSUPPORTED_NON_FIXED_STRING_ARGUMENT:
-  minimumLength with higher than parameter variability is not supported
+Compliance error at line 7, column 31, in file '...', UNSUPPORTED_NON_FIXED_STRING_ARGUMENT:
+  Argument format of String operator is only supported as a fixed parameter expression.
 
-Compliance error at line 5, column 94, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', UNSUPPORTED_NON_FIXED_STRING_ARGUMENT:
-  leftJustified with higher than parameter variability is not supported
+Compliance error at line 15, column 5, in file '...':
+  Parameters with fixed=false can not be used as structural parameters
+
+Compliance error at line 22, column 42, in file '...', UNSUPPORTED_NON_FIXED_STRING_ARGUMENT:
+  Argument format of String operator is only supported as a fixed parameter expression.
 ")})));
 end StringOperator1;
 
+
+model StringOperator2
+    String s = String(time, format="%f");
+
+annotation(__JModelica(UnitTesting(tests={
+    WarningTestCase(
+        name="StringOperator2",
+        description="Test warning for supplying the initial % of format specifier",
+        errorMessage="
+
+
+Warning at line 2, column 16, in file '...', INVALID_FORMAT_STRING:
+  The format string argument should not include the initial '%': \"%f\".
+")})));
+end StringOperator2;
 
 
 package UnknownArraySizes

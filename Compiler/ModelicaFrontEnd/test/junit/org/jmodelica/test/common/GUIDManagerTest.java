@@ -2,11 +2,16 @@ package org.jmodelica.test.common;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StringReader;
 
 import org.jmodelica.common.GUIDManager;
+import org.jmodelica.util.logging.Level;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -116,5 +121,33 @@ public class GUIDManagerTest {
         
         assertEquals(ignoreWhitespace(expected), ignoreWhitespace(actual));
     }
+    
+    @Test 
+    public void checksumOfFilesOnlyWrittenAtDebug() {
+        TestLogger log = new TestLogger(Level.VERBOSE);
+        guidManager.filesMd5.add("DummyHash");
+        guidManager.writeFileMD5(log);
+        assertNull(log.next());
+        
+        log = new TestLogger(Level.DEBUG);
+        guidManager.filesMd5.add("DummyHash");
+        guidManager.writeFileMD5(log);
+        assertEquals("DEBUG: DummyHash", log.next());
+    }
 
+    @Test
+    public void checksumFiles() throws IOException {
+        TestLogger log = new TestLogger(Level.VERBOSE);
+        String dummyFile = "This is a dummy c-file /n c-stuff";
+        StringReader reader = new StringReader(dummyFile);
+        guidManager.createFileMD5(reader, "dummyfile.c", log);
+        guidManager.writeFileMD5(log);
+        assertNull(log.next());
+        
+        reader = new StringReader(dummyFile);
+        log = new TestLogger(Level.DEBUG);
+        guidManager.createFileMD5(reader, "dummyfile.c", log);
+        guidManager.writeFileMD5(log);
+        assertEquals("DEBUG: Generated file dummyfile.c with checksum fcde3f483c06e4a10bc5b28ec56214f8", log.next());
+    }
 }

@@ -1,4 +1,11 @@
 ================= Unreleased ==================
+; Feature ; Minor ; Runtime ; #5868
+Added a compiler flag 'mathematical_domain_checks' which determines if
+domain checks is to be performed for all mathematical functions.
+
+# Change ; Minor ; Compiler; #5870
+Debug log now contains checksums of all generated c-files.
+
 # Fixed ; Minor ; Compiler; #5864
 Fixed bug where partial variability propagation lead to unbalanced equation systems.
 
@@ -19,7 +26,7 @@ attributes are now only generated in model description for inputs
 and states.
 
 # Fixed ; Minor ; Compiler; #5835
-Format string argument to the String function is now useable.
+Format string argument to the String function is now respected during constant evaluations.
 
 # Change ; Minor ; Compiler; #5830
 ParseHandler now have a target for Subscript.

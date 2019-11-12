@@ -262,11 +262,14 @@ aspect DynamicStateSelect{
     
     public class IndexReductionBiPGraph {
         public static class DSSet {
-            private static Enumerator e = new Enumerator();
             public final Set<IndexReductionEq> eqns = new LinkedHashSet<IndexReductionEq>();
             public final Set<IndexReductionVar> vars = new LinkedHashSet<IndexReductionVar>();
-            public final int id = e.next();
+            public final int id;
             public FExp[][] coefficients;
+
+            public DSSet(int id) {
+                this.id = id;
+            }
             
             public String toString() {
                 StringBuilder sb = new StringBuilder();
@@ -308,6 +311,8 @@ aspect DynamicStateSelect{
             if (coff != null && coff.state == COEFFICIENT_STATE.CONTINUOUS)
                 worklist.add(eqn);
         }
+
+        Enumerator enumerator = new Enumerator();
         while (!worklist.isEmpty()) {
             IndexReductionEq eqn = worklist.poll();
             ASTNode.log.debug("Looking for DS in %s", eqn);
@@ -323,7 +328,7 @@ aspect DynamicStateSelect{
             }
             DSSet set = dsLookup.get(eqn);
             if (set == null)
-                set = new DSSet();
+                set = new DSSet(enumerator.next());
             Collection<IndexReductionEq> otherEqns = new ArrayList<IndexReductionEq>();
             ASTNode.log.debug("    Path not found, set %d", set.id);
             for (IndexReductionVar var : eqn.getVariablesSortedSAP2(tempAssignmentMap)) {
