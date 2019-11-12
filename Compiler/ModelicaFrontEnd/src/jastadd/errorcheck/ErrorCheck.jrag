@@ -749,10 +749,14 @@ aspect InstanceErrorCheck {
             }
             if (!error) {
                 getInstComponentDecl().collectErrors(checkType);
-                // TODO: Use missingInnerMessage annotation
-                getCopiedOuter().warning("Generated missing inner declaration for '%s'", getCopiedOuter());
+                missingInnerWarning();
             }
         }
+    }
+    
+    public void InstGeneratedInner.missingInnerWarning() {
+        // TODO: Use missingInnerMessage annotation
+        getCopiedOuter().warning("Generated missing inner declaration for '%s'", getCopiedOuter());
     }
 
     public void InstBaseClassDecl.errorCheckDerivativeAnnotations(ErrorCheckType checkType) {
@@ -851,8 +855,19 @@ aspect InstanceErrorCheck {
                 if (hasFArraySubscripts()) {
                     getFArraySubscripts().collectErrors(checkType);
                 }
-                if (hasConditionalAttribute())  {
-                    getConditionalAttribute().collectErrors(checkType);
+                if (hasConditionalAttribute()) {
+                    FExp cond = getConditionalAttribute();
+                    cond.collectErrors(checkType);
+                    if (!cond.type().isUnknown()) {
+                        if (!cond.type().isScalar() || !cond.type().isBoolean()) {
+                            NON_BOOLEAN_CONDITIONAL_GUARD.invoke(this);
+                        }
+                        if (!cond.variability().fixedParameterOrLess()) {
+                            NON_FIXED_CONDITIONAL_GUARD.invoke(this);
+                        } else {
+                            cond.markAsStructuralParameter(checkType);
+                        }
+                    }
                 }
                 if (!isDisabled() && hasInstModification()) {
                     getInstModification().collectErrors(checkType);

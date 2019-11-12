@@ -149,5 +149,13 @@ jmi_real_t jmi_linear_algebra_dgecon(jmi_real_t* LU, jmi_real_t A_norm, jmi_int_
  */
 jmi_real_t jmi_linear_algebra_dlange(jmi_real_t* A, jmi_int_t N, char norm_type);
 
+/**
+ * \brief Computes the element-wise multiplication of two vectors
+ * 
+ * @param jmi_real_t* A real pointer to the x vector.
+ * @param jmi_real_t* A real pointer to the y vector (result saved in this vector).
+ * @param jmi_int_t The number of elements.
+ */
+void jmi_linear_algebra_dxemy(jmi_real_t* x, jmi_real_t* y, jmi_int_t N); 
 
 #endif

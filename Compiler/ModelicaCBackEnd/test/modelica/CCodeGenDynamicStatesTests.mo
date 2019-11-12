@@ -32,7 +32,7 @@ package CCodeGenDynamicStatesTests
 
         annotation(__JModelica(UnitTesting(tests={
             CCodeGenTestCase(
-                name="DynamicStates_ThreeDSOneEq",
+                name="ThreeDSOneEq",
                 description="Test code gen for dynamic state model with three states in one equation",
                 dynamic_states=true,
                 template="
@@ -82,17 +82,17 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     if (jmi_dynamic_state_check_is_state(jmi, 0, 6, 4)) {
         _a3_2 = __ds_1_s1_5;
         _a1_0 = __ds_1_s2_6;
-        _a2_1 = jmi_divide_equation(jmi, 1, (_a1_0 * _a3_2), \"1 / (ds(1, a1) * ds(1, a3))\");
+        _a2_1 = JMI_DIVIDE_EQUATION(jmi, 1, (_a1_0 * _a3_2), \"1 / (ds(1, a1) * ds(1, a3))\");
         __ds_1_a1_4 = _a2_1;
     } else if (jmi_dynamic_state_check_is_state(jmi, 0, 5, 4)) {
         _a2_1 = __ds_1_s1_5;
         _a1_0 = __ds_1_s2_6;
-        _a3_2 = jmi_divide_equation(jmi, 1, (_a1_0 * _a2_1), \"1 / (ds(1, a1) * ds(1, a2))\");
+        _a3_2 = JMI_DIVIDE_EQUATION(jmi, 1, (_a1_0 * _a2_1), \"1 / (ds(1, a1) * ds(1, a2))\");
         __ds_1_a1_4 = _a3_2;
     } else if (jmi_dynamic_state_check_is_state(jmi, 0, 5, 6)) {
         _a2_1 = __ds_1_s1_5;
         _a3_2 = __ds_1_s2_6;
-        _a1_0 = jmi_divide_equation(jmi, 1, (_a2_1 * _a3_2), \"1 / (ds(1, a2) * ds(1, a3))\");
+        _a1_0 = JMI_DIVIDE_EQUATION(jmi, 1, (_a2_1 * _a3_2), \"1 / (ds(1, a2) * ds(1, a3))\");
         __ds_1_a1_4 = _a1_0;
     }
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
@@ -422,7 +422,7 @@ static int dae_block_3(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 
         annotation(__JModelica(UnitTesting(tests={
             CCodeGenTestCase(
-                name="DynamicStates_Pendulum",
+                name="Pendulum",
                 description="Test code gen for dynamic state related parts of the pendulum model",
                 dynamic_states=true,
                 template="
@@ -500,13 +500,13 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     if (jmi_dynamic_state_check_is_state(jmi, 0, 14)) {
         __der_y_10 = __ds_1_s1_12;
         _der_y_18 = __der_y_10;
-        _der_x_17 = jmi_divide_equation(jmi, (- 2 * _y_3 * _der_y_18), (2 * _x_2), \"(- 2 * ds(2, y) * dynDer(y)) / (2 * ds(2, x))\");
+        _der_x_17 = JMI_DIVIDE_EQUATION(jmi, (- 2 * _y_3 * _der_y_18), (2 * _x_2), \"(- 2 * ds(2, y) * dynDer(y)) / (2 * ds(2, x))\");
         __der_x_9 = _der_x_17;
         __ds_1_a1_11 = __der_x_9;
     } else if (jmi_dynamic_state_check_is_state(jmi, 0, 13)) {
         __der_x_9 = __ds_1_s1_12;
         _der_x_17 = __der_x_9;
-        _der_y_18 = jmi_divide_equation(jmi, (- 2 * _x_2 * _der_x_17), (2 * _y_3), \"(- 2 * ds(2, x) * dynDer(x)) / (2 * ds(2, y))\");
+        _der_y_18 = JMI_DIVIDE_EQUATION(jmi, (- 2 * _x_2 * _der_x_17), (2 * _y_3), \"(- 2 * ds(2, x) * dynDer(x)) / (2 * ds(2, y))\");
         __der_y_10 = _der_y_18;
         __ds_1_a1_11 = __der_y_10;
     }
@@ -537,7 +537,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
         x[0] = 7;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
-        (*res)[0] = jmi_max(jmi_max(1.0, 1.0), jmi_abs(_L_0));
+        (*res)[0] = JMI_MAX_EQUATION(JMI_MAX_EQUATION(1.0, 1.0), JMI_ABS_EQUATION(_L_0));
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _y_3;
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
@@ -560,7 +560,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
         x[0] = 6;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
-        (*res)[0] = jmi_max(jmi_max(1.0, 1.0), jmi_abs(_L_0));
+        (*res)[0] = JMI_MAX_EQUATION(JMI_MAX_EQUATION(1.0, 1.0), JMI_ABS_EQUATION(_L_0));
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _x_2;
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
@@ -1150,10 +1150,8 @@ annotation(__JModelica(UnitTesting(tests={
     CCodeGenTestCase(
         name="PreBlock1",
         description="Dynamic state block inside pre block",
-        template="
-$C_dae_blocks_residual_functions$
-",
-    generatedCode="
+        template="$C_dae_blocks_residual_functions$",
+        generatedCode="
 static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1.2 *****/
     jmi_real_t** res = &residual;
@@ -1235,11 +1233,11 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         }
         if (jmi_dynamic_state_check_is_state(jmi, 0, 4)) {
             _a1_0 = __ds_1_s1_7;
-            _a2_1 = jmi_divide_equation(jmi, COND_EXP_EQ(LOG_EXP_AND(_b2_3, LOG_EXP_NOT(pre_b2_3)), JMI_TRUE, 1.0, _time), _a1_0, \"(if b2 and not pre(b2) then 1 else time) / ds(1, a1)\");
+            _a2_1 = JMI_DIVIDE_EQUATION(jmi, COND_EXP_EQ(LOG_EXP_AND(_b2_3, LOG_EXP_NOT(pre_b2_3)), JMI_TRUE, 1.0, _time), _a1_0, \"(if b2 and not pre(b2) then 1 else time) / ds(1, a1)\");
             __ds_1_a1_6 = _a2_1;
         } else if (jmi_dynamic_state_check_is_state(jmi, 0, 5)) {
             _a2_1 = __ds_1_s1_7;
-            _a1_0 = jmi_divide_equation(jmi, COND_EXP_EQ(LOG_EXP_AND(_b2_3, LOG_EXP_NOT(pre_b2_3)), JMI_TRUE, 1.0, _time), _a2_1, \"(if b2 and not pre(b2) then 1 else time) / ds(1, a2)\");
+            _a1_0 = JMI_DIVIDE_EQUATION(jmi, COND_EXP_EQ(LOG_EXP_AND(_b2_3, LOG_EXP_NOT(pre_b2_3)), JMI_TRUE, 1.0, _time), _a2_1, \"(if b2 and not pre(b2) then 1 else time) / ds(1, a2)\");
             __ds_1_a1_6 = _a1_0;
         }
         ef |= jmi_solve_block_residual(jmi->dae_block_residuals[1]);
@@ -1249,6 +1247,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 ")})));
 end PreBlock1;
 

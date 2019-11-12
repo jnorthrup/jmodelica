@@ -22,6 +22,15 @@
 #include <math.h>
 #include <stdlib.h>
 
+/* Computes y = x.*y (element-wise multiplication)*/
+void jmi_linear_algebra_dxemy(jmi_real_t* x, jmi_real_t* y, jmi_int_t N) {
+    jmi_int_t i;
+    
+    for (i = 0; i < N; i++) {
+        y[i] = y[i]*x[i];
+    }
+}
+
 /* Computes a = sqrt( sum( (wi*xi)^2) / N) */
 jmi_real_t jmi_linear_algebra_wrms(jmi_real_t* weights, jmi_real_t* x, jmi_int_t N) {
     jmi_int_t i;
@@ -116,11 +125,14 @@ void jmi_linear_algebra_daxpby(jmi_real_t a, jmi_real_t* x, jmi_real_t b, jmi_re
 
 /* Find the index of the max absolute value */
 jmi_int_t jmi_linear_algebra_idamax(jmi_real_t *x, jmi_int_t N) {
-    int i = 0;
-    int j=0;
+    int i = 0, j = 0;
+
     jmi_real_t cmax = JMI_ABS(x[i]);
-    for(i=1; i<N; i++) {
-        if(JMI_ABS(x[i])>cmax) {
+    jmi_real_t tmp;
+    for(i=1; i < N; i++) {
+        tmp = JMI_ABS(x[i]);
+        if(tmp > cmax) {
+            cmax = tmp;
             j=i;
         }
     }
