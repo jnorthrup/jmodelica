@@ -11,7 +11,7 @@ public enum CausalityConnectorPrefix {
     STREAM("stream"),
     INSTREAM("inStream");
     
-    private String toString;
+    private final String toString;
     
     private CausalityConnectorPrefix(String toString) {
         this.toString = toString;

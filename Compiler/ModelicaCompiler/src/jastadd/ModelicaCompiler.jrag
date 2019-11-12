@@ -2502,7 +2502,7 @@ public class Templates {
     private LinkedHashSet<String> C_SOURCE_TEMPLATES;    
     
     public abstract static class TemplateContributor {
-        public void addTemplates(Templates templates, OptionRegistry options) { }
+        public abstract void addTemplates(Templates templates, OptionRegistry options);
     }
 
     public static <T extends TemplateContributor> T addContributor(T contributor) {
