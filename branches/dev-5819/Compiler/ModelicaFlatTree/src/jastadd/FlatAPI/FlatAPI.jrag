@@ -4476,7 +4476,13 @@ aspect ExpressionGeneralisation {
         if (hasFormat()) {
             FExp fmt = getFormat();
             FExp exp = fmt.treeCopy();
-            if (!formatSpecifier().initialPercent) {
+            boolean initialPercent = false;
+            try {
+                initialPercent = formatSpecifier().initialPercent;
+            } catch (ConstantEvaluationException e) {
+                // If we can't evaluate it here, assume there is no "%"
+            }
+            if (!initialPercent) {
                 exp = new FStringAddExp(new FStringLitExp("%"), exp);
             }
             if (fmt.variability().fixedParameterOrLess()) {
