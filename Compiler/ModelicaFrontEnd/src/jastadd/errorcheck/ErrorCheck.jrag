@@ -749,10 +749,14 @@ aspect InstanceErrorCheck {
             }
             if (!error) {
                 getInstComponentDecl().collectErrors(checkType);
-                // TODO: Use missingInnerMessage annotation
-                getCopiedOuter().warning("Generated missing inner declaration for '%s'", getCopiedOuter());
+                missingInnerWarning();
             }
         }
+    }
+    
+    public void InstGeneratedInner.missingInnerWarning() {
+        // TODO: Use missingInnerMessage annotation
+        getCopiedOuter().warning("Generated missing inner declaration for '%s'", getCopiedOuter());
     }
 
     public void InstBaseClassDecl.errorCheckDerivativeAnnotations(ErrorCheckType checkType) {
