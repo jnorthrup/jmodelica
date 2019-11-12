@@ -24,6 +24,8 @@ $(PREINSTALL_DIR):
 	find . -type f | grep -v -E '/.svn|.pyc' |tar c -T - | tar x -C $(TARGET_BUILD_DIR)
 	cd $(TARGET_BUILD_DIR); \
 	$(PYTHONHOME)python setup.py $(BUILD_SETUP_EXTRA) install --superlu-home=$(SUPERLU_HOME) --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(BLAS_HOME) --lapack-home=$(LAPACK_HOME) $(EXTRA_SETUP_ARGS) --prefix=$@ --mkl-home=$(MKL_HOME)
+	echo "(DEBUG): Searching for all directories named tests"
+	find $(JM_HOME) -type d -name "tests"
 
 install: folder
 	@echo "makefile: Got PREINSTALL_DIR=$(PREINSTALL_DIR)"
