@@ -4,7 +4,7 @@ docker_test_wheel docker_test_folder: $(subst test_,,$@)
 
 docker_wheel docker_folder: docker_$(TARGET)_dependencies
 
-docker_wheel docker_folder docker_test_wheel docker_test_folder: setup docker_setup
+docker_wheel docker_folder docker_test_wheel docker_test_folder docker_install_wheel docker_install_folder: setup docker_setup
 	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG)))
 	@echo "Starting docker container with ID=$(DOCKER_ID) for testing $(TARGET)"
 	@docker run -v $(PATH_TO_MOUNT):$(JM_HOME_IN_DOCKER) ${DOCKER_ID} sh -c \
