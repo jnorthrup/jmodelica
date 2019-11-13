@@ -25,8 +25,9 @@ find_wheel:
 	find $(DOCKER_BUILD_DIR) -type f -name "*.whl"
 
 find_folder:
-	find $(DOCKER_BUILD_DIR) -type d -name assimulo
-	find $(DOCKER_BUILD_DIR) -type f -name "test_kinsol.pyc"
+	find $(DOCKER_BUILD_DIR)/../ -type d -name assimulo
+	find $(DOCKER_BUILD_DIR)/../ -type f -name "test_kinsol.pyc"
+	find $(DOCKER_BUILD_DIR)/../ -type d -name "solvers"
 	#find $(DOCKER_BUILD_DIR)/$(TARGET)_install$(BITNESS) -type d -name assimulo -exec cp -r {} $(DISTRO)/$(TARGET)$(BITNESS)/$(subst install_,,$@)/ \;
 
 docker_$(TARGET)_dependencies: docker_base_$(TARGET)
