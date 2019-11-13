@@ -22,14 +22,16 @@ install_wheel: find_wheel
 	echo "(DEBUG): Finished installing"
 
 find_wheel:
-	mkdir -p $(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)
-	find $(DOCKER_BUILD_DIR) -type f -name "*.whl" -exec cp -r {} $(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)/ \;
-	ls -la $(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)
+	echo "Creating directory $(JM_HOME)/$(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)"
+	mkdir -p $(JM_HOME)/$(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)
+	find $(DOCKER_BUILD_DIR) -type f -name "*.whl" -exec cp -r {} $(JM_HOME)/$(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)/ \;
+	ls -la $(JM_HOME)/$(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)
 
 find_folder:
-	mkdir -p $(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)
-	find $(PREINSTALL_DIR) -type d -name assimulo -exec cp -r {} $(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)/ \;
-	ls -la $(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)
+	echo "Creating directory $(JM_HOME)/$(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)"
+	mkdir -p $(JM_HOME)/$(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)
+	find $(PREINSTALL_DIR) -type d -name assimulo -exec cp -r {} $(JM_HOME)/$(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)/ \;
+	ls -la $(JM_HOME)/$(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)
 
 docker_$(TARGET)_dependencies: docker_base_$(TARGET)
 	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG)))
