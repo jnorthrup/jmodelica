@@ -28,6 +28,7 @@ find_folder:
 	find $(DOCKER_BUILD_DIR)/../ -type d -name assimulo
 	find $(DOCKER_BUILD_DIR)/../ -type f -name "test_kinsol.pyc"
 	find $(DOCKER_BUILD_DIR)/../ -type d -name "solvers"
+	mkdir -p $(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)
 	find $(PREINSTALL_DIR) -type d -name assimulo -exec cp -r {} $(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)/ \;
 	ls -la $(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)
 
