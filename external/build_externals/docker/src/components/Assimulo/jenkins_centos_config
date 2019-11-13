@@ -10,6 +10,8 @@ BITNESS=64
 # Set to your local checkout of JModelica
 #PATH_TO_MOUNT=# does not need to be set on jenkins, is set in groovy
 
+# DIRECTORY TO PLACE ARTIFACT BEFFORE INSTALLATION
+PREINSTALL_DIR=${JM_HOME}/${DISTRO}/assimulo_install${BITNESS}
 
 # Set JM_HOME to your local checkout of JModelica
 #JM_HOME=# does not need to be set on jenkins, is set in groovy
@@ -26,4 +28,5 @@ WHEEL_INSTALL_DIR=/usr/lib64/python${PYTHON_VERSION}/site-packages/assimulo
 # Dont modify the variables below
 DISTRO=${PLATFORM}_${DIST_VERSION}_${PYTHON_VERSION}
 ASSIMULO_FOLDER_INSTALL_DIR=${JM_HOME}/${DISTRO}/assimulo${BITNESS}/folder/assimulo
+PREINSTALL_DIR=$(ASSIMULO_FOLDER_INSTALL_DIR)
 EXTRA_SETUP_ARGS=--with_openmp=True
