@@ -13,6 +13,9 @@ BITNESS=64
 # DIRECTORY TO PLACE ARTIFACT BEFFORE INSTALLATION
 PREINSTALL_DIR=${JM_HOME}/${DISTRO}/assimulo_install${BITNESS}
 
+# REMOVE ENTIRE BUILD DIRECTORY
+REMOVE_BUILD_DIR=yes
+
 # Set JM_HOME to your local checkout of JModelica
 #JM_HOME=# does not need to be set on jenkins, is set in groovy
 
