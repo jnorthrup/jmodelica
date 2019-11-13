@@ -15,7 +15,10 @@ wheel folder test_wheel test_folder:
 	@cd $(BUILD_EXTERNALS)/$(TARGET) && \
 	make $@ USER_CONFIG=$(BUILD_DIR)/$(USER_CONFIG) BUILD_DIR=$(DOCKER_BUILD_DIR) PREINSTALL_DIR=$(DOCKER_BUILD_DIR)
 
-install_wheel install_folder: $(subst install,find,$@)
+install_folder: find_folder
+	echo "(DEBUG): Finished searching"
+
+install_wheel: find_wheel
 	echo "(DEBUG): Finished searching"
 
 find_wheel:
