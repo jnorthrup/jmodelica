@@ -14,7 +14,10 @@ test_wheel: $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)
 test_folder: $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)
 	nosetests $(ASSIMULO_FOLDER_INSTALL_DIR)/tests/*.pyc $(ASSIMULO_FOLDER_INSTALL_DIR)/tests/solvers/*.pyc
 
-folder: $(PREINSTALL_DIR)
+folder: $(PREINSTALL_DIR) debug_var
+
+debug_var:
+	ls -la $(PREINSTALL_DIR)
 
 $(PREINSTALL_DIR): 
 	@$(eval TARGET_BUILD_DIR=$(BUILD_DIR)/Assimulo_build$(BITNESS))
