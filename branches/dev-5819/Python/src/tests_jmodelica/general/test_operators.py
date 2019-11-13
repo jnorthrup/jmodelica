@@ -32,7 +32,7 @@ class TestDomainChecks(SimulationTest):
         target_msg = "Using mathematical functions with domain checks."
         found_msg = False
         for msg in model.get_log():
-            print msg
+            print(msg)
             if target_msg in msg:
                 found_msg = True
                 break
