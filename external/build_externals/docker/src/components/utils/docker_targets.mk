@@ -9,25 +9,24 @@ docker_wheel docker_folder docker_test_wheel docker_test_folder docker_install_w
 	@echo "Starting docker container with ID=$(DOCKER_ID) for testing $(TARGET)"
 	@docker run -v $(PATH_TO_MOUNT):$(JM_HOME_IN_DOCKER) ${DOCKER_ID} sh -c \
 	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) OS=$(OS) JM_HOME=$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
-	@echo $(DISTRO)/$(TARGET)$(BITNESS)/$(subst test_,,$(subst docker_,,$@))/** > $(ARTIFACT_FILE)
+	@echo $(DISTRO)/$(TARGET)$(BITNESS)/$(subst install_,,$(subst test_,,$(subst docker_,,$@)))/** > $(ARTIFACT_FILE)
 
 wheel folder test_wheel test_folder:
 	@cd $(BUILD_EXTERNALS)/$(TARGET) && \
 	make $@ USER_CONFIG=$(BUILD_DIR)/$(USER_CONFIG) BUILD_DIR=$(DOCKER_BUILD_DIR)
 
 install_folder: find_folder
-	echo "(DEBUG): Finished searching"
+	echo "(DEBUG): Finished installing"
 
 install_wheel: find_wheel
-	echo "(DEBUG): Finished searching"
+	echo "(DEBUG): Finished installing"
 
 find_wheel:
-	find $(DOCKER_BUILD_DIR) -type f -name "*.whl"
+	mkdir -p $(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)
+	find $(DOCKER_BUILD_DIR) -type f -name "*.whl" -exec cp -r {} $(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)/ \;
+	ls -la $(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)
 
 find_folder:
-	find $(DOCKER_BUILD_DIR)/../ -type d -name assimulo
-	find $(DOCKER_BUILD_DIR)/../ -type f -name "test_kinsol.pyc"
-	find $(DOCKER_BUILD_DIR)/../ -type d -name "solvers"
 	mkdir -p $(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)
 	find $(PREINSTALL_DIR) -type d -name assimulo -exec cp -r {} $(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)/ \;
 	ls -la $(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)
