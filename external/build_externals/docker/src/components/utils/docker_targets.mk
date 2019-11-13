@@ -13,7 +13,7 @@ docker_wheel docker_folder docker_test_wheel docker_test_folder docker_install_w
 
 wheel folder test_wheel test_folder:
 	@cd $(BUILD_EXTERNALS)/$(TARGET) && \
-	make $@ USER_CONFIG=$(BUILD_DIR)/$(USER_CONFIG) BUILD_DIR=$(DOCKER_BUILD_DIR) PREINSTALL_DIR=$(DOCKER_BUILD_DIR)
+	make $@ USER_CONFIG=$(BUILD_DIR)/$(USER_CONFIG) BUILD_DIR=$(DOCKER_BUILD_DIR)
 
 install_folder: find_folder
 	echo "(DEBUG): Finished searching"
