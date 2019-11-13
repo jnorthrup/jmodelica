@@ -51,6 +51,9 @@ $(INSTALL_DIR_FOLDER)/wheel:
 clean:
 	@$(eval TARGET_BUILD_DIR=$(BUILD_DIR)/Assimulo_build*)
 	rm -rf $(TARGET_BUILD_DIR) $(INSTALL_DIR_FOLDER)
+ifeq ($(REMOVE_BUILD_DIR), yes)
+	@echo "Removing $(BUILD_DIR)" && rm -rf $(BUILD_DIR)
+endif
 ifeq ($(REMOVE_PREINSTALL_DIR), yes)
 	@echo "Removing $(PREINSTALL_DIR)" && rm -rf $(PREINSTALL_DIR)
 endif
