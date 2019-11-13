@@ -15,10 +15,16 @@ wheel folder test_wheel test_folder:
 	@cd $(BUILD_EXTERNALS)/$(TARGET) && \
 	make $@ USER_CONFIG=$(BUILD_DIR)/$(USER_CONFIG) BUILD_DIR=$(DOCKER_BUILD_DIR) PREINSTALL_DIR=$(DOCKER_BUILD_DIR)
 
-install_wheel install_folder:
-	echo "(DEBUG): Finding in docker"
+install_wheel install_folder: find_$(subst install_,,$@)
+	echo "(DEBUG): Finished searching"
+
+find_wheel:
+	find $(DOCKER_BUILD_DIR) -type f -name "*.whl"
+
+find_folder:
 	find $(DOCKER_BUILD_DIR) -type d -name assimulo
-	find $(DOCKER_BUILD_DIR)/$(TARGET)_install$(BITNESS) -type d -name assimulo -exec cp -r {} $(DISTRO)/$(TARGET)$(BITNESS)/$(subst install_,,$@)/ \;
+	find $(DOCKER_BUILD_DIR) -type f -name "test_kinsol.pyc"
+	#find $(DOCKER_BUILD_DIR)/$(TARGET)_install$(BITNESS) -type d -name assimulo -exec cp -r {} $(DISTRO)/$(TARGET)$(BITNESS)/$(subst install_,,$@)/ \;
 
 docker_$(TARGET)_dependencies: docker_base_$(TARGET)
 	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG)))
