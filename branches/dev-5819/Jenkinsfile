@@ -51,8 +51,8 @@ echo ==== Run configure
 
 echo ==== Go to build and run make
 cd "\${BUILD_HOME}"
-make
-make install
+make WORKSPACE=\${WORKSPACE}
+make install WORKSPACE=\${WORKSPACE}
 if [ "\${BUILD_CASADI:-1}" == "1" ]; then
     make casadi_interface
 fi
