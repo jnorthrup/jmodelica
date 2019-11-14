@@ -3753,7 +3753,7 @@ aspect StartValueDependency {
     public void EquationBlock.errorCheckStartValueDependencies(FClass fclass) {
         Collection<FVariable> allVariables = allVariables();
         Set<FVariable> memberVariables = new HashSet<FVariable>(allVariables);
-        for (FVariable var : allVariables) {
+        for (FVariable var : unsolvedVariables()) {
             FExp startExpression = var.startAttributeExp();
             if (startExpression == null) {
                 continue;

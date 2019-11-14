@@ -180,5 +180,44 @@ Residual equations:
 ")})));
         end StartValueDependency2;
         
+        model StartValueDependency3
+            parameter Real p1(fixed=false);
+            parameter Real p2(fixed=false);
+            Real x(start = p1);
+            Real y(start = p2);
+        initial equation
+            p1 = y + 1;
+            p2 = y + time;
+        equation
+            x * y = 10;
+            x = y + time;
+        annotation(__JModelica(UnitTesting(tests={
+            ErrorTestCase(
+                name="InitialParameters_StartValueDependency3",
+                description="Test error given when start value of a variable depends on initial parameter which is computed in same block",
+                errorMessage="
+Error in flattened model, START_VALUE_DEPEND_ON_BLOCK_ERROR:
+  The start value ('p2') for variable y depends on variables which are computed in the same block, this is not allowed!
+Block which produced the error:
+--- Torn system (Block 1) of 1 iteration variables and 3 solved variables ---
+Torn variables:
+  p2
+  x
+  p1
+
+Iteration variables:
+  y (start=p2)
+
+Torn equations:
+  p2 := y + time
+  x := y + time
+  p1 := y + 1
+
+Residual equations:
+  x * y = 10
+    Iteration variables: y
+")})));
+        end StartValueDependency3;
+        
     end InitialParameters;
 end BlockCompositionTests;
