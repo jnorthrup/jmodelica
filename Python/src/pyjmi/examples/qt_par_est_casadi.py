@@ -165,8 +165,8 @@ def run_demo(with_plots=True):
     a2_opt = res.initial("a2")
 
     # Print and assert estimated parameter values
-    print('a1: ' + str(a1_opt*1e4) + 'cm^2')
-    print('a2: ' + str(a2_opt*1e4) + 'cm^2')
+    print(('a1: ' + str(a1_opt*1e4) + 'cm^2'))
+    print(('a2: ' + str(a2_opt*1e4) + 'cm^2'))
     a_ref = [0.02656702, 0.02713898]
     N.testing.assert_allclose(1e4 * N.array([a1_opt, a2_opt]),
                               a_ref, rtol=1e-4)

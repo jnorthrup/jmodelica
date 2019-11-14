@@ -71,6 +71,10 @@ aspect RootAccess {
     public boolean ASTNode.hasRoot() { return (getParent() == null) ? false : getParent().hasRoot(); }
     public boolean Root.hasRoot()    { return true; }
 
+    @Override
+    public SourceRoot SrcBaseNode.root() {
+        return super.root().asSourceRoot();
+    }
 }
 
 aspect Logging {

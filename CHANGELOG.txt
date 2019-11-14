@@ -1,4 +1,8 @@
 ================= Unreleased ==================
+; Feature ; Minor ; Runtime ; #5868
+Added a compiler flag 'mathematical_domain_checks' which determines if
+domain checks is to be performed for all mathematical functions.
+
 # Change ; Minor ; Compiler; #5870
 Debug log now contains checksums of all generated c-files.
 

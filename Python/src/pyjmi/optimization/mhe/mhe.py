@@ -21,8 +21,8 @@ from pyjmi.optimization.casadi_collocation import ExternalData
 from pyjmi.common.algorithm_drivers import OptionBase
 import modelicacasadi_wrapper as mc
 
-from ekf_arrival_cost import EKFArrivalCost
-import check_mhe_inputs as check
+from .ekf_arrival_cost import EKFArrivalCost
+from . import check_mhe_inputs as check
 
 
 class MHE(object):
@@ -138,7 +138,7 @@ class MHE(object):
             self._c_est[row,0] = value
     
         self.x_est = N.zeros((self._size_dict['x'],1))
-        for name, value in self._x_0_guess.items():
+        for name, value in list(self._x_0_guess.items()):
             row = self._variable_row_map[name]
             self.x_est[row,0] = value
         
@@ -200,10 +200,10 @@ class MHE(object):
                 provided by the user to the names they have in the 
                 model.
         """
-        old_state_names = x_0_guess.keys()
+        old_state_names = list(x_0_guess.keys())
         corresponding_model_names = [self.op.getModelVariable(name).getName() \
                                      for name in old_state_names]
-        state_alias_dict = dict(zip(corresponding_model_names, old_state_names))
+        state_alias_dict = dict(list(zip(corresponding_model_names, old_state_names)))
         return state_alias_dict
       
     def _check_inputs_and_replace_aliases(self, dx_0, c_0, MHE_opts):
@@ -283,7 +283,7 @@ class MHE(object):
         check.check_for_duplicates(duplicate_list)
         #Check x_0_guess and generate a new dict with the aliases replaced
         x_0_guess_items = check.check_tuple_list(self.op, 
-                                                 self._x_0_guess.items(),
+                                                 list(self._x_0_guess.items()),
                                                  self._state_names,
                                                  'x_0_guess')
         self._x_0_guess = dict(x_0_guess_items)
@@ -399,7 +399,7 @@ class MHE(object):
         for var in initial_value_pars:
             var.setAttribute('free',True)
         
-        initial_value_dict = dict(zip(states, initial_value_pars))
+        initial_value_dict = dict(list(zip(states, initial_value_pars)))
         initial_value_pars = [initial_value_dict[name] \
                               for name in self._state_names]
         return initial_value_pars
@@ -611,7 +611,7 @@ class MHE(object):
         """
         matrix_index_par_list = []
         for (list, cov_matrix) in cov_list:
-            if isinstance(list, basestring):
+            if isinstance(list, str):
                 par_string = matrix_name + '_' + list
                 #Check if parameter already exists
                 par = self.op.getVariable(par_string)

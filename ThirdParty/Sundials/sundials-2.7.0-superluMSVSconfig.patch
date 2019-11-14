@@ -1,0 +1,28 @@
+Index: config/FindSUPERLUMT.cmake
+===================================================================
+--- config/FindSUPERLUMT.cmake	(revision 13668)
++++ config/FindSUPERLUMT.cmake	(working copy)
+@@ -32,9 +32,6 @@
+     
+ ENDIF(SUPERLUMT_THREAD_TYPE)
+ 
+-IF(MSVC)
+-  SET(CMAKE_FIND_LIBRARY_PREFIXES lib ${CMAKE_FIND_LIBRARY_PREFIXES})
+-ENDIF()
+ 
+ if(SUPERLUMT_LIBRARY)
+     get_filename_component(SUPERLUMT_LIBRARY_DIR ${SUPERLUMT_LIBRARY} PATH)
+Index: config/SundialsSuperLUMT.cmake
+===================================================================
+--- config/SundialsSuperLUMT.cmake	(revision 13668)
++++ config/SundialsSuperLUMT.cmake	(working copy)
+@@ -39,6 +39,9 @@
+     "SET(CMAKE_C_FLAGS_DEBUG \"${CMAKE_C_FLAGS_DEBUG}\")\n"
+     "SET(CMAKE_C_FLAGS_RELWITHDEBUGINFO \"${CMAKE_C_FLAGS_RELWITHDEBUGINFO}\")\n"
+     "SET(CMAKE_C_FLAGS_MINSIZE \"${CMAKE_C_FLAGS_MINSIZE}\")\n"
++    "if(MSVC)\n"
++    "    ADD_DEFINITIONS(/D __OPENMP)\n"
++    "endif()\n"
+     "INCLUDE_DIRECTORIES(${SUPERLUMT_INCLUDE_DIR})\n"
+     "ADD_EXECUTABLE(ltest ltest.c)\n"
+     "TARGET_LINK_LIBRARIES(ltest ${SUPERLUMT_LIBRARIES})\n")    

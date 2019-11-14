@@ -19,7 +19,11 @@
 include default_config
 include $(USER_CONFIG)
 
-.PHONY: install clean clean_install
+.PHONY: install_msvs install clean clean_install
+
+install_msvs: $(SUNDIALS_BUILD_DIR)
+	cd $(SUNDIALS_BUILD_DIR) && cmake --build . --config Release ; \
+	cmake --build . --target install --config Release
 
 install: $(SUNDIALS_BUILD_DIR)
 	cd $(SUNDIALS_BUILD_DIR) && make install DESTDIR=
@@ -30,6 +34,9 @@ $(SUNDIALS_BUILD_DIR):
 	cmake $(GENERATOR) $(SUPERLU_ADDON) -DEXAMPLES_ENABLE=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS=$(SUNDIALS_C_FLAGS) -DCMAKE_INSTALL_PREFIX:PATH=$(SUNDIALS_INSTALL_DIR) $(SUNDIALS_SRC_DIR)
 
 clean:
-	rm -rf $(SUNDIALS_BUILD_DIR)
+	rm -rf $(SUNDIALS_BUILD_DIR); \
+	rm -rf $(SUNDIALS_INSTALL_DIR)
 
 clean_install: clean install
+
+clean_install_msvs: clean install_msvs

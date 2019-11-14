@@ -13,6 +13,8 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 */
 
+$C_defines$
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
