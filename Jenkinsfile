@@ -51,7 +51,7 @@ echo ==== Run configure
 
 echo ==== Go to build and run make
 cd "\${BUILD_HOME}"
-export WORKSPACE=${unixpath(\${WORKSPACE})}
+export WORKSPACE=${unixpath("\${WORKSPACE}")}
 make
 make install
 if [ "\${BUILD_CASADI:-1}" == "1" ]; then
