@@ -39,7 +39,7 @@ def svnversion(path, committed = False):
     switched = False
     modified = False
     hi_rev = -1
-    lo_rev = sys.maxint
+    lo_rev = sys.maxsize
     for s in status:
         if s.is_versioned and s.entry:
             # must test s.entry since ignored files have is_versioned = True but entry = None...
@@ -74,7 +74,7 @@ def get_package_dir (package_dir, package):
 
     if not package_dir:
         if path:
-            return apply(os.path.join, path)
+            return os.path.join(*path)
         else:
             return ''
     else:
@@ -87,7 +87,7 @@ def get_package_dir (package_dir, package):
                 del path[-1]
             else:
                 tail.insert(0, pdir)
-                return apply(os.path.join, tail)
+                return os.path.join(*tail)
         else:
             # Oops, got all the way through 'path' without finding a
             # match in package_dir.  If package_dir defines a directory
@@ -101,7 +101,7 @@ def get_package_dir (package_dir, package):
                 tail.insert(0, pdir)
 
             if tail:
-                return apply(os.path.join, tail)
+                return os.path.join(*tail)
             else:
                 return ''
 

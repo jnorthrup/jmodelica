@@ -15,7 +15,7 @@ from pyjmi.optimization.casadi_collocation import BlockingFactors
 from casadi import ExternalFunction, NlpSolver
 from pymodelica import compile_fmu
 from pyfmi import load_fmu
-
+from six import with_metaclass
 
 class ParameterChanges(object):
     
@@ -81,9 +81,7 @@ class ParameterChanges(object):
         return None
       
       
-class RealTimeBase(object):
-    
-    __metaclass__ = ABCMeta
+class RealTimeBase(object, with_metaclass(ABCMeta)):
     
     def __init__(self, dt, t_final, start_values, output_names, 
                  input_names, par_changes = ParameterChanges(), noise=0):
@@ -156,7 +154,7 @@ class RealTimeBase(object):
         self.late_times.append(late_time)
         self.wait_times.append(end_wait_time - start_wait_time)
         if late_time > self.dt/10.0:
-            print 'WARNING: Sample late by', late_time, 's.'
+            print('WARNING: Sample late by', late_time, 's.')
         return data
         
     @abstractmethod
@@ -371,7 +369,7 @@ class RealTimeMPCBase(RealTimeBase):
     
         op = transfer_optimization_problem(opt_name, file_path,
                                            compiler_options = {'state_initial_equations' : True,"common_subexp_elim":False})
-        op.set(par_values.keys(), par_values.values())
+        op.set(list(par_values.keys()), list(par_values.values()))
                                            
         opt_opts = op.optimize_options()
         opt_opts['n_e'] = n_e
@@ -493,7 +491,7 @@ class RealTimeMPCBase(RealTimeBase):
         for k in range(self.n_steps):
             new_pars = self.par_changes.get_new_pars(k*self.dt)
             if new_pars != None:
-                self.solver.op.set(new_pars.keys(), new_pars.values())
+                self.solver.op.set(list(new_pars.keys()), list(new_pars.values()))
             
             self.solver.update_state(x_k)
             u_k = self.solver.sample()
@@ -505,7 +503,7 @@ class RealTimeMPCBase(RealTimeBase):
                 solve_time = time.time() - time3
                 self.solve_times.append(solve_time)
                 if solve_time > self.dt*0.2:
-                    print 'WARNING: Control signal late by', solve_time, 's'
+                    print('WARNING: Control signal late by', solve_time, 's')
             if self._ia:
                 self.send_control_signal(u_k_e)
             else:
@@ -528,8 +526,8 @@ class RealTimeMPCBase(RealTimeBase):
             
         self.ptime = time.clock()-time1
         self.rtime = time.time()-time2
-        print 'Processor time:', self.ptime, 's'
-        print 'Real time:', self.rtime, 's'
+        print('Processor time:', self.ptime, 's')
+        print('Real time:', self.rtime, 's')
         
         if save:
             self.save_results()
@@ -608,9 +606,9 @@ class RealTimeMPCBase(RealTimeBase):
                 total_times[name] += stat[name]
 
         t_total = total_times['t_mainloop']
-        print 'Total times:'
+        print('Total times:')
         for name in stat_names:
-            print("%19s: %6.4f s (%7.3f%%)" %(name, total_times[name], total_times[name]/t_total*100))
+            print(("%19s: %6.4f s (%7.3f%%)" %(name, total_times[name], total_times[name]/t_total*100)))
     
     def save_results(self, filename=None):
         """
@@ -740,8 +738,8 @@ class MPCSimBase(RealTimeMPCBase):
         sim_fmu = compile_fmu(model_name, file_path,
                               compiler_options = {'state_initial_equations' : True})
         self.model = load_fmu(sim_fmu)
-        self.model.set(start_values.keys(), start_values.values())
-        self.model.set(par_values.keys(), par_values.values())
+        self.model.set(list(start_values.keys()), list(start_values.values()))
+        self.model.set(list(par_values.keys()), list(par_values.values()))
         self.model.initialize()
         self.t = 0
         self._realtime = False
@@ -939,17 +937,17 @@ class RealTimeLQRBase(RealTimeBase):
         for k in range(self.n_steps):
             new_pars = self.par_changes.get_new_pars(k*self.dt)
             if new_pars != None:
-                for name, value in new_pars.items():
+                for name, value in list(new_pars.items()):
                     ctrl_point[name] = value
                     
-            for name, value in ctrl_point.items():
+            for name, value in list(ctrl_point.items()):
                 if name in self.outputs:
                     x_k['_start_' + name] -= value
                     
             control_signal = -N.dot(self._x_to_array(x_k), self.K.T)
             if len(self.inputs) == 1:
                 control_signal = [control_signal]
-            for name, value in ctrl_point.items():
+            for name, value in list(ctrl_point.items()):
                 if name in self.inputs:
                     i = self.inputs.index(name)
                     control_signal[i] += value
@@ -967,7 +965,7 @@ class RealTimeLQRBase(RealTimeBase):
                 solve_time = time.time() - time3
                 self.solve_times.append(solve_time)
                 if solve_time > self.dt*0.2:
-                    print 'WARNING: Control signal late by', solve_time, 's'
+                    print('WARNING: Control signal late by', solve_time, 's')
             if self._ia:
                 self.send_control_signal(u_k_e)
             else:
@@ -989,8 +987,8 @@ class RealTimeLQRBase(RealTimeBase):
             
         self.ptime = time.clock()-time1
         self.rtime = time.time()-time2
-        print 'Processor time:', self.ptime, 's'
-        print 'Real time:', self.rtime, 's'
+        print('Processor time:', self.ptime, 's')
+        print('Real time:', self.rtime, 's')
         
         if save:
             self.save_results()
@@ -1166,8 +1164,8 @@ class LQRSimBase(RealTimeLQRBase):
         sim_fmu = compile_fmu(model_name, file_path,
                               compiler_options = {'state_initial_equations' : True})
         self.model = load_fmu(sim_fmu)
-        self.model.set(start_values.keys(), start_values.values())
-        self.model.set(par_values.keys(), par_values.values())
+        self.model.set(list(start_values.keys()), list(start_values.values()))
+        self.model.set(list(par_values.keys()), list(par_values.values()))
         self.model.initialize()
         self.t = 0
         self._realtime = False
@@ -1221,7 +1219,7 @@ def save_to_file(data, filename=None):
     """
     
     if filename is None:
-        filename = raw_input('Enter file name to save as: ')
+        filename = input('Enter file name to save as: ')
     if filename != '':
         if '.' not in filename:
             filename += '.pkl'
@@ -1246,7 +1244,7 @@ def load_from_file(filename=None):
     """
     
     if filename is None:
-        filename = raw_input('Enter file name to load: ')
+        filename = input('Enter file name to load: ')
     if '.' not in filename:
         filename += '.pkl'
     with open(filename, 'rb') as infile:

@@ -32,7 +32,7 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
     
     retval = jmi_new(&jmi, jmi_callbacks);
     if(retval != 0) {
-        /* creating jmi struct failed */
+        /* Creating jmi struct failed */
         jmi_log_node(jmi_->log, logError, "StructCreationFailure","Creating internal struct failed.");
         return retval;
     }
@@ -57,7 +57,7 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
     /* Postpone resource check until it is used. */
     jmi_->resource_location = resource_location;
     
-    /* set start values*/
+    /* Set start values*/
     if (jmi_init_eval_independent(jmi) != 0) {
         return -1;
     }

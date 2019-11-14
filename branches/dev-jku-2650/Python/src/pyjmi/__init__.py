@@ -48,7 +48,7 @@ finally:
 
 try:
     _f = os.path.join(os.environ['JMODELICA_HOME'],'startup.py')
-    execfile(_f)
+    exec(compile(open(_f, "rb").read(), _f, 'exec'))
 except IOError:
     logging.warning('Startup script ''%s'' not found. Environment may be corrupt'
                   % _f)
@@ -79,7 +79,7 @@ if casadi_present:
     except ImportError:
         modelicacasadi_present = False
     if modelicacasadi_present:
-        from casadi_interface import (OptimizationProblem,
+        from .casadi_interface import (OptimizationProblem,
                                       transfer_to_casadi_interface,
                                       transfer_optimization_problem,
                                       transfer_model,

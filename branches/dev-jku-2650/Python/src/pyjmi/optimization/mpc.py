@@ -132,7 +132,7 @@ class MPC(object):
             self.res['w'] = []
             self.res['elim_vars'] = []
 
-			
+            
         # Create array to storage eliminated variables
         self.eliminated_variables = op.getEliminatedVariables()
            
@@ -158,16 +158,16 @@ class MPC(object):
         
         # Check if nominal trajectories provided
         if self.options['nominal_traj'] != None:
-            print('Warning: Nominal trajectories will not work as intended '+\
+            print(('Warning: Nominal trajectories will not work as intended '+\
                  'with the MPC class. The trajectories will not shift with '+\
-                 'the shifting optimization horizon.') 
+                 'the shifting optimization horizon.')) 
         
         # Check if external data provided
         if self.options['external_data'] != None:
-            print('Warning: Using external_data to provide reference '+\
+            print(('Warning: Using external_data to provide reference '+\
                  'trajectories will not work as intended with the MPC class.'+\
                  'The trajectories do not shift with the shifting '+\
-                 'optimization horizon.') 
+                 'optimization horizon.')) 
                  
         # Soften variable bounds and add u0-parameters for blockingfactors 
         self.extra_param = []
@@ -213,7 +213,7 @@ class MPC(object):
         """
         bf = self.options['blocking_factors']
         if bf is not None:
-            for key in bf.du_quad_pen.keys():
+            for key in list(bf.du_quad_pen.keys()):
                 var_par = casadi.MX.sym("%s_0" %key)
                 var =  ci.RealVariable(self.op, var_par, 2, 1) 
                 self.op.addVariable(var)
@@ -248,7 +248,7 @@ class MPC(object):
             for constr in self.op.getPointConstraints():
                 pc.append(constr)
 
-            for key in bf.du_bounds.keys():
+            for key in list(bf.du_bounds.keys()):
                 # Find or create new _0 parameter
                 var_par = self.op.getVariable("%s_0" %key)
                 if var_par is None:
@@ -326,7 +326,7 @@ class MPC(object):
             path_constr.append(constr)
 
         # Change bounds on variables to soft constraints 
-        for name in self.constr_viol_costs.keys():
+        for name in list(self.constr_viol_costs.keys()):
             var = self.op.getVariable(name)
 
             # Create slack variable
@@ -415,7 +415,7 @@ class MPC(object):
                 raise NotImplementedError("The MPC-class does not support"+\
                                             " free element lengths.")
             else:
-                bf = self.options['blocking_factors'].factors.values()[0]
+                bf = list(self.options['blocking_factors'].factors.values())[0]
                 if bf[0] != self.n_e_s:
                     raise ValueError("The first value in the blocking factor"+\
                                      " vector does not equal the number of"+\
@@ -427,9 +427,9 @@ class MPC(object):
         # Check if horizon_time equals finalTime
         if N.abs(self.op.get('finalTime')-self.op.get('startTime')-\
                                                 self.horizon_time) > 1e-6:
-			self.op.set('finalTime',self.op.get('startTime')+self.horizon_time)
+            self.op.set('finalTime',self.op.get('startTime')+self.horizon_time)
             #print("Warning: The final time has been changed to %s" % op.get('finalTime'))
-        print("The prediction horizon is %s" % self.horizon_time)
+        print(("The prediction horizon is %s" % self.horizon_time))
 
     def _calculate_nbr_values_sample(self):
         """
@@ -491,7 +491,7 @@ class MPC(object):
             if self.options['IPOPT_options'].get('print_level') is None:
                 self.collocator.solver_object.setOption('print_level', 0)
                                                     
-            for key in self.warm_start_options.keys():
+            for key in list(self.warm_start_options.keys()):
                 self.collocator.solver_object.setOption(key,\
                                                 self.warm_start_options[key])
 
@@ -501,7 +501,7 @@ class MPC(object):
             self.collocator.solver_object.setOption('NLPprint', 0)
             self.collocator.solver_object.setOption('InitialLMest', False)
             
-            for key in self.warm_start_options.keys():
+            for key in list(self.warm_start_options.keys()):
                 self.collocator.solver_object.setOption(key,\
                                                 self.warm_start_options[key])
 
@@ -533,7 +533,7 @@ class MPC(object):
         for k in range(n_values):
             for i,var in enumerate (self.eliminated_variables):
                 elims[i] = sim_res[var.getName()][k]
-			
+            
             self.res['elim_vars'].append(elims)
        
     def _add_times(self):
@@ -659,7 +659,7 @@ class MPC(object):
         u_cont_names = [ var.getName() for var in 
                         self.collocator.mvar_vectors['unelim_u'] 
                         if var.getName() not in 
-                        self.options['blocking_factors'].factors.keys()]
+                        list(self.options['blocking_factors'].factors.keys())]
                     
         n_cont_u = len(u_cont_names) 
         start_cont_u=gsi[split_map['unelim_u']]
@@ -676,7 +676,7 @@ class MPC(object):
         n_bf_u = self.collocator.n_var['unelim_u'] - n_cont_u
         start_bf_u = end_cont_u
 
-        for name in self.options['blocking_factors'].factors.keys():
+        for name in list(self.options['blocking_factors'].factors.keys()):
             factors = self.options['blocking_factors'].factors[name]
 
             end_bf_u = start_bf_u + len(factors)
@@ -760,8 +760,8 @@ class MPC(object):
             raise ValueError("x_k must be a dictionary or None.")
 
         # Updates states
-        for key in state_dict.keys():
-            if not self.index.has_key(key):
+        for key in list(state_dict.keys()):
+            if key not in self.index:
                 raise ValueError("You are not allowed to change %s using this\
                                 method. Use MPC.set()-method instead." %key)
             else:
@@ -830,8 +830,8 @@ class MPC(object):
                     if self.status in self.successful_optimization: 
                         self.collocator.xx_init = self.collocator.primal_opt
                 else:
-                    print("Warning: A new initial guess for the primal " +\
-                          "variables have not been specified for this sample.") 
+                    print(("Warning: A new initial guess for the primal " +\
+                          "variables have not been specified for this sample.")) 
        
         # Initiate the warm start 
         if self._sample_nbr == 2:            
@@ -882,7 +882,7 @@ class MPC(object):
 
     def extract_states(self, sim_res, mean=0, st_dev=0.000):
         """
-		Extracts the last value of the states from a simulation result object 
+        Extracts the last value of the states from a simulation result object 
         and adds a noise with mean and variance as defined. 
         If 'create_comp_result' is True the method also saves and concatenates 
         all sim_res to create a complete MPC simulation result file.
@@ -902,7 +902,7 @@ class MPC(object):
                 Factor to be multiplied with the current value of each state to
                 define the stanard deviation of the noise.
                 Default: 0.000
-		"""
+        """
         if self.create_comp_result:
             self._append_to_result_file(sim_res)
         states = {}
@@ -958,7 +958,7 @@ class MPC(object):
         res_p = N.array(0).reshape(-1)
         
         if len(self.eliminated_variables) == 0:
-            self.res_elim_vars = N.ones([len(self.res['t']),0])	
+            self.res_elim_vars = N.ones([len(self.res['t']),0])    
         else:
             self.res_elim_vars = N.array(self.res['elim_vars']).reshape\
                                             ([-1, len(self.eliminated_variables)])                        
@@ -1012,18 +1012,18 @@ class MPC(object):
     def set(self, name, value): 
         """ 
         Sets the specified parameters in names to the value in values. 
- 	         
- 	        Parameters:: 
-	 	             
- 	            names -- 
- 	                List of parameter names whose values are to be changed.  
- 	                 
- 	                Type: [string] or string  
- 	                 
- 	            values -- 
- 	                Corresponding new values for the parameters. 
- 	                 
- 	                Type: [float] or float 
+              
+             Parameters:: 
+                      
+                 names -- 
+                     List of parameter names whose values are to be changed.  
+                      
+                     Type: [string] or string  
+                      
+                 values -- 
+                     Corresponding new values for the parameters. 
+                      
+                     Type: [float] or float 
         """ 
         self.op.set(name, value)
     
@@ -1045,8 +1045,8 @@ class MPC(object):
         for each optimization.
         """
         for i, stat in enumerate(self.solver_stats): 
-            print("%s: %s: %s iterations in %s seconds" %(i+1, stat[0], \
-                                                stat[1], stat[3]))
+            print(("%s: %s: %s iterations in %s seconds" %(i+1, stat[0], \
+                                                stat[1], stat[3])))
     def get_solver_stats(self):
         """ 
         Returns the return status and number of iterations for each for each 

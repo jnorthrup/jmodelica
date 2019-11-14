@@ -26,6 +26,7 @@ from collections import OrderedDict
 from modelicacasadi_wrapper import Model
 from pyjmi.common.core import ModelBase
 from pyjmi.common.algorithm_drivers import OptionBase
+from functools import reduce
 
 class EliminationOptions(OptionBase):
 
@@ -170,7 +171,7 @@ class NonBool(object):
     def __init__(self):
         pass
 
-    def __nonzero__(self):
+    def __bool__(self):
         raise RuntimeError("BUG: Undefined Boolean value")
 
 class Variable(object):
@@ -220,9 +221,9 @@ def find_deps(expr, mx_vars, deps=None):
     """
     if deps is None:
         deps = len(mx_vars) * [False]
-    for i in xrange(expr.getNdeps()):
+    for i in range(expr.getNdeps()):
         dep = expr.getDep(i)
-        deps = map(any, zip(deps, [casadi.isEqual(dep, var) for var in mx_vars]))
+        deps = list(map(any, list(zip(deps, [casadi.isEqual(dep, var) for var in mx_vars]))))
         deps = find_deps(dep, mx_vars, deps)
     return deps
 
@@ -321,8 +322,8 @@ class Component(object):
         res_f.setOption("name", "block_residual_for_solvability")
         res_f.init()
         is_linear = True
-        for i in xrange(self.n):
-            for j in xrange(self.n):
+        for i in range(self.n):
+            for j in range(self.n):
                 # Check if jac[i, j] depends on block unknowns
                 if casadi.dependsOn(res_f.jac(i, j), self.mx_vars):
                     is_linear = False
@@ -344,16 +345,16 @@ class Component(object):
         """
         print("Chosen causal variables: \n")
         for var in self.block_causal_vars:
-            print("\t%s" % var.name)
+            print(("\t%s" % var.name))
         print("\nChosen tearing variables: \n")
         for var in self.block_tear_vars:
-            print("\t%s" % var.name)
+            print(("\t%s" % var.name))
         print("\nChosen causal equations (ID: expression): \n")
         for eq in self.block_causal_equations:
-            print("\t%d: %s" % (eq.global_index, eq.string))
+            print(("\t%d: %s" % (eq.global_index, eq.string)))
         print("\nChosen tearing residuals: \n")
         for eq in self.block_tear_res:
-            print("\t%d: %s" % (eq.global_index, eq.string))
+            print(("\t%d: %s" % (eq.global_index, eq.string)))
 
     def create_lin_eq(self, known_vars, solved_vars, tear_vars):
         """
@@ -371,7 +372,7 @@ class Component(object):
 
         # Create coefficient function
         A = []
-        for i in xrange(self.n):
+        for i in range(self.n):
             jac_f = res_f.jacobian(i)
             jac_f.setOption("name", "block_jacobian")
             jac_f.init()
@@ -431,7 +432,7 @@ class Component(object):
 
         # Update component indices
         i = 0
-        for (eq, var) in itertools.izip(causal_equations, causal_variables):
+        for (eq, var) in zip(causal_equations, causal_variables):
             eq.local_index = i
             var.local_index = i
             eq.local_blt_index = None
@@ -524,7 +525,7 @@ class Component(object):
 
         # Update component indices
         i = 0
-        for (eq, var) in itertools.izip(causal_equations, causal_variables):
+        for (eq, var) in zip(causal_equations, causal_variables):
             eq.local_index = i
             var.local_index = i
             eq.local_blt_index = None
@@ -861,7 +862,7 @@ class BipartiteGraph(object):
             plt.figure(idx)
 
             # Plot vertices
-            for i in xrange(i_star + 1):
+            for i in range(i_star + 1):
                 if i % 2 == 0:
                     for eq in L[i]:
                         plt.plot(i, -eq.local_index, 'go', ms=12)
@@ -880,7 +881,7 @@ class BipartiteGraph(object):
                 plt.plot([i_star + 1, i_star], [-(self.n - 1) / 2., -vari.local_index], 'k', ms=12)
 
             # Plot edges
-            for i in xrange(i_star):
+            for i in range(i_star):
                 for (u, v) in E[i]:
                     if i % 2 == 0:
                         color = 'r'
@@ -892,7 +893,7 @@ class BipartiteGraph(object):
 
         # Compute vertex successors
         successors = {}
-        for i in xrange(i_star):
+        for i in range(i_star):
             for v in L[i+1]:
                 successors[v] = []
             for (u, v) in E[i]:
@@ -918,7 +919,7 @@ class BipartiteGraph(object):
                         path = []
                         del stack[0] # Remove source
                         del stack[-1] # Remove sink
-                        for i in xrange(len(stack)-1):
+                        for i in range(len(stack)-1):
                             if i % 2 == 0:
                                 path.append((stack[i+1], stack[i]))
                             else:
@@ -1002,7 +1003,7 @@ def create_edges(equations, variables):
         for equation in equations:
             expr = equation.expression
             deps_incidence = np.array(find_deps(expr, mx_vars))
-            deps_equal = np.array(map(lambda mx_var: casadi.isEqual(expr, mx_var), mx_vars))
+            deps_equal = np.array([casadi.isEqual(expr, mx_var) for mx_var in mx_vars])
             deps = deps_incidence + deps_equal
             for (i, var) in enumerate(variables):
                 if deps[i]:
@@ -1109,8 +1110,8 @@ class BLTModel(object):
                                      par_kind in par_kinds])
 
         # Sort free/fixed parameters
-        fixed_pars = filter(lambda par: not model.get_attr(par, "free"), pars)
-        free_pars = filter(lambda par: model.get_attr(par, "free"), pars)
+        fixed_pars = [par for par in pars if not model.get_attr(par, "free")]
+        free_pars = [par for par in pars if model.get_attr(par, "free")]
         mvar_vectors['p_fixed'] = fixed_pars
         n_var['p_fixed'] = len(mvar_vectors['p_fixed'])
         mvar_vectors['p_opt'] = free_pars
@@ -1137,7 +1138,7 @@ class BLTModel(object):
         # Create variables
         i = 0
         for vk in ["dx", "w"]:
-            for (mvar, mx_var) in itertools.izip(mvar_vectors[vk], mx_var_struct[vk]):
+            for (mvar, mx_var) in zip(mvar_vectors[vk], mx_var_struct[vk]):
                 if self.options['tearing'] and mvar.getTearing():
                     tearing = True
                 else:
@@ -1147,7 +1148,7 @@ class BLTModel(object):
 
         # Create equations
         i = 0
-        for (named_res, named_eq) in itertools.izip(named_dae, named_dae_equations):
+        for (named_res, named_eq) in zip(named_dae, named_dae_equations):
             if self.options['tearing'] and named_eq.getTearing():
                 tearing = True
             else:
@@ -1203,7 +1204,7 @@ class BLTModel(object):
     def _create_residuals(self):
         # Create list of named MX variables
         mx_var_struct = self._mx_var_struct
-        mx_vars = list(itertools.chain.from_iterable(mx_var_struct.values()))
+        mx_vars = list(itertools.chain.from_iterable(list(mx_var_struct.values())))
         time = mx_var_struct['time']
         dx = mx_var_struct['dx']
         x = mx_var_struct['x']
@@ -1501,7 +1502,7 @@ class BLTModel(object):
 
         # Find untorn dependencies, excluding block variable
         deps = []
-        for i in xrange(co.n):
+        for i in range(co.n):
             for vk in ['dx', 'x', 'u', 'w', 'p_opt']:
                 for dae_var in self._mx_var_struct[vk]:
                     if casadi.dependsOn(co.eq_expr[i], [dae_var]) and dae_var.getName() != var.name:
@@ -1559,12 +1560,12 @@ class BLTModel(object):
         block_sizes = np.sort([co.n for co in self._graph.components])
         n_alg_before = len([var for var in self._model.getVariables(self._model.REAL_ALGEBRAIC) if not var.isAlias()])
         n_alg_after = len([var for var in self.getVariables(self.REAL_ALGEBRAIC) if not var.isAlias()])
-        print('\nSystem has %d algebraic variables before elimination and %d after.' % (n_alg_before, n_alg_after))
+        print(('\nSystem has %d algebraic variables before elimination and %d after.' % (n_alg_before, n_alg_after)))
         n_blocks = len(self._graph.components)
         if n_blocks > 3:
-            print('The three largest BLT blocks have sizes %d, %d, and %d.\n' % tuple(block_sizes[-1:-4:-1]))
+            print(('The three largest BLT blocks have sizes %d, %d, and %d.\n' % tuple(block_sizes[-1:-4:-1])))
         else:
-            print('The system has %d BLT blocks of sizes: %s' % (n_blocks, block_sizes[::-1]))
+            print(('The system has %d BLT blocks of sizes: %s' % (n_blocks, block_sizes[::-1])))
 
     def getVariables(self, vk):
         if vk == self.REAL_ALGEBRAIC:
@@ -1694,7 +1695,7 @@ class BLTOptimizationProblem(BLTModel, ModelBase):
         n_path = len(path_constraints)
         if n_path > 0:
             [path_lhs, path_rhs] = \
-                    map(list, zip(*[(constraint.getLhs(), constraint.getRhs()) for constraint in path_constraints]))
+                    list(map(list, list(zip(*[(constraint.getLhs(), constraint.getRhs()) for constraint in path_constraints]))))
         else:
             path_lhs = []
             path_rhs = []
@@ -1722,7 +1723,7 @@ class BLTOptimizationProblem(BLTModel, ModelBase):
             self._path_constraints = np.array(path_lhs) - np.array(path_rhs)
             self._objective_integrand = objective_integrand
         else:
-            for (path, lhs, rhs) in itertools.izip(path_constraints, path_lhs, path_rhs):
+            for (path, lhs, rhs) in zip(path_constraints, path_lhs, path_rhs):
                 path.setLhs(lhs)
                 path.setRhs(rhs)
             self._path_constraints = np.array(path_constraints)
@@ -1822,7 +1823,7 @@ class BLTOptimizationProblem(BLTModel, ModelBase):
             def get_solver_statistics(self):
                 return self._op_res.get_solver_statistics()
         res = BLTResult(op_res)
-        for key in op_res.keys():
+        for key in list(op_res.keys()):
             res[key] = op_res[key]
 
         # Add result for solved algebraics
@@ -1839,7 +1840,7 @@ class BLTOptimizationProblem(BLTModel, ModelBase):
                 alg_sol_f.init()
 
             # Compute solved algebraics
-            for k in xrange(len(res['time'])):
+            for k in range(len(res['time'])):
                 for (i, var) in enumerate(self._known_vars + self._explicit_unsolved_vars):
                     alg_sol_f.setInput(res[var.getName()][k], i)
                 alg_sol_f.evaluate()
