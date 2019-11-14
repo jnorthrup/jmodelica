@@ -187,6 +187,7 @@ class Test_FMUModelCS2:
         
         model.set("_cs_solver",2) #Set the no state solver
 
+        #The model has states and thus an exception should be raised
         nose.tools.assert_raises(Exception, model.initialize)
     
     @testattr(stddist_full = True)

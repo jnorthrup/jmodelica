@@ -245,7 +245,8 @@ class Test_FMUModelCS1:
         
         model.set("_cs_solver",2) #Set the no state solver
 
-        nose.tools.assert_raises(Exception, model.initialize)
+        #The model has states and thus an exception should be raised
+        nose.tools.assert_raises(Exception, model.initialize) 
 
     @testattr(stddist_full = True)
     def test_input_derivatives(self):
