@@ -240,7 +240,7 @@ class Test_Compiler:
         Test_Compiler.mc.set_string_option(option, setvalue)
         nose.tools.assert_equal(Test_Compiler.mc.get_string_option(option), setvalue)
         # option should be of type str
-        assert isinstance(Test_Compiler.mc.get_string_option(option),basestring)
+        assert isinstance(Test_Compiler.mc.get_string_option(option),str)
         # reset to original value
         Test_Compiler.mc.set_string_option(option, default_value)
     
@@ -479,6 +479,23 @@ class Test_Compiler_functions:
         assert 'sources/' in includedFiles, 'Source files should be present when copy_source_files_to_fmu is set to true'
         assert 'sources/BouncingBall.c' in includedFiles, 'Source files should be present when copy_source_files_to_fmu is set to true'
 
+    @testattr(stddist_full = True)
+    def test_exception_at_non_existing_file(self):
+        """Test that exception is raised when specified file name does not exist"""
+        model_name = 'BouncingBall'
+        file_name = "NonExistantFile"
+        if 'linux' in sys.platform:
+            # note with CentOS 7.4  sys.platform==linux2
+            platform_specific_msg = "No such file or directory"
+        else:
+            platform_specific_msg = "The system cannot find the file specified"
+        try:
+            compile_fmu(model_name, file_name = file_name)
+        except OSError as e:
+            expected_msg = 'NonExistantFile ({})'.format(platform_specific_msg)
+            err_msg = "EXPECTED: OSError: {}\nRECEIVED: {}: {}\n".format(expected_msg, type(e).__name__, str(e))
+            assert str(e) == expected_msg, err_msg
+    
     def assert_compiler_option_missing(self, option_name, exception) :
         """
             Tests that an option is missing, deducing it from an exception message.

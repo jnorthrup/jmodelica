@@ -21,7 +21,8 @@ Parser for the new JModelica FMU log format
 from xml import sax
 import re
 import numpy as np
-from tree import *
+from .tree import *
+from pyjmi.common import python3_flag
 
 
 ## Leaf parser ##
@@ -52,15 +53,16 @@ def parse_value(text):
             text = text[1:-1].replace('""','"')
         else:
             assert '"' not in text            
-#        return text
-        return text.encode('ascii', 'xmlcharrefreplace') # avoid printing all strings as u'...'
+        # for python 2 we need to avoid printing all strings as u'...'
+        return text if python3_flag else text.encode('ascii', 'xmlcharrefreplace')
 
 def parse_vector(text):
+    
     text = text.strip()
     if text == "":
         return np.zeros(0)
     parts = comma_pattern.split(text)
-    parts = parts[1::2]
+    parts = filter(None, map(str, parts))
     return np.asarray([parse_value(part) for part in parts])
 
 def parse_matrix(text):
@@ -108,6 +110,9 @@ class ContentHandler(sax.ContentHandler):
         self.create_comment()
         
         key = attrs.get('name')
+        # convert to string if key is not None
+        # because Python 2.x returns unicode while Python 3.x does not
+        key = key if not key else str(key)
 
         self.chars = []
         self.leafkey = self.leafparser = None
@@ -154,8 +159,8 @@ def parse_xml_log(filename, accept_errors=False):
         parser.parse(filename)
     except sax.SAXException as e:
         if accept_errors:
-            print 'Warning: Failure during parsing of XML JMI log:\n', e
-            print 'Parsed log will be incomplete.'
+            print('Warning: Failure during parsing of XML JMI log:\n', e)
+            print('Parsed log will be incomplete.')
         else:
             raise Exception('Failed to parse XML JMI log:\n' + repr(e))
         
@@ -179,8 +184,8 @@ def parse_jmi_log(filename, modulename = 'Model', accept_errors=False):
         parser.close()
     except sax.SAXException as e:
         if accept_errors:
-            print 'Warning: Failure during parsing of XML JMI log:\n', e
-            print 'Parsed log will be incomplete'
+            print('Warning: Failure during parsing of XML JMI log:\n', e)
+            print('Parsed log will be incomplete')
         else:
             raise Exception('Failed to parse XML JMI log:\n' + repr(e))
     

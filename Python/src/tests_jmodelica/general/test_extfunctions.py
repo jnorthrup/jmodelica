@@ -540,7 +540,7 @@ class TestAssertEqu3(SimulationTest):
             self.setup_base()
             self.run()
             assert False, 'Simulation not stopped by failed assertions'
-        except FMUException, e:
+        except FMUException as e:
             pass
     
 class TestModelicaError:
@@ -560,7 +560,7 @@ class TestModelicaError:
         try:
             model.simulate(final_time = 3, options={"CVode_options":{"minh":1e-15}})
             assert False, 'Simulation not stopped by calls to ModelicaError()'
-        except CVodeError, e:
+        except CVodeError as e:
             assert abs(e.t - 2.0) < 0.01, 'Simulation stopped at wrong time'
         
 

@@ -19,7 +19,12 @@
 include default_config
 include $(USER_CONFIG)
 
-.PHONY: install
+.PHONY: install install_msvs
+
+install_msvs: $(SUPERLU_BUILD_DIR)
+	cd $(SUPERLU_BUILD_DIR) && cmake -G $(GENERATOR) $(SUPERLU_BUILD_DIR) -DSUPERLU_INSTALL_DIR=$(SUPERLU_INSTALL_DIR) -DUSE_CBLAS=ON; \
+	cmake --build . --config Release ; \
+	cmake --build . --target install --config Release
 
 install: $(SUPERLU_BUILD_DIR)
 	cd $(SUPERLU_BUILD_DIR) && make blaslib $(SUPERLU_EXTRA_CFLAGS) DESTDIR= && make superlulib $(SUPERLU_EXTRA_CFLAGS) DESTDIR=; \
@@ -32,6 +37,9 @@ $(SUPERLU_BUILD_DIR):
 	tar -c --exclude .svn . | tar x -C $(SUPERLU_BUILD_DIR)
 
 clean: 
-	rm -rf $(SUPERLU_BUILD_DIR)
+	rm -rf $(SUPERLU_BUILD_DIR); \
+	rm -rf $(SUPERLU_INSTALL_DIR)
 
 clean_install: clean install
+
+clean_install_msvs: clean install_msvs

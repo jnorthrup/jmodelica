@@ -14,23 +14,27 @@ test_wheel: $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)
 test_folder: $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)
 	nosetests $(ASSIMULO_FOLDER_INSTALL_DIR)/tests/*.pyc $(ASSIMULO_FOLDER_INSTALL_DIR)/tests/solvers/*.pyc
 
-folder: $(INSTALL_DIR_FOLDER)/folder
+folder: $(PREINSTALL_DIR) debug_var
 
-$(INSTALL_DIR_FOLDER)/folder: 
-	@$(eval TARGET_BUILD_DIR=$(BUILD_DIR)/folder_build)
+debug_var:
+	ls -la $(PREINSTALL_DIR)
+
+$(PREINSTALL_DIR): 
+	@$(eval TARGET_BUILD_DIR=$(BUILD_DIR)/Assimulo_build$(BITNESS))
 	mkdir -p $(TARGET_BUILD_DIR)
-	@$(eval TARGET_INSTALL_DIR=$(BUILD_DIR)/folder_install)
-	mkdir -p $(TARGET_INSTALL_DIR)
 	mkdir -p $@
-
 	cd $(ASSIMULO_SRC) && \
 	find . -type f | grep -v -E '/.svn|.pyc' |tar c -T - | tar x -C $(TARGET_BUILD_DIR)
 	cd $(TARGET_BUILD_DIR); \
-	$(PYTHONHOME)python setup.py install --superlu-home=$(SUPERLU_HOME) --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(BLAS_HOME) --lapack-home=$(LAPACK_HOME) $(EXTRA_SETUP_ARGS) --prefix=$(TARGET_INSTALL_DIR)
-	
-	cd $(TARGET_INSTALL_DIR)/$(PLATFORM_SITE_PACKAGES); \
-	find $(TARGET_INSTALL_DIR)/$(PLATFORM_SITE_PACKAGES) -type d -name assimulo -exec cp -r {} $@/ \;
-	rm -rf $(TARGET_BUILD_DIR) $(TARGET_INSTALL_DIR)
+	$(PYTHONHOME)python setup.py $(BUILD_SETUP_EXTRA) install --superlu-home=$(SUPERLU_HOME) --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(BLAS_HOME) --lapack-home=$(LAPACK_HOME) $(EXTRA_SETUP_ARGS) --prefix=$@ --mkl-home=$(MKL_HOME)
+	echo "(DEBUG): Searching for all directories named tests"
+	find $(JM_HOME) -type d -name "tests"
+
+install: folder
+	@echo "makefile: Got PREINSTALL_DIR=$(PREINSTALL_DIR)"
+	mkdir -p $(INSTALL_DIR_FOLDER)
+	cd $(PREINSTALL_DIR); \
+	find $(PREINSTALL_DIR) -type d -name assimulo -exec cp -r {} $(INSTALL_DIR_FOLDER)/ \;
 
 wheel: $(INSTALL_DIR_FOLDER)/wheel
 
@@ -41,12 +45,18 @@ $(INSTALL_DIR_FOLDER)/wheel:
 	cd $(ASSIMULO_SRC) && \
 	find . -type f | grep -v -E '/.svn|.pyc' |tar c -T - -f - | tar x -C $(TARGET_BUILD_DIR)
 	cd $(TARGET_BUILD_DIR); \
-	$(PYTHONHOME)python setup.py bdist_wheel --superlu-home=$(SUPERLU_HOME) --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(BLAS_HOME) --lapack-home=$(LAPACK_HOME) $(EXTRA_SETUP_ARGS); \
+	$(PYTHONHOME)python setup.py $(BUILD_SETUP_EXTRA) bdist_wheel --superlu-home=$(SUPERLU_HOME) --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(BLAS_HOME) --lapack-home=$(LAPACK_HOME) --mkl-home=$(MKL_HOME) $(EXTRA_SETUP_ARGS); \
 	find -type f -name Assimulo*.whl -exec cp {} $@/ \;
-	rm -rf $(TARGET_BUILD_DIR)
 
 clean:
-	rm -rf $(BUILD_DIR)
+	@$(eval TARGET_BUILD_DIR=$(BUILD_DIR)/Assimulo_build*)
+	rm -rf $(TARGET_BUILD_DIR) $(INSTALL_DIR_FOLDER)
+ifeq ($(REMOVE_BUILD_DIR), yes)
+	@echo "Removing $(BUILD_DIR)" && rm -rf $(BUILD_DIR)
+endif
+ifeq ($(REMOVE_PREINSTALL_DIR), yes)
+	@echo "Removing $(PREINSTALL_DIR)" && rm -rf $(PREINSTALL_DIR)
+endif
 
 #
 #	Copyright (C) 2018 Modelon AB

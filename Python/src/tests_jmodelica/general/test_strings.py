@@ -25,6 +25,9 @@ def assertString(model, name, value):
     assert val==value, "Expected '" + str(value) + "' got '" + str(val) + "'"
 
 def setString(model, name, value):
+    value_ref = model.get_variable_valueref(name)
+    print("Using model.set_string(a, b) where:\na={} of type {}".format(value_ref, type(value_ref)))
+    print("b={} of type {}".format(value, type(value)))
     model.set_string([model.get_variable_valueref(name)], [value])
     
 def setStringAssertFail(model, name):
@@ -32,7 +35,7 @@ def setStringAssertFail(model, name):
         setString(model, name, "something")
         assert False, "Expected exception"
     except FMUException as e:
-        assert e.message.startswith("Failed to set the String values."), "Wrong error: '" + e.message + "'"
+        assert str(e).startswith("Failed to set the String values."), "Wrong error: '" + str(e) + "'"
 
 class TestStringParameter1(SimulationTest):
     """
