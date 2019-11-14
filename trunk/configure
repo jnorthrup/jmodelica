@@ -637,6 +637,8 @@ ORIG_PYTHON_HOME
 CMAKE_PYTHON_INCLUDE
 CMAKE_PYTHON_LIB
 PYTHON_HOME
+BUILD_WITH_PYTHON32_FALSE
+BUILD_WITH_PYTHON32_TRUE
 HAVE_ANT_FALSE
 HAVE_ANT_TRUE
 ANT_OPTS
@@ -19381,15 +19383,31 @@ fi
 
 
 
+# Since we always build JM 32bit together with 64bit we put this in a conditional for setting proper flags to assimulo and pyfmi
+# therefore BUILD_WITH_PYTHON32 is true only when PYTHON64_HOME is set
+ if test "x$PYTHON64_HOME" != x; then
+  BUILD_WITH_PYTHON32_TRUE=
+  BUILD_WITH_PYTHON32_FALSE='#'
+else
+  BUILD_WITH_PYTHON32_TRUE='#'
+  BUILD_WITH_PYTHON32_FALSE=
+fi
+
+if test "x$PYTHON64_HOME" != x; then
+    PYTHON_LIB_VERSION="libpython27.a"
+else
+    PYTHON_LIB_VERSION="libpython37.a"
+fi
+
 
 # Detect if Python installation is specified with environment var
 
 if test "${PYTHON_HOME}"; then :
 
           PYTHON_HOME_ABS="`cd ${PYTHON_HOME}; pwd`"
-          { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python  installation ${PYTHON_HOME_ABS}" >&5
-$as_echo "Using Python  installation ${PYTHON_HOME_ABS}" >&6; }
-          CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=${PYTHON_HOME_ABS}/libs/libpython27.a"
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python  installation ${PYTHON_HOME_ABS} and Python library ${PYTHON_HOME_ABS}/libs/${PYTHON_LIB_VERSION}" >&5
+$as_echo "Using Python  installation ${PYTHON_HOME_ABS} and Python library ${PYTHON_HOME_ABS}/libs/${PYTHON_LIB_VERSION}" >&6; }
+          CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=${PYTHON_HOME_ABS}/libs/${PYTHON_LIB_VERSION}"
           CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON_HOME_ABS}/include"
 
 else
@@ -19426,9 +19444,9 @@ ORIG_PYTHON_HOME=$PYTHON_HOME_ABS
 if test "${PYTHON64_HOME}"; then :
 
           PYTHON64_HOME_ABS="`cd ${PYTHON64_HOME}; pwd`"
-          { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python 64bit installation ${PYTHON64_HOME_ABS}" >&5
-$as_echo "Using Python 64bit installation ${PYTHON64_HOME_ABS}" >&6; }
-          CMAKE_PYTHON64_LIB="-DPYTHON_LIBRARY=${PYTHON64_HOME_ABS}/libs/libpython27.a"
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python 64bit installation ${PYTHON64_HOME_ABS} and Python library ${PYTHON64_HOME_ABS}/libs/${PYTHON_LIB_VERSION}" >&5
+$as_echo "Using Python 64bit installation ${PYTHON64_HOME_ABS} and Python library ${PYTHON64_HOME_ABS}/libs/${PYTHON_LIB_VERSION}" >&6; }
+          CMAKE_PYTHON64_LIB="-DPYTHON_LIBRARY=${PYTHON64_HOME_ABS}/libs/${PYTHON_LIB_VERSION}"
           CMAKE_PYTHON64_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON64_HOME_ABS}/include"
 
 else
@@ -19966,6 +19984,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_ANT_TRUE}" && test -z "${HAVE_ANT_FALSE}"; then
   as_fn_error $? "conditional \"HAVE_ANT\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_WITH_PYTHON32_TRUE}" && test -z "${BUILD_WITH_PYTHON32_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_WITH_PYTHON32\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${WITH_PYTHON64_TRUE}" && test -z "${WITH_PYTHON64_FALSE}"; then

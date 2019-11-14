@@ -89,9 +89,9 @@ def run_demo(with_plots=True):
 
     # Print some data for stationary point A
     print(' *** Stationary point A ***')
-    print('Tc = %f' % Tc_0_A)
-    print('c = %f' % c_0_A)
-    print('T = %f' % T_0_A)
+    print(('Tc = %f' % Tc_0_A))
+    print(('c = %f' % c_0_A))
+    print(('T = %f' % T_0_A))
     
     # Set inputs for Stationary point B
     init_model.reset() # reset the FMU so that we can initialize it again
@@ -106,9 +106,9 @@ def run_demo(with_plots=True):
 
     # Print some data for stationary point B
     print(' *** Stationary point B ***')
-    print('Tc = %f' % Tc_0_B)
-    print('c = %f' % c_0_B)
-    print('T = %f' % T_0_B)
+    print(('Tc = %f' % Tc_0_B))
+    print(('c = %f' % c_0_B))
+    print(('T = %f' % T_0_B))
     
     ### 2. Compute initial guess trajectories by means of simulation
     # Compile the optimization initialization model

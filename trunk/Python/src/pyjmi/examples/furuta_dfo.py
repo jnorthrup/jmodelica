@@ -119,11 +119,11 @@ def run_demo(with_plots=True):
     [armFrictionCoefficient_opt, pendulumFrictionCoefficient_opt] = x_opt/1e3
     
     # Print optimal parameter values and optimal function value
-    print 'Optimal parameter values:'
-    print 'arm friction coefficient = ' + str(armFrictionCoefficient_opt)
-    print 'pendulum friction coefficient = ' + str(pendulumFrictionCoefficient_opt)
-    print 'Optimal function value: ' + str(f_opt)
-    print ' '
+    print('Optimal parameter values:')
+    print('arm friction coefficient = ' + str(armFrictionCoefficient_opt))
+    print('pendulum friction coefficient = ' + str(pendulumFrictionCoefficient_opt))
+    print('Optimal function value: ' + str(f_opt))
+    print(' ')
     
     # Load model
     model = load_fmu(os.path.join(curr_dir,'files','FMUs','Furuta.fmu'))

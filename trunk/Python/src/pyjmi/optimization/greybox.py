@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#    Copyright (C) 2015 Modelon AB
+# Copyright (C) 2015 Modelon AB, all rights reserved.
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 from pyjmi.optimization.casadi_collocation import ExternalData
 
 import time, types
@@ -25,7 +26,7 @@ from scipy.stats import chi2
 from pymodelica import compile_fmu
 from pyjmi import get_files_path
 from casadi import MX
-import cPickle as pickle
+import pickle as pickle
 import modelicacasadi_wrapper as mc
 from scipy.stats import chi2
 
@@ -155,7 +156,7 @@ class GreyBox(object):
             self.options['n_cp'] = 1
             self.weight = options['n_e']/(self.tf-self.t0)
             
-            for var in measurements.keys(): 
+            for var in list(measurements.keys()): 
                 # Add parameter for noise convariance, set initial guess to base nominal squared
                 r = self._add_real_parameter(self.prefix+'r_'+var)
                 base_var = op.getVariable(var)
@@ -180,7 +181,7 @@ class GreyBox(object):
             
             # add parameters for noise convariance of measured variables
             # add timed variable for each variable and measurementpoint
-            for var in measurements.keys(): 
+            for var in list(measurements.keys()): 
                 
                 # Add parameter for noise convariance, set initial guess to base nominal squared
                 r = self._add_real_parameter(self.prefix+'r_'+var)
@@ -217,11 +218,11 @@ class GreyBox(object):
         
         # add external data for measured variables
         if self.costType == "integral":
-            for (name, data) in self.measurements.items():
+            for (name, data) in list(self.measurements.items()):
                 dictionary[self.prefix+'measured_'+name] = np.vstack([self.time,data])
         
         # add external data for inputs    
-        for (name, data) in self.inputs.items():
+        for (name, data) in list(self.inputs.items()):
             dictionary[name] = np.vstack([self.time,data])
     
         #create mesurement_data object to load into the optimization
@@ -318,7 +319,7 @@ class GreyBox(object):
         self._set_free_parameters(free_parameters)
         # print currently free parameters
         print ('Identifying with free parameters:')
-        print self.free_parameters
+        print(self.free_parameters)
         res = self.op.optimize(options=self.options)
         
         # optimize
@@ -544,11 +545,11 @@ class Identification(object):
             print("Additional free parameter/-s:")
             for par in additionalFree:
                 print(par)
-            print("Cost: %f" % obj.cost)
+            print(("Cost: %f" % obj.cost))
             costred = self.cost-obj.cost
-            print("Cost reduction: %f" % costred)
+            print(("Cost reduction: %f" % costred))
             risk= self.calculate_risk(costred, dof, cases)
-            print("Risk: %f" % risk )
+            print(("Risk: %f" % risk ))
             print("")
 
             results.append({})

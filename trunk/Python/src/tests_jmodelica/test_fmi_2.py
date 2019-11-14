@@ -637,7 +637,7 @@ class Test_FMUModelME2:
             ref_values = f.readlines()
 
         # remove all newlines and convert elements to float since they are strings
-        ref_values = map(lambda s: s.strip(), ref_values)
+        ref_values = [s.strip() for s in ref_values]
         ref_values = [float(x) for x in ref_values]
         return ref_values
     
@@ -959,7 +959,7 @@ class Test_FMUModelME2:
         nose.tools.assert_almost_equal(der[0], 2.000000)
 
         der_list = coupled.get_derivatives_list()
-        der_ref  = N.array([s.value_reference for s in der_list.values()])
+        der_ref  = N.array([s.value_reference for s in list(der_list.values())])
         der = coupled.get_derivatives()
         diff = N.sort(N.array([coupled.get_real(i) for i in der_ref]))-N.sort(der)
         nose.tools.assert_almost_equal(N.sum(diff), 0.)

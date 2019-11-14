@@ -21,11 +21,11 @@ Interfaces to the JModelica.org Modelica and Optimica compilers.
 import jpype
 
 import pymodelica as pym
-from compiler_interface import *
-from compiler_logging import CompilerLogHandler, LogHandlerThread
+from .compiler_interface import *
+from .compiler_logging import CompilerLogHandler, LogHandlerThread
+from pymodelica.common import python3_flag
 from pymodelica.common.core import list_to_string
-from compiler_exceptions import *
-
+from .compiler_exceptions import *
 
 class ModelicaCompiler(object):
     """ 
@@ -39,14 +39,17 @@ class ModelicaCompiler(object):
         Create a Modelica compiler. The compiler can be used to compile pure 
         Modelica models. A compiler instance can be used multiple times.
         """
+        self._java_exception = jpype.JException if python3_flag else jpype.JavaException
+        
         try:
             options = ModelicaCompilerInterface.createOptions()
-        except jpype.JavaException as ex:
+        except self._java_exception as ex:
             self._handle_exception(ex)
             
         options.setStringOption('MODELICAPATH',pym.environ['MODELICAPATH'])
         
         self._compiler = pym._create_compiler(ModelicaCompilerInterface, options)
+        
         
     def set_options(self, compiler_options):
         """
@@ -64,10 +67,10 @@ class ModelicaCompiler(object):
             types (float, boolean, string, integer or list).
         """
         # set compiler options
-        for key, value in compiler_options.iteritems():
+        for key, value in compiler_options.items():
             if isinstance(value, bool):
                 self.set_boolean_option(key, value)
-            elif isinstance(value, basestring):
+            elif isinstance(value, str):
                 self.set_string_option(key,value)
             elif isinstance(value, int):
                 self.set_integer_option(key,value)
@@ -89,7 +92,7 @@ class ModelicaCompiler(object):
         """
         try:
             self._compiler.setLogger(log_string)
-        except jpype.JavaException as ex:
+        except self._java_exception as ex:
             self._handle_exception(ex)
 
     def get_modelicapath(self):
@@ -128,7 +131,7 @@ class ModelicaCompiler(object):
         """
         try:
             target_obj = self._compiler.createTargetObject(target, version)
-        except jpype.JavaException as ex:
+        except self._java_exception as ex:
             self._handle_exception(ex)
         return target_obj
 
@@ -147,7 +150,7 @@ class ModelicaCompiler(object):
         """
         try:
             option = self._compiler.getBooleanOption(key)
-        except jpype.JavaException as ex:
+        except self._java_exception as ex:
             self._handle_exception(ex)
         return bool(option)
     
@@ -170,7 +173,7 @@ class ModelicaCompiler(object):
         """
         try:
             self._compiler.setBooleanOption(key, value)
-        except jpype.JavaException as ex:
+        except self._java_exception as ex:
             self._handle_exception(ex)
         
     def get_integer_option(self, key):
@@ -188,7 +191,7 @@ class ModelicaCompiler(object):
         """
         try:
             option = self._compiler.getIntegerOption(key)
-        except jpype.JavaException as ex:
+        except self._java_exception as ex:
             self._handle_exception(ex)
         return option
     
@@ -211,7 +214,7 @@ class ModelicaCompiler(object):
         """
         try:
             self._compiler.setIntegerOption(key, value)
-        except jpype.JavaException as ex:
+        except self._java_exception as ex:
             self._handle_exception(ex)
         
     def get_real_option(self, key):
@@ -229,7 +232,7 @@ class ModelicaCompiler(object):
         """
         try:
             option = self._compiler.getRealOption(key)
-        except jpype.JavaException as ex:
+        except self._java_exception as ex:
             self._handle_exception(ex)
         return option
     
@@ -252,7 +255,7 @@ class ModelicaCompiler(object):
         """
         try:
             self._compiler.setRealOption(key, value)
-        except jpype.JavaException as ex:
+        except self._java_exception as ex:
             self._handle_exception(ex)
                     
     def get_string_option(self, key):
@@ -270,7 +273,7 @@ class ModelicaCompiler(object):
         """
         try:
             option = self._compiler.getStringOption(key)
-        except jpype.JavaException as ex:
+        except self._java_exception as ex:
             self._handle_exception(ex)
         return str(option)
         
@@ -293,7 +296,7 @@ class ModelicaCompiler(object):
         """
         try:
             self._compiler.setStringOption(key, value)
-        except jpype.JavaException as ex:
+        except self._java_exception as ex:
             self._handle_exception(ex)
         
     def get_warnings(self):
@@ -315,11 +318,11 @@ class ModelicaCompiler(object):
                 java_warning.beginLine(), \
                 java_warning.beginColumn(), \
                 java_warning.message() \
-            ));
+            ))
         return warnings
         
     def set_target_platforms(self, platforms):
-        if isinstance(platforms, basestring):
+        if isinstance(platforms, str):
             platforms = [platforms]
         self._compiler.setTargetPlatforms(platforms)
         
@@ -360,9 +363,9 @@ class ModelicaCompiler(object):
         try:
             unit = self._compiler.compileUnit(class_name, file_name, target, version, compile_to)
             self._compiler.closeLogger()
-        except jpype.JavaException as ex:
+        except self._java_exception as ex:
             self._handle_exception(ex)
-        from compiler import CompilerResult
+        from .compiler import CompilerResult
         return CompilerResult(unit, self.get_warnings())
 
     def parse_model(self,model_file_name):
@@ -386,8 +389,8 @@ class ModelicaCompiler(object):
         
             CompilerError if one or more error is found during compilation.
             
-            IOError if the model file is not found, can not be read or any other 
-            IO related error.
+            OSError if the model file is not found, can not be read or any other 
+            OS related error.
             
             Exception if there are general errors related to the parsing of the 
             model.
@@ -395,12 +398,12 @@ class ModelicaCompiler(object):
             JError if there was a runtime exception thrown by the underlying 
             Java classes.
         """        
-        if isinstance(model_file_name, basestring):
+        if isinstance(model_file_name, str):
             model_file_name = [model_file_name]
         try:
             sr = self._compiler.parseModel(model_file_name)
             return sr        
-        except jpype.JavaException as ex:
+        except self._java_exception as ex:
             self._handle_exception(ex)
 
     def instantiate_model(self, source_root, model_class_name, target):
@@ -438,7 +441,7 @@ class ModelicaCompiler(object):
         try:
             ipr = self._compiler.instantiateModel(source_root, model_class_name, target)
             return ipr    
-        except jpype.JavaException as ex:
+        except self._java_exception as ex:
             self._handle_exception(ex)
 
     def flatten_model(self, inst_class_decl, target):
@@ -467,8 +470,8 @@ class ModelicaCompiler(object):
             
             ModelicaClassNotFoundError if the model class is not found.
             
-            IOError if the model file is not found, can not be read or any 
-            other IO related error.
+            OSError if the model file is not found, can not be read or any 
+            other OS related error.
             
             JError if there was a runtime exception thrown by the underlying 
             Java classes.
@@ -476,7 +479,7 @@ class ModelicaCompiler(object):
         try:
             fclass = self._compiler.flattenModel(inst_class_decl, target, None)
             return fclass    
-        except jpype.JavaException as ex:
+        except self._java_exception as ex:
             self._handle_exception(ex)
 
     def generate_code(self, fclass, target):
@@ -498,15 +501,15 @@ class ModelicaCompiler(object):
 
         Raises::
         
-            IOError if the model file is not found, can not be read or any other 
-            IO related error.
+            OSError if the model file is not found, can not be read or any other 
+            OS related error.
                 
             JError if there was a runtime exception thrown by the underlying 
             Java classes.
         """
         try:
             self._compiler.generateCode(fclass, target)
-        except jpype.JavaException as ex:
+        except self._java_exception as ex:
             self._handle_exception(ex)
             
     def _handle_exception(self, ex):
@@ -515,14 +518,20 @@ class ModelicaCompiler(object):
         underlying Java classes might throw. Raises an appropriate Python error 
         or the default JError.
         """
-        if ex.javaClass() is CompilerException:
+        def _py_handle_exception(raised_ex, ref_ex):
+            # Due to differences in jpype between 0.6.2 and 0.7.0
+            #  we need to compare the raised exception with the reference exception
+            #  in different ways.
+            return type(raised_ex) is ref_ex if python3_flag else raised_ex.javaClass() is ref_ex
+
+        if _py_handle_exception(ex, CompilerException):
             arraylist = ex.__javaobject__.getProblems()
             itr = arraylist.iterator()
 
             errors = []
             warnings = []
             while itr.hasNext():
-                problem = itr.next()
+                problem = next(itr)
                 if str(problem.severity()).lower() == 'warning':
                     warnings.append(CompilationWarning( \
                         problem.identifier(), \
@@ -543,71 +552,71 @@ class ModelicaCompiler(object):
                     ))
             raise CompilerError(errors, warnings)
         
-        if ex.javaClass() is IllegalCompilerArgumentException:
+        if _py_handle_exception(ex, IllegalCompilerArgumentException):
             raise IllegalCompilerArgumentError(
                 str(ex.__javaobject__.getMessage()))
         
-        if ex.javaClass() is ModelicaClassNotFoundException:
+        if _py_handle_exception(ex, ModelicaClassNotFoundException):
             raise ModelicaClassNotFoundError(
                 str(ex.__javaobject__.getClassName()))
         
-        if ex.javaClass() is IllegalLogStringException:
+        if _py_handle_exception(ex, IllegalLogStringException):
             raise IllegalLogStringError(
                 str(ex.__javaobject__.getMessage()))
         
-        if ex.javaClass() is jpype.java.io.FileNotFoundException:
-            raise IOError(
-                '\nMessage: '+ex.message().encode('utf-8')+\
-                '\nStacktrace: '+ex.stacktrace().encode('utf-8'))
+        if _py_handle_exception(ex, jpype.java.io.FileNotFoundException):
+            raise OSError(
+                '\nMessage: '+str(ex.message().encode('utf-8'))+\
+                '\nStacktrace: '+str(ex.stacktrace().encode('utf-8')))
         
-        if ex.javaClass() is jpype.java.io.IOException:
-            raise IOError(
-                '\nMessage: '+ex.message().encode('utf-8')+\
-                '\nStacktrace: '+ex.stacktrace().encode('utf-8'))
+        if _py_handle_exception(ex, jpype.java.io.IOException):
+            raise OSError(
+                '\nMessage: '+str(ex.message().encode('utf-8'))+\
+                '\nStacktrace: '+str(ex.stacktrace().encode('utf-8')))
         
-        if ex.javaClass() is jpype.javax.xml.xpath.XPathExpressionException:
+        if _py_handle_exception(ex, jpype.javax.xml.xpath.XPathExpressionException):
             raise XPathExpressionError(
-                '\nMessage: '+ex.message().encode('utf-8')+\
-                '\nStacktrace: '+ex.stacktrace().encode('utf-8'))
+                '\nMessage: '+str(ex.message().encode('utf-8'))+\
+                '\nStacktrace: '+str(ex.stacktrace().encode('utf-8')))
         
-        if ex.javaClass() is jpype.javax.xml.parsers.ParserConfigurationException:
+        if _py_handle_exception(ex, jpype.javax.xml.parsers.ParserConfigurationException):
             raise ParserConfigurationError(
-                '\nMessage: '+ex.message().encode('utf-8')+\
-                '\nStacktrace: '+ex.stacktrace().encode('utf-8'))
+                '\nMessage: '+str(ex.message().encode('utf-8'))+\
+                '\nStacktrace: '+str(ex.stacktrace().encode('utf-8')))
         
-        if ex.javaClass() is SAXException or \
-            ex.javaClass() is SAXNotRecognizedException or \
-            ex.javaClass() is SAXNotSupportedException or \
-            ex.javaClass() is SAXParseException:
+        if _py_handle_exception(ex, SAXException) or \
+            _py_handle_exception(ex, SAXNotRecognizedException) or \
+            _py_handle_exception(ex, SAXNotSupportedException) or \
+            _py_handle_exception(ex, SAXParseException):
             raise SAXError(
-                '\nMessage: '+ex.message().encode('utf-8')+\
-                '\nStacktrace: '+ex.stacktrace().encode('utf-8'))
+                '\nMessage: '+str(ex.message().encode('utf-8'))+\
+                '\nStacktrace: '+str(ex.stacktrace().encode('utf-8')))
     
-        if ex.javaClass() is UnknownOptionException:
+        if _py_handle_exception(ex, UnknownOptionException):
             raise UnknownOptionError(
-                ex.message().encode('utf-8')+'\nStacktrace: '+\
-                    ex.stacktrace().encode('utf-8'))
+                str(ex.message().encode('utf-8'))+'\nStacktrace: '+\
+                    str(ex.stacktrace().encode('utf-8')))
 
-        if ex.javaClass() is InvalidOptionValueException:
+        if _py_handle_exception(ex, InvalidOptionValueException):
             raise InvalidOptionValueError(
-                ex.message().encode('utf-8')+'\nStacktrace: '+\
-                    ex.stacktrace().encode('utf-8'))
+                str(ex.message().encode('utf-8'))+'\nStacktrace: '+\
+                    str(ex.stacktrace().encode('utf-8')))
         
-        if ex.javaClass() is jpype.java.lang.Exception:
+        if _py_handle_exception(ex, jpype.java.lang.Exception):
             raise Exception(
-                '\nMessage: '+ex.message().encode('utf-8')+\
-                '\nStacktrace: '+ex.stacktrace().encode('utf-8'))
+                '\nMessage: '+str(ex.message().encode('utf-8'))+\
+                '\nStacktrace: '+str(ex.stacktrace().encode('utf-8')))
         
-        if ex.javaClass() is jpype.java.lang.NullPointerException:
-            raise JError(ex.stacktrace().encode('utf-8'))
+        if _py_handle_exception(ex, jpype.java.lang.NullPointerException):
+            raise JError(str(ex.stacktrace().encode('utf-8')))
         
-        if ex.javaClass() is ModelicaCCodeCompilationException or \
-            ex.javaClass() is OptimicaCCodeCompilationException:
+        if _py_handle_exception(ex, ModelicaCCodeCompilationException) or \
+            _py_handle_exception(ex, OptimicaCCodeCompilationException):
             raise CcodeCompilationError(
-                '\nMessage: '+ex.message().encode('utf-8')+\
-                '\nStacktrace: '+ex.stacktrace().encode('utf-8'))
+                '\nMessage: '+str(ex.message().encode('utf-8'))+\
+                '\nStacktrace: '+str(ex.stacktrace().encode('utf-8')))
         
-        raise JError(ex.stacktrace().encode('utf-8'))
+        raise JError(str(ex.stacktrace().encode('utf-8')))
 
 class OptimicaCompiler(ModelicaCompiler):
     """ 
@@ -624,7 +633,7 @@ class OptimicaCompiler(ModelicaCompiler):
         """
         try:
             options = OptimicaCompilerInterface.createOptions()
-        except jpype.JavaException as ex:
+        except self._java_exception as ex:
             self._handle_exception(ex)
             
         options.setStringOption('MODELICAPATH',pym.environ['MODELICAPATH'])
@@ -650,5 +659,5 @@ class OptimicaCompiler(ModelicaCompiler):
         """
         try:
             self._compiler.setBooleanOption(key, value)
-        except jpype.JavaException as ex:
+        except self._java_exception as ex:
             self._handle_exception(ex)

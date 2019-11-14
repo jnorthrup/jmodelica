@@ -246,9 +246,9 @@ class LocalDAECollocationAlg(AlgorithmBase):
             except KeyError:
                 warm_start = False
             if not warm_start:
-                print("Warning: The provided initial guess for the dual " +
+                print(("Warning: The provided initial guess for the dual " +
                       "variables will not be used since warm start is not " +
-                      "enabled for IPOPT.")
+                      "enabled for IPOPT."))
 
         # Check validity of blocking_factors
         if self.blocking_factors is not None:
@@ -258,7 +258,7 @@ class LocalDAECollocationAlg(AlgorithmBase):
                             "The sum of blocking factors does not " +
                             "match the number of collocation elements.")
             elif isinstance(self.blocking_factors, BlockingFactors):
-                for (name, facs) in self.blocking_factors.factors.iteritems():
+                for (name, facs) in self.blocking_factors.factors.items():
                     var = self.op.getVariable(name)
                     if var is None:
                         raise ValueError('Variable %s not found in ' % name +
@@ -307,7 +307,7 @@ class LocalDAECollocationAlg(AlgorithmBase):
                                  'iterable or an instance of BlockingFactors.')
         
         # Check validity of nominal_traj_mode
-        for name in self.nominal_traj_mode.keys():
+        for name in list(self.nominal_traj_mode.keys()):
             if name != "_default_mode":
                 var = self.op.getVariable(name)
                 if var is None:
@@ -343,7 +343,7 @@ class LocalDAECollocationAlg(AlgorithmBase):
         """ 
         Helper function that sets options for the solver.
         """
-        for (k, v) in self.solver_options.iteritems():
+        for (k, v) in self.solver_options.items():
             self.nlp.set_solver_option(k, v)
             
     def solve(self):
@@ -811,17 +811,17 @@ class MPCAlgResult(JMResultBase):
 
               
         #Print times 
-        print("\nTotal time for %s samples (average time in parenthesis)." 
-                %(nbr_samp))
-        print("\nInitialization time: %.2f seconds" %times['init'])
-        print("\nTotal time: %.2f seconds             (%.3f)" % (times['tot'], 
-                times['tot']/(nbr_samp)))
-        print("Pre-processing time: %.2f seconds    (%.3f)" % (times['update'],
-                times['update']/(nbr_samp)))
-        print("Solution time: %.2f seconds          (%.3f)" % (times['sol'], 
-                times['sol']/(nbr_samp)))
-        print("Post-processing time: %.2f seconds   (%.3f)" % 
-                (times['post_processing'], times['post_processing']/(nbr_samp)))
-        print("\nLargest total time for one sample (nbr %s): %.2f seconds" %
-                (times['maxSample'], times['maxTime']))
-        print("The sample period is %.2f seconds\n" %sample_period)
+        print(("\nTotal time for %s samples (average time in parenthesis)." 
+                %(nbr_samp)))
+        print(("\nInitialization time: %.2f seconds" %times['init']))
+        print(("\nTotal time: %.2f seconds             (%.3f)" % (times['tot'], 
+                times['tot']/(nbr_samp))))
+        print(("Pre-processing time: %.2f seconds    (%.3f)" % (times['update'],
+                times['update']/(nbr_samp))))
+        print(("Solution time: %.2f seconds          (%.3f)" % (times['sol'], 
+                times['sol']/(nbr_samp))))
+        print(("Post-processing time: %.2f seconds   (%.3f)" % 
+                (times['post_processing'], times['post_processing']/(nbr_samp))))
+        print(("\nLargest total time for one sample (nbr %s): %.2f seconds" %
+                (times['maxSample'], times['maxTime'])))
+        print(("The sample period is %.2f seconds\n" %sample_period))

@@ -203,12 +203,18 @@ class Test_FMUModelME1Extended:
     @testattr(stddist_full = True)
     def test_version(self):
         rlc  = FMUModelME1Extended(Test_FMUModelME1Extended.rlc_circuit)
-        assert rlc._get_version() == '1.0'
+        # use get_version and not _get_version since it is an internal property
+        # just for accessing version (which is also deprecated)
+        rlc_version = rlc.get_version()
+        expected = '1.0'
+        assert rlc_version == expected, "EXPECTED: {}\nACTUAL:{}".format(expected, rlc_version)
 
     @testattr(stddist_full = True)
     def test_valid_platforms(self):
         rlc  = FMUModelME1Extended(Test_FMUModelME1Extended.rlc_circuit)
-        assert rlc._get_types_platform() == 'standard32'
+        rlc_platform = rlc.types_platform
+        expected = 'standard32'
+        assert rlc_platform == expected, "EXPECTED: {}\nACTUAL: {}".format(expected, rlc_platform)
 
     @testattr(stddist_full = True)
     def test_simulation_with_reset_cs_2(self):
@@ -226,7 +232,7 @@ class Test_FMUModelME1Extended:
         rlc_square  = FMUModelME1Extended(Test_FMUModelME1Extended.rlc_circuit_square)
         res1 = rlc_square.simulate()
         resistor_v = res1['resistor.v']
-        print resistor_v[-1]
+        print(resistor_v[-1])
         assert N.abs(resistor_v[-1] + 0.233534539103) < 1e-3
         rlc_square.reset()
         res2 = rlc_square.simulate()

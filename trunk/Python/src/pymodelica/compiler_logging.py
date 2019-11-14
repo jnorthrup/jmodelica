@@ -19,7 +19,7 @@ Internal module, handles log output from the compiler
 """
 import xml.sax
 from threading import Thread
-from compiler_exceptions import *
+from .compiler_exceptions import *
 import sys
 import traceback
 import os
@@ -44,8 +44,8 @@ class LogErrorParser(xml.sax.ContentHandler):
         if self.state == 'error' or self.state == 'warning' or \
                 self.state == 'exception' or self.state == 'unit':
             if name == 'value':
-                self.attribute = attrs['name'].encode('utf-8')
-                self.node[self.attribute] = '';
+                self.attribute = str(attrs['name'])
+                self.node[self.attribute] = ''
         else:
             if name == "Error":
                 self.state = 'error'
@@ -77,7 +77,7 @@ class LogErrorParser(xml.sax.ContentHandler):
     
     def characters(self, content):
         if self.node is not None and self.attribute is not None:
-            self.node[self.attribute] += content;
+            self.node[self.attribute] += content
     
     def _construct_problem_node(self, node):
         if node['type'] == 'exception':
@@ -111,9 +111,11 @@ class KeepLastStream():
         """
         if self.last is not None:
             # Count the number of lines in the previous contents
-            self.line += self.last.count('\n')
+            # apparently self.last is of class 'bytes' in py3
+            # compared to class 'str' in py2
+            self.line += str(self.last.decode('utf-8')).count('\n')
             # Get the two last lines
-            lines = self.last.rsplit('\n', 2)
+            lines = str(self.last.decode('utf-8')).rsplit('\n', 2)
             # Update lastLine and secondLastLine depending on how many
             # rows we got
             if len(lines) == 1:
@@ -141,7 +143,7 @@ class KeepLastStream():
         dump_file = tempfile.NamedTemporaryFile(prefix='JM_LOG_DUMP_', delete=False)
         dump_file.write(self.last)
         
-        lines = self.last.split('\n')
+        lines = str(self.last.decode('utf-8')).split('\n')
         lines[0] = self.lastLine + lines[0]
         
         # Add lines before...
@@ -153,7 +155,7 @@ class KeepLastStream():
             more = self.stream.read()
             dump_file.write(more)
             while localLine + 2 >= len(lines) and more:
-                pos = more.find('\n')
+                pos = str(more.decode('utf-8')).find('\n')
                 if pos == -1:
                     lines[-1] = lines[-1] + more
                     more = self.stream.read()
@@ -187,12 +189,14 @@ class KeepLastStream():
                 % (lines[localLine][column], os.linesep, message)
         
         # Discard remaining data.
-        data = self.stream.read()
-        dump_file.write(data)
-        while data is None or data != '':
+        # Check if not already closed since later versions of xmlreader closes it by itself
+        if not self.stream.closed:
             data = self.stream.read()
             dump_file.write(data)
-        dump_file.close()
+            while data is None or data != '':
+                data = self.stream.read()
+                dump_file.write(data)
+            dump_file.close()
         
         message += "%sDump of the log has been saved in %s" % (os.linesep, dump_file.name)
         return message
@@ -222,7 +226,7 @@ class LogHandlerThread(Thread):
         """
         try:
             xml.sax.parse(self.stream, LogErrorParser(self.result))
-        except xml.sax.SAXParseException, e:
+        except xml.sax.SAXParseException as e:
             self.result.problems.append(CompilationException('xml.sax.SAXParseException', self.stream.genErrorMsg(e),""))
 
 class _CompilerResultHolder:
@@ -259,7 +263,7 @@ class CompilerLogHandler:
         
             A LogHandlerThread object.
         """
-        return LogHandlerThread(stream);
+        return LogHandlerThread(stream)
     
     def start(self, stream):
         """
@@ -287,7 +291,7 @@ class CompilerLogHandler:
         given by the compiler process.
         """
         if (self.loggerThread is None):
-            print "Invalid call order!"
+            print("Invalid call order!")
         self.loggerThread.join()
         problems = self.loggerThread.result.problems
         name = self.loggerThread.result.name
@@ -306,7 +310,7 @@ class CompilerLogHandler:
                 warnings.append(problem)
         if not exceptions:
             if not errors:
-                from compiler import CompilerResult
+                from .compiler import CompilerResult
                 return CompilerResult(name, warnings)
             else:
                 raise CompilerError(errors, warnings)
@@ -317,7 +321,7 @@ class CompilerLogHandler:
             raise ModelicaClassNotFoundError(exception.message)
         
         if exception.kind == 'java.io.FileNotFoundException':
-            raise IOError(exception.message)
+            raise OSError(exception.message)
         
         if exception.kind == 'org.jmodelica.util.logging.IllegalLogStringException':
             raise IllegalLogStringError(exception.message)
@@ -335,7 +339,7 @@ class CompilerLogHandler:
             raise PackingFailedError(exception.message)
         
         if exception.kind == 'xml.sax.SAXParseException':
-            raise IOError(exception.message)
+            raise OSError(exception.message)
 
         if exception.kind == 'org.jmodelica.util.exceptions.IllegalCompilerArgumentException':
             raise IllegalCompilerArgumentError(exception.message)

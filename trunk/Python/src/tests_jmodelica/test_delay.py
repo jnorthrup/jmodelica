@@ -278,9 +278,9 @@ def test_variable_delay_events():
     x_expected = t-(N.cos(5*t)+1) > 1
     x_expected[inds]   = x_expected[inds-1]
     x_expected[inds+1] = x_expected[inds+2]
-    print x_expected+0
-    print N.asarray(x, dtype=int)
-    print t
+    print(x_expected+0)
+    print(N.asarray(x, dtype=int))
+    print(t)
     assert_close(x, x_expected, 1e-12)
     assert_close(t[inds], N.array([0.43439307, 0.92808171, 1.0, 1.47239509,
                                    1.64366485, 2.24956004, 2.67833465]), 1e-7)
