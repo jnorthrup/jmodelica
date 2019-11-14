@@ -32,10 +32,10 @@ jmi_ode_status_t jmi_ode_no_state_solve(jmi_ode_solver_t* solver, double tend, i
     jmi_real_t tcur;
     size_t k;
     
-    jmi_real_t* event_indicators = 0;
-    jmi_real_t* event_indicators_previous = 0;
+    jmi_real_t* event_indicators = NULL;
+    jmi_real_t* event_indicators_previous = NULL;
     
-    if(sizes.event_indicators) {
+    if(sizes.event_indicators > 0) {
         event_indicators          = solver->event_indicators;
         event_indicators_previous = solver->event_indicators_previous;
     }

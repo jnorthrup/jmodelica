@@ -18,8 +18,8 @@
 */
 
 
-/** \file jmi_ode_cvode.h
- *  \brief Structures and functions for handling an explicit EULER ODE solver.
+/** \file jmi_ode_no_state.h
+ *  \brief Structures and functions for handling an ODE solver without any states.
  */
 
 #ifndef _JMI_ODE_NO_STATE_H
