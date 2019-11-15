@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "JCCEnv.h"
 
 #include "CompilerOptionsWrapper.hpp"
+#include "utils.hpp"
 
 
 namespace ModelicaCasADi 
@@ -68,8 +69,8 @@ void ModelicaOptionsWrapper::printCompilerOptions(std::ostream& out){
         java::util::Iterator iter(opts.iterator().this$);
         while(iter.hasNext()){
             java::lang::String key(iter.next().this$);
-            out <<"\033[31m"<<env->toString(key.this$) <<"\033[0m"<< ": ";
-            out << env->toString(optr.getDescription(key).this$);
+            out <<"\033[31m"<<jobjectoToString(key.this$) <<"\033[0m"<< ": ";
+            out << jobjectoToString(optr.getDescription(key).this$);
             out << "\n";
         }
 
@@ -88,7 +89,7 @@ bool ModelicaOptionsWrapper::getBooleanOption(std::string opt) {
     return roption;
 }
 
-void ModelicaOptionsWrapper::print(std::ostream& os) const { os << "ModelicaOptionsWrapper(" << env->toString(optr.this$) << ")"; }
+void ModelicaOptionsWrapper::print(std::ostream& os) const { os << "ModelicaOptionsWrapper(" << jobjectoToString(optr.this$) << ")"; }
 
 void OptimicaOptionsWrapper::setStringOption(std::string opt, std::string val) {
     try {
@@ -129,8 +130,8 @@ void OptimicaOptionsWrapper::printCompilerOptions(std::ostream& out){
         java::util::Iterator iter(opts.iterator().this$);
         while(iter.hasNext()){
             java::lang::String key(iter.next().this$);
-            out <<"\033[31m"<<env->toString(key.this$) <<"\033[0m"<< ": ";
-            out << env->toString(optr.getDescription(key).this$);
+            out <<"\033[31m"<<jobjectoToString(key.this$) <<"\033[0m"<< ": ";
+            out << jobjectoToString(optr.getDescription(key).this$);
             out << "\n";
         }
 
@@ -148,6 +149,5 @@ bool OptimicaOptionsWrapper::getBooleanOption(std::string opt) {
     }
     return roption;
 }
-
-void OptimicaOptionsWrapper::print(std::ostream& os) const { os << "OptimicaOptionsWrapper(" << env->toString(optr.this$) << ")"; }
+void OptimicaOptionsWrapper::print(std::ostream& os) const { os << "OptimicaOptionsWrapper(" << jobjectoToString(optr.this$) << ")"; }
 }; // End namespace

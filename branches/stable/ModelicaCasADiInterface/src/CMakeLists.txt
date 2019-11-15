@@ -58,6 +58,7 @@ set(MC_CPP
   Equations.cpp
   FlatEquations.cpp
   BLT.cpp
+  utils.cpp
   ${TYPES_CPP}
   jcc/initjcc.cpp
   jcc/jccutils.cpp
@@ -91,6 +92,7 @@ set(MC_HPP
   Equations.hpp
   FlatEquations.hpp
   BLT.hpp
+  utils.hpp
   ${TYPES_HPP}
   jcc/initjcc.h
   jcc/jccutils.h

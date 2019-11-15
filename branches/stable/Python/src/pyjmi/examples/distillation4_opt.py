@@ -91,8 +91,8 @@ def run_demo(with_plots=True, use_ma57=True, latex_plots=False):
     L_fac = 1e3 * 3.6e3
     Q_fac = 1e-3
 
-    print('T_14_ref: %.6f' % T_14_ref)
-    print('T_28_ref: %.6f' % T_28_ref)
+    print(('T_14_ref: %.6f' % T_14_ref))
+    print(('T_28_ref: %.6f' % T_28_ref))
 
     # Plot simulation
     if with_plots:
@@ -204,8 +204,8 @@ def run_demo(with_plots=True, use_ma57=True, latex_plots=False):
         plt.close(2)
         plt.figure(2)
         plt.hold(True)
-        for i in xrange(1, 43):
-            temperature = (ss_res.final('Temp[' + `i` + ']') +
+        for i in range(1, 43):
+            temperature = (ss_res.final('Temp[' + repr(i) + ']') +
                            ss_res.initial('absolute_zero'))
             plt.plot(temperature, 43 - i, 'ko')
         plt.title('Steady state temperatures')
@@ -224,7 +224,7 @@ def run_demo(with_plots=True, use_ma57=True, latex_plots=False):
     # Set initial values
     break_model.set('Q_elec_ref', Q_ref)
     break_model.set('Vdot_L1_ref', L_vol_ref)
-    for i in xrange(1, 43):
+    for i in range(1, 43):
         break_model.set('xA_init[%d]' % i, ss_res.final('xA[%d]' % i))
 
     # Define input function for broken reflux
@@ -255,9 +255,9 @@ def run_demo(with_plots=True, use_ma57=True, latex_plots=False):
     # Set initial conditions for post breakdown
     ref_model.set('Q_elec_ref', Q_ref)
     ref_model.set('Vdot_L1_ref', L_vol_ref)
-    for i in xrange(1, 43):
-        ref_model.set('xA_init[' + `i` + ']',
-                      break_res.final('xA[' + `i` + ']'))
+    for i in range(1, 43):
+        ref_model.set('xA_init[' + repr(i) + ']',
+                      break_res.final('xA[' + repr(i) + ']'))
 
     # Simulate
     ref_res = ref_model.simulate(final_time=5000.,
@@ -285,8 +285,8 @@ def run_demo(with_plots=True, use_ma57=True, latex_plots=False):
     # Set initial conditions for post breakdown
     op.set('Q_elec_ref', Q_ref)
     op.set('Vdot_L1_ref', L_vol_ref)
-    for i in xrange(1, 43):
-        op.set('xA_init[' + `i` + ']', break_res.final('xA[' + `i` + ']'))
+    for i in range(1, 43):
+        op.set('xA_init[' + repr(i) + ']', break_res.final('xA[' + repr(i) + ']'))
 
     # Set optimization options and solve
     opts = op.optimize_options()
@@ -324,9 +324,9 @@ def run_demo(with_plots=True, use_ma57=True, latex_plots=False):
     # Set initial conditions for post breakdown
     verif_model.set('Q_elec_ref', Q_ref)
     verif_model.set('Vdot_L1_ref', L_vol_ref)
-    for i in xrange(1, 43):
-        verif_model.set('xA_init[' + `i` + ']',
-                        break_res.final('xA[' + `i` + ']'))
+    for i in range(1, 43):
+        verif_model.set('xA_init[' + repr(i) + ']',
+                        break_res.final('xA[' + repr(i) + ']'))
 
     # Simulate with optimal input
     verif_res = verif_model.simulate(final_time=5000.,

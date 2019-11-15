@@ -470,7 +470,7 @@ aspect SimpleLookup {
         }
         duringFindClassDeclRevisits--;
         return res;
-	}
+    }
     eq SrcLibClassDecl.simpleLookupMemberScope(String name) {
         if (duringFindClassDeclRevisits > MAX_FIND_CLASS_DECL_REVISITS) {
             return unknownAccess();
@@ -606,8 +606,8 @@ aspect SimpleLookup {
 
     /**
      * Convenience method for looking up a class in the given list of SrcLibNodes.
-     * Has to be an simple (unqualified) classname.
-     * This method returns null when the class isn't found.
+     * Has to be a simple (unqualified) classname.
+     * This method returns unknownAccess() when the class is not found.
      */
     public ResolvedAccess ASTNode.simpleLookupInLibNodeList(List<SrcLibNode> list, String name) {
         for (SrcLibNode ln : list) {
