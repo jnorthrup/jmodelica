@@ -8,7 +8,7 @@ test:
 	nosetests tests/*.pyc
 
 test_wheel: $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)
-	@pip install $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)/*.whl
+	@cd $(INSTALL_DIR_FOLDER)/$(subst test_,,$@) && pwd && ls -la && pip install *.whl
 	nosetests $(WHEEL_INSTALL_DIR)/tests/*.py
 
 test_folder: $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)

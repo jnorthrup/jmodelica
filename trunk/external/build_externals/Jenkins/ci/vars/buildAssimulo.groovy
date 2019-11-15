@@ -30,8 +30,8 @@ def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, TARGET, bitness=["32", "64"]
             JENKINS_BUILD_DIR="\$(pwd)/build"
             cd \${JM_HOME}/external/build_externals/build/assimulo
             
-            make clean USER_CONFIG=${USER_CONFIG} BUILD_DIR=\${JENKINS_BUILD_DIR}
-            make ${TARGET} USER_CONFIG=${USER_CONFIG} JM_HOME=\${JM_HOME} BUILD_DIR=\${JENKINS_BUILD_DIR} WORKSPACE=\${JM_HOME}/.. INSTALL_DIR_FOLDER=${INSTALL_PATH_UNIX}/${msvs_suffix}
+            make clean USER_CONFIG=${USER_CONFIG} BUILD_DIR=\${JENKINS_BUILD_DIR} INSTALL_DIR_FOLDER=${INSTALL_PATH_UNIX}/${bit}${msvs_suffix}
+            make ${TARGET} USER_CONFIG=${USER_CONFIG}${bit} JM_HOME=\${JM_HOME} BUILD_DIR=\${JENKINS_BUILD_DIR} WORKSPACE=\${JM_HOME}/.. INSTALL_DIR_FOLDER=${INSTALL_PATH_UNIX}/${bit}${msvs_suffix}
             """, extra_bat);
             if ("${TARGET}" == "folder") {
                 runMSYSWithEnv("""\
@@ -44,10 +44,15 @@ def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, TARGET, bitness=["32", "64"]
                     if (stash) {
                         stash includes: "Python_${bit}/**", name: "Python_${bit}_assimulo_${TARGET}"
                     }
-                    if (msvs_suffix == "msvs") {
-                        archiveArtifacts artifacts: "${msvs_suffix}/assimulo/**", fingerprint: false
+                    if (TARGET == "wheel") {
+                        archiveArtifacts artifacts: "${bit}/${TARGET}/**", fingerprint: false
                     } else {
-                        archiveArtifacts artifacts: "assimulo/**", fingerprint: false
+                        // archiving the entire directory
+                        if (msvs_suffix == "msvs") {
+                            archiveArtifacts artifacts: "${bit}${msvs_suffix}/assimulo/**", fingerprint: false
+                        } else {
+                            archiveArtifacts artifacts: "${bit}/assimulo/**", fingerprint: false
+                        }
                     }
                 }
             }
