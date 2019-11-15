@@ -30,6 +30,9 @@ ENV GCC_INSTALLATION_TYPE=${GCC_INSTALL_TYPE}
 ARG GCC_VERSION_TO_BUILD=6.3.0
 ENV GCC_VERSION=${GCC_VERSION_TO_BUILD}
 
+ARG PYTHON_VERSION=3
+ENV PYTHON_VERSION=${PYTHON_VERSION}
+
 RUN useradd -ms /bin/bash baseuser && groupadd docker && usermod -aG docker baseuser
 # switch user back and forth to create bashrc
 USER baseuser
@@ -42,6 +45,7 @@ RUN chmod +x ${DOCKER_SRC_DIR}/*.sh
 # split the scripts into separate RUNS in order to utilize caching in case build fails mid build
 RUN ${DOCKER_SRC_DIR}/setup_openjdk.sh
 RUN ${DOCKER_SRC_DIR}/setup_requirements.sh
+RUN ${DOCKER_SRC_DIR}/setup_python.sh
 RUN ${DOCKER_SRC_DIR}/setup_gcc.sh
 RUN ${DOCKER_SRC_DIR}/setup_ant.sh
 RUN ${DOCKER_SRC_DIR}/setup_ipopt.sh

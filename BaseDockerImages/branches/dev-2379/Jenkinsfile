@@ -19,8 +19,8 @@ def imageName
 def platformVersion
 def pushTag
 
-def buildBaseImage(image_name, repo_name, platform, platform_version, gcc_install_type) {
-    return docker.build("${repo_name}/$image_name", "--no-cache --pull --build-arg DOCKER_LINUX_DIST=$platform --build-arg DOCKER_DIST_TAG=$platform_version --build-arg GCC_INSTALL_TYPE=$gcc_install_type --build-arg ENABLE_PYTHON="yes" .")
+def buildBaseImage(image_name, repo_name, platform, platform_version, gcc_install_type, python_version="2") {
+    return docker.build("${repo_name}/$image_name", "--no-cache --pull --build-arg DOCKER_LINUX_DIST=$platform --build-arg DOCKER_DIST_TAG=$platform_version --build-arg GCC_INSTALL_TYPE=$gcc_install_type --build-arg ENABLE_PYTHON="yes" --build-arg PYTHON_VERSION=$python_version.")
 }
 
 def pushImage(docker_image, repo_name, image_name, push_tag) {
@@ -42,6 +42,34 @@ def pushImage(docker_image, repo_name, image_name, push_tag) {
 }
 
 node('docker') {
+
+    imageName = "centos_py3_base"
+    platformVersion = "7.4.1708"
+    pushTag = "7.4"
+    python_version="3"
+    
+    stage ("Building ${imageName} ${platformVersion} Python ${python_version}") {
+        checkout scm
+        def dockerImageRef = buildBaseImage("${imageName}", "${repoName}", "centos", "${platformVersion}", "CENTOS_DEFAULT", "${python_version}")
+        dockerImageRef.inside {
+            sh 'echo Built version: && cat /etc/centos-release'
+        }
+        //pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")
+    }
+    
+    imageName = "centos_py2_base"
+    platformVersion = "7.4.1708"
+    pushTag = "7.4"
+    python_version="2"
+    
+    stage ("Building ${imageName} ${platformVersion} Python ${python_version}") {
+        checkout scm
+        def dockerImageRef = buildBaseImage("${imageName}", "${repoName}", "centos", "${platformVersion}", "CENTOS_DEFAULT", "${python_version}")
+        dockerImageRef.inside {
+            sh 'echo Built version: && cat /etc/centos-release'
+        }
+        //pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")
+    }
     
     imageName = "ubuntu_base"
     platformVersion = "18.04"
@@ -66,29 +94,6 @@ node('docker') {
         //pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")
     }
     
-    imageName = "centos_base"
-    platformVersion = "7.4.1708"
-    pushTag = "7.4"
+
     
-    stage ("Building ${imageName} ${platformVersion}") {
-        checkout scm
-        def dockerImageRef = buildBaseImage("${imageName}", "${repoName}", "centos", "${platformVersion}", "CENTOS_DEFAULT")
-        dockerImageRef.inside {
-            sh 'echo Built version: && cat /etc/centos-release'
-        }
-        //pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")
-    }
-    
-    imageName = "centos_base"
-    platformVersion = "7.2.1511"
-    pushTag = "7.2"
-    
-    stage ("Building ${imageName} ${platformVersion}") {
-        //checkout scm
-        //def dockerImageRef = buildBaseImage("${imageName}", "${repoName}", "centos", "${platformVersion}", "CENTOS_DEFAULT")
-        //dockerImageRef.inside {
-        //    sh 'echo Built version: && cat /etc/centos-release'
-        //}
-        //pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")
-    }
 }
