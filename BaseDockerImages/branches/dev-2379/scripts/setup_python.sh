@@ -13,6 +13,12 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
+set -e
+
+ME="$( basename "${BASH_SOURCE[0]}" )"
+
+. ${DOCKER_SRC_DIR}/settings.sh
+
 if [ "$PYTHON_VERSION" = "3" ]; then
     BUILD_PKGS_JM_REDHAT="python3-pip"
     BUILD_PKGS_JM_DEBIAN="python3-pip"
