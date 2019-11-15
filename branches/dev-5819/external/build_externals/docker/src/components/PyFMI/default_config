@@ -19,3 +19,4 @@ DOCKER_BUILD_DIR=//${JM_HOME_IN_DOCKER}/${DISTRO}/${TARGET}${BITNESS}
 CONFIG_HOME=${JM_HOME}/external/build_externals/docker/src/components/PyFMI
 DOCKER_CONFIG_HOME=${JM_HOME_IN_DOCKER}/external/build_externals/docker/src/components/PyFMI
 ARTIFACT_FILE=${JM_HOME}/${DISTRO}/${TARGET}${BITNESS}/artifacts_pyfmi
+INSTALL_DIR_FOLDER=$(DOCKER_BUILD_DIR)
