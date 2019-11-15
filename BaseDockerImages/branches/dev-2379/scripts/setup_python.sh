@@ -20,10 +20,12 @@ ME="$( basename "${BASH_SOURCE[0]}" )"
 . ${DOCKER_SRC_DIR}/settings.sh
 
 if [ "$PYTHON_VERSION" = "3" ]; then
+    pip_command=pip3
     BUILD_PKGS_JM_REDHAT="python3-pip python3-devel.x86_64"
     BUILD_PKGS_JM_DEBIAN="python3-pip python3-dev"
     BUILD_PYTHON_PIP_PACKAGES="html5lib==1.0.1 notebook==6.0.1 jupyter==1.0.0 colorama==0.4.1 nbformat==4.4.0 Jinja2==2.10.1 openpyxl==2.6.3 mock==3.0.5 natsort==6.0.0 six==1.12.0 MarkupSafe==1.1.1 lxml==4.4.1 matplotlib==3.1.1 scipy==1.3.1 cython==0.29.13 nose==1.3.7 ipython==7.8.0 ipykernel==5.1.2 jpype1==0.7.0"
 else
+    pip_command=pip
     BUILD_PKGS_JM_DEBIAN="python-lucene python-dev python-jpype"
     BUILD_PKGS_JM_REDHAT="python-pip python-devel python-jpype"
     BUILD_PYTHON_PIP_PACKAGES="html5lib notebook==5.7.8 jupyter colorama nbformat Jinja2 openpyxl mock natsort six MarkupSafe lxml>=4.0.0 matplotlib==2.0.2 scipy==1.2.2 cython==0.29.13 nose ipython==5.7 ipykernel==4.10.0"
@@ -74,11 +76,11 @@ then
 else
     if [ ! -z "${PYTHON_ENABLED}" ]; then
         echo "${ME}:  Installing python packages..."
-        pip3 install $BUILD_PYTHON_PIP_PACKAGES
+        ${pip_command} install $BUILD_PYTHON_PIP_PACKAGES
     fi
 fi
 
 if [ ! -z "${PYTHON_ENABLED}" ]; then
     echo "${ME}: Installed python packages:"
-    pip3 list 
+    ${pip_command} list 
 fi

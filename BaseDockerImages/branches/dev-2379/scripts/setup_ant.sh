@@ -1,3 +1,4 @@
+#!/bin/bash
 # 
 #    Copyright (C) 2019 Modelon AB
 #
@@ -23,8 +24,9 @@ if [ "$LINUX_DISTRIBUTION" = "CENTOS" ] || [ "$LINUX_DISTRIBUTION" = "FEDORA" ];
     echo "${ME}: Installing ANT version ${ANT_VERSION}"
     wget http://archive.apache.org/dist/ant/binaries/apache-ant-$ANT_VERSION-bin.tar.gz
     ANTTMP=anttmp
-    mkdir $ANTTMP && cd $ANTTMP && tar -xvf ../apache-ant-$ANT_VERSION-bin.tar.gz && cd ..
+    mkdir /opt/ant && mkdir $ANTTMP && cd $ANTTMP && tar -xvf ../apache-ant-$ANT_VERSION-bin.tar.gz && cd ..
     mv $ANTTMP/apache-ant-$ANT_VERSION /opt/ant && rm -rf apache-ant-$ANT_VERSION-bin.tar.gz && rm -rf $ANTTMP
+    ls -ls opt/ant
     echo 'export ANT_HOME=/opt/ant/'>/etc/profile.d/antenv.sh
     chmod 0755 /etc/profile.d/antenv.sh
 fi
