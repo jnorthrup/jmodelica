@@ -22,7 +22,11 @@ if [ -f /etc/centos-release ] && [ "$(cat /etc/centos-release | tr -dc '0-9.'|cu
 then
     echo "Not setting matplotlib backend for CentOS 6"
 else
-    sed -i "/^backend/c\\backend:Agg" $(python -c "import matplotlib;print(matplotlib.matplotlib_fname())")
+    if [ "$PYTHON_VERSION" = "3" ]; then
+        sed -i "/^backend/c\\backend:Agg" $(python3 -c "import matplotlib;print(matplotlib.matplotlib_fname())")
+    else
+        sed -i "/^backend/c\\backend:Agg" $(python -c "import matplotlib;print(matplotlib.matplotlib_fname())")
+    fi
 fi
 
 

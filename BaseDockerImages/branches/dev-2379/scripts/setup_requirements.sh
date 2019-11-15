@@ -15,8 +15,6 @@
 
 set -e
 
-ME="$( basename "${BASH_SOURCE[0]}" )"
-
 . ${DOCKER_SRC_DIR}/settings.sh
 
 BUILD_PKGS_JM_COMMON="vim sudo cmake swig wget tar patch"
@@ -29,22 +27,22 @@ BUILD_PKGS_JM_DEBIAN="dos2unix dc ant subversion zlib1g-dev libboost-dev"
 if [ "$LINUX_DISTRIBUTION" = "CENTOS" ]; then
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_REDHAT
 	yum -y install epel-release  # for some python packages 
-	alias pckinstall="yum -y install"
+	pckinstall="yum -y install"
 elif [ "$LINUX_DISTRIBUTION" = "REDHAT" ]; then
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_REDHAT
 	yum -y install epel-release  # for some python packages 
-	alias pckinstall="yum -y install"
+	pckinstall="yum -y install"
 elif [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then 
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_DEBIAN
 	apt-get update
     apt-get -y install tzdata #install separately due to issues with backends in docker
-	alias pckinstall="apt-get -y install"
+	pckinstall="apt-get -y install"
 else 
 	echo ERROR: current linux distribution not supported yet
     exit 1
 fi
 
-pckinstall $BUILD_PKGS_JM_COMMON
-pckinstall $BUILD_PKGS_JM
+${pckinstall} $BUILD_PKGS_JM_COMMON
+${pckinstall} $BUILD_PKGS_JM
 
 

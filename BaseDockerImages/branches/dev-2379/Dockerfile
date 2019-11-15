@@ -40,17 +40,18 @@ USER root
 
 COPY ${SRC_DIR}/*.sh ${DOCKER_SRC_DIR}/
 COPY ${SRC_DIR}/jcc.patch ${DOCKER_SRC_DIR}/
+COPY ${SRC_DIR}/jcc35.patch ${DOCKER_SRC_DIR}/
 RUN chmod +x ${DOCKER_SRC_DIR}/*.sh
 
 # split the scripts into separate RUNS in order to utilize caching in case build fails mid build
 RUN ${DOCKER_SRC_DIR}/setup_openjdk.sh
 RUN ${DOCKER_SRC_DIR}/setup_requirements.sh
-RUN ${DOCKER_SRC_DIR}/setup_python.sh
 RUN ${DOCKER_SRC_DIR}/setup_gcc.sh
+RUN ${DOCKER_SRC_DIR}/setup_python.sh
 RUN ${DOCKER_SRC_DIR}/setup_ant.sh
-RUN ${DOCKER_SRC_DIR}/setup_ipopt.sh
 RUN ${DOCKER_SRC_DIR}/setup_jcc.sh
 RUN ${DOCKER_SRC_DIR}/centos_python_env.sh
+RUN ${DOCKER_SRC_DIR}/setup_ipopt.sh
 RUN rm -rf ${USR_PATH}
 RUN rm -rf /*.tgz
 USER baseuser
