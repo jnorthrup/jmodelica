@@ -54,5 +54,5 @@ RUN ${DOCKER_SRC_DIR}/centos_python_env.sh
 RUN ${DOCKER_SRC_DIR}/setup_ipopt.sh
 RUN rm -rf ${USR_PATH}
 RUN rm -rf /*.tgz
-RUN ln -s /opt/ant/ant /usr/bin/ant
+RUN ln -s /opt/ant/bin/ant /usr/bin/ant
 USER baseuser
