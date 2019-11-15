@@ -160,7 +160,7 @@ def run_demo(with_plots=True):
         # Reset the model and set the new initial states before simulating
         # the next sample period with the optimal input u_k
         sim_model.reset()
-        sim_model.set(x_k.keys(), x_k.values())
+        sim_model.set(list(x_k.keys()), list(x_k.values()))
         sim_res = sim_model.simulate(start_time=k*sample_period, 
                                      final_time=(k+1)*sample_period, 
                                      input=u_k, options=opts)

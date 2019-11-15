@@ -182,7 +182,7 @@ class TestMPCClass(object):
                 largest_delta_quad = delta
             prev_value = value
 
-        N.testing.assert_(largest_delta_quad<largest_delta)
+        assert largest_delta_quad<largest_delta, "Value {} is not less than {}".format(largest_delta_quad, largest_delta)
         
     @testattr(casadi_base = True)
     def test_du_bounds(self):
@@ -230,7 +230,7 @@ class TestMPCClass(object):
                 largest_delta = delta
             prev_value = value
             
-        N.testing.assert_(largest_delta<5)
+        assert largest_delta<5, "Value {} is not less than {}".format(largest_delta, 5)
         
     @testattr(casadi_base = True)
     def test_softening_bounds(self):
@@ -364,12 +364,13 @@ class TestMPCClass(object):
         # optimization 
         result2 = MPC_object.get_results_this_sample()
 
-        N.testing.assert_(result1==result2)
+        assert result1==result2, "UNEQUAL VALUES. result1={}\nresult2={}".format(result1, result2)
         
         # Assert that problem was infeasible yet again and that the returned 
         # input is the next (third) input from the last succesful optimization
         MPC_object.update_state({'_start_c': 900, '_start_T': 400})
         u_k3 = MPC_object.sample()
+        
         N.testing.assert_('Infeasible_Problem_Detected', MPC_object.collocator.
                                         solver_object.getStat('return_status'))
  
@@ -725,7 +726,7 @@ class TestMPCClass(object):
             # Reset the model and set the new initial states before simulating
             # the next sample period with the optimal input u_k
             sim_model.reset()
-            sim_model.set(x_k.keys(), x_k.values())
+            sim_model.set(list(x_k.keys()), list(x_k.values()))
             sim_res = sim_model.simulate(start_time=k*sample_period, 
                                          final_time=(k+1)*sample_period, 
                                          input=u_k)
@@ -764,7 +765,7 @@ class TestMPCClass(object):
             # Reset the model and set the new initial states before simulating
             # the next sample period with the optimal input u_k
             sim_model_elim.reset()
-            sim_model_elim.set(x_k.keys(), x_k.values())
+            sim_model_elim.set(list(x_k.keys()), list(x_k.values()))
             sim_res = sim_model_elim.simulate(start_time=k*sample_period, 
                                          final_time=(k+1)*sample_period, 
                                          input=u_k)

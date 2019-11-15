@@ -334,7 +334,7 @@ class Model(CI_Model):
         # Add sensitivity differential equations
         mx_zero = casadi.MX(0.)
         for par in mvar_par:
-            for i in xrange(dae.numel()):
+            for i in range(dae.numel()):
                 eq = mx_zero
                 for vk in var_kinds:
                     for mvar in mvar_vectors[vk]:
@@ -350,7 +350,7 @@ class Model(CI_Model):
 
         # Add sensitivity initial equations
         for par in mvar_par:
-            for i in xrange(init.numel()):
+            for i in range(init.numel()):
                 init_eq = mx_zero
                 for vk in var_kinds:
                     for mvar in mvar_vectors[vk]:
@@ -496,16 +496,16 @@ class OptimizationProblem(Model, CI_OP, ModelBase):
                 sensitivity of output j with respect to parameter k at time point
                 i.
         """
-        time_points = map(casadi.MX, time_points)
+        time_points = list(map(casadi.MX, time_points))
         sensitivities = N.array([[self.getVariable('d%s/d%s' % (var, par)) for par in parameters] for var in outputs])
         timed_mx_vars = [N.array([[casadi.MX.sym(sens.getName() + "(%s)" % tp.getValue()) for sens in sensitivities[i]]
-                                  for i in xrange(len(outputs))]) for tp in time_points]
+                                  for i in range(len(outputs))]) for tp in time_points]
         timed_sens = []
-        for i in xrange(len(time_points)):
+        for i in range(len(time_points)):
             timed_sens_i = []
-            for j in xrange(len(outputs)):
+            for j in range(len(outputs)):
                 timed_sens_ij = []
-                for k in xrange(len(parameters)):
+                for k in range(len(parameters)):
                     tv = ci.TimedVariable(self, timed_mx_vars[i][j, k], sensitivities[j, k], time_points[i])
                     self.addTimedVariable(tv)
                     timed_sens_ij.append(tv)
@@ -550,11 +550,11 @@ class OptimizationProblem(Model, CI_OP, ModelBase):
         
         # Create sensitivity and Fisher matrices
         Q = []
-        for j in xrange(len(outputs)):
+        for j in range(len(outputs)):
             Q.append(casadi.vertcat([casadi.horzcat([s.getVar() for s in timed_sens[i][j]])
-                                     for i in xrange(len(time_points))]))
-        Fisher = sum([sigma[i, j] * casadi.mul(Q[i].T, Q[j]) for i in xrange(len(outputs))
-                      for j in xrange(len(outputs))])
+                                     for i in range(len(time_points))]))
+        Fisher = sum([sigma[i, j] * casadi.mul(Q[i].T, Q[j]) for i in range(len(outputs))
+                      for j in range(len(outputs))])
 
         # Define the objective
         if design == "A":

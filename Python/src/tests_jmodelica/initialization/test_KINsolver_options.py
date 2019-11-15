@@ -1,7 +1,7 @@
 #!/usr/bin/env python 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2013 Modelon AB
+# Copyright (C) 2013-2019 Modelon AB
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -52,6 +52,7 @@ class TestInitOptions:
         """
         test if model options are correctly initialized
         """
+        self.setUp()
         nose.tools.assert_true(self.model.get('_enforce_bounds'))
         nose.tools.assert_equals(self.model.get('_iteration_variable_scaling'), 1)
         nose.tools.assert_equals(self.model.get('_residual_equation_scaling'), 1)
@@ -64,6 +65,7 @@ class TestInitOptions:
         """
         test if user can set variable scaling.
         """
+        self.setUp()
         self.model.set('_iteration_variable_scaling', 0)
         self.model.initialize()
         extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
@@ -77,6 +79,7 @@ class TestInitOptions:
         """
         test if user can set variable scaling.
         """
+        self.setUp()
         self.model.set('_residual_equation_scaling',1)
         self.model.initialize()
         extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
@@ -108,6 +111,7 @@ class TestInitOptions:
         """
         test if maxiterations works. error propagation is tested.
         """
+        self.setUp()
         #Test with too few iterations
         self.model.set('_nle_solver_max_iter', 3)
         nose.tools.assert_raises(FMUException, self.model.initialize)
@@ -118,17 +122,18 @@ class TestInitOptions:
         nose.tools.assert_equals(self.model.initialize(), None)
     
     @testattr(stddist_full = True)    
-    def test_debbug_file(self):
+    def test_debug_file(self):
         """
         That the correct amount of debug info is created.
         """
+        self.setUp()
         self.model.set_debug_logging(True)
         self.model.set('_log_level',1)
         self.model.initialize()
         extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        nose.tools.assert_equals(solves, [])
+        assert not solves, "Failed in assert (1/6) because list is not empty, got solves={}".format(solves)
         
         self.setUp()
         self.model.set('_log_level',2)
@@ -136,7 +141,7 @@ class TestInitOptions:
         extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        nose.tools.assert_equals(solves, [])
+        assert not solves, "Failed in assert (2/6) because list is not empty, got solves={}".format(solves)
         
         self.setUp()
         self.model.set('_log_level',3)
@@ -144,7 +149,7 @@ class TestInitOptions:
         extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        nose.tools.assert_equals(solves, [])
+        assert not solves, "Failed in assert (3/6) because list is not empty, got solves={}".format(solves)
         
         self.setUp()
         self.model.set('_log_level',4)
@@ -152,7 +157,7 @@ class TestInitOptions:
         extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        nose.tools.assert_equals(solves, [])
+        assert not solves, "Failed in assert (4/6) because list is not empty, got solves={}".format(solves)
         
         self.setUp()
         self.model.set('_log_level',5)
@@ -160,7 +165,7 @@ class TestInitOptions:
         extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        nose.tools.assert_equals(len(solves), 4)
+        assert len(solves) == 4, "Failed in assert (5/6) because result is not of length 4, got solves={}, with length {}".format(solves, len(solves))
         
         self.setUp()
         self.model.set('_log_level',6)
@@ -168,19 +173,22 @@ class TestInitOptions:
         extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        nose.tools.assert_equals(len(solves), 4)
+        assert len(solves) == 4, "Failed in assert (6/6) because result is not of length 4, got solves={}, with length {}".format(solves, len(solves))
     
     @testattr(stddist_full = True)
     def test_debug_solution(self):
         """
         That the correct solution is stored in the debug file.
         """
-        
+        self.setUp()
         self.model.initialize()
         extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        N.testing.assert_array_almost_equal(solves[0].block_solves[0].iterations[-1].ivs, N.array([N.sqrt(11), 5. ]))
+        result = solves[0].block_solves[0].iterations[-1].ivs
+        expected = N.array([N.sqrt(11), 5. ])
+        err_msg = "Arrays not equal, expected {} but got {}".format(expected, result)
+        assert N.allclose(result, expected), err_msg 
         
         
 class TestInitOptions20:
@@ -209,6 +217,7 @@ class TestInitOptions20:
         """
         test if model options are correctly initialized
         """
+        self.setUp()
         nose.tools.assert_true(self.model.get('_enforce_bounds'))
         nose.tools.assert_equals(self.model.get('_iteration_variable_scaling'), 1)
         nose.tools.assert_equals(self.model.get('_residual_equation_scaling'), 1)
@@ -221,25 +230,31 @@ class TestInitOptions20:
         """
         test if user can set variable scaling.
         """
+        self.setUp()
         self.model.set('_iteration_variable_scaling', 0)
         self.model.initialize()
         extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        nose.tools.assert_true(N.array_equal(solves[0].block_solves[0].nominal,
-                                             N.array([1.,1.])))
+        result = solves[0].block_solves[0].nominal
+        expected = N.array([1.,1.])
+        err_msg = "Arrays not equal, expected {} but got {}".format(expected, result)
+        assert N.allclose(result, expected), err_msg
         
     @testattr(stddist_full = True)
     def test_equation_scaling(self):
         """
         test if user can set variable scaling.
         """
+        self.setUp()
         self.model.set('_residual_equation_scaling',1)
         self.model.initialize()
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        nose.tools.assert_false(N.array_equal(solves[0].block_solves[0].iterations[0].residual_scaling,
-                                             N.array([1., 1.])))
+        result = solves[0].block_solves[0].iterations[0].residual_scaling
+        expected = N.array([1., 1.])
+        err_msg = "Arrays are supposed to be different but are actually equal. Result={}\nExpected={}".format(result, expected)
+        assert not N.allclose(result, expected), err_msg
         
 #        self.setUp()
 #        self.model.set('_residual_equation_scaling',2)
@@ -256,7 +271,8 @@ class TestInitOptions20:
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
         #residual scaling is not logged when turned off.
-        nose.tools.assert_false('residual_scaling' in solves[0].block_solves[0].iterations[0])
+        condition = 'residual_scaling' in solves[0].block_solves[0].iterations[0]
+        assert not condition, "Test failed because string residual_scaling was found in {}".format(solves[0].block_solves[0].iterations[0])
     
     @testattr(stddist_full = True)
     def test_max_iter(self):
@@ -277,67 +293,60 @@ class TestInitOptions20:
         """
         That the correct amount of debug info is created.
         """
+        self.setUp('test_KINsolver_options_log_ll1.txt')
         self.model.set_debug_logging(True)
         self.model.set('_log_level',1)
         self.model.initialize()
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        nose.tools.assert_equals(solves, [])
+        assert not solves, "Failed in assert (1/6) because list is not empty, got solves={}".format(solves)
         
         self.setUp('test_KINsolver_options_log_ll2.txt')
         self.model.set('_log_level',2)
         self.model.initialize()
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        nose.tools.assert_equals(solves, [])
+        assert not solves, "Failed in assert (2/6) because list is not empty, got solves={}".format(solves)
         
         self.setUp('test_KINsolver_options_log_ll3.txt')
         self.model.set('_log_level',3)
         self.model.initialize()
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        nose.tools.assert_equals(solves, [])
+        assert not solves, "Failed in assert (3/6) because list is not empty, got solves={}".format(solves)
         
         self.setUp('test_KINsolver_options_log_ll4.txt')
         self.model.set('_log_level',4)
         self.model.initialize()
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        nose.tools.assert_equals(solves, [])
+        assert not solves, "Failed in assert (4/6) because list is not empty, got solves={}".format(solves)
         
         self.setUp('test_KINsolver_options_log_ll5.txt')
         self.model.set('_log_level',5)
         self.model.initialize()
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        nose.tools.assert_equals(len(solves), 2)
+        assert len(solves) == 2, "Failed in assert (5/6) because result is not of length 2, got solves={}, with length {}".format(solves, len(solves))
         
         self.setUp('test_KINsolver_options_log_ll6.txt')
         self.model.set('_log_level',6)
         self.model.initialize()
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        print solves
-        nose.tools.assert_equals(len(solves), 2)
+        assert len(solves) == 2, "Failed in assert (6/6) because result is not of length 2, got solves={}, with length {}".format(solves, len(solves))
     
     @testattr(stddist_full = True)
     def test_debug_solution(self):
         """
         That the correct solution is stored in the debug file.
         """
-        
+        self.setUp()
         self.model.initialize()
         extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        N.testing.assert_array_almost_equal(solves[0].block_solves[0].iterations[-1].ivs, N.array([N.sqrt(11), 5. ]))
-        
-    
-        
-        
-        
-        
-        
-        
-        
-
+        result = solves[0].block_solves[0].iterations[-1].ivs
+        expected = N.array([N.sqrt(11), 5. ])
+        err_msg = "Arrays are not almost equal:\nEXPECTED: {}\nACTUAL: {}".format(expected, result)
+        N.testing.assert_array_almost_equal(result, expected, err_msg=err_msg)

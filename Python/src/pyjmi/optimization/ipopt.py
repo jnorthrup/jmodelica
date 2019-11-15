@@ -939,7 +939,7 @@ class NLPCollocation(object):
                     else:
                         p_opt_data[i_pi_opt] = traj.x[0]
                 except VariableNotFoundError:
-                    print "Warning: Could not find value for parameter " + name
+                    print("Warning: Could not find value for parameter " + name)
                     
         #print(N.size(var_data))
 
@@ -974,7 +974,7 @@ class NLPCollocation(object):
             except VariableNotFoundError:
                 dx_index = dx_index + 1
                 col_index = col_index + 1
-                print "Warning: Could not find trajectory for derivative variable " + name
+                print("Warning: Could not find trajectory for derivative variable " + name)
         for name in x_names:
             try:
                 #print(name)
@@ -989,7 +989,7 @@ class NLPCollocation(object):
             except VariableNotFoundError:
                 x_index = x_index + 1
                 col_index = col_index + 1
-                print "Warning: Could not find trajectory for state variable " + name
+                print("Warning: Could not find trajectory for state variable " + name)
 
         for name in u_names:
             try:
@@ -1011,7 +1011,7 @@ class NLPCollocation(object):
             except VariableNotFoundError:
                 u_index = u_index + 1
                 col_index = col_index + 1
-                print "Warning: Could not find trajectory for input variable " + name
+                print("Warning: Could not find trajectory for input variable " + name)
 
         for name in w_names:
             try:
@@ -1033,7 +1033,7 @@ class NLPCollocation(object):
             except VariableNotFoundError:
                 w_index = w_index + 1
                 col_index = col_index + 1
-                print "Warning: Could not find trajectory for algebraic variable " + name
+                print("Warning: Could not find trajectory for algebraic variable " + name)
 
         #print(var_data)
         #print(N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0])

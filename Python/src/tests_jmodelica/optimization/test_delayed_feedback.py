@@ -17,7 +17,7 @@
 
 """Tests optimization with delayed feedback."""
 
-from __future__ import division
+
 
 import os
 import nose
@@ -51,7 +51,7 @@ def test_delayed_feedback_optimization(with_plots = False):
     u2.setAttribute('initialGuess',0.25)
 
     stepresults = []
-    for step in xrange(2):    
+    for step in range(2):    
         opts = opt.optimize_options()
         #    opts['variable_scaling'] = False
         #    opts['discr'] = "LG"

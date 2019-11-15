@@ -53,15 +53,15 @@ def run_demo(with_plots=True):
     V40	= res['V[40]']
     t	= res['time']
     
-    print "t = ", repr(N.array(t))
-    print "x20 = ", repr(N.array(x20))
-    print "x40 = ", repr(N.array(x40))
+    print("t = ", repr(N.array(t)))
+    print("x20 = ", repr(N.array(x20)))
+    print("x40 = ", repr(N.array(x40)))
 	
-    print "T20 = ", repr(N.array(T20))
-    print "T40 = ", repr(N.array(T40))
+    print("T20 = ", repr(N.array(T20)))
+    print("T40 = ", repr(N.array(T40)))
 
-    print "V20 = ", repr(N.array(V20))
-    print "V40 = ", repr(N.array(V40))
+    print("V20 = ", repr(N.array(V20)))
+    print("V40 = ", repr(N.array(V40)))
 	
     if with_plots:
         # Plot
