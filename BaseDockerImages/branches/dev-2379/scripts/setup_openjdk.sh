@@ -1,3 +1,4 @@
+#!/bin/sh
 # 
 #    Copyright (C) 2019 Modelon AB
 #
@@ -32,7 +33,7 @@ elif [ "$LINUX_DISTRIBUTION" = "FEDORA" ]; then
 elif [ "$LINUX_DISTRIBUTION" = "REDHAT" ]; then
 	yum -y install java-1.8.0-openjdk-devel
 elif [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then
-    apt-get -y install openjdk-8-jdk
+    apt-get -y install openjdk-11-jdk
 else 
 	echo "${ME}: No set openjdk distribution for current linux distribution, exiting..."
     exit 1
