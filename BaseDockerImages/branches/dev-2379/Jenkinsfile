@@ -1,0 +1,94 @@
+// 
+//    Copyright (C) 2018 Modelon AB
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the Common Public License as published by
+//    IBM, version 1.0 of the License.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY. See the Common Public License for more details.
+//
+//    You should have received a copy of the Common Public License
+//    along with this program.  If not, see
+//     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
+
+
+def repoName="jmodelica"
+
+def imageName
+def platformVersion
+def pushTag
+
+def buildBaseImage(image_name, repo_name, platform, platform_version, gcc_install_type) {
+    return docker.build("${repo_name}/$image_name", "--no-cache --pull --build-arg DOCKER_LINUX_DIST=$platform --build-arg DOCKER_DIST_TAG=$platform_version --build-arg GCC_INSTALL_TYPE=$gcc_install_type --build-arg ENABLE_PYTHON="yes" .")
+}
+
+def pushImage(docker_image, repo_name, image_name, push_tag) {
+    stage ("Push ${image_name}:${push_tag}") {
+        //note we push to registry.hub.docker, it doesn't work otherwise, please read link below
+        //https://getintodevops.com/blog/building-your-first-docker-image-with-jenkins-2-guide-for-developers
+        docker.withRegistry('https://registry.hub.docker.com', 'jmodelica-dockerhub') {
+            docker_image.push("${push_tag}")
+        }
+        sh 'docker images'
+        sh "docker 2>/dev/null 1>&2 rm -f ${repo_name}/${image_name}:${push_tag} || true"
+        sh "docker 2>/dev/null 1>&2 rm -f ${repo_name}/${image_name}:latest || true"
+        sh "docker 2>/dev/null 1>&2 rm -f registry.hub.docker.com/${repo_name}/${image_name}:latest || true"
+        sh "docker 2>/dev/null 1>&2 rmi -f ${repo_name}/${image_name}:${push_tag} || true"
+        sh "docker 2>/dev/null 1>&2 rmi -f ${repo_name}/${image_name}:latest || true"
+        sh "docker 2>/dev/null 1>&2 rmi -f registry.hub.docker.com/${repo_name}/${image_name}:${push_tag} || true"
+        sh 'docker images'
+    }
+}
+
+node('docker') {
+    
+    imageName = "ubuntu_base"
+    platformVersion = "18.04"
+    pushTag = "18.04"
+    
+    stage ("Building ${imageName} ${platformVersion}") {
+        //checkout scm
+        //def dockerImageRef = buildBaseImage("${imageName}", "${repoName}", "ubuntu", "${platformVersion}", "UBUNTU_DEFAULT")
+        //pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")
+    }
+    
+    imageName = "centos_base"
+    platformVersion = "6"
+    pushTag = "6"
+    
+    stage ("Building ${imageName} ${platformVersion}") {
+        //checkout scm
+        //def dockerImageRef = buildBaseImage("${imageName}", "${repoName}", "centos", "${platformVersion}", "CENTOS_GCCv482")
+        //dockerImageRef.inside {
+        //    sh 'echo Built version: && cat /etc/centos-release'
+        //}
+        //pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")
+    }
+    
+    imageName = "centos_base"
+    platformVersion = "7.4.1708"
+    pushTag = "7.4"
+    
+    stage ("Building ${imageName} ${platformVersion}") {
+        checkout scm
+        def dockerImageRef = buildBaseImage("${imageName}", "${repoName}", "centos", "${platformVersion}", "CENTOS_DEFAULT")
+        dockerImageRef.inside {
+            sh 'echo Built version: && cat /etc/centos-release'
+        }
+        //pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")
+    }
+    
+    imageName = "centos_base"
+    platformVersion = "7.2.1511"
+    pushTag = "7.2"
+    
+    stage ("Building ${imageName} ${platformVersion}") {
+        //checkout scm
+        //def dockerImageRef = buildBaseImage("${imageName}", "${repoName}", "centos", "${platformVersion}", "CENTOS_DEFAULT")
+        //dockerImageRef.inside {
+        //    sh 'echo Built version: && cat /etc/centos-release'
+        //}
+        //pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")
+    }
+}
