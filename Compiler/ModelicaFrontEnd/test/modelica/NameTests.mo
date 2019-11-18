@@ -4293,4 +4293,20 @@ annotation(__JModelica(UnitTesting(tests={
 )})));
 end OrderFile4;
 
+
+model ModificationOnTest1
+    Real x = time;
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="ModificationOnTest1",
+        description="Check that a modification to the test class can be added in test annotation",
+        modification="x=2",
+        flatModel="
+fclass NameTests.ModificationOnTest1
+ Real x = 2;
+end NameTests.ModificationOnTest1;
+")})));
+end ModificationOnTest1;
+
 end NameTests;
