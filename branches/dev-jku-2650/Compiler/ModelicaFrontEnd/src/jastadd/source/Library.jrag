@@ -556,6 +556,7 @@ aspect Library {
         }
         
         private LibraryDef(String name, String version, boolean structured, SrcLibNode.LoadReason reason, LoadInfo loadInfo) {
+            assert !loadInfo.getPathAsPath().getFileName().toString().equals(SrcLibNode.PACKAGE_FILE);
             this.name = name;
             this.version = version;
             this.structured = structured;

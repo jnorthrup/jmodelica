@@ -7,11 +7,11 @@ include $(USER_CONFIG)
 test:
 	nosetests tests/*.pyc tests/solvers/*.pyc
 
-test_wheel: $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)
-	@pip install $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)/*.whl
+test_wheel:
+	@cd $(JM_HOME)/$(DISTRO)/$(TARGET)$(BITNESS)/$(subst test_,,$@) && pip install *.whl
 	nosetests $(WHEEL_INSTALL_DIR)/tests/*.pyc $(WHEEL_INSTALL_DIR)/tests/solvers/*.pyc
 
-test_folder: $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)
+test_folder:
 	nosetests $(ASSIMULO_FOLDER_INSTALL_DIR)/tests/*.pyc $(ASSIMULO_FOLDER_INSTALL_DIR)/tests/solvers/*.pyc
 
 folder: $(PREINSTALL_DIR) debug_var
