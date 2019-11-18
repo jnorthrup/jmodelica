@@ -33,10 +33,10 @@ def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, TARGET, bitness=["32", "64"]
             make clean USER_CONFIG=${USER_CONFIG} BUILD_DIR=\${JENKINS_BUILD_DIR} INSTALL_DIR_FOLDER=${INSTALL_PATH_UNIX}/${bit}${msvs_suffix}
             make ${TARGET} USER_CONFIG=${USER_CONFIG}${bit} JM_HOME=\${JM_HOME} BUILD_DIR=\${JENKINS_BUILD_DIR} WORKSPACE=\${JM_HOME}/.. INSTALL_DIR_FOLDER=${INSTALL_PATH_UNIX}/${bit}${msvs_suffix}
             """, extra_bat);
-            if ("${TARGET}" == "folder") {
+            if ("${TARGET}" == "install") {
                 runMSYSWithEnv("""\
                 export JM_HOME="\$(pwd)/JModelica/"
-                nosetests ${INSTALL_PATH_UNIX}/assimulo/tests/*.py
+                nosetests ${INSTALL_PATH_UNIX}/${bit}${msvs_suffix}/assimulo/tests/*.py
                 """, "", false, bit); 
             }
             if (stash || archive) {

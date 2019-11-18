@@ -13,7 +13,7 @@ def call(PLATFORM, TARGET, USER_CONFIG) {
                     archiveArtifacts artifacts: artifact_list, fingerprint: false
                     sh "rm ${ARTIFACT_FILE}"
                 }
-                //sh "make docker_test_${TARGET} ${MAKE_ARGS}"
+                sh "make docker_test_${TARGET} ${MAKE_ARGS}"
             } finally {
                 sh "make clean_in_docker ${MAKE_ARGS}"
             }
