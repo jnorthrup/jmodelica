@@ -1183,49 +1183,49 @@ install-python-packages: build-python-packages install-python-tests
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	mkdir -p $(DESTDIR)$(prefix)/Python_64
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	cp Python/src/required_defaults.py $(DESTDIR)$(prefix)/Python_64/
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@@WITH_PYTHON64_TRUE@	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(DESTDIR)$(prefix)/Python_64
-@PYTHON_ENABLED_TRUE@	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.7 Lib; do \
+@PYTHON_ENABLED_TRUE@	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.6  lib64/python3.7 Lib; do \
 @PYTHON_ENABLED_TRUE@	if [ -e $(pymodelica_install_dir)/$${pkgdir}/site-packages/ ]; \
 @PYTHON_ENABLED_TRUE@	then \
 @PYTHON_ENABLED_TRUE@	cd $(pymodelica_install_dir)/$${pkgdir}/site-packages/; \
 @PYTHON_ENABLED_TRUE@	find pymodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 @PYTHON_ENABLED_TRUE@	fi; \
 @PYTHON_ENABLED_TRUE@	done
-@PYTHON_ENABLED_TRUE@	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.7 Lib; do \
+@PYTHON_ENABLED_TRUE@	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.6  lib64/python3.7 Lib; do \
 @PYTHON_ENABLED_TRUE@	if [ -e $(pyjmi_install_dir)/$${pkgdir}/site-packages/ ]; \
 @PYTHON_ENABLED_TRUE@	then \
 @PYTHON_ENABLED_TRUE@	cd $(pyjmi_install_dir)/$${pkgdir}/site-packages/; \
 @PYTHON_ENABLED_TRUE@	find pyjmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 @PYTHON_ENABLED_TRUE@	fi; \
 @PYTHON_ENABLED_TRUE@	done
-@PYTHON_ENABLED_TRUE@	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.7 Lib; do \
+@PYTHON_ENABLED_TRUE@	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.6  lib64/python3.7 Lib; do \
 @PYTHON_ENABLED_TRUE@	if [ -e $(pyfmi_install_dir)/$${pkgdir}/site-packages/ ]; \
 @PYTHON_ENABLED_TRUE@	then \
 @PYTHON_ENABLED_TRUE@	cd $(pyfmi_install_dir)/$${pkgdir}/site-packages/; \
 @PYTHON_ENABLED_TRUE@	find pyfmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 @PYTHON_ENABLED_TRUE@	fi; \
 @PYTHON_ENABLED_TRUE@	done
-@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.7 Lib; do \
+@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.6  lib64/python3.7 Lib; do \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	if [ -e $(assimulo_install_dir64)/$${pkgdir}/site-packages/ ]; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	then \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	cd $(assimulo_install_dir64)/$${pkgdir}/site-packages/; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	find assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	fi; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	done
-@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.7 Lib; do \
+@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.6  lib64/python3.7 Lib; do \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	if [ -e $(pymodelica_install_dir64)/$${pkgdir}/site-packages/ ]; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	then \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	cd $(pymodelica_install_dir64)/$${pkgdir}/site-packages/; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	find pymodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	fi; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	done
-@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.7 Lib; do \
+@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.6  lib64/python3.7 Lib; do \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	if [ -e $(pyjmi_install_dir64)/$${pkgdir}/site-packages/ ]; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	then \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	cd $(pyjmi_install_dir64)/$${pkgdir}/site-packages/; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	find pyjmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	fi; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	done
-@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.7 Lib; do \
+@JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.6  lib64/python3.7 Lib; do \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	if [ -e $(pyfmi_install_dir64)/$${pkgdir}/site-packages/ ]; \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	then \
 @JM_WIN64_TRUE@@PYTHON_ENABLED_TRUE@	cd $(pyfmi_install_dir64)/$${pkgdir}/site-packages/; \
