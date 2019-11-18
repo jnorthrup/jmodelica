@@ -29,4 +29,5 @@ if [ "$LINUX_DISTRIBUTION" = "CENTOS" ] || [ "$LINUX_DISTRIBUTION" = "FEDORA" ];
     ls -ls opt/ant
     echo 'export ANT_HOME=/opt/ant/'>/etc/profile.d/antenv.sh
     chmod 0755 /etc/profile.d/antenv.sh
+    ln -s /opt/ant/bin/ant /usr/bin/ant
 fi
