@@ -30,7 +30,7 @@ def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, TARGET, bitness=["32", "64"]
             JENKINS_BUILD_DIR="\$(pwd)/build"
             cd \${JM_HOME}/external/build_externals/build/assimulo
             
-            make clean USER_CONFIG=${USER_CONFIG} BUILD_DIR=\${JENKINS_BUILD_DIR} INSTALL_DIR_FOLDER=${INSTALL_PATH_UNIX}/${bit}${msvs_suffix}
+            make clean USER_CONFIG=${USER_CONFIG}${bit} BUILD_DIR=\${JENKINS_BUILD_DIR} INSTALL_DIR_FOLDER=${INSTALL_PATH_UNIX}/${bit}${msvs_suffix}
             make ${TARGET} USER_CONFIG=${USER_CONFIG}${bit} JM_HOME=\${JM_HOME} BUILD_DIR=\${JENKINS_BUILD_DIR} WORKSPACE=\${JM_HOME}/.. INSTALL_DIR_FOLDER=${INSTALL_PATH_UNIX}/${bit}${msvs_suffix}
             """, extra_bat);
             if ("${TARGET}" == "install") {
