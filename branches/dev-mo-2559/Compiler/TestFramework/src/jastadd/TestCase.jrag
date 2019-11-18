@@ -59,6 +59,7 @@ abstract public class TestCase implements GenericTestCase {
     private String platform = null;
     private String sourceFileName = null;
     private String className = null;
+    private String modification = null;
     private int beginLine = -1;
 
     private boolean filter = false;
@@ -291,6 +292,39 @@ abstract public class TestCase implements GenericTestCase {
         this.className = className;
     }
 
+    /**
+     * @return the modification
+     */
+    public String getModification() {
+        return modification;
+    }
+
+    /**
+     * @param name the modification to set
+     */
+    public void setModification(String modification) {
+        this.modification = modification;
+    }
+
+    /**
+     * Returns the class name with any set modification added to it, 
+     * using the syntax accepted by ModelicaCompiler.
+     */
+    public String makeClassNameWithMod() {
+    	StringBuilder buf = new StringBuilder(className);
+    	if (modification != null) {
+    		boolean addParen = !modification.startsWith("(");
+    		if (addParen) {
+    			buf.append('(');
+    		}
+    		buf.append(modification);
+    		if (addParen) {
+    			buf.append(')');
+    		}
+    	}
+    	return buf.toString();
+    }
+    
     /**
      * @return the beginLine
      */
@@ -599,9 +633,10 @@ abstract public class TestCase implements GenericTestCase {
 
         // Instantiate and check for errors.
         InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
+        String classNameWithMod = makeClassNameWithMod();
         Collection<Problem> problems = null;
         try {
-            ipr.checkErrorsInInstClass(className, checkType);
+            ipr.checkErrorsInInstClass(classNameWithMod, checkType);
             problems = sr.collectWarnings();
         } catch (CompilerException e) {
             problems = e.getProblems();
@@ -609,7 +644,7 @@ abstract public class TestCase implements GenericTestCase {
         if (testSemanticProblems(problems) || checkType == ErrorCheckType.CHECK) return;
         
         // Test instantiated class
-        InstClassDecl icd = ipr.instantiateModel(getClassName());
+        InstClassDecl icd = ipr.instantiateModel(classNameWithMod);
         uif.modelInstantiated(icd);
         if (testInstantiated(icd)) return;
         
