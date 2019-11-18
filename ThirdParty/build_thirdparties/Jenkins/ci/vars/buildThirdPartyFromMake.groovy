@@ -1,4 +1,4 @@
-def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, module,bitness=["32", "64"], stash=false, archive=true, target_suffix="") {
+def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, module,bitness=["32", "64"], stash=false, archive=false, target_suffix="") {
     if (JM_CHECKOUT_PATH != null) {
         checkoutJM(${JM_BRANCH})
     }
