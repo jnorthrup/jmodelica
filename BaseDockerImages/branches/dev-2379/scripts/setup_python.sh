@@ -28,7 +28,7 @@ else
     pip_command=pip
     BUILD_PKGS_JM_DEBIAN="python-lucene python-dev python-jpype"
     BUILD_PKGS_JM_REDHAT="python-pip python-devel python-jpype"
-    BUILD_PYTHON_PIP_PACKAGES="html5lib notebook==5.7.8 jupyter colorama nbformat Jinja2 openpyxl mock natsort six MarkupSafe lxml>=4.0.0 matplotlib==2.0.2 scipy==1.2.2 cython==0.29.13 nose ipython==5.7 ipykernel==4.10.0"
+    BUILD_PYTHON_PIP_PACKAGES="html5lib notebook==5.7.8 jupyter colorama nbformat Jinja2 mock natsort six MarkupSafe lxml>=4.0.0 matplotlib==2.0.2 scipy==1.2.2 cython==0.29.13 nose ipython==5.7 ipykernel==4.10.0"
 fi
 
 
