@@ -23,10 +23,10 @@ import jpype
 import pymodelica as pym
 from .compiler_interface import *
 from .compiler_logging import CompilerLogHandler, LogHandlerThread
-from pymodelica.common import python3_flag
 from pymodelica.common.core import list_to_string
 from .compiler_exceptions import *
-
+from distutils.version import StrictVersion
+jpype_jexception_compatibility = True if StrictVersion(jpype.__version__) >= '0.7.0' else False
 class ModelicaCompiler(object):
     """ 
     User class for accessing the Java ModelicaCompiler class. 
@@ -39,7 +39,7 @@ class ModelicaCompiler(object):
         Create a Modelica compiler. The compiler can be used to compile pure 
         Modelica models. A compiler instance can be used multiple times.
         """
-        self._java_exception = jpype.JException if python3_flag else jpype.JavaException
+        self._java_exception = jpype.JException if jpype_jexception_compatibility else jpype.JavaException
         
         try:
             options = ModelicaCompilerInterface.createOptions()
@@ -522,7 +522,7 @@ class ModelicaCompiler(object):
             # Due to differences in jpype between 0.6.2 and 0.7.0
             #  we need to compare the raised exception with the reference exception
             #  in different ways.
-            return type(raised_ex) is ref_ex if python3_flag else raised_ex.javaClass() is ref_ex
+            return type(raised_ex) is ref_ex if jpype_jexception_compatibility else raised_ex.javaClass() is ref_ex
 
         if _py_handle_exception(ex, CompilerException):
             arraylist = ex.__javaobject__.getProblems()
