@@ -4301,7 +4301,7 @@ annotation(__JModelica(UnitTesting(tests={
     FlatteningTestCase(
         name="ModificationOnTest1",
         description="Check that a modification to the test class can be added in test annotation",
-        modification="x=2",
+        modification="(x=2)",
         flatModel="
 fclass NameTests.ModificationOnTest1
  Real x = 2;

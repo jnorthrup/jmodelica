@@ -313,14 +313,7 @@ abstract public class TestCase implements GenericTestCase {
     public String makeClassNameWithMod() {
     	StringBuilder buf = new StringBuilder(className);
     	if (modification != null) {
-    		boolean addParen = !modification.startsWith("(");
-    		if (addParen) {
-    			buf.append('(');
-    		}
     		buf.append(modification);
-    		if (addParen) {
-    			buf.append(')');
-    		}
     	}
     	return buf.toString();
     }
