@@ -212,21 +212,21 @@ if WITH_PYTHON64
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(DESTDIR)$(prefix)/Python_64
 endif
 endif
-	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.7 Lib; do \
+	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.6  lib64/python3.7 Lib; do \
 	if [ -e $(pymodelica_install_dir)/$${pkgdir}/site-packages/ ]; \
 	then \
 	cd $(pymodelica_install_dir)/$${pkgdir}/site-packages/; \
 	find pymodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 	fi; \
 	done
-	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.7 Lib; do \
+	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.6  lib64/python3.7 Lib; do \
 	if [ -e $(pyjmi_install_dir)/$${pkgdir}/site-packages/ ]; \
 	then \
 	cd $(pyjmi_install_dir)/$${pkgdir}/site-packages/; \
 	find pyjmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 	fi; \
 	done
-	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.7 Lib; do \
+	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.6  lib64/python3.7 Lib; do \
 	if [ -e $(pyfmi_install_dir)/$${pkgdir}/site-packages/ ]; \
 	then \
 	cd $(pyfmi_install_dir)/$${pkgdir}/site-packages/; \
@@ -234,28 +234,28 @@ endif
 	fi; \
 	done
 if JM_WIN64
-	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.7 Lib; do \
+	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.6  lib64/python3.7 Lib; do \
 	if [ -e $(assimulo_install_dir64)/$${pkgdir}/site-packages/ ]; \
 	then \
 	cd $(assimulo_install_dir64)/$${pkgdir}/site-packages/; \
 	find assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64; \
 	fi; \
 	done
-	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.7 Lib; do \
+	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.6  lib64/python3.7 Lib; do \
 	if [ -e $(pymodelica_install_dir64)/$${pkgdir}/site-packages/ ]; \
 	then \
 	cd $(pymodelica_install_dir64)/$${pkgdir}/site-packages/; \
 	find pymodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64; \
 	fi; \
 	done
-	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.7 Lib; do \
+	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.6  lib64/python3.7 Lib; do \
 	if [ -e $(pyjmi_install_dir64)/$${pkgdir}/site-packages/ ]; \
 	then \
 	cd $(pyjmi_install_dir64)/$${pkgdir}/site-packages/; \
 	find pyjmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64; \
 	fi; \
 	done
-	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.7 Lib; do \
+	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib/python3.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 lib64/python3.6  lib64/python3.7 Lib; do \
 	if [ -e $(pyfmi_install_dir64)/$${pkgdir}/site-packages/ ]; \
 	then \
 	cd $(pyfmi_install_dir64)/$${pkgdir}/site-packages/; \
