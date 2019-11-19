@@ -30,7 +30,7 @@ def check_roundtrip(solver):
     coll = solver.collocator
     
     xx_dests, xx_sources = coll.xx_dests, coll.xx_sources
-    for (var, dest) in xx_dests.iteritems():
+    for (var, dest) in xx_dests.items():
         inds = dest['inds']
         assert N.all(xx_sources['var'][inds] == var)
         assert N.all(xx_sources['i'][inds] == dest['i'])
@@ -207,7 +207,7 @@ def test_get_equations():
     solver = op.prepare_optimization()
     check_roundtrip(solver)
 
-    for (eqtype, key) in eqkeys.iteritems():
+    for (eqtype, key) in eqkeys.items():
         eqs = solver.get_equations(eqtype)
         assert len(eqs) == 1
         assert key in repr(eqs[0])

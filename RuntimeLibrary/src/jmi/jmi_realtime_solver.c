@@ -24,10 +24,11 @@
 #include <math.h>
 #include <string.h>
 
-#define JMI_REALTIME_SOLVER_MAX_ITER 20
+#define JMI_REALTIME_SOLVER_MAX_ITER 10
 #define JMI_REALTIME_UPDATE_JACOBIAN_ITER 10
 #define JMI_REALTIME_PROGRESS_LOG_LEVEL 4
-
+#define JMI_REALTIME_INFO_LOG_LEVEL 5
+#define JMI_REALTIME_DEBUG_LOG_LEVEL 6
 
 static void progress_reset_char_log(jmi_block_solver_t* block) {
     jmi_realtime_solver_t* solver = (jmi_realtime_solver_t*)block->solver;
@@ -175,11 +176,11 @@ int jmi_realtime_solver_solve(jmi_block_solver_t *block) {
     }
     
     /* Open log and log the Jacobian.*/
-    if((block->callbacks->log_options.log_level >= 5)) {
+    if((block->callbacks->log_options.log_level >= JMI_REALTIME_INFO_LOG_LEVEL)) {
         destnode = jmi_log_enter_fmt(block->log, logInfo, "RealtimeSolver", 
                                      "Realtime solver invoked for <block:%s>", block->label);
         jmi_log_reals(block->log, destnode, logInfo, "ivs", block->x, block->n);
-        if((block->callbacks->log_options.log_level >= 6)) {
+        if((block->callbacks->log_options.log_level >= JMI_REALTIME_DEBUG_LOG_LEVEL)) {
             jmi_log_real_matrix(block->log, destnode, logInfo, "LU", solver->factorization, block->n, block->n);
         }
     }
@@ -207,7 +208,7 @@ int jmi_realtime_solver_solve(jmi_block_solver_t *block) {
         
         /* Logging compute the id of the largest (weighted) step */
         if (block->callbacks->log_options.log_level >= JMI_REALTIME_PROGRESS_LOG_LEVEL) { 
-            jmi_linear_algebra_ddot(solver->weights, block->res, block->n);
+            jmi_linear_algebra_dxemy(solver->weights, block->res, block->n); 
             solver->last_wrms_id = jmi_linear_algebra_idamax(block->res, block->n);
         }
         
@@ -230,7 +231,7 @@ int jmi_realtime_solver_solve(jmi_block_solver_t *block) {
     }
     
     /* Close log.*/
-    if((block->callbacks->log_options.log_level >= 5)) {
+    if((block->callbacks->log_options.log_level >= JMI_REALTIME_INFO_LOG_LEVEL)) {
         jmi_log_reals(block->log, destnode, logInfo, "ivs", block->x, block->n);
         jmi_log_reals(block->log, destnode, logInfo, "residual", block->res, block->n);
         jmi_log_leave(block->log, destnode);

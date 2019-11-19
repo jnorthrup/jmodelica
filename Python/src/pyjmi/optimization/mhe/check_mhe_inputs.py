@@ -337,7 +337,7 @@ def _replace_aliases_in_cov_list(op, cov_list):
     names = []
     for (list, cov_matrix) in cov_list:
         #Check if the list is a string
-        if isinstance(list, basestring):
+        if isinstance(list, str):
             var = op.getVariable(list)
             if var == None:
                 not_in_model.append(list)

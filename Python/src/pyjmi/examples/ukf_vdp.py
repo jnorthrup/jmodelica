@@ -127,10 +127,10 @@ def run_demo():
     MSEx1 = N.sum(((N.array(x1_estimate) - N.array(x1_process))**2))/len(x1_estimate)
     MSEx2 = N.sum(((N.array(x2_estimate) - N.array(x2_process))**2))/len(x2_estimate)
     
-    print
-    print 'Mean square error x1: '+str(MSEx1)
-    print 'Mean square error x2: '+str(MSEx2)
-    print
+    print()
+    print('Mean square error x1: '+str(MSEx1))
+    print('Mean square error x2: '+str(MSEx2))
+    print()
 
     #Plot simulation results
     fig1 = plt.figure(1)

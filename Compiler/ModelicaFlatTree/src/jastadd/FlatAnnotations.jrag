@@ -27,10 +27,20 @@ aspect FlatAnnotations {
 
     public class FlatAnnotation extends GenericAnnotationNode<FlatAnnotation, FlatAnnotationProvider, FExp> {
 
-        public static final FlatAnnotation AMBIGUOUS_ANNOTATION =  new FlatAnnotation(null, null, null);
+        public static final FlatAnnotation AMBIGUOUS_ANNOTATION =  new FlatAnnotation();
 
+        /** Creates an unambiguous flat annotation.
+         * See {@link GenericAnnotationNode#GenericAnnotationNode(String, AnnotationProvider, GenericAnnotationNode)}
+         */
         protected FlatAnnotation(String name, FlatAnnotationProvider node, FlatAnnotation parent) {
             super(name, node, parent);
+        }
+
+        /** Creates an ambiguous flat annotation.
+         * See {@link GenericAnnotationNode#GenericAnnotationNode()}
+         */
+        protected FlatAnnotation() {
+            super();
         }
 
         @Override

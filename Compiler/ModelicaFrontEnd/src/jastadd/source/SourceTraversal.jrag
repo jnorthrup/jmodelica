@@ -89,7 +89,7 @@ aspect SourceTraversal {
     
     syn Iterable<SrcComponentDecl> SrcEnumClassDecl.componentsIterable() = super.components();
     syn SrcEnumClassDecl SrcEnumClassDecl.enumBase() = 
-        root().asSourceRoot().getProgram().getEnumBaseDecl();
+        root().getProgram().getEnumBaseDecl();
     
     syn Iterable<SrcModificationOrRedeclareElement> SrcClassDecl.elementModifications();
     eq SrcClassDecl.elementModifications()     = 

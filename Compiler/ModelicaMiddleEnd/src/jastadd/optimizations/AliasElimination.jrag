@@ -293,8 +293,12 @@ aspect AliasElimination {
     public void FVariable.aliasSort(ArrayList<FVariable> nonAliasVars, ArrayList<FVariable> aliasVars) {
         if (isAlias()) {
             aliasVars.add(this);
-        } else if (aliasSortKeep()) { 
+        } else if (aliasSortKeep()) {
             nonAliasVars.add(this);
+            AliasManager.AliasSet aliasSet = aliasSet();
+            if (isDiscrete() && myPreVariable().isUnknown() && aliasSet != null && aliasSet.hasPreVariable()) {
+                nonAliasVars.add(createPreVariable());
+            }
             this.propagateAttributesFromAlias();
         }
     }

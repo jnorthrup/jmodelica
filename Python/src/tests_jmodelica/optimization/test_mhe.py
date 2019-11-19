@@ -830,9 +830,9 @@ class TestMHE:
         MHE_object = MHE(op, sample_time, horizon, self.CSTR_x_0_guess, 
                          self.CSTR_dx_0, self.CSTR_c_0, self.CSTR_MHE_opts)
         #Get the names for the inputs and measured variables
-        meas_names = y.keys()
-        input_names = u.keys()
-        state_names = res.keys()
+        meas_names = list(y.keys())
+        input_names = list(u.keys())
+        state_names = list(res.keys())
         #Tolerance
         small = 1e-4
         #Start estimating
@@ -890,9 +890,9 @@ class TestMHE:
         MHE_object = MHE(op, sample_time, horizon, self.VDP_x_0_guess, 
                          self.VDP_dx_0, self.VDP_c_0, self.VDP_MHE_opts)
         #Get the names for the inputs and measured variables
-        meas_names = y.keys()
-        input_names = u.keys()
-        state_names = res.keys()
+        meas_names = list(y.keys())
+        input_names = list(u.keys())
+        state_names = list(res.keys())
         #Tolerance
         small = 1e-4
         #Start estimating
@@ -957,9 +957,9 @@ class TestMHE:
         MHE_object = MHE(op, sample_time, horizon, self.alg_x_0_guess, 
                          self.alg_dx_0, self.alg_c_0, self.alg_MHE_opts)
         #Get the names for the inputs and measured variables
-        meas_names = y.keys()
-        input_names = u.keys()
-        state_names = res.keys() 
+        meas_names = list(y.keys())
+        input_names = list(u.keys())
+        state_names = list(res.keys()) 
         #Tolerance
         small = 1e-4
         #Start estimating
@@ -1011,8 +1011,8 @@ class TestMHE:
                      984.68736633222295, 983.40354818470905]}
         
         #Get the names for the inputs and measured variables
-        meas_names = res.keys()
-        input_names = u.keys()
+        meas_names = list(res.keys())
+        input_names = list(u.keys())
         #Define the time vector and sample_time
         nbr_of_points = 11
         sim_time = 1.0
@@ -1102,9 +1102,9 @@ class TestMHE:
         
         
         #Get the names for the inputs and measured variables
-        meas_names = y.keys()
-        input_names = u.keys()
-        state_names = res.keys() 
+        meas_names = list(y.keys())
+        input_names = list(u.keys())
+        state_names = list(res.keys()) 
         #Tolerance
         small = 1e-4
         #Start estimating
@@ -1148,8 +1148,8 @@ class TestMHE:
         dx_0 = [('der(c)', 0.0166666666667671), ('der(T)', 0.00083333333331231396)]
         c_0 = []
         #Get the names for the inputs and measured variables
-        meas_names = res.keys()
-        input_names = u.keys()
+        meas_names = list(res.keys())
+        input_names = list(u.keys())
         #Define the time vector and sample_time
         nbr_of_points = 11
         sim_time = 10.0

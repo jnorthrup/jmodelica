@@ -76,6 +76,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "mxwrap.hpp"
 #include "mxvectorwrap.hpp"
 #include "mxfunctionwrap.hpp"
+#include "utils.hpp"
 
 namespace oc = org::jmodelica::optimica::compiler;
 namespace jl = java::lang;
@@ -171,7 +172,7 @@ namespace ModelicaCasADi
                 new_JArray<java::lang::String>(strings, modelFiles.size()),
                 StringFromUTF(modelName.c_str())).this$);
 
-            std::string identfier = env->toString(fclass.nameUnderscore().this$);
+            std::string identfier = jobjectoToString(fclass.nameUnderscore().this$);
             std::string option = "normalize_minimum_time_problems";
             bool normalizedTime = fclass.myOptions().getBooleanOption(StringFromUTF(option.c_str()));
 

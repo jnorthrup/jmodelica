@@ -1,5 +1,53 @@
 package OperatorTests "Some tests for operators" 
 
+model DomainChecks
+	Real x1 = abs(time);
+	Real x2 = cos(time);
+	Real x3 = sin(time);
+	Real x4 = tan(time);
+	Real x5 = acos(time);
+	Real x6 = asin(time);
+	Real x7 = atan(time);
+	Real x8 = log(time);
+	Real x9 = log10(time);
+	Real x10= exp(time);
+	Real x11= time^10;
+	Real x12= sqrt(time);
+	Real x13= sinh(time);
+	Real x14= cosh(time);
+	Real x15= tanh(time);
+	Real x16= atan2(time, 2*time);
+	Real x17= time / x16;
+	Real x18= sign(time);
+	Real x19= max(time, x16);
+	Real x20= min(time, x16);
+	Real x21= div(time, 2*time);
+
+	function operators
+		input Real t;
+		output Real[16] o;
+	algorithm
+		o[1] := cos(t);
+		o[2] := sin(t);
+		o[3] := acos(t);
+		o[4] := asin(t);
+		o[5] := atan(t);
+		o[6] := log(t);
+		o[7] := log10(t);
+		o[8] := exp(t);
+		o[9] := t^10;
+		o[10]:= sqrt(time);
+		o[11]:= cosh(time);
+		o[12]:= sinh(time);
+		o[13]:= tanh(time);
+		o[14]:= atan2(time, 2*time);
+		o[15]:= t / o[1];
+		o[16]:= div(time, 2*time);
+	end operators;
+	
+	Real o[16] = operators(time);
+end DomainChecks;
+
 model HomotopyTest
   Real x = homotopy(time,time*2);
 end HomotopyTest;

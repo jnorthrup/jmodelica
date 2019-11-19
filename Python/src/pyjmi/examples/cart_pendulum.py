@@ -68,7 +68,7 @@ def run_demo(with_plots=True):
     opts['n_cp'] = n_cp
     opts['init_traj'] = init_res
     res = pend_opt.optimize(options=opts)
-						    
+                            
     # Extract variable profiles and plot the results
     a_ref = res['a_ref']
     x_p = res['x_p']
@@ -76,32 +76,32 @@ def run_demo(with_plots=True):
     t = res['time']
 
     if with_plots:
-	plt.close(1)
-	plt.figure(1)
-	plt.plot(t,a_ref)
-	plt.grid()
-	plt.title('Input signal to process ($a_{ref}$)')
-	plt.xlabel('Time (s)')
-	plt.ylabel('Acceleration $m/s^2$')
-		
-	plt.close(2)
-	plt.figure(2)
-	plt.plot(x_p,y_p)
-	plt.grid()
-	plt.title('Pendulum end-point path and obstacle')
-	plt.xlabel('x-coordinate (m)')
-	plt.ylabel('y-coordinate (m)')
+        plt.close(1)
+        plt.figure(1)
+        plt.plot(t,a_ref)
+        plt.grid()
+        plt.title('Input signal to process ($a_{ref}$)')
+        plt.xlabel('Time (s)')
+        plt.ylabel('Acceleration $m/s^2$')
+            
+        plt.close(2)
+        plt.figure(2)
+        plt.plot(x_p,y_p)
+        plt.grid()
+        plt.title('Pendulum end-point path and obstacle')
+        plt.xlabel('x-coordinate (m)')
+        plt.ylabel('y-coordinate (m)')
 
-	x_obst = N.linspace(-0.35,-0.25)
-	y_obst = N.sqrt(1-((x_obst+0.3)/0.05)**2)*0.3 - 0.4
+        x_obst = N.linspace(-0.35,-0.25)
+        y_obst = N.sqrt(1-((x_obst+0.3)/0.05)**2)*0.3 - 0.4
 
-	x_track = N.linspace(-1.45,0.1)
-	y_track = N.zeros(N.size(x_track))
+        x_track = N.linspace(-1.45,0.1)
+        y_track = N.zeros(N.size(x_track))
 
-	plt.plot(x_obst,y_obst)
-	plt.plot(x_track,y_track,'--')
+        plt.plot(x_obst,y_obst)
+        plt.plot(x_track,y_track,'--')
 
-	plt.show()
+        plt.show()
 
 if __name__ == "__main__":
     run_demo()

@@ -106,7 +106,7 @@ else:
     _p = os.environ['HOME']
     
 try:
-    execfile(os.path.join(_p,'.jmodelica.org','user_startup.py'))
+    exec(compile(open(os.path.join(_p,'.jmodelica.org','user_startup.py'), "rb").read(), os.path.join(_p,'.jmodelica.org','user_startup.py'), 'exec'))
 except IOError:
     None
 
