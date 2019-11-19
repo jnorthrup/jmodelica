@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "JCCEnv.h"
 
 #include "utils.hpp"
+using namespace std;
 
 char *jobjectoToString(jobject obj)
 {
