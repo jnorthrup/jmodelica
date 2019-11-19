@@ -23,7 +23,7 @@ if [ "$PYTHON_VERSION" = "3" ]; then
     pip_command=pip3
     BUILD_PKGS_JM_REDHAT="python3-pip python3-devel.x86_64"
     BUILD_PKGS_JM_DEBIAN="python3-pip python3-dev python3-venv"
-    BUILD_PYTHON_PIP_PACKAGES="html5lib==1.0.1 notebook==6.0.1 jupyter==1.0.0 colorama==0.4.1 nbformat==4.4.0 Jinja2==2.10.1 openpyxl==2.6.3 mock==3.0.5 natsort==6.0.0 six==1.12.0 MarkupSafe==1.1.1 lxml==4.4.1 matplotlib==3.1.1 scipy==1.3.1 cython==0.29.13 nose==1.3.7 ipython==7.8.0 ipykernel==5.1.2 jpype1==0.7.0 numpy==1.17.1"
+    BUILD_PYTHON_PIP_PACKAGES="html5lib==1.0.1 notebook==6.0.1 jupyter==1.0.0 colorama==0.4.1 nbformat==4.4.0 Jinja2==2.10.1 openpyxl==2.6.3 mock==3.0.5 natsort==6.0.0 six==1.12.0 MarkupSafe==1.1.1 lxml==4.4.1 matplotlib==3.1.1 scipy==1.3.1 cython==0.29.13 nose==1.3.7 ipython==7.8.0 ipykernel==5.1.2 jpype1==0.7.0 numpy==1.14.4"
 else
     pip_command=pip
     BUILD_PKGS_JM_DEBIAN="python-lucene python-dev python-jpype"
