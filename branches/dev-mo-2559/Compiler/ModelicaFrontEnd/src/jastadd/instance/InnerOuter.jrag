@@ -92,8 +92,35 @@ aspect InnerOuterComponents {
 
     syn nta List<InstGeneratedInner> InstClassDecl.getInstGeneratedInners() = new List<InstGeneratedInner>();
 
-    eq InstGeneratedInner.getChild().myEnvironment() = new Environment();
-    eq InstGeneratedInner.getChild().myEnvironment(String name) = new Environment();
+    eq InstGeneratedInner.getChild().lookupInstComponentInInstElement(String name) {
+        InstComponentDecl icd = getInstComponentDecl();
+        if (icd.matches(name)) {
+            return InstLookupResult.<InstComponentDecl>found(icd);
+        }
+        return icd.genericLookupInstComponent(name);
+    }
+
+    eq InstGeneratedInner.getChild().myEnvironment()            = new Environment().mergeInnerClone(getGeneratedInnerModifications());
+    eq InstGeneratedInner.getChild().myEnvironment(String name) = new Environment().mergeInnerClone(getGeneratedInnerModifications()).filter(name);
+    
+    syn nta List<InstModification> InstGeneratedInner.getGeneratedInnerModifications() {
+        List<InstModification> res = new List<>();
+        SrcModification annotation = myInnerAnnotation(name());
+        if (annotation != null) {
+            res.add(annotation.newInstModification());
+        }
+        return res;
+    }
+    
+    inh SrcModification InstGeneratedInner.myInnerAnnotation(String name);
+    eq BaseNode.getChild().myInnerAnnotation(String name) = null;
+    eq InstClassDecl.getChild().myInnerAnnotation(String name) {
+        AnnotationNode an = annotation().forPath("__Modelon/inners").forPath(name);
+        if (!an.exists()) {
+            return null;
+        }
+        return (SrcModification) an.ast();
+    }
 
     public InstGeneratedInner.InstGeneratedInner(InstClassDecl parent, InstComponentDecl outer, InstComponentDecl nonInner) {
         this(parent.createInstComponentDecl(outer.getSrcComponentDecl()), outer, nonInner);
