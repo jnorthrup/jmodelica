@@ -21,13 +21,15 @@
 #include "jmi_math.h"
 
 
-void jmi_log_func_or_eq(jmi_t *jmi, const char cathegory_name[], const char func_name[], const char msg[], const char val[]) {
+void jmi_log_func_or_eq(jmi_t *jmi, const char category_name[], const char func_name[], const char msg[], const char val[]) {
+    if (jmi == NULL) jmi = jmi_get_current();
+    
     if (func_name != NULL) {
         char buf[64];
-        sprintf(buf, "%s%s", cathegory_name, "InFunc");
+        sprintf(buf, "%s%s", category_name, "InFunc");
         jmi_log_node(jmi->log, logWarning, buf, "<func: %s, exp: %s, val:%s>", func_name, msg, val);
     } else {
-        jmi_log_node(jmi->log, logWarning, cathegory_name, "<exp:%s, val: %s>", msg, val);
+        jmi_log_node(jmi->log, logWarning, category_name, "<exp:%s, val: %s>", msg, val);
     }
 }
 
@@ -44,7 +46,6 @@ int jmi_check_nan(jmi_t *jmi, jmi_real_t* val, size_t n_val, jmi_int_t* index_of
 
 void jmi_inf_log(jmi_t *jmi, const char func_name[], const char msg[], jmi_real_t res, jmi_real_t x) {
     if (((res - res) != 0)) {
-        if (jmi == NULL) jmi = jmi_get_current();
         
         if (res > 0) {
             /* res is +inf */
@@ -66,7 +67,6 @@ jmi_real_t jmi_divide(jmi_t *jmi, const char func_name[], jmi_real_t num, jmi_re
         char val[64];
         sprintf(val, "%.14E, %.14E", num, den);
         
-        if (jmi == NULL) jmi = jmi_get_current();
         jmi_log_func_or_eq(jmi, "DivideByZero", func_name, msg, val);
     }
     
@@ -151,7 +151,6 @@ jmi_real_t jmi_atan2(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_
         char val[64];
         sprintf(val, "%.14E, %.14E", x, y);
         
-        if (jmi == NULL) jmi = jmi_get_current();
         jmi_log_func_or_eq(jmi, "IllegalAtan2Input", func_name, msg, val);
     }
     
@@ -169,10 +168,8 @@ jmi_real_t jmi_atan2_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t y, const char
 jmi_real_t jmi_pow(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t y, const char msg[]) {
     jmi_real_t to_return = pow(x, y);
 
+    /* The returned value is not a number */
     if ((to_return - to_return) != 0) {
-        /* The returned value is not a number */
-        if (jmi == NULL)
-            jmi = jmi_get_current();
 
         /* Check that the inputs are in the domain of the function*/
         if (x > 0 || (x == 0 && y > 0) || (x < 0 && (int) y == y)) {
@@ -218,9 +215,8 @@ jmi_real_t jmi_log(jmi_t *jmi, const char func_name[], jmi_real_t x, const char 
 
     jmi_real_t to_return = log(x);
     
+    /* The returned value is not a number */
     if ((to_return - to_return) != 0) {
-        /* The returned value is not a number */
-        if (jmi == NULL) jmi = jmi_get_current();
         
         if (x == 0) {
             /* Pole problem, will return -JMI_INF */
@@ -249,10 +245,9 @@ jmi_real_t jmi_log10(jmi_t *jmi, const char func_name[], jmi_real_t x, const cha
 
     jmi_real_t to_return = log10(x);
     
+    /* The returned value is not a number */
     if ((to_return - to_return) != 0) {
-        /* The returned value is not a number */
-        if (jmi == NULL) jmi = jmi_get_current();
-        
+
         if (x == 0) {
             /* Pole problem, will return -JMI_INF */
             char val[64];

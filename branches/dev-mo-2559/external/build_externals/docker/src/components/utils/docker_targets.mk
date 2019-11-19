@@ -4,16 +4,34 @@ docker_test_wheel docker_test_folder: $(subst test_,,$@)
 
 docker_wheel docker_folder: docker_$(TARGET)_dependencies
 
-docker_wheel docker_folder docker_test_wheel docker_test_folder: setup docker_setup
+docker_wheel docker_folder docker_test_wheel docker_test_folder docker_install_wheel docker_install_folder: setup docker_setup
 	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG)))
 	@echo "Starting docker container with ID=$(DOCKER_ID) for testing $(TARGET)"
 	@docker run -v $(PATH_TO_MOUNT):$(JM_HOME_IN_DOCKER) ${DOCKER_ID} sh -c \
 	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) OS=$(OS) JM_HOME=$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
-	@echo $(DISTRO)/$(TARGET)$(BITNESS)/$(subst test_,,$(subst docker_,,$@))/** > $(ARTIFACT_FILE)
+	@echo $(DISTRO)/$(TARGET)$(BITNESS)/$(subst install_,,$(subst test_,,$(subst docker_,,$@)))/** > $(ARTIFACT_FILE)
 
 wheel folder test_wheel test_folder:
 	@cd $(BUILD_EXTERNALS)/$(TARGET) && \
-	make $@ USER_CONFIG=$(BUILD_DIR)/$(USER_CONFIG) BUILD_DIR=$(DOCKER_BUILD_DIR) INSTALL_DIR_FOLDER=$(DOCKER_BUILD_DIR)
+	make $@ USER_CONFIG=$(BUILD_DIR)/$(USER_CONFIG) BUILD_DIR=$(DOCKER_BUILD_DIR)
+
+install_folder: find_folder
+	echo "(DEBUG): Finished installing"
+
+install_wheel: find_wheel
+	echo "(DEBUG): Finished installing"
+
+find_wheel:
+	echo "Creating directory $(JM_HOME)/$(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)"
+	mkdir -p $(JM_HOME)/$(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)
+	find $(DOCKER_BUILD_DIR) -type f -name "*.whl" -exec cp -r {} $(JM_HOME)/$(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)/ \;
+	ls -la $(JM_HOME)/$(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)
+
+find_folder:
+	echo "Creating directory $(JM_HOME)/$(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)"
+	mkdir -p $(JM_HOME)/$(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)
+	find $(PREINSTALL_DIR) -type d -name assimulo -exec cp -r {} $(JM_HOME)/$(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)/ \;
+	ls -la $(JM_HOME)/$(DISTRO)/$(TARGET)$(BITNESS)/$(subst find_,,$@)
 
 docker_$(TARGET)_dependencies: docker_base_$(TARGET)
 	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG)))

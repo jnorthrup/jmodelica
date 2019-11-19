@@ -29,7 +29,7 @@ import multiprocessing
 import logging
 import os
 
-import thread_feval as tf
+from . import thread_feval as tf
 
 try:
     from openopt import NLP
@@ -171,14 +171,14 @@ def nelme_modified(func,xstart,lb=None,ub=None,h=0.3,x_tol=1e-3,f_tol=1e-6,
     # Check that lb < ub
     if ub is not None:  # "None" < everything
         if N.any(lb >= ub):
-            raise ValueError, 'Lower bound must be smaller than upper bound.'
+            raise ValueError('Lower bound must be smaller than upper bound.')
     
     # Check that lb < xstart < ub 
     if N.any(xstart <= lb):
-        raise ValueError, 'xstart must be larger than lb.'
+        raise ValueError('xstart must be larger than lb.')
     if ub is not None:  # "None" < everything
         if N.any(xstart >= ub):
-            raise ValueError, 'xstart must be smaller than ub.'
+            raise ValueError('xstart must be smaller than ub.')
     
     if nbr_cores is None:
         nbr_cores = multiprocessing.cpu_count()
@@ -227,10 +227,10 @@ def nelme_modified(func,xstart,lb=None,ub=None,h=0.3,x_tol=1e-3,f_tol=1e-6,
     Shiftfv = []
     Ssize = []
     
-    print ' '
-    print 'Running solver Nelder-Mead...'
-    print ' Initial parameters: ', xstart
-    print ' '
+    print(' ')
+    print('Running solver Nelder-Mead...')
+    print(' Initial parameters: ', xstart)
+    print(' ')
     
     if debug:    
         multiprocessing.log_to_stderr()
@@ -290,8 +290,8 @@ def nelme_modified(func,xstart,lb=None,ub=None,h=0.3,x_tol=1e-3,f_tol=1e-6,
         term_f = shiftfv < f_tol
         
         if k%10 == 1:
-            print '  %s  %s        %s            %s          %s'%("iter", "fevals", "obj", "term_x", "term_f")
-        print ' {:>5d} {:>7d} {:>15e} {:>15e} {:>15e}'.format(k, nbr_fevals, f_val[0], ssize, shiftfv)
+            print('  %s  %s        %s            %s          %s'%("iter", "fevals", "obj", "term_x", "term_f"))
+        print(' {:>5d} {:>7d} {:>15e} {:>15e} {:>15e}'.format(k, nbr_fevals, f_val[0], ssize, shiftfv))
         
         if term_x or term_f:
             break
@@ -401,23 +401,23 @@ def nelme_modified(func,xstart,lb=None,ub=None,h=0.3,x_tol=1e-3,f_tol=1e-6,
     
     # Print convergence results
     if disp:
-        print " "
+        print(" ")
         if nbr_iters >= max_iters:
-            print 'Warning: Maximum number of iterations has been exceeded.'
+            print('Warning: Maximum number of iterations has been exceeded.')
         elif nbr_fevals >= max_fevals:
-            print 'Warning: Maximum number of function evaluations has been exceeded.'
+            print('Warning: Maximum number of function evaluations has been exceeded.')
         else:
-            print 'Optimization terminated successfully.'
+            print('Optimization terminated successfully.')
             if term_x:
-                print 'Terminated due to sufficiently small simplex.'
+                print('Terminated due to sufficiently small simplex.')
             else:
-                print 'Terminated due to sufficiently close function values at the vertices of the simplex.'
-            print 'Found parameters: ', x_opt
-        print ' '
-        print 'Total number of iterations: ' + str(nbr_iters)
-        print 'Total number of function evaluations: ' + str(nbr_fevals)
-        print 'Total execution time: ' + str(solve_time) + ' s'
-        print ' '
+                print('Terminated due to sufficiently close function values at the vertices of the simplex.')
+            print('Found parameters: ', x_opt)
+        print(' ')
+        print('Total number of iterations: ' + str(nbr_iters))
+        print('Total number of function evaluations: ' + str(nbr_fevals))
+        print('Total execution time: ' + str(solve_time) + ' s')
+        print(' ')
 
     # Return results
     return x_opt, f_opt, nbr_iters, nbr_fevals, solve_time
@@ -569,19 +569,19 @@ def nelme(func,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
     # Check that lb < ub
     if ub is not None:  # "None" < everything
         if N.any(lb >= ub):
-            raise ValueError, 'Lower bound must be smaller than upper bound.'
+            raise ValueError('Lower bound must be smaller than upper bound.')
     
     # Check that lb < xstart < ub 
     if N.any(xstart <= lb):
-        raise ValueError, 'xstart must be larger than lb.'
+        raise ValueError('xstart must be larger than lb.')
     if ub is not None:  # "None" < everything
         if N.any(xstart >= ub):
-            raise ValueError, 'xstart must be smaller than ub.'
+            raise ValueError('xstart must be smaller than ub.')
     
     # Check that nbr of cores is provided if multithreading is to be used
     if type(func).__name__ != 'function':
         if nbr_cores is None:
-            raise ValueError, 'The number of processor cores used must be provided.'
+            raise ValueError('The number of processor cores used must be provided.')
     
     # Convert xstart to float type array and flatten it so that 
     # len(xstart) can be used even if xstart is a scalar
@@ -717,14 +717,14 @@ def nelme(func,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
         
         t_temp = time.clock()
         t_now = t_temp - t0
-        print ' '
-        print 'Number of iterations: ' + str(k)
-        print 'Number of function evaluations: ' + str(nbr_fevals)
-        print 'Current time: ' + str(t_now) + ' s'
-        print ' '
-        print 'Current x value: ' + str(X[0])
-        print 'Current function value: ' + str(f_val[0])
-        print ' '
+        print(' ')
+        print('Number of iterations: ' + str(k))
+        print('Number of function evaluations: ' + str(nbr_fevals))
+        print('Current time: ' + str(t_now) + ' s')
+        print(' ')
+        print('Current x value: ' + str(X[0]))
+        print('Current function value: ' + str(f_val[0]))
+        print(' ')
             
         if plot_sim:
             # Plot the current simplex
@@ -746,9 +746,9 @@ def nelme(func,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
         Shiftfv.append(shiftfv)
         term_f = shiftfv < f_tol
         
-        print 'Termination criterion for x: ' + str(ssize)
-        print 'Termination criterion for the objective function: ' + str(shiftfv)
-        print ' '
+        print('Termination criterion for x: ' + str(ssize))
+        print('Termination criterion for the objective function: ' + str(shiftfv))
+        print(' ')
         
         if term_x or term_f:
             break
@@ -895,7 +895,7 @@ def nelme(func,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
     
     # Plot convergence criteria
     if plot_conv:
-        iters = range(len(F_val))
+        iters = list(range(len(F_val)))
         # Plot shiftfv vs iterations
         plt.figure()
         plt.grid()
@@ -917,24 +917,24 @@ def nelme(func,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
     
     # Print convergence results
     if disp:
-        print ' '
-        print 'Solver: Nelder-Mead'
-        print ' '
+        print(' ')
+        print('Solver: Nelder-Mead')
+        print(' ')
         if nbr_iters >= max_iters:
-            print 'Warning: Maximum number of iterations has been exceeded.'
+            print('Warning: Maximum number of iterations has been exceeded.')
         elif nbr_fevals >= max_fevals:
-            print 'Warning: Maximum number of function evaluations has been exceeded.'
+            print('Warning: Maximum number of function evaluations has been exceeded.')
         else:
-            print 'Optimization terminated successfully.'
+            print('Optimization terminated successfully.')
             if term_x:
-                print 'Terminated due to sufficiently small simplex.'
+                print('Terminated due to sufficiently small simplex.')
             else:
-                print 'Terminated due to sufficiently close function values at the vertices of the simplex.'
-        print ' '
-        print 'Total number of iterations: ' + str(nbr_iters)
-        print 'Total number of function evaluations: ' + str(nbr_fevals)
-        print 'Total execution time: ' + str(solve_time) + ' s'
-        print ' '
+                print('Terminated due to sufficiently close function values at the vertices of the simplex.')
+        print(' ')
+        print('Total number of iterations: ' + str(nbr_iters))
+        print('Total number of function evaluations: ' + str(nbr_fevals))
+        print('Total execution time: ' + str(solve_time) + ' s')
+        print(' ')
 
     # Return results
     return x_opt, f_opt, nbr_iters, nbr_fevals, solve_time
@@ -1036,19 +1036,19 @@ def seqbar(f,xstart,lb=None,ub=None,mu=0.1,plot=False,x_tol=1e-3,
     
     # If no bounds are given this function should not be used
     if lb is None and ub is None:
-        raise ValueError, 'No bounds given, use function nelme instead.'
+        raise ValueError('No bounds given, use function nelme instead.')
     
     # Check that lb < ub
     if ub is not None:  # "None" < everything
         if N.any(lb >= ub):
-            raise ValueError, 'Lower bound must be smaller than upper bound.'
+            raise ValueError('Lower bound must be smaller than upper bound.')
     
     # Check that lb < xstart < ub 
     if N.any(xstart <= lb):
-        raise ValueError, 'xstart must be larger than lb.'
+        raise ValueError('xstart must be larger than lb.')
     if ub is not None:  # "None" < everything
         if N.any(xstart >= ub):
-            raise ValueError, 'xstart must be smaller than ub.'
+            raise ValueError('xstart must be smaller than ub.')
     
     # Convert xstart to float type array and flatten it so that 
     # len(xstart) can be used even if xstart is a scalar
@@ -1156,7 +1156,7 @@ def seqbar(f,xstart,lb=None,ub=None,mu=0.1,plot=False,x_tol=1e-3,
                 b = - N.log(ub[0]-x_grid) - N.log(ub[1]-y_grid)\
                     - N.log(x_grid-lb[0]) - N.log(y_grid-lb[1])
             Z = z + mu*b 
-            print 'Z: ' + str(Z)
+            print('Z: ' + str(Z))
             plt.figure()
             plt.grid()
             plt.axis('equal')
@@ -1217,25 +1217,25 @@ def seqbar(f,xstart,lb=None,ub=None,mu=0.1,plot=False,x_tol=1e-3,
     
     # Print convergence results
     if disp:
-        print ' '
-        print 'Solver: Sequential barrier method with Nelder-Mead'
-        print ' '
+        print(' ')
+        print('Solver: Sequential barrier method with Nelder-Mead')
+        print(' ')
         if nbr_iters >= max_iters:
-            print 'Warning: Maximum number of iterations has been exceeded.'
+            print('Warning: Maximum number of iterations has been exceeded.')
         elif nbr_fevals >= max_fevals:
-            print 'Warning: Maximum number of function evaluations has been exceeded.'
+            print('Warning: Maximum number of function evaluations has been exceeded.')
         else:
-            print 'Optimization terminated successfully.'
+            print('Optimization terminated successfully.')
             if term_x:
-                print 'Termination criteria for x was fulfilled.'
+                print('Termination criteria for x was fulfilled.')
             else:
-                print 'Termination criteria for auxiliary function was fulfilled.'
-        print ' '
-        print 'Number of iterations: ' + str(nbr_iters)
-        print 'Number of function evaluations: ' + str(nbr_fevals)
-        print ' '
-        print 'Execution time: ' + str(solve_time) + ' s'
-        print ' '
+                print('Termination criteria for auxiliary function was fulfilled.')
+        print(' ')
+        print('Number of iterations: ' + str(nbr_iters))
+        print('Number of function evaluations: ' + str(nbr_fevals))
+        print(' ')
+        print('Execution time: ' + str(solve_time) + ' s')
+        print(' ')
     
     # Return results
     return x_opt, f_opt, nbr_iters, nbr_fevals, solve_time
@@ -1321,7 +1321,7 @@ def de(f,lb,ub,plot=False,x_tol=1e-6,f_tol=1e-6,max_iters=1000,
     
     # Check that lb < ub
     if N.any(lb >= ub):
-        raise ValueError, 'Lower bound must be smaller than upper bound.'
+        raise ValueError('Lower bound must be smaller than upper bound.')
     
     if plot:
         plt.figure()
@@ -1347,14 +1347,14 @@ def de(f,lb,ub,plot=False,x_tol=1e-6,f_tol=1e-6,max_iters=1000,
     solve_time = d2['solver_time']
     
     if disp:
-        print ' '
-        print 'Solver: OpenOpt solver ' + solver
-        print ' '
-        print 'Number of iterations: ' + str(nbr_iters)
-        print 'Number of function evaluations: ' + str(nbr_fevals)
-        print ' '
-        print 'Execution time: ' + str(solve_time)
-        print ' '
+        print(' ')
+        print('Solver: OpenOpt solver ' + solver)
+        print(' ')
+        print('Number of iterations: ' + str(nbr_iters))
+        print('Number of function evaluations: ' + str(nbr_fevals))
+        print(' ')
+        print('Execution time: ' + str(solve_time))
+        print(' ')
     
     # Return results
     return x_opt, f_opt, nbr_iters, nbr_fevals, solve_time
@@ -1439,7 +1439,7 @@ def galileo(f,lb,ub,plot=False,x_tol=1e-6,f_tol=1e-6,max_iters=1000,
     
     # Check that lb < ub
     if N.any(lb >= ub):
-        raise ValueError, 'Lower bound must be smaller than upper bound.'
+        raise ValueError('Lower bound must be smaller than upper bound.')
     
     if plot:
         plt.figure()
@@ -1465,14 +1465,14 @@ def galileo(f,lb,ub,plot=False,x_tol=1e-6,f_tol=1e-6,max_iters=1000,
     solve_time = d2['solver_time']
     
     if disp:
-        print ' '
-        print 'Solver: OpenOpt solver ' + solver
-        print ' '
-        print 'Number of iterations: ' + str(nbr_iters)
-        print 'Number of function evaluations: ' + str(nbr_fevals)
-        print ' '
-        print 'Execution time: ' + str(solve_time)
-        print ' '
+        print(' ')
+        print('Solver: OpenOpt solver ' + solver)
+        print(' ')
+        print('Number of iterations: ' + str(nbr_iters))
+        print('Number of function evaluations: ' + str(nbr_fevals))
+        print(' ')
+        print('Execution time: ' + str(solve_time))
+        print(' ')
     
     # Return results
     return x_opt, f_opt, nbr_iters, nbr_fevals, solve_time
@@ -1655,25 +1655,25 @@ def fmin(func,xstart=None,lb=None,ub=None,alg=None,plot=False,plot_conv=False,
     # Check that the choice of alg is allowed concerning lb and ub
     if lb is None and ub is None:
         if alg == 2:
-            raise ValueError, 'Method 2 can only be chosen if bounds are provided.'
+            raise ValueError('Method 2 can only be chosen if bounds are provided.')
         if alg == 3:
-            raise ValueError, 'Method 3 can only be chosen if bounds are provided.'
+            raise ValueError('Method 3 can only be chosen if bounds are provided.')
         if alg == 4:
-            raise ValueError, 'Method 4 can only be chosen if bounds are provided.'
+            raise ValueError('Method 4 can only be chosen if bounds are provided.')
     elif lb is None or ub is None:
         if alg == 3:
-            raise ValueError, 'Method 3 can only be chosen if both upper and lower bounds are provided.'
+            raise ValueError('Method 3 can only be chosen if both upper and lower bounds are provided.')
         if alg == 4:
-            raise ValueError, 'Method 4 can only be chosen if both upper and lower bounds are provided.'
+            raise ValueError('Method 4 can only be chosen if both upper and lower bounds are provided.')
                               
     # Check that xstart is given if alg = 1 or 2                          
     if alg == 1 or alg == 2:
         if xstart is None:
-            raise ValueError, 'Methods 1 and 2 require a starting point.'
+            raise ValueError('Methods 1 and 2 require a starting point.')
     
     if type(func).__name__ != 'function':
         if alg != 1:
-            raise ValueError, 'If other than the Nelder-Mead method is chosen, func must be of function type.'
+            raise ValueError('If other than the Nelder-Mead method is chosen, func must be of function type.')
     
     # Solve the problem
     if alg == 1:
@@ -1822,16 +1822,16 @@ def quad_err(t_meas,y_meas,t_sim,y_sim,w=None):
         n2 = N.size(y_sim,1)
     
     if len(t_meas) != n1:
-        raise ValueError, 't_meas and y_meas must have the same length.'
+        raise ValueError('t_meas and y_meas must have the same length.')
     
     if len(t_sim) != n2:
-        raise ValueError, 't_sim and y_sim must have the same length.'
+        raise ValueError('t_sim and y_sim must have the same length.')
     
     if m1 != m2:
-        raise ValueError, 'y_meas and y_sim must have the same number of rows.'
+        raise ValueError('y_meas and y_sim must have the same number of rows.')
     
     if not N.all(N.diff(t_sim) >= 0):
-        raise ValueError, 't_sim must be increasing.'
+        raise ValueError('t_sim must be increasing.')
     
     if w is None:
         if dim1 == 1:
@@ -1841,12 +1841,12 @@ def quad_err(t_meas,y_meas,t_sim,y_sim,w=None):
     else:
         if dim1 == 1:
             if N.ndim(w) != 0:
-                raise ValueError, 'w must be a scalar since y_meas and y_sim only have one dimension.'
+                raise ValueError('w must be a scalar since y_meas and y_sim only have one dimension.')
         else:
             if N.ndim(w) != 1:
-                raise ValueError, 'w must be a 1-dimensional array since y_meas and y_sim are 2-dimensional.'
+                raise ValueError('w must be a 1-dimensional array since y_meas and y_sim are 2-dimensional.')
             if (len(w) != m1):
-                raise ValueError, 'w must have the same length as the number of rows in y_meas and y_sim.'
+                raise ValueError('w must have the same length as the number of rows in y_meas and y_sim.')
             
     # The number of measurement points
     n = n1

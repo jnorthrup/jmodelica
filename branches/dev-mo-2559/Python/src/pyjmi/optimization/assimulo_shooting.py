@@ -27,7 +27,7 @@ from scipy.optimize import slsqp
 try:
     from openopt import NLP
 except ImportError:
-    print "Could not load OpenOpt."
+    print("Could not load OpenOpt.")
     
 
 class Multiple_Shooting_Exception(Exception):
@@ -164,9 +164,9 @@ class Multiple_Shooting(object):
         [u, y] = self.split_p(p)
         
         if self.verbosity >= Multiple_Shooting.SCREAM:
-            print 'Calculating cost...'
-            print 'Input u:', u[-1]
-            print 'Input y: ', y[-1,:-1]
+            print('Calculating cost...')
+            print('Input u:', u[-1])
+            print('Input y: ', y[-1,:-1])
         
         start_time = (self.final_time-self.start_time)/self.gridsize*(self.gridsize-1)
 
@@ -188,7 +188,7 @@ class Multiple_Shooting(object):
             cost = N.array(N.nan)
         
         if  self.verbosity >= Multiple_Shooting.WHISPER:
-            print 'Evaluating cost:', cost
+            print('Evaluating cost:', cost)
         #if  self.verbosity >= Multiple_Shooting.SCREAM:
         #    print 'Evaluating cost: (u, y) = ', u[-1], ys[-1]
 
@@ -202,9 +202,9 @@ class Multiple_Shooting(object):
         u, y = self.split_p(p)
         
         if self.verbosity >= Multiple_Shooting.SCREAM:
-            print 'Calculating constraints...'
-            print 'Input u:', u
-            print 'Input y: ', y
+            print('Calculating constraints...')
+            print('Input u:', u)
+            print('Input y: ', y)
         
         y_calc = N.array([])
 
@@ -228,7 +228,7 @@ class Multiple_Shooting(object):
         cons = cons.flatten()
             
         if self.verbosity >= Multiple_Shooting.SCREAM:
-            print 'Equility constraints: ', cons.sum()
+            print('Equility constraints: ', cons.sum())
 
         return cons
         
@@ -251,10 +251,10 @@ class Multiple_Shooting(object):
         #ubound = [0.75]*(self.gridsize*self.nbr_us)+[N.inf]*((self.gridsize-1)*self.nbr_ys)
         
         if self.verbosity >= Multiple_Shooting.NORMAL:
-            print 'Initial parameter vector: '
-            print p0
-            print 'Lower bound:', len(lbound)
-            print 'Upper bound:', len(ubound)
+            print('Initial parameter vector: ')
+            print(p0)
+            print('Lower bound:', len(lbound))
+            print('Upper bound:', len(ubound))
 
         # Get OpenOPT handler
         p_solve = NLP(self.f,p0,lb = lbound, ub=ubound,maxFunEvals = self.maxFeval, maxIter = self.maxIter, ftol=self.ftol, maxTime=self.maxTime)

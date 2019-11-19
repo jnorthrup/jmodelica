@@ -95,6 +95,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Equations.hpp"
 #include "FlatEquations.hpp"
 #include "BLT.hpp"
+#include "utils.hpp"
 
 // For transforming output from JCC-wrapped classes to CasADi objects.
 // Must be included after FExp.h
@@ -173,7 +174,7 @@ namespace ModelicaCasADi
             new_JArray<java::lang::String>(strings, modelFiles.size()),
             StringFromUTF(modelName.c_str()));
 
-        std::string identfier = env->toString(fclass.nameUnderscore().this$);
+        std::string identfier = jobjectoToString(fclass.nameUnderscore().this$);
         // Initialize the model with the model identfier.
         m->initializeModel(identfier);
         /***** ModelicaCasADi::Model *****/

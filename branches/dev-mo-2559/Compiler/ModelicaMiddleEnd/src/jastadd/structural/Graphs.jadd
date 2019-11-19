@@ -1138,7 +1138,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
      */
     private static class HomotopyContributor extends SCCContributor {
         
-        private static final Collection<? extends Object> memberSets = Arrays.asList("homotopy");
+        private static final Collection<? extends Object> memberSets = Collections.singleton("homotopy");
         
         @Override
         public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<E> members(E equation, AbstractBiPGraph<E, V, ?> graph) {
@@ -2173,7 +2173,7 @@ public Set<V> AbstractBiPGraph.lookupVars(Iterable<FAccessExp> set) {
 aspect AugmentingPath {
     
     public abstract class AbstractBiPGraph {
-        private final static Enumerator visitEnumerator = new Enumerator(1);
+        private final Enumerator visitEnumerator = new Enumerator(1);
         public abstract class AugmentingPathAlgorithm<R> {
             private final R TRUE_VALUE;
 

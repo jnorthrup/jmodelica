@@ -512,7 +512,7 @@ def test_RealVariableInvalidDerivativeVariable():
         realVar1.setMyDerivativeVariable(notARealVariable)
     except:
         errorString = sys.exc_info()[1].message 
-    print errorString
+    print(errorString)
     assert(strnorm(errorString) == strnorm("A Variable that is set as a derivative variable must be a DerivativeVariable"));
     
     errorString = ""
@@ -520,7 +520,7 @@ def test_RealVariableInvalidDerivativeVariable():
         realVar1.setMyDerivativeVariable(realVar2)
     except:
         errorString = sys.exc_info()[1].message 
-    print errorString
+    print(errorString)
     assert(strnorm(errorString) == strnorm("A Variable that is set as a derivative variable must be a DerivativeVariable"));
     
 @testattr(casadi_base = True)    
@@ -537,7 +537,7 @@ def test_RealVariableInvalidAsStateVariable():
         realVar.setMyDerivativeVariable(derVar)
     except:
         errorString = sys.exc_info()[1].message 
-    print errorString
+    print(errorString)
     assert(strnorm(errorString) == strnorm("A RealVariable that is a state variable must have continuous variability, and may not be a derivative variable."));
     
 @testattr(casadi_base = True)    
@@ -986,7 +986,7 @@ def test_OptimizationProblemPrinting():
                      "----------------------- Optimization information ------------------------\n\n" +
                      "Start time = 0\nFinal time = 0\n\n\n" +
                      "-- Objective integrand term --\n0\n-- Objective term --\n0")
-    print simpleOptProblem
+    print(simpleOptProblem)
     assert( strnorm(simpleOptProblem) == strnorm(expectedPrint) )
 
 @testattr(casadi_base = True)    
@@ -1367,5 +1367,5 @@ def test_ModelPrinting():
                     "------------------------------- Equations -------------------------------\n\n" +
                     " -- Initial equations -- \nnode3 = node4\n -- DAE equations -- \n" +
                     "node1 = node2\n\n")
-    print model, expectedPrint
+    print(model, expectedPrint)
     assert( strnorm(model) == strnorm(expectedPrint.rstrip()) )

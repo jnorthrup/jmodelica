@@ -23,7 +23,7 @@ import modelicacasadi_wrapper as mc
 from collections import OrderedDict
 import numpy as N
 from pyjmi.optimization.casadi_collocation import ExternalData
-import check_mhe_inputs as check
+from . import check_mhe_inputs as check
 
 def optimize_for_initial_values(op, x_0_guess, u_0, MHE_opts):
     """
@@ -251,13 +251,13 @@ def _check_inputs(op, x_0_guess, u_0, MHE_opts):
     state_names = [var.getName() for var in op.getVariables(op.DIFFERENTIATED)]
     
     x_0_guess_items = check.check_tuple_list(op, 
-                                             x_0_guess.items(), 
+                                             list(x_0_guess.items()), 
                                              state_names, 
                                              'x_0_guess')
     x_0_guess = dict(x_0_guess_items)
     
     u_0_items = check.check_tuple_list(op, 
-                                       u_0.items(), 
+                                       list(u_0.items()), 
                                        opts['input_names'], 
                                        'u_0')
     u_0 = dict(u_0_items)

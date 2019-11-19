@@ -103,13 +103,13 @@ class TestLocalDAECollocator(object):
         self.vdp_function_op = \
                 transfer_to_casadi_interface(
                         class_path, vdp_file_path,
-                        compiler_options=dict({"inline_functions": "none"}.items() + self.compiler_opts.items()))
+                        compiler_options=dict(list({"inline_functions": "none"}.items()) + list(self.compiler_opts.items())))
         
         class_path = "VDP_pack.VDP_Opt_Function_global_constant"
         self.vdp_function_op_global_constant = \
                 transfer_to_casadi_interface(
                         class_path, vdp_file_path,
-                        compiler_options=dict({"inline_functions": "none"}.items() + self.compiler_opts.items()))
+                        compiler_options=dict(list({"inline_functions": "none"}.items()) + list(self.compiler_opts.items())))
         
         cstr_file_path = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
         class_path = "CSTR.CSTR"
@@ -246,14 +246,14 @@ class TestLocalDAECollocator(object):
         
         opts['discr'] = 'LG'
         opts['result_mode'] = 'collocation_points'
-        print 'LG + collocation_points'
+        print('LG + collocation_points')
         res = op.optimize(self.algorithm, opts)
         assert_time(res)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
         
         opts['discr'] = 'LG'
         opts['result_mode'] = 'element_interpolation'
-        print 'LG + element_interpolation'
+        print('LG + element_interpolation')
         res = op.optimize(self.algorithm, opts)
         N.testing.assert_allclose(res['time'][[0, -1]], [t0 + dt, tf + dt])
         assert_time(res)
@@ -261,28 +261,28 @@ class TestLocalDAECollocator(object):
         
         opts['discr'] = 'LG'
         opts['result_mode'] = 'mesh_points'
-        print 'LG + mesh_points'
+        print('LG + mesh_points')
         res = op.optimize(self.algorithm, opts)
         assert_time(res)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
         
         opts['discr'] = 'LGR'
         opts['result_mode'] = 'collocation_points'
-        print 'LGR + collocation_points'
+        print('LGR + collocation_points')
         res = op.optimize(self.algorithm, opts)
         assert_time(res)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
         
         opts['discr'] = 'LGR'
         opts['result_mode'] = 'element_interpolation'
-        print 'LGR + element_interpolation'
+        print('LGR + element_interpolation')
         res = op.optimize(self.algorithm, opts)
         assert_time(res)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
         
         opts['discr'] = 'LGR'
         opts['result_mode'] = 'mesh_points'
-        print 'LGR + mesh_points'
+        print('LGR + mesh_points')
         res = op.optimize(self.algorithm, opts)
         assert_time(res)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
@@ -1609,7 +1609,7 @@ class TestLocalDAECollocator(object):
         opts['result_mode'] = "collocation_points"
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
-        indices = range(1, 4) + range(opts['n_e'] - 3, opts['n_e'])
+        indices = list(range(1, 4)) + list(range(opts['n_e'] - 3, opts['n_e']))
         values = N.array([0.5, 0.5, 0.5, 2.0, 2.0, 2.0])
         N.testing.assert_allclose(20. * res.h_opt[indices], values, 5e-3)
         
@@ -2288,7 +2288,7 @@ class TestLocalDAECollocator(object):
         
         # Set arbitrary non-zero guesses
         guesses = N.linspace(0.5, 1.8, len(op.getAllVariables()))
-        for (var, ig) in itertools.izip(op.getAllVariables(), guesses):
+        for (var, ig) in zip(op.getAllVariables(), guesses):
             var.setAttribute('initialGuess', ig)
 
         # Reference values

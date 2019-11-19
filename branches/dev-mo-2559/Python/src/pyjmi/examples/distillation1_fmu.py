@@ -52,11 +52,11 @@ def run_demo(with_plots=True):
     y32	= res['y[32]']
     t	= res['time']
     
-    print "t = ", repr(N.array(t))
-    print "x16 = ", repr(N.array(x16))
-    print "x32 = ", repr(N.array(x32))
-    print "y16 = ", repr(N.array(y16))
-    print "y32 = ", repr(N.array(y32))
+    print("t = ", repr(N.array(t)))
+    print("x16 = ", repr(N.array(x16)))
+    print("x32 = ", repr(N.array(x32)))
+    print("y16 = ", repr(N.array(y16)))
+    print("y32 = ", repr(N.array(y32)))
 
     if with_plots:
         # Plot
