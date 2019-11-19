@@ -19,7 +19,7 @@ def imageName
 def platformVersion
 def pushTag
 
-def buildBaseImage(image_name, repo_name, platform, platform_version, gcc_install_type, python_version="2") {
+def buildBaseImage(image_name, repo_name, platform, platform_version, gcc_install_type, python_version="3") {
     return docker.build("${repo_name}/$image_name", "--no-cache --pull --build-arg DOCKER_LINUX_DIST=$platform --build-arg DOCKER_DIST_TAG=$platform_version --build-arg GCC_INSTALL_TYPE=$gcc_install_type --build-arg ENABLE_PYTHON=\"yes\" --build-arg PYTHON_VERSION=$python_version .")
 }
 
@@ -76,9 +76,9 @@ node('docker') {
     pushTag = "18.04"
     python_version="3"
     
-    stage ("Building ${imageName} ${platformVersion}") {
+    stage ("Building ${imageName} ${platformVersion} Python ${python_version}") {
         checkout scm
-        def dockerImageRef = buildBaseImage("${imageName}", "${repoName}", "ubuntu", "${platformVersion}", "UBUNTU_DEFAULT")
+        def dockerImageRef = buildBaseImage("${imageName}", "${repoName}", "ubuntu", "${platformVersion}", "UBUNTU_DEFAULT", "${python_version}")
         pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")K
     }
     
