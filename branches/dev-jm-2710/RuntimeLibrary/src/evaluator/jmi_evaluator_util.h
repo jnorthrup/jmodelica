@@ -62,7 +62,7 @@
 #define JMCEVAL_DBGP(x) if (JMCEVAL_DEBUG) { printf(x); fflush(stdout);}
 
 /* Format specifier when printing jmi_real_t */
-#define JMCEVAL_realFormat "%.17f"
+#define JMCEVAL_realFormat "%.17e"
 
 /* Parses ND dimensions into dimension buffer d*/
 #define JMCEVAL_parseArrayDims(ND) \
