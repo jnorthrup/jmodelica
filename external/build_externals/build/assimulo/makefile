@@ -14,10 +14,8 @@ test_wheel:
 test_folder:
 	nosetests $(ASSIMULO_FOLDER_INSTALL_DIR)/tests/*.pyc $(ASSIMULO_FOLDER_INSTALL_DIR)/tests/solvers/*.pyc
 
-folder: $(PREINSTALL_DIR) debug_var
+folder: $(PREINSTALL_DIR)
 
-debug_var:
-	ls -la $(PREINSTALL_DIR)
 
 $(PREINSTALL_DIR): 
 	@$(eval TARGET_BUILD_DIR=$(BUILD_DIR)/Assimulo_build$(BITNESS))
@@ -46,7 +44,7 @@ $(INSTALL_DIR_FOLDER)/wheel:
 	find . -type f | grep -v -E '/.svn|.pyc' |tar c -T - -f - | tar x -C $(TARGET_BUILD_DIR)
 	cd $(TARGET_BUILD_DIR); \
 	$(PYTHONHOME)python setup.py $(BUILD_SETUP_EXTRA) bdist_wheel --superlu-home=$(SUPERLU_HOME) --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(BLAS_HOME) --lapack-home=$(LAPACK_HOME) --mkl-home=$(MKL_HOME) $(EXTRA_SETUP_ARGS); \
-	find -type f -name Assimulo*.whl -exec cp {} $@/ \;
+	find -type f -name Assimulo*$(BITNESS).whl -exec cp {} $@/ \;
 
 clean:
 	@$(eval TARGET_BUILD_DIR=$(BUILD_DIR)/Assimulo_build*)

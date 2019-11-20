@@ -322,7 +322,7 @@ opc = open_client()</programlisting>
 </member>
 
 <member>
-<para><link xlink:href="https://www.numpy.org">numpy 1.17.2</link></para>
+<para><link xlink:href="https://www.numpy.org">numpy 1.17.1</link></para>
 </member>
 
 <member>
